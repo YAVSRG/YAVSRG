@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5EBB46B4-2F12-4258-A257-73C409BB00D9}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>YAVSRG</RootNamespace>
+    <AssemblyName>YAVSRG</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>0.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestCertificateThumbprint>CF14F3B002B7CBCF18BBE16EDC81F9AC04AF77F3</ManifestCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ManifestKeyFile>YAVSRG_TemporaryKey.pfx</ManifestKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignManifests>true</SignManifests>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ManagedBass, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ManagedBass.2.0.4\lib\net45\ManagedBass.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OpenTK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Beatmap\Osu\EventData.cs" />
+    <Compile Include="Beatmap\Osu\StoryboardEvent.cs" />
+    <Compile Include="DELETE THISAudio.cs" />
+    <Compile Include="Audio\MusicPlayer.cs" />
+    <Compile Include="Audio\Track.cs" />
+    <Compile Include="Beatmap\BPMPoint.cs" />
+    <Compile Include="Beatmap\Chart.cs" />
+    <Compile Include="Beatmap\ChartHeader.cs" />
+    <Compile Include="Beatmap\MultiChart.cs" />
+    <Compile Include="Beatmap\OffsetItem.cs" />
+    <Compile Include="Beatmap\Osu\OsuBeatmap.cs" />
+    <Compile Include="Beatmap\Osu\BeatmapHeader.cs" />
+    <Compile Include="Beatmap\DifficultyRating\DataSet.cs" />
+    <Compile Include="Beatmap\DifficultyRating\KeyLayout.cs" />
+    <Compile Include="Beatmap\DifficultyRating\RatingReport.cs" />
+    <Compile Include="Beatmap\Osu\HitObject.cs" />
+    <Compile Include="Beatmap\Osu\HitObjectConverter.cs" />
+    <Compile Include="Beatmap\PointManager.cs" />
+    <Compile Include="Beatmap\Snap.cs" />
+    <Compile Include="Beatmap\Osu\TimingPointConverter.cs" />
+    <Compile Include="Beatmap\Osu\TimingPoint.cs" />
+    <Compile Include="Beatmap\Stepmania\Measure.cs" />
+    <Compile Include="Beatmap\Stepmania\StepFile.cs" />
+    <Compile Include="ChartLoader.cs" />
+    <Compile Include="Content.cs" />
+    <Compile Include="Gameplay\PlayingChart.cs" />
+    <Compile Include="Gameplay\Score.cs" />
+    <Compile Include="Interface\AnchorType.cs" />
+    <Compile Include="Interface\CrashWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Interface\CrashWindow.Designer.cs">
+      <DependentUpon>CrashWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
+    <Compile Include="Interface\Screens\ScreenScore.cs" />
+    <Compile Include="Interface\SlidingEffect.cs" />
+    <Compile Include="Interface\Widget.cs" />
+    <Compile Include="Interface\Widgets\BoolPicker.cs" />
+    <Compile Include="Interface\Widgets\Button.cs" />
+    <Compile Include="Interface\Widgets\ChartDifficulty.cs" />
+    <Compile Include="Interface\Widgets\HitMeter.cs" />
+    <Compile Include="Interface\Widgets\InfoCard.cs" />
+    <Compile Include="Interface\Widgets\LevelSelector.cs" />
+    <Compile Include="Interface\Widgets\OptionsMenu.cs" />
+    <Compile Include="Interface\Widgets\ProgressBar.cs" />
+    <Compile Include="Interface\Widgets\Slider.cs" />
+    <Compile Include="Interface\Widgets\TextPicker.cs" />
+    <Compile Include="Options\Colorizer.cs" />
+    <Compile Include="Options\Profile.cs" />
+    <Compile Include="Options\Theme.cs" />
+    <Compile Include="Game.cs" />
+    <Compile Include="Interface\Input.cs" />
+    <Compile Include="Interface\Screen.cs" />
+    <Compile Include="Interface\Screens\ScreenMenu.cs" />
+    <Compile Include="Interface\Screens\ScreenPlay.cs" />
+    <Compile Include="Interface\ScreenUtils.cs" />
+    <Compile Include="Interface\Toolbar.cs" />
+    <Compile Include="Options\Options.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sprite.cs" />
+    <Compile Include="SpriteBatch.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\app.manifest" />
+    <None Include="YAVSRG_TemporaryKey.pfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Interface\CrashWindow.resx">
+      <DependentUpon>CrashWindow.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
