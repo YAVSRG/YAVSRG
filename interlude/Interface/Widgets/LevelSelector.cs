@@ -105,6 +105,7 @@ namespace YAVSRG.Interface.Widgets
             public override void OnClick(LevelSelector parent)
             {
                 Game.Instance.ChangeChart(data);
+                parent.parent.OnChangeChart();
                 ChartLoader.SelectedChart = parent.chart;
                 ChartLoader.SelectedPack = parent.pack;
             }
@@ -113,11 +114,13 @@ namespace YAVSRG.Interface.Widgets
         protected List<SelectableItem> items;
         protected ChartLoader.ChartPack pack = ChartLoader.SelectedPack;
         protected MultiChart chart = ChartLoader.SelectedChart;
+        private Screens.ScreenLevelSelect parent;
 
         public SlidingEffect scroll;
 
-        public LevelSelector() : base()
+        public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {
+            this.parent = parent;
             box = Content.LoadTextureFromAssets("levelselectbase");
             items = new List<SelectableItem>();
             scroll = new SlidingEffect(80);

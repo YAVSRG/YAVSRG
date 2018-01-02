@@ -47,6 +47,16 @@ namespace YAVSRG.Beatmap
             bg.Height = 0;
         }
 
+        public float GetDuration()
+        {
+            return States.Points[States.Count - 1].Offset - States.Points[0].Offset;
+        }
+
+        public int GetBPM()
+        {
+            return (int)(60000f/Timing.Points[0].MSPerBeat);
+        }
+
         public static Chart FromFile(string path)
         {
             return null; //nyi

@@ -34,7 +34,7 @@ namespace YAVSRG.Interface.Widgets
                 "all",Utils.RoundNumber(rating[3]),
                 "gotta",Utils.RoundNumber(0),
                 "go",Utils.RoundNumber(0),
-                Utils.RoundNumber(0),Utils.RoundNumber(0),
+                Utils.FormatTime(c.GetDuration()),c.GetBPM().ToString()+"BPM",
             };
         }
 

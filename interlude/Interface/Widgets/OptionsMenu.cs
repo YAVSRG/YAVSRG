@@ -44,7 +44,8 @@ namespace YAVSRG.Interface.Widgets
                 .PositionTopLeft(350, 275, AnchorType.MIN, AnchorType.MIN)
                 .PositionBottomRight(450, 325, AnchorType.MIN, AnchorType.MIN)
                 );
-
+            Widgets.Add(new KeyLayoutMenu().PositionTopLeft(0, 300, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MAX));
+            /*
             Widgets.Add(
                 new Slider("Columns in note texture", v => { Game.Options.Theme.UV_X = (int)v; }, () => Game.Options.Theme.UV_X, 1, 9, 1)
                 .PositionTopLeft(600, 75, AnchorType.MIN, AnchorType.MIN)
@@ -55,7 +56,7 @@ namespace YAVSRG.Interface.Widgets
                 .PositionTopLeft(600, 175, AnchorType.MIN, AnchorType.MIN)
                 .PositionBottomRight(700, 225, AnchorType.MIN, AnchorType.MIN)
                 );
-
+                */
             Widgets.Add(new Button("buttonbase", "Open Data Folder", () => {
                 System.Diagnostics.Process.Start("explorer.exe", Content.WorkingDirectory);
             }).PositionTopLeft(0, 100, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));

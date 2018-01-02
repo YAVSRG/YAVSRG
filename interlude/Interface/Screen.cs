@@ -8,7 +8,7 @@ using System.Drawing;
 
 namespace YAVSRG.Interface
 {
-    class Screen
+    public class Screen
     {
         protected List<Widget> Widgets = new List<Widget>();
 

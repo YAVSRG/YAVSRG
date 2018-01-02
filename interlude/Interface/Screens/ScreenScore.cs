@@ -119,7 +119,7 @@ namespace YAVSRG.Interface.Screens
                 {
                     if (o == 0) { continue; }
                     SpriteBatch.DrawRect(
-                            -398 + i*w, 298 + o*scale, -402 + i*w, 302 + o*scale, Game.Options.Theme.JudgeColors[Game.Options.Profile.JudgeHit(Math.Abs(o))]);
+                            -398 + i*w, 298 - o*scale, -402 + i*w, 302 - o*scale, Game.Options.Theme.JudgeColors[Game.Options.Profile.JudgeHit(Math.Abs(o))]);
                 }
             }
         }

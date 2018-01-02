@@ -137,11 +137,14 @@
     <Compile Include="Interface\Widgets\ChartDifficulty.cs" />
     <Compile Include="Interface\Widgets\HitMeter.cs" />
     <Compile Include="Interface\Widgets\InfoCard.cs" />
+    <Compile Include="Interface\Widgets\KeyBinder.cs" />
+    <Compile Include="Interface\Widgets\KeyLayoutMenu.cs" />
     <Compile Include="Interface\Widgets\LevelSelector.cs" />
     <Compile Include="Interface\Widgets\OptionsMenu.cs" />
     <Compile Include="Interface\Widgets\ProgressBar.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
+    <Compile Include="Interface\Widgets\WidgetContainer.cs" />
     <Compile Include="Options\Colorizer.cs" />
     <Compile Include="Options\Profile.cs" />
     <Compile Include="Options\Theme.cs" />

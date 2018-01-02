@@ -14,7 +14,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.0.1_hotfix2";
+        public static readonly string Version = "v0.0.1SOON";
 
         public static Game Instance;
         public static Chart CurrentChart;

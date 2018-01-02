@@ -22,6 +22,13 @@ namespace YAVSRG
             return Math.Round(x, 2).ToString();
         }
 
+        public static string FormatTime(float ms)
+        {
+            int seconds = (int)(ms / 1000) % 60;
+            int minutes = (int)Math.Floor(ms / 60000);
+            return minutes.ToString() + ":" + seconds.ToString().PadLeft(2,'0');
+        }
+
         public static T LoadObject<T>(string path)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(System.IO.File.ReadAllText(path));

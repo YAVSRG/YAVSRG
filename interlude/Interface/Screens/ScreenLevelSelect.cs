@@ -9,14 +9,14 @@ using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Interface.Screens
 {
-    class ScreenLevelSelect : Screen
+    public class ScreenLevelSelect : Screen
     {
         private ChartDifficulty diffDisplay;
         private LevelSelector selector;
 
         public ScreenLevelSelect()
         {
-            selector = new LevelSelector();
+            selector = new LevelSelector(this);
             selector.PositionTopLeft(0, 0, 0, 0).PositionBottomRight(0, 0, 0, 0);
 
             foreach (ChartLoader.ChartPack p in ChartLoader.Cache)
@@ -32,6 +32,12 @@ namespace YAVSRG.Interface.Screens
                 .PositionTopLeft(-250,-200,AnchorType.CENTER,AnchorType.CENTER)
                 .PositionBottomRight(0,-100,AnchorType.CENTER,AnchorType.CENTER)
                 );
+        }
+
+        public void OnChangeChart()
+        {
+            diffDisplay.ChangeChart(Game.CurrentChart);
+            Game.Audio.SetRate(Game.Options.Profile.Rate);
         }
 
         public override void OnEnter(Screen prev)
