@@ -22,7 +22,8 @@ namespace YAVSRG.Options
 
         public static void Colorize(Chart c, ColorScheme scheme)
         {
-            Chord(c);
+            DDR(c);
+            //Chord(c);
         }
 
         private static void Jackhammer(Chart c)
@@ -97,7 +98,9 @@ namespace YAVSRG.Options
 
         private static bool RoughlyDivisibleBy(float a, float b)
         {
-            return Math.Round(a % b,1) == 0;
+            var x = a % b;
+
+            return Math.Min(Math.Abs(x),Math.Abs(b-x)) < 5;
         }
     }
 }
