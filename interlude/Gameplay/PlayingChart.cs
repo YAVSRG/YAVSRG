@@ -9,113 +9,52 @@ namespace YAVSRG.Gameplay
 {
     public class PlayingChart
     {
-        public class ChordCohesion : OffsetItem
+        public class HitData : OffsetItem
         {
-            int notes;
             public float[] delta;
-            public bool[] hit;
-            public int angery;
+            public byte[] hit;
 
-            public ChordCohesion(float offset, int keycount, int notecount)
+            public HitData(Snap s, int keycount)
             {
-                notes = notecount;
-                Offset = offset;
-                hit = new bool[keycount];
+                Offset = s.Offset;
+                hit = new byte[keycount];
+                foreach (int k in s.Combine().GetColumns())
+                {
+                    hit[k] = 1;
+                }
                 delta = new float[keycount];
             }
         }
 
         public Chart c;
-
-        public ChordCohesion[] hitdata;
-        private static int[] weight = new int[] { 10, 9, 5, 1, -10, 0 };
-        public int[] judgement;
-        private float maxscore = 0.001f;
-        private float score = 0.001f;
-        private int pos;
-
-        public int combo;
-        public int maxcombo = -1;
+        public CCScoring scorer;
+        public HitData[] hitdata;
 
         public PlayingChart(Chart c)
         {
             this.c = c;
-            judgement = new int[6];
+            scorer = new CCScoring(Game.Options.Profile.HitWindows(), new int[] { 10, 9, 5, 1, -10, 0 }, 10);
             int to = c.States.Count;
-            hitdata = new ChordCohesion[to];
+            hitdata = new HitData[to];
             for (int i = 0; i < to; i++)
             {
-                hitdata[i] = new ChordCohesion(c.States.Points[i].Offset, c.Keys, c.States.Points[i].Count);
+                hitdata[i] = new HitData(c.States.Points[i], c.Keys);
             }
         }
 
-        public void AddJudgement(int i)
+        public int Combo()
         {
-            judgement[i] += 1;
-            score += weight[i];
-            maxscore += 10;
-        }
-
-        public void ComboBreak()
-        {
-            if (combo > maxcombo)
-            {
-                maxcombo = combo;
-            }
-            combo = 0;
+            return scorer.Combo;
         }
 
         public float Accuracy()
         {
-            return (float)Math.Round(score * 100f / maxscore, 2);
+            return scorer.Accuracy();
         }
 
-        public void Update(float time, float hitwindow)
+        public void Update(float time)
         {
-            while (pos < hitdata.Length && hitdata[pos].Offset < time)
-            {
-                Snap s = c.States.Points[pos];
-                float[] data = hitdata[pos].delta;
-                float t = 0;
-                int n = 0;
-                foreach (int k in new Snap.BinarySwitcher(s.taps.value + s.holds.value + s.ends.value).GetColumns())
-                {
-                    if (!hitdata[pos].hit[k])
-                    {
-                        hitdata[pos].angery += 1;
-                    }
-                    else
-                    {
-                        t += Math.Abs(data[k]);
-                        n += 1;
-                    }
-                }
-                if (n > 0)
-                {
-                    float delta = t / n;
-                    int score = hitdata[pos].angery;
-                    score += Game.Options.Profile.JudgeHit(delta);
-                    if (score > 4)
-                    {
-                        score = 4;
-                    }
-                    if (hitdata[pos].angery > 0)
-                    {
-                        ComboBreak();
-                    }
-                    else
-                    {
-                        combo += 1;
-                    }
-                    AddJudgement(score);
-                }
-                else
-                {
-                    AddJudgement(5);
-                    ComboBreak();
-                }
-                pos++;
-            }
+            scorer.Update(time,hitdata);
         }
     }
 }

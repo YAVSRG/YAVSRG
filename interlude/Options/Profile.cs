@@ -30,6 +30,11 @@ namespace YAVSRG.Options
             //new Key[] { Key.A, Key.S, Key.D, Key.Space, Key.Keypad4, Key.Keypad5, Key.Keypad6 }, //7k
         };
 
+        public float[] HitWindows()
+        {
+            return new float[] { Game.Options.Profile.HitWindow / 2, Game.Options.Profile.HitWindow, Game.Options.Profile.HitWindow * 2, Game.Options.Profile.HitWindow * 3 };
+        }
+
         public int JudgeHit(float delta) //add one with fixed j4 or something for standardising scores
         {
             if (delta < HitWindow * 0.5f)

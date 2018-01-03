@@ -109,7 +109,7 @@ namespace YAVSRG.Interface.Screens
                     OnKeyUp(k, now);
                 }
             }
-            scoreTracker.Update(now - HITWINDOW * 3, HITWINDOW);
+            scoreTracker.Update(now - HITWINDOW * 3);
             if (now > end)
             {
                 Push(new ScreenScore(scoreTracker));
@@ -141,7 +141,7 @@ namespace YAVSRG.Interface.Screens
             }
             if (delta <= HITWINDOW * 3f)
             {
-                scoreTracker.hitdata[hitAt].hit[k] = true;
+                scoreTracker.hitdata[hitAt].hit[k] = 2;
                 scoreTracker.hitdata[hitAt].delta[k] = delta;
                 hitmeter.AddHit(k, delta, now);
             }
@@ -177,7 +177,7 @@ namespace YAVSRG.Interface.Screens
             }
             if (delta <= HITWINDOW * 3f)
             {
-                scoreTracker.hitdata[hitAt].hit[k] = true;
+                scoreTracker.hitdata[hitAt].hit[k] = 2;
                 scoreTracker.hitdata[hitAt].delta[k] = delta;
                 hitmeter.AddHit(k, delta, now);
             }
@@ -229,8 +229,8 @@ namespace YAVSRG.Interface.Screens
                 DrawSnap(new Snap(0, 0, holdsInHitpos.value, 0, 0), offset, HITPOSITION); //draw hold heads in hit position
             }
             
-            SpriteBatch.DrawCentredText(scoreTracker.combo.ToString(),40f,0,-100, Color.White); //combo
-            SpriteBatch.DrawCentredText(scoreTracker.Accuracy().ToString(), 40f, 0, -Height + 70, Color.White); //acc
+            SpriteBatch.DrawCentredText(scoreTracker.Combo().ToString(),40f,0,-100, Color.White); //combo
+            SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -Height + 70, Color.White); //acc
 
             base.Draw();
         }

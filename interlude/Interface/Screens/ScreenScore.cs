@@ -16,16 +16,15 @@ namespace YAVSRG.Interface.Screens
         static string[] ranks = new[] { "SS", "S", "A", "B", "C", "F" };
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
         int tier;
-        int cbs;
         int mapcombo;
-        string osuacc;
-        string dpacc;
+        ScoreSystem osuacc, dpacc;
 
         public ScreenScore(PlayingChart data)
         {
             score = data;
             mapcombo = score.c.States.Count;
-            score.ComboBreak(); //it is important that this is here
+            score.scorer.ComboBreak(); //it is important that this is here
+            score.scorer.ComboBreaks -= 1;
 
             float acc = score.Accuracy();
             if (acc > 98) { tier = 0; } //code goes here for custom grade boundaries
@@ -39,37 +38,10 @@ namespace YAVSRG.Interface.Screens
             c.PositionTopLeft(520, 605, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 105, AnchorType.MAX, AnchorType.MAX);
             Widgets.Add(c);
 
-            dpacc = Utils.RoundNumber(ScoreCalculator(new int[] { 2, 2, 1, -4, -8, -8 }, 2));
-            osuacc = Utils.RoundNumber(ScoreCalculator(new int[] { 300, 300, 200, 100, 50, 0 }, 300));
-
-            for (int i = 0; i < mapcombo; i++)
-            {
-                cbs += score.hitdata[i].angery;
-            }
-        }
-
-        public float ScoreCalculator(int[] weights, int max)
-        {
-            int total = 0;
-            int value = 0;
-            PlayingChart.ChordCohesion c;
-            for (int i = 0; i < mapcombo; i++)
-            {
-                foreach (int k in score.c.States.Points[i].Combine().GetColumns())
-                {
-                    c = score.hitdata[i];
-                    if (c.hit[k])
-                    {
-                        value += weights[Game.Options.Profile.JudgeHit(Math.Abs(c.delta[k]))];
-                    }
-                    else
-                    {
-                        value += weights[5];
-                    }
-                    total += max;
-                }
-            }
-            return 100f * value / total;
+            dpacc = new NoCCScoring(Game.Options.Profile.HitWindows(), new int[] { 2, 2, 1, -4, -8, -8 }, 2);
+            osuacc = new NoCCScoring(new float[] { 16.5f,34.5f,67.5f,97.5f,121.5f }, new int[] { 300, 300, 200, 100, 50, 0 }, 300);
+            dpacc.ProcessScore(score.hitdata);
+            osuacc.ProcessScore(score.hitdata);
         }
 
         public override void OnEnter(Screen prev)
@@ -88,17 +60,17 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.DrawTextToFill(ChartLoader.SelectedPack.title, -Width+300, -Height + 80, Width-300, -Height + 130, Color.White);
 
             SpriteBatch.DrawCentredText(Utils.RoundNumber(score.Accuracy())+"%", 50, 0, -50, Color.White);
-            SpriteBatch.DrawCentredText(osuacc + "% (Osu)", 30, -150, 50, Color.White);
-            SpriteBatch.DrawCentredText(dpacc + "% (DP)", 30, 150, 50, Color.White);
+            SpriteBatch.DrawCentredText(Utils.RoundNumber(osuacc.Accuracy()) + "% (Osu)", 30, -150, 50, Color.White);
+            SpriteBatch.DrawCentredText(Utils.RoundNumber(dpacc.Accuracy()) + "% (DP)", 30, 150, 50, Color.White);
             for (int i = 0; i < 6; i++)
             {
                 SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80,Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 50 + 350f * score.judgement[i] / mapcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 50 + 350f * score.scorer.Judgements[i] / mapcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, -Width+50, 100+i * 40, Color.White);
-                SpriteBatch.DrawJustifiedText(score.judgement[i].ToString(), 30, -Width+400, 100+i * 40, Color.White);
+                SpriteBatch.DrawJustifiedText(score.scorer.Judgements[i].ToString(), 30, -Width+400, 100+i * 40, Color.White);
             }
-            SpriteBatch.DrawText(score.maxcombo.ToString()+"x", 30, -Width + 50, 340, Color.White);
-            SpriteBatch.DrawJustifiedText(cbs.ToString()+ "cbs", 30, -Width + 400, 340, Color.White);
+            SpriteBatch.DrawText(score.scorer.MaxCombo.ToString()+"x", 30, -Width + 50, 340, Color.White);
+            SpriteBatch.DrawJustifiedText(score.scorer.ComboBreaks.ToString()+ "cbs", 30, -Width + 400, 340, Color.White);
             DrawGraph();
         }
 
@@ -110,16 +82,19 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.DrawRect(-400, 297, 400, 303, Color.Green);
             for (int i = 0; i < mapcombo; i++)
             {
-                if (score.hitdata[i].angery > 0)
+                for (int k = 0; k < score.hitdata[i].hit.Length; k++)
                 {
-                    SpriteBatch.DrawRect(
-                            -399 + i * w, 200, -401 + i * w, 400, Color.FromArgb(120,Game.Options.Theme.JudgeColors[5]));
-                }
-                foreach (float o in score.hitdata[i].delta)
-                {
-                    if (o == 0) { continue; }
-                    SpriteBatch.DrawRect(
-                            -398 + i*w, 298 - o*scale, -402 + i*w, 302 - o*scale, Game.Options.Theme.JudgeColors[Game.Options.Profile.JudgeHit(Math.Abs(o))]);
+                    if (score.hitdata[i].hit[k] == 1)
+                    {
+                        SpriteBatch.DrawRect(
+                                -399 + i * w, 200, -401 + i * w, 400, Color.FromArgb(120, Game.Options.Theme.JudgeColors[5]));
+                    }
+                    else if (score.hitdata[i].hit[k] == 2)
+                    {
+                        float o = score.hitdata[i].delta[k];
+                        SpriteBatch.DrawRect(
+                                -398 + i * w, 298 - o * scale, -402 + i * w, 302 - o * scale, Game.Options.Theme.JudgeColors[Game.Options.Profile.JudgeHit(Math.Abs(o))]);
+                    }
                 }
             }
         }

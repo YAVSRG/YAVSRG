@@ -119,8 +119,11 @@
     <Compile Include="Beatmap\Stepmania\StepFile.cs" />
     <Compile Include="ChartLoader.cs" />
     <Compile Include="Content.cs" />
+    <Compile Include="Gameplay\CCScoring.cs" />
+    <Compile Include="Gameplay\NoCCScoring.cs" />
     <Compile Include="Gameplay\PlayingChart.cs" />
     <Compile Include="Gameplay\Score.cs" />
+    <Compile Include="Gameplay\ScoreSystem.cs" />
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\CrashWindow.cs">
       <SubType>Form</SubType>
