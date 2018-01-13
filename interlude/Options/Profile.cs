@@ -17,6 +17,8 @@ namespace YAVSRG.Options
         public float ScrollSpeed = 2.05f;
         public float Rate = 1.0f;
         public float HitWindow = 45f;
+        public float OD = 8.5f;
+        public int Judge = 4;
         public ColorScheme ColorStyle = ColorScheme.Column; //has no effect atm
 
         public Key[][] Bindings = new Key[][]

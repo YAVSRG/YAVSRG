@@ -96,7 +96,6 @@
   <ItemGroup>
     <Compile Include="Beatmap\Osu\EventData.cs" />
     <Compile Include="Beatmap\Osu\StoryboardEvent.cs" />
-    <Compile Include="DELETE THISAudio.cs" />
     <Compile Include="Audio\MusicPlayer.cs" />
     <Compile Include="Audio\Track.cs" />
     <Compile Include="Beatmap\BPMPoint.cs" />
@@ -120,7 +119,10 @@
     <Compile Include="ChartLoader.cs" />
     <Compile Include="Content.cs" />
     <Compile Include="Gameplay\CCScoring.cs" />
+    <Compile Include="Gameplay\DP.cs" />
+    <Compile Include="Gameplay\MSScoring.cs" />
     <Compile Include="Gameplay\NoCCScoring.cs" />
+    <Compile Include="Gameplay\OD.cs" />
     <Compile Include="Gameplay\PlayingChart.cs" />
     <Compile Include="Gameplay\Score.cs" />
     <Compile Include="Gameplay\ScoreSystem.cs" />

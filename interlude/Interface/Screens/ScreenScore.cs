@@ -38,8 +38,8 @@ namespace YAVSRG.Interface.Screens
             c.PositionTopLeft(520, 605, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 105, AnchorType.MAX, AnchorType.MAX);
             Widgets.Add(c);
 
-            dpacc = new NoCCScoring(Game.Options.Profile.HitWindows(), new int[] { 2, 2, 1, -4, -8, -8 }, 2);
-            osuacc = new NoCCScoring(new float[] { 16.5f,34.5f,67.5f,97.5f,121.5f }, new int[] { 300, 300, 200, 100, 50, 0 }, 300);
+            dpacc = new MSScoring();//new DP(Game.Options.Profile.Judge);
+            osuacc = new OD(Game.Options.Profile.OD);
             dpacc.ProcessScore(score.hitdata);
             osuacc.ProcessScore(score.hitdata);
         }
@@ -60,8 +60,8 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.DrawTextToFill(ChartLoader.SelectedPack.title, -Width+300, -Height + 80, Width-300, -Height + 130, Color.White);
 
             SpriteBatch.DrawCentredText(Utils.RoundNumber(score.Accuracy())+"%", 50, 0, -50, Color.White);
-            SpriteBatch.DrawCentredText(Utils.RoundNumber(osuacc.Accuracy()) + "% (Osu)", 30, -150, 50, Color.White);
-            SpriteBatch.DrawCentredText(Utils.RoundNumber(dpacc.Accuracy()) + "% (DP)", 30, 150, 50, Color.White);
+            SpriteBatch.DrawCentredText(osuacc.FormatAcc(), 30, -250, 50, Color.White);
+            SpriteBatch.DrawCentredText(dpacc.FormatAcc(), 30, 250, 50, Color.White);
             for (int i = 0; i < 6; i++)
             {
                 SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80,Game.Options.Theme.JudgeColors[i]));

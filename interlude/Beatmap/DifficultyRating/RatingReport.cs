@@ -8,11 +8,12 @@ namespace YAVSRG.Beatmap.DifficultyRating
 {
     public class RatingReport
     {
-        static readonly float TIMEEXPONENT = -1.2f;
-        static readonly float SMOOTHEXPONENT = 0.9f;
+        static readonly float TIMEEXPONENT = -1.8f; //difficulty inversely proportional to time between each note
+        static readonly float SMOOTHEXPONENT = 0.6f;
+        static readonly float SKILLSETEXPONENT = 0.8f;
         static readonly float HANDEXPONENT = 0.3f;
-        static readonly float JACKMULTIPLIER = 1.3f;
-        static readonly float SCALE = 10000;
+        static readonly float JACKMULTIPLIER = 1.5f;
+        static readonly float SCALE = 1000000;
 
         public List<float>[] combine;
         public List<float>[] combineskillset;
@@ -29,14 +30,14 @@ namespace YAVSRG.Beatmap.DifficultyRating
             raw = new List<float>[hands, 6];//jack, stream, longnote, rhythm, sv, ??
             combine = new List<float>[hands];
             combineskillset = new[] { new List<float>(), new List<float>(), new List<float>(), new List<float>(), new List<float>(), new List<float>() };
-            for (int h = 0; h < hands; h++)
+            for (int i = 0; i < 6; i++)
             {
-                combine[h] = new List<float>();
-                for (int i = 0; i < 6; i++)
+                for (int h = 0; h < hands; h++)
                 {
                     raw[h, i] = new List<float>();
                 }
             }
+            combine.Initialize();
 
             Snap[] snaps = map.States.Points;
             Snap current;
@@ -55,13 +56,13 @@ namespace YAVSRG.Beatmap.DifficultyRating
                         previousHands[h] = current;
                         continue;
                     }
-                    delta = (current.Offset - previousHands[h].Offset) / SCALE;
-                    mult = GetSpeedMult(delta / rate);
+                    delta = (current.Offset - previousHands[h].Offset) / rate;
+                    mult = GetSpeedMult(delta);
 
                     //MANIPULATION -- This will break some stuff unless i fix
 
-                    manip = delta * SCALE / hitwindow;
-                    if (manip < 2)
+                    manip = delta / hitwindow;
+                    if (manip < 2) //this is a grace note
                     {
                         mult /= 10f;
                     }
@@ -70,7 +71,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
                     var jack = new Snap.BinarySwitcher(previous.taps.value & (current.holds.value | current.taps.value));
                     if (jack.value > 0)
                     {
-                        raw[h,0].Add(GetSpeedMult(delta*JACKMULTIPLIER/rate));
+                        raw[h, 0].Add(GetSpeedMult(delta * JACKMULTIPLIER));
                     }
                     else
                     {
@@ -107,7 +108,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
             for (int h = 0; h < hands; h++)
             {
-                combine[h] = DataSet.Smooth(DataSet.Combine(raw[h, 0], raw[h, 1], raw[h, 2], 1),SMOOTHEXPONENT);
+                combine[h] = DataSet.Smooth(DataSet.Combine(raw[h, 0], raw[h, 1], raw[h, 2], SKILLSETEXPONENT),SMOOTHEXPONENT);
             }
             for (int i = 0; i < 6; i++)
             {
@@ -124,7 +125,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
         public float GetSpeedMult(float delta)
         {
-            return (float)Math.Pow(delta,TIMEEXPONENT);
+            return (float)Math.Pow(delta,TIMEEXPONENT)*SCALE;
         }
 
         public float GetFingerStrain(Snap.BinarySwitcher a, Snap.BinarySwitcher b, KeyLayout.Hand hand)

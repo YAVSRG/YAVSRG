@@ -12,12 +12,13 @@ namespace YAVSRG.Gameplay
         protected int[] weights;
         protected int maxweight;
         protected int pos = 0;
-        protected int score = 0;
+        protected float score = 0;
         protected int maxscore = 0;
         public int Combo = 0;
         public int ComboBreaks = 0;
         public int[] Judgements;
         public int MaxCombo = 0;
+        public string name;
         
         public abstract void Update(float now, PlayingChart.HitData[] data);
 
@@ -56,6 +57,11 @@ namespace YAVSRG.Gameplay
                 if (delta <= windows[i]) { return i; }
             }
             return windows.Length;
+        }
+
+        public virtual string FormatAcc()
+        {
+            return Utils.RoundNumber(Accuracy())+"%";
         }
     }
 }

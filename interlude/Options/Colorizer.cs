@@ -20,7 +20,7 @@ namespace YAVSRG.Options
             Manipulate
         }
 
-        public static void Colorize(Chart c, ColorScheme scheme)
+        public static void Colorize(Chart c, ColorScheme scheme, int[] ColorMap)
         {
             DDR(c);
             //Chord(c);

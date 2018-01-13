@@ -76,7 +76,7 @@ namespace YAVSRG.Interface.Screens
                 DoPop(); return;
             }
             base.OnEnter(prev);
-            Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
+            Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle, new int[1]);
             Game.Toolbar.hide = true;
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
