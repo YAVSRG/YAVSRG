@@ -27,16 +27,16 @@ namespace YAVSRG.Gameplay
         }
 
         public Chart c;
-        public CCScoring scorer;
+        public ScoreSystem Scoring;
         public HitData[] hitdata;
 
         public PlayingChart(Chart c)
         {
             this.c = c;
-            scorer = new CCScoring(Game.Options.Profile.HitWindows(), new int[] { 10, 9, 5, 1, -10, 0 }, 10);
-            int to = c.States.Count;
-            hitdata = new HitData[to];
-            for (int i = 0; i < to; i++)
+            Scoring = new StandardScoring(); //scoring will be the one you want, standard scoring will be calculated on score screen
+            int count = c.States.Count;
+            hitdata = new HitData[count];
+            for (int i = 0; i < count; i++)
             {
                 hitdata[i] = new HitData(c.States.Points[i], c.Keys);
             }
@@ -44,17 +44,23 @@ namespace YAVSRG.Gameplay
 
         public int Combo()
         {
-            return scorer.Combo;
+            return Scoring.Combo;
         }
 
         public float Accuracy()
         {
-            return scorer.Accuracy();
+            return Scoring.Accuracy();
         }
 
         public void Update(float time)
         {
-            scorer.Update(time,hitdata);
+            Scoring.Update(time,hitdata);
+        }
+
+        public void RegisterHit(int i, int k, float delta)
+        {
+            hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit
+            hitdata[i].delta[k] = delta;
         }
     }
 }

@@ -126,6 +126,7 @@
     <Compile Include="Gameplay\PlayingChart.cs" />
     <Compile Include="Gameplay\Score.cs" />
     <Compile Include="Gameplay\ScoreSystem.cs" />
+    <Compile Include="Gameplay\StandardScoring.cs" />
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\CrashWindow.cs">
       <SubType>Form</SubType>
@@ -151,6 +152,7 @@
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\WidgetContainer.cs" />
     <Compile Include="Options\Colorizer.cs" />
+    <Compile Include="Options\ColorScheme.cs" />
     <Compile Include="Options\Profile.cs" />
     <Compile Include="Options\Theme.cs" />
     <Compile Include="Game.cs" />

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static YAVSRG.Options.Colorizer;
 using OpenTK.Input;
 
 namespace YAVSRG.Options
@@ -16,12 +15,11 @@ namespace YAVSRG.Options
         public bool FixedScroll = false;
         public float ScrollSpeed = 2.05f;
         public float Rate = 1.0f;
-        public float HitWindow = 45f;
         public float OD = 8.5f;
         public int Judge = 4;
-        public ColorScheme ColorStyle = ColorScheme.Column; //has no effect atm
+        public ColorScheme ColorStyle = new ColorScheme( Colorizer.ColorStyle.Column);
 
-        public Key[][] Bindings = new Key[][]
+        public Key[][] Bindings = new Key[][] //this needs redoing cause it turns out shit in the profile.json
         {
             null, null, null, null, //1K 2K 3K
             //new Key[] { Key.S, Key.D, Key.Keypad4, Key.Keypad5 }, //4k
@@ -31,27 +29,5 @@ namespace YAVSRG.Options
             new Key[] { Key.Z, Key.X, Key.C, Key.Space, Key.Comma, Key.Period, Key.Slash }, //7k
             //new Key[] { Key.A, Key.S, Key.D, Key.Space, Key.Keypad4, Key.Keypad5, Key.Keypad6 }, //7k
         };
-
-        public float[] HitWindows()
-        {
-            return new float[] { Game.Options.Profile.HitWindow / 2, Game.Options.Profile.HitWindow, Game.Options.Profile.HitWindow * 2, Game.Options.Profile.HitWindow * 3 };
-        }
-
-        public int JudgeHit(float delta) //add one with fixed j4 or something for standardising scores
-        {
-            if (delta < HitWindow * 0.5f)
-            {
-                return 0;
-            }
-            if (delta < HitWindow)
-            {
-                return 1;
-            }
-            if (delta < HitWindow * 2)
-            {
-                return 2;
-            }
-            return 3;
-        }
     }
 }

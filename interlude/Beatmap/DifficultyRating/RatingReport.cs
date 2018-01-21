@@ -9,10 +9,10 @@ namespace YAVSRG.Beatmap.DifficultyRating
     public class RatingReport
     {
         static readonly float TIMEEXPONENT = -1.8f; //difficulty inversely proportional to time between each note
-        static readonly float SMOOTHEXPONENT = 0.6f;
-        static readonly float SKILLSETEXPONENT = 0.8f;
-        static readonly float HANDEXPONENT = 0.3f;
-        static readonly float JACKMULTIPLIER = 1.5f;
+        static readonly float SMOOTHEXPONENT = 0.75f;
+        static readonly float SKILLSETEXPONENT = 0.5f; //this is the weakness of the calc
+        static readonly float HANDEXPONENT = 0.8f; //as long as ratings are about 10 per movement this is a good number pick (maths involved)
+        static readonly float JACKMULTIPLIER = 1.25f; //fixed value depending on timeexponent to make jt = roll (maths involved)
         static readonly float SCALE = 1000000;
 
         public List<float>[] combine;
@@ -59,13 +59,9 @@ namespace YAVSRG.Beatmap.DifficultyRating
                     delta = (current.Offset - previousHands[h].Offset) / rate;
                     mult = GetSpeedMult(delta);
 
-                    //MANIPULATION -- This will break some stuff unless i fix
-
-                    manip = delta / hitwindow;
-                    if (manip < 2) //this is a grace note
-                    {
-                        mult /= 10f;
-                    }
+                    //MANIPULATION -- reduce the rating of stuff that is close together
+                    manip = (float)Math.Pow(delta / hitwindow * 0.5,0.5f);
+                    mult *= manip;
 
                     //JACKHAMMERS
                     var jack = new Snap.BinarySwitcher(previous.taps.value & (current.holds.value | current.taps.value));

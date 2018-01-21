@@ -12,11 +12,14 @@ namespace YAVSRG.Interface.Widgets
         {
             public float time;
             public float delta;
+            public int tier;
 
-            public Hit(float t, float d)
+            public Hit(float t, float d, int j)
             {
                 time = t;
                 delta = d;
+                tier = j;
+
             }
         }
 
@@ -71,9 +74,8 @@ namespace YAVSRG.Interface.Widgets
             hits = new List<Hit>();
         }
 
-        public void AddHit(int k, float delta, float now)
+        public void AddHit(int k, float delta, float now, int tier)
         {
-            int tier = Game.Options.Profile.JudgeHit(Math.Abs(delta));
             if (Game.Options.Theme.JudgementPerColumn)
             {
                 disp[k].NewHit(tier, now);
@@ -82,7 +84,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 disp[0].NewHit(tier, now);
             }
-            hits.Add(new Hit(now,delta));
+            hits.Add(new Hit(now,delta,tier));
         }
 
         public override void Draw(float left, float top, float right, float bottom)
@@ -106,7 +108,7 @@ namespace YAVSRG.Interface.Widgets
 
             foreach (Hit h in hits)
             {
-                SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb((int)(255+h.time-now),Game.Options.Theme.JudgeColors[Game.Options.Profile.JudgeHit(Math.Abs(h.delta))]));
+                SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb((int)(255+h.time-now),Game.Options.Theme.JudgeColors[h.tier]));
             }
         }
 

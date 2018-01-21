@@ -28,7 +28,6 @@ namespace YAVSRG.Interface.Screens
         int COLUMNWIDTH = Game.Options.Theme.ColumnWidth;
         float SCROLLSPEED = Game.Options.Profile.ScrollSpeed / Game.Options.Profile.Rate;
         int HITPOSITION = Game.Options.Theme.HitPosition;
-        float HITWINDOW = Game.Options.Profile.HitWindow * Game.Options.Profile.Rate;
 
         float end;
 
@@ -40,6 +39,7 @@ namespace YAVSRG.Interface.Screens
         Chart Chart;
         PlayingChart scoreTracker;
         Widgets.HitMeter hitmeter;
+        float missWindow;
         float[] holds;
         Snap.BinarySwitcher holdsInHitpos = new Snap.BinarySwitcher(0);
         Key[] binds;
@@ -59,6 +59,7 @@ namespace YAVSRG.Interface.Screens
             lasti = Chart.States.Count;
             lastt = Chart.Timing.Count;
             holds = new float[Chart.Keys];
+            missWindow = scoreTracker.Scoring.MissWindow * Game.Options.Profile.Rate;
 
             end = Chart.States.Points[Chart.States.Count - 1].Offset;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
@@ -76,7 +77,7 @@ namespace YAVSRG.Interface.Screens
                 DoPop(); return;
             }
             base.OnEnter(prev);
-            Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle, new int[1]);
+            Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
             Game.Toolbar.hide = true;
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
@@ -109,7 +110,7 @@ namespace YAVSRG.Interface.Screens
                     OnKeyUp(k, now);
                 }
             }
-            scoreTracker.Update(now - HITWINDOW * 3);
+            scoreTracker.Update(now - missWindow);
             if (now > end)
             {
                 Push(new ScreenScore(scoreTracker));
@@ -118,54 +119,30 @@ namespace YAVSRG.Interface.Screens
 
         public void OnKeyDown(int k, float now)
         {
-            int i = Chart.States.GetNextIndex(now - HITWINDOW * 3);
-            if (i >= lasti) { return; }
-            int c = Chart.States.Count;
-            float delta = HITWINDOW * 4;
-            float d;
-            int hitAt = -1;
-            while (Chart.States.Points[i].Offset < now + HITWINDOW * 3)
-            {
-                Snap s = Chart.States.Points[i];
-                if (new Snap.BinarySwitcher(s.taps.value + s.holds.value).GetColumn(k))
-                {
-                    d = (now - s.Offset) / Game.Options.Profile.Rate;
-                    if (Math.Abs(d) < Math.Abs(delta))
-                    {
-                        delta = d;
-                        hitAt = i;
-                    }
-                }
-                i++;
-                if (i == c) { break; }
-            }
-            if (delta <= HITWINDOW * 3f)
-            {
-                scoreTracker.hitdata[hitAt].hit[k] = 2;
-                scoreTracker.hitdata[hitAt].delta[k] = delta;
-                hitmeter.AddHit(k, delta, now);
-            }
-            /*
-            else if (true)//if cb-on-unnecessary-keypress-is-on
-            {
-                //just combobreak
-            }*/
+            HandleHit(k, now, false);
         }
 
         public void OnKeyUp(int k, float now)
         {
-            int i = Chart.States.GetNextIndex(now - HITWINDOW * 3);
+            HandleHit(k, now, true);
+        }
+
+        public void HandleHit(int k, float now, bool release)
+        {
+            //basically, this whole algorithm finds the closest snap to the receptors (above or below) that is relevant (has a note in the column you're pressing)
+            int i = Chart.States.GetNextIndex(now - missWindow);
             if (i >= lasti) { return; }
             int c = Chart.States.Count;
-            float delta = HITWINDOW * 4;
+            float delta = missWindow;
             float d;
             int hitAt = -1;
-            while (Chart.States.Points[i].Offset < now + HITWINDOW * 3)
+            while (Chart.States.Points[i].Offset < now + missWindow) //search loop
             {
                 Snap s = Chart.States.Points[i];
-                if (s.ends.GetColumn(k))
+                Snap.BinarySwitcher b = release ? s.ends : new Snap.BinarySwitcher(s.taps.value + s.holds.value);
+                if (b.GetColumn(k))
                 {
-                    d = (now - s.Offset) / Game.Options.Profile.Rate * 0.5f;
+                    d = (now - s.Offset);
                     if (Math.Abs(d) < Math.Abs(delta))
                     {
                         delta = d;
@@ -174,13 +151,14 @@ namespace YAVSRG.Interface.Screens
                 }
                 i++;
                 if (i == c) { break; }
-            }
-            if (delta <= HITWINDOW * 3f)
+            } //delta is HITWINDOW * 4 if nothing found
+            if (release) delta *= 0.5f; //releasing long notes is more lenient (hit windows twice as big). needs a setting to turn on and off
+            if (hitAt >= 0)
             {
-                scoreTracker.hitdata[hitAt].hit[k] = 2;
-                scoreTracker.hitdata[hitAt].delta[k] = delta;
-                hitmeter.AddHit(k, delta, now);
-            }
+                delta /= Game.Options.Profile.Rate; //convert back to time relative to map instead of to player
+                scoreTracker.RegisterHit(hitAt, k, delta);
+                hitmeter.AddHit(k, delta, now, scoreTracker.Scoring.JudgeHit(Math.Abs(delta)));
+            }//put else statement here for cb on unecessary keypress
         }
 
         //This is the core rhythm game engine bit

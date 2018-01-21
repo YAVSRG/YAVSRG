@@ -10,24 +10,35 @@ namespace YAVSRG.Options
 {
     class Colorizer
     {
-        public enum ColorScheme
+        public enum ColorStyle
         {
             DDR,
             Column,
             Chord,
-            LongNote,
-            Jackhammer,
-            Manipulate
+            //LongNote,
+            //Jackhammer,
+            //Manipulate
         }
 
-        public static void Colorize(Chart c, ColorScheme scheme, int[] ColorMap)
+        public static void Colorize(Chart c, ColorScheme s)
         {
-            DDR(c);
-            //Chord(c);
+            switch (s.Style)
+            {
+                case (ColorStyle.DDR):
+                    DDR(c, s);
+                    return;
+                case (ColorStyle.Column):
+                    Column(c, s);
+                    return;
+                case (ColorStyle.Chord):
+                    Chord(c, s);
+                    return;
+            }
         }
 
-        private static void Jackhammer(Chart c)
+        private static void Jackhammer(Chart c, ColorScheme cs)
         {
+            //DO NOT USE UNTIL FINISHED/FIXED
             int last = c.States.Points[0].taps.value;
             int current;
             for (int i = 1; i < c.States.Count; i++)
@@ -41,8 +52,9 @@ namespace YAVSRG.Options
                 last = current;
             }
         }
-        private static void DDR(Chart c)
+        private static void DDR(Chart c, ColorScheme cs)
         {
+            //sorry, i'll comment it soon, but the code is likely to change around a bit
             int[] arr1 = new[] { 1, 2, 4, 8, 3, 6, 12 };
             float v;
             float x;
@@ -65,33 +77,33 @@ namespace YAVSRG.Options
                 }
                 for (int k = 0; k < c.Keys; k++)
                 {
-                    s.colors[k] = color;
+                    s.colors[k] = cs.GetColorIndex(color);
                 }
             }
         }
 
-        private static void Column(Chart c)
+        private static void Column(Chart c, ColorScheme cs)
         {
             foreach (Snap s in c.States.Points)
             {
                 s.colors = new int[c.Keys];
-                for (int i = 1; i < c.Keys; i++)
+                for (int i = 0; i < c.Keys; i++)
                 {
-                    s.colors[i] = i;
+                    s.colors[i] = cs.GetColorIndex(i); //color notes based on column.
                 }
             }
         }
 
-        private static void Chord(Chart c)
+        private static void Chord(Chart c, ColorScheme cs)
         {
             int count;
             foreach (Snap s in c.States.Points)
             {
                 s.colors = new int[c.Keys];
-                count = new Snap.BinarySwitcher(s.taps.value | s.holds.value).Count - 1;
+                count = new Snap.BinarySwitcher(s.taps.value | s.holds.value).Count - 1; //count number of lns/notes
                 for (int i = 0; i < c.Keys; i++)
                 {
-                    s.colors[i] = count;
+                    s.colors[i] = cs.GetColorIndex(count); //color notes in row based on number of notes. chord coloring.
                 }
             }
         }

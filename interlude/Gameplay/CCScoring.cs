@@ -40,7 +40,7 @@ namespace YAVSRG.Gameplay
                 {
                     float delta = t / n;
                     if (judgement > 0) judgement++;
-                    judgement += Game.Options.Profile.JudgeHit(delta);
+                    judgement += JudgeHit(delta);
                     if (judgement > 4)
                     {
                         judgement = 4;

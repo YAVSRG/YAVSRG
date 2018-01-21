@@ -23,8 +23,7 @@ namespace YAVSRG.Interface.Screens
         {
             score = data;
             mapcombo = score.c.States.Count;
-            score.scorer.ComboBreak(); //it is important that this is here
-            score.scorer.ComboBreaks -= 1;
+            score.Scoring.MaxCombo = Math.Max(score.Scoring.Combo, score.Scoring.MaxCombo); //if your biggest combo was until the end of the map, this catches it
 
             float acc = score.Accuracy();
             if (acc > 98) { tier = 0; } //code goes here for custom grade boundaries
@@ -65,12 +64,12 @@ namespace YAVSRG.Interface.Screens
             for (int i = 0; i < 6; i++)
             {
                 SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80,Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 50 + 350f * score.scorer.Judgements[i] / mapcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 50 + 350f * score.Scoring.Judgements[i] / mapcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, -Width+50, 100+i * 40, Color.White);
-                SpriteBatch.DrawJustifiedText(score.scorer.Judgements[i].ToString(), 30, -Width+400, 100+i * 40, Color.White);
+                SpriteBatch.DrawJustifiedText(score.Scoring.Judgements[i].ToString(), 30, -Width+400, 100+i * 40, Color.White);
             }
-            SpriteBatch.DrawText(score.scorer.MaxCombo.ToString()+"x", 30, -Width + 50, 340, Color.White);
-            SpriteBatch.DrawJustifiedText(score.scorer.ComboBreaks.ToString()+ "cbs", 30, -Width + 400, 340, Color.White);
+            SpriteBatch.DrawText(score.Scoring.MaxCombo.ToString()+"x", 30, -Width + 50, 340, Color.White);
+            SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString()+ "cbs", 30, -Width + 400, 340, Color.White);
             DrawGraph();
         }
 
@@ -78,7 +77,7 @@ namespace YAVSRG.Interface.Screens
         {
             SpriteBatch.DrawRect(-400, 200, 400, 400, Color.FromArgb(150, 0, 0, 0));
             float w = 800f / mapcombo;
-            float scale = 30f / Game.Options.Profile.HitWindow;
+            float scale = 100f / score.Scoring.MissWindow;
             SpriteBatch.DrawRect(-400, 297, 400, 303, Color.Green);
             for (int i = 0; i < mapcombo; i++)
             {
@@ -93,7 +92,7 @@ namespace YAVSRG.Interface.Screens
                     {
                         float o = score.hitdata[i].delta[k];
                         SpriteBatch.DrawRect(
-                                -398 + i * w, 298 - o * scale, -402 + i * w, 302 - o * scale, Game.Options.Theme.JudgeColors[Game.Options.Profile.JudgeHit(Math.Abs(o))]);
+                                -398 + i * w, 298 - o * scale, -402 + i * w, 302 - o * scale, Game.Options.Theme.JudgeColors[score.Scoring.JudgeHit(Math.Abs(o))]);
                     }
                 }
             }

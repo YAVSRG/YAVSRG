@@ -35,8 +35,15 @@ namespace YAVSRG.Options
             {
                 if (Path.GetExtension(s) == ".json")
                 {
-                    Profile p = Utils.LoadObject<Profile>(s);
-                    Profiles.Add(p);
+                    try
+                    {
+                        Profile p = Utils.LoadObject<Profile>(s);
+                        Profiles.Add(p);
+                    }
+                    catch
+                    {
+                        //:( log that you couldn't load the profile
+                    }
                 }
             }
             if (Profiles.Count > 0)

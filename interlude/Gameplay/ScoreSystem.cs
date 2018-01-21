@@ -18,6 +18,7 @@ namespace YAVSRG.Gameplay
         public int ComboBreaks = 0;
         public int[] Judgements;
         public int MaxCombo = 0;
+        public float MissWindow = 180f;
         public string name;
         
         public abstract void Update(float now, PlayingChart.HitData[] data);
