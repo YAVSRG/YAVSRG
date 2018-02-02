@@ -4,30 +4,35 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Input;
+using Newtonsoft.Json;
 
 namespace YAVSRG.Options
 {
     class Profile
     {
+        [JsonIgnore]
+        public string ProfilePath = "Default.json";
         public string Name = "Default Profile";
         public int Keymode = 0;
         public string Skin = "_fallback";
         public bool FixedScroll = false;
         public float ScrollSpeed = 2.05f;
-        public float Rate = 1.0f;
+        public double Rate = 1.0f;
         public float OD = 8.5f;
         public int Judge = 4;
-        public ColorScheme ColorStyle = new ColorScheme( Colorizer.ColorStyle.Column);
+        public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
 
+        //these are default binds
         public Key[][] Bindings = new Key[][] //this needs redoing cause it turns out shit in the profile.json
         {
-            null, null, null, null, //1K 2K 3K
-            //new Key[] { Key.S, Key.D, Key.Keypad4, Key.Keypad5 }, //4k
-            new Key[] { Key.Z, Key.X, Key.Period, Key.Slash },
+            null, null, null, null, //0K 1K 2K 3K
+            new Key[] { Key.Z, Key.X, Key.Period, Key.Slash }, //4k
             new Key[] { Key.Z, Key.X, Key.Space, Key.Period, Key.Slash }, //5k
             new Key[] { Key.Z, Key.X, Key.C, Key.Comma, Key.Period, Key.Slash }, //6k
             new Key[] { Key.Z, Key.X, Key.C, Key.Space, Key.Comma, Key.Period, Key.Slash }, //7k
-            //new Key[] { Key.A, Key.S, Key.D, Key.Space, Key.Keypad4, Key.Keypad5, Key.Keypad6 }, //7k
+            new Key[] { Key.Z, Key.X, Key.C, Key.V, Key.Comma, Key.Period, Key.Slash, Key.RShift }, //8k
+            new Key[] { Key.Z, Key.X, Key.C, Key.V, Key.Space, Key.Comma, Key.Period, Key.Slash, Key.RShift }, //9k
+            new Key[] { Key.CapsLock, Key.Q, Key.W, Key.E, Key.V, Key.Space, Key.K, Key.L, Key.Semicolon, Key.Quote }, //10k
         };
     }
 }

@@ -21,8 +21,11 @@ namespace YAVSRG.Audio
         public MusicPlayer()
         {
             timer = new Stopwatch();
-            //ManagedBass.Bass.Volume = 0.3f;
-            ManagedBass.Bass.GlobalStreamVolume = 2000;
+        }
+
+        public void SetVolume(float volume)
+        {
+            ManagedBass.Bass.GlobalStreamVolume = (int)(volume * 10000);
         }
 
         public void SetRate(double rate)

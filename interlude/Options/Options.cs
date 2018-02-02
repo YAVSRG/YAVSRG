@@ -13,11 +13,28 @@ namespace YAVSRG.Options
 
         public Profile Profile;
         public Theme Theme;
+        public General General;
 
         public Options()
         {
             Profile = new Profile();
             Theme = new Theme();
+            General = new General();
+            try
+            {
+                General = Utils.LoadObject<General>(Path.Combine(Content.WorkingDirectory, "Data", "Options.json"));
+                foreach (Profile p in Profiles) //linear search cause i'm lazy, this runs once and you're not gonna have more than like 20 profiles ever
+                {
+                    if (p.ProfilePath == General.CurrentProfile)
+                    {
+                        ChangeProfile(p);
+                    }
+                }
+            }
+            catch
+            {
+                //log that settings have been reset due to load failure
+            }
         }
 
         public static string ProfilePath
@@ -38,6 +55,7 @@ namespace YAVSRG.Options
                     try
                     {
                         Profile p = Utils.LoadObject<Profile>(s);
+                        p.ProfilePath = Path.GetFileName(s);
                         Profiles.Add(p);
                     }
                     catch
@@ -46,21 +64,26 @@ namespace YAVSRG.Options
                     }
                 }
             }
-            if (Profiles.Count > 0)
-            {
-                Game.Options.ChangeProfile(Profiles[0]);
-            }
         }
 
         public void ChangeProfile(Profile p)
         {
+            //remember to save the old one
+            SaveProfile(Profile);
             Profile = p;
+            General.CurrentProfile = p.ProfilePath;
             Theme = Content.LoadThemeData(p.Skin);
         }
 
-        public void SaveProfile()
+        public void SaveProfile(Profile p)
         {
-            Utils.SaveObject(Profile, Path.Combine(ProfilePath, Profile.Name + ".json"));
+            Utils.SaveObject(p, Path.Combine(ProfilePath, p.ProfilePath));
+        }
+
+        public void Save()
+        {
+            SaveProfile(Profile);
+            Utils.SaveObject(General, Path.Combine(Content.WorkingDirectory, "Data", "Options.json"));
         }
     }
 }

@@ -26,6 +26,7 @@ namespace YAVSRG.Gameplay
                     {
                         //GET MAD
                         AddJudgement(5);
+                        OnMiss(i);
                         ComboBreak();
                     }
                     else if (data[pos].hit[i] == 2)

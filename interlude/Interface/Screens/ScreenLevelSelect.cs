@@ -17,11 +17,11 @@ namespace YAVSRG.Interface.Screens
         public ScreenLevelSelect()
         {
             selector = new LevelSelector(this);
-            selector.PositionTopLeft(0, 0, 0, 0).PositionBottomRight(0, 0, 0, 0);
+            selector.PositionTopLeft(0, 0, AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
 
             foreach (ChartLoader.ChartPack p in ChartLoader.Cache)
             {
-                selector.AddPack(p);
+                selector.AddPack(p,0);
             }
 
             diffDisplay = new ChartDifficulty(Game.CurrentChart);
@@ -51,13 +51,14 @@ namespace YAVSRG.Interface.Screens
 
             if (Input.KeyTap(OpenTK.Input.Key.Plus))
             {
-                Game.Options.Profile.Rate += 0.05f;
+                Game.Options.Profile.Rate += 0.05d;
+                Game.Options.Profile.Rate = Math.Round(Game.Options.Profile.Rate, 2, MidpointRounding.AwayFromZero);
                 Game.Audio.SetRate(Game.Options.Profile.Rate);
                 diffDisplay.ChangeChart(Game.CurrentChart);
             }
             if (Input.KeyTap(OpenTK.Input.Key.Minus))
             {
-                Game.Options.Profile.Rate -= 0.05f;
+                Game.Options.Profile.Rate -= 0.05d;
                 Game.Audio.SetRate(Game.Options.Profile.Rate);
                 diffDisplay.ChangeChart(Game.CurrentChart);
             }

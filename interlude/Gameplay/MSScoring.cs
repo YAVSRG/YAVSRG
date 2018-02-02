@@ -30,6 +30,7 @@ namespace YAVSRG.Gameplay
                         //GET MAD
                         score += (maxweight - linFac); //miss penalty
                         ComboBreak();
+                        OnMiss(i);
                         maxscore += maxweight;
                     }
                     else if (data[pos].hit[i] == 2)

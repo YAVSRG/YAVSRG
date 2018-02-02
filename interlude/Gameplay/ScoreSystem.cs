@@ -20,6 +20,7 @@ namespace YAVSRG.Gameplay
         public int MaxCombo = 0;
         public float MissWindow = 180f;
         public string name;
+        public Action<int> OnMiss = (x) => { };
         
         public abstract void Update(float now, PlayingChart.HitData[] data);
 

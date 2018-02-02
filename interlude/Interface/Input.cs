@@ -16,6 +16,7 @@ namespace YAVSRG.Interface
 
         public static int MouseX;
         public static int MouseY;
+        public static int MouseScroll;
 
         public static void Init()
         {
@@ -29,6 +30,12 @@ namespace YAVSRG.Interface
             Game.Instance.KeyDown += KeyDown;
             Game.Instance.KeyUp += KeyUp;
             Game.Instance.MouseMove += MouseMove;
+            Game.Instance.MouseWheel += MouseWheel;
+        }
+
+        private static void MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            MouseScroll = e.Delta;
         }
 
         private static void MouseMove(object sender, MouseMoveEventArgs e)
@@ -97,6 +104,7 @@ namespace YAVSRG.Interface
         {
             ok = new List<Key>(k);
             om = new List<MouseButton>(m);
+            MouseScroll = 0;
         }
     }
 }

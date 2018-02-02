@@ -36,6 +36,12 @@ namespace YAVSRG.Interface
                 _Y.Target += y;
             }
 
+            public void Target(float x, float y)
+            {
+                _X.Target = x;
+                _Y.Target = y;
+            }
+
             public float X(float min, float max)
             {
                 switch (XRel)
@@ -62,6 +68,22 @@ namespace YAVSRG.Interface
                         return min + _Y;
                 }
                 return _Y;
+            }
+
+            public float AbsX
+            {
+                get
+                {
+                    return _X;
+                }
+            }
+
+            public float AbsY
+            {
+                get
+                {
+                    return _Y;
+                }
             }
         }
 

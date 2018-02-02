@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Beatmap.DifficultyRating;
 using System.Drawing;
-using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Beatmap;
 
 namespace YAVSRG.Interface.Widgets
@@ -23,7 +22,7 @@ namespace YAVSRG.Interface.Widgets
 
         public void ChangeChart(Chart c)
         {
-            diff = new RatingReport(c, Game.Options.Profile.Rate, 45f);
+            diff = new RatingReport(c, (float)Game.Options.Profile.Rate, 45f);
             rating = diff.breakdown;
             points = diff.final.Count;
             info = new string[]
@@ -34,7 +33,7 @@ namespace YAVSRG.Interface.Widgets
                 "all",Utils.RoundNumber(rating[3]),
                 "gotta",Utils.RoundNumber(0),
                 "go",Utils.RoundNumber(0),
-                Utils.FormatTime(c.GetDuration()/Game.Options.Profile.Rate),((int)(c.GetBPM()*Game.Options.Profile.Rate)).ToString()+"BPM",
+                Utils.FormatTime(c.GetDuration()/(float)Game.Options.Profile.Rate),((int)(c.GetBPM()*Game.Options.Profile.Rate)).ToString()+"BPM",
             };
         }
 

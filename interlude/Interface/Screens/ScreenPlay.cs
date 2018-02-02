@@ -26,7 +26,7 @@ namespace YAVSRG.Interface.Screens
         }
 
         int COLUMNWIDTH = Game.Options.Theme.ColumnWidth;
-        float SCROLLSPEED = Game.Options.Profile.ScrollSpeed / Game.Options.Profile.Rate;
+        float SCROLLSPEED = Game.Options.Profile.ScrollSpeed / (float)Game.Options.Profile.Rate;
         int HITPOSITION = Game.Options.Theme.HitPosition;
 
         float end;
@@ -59,7 +59,7 @@ namespace YAVSRG.Interface.Screens
             lasti = Chart.States.Count;
             lastt = Chart.Timing.Count;
             holds = new float[Chart.Keys];
-            missWindow = scoreTracker.Scoring.MissWindow * Game.Options.Profile.Rate;
+            missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
 
             end = Chart.States.Points[Chart.States.Count - 1].Offset;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
@@ -68,6 +68,8 @@ namespace YAVSRG.Interface.Screens
             Widgets.Add(hitmeter.PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
 
             Widgets.Add(new Widgets.ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500,50,AnchorType.CENTER,AnchorType.MIN));
+
+            scoreTracker.Scoring.OnMiss = (k) => { OnMiss(k); };
         }
 
         public override void OnEnter(Screen prev)
@@ -117,6 +119,12 @@ namespace YAVSRG.Interface.Screens
             }
         }
 
+        public void OnMiss(int k)
+        {
+            hitmeter.AddHit(k, scoreTracker.Scoring.MissWindow, (float)Game.Audio.Now(), 5);
+            //some other stuff
+        }
+
         public void OnKeyDown(int k, float now)
         {
             HandleHit(k, now, false);
@@ -155,7 +163,7 @@ namespace YAVSRG.Interface.Screens
             if (release) delta *= 0.5f; //releasing long notes is more lenient (hit windows twice as big). needs a setting to turn on and off
             if (hitAt >= 0)
             {
-                delta /= Game.Options.Profile.Rate; //convert back to time relative to map instead of to player
+                delta /= (float)Game.Options.Profile.Rate; //convert back to time relative to map instead of to player
                 scoreTracker.RegisterHit(hitAt, k, delta);
                 hitmeter.AddHit(k, delta, now, scoreTracker.Scoring.JudgeHit(Math.Abs(delta)));
             }//put else statement here for cb on unecessary keypress

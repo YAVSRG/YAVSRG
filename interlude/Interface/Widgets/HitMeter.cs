@@ -39,7 +39,7 @@ namespace YAVSRG.Interface.Widgets
                 if (now-when < 200)
                 {
                     float x = Math.Abs(1 - (now - when) * 0.01f) * (right-left)*0.2f;
-                    SpriteBatch.DrawTextToFill(Game.Options.Theme.Judges[tier], left + x, top, right - x, bottom, Game.Options.Theme.JudgeColors[tier]);
+                    SpriteBatch.DrawCentredTextToFill(Game.Options.Theme.Judges[tier], left + x, top, right - x, bottom, Game.Options.Theme.JudgeColors[tier]);
                 }
             }
 
@@ -108,7 +108,7 @@ namespace YAVSRG.Interface.Widgets
 
             foreach (Hit h in hits)
             {
-                SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb((int)(255+h.time-now),Game.Options.Theme.JudgeColors[h.tier]));
+                SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb((int)((5000+h.time-now)*0.05f),Game.Options.Theme.JudgeColors[h.tier]));
             }
         }
 
@@ -119,7 +119,7 @@ namespace YAVSRG.Interface.Widgets
             List<Hit> temp = new List<Hit>();
             foreach (Hit h in hits)
             {
-                if (now - h.time > 200)
+                if (now - h.time > 5000)
                 {
                     temp.Add(h);
                 }

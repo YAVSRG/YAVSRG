@@ -23,8 +23,8 @@ namespace YAVSRG.Interface.Widgets
 
         private void DrawRow(string a, string b, float left, float top, float right, float bottom)
         {
-            SpriteBatch.DrawTextToFill(a, left, top, (left + right) / 2, bottom, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawTextToFill(b, (left + right) / 2, top, right, bottom, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredTextToFill(a, left, top, (left + right) / 2, bottom, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredTextToFill(b, (left + right) / 2, top, right, bottom, Game.Options.Theme.MenuFont);
         }
 
         public override void Draw(float left, float top, float right, float bottom)

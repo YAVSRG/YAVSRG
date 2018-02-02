@@ -7,7 +7,7 @@ using YAVSRG.Beatmap;
 
 namespace YAVSRG.Gameplay
 {
-    public class PlayingChart
+    public class PlayingChart //handles scoring while you play through a chart, keeping track of hits and acc and stuff
     {
         public class HitData : OffsetItem
         {
@@ -52,13 +52,14 @@ namespace YAVSRG.Gameplay
             return Scoring.Accuracy();
         }
 
-        public void Update(float time)
+        public void Update(float time) //returns flag if missed
         {
             Scoring.Update(time,hitdata);
         }
 
         public void RegisterHit(int i, int k, float delta)
         {
+            if (hitdata[i].hit[k] == 2) { return; } //ignore if the note is already hit. prevents mashing exploit.
             hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit
             hitdata[i].delta[k] = delta;
         }

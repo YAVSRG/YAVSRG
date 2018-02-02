@@ -14,7 +14,7 @@ namespace YAVSRG.Options
         public ColorScheme(Colorizer.ColorStyle s)
         {
             Style = s;
-            ColorMap = new int[10];//temp
+            ColorMap = new int[10]; //temp
         }
 
         public int GetColorIndex(int i)

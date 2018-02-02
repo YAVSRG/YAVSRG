@@ -135,6 +135,7 @@
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
+    <Compile Include="Interface\Screens\ScreenOptions.cs" />
     <Compile Include="Interface\Screens\ScreenScore.cs" />
     <Compile Include="Interface\SlidingEffect.cs" />
     <Compile Include="Interface\Widget.cs" />
@@ -151,9 +152,12 @@
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\WidgetContainer.cs" />
+    <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
     <Compile Include="Options\Colorizer.cs" />
     <Compile Include="Options\ColorScheme.cs" />
+    <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
+    <Compile Include="Options\Tabs\Visuals.cs" />
     <Compile Include="Options\Theme.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Interface\Input.cs" />
@@ -193,6 +197,7 @@
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

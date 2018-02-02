@@ -87,7 +87,7 @@ namespace YAVSRG
             DrawText(text, scale, x, y, c);
         }
 
-        public static void DrawTextToFill(string text, float left, float top, float right, float bottom, Color c)
+        public static void DrawCentredTextToFill(string text, float left, float top, float right, float bottom, Color c)
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
@@ -96,6 +96,17 @@ namespace YAVSRG
                 (bottom - top) / h
                 );
             DrawCentredText(text, scale * FONTSCALE, (left + right) * 0.5f, (top + bottom) * 0.5f - h * scale * 0.5f, c);
+        }
+
+        public static void DrawTextToFill(string text, float left, float top, float right, float bottom, Color c)
+        {
+            float w = MeasureText(text);
+            int h = FontLookup['T'].Height;
+            float scale = Math.Min(
+                (right - left) / w,
+                (bottom - top) / h
+                );
+            DrawText(text, scale * FONTSCALE, left, (top + bottom) * 0.5f - h * scale * 0.5f, c);
         }
 
         public static float MeasureText(string text)

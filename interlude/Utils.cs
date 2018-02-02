@@ -17,9 +17,9 @@ namespace YAVSRG
             return a % b;
         }
 
-        public static string RoundNumber(float x)
+        public static string RoundNumber(double x)
         {
-            return Math.Round(x, 2).ToString();
+            return string.Format("{0:0.00}",Math.Round(x, 2));
         }
 
         public static string FormatTime(float ms)

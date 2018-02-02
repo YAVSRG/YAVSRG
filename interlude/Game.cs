@@ -14,7 +14,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.0.1SOON";
+        public static readonly string Version = "v0.1_this_might_take_a_while";
 
         //why the fuck is half of this static and half of it not?
         //todo: clean this up a bit
@@ -28,17 +28,23 @@ namespace YAVSRG
         {
             Title = "YAVSRG";
             Instance = this;
-            CursorVisible = false;
+            Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on
-            FullScreen(); //this needs fiddling with for user options
         }
 
-        public void FullScreen() //temporary code to put the game as a borderless window
+        public void ApplyWindowSettings(Options.General settings) //apply video settings
         {
-            Width = 1920;
-            Height = 1030;
-            WindowBorder = WindowBorder.Hidden;
-            WindowState = WindowState.Maximized;
+            TargetRenderFrequency = settings.FrameLimiter; //set frame limit
+            if (settings.WindowMode == YAVSRG.Options.General.WindowType.Borderless)
+            {
+                WindowState = WindowState.Maximized;
+                WindowBorder = WindowBorder.Hidden;
+            }
+            else if (settings.WindowMode == YAVSRG.Options.General.WindowType.Fullscreen)
+            {
+                WindowState = WindowState.Fullscreen;
+            }
+            Audio.SetVolume(settings.AudioVolume);
         }
 
         protected override void OnResize(EventArgs e) //handles resizing of the window. tells OpenGL the new resolution etc
@@ -86,10 +92,11 @@ namespace YAVSRG
             base.OnLoad(e);
             //might need to move all this
             ManagedBass.Bass.Init();
-            ScreenUtils.UpdateBounds(Width, Height); //why is this here? todo: find out
-            Options = new Options.Options();
-            YAVSRG.Options.Options.Init();
             Audio = new MusicPlayer();
+            ScreenUtils.UpdateBounds(Width, Height); //why is this here? todo: find out
+            YAVSRG.Options.Options.Init();
+            Options = new Options.Options();
+            ApplyWindowSettings(Options.General);
             Input.Init();
             SpriteBatch.Init();
             Toolbar = new Toolbar();
@@ -110,7 +117,7 @@ namespace YAVSRG
         protected override void OnUnload(EventArgs e)
         {
             base.OnUnload(e);
-            Options.SaveProfile(); //remember to dump any updated profile settings to file
+            Options.Save(); //remember to dump any updated profile settings to file
         }
     }
 }
