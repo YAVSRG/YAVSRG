@@ -157,7 +157,8 @@
     <Compile Include="Options\ColorScheme.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
-    <Compile Include="Options\Tabs\Visuals.cs" />
+    <Compile Include="Options\Tabs\GeneralTab.cs" />
+    <Compile Include="Options\Tabs\GameplayTab.cs" />
     <Compile Include="Options\Theme.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Interface\Input.cs" />

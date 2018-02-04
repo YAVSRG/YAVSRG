@@ -23,7 +23,7 @@ namespace YAVSRG.Interface.Screens
                 .PositionBottomRight(100,0,AnchorType.CENTER,AnchorType.CENTER)
                 );
             Widgets.Add(
-                new Button("buttonbase", "Options", () => { })
+                new Button("buttonbase", "Options", () => { Push(new ScreenOptions()); })
                 .PositionTopLeft(-100, 100, AnchorType.CENTER, AnchorType.CENTER)
                 .PositionBottomRight(100, 200, AnchorType.CENTER, AnchorType.CENTER)
                 );

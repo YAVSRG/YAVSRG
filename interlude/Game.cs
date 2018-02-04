@@ -44,6 +44,11 @@ namespace YAVSRG
             {
                 WindowState = WindowState.Fullscreen;
             }
+            else
+            {
+                WindowState = WindowState.Normal;
+                WindowBorder = WindowBorder.Resizable;
+            }
             Audio.SetVolume(settings.AudioVolume);
         }
 

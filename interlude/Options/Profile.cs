@@ -25,7 +25,8 @@ namespace YAVSRG.Options
         //these are default binds
         public Key[][] Bindings = new Key[][] //this needs redoing cause it turns out shit in the profile.json
         {
-            null, null, null, null, //0K 1K 2K 3K
+            null, null, null, //0k 1k 2k
+            new Key[] { Key.Left, Key.Down, Key.Right }, //3K
             new Key[] { Key.Z, Key.X, Key.Period, Key.Slash }, //4k
             new Key[] { Key.Z, Key.X, Key.Space, Key.Period, Key.Slash }, //5k
             new Key[] { Key.Z, Key.X, Key.C, Key.Comma, Key.Period, Key.Slash }, //6k

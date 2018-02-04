@@ -16,8 +16,13 @@ namespace YAVSRG.Interface.Widgets
 
         public KeyBinder(string label, Key start, Action<Key> set) : base()
         {
-            bind = start;
             this.label = label;
+            Change(start, set);
+        }
+
+        public void Change(Key start, Action<Key> set)
+        {
+            bind = start;
             this.set = set;
         }
 

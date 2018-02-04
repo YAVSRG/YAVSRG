@@ -39,10 +39,21 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Update(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (Input.MousePress(OpenTK.Input.MouseButton.Left) && ScreenUtils.MouseOver(left, top, right, bottom))
+            if (ScreenUtils.MouseOver(left, top, right, bottom))
             {
-                set(min + (Input.MouseX - left) / (right - left) * (max - min));
-                set(get() - get() % resolution);
+                if (Input.KeyTap(OpenTK.Input.Key.Left))
+                {
+                    set(get() - resolution);
+                }
+                if (Input.KeyTap(OpenTK.Input.Key.Right))
+                {
+                    set(get() + resolution);
+                }
+                if (Input.MousePress(OpenTK.Input.MouseButton.Left))
+                {
+                    set(min + (Input.MouseX - left) / (right - left) * (max - min));
+                    set(get() - get() % resolution);
+                }
             }
         }
     }

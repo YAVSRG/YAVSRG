@@ -90,11 +90,12 @@ namespace YAVSRG.Interface
         public AnchorPoint A;
         public AnchorPoint B;
         
-        public bool Focus;
+        public int State = 1; //0 is hidden, 2 is focussed
 
         public Widget()
         {
-
+            A = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN);
+            B = new AnchorPoint(0, 0, AnchorType.MAX, AnchorType.MAX);
         }
 
         public float Left(float l, float r)

@@ -21,7 +21,10 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             foreach (Widget w in Widgets)
             {
-                w.Draw(left, top, right, bottom);
+                if (w.State > 0)
+                {
+                    w.Draw(left, top, right, bottom);
+                }
             }
         }
 
@@ -31,7 +34,10 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             foreach (Widget w in Widgets)
             {
-                w.Update(left, top, right, bottom);
+                if (w.State > 0)
+                {
+                    w.Update(left, top, right, bottom);
+                }
             }
         }
     }
