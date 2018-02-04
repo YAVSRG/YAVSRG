@@ -80,7 +80,7 @@ namespace YAVSRG.Interface.Screens
             }
             base.OnEnter(prev);
             Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
-            Game.Toolbar.hide = true;
+            Game.Instance.Toolbar.hide = true;
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
@@ -90,7 +90,7 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnExit(next);
 
-            Game.Toolbar.hide = false;
+            Game.Instance.Toolbar.hide = false;
         }
 
         public override void Update()

@@ -15,14 +15,28 @@ namespace YAVSRG
     class Game : GameWindow
     {
         public static readonly string Version = "v0.1_this_might_take_a_while";
-
-        //why the fuck is half of this static and half of it not?
-        //todo: clean this up a bit
+        
         public static Game Instance; //keep track of instance of the game (should only be one).
-        public static Chart CurrentChart; //the current selected chart ingame 
-        public static MusicPlayer Audio; //audio engine instance
-        public static Options.Options Options; //options handler instance
-        public static Toolbar Toolbar; //toolbar instance ??
+
+        protected Chart currentChart; //the current selected chart ingame 
+        protected MusicPlayer audio; //audio engine instance
+        protected Options.Options options; //options handler instance
+        public Toolbar Toolbar; //toolbar instance ??
+
+        public static Options.Options Options
+        {
+            get { return Instance.options; }
+        }
+
+        public static Chart CurrentChart
+        {
+            get { return Instance.currentChart; }
+        }
+
+        public static MusicPlayer Audio
+        {
+            get { return Instance.audio; }
+        }
 
         public Game() : base(1800, 960)
         {
@@ -36,16 +50,16 @@ namespace YAVSRG
         {
             TargetRenderFrequency = settings.FrameLimiter; //set frame limit
             if (settings.WindowMode == YAVSRG.Options.General.WindowType.Borderless)
-            {
+            { //settings for borderless
                 WindowState = WindowState.Maximized;
                 WindowBorder = WindowBorder.Hidden;
             }
             else if (settings.WindowMode == YAVSRG.Options.General.WindowType.Fullscreen)
-            {
+            {//settings for fullscreen
                 WindowState = WindowState.Fullscreen;
             }
             else
-            {
+            {//settings for windowed
                 WindowState = WindowState.Normal;
                 WindowBorder = WindowBorder.Resizable;
             }
@@ -86,7 +100,7 @@ namespace YAVSRG
             base.OnUpdateFrame(e);
             if (Screen.Current == null) { Exit(); return; } //close game when you close all the screens (main menu goes last)
             Toolbar.Update();
-            Audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
+            audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             Screen.Current.Update();
             Screen.UpdateAnimation(); //this is the fade to black transition between screens. needs removing for a fancy transition.
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
@@ -97,11 +111,11 @@ namespace YAVSRG
             base.OnLoad(e);
             //might need to move all this
             ManagedBass.Bass.Init();
-            Audio = new MusicPlayer();
+            audio = new MusicPlayer();
             ScreenUtils.UpdateBounds(Width, Height); //why is this here? todo: find out
             YAVSRG.Options.Options.Init();
-            Options = new Options.Options();
-            ApplyWindowSettings(Options.General);
+            options = new Options.Options();
+            ApplyWindowSettings(options.General);
             Input.Init();
             SpriteBatch.Init();
             Toolbar = new Toolbar();
@@ -110,19 +124,19 @@ namespace YAVSRG
 
         public void ChangeChart(Chart c) //tells the game to change selected chart. handles changing loaded audio file and background
         {
-            if (CurrentChart != null)
+            if (currentChart != null)
             {
-                CurrentChart.UnloadBackground(); //delete old background image from ram. (otherwise it's a GL ram leak)
+                currentChart.UnloadBackground(); //delete old background image from ram. (otherwise it's a GL ram leak)
             }
-            CurrentChart = c;
-            Audio.ChangeTrack(c.AudioPath());
-            Audio.Play((long)c.PreviewTime); //play from the preview point given in the chart data
+            currentChart = c;
+            audio.ChangeTrack(c.AudioPath());
+            audio.Play((long)c.PreviewTime); //play from the preview point given in the chart data
         }
 
         protected override void OnUnload(EventArgs e)
         {
             base.OnUnload(e);
-            Options.Save(); //remember to dump any updated profile settings to file
+            options.Save(); //remember to dump any updated profile settings to file
         }
     }
 }

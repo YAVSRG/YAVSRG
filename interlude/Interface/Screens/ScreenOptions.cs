@@ -26,7 +26,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Toolbar.hide = false;
+            Game.Instance.Toolbar.hide = false;
         }
 
         public override void Draw()
