@@ -23,6 +23,8 @@ namespace YAVSRG.Options
         public double Rate = 1.0f;
         public float OD = 8.5f;
         public int Judge = 4;
+        public float ScreenCoverUp = 0f;
+        public float ScreenCoverDown = 0f;
         public ScoreType ScoreSystem = ScoreType.Default;
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
 

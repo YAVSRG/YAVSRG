@@ -32,7 +32,7 @@ namespace YAVSRG.Interface.Screens
         float end;
 
         readonly Color bgdim = Color.FromArgb(140, 140, 140);
-        Sprite note, hold, holdhead, receptor, playfield;
+        Sprite note, hold, holdhead, receptor, playfield, screencover;
 
         int index = 0;
         int lasti; int lastt;
@@ -51,6 +51,7 @@ namespace YAVSRG.Interface.Screens
             hold = Game.Options.Theme.GetBodyTexture(Game.CurrentChart.Keys);
             holdhead = Game.Options.Theme.GetHeadTexture(Game.CurrentChart.Keys);
             playfield = Content.LoadTextureFromAssets("playfield");
+            screencover = Content.LoadTextureFromAssets("screencover");
 
             Chart = Game.CurrentChart;
             scoreTracker = new PlayingChart(Game.CurrentChart);
@@ -67,7 +68,7 @@ namespace YAVSRG.Interface.Screens
 
             Widgets.Add(hitmeter.PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
 
-            Widgets.Add(new Widgets.ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500,50,AnchorType.CENTER,AnchorType.MIN));
+            Widgets.Add(new Widgets.ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
 
             scoreTracker.Scoring.OnMiss = (k) => { OnMiss(k); };
         }
@@ -197,11 +198,11 @@ namespace YAVSRG.Interface.Screens
                 holds[k] = 0;//used in DrawSnapWithHolds. it's only initialised once to reduce garbage collection
             }
 
-            while (y+v < Height*2 && i < lasti)//continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
+            while (y + v < Height * 2 && i < lasti)//continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
             {
-                while (!Game.Options.Profile.FixedScroll && t < lastt-1 && Chart.Timing.Points[t+1].Offset < Chart.States.Points[i].Offset) //check if we've gone past any timing points
+                while (!Game.Options.Profile.FixedScroll && t < lastt - 1 && Chart.Timing.Points[t + 1].Offset < Chart.States.Points[i].Offset) //check if we've gone past any timing points
                 {
-                    y += SCROLLSPEED * Chart.Timing.Points[t].ScrollSpeed * (Chart.Timing.Points[t+1].Offset - now); //handle scrollspeed adjustments
+                    y += SCROLLSPEED * Chart.Timing.Points[t].ScrollSpeed * (Chart.Timing.Points[t + 1].Offset - now); //handle scrollspeed adjustments
                     SpriteBatch.DrawRect(offset, Height - y, -offset, Height - y + 5, Color.White); //bar line
                     t++;//tracks which timing point we're looking at
                     now = Chart.Timing.Points[t].Offset; //we're now drawing relative to the most recent timing point
@@ -214,8 +215,11 @@ namespace YAVSRG.Interface.Screens
             {
                 DrawSnap(new Snap(0, 0, holdsInHitpos.value, 0, 0), offset, HITPOSITION); //draw hold heads in hit position
             }
-            
-            SpriteBatch.DrawCentredText(scoreTracker.Combo().ToString(),40f,0,-100, Color.White); //combo
+
+            DrawScreenCoverUp(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverUp); //draws the screencover
+            DrawScreenCoverDown(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverDown);
+
+            SpriteBatch.DrawCentredText(scoreTracker.Combo().ToString(), 40f, 0, -100, Color.White); //combo
             SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -Height + 70, Color.White); //acc
 
             base.Draw();
@@ -272,7 +276,7 @@ namespace YAVSRG.Interface.Screens
             pos = Height - pos;
             foreach (int k in s.taps.GetColumns())
             {
-                Game.Options.Theme.DrawNote(note, k * COLUMNWIDTH + offset, pos - COLUMNWIDTH, (k + 1) * COLUMNWIDTH+ offset, pos, k ,Game.CurrentChart.Keys, s.colors[k], 2);
+                Game.Options.Theme.DrawNote(note, k * COLUMNWIDTH + offset, pos - COLUMNWIDTH, (k + 1) * COLUMNWIDTH + offset, pos, k, Game.CurrentChart.Keys, s.colors[k], 2);
             }
             foreach (int k in s.ends.GetColumns())
             {
@@ -282,6 +286,22 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Options.Theme.DrawTail(holdhead, k * COLUMNWIDTH + offset, pos - COLUMNWIDTH, (k + 1) * COLUMNWIDTH + offset, pos, k, Game.CurrentChart.Keys);
             }
+        }
+
+        private void DrawScreenCoverUp(float left, float right, float amount)
+        {
+            if (amount <= 0.1) { return; }
+            int h = Height * 2 - HITPOSITION;
+            SpriteBatch.Draw(screencover, left, Height - HITPOSITION - h * amount - COLUMNWIDTH, right, Height - HITPOSITION - h * amount, Color.White, 0, 0, 0);
+            SpriteBatch.Draw(screencover, left, Height - HITPOSITION - h * amount, right, Height - HITPOSITION, Color.White, 0, 1, 0);
+        }
+
+        private void DrawScreenCoverDown(float left, float right, float amount)
+        {
+            if (amount <= 0.1) { return; }
+            int h = Height * 2 - HITPOSITION;
+            SpriteBatch.Draw(screencover, left, h * amount - COLUMNWIDTH - Height, right, h * amount - Height, Color.White, 0, 0, 2);
+            SpriteBatch.Draw(screencover, left, -Height, right,  h * amount - COLUMNWIDTH - Height, Color.White, 0, 1, 2);
         }
     }
 }

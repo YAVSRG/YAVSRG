@@ -24,6 +24,16 @@ namespace YAVSRG.Options.Tabs
                 .PositionBottomRight(100, 225, AnchorType.CENTER, AnchorType.MIN)
                 );
             Widgets.Add(
+                new Slider("Upwards Screencover", v => { Game.Options.Profile.ScreenCoverUp = v; }, () => Game.Options.Profile.ScreenCoverUp, 0, 1, 0.05f)
+                .PositionTopLeft(-300, 275, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-50, 325, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new Slider("Downwards Screencover", v => { Game.Options.Profile.ScreenCoverDown = v; }, () => Game.Options.Profile.ScreenCoverDown, 0, 1, 0.05f)
+                .PositionTopLeft(50, 275, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(300, 325, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
                 new BoolPicker("Disable SV", Game.Options.Profile.FixedScroll, v => { Game.Options.Profile.FixedScroll = v; })
                 .PositionTopLeft(-200, 375, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(-50, 425, AnchorType.CENTER, AnchorType.MIN)
