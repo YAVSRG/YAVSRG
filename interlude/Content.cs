@@ -20,26 +20,50 @@ namespace YAVSRG
         static Dictionary<string,Sprite> Store = new Dictionary<string,Sprite>();
         static Dictionary<string, int> SoundStore = new Dictionary<string, int>();
 
-        public static Sprite LoadTexture(string path)
+        public static Sprite LoadTexture(string path) //load texture from absolute path
         {
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException();
             }
             Bitmap bmp = new Bitmap(path);
-            return UploadTexture(bmp);
+            return UploadTexture(bmp,1,1); //temp
+        }
+
+        public static Sprite FindTextureWithUV(string name, string skin)
+        {
+            string filename;
+            foreach (string s in Directory.GetFiles(Path.Combine(AssetsDir, skin)))
+            {
+                filename = Path.GetFileNameWithoutExtension(s);
+                int ux = 1; int uy = 1;
+                if (filename.StartsWith(name))
+                {
+                    string[] split = filename.Split(' ');
+                    split = split[split.Length - 1].Split('x');
+                    if (split.Length == 2)
+                    {
+                        int.TryParse(split[0], out ux);
+                        int.TryParse(split[1], out uy);
+                    }
+                    //needs some way to check format isn't being abused
+                    Bitmap bmp = new Bitmap(s);
+                    return UploadTexture(bmp, ux, uy);
+                }
+            }
+            return new Sprite();
         }
 
         public static Sprite LoadTextureFromAssets(string path)
         {
             if (!Store.ContainsKey(path))
             {
-                string newpath = Path.Combine(AssetsDir, Game.Options.Profile.Skin, path + ".png");
-                if (!File.Exists(newpath))
+                Sprite s = FindTextureWithUV(path, Game.Options.Profile.Skin);
+                if (s.Height == 0)
                 {
-                    newpath = Path.Combine(AssetsDir, "_fallback", path + ".png");
+                    s = FindTextureWithUV(path, "_fallback");
                 }
-                Store.Add(path, LoadTexture(newpath));
+                Store.Add(path, s);
             }
             return Store[path];
         }
@@ -101,7 +125,7 @@ namespace YAVSRG
             return LoadTextureFromAssets("background");
         }
 
-        public static Sprite UploadTexture(Bitmap bmp, bool font = false)
+        public static Sprite UploadTexture(Bitmap bmp, int ux, int uy, bool font = false)
         {
             int id = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, id);
@@ -123,7 +147,7 @@ namespace YAVSRG
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             }
 
-            return new Sprite(id, bmp.Width, bmp.Height);
+            return new Sprite(id, bmp.Width, bmp.Height, ux, uy);
         }
 
         public static void UnloadTexture(Sprite s)

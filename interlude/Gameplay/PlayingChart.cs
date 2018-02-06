@@ -33,7 +33,7 @@ namespace YAVSRG.Gameplay
         public PlayingChart(Chart c)
         {
             this.c = c;
-            Scoring = new StandardScoring(); //scoring will be the one you want, standard scoring will be calculated on score screen
+            Scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);//new StandardScoring(); //scoring will be the one you want, standard scoring will be calculated on score screen
             int count = c.States.Count;
             hitdata = new HitData[count];
             for (int i = 0; i < count; i++)

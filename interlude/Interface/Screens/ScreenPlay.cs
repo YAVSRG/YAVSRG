@@ -27,7 +27,7 @@ namespace YAVSRG.Interface.Screens
 
         int COLUMNWIDTH = Game.Options.Theme.ColumnWidth;
         float SCROLLSPEED = Game.Options.Profile.ScrollSpeed / (float)Game.Options.Profile.Rate;
-        int HITPOSITION = Game.Options.Theme.HitPosition;
+        int HITPOSITION = Game.Options.Profile.HitPosition;
 
         float end;
 

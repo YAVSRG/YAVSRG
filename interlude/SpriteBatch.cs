@@ -19,6 +19,15 @@ namespace YAVSRG
         {
             Draw(texture, left, top, right, bottom, new Rectangle(0, 0, 1, 1), color, rotation);
         }
+
+        public static void Draw(Sprite texture, float left, float top, float right, float bottom, Color color, int ux, int uy, int rotation = 0)
+        {
+            float x = 1f / texture.UV_X;
+            float y = 1f / texture.UV_Y;
+            RectangleF UV = new RectangleF(x * ux, y * uy, x, y);
+            Draw(texture, left, top, right, bottom, UV, color, rotation);
+        }
+
         public static void Draw(Sprite texture, float left, float top, float right, float bottom, RectangleF uv, Color color, int rotation = 0)
         {
             GL.Enable(EnableCap.Texture2D);
@@ -157,7 +166,7 @@ namespace YAVSRG
                     g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
                     g.DrawString(c.ToString(), f, Brushes.White, 0, 0);
                 }
-                FontLookup.Add(c, Content.UploadTexture(bmp, true));
+                FontLookup.Add(c, Content.UploadTexture(bmp, 1, 1, true));
             }
         }
     }

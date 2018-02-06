@@ -29,12 +29,14 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             Widgets[Current].Draw(left, top, right, bottom);
         }
 
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             Widgets[Current].Update(left, top, right, bottom);
         }
     }

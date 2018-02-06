@@ -100,7 +100,7 @@ namespace YAVSRG.Options
             foreach (Snap s in c.States.Points)
             {
                 s.colors = new int[c.Keys];
-                count = new Snap.BinarySwitcher(s.taps.value | s.holds.value).Count - 1; //count number of lns/notes
+                count = new Snap.BinarySwitcher(s.taps.value | s.holds.value).Count; //count number of lns/notes
                 for (int i = 0; i < c.Keys; i++)
                 {
                     s.colors[i] = cs.GetColorIndex(count); //color notes in row based on number of notes. chord coloring.

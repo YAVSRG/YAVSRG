@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Input;
 using Newtonsoft.Json;
+using YAVSRG.Gameplay;
 
 namespace YAVSRG.Options
 {
@@ -17,9 +18,12 @@ namespace YAVSRG.Options
         public string Skin = "_fallback";
         public bool FixedScroll = false;
         public float ScrollSpeed = 2.05f;
+        public bool UseArrowsFor4k = false;
+        public int HitPosition = 0;
         public double Rate = 1.0f;
         public float OD = 8.5f;
         public int Judge = 4;
+        public ScoreType ScoreSystem = ScoreType.Default;
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
 
         //these are default binds

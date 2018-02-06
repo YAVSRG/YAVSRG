@@ -126,6 +126,7 @@
     <Compile Include="Gameplay\PlayingChart.cs" />
     <Compile Include="Gameplay\Score.cs" />
     <Compile Include="Gameplay\ScoreSystem.cs" />
+    <Compile Include="Gameplay\ScoreType.cs" />
     <Compile Include="Gameplay\StandardScoring.cs" />
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\CrashWindow.cs">
@@ -145,9 +146,7 @@
     <Compile Include="Interface\Widgets\HitMeter.cs" />
     <Compile Include="Interface\Widgets\InfoCard.cs" />
     <Compile Include="Interface\Widgets\KeyBinder.cs" />
-    <Compile Include="Interface\Widgets\KeyLayoutMenu.cs" />
     <Compile Include="Interface\Widgets\LevelSelector.cs" />
-    <Compile Include="Interface\Widgets\OptionsMenu.cs" />
     <Compile Include="Interface\Widgets\ProgressBar.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
@@ -157,8 +156,9 @@
     <Compile Include="Options\ColorScheme.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
-    <Compile Include="Options\Tabs\GeneralTab.cs" />
     <Compile Include="Options\Tabs\GameplayTab.cs" />
+    <Compile Include="Options\Tabs\GeneralTab.cs" />
+    <Compile Include="Options\Tabs\LayoutTab.cs" />
     <Compile Include="Options\Theme.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Interface\Input.cs" />

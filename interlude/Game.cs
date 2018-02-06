@@ -14,7 +14,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.1_this_might_take_a_while";
+        public static readonly string Version = "v0.1.0_pre";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -82,7 +82,8 @@ namespace YAVSRG
             SpriteBatch.Begin(Width,Height); //start my render code
             if (!ChartLoader.Loaded) //some temp hack that dont even work delete this
             { //it just flashes for one frame
-                SpriteBatch.DrawCentredText("LOADING...", 100f, 0, 0, Color.White); 
+                SpriteBatch.DrawCentredText("LOADING...", 100f, 0, 0, Color.White);
+                SwapBuffers();
                 ChartLoader.Init();
                 ChartLoader.RandomPack();
             }//it's supposed to show "LOADING" when the game first opens and stay that way until packs are loaded

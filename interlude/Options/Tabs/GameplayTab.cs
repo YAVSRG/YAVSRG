@@ -3,67 +3,56 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using OpenTK.Input;
-using YAVSRG.Interface;
 using YAVSRG.Interface.Widgets;
+using YAVSRG.Interface;
+using YAVSRG.Gameplay;
 
 namespace YAVSRG.Options.Tabs
 {
     class GameplayTab : WidgetContainer
     {
-        private Widget selectKeyMode;
-        private ColumnOptions[] columns = new ColumnOptions[10];
-        private int keyMode;
-
-        private class ColumnOptions : WidgetContainer
+        public GameplayTab()
         {
-            private KeyBinder bind;
-
-            public ColumnOptions(int k)
-            {
-                bind = new KeyBinder("Column " + (k + 1).ToString(), Key.F35, (b) => { });
-                Widgets.Add(bind.PositionTopLeft(0, 50, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
-            }
-
-            public void Update(Key b, Action<Key> onBind)
-            {
-                bind.Change(b, onBind);
-            }
-        }
-
-        public GameplayTab() : base()
-        {
-            selectKeyMode = new TextPicker("Keys", new string[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, 1, (i) => { ChangeKeyMode(i + 3); })
-                .PositionTopLeft(-50,25,AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(50,75,AnchorType.CENTER,AnchorType.MIN);
-            for (int i = 0; i < 10; i++)
-            {
-                columns[i] = new ColumnOptions(i);
-                Widgets.Add(columns[i]);
-            }
-            Widgets.Add(selectKeyMode);
-            ChangeKeyMode(4); //profile based stuff nyi
-        }
-        
-        private Action<Key> SomeFunnyClosureThing(int i, int k)
-        {
-            return (key) => { Game.Options.Profile.Bindings[k][i] = key; };
-        }
-
-        private void ChangeKeyMode(int k)
-        {
-            for (int i = 0; i < 10; i++)
-            {
-                columns[i].State = 0;
-            }
-            keyMode = k;
-            int c = Game.Options.Theme.ColumnWidth;
-            int start = -k * c / 2;
-            for (int i = 0; i < k; i++)
-            {
-                columns[i].Update(Game.Options.Profile.Bindings[k][i], SomeFunnyClosureThing(i, k));
-                columns[i].State = 1;
-                columns[i].PositionTopLeft(start + i * c, 100, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 100, AnchorType.CENTER, AnchorType.MAX);
-            }
+            Widgets.Add(
+                new Slider("Scroll speed", v => { Game.Options.Profile.ScrollSpeed = v; }, () => Game.Options.Profile.ScrollSpeed, 1, 4, 0.01f)
+                .PositionTopLeft(-100, 75, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(100, 125, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new Slider("Hit Position", v => { Game.Options.Profile.HitPosition = (int)v; }, () => Game.Options.Profile.HitPosition, -100, 400, 1)
+                .PositionTopLeft(-100, 175, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(100, 225, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new BoolPicker("Disable SV", Game.Options.Profile.FixedScroll, v => { Game.Options.Profile.FixedScroll = v; })
+                .PositionTopLeft(-200, 375, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-50, 425, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new BoolPicker("Arrows for 4k", Game.Options.Profile.UseArrowsFor4k, v => { Game.Options.Profile.UseArrowsFor4k = v; })
+                .PositionTopLeft(50, 375, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(200, 425, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; })
+                .PositionTopLeft(-200, 475, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-50, 525, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife" }, (int)Game.Options.Profile.ScoreSystem, v => { Game.Options.Profile.ScoreSystem = (ScoreType)v; })
+                .PositionTopLeft(50, 475, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(200, 525, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new Slider("Osu OD", v => { Game.Options.Profile.OD = v; }, () => Game.Options.Profile.OD, 0, 10, 0.1f)
+                .PositionTopLeft(-300, 575, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-50, 625, AnchorType.CENTER, AnchorType.MIN)
+                );
+            Widgets.Add(
+                new Slider("Stepmania Judge", v => { Game.Options.Profile.Judge = (int)v; }, () => Game.Options.Profile.Judge, 1, 10, 1f)
+                .PositionTopLeft(50, 575, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(300, 625, AnchorType.CENTER, AnchorType.MIN)
+                );
         }
     }
 }

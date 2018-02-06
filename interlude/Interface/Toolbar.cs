@@ -14,8 +14,6 @@ namespace YAVSRG.Interface
         Sprite texture, cursor;
         
         public bool hide;
-        OptionsMenu options;
-        bool collapseOptions;
 
         public Toolbar()
         {
@@ -41,14 +39,6 @@ namespace YAVSRG.Interface
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
-            Widgets.Add(
-                new Button("buttonbase", "Options", () => { collapseOptions = !collapseOptions; var m = collapseOptions ? -1000 : 1000; options.A.Move(m, 0);options.B.Move(m, 0); })
-                .PositionTopLeft(160, 0, AnchorType.MIN, AnchorType.MIN)
-                .PositionBottomRight(320, 80, AnchorType.MIN, AnchorType.MIN)
-                );
-            options = new OptionsMenu();
-            options.PositionTopLeft(20,105,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(820,105,AnchorType.MIN,AnchorType.MAX);
-            Widgets.Add(options);
             cursor = Content.LoadTextureFromAssets("cursor");
         }
 

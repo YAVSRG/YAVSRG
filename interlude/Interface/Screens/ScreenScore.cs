@@ -17,7 +17,7 @@ namespace YAVSRG.Interface.Screens
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
         int tier;
         int mapcombo;
-        ScoreSystem osuacc, dpacc;
+        ScoreSystem acc1, acc2;
 
         public ScreenScore(PlayingChart data)
         {
@@ -37,10 +37,10 @@ namespace YAVSRG.Interface.Screens
             c.PositionTopLeft(520, 605, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 105, AnchorType.MAX, AnchorType.MAX);
             Widgets.Add(c);
 
-            dpacc = new MSScoring();//new DP(Game.Options.Profile.Judge);
-            osuacc = new OD(Game.Options.Profile.OD);
-            dpacc.ProcessScore(score.hitdata);
-            osuacc.ProcessScore(score.hitdata);
+            acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
+            acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
+            acc1.ProcessScore(score.hitdata);
+            acc2.ProcessScore(score.hitdata);
         }
 
         public override void OnEnter(Screen prev)
@@ -58,9 +58,9 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);
             SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -Width+300, -Height + 80, Width-300, -Height + 130, Color.White);
 
-            SpriteBatch.DrawCentredText(Utils.RoundNumber(score.Accuracy())+"%", 50, 0, -50, Color.White);
-            SpriteBatch.DrawCentredText(osuacc.FormatAcc(), 30, -250, 50, Color.White);
-            SpriteBatch.DrawCentredText(dpacc.FormatAcc(), 30, 250, 50, Color.White);
+            SpriteBatch.DrawCentredText(score.Scoring.FormatAcc(), 50, 0, -50, Color.White);
+            SpriteBatch.DrawCentredText(acc1.FormatAcc(), 30, -250, 50, Color.White);
+            SpriteBatch.DrawCentredText(acc2.FormatAcc(), 30, 250, 50, Color.White);
             for (int i = 0; i < 6; i++)
             {
                 SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80,Game.Options.Theme.JudgeColors[i]));

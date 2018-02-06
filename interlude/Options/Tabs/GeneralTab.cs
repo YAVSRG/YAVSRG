@@ -22,6 +22,9 @@ namespace YAVSRG.Options.Tabs
                 .PositionTopLeft(50, 250, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(200, 275, AnchorType.CENTER, AnchorType.MIN));
             Widgets.Add(new Button("buttonbase", "Apply", () => { Game.Instance.ApplyWindowSettings(Game.Options.General); })
                 .PositionTopLeft(-100, 450, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(100, 475, AnchorType.CENTER, AnchorType.MIN));
+            Widgets.Add(new Button("buttonbase", "Open Data Folder", () => {
+                System.Diagnostics.Process.Start("file://" + Content.WorkingDirectory);
+            }).PositionTopLeft(0, 100, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
         }
     }
 }

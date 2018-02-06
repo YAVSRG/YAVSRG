@@ -15,14 +15,10 @@ namespace YAVSRG.Options
         public Color PressedReceptor = Color.LightBlue;
         public Color Receptor = Color.White;
         public int ColumnWidth = 150;
-        public bool UseArrowsFor4k = false;
         public bool UseColor = false;
         public bool FlipHoldTail = true;
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;
-        public int UV_X = 8;
-        public int UV_Y = 8;
-        public int HitPosition = 0;
         public Color MenuFont = Color.White;
         public Color Base = Color.FromArgb(0, 120, 255);
         public Color Dark = Color.FromArgb(127, 0, 60, 130);
@@ -40,7 +36,7 @@ namespace YAVSRG.Options
 
         public int GetRotation(int column, int keycount)
         {
-            if (UseArrowsFor4k && keycount == 4)
+            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
                 switch (column)
                 {
@@ -55,10 +51,7 @@ namespace YAVSRG.Options
 
         public void DrawNote(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            float x = 1f / UV_X;
-            float y = 1f / UV_Y;
-            RectangleF UV = new RectangleF(x * animation, y * index, x, y);
-            SpriteBatch.Draw(s, left, top, right, bottom, UV,  GetColor(index),GetRotation(column, keycount));
+            SpriteBatch.Draw(s, left, top, right, bottom, GetColor(index), animation, index, GetRotation(column, keycount));
         }
 
         public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
@@ -80,7 +73,7 @@ namespace YAVSRG.Options
 
         public Sprite GetNoteTexture(int keycount)
         {
-            if (UseArrowsFor4k && keycount == 4)
+            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
                 return Content.LoadTextureFromAssets("arrow");
             }
@@ -89,7 +82,7 @@ namespace YAVSRG.Options
 
         public Sprite GetHeadTexture(int keycount)
         {
-            if (UseArrowsFor4k && keycount == 4)
+            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
                 return Content.LoadTextureFromAssets("arrowholdhead"); //temp fix
             }
@@ -103,7 +96,7 @@ namespace YAVSRG.Options
 
         public Sprite GetReceptorTexture(int keycount)
         {
-            if (UseArrowsFor4k && keycount == 4)
+            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
                 return Content.LoadTextureFromAssets("arrowreceptor");
             }

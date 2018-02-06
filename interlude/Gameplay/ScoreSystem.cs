@@ -24,6 +24,22 @@ namespace YAVSRG.Gameplay
         
         public abstract void Update(float now, PlayingChart.HitData[] data);
 
+        public static ScoreSystem GetScoreSystem(ScoreType s)
+        {
+            switch (s)
+            {
+                case ScoreType.DP:
+                    return new DP(Game.Options.Profile.Judge);
+                case ScoreType.Osu:
+                    return new OD(Game.Options.Profile.OD);
+                case ScoreType.Wife:
+                    return new MSScoring();
+                case ScoreType.Default:
+                default:
+                    return new StandardScoring();
+            }
+        }
+
         public virtual void ProcessScore(PlayingChart.HitData[] data)
         {
             Update(data[data.Length - 1].Offset, data);
