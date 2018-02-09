@@ -10,6 +10,7 @@ namespace YAVSRG.Options
     class Options
     {
         public static List<Profile> Profiles;
+        public static string[] Skins;
 
         public Profile Profile;
         public Theme Theme;
@@ -48,14 +49,14 @@ namespace YAVSRG.Options
         public static void Init()
         {
             Profiles = new List<Profile>();
-            foreach (string s in Directory.GetFiles(ProfilePath))
+            foreach (string path in Directory.GetFiles(ProfilePath))
             {
-                if (Path.GetExtension(s) == ".json")
+                if (Path.GetExtension(path) == ".json")
                 {
                     try
                     {
-                        Profile p = Utils.LoadObject<Profile>(s);
-                        p.ProfilePath = Path.GetFileName(s);
+                        Profile p = Utils.LoadObject<Profile>(path);
+                        p.ProfilePath = Path.GetFileName(path);
                         Profiles.Add(p);
                     }
                     catch
@@ -63,6 +64,12 @@ namespace YAVSRG.Options
                         //:( log that you couldn't load the profile
                     }
                 }
+            }
+            string[] s = Directory.GetDirectories(Content.AssetsDir);
+            Skins = new string[s.Length];
+            for (int i = 0; i < s.Length; i++)
+            {
+                Skins[i] = Path.GetFileName(s[i]);
             }
         }
 

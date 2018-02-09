@@ -60,6 +60,14 @@ namespace YAVSRG.Gameplay
             Judgements[i] += 1;
             score += weights[i];
             maxscore += maxweight;
+            if (i > 3)
+            {
+                ComboBreak();
+                if (i == 5)
+                {
+                    OnMiss(i);
+                }
+            }
         }
 
         public virtual float Accuracy()

@@ -135,6 +135,9 @@
     <Compile Include="Interface\CrashWindow.Designer.cs">
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="Interface\Dialog.cs" />
+    <Compile Include="Interface\Dialogs\ConfirmDialog.cs" />
+    <Compile Include="Interface\Dialogs\TextDialog.cs" />
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
     <Compile Include="Interface\Screens\ScreenScore.cs" />

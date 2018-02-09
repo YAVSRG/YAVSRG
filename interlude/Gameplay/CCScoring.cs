@@ -28,8 +28,6 @@ namespace YAVSRG.Gameplay
                     if (data[pos].hit[i] == 1)
                     {
                         judgement += 1;
-                        OnMiss(i);
-                        ComboBreak();
                     }
                     else if (data[pos].hit[i] == 2)
                     {

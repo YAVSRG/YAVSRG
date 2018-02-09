@@ -16,7 +16,7 @@ namespace YAVSRG
     class Content
     {
         public static readonly string WorkingDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YAVSRG");
-        static readonly string AssetsDir = Path.Combine(WorkingDirectory,"Data","Assets");
+        public static readonly string AssetsDir = Path.Combine(WorkingDirectory,"Data","Assets");
         static Dictionary<string,Sprite> Store = new Dictionary<string,Sprite>();
         static Dictionary<string, int> SoundStore = new Dictionary<string, int>();
 

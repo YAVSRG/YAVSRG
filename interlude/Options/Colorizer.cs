@@ -10,6 +10,8 @@ namespace YAVSRG.Options
 {
     class Colorizer
     {
+        public static readonly int[] DDRValues = { 1, 2, 4, 8, 3, 6, 12 };
+
         public enum ColorStyle
         {
             DDR,
@@ -55,7 +57,6 @@ namespace YAVSRG.Options
         private static void DDR(Chart c, ColorScheme cs)
         {
             //sorry, i'll comment it soon, but the code is likely to change around a bit
-            int[] arr1 = new[] { 1, 2, 4, 8, 3, 6, 12 };
             float v;
             float x;
             BPMPoint p;
@@ -67,9 +68,9 @@ namespace YAVSRG.Options
                 x = (s.Offset - p.Offset) % v;
 
                 color = 7;
-                for (int i = 0; i < arr1.Length; i++)
+                for (int i = 0; i < DDRValues.Length; i++)
                 {
-                    if (RoughlyDivisibleBy(x, v / arr1[i]))
+                    if (RoughlyDivisibleBy(x, v / DDRValues[i]))
                     {
                         color = i;
                         break;
@@ -77,7 +78,7 @@ namespace YAVSRG.Options
                 }
                 for (int k = 0; k < c.Keys; k++)
                 {
-                    s.colors[k] = cs.GetColorIndex(color);
+                    s.colors[k] = cs.GetColorIndex(color,c.Keys);
                 }
             }
         }
@@ -89,7 +90,7 @@ namespace YAVSRG.Options
                 s.colors = new int[c.Keys];
                 for (int i = 0; i < c.Keys; i++)
                 {
-                    s.colors[i] = cs.GetColorIndex(i); //color notes based on column.
+                    s.colors[i] = cs.GetColorIndex(i,c.Keys); //color notes based on column.
                 }
             }
         }
@@ -103,7 +104,7 @@ namespace YAVSRG.Options
                 count = new Snap.BinarySwitcher(s.taps.value | s.holds.value).Count; //count number of lns/notes
                 for (int i = 0; i < c.Keys; i++)
                 {
-                    s.colors[i] = cs.GetColorIndex(count); //color notes in row based on number of notes. chord coloring.
+                    s.colors[i] = cs.GetColorIndex(count,c.Keys); //color notes in row based on number of notes. chord coloring.
                 }
             }
         }

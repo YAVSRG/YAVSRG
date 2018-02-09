@@ -17,6 +17,7 @@ namespace YAVSRG.Interface
         private static bool fadingIn = false;
         private static List<Screen> stack = new List<Screen> { new Screens.ScreenMenu() };
         private static Screen Pending;
+        private static List<Dialog> dialogs = new List<Dialog>();
 
         public static Screen Current
         {
@@ -25,6 +26,11 @@ namespace YAVSRG.Interface
                 if (stack.Count == 0) { return null; }
                 return stack[stack.Count -1];
             }
+        }
+
+        public static void AddDialog(Dialog d)
+        {
+            dialogs.Insert(0,d);
         }
 
         public static void Push(Screen s)
@@ -58,7 +64,7 @@ namespace YAVSRG.Interface
             Current?.OnEnter(old);
         }
 
-        public static void UpdateAnimation()
+        public static void UpdateScreens()
         {
             if (fadingIn || fade > 0)
             {
@@ -83,13 +89,29 @@ namespace YAVSRG.Interface
                     fade -= 0.03f;
                 }
             }
+            if (dialogs.Count > 0)
+            {
+                dialogs[0].Update(-Width, -Height, Width, Height);
+                if (dialogs[0].Closed)
+                {
+                    dialogs.RemoveAt(0);
+                }
+            }
+            else
+            {
+                Current?.Update();
+            }
         }
 
         public static void DrawScreens()
         {
             SpriteBatch.Draw(Game.CurrentChart.background, -Width, -Height, Width, Height, bgdim);
             Current?.Draw();
-            if (fade > 0)
+            if (dialogs.Count > 0)
+            {
+                dialogs[0].Draw(-Width, -Height, Width, Height);
+            }
+                if (fade > 0)
             {
                 SpriteBatch.DrawRect(-Width, -Height, Width, Height, Color.FromArgb((int)(fade*250), 0, 0, 0));
             }

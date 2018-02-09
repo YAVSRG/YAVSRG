@@ -123,12 +123,12 @@ namespace YAVSRG.Beatmap
                     {
                         if (holds[k] == min)
                         {
-                            end += (1 >> k);
+                            end += (1 << k);
                             holds[k] = -1;
                         }
                         else if (holds[k] > min)
                         {
-                            mid += (1 >> k);
+                            mid += (1 << k);
                         }
                     }
                     states.Add(new Snap(min, 0, 0, mid, end));

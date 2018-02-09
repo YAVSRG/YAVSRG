@@ -203,7 +203,7 @@ namespace YAVSRG.Interface.Screens
                 while (!Game.Options.Profile.FixedScroll && t < lastt - 1 && Chart.Timing.Points[t + 1].Offset < Chart.States.Points[i].Offset) //check if we've gone past any timing points
                 {
                     y += SCROLLSPEED * Chart.Timing.Points[t].ScrollSpeed * (Chart.Timing.Points[t + 1].Offset - now); //handle scrollspeed adjustments
-                    SpriteBatch.DrawRect(offset, Height - y, -offset, Height - y + 5, Color.White); //bar line
+                    //SpriteBatch.DrawRect(offset, Height - y, -offset, Height - y + 5, Color.White); //bar line
                     t++;//tracks which timing point we're looking at
                     now = Chart.Timing.Points[t].Offset; //we're now drawing relative to the most recent timing point
                 }

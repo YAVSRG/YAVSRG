@@ -80,9 +80,10 @@ namespace YAVSRG
             GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
             GL.ClearColor(0, 0, 0, 0);
             SpriteBatch.Begin(Width,Height); //start my render code
-            if (!ChartLoader.Loaded) //some temp hack that dont even work delete this
+            if (!ChartLoader.Loaded) //some temp hack to show "LOADING..."
             { //it just flashes for one frame
                 SpriteBatch.DrawCentredText("LOADING...", 100f, 0, 0, Color.White);
+                SpriteBatch.End();
                 SwapBuffers();
                 ChartLoader.Init();
                 ChartLoader.RandomPack();
@@ -102,8 +103,7 @@ namespace YAVSRG
             if (Screen.Current == null) { Exit(); return; } //close game when you close all the screens (main menu goes last)
             Toolbar.Update();
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
-            Screen.Current.Update();
-            Screen.UpdateAnimation(); //this is the fade to black transition between screens. needs removing for a fancy transition.
+            Screen.UpdateScreens(); //this is the fade to black transition between screens. needs removing for a fancy transition.
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
         }
 
