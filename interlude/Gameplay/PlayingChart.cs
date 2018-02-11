@@ -29,11 +29,26 @@ namespace YAVSRG.Gameplay
         public Chart c;
         public ScoreSystem Scoring;
         public HitData[] hitdata;
+        public int maxcombo;
 
         public PlayingChart(Chart c)
         {
             this.c = c;
-            Scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);//new StandardScoring(); //scoring will be the one you want, standard scoring will be calculated on score screen
+            //some temp hack until i move this inside ScoreSystem
+            if (Game.Options.Profile.ScoreSystem == ScoreType.Default)
+            {
+                maxcombo = c.States.Count;
+            }
+            else
+            {
+                maxcombo = 0;
+                foreach (Snap s in c.States.Points)
+                {
+                    maxcombo += s.Count;
+                }
+            }
+            Scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
+
             int count = c.States.Count;
             hitdata = new HitData[count];
             for (int i = 0; i < count; i++)

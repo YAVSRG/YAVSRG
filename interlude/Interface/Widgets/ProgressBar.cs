@@ -25,7 +25,7 @@ namespace YAVSRG.Interface.Widgets
             float x = left;
             for(int i = 5; i >= 0; i--)
             {
-                temp = playing.Scoring.Judgements[i] * (right - left) / playing.c.States.Count;
+                temp = playing.Scoring.Judgements[i] * (right - left) / playing.maxcombo;
                 SpriteBatch.DrawRect(x, top, x + temp, bottom, Game.Options.Theme.JudgeColors[i]);
                 x += temp;
             }

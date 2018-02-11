@@ -23,7 +23,7 @@ namespace YAVSRG.Options
         public Color Base = Color.FromArgb(0, 120, 255);
         public Color Dark = Color.FromArgb(127, 0, 60, 130);
         public Color Highlight = Color.FromArgb(190, 220, 255);
-        public string[] Judges = new[] { "Marvellous", "Perfect", "Ok", "Bad", "Oof", "Miss" };
+        public string[] Judges = new[] { "Marvellous", "Perfect", "Ok", "Bad", "Terrible", "Miss" };
 
         public Color GetColor(int index)
         {
@@ -84,7 +84,7 @@ namespace YAVSRG.Options
         {
             if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
-                return Content.LoadTextureFromAssets("arrowholdhead"); //temp fix
+                return Content.LoadTextureFromAssets("arrowholdhead");
             }
             return Content.LoadTextureFromAssets("holdhead");
         }

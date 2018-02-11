@@ -17,9 +17,12 @@ namespace YAVSRG.Audio
         private bool leadIn;
         public bool Loop = true;
         private double Rate;
+        public float[] WaveForm;
+        public bool Paused;
 
         public MusicPlayer()
         {
+            WaveForm = new float[256];
             timer = new Stopwatch();
         }
 
@@ -47,6 +50,7 @@ namespace YAVSRG.Audio
             startTime = -BUFFER;
             leadIn = true;
             timer.Start();
+            Paused = false;
         }
 
         public void Play(long start)
@@ -61,6 +65,7 @@ namespace YAVSRG.Audio
         {
             ManagedBass.Bass.ChannelPlay(nowplaying);
             timer.Start();
+            Paused = false;
         }
 
         public void Stop()
@@ -68,12 +73,15 @@ namespace YAVSRG.Audio
             ManagedBass.Bass.ChannelStop(nowplaying);
             timer.Stop();
             timer.Reset();
+            Seek(0);
+            Paused = true;
         }
 
         public void Pause()
         {
             ManagedBass.Bass.ChannelPause(nowplaying);
             timer.Stop();
+            Paused = true;
         }
 
         public double Now()
@@ -95,6 +103,16 @@ namespace YAVSRG.Audio
 
         public void Update()
         {
+            float[] temp = new float[256];
+            if (!Paused && Playing)
+            {
+                //thanks peppy lad i stole this off you
+                ManagedBass.Bass.ChannelGetData(nowplaying, temp, (int)ManagedBass.DataFlags.FFT256);
+            }
+            for (int i = 0; i < 256; i++)
+            {
+                WaveForm[i] = WaveForm[i] * 0.8f + temp[i] * 0.2f;
+            }
             if (leadIn && Now() > 0)
             {
                 Seek(Now());

@@ -14,7 +14,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.1.0_pre";
+        public static readonly string Version = "v0.1";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -82,7 +82,7 @@ namespace YAVSRG
             SpriteBatch.Begin(Width,Height); //start my render code
             if (!ChartLoader.Loaded) //some temp hack to show "LOADING..."
             { //it just flashes for one frame
-                SpriteBatch.DrawCentredText("LOADING...", 100f, 0, 0, Color.White);
+                SpriteBatch.DrawCentredText("Loading files...", 100f, 0, 0, Color.White);
                 SpriteBatch.End();
                 SwapBuffers();
                 ChartLoader.Init();

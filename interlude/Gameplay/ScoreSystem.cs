@@ -17,7 +17,7 @@ namespace YAVSRG.Gameplay
         public int Combo = 0;
         public int ComboBreaks = 0;
         public int[] Judgements;
-        public int MaxCombo = 0;
+        public int BestCombo = 0;
         public float MissWindow = 180f;
         public string name;
         public Action<int> OnMiss = (x) => { };
@@ -47,9 +47,9 @@ namespace YAVSRG.Gameplay
 
         public virtual void ComboBreak()
         {
-            if (Combo > MaxCombo)
+            if (Combo > BestCombo)
             {
-                MaxCombo = Combo;
+                BestCombo = Combo;
             }
             Combo = 0;
             ComboBreaks += 1;

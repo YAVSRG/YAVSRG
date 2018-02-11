@@ -14,7 +14,7 @@ namespace YAVSRG.Options.Tabs
         private Widget selectKeyMode;
         private KeyBinder[] binds = new KeyBinder[10];
         private ColorPicker[] colors = new ColorPicker[10];
-        private int keyMode;
+        private int keyMode = 4;
         private Sprite texture;
 
         protected class ColorPicker : Widget
@@ -76,15 +76,7 @@ namespace YAVSRG.Options.Tabs
                 Widgets.Add(colors[i]);
             }
             Widgets.Add(selectKeyMode);
-            if (Game.Options.Profile.Keymode == 0)
-            {
-                ChangeKeyMode(4);
-            }
-            else
-            {
-                ChangeKeyMode(Game.Options.Profile.Keymode);
-                selectKeyMode.State = 0;
-            }
+            Refresh();
             Widgets.Add(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .PositionTopLeft(-500, 425, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-200, 475, AnchorType.CENTER, AnchorType.MIN));
             Widgets.Add(new TextPicker("Skin [REQUIRES GAME RESTART]", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); })
@@ -93,6 +85,15 @@ namespace YAVSRG.Options.Tabs
 
         public void Refresh()
         {
+            if (Game.Options.Profile.Keymode == 0)
+            {
+                selectKeyMode.State = 1;
+            }
+            else
+            {
+                keyMode = Game.Options.Profile.Keymode;
+                selectKeyMode.State = 0;
+            }
             ChangeKeyMode(keyMode);
         }
 

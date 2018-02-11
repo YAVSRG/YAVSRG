@@ -16,14 +16,14 @@ namespace YAVSRG.Interface.Screens
         static string[] ranks = new[] { "SS", "S", "A", "B", "C", "F" };
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
         int tier;
-        int mapcombo;
+        int snapcount;
         ScoreSystem acc1, acc2;
 
         public ScreenScore(PlayingChart data)
         {
             score = data;
-            mapcombo = score.c.States.Count;
-            score.Scoring.MaxCombo = Math.Max(score.Scoring.Combo, score.Scoring.MaxCombo); //if your biggest combo was until the end of the map, this catches it
+            snapcount = score.c.States.Count;
+            score.Scoring.BestCombo = Math.Max(score.Scoring.Combo, score.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             float acc = score.Accuracy();
             if (acc > 98) { tier = 0; } //code goes here for custom grade boundaries
@@ -64,11 +64,11 @@ namespace YAVSRG.Interface.Screens
             for (int i = 0; i < 6; i++)
             {
                 SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80,Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 50 + 350f * score.Scoring.Judgements[i] / mapcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 50 + 350f * score.Scoring.Judgements[i] / score.maxcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, -Width+50, 100+i * 40, Color.White);
                 SpriteBatch.DrawJustifiedText(score.Scoring.Judgements[i].ToString(), 30, -Width+400, 100+i * 40, Color.White);
             }
-            SpriteBatch.DrawText(score.Scoring.MaxCombo.ToString()+"x", 30, -Width + 50, 340, Color.White);
+            SpriteBatch.DrawText(score.Scoring.BestCombo.ToString()+"x", 30, -Width + 50, 340, Color.White);
             SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString()+ "cbs", 30, -Width + 400, 340, Color.White);
             DrawGraph();
         }
@@ -76,10 +76,10 @@ namespace YAVSRG.Interface.Screens
         private void DrawGraph()
         {
             SpriteBatch.DrawRect(-400, 200, 400, 400, Color.FromArgb(150, 0, 0, 0));
-            float w = 800f / mapcombo;
+            float w = 800f / snapcount;
             float scale = 100f / score.Scoring.MissWindow;
             SpriteBatch.DrawRect(-400, 297, 400, 303, Color.Green);
-            for (int i = 0; i < mapcombo; i++)
+            for (int i = 0; i < snapcount; i++)
             {
                 for (int k = 0; k < score.hitdata[i].hit.Length; k++)
                 {

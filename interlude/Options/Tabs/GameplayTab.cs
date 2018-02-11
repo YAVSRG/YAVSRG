@@ -49,7 +49,7 @@ namespace YAVSRG.Options.Tabs
                 .PositionBottomRight(-50, 525, AnchorType.CENTER, AnchorType.MIN)
                 );
             Widgets.Add(
-                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife" }, (int)Game.Options.Profile.ScoreSystem, v => { Game.Options.Profile.ScoreSystem = (ScoreType)v; })
+                new TextPicker("Score System", new string[] { "Default", "Osu", "DP" }, (int)Game.Options.Profile.ScoreSystem, v => { Game.Options.Profile.ScoreSystem = (ScoreType)v; })
                 .PositionTopLeft(50, 475, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 525, AnchorType.CENTER, AnchorType.MIN)
                 );
