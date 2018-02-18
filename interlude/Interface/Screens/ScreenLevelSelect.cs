@@ -25,13 +25,12 @@ namespace YAVSRG.Interface.Screens
             }
 
             diffDisplay = new ChartDifficulty(Game.CurrentChart);
-            diffDisplay.PositionTopLeft(20, 105, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(520, 605, AnchorType.MIN, AnchorType.MIN);
+            diffDisplay.PositionTopLeft(100, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 80, AnchorType.MIN, AnchorType.MAX);
             Widgets.Add(diffDisplay);
             Widgets.Add(selector);
             Widgets.Add(new FramedButton("buttonbase", "Play", () => { Push(new ScreenPlay()); })
-                .PositionTopLeft(-250,-200,AnchorType.CENTER,AnchorType.CENTER)
-                .PositionBottomRight(0,-100,AnchorType.CENTER,AnchorType.CENTER)
-                );
+                .PositionTopLeft(250,100,AnchorType.MIN,AnchorType.CENTER)
+                .PositionBottomRight(450,200,AnchorType.MIN,AnchorType.CENTER));
         }
 
         public void OnChangeChart()
@@ -67,12 +66,6 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Rate = Math.Max(0.5, Math.Min(Game.Options.Profile.Rate,3.0));
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             diffDisplay.ChangeChart(Game.CurrentChart);
-        }
-
-        public override void Draw()
-        {
-            base.Draw();
-            SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate) + "x Audio", 40f, 0, Height-180, Color.White);
         }
     }
 }

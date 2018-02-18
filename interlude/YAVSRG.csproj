@@ -94,6 +94,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Beatmap\DifficultyRating\RatingReport.cs" />
     <Compile Include="Beatmap\Osu\EventData.cs" />
     <Compile Include="Beatmap\Osu\StoryboardEvent.cs" />
     <Compile Include="Audio\MusicPlayer.cs" />
@@ -107,7 +108,7 @@
     <Compile Include="Beatmap\Osu\BeatmapHeader.cs" />
     <Compile Include="Beatmap\DifficultyRating\DataSet.cs" />
     <Compile Include="Beatmap\DifficultyRating\KeyLayout.cs" />
-    <Compile Include="Beatmap\DifficultyRating\RatingReport.cs" />
+    <Compile Include="Beatmap\DifficultyRating\RatingReportOld.cs" />
     <Compile Include="Beatmap\Osu\HitObject.cs" />
     <Compile Include="Beatmap\Osu\HitObjectConverter.cs" />
     <Compile Include="Beatmap\PointManager.cs" />
@@ -151,7 +152,6 @@
     <Compile Include="Interface\Widgets\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\FramedButton.cs" />
     <Compile Include="Interface\Widgets\HitMeter.cs" />
-    <Compile Include="Interface\Widgets\InfoCard.cs" />
     <Compile Include="Interface\Widgets\KeyBinder.cs" />
     <Compile Include="Interface\Widgets\LevelSelector.cs" />
     <Compile Include="Interface\Widgets\ProgressBar.cs" />

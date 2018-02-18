@@ -9,56 +9,52 @@ using YAVSRG.Beatmap;
 
 namespace YAVSRG.Interface.Widgets
 {
-    public class ChartDifficulty : InfoCard
+    public class ChartDifficulty : Widget
     {
         RatingReport diff;
-        float[] rating;
-        int points;
+        float physical;
+        float technical;
+        float rate;
+        string time, bpm;
+
+        Sprite texture, frame;
 
         public ChartDifficulty(Chart c) : base()
         {
             ChangeChart(c);
+            texture = Content.LoadTextureFromAssets("infocard");
+            frame = Content.LoadTextureFromAssets("frame");
         }
 
         public void ChangeChart(Chart c)
         {
             diff = new RatingReport(c, (float)Game.Options.Profile.Rate, 45f);
-            rating = diff.breakdown;
-            points = diff.final.Count;
-            info = new string[]
-            {
-                Utils.RoundNumber(rating[0]),Utils.RoundNumber(0),
-                "this",Utils.RoundNumber(rating[1]),
-                "has",Utils.RoundNumber(rating[2]),
-                "all",Utils.RoundNumber(rating[3]),
-                "gotta",Utils.RoundNumber(0),
-                "go",Utils.RoundNumber(0),
-                Utils.FormatTime(c.GetDuration()/(float)Game.Options.Profile.Rate),((int)(c.GetBPM()*Game.Options.Profile.Rate)).ToString()+"BPM",
-            };
+            rate = (float)Game.Options.Profile.Rate;
+            physical = diff.breakdown[0];
+            technical = diff.breakdown[1];
+            time = Utils.FormatTime(c.GetDuration() / (float)Game.Options.Profile.Rate);
+            bpm = ((int)(c.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
-
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (diff != null)
-            {
-                //DrawGraph(left, top, right, bottom);
-            }
-        }
+            SpriteBatch.DrawTilingTexture(texture, left, top, right, bottom, 400f, 0, 0, Game.Options.Theme.Base);
+            SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Color.White);
+            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.title, left, top, right, top + 100, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredTextToFill(Game.CurrentChart.DifficultyName, left, top + 110, right, top + 150, Game.Options.Theme.MenuFont);
 
-        private void DrawGraph(float left, float top, float right, float bottom)
-        {
-            float w = 480f / points;
-            for (int i = 0; i < points; i++)
-            {
-                float x = left + 10 + i * w;
-                SpriteBatch.DrawRect(x - 2, top + 702 - diff.final[i]*4, x + 2, top + 698 - diff.final[i] * 4, Color.White);
-                SpriteBatch.DrawRect(x - 2, top + 702 - diff.combineskillset[0][i] * 4, x + 2, top + 698 - diff.combineskillset[0][i] * 4, Color.Red);
-                SpriteBatch.DrawRect(x - 2, top + 702 - diff.combineskillset[1][i] * 4, x + 2, top + 698 - diff.combineskillset[1][i] * 4, Color.Blue);
-                SpriteBatch.DrawRect(x - 2, top + 702 - diff.combineskillset[2][i] * 4, x + 2, top + 698 - diff.combineskillset[2][i] * 4, Color.Green);
-            }
+            SpriteBatch.DrawText("Physical", 20f, left+20, top+160, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText("Technical", 20f, right-20, top + 160, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawText(Utils.RoundNumber(physical), 40f, left+20, top + 190, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(Utils.RoundNumber(technical), 40f, right-20, top + 190, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredTextToFill(Utils.RoundNumber(rate)+"x Audio", left, top + 250, right, top + 300, Game.Options.Theme.MenuFont);
+
+            SpriteBatch.DrawText(time, 40f, left + 20, bottom - 70, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(bpm, 40f, right - 20, bottom - 70, Game.Options.Theme.MenuFont);
+
+            SpriteBatch.DrawCentredTextToFill("MORE RELEVANT INFORMATION", left, top, right, bottom, Game.Options.Theme.MenuFont);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace YAVSRG.Interface.Screens
             }
 
             ChartDifficulty c = new ChartDifficulty(Game.CurrentChart);
-            c.PositionTopLeft(520, 605, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 105, AnchorType.MAX, AnchorType.MAX);
+            c.PositionTopLeft(520, 80, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 80, AnchorType.MAX, AnchorType.MAX);
             Widgets.Add(c);
 
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
