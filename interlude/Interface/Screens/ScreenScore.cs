@@ -26,12 +26,14 @@ namespace YAVSRG.Interface.Screens
             score.Scoring.BestCombo = Math.Max(score.Scoring.Combo, score.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             float acc = score.Accuracy();
-            if (acc > 98) { tier = 0; } //code goes here for custom grade boundaries
-            else if (acc > 95) { tier = 1; }
-            else if (acc > 93) { tier = 2; }
-            else if (acc > 91) { tier = 3; }
-            else if (acc > 89) { tier = 4; }
-            else { tier = 5; }
+            tier = 5;
+            for (int i = 0; i < Game.Options.Profile.AccGradeThresholds.Length; i++) //custom grade boundaries
+            {
+                if (acc >= Game.Options.Profile.AccGradeThresholds[i])
+                {
+                    tier = i; break;
+                }
+            }
 
             ChartDifficulty c = new ChartDifficulty(Game.CurrentChart);
             c.PositionTopLeft(520, 605, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 105, AnchorType.MAX, AnchorType.MAX);

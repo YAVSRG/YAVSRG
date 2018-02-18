@@ -14,11 +14,11 @@ namespace YAVSRG.Interface.Dialogs
         {
             PositionTopLeft(-200, -100, AnchorType.CENTER, AnchorType.CENTER);
             PositionBottomRight(200, 100, AnchorType.CENTER, AnchorType.CENTER);
-            Widgets.Add(new Button("buttonbase","New Profile",NewProfile)
+            Widgets.Add(new FramedButton("buttonbase","New Profile",NewProfile)
                 .PositionTopLeft(0,-100,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0,0,AnchorType.MAX,AnchorType.MIN));
             for (int i = 0; i < Options.Options.Profiles.Count; i++)
             {
-                Widgets.Add(new Button("buttonbase", Options.Options.Profiles[i].Name, ClosureToChangeProfile(Options.Options.Profiles[i]))
+                Widgets.Add(new FramedButton("buttonbase", Options.Options.Profiles[i].Name, ClosureToChangeProfile(Options.Options.Profiles[i]))
                     .PositionTopLeft(0, i*100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 100+i*100, AnchorType.MAX, AnchorType.MIN));
             }
         }
@@ -31,7 +31,7 @@ namespace YAVSRG.Interface.Dialogs
         public void NewProfile()
         {
             Screen.AddDialog(new TextDialog("Enter Profile Name:", (s) => {
-                Options.Profile p = new Options.Profile() { Name = s, ProfilePath = new Regex("[^a-zA-Z0-9_-]").Replace(s, "") };
+                Options.Profile p = new Options.Profile() { Name = s, ProfilePath = new Regex("[^a-zA-Z0-9_-]").Replace(s, "")+".json" };
                 Options.Options.Profiles.Add(p);
                 Game.Options.ChangeProfile(p);
                 Close(p.Name);

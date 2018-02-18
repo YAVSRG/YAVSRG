@@ -28,7 +28,7 @@ namespace YAVSRG.Interface.Screens
             diffDisplay.PositionTopLeft(20, 105, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(520, 605, AnchorType.MIN, AnchorType.MIN);
             Widgets.Add(diffDisplay);
             Widgets.Add(selector);
-            Widgets.Add(new Button("buttonbase", "Play", () => { Push(new ScreenPlay()); })
+            Widgets.Add(new FramedButton("buttonbase", "Play", () => { Push(new ScreenPlay()); })
                 .PositionTopLeft(-250,-200,AnchorType.CENTER,AnchorType.CENTER)
                 .PositionBottomRight(0,-100,AnchorType.CENTER,AnchorType.CENTER)
                 );
@@ -49,19 +49,24 @@ namespace YAVSRG.Interface.Screens
         {
             base.Update();
 
+            double ratestep = Input.KeyPress(OpenTK.Input.Key.ControlLeft) ? 0.2d : 0.05d;
             if (Input.KeyTap(OpenTK.Input.Key.Plus))
             {
-                Game.Options.Profile.Rate += 0.05d;
-                Game.Options.Profile.Rate = Math.Round(Game.Options.Profile.Rate, 2, MidpointRounding.AwayFromZero);
-                Game.Audio.SetRate(Game.Options.Profile.Rate);
-                diffDisplay.ChangeChart(Game.CurrentChart);
+                ChangeRate(ratestep);
             }
-            if (Input.KeyTap(OpenTK.Input.Key.Minus))
+            else if (Input.KeyTap(OpenTK.Input.Key.Minus))
             {
-                Game.Options.Profile.Rate -= 0.05d;
-                Game.Audio.SetRate(Game.Options.Profile.Rate);
-                diffDisplay.ChangeChart(Game.CurrentChart);
+                ChangeRate(-ratestep);
             }
+        }
+
+        public void ChangeRate(double change)
+        {
+            Game.Options.Profile.Rate += change;
+            Game.Options.Profile.Rate = Math.Round(Game.Options.Profile.Rate, 2, MidpointRounding.AwayFromZero);
+            Game.Options.Profile.Rate = Math.Max(0.5, Math.Min(Game.Options.Profile.Rate,3.0));
+            Game.Audio.SetRate(Game.Options.Profile.Rate);
+            diffDisplay.ChangeChart(Game.CurrentChart);
         }
 
         public override void Draw()

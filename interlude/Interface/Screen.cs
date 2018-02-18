@@ -13,6 +13,7 @@ namespace YAVSRG.Interface
         protected List<Widget> Widgets = new List<Widget>();
 
         static readonly Color bgdim = Color.FromArgb(80, 80, 80);
+        public static int parallax = 15;
         private static float fade = 0;
         private static bool fadingIn = false;
         private static List<Screen> stack = new List<Screen> { new Screens.ScreenMenu() };
@@ -105,7 +106,9 @@ namespace YAVSRG.Interface
 
         public static void DrawScreens()
         {
-            SpriteBatch.Draw(Game.CurrentChart.background, -Width, -Height, Width, Height, bgdim);
+            int parallaxX = Input.MouseX * parallax / Width;
+            int parallaxY = Input.MouseY * parallax / Height;
+            SpriteBatch.Draw(Game.CurrentChart.background, -Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, bgdim);
             Current?.Draw();
             if (dialogs.Count > 0)
             {

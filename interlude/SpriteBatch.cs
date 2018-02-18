@@ -13,7 +13,7 @@ namespace YAVSRG
     {
         private static Dictionary<char, Sprite> FontLookup;
 
-        private static readonly int FONTSCALE = 200;
+        private static readonly int FONTSCALE = 60;
 
         public static void Draw(Sprite texture, float left, float top, float right, float bottom, Color color, int rotation = 0)
         {
@@ -55,6 +55,26 @@ namespace YAVSRG
 
             GL.End();
             GL.Disable(EnableCap.Texture2D);
+        }
+
+        public static void DrawTilingTexture(Sprite texture, float left, float top, float right, float bottom, float scale, float x, float y, Color color)
+        {
+            RectangleF uv = new RectangleF(x+left/scale,y+top/scale,(right-left)/scale,(bottom-top)/scale);
+            Draw(texture, left, top, right, bottom, uv, color);
+        }
+
+        public static void DrawFrame(Sprite texture, float left, float top, float right, float bottom, float scale, Color color)
+        {
+            //corners
+            Draw(texture, left, top, left + scale, top + scale, color, 0, 0);
+            Draw(texture, right - scale, top, right, top + scale, color, 2, 0);
+            Draw(texture, left, bottom - scale, left + scale, bottom, color, 0, 2);
+            Draw(texture, right - scale, bottom - scale, right, bottom, color, 2, 2);
+            //edges
+            Draw(texture, left + scale, top, right - scale, top + scale, color, 1, 0);
+            Draw(texture, left, top + scale, left + scale, bottom - scale, color, 0, 1);
+            Draw(texture, right - scale, top + scale, right, bottom - scale, color, 2, 1);
+            Draw(texture, left + scale, bottom - scale, right - scale, bottom, color, 1, 2);
         }
 
         public static void DrawRect(float left, float top, float right, float bottom, Color color)
@@ -148,7 +168,7 @@ namespace YAVSRG
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             FontLookup = new Dictionary<char, Sprite>();
-            Font f = new Font("Arial", FONTSCALE);
+            Font f = new Font("Courier", FONTSCALE);
             SizeF size;
 
             foreach (char c in @"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\|")
@@ -163,7 +183,9 @@ namespace YAVSRG
                 var bmp = new Bitmap((int)size.Width, (int)size.Height);
                 using (var g = Graphics.FromImage(bmp))
                 {
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+                    //g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    //g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                     g.DrawString(c.ToString(), f, Brushes.White, 0, 0);
                 }
                 FontLookup.Add(c, Content.UploadTexture(bmp, 1, 1, true));

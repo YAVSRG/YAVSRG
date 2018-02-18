@@ -53,7 +53,7 @@ namespace YAVSRG.Interface
                 SpriteBatch.DrawRect(-Width, -Height + 80 + i * s, -Width + 5 + 400 *level, -Height + 78 + s + i * s, Color.FromArgb(100,Game.Options.Theme.Highlight));
                 SpriteBatch.DrawRect(Width - 5 - 400 * level, -Height + 80 + i * s, Width, -Height + 78 + s + i * s, Color.FromArgb(100, Game.Options.Theme.Highlight));
             }
-
+            
             SpriteBatch.Draw(texture,-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
             SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Options.Theme.Base);
             SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Options.Theme.Base);
@@ -76,7 +76,6 @@ namespace YAVSRG.Interface
         public override void Update()
         {
             if (hide) { return; }
-
             base.Update();
         }
     }

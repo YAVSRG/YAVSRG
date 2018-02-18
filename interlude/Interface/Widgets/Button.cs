@@ -12,24 +12,21 @@ namespace YAVSRG.Interface.Widgets
         protected Sprite icon;
         protected string text;
         protected Action action;
-        protected Color hover;
-        protected Color normal;
+        protected ColorFade color;
 
         public Button(string sprite, string label, Action onClick) : base()
         {
             icon = Content.LoadTextureFromAssets(sprite);
             text = label;
             action = onClick;
-            hover = Game.Options.Theme.Highlight;
-            normal = Game.Options.Theme.Base;
+            color = new ColorFade(Game.Options.Theme.Base, Game.Options.Theme.Highlight);
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            var c = ScreenUtils.MouseOver(left, top, right, bottom) ? hover : normal;
-            SpriteBatch.Draw(icon, left, top, right, bottom, c);
+            SpriteBatch.Draw(icon, left, top, right, bottom, color);
             SpriteBatch.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
         }
 
@@ -37,6 +34,8 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Update(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            color.Target = ScreenUtils.MouseOver(left, top, right, bottom) ? 1 : 0;
+            color.Update();
             if (ScreenUtils.CheckButtonClick(left, top, right, bottom))
             {
                 action();

@@ -9,23 +9,25 @@ namespace YAVSRG.Interface.Widgets
 {
     public class LevelSelector : Widget
     {
-        static Sprite box;
+        static Sprite box, frame;
 
         protected class SelectableItem : Widget
         {
             public int Height;
+            protected float Scroll;
 
             public SelectableItem(int height, int position)
             {
                 Height = height;
-                A = new AnchorPoint(800, position, AnchorType.MAX, AnchorType.MIN);
-                B = new AnchorPoint(0, position + Height, AnchorType.MAX, AnchorType.MIN);
+                Scroll = position * 0.003f;
+                A = new AnchorPoint(100, position, AnchorType.MAX, AnchorType.MIN);
+                B = new AnchorPoint(-50, position + Height, AnchorType.MAX, AnchorType.MIN);
             }
 
             public void SetPosition(float x, float y) //x is width, y is position vertically
             {
                 A.Target(x, y);
-                B.Target(0, y + Height);
+                B.Target(-50, y + Height);
             }
 
             public virtual bool Match(object o)
@@ -37,6 +39,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 bool flag = false;
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+                Scroll += 0.001f;
                 if (ScreenUtils.MouseOver(left, top, right, bottom))
                 {
                     A.Move(150, 0);
@@ -66,7 +69,8 @@ namespace YAVSRG.Interface.Widgets
             public override void Draw(float left, float top, float right, float bottom)
             {
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                SpriteBatch.Draw(box, left, top, right, bottom, System.Drawing.Color.LightGray);
+                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, Scroll, Game.Options.Theme.SelectPack);
+                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, System.Drawing.Color.White);
                 SpriteBatch.DrawTextToFill(data.title, left + 20, top + 20, left+900, bottom - 20, System.Drawing.Color.White);
             }
 
@@ -94,7 +98,8 @@ namespace YAVSRG.Interface.Widgets
             public override void Draw(float left, float top, float right, float bottom)
             {
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                SpriteBatch.Draw(box, left, top, right, bottom, System.Drawing.Color.LightGreen);
+                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 300, 0, Scroll, Game.Options.Theme.SelectChart);
+                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, System.Drawing.Color.White);
                 SpriteBatch.DrawTextToFill(data.title, left + 10, top + 10,left+900, bottom - 10, System.Drawing.Color.White);
             }
 
@@ -122,7 +127,8 @@ namespace YAVSRG.Interface.Widgets
             public override void Draw(float left, float top, float right, float bottom)
             {
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                SpriteBatch.Draw(box, left, top, right, bottom, System.Drawing.Color.LightBlue);
+                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 200, 0, Scroll, Game.Options.Theme.SelectDiff);
+                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, System.Drawing.Color.White);
                 SpriteBatch.DrawTextToFill(data.DifficultyName, left + 10, top + 10, left + 900, bottom - 10, System.Drawing.Color.White);
             }
 
@@ -146,6 +152,7 @@ namespace YAVSRG.Interface.Widgets
         {
             this.parent = parent;
             box = Content.LoadTextureFromAssets("levelselectbase");
+            frame = Content.LoadTextureFromAssets("frame");
             items = new List<SelectableItem>();
         }
 
@@ -156,7 +163,9 @@ namespace YAVSRG.Interface.Widgets
 
         public void ExpandPack(ChartLoader.ChartPack pack, int at)
         {
+            int h;
             int index = -1;
+            scroll -= at - ScreenUtils.Height;
             List<int> remove = new List<int>();
             for (int i = 0; i < items.Count; i++)
             {
@@ -172,8 +181,9 @@ namespace YAVSRG.Interface.Widgets
             remove.Reverse();
             foreach (int i in remove)
             {
+                h = items[i].Height;
                 items.RemoveAt(i);
-                if (i < index) { index--; }
+                if (i < index) { index--; scroll += h; }
             }
             foreach (ChartLoader.CachedChart c in pack.charts)
             {
@@ -185,6 +195,7 @@ namespace YAVSRG.Interface.Widgets
         {
             int index = -1;
             List<int> remove = new List<int>();
+            scroll -= at-ScreenUtils.Height;
             for (int i = 0; i < items.Count; i++)
             {
                 if (items[i].Match(chart))

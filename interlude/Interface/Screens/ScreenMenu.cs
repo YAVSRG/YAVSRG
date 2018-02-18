@@ -18,17 +18,17 @@ namespace YAVSRG.Interface.Screens
         public ScreenMenu()
         {
             Widgets.Add(
-                new Button("buttonbase", "Play", () => { Push(new ScreenLevelSelect()); })
+                new FramedButton("buttonbase", "Play", () => { Push(new ScreenLevelSelect()); })
                 .PositionTopLeft(-100,-100,AnchorType.CENTER,AnchorType.CENTER)
                 .PositionBottomRight(100,0,AnchorType.CENTER,AnchorType.CENTER)
                 );
             Widgets.Add(
-                new Button("buttonbase", "Options", () => { Push(new ScreenOptions()); })
+                new FramedButton("buttonbase", "Options", () => { Push(new ScreenOptions()); })
                 .PositionTopLeft(-100, 100, AnchorType.CENTER, AnchorType.CENTER)
                 .PositionBottomRight(100, 200, AnchorType.CENTER, AnchorType.CENTER)
                 );
             Widgets.Add(
-                new Button("buttonbase", "Quit", () => { Pop(); })
+                new FramedButton("buttonbase", "Quit", () => { Pop(); })
                 .PositionTopLeft(-100, 300, AnchorType.CENTER, AnchorType.CENTER)
                 .PositionBottomRight(100, 400, AnchorType.CENTER, AnchorType.CENTER)
                 );

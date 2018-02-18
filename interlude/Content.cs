@@ -71,11 +71,17 @@ namespace YAVSRG
         public static Options.Theme LoadThemeData(string name)
         {
             string newpath = Path.Combine(AssetsDir, name, "skin.json");
+            Options.Theme t;
             if (!File.Exists(newpath))
             {
-                return new Options.Theme();
+                t = new Options.Theme();
             }
-            return Utils.LoadObject<Options.Theme>(newpath);
+            else
+            {
+                t = Utils.LoadObject<Options.Theme>(newpath);
+            }
+            Utils.SaveObject(t, newpath);
+            return t;
         }
 
         public static int LoadSoundFromAssets(string path)

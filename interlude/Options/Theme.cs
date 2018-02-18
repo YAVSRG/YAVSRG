@@ -21,8 +21,11 @@ namespace YAVSRG.Options
         public bool JudgementShowMarv = false;
         public Color MenuFont = Color.White;
         public Color Base = Color.FromArgb(0, 120, 255);
-        public Color Dark = Color.FromArgb(127, 0, 60, 130);
-        public Color Highlight = Color.FromArgb(190, 220, 255);
+        public Color Dark = Color.FromArgb(0, 60, 130);
+        public Color Highlight = Color.FromArgb(0, 200, 255);
+        public Color SelectPack = Color.FromArgb(100, 30, 180);
+        public Color SelectChart = Color.FromArgb(0, 180, 110);
+        public Color SelectDiff = Color.FromArgb(0, 140, 200);
         public string[] Judges = new[] { "Marvellous", "Perfect", "Ok", "Bad", "Terrible", "Miss" };
 
         public Color GetColor(int index)
