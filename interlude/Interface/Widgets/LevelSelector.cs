@@ -3,242 +3,232 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 using YAVSRG.Beatmap;
 
 namespace YAVSRG.Interface.Widgets
 {
     public class LevelSelector : Widget
     {
-        static Sprite box, frame;
-
-        protected class SelectableItem : Widget
+        protected class Group : Widget
         {
-            public int Height;
-            protected float Scroll;
+            public List<Group> Children;
+            public bool Expand;
+            private string title;
+            private string subtitle;
+            private int height;
+            private int width;
+            private Action<Group> OnClick;
+            private Func<bool> Highlight;
+            private ColorFade border;
+            private ColorFade fill;
 
-            public SelectableItem(int height, int position)
+            public Group(int height, int width, Action<Group> action, Func<bool> highlight, string line1, string line2, Color c)
             {
-                Height = height;
-                Scroll = position * 0.003f;
-                A = new AnchorPoint(100, position, AnchorType.MAX, AnchorType.MIN);
-                B = new AnchorPoint(-50, position + Height, AnchorType.MAX, AnchorType.MIN);
+                Children = new List<Group>();
+                this.height = height;
+                this.width = width;
+                title = line1;
+                subtitle = line2;
+                OnClick = action;
+                Highlight = highlight;
+                border = new ColorFade(Color.White, Color.White);
+                fill = new ColorFade(c, Color.White);
+                RecursivePopOut(0);
             }
 
-            public void SetPosition(float x, float y) //x is width, y is position vertically
+            public void UpdatePosition(float y)
             {
-                A.Target(x, y);
-                B.Target(-50, y + Height);
+                A.Target(width - (float)Math.Pow((y-ScreenUtils.Height) / 50f, 2), y);
+                B.Target(-50, y + height);
             }
 
-            public virtual bool Match(object o)
+            public float BottomEdge()
             {
-                return false;
+                return B.TargetY;
             }
 
-            public bool Update(float left, float top, float right, float bottom, LevelSelector parent)
+            public void AddItem(Group i)
             {
-                bool flag = false;
+                Children.Add(i);
+            }
+
+            public void RecursivePopOutRooted()
+            {
+                foreach (Group g in Children)
+                {
+                    g.RecursivePopOut(B.AbsY);
+                }
+            }
+
+            public void RecursivePopOut(float bottomedge)
+            {
+                PositionTopLeft(100, bottomedge, AnchorType.MAX, AnchorType.MIN);
+                PositionBottomRight(-50, bottomedge + height, AnchorType.MAX, AnchorType.MIN);
+                RecursivePopOutRooted();
+            }
+
+            public virtual int Height()
+            {
+                int r = height;
+                if (Expand)
+                {
+                    foreach (Group g in Children)
+                    {
+                        r += g.Height();
+                    }
+                }
+                return r;
+            }
+
+            public override void Draw(float left, float top, float right, float bottom)
+            {
+                base.Draw(left, top, right, bottom);
+                if (Expand)
+                {
+                    foreach (Group g in Children)
+                    {
+                        g.Draw(left, top, right, bottom);
+                    }
+                }
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                Scroll += 0.001f;
+                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, 0, fill);
+                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, border);
+                SpriteBatch.DrawTextToFill(title, left + 20, top + 20, left + width, bottom - 20, border);
+            }
+
+            public override void Update(float left, float top, float right, float bottom)
+            {
+                float x = BottomEdge();
+                if (Expand)
+                {
+                    foreach (Group g in Children)
+                    {
+                        g.UpdatePosition(x);
+                        g.Update(left, top, right, bottom);
+                        x += g.Height();
+                    }
+                }
+                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
                 if (ScreenUtils.MouseOver(left, top, right, bottom))
                 {
                     A.Move(150, 0);
+                    fill.Target = 0.2f;
                     if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                     {
-                        flag = true;
-                        OnClick(parent);
+                        OnClick(this);
                     }
                 }
-                A.Update();
-                B.Update();
-                return flag;
-            }
-
-            public virtual void OnClick(LevelSelector parent) { }
-        }
-
-        protected class SelectPack : SelectableItem
-        {
-            private ChartLoader.ChartPack data;
-
-            public SelectPack(ChartLoader.ChartPack pack, int position) : base(100, position)
-            {
-                data = pack;
-            }
-
-            public override void Draw(float left, float top, float right, float bottom)
-            {
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, Scroll, Game.Options.Theme.SelectPack);
-                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, System.Drawing.Color.White);
-                SpriteBatch.DrawTextToFill(data.title, left + 20, top + 20, left+900, bottom - 20, System.Drawing.Color.White);
-            }
-
-            public override bool Match(object o)
-            {
-                return (o is ChartLoader.ChartPack) && ((ChartLoader.ChartPack)o).title == data.title;
-            }
-
-            public override void OnClick(LevelSelector parent)
-            {
-                parent.pack = data;
-                parent.ExpandPack(data, (int)B.AbsY);
+                else
+                {
+                    fill.Target = Highlight() ? 0.4f : 0;
+                }
+                border.Update();
+                fill.Update();
+                base.Update(left, top, right, bottom);
             }
         }
 
-        protected class SelectChart : SelectableItem
-        {
-            private ChartLoader.CachedChart data;
-
-            public SelectChart(ChartLoader.CachedChart map, int position) : base(80, position)
-            {
-                data = map;
-            }
-
-            public override void Draw(float left, float top, float right, float bottom)
-            {
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 300, 0, Scroll, Game.Options.Theme.SelectChart);
-                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, System.Drawing.Color.White);
-                SpriteBatch.DrawTextToFill(data.title, left + 10, top + 10,left+900, bottom - 10, System.Drawing.Color.White);
-            }
-
-            public override void OnClick(LevelSelector parent)
-            {
-                parent.chart = ChartLoader.LoadFromCache(data);
-                parent.ExpandChart(data, parent.chart.diffs, (int)B.AbsY);
-            }
-
-            public override bool Match(object o)
-            {
-                return (o is ChartLoader.CachedChart) && ((ChartLoader.CachedChart)o).title == data.title;
-            }
-        }
-
-        protected class SelectDiff : SelectableItem
-        {
-            private Chart data;
-
-            public SelectDiff(Chart diff, int position) : base(60, position)
-            {
-                data = diff;
-            }
-
-            public override void Draw(float left, float top, float right, float bottom)
-            {
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 200, 0, Scroll, Game.Options.Theme.SelectDiff);
-                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, System.Drawing.Color.White);
-                SpriteBatch.DrawTextToFill(data.DifficultyName, left + 10, top + 10, left + 900, bottom - 10, System.Drawing.Color.White);
-            }
-
-            public override void OnClick(LevelSelector parent)
-            {
-                Game.Instance.ChangeChart(data);
-                parent.parent.OnChangeChart();
-                ChartLoader.SelectedChart = parent.chart;
-                ChartLoader.SelectedPack = parent.pack;
-            }
-        }
-
-        protected List<SelectableItem> items;
-        protected ChartLoader.ChartPack pack = ChartLoader.SelectedPack;
-        protected MultiChart chart = ChartLoader.SelectedChart;
+        protected List<Group> groups;
         private Screens.ScreenLevelSelect parent;
 
-        public int scroll = 0;
+        static Sprite box, frame;
+        public static int scroll = 0;
 
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {
             this.parent = parent;
             box = Content.LoadTextureFromAssets("levelselectbase");
             frame = Content.LoadTextureFromAssets("frame");
-            items = new List<SelectableItem>();
-        }
-
-        public void AddPack(ChartLoader.ChartPack pack, int at)
-        {
-            items.Add(new SelectPack(pack,at));
-        }
-
-        public void ExpandPack(ChartLoader.ChartPack pack, int at)
-        {
-            int h;
-            int index = -1;
-            scroll -= at - ScreenUtils.Height;
-            List<int> remove = new List<int>();
-            for (int i = 0; i < items.Count; i++)
+            groups = new List<Group>();
+            foreach (ChartLoader.ChartPack p in ChartLoader.Cache)
             {
-                if (items[i].Match(pack))
-                {
-                    index = i;
-                }
-                else if (items[i] is SelectChart || items[i] is SelectDiff)
-                {
-                    remove.Add(i);
-                }
-            }
-            remove.Reverse();
-            foreach (int i in remove)
-            {
-                h = items[i].Height;
-                items.RemoveAt(i);
-                if (i < index) { index--; scroll += h; }
-            }
-            foreach (ChartLoader.CachedChart c in pack.charts)
-            {
-                items.Insert(index + 1, new SelectChart(c,at));
+                AddPack(p);
             }
         }
 
-        public void ExpandChart(ChartLoader.CachedChart chart, List<Chart> diffs, int at)
+        public void AddPack(ChartLoader.ChartPack pack)
         {
-            int index = -1;
-            List<int> remove = new List<int>();
-            scroll -= at-ScreenUtils.Height;
-            for (int i = 0; i < items.Count; i++)
+            Group g = new Group(100, 900, (x) =>
             {
-                if (items[i].Match(chart))
+                bool temp = x.Expand;
+                foreach (Group c in groups)
                 {
-                    index = i;
+                    if (c.Expand)
+                    {
+                        if (c.BottomEdge() < x.BottomEdge())
+                        {
+                            scroll += c.Height();
+                        }
+                        c.Expand = false;
+                    }
                 }
-                else if (items[i] is SelectDiff)
+                x.Expand = !temp;
+                if (x.Expand)
                 {
-                    remove.Add(i);
+                    x.RecursivePopOutRooted();
                 }
-            }
-            remove.Reverse();
-            foreach (int i in remove)
+                scroll -= (int)x.BottomEdge() - ScreenUtils.Height;
+            }, () => { return ChartLoader.SelectedPack.title == pack.title; }, pack.title, "", Game.Options.Theme.SelectPack);
+            foreach (ChartLoader.CachedChart chart in pack.charts)
             {
-                items.RemoveAt(i);
-                if (i < index) { index--; }
+                g.AddItem(new Group(80, 900, (x) =>
+                {
+                    bool temp = x.Expand;
+                    foreach (Group c in g.Children)
+                    {
+                        if (c.Expand)
+                        {
+                            if (c.BottomEdge() < x.BottomEdge())
+                            {
+                                scroll += c.Height();
+                            }
+                            c.Expand = false;
+                        }
+                    }
+                    x.Expand = !temp;
+                    if (x.Expand)
+                    {
+                        if (x.Children.Count == 0)
+                        {
+                            MultiChart m = ChartLoader.LoadFromCache(chart);
+                            foreach (Chart d in m.diffs)
+                            {
+                                x.AddItem(new Group(80, 900, (y) =>
+                                {
+                                    Game.Instance.ChangeChart(d);
+                                    parent.OnChangeChart();
+                                    ChartLoader.SelectedChart = m;
+                                    ChartLoader.SelectedPack = pack;
+                                }, () => { return Game.CurrentChart.path + Game.CurrentChart.DifficultyName == d.path + d.DifficultyName; }, d.DifficultyName, "", Game.Options.Theme.SelectDiff));
+                            }
+                        }
+                        x.RecursivePopOutRooted();
+                        scroll -= (int)x.BottomEdge() - ScreenUtils.Height;
+                    }
+                }, () => { return ChartLoader.SelectedChart.header.title == chart.title; }, chart.title, chart.artist, Game.Options.Theme.SelectChart));
             }
-            foreach (Chart diff in diffs)
-            {
-                items.Insert(index + 1, new SelectDiff(diff,at));
-            }
+            groups.Add(g);
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            int c = items.Count;
-            for (int i = 0; i < c; i++)
+            foreach (Group g in groups)
             {
-                items[i].Draw(left, top, right, bottom);
+                g.Draw(left, top, right, bottom);
             }
         }
 
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
-            int c = items.Count;
             int y = scroll;
-            for (int i = 0; i < c; i++)
+            foreach (Group g in groups)
             {
-                items[i].SetPosition(800 - (float)Math.Pow(y / 50f, 2), y + ScreenUtils.Height);
-                if (items[i].Update(left, top, right, bottom, this)) break;
-                y += items[i].Height;
+                g.UpdatePosition(y);
+                g.Update(left, top, right, bottom);
+                y += g.Height();
             }
             if (Input.KeyPress(OpenTK.Input.Key.Up))
             {

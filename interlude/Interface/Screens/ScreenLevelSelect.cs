@@ -19,11 +19,6 @@ namespace YAVSRG.Interface.Screens
             selector = new LevelSelector(this);
             selector.PositionTopLeft(0, 0, AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
 
-            foreach (ChartLoader.ChartPack p in ChartLoader.Cache)
-            {
-                selector.AddPack(p,0);
-            }
-
             diffDisplay = new ChartDifficulty(Game.CurrentChart);
             diffDisplay.PositionTopLeft(100, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 80, AnchorType.MIN, AnchorType.MAX);
             Widgets.Add(diffDisplay);

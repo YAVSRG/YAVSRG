@@ -45,16 +45,20 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.title, left, top, right, top + 100, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawCentredTextToFill(Game.CurrentChart.DifficultyName, left, top + 110, right, top + 150, Game.Options.Theme.MenuFont);
 
-            SpriteBatch.DrawText("Physical", 20f, left+20, top+160, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText("Technical", 20f, right-20, top + 160, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawText(Utils.RoundNumber(physical), 40f, left+20, top + 190, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText(Utils.RoundNumber(technical), 40f, right-20, top + 190, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawCentredTextToFill(Utils.RoundNumber(rate)+"x Audio", left, top + 250, right, top + 300, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawText("Physical", 20f, left + 20, top + 160, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText("Technical", 20f, right - 20, top + 160, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawText(Utils.RoundNumber(physical), 40f, left + 20, top + 190, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(Utils.RoundNumber(technical), 40f, right - 20, top + 190, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredTextToFill(Utils.RoundNumber(rate) + "x Audio", left, top + 250, right, top + 300, Game.Options.Theme.MenuFont);
 
             SpriteBatch.DrawText(time, 40f, left + 20, bottom - 70, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawJustifiedText(bpm, 40f, right - 20, bottom - 70, Game.Options.Theme.MenuFont);
 
-            SpriteBatch.DrawCentredTextToFill("MORE RELEVANT INFORMATION", left, top, right, bottom, Game.Options.Theme.MenuFont);
+            string[] text = new[] { "MORE RELEVANT INFORMATION", "PLEASE HELP ME DESIGN THIS SCREEN", "PLEASE", "I WILL SUCK DICK FOR A MOCKUP IN PAINT", "I'LL DO ANYTHING I JUST NEED FEEDBACK", "PLZ" };
+            for (int i = 0; i < 6; i++)
+            {
+                SpriteBatch.DrawCentredText(text[i], 15f, (left + right) / 2, top + 340 + i * 60, Game.Options.Theme.MenuFont);
+            }
         }
     }
 }

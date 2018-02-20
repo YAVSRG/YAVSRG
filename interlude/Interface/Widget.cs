@@ -85,6 +85,22 @@ namespace YAVSRG.Interface
                     return _Y;
                 }
             }
+
+            public float TargetX
+            {
+                get
+                {
+                    return _X.Target;
+                }
+            }
+
+            public float TargetY
+            {
+                get
+                {
+                    return _Y.Target;
+                }
+            }
         }
 
         public AnchorPoint A;
