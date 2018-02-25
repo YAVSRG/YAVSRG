@@ -53,15 +53,17 @@ namespace YAVSRG.Interface
                 SpriteBatch.DrawRect(-Width, -Height + 80 + i * s, -Width + 5 + 400 *level, -Height + 78 + s + i * s, Color.FromArgb(100,Game.Options.Theme.Highlight));
                 SpriteBatch.DrawRect(Width - 5 - 400 * level, -Height + 80 + i * s, Width, -Height + 78 + s + i * s, Color.FromArgb(100, Game.Options.Theme.Highlight));
             }
-            
-            SpriteBatch.Draw(texture,-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
+
+            //SpriteBatch.Draw(texture,-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
+            DrawChartBackground(-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
             SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Options.Theme.Base);
             SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Options.Theme.Base);
 
             SpriteBatch.DrawRect(Width - 710, -Height + 55,Width - 710 + 460 * Game.Audio.NowPercentage(), -Height + 65, Game.Options.Theme.Base);
             SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, Width - 710, -Height+20, Width - 250, -Height+60, Game.Options.Theme.MenuFont);
 
-            SpriteBatch.Draw(texture, -Width, Height-80, Width, Height, Game.Options.Theme.Dark);
+            //SpriteBatch.Draw(texture, -Width, Height-80, Width, Height, Game.Options.Theme.Dark);
+            DrawChartBackground(-Width, Height-80, Width, Height, Game.Options.Theme.Dark);
             SpriteBatch.DrawRect(-Width, Height - 85, Width, Height - 80, Game.Options.Theme.Base);
 
             base.Draw();

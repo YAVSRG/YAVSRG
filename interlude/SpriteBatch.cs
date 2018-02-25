@@ -165,6 +165,7 @@ namespace YAVSRG
         public static void Init()
         {
             GL.Enable(EnableCap.Blend);
+            GL.ClearColor(0, 0, 0, 0);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             FontLookup = new Dictionary<char, Sprite>();
@@ -183,8 +184,6 @@ namespace YAVSRG
                 var bmp = new Bitmap((int)size.Width, (int)size.Height);
                 using (var g = Graphics.FromImage(bmp))
                 {
-                    //g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                    //g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
                     g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
                     g.DrawString(c.ToString(), f, Brushes.White, 0, 0);
                 }

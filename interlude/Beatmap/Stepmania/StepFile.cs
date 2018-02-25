@@ -87,12 +87,12 @@ namespace YAVSRG.Beatmap.Stepmania
 
         public string GetTag(string id)
         {
-            return raw.ContainsKey(id) ? raw[id] : "fucking retarded tags";
+            return raw.ContainsKey(id) ? raw[id] : "This file has broken tags!!! >:(";
         }
 
         public string GetSubtitle()
         {
-            return raw.ContainsKey("CREDIT") ? (raw["CREDIT"] == "" ? (raw.ContainsKey("SUBTITLE") ? raw["SUBTITLE"] : "retard") : raw["CREDIT"]) : "actual retard";
+            return raw.ContainsKey("CREDIT") ? (raw["CREDIT"] == "" ? (raw.ContainsKey("SUBTITLE") ? raw["SUBTITLE"] : "retard") : raw["CREDIT"]) : "actual retard fix your tags";
         }
 
         public string GetBG()
@@ -113,7 +113,7 @@ namespace YAVSRG.Beatmap.Stepmania
             List<Tuple<double, double>> bpms = new List<Tuple<double, double>>();
             string[] split;
 
-            foreach (string s in raw["BPMS"].Split(','))
+            foreach (string s in new string(raw["BPMS"].Where((c) => { return !char.IsWhiteSpace(c); }).ToArray()).Split(','))
             {
                 split = s.Split('=');
                 bpms.Add(new Tuple<double, double>(double.Parse(split[0]), 60000/double.Parse(split[1])));
@@ -141,7 +141,7 @@ namespace YAVSRG.Beatmap.Stepmania
                         }
                         now += bpms[bpm].Item2;
                         totalbeats += 1;
-                        if (bpm < bpms.Count - 10 && bpms[bpm+1].Item1 <= totalbeats)
+                        if (bpm < bpms.Count - 1 && bpms[bpm+1].Item1 <= totalbeats)
                         {
                             bpm += 1;
                             points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));

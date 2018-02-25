@@ -14,7 +14,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.1.2dev";
+        public static readonly string Version = "v0.1.2";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -38,12 +38,22 @@ namespace YAVSRG
             get { return Instance.audio; }
         }
 
-        public Game() : base(1800, 960)
+        Sprite test;
+
+        public Game() : base(800, 600)
         {
             Title = "YAVSRG";
             Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on
+            ManagedBass.Bass.Init();
+            audio = new MusicPlayer();
+            YAVSRG.Options.Options.Init();
+            options = new Options.Options();
+            ApplyWindowSettings(options.General);
+            ScreenUtils.UpdateBounds(Width, Height); //why is this here? todo: find out
+            test = Content.UploadTexture(Utils.CaptureScreen(), 1, 1);
+            SpriteBatch.Init();
         }
 
         public void ApplyWindowSettings(Options.General settings) //apply video settings
@@ -78,10 +88,10 @@ namespace YAVSRG
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
-            GL.ClearColor(0, 0, 0, 0);
             SpriteBatch.Begin(Width,Height); //start my render code
             if (!ChartLoader.Loaded) //some temp hack to show "LOADING..."
-            { //it just flashes for one frame
+            {
+                SpriteBatch.Draw(test, -ScreenUtils.Width, -ScreenUtils.Height, ScreenUtils.Width, ScreenUtils.Height, Color.White);
                 SpriteBatch.DrawCentredText("Loading files...", 100f, 0, 0, Color.White);
                 SpriteBatch.End();
                 SwapBuffers();
@@ -110,15 +120,7 @@ namespace YAVSRG
         protected override void OnLoad(EventArgs e) //called when game loads up
         {
             base.OnLoad(e);
-            //might need to move all this
-            ManagedBass.Bass.Init();
-            audio = new MusicPlayer();
-            ScreenUtils.UpdateBounds(Width, Height); //why is this here? todo: find out
-            YAVSRG.Options.Options.Init();
-            options = new Options.Options();
-            ApplyWindowSettings(options.General);
             Input.Init();
-            SpriteBatch.Init();
             Toolbar = new Toolbar();
             //i'll clean this up later
         }

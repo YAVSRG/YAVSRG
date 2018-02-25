@@ -149,7 +149,8 @@ namespace YAVSRG.Interface.Widgets
 
         public void AddPack(ChartLoader.ChartPack pack)
         {
-            Group g = new Group(100, 900, (x) =>
+            int width = (int)(ScreenUtils.Width*0.8f - 150);
+            Group g = new Group(100, width, (x) =>
             {
                 bool temp = x.Expand;
                 foreach (Group c in groups)
@@ -172,7 +173,7 @@ namespace YAVSRG.Interface.Widgets
             }, () => { return ChartLoader.SelectedPack.title == pack.title; }, pack.title, "", Game.Options.Theme.SelectPack);
             foreach (ChartLoader.CachedChart chart in pack.charts)
             {
-                g.AddItem(new Group(80, 900, (x) =>
+                g.AddItem(new Group(80, width, (x) =>
                 {
                     bool temp = x.Expand;
                     foreach (Group c in g.Children)
@@ -194,7 +195,7 @@ namespace YAVSRG.Interface.Widgets
                             MultiChart m = ChartLoader.LoadFromCache(chart);
                             foreach (Chart d in m.diffs)
                             {
-                                x.AddItem(new Group(80, 900, (y) =>
+                                x.AddItem(new Group(80, width, (y) =>
                                 {
                                     Game.Instance.ChangeChart(d);
                                     parent.OnChangeChart();

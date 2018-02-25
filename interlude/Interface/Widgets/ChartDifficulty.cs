@@ -40,15 +40,16 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawTilingTexture(texture, left, top, right, bottom, 400f, 0, 0, Game.Options.Theme.Base);
+            ScreenUtils.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,Game.Options.Theme.Base));
+            //SpriteBatch.DrawTilingTexture(texture, left, top, right, bottom, 400f, 0, 0, Game.Options.Theme.Base);
             SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Color.White);
             SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.title, left, top, right, top + 100, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawCentredTextToFill(Game.CurrentChart.DifficultyName, left, top + 110, right, top + 150, Game.Options.Theme.MenuFont);
 
             SpriteBatch.DrawText("Physical", 20f, left + 20, top + 160, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawJustifiedText("Technical", 20f, right - 20, top + 160, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawText(Utils.RoundNumber(physical), 40f, left + 20, top + 190, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText(Utils.RoundNumber(technical), 40f, right - 20, top + 190, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawText(Utils.RoundNumber(physical)+"*", 40f, left + 20, top + 190, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(Utils.RoundNumber(technical)+"*", 40f, right - 20, top + 190, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawCentredTextToFill(Utils.RoundNumber(rate) + "x Audio", left, top + 250, right, top + 300, Game.Options.Theme.MenuFont);
 
             SpriteBatch.DrawText(time, 40f, left + 20, bottom - 70, Game.Options.Theme.MenuFont);

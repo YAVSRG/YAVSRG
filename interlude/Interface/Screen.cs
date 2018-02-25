@@ -108,7 +108,7 @@ namespace YAVSRG.Interface
         {
             int parallaxX = Input.MouseX * parallax / Width;
             int parallaxY = Input.MouseY * parallax / Height;
-            SpriteBatch.Draw(Game.CurrentChart.background, -Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, bgdim);
+            DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, bgdim);
             Current?.Draw();
             if (dialogs.Count > 0)
             {

@@ -13,15 +13,33 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenPlay : Screen
     {
-        struct DrawPosition
+        class HitLighting : Widget
         {
-            public float y;
-            public Snap s;
+            public SlidingEffect NoteLight = new SlidingEffect(0);
+            public SlidingEffect ReceptorLight = new SlidingEffect(0);
+            Sprite s = Content.LoadTextureFromAssets("receptorlighting");
 
-            public DrawPosition(float y, Snap s)
+            public HitLighting() : base()
             {
-                this.y = y;
-                this.s = s;
+
+            }
+
+            public override void Draw(float left, float top, float right, float bottom)
+            {
+                base.Draw(left, top, right, bottom);
+                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+                if (ReceptorLight.Val > 0.5f)
+                {
+                    float w = (right - left);
+                    SpriteBatch.Draw(s, left + w * (1 - ReceptorLight.Val), top - 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
+                }
+            }
+
+            public override void Update(float left, float top, float right, float bottom)
+            {
+                base.Update(left, top, right, bottom);
+                    ReceptorLight.Update();
+                    NoteLight.Update();
             }
         }
 
@@ -43,6 +61,7 @@ namespace YAVSRG.Interface.Screens
         float[] holds;
         Snap.BinarySwitcher holdsInHitpos = new Snap.BinarySwitcher(0);
         Key[] binds;
+        HitLighting[] lighting;
 
         public ScreenPlay()
         {
@@ -71,6 +90,16 @@ namespace YAVSRG.Interface.Screens
             Widgets.Add(new Widgets.ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
 
             scoreTracker.Scoring.OnMiss = (k) => { OnMiss(k); };
+
+            lighting = new HitLighting[Chart.Keys];
+            float x = Chart.Keys / 2;
+            for (int i = 0; i < Chart.Keys; i++)
+            {
+                lighting[i] = new HitLighting();
+                lighting[i].PositionTopLeft(COLUMNWIDTH * (i - x), HITPOSITION + COLUMNWIDTH * 2, AnchorType.CENTER, AnchorType.MAX)
+                    .PositionBottomRight(COLUMNWIDTH * (i - x + 1), HITPOSITION, AnchorType.CENTER, AnchorType.MAX);
+                Widgets.Add(lighting[i]);
+            }
         }
 
         public override void OnEnter(Screen prev)
@@ -129,11 +158,14 @@ namespace YAVSRG.Interface.Screens
         public void OnKeyDown(int k, float now)
         {
             HandleHit(k, now, false);
+            lighting[k].ReceptorLight.Target = 1;
+            lighting[k].ReceptorLight.Val = 1;
         }
 
         public void OnKeyUp(int k, float now)
         {
             HandleHit(k, now, true);
+            lighting[k].ReceptorLight.Target = 0;
         }
 
         public void HandleHit(int k, float now, bool release)

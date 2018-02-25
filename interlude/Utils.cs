@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace YAVSRG
 {
@@ -37,6 +38,17 @@ namespace YAVSRG
         public static void SaveObject<T>(T obj, string path)
         {
             System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented));
+        }
+
+        public static Bitmap CaptureScreen()
+        {
+            Rectangle screenSize = Game.Instance.ClientRectangle;
+            Bitmap target = new Bitmap(screenSize.Width, screenSize.Height);
+            using (Graphics g = Graphics.FromImage(target))
+            {
+                g.CopyFromScreen(0, 0, 0, 0, new Size(screenSize.Width, screenSize.Height));
+            }
+            return target;
         }
     }
 }

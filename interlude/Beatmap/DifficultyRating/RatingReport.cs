@@ -11,7 +11,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
         static readonly float TIMEEXPONENT = -1.7f; //difficulty inversely proportional to time between each note
         static readonly float SMOOTHEXPONENT = 2f;
         static readonly float TIMESCALE = 1000;
-        static readonly float BASESCALE = 500;
+        static readonly float BASESCALE = 50;
 
         public List<float> raw;
         public float[] breakdown;

@@ -130,6 +130,7 @@
     <Compile Include="Gameplay\ScoreType.cs" />
     <Compile Include="Gameplay\StandardScoring.cs" />
     <Compile Include="Interface\AnchorType.cs" />
+    <Compile Include="Interface\Animation.cs" />
     <Compile Include="Interface\ColorFade.cs" />
     <Compile Include="Interface\CrashWindow.cs">
       <SubType>Form</SubType>
@@ -177,6 +178,7 @@
     <Compile Include="Options\Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shader.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="Utils.cs" />
@@ -205,7 +207,9 @@
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Interface\Animations\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
