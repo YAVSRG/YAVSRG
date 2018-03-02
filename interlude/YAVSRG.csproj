@@ -24,7 +24,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>0.1.1.%2a</ApplicationVersion>
+    <ApplicationVersion>0.1.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -131,6 +131,7 @@
     <Compile Include="Gameplay\StandardScoring.cs" />
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\Animation.cs" />
+    <Compile Include="Interface\Animations\AnimationGroup.cs" />
     <Compile Include="Interface\ColorFade.cs" />
     <Compile Include="Interface\CrashWindow.cs">
       <SubType>Form</SubType>
@@ -158,7 +159,6 @@
     <Compile Include="Interface\Widgets\ProgressBar.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
-    <Compile Include="Interface\Widgets\WidgetContainer.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
     <Compile Include="Options\Colorizer.cs" />
     <Compile Include="Options\ColorScheme.cs" />
@@ -207,9 +207,7 @@
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Interface\Animations\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

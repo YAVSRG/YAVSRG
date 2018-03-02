@@ -12,9 +12,10 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenScore : Screen
     {
-        private PlayingChart score;
-        static string[] ranks = new[] { "SS", "S", "A", "B", "C", "F" };
+        static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" };
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
+        private PlayingChart score;
+        Sprite rank;
         int tier;
         int snapcount;
         ScoreSystem acc1, acc2;
@@ -34,10 +35,11 @@ namespace YAVSRG.Interface.Screens
                     tier = i; break;
                 }
             }
+            rank = Content.LoadTextureFromAssets("rank-" + ranks[tier]);
 
             ChartDifficulty c = new ChartDifficulty(Game.CurrentChart);
             c.PositionTopLeft(520, 80, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 80, AnchorType.MAX, AnchorType.MAX);
-            Widgets.Add(c);
+            AddChild(c);
 
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
             acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
@@ -48,17 +50,18 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Instance.Toolbar.hide = false;
+            toolbar.hide = false;
         }
 
-        public override void Draw()
+        public override void Draw(float left, float top, float right, float bottom)
         {
-            base.Draw();
-            SpriteBatch.DrawCentredText(ranks[tier], 200f, 0, -320, rankColors[tier]);
+            base.Draw(left, top, right, bottom);
+            //SpriteBatch.DrawCentredText(ranks[tier], 200f, 0, -320, rankColors[tier]);
+            SpriteBatch.Draw(rank, -90, -280, 90, -80, Color.White);
             //you'll just have to change to the chart before showing the score screen
-            SpriteBatch.DrawCentredText(ChartLoader.SelectedChart.header.title + " [" + score.c.DifficultyName + "]", 30f, 0, -Height + 150, Color.White);
-            SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -Width+300, -Height + 80, Width-300, -Height + 130, Color.White);
+            //SpriteBatch.DrawCentredText(ChartLoader.SelectedChart.header.title + " [" + score.c.DifficultyName + "]", 30f, 0, -Height + 150, Color.White);
+            //SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);
+            //SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -Width+300, -Height + 80, Width-300, -Height + 130, Color.White);
 
             SpriteBatch.DrawCentredText(score.Scoring.FormatAcc(), 50, 0, -50, Color.White);
             SpriteBatch.DrawCentredText(acc1.FormatAcc(), 30, -250, 50, Color.White);

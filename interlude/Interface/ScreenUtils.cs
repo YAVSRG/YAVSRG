@@ -9,9 +9,6 @@ namespace YAVSRG.Interface
 {
     class ScreenUtils
     {
-        //buttons
-        //dragging sliders
-        //tweening motions
         public static int Width;
 
         public static int Height;
@@ -20,11 +17,6 @@ namespace YAVSRG.Interface
         {
             ScreenUtils.Width = Width / 2;
             ScreenUtils.Height = Height / 2;
-        }
-
-        public static void DrawButton(Sprite s, float left, float top, float right, float bottom, Color normal, Color hover)
-        {
-            SpriteBatch.Draw(s, left, top, right, bottom, MouseOver(left, top, right, bottom) ? hover : normal);
         }
 
         public static bool MouseOver(float left, float top, float right, float bottom)
@@ -39,7 +31,7 @@ namespace YAVSRG.Interface
             return Input.MouseClick(OpenTK.Input.MouseButton.Left) && MouseOver(left, top, right, bottom);
         }
 
-        public static void DrawChartBackground(float left, float top, float right, float bottom, Color c)
+        public static void DrawStaticChartBackground(float left, float top, float right, float bottom, Color c) //todo: reduce redundant code in these two functions
         {
             float bg = ((float)Game.CurrentChart.background.Width / Game.CurrentChart.background.Height);
             float window = ((float)Width / Height);
@@ -52,6 +44,16 @@ namespace YAVSRG.Interface
 
             RectangleF uv = new RectangleF(l, t, r - l, b - t);
             SpriteBatch.Draw(Game.CurrentChart.background, left, top, right, bottom+1, uv, c);
+        }
+
+        public static void DrawChartBackground(float left, float top, float right, float bottom, Color c)
+        {
+            float bg = ((float)Game.CurrentChart.background.Width / Game.CurrentChart.background.Height);
+            float window = ((float)Width / Height);
+            float correction = window / bg;
+
+            RectangleF uv = new RectangleF(0, (correction - 1) * 0.5f, 1, 1.5f - correction * 0.5f);
+            SpriteBatch.Draw(Game.CurrentChart.background, left, top, right, bottom + 1, uv, c);
         }
     }
 }

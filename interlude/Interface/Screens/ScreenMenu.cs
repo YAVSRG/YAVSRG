@@ -17,17 +17,17 @@ namespace YAVSRG.Interface.Screens
 
         public ScreenMenu()
         {
-            Widgets.Add(
+            AddChild(
                 new FramedButton("buttonbase", "Play", () => { Push(new ScreenLevelSelect()); })
                 .PositionTopLeft(-100,-100,AnchorType.CENTER,AnchorType.CENTER)
                 .PositionBottomRight(100,0,AnchorType.CENTER,AnchorType.CENTER)
                 );
-            Widgets.Add(
+            AddChild(
                 new FramedButton("buttonbase", "Options", () => { Push(new ScreenOptions()); })
                 .PositionTopLeft(-100, 100, AnchorType.CENTER, AnchorType.CENTER)
                 .PositionBottomRight(100, 200, AnchorType.CENTER, AnchorType.CENTER)
                 );
-            Widgets.Add(
+            AddChild(
                 new FramedButton("buttonbase", "Quit", () => { Pop(); })
                 .PositionTopLeft(-100, 300, AnchorType.CENTER, AnchorType.CENTER)
                 .PositionBottomRight(100, 400, AnchorType.CENTER, AnchorType.CENTER)
@@ -40,9 +40,9 @@ namespace YAVSRG.Interface.Screens
             splash = splashes[new Random().Next(0, splashes.Length)];
         }
 
-        public override void Draw()
+        public override void Draw(float left, float top, float right, float bottom)
         {
-            base.Draw();
+            base.Draw(left, top, right, bottom);
             SpriteBatch.DrawCentredText("YAVSRG", 50f, 0, -300, Color.Aqua);
             SpriteBatch.DrawCentredText(splash, 20f, 0, -240, Color.Aqua);
         }

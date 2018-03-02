@@ -9,7 +9,7 @@ using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Options.Tabs
 {
-    class LayoutTab : WidgetContainer
+    class LayoutTab : Widget
     {
         private Widget selectKeyMode;
         private KeyBinder[] binds = new KeyBinder[10];
@@ -71,15 +71,15 @@ namespace YAVSRG.Options.Tabs
             for (int i = 0; i < 10; i++)
             {
                 binds[i] = new KeyBinder("Column " + (i + 1).ToString(), Key.F35, (b) => { });
-                Widgets.Add(binds[i]);
+                AddChild(binds[i]);
                 colors[i] = new ColorPicker("", null, null, new Sprite(), 1);
-                Widgets.Add(colors[i]);
+                AddChild(colors[i]);
             }
-            Widgets.Add(selectKeyMode);
+            AddChild(selectKeyMode);
             Refresh();
-            Widgets.Add(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
+            AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .PositionTopLeft(-500, 425, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-200, 475, AnchorType.CENTER, AnchorType.MIN));
-            Widgets.Add(new TextPicker("Skin [REQUIRES GAME RESTART]", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); })
+            AddChild(new TextPicker("Skin [REQUIRES GAME RESTART]", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); })
                 .PositionTopLeft(200, 425, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 475, AnchorType.CENTER, AnchorType.MIN));
         }
 

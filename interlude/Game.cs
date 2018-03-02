@@ -21,7 +21,6 @@ namespace YAVSRG
         protected Chart currentChart; //the current selected chart ingame 
         protected MusicPlayer audio; //audio engine instance
         protected Options.Options options; //options handler instance
-        public Toolbar Toolbar; //toolbar instance ??
 
         public static Options.Options Options
         {
@@ -101,7 +100,6 @@ namespace YAVSRG
             else
             {
                 Screen.DrawScreens(); //the whole UI
-                Toolbar.Draw(); //the toolbar which is separate atm. I'll move it into screens when i redesign the whole screen thing
             }
             SpriteBatch.End();
             SwapBuffers(); //send rendered pixels to screen
@@ -111,7 +109,6 @@ namespace YAVSRG
         {
             base.OnUpdateFrame(e);
             if (Screen.Current == null) { Exit(); return; } //close game when you close all the screens (main menu goes last)
-            Toolbar.Update();
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             Screen.UpdateScreens(); //this is the fade to black transition between screens. needs removing for a fancy transition.
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
@@ -121,7 +118,6 @@ namespace YAVSRG
         {
             base.OnLoad(e);
             Input.Init();
-            Toolbar = new Toolbar();
             //i'll clean this up later
         }
 

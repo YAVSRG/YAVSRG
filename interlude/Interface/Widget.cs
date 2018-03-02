@@ -15,7 +15,7 @@ namespace YAVSRG.Interface
             private SlidingEffect _Y;
             private AnchorType XRel;
             private AnchorType YRel;
-            
+
             public AnchorPoint(float x, float y, AnchorType xa, AnchorType ya)
             {
                 _X = new SlidingEffect(x);
@@ -105,46 +105,62 @@ namespace YAVSRG.Interface
 
         public AnchorPoint A;
         public AnchorPoint B;
-        
         public int State = 1; //0 is hidden, 2 is focussed
+        public Animations.AnimationGroup Animation;
+        protected Widget parent;
+        protected List<Widget> Widgets;
+
 
         public Widget()
         {
             A = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN);
             B = new AnchorPoint(0, 0, AnchorType.MAX, AnchorType.MAX);
+            Animation = new Animations.AnimationGroup(true);
+            Widgets = new List<Widget>();
+        }
+
+        public virtual void AddToContainer(Widget parent)
+        {
+            this.parent = parent;
+        }
+
+        public virtual void AddChild(Widget child)
+        {
+            Widgets.Add(child);
+            child.AddToContainer(this);
         }
 
         public float Left(float l, float r)
         {
-            return A.X(l,r);
+            return A.X(l, r);
         }
 
         public float Top(float t, float b)
         {
-            return A.Y(t,b);
+            return A.Y(t, b);
         }
 
         public float Right(float l, float r)
         {
-            return B.X(l,r);
+            return B.X(l, r);
         }
 
         public float Bottom(float t, float b)
         {
-            return B.Y(t,b);
+            return B.Y(t, b);
         }
 
         protected void ConvertCoordinates(ref float l, ref float t, ref float r, ref float b)
         {
             float ol = l;//otherwise it will fuck up
             float ot = t;
-            l = Left(l,r); t = Top(t,b); r = Right(ol,r); b = Bottom(ot,b);
+            l = Left(l, r); t = Top(t, b); r = Right(ol, r); b = Bottom(ot, b);
         }
 
         public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay)
         {
             A = new AnchorPoint(x, y, ax, ay);
-            return this;
+            return this; //allows for method chaining
         }
 
         public Widget PositionBottomRight(float x, float y, AnchorType ax, AnchorType ay)
@@ -153,8 +169,31 @@ namespace YAVSRG.Interface
             return this;
         }
 
-        public virtual void Draw(float left, float top, float right, float bottom) { }
+        public virtual void Draw(float left, float top, float right, float bottom)
+        {
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            foreach (Widget w in Widgets)
+            {
+                if (w.State > 0)
+                {
+                    w.Draw(left, top, right, bottom);
+                }
+            }
+        }
 
-        public virtual void Update(float left, float top, float right, float bottom) { A.Update();B.Update(); }
+        public virtual void Update(float left, float top, float right, float bottom)
+        {
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            foreach (Widget w in Widgets)
+            {
+                if (w.State > 0)
+                {
+                    w.Update(left, top, right, bottom);
+                }
+            }
+            A.Update();
+            B.Update();
+            Animation.Update();
+        }
     }
 }

@@ -85,20 +85,20 @@ namespace YAVSRG.Interface.Screens
             binds = Game.Options.Profile.Bindings[Chart.Keys];
             hitmeter = new Widgets.HitMeter(Chart.Keys);
 
-            Widgets.Add(hitmeter.PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(hitmeter.PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
 
-            Widgets.Add(new Widgets.ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new Widgets.ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
 
             scoreTracker.Scoring.OnMiss = (k) => { OnMiss(k); };
 
             lighting = new HitLighting[Chart.Keys];
-            float x = Chart.Keys / 2;
+            float x = Chart.Keys * 0.5f;
             for (int i = 0; i < Chart.Keys; i++)
             {
                 lighting[i] = new HitLighting();
                 lighting[i].PositionTopLeft(COLUMNWIDTH * (i - x), HITPOSITION + COLUMNWIDTH * 2, AnchorType.CENTER, AnchorType.MAX)
                     .PositionBottomRight(COLUMNWIDTH * (i - x + 1), HITPOSITION, AnchorType.CENTER, AnchorType.MAX);
-                Widgets.Add(lighting[i]);
+                AddChild(lighting[i]);
             }
         }
 
@@ -110,7 +110,7 @@ namespace YAVSRG.Interface.Screens
             }
             base.OnEnter(prev);
             Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
-            Game.Instance.Toolbar.hide = true;
+            toolbar.hide = true;
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
@@ -120,12 +120,12 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnExit(next);
 
-            Game.Instance.Toolbar.hide = false;
+            toolbar.hide = false;
         }
 
-        public override void Update()
+        public override void Update(float left, float top, float right, float bottom)
         {
-            base.Update();
+            base.Update(left, top, right, bottom);
             float now = (float)Game.Audio.Now();
             if (Input.KeyTap(Key.Escape))
             {
@@ -203,7 +203,7 @@ namespace YAVSRG.Interface.Screens
         }
 
         //This is the core rhythm game engine bit
-        public override void Draw()
+        public override void Draw(float left, float top, float right, float bottom)
         {
             float offset = Chart.Keys * COLUMNWIDTH * -0.5f; //offset means actual horizontal offset of the playfield
             //0 offset = playfield left edge is in centre of screen
@@ -254,7 +254,7 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.DrawCentredText(scoreTracker.Combo().ToString(), 40f, 0, -100, Color.White); //combo
             SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -Height + 70, Color.White); //acc
 
-            base.Draw();
+            base.Draw(left, top, right, bottom);
         }
 
         private void DrawLongTap(float offset, int i, float start, float end)

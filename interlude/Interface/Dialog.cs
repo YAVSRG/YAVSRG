@@ -7,7 +7,7 @@ using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Interface
 {
-    public class Dialog : WidgetContainer
+    public class Dialog : Widget
     {
         public Action<string> OnComplete;
         public bool Closed = false;

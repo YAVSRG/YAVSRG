@@ -21,9 +21,9 @@ namespace YAVSRG.Interface.Screens
 
             diffDisplay = new ChartDifficulty(Game.CurrentChart);
             diffDisplay.PositionTopLeft(100, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 80, AnchorType.MIN, AnchorType.MAX);
-            Widgets.Add(diffDisplay);
-            Widgets.Add(selector);
-            Widgets.Add(new FramedButton("buttonbase", "Play", () => { Push(new ScreenPlay()); })
+            AddChild(diffDisplay);
+            AddChild(selector);
+            AddChild(new FramedButton("buttonbase", "Play", () => { Push(new ScreenPlay()); })
                 .PositionTopLeft(250,100,AnchorType.MIN,AnchorType.CENTER)
                 .PositionBottomRight(450,200,AnchorType.MIN,AnchorType.CENTER));
         }
@@ -39,9 +39,9 @@ namespace YAVSRG.Interface.Screens
             base.OnEnter(prev);
         }
 
-        public override void Update()
+        public override void Update(float left, float top, float right, float bottom)
         {
-            base.Update();
+            base.Update(left, top, right, bottom);
 
             double ratestep = Input.KeyPress(OpenTK.Input.Key.ControlLeft) ? 0.2d : 0.05d;
             if (Input.KeyTap(OpenTK.Input.Key.Plus))

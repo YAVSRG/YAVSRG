@@ -18,28 +18,27 @@ namespace YAVSRG.Interface.Screens
         public ScreenOptions()
         {
             tabs = new WidgetSwitcher();
-            tabs.Add(new GeneralTab());
+            tabs.AddChild(new GeneralTab());
             layout = new LayoutTab();
-            tabs.Add(layout);
-            tabs.Add(new GameplayTab());
-            Widgets.Add(tabs.PositionTopLeft(0, 140, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MAX));
-            Widgets.Add(new FramedButton("buttonbase", "General", () => { tabs.Switch(0); })
-                .PositionTopLeft(0,80,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(200,140,AnchorType.MIN,AnchorType.MIN));
-            Widgets.Add(new FramedButton("buttonbase", "Layout", () => { tabs.Switch(1); layout.Refresh(); })
+            tabs.AddChild(layout);
+            tabs.AddChild(new GameplayTab());
+
+            AddChild(tabs.PositionTopLeft(0, 140, AnchorType.MIN, AnchorType.MIN)
+                .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MAX));
+            AddChild(new FramedButton("buttonbase", "General", () => { tabs.Switch(0); })
+                .PositionTopLeft(0, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(200, 140, AnchorType.MIN, AnchorType.MIN));
+            AddChild(new FramedButton("buttonbase", "Layout", () => { tabs.Switch(1); layout.Refresh(); })
                 .PositionTopLeft(200, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(400, 140, AnchorType.MIN, AnchorType.MIN));
-            Widgets.Add(new FramedButton("buttonbase", "Gameplay", () => { tabs.Switch(2); })
+            AddChild(new FramedButton("buttonbase", "Gameplay", () => { tabs.Switch(2); })
                 .PositionTopLeft(400, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 140, AnchorType.MIN, AnchorType.MIN));
+
         }
 
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Instance.Toolbar.hide = false;
-        }
-
-        public override void Draw()
-        {
-            base.Draw();
+            toolbar.hide = false;
+            tabs.Switch(0);
         }
     }
 }

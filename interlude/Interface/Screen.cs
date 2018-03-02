@@ -8,12 +8,11 @@ using System.Drawing;
 
 namespace YAVSRG.Interface
 {
-    public class Screen
+    public class Screen : Widget
     {
-        protected List<Widget> Widgets = new List<Widget>();
-
         static readonly Color bgdim = Color.FromArgb(80, 80, 80);
         public static int parallax = 15;
+        protected static Toolbar toolbar = new Toolbar();
         private static float fade = 0;
         private static bool fadingIn = false;
         private static List<Screen> stack = new List<Screen> { new Screens.ScreenMenu() };
@@ -100,8 +99,9 @@ namespace YAVSRG.Interface
             }
             else
             {
-                Current?.Update();
+                Current?.Update(-Width,-Height,Width,Height);
             }
+            toolbar.Update(-Width, -Height, Width, Height);
         }
 
         public static void DrawScreens()
@@ -109,30 +109,15 @@ namespace YAVSRG.Interface
             int parallaxX = Input.MouseX * parallax / Width;
             int parallaxY = Input.MouseY * parallax / Height;
             DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, bgdim);
-            Current?.Draw();
+            Current?.Draw(-Width, -Height, Width, Height);
             if (dialogs.Count > 0)
             {
                 dialogs[0].Draw(-Width, -Height, Width, Height);
             }
-                if (fade > 0)
+            toolbar.Draw(-Width, -Height, Width, Height);
+            if (fade > 0)
             {
-                SpriteBatch.DrawRect(-Width, -Height, Width, Height, Color.FromArgb((int)(fade*250), 0, 0, 0));
-            }
-        }
-
-        public virtual void Update()
-        {
-            foreach (Widget w in Widgets)
-            {
-                w.Update(-Width,-Height,Width,Height);
-            }
-        }
-
-        public virtual void Draw()
-        {
-            foreach (Widget w in Widgets)
-            {
-                w.Draw(-Width, -Height, Width, Height);
+                SpriteBatch.DrawRect(-Width, -Height, Width, Height, Color.FromArgb((int)(fade * 250), 0, 0, 0));
             }
         }
 

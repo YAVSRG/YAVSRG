@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Interface
 {
-    public class Animation<T>
+    public class Animation
     {
         public virtual bool DisposeMe { get { return false; } }
         public virtual bool Running { get { return true; } }

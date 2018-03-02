@@ -8,36 +8,19 @@ namespace YAVSRG.Interface.Widgets
 {
     class WidgetSwitcher : Widget
     {
-        List<Widget> Widgets;
         int Current;
-
-        public WidgetSwitcher()
-        {
-            Widgets = new List<Widget>();
-        }
-
-        public void Add(Widget w)
-        {
-            Widgets.Add(w);
-        }
 
         public void Switch(int x)
         {
+            Widgets[Current].State = 0;
             Current = x;
+            Widgets[x].State = 1;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void AddChild(Widget child)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            Widgets[Current].Draw(left, top, right, bottom);
-        }
-
-        public override void Update(float left, float top, float right, float bottom)
-        {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            Widgets[Current].Update(left, top, right, bottom);
+            base.AddChild(child);
+            child.State = 0;
         }
     }
 }

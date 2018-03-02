@@ -40,7 +40,7 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,Game.Options.Theme.Base));
+            ScreenUtils.DrawStaticChartBackground(left, top, right, bottom, Color.Gray);
             //SpriteBatch.DrawTilingTexture(texture, left, top, right, bottom, 400f, 0, 0, Game.Options.Theme.Base);
             SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Color.White);
             SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.title, left, top, right, top + 100, Game.Options.Theme.MenuFont);
