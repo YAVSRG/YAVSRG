@@ -21,13 +21,13 @@ namespace YAVSRG.Interface
             cursor = Content.LoadTextureFromAssets("cursor");
             AddChild(
                 new Button("buttonback", "", () => { Game.Screens.PopScreen(); })
-                .PositionTopLeft(0,0,AnchorType.MIN,AnchorType.MIN)
-                .PositionBottomRight(160,80,AnchorType.MIN,AnchorType.MIN)
+                .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN)
+                .PositionBottomRight(160, 80, AnchorType.MIN, AnchorType.MIN)
                 );
             AddChild(
                 new Button("buttonplay", "", () => { Game.Audio.Play(); })
-                .PositionTopLeft(240,0,AnchorType.MAX,AnchorType.MIN)
-                .PositionBottomRight(160,80,AnchorType.MAX,AnchorType.MIN)
+                .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN)
+                .PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
                 new Button("buttonpause", "", () => { Game.Audio.Pause(); })
@@ -57,7 +57,7 @@ namespace YAVSRG.Interface
         {
             if (slide < 0) { return; }
 
-            float s = (Height * 2 - slide * 2)/24f;
+            float s = (Height * 2 - slide * 2) / 24f;
             for (int i = 0; i < 24; i++)
             {
                 float level = Game.Audio.WaveForm[i * 4] + Game.Audio.WaveForm[i * 4 + 1] + Game.Audio.WaveForm[i * 4 + 2] + Game.Audio.WaveForm[i * 4 + 3];
@@ -69,23 +69,23 @@ namespace YAVSRG.Interface
 
             //SpriteBatch.Draw(texture,-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
             DrawStaticChartBackground(-Width, -Height, Width, -Height + slide, Game.Options.Theme.Dark);
-            SpriteBatch.DrawFrame(frame, -Width-30, -Height - 30, Width+30, -Height + slide + 5, 30f, Game.Options.Theme.Base);
+            SpriteBatch.DrawFrame(frame, -Width - 30, -Height - 30, Width + 30, -Height + slide + 5, 30f, Game.Options.Theme.Base);
             //SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Options.Theme.Base);
             //SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Options.Theme.Base);
 
-            SpriteBatch.DrawRect(Width - 710, -Height + 55,Width - 710 + 460 * Game.Audio.NowPercentage(), -Height + 65, Game.Options.Theme.Base);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, Width - 710, -Height+20, Width - 250, -Height+60, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawRect(Width - 710, -Height + slide - 25, Width - 710 + 460 * Game.Audio.NowPercentage(), -Height + slide - 15, Game.Options.Theme.Base);
+            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, Width - 710, -Height + slide - 60, Width - 250, -Height + slide - 20, Game.Options.Theme.MenuFont);
 
             //SpriteBatch.Draw(texture, -Width, Height-80, Width, Height, Game.Options.Theme.Dark);
-            DrawStaticChartBackground(-Width, Height-slide, Width, Height, Game.Options.Theme.Dark);
+            DrawStaticChartBackground(-Width, Height - slide, Width, Height, Game.Options.Theme.Dark);
             //SpriteBatch.DrawRect(-Width, Height - slide - 5, Width, Height - slide, Game.Options.Theme.Base);
             SpriteBatch.DrawFrame(frame, -Width - 30, Height - slide - 5, Width + 30, Height + 30, 30f, Game.Options.Theme.Base);
 
-            base.Draw(left,top,right,bottom);
+            base.Draw(left, top + slide - 80, right, bottom);
 
-            SpriteBatch.DrawText(Game.Options.Profile.Name, 30f, -Width, Height - 75, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText(Game.Version, 25f, Width, Height - 75, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, Width, Height - 35, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawText(Game.Options.Profile.Name, 30f, -Width, Height - slide + 5, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(Game.Version, 25f, Width, Height - slide + 5, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, Width, Height - slide + 45, Game.Options.Theme.MenuFont);
 
             SpriteBatch.Draw(cursor, Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Options.Theme.Base);
         }

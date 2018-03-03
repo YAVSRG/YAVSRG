@@ -11,8 +11,6 @@ namespace YAVSRG.Interface
 {
     class ScreenManager
     {
-
-
         readonly Color bgdim = Color.FromArgb(80, 80, 80);
         AnimationFade fade1;
         AnimationFade fade2;
