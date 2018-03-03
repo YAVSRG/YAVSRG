@@ -89,5 +89,10 @@ namespace YAVSRG.Gameplay
         {
             return Utils.RoundNumber(Accuracy())+"%";
         }
+
+        public bool EndOfChart(int snaps)
+        {
+            return pos == snaps;
+        }
     }
 }

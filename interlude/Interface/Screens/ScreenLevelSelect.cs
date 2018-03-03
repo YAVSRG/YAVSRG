@@ -23,7 +23,7 @@ namespace YAVSRG.Interface.Screens
             diffDisplay.PositionTopLeft(100, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 80, AnchorType.MIN, AnchorType.MAX);
             AddChild(diffDisplay);
             AddChild(selector);
-            AddChild(new FramedButton("buttonbase", "Play", () => { Push(new ScreenPlay()); })
+            AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
                 .PositionTopLeft(250,100,AnchorType.MIN,AnchorType.CENTER)
                 .PositionBottomRight(450,200,AnchorType.MIN,AnchorType.CENTER));
         }

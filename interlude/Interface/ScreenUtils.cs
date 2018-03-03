@@ -49,7 +49,7 @@ namespace YAVSRG.Interface
         public static void DrawChartBackground(float left, float top, float right, float bottom, Color c)
         {
             float bg = ((float)Game.CurrentChart.background.Width / Game.CurrentChart.background.Height);
-            float window = ((float)Width / Height);
+            float window = (right-left)/(bottom-top);
             float correction = window / bg;
 
             RectangleF uv = new RectangleF(0, (correction - 1) * 0.5f, 1, 1.5f - correction * 0.5f);

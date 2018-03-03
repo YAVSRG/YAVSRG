@@ -37,7 +37,6 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            toolbar.hide = false;
             tabs.Switch(0);
         }
     }

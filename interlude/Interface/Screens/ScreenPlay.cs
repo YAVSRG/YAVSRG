@@ -106,11 +106,11 @@ namespace YAVSRG.Interface.Screens
         {
             if (prev is ScreenScore)
             {
-                DoPop(); return;
+                Game.Screens.PopScreen(); return;
             }
             base.OnEnter(prev);
             Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
-            toolbar.hide = true;
+            Game.Screens.Toolbar(false);
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
@@ -118,9 +118,8 @@ namespace YAVSRG.Interface.Screens
 
         public override void OnExit(Screen next)
         {
+            Game.Screens.Toolbar(true);
             base.OnExit(next);
-
-            toolbar.hide = false;
         }
 
         public override void Update(float left, float top, float right, float bottom)
@@ -129,7 +128,7 @@ namespace YAVSRG.Interface.Screens
             float now = (float)Game.Audio.Now();
             if (Input.KeyTap(Key.Escape))
             {
-                Pop();
+                Game.Screens.PopScreen();
             }
             for (int k = 0; k < Chart.Keys; k++)
             {
@@ -143,9 +142,11 @@ namespace YAVSRG.Interface.Screens
                 }
             }
             scoreTracker.Update(now - missWindow);
-            if (now > end)
+            if (scoreTracker.EndOfChart())
             {
-                Push(new ScreenScore(scoreTracker));
+                Game.Screens.PopScreen();
+                Game.Screens.AddScreen(new ScreenScore(scoreTracker));
+                Widgets.Clear();
             }
         }
 

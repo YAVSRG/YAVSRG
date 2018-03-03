@@ -78,5 +78,10 @@ namespace YAVSRG.Gameplay
             hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit
             hitdata[i].delta[k] = delta;
         }
+
+        public bool EndOfChart()
+        {
+            return Scoring.EndOfChart(hitdata.Length);
+        }
     }
 }

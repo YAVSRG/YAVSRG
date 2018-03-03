@@ -30,7 +30,7 @@ namespace YAVSRG.Interface.Dialogs
 
         public void NewProfile()
         {
-            Screen.AddDialog(new TextDialog("Enter Profile Name:", (s) => {
+            Game.Screens.AddDialog(new TextDialog("Enter Profile Name:", (s) => {
                 Options.Profile p = new Options.Profile() { Name = s, ProfilePath = new Regex("[^a-zA-Z0-9_-]").Replace(s, "")+".json" };
                 Options.Options.Profiles.Add(p);
                 Game.Options.ChangeProfile(p);

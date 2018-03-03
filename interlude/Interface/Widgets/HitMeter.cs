@@ -108,7 +108,7 @@ namespace YAVSRG.Interface.Widgets
 
             foreach (Hit h in hits)
             {
-                SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb((int)((5000+h.time-now)*0.05f),Game.Options.Theme.JudgeColors[h.tier]));
+                SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb((int)(4+(5000+h.time-now)*0.05f),Game.Options.Theme.JudgeColors[h.tier]));
             }
         }
 

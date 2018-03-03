@@ -12,17 +12,15 @@ namespace YAVSRG.Interface
     public class Toolbar : Widget
     {
         Sprite texture, cursor, frame;
-        
-        public bool hide;
+        SlidingEffect slide;
 
         public Toolbar()
         {
-            hide = false;
             texture = Content.LoadTextureFromAssets("toolbar");
             frame = Content.LoadTextureFromAssets("frame");
             cursor = Content.LoadTextureFromAssets("cursor");
             AddChild(
-                new Button("buttonback", "", () => { Screen.Pop(); })
+                new Button("buttonback", "", () => { Game.Screens.PopScreen(); })
                 .PositionTopLeft(0,0,AnchorType.MIN,AnchorType.MIN)
                 .PositionBottomRight(160,80,AnchorType.MIN,AnchorType.MIN)
                 );
@@ -41,32 +39,47 @@ namespace YAVSRG.Interface
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
+            slide = new SlidingEffect(80);
+            Animation.Add(slide);
+        }
+
+        public void Collapse()
+        {
+            slide.Target = -10;
+        }
+
+        public void Expand()
+        {
+            slide.Target = 80;
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
-            if (hide) { return; }
+            if (slide < 0) { return; }
 
-            float s = (Height * 2 - 80 * 2)/24f;
+            float s = (Height * 2 - slide * 2)/24f;
             for (int i = 0; i < 24; i++)
             {
                 float level = Game.Audio.WaveForm[i * 4] + Game.Audio.WaveForm[i * 4 + 1] + Game.Audio.WaveForm[i * 4 + 2] + Game.Audio.WaveForm[i * 4 + 3];
-                SpriteBatch.DrawRect(-Width, -Height + 80 + i * s, -Width + 5 + 400 *level, -Height + 78 + s + i * s, Color.FromArgb(100,Game.Options.Theme.Highlight));
-                SpriteBatch.DrawRect(Width - 5 - 400 * level, -Height + 80 + i * s, Width, -Height + 78 + s + i * s, Color.FromArgb(100, Game.Options.Theme.Highlight));
+                level += 0.01f;
+                level *= slide * 5;
+                SpriteBatch.DrawRect(-Width, -Height + slide + i * s, -Width + level, -Height + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Options.Theme.Highlight));
+                SpriteBatch.DrawRect(Width - level, -Height + slide + i * s, Width, -Height + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Options.Theme.Highlight));
             }
 
             //SpriteBatch.Draw(texture,-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
-            DrawStaticChartBackground(-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
-            SpriteBatch.DrawFrame(frame, -Width-30, -Height - 30, Width+30, -Height + 85, 30f, Game.Options.Theme.Base);
-            SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Options.Theme.Base);
-            SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Options.Theme.Base);
+            DrawStaticChartBackground(-Width, -Height, Width, -Height + slide, Game.Options.Theme.Dark);
+            SpriteBatch.DrawFrame(frame, -Width-30, -Height - 30, Width+30, -Height + slide + 5, 30f, Game.Options.Theme.Base);
+            //SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Options.Theme.Base);
+            //SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Options.Theme.Base);
 
             SpriteBatch.DrawRect(Width - 710, -Height + 55,Width - 710 + 460 * Game.Audio.NowPercentage(), -Height + 65, Game.Options.Theme.Base);
             SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, Width - 710, -Height+20, Width - 250, -Height+60, Game.Options.Theme.MenuFont);
 
             //SpriteBatch.Draw(texture, -Width, Height-80, Width, Height, Game.Options.Theme.Dark);
-            DrawStaticChartBackground(-Width, Height-80, Width, Height, Game.Options.Theme.Dark);
-            SpriteBatch.DrawRect(-Width, Height - 85, Width, Height - 80, Game.Options.Theme.Base);
+            DrawStaticChartBackground(-Width, Height-slide, Width, Height, Game.Options.Theme.Dark);
+            //SpriteBatch.DrawRect(-Width, Height - slide - 5, Width, Height - slide, Game.Options.Theme.Base);
+            SpriteBatch.DrawFrame(frame, -Width - 30, Height - slide - 5, Width + 30, Height + 30, 30f, Game.Options.Theme.Base);
 
             base.Draw(left,top,right,bottom);
 
@@ -79,7 +92,6 @@ namespace YAVSRG.Interface
 
         public override void Update(float left, float top, float right, float bottom)
         {
-            if (hide) { return; }
             base.Update(left, top, right, bottom);
         }
     }

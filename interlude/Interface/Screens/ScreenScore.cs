@@ -50,14 +50,14 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            toolbar.hide = false;
+            Game.Screens.Toolbar(true);
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
             //SpriteBatch.DrawCentredText(ranks[tier], 200f, 0, -320, rankColors[tier]);
-            SpriteBatch.Draw(rank, -90, -280, 90, -80, Color.White);
+            SpriteBatch.Draw(rank, -100, -280, 100, -80, Color.White);
             //you'll just have to change to the chart before showing the score screen
             //SpriteBatch.DrawCentredText(ChartLoader.SelectedChart.header.title + " [" + score.c.DifficultyName + "]", 30f, 0, -Height + 150, Color.White);
             //SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);

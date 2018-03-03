@@ -10,10 +10,26 @@ using System.Drawing;
 namespace YAVSRG
 {
     class SpriteBatch
-    {
-        private static Dictionary<char, Sprite> FontLookup;
+    {/*
+        struct Vertex
+        {
+            public static int SizeInBytes { get { return Vector2.SizeInBytes * 2 + Vector4.SizeInBytes; } }
 
-        private static readonly int FONTSCALE = 60;
+            public Vector2 position;
+            public Vector2 texCoord;
+            public Vector4 color;
+            public Vertex(Vector2 position, Vector2 texCoord, Color color)
+            {
+                this.position = position;
+                this.texCoord = texCoord;
+                this.color = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
+            }
+        }*/
+
+        static Dictionary<char, Sprite> FontLookup;
+        static readonly int FONTSCALE = 60;
+
+        static int VBO;
 
         public static void Draw(Sprite texture, float left, float top, float right, float bottom, Color color, int rotation = 0)
         {
@@ -167,6 +183,13 @@ namespace YAVSRG
             GL.Enable(EnableCap.Blend);
             GL.ClearColor(0, 0, 0, 0);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            /*
+            VBO = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
+            GL.EnableClientState(ArrayCap.VertexArray);
+            GL.EnableClientState(ArrayCap.TextureCoordArray);
+            GL.EnableClientState(ArrayCap.ColorArray);*/
 
             FontLookup = new Dictionary<char, Sprite>();
             Font f = new Font("Courier", FONTSCALE);

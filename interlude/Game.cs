@@ -14,13 +14,14 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.1.2";
+        public static readonly string Version = "v0.1.3dev";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
         protected Chart currentChart; //the current selected chart ingame 
         protected MusicPlayer audio; //audio engine instance
         protected Options.Options options; //options handler instance
+        protected ScreenManager screens;
 
         public static Options.Options Options
         {
@@ -30,6 +31,11 @@ namespace YAVSRG
         public static Chart CurrentChart
         {
             get { return Instance.currentChart; }
+        }
+
+        public static ScreenManager Screens
+        {
+            get { return Instance.screens; }
         }
 
         public static MusicPlayer Audio
@@ -44,14 +50,15 @@ namespace YAVSRG
             Title = "YAVSRG";
             Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
-            VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on
-            ManagedBass.Bass.Init();
-            audio = new MusicPlayer();
-            YAVSRG.Options.Options.Init();
-            options = new Options.Options();
-            ApplyWindowSettings(options.General);
+            VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on. best performance is no frame cap and no vsync otherwise you get stutters
+            ManagedBass.Bass.Init(); //init bass
+            audio = new MusicPlayer(); //init my music player
+            YAVSRG.Options.Options.Init(); //init options i.e load profiles
+            options = new Options.Options(); //create options data from profile
+            ApplyWindowSettings(options.General); //apply window settings from options
             ScreenUtils.UpdateBounds(Width, Height); //why is this here? todo: find out
             test = Content.UploadTexture(Utils.CaptureScreen(), 1, 1);
+            screens = new ScreenManager();
             SpriteBatch.Init();
         }
 
@@ -99,7 +106,8 @@ namespace YAVSRG
             }//it's supposed to show "LOADING" when the game first opens and stay that way until packs are loaded
             else
             {
-                Screen.DrawScreens(); //the whole UI
+                screens.Draw();
+                //Screen.DrawScreens(); //the whole UI
             }
             SpriteBatch.End();
             SwapBuffers(); //send rendered pixels to screen
@@ -108,9 +116,10 @@ namespace YAVSRG
         protected override void OnUpdateFrame(FrameEventArgs e) //this is update loop code (tries to hit 120 times a second)
         {
             base.OnUpdateFrame(e);
-            if (Screen.Current == null) { Exit(); return; } //close game when you close all the screens (main menu goes last)
+            if (screens.Current == null) { Exit(); return; } //close game when you close all the screens (main menu goes last)
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
-            Screen.UpdateScreens(); //this is the fade to black transition between screens. needs removing for a fancy transition.
+            screens.Update();
+            //Screen.UpdateScreens(); //this is the fade to black transition between screens. needs removing for a fancy transition.
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
         }
 

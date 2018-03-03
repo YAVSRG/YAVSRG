@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Interface
 {
-    public class SlidingEffect
+    public class SlidingEffect : Animation
     {
         public float Val;
         public float Target;
@@ -17,7 +17,15 @@ namespace YAVSRG.Interface
             Target = p;
         }
 
-        public void Update()
+        public override bool Running
+        {
+            get
+            {
+                return base.Running;
+            }
+        }
+
+        public override void Update()
         {
             Val = Val * 0.95f + Target * 0.05f;
         }
