@@ -22,7 +22,7 @@ namespace YAVSRG.Interface
             AddChild(
                 new Button("buttonback", "", () => { Game.Screens.PopScreen(); })
                 .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN)
-                .PositionBottomRight(160, 80, AnchorType.MIN, AnchorType.MIN)
+                .PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN)
                 );
             AddChild(
                 new Button("buttonplay", "", () => { Game.Audio.Play(); })
@@ -39,7 +39,7 @@ namespace YAVSRG.Interface
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
-            slide = new SlidingEffect(80);
+            slide = new SlidingEffect(-10);
             Animation.Add(slide);
         }
 

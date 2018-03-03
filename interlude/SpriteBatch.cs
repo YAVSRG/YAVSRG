@@ -192,7 +192,7 @@ namespace YAVSRG
             GL.EnableClientState(ArrayCap.ColorArray);*/
 
             FontLookup = new Dictionary<char, Sprite>();
-            Font f = new Font("Courier", FONTSCALE);
+            Font f = new Font("Century Gothic", FONTSCALE);
             SizeF size;
 
             foreach (char c in @"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\|")

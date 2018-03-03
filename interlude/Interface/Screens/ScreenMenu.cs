@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Interface;
-using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Interface.Widgets;
 using System.Drawing;
 
@@ -38,6 +37,13 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnEnter(prev);
             splash = splashes[new Random().Next(0, splashes.Length)];
+            Game.Screens.BackgroundDim.Target = 1;
+        }
+
+        public override void OnExit(Screen next)
+        {
+            base.OnExit(next);
+            Game.Screens.BackgroundDim.Target = 0;
         }
 
         public override void Draw(float left, float top, float right, float bottom)

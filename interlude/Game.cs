@@ -43,22 +43,23 @@ namespace YAVSRG
             get { return Instance.audio; }
         }
 
-        Sprite test;
-
-        public Game() : base(800, 600)
+        public Game() : base(1200,800)
         {
+            Sprite s = Content.UploadTexture(Utils.CaptureScreen(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "YAVSRG";
             Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on. best performance is no frame cap and no vsync otherwise you get stutters
             ManagedBass.Bass.Init(); //init bass
             audio = new MusicPlayer(); //init my music player
+
             YAVSRG.Options.Options.Init(); //init options i.e load profiles
             options = new Options.Options(); //create options data from profile
             ApplyWindowSettings(options.General); //apply window settings from options
-            ScreenUtils.UpdateBounds(Width, Height); //why is this here? todo: find out
-            test = Content.UploadTexture(Utils.CaptureScreen(), 1, 1);
+            ScreenUtils.UpdateBounds(Width, Height);
+
             screens = new ScreenManager();
+            screens.AddScreen(new Interface.Screens.ScreenLoading(s));
             SpriteBatch.Init();
         }
 
@@ -94,21 +95,8 @@ namespace YAVSRG
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
-            SpriteBatch.Begin(Width,Height); //start my render code
-            if (!ChartLoader.Loaded) //some temp hack to show "LOADING..."
-            {
-                SpriteBatch.Draw(test, -ScreenUtils.Width, -ScreenUtils.Height, ScreenUtils.Width, ScreenUtils.Height, Color.White);
-                SpriteBatch.DrawCentredText("Loading files...", 100f, 0, 0, Color.White);
-                SpriteBatch.End();
-                SwapBuffers();
-                ChartLoader.Init();
-                ChartLoader.RandomPack();
-            }//it's supposed to show "LOADING" when the game first opens and stay that way until packs are loaded
-            else
-            {
-                screens.Draw();
-                //Screen.DrawScreens(); //the whole UI
-            }
+            SpriteBatch.Begin(Width, Height); //start my render code
+            screens.Draw();
             SpriteBatch.End();
             SwapBuffers(); //send rendered pixels to screen
         }
@@ -116,7 +104,6 @@ namespace YAVSRG
         protected override void OnUpdateFrame(FrameEventArgs e) //this is update loop code (tries to hit 120 times a second)
         {
             base.OnUpdateFrame(e);
-            if (screens.Current == null) { Exit(); return; } //close game when you close all the screens (main menu goes last)
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             screens.Update();
             //Screen.UpdateScreens(); //this is the fade to black transition between screens. needs removing for a fancy transition.

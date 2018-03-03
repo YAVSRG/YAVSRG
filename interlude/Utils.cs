@@ -40,9 +40,8 @@ namespace YAVSRG
             System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented));
         }
 
-        public static Bitmap CaptureScreen()
+        public static Bitmap CaptureScreen(Rectangle screenSize)
         {
-            Rectangle screenSize = Game.Instance.ClientRectangle;
             Bitmap target = new Bitmap(screenSize.Width, screenSize.Height);
             using (Graphics g = Graphics.FromImage(target))
             {

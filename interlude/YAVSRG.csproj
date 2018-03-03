@@ -134,7 +134,7 @@
     <Compile Include="Interface\Animations\AnimationFade.cs" />
     <Compile Include="Interface\Animations\AnimationGroup.cs" />
     <Compile Include="Interface\Animations\AnimationSeries.cs" />
-    <Compile Include="Interface\Animations\AnimationTimer.cs" />
+    <Compile Include="Interface\Animations\AnimationCounter.cs" />
     <Compile Include="Interface\ColorFade.cs" />
     <Compile Include="Interface\CrashWindow.cs">
       <SubType>Form</SubType>
@@ -148,6 +148,7 @@
     <Compile Include="Interface\Dialogs\TextDialog.cs" />
     <Compile Include="Interface\ScreenManager.cs" />
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
+    <Compile Include="Interface\Screens\ScreenLoading.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
     <Compile Include="Interface\Screens\ScreenScore.cs" />
     <Compile Include="Interface\Animations\SlidingEffect.cs" />

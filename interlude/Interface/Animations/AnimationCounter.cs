@@ -6,20 +6,23 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Interface.Animations
 {
-    class AnimationTimer : Animation
+    class AnimationCounter : Animation
     {
         public int value = 0;
         int target;
+        bool loop;
 
-        public AnimationTimer(int final)
+        public AnimationCounter(int final, bool loop)
         {
             target = final;
+            this.loop = loop;
         }
 
         public override void Update()
         {
             base.Update();
             value++;
+            if (loop) { value %= target; }
         }
 
         public override bool Running

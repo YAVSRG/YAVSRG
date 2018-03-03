@@ -11,21 +11,17 @@ namespace YAVSRG.Interface
 {
     class ScreenManager
     {
-        readonly Color bgdim = Color.FromArgb(80, 80, 80);
         AnimationFade fade1;
         AnimationFade fade2;
         SlidingEffect parallax = new SlidingEffect(15);
         Toolbar toolbar = new Toolbar();
-        List<Screen> stack = new List<Screen>() { null };
+        List<Screen> stack = new List<Screen>() {};
         List<Dialog> dialogs = new List<Dialog>();
         AnimationSeries animation = new AnimationSeries(true);
-        public Screen Current = null;
         Screen Previous = null;
-
-        public ScreenManager()
-        {
-            AddScreen(new Screens.ScreenMenu());
-        }
+        public ColorFade BackgroundDim = new ColorFade(Color.FromArgb(80, 80, 80), Color.White);
+        public Screen Current = null;
+        public bool Loading = true;
         
         public void AddDialog(Dialog d)
         {
@@ -71,20 +67,25 @@ namespace YAVSRG.Interface
 
         public void Draw()
         {
+            if (Loading)
+            {
+                Current?.Draw(-Width, -Height, Width, Height);
+                return;
+            }
             float parallaxX = Input.MouseX * parallax / Width;
             float parallaxY = Input.MouseY * parallax / Height;
-            DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, bgdim);
+            DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, BackgroundDim);
             if (animation.Running)
             {
                 if (fade1.Running)
                 {
                     Previous?.Draw(-Width, -Height, Width, Height);
-                    DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, Color.FromArgb((int)(255 * fade1), bgdim));
+                    DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, Color.FromArgb((int)(255 * fade1), BackgroundDim));
                 }
                 else
                 {
                     Current?.Draw(-Width, -Height, Width, Height);
-                    DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, Color.FromArgb((int)(255 * (1-fade2)), bgdim));
+                    DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
                 }
             }
             else
@@ -100,6 +101,11 @@ namespace YAVSRG.Interface
 
         public void Update()
         {
+            if (Loading)
+            {
+                Current?.Update(-Width, -Height, Width, Height);
+                return;
+            }
             if (dialogs.Count > 0)
             {
                 dialogs[0].Update(-Width, -Height, Width, Height);
@@ -114,11 +120,12 @@ namespace YAVSRG.Interface
             }
             if (Previous != null && !animation.Running)
             {
-                Previous = null; //lets the old screen get cleaned up
+                Previous = null;
             }
             toolbar.Update(-Width, -Height, Width, Height);
             animation.Update();
             parallax.Update();
+            BackgroundDim.Update();
         }
     }
 }
