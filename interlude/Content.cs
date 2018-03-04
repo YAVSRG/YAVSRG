@@ -20,13 +20,17 @@ namespace YAVSRG
         static Dictionary<string,Sprite> Store = new Dictionary<string,Sprite>();
         static Dictionary<string, int> SoundStore = new Dictionary<string, int>();
 
-        public static Sprite LoadTexture(string path) //load texture from absolute path
+        public static Sprite LoadTexture(string path, bool getColors = false) //load texture from absolute path
         {
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException();
             }
             Bitmap bmp = new Bitmap(path);
+            if (getColors)
+            {
+                Utils.SetThemeColor(bmp);
+            }
             return UploadTexture(bmp,1,1); //temp
         }
 
@@ -114,20 +118,17 @@ namespace YAVSRG
 
         public static Sprite LoadBackground(string path, string filename)
         {
-            if (File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename));
+            if (File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename),true);
             else
             {
                 foreach (string s in Directory.GetFiles(path))
                 {
                     if (Path.GetFileNameWithoutExtension(s).ToLower().Contains("bg"))
                     {
-                        return LoadTexture(s);
+                        return LoadTexture(s,true);
                     }
                 }
             }
-
-            Console.WriteLine(path);
-            Console.WriteLine(filename);
             return LoadTextureFromAssets("background");
         }
 

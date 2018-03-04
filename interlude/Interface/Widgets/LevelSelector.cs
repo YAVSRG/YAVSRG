@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using YAVSRG.Beatmap;
+using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface.Widgets
 {
@@ -20,8 +21,9 @@ namespace YAVSRG.Interface.Widgets
             private int width;
             private Action<Group> OnClick;
             private Func<bool> Highlight;
-            private ColorFade border;
-            private ColorFade fill;
+            private AnimationColorMixer border;
+            private AnimationColorMixer fill;
+            private Color baseColor;
 
             public Group(int height, int width, Action<Group> action, Func<bool> highlight, string line1, string line2, Color c)
             {
@@ -32,8 +34,9 @@ namespace YAVSRG.Interface.Widgets
                 subtitle = line2;
                 OnClick = action;
                 Highlight = highlight;
-                border = new ColorFade(Color.White, Color.White);
-                fill = new ColorFade(c, Color.White);
+                baseColor = c;
+                border = new AnimationColorMixer(Color.White);
+                fill = new AnimationColorMixer(c);
                 RecursivePopOut(0);
             }
 
@@ -113,7 +116,7 @@ namespace YAVSRG.Interface.Widgets
                 if (ScreenUtils.MouseOver(left, top, right, bottom))
                 {
                     A.Move(150, 0);
-                    fill.Target = 0.2f;
+                    fill.Target(Utils.ColorInterp(baseColor, Color.White, 0.2f));
                     if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                     {
                         OnClick(this);
@@ -121,7 +124,7 @@ namespace YAVSRG.Interface.Widgets
                 }
                 else
                 {
-                    fill.Target = Highlight() ? 0.4f : 0;
+                    fill.Target(Highlight() ? Utils.ColorInterp(baseColor, Color.White, 0.2f) : baseColor);
                 }
                 border.Update();
                 fill.Update();

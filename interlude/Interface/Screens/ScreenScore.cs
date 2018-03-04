@@ -45,6 +45,9 @@ namespace YAVSRG.Interface.Screens
             acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
             acc1.ProcessScore(score.hitdata);
             acc2.ProcessScore(score.hitdata);
+
+            Game.Options.Profile.Stats.SecondsPlayed += (int)(data.c.GetDuration() / 1000 / Game.Options.Profile.Rate);
+            Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
         }
 
         public override void OnEnter(Screen prev)

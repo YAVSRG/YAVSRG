@@ -40,8 +40,8 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawStaticChartBackground(left, top, right, bottom, Color.Gray);
-            //SpriteBatch.DrawTilingTexture(texture, left, top, right, bottom, 400f, 0, 0, Game.Options.Theme.Base);
+            Game.Screens.DrawStaticChartBackground(left, top, right, bottom, Color.Gray);
+            //SpriteBatch.DrawTilingTexture(texture, left, top, right, bottom, 400f, 0, 0, Game.Screens.BaseColor);
             SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Color.White);
             SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.title, left, top, right, top + 100, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawCentredTextToFill(Game.CurrentChart.DifficultyName, left, top + 110, right, top + 150, Game.Options.Theme.MenuFont);
@@ -55,8 +55,8 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.DrawText(time, 40f, left + 20, bottom - 70, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawJustifiedText(bpm, 40f, right - 20, bottom - 70, Game.Options.Theme.MenuFont);
 
-            string[] text = new[] { "MORE RELEVANT INFORMATION", "PLEASE HELP ME DESIGN THIS SCREEN", "PLEASE", "I WILL SUCK DICK FOR A MOCKUP IN PAINT", "I'LL DO ANYTHING I JUST NEED FEEDBACK", "PLZ" };
-            for (int i = 0; i < 6; i++)
+            string[] text = new[] { "MORE RELEVANT INFORMATION"};
+            for (int i = 0; i < 1; i++)
             {
                 SpriteBatch.DrawCentredText(text[i], 15f, (left + right) / 2, top + 340 + i * 60, Game.Options.Theme.MenuFont);
             }

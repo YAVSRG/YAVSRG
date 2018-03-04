@@ -20,14 +20,14 @@ namespace YAVSRG
 
         public static string RoundNumber(double x)
         {
-            return string.Format("{0:0.00}",Math.Round(x, 2));
+            return string.Format("{0:0.00}", Math.Round(x, 2));
         }
 
         public static string FormatTime(float ms)
         {
             int seconds = (int)(ms / 1000) % 60;
             int minutes = (int)Math.Floor(ms / 60000);
-            return minutes.ToString() + ":" + seconds.ToString().PadLeft(2,'0');
+            return minutes.ToString() + ":" + seconds.ToString().PadLeft(2, '0');
         }
 
         public static T LoadObject<T>(string path)
@@ -48,6 +48,34 @@ namespace YAVSRG
                 g.CopyFromScreen(0, 0, 0, 0, new Size(screenSize.Width, screenSize.Height));
             }
             return target;
+        }
+
+        public static Color ColorInterp(Color a, Color b, float val1)
+        {
+            float val2 = 1 - val1;
+            return Color.FromArgb((int)(a.A * val2 + b.A * val1), (int)(a.R * val2 + b.R * val1), (int)(a.G * val2 + b.G * val1), (int)(a.B * val2 + b.B * val1));
+        }
+
+        public static void SetThemeColor(Bitmap bitmap)
+        {
+            int goodness = 0;
+            Color best = Color.White;
+            for (int x = 0; x < bitmap.Width / 10; x++)
+            {
+                for (int y = 0; y < bitmap.Height / 10; y++)
+                {
+                    Color c = bitmap.GetPixel(x * 10, y * 10);
+                    int compare = Math.Abs(c.R - c.B) + Math.Abs(c.B - c.G) + Math.Abs(c.G - c.R);
+                    if (compare > goodness)
+                    {
+                        goodness = compare;
+                        best = c;
+                    }
+                }
+            }
+            Game.Screens.DarkColor.Target(ColorInterp(best, Color.Black, 0.5f));
+            Game.Screens.BaseColor.Target(best);
+            Game.Screens.HighlightColor.Target(ColorInterp(best, Color.White, 0.5f));
         }
     }
 }

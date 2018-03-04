@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, top, right, bottom, Game.Options.Theme.Dark);
+            SpriteBatch.DrawRect(left, top, right, bottom, Game.Screens.DarkColor);
             float temp;
             float x = left;
             for(int i = 5; i >= 0; i--)

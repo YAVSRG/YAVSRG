@@ -15,8 +15,8 @@ namespace YAVSRG.Interface.Screens
     {
         class HitLighting : Widget
         {
-            public SlidingEffect NoteLight = new SlidingEffect(0);
-            public SlidingEffect ReceptorLight = new SlidingEffect(0);
+            public AnimationSlider NoteLight = new AnimationSlider(0);
+            public AnimationSlider ReceptorLight = new AnimationSlider(0);
             Sprite s = Content.LoadTextureFromAssets("receptorlighting");
 
             public HitLighting() : base()
@@ -109,6 +109,7 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.PopScreen(); return;
             }
             base.OnEnter(prev);
+            Game.Options.Profile.Stats.TimesPlayed++;
             Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
             Game.Screens.Toolbar(false);
             Game.Audio.Stop();
@@ -129,6 +130,7 @@ namespace YAVSRG.Interface.Screens
             if (Input.KeyTap(Key.Escape))
             {
                 Game.Screens.PopScreen();
+                Game.Options.Profile.Stats.TimesQuit++;
             }
             for (int k = 0; k < Chart.Keys; k++)
             {

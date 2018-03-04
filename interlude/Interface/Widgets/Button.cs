@@ -12,14 +12,14 @@ namespace YAVSRG.Interface.Widgets
         protected Sprite icon;
         protected string text;
         protected Action action;
-        protected ColorFade color;
+        protected Animations.AnimationColorMixer color;
 
         public Button(string sprite, string label, Action onClick) : base()
         {
             icon = Content.LoadTextureFromAssets(sprite);
             text = label;
             action = onClick;
-            color = new ColorFade(Game.Options.Theme.Base, Game.Options.Theme.Highlight);
+            Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.BaseColor));
         }
 
         public override void Draw(float left, float top, float right, float bottom)
@@ -34,7 +34,7 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Update(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            color.Target = ScreenUtils.MouseOver(left, top, right, bottom) ? 1 : 0;
+            color.Target(ScreenUtils.MouseOver(left, top, right, bottom) ? Game.Screens.HighlightColor : Game.Screens.DarkColor);
             color.Update();
             if (ScreenUtils.CheckButtonClick(left, top, right, bottom))
             {

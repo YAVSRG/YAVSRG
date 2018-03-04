@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Interface
 {
-    public class SlidingEffect : Animation
+    public class AnimationSlider : Animation
     {
         public float Val;
         public float Target;
 
-        public SlidingEffect(float p)
+        public AnimationSlider(float p)
         {
             Val = p;
             Target = p;
@@ -21,7 +21,7 @@ namespace YAVSRG.Interface
         {
             get
             {
-                return base.Running;
+                return false;
             }
         }
 
@@ -30,7 +30,7 @@ namespace YAVSRG.Interface
             Val = Val * 0.95f + Target * 0.05f;
         }
 
-        public static implicit operator float (SlidingEffect s)
+        public static implicit operator float (AnimationSlider s)
         {
             return s.Val;
         }

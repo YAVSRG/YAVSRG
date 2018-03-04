@@ -8,12 +8,12 @@ namespace YAVSRG.Interface.Widgets
 {
     class ComboDisplay : Widget
     {
-        SlidingEffect size;
+        AnimationSlider size;
         Func<int> get;
 
         public ComboDisplay(Func<int> getter)
         {
-            size = new SlidingEffect(30);
+            size = new AnimationSlider(30);
             get = getter;
         }
 

@@ -26,6 +26,9 @@ namespace YAVSRG.Interface.Screens
             AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
                 .PositionTopLeft(250,100,AnchorType.MIN,AnchorType.CENTER)
                 .PositionBottomRight(450,200,AnchorType.MIN,AnchorType.CENTER));
+            PositionTopLeft(-Width, 0, AnchorType.MIN, AnchorType.MIN);
+            PositionBottomRight(-Width, 0, AnchorType.MAX, AnchorType.MAX);
+            Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
         }
 
         public void OnChangeChart()
@@ -37,6 +40,15 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
+            A.Target(0, 0);
+            B.Target(0, 0);
+        }
+
+        public override void OnExit(Screen next)
+        {
+            base.OnExit(next);
+            A.Target(-Width, 0);
+            B.Target(-Width, 0);
         }
 
         public override void Update(float left, float top, float right, float bottom)

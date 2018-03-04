@@ -4,109 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface
 {
     public class Widget
     {
-        public class AnchorPoint
-        {
-            private SlidingEffect _X;
-            private SlidingEffect _Y;
-            private AnchorType XRel;
-            private AnchorType YRel;
-
-            public AnchorPoint(float x, float y, AnchorType xa, AnchorType ya)
-            {
-                _X = new SlidingEffect(x);
-                _Y = new SlidingEffect(y);
-                XRel = xa;
-                YRel = ya;
-            }
-
-            public void Update()
-            {
-                _X.Update();
-                _Y.Update();
-            }
-
-            public void Move(float x, float y)
-            {
-                _X.Target += x;
-                _Y.Target += y;
-            }
-
-            public void Target(float x, float y)
-            {
-                _X.Target = x;
-                _Y.Target = y;
-            }
-
-            public float X(float min, float max)
-            {
-                switch (XRel)
-                {
-                    case (AnchorType.CENTER):
-                        return _X;
-                    case (AnchorType.MAX):
-                        return max - _X;
-                    case (AnchorType.MIN):
-                        return min + _X;
-                }
-                return _X;
-            }
-
-            public float Y(float min, float max)
-            {
-                switch (YRel)
-                {
-                    case (AnchorType.CENTER):
-                        return _Y;
-                    case (AnchorType.MAX):
-                        return max - _Y;
-                    case (AnchorType.MIN):
-                        return min + _Y;
-                }
-                return _Y;
-            }
-
-            public float AbsX
-            {
-                get
-                {
-                    return _X;
-                }
-            }
-
-            public float AbsY
-            {
-                get
-                {
-                    return _Y;
-                }
-            }
-
-            public float TargetX
-            {
-                get
-                {
-                    return _X.Target;
-                }
-            }
-
-            public float TargetY
-            {
-                get
-                {
-                    return _Y.Target;
-                }
-            }
-        }
-
         public AnchorPoint A;
         public AnchorPoint B;
         public int State = 1; //0 is hidden, 2 is focussed
-        public Animations.AnimationGroup Animation;
+        public AnimationGroup Animation;
         protected Widget parent;
         protected List<Widget> Widgets;
 
@@ -115,7 +22,9 @@ namespace YAVSRG.Interface
         {
             A = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN);
             B = new AnchorPoint(0, 0, AnchorType.MAX, AnchorType.MAX);
-            Animation = new Animations.AnimationGroup(true);
+            Animation = new AnimationGroup(true);
+            Animation.Add(A);
+            Animation.Add(B);
             Widgets = new List<Widget>();
         }
 
@@ -159,13 +68,13 @@ namespace YAVSRG.Interface
 
         public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay)
         {
-            A = new AnchorPoint(x, y, ax, ay);
+            A.Reposition(x, y, ax, ay);
             return this; //allows for method chaining
         }
 
         public Widget PositionBottomRight(float x, float y, AnchorType ax, AnchorType ay)
         {
-            B = new AnchorPoint(x, y, ax, ay);
+            B.Reposition(x, y, ax, ay);
             return this;
         }
 
@@ -191,8 +100,6 @@ namespace YAVSRG.Interface
                     w.Update(left, top, right, bottom);
                 }
             }
-            A.Update();
-            B.Update();
             Animation.Update();
         }
     }

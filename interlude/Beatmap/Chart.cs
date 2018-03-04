@@ -13,16 +13,9 @@ namespace YAVSRG.Beatmap
         public int Keys;
         public PointManager<Snap> States;
         public PointManager<BPMPoint> Timing;
-        private string bgpath;
-        private Sprite bg;
+        public string bgpath;
         public string path;
         private string audioFileName;
-
-        public Sprite background
-        {
-            get { if (bg.Height == 0) { bg = Content.LoadBackground(path, bgpath); } return bg; }
-        }
-
 
         public Chart(List<Snap> data, List<BPMPoint> timing, string diff, float prevtime, int keys, string path, string audioFileName, string bgFileName)
         {
@@ -39,12 +32,6 @@ namespace YAVSRG.Beatmap
         public string AudioPath()
         {
             return System.IO.Path.Combine(path, audioFileName);
-        }
-
-        public void UnloadBackground()
-        {
-            Content.UnloadTexture(bg);
-            bg.Height = 0;
         }
 
         public float GetDuration()

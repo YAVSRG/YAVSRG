@@ -13,19 +13,41 @@ namespace YAVSRG.Interface
     {
         AnimationFade fade1;
         AnimationFade fade2;
-        SlidingEffect parallax = new SlidingEffect(15);
-        Toolbar toolbar = new Toolbar();
+        AnimationSlider parallax = new AnimationSlider(15);
+        public Toolbar toolbar;
         List<Screen> stack = new List<Screen>() {};
         List<Dialog> dialogs = new List<Dialog>();
         AnimationSeries animation = new AnimationSeries(true);
+        AnimationGroup animation2 = new AnimationGroup(true);
         Screen Previous = null;
         public ColorFade BackgroundDim = new ColorFade(Color.FromArgb(80, 80, 80), Color.White);
         public Screen Current = null;
         public bool Loading = true;
-        
+        public Sprite Background;
+        public Sprite Oldbackground;
+        public AnimationColorMixer BaseColor;
+        public AnimationColorMixer DarkColor;
+        public AnimationColorMixer HighlightColor;
+
+        public ScreenManager()
+        {
+            animation2.Add(parallax);
+            animation2.Add(BackgroundDim);
+            animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
+            animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
+            animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
+        }
+
         public void AddDialog(Dialog d)
         {
             dialogs.Insert(0, d);
+        }
+
+        public void ChangeBackground(Sprite bg)
+        {
+            Content.UnloadTexture(Oldbackground);
+            Oldbackground = Background;
+            Background = bg;
         }
 
         public void AddScreen(Screen s)
@@ -99,6 +121,31 @@ namespace YAVSRG.Interface
             toolbar.Draw(-Width, -Height, Width, Height);
         }
 
+        public void DrawChartBackground(float left, float top, float right, float bottom, Color c)
+        {
+            float bg = ((float)Background.Width / Background.Height);
+            float window = (right - left) / (bottom - top);
+            float correction = window / bg;
+
+            RectangleF uv = new RectangleF(0, (correction - 1) * 0.5f, 1, 1.5f - correction * 0.5f);
+            SpriteBatch.Draw(Background, left, top, right, bottom + 1, uv, c);
+        }
+
+        public void DrawStaticChartBackground(float left, float top, float right, float bottom, Color c) //todo: reduce redundant code in these two functions
+        {
+            float bg = ((float)Background.Width / Background.Height);
+            float window = ((float)Width / Height);
+            float correction = window / bg;
+
+            float l = (1 + left / Width) / 2;
+            float r = (1 + right / Width) / 2;
+            float t = (correction + top / Height) / (2 * correction);
+            float b = (correction + bottom / Height) / (2 * correction);
+
+            RectangleF uv = new RectangleF(l, t, r - l, b - t);
+            SpriteBatch.Draw(Background, left, top, right, bottom + 1, uv, c);
+        }
+
         public void Update()
         {
             if (Loading)
@@ -118,14 +165,23 @@ namespace YAVSRG.Interface
             {
                 Current?.Update(-Width, -Height, Width, Height);
             }
-            if (Previous != null && !animation.Running)
+            if (Previous != null)
             {
-                Previous = null;
+                if (animation.Running)
+                {
+                    if (Previous.Animation.Running)
+                    {
+                        Previous.Animation.Update();
+                    }
+                }
+                else
+                {
+                    Previous = null;
+                }
             }
             toolbar.Update(-Width, -Height, Width, Height);
             animation.Update();
-            parallax.Update();
-            BackgroundDim.Update();
+            animation2.Update();
         }
     }
 }

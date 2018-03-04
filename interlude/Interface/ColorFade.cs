@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace YAVSRG.Interface
 {
-    public class ColorFade : SlidingEffect
+    public class ColorFade : AnimationSlider
     {
         protected Color a;
         protected Color b;

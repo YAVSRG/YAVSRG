@@ -33,7 +33,11 @@ namespace YAVSRG.Interface.Animations
         {
             get
             {
-                return items.Count > 0;
+                foreach (Animation a in items)
+                {
+                    if (a.Running) return true;
+                };
+                return false;
             }
         }
 

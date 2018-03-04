@@ -59,6 +59,7 @@ namespace YAVSRG
             ScreenUtils.UpdateBounds(Width, Height);
 
             screens = new ScreenManager();
+            screens.toolbar = new Toolbar();
             screens.AddScreen(new Interface.Screens.ScreenLoading(s));
             SpriteBatch.Init();
         }
@@ -119,11 +120,8 @@ namespace YAVSRG
 
         public void ChangeChart(Chart c) //tells the game to change selected chart. handles changing loaded audio file and background
         {
-            if (currentChart != null)
-            {
-                currentChart.UnloadBackground(); //delete old background image from ram. (otherwise it's a GL ram leak)
-            }
             currentChart = c;
+            screens.ChangeBackground(Content.LoadBackground(c.path, c.bgpath));
             audio.ChangeTrack(c.AudioPath());
             audio.Play((long)c.PreviewTime); //play from the preview point given in the chart data
         }
