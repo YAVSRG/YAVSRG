@@ -34,7 +34,7 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Update(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            color.Target(ScreenUtils.MouseOver(left, top, right, bottom) ? Game.Screens.HighlightColor : Game.Screens.DarkColor);
+            color.Target(ScreenUtils.MouseOver(left, top, right, bottom) ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
             color.Update();
             if (ScreenUtils.CheckButtonClick(left, top, right, bottom))
             {

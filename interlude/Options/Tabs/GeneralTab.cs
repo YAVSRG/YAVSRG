@@ -15,7 +15,7 @@ namespace YAVSRG.Options.Tabs
         {
             AddChild(new Slider("Volume", (v) => { Game.Options.General.AudioVolume = v; }, () => { return Game.Options.General.AudioVolume; }, 0, 1, 0.01f)
                 .PositionTopLeft(-200, 50, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(200, 75, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new Slider("Offset (NYI)", (v) => { Game.Options.General.UniversalAudioOffset = v; }, () => { return Game.Options.General.UniversalAudioOffset; }, -100, 100, 1f)
+            AddChild(new Slider("Audio Offset", (v) => { Game.Options.General.UniversalAudioOffset = v; }, () => { return Game.Options.General.UniversalAudioOffset; }, -100, 100, 1f)
                 .PositionTopLeft(-200, 150, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(200, 175, AnchorType.CENTER, AnchorType.MIN));
             AddChild(new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Fullscreen" }, (int)Game.Options.General.WindowMode, (v) => { Game.Options.General.WindowMode = (General.WindowType)v; })
                 .PositionTopLeft(-200, 250, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-50, 275, AnchorType.CENTER, AnchorType.MIN));

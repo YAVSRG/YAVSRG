@@ -87,8 +87,8 @@ namespace YAVSRG.Audio
         public double Now()
         {
             if (nowplaying == null) return 0;
-            if (leadIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime);
-            return ManagedBass.Bass.ChannelBytes2Seconds(nowplaying,ManagedBass.Bass.ChannelGetPosition(nowplaying))*1000;
+            if (leadIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - Game.Options.General.UniversalAudioOffset;
+            return ManagedBass.Bass.ChannelBytes2Seconds(nowplaying,ManagedBass.Bass.ChannelGetPosition(nowplaying))*1000 - Game.Options.General.UniversalAudioOffset;
         }
 
         public float NowPercentage()

@@ -130,6 +130,7 @@ namespace YAVSRG.Interface.Screens
             if (Input.KeyTap(Key.Escape))
             {
                 Game.Screens.PopScreen();
+                Widgets.Clear();
                 Game.Options.Profile.Stats.TimesQuit++;
             }
             for (int k = 0; k < Chart.Keys; k++)
