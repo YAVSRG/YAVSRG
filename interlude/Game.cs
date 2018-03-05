@@ -22,6 +22,7 @@ namespace YAVSRG
         protected MusicPlayer audio; //audio engine instance
         protected Options.Options options; //options handler instance
         protected ScreenManager screens;
+        //protected System.Windows.Forms.NotifyIcon test;
 
         public static Options.Options Options
         {
@@ -61,6 +62,9 @@ namespace YAVSRG
             screens = new ScreenManager();
             screens.toolbar = new Toolbar();
             screens.AddScreen(new Interface.Screens.ScreenLoading(s));
+            var test = new Discord.EventHandlers();
+            Discord.Initialize("420320424199716864", ref test, true, "");
+            Utils.SetDiscordData("Just started playing", "Pick a song already!");
             SpriteBatch.Init();
         }
 
@@ -115,7 +119,12 @@ namespace YAVSRG
         {
             base.OnLoad(e);
             Input.Init();
-            //i'll clean this up later
+            /*
+            test = new System.Windows.Forms.NotifyIcon();
+            test.Icon = new Icon(@"C:\Users\percy\Documents\thishadmynamehere\bird.ico");
+            test.Visible = true;
+            test.ShowBalloonTip(2000, "YAVSRG", "I'm down here!", System.Windows.Forms.ToolTipIcon.Info);
+            test.Text = "YAVSRG";*/
         }
 
         public void ChangeChart(Chart c) //tells the game to change selected chart. handles changing loaded audio file and background
@@ -129,6 +138,8 @@ namespace YAVSRG
         protected override void OnUnload(EventArgs e)
         {
             base.OnUnload(e);
+            //test.Dispose();
+            Discord.Shutdown();
             options.Save(); //remember to dump any updated profile settings to file
         }
     }

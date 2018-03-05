@@ -24,7 +24,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>0.1.2.%2a</ApplicationVersion>
+    <ApplicationVersion>0.1.3.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -124,7 +124,7 @@
     <Compile Include="Gameplay\MSScoring.cs" />
     <Compile Include="Gameplay\NoCCScoring.cs" />
     <Compile Include="Gameplay\OD.cs" />
-    <Compile Include="Gameplay\PlayingChart.cs" />
+    <Compile Include="Gameplay\ScoreTracker.cs" />
     <Compile Include="Gameplay\ProfileStats.cs" />
     <Compile Include="Gameplay\Score.cs" />
     <Compile Include="Gameplay\ScoreSystem.cs" />
@@ -162,17 +162,20 @@
     <Compile Include="Interface\Widgets\BoolPicker.cs" />
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartDifficulty.cs" />
-    <Compile Include="Interface\Widgets\ComboDisplay.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\FramedButton.cs" />
-    <Compile Include="Interface\Widgets\HitMeter.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\GameplayWidget.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\HitMeter.cs" />
     <Compile Include="Interface\Widgets\KeyBinder.cs" />
     <Compile Include="Interface\Widgets\LevelSelector.cs" />
-    <Compile Include="Interface\Widgets\ProgressBar.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\Playfield.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\ProgressBar.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
     <Compile Include="Options\Colorizer.cs" />
     <Compile Include="Options\ColorScheme.cs" />
+    <Compile Include="Options\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
     <Compile Include="Options\Tabs\GameplayTab.cs" />
@@ -218,7 +221,11 @@
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="discord-rpc.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

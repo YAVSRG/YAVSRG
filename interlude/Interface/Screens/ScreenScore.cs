@@ -14,13 +14,13 @@ namespace YAVSRG.Interface.Screens
     {
         static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" };
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
-        private PlayingChart score;
+        private ScoreTracker score;
         Sprite rank;
         int tier;
         int snapcount;
         ScoreSystem acc1, acc2;
 
-        public ScreenScore(PlayingChart data)
+        public ScreenScore(ScoreTracker data)
         {
             score = data;
             snapcount = score.c.States.Count;

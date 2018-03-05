@@ -23,11 +23,17 @@ namespace YAVSRG
             return string.Format("{0:0.00}", Math.Round(x, 2));
         }
 
+        public static void SetDiscordData(string main, string detail)
+        {
+            Discord.UpdatePresence(new Discord.RichPresence() { state = main, details = detail });
+        }
+
         public static string FormatTime(float ms)
         {
             int seconds = (int)(ms / 1000) % 60;
-            int minutes = (int)Math.Floor(ms / 60000);
-            return minutes.ToString() + ":" + seconds.ToString().PadLeft(2, '0');
+            int minutes = (int)Math.Floor(ms % 3600000 / 60000);
+            int hours = (int)Math.Floor(ms / 3600000);
+            return hours > 0 ? hours.ToString() + ":" +minutes.ToString().PadLeft(2,'0') + ":" + seconds.ToString().PadLeft(2, '0') : minutes.ToString() + ":" + seconds.ToString().PadLeft(2, '0');
         }
 
         public static T LoadObject<T>(string path)

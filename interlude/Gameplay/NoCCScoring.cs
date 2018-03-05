@@ -16,7 +16,7 @@ namespace YAVSRG.Gameplay
             Judgements = new int[weights.Length];
         }
 
-        public override void Update(float now, PlayingChart.HitData[] data)
+        public override void Update(float now, ScoreTracker.HitData[] data)
         {
             while (pos < data.Length && data[pos].Offset <= now)
             {

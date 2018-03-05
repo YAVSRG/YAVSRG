@@ -7,7 +7,7 @@ using YAVSRG.Beatmap;
 
 namespace YAVSRG.Gameplay
 {
-    public class PlayingChart //handles scoring while you play through a chart, keeping track of hits and acc and stuff
+    public class ScoreTracker //handles scoring while you play through a chart, keeping track of hits and acc and stuff
     {
         public class HitData : OffsetItem
         {
@@ -31,7 +31,7 @@ namespace YAVSRG.Gameplay
         public HitData[] hitdata;
         public int maxcombo;
 
-        public PlayingChart(Chart c)
+        public ScoreTracker(Chart c)
         {
             this.c = c;
             //some temp hack until i move this inside ScoreSystem

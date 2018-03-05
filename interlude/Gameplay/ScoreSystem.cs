@@ -22,7 +22,7 @@ namespace YAVSRG.Gameplay
         public string name;
         public Action<int> OnMiss = (x) => { };
         
-        public abstract void Update(float now, PlayingChart.HitData[] data);
+        public abstract void Update(float now, ScoreTracker.HitData[] data);
 
         public static ScoreSystem GetScoreSystem(ScoreType s)
         {
@@ -40,7 +40,7 @@ namespace YAVSRG.Gameplay
             }
         }
 
-        public virtual void ProcessScore(PlayingChart.HitData[] data)
+        public virtual void ProcessScore(ScoreTracker.HitData[] data)
         {
             Update(data[data.Length - 1].Offset, data);
         }

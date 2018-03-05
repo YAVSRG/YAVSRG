@@ -9,9 +9,9 @@ namespace YAVSRG.Interface.Widgets
 {
     public class ProgressBar : Widget
     {
-        PlayingChart playing;
+        ScoreTracker playing;
 
-        public ProgressBar(PlayingChart playing) : base()
+        public ProgressBar(ScoreTracker playing) : base()
         {
             this.playing = playing;
         }
