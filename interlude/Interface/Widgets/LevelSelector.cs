@@ -234,6 +234,8 @@ namespace YAVSRG.Interface.Widgets
                 g.Update(left, top, right, bottom);
                 y += g.Height();
             }
+            if (y < ScreenUtils.Height*2-100) scroll += 10; //prevents users from scrolling off the list
+            if (scroll > 100) scroll -= 10;
             if (Input.KeyPress(OpenTK.Input.Key.Up))
             {
                 scroll += 15;

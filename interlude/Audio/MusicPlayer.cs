@@ -37,6 +37,8 @@ namespace YAVSRG.Audio
             Rate = rate;
         }
 
+        protected double AudioOffset { get { return Game.Options.General.UniversalAudioOffset * Rate; } }
+
         public bool Playing
         {
             get
@@ -87,8 +89,8 @@ namespace YAVSRG.Audio
         public double Now()
         {
             if (nowplaying == null) return 0;
-            if (leadIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - Game.Options.General.UniversalAudioOffset;
-            return ManagedBass.Bass.ChannelBytes2Seconds(nowplaying,ManagedBass.Bass.ChannelGetPosition(nowplaying))*1000 - Game.Options.General.UniversalAudioOffset;
+            if (leadIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - AudioOffset;
+            return ManagedBass.Bass.ChannelBytes2Seconds(nowplaying,ManagedBass.Bass.ChannelGetPosition(nowplaying))*1000 - AudioOffset;
         }
 
         public float NowPercentage()
@@ -113,9 +115,9 @@ namespace YAVSRG.Audio
             {
                 WaveForm[i] = WaveForm[i] * 0.8f + temp[i] * 0.2f;
             }
-            if (leadIn && Now() > 0)
+            if (leadIn && Now()+AudioOffset > 0)
             {
-                Seek(Now());
+                Seek(Now()+AudioOffset);
                 ManagedBass.Bass.ChannelPlay(nowplaying);
                 leadIn = false;
             }
