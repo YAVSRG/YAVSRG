@@ -116,6 +116,7 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Stats.TimesPlayed++;
             Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
             Game.Screens.Toolbar(false);
+            Game.Audio.Loop = false;
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
@@ -125,6 +126,7 @@ namespace YAVSRG.Interface.Screens
         {
             Utils.SetDiscordData("Looking for something to play", "");
             Game.Screens.Toolbar(true);
+            Game.Audio.Loop = true;
             base.OnExit(next);
         }
 

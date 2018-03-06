@@ -43,7 +43,7 @@ namespace YAVSRG.Audio
         {
             get
             {
-                return Now() - BUFFER < nowplaying?.Duration;
+                return Now()+AudioOffset < nowplaying?.Duration;
             }
         }
 
@@ -106,7 +106,7 @@ namespace YAVSRG.Audio
         public void Update()
         {
             float[] temp = new float[256];
-            if (!Paused && Playing)
+            if (!Paused)
             {
                 //thanks peppy lad i stole this off you
                 ManagedBass.Bass.ChannelGetData(nowplaying, temp, (int)ManagedBass.DataFlags.FFT256);
@@ -115,15 +115,19 @@ namespace YAVSRG.Audio
             {
                 WaveForm[i] = WaveForm[i] * 0.8f + temp[i] * 0.2f;
             }
-            if (leadIn && Now()+AudioOffset > 0)
+            if (leadIn && Playing && Now() + AudioOffset > 0)
             {
-                Seek(Now()+AudioOffset);
+                Seek(Now() + AudioOffset);
                 ManagedBass.Bass.ChannelPlay(nowplaying);
                 leadIn = false;
             }
-            if (!Playing && Loop)
+            if (!Playing)
             {
-                Play(0);
+                if (Loop)
+                {
+                    Play(0);
+                }
+                else if (!leadIn) { leadIn = true; }
             }
         }
 
