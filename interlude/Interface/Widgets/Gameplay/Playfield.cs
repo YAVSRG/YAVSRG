@@ -13,7 +13,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
     class Playfield : GameplayWidget
     {
         Sprite note, hold, holdhead, receptor, playfield, screencover;
-        
+
         int lasti; int lastt;
         float[] holds;
         Snap.BinarySwitcher holdsInHitpos = new Snap.BinarySwitcher(0);
@@ -24,6 +24,8 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         protected float ScrollSpeed { get { return Game.Options.Profile.ScrollSpeed / (float)Game.Options.Profile.Rate; } }
         protected Chart Chart { get { return scoreTracker.c; } }
 
+        protected Animations.AnimationCounter animation;
+
         public Playfield(ScoreTracker s) : base(s)
         {
             note = Game.Options.Theme.GetNoteTexture(Game.CurrentChart.Keys);
@@ -32,6 +34,8 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             holdhead = Game.Options.Theme.GetHeadTexture(Game.CurrentChart.Keys);
             playfield = Content.LoadTextureFromAssets("playfield");
             screencover = Content.LoadTextureFromAssets("screencover");
+
+            Animation.Add(animation = new Animations.AnimationCounter(25, true));
 
             //i make all this stuff ahead of time so i'm not creating a shitload of new objects/recalculating the same thing/sending stuff to garbage every 8ms
             lasti = Chart.States.Count;
@@ -47,6 +51,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         public override void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            SpriteBatch.EnableTransform(Game.Options.Profile.Upscroll);
             for (int c = 0; c < Keys; c++) //draw columns and empty receptors
             {
                 DrawColumn(left, c);
@@ -75,14 +80,21 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                     now = Chart.Timing.Points[t].Offset; //we're now drawing relative to the most recent timing point
                 }
                 v = (Game.Options.Profile.FixedScroll ? 1 : Chart.Timing.Points[t].ScrollSpeed) * (Chart.States.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
-                DrawSnapWithHolds(Chart.States.Points[i], left, y + v);//draw whole row of notes
+                DrawSnap(Chart.States.Points[i], left, y + v);//draw whole row of notes
                 i++;//move on to next row of notes
             }
 
             if (holdsInHitpos.value > 0)//this has been updated by DrawSnapWithHolds
             {
                 DrawSnap(new Snap(0, 0, holdsInHitpos.value, 0, 0), left, HitPos); //draw hold heads in hit position
+
+                foreach (int k in holdsInHitpos.GetColumns())
+                {
+                    Game.Options.Theme.DrawHead(holdhead, k * ColumnWidth + left, HitPos, (k + 1) * ColumnWidth + left, HitPos + ColumnWidth, k, Keys);
+                }
             }
+
+            SpriteBatch.DisableTransform();
 
             base.Draw(left, top, right, bottom);
         }
@@ -93,33 +105,39 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 start = HitPos;
             }
-            SpriteBatch.Draw(hold, i * ColumnWidth + offset, Height - start - ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, Height - end - ColumnWidth * 0.5f, Color.White);
+            bool drawhead = start < 0; //if y was negative
+            start = Math.Abs(start);
+            SpriteBatch.Draw(hold, i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f, Color.White); //Math.Abs corrects neg number
+            if (drawhead)
+            {
+                Game.Options.Theme.DrawHead(holdhead, i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth, i, Keys);
+            }
         }
 
         private void DrawColumn(float offset, int i)
         {
-            SpriteBatch.Draw(playfield, i * ColumnWidth + offset, -Height, (i + 1) * ColumnWidth + offset, Height, Color.White);
+            SpriteBatch.Draw(playfield, i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, Height * 2, Color.White);
         }
 
         private void DrawReceptor(float offset, int k)
         {
-            Game.Options.Theme.DrawReceptor(receptor, k * ColumnWidth + offset, Height - ColumnWidth - HitPos, (k + 1) * ColumnWidth + offset, Height - HitPos, k, Game.CurrentChart.Keys, false);
+            Game.Options.Theme.DrawReceptor(receptor, k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos, k, Keys, false);
         }
 
-        private void DrawSnapWithHolds(Snap s, float offset, float y)
+        private void DrawSnap(Snap s, float offset, float pos)
         {
             foreach (int k in s.middles.GetColumns())
             {
-                DrawLongTap(offset, k, holds[k], y);
+                DrawLongTap(offset, k, holds[k], pos);
                 if (holds[k] == 0)
                 {
                     holdsInHitpos.SetColumn(k);
                 }
-                holds[k] = y;
+                holds[k] = pos; //negative ys mark middle so don't draw a hold head
             }
             foreach (int k in s.ends.GetColumns())
             {
-                DrawLongTap(offset, k, holds[k], y);
+                DrawLongTap(offset, k, holds[k], pos);
                 if (holds[k] == 0)
                 {
                     holdsInHitpos.SetColumn(k);
@@ -128,25 +146,15 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (int k in s.holds.GetColumns())
             {
-                holds[k] = y;
+                holds[k] = -pos;
             }
-            DrawSnap(s, offset, y);
-        }
-
-        private void DrawSnap(Snap s, float offset, float pos)
-        {
-            pos = Height - pos;
             foreach (int k in s.taps.GetColumns())
             {
-                Game.Options.Theme.DrawNote(note, k * ColumnWidth + offset, pos - ColumnWidth, (k + 1) * ColumnWidth + offset, pos, k, Game.CurrentChart.Keys, s.colors[k], 2);
+                Game.Options.Theme.DrawNote(note, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % note.UV_X);
             }
             foreach (int k in s.ends.GetColumns())
             {
-                Game.Options.Theme.DrawHead(holdhead, k * ColumnWidth + offset, pos - ColumnWidth, (k + 1) * ColumnWidth + offset, pos, k, Game.CurrentChart.Keys);
-            }
-            foreach (int k in s.holds.GetColumns())
-            {
-                Game.Options.Theme.DrawTail(holdhead, k * ColumnWidth + offset, pos - ColumnWidth, (k + 1) * ColumnWidth + offset, pos, k, Game.CurrentChart.Keys);
+                Game.Options.Theme.DrawTail(holdhead, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys);
             }
         }
     }

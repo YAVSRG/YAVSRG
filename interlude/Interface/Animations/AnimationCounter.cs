@@ -9,6 +9,7 @@ namespace YAVSRG.Interface.Animations
     class AnimationCounter : Animation
     {
         public int value = 0;
+        public int cycles = 0;
         int target;
         bool loop;
 
@@ -22,7 +23,7 @@ namespace YAVSRG.Interface.Animations
         {
             base.Update();
             value++;
-            if (loop) { value %= target; }
+            if (loop && value == target) { value = 0; cycles++; }
         }
 
         public override bool Running

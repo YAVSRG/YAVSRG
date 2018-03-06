@@ -41,8 +41,8 @@ namespace YAVSRG.Options
                 switch (column)
                 {
                     case 0: { return 3; }
-                    case 1: { return 0; }
-                    case 2: { return 2; }
+                    case 1: { return Game.Options.Profile.Upscroll ? 2 : 0; }
+                    case 2: { return Game.Options.Profile.Upscroll ? 0 : 2; }
                     case 3: { return 1; }
                 }
             }
@@ -56,14 +56,19 @@ namespace YAVSRG.Options
 
         public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
         {
-            SpriteBatch.Draw(s, left, bottom, right, top, Color.White, GetRotation(column,keycount));
+            SpriteBatch.Draw(s, left, top, right, bottom, Color.White, GetRotation(column,keycount));
         }
 
         public void DrawTail(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
         {
-            //something funny for arrow tails
-            //handle flip logic
-            SpriteBatch.Draw(s, left, top, right, bottom, Color.White, GetRotation(column,keycount));
+            if (FlipHoldTail)
+            {
+                DrawHead(s, left, bottom, right, top, column, keycount);
+            }
+            else
+            {
+                DrawHead(s, left, top, right, bottom, column, keycount);
+            }
         }
 
         public void DrawReceptor(Sprite s, float left, float top, float right, float bottom, int column, int keycount, bool pressed)

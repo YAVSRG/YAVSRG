@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
+using YAVSRG.Interface;
 
 namespace YAVSRG
 {
@@ -167,11 +168,31 @@ namespace YAVSRG
             return w;
         }
 
+        public static void EnableTransform(bool upscroll)
+        {
+            double[] mat = new[] {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, upscroll ? 1 : -1, 0.0, 0.0,
+                0.0, 1.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+            };
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.Translate(0, ScreenUtils.Height, 0);
+            GL.MultMatrix(mat);
+        }
+
+        public static void DisableTransform()
+        {
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PopMatrix();
+        }
+
         public static void Begin(int width, int height)
         {
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            GL.Ortho(-width * 0.5f, width * 0.5f, height * 0.5f, -height * 0.5f, 0f, 1f);
+            GL.Ortho(-width * 0.5f, width * 0.5f, height * 0.5f, -height * 0.5f, -height, height);
         }
 
         public static void End()
