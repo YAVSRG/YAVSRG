@@ -63,11 +63,12 @@ namespace YAVSRG.Beatmap.DifficultyRating
         public static float Mean(List<float> data)
         {
             float t = 0;
+            if (data.Count == 0) { return 0; }
             foreach (float f in data)
             {
                 t += f;
             }
-            return t / (data.Count + 1);
+            return t / (data.Count);
         }
 
         public static List<float> Smooth(List<float> data, float smooth)

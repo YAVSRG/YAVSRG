@@ -14,7 +14,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.1.3";
+        public static readonly string Version = "ver-zero.one.four";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -133,6 +133,7 @@ namespace YAVSRG
             screens.ChangeBackground(Content.LoadBackground(c.path, c.bgpath));
             audio.ChangeTrack(c.AudioPath());
             audio.Play((long)c.PreviewTime); //play from the preview point given in the chart data
+            Console.WriteLine(c.GetHash());
         }
 
         protected override void OnUnload(EventArgs e)

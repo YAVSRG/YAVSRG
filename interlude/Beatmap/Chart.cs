@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 namespace YAVSRG.Beatmap
 {
@@ -42,6 +43,38 @@ namespace YAVSRG.Beatmap
         public int GetBPM()
         {
             return (int)(60000f/Timing.Points[0].MSPerBeat);
+        }
+
+        public string GetHash()
+        {
+            var h = SHA256.Create();
+            byte[] data = new byte[8 * States.Count];
+            int p = 0;
+            foreach (Snap s in States.Points)
+            {
+                BitConverter.GetBytes((int)s.Offset).CopyTo(data,p);
+                p += 4;
+                data[p] = (byte)s.taps.value;
+                data[p+1] = (byte)s.holds.value;
+                data[p+2] = (byte)s.ends.value;
+                data[p+3] = (byte)s.middles.value;
+                p += 4;
+            }
+
+            float speed = float.PositiveInfinity;
+            foreach (BPMPoint s in Timing.Points)
+            {
+                if (speed != s.ScrollSpeed)
+                {
+                    Array.Resize(ref data, data.Length + 8);
+                    BitConverter.GetBytes((int)s.Offset).CopyTo(data, p);
+                    p += 4;
+                    BitConverter.GetBytes(s.ScrollSpeed).CopyTo(data, p);
+                    p += 4;
+                    speed = s.ScrollSpeed;
+                }
+            }
+            return BitConverter.ToString(h.ComputeHash(data)).Replace("-", "");
         }
 
         public static Chart FromFile(string path)

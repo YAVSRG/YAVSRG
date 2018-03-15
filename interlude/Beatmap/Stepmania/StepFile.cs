@@ -53,7 +53,7 @@ namespace YAVSRG.Beatmap.Stepmania
             while (!ts.EndOfStream)
             {
                 c = (char)ts.Read();
-                if (c == '/')
+                if (c == '/' && state != 2)
                 {
                     ts.ReadLine();
                 }
@@ -102,8 +102,9 @@ namespace YAVSRG.Beatmap.Stepmania
 
         public MultiChart ConvertToRoot()
         {
-            MultiChart c = new MultiChart(new ChartHeader(GetTag("TITLE"), raw.ContainsKey("ARTIST") ? raw["ARTIST"] : raw["ARTISTTRANSLIT"], GetSubtitle(), path));
+            MultiChart c = new MultiChart(new ChartHeader(GetTag("TITLE"), raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"), GetSubtitle(), path));
             c.diffs = Convert();
+            if (c.diffs.Count == 0) { return null; }
             return c;
         }
 
@@ -121,6 +122,7 @@ namespace YAVSRG.Beatmap.Stepmania
 
             foreach (StepFileDifficulty diff in diffs)
             {
+                if (diff.gamemode != "dance-single") { continue; }
                 int meter = 4;
                 List<Snap> states = new List<Snap>();
                 List<BPMPoint> points = new List<BPMPoint>();

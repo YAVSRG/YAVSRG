@@ -52,7 +52,6 @@ namespace YAVSRG.Interface
 
         public void AddScreen(Screen s)
         {
-            Console.WriteLine("+ " + s.ToString());
             stack.Insert(0, s);
             SetNextScreen(stack[0]);
             animation.Clear();
@@ -64,7 +63,6 @@ namespace YAVSRG.Interface
 
         public void PopScreen()
         {
-            Console.WriteLine("- " + stack[0].ToString());
             stack.RemoveAt(0);
             SetNextScreen(stack[0]);
             animation.Clear();
@@ -126,8 +124,7 @@ namespace YAVSRG.Interface
             float bg = ((float)Background.Width / Background.Height);
             float window = (right - left) / (bottom - top);
             float correction = window / bg;
-
-            RectangleF uv = new RectangleF(0, (correction - 1) * 0.5f, 1, 1.5f - correction * 0.5f);
+            RectangleF uv = new RectangleF(0, (correction - 1) * 0.5f, 1, 2 - correction);
             SpriteBatch.Draw(Background, left, top, right, bottom + 1, uv, c);
         }
 

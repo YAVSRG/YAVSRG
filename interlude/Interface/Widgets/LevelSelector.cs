@@ -136,7 +136,7 @@ namespace YAVSRG.Interface.Widgets
         private Screens.ScreenLevelSelect parent;
 
         static Sprite box, frame;
-        public static int scroll = 0;
+        public int scroll = 0;
 
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {

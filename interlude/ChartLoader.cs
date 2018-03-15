@@ -121,9 +121,9 @@ namespace YAVSRG
                         c = CacheChart(LoadFromPath(s));
                         SaveCacheFile(path, c);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        Console.WriteLine(s);
+                        Console.WriteLine("Failed to load chart: "+s+"\n"+e.ToString());
                         continue;
                     }
                 }
