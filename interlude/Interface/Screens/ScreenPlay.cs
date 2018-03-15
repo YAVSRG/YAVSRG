@@ -32,7 +32,7 @@ namespace YAVSRG.Interface.Screens
                 if (ReceptorLight.Val > 0.5f)
                 {
                     float w = (right - left);
-                    SpriteBatch.Draw(s, left + w * (1 - ReceptorLight.Val), top - 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
+                    SpriteBatch.Draw(s, left + w * (1 - ReceptorLight.Val), top + 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
                 }
             }
 
@@ -45,32 +45,22 @@ namespace YAVSRG.Interface.Screens
         }
 
         int COLUMNWIDTH = Game.Options.Theme.ColumnWidth;
-        float SCROLLSPEED = Game.Options.Profile.ScrollSpeed / (float)Game.Options.Profile.Rate;
         int HITPOSITION = Game.Options.Profile.HitPosition;
 
         float end;
 
         readonly Color bgdim = Color.FromArgb(140, 140, 140);
-        Sprite note, hold, holdhead, receptor, playfield, screencover;
-
-        int index = 0;
+        Sprite screencover;
         int lasti; int lastt;
         Chart Chart;
         ScoreTracker scoreTracker;
-        Widgets.HitMeter hitmeter;
+        Widget playfield;
         float missWindow;
-        float[] holds;
-        Snap.BinarySwitcher holdsInHitpos = new Snap.BinarySwitcher(0);
         Key[] binds;
         HitLighting[] lighting;
 
         public ScreenPlay()
         {
-            note = Game.Options.Theme.GetNoteTexture(Game.CurrentChart.Keys);
-            receptor = Game.Options.Theme.GetReceptorTexture(Game.CurrentChart.Keys);
-            hold = Game.Options.Theme.GetBodyTexture(Game.CurrentChart.Keys);
-            holdhead = Game.Options.Theme.GetHeadTexture(Game.CurrentChart.Keys);
-            playfield = Content.LoadTextureFromAssets("playfield");
             screencover = Content.LoadTextureFromAssets("screencover");
 
             Chart = Game.CurrentChart;
@@ -79,29 +69,23 @@ namespace YAVSRG.Interface.Screens
             //i make all this stuff ahead of time so i'm not creating a shitload of new objects/recalculating the same thing/sending stuff to garbage every 8ms
             lasti = Chart.States.Count;
             lastt = Chart.Timing.Count;
-            holds = new float[Chart.Keys];
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
 
             end = Chart.States.Points[Chart.States.Count - 1].Offset;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
-            hitmeter = new Widgets.HitMeter(Chart.Keys);
-
-            AddChild(new Playfield(scoreTracker).PositionTopLeft(-COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MAX));
-
-            AddChild(hitmeter.PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
-
-            AddChild(new Widgets.ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
-
-            scoreTracker.Scoring.OnMiss = (k) => { OnMiss(k); };
+            
+            AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MAX));
+            AddChild(new HitMeter(scoreTracker).PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
 
             lighting = new HitLighting[Chart.Keys];
             float x = Chart.Keys * 0.5f;
             for (int i = 0; i < Chart.Keys; i++)
             {
                 lighting[i] = new HitLighting();
-                lighting[i].PositionTopLeft(COLUMNWIDTH * (i - x), HITPOSITION + COLUMNWIDTH * 2, AnchorType.CENTER, AnchorType.MAX)
-                    .PositionBottomRight(COLUMNWIDTH * (i - x + 1), HITPOSITION, AnchorType.CENTER, AnchorType.MAX);
-                AddChild(lighting[i]);
+                lighting[i].PositionTopLeft(COLUMNWIDTH * i, HITPOSITION + COLUMNWIDTH * 2, AnchorType.MIN, AnchorType.CENTER)
+                    .PositionBottomRight(COLUMNWIDTH * (i + 1), HITPOSITION, AnchorType.MIN, AnchorType.CENTER);
+                playfield.AddChild(lighting[i]);
             }
         }
 
@@ -109,6 +93,7 @@ namespace YAVSRG.Interface.Screens
         {
             if (prev is ScreenScore)
             {
+                Game.Audio.Loop = true;
                 Game.Screens.PopScreen(); return;
             }
             Utils.SetDiscordData("Playing", ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title + " [" + Chart.DifficultyName + "]");
@@ -126,7 +111,6 @@ namespace YAVSRG.Interface.Screens
         {
             Utils.SetDiscordData("Looking for something to play", "");
             Game.Screens.Toolbar(true);
-            Game.Audio.Loop = true;
             base.OnExit(next);
         }
 
@@ -162,7 +146,7 @@ namespace YAVSRG.Interface.Screens
 
         public void OnMiss(int k)
         {
-            hitmeter.AddHit(k, scoreTracker.Scoring.MissWindow, (float)Game.Audio.Now(), 5);
+            //hitmeter.AddHit(k, scoreTracker.Scoring.MissWindow, (float)Game.Audio.Now(), 5);
             //some other stuff
         }
 
@@ -209,7 +193,6 @@ namespace YAVSRG.Interface.Screens
             {
                 delta /= (float)Game.Options.Profile.Rate; //convert back to time relative to map instead of to player
                 scoreTracker.RegisterHit(hitAt, k, delta);
-                hitmeter.AddHit(k, delta, now, scoreTracker.Scoring.JudgeHit(Math.Abs(delta)));
             }//put else statement here for cb on unecessary keypress
         }
         

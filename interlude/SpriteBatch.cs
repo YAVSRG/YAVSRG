@@ -178,7 +178,7 @@ namespace YAVSRG
             };
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
-            GL.Translate(0, ScreenUtils.Height, 0);
+            GL.Translate(0, (upscroll? -1 : 1) * ScreenUtils.Height, 0);
             GL.MultMatrix(mat);
         }
 

@@ -26,6 +26,8 @@ namespace YAVSRG.Gameplay
             }
         }
 
+        public event Action<int, int, float> OnHit;
+
         public Chart c;
         public ScoreSystem Scoring;
         public HitData[] hitdata;
@@ -49,6 +51,8 @@ namespace YAVSRG.Gameplay
             }
             Scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
 
+            Scoring.OnMiss += (k) => { OnHit(k, 5, Scoring.MissWindow); };
+
             int count = c.States.Count;
             hitdata = new HitData[count];
             for (int i = 0; i < count; i++)
@@ -67,9 +71,10 @@ namespace YAVSRG.Gameplay
             return Scoring.Accuracy();
         }
 
-        public void Update(float time) //returns flag if missed
+        public void Update(float time)
         {
             Scoring.Update(time,hitdata);
+            
         }
 
         public void RegisterHit(int i, int k, float delta)
@@ -77,6 +82,7 @@ namespace YAVSRG.Gameplay
             if (hitdata[i].hit[k] == 2) { return; } //ignore if the note is already hit. prevents mashing exploit.
             hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit
             hitdata[i].delta[k] = delta;
+            OnHit(k, Scoring.JudgeHit(Math.Abs(delta)), delta);
         }
 
         public bool EndOfChart()

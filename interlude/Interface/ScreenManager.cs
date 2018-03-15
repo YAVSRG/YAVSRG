@@ -128,7 +128,7 @@ namespace YAVSRG.Interface
             SpriteBatch.Draw(Background, left, top, right, bottom + 1, uv, c);
         }
 
-        public void DrawStaticChartBackground(float left, float top, float right, float bottom, Color c) //todo: reduce redundant code in these two functions
+        public void DrawStaticChartBackground(float left, float top, float right, float bottom, Color c)
         {
             float bg = ((float)Background.Width / Background.Height);
             float window = ((float)Width / Height);

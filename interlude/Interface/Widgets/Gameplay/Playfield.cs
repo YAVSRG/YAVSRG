@@ -50,6 +50,10 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         //This is the core rhythm game engine bit
         public override void Draw(float left, float top, float right, float bottom)
         {
+            float ol = left;
+            float or = right;
+            float ot = top;
+            float ob = bottom;
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.EnableTransform(Game.Options.Profile.Upscroll);
             for (int c = 0; c < Keys; c++) //draw columns and empty receptors
@@ -94,9 +98,8 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 }
             }
 
+            base.Draw(ol, ot, or, ob);
             SpriteBatch.DisableTransform();
-
-            base.Draw(left, top, right, bottom);
         }
 
         private void DrawLongTap(float offset, int i, float start, float end)
@@ -121,7 +124,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         private void DrawReceptor(float offset, int k)
         {
-            Game.Options.Theme.DrawReceptor(receptor, k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos, k, Keys, false);
+            Game.Options.Theme.DrawReceptor(receptor, k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos, k, Keys, Input.KeyPress(Game.Options.Profile.Bindings[Keys][k]));
         }
 
         private void DrawSnap(Snap s, float offset, float pos)

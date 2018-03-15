@@ -39,6 +39,11 @@ namespace YAVSRG.Options.Tabs
                 .PositionBottomRight(-50, 425, AnchorType.CENTER, AnchorType.MIN)
                 );
             AddChild(
+                new BoolPicker("Upscroll", Game.Options.Profile.Upscroll, v => { Game.Options.Profile.Upscroll = v; })
+                .PositionTopLeft(-400, 375, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-250, 425, AnchorType.CENTER, AnchorType.MIN)
+                );
+            AddChild(
                 new BoolPicker("Arrows for 4k", Game.Options.Profile.UseArrowsFor4k, v => { Game.Options.Profile.UseArrowsFor4k = v; })
                 .PositionTopLeft(50, 375, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 425, AnchorType.CENTER, AnchorType.MIN)

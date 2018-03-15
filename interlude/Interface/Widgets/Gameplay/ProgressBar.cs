@@ -5,15 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Gameplay;
 
-namespace YAVSRG.Interface.Widgets
+namespace YAVSRG.Interface.Widgets.Gameplay
 {
-    public class ProgressBar : Widget
+    public class ProgressBar : GameplayWidget
     {
-        ScoreTracker playing;
-
-        public ProgressBar(ScoreTracker playing) : base()
+        public ProgressBar(ScoreTracker playing) : base(playing)
         {
-            this.playing = playing;
         }
 
         public override void Draw(float left, float top, float right, float bottom)
@@ -25,15 +22,10 @@ namespace YAVSRG.Interface.Widgets
             float x = left;
             for(int i = 5; i >= 0; i--)
             {
-                temp = playing.Scoring.Judgements[i] * (right - left) / playing.maxcombo;
+                temp = scoreTracker.Scoring.Judgements[i] * (right - left) / scoreTracker.maxcombo;
                 SpriteBatch.DrawRect(x, top, x + temp, bottom, Game.Options.Theme.JudgeColors[i]);
                 x += temp;
             }
-        }
-
-        public override void Update(float left, float top, float right, float bottom)
-        {
-            base.Update(left, top, right, bottom);
         }
     }
 }

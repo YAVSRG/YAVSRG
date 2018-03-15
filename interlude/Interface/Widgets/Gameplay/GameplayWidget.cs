@@ -7,7 +7,7 @@ using YAVSRG.Gameplay;
 
 namespace YAVSRG.Interface.Widgets.Gameplay
 {
-    class GameplayWidget : Widget
+    public class GameplayWidget : Widget
     {
         protected ScoreTracker scoreTracker;
 

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Interface.Widgets
+namespace YAVSRG.Interface.Widgets.Gameplay
 {
-    public class HitMeter : Widget
+    public class HitMeter : GameplayWidget
     {
         struct Hit
         {
@@ -56,12 +56,13 @@ namespace YAVSRG.Interface.Widgets
         JudgementDisplay[] disp;
         List<Hit> hits;
 
-        public HitMeter(int keys) : base()
+        public HitMeter(YAVSRG.Gameplay.ScoreTracker st) : base(st)
         {
+            st.OnHit += AddHit;
             if (Game.Options.Theme.JudgementPerColumn)
             {
-                disp = new JudgementDisplay[keys];
-                for (int k = 0; k < keys; k++)
+                disp = new JudgementDisplay[st.c.Keys];
+                for (int k = 0; k < st.c.Keys; k++)
                 {
                     disp[k] = new JudgementDisplay();
                 }
@@ -74,8 +75,9 @@ namespace YAVSRG.Interface.Widgets
             hits = new List<Hit>();
         }
 
-        public void AddHit(int k, float delta, float now, int tier)
+        private void AddHit(int k, int tier, float delta)
         {
+            float now = (float)Game.Audio.Now();
             if (Game.Options.Theme.JudgementPerColumn)
             {
                 disp[k].NewHit(tier, now);
