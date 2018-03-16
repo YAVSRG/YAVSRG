@@ -77,6 +77,7 @@ namespace YAVSRG.Interface.Screens
             AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MAX));
             AddChild(new HitMeter(scoreTracker).PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
             AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new ComboDisplay(scoreTracker).PositionTopLeft(0, -100, AnchorType.CENTER, AnchorType.CENTER));
 
             lighting = new HitLighting[Chart.Keys];
             float x = Chart.Keys * 0.5f;
@@ -202,8 +203,7 @@ namespace YAVSRG.Interface.Screens
             base.Draw(left, top, right, bottom);
             DrawScreenCoverUp(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverUp); //draws the screencover
             DrawScreenCoverDown(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverDown);
-
-            SpriteBatch.DrawCentredText(scoreTracker.Combo().ToString(), 40f, 0, -100, Color.White); //combo
+            
             SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -Height + 70, Color.White); //acc
 
         }

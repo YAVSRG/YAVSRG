@@ -6,19 +6,18 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Gameplay
 {
-    public class MSScoring : ScoreSystem
+    public class MSScoring : DP
     {
         float CurveBegin = 18f; //named exactly like etterna wiki
         float CurveEnd = 150f;
         float linFac = 9.5f;
         float expFac = 2f;
 
-        public MSScoring()
+        public MSScoring(int judge) : base(judge)
         {
-            maxweight = 2;
-            Judgements = new int[6];
         }
 
+        /*
         public override void Update(float now, ScoreTracker.HitData[] data)
         {
             while (pos < data.Length && data[pos].Offset <= now) //copy paste code from DP except it calcs a bit differently
@@ -30,7 +29,7 @@ namespace YAVSRG.Gameplay
                         //GET MAD
                         score += (maxweight - linFac); //miss penalty
                         ComboBreak();
-                        OnMiss(i);
+                        //OnMiss(i);
                         maxscore += maxweight;
                     }
                     else if (data[pos].hit[i] == 2)
@@ -43,11 +42,33 @@ namespace YAVSRG.Gameplay
                 }
                 pos++;
             }
+        }*/
+
+        public override void AddJudgement(int i)
+        {
+            Judgements[i]++;
+        }
+
+        public override void HandleHit(int k, int index, ScoreTracker.HitData[] data)
+        {
+            int j = JudgeHit(data[index].delta[k]);
+            AddJudgement(j);
+            maxscore += maxweight;
+            score += CalculatePoints(Math.Abs(data[index].delta[k]));
+            if (j >= 3)
+            {
+                ComboBreak();
+            }
+            else
+            {
+                Combo++;
+            }
+            OnHit(k, j, data[index].delta[k]);
         }
 
         private float CalculatePoints(float ms)
         {
-            return maxweight - (linFac * (float)Math.Pow((ms-CurveBegin) / (CurveEnd-CurveBegin),expFac));
+            return maxweight - (linFac * (float)Math.Pow((ms - CurveBegin) / (CurveEnd - CurveBegin), expFac));
         }
 
         public override string FormatAcc()

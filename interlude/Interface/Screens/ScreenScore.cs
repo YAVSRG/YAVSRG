@@ -64,20 +64,20 @@ namespace YAVSRG.Interface.Screens
             //you'll just have to change to the chart before showing the score screen
             //SpriteBatch.DrawCentredText(ChartLoader.SelectedChart.header.title + " [" + score.c.DifficultyName + "]", 30f, 0, -Height + 150, Color.White);
             //SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -Width+300, -Height + 80, Width-300, -Height + 130, Color.White);
+            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -Width + 300, -Height + 80, Width - 300, -Height + 130, Color.White);
 
             SpriteBatch.DrawCentredText(score.Scoring.FormatAcc(), 50, 0, -50, Color.White);
             SpriteBatch.DrawCentredText(acc1.FormatAcc(), 30, -250, 50, Color.White);
             SpriteBatch.DrawCentredText(acc2.FormatAcc(), 30, 250, 50, Color.White);
             for (int i = 0; i < 6; i++)
             {
-                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80,Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 50 + 350f * score.Scoring.Judgements[i] / score.maxcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, -Width+50, 100+i * 40, Color.White);
-                SpriteBatch.DrawJustifiedText(score.Scoring.Judgements[i].ToString(), 30, -Width+400, 100+i * 40, Color.White);
+                SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, -Width + 50, 100 + i * 40, Color.White);
+                SpriteBatch.DrawJustifiedText(score.Scoring.Judgements[i].ToString(), 30, -Width + 400, 100 + i * 40, Color.White);
             }
-            SpriteBatch.DrawText(score.Scoring.BestCombo.ToString()+"x", 30, -Width + 50, 340, Color.White);
-            SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString()+ "cbs", 30, -Width + 400, 340, Color.White);
+            SpriteBatch.DrawText(score.Scoring.BestCombo.ToString() + "x", 30, -Width + 50, 340, Color.White);
+            SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString() + "cbs", 30, -Width + 400, 340, Color.White);
             DrawGraph();
         }
 
@@ -87,6 +87,8 @@ namespace YAVSRG.Interface.Screens
             float w = 800f / snapcount;
             float scale = 100f / score.Scoring.MissWindow;
             SpriteBatch.DrawRect(-400, 297, 400, 303, Color.Green);
+            int j;
+            float o;
             for (int i = 0; i < snapcount; i++)
             {
                 for (int k = 0; k < score.hitdata[i].hit.Length; k++)
@@ -94,13 +96,14 @@ namespace YAVSRG.Interface.Screens
                     if (score.hitdata[i].hit[k] == 1)
                     {
                         SpriteBatch.DrawRect(
-                                -399 + i * w, 200, -401 + i * w, 400, Color.FromArgb(120, Game.Options.Theme.JudgeColors[5]));
+                                -399 + i * w, 200, -401 + i * w, 400, Color.FromArgb(80, Game.Options.Theme.JudgeColors[5]));
                     }
                     else if (score.hitdata[i].hit[k] == 2)
                     {
-                        float o = score.hitdata[i].delta[k];
+                        o = score.hitdata[i].delta[k];
+                        j = score.Scoring.JudgeHit(o);
                         SpriteBatch.DrawRect(
-                                -398 + i * w, 298 - o * scale, -402 + i * w, 302 - o * scale, Game.Options.Theme.JudgeColors[score.Scoring.JudgeHit(Math.Abs(o))]);
+                                -398 + i * w, 298 - o * scale, -402 + i * w, 302 - o * scale, Game.Options.Theme.JudgeColors[j]);
                     }
                 }
             }

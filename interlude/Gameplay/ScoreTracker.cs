@@ -24,6 +24,22 @@ namespace YAVSRG.Gameplay
                 }
                 delta = new float[keycount];
             }
+
+            public int Count
+            {
+                get
+                {
+                    int x = 0;
+                    for (int i = 0; i < hit.Length; i++)
+                    {
+                        if (hit[i] > 0)
+                        {
+                            x++;
+                        }
+                    }
+                    return x;
+                }
+            }
         }
 
         public event Action<int, int, float> OnHit;
@@ -37,21 +53,14 @@ namespace YAVSRG.Gameplay
         {
             this.c = c;
             //some temp hack until i move this inside ScoreSystem
-            if (Game.Options.Profile.ScoreSystem == ScoreType.Default)
+            maxcombo = 0;
+            foreach (Snap s in c.States.Points)
             {
-                maxcombo = c.States.Count;
-            }
-            else
-            {
-                maxcombo = 0;
-                foreach (Snap s in c.States.Points)
-                {
-                    maxcombo += s.Count;
-                }
+                maxcombo += s.Count;
             }
             Scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
 
-            Scoring.OnMiss += (k) => { OnHit(k, 5, Scoring.MissWindow); };
+            Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); };
 
             int count = c.States.Count;
             hitdata = new HitData[count];
@@ -82,7 +91,8 @@ namespace YAVSRG.Gameplay
             if (hitdata[i].hit[k] == 2) { return; } //ignore if the note is already hit. prevents mashing exploit.
             hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit
             hitdata[i].delta[k] = delta;
-            OnHit(k, Scoring.JudgeHit(Math.Abs(delta)), delta);
+            Scoring.HandleHit(k, i, hitdata);
+            //OnHit(k, Scoring.JudgeHit(Math.Abs(delta)), delta);
         }
 
         public bool EndOfChart()

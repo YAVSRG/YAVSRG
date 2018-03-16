@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Gameplay
 {
-    class DP : NoCCScoring
+    public class DP : NoCCScoring
     {
         int judge;
         public DP(int judge) : base(null, new int[] { 2, 2, 1, -4, -8, -8 }, 2)

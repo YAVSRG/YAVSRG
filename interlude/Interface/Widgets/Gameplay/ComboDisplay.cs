@@ -3,25 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Gameplay;
 
-namespace YAVSRG.Interface.Widgets
+namespace YAVSRG.Interface.Widgets.Gameplay
 {
-    class ComboDisplay : Widget
+    class ComboDisplay : GameplayWidget
     {
         AnimationSlider size;
-        Func<int> get;
 
-        public ComboDisplay(Func<int> getter)
+
+        public ComboDisplay(ScoreTracker st) : base(st)
         {
-            size = new AnimationSlider(30);
-            get = getter;
+            size = new AnimationSlider(40);
+            st.OnHit += (x,y,z) =>
+            {
+                size.Val = 60;
+                if (st.Scoring.Combo == 0)
+                {
+                    size.Val = 80;
+                }
+            };
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            int val = get();
-            SpriteBatch.DrawCentredText(val.ToString(), size + val * 0.01f, left, top, System.Drawing.Color.White);
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            SpriteBatch.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), size + scoreTracker.Scoring.Combo * 0.05f, left, top - size / 2, System.Drawing.Color.White);
         }
 
         public override void Update(float left, float top, float right, float bottom)

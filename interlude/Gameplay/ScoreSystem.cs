@@ -13,16 +13,20 @@ namespace YAVSRG.Gameplay
         protected int maxweight;
         protected int pos = 0;
         protected float score = 0;
-        protected int maxscore = 0;
+        protected float maxscore = 0;
         public int Combo = 0;
         public int ComboBreaks = 0;
         public int[] Judgements;
         public int BestCombo = 0;
         public float MissWindow = 180f;
         public string name;
-        public Action<int> OnMiss = (x) => { };
-        
+        public Action<int, int, float> OnHit = (a, b, c) => { };
+
         public abstract void Update(float now, ScoreTracker.HitData[] data);
+
+        public abstract void HandleHit(int k, int index, ScoreTracker.HitData[] data);
+
+        public abstract void ProcessScore(ScoreTracker.HitData[] data);
 
         public static ScoreSystem GetScoreSystem(ScoreType s)
         {
@@ -33,17 +37,16 @@ namespace YAVSRG.Gameplay
                 case ScoreType.Osu:
                     return new OD(Game.Options.Profile.OD);
                 case ScoreType.Wife:
-                    return new MSScoring();
+                    return new MSScoring(Game.Options.Profile.Judge);
                 case ScoreType.Default:
                 default:
                     return new StandardScoring();
             }
         }
 
-        public virtual void ProcessScore(ScoreTracker.HitData[] data)
-        {
-            Update(data[data.Length - 1].Offset, data);
-        }
+        //{
+        //    Update(data[data.Length - 1].Offset, data);
+        //}
 
         public virtual void ComboBreak()
         {
@@ -60,14 +63,6 @@ namespace YAVSRG.Gameplay
             Judgements[i] += 1;
             score += weights[i];
             maxscore += maxweight;
-            if (i > 3)
-            {
-                ComboBreak();
-                if (i == 5)
-                {
-                    OnMiss(i);
-                }
-            }
         }
 
         public virtual float Accuracy()
@@ -78,6 +73,7 @@ namespace YAVSRG.Gameplay
 
         public virtual int JudgeHit(float delta)
         {
+            delta = Math.Abs(delta);
             for (int i = 0; i < windows.Length; i++)
             {
                 if (delta <= windows[i]) { return i; }
@@ -87,7 +83,7 @@ namespace YAVSRG.Gameplay
 
         public virtual string FormatAcc()
         {
-            return Utils.RoundNumber(Accuracy())+"%";
+            return Utils.RoundNumber(Accuracy()) + "%";
         }
 
         public bool EndOfChart(int snaps)
