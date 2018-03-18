@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenMenu : Screen
     {
-        static readonly string[] splashes = new[] { "Yet Another Vertically Scrolling Rhythm Game", "Some funny flavourtext", "Based on the hit game osu!mania", "Pausers never win", "Winners never pause", "Timing is everything", "Where's the pause button?", "More arrows than a medieval army", "Skill not included", "Click play already", "JUST MASH", "A cool name for a rhythm game", "Making rhythm games great again", "We're keeping this name and we don't know why" };
+        static readonly string[] splashes = new[] { "Yet Another Vertically Scrolling Rhythm Game", "Some funny flavourtext", "Based on the hit game osu!mania", "Pausers never win", "Winners never pause", "Timing is everything", "Where's the pause button?", "More arrows than a medieval army", "Skill not included", "Click play already", "JUST MASH", "A cool name for a rhythm game", "Making rhythm games great again" };
         string splash = splashes[new Random().Next(0, splashes.Length)];
         AnimationSlider slide;
         Sprite banner;
@@ -22,16 +22,19 @@ namespace YAVSRG.Interface.Screens
         {
             AddChild(
                 play = new BannerButton("Play", () => { Game.Screens.AddScreen(new ScreenLevelSelect()); })
-                .PositionTopLeft(-100,-100,AnchorType.MIN,AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.Width,0,AnchorType.CENTER,AnchorType.CENTER)
+                .PositionTopLeft(-100, -100, AnchorType.MIN, AnchorType.CENTER)
+                .PositionBottomRight(-ScreenUtils.Width, 0, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(
-                options =new BannerButton( "Options", () => { Game.Screens.AddScreen(new ScreenOptions()); })
+                options = new BannerButton("Options", () => { Game.Screens.AddScreen(new ScreenOptions()); })
                 .PositionTopLeft(-100, 50, AnchorType.MIN, AnchorType.CENTER)
                 .PositionBottomRight(-ScreenUtils.Width, 150, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(
-                quit = new BannerButton("Quit", () => { Game.Screens.PopScreen(); })
+                quit = new BannerButton("Quit", () =>
+                {
+                    Game.Screens.PopScreen();
+                })
                 .PositionTopLeft(-100, 200, AnchorType.MIN, AnchorType.CENTER)
                 .PositionBottomRight(-ScreenUtils.Width, 300, AnchorType.CENTER, AnchorType.CENTER)
                 );
@@ -79,7 +82,7 @@ namespace YAVSRG.Interface.Screens
             base.Draw(left, top, right, bottom);
             float w = (ScreenUtils.Width-100) * slide;
             ScreenUtils.DrawBanner(banner, -w, -300, w, -200, Game.Screens.HighlightColor);
-            SpriteBatch.DrawCentredText("YAVSRG", 50f, 0, -300, Game.Screens.HighlightColor);
+            SpriteBatch.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
             SpriteBatch.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
         }
     }

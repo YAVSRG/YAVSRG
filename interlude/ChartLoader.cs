@@ -51,7 +51,7 @@ namespace YAVSRG
         public static void Init()
         {
             Cache = new List<ChartPack>();
-            LoadCache();
+            UpdateCache();
             Loaded = true;
         }
 

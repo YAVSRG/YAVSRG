@@ -10,21 +10,26 @@ namespace YAVSRG.Interface.Dialogs
     class ConfirmDialog : Dialog
     {
         string prompt;
+        Sprite banner;
 
         public ConfirmDialog(string prompt, Action<string> action) : base(action)
         {
             this.prompt = prompt;
-            PositionTopLeft(-200, -100, AnchorType.CENTER, AnchorType.CENTER);
-            PositionBottomRight(200, 100, AnchorType.CENTER, AnchorType.CENTER);
-            AddChild(new FramedButton("buttonbase", "Yes", () => { Close("Y"); }).PositionTopLeft(0, 100, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.CENTER, AnchorType.MAX));
-            AddChild(new FramedButton("buttonbase", "No", () => { Close("N"); }).PositionTopLeft(0, 100, AnchorType.CENTER, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
+            banner = Content.LoadTextureFromAssets("banner");
+            PositionTopLeft(ScreenUtils.Width, -50, AnchorType.CENTER, AnchorType.CENTER);
+            PositionBottomRight(ScreenUtils.Width+100, 50, AnchorType.CENTER, AnchorType.CENTER);
+            A.Target(-ScreenUtils.Width, -50);
+            AddChild(new BannerButton("Yes", () => { Close("Y"); }).PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(ScreenUtils.Width, 200, AnchorType.MIN, AnchorType.MAX));
+            AddChild(new BannerButton("No", () => { Close("N"); }).PositionTopLeft(ScreenUtils.Width, 100, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(-100, 200, AnchorType.MAX, AnchorType.MAX));
+
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
-            base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            ScreenUtils.DrawBanner(banner, left, top, right, bottom, System.Drawing.Color.Azure);
             SpriteBatch.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
+            DrawWidgets(left, top, right, bottom);
         }
     }
 }
