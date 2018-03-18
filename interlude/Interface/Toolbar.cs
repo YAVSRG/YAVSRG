@@ -13,29 +13,24 @@ namespace YAVSRG.Interface
     {
         Sprite texture, cursor, frame;
         AnimationSlider slide;
+        Widget mc;
 
         public Toolbar()
         {
             texture = Content.LoadTextureFromAssets("toolbar");
             frame = Content.LoadTextureFromAssets("frame");
             cursor = Content.LoadTextureFromAssets("cursor");
+            AddChild(mc = new MusicControls()
+                .PositionTopLeft(0,80,AnchorType.MAX,AnchorType.MIN)
+                .PositionBottomRight(-1000,180,AnchorType.MAX,AnchorType.MIN)
+                );
             AddChild(
                 new Button("buttonback", "", () => { Game.Screens.PopScreen(); })
                 .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN)
                 .PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttonplay", "", () => { Game.Audio.Play(); })
-                .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN)
-                );
-            AddChild(
-                new Button("buttonpause", "", () => { Game.Audio.Pause(); })
-                .PositionTopLeft(160, 0, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN)
-                );
-            AddChild(
-                new Button("buttonstop", "", () => { Game.Audio.Stop(); })
+                new Button("buttonstop", "", () => { int m = mc.A.TargetX > 0 ? -1000 : 1000; mc.A.Move(m, 0); mc.B.Move(m, 0); })
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
@@ -58,7 +53,7 @@ namespace YAVSRG.Interface
             if (slide < 0) { return; }
 
             float s = (Height * 2 - slide * 2) / 24f;
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < 24; i++) //draws the waveform
             {
                 float level = Game.Audio.WaveForm[i * 4] + Game.Audio.WaveForm[i * 4 + 1] + Game.Audio.WaveForm[i * 4 + 2] + Game.Audio.WaveForm[i * 4 + 3];
                 level += 0.01f;
@@ -72,9 +67,6 @@ namespace YAVSRG.Interface
             SpriteBatch.DrawFrame(frame, -Width - 30, -Height - 30, Width + 30, -Height + slide + 5, 30f, Game.Screens.BaseColor);
             //SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Screens.BaseColor);
             //SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Screens.BaseColor);
-
-            SpriteBatch.DrawRect(Width - 710, -Height + slide - 25, Width - 710 + 460 * Game.Audio.NowPercentage(), -Height + slide - 15, Game.Screens.BaseColor);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, Width - 710, -Height + slide - 60, Width - 250, -Height + slide - 20, Game.Options.Theme.MenuFont);
 
             //SpriteBatch.Draw(texture, -Width, Height-80, Width, Height, Game.Options.Theme.Dark);
             Game.Screens.DrawStaticChartBackground(-Width, Height - slide, Width, Height, Game.Screens.DarkColor);

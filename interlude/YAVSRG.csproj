@@ -166,10 +166,12 @@
     <Compile Include="Interface\Widgets\FramedButton.cs" />
     <Compile Include="Interface\Widgets\Gameplay\GameplayWidget.cs" />
     <Compile Include="Interface\Widgets\Gameplay\HitMeter.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\Screencover.cs" />
     <Compile Include="Interface\Widgets\KeyBinder.cs" />
     <Compile Include="Interface\Widgets\LevelSelector.cs" />
     <Compile Include="Interface\Widgets\Gameplay\Playfield.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ProgressBar.cs" />
+    <Compile Include="Interface\Widgets\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />

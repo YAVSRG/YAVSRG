@@ -7,10 +7,9 @@ using YAVSRG.Gameplay;
 
 namespace YAVSRG.Interface.Widgets.Gameplay
 {
-    class ComboDisplay : GameplayWidget
+    public class ComboDisplay : GameplayWidget
     {
         AnimationSlider size;
-
 
         public ComboDisplay(ScoreTracker st) : base(st)
         {
@@ -29,7 +28,8 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), size + scoreTracker.Scoring.Combo * 0.05f, left, top - size / 2, System.Drawing.Color.White);
+            float s = Math.Min(50, scoreTracker.Scoring.Combo * 0.05f) + size;
+            SpriteBatch.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), s, left, top - s / 2, System.Drawing.Color.White);
         }
 
         public override void Update(float left, float top, float right, float bottom)

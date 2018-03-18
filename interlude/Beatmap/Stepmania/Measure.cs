@@ -15,7 +15,7 @@ namespace YAVSRG.Beatmap.Stepmania
             data = rows;
         }
 
-        public IEnumerable<Snap> ConvertBeat(double offset, double msPerBeat, Snap.BinarySwitcher lntracker, int keys, int beat, int meter)
+        public void ConvertBeat(double offset, double msPerBeat, Snap.BinarySwitcher lntracker, int keys, int beat, int meter, List<Snap> output)
         {
             int l = data.Length;
             double sep = msPerBeat * 4 / l;
@@ -31,7 +31,7 @@ namespace YAVSRG.Beatmap.Stepmania
                     else if (data[i][c] == '3') { s.ends.SetColumn(c); lntracker.RemoveColumn(c); }
                 }
                 if (s.Count > 0) {
-                    yield return s;
+                    output.Add(s);
                 }
             }
         }

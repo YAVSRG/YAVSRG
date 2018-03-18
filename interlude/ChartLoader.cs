@@ -51,7 +51,7 @@ namespace YAVSRG
         public static void Init()
         {
             Cache = new List<ChartPack>();
-            UpdateCache();
+            LoadCache();
             Loaded = true;
         }
 
@@ -72,11 +72,19 @@ namespace YAVSRG
             Game.Instance.ChangeChart(SelectedChart.diffs[new Random().Next(0, SelectedChart.diffs.Count)]);
         }
 
+        private static void LoadCache()
+        {
+            foreach (string s in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
+            {
+                LoadPack(s, false);
+            }
+        }
+
         private static void UpdateCache()
         {
             foreach (string s in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
             {
-                LoadPack(s);
+                LoadPack(s, true);
             }
         }
 
@@ -102,7 +110,7 @@ namespace YAVSRG
             fs.Close();
         }
 
-        private static void LoadPack(string folder)
+        private static void LoadPack(string folder, bool loadnew)
         {
             List<CachedChart> diffs = new List<CachedChart>();
             CachedChart c;
@@ -114,7 +122,7 @@ namespace YAVSRG
                 {
                     c = LoadCacheFile(path);
                 }
-                else
+                else if (loadnew)
                 {
                     try
                     {
@@ -126,6 +134,10 @@ namespace YAVSRG
                         Console.WriteLine("Failed to load chart: "+s+"\n"+e.ToString());
                         continue;
                     }
+                }
+                else
+                {
+                    continue;
                 }
                 diffs.Add(c);
             }

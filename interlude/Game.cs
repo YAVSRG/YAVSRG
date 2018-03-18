@@ -14,7 +14,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "ver-zero.one.four";
+        public static readonly string Version = "v0.2.0";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -47,7 +47,7 @@ namespace YAVSRG
         public Game() : base(1200,800)
         {
             Sprite s = Content.UploadTexture(Utils.CaptureScreen(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
-            Title = "YAVSRG";
+            Title = "Interlude";
             Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on. best performance is no frame cap and no vsync otherwise you get stutters

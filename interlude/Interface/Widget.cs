@@ -81,6 +81,11 @@ namespace YAVSRG.Interface
         public virtual void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            DrawWidgets(left, top, right, bottom);
+        }
+
+        protected void DrawWidgets(float left, float top, float right, float bottom)
+        {
             foreach (Widget w in Widgets)
             {
                 if (w.State > 0)

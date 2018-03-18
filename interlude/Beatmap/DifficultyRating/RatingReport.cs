@@ -8,11 +8,6 @@ namespace YAVSRG.Beatmap.DifficultyRating
 {
     public class RatingReport
     {
-        static readonly float TIMEEXPONENT = -1.7f; //difficulty inversely proportional to time between each note
-        static readonly float SMOOTHEXPONENT = 2f;
-        static readonly float TIMESCALE = 1000;
-        static readonly float BASESCALE = 50;
-
         public List<float> raw;
         public float[] breakdown;
 
@@ -62,7 +57,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
         protected float GetSnapDifficulty(List<float> data)
         {
-            return DataSet.Mean(data)*6; //not actually that temp
+            return DataSet.Mean(data)*9; //not actually that temp
         }
 
         protected float GetNoteDifficulty(int c, float offset, int h, float rate)
@@ -78,7 +73,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
             }
             else //if it is, this is some temp fix
             {
-                delta1 = 1000;
+                delta1 = 10000;
             }
             foreach (int k in s.GetColumns()) //for all other columns on this hand
             {
@@ -100,7 +95,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
         protected float GetStreamCurve(float delta) //how hard is it to hit these two adjacent notes? when they are VERY close together you can hit them at the same time so no difficulty added
         {
             float widthScale = 0.05f;
-            float heightScale = 10f;
+            float heightScale = 5f;
             float curveExponent = 1.1f;
             float cutoffExponent = 10f;
             return (float)Math.Max((1.1f * heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.1 * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
@@ -111,7 +106,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
             float widthScale = 0.05f;
             float heightScale = 10f;
             float curveExponent = 1.1f;
-            return (float)(0.7f * heightScale / Math.Pow(widthScale * delta, curveExponent));
+            return (float)(heightScale / Math.Pow(widthScale * delta, curveExponent));
         }
     }
 }

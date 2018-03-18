@@ -137,10 +137,7 @@ namespace YAVSRG.Beatmap.Stepmania
                 {
                     for (int b = 0; b < meter; b++)
                     {
-                        foreach (Snap s in diff.measures[i].ConvertBeat(now, bpms[bpm].Item2, lntracker, keycount, b, meter))
-                        {
-                            states.Add(s);
-                        }
+                        diff.measures[i].ConvertBeat(now, bpms[bpm].Item2, lntracker, keycount, b, meter, states);
                         now += bpms[bpm].Item2;
                         totalbeats += 1;
                         if (bpm < bpms.Count - 1 && bpms[bpm+1].Item1 <= totalbeats)

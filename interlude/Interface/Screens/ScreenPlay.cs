@@ -88,6 +88,10 @@ namespace YAVSRG.Interface.Screens
                     .PositionBottomRight(COLUMNWIDTH * (i + 1), HITPOSITION, AnchorType.MIN, AnchorType.CENTER);
                 playfield.AddChild(lighting[i]);
             }
+            //playfield.AddChild(new Screencover(scoreTracker, true)
+                //.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, Height * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.MIN));
+            //playfield.AddChild(new Screencover(scoreTracker, false)
+                //.PositionTopLeft(0, Height * 2 * Game.Options.Profile.ScreenCoverDown, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
         }
 
         public override void OnEnter(Screen prev)
@@ -201,8 +205,8 @@ namespace YAVSRG.Interface.Screens
         {
             float offset = Chart.Keys * COLUMNWIDTH * -0.5f; //offset means actual horizontal offset of the playfield
             base.Draw(left, top, right, bottom);
-            DrawScreenCoverUp(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverUp); //draws the screencover
-            DrawScreenCoverDown(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverDown);
+           // DrawScreenCoverUp(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverUp); //draws the screencover
+           // DrawScreenCoverDown(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverDown);
             
             SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -Height + 70, Color.White); //acc
 
