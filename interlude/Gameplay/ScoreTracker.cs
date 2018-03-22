@@ -14,7 +14,7 @@ namespace YAVSRG.Gameplay
             public float[] delta;
             public byte[] hit;
 
-            public HitData(Snap s, int keycount)
+            public HitData(GameplaySnap s, int keycount)
             {
                 Offset = s.Offset;
                 hit = new byte[keycount];
@@ -44,17 +44,17 @@ namespace YAVSRG.Gameplay
 
         public event Action<int, int, float> OnHit;
 
-        public Chart c;
+        public ChartWithModifiers c;
         public ScoreSystem Scoring;
         public HitData[] hitdata;
         public int maxcombo;
 
-        public ScoreTracker(Chart c)
+        public ScoreTracker(ChartWithModifiers c)
         {
             this.c = c;
             //some temp hack until i move this inside ScoreSystem
             maxcombo = 0;
-            foreach (Snap s in c.States.Points)
+            foreach (Snap s in c.Notes.Points)
             {
                 maxcombo += s.Count;
             }
@@ -62,11 +62,11 @@ namespace YAVSRG.Gameplay
 
             Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); };
 
-            int count = c.States.Count;
+            int count = c.Notes.Count;
             hitdata = new HitData[count];
             for (int i = 0; i < count; i++)
             {
-                hitdata[i] = new HitData(c.States.Points[i], c.Keys);
+                hitdata[i] = new HitData(c.Notes.Points[i], c.Keys);
             }
         }
 
@@ -83,7 +83,6 @@ namespace YAVSRG.Gameplay
         public void Update(float time)
         {
             Scoring.Update(time,hitdata);
-            
         }
 
         public void RegisterHit(int i, int k, float delta)

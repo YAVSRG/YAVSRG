@@ -126,7 +126,7 @@ namespace YAVSRG.Beatmap.Stepmania
                 int meter = 4;
                 List<Snap> states = new List<Snap>();
                 List<BPMPoint> points = new List<BPMPoint>();
-                Snap.BinarySwitcher lntracker = new Snap.BinarySwitcher(0);
+                BinarySwitcher lntracker = new BinarySwitcher(0);
                 double now = -double.Parse(raw["OFFSET"]) * 1000;
                 int bpm = 0;
                 points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now));

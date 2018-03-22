@@ -12,7 +12,7 @@ namespace YAVSRG.Beatmap
         public string DifficultyName;
         public float PreviewTime;
         public int Keys;
-        public PointManager<Snap> States;
+        public PointManager<Snap> Notes;
         public PointManager<BPMPoint> Timing;
         public string bgpath;
         public string path;
@@ -22,7 +22,7 @@ namespace YAVSRG.Beatmap
         {
             Keys = keys;
             Timing = new PointManager<BPMPoint>(timing);
-            States = new PointManager<Snap>(data);
+            Notes = new PointManager<Snap>(data);
             DifficultyName = diff;
             PreviewTime = prevtime;
             this.path = path;
@@ -37,7 +37,7 @@ namespace YAVSRG.Beatmap
 
         public float GetDuration()
         {
-            return States.Points[States.Count - 1].Offset - States.Points[0].Offset;
+            return Notes.Points[Notes.Count - 1].Offset - Notes.Points[0].Offset;
         }
 
         public int GetBPM()
@@ -48,9 +48,9 @@ namespace YAVSRG.Beatmap
         public string GetHash()
         {
             var h = SHA256.Create();
-            byte[] data = new byte[8 * States.Count];
+            byte[] data = new byte[8 * Notes.Count];
             int p = 0;
-            foreach (Snap s in States.Points)
+            foreach (Snap s in Notes.Points)
             {
                 BitConverter.GetBytes((int)s.Offset).CopyTo(data,p);
                 p += 4;

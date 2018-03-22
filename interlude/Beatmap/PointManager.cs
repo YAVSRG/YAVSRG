@@ -5,19 +5,11 @@ namespace YAVSRG.Beatmap
 {
     public class PointManager<P> where P : OffsetItem
     {
-        public P[] Points;
-
+        public List<P> Points;
+        public int Count;
         public PointManager() : this(new List<P>()) { }
 
-        public PointManager(List<P> data) { Points = data.ToArray(); }
-
-        public int Count
-        {
-            get
-            {
-                return Points.Length;
-            }
-        }
+        public PointManager(List<P> data) { Points = data; Count = data.Count; }
 
         public P GetPointAt(float offset, bool interpolate)
         {
@@ -44,7 +36,7 @@ namespace YAVSRG.Beatmap
         public float GetInterpolatedIndex(float offset)
         {
             int low = 0;
-            int high = Points.Length - 1;
+            int high = Count - 1;
             int mid = -1;
             float o = 0f;
             while (low <= high)

@@ -52,7 +52,7 @@ namespace YAVSRG.Interface.Screens
         readonly Color bgdim = Color.FromArgb(140, 140, 140);
         Sprite screencover;
         int lasti; int lastt;
-        Chart Chart;
+        ChartWithModifiers Chart;
         ScoreTracker scoreTracker;
         Widget playfield;
         float missWindow;
@@ -63,15 +63,15 @@ namespace YAVSRG.Interface.Screens
         {
             screencover = Content.LoadTextureFromAssets("screencover");
 
-            Chart = Game.CurrentChart;
-            scoreTracker = new ScoreTracker(Game.CurrentChart);
+            Chart = Game.Gameplay.ModifiedChart;
+            scoreTracker = new ScoreTracker(Game.Gameplay.ModifiedChart);
 
             //i make all this stuff ahead of time so i'm not creating a shitload of new objects/recalculating the same thing/sending stuff to garbage every 8ms
-            lasti = Chart.States.Count;
+            lasti = Chart.Notes.Count;
             lastt = Chart.Timing.Count;
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
 
-            end = Chart.States.Points[Chart.States.Count - 1].Offset;
+            end = Chart.Notes.Points[Chart.Notes.Count - 1].Offset;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
             
             AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MAX));
@@ -101,10 +101,10 @@ namespace YAVSRG.Interface.Screens
                 Game.Audio.Loop = true;
                 Game.Screens.PopScreen(); return;
             }
-            Utils.SetDiscordData("Playing", ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title + " [" + Chart.DifficultyName + "]");
+            Utils.SetDiscordData("Playing", ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title + " [" + Game.CurrentChart.DifficultyName + "]");
             base.OnEnter(prev);
             Game.Options.Profile.Stats.TimesPlayed++;
-            Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
+            //Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
             Game.Screens.Toolbar(false);
             Game.Audio.Loop = false;
             Game.Audio.Stop();
@@ -171,16 +171,16 @@ namespace YAVSRG.Interface.Screens
         public void HandleHit(int k, float now, bool release)
         {
             //basically, this whole algorithm finds the closest snap to the receptors (above or below) that is relevant (has a note in the column you're pressing)
-            int i = Chart.States.GetNextIndex(now - missWindow);
+            int i = Chart.Notes.GetNextIndex(now - missWindow);
             if (i >= lasti) { return; }
-            int c = Chart.States.Count;
+            int c = Chart.Notes.Count;
             float delta = missWindow;
             float d;
             int hitAt = -1;
-            while (Chart.States.Points[i].Offset < now + missWindow) //search loop
+            while (Chart.Notes.Points[i].Offset < now + missWindow) //search loop
             {
-                Snap s = Chart.States.Points[i];
-                Snap.BinarySwitcher b = release ? s.ends : new Snap.BinarySwitcher(s.taps.value + s.holds.value);
+                Snap s = Chart.Notes.Points[i];
+                BinarySwitcher b = release ? s.ends : new BinarySwitcher(s.taps.value + s.holds.value);
                 if (b.GetColumn(k))
                 {
                     d = (now - s.Offset);
@@ -211,6 +211,7 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -Height + 70, Color.White); //acc
 
         }
+        /*
 
         private void DrawScreenCoverUp(float left, float right, float amount)
         {
@@ -226,6 +227,6 @@ namespace YAVSRG.Interface.Screens
             int h = Height * 2 - HITPOSITION;
             SpriteBatch.Draw(screencover, left, h * amount - COLUMNWIDTH - Height, right, h * amount - Height, Color.White, 0, 0, 2);
             SpriteBatch.Draw(screencover, left, -Height, right,  h * amount - COLUMNWIDTH - Height, Color.White, 0, 1, 2);
-        }
+        }*/
     }
 }

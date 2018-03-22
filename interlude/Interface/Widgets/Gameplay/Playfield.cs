@@ -16,13 +16,13 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         int lasti; int lastt;
         float[] holds;
-        Snap.BinarySwitcher holdsInHitpos = new Snap.BinarySwitcher(0);
+        BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
 
         protected int Keys { get { return scoreTracker.c.Keys; } }
         protected int HitPos { get { return Game.Options.Profile.HitPosition; } }
         protected int ColumnWidth { get { return Game.Options.Theme.ColumnWidth; } }
         protected float ScrollSpeed { get { return Game.Options.Profile.ScrollSpeed / (float)Game.Options.Profile.Rate; } }
-        protected Chart Chart { get { return scoreTracker.c; } }
+        protected ChartWithModifiers Chart { get { return scoreTracker.c; } }
 
         protected Animations.AnimationCounter animation;
 
@@ -38,10 +38,11 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             Animation.Add(animation = new Animations.AnimationCounter(25, true));
 
             //i make all this stuff ahead of time so i'm not creating a shitload of new objects/recalculating the same thing/sending stuff to garbage every 8ms
-            lasti = Chart.States.Count;
+            lasti = Chart.Notes.Count;
             lastt = Chart.Timing.Count;
             holds = new float[Chart.Keys];
         }
+
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
@@ -63,7 +64,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
 
             float now = (float)Game.Audio.Now(); //where are we in the song
-            int i = Chart.States.GetNextIndex(now); //we need a copy of this number so we can increase it without messing the thing up next frame
+            int i = Chart.Notes.GetNextIndex(now); //we need a copy of this number so we can increase it without messing the thing up next frame
             int t = Chart.Timing.GetLastIndex(now); //no catch up algorithm used for SV because there are less SVs and this is optimised pretty neatly
             float y = HitPos; //keeps track of where we're drawing vertically on the screen
             float v = 0; //needs a better name
@@ -76,15 +77,15 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
             while (y + v < Height * 2 && i < lasti)//continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
             {
-                while (!Game.Options.Profile.FixedScroll && t < lastt - 1 && Chart.Timing.Points[t + 1].Offset < Chart.States.Points[i].Offset) //check if we've gone past any timing points
+                while (!Game.Options.Profile.FixedScroll && t < lastt - 1 && Chart.Timing.Points[t + 1].Offset < Chart.Notes.Points[i].Offset) //check if we've gone past any timing points
                 {
                     y += ScrollSpeed * Chart.Timing.Points[t].ScrollSpeed * (Chart.Timing.Points[t + 1].Offset - now); //handle scrollspeed adjustments
                     //SpriteBatch.DrawRect(offset, Height - y, -offset, Height - y + 5, Color.White); //bar line
                     t++; //tracks which timing point we're looking at
                     now = Chart.Timing.Points[t].Offset; //we're now drawing relative to the most recent timing point
                 }
-                v = (Game.Options.Profile.FixedScroll ? 1 : Chart.Timing.Points[t].ScrollSpeed) * (Chart.States.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
-                DrawSnap(Chart.States.Points[i], left, y + v);//draw whole row of notes
+                v = (Game.Options.Profile.FixedScroll ? 1 : Chart.Timing.Points[t].ScrollSpeed) * (Chart.Notes.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
+                DrawSnap(Chart.Notes.Points[i], left, y + v);//draw whole row of notes
                 i++;//move on to next row of notes
             }
 

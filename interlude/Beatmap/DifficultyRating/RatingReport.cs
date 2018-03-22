@@ -22,20 +22,20 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
             raw = new List<float>();
             tech = new List<float>();
-            Snap[] snaps = map.States.Points;
+            List<Snap> snaps = map.Notes.Points;
             Snap current;
             List<float> fingersOnHand = new List<float>();
             List<float> handsInSnap = new List<float>();
-            Snap.BinarySwitcher s;
+            BinarySwitcher s;
 
-            for (int i = 0; i < snaps.Length; i++)
+            for (int i = 0; i < snaps.Count; i++)
             {
                 handsInSnap.Clear();
                 for (int h = 0; h < hands; h++)
                 {
                     fingersOnHand.Clear();
                     current = snaps[i].Mask(layout.hands[h].Mask());
-                    s = new Snap.BinarySwitcher(current.taps.value + current.holds.value);
+                    s = new BinarySwitcher(current.taps.value + current.holds.value);
                     foreach (int k in s.GetColumns())
                     {
                         fingersOnHand.Add(GetNoteDifficulty(k, current.Offset, layout.hands[h].Mask(), rate)); //collect together difficulty of each note on each hand
@@ -72,7 +72,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
         protected float GetNoteDifficulty(int c, float offset, int h, float rate)
         {
             float val = 0;
-            Snap.BinarySwitcher s = new Snap.BinarySwitcher(h);
+            BinarySwitcher s = new BinarySwitcher(h);
             s.RemoveColumn(c);
             float delta1;
             if (fingers[c] > 0) //if this is not the first note in this column in the map

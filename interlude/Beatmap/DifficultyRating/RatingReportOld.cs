@@ -39,7 +39,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
             }
             combine.Initialize();
 
-            Snap[] snaps = map.States.Points;
+            Snap[] snaps = map.Notes.Points.ToArray();
             Snap current;
             Snap previous;
             float delta, manip, mult;
@@ -64,7 +64,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
                     mult *= manip;
 
                     //JACKHAMMERS
-                    var jack = new Snap.BinarySwitcher(previous.taps.value & (current.holds.value | current.taps.value));
+                    var jack = new BinarySwitcher(previous.taps.value & (current.holds.value | current.taps.value));
                     if (jack.value > 0)
                     {
                         raw[h, 0].Add(GetSpeedMult(delta * JACKMULTIPLIER));
@@ -76,8 +76,8 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
                     //STRAIN
                     raw[h, 1].Add(GetFingerStrain(
-                    new Snap.BinarySwitcher(previous.holds.value | previous.taps.value | previous.middles.value),
-                    new Snap.BinarySwitcher(current.holds.value | current.taps.value | current.middles.value),
+                    new BinarySwitcher(previous.holds.value | previous.taps.value | previous.middles.value),
+                    new BinarySwitcher(current.holds.value | current.taps.value | current.middles.value),
                     layout.hands[h]) * mult);
 
                     //LONG NOTE
@@ -85,12 +85,12 @@ namespace YAVSRG.Beatmap.DifficultyRating
                     {
                         //LIFTS
                         raw[h, 2].Add(1.0f * GetFingerStrain(
-                        new Snap.BinarySwitcher(current.middles.value),
-                        new Snap.BinarySwitcher(current.ends.value),
+                        new BinarySwitcher(current.middles.value),
+                        new BinarySwitcher(current.ends.value),
                         layout.hands[h]) * mult
                         + 1.0f * GetFingerStrain(
-                        new Snap.BinarySwitcher(current.middles.value),
-                        new Snap.BinarySwitcher(current.holds.value | current.taps.value),
+                        new BinarySwitcher(current.middles.value),
+                        new BinarySwitcher(current.holds.value | current.taps.value),
                         layout.hands[h]) * mult);
                     }
                     else
@@ -122,7 +122,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
             return (float)Math.Pow(delta,TIMEEXPONENT)*SCALE;
         }
 
-        public float GetFingerStrain(Snap.BinarySwitcher a, Snap.BinarySwitcher b, KeyLayout.Hand hand)
+        public float GetFingerStrain(BinarySwitcher a, BinarySwitcher b, KeyLayout.Hand hand)
         {
             float r = 0f;
             b.value &= ~(a.value);

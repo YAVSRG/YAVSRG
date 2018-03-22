@@ -73,7 +73,7 @@ namespace YAVSRG.Gameplay
 
         public override string FormatAcc()
         {
-            return base.FormatAcc() + " (Wife)";
+            return base.FormatAcc() + " (broken)";
         }
     }
 }

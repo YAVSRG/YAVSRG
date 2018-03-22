@@ -94,6 +94,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Beatmap\BinarySwitcher.cs" />
     <Compile Include="Beatmap\DifficultyRating\RatingReport.cs" />
     <Compile Include="Beatmap\Osu\EventData.cs" />
     <Compile Include="Beatmap\Osu\StoryboardEvent.cs" />
@@ -119,17 +120,20 @@
     <Compile Include="Beatmap\Stepmania\StepFile.cs" />
     <Compile Include="ChartLoader.cs" />
     <Compile Include="Content.cs" />
-    <Compile Include="Gameplay\CCScoring.cs" />
-    <Compile Include="Gameplay\DP.cs" />
-    <Compile Include="Gameplay\MSScoring.cs" />
-    <Compile Include="Gameplay\NoCCScoring.cs" />
-    <Compile Include="Gameplay\OD.cs" />
+    <Compile Include="Gameplay\ChartWithModifiers.cs" />
+    <Compile Include="Gameplay\GameplayManager.cs" />
+    <Compile Include="Gameplay\GameplaySnap.cs" />
+    <Compile Include="Gameplay\Scoring\CCScoring.cs" />
+    <Compile Include="Gameplay\Scoring\DP.cs" />
+    <Compile Include="Gameplay\Scoring\MSScoring.cs" />
+    <Compile Include="Gameplay\Scoring\NoCCScoring.cs" />
+    <Compile Include="Gameplay\Scoring\OD.cs" />
     <Compile Include="Gameplay\ScoreTracker.cs" />
     <Compile Include="Gameplay\ProfileStats.cs" />
     <Compile Include="Gameplay\Score.cs" />
-    <Compile Include="Gameplay\ScoreSystem.cs" />
-    <Compile Include="Gameplay\ScoreType.cs" />
-    <Compile Include="Gameplay\StandardScoring.cs" />
+    <Compile Include="Gameplay\Scoring\ScoreSystem.cs" />
+    <Compile Include="Gameplay\Scoring\ScoreType.cs" />
+    <Compile Include="Gameplay\Scoring\StandardScoring.cs" />
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\Animation.cs" />
     <Compile Include="Interface\Animations\AnimationAction.cs" />
@@ -227,6 +231,9 @@
     <Content Include="discord-rpc.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Gameplay\Mods\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

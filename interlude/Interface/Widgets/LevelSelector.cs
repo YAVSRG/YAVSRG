@@ -200,7 +200,7 @@ namespace YAVSRG.Interface.Widgets
                             {
                                 x.AddItem(new Group(80, width, (y) =>
                                 {
-                                    Game.Instance.ChangeChart(d);
+                                    Game.Gameplay.ChangeChart(d);
                                     parent.OnChangeChart();
                                     ChartLoader.SelectedChart = m;
                                     ChartLoader.SelectedPack = pack;

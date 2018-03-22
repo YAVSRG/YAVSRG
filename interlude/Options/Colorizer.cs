@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using YAVSRG.Gameplay;
 using YAVSRG.Beatmap;
 
 namespace YAVSRG.Options
@@ -22,7 +23,7 @@ namespace YAVSRG.Options
             //Manipulate
         }
 
-        public static void Colorize(Chart c, ColorScheme s)
+        public static void Colorize(ChartWithModifiers c, ColorScheme s)
         {
             switch (s.Style)
             {
@@ -38,30 +39,30 @@ namespace YAVSRG.Options
             }
         }
 
-        private static void Jackhammer(Chart c, ColorScheme cs)
+        private static void Jackhammer(ChartWithModifiers c, ColorScheme cs)
         {
             //DO NOT USE UNTIL FINISHED/FIXED
-            int last = c.States.Points[0].taps.value;
+            int last = c.Notes.Points[0].taps.value;
             int current;
-            for (int i = 1; i < c.States.Count; i++)
+            for (int i = 1; i < c.Notes.Count; i++)
             {
-                current = c.States.Points[i].taps.value;
-                foreach (int k in new Snap.BinarySwitcher(current & last).GetColumns())
+                current = c.Notes.Points[i].taps.value;
+                foreach (int k in new BinarySwitcher(current & last).GetColumns())
                 {
-                    c.States.Points[i - 1].colors[k] = 3;
-                    c.States.Points[i].colors[k] += 1;
+                    c.Notes.Points[i - 1].colors[k] = 3;
+                    c.Notes.Points[i].colors[k] += 1;
                 }
                 last = current;
             }
         }
-        private static void DDR(Chart c, ColorScheme cs)
+        private static void DDR(ChartWithModifiers c, ColorScheme cs)
         {
             //sorry, i'll comment it soon, but the code is likely to change around a bit
             float v;
             float x;
             BPMPoint p;
             int color;
-            foreach (Snap s in c.States.Points)
+            foreach (Snap s in c.Notes.Points)
             {
                 p = c.Timing.GetPointAt(c.Timing.GetPointAt(s.Offset, false).InheritsFrom, false);
                 v = p.MSPerBeat;
@@ -83,9 +84,9 @@ namespace YAVSRG.Options
             }
         }
 
-        private static void Column(Chart c, ColorScheme cs)
+        private static void Column(ChartWithModifiers c, ColorScheme cs)
         {
-            foreach (Snap s in c.States.Points)
+            foreach (Snap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
                 for (int i = 0; i < c.Keys; i++)
@@ -95,13 +96,13 @@ namespace YAVSRG.Options
             }
         }
 
-        private static void Chord(Chart c, ColorScheme cs)
+        private static void Chord(ChartWithModifiers c, ColorScheme cs)
         {
             int count;
-            foreach (Snap s in c.States.Points)
+            foreach (Snap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
-                count = new Snap.BinarySwitcher(s.taps.value | s.holds.value).Count; //count number of lns/notes
+                count = new BinarySwitcher(s.taps.value | s.holds.value).Count; //count number of lns/notes
                 for (int i = 0; i < c.Keys; i++)
                 {
                     s.colors[i] = cs.GetColorIndex(count,c.Keys); //color notes in row based on number of notes. chord coloring.
@@ -113,7 +114,7 @@ namespace YAVSRG.Options
         {
             var x = a % b;
 
-            return Math.Min(Math.Abs(x),Math.Abs(b-x)) < 5;
+            return Math.Min(Math.Abs(x),Math.Abs(b-x)) < 2;
         }
     }
 }

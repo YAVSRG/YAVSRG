@@ -9,6 +9,7 @@ using System.Drawing;
 using YAVSRG.Beatmap;
 using YAVSRG.Interface;
 using YAVSRG.Audio;
+using YAVSRG.Gameplay;
 
 namespace YAVSRG
 {
@@ -18,7 +19,7 @@ namespace YAVSRG
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
-        protected Chart currentChart; //the current selected chart ingame 
+        protected GameplayManager gameplay; //the current selected chart ingame 
         protected MusicPlayer audio; //audio engine instance
         protected Options.Options options; //options handler instance
         protected ScreenManager screens;
@@ -31,7 +32,12 @@ namespace YAVSRG
 
         public static Chart CurrentChart
         {
-            get { return Instance.currentChart; }
+            get { return Instance.gameplay.CurrentChart; }
+        }
+
+        public static GameplayManager Gameplay
+        {
+            get { return Instance.gameplay; }
         }
 
         public static ScreenManager Screens
@@ -59,6 +65,7 @@ namespace YAVSRG
             ApplyWindowSettings(options.General); //apply window settings from options
             ScreenUtils.UpdateBounds(Width, Height);
 
+            gameplay = new GameplayManager();
             screens = new ScreenManager();
             screens.toolbar = new Toolbar();
             screens.AddScreen(new Interface.Screens.ScreenLoading(s));
@@ -125,15 +132,6 @@ namespace YAVSRG
             test.Visible = true;
             test.ShowBalloonTip(2000, "YAVSRG", "I'm down here!", System.Windows.Forms.ToolTipIcon.Info);
             test.Text = "YAVSRG";*/
-        }
-
-        public void ChangeChart(Chart c) //tells the game to change selected chart. handles changing loaded audio file and background
-        {
-            currentChart = c;
-            screens.ChangeBackground(Content.LoadBackground(c.path, c.bgpath));
-            audio.ChangeTrack(c.AudioPath());
-            audio.Play((long)c.PreviewTime); //play from the preview point given in the chart data
-            Console.WriteLine(c.GetHash());
         }
 
         protected override void OnUnload(EventArgs e)

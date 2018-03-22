@@ -15,7 +15,7 @@ namespace YAVSRG.Beatmap.Stepmania
             data = rows;
         }
 
-        public void ConvertBeat(double offset, double msPerBeat, Snap.BinarySwitcher lntracker, int keys, int beat, int meter, List<Snap> output)
+        public void ConvertBeat(double offset, double msPerBeat, BinarySwitcher lntracker, int keys, int beat, int meter, List<Snap> output)
         {
             int l = data.Length;
             double sep = msPerBeat * 4 / l;

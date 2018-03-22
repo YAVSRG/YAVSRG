@@ -69,7 +69,7 @@ namespace YAVSRG
 
         public static void RandomDifficulty()
         {
-            Game.Instance.ChangeChart(SelectedChart.diffs[new Random().Next(0, SelectedChart.diffs.Count)]);
+            Game.Gameplay.ChangeChart(SelectedChart.diffs[new Random().Next(0, SelectedChart.diffs.Count)]);
         }
 
         private static void LoadCache()

@@ -23,7 +23,7 @@ namespace YAVSRG.Interface.Screens
         public ScreenScore(ScoreTracker data)
         {
             score = data;
-            snapcount = score.c.States.Count;
+            snapcount = score.c.Notes.Count;
             score.Scoring.BestCombo = Math.Max(score.Scoring.Combo, score.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             float acc = score.Accuracy();
@@ -46,7 +46,7 @@ namespace YAVSRG.Interface.Screens
             acc1.ProcessScore(score.hitdata);
             acc2.ProcessScore(score.hitdata);
 
-            Game.Options.Profile.Stats.SecondsPlayed += (int)(data.c.GetDuration() / 1000 / Game.Options.Profile.Rate);
+            Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
         }
 
