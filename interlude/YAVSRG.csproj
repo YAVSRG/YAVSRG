@@ -120,6 +120,7 @@
     <Compile Include="Beatmap\Stepmania\StepFile.cs" />
     <Compile Include="ChartLoader.cs" />
     <Compile Include="Content.cs" />
+    <Compile Include="Gameplay\ChartSaveData.cs" />
     <Compile Include="Gameplay\ChartWithModifiers.cs" />
     <Compile Include="Gameplay\GameplayManager.cs" />
     <Compile Include="Gameplay\GameplaySnap.cs" />

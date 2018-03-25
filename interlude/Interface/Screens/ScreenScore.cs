@@ -14,6 +14,7 @@ namespace YAVSRG.Interface.Screens
     {
         static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" };
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
+        string[] mods;
         private ScoreTracker score;
         Sprite rank;
         int tier;
@@ -24,6 +25,7 @@ namespace YAVSRG.Interface.Screens
         {
             score = data;
             snapcount = score.c.Notes.Count;
+            mods = Game.Gameplay.GetModifiers();
             score.Scoring.BestCombo = Math.Max(score.Scoring.Combo, score.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             float acc = score.Accuracy();
@@ -37,7 +39,7 @@ namespace YAVSRG.Interface.Screens
             }
             rank = Content.LoadTextureFromAssets("rank-" + ranks[tier]);
 
-            ChartDifficulty c = new ChartDifficulty(Game.CurrentChart);
+            ChartDifficulty c = new ChartDifficulty();
             c.PositionTopLeft(520, 80, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 80, AnchorType.MAX, AnchorType.MAX);
             AddChild(c);
 
@@ -64,11 +66,14 @@ namespace YAVSRG.Interface.Screens
             //you'll just have to change to the chart before showing the score screen
             //SpriteBatch.DrawCentredText(ChartLoader.SelectedChart.header.title + " [" + score.c.DifficultyName + "]", 30f, 0, -Height + 150, Color.White);
             //SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -Width + 300, -Height + 80, Width - 300, -Height + 130, Color.White);
-
-            SpriteBatch.DrawCentredText(score.Scoring.FormatAcc(), 50, 0, -50, Color.White);
-            SpriteBatch.DrawCentredText(acc1.FormatAcc(), 30, -250, 50, Color.White);
-            SpriteBatch.DrawCentredText(acc2.FormatAcc(), 30, 250, 50, Color.White);
+            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -Width + 300, -Height + 80, Width - 300, -Height + 130, Game.Options.Theme.MenuFont);
+            for (int i = 0; i < mods.Length; i++)
+            {
+                SpriteBatch.DrawText(mods[i], 30f, -Width, -Height + 90 + i * 40, Game.Options.Theme.MenuFont);
+            }
+            SpriteBatch.DrawCentredText(score.Scoring.FormatAcc(), 50, 0, -50, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredText(acc1.FormatAcc(), 30, -250, 50, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredText(acc2.FormatAcc(), 30, 250, 50, Game.Options.Theme.MenuFont);
             for (int i = 0; i < 6; i++)
             {
                 SpriteBatch.DrawRect(-Width + 50, 100 + i * 40, -Width + 400, 140 + i * 40, Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
@@ -76,8 +81,8 @@ namespace YAVSRG.Interface.Screens
                 SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, -Width + 50, 100 + i * 40, Color.White);
                 SpriteBatch.DrawJustifiedText(score.Scoring.Judgements[i].ToString(), 30, -Width + 400, 100 + i * 40, Color.White);
             }
-            SpriteBatch.DrawText(score.Scoring.BestCombo.ToString() + "x", 30, -Width + 50, 340, Color.White);
-            SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString() + "cbs", 30, -Width + 400, 340, Color.White);
+            SpriteBatch.DrawText(score.Scoring.BestCombo.ToString() + "x", 30, -Width + 50, 340, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString() + "cbs", 30, -Width + 400, 340, Game.Options.Theme.MenuFont);
             DrawGraph();
         }
 

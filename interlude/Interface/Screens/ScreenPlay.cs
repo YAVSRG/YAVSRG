@@ -106,6 +106,7 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Stats.TimesPlayed++;
             //Options.Colorizer.Colorize(Chart, Game.Options.Profile.ColorStyle);
             Game.Screens.Toolbar(false);
+            Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
             Game.Audio.Loop = false;
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
@@ -128,6 +129,15 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.PopScreen();
                 Widgets.Clear();
                 Game.Options.Profile.Stats.TimesQuit++;
+            }
+            else if (Game.Audio.LeadingIn && Input.KeyTap(Key.Plus))
+            {
+                Game.Audio.Stop();
+                Game.Screens.AddDialog(new Dialogs.TextDialog("Change sync by... (ms)", (x) => {
+                    float f = 0; float.TryParse(x, out f); Game.Gameplay.ChartSaveData.Offset += f;
+                    Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
+                    Game.Audio.PlayLeadIn();
+                }));
             }
             for (int k = 0; k < Chart.Keys; k++)
             {

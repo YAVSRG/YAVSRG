@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Gameplay;
 
 namespace YAVSRG.Beatmap.DifficultyRating
 {
@@ -14,7 +15,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
         float[] fingers;
 
-        public RatingReport(Chart map, float rate, float hitwindow)
+        public RatingReport(ChartWithModifiers map, float rate, float hitwindow)
         {
             KeyLayout layout = new KeyLayout(map.Keys);
             int hands = layout.hands.Count;
@@ -22,7 +23,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
             raw = new List<float>();
             tech = new List<float>();
-            List<Snap> snaps = map.Notes.Points;
+            List<GameplaySnap> snaps = map.Notes.Points;
             Snap current;
             List<float> fingersOnHand = new List<float>();
             List<float> handsInSnap = new List<float>();

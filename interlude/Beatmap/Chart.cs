@@ -49,10 +49,12 @@ namespace YAVSRG.Beatmap
         {
             var h = SHA256.Create();
             byte[] data = new byte[8 * Notes.Count];
+            float offset;
+            if (Notes.Count > 0) { offset = Notes.Points[0].Offset; } else { return ""; } //no hash if empty chart
             int p = 0;
             foreach (Snap s in Notes.Points)
             {
-                BitConverter.GetBytes((int)s.Offset).CopyTo(data,p);
+                BitConverter.GetBytes((int)(s.Offset-offset)).CopyTo(data,p);
                 p += 4;
                 data[p] = (byte)s.taps.value;
                 data[p+1] = (byte)s.holds.value;
@@ -67,7 +69,7 @@ namespace YAVSRG.Beatmap
                 if (speed != s.ScrollSpeed)
                 {
                     Array.Resize(ref data, data.Length + 8);
-                    BitConverter.GetBytes((int)s.Offset).CopyTo(data, p);
+                    BitConverter.GetBytes((int)(s.Offset-offset)).CopyTo(data, p);
                     p += 4;
                     BitConverter.GetBytes(s.ScrollSpeed).CopyTo(data, p);
                     p += 4;

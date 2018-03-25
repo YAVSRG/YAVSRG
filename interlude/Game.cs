@@ -137,6 +137,7 @@ namespace YAVSRG
         protected override void OnUnload(EventArgs e)
         {
             base.OnUnload(e);
+            gameplay.Unload();
             //test.Dispose();
             Discord.Shutdown();
             options.Save(); //remember to dump any updated profile settings to file

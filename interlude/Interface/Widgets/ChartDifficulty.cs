@@ -19,21 +19,21 @@ namespace YAVSRG.Interface.Widgets
 
         Sprite texture, frame;
 
-        public ChartDifficulty(Chart c) : base()
+        public ChartDifficulty() : base()
         {
-            ChangeChart(c);
+            ChangeChart();
             texture = Content.LoadTextureFromAssets("infocard");
             frame = Content.LoadTextureFromAssets("frame");
         }
 
-        public void ChangeChart(Chart c)
+        public void ChangeChart()
         {
-            diff = new RatingReport(c, (float)Game.Options.Profile.Rate, 45f);
+            diff = new RatingReport(Game.Gameplay.ModifiedChart, (float)Game.Options.Profile.Rate, 45f);
             rate = (float)Game.Options.Profile.Rate;
             physical = diff.breakdown[0];
             technical = diff.breakdown[1];
-            time = Utils.FormatTime(c.GetDuration() / (float)Game.Options.Profile.Rate);
-            bpm = ((int)(c.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
+            time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
+            bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
         }
 
         public override void Draw(float left, float top, float right, float bottom)

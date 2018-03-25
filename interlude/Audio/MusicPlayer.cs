@@ -14,11 +14,13 @@ namespace YAVSRG.Audio
         private Track nowplaying;
         private Stopwatch timer;
         private double startTime;
-        private bool leadIn;
-        public bool Loop = true;
         private double Rate;
+
         public float[] WaveForm;
         public bool Paused;
+        public bool LeadingIn;
+        public bool Loop = true;
+        public float LocalOffset = 0;
 
         public MusicPlayer()
         {
@@ -37,7 +39,7 @@ namespace YAVSRG.Audio
             Rate = rate;
         }
 
-        protected double AudioOffset { get { return Game.Options.General.UniversalAudioOffset * Rate; } }
+        protected double AudioOffset { get { return Game.Options.General.UniversalAudioOffset * Rate + LocalOffset; } }
 
         public bool Playing
         {
@@ -50,7 +52,7 @@ namespace YAVSRG.Audio
         public void PlayLeadIn()
         {
             startTime = -BUFFER;
-            leadIn = true;
+            LeadingIn = true;
             timer.Start();
             Paused = false;
         }
@@ -89,7 +91,7 @@ namespace YAVSRG.Audio
         public double Now()
         {
             if (nowplaying == null) return 0;
-            if (leadIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - AudioOffset;
+            if (LeadingIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - AudioOffset;
             return ManagedBass.Bass.ChannelBytes2Seconds(nowplaying,ManagedBass.Bass.ChannelGetPosition(nowplaying))*1000 - AudioOffset;
         }
 
@@ -115,11 +117,11 @@ namespace YAVSRG.Audio
             {
                 WaveForm[i] = WaveForm[i] * 0.8f + temp[i] * 0.2f;
             }
-            if (leadIn && Playing && Now() + AudioOffset > 0)
+            if (LeadingIn && Playing && Now() + AudioOffset > 0)
             {
                 Seek(Now() + AudioOffset);
                 ManagedBass.Bass.ChannelPlay(nowplaying);
-                leadIn = false;
+                LeadingIn = false;
             }
             if (!Playing)
             {
@@ -127,7 +129,7 @@ namespace YAVSRG.Audio
                 {
                     Play(0);
                 }
-                else if (!leadIn) { leadIn = true; }
+                else if (!LeadingIn) { LeadingIn = true; }
             }
         }
 
