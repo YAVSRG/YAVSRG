@@ -16,30 +16,6 @@ namespace YAVSRG.Gameplay
             Judgements = new int[weights.Length];
         }
 
-        /*
-        public override void Update(float now, ScoreTracker.HitData[] data)
-        {
-            while (pos < data.Length && data[pos].Offset <= now)
-            {
-                for (int i = 0; i < data[pos].hit.Length; i++)
-                {
-                    if (data[pos].hit[i] == 1)
-                    {
-                        //GET MAD
-                        AddJudgement(5);
-                    }
-                    else if (data[pos].hit[i] == 2)
-                    {
-                        //GET GLAD
-                        AddJudgement(JudgeHit(Math.Abs(data[pos].delta[i])));
-                        Combo++;
-                    }
-                }
-                pos++;
-            }
-        }*/
-
-
         public override void HandleHit(int k, int index, ScoreTracker.HitData[] data)
         {
             int j = JudgeHit(data[index].delta[k]);
@@ -63,9 +39,8 @@ namespace YAVSRG.Gameplay
                 {
                     if (data[pos].hit[i] == 1)
                     {
-                        AddJudgement(5);
-                        //no onhit call here because it doesn't matter
-                        ComboBreak();
+                        data[pos].delta[i] = MissWindow;
+                        HandleHit(i, pos, data);
                     }
                     else if (data[pos].hit[i] == 2)
                     {

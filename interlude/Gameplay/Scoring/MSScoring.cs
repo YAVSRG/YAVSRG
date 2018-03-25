@@ -73,7 +73,7 @@ namespace YAVSRG.Gameplay
 
         public override string FormatAcc()
         {
-            return base.FormatAcc() + " (broken)";
+            return base.FormatAcc().Replace("DP","Wife");
         }
     }
 }
