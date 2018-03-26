@@ -31,6 +31,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
             for (int i = 0; i < snaps.Count; i++)
             {
+                if (snaps[i].Count == 0) { continue; }
                 handsInSnap.Clear();
                 for (int h = 0; h < hands; h++)
                 {

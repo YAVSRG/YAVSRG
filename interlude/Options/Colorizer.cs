@@ -62,7 +62,7 @@ namespace YAVSRG.Options
             float x;
             BPMPoint p;
             int color;
-            foreach (Snap s in c.Notes.Points)
+            foreach (GameplaySnap s in c.Notes.Points)
             {
                 p = c.Timing.GetPointAt(c.Timing.GetPointAt(s.Offset, false).InheritsFrom, false);
                 v = p.MSPerBeat;
@@ -86,7 +86,7 @@ namespace YAVSRG.Options
 
         private static void Column(ChartWithModifiers c, ColorScheme cs)
         {
-            foreach (Snap s in c.Notes.Points)
+            foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
                 for (int i = 0; i < c.Keys; i++)
@@ -99,7 +99,7 @@ namespace YAVSRG.Options
         private static void Chord(ChartWithModifiers c, ColorScheme cs)
         {
             int count;
-            foreach (Snap s in c.Notes.Points)
+            foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
                 count = new BinarySwitcher(s.taps.value | s.holds.value).Count; //count number of lns/notes

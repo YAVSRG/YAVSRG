@@ -54,6 +54,11 @@ namespace YAVSRG.Options
             SpriteBatch.Draw(s, left, top, right, bottom, GetColor(index), animation, index, GetRotation(column, keycount));
         }
 
+        public void DrawMine(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
+        {
+            SpriteBatch.Draw(s, left, top, right, bottom, GetColor(index), animation, index, 0); //fix it later
+        }
+
         public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
         {
             SpriteBatch.Draw(s, left, top, right, bottom, Color.White, GetRotation(column,keycount));

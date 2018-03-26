@@ -23,14 +23,15 @@ namespace YAVSRG.Beatmap.Stepmania
             int start = (beat) * l / meter;
             for (int i = start; i < end; i++)
             {
-                Snap s = new Snap((float)(offset+(i-start)*sep),0,0,lntracker.value,0);
+                Snap s = new Snap((float)(offset + (i - start) * sep), 0, 0, lntracker.value, 0, 0);
                 for (int c = 0; c < keys; c++)
                 {
                     if (data[i][c] == '1') { s.taps.SetColumn(c); }
+                    else if (data[i][c] == 'M') { s.mines.SetColumn(c); }
                     else if (data[i][c] == '2') { s.holds.SetColumn(c); lntracker.SetColumn(c); }
                     else if (data[i][c] == '3') { s.ends.SetColumn(c); lntracker.RemoveColumn(c); }
                 }
-                if (s.Count > 0) {
+                if (!s.IsEmpty()) {
                     output.Add(s);
                 }
             }

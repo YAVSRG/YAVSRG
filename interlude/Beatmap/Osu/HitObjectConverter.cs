@@ -131,7 +131,7 @@ namespace YAVSRG.Beatmap
                             mid += (1 << k);
                         }
                     }
-                    states.Add(new Snap(min, 0, 0, mid, end));
+                    states.Add(new Snap(min, 0, 0, mid, end, 0));
                 }
                 else
                 {

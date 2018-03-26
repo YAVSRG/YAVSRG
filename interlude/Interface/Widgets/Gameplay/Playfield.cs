@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     class Playfield : GameplayWidget
     {
-        Sprite note, hold, holdhead, receptor, playfield, screencover;
+        Sprite mine, note, hold, holdhead, receptor, playfield, screencover;
 
         int lasti; int lastt;
         float[] holds;
@@ -28,6 +28,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         public Playfield(ScoreTracker s) : base(s)
         {
+            mine = Content.LoadTextureFromAssets("mine");
             note = Game.Options.Theme.GetNoteTexture(Game.CurrentChart.Keys);
             receptor = Game.Options.Theme.GetReceptorTexture(Game.CurrentChart.Keys);
             hold = Game.Options.Theme.GetBodyTexture(Game.CurrentChart.Keys);
@@ -91,7 +92,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
             if (holdsInHitpos.value > 0)//this has been updated by DrawSnapWithHolds
             {
-                DrawSnap(new Snap(0, 0, holdsInHitpos.value, 0, 0), left, HitPos); //draw hold heads in hit position
+                DrawSnap(new GameplaySnap(0, 0, holdsInHitpos.value, 0, 0, 0), left, HitPos); //draw hold heads in hit position
 
                 foreach (int k in holdsInHitpos.GetColumns())
                 {
@@ -128,7 +129,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             Game.Options.Theme.DrawReceptor(receptor, k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos, k, Keys, Input.KeyPress(Game.Options.Profile.Bindings[Keys][k]));
         }
 
-        private void DrawSnap(Snap s, float offset, float pos)
+        private void DrawSnap(GameplaySnap s, float offset, float pos)
         {
             foreach (int k in s.middles.GetColumns())
             {
@@ -155,6 +156,10 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             foreach (int k in s.taps.GetColumns())
             {
                 Game.Options.Theme.DrawNote(note, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % note.UV_X);
+            }
+            foreach (int k in s.mines.GetColumns())
+            {
+                Game.Options.Theme.DrawMine(mine, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % mine.UV_X);
             }
             foreach (int k in s.ends.GetColumns())
             {
