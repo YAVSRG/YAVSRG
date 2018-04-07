@@ -7,7 +7,7 @@ YAVSRG (Yet Another Vertical Scrolling Rhythm Game) is a rhythm game written in 
 
 Well, the truth is, osu sucks competitively; etterna sucks casually.
 
-I plan to have the best of both worlds with regards to charting features. Mines ~~will~~likely will be retained from stepmania and the functionality of LNs and SVs will be retained from osu, this will allow for a significantly more diverse charting lineup + all files will eventually be converted to the .YAV format, where files can have both mines and svs simultaneously.
+I plan to have the best of both worlds with regards to charting features. Mines are retained from stepmania and the functionality of LNs and SVs will be retained from osu, this will allow for a significantly more diverse charting lineup + all files will eventually be converted to the .YAV format, where files can have both mines and svs simultaneously.
 
 YAV will be an extremely versatile client, supporting all styles of play with modifiers for competitive play (rates, screen covers) and for casual play (chord cohesion etc.) YAV will also support 3-10k and support loading of the .osu and .sm filetypes for this. Some features YAV will have that other rhythm games do not have include note colors based on chords and similar reading modifiers.
 
