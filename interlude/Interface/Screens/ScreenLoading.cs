@@ -50,7 +50,7 @@ namespace YAVSRG.Interface.Screens
             var screen = OpenTK.DisplayDevice.Default;
             Rectangle bounds = new Rectangle(Game.Instance.Bounds.X, Game.Instance.Bounds.Y, Game.Instance.ClientRectangle.Width, Game.Instance.ClientRectangle.Height);
             RectangleF UV = new RectangleF((float)bounds.X/screen.Width,(float)bounds.Y/screen.Height,(float)bounds.Width/screen.Width,(float)bounds.Height/screen.Height);
-            SpriteBatch.Draw(desktop, -Width, -Height, Width, Height, UV, Color.White);
+            SpriteBatch.Draw(desktop, -ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, UV, Color.White);
             int a = (int)(255 * fade);
             if (exiting) { a = 255 - a; }
             SpriteBatch.Draw(logo, -250, -250, 250, 250, Color.FromArgb(a, Color.White));

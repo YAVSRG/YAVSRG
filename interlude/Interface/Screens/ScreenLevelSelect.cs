@@ -26,9 +26,22 @@ namespace YAVSRG.Interface.Screens
             AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
                 .PositionTopLeft(250,100,AnchorType.MIN,AnchorType.CENTER)
                 .PositionBottomRight(450,200,AnchorType.MIN,AnchorType.CENTER));
-            PositionTopLeft(-Width, 0, AnchorType.MIN, AnchorType.MIN);
-            PositionBottomRight(-Width, 0, AnchorType.MAX, AnchorType.MAX);
+            //temp mod selection menu
+            FlowContainer f = new FlowContainer(20,20) { };
+            foreach (Gameplay.Mods.Mod m in Game.Gameplay.mods)
+            {
+                f.AddChild(new BoolPicker(m.GetName(), m.Enable, ModSelectClosure(m)).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
+            }
+            AddChild(f.PositionTopLeft(-100,0,AnchorType.CENTER,AnchorType.CENTER).PositionBottomRight(100,0,AnchorType.CENTER,AnchorType.MAX));
+            //
+            PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
+            PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
+        }
+
+        private Action<bool> ModSelectClosure(Gameplay.Mods.Mod m)
+        {
+            return (b) => { m.Enable = b; };
         }
 
         public void OnChangeChart()
@@ -47,8 +60,8 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            A.Target(-Width, 0);
-            B.Target(-Width, 0);
+            A.Target(-ScreenWidth, 0);
+            B.Target(-ScreenWidth, 0);
         }
 
         public override void Update(float left, float top, float right, float bottom)

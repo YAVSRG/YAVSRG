@@ -5,12 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Beatmap;
 using System.IO;
+using YAVSRG.Gameplay.Mods;
 
 namespace YAVSRG.Gameplay
 {
     public class GameplayManager
     {
         //"modded" chart
+        public Mod[] mods = new Mod[] { new Mirror(), new NoSV() };
 
         public Chart CurrentChart;
         public ChartWithModifiers ModifiedChart;
@@ -36,6 +38,13 @@ namespace YAVSRG.Gameplay
             ModifiedChart = new ChartWithModifiers(CurrentChart);
             Options.Colorizer.Colorize(ModifiedChart, Game.Options.Profile.ColorStyle);
             //for i in mods
+            foreach (Mod m in mods)
+            {
+                if (m.IsActive(ModifiedChart))
+                {
+                    m.Apply(ModifiedChart);
+                }
+            }
             //mod it
         }
 
@@ -72,7 +81,15 @@ namespace YAVSRG.Gameplay
 
         public string[] GetModifiers()
         {
-            return GetBaseModifiers();
+            List<string> l = GetBaseModifiers().ToList();
+            foreach (Mod m in mods)
+            {
+                if (m.IsActive(ModifiedChart))
+                {
+                    l.Add(m.GetName());
+                }
+            }
+            return l.ToArray();
         }
     }
 }

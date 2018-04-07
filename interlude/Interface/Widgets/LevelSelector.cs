@@ -42,7 +42,7 @@ namespace YAVSRG.Interface.Widgets
 
             public void UpdatePosition(float y)
             {
-                A.Target(width - (float)Math.Pow((y-ScreenUtils.Height) / 50f, 2), y);
+                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight) / 50f, 2), y);
                 B.Target(-50, y + height);
             }
 
@@ -152,7 +152,7 @@ namespace YAVSRG.Interface.Widgets
 
         public void AddPack(ChartLoader.ChartPack pack)
         {
-            int width = (int)(ScreenUtils.Width*0.8f - 150);
+            int width = (int)(ScreenUtils.ScreenWidth*0.8f - 150);
             Group g = new Group(100, width, (x) =>
             {
                 bool temp = x.Expand;
@@ -172,7 +172,7 @@ namespace YAVSRG.Interface.Widgets
                 {
                     x.RecursivePopOutRooted();
                 }
-                scroll -= (int)x.BottomEdge() - ScreenUtils.Height;
+                scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
             }, () => { return ChartLoader.SelectedPack.title == pack.title; }, pack.title, "", Game.Options.Theme.SelectPack);
             foreach (ChartLoader.CachedChart chart in pack.charts)
             {
@@ -208,7 +208,7 @@ namespace YAVSRG.Interface.Widgets
                             }
                         }
                         x.RecursivePopOutRooted();
-                        scroll -= (int)x.BottomEdge() - ScreenUtils.Height;
+                        scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
                     }
                 }, () => { return ChartLoader.SelectedChart.header.title == chart.title; }, chart.title, chart.artist, Game.Options.Theme.SelectChart));
             }
@@ -234,7 +234,7 @@ namespace YAVSRG.Interface.Widgets
                 g.Update(left, top, right, bottom);
                 y += g.Height();
             }
-            if (y < ScreenUtils.Height*2-100) scroll += 10; //prevents users from scrolling off the list
+            if (y < ScreenUtils.ScreenHeight*2-100) scroll += 10; //prevents users from scrolling off the list
             if (scroll > 100) scroll -= 10;
             if (Input.KeyPress(OpenTK.Input.Key.Up))
             {

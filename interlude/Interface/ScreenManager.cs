@@ -89,34 +89,34 @@ namespace YAVSRG.Interface
         {
             if (Loading)
             {
-                Current?.Draw(-Width, -Height, Width, Height);
+                Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
                 return;
             }
-            float parallaxX = Input.MouseX * parallax / Width;
-            float parallaxY = Input.MouseY * parallax / Height;
-            DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, BackgroundDim);
+            float parallaxX = Input.MouseX * parallax / ScreenWidth;
+            float parallaxY = Input.MouseY * parallax / ScreenHeight;
+            DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, BackgroundDim);
             if (animation.Running)
             {
                 if (fade1.Running)
                 {
-                    Previous?.Draw(-Width, -Height, Width, Height);
-                    DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, Color.FromArgb((int)(255 * fade1), BackgroundDim));
+                    Previous?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                    DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, Color.FromArgb((int)(255 * fade1), BackgroundDim));
                 }
                 else
                 {
-                    Current?.Draw(-Width, -Height, Width, Height);
-                    DrawChartBackground(-Width - parallaxX - parallax, -Height - parallaxY - parallax, Width - parallaxX + parallax, Height - parallaxY + parallax, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
+                    Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                    DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
                 }
             }
             else
             {
-                Current?.Draw(-Width, -Height, Width, Height);
+                Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             }
             if (dialogs.Count > 0)
             {
-                dialogs[0].Draw(-Width, -Height, Width, Height);
+                dialogs[0].Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             }
-            toolbar.Draw(-Width, -Height, Width, Height);
+            toolbar.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
         }
 
         public void DrawChartBackground(float left, float top, float right, float bottom, Color c)
@@ -131,13 +131,13 @@ namespace YAVSRG.Interface
         public void DrawStaticChartBackground(float left, float top, float right, float bottom, Color c)
         {
             float bg = ((float)Background.Width / Background.Height);
-            float window = ((float)Width / Height);
+            float window = ((float)ScreenWidth / ScreenHeight);
             float correction = window / bg;
 
-            float l = (1 + left / Width) / 2;
-            float r = (1 + right / Width) / 2;
-            float t = (correction + top / Height) / (2 * correction);
-            float b = (correction + bottom / Height) / (2 * correction);
+            float l = (1 + left / ScreenWidth) / 2;
+            float r = (1 + right / ScreenWidth) / 2;
+            float t = (correction + top / ScreenHeight) / (2 * correction);
+            float b = (correction + bottom / ScreenHeight) / (2 * correction);
 
             RectangleF uv = new RectangleF(l, t, r - l, b - t);
             SpriteBatch.Draw(Background, left, top, right, bottom + 1, uv, c);
@@ -147,12 +147,12 @@ namespace YAVSRG.Interface
         {
             if (Loading)
             {
-                Current?.Update(-Width, -Height, Width, Height);
+                Current?.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
                 return;
             }
             if (dialogs.Count > 0)
             {
-                dialogs[0].Update(-Width, -Height, Width, Height);
+                dialogs[0].Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
                 if (dialogs[0].Closed)
                 {
                     dialogs.RemoveAt(0);
@@ -160,7 +160,7 @@ namespace YAVSRG.Interface
             }
             else
             {
-                Current?.Update(-Width, -Height, Width, Height);
+                Current?.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             }
             if (Previous != null)
             {
@@ -176,7 +176,7 @@ namespace YAVSRG.Interface
                     Previous = null;
                 }
             }
-            toolbar.Update(-Width, -Height, Width, Height);
+            toolbar.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             animation.Update();
             animation2.Update();
         }

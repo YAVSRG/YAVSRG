@@ -16,11 +16,11 @@ namespace YAVSRG.Interface.Dialogs
         {
             this.prompt = prompt;
             banner = Content.LoadTextureFromAssets("banner");
-            PositionTopLeft(ScreenUtils.Width, -50, AnchorType.CENTER, AnchorType.CENTER);
-            PositionBottomRight(ScreenUtils.Width+100, 50, AnchorType.CENTER, AnchorType.CENTER);
-            A.Target(-ScreenUtils.Width, -50);
-            AddChild(new BannerButton("Yes", () => { Close("Y"); }).PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(ScreenUtils.Width, 200, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new BannerButton("No", () => { Close("N"); }).PositionTopLeft(ScreenUtils.Width, 100, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(-100, 200, AnchorType.MAX, AnchorType.MAX));
+            PositionTopLeft(ScreenUtils.ScreenWidth, -50, AnchorType.CENTER, AnchorType.CENTER);
+            PositionBottomRight(ScreenUtils.ScreenWidth+100, 50, AnchorType.CENTER, AnchorType.CENTER);
+            A.Target(-ScreenUtils.ScreenWidth, -50);
+            AddChild(new BannerButton("Yes", () => { Close("Y"); }).PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(ScreenUtils.ScreenWidth, 200, AnchorType.MIN, AnchorType.MAX));
+            AddChild(new BannerButton("No", () => { Close("N"); }).PositionTopLeft(ScreenUtils.ScreenWidth, 100, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(-100, 200, AnchorType.MAX, AnchorType.MAX));
 
         }
 

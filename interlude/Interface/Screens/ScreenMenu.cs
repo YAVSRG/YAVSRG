@@ -23,12 +23,12 @@ namespace YAVSRG.Interface.Screens
             AddChild(
                 play = new BannerButton("Play", () => { Game.Screens.AddScreen(new ScreenLevelSelect()); })
                 .PositionTopLeft(-100, -100, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.Width, 0, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionBottomRight(-ScreenUtils.ScreenWidth, 0, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(
                 options = new BannerButton("Options", () => { Game.Screens.AddScreen(new ScreenOptions()); })
                 .PositionTopLeft(-100, 50, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.Width, 150, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionBottomRight(-ScreenUtils.ScreenWidth, 150, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(
                 quit = new BannerButton("Quit", () =>
@@ -36,7 +36,7 @@ namespace YAVSRG.Interface.Screens
                     Game.Screens.PopScreen();
                 })
                 .PositionTopLeft(-100, 200, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.Width, 300, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionBottomRight(-ScreenUtils.ScreenWidth, 300, AnchorType.CENTER, AnchorType.CENTER)
                 );
             slide = new AnimationSlider(0);
             banner = Content.LoadTextureFromAssets("banner");
@@ -51,9 +51,9 @@ namespace YAVSRG.Interface.Screens
             splash = splashes[new Random().Next(0, splashes.Length)];
             Game.Screens.BackgroundDim.Target = 1;
             slide.Target = 1;
-            play.B.Reposition(-ScreenUtils.Width, 0, AnchorType.CENTER, AnchorType.CENTER);
-            options.B.Reposition(-ScreenUtils.Width, 150, AnchorType.CENTER, AnchorType.CENTER);
-            quit.B.Reposition(-ScreenUtils.Width, 300, AnchorType.CENTER, AnchorType.CENTER);
+            play.B.Reposition(-ScreenUtils.ScreenWidth, 0, AnchorType.CENTER, AnchorType.CENTER);
+            options.B.Reposition(-ScreenUtils.ScreenWidth, 150, AnchorType.CENTER, AnchorType.CENTER);
+            quit.B.Reposition(-ScreenUtils.ScreenWidth, 300, AnchorType.CENTER, AnchorType.CENTER);
             var a = new AnimationSeries(false);
             a.Add(new AnimationCounter(10,false));
             a.Add(new AnimationAction(() => {
@@ -80,7 +80,7 @@ namespace YAVSRG.Interface.Screens
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            float w = (ScreenUtils.Width-100) * slide;
+            float w = (ScreenUtils.ScreenWidth-100) * slide;
             ScreenUtils.DrawBanner(banner, -w, -300, w, -200, Game.Screens.HighlightColor);
             SpriteBatch.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
             SpriteBatch.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);

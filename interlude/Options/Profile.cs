@@ -13,14 +13,15 @@ namespace YAVSRG.Options
     {
         [JsonIgnore]
         public string ProfilePath = "Default.json";
+        [JsonIgnore]
+        public double Rate = 1.0f;
+
         public string Name = "Default Profile";
         public int Keymode = 0;
         public string Skin = "_fallback";
-        public bool FixedScroll = false;
         public float ScrollSpeed = 2.05f;
         public bool UseArrowsFor4k = false;
         public int HitPosition = 0;
-        public double Rate = 1.0f;
         public float OD = 8.5f;
         public int Judge = 4;
         public bool Upscroll = false;

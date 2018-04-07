@@ -52,35 +52,35 @@ namespace YAVSRG.Interface
         {
             if (slide < 0) { return; }
 
-            float s = (Height * 2 - slide * 2) / 24f;
+            float s = (ScreenHeight * 2 - slide * 2) / 24f;
             for (int i = 0; i < 24; i++) //draws the waveform
             {
                 float level = Game.Audio.WaveForm[i * 4] + Game.Audio.WaveForm[i * 4 + 1] + Game.Audio.WaveForm[i * 4 + 2] + Game.Audio.WaveForm[i * 4 + 3];
                 level += 0.01f;
                 level *= slide * 5;
-                SpriteBatch.DrawRect(-Width, -Height + slide + i * s, -Width + level, -Height + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
-                SpriteBatch.DrawRect(Width - level, -Height + slide + i * s, Width, -Height + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
+                SpriteBatch.DrawRect(-ScreenWidth, -ScreenHeight + slide + i * s, -ScreenWidth + level, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
+                SpriteBatch.DrawRect(ScreenWidth - level, -ScreenHeight + slide + i * s, ScreenWidth, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
             }
 
             //SpriteBatch.Draw(texture,-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
-            Game.Screens.DrawStaticChartBackground(-Width, -Height, Width, -Height + slide, Game.Screens.DarkColor);
-            SpriteBatch.DrawFrame(frame, -Width - 30, -Height - 30, Width + 30, -Height + slide + 5, 30f, Game.Screens.BaseColor);
+            Game.Screens.DrawStaticChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor);
+            SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + slide + 5, 30f, Game.Screens.BaseColor);
             //SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Screens.BaseColor);
             //SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Screens.BaseColor);
 
             //SpriteBatch.Draw(texture, -Width, Height-80, Width, Height, Game.Options.Theme.Dark);
-            Game.Screens.DrawStaticChartBackground(-Width, Height - slide, Width, Height, Game.Screens.DarkColor);
+            Game.Screens.DrawStaticChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor);
             //SpriteBatch.DrawRect(-Width, Height - slide - 5, Width, Height - slide, Game.Screens.BaseColor);
-            SpriteBatch.DrawFrame(frame, -Width - 30, Height - slide - 5, Width + 30, Height + 30, 30f, Game.Screens.BaseColor);
+            SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
 
             base.Draw(left, top + slide - 80, right, bottom);
 
-            SpriteBatch.DrawText(Game.Options.Profile.Name, 30f, -Width, Height - slide + 5, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawCentredText("Plays: "+Game.Options.Profile.Stats.TimesPlayed.ToString(), 18f, 0, Height - slide + 5, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawCentredText("Playtime: " + Utils.FormatTime(Game.Options.Profile.Stats.SecondsPlayed*1000), 18f, 0, Height - slide + 28, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawCentredText("S Ranks: " + Game.Options.Profile.Stats.SRanks, 18f, 0, Height - slide + 51, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText(Game.Version, 25f, Width, Height - slide + 5, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, Width, Height - slide + 45, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawText(Game.Options.Profile.Name, 30f, -ScreenWidth, ScreenHeight - slide + 5, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredText("Plays: "+Game.Options.Profile.Stats.TimesPlayed.ToString(), 18f, 0, ScreenHeight - slide + 5, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredText("Playtime: " + Utils.FormatTime(Game.Options.Profile.Stats.SecondsPlayed*1000), 18f, 0, ScreenHeight - slide + 28, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredText("S Ranks: " + Game.Options.Profile.Stats.SRanks, 18f, 0, ScreenHeight - slide + 51, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(Game.Version, 25f, ScreenWidth, ScreenHeight - slide + 5, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, ScreenWidth, ScreenHeight - slide + 45, Game.Options.Theme.MenuFont);
 
             SpriteBatch.Draw(cursor, Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Screens.HighlightColor);
         }

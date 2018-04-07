@@ -76,16 +76,16 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 holds[k] = 0;//used in DrawSnapWithHolds. it's only initialised once to reduce garbage collection
             }
 
-            while (y + v < Height * 2 && i < lasti)//continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
+            while (y + v < ScreenHeight * 2 && i < lasti)//continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
             {
-                while (!Game.Options.Profile.FixedScroll && t < lastt - 1 && Chart.Timing.Points[t + 1].Offset < Chart.Notes.Points[i].Offset) //check if we've gone past any timing points
+                while (t < lastt - 1 && Chart.Timing.Points[t + 1].Offset < Chart.Notes.Points[i].Offset) //check if we've gone past any timing points
                 {
                     y += ScrollSpeed * Chart.Timing.Points[t].ScrollSpeed * (Chart.Timing.Points[t + 1].Offset - now); //handle scrollspeed adjustments
                     //SpriteBatch.DrawRect(offset, Height - y, -offset, Height - y + 5, Color.White); //bar line
                     t++; //tracks which timing point we're looking at
                     now = Chart.Timing.Points[t].Offset; //we're now drawing relative to the most recent timing point
                 }
-                v = (Game.Options.Profile.FixedScroll ? 1 : Chart.Timing.Points[t].ScrollSpeed) * (Chart.Notes.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
+                v = Chart.Timing.Points[t].ScrollSpeed * (Chart.Notes.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
                 DrawSnap(Chart.Notes.Points[i], left, y + v);//draw whole row of notes
                 i++;//move on to next row of notes
             }
@@ -121,7 +121,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         private void DrawColumn(float offset, int i)
         {
-            SpriteBatch.Draw(playfield, i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, Height * 2, Color.White);
+            SpriteBatch.Draw(playfield, i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, ScreenHeight * 2, Color.White);
         }
 
         private void DrawReceptor(float offset, int k)
@@ -147,7 +147,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 {
                     holdsInHitpos.SetColumn(k);
                 }
-                holds[k] = Height * 2;
+                holds[k] = ScreenHeight * 2;
             }
             foreach (int k in s.holds.GetColumns())
             {

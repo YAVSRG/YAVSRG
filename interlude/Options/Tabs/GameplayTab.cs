@@ -34,11 +34,6 @@ namespace YAVSRG.Options.Tabs
                 .PositionBottomRight(300, 325, AnchorType.CENTER, AnchorType.MIN)
                 );
             AddChild(
-                new BoolPicker("Disable SV", Game.Options.Profile.FixedScroll, v => { Game.Options.Profile.FixedScroll = v; })
-                .PositionTopLeft(-200, 375, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(-50, 425, AnchorType.CENTER, AnchorType.MIN)
-                );
-            AddChild(
                 new BoolPicker("Upscroll", Game.Options.Profile.Upscroll, v => { Game.Options.Profile.Upscroll = v; })
                 .PositionTopLeft(-400, 375, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(-250, 425, AnchorType.CENTER, AnchorType.MIN)

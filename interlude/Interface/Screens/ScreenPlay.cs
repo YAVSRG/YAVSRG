@@ -218,7 +218,7 @@ namespace YAVSRG.Interface.Screens
            // DrawScreenCoverUp(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverUp); //draws the screencover
            // DrawScreenCoverDown(offset, offset + COLUMNWIDTH * Chart.Keys, Game.Options.Profile.ScreenCoverDown);
             
-            SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -Height + 70, Color.White); //acc
+            SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -ScreenHeight + 70, Color.White); //acc
 
         }
         /*

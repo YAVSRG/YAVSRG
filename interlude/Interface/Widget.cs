@@ -17,7 +17,6 @@ namespace YAVSRG.Interface
         protected Widget parent;
         protected List<Widget> Widgets;
 
-
         public Widget()
         {
             A = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN);
@@ -57,6 +56,16 @@ namespace YAVSRG.Interface
         public float Bottom(float t, float b)
         {
             return B.Y(t, b);
+        }
+
+        public float Width
+        {
+            get { return B.TargetX - A.TargetX; }
+        }
+
+        public float Height
+        {
+            get { return B.TargetY - A.TargetY; }
         }
 
         protected void ConvertCoordinates(ref float l, ref float t, ref float r, ref float b)

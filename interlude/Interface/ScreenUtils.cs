@@ -9,14 +9,14 @@ namespace YAVSRG.Interface
 {
     class ScreenUtils
     {
-        public static int Width;
+        public static int ScreenWidth;
 
-        public static int Height;
+        public static int ScreenHeight;
 
         public static void UpdateBounds(int Width, int Height)
         {
-            ScreenUtils.Width = Width / 2;
-            ScreenUtils.Height = Height / 2;
+            ScreenWidth = Width / 2;
+            ScreenHeight = Height / 2;
         }
 
         public static bool MouseOver(float left, float top, float right, float bottom)

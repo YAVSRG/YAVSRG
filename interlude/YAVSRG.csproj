@@ -124,6 +124,9 @@
     <Compile Include="Gameplay\ChartWithModifiers.cs" />
     <Compile Include="Gameplay\GameplayManager.cs" />
     <Compile Include="Gameplay\GameplaySnap.cs" />
+    <Compile Include="Gameplay\Mods\Mirror.cs" />
+    <Compile Include="Gameplay\Mods\Mod.cs" />
+    <Compile Include="Gameplay\Mods\NoSV.cs" />
     <Compile Include="Gameplay\Scoring\CCScoring.cs" />
     <Compile Include="Gameplay\Scoring\DP.cs" />
     <Compile Include="Gameplay\Scoring\MSScoring.cs" />
@@ -167,6 +170,7 @@
     <Compile Include="Interface\Widgets\BoolPicker.cs" />
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartDifficulty.cs" />
+    <Compile Include="Interface\Widgets\FlowContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\FramedButton.cs" />
     <Compile Include="Interface\Widgets\Gameplay\GameplayWidget.cs" />
@@ -233,9 +237,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Gameplay\Mods\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
