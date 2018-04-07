@@ -73,8 +73,8 @@ namespace YAVSRG.Interface.Screens
 
             end = Chart.Notes.Points[Chart.Notes.Count - 1].Offset;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
-            
-            AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(COLUMNWIDTH*Chart.Keys*0.5f,0,AnchorType.CENTER,AnchorType.MAX));
+
+            AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-COLUMNWIDTH * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(COLUMNWIDTH * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
             AddChild(new HitMeter(scoreTracker).PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
             AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
             AddChild(new ComboDisplay(scoreTracker).PositionTopLeft(0, -100, AnchorType.CENTER, AnchorType.CENTER));
@@ -88,10 +88,10 @@ namespace YAVSRG.Interface.Screens
                     .PositionBottomRight(COLUMNWIDTH * (i + 1), HITPOSITION, AnchorType.MIN, AnchorType.CENTER);
                 playfield.AddChild(lighting[i]);
             }
-            //playfield.AddChild(new Screencover(scoreTracker, true)
-                //.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, Height * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.MIN));
-            //playfield.AddChild(new Screencover(scoreTracker, false)
-                //.PositionTopLeft(0, Height * 2 * Game.Options.Profile.ScreenCoverDown, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
+            playfield.AddChild(new Screencover(scoreTracker, false)
+                .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
+            playfield.AddChild(new Screencover(scoreTracker, true)
+                .PositionTopLeft(0, ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverDown), AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2, AnchorType.MAX, AnchorType.CENTER));
         }
 
         public override void OnEnter(Screen prev)
