@@ -63,7 +63,8 @@ namespace YAVSRG.Interface.Screens
             if (!fade.Running && !ChartLoader.Loaded)
             {
                 ChartLoader.Init();
-                ChartLoader.RandomPack();
+                ChartLoader.SortIntoGroups(ChartLoader.GroupByPack, ChartLoader.SortByTitle);
+                ChartLoader.RandomChart();
             }
             else if (exiting)
             {

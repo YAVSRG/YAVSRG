@@ -19,36 +19,35 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 time = t;
                 delta = d;
                 tier = j;
-
             }
         }
 
         class JudgementDisplay
         {
-            int tier;
-            float when;
+            Hit h;
+            Sprite sprite;
 
             public JudgementDisplay()
             {
-                tier = 0;
-                when = -10000;
+                h = new Hit(-10000, 0, 0);
+                sprite = Content.LoadTextureFromAssets("judgements");
             }
 
             public void Draw(float left, float top, float right, float bottom, float now)
             {
-                if (now-when < 200)
+                if (now-h.time < 200)
                 {
-                    float x = Math.Abs(1 - (now - when) * 0.01f) * (right-left)*0.2f;
-                    SpriteBatch.DrawCentredTextToFill(Game.Options.Theme.Judges[tier], left + x, top, right - x, bottom, Game.Options.Theme.JudgeColors[tier]);
+                    float x = Math.Abs(1 - (now - h.time) * 0.01f) * (right-left)*0.2f;
+                    //SpriteBatch.Draw(sprite, left, top, right, top + (right-left)*34f/256f, System.Drawing.Color.White, h.delta < 0 ? 1 : 0, h.tier);
+                    SpriteBatch.DrawCentredTextToFill(Game.Options.Theme.Judges[h.tier], left + x, top, right - x, bottom, Game.Options.Theme.JudgeColors[h.tier]);
                 }
             }
 
-            public void NewHit(int tier, float now)
+            public void NewHit(Hit newhit)
             {
-                if ((now - when >= 200 || tier > this.tier) && (tier > 0 || Game.Options.Theme.JudgementShowMarv))
+                if ((newhit.time - h.time >= 200 || newhit.tier > h.tier) && (newhit.tier > 0 || Game.Options.Theme.JudgementShowMarv))
                 {
-                    this.tier = tier;
-                    when = now;
+                    h = newhit;
                 }
             }
         }
@@ -78,15 +77,16 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         private void AddHit(int k, int tier, float delta)
         {
             float now = (float)Game.Audio.Now();
+            Hit h = new Hit(now, delta, tier);
             if (Game.Options.Theme.JudgementPerColumn)
             {
-                disp[k].NewHit(tier, now);
+                disp[k].NewHit(h);
             }
             else
             {
-                disp[0].NewHit(tier, now);
+                disp[0].NewHit(h);
             }
-            hits.Add(new Hit(now,delta,tier));
+            hits.Add(h);
         }
 
         public override void Draw(float left, float top, float right, float bottom)
@@ -110,8 +110,8 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
             foreach (Hit h in hits)
             {
-                int alpha = (int)(4 + (5000 + h.time - now) * 0.05f); //you do not understand how many cancerous crashes this has caused
-                alpha = Math.Max(0, Math.Min(alpha, 255));
+                int alpha = (int)((2500 + h.time - now) * 0.1f); //you do not understand how many cancerous crashes this has caused
+                alpha = Math.Max(0, Math.Min(alpha, 255)); //so i did this
                 SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb(alpha,Game.Options.Theme.JudgeColors[h.tier]));
             }
         }

@@ -71,14 +71,14 @@ namespace YAVSRG.Interface.Widgets
                 RecursivePopOutRooted();
             }
 
-            public virtual int Height()
+            public virtual int GetHeight()
             {
                 int r = height;
                 if (Expand)
                 {
                     foreach (Group g in Children)
                     {
-                        r += g.Height();
+                        r += g.GetHeight();
                     }
                 }
                 return r;
@@ -95,6 +95,7 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+                if (top > ScreenUtils.ScreenHeight || bottom < -ScreenUtils.ScreenHeight) { return; }
                 SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, 0, fill);
                 SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, border);
                 SpriteBatch.DrawTextToFill(title, left + 20, top + 20, left + width, bottom - 20, border);
@@ -109,7 +110,7 @@ namespace YAVSRG.Interface.Widgets
                     {
                         g.UpdatePosition(x);
                         g.Update(left, top, right, bottom);
-                        x += g.Height();
+                        x += g.GetHeight();
                     }
                 }
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
@@ -133,24 +134,27 @@ namespace YAVSRG.Interface.Widgets
         }
 
         protected List<Group> groups;
-        private Screens.ScreenLevelSelect parent;
 
         static Sprite box, frame;
         public int scroll = 0;
 
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {
-            this.parent = parent;
             box = Content.LoadTextureFromAssets("levelselectbase");
             frame = Content.LoadTextureFromAssets("frame");
+            Refresh();
+        }
+
+        public void Refresh()
+        {
             groups = new List<Group>();
-            foreach (ChartLoader.ChartPack p in ChartLoader.Cache)
+            foreach (ChartLoader.ChartGroup p in ChartLoader.Groups)
             {
                 AddPack(p);
             }
         }
 
-        public void AddPack(ChartLoader.ChartPack pack)
+        public void AddPack(ChartLoader.ChartGroup pack)
         {
             int width = (int)(ScreenUtils.ScreenWidth*0.8f - 150);
             Group g = new Group(100, width, (x) =>
@@ -162,7 +166,7 @@ namespace YAVSRG.Interface.Widgets
                     {
                         if (c.BottomEdge() < x.BottomEdge())
                         {
-                            scroll += c.Height();
+                            scroll += c.GetHeight();
                         }
                         c.Expand = false;
                     }
@@ -173,7 +177,7 @@ namespace YAVSRG.Interface.Widgets
                     x.RecursivePopOutRooted();
                 }
                 scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
-            }, () => { return ChartLoader.SelectedPack.title == pack.title; }, pack.title, "", Game.Options.Theme.SelectPack);
+            }, () => { return false; }, pack.label, "", Game.Options.Theme.SelectPack); //groups don't know when they're expanded :(
             foreach (ChartLoader.CachedChart chart in pack.charts)
             {
                 g.AddItem(new Group(80, width, (x) =>
@@ -185,7 +189,7 @@ namespace YAVSRG.Interface.Widgets
                         {
                             if (c.BottomEdge() < x.BottomEdge())
                             {
-                                scroll += c.Height();
+                                scroll += c.GetHeight();
                             }
                             c.Expand = false;
                         }
@@ -201,9 +205,8 @@ namespace YAVSRG.Interface.Widgets
                                 x.AddItem(new Group(80, width, (y) =>
                                 {
                                     Game.Gameplay.ChangeChart(d);
-                                    parent.OnChangeChart();
+                                    ((Screens.ScreenLevelSelect)parent).OnChangeChart(); //some temp hack
                                     ChartLoader.SelectedChart = m;
-                                    ChartLoader.SelectedPack = pack;
                                 }, () => { return Game.CurrentChart.path + Game.CurrentChart.DifficultyName == d.path + d.DifficultyName; }, d.DifficultyName, "", Game.Options.Theme.SelectDiff));
                             }
                         }
@@ -232,7 +235,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 g.UpdatePosition(y);
                 g.Update(left, top, right, bottom);
-                y += g.Height();
+                y += g.GetHeight();
             }
             if (y < ScreenUtils.ScreenHeight*2-100) scroll += 10; //prevents users from scrolling off the list
             if (scroll > 100) scroll -= 10;

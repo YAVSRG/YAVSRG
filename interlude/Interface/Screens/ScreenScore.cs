@@ -66,7 +66,7 @@ namespace YAVSRG.Interface.Screens
             //you'll just have to change to the chart before showing the score screen
             //SpriteBatch.DrawCentredText(ChartLoader.SelectedChart.header.title + " [" + score.c.DifficultyName + "]", 30f, 0, -Height + 150, Color.White);
             //SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedPack.title, -ScreenWidth + 300, -ScreenHeight + 80, ScreenWidth - 300, -ScreenHeight + 130, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.pack, -ScreenWidth + 300, -ScreenHeight + 80, ScreenWidth - 300, -ScreenHeight + 130, Game.Options.Theme.MenuFont);
             for (int i = 0; i < mods.Length; i++)
             {
                 SpriteBatch.DrawText(mods[i], 30f, -ScreenWidth, -ScreenHeight + 90 + i * 40, Game.Options.Theme.MenuFont);

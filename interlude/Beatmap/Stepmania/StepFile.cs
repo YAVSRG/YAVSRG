@@ -102,7 +102,7 @@ namespace YAVSRG.Beatmap.Stepmania
 
         public MultiChart ConvertToRoot()
         {
-            MultiChart c = new MultiChart(new ChartHeader(GetTag("TITLE"), raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"), GetSubtitle(), path));
+            MultiChart c = new MultiChart(new ChartHeader { title = GetTag("TITLE"), artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"), creator = GetSubtitle(), path = path });
             c.diffs = Convert();
             if (c.diffs.Count == 0) { return null; }
             return c;

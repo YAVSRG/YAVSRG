@@ -31,8 +31,6 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 SpriteBatch.Draw(texture, left, top, right, bottom - Game.Options.Theme.ColumnWidth, System.Drawing.Color.White, 0, 1);
                 SpriteBatch.Draw(texture, left, bottom - Game.Options.Theme.ColumnWidth, right, bottom, System.Drawing.Color.White, 0, 0, 2);
             }
-            //SpriteBatch.Draw(texture, left, h * amount - COLUMNWIDTH - Height, right, h * amount - Height, Color.White, 0, 0, 2);
-            //SpriteBatch.Draw(texture, left, -Height, right, h * amount - COLUMNWIDTH - Height, Color.White, 0, 1, 2);
         }
     }
 }

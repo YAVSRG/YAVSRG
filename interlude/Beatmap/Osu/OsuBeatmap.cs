@@ -81,7 +81,7 @@ namespace YAVSRG.Beatmap
         public MultiChart ConvertToRoot()
         {
             if (Mode != 3) { return null; }
-            ChartHeader header = new ChartHeader(Metadata.GetValue("Title"), Metadata.GetValue("Artist"), Metadata.GetValue("Creator"),path);
+            ChartHeader header = new ChartHeader { title = Metadata.GetValue("Title"), artist = Metadata.GetValue("Artist"), creator = Metadata.GetValue("Creator"), path = path };
             MultiChart diffs = new MultiChart(header);
             Chart c = Convert();
             diffs.diffs.Add(c);

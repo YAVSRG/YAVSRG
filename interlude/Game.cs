@@ -69,10 +69,6 @@ namespace YAVSRG
             screens = new ScreenManager();
             screens.toolbar = new Toolbar();
             screens.AddScreen(new Interface.Screens.ScreenLoading(s));
-            var test = new Discord.EventHandlers();
-            Discord.Initialize("420320424199716864", ref test, true, "");
-            Utils.SetDiscordData("Just started playing", "Pick a song already!");
-            SpriteBatch.Init();
         }
 
         public void ApplyWindowSettings(Options.General settings) //apply video settings
@@ -126,6 +122,10 @@ namespace YAVSRG
         {
             base.OnLoad(e);
             Input.Init();
+            var test = new Discord.EventHandlers();
+            Discord.Initialize("420320424199716864", ref test, true, "");
+            Utils.SetDiscordData("Just started playing", "Pick a song already!");
+            SpriteBatch.Init();
             /*
             test = new System.Windows.Forms.NotifyIcon();
             test.Icon = new Icon(@"C:\Users\percy\Documents\thishadmynamehere\bird.ico");

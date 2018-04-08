@@ -12,10 +12,6 @@ namespace YAVSRG.Beatmap
         public string artist;
         public string creator;
         public string path;
-
-        public ChartHeader(string t, string a, string c, string p)
-        {
-            title = t; artist = a; creator = c; path = p;
-        }
+        public string pack;
     }
 }

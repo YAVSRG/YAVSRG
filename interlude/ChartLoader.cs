@@ -11,17 +11,33 @@ namespace YAVSRG
 {
     public class ChartLoader
     {
-        public struct ChartPack
-        {
-            public string title;
-            public string desc;
-            public CachedChart[] charts;
 
-            public ChartPack(string title, CachedChart[] charts)
+        public static Func<CachedChart,string> GroupByPack = (c) => { return c.pack; };
+        public static Func<CachedChart, string> GroupByTitle = (c) => { return c.title.Substring(0,1).ToUpper(); };
+        public static Func<CachedChart, string> GroupByDifficulty = (c) => { return "NYI"; };
+        public static Func<CachedChart, string> GroupByCreator = (c) => { return c.creator; };
+        public static Func<CachedChart, string> GroupByArtist = (c) => { return c.artist.Substring(0,1).ToUpper(); };
+
+        public static Comparison<CachedChart> SortByDifficulty = (a,b) => (0.CompareTo(0));
+        public static Comparison<CachedChart> SortByTitle = (a, b) => (a.title.CompareTo(b.title));
+        public static Comparison<CachedChart> SortByCreator = (a, b) => (a.creator.CompareTo(b.creator));
+        public static Comparison<CachedChart> SortByArtist = (a, b) => (a.artist.CompareTo(b.artist));
+
+        public class ChartGroup
+        {
+            public List<CachedChart> charts;
+            public string label;
+
+            public ChartGroup(List<CachedChart> charts, string label)
             {
-                this.title = title;
-                desc = "";
                 this.charts = charts;
+                this.label = label;
+            }
+
+            public void Sort(Comparison<CachedChart> comp, bool reverse)
+            {
+                charts.Sort(comp);
+                if (reverse) { charts.Reverse(); }
             }
         }
 
@@ -31,39 +47,52 @@ namespace YAVSRG
             public string artist;
             public string creator;
             public string abspath;
+            public string pack;
+            public string hash;
             public float[] difficulty;
-
-            public CachedChart(string a, string b, string c, string d)
-            {
-                difficulty = new float[8];
-                title = a;
-                artist = b;
-                creator = c;
-                abspath = d;
-            }
         }
 
         public static bool Loaded;
-        public static List<ChartPack> Cache;
-        public static ChartPack SelectedPack;
+        public static List<ChartGroup> Groups;
+        public static List<CachedChart> Cache;
         public static MultiChart SelectedChart;
 
         public static void Init()
         {
-            Cache = new List<ChartPack>();
+            Groups = new List<ChartGroup>();
+            Cache = new List<CachedChart>();
             UpdateCache();
             Loaded = true;
         }
 
-        public static void RandomPack()
+        public static void SortIntoGroups(Func<CachedChart,string> groupBy, Comparison<CachedChart> sortBy)
         {
-            SelectedPack = Cache[new Random().Next(0, Cache.Count)];
-            RandomChart();
+            Groups = new List<ChartGroup>();
+            Dictionary<string, List<CachedChart>> temp = new Dictionary<string, List<CachedChart>>();
+            string s;
+            foreach (CachedChart c in Cache)
+            {
+                s = groupBy(c);
+                if (temp.ContainsKey(s))
+                {
+                    temp[s].Add(c);
+                }
+                else
+                {
+                    temp.Add(s, new List<CachedChart> { c });
+                }
+            }
+            foreach (string k in temp.Keys)
+            {
+                ChartGroup g = new ChartGroup(temp[k], k);
+                g.Sort(sortBy, false);
+                Groups.Add(g);
+            }
         }
 
         public static void RandomChart()
         {
-            SelectedChart = LoadFromCache(SelectedPack.charts[new Random().Next(0, SelectedPack.charts.Length)]);
+            SelectedChart = LoadFromCache(Cache[new Random().Next(0, Cache.Count)]);
             RandomDifficulty();
         }
 
@@ -92,7 +121,7 @@ namespace YAVSRG
         {
             FileStream fs = new FileStream(path, FileMode.Open);
             TextReader t = new StreamReader(fs);
-            var c = new CachedChart(t.ReadLine(), t.ReadLine(), t.ReadLine(), t.ReadLine());
+            var c = new CachedChart { title = t.ReadLine(), creator = t.ReadLine(), artist = t.ReadLine(), abspath = t.ReadLine() };
             t.Close();
             fs.Close();
             return c;
@@ -112,12 +141,12 @@ namespace YAVSRG
 
         private static void LoadPack(string folder, bool loadnew)
         {
-            List<CachedChart> diffs = new List<CachedChart>();
             CachedChart c;
             string path;
+            string packname = Path.GetFileName(folder);
             foreach (string s in Directory.GetDirectories(folder))
             {
-                path = Path.Combine(Content.WorkingDirectory,"Data","Cache",Path.GetFileName(folder)+Path.GetFileNameWithoutExtension(s)+".cache");
+                path = Path.Combine(Content.WorkingDirectory,"Data","Cache",packname+Path.GetFileNameWithoutExtension(s)+".cache");
                 if (File.Exists(path) && true) //replace true with verification that cache is not out of date
                 {
                     c = LoadCacheFile(path);
@@ -126,11 +155,12 @@ namespace YAVSRG
                 {
                     try
                     {
-                        c = CacheChart(LoadFromPath(s));
+                        c = CacheChart(LoadFromPath(s,packname));
                         SaveCacheFile(path, c);
                     }
                     catch (Exception e)
                     {
+                        //normally when no difficulties are loadable
                         Console.WriteLine("Failed to load chart: "+s+"\n"+e.ToString());
                         continue;
                     }
@@ -139,13 +169,12 @@ namespace YAVSRG
                 {
                     continue;
                 }
-                diffs.Add(c);
+                c.pack = packname;
+                Cache.Add(c);
             }
-            ChartPack p = new ChartPack(Path.GetFileName(folder),diffs.ToArray());
-            Cache.Add(p);
         }
 
-        public static MultiChart LoadFromPath(string p)
+        public static MultiChart LoadFromPath(string p, string packname)
         {
             MultiChart c = null;
             Chart d = null;
@@ -183,19 +212,24 @@ namespace YAVSRG
                     }
                 }
             }
+            c.header.pack = packname;
             return c;
         }
 
         private static CachedChart CacheChart(MultiChart c)
         {
-            return new CachedChart(
-                    c.header.title, c.header.artist, c.header.creator, c.header.path
-                );
+            return new CachedChart
+            {
+                title = c.header.title,
+                artist = c.header.artist,
+                creator = c.header.creator,
+                abspath = c.header.path
+            };
         }
 
         public static MultiChart LoadFromCache(CachedChart c)
         {
-            return LoadFromPath(c.abspath);
+            return LoadFromPath(c.abspath, c.pack);
         }
     }
 }
