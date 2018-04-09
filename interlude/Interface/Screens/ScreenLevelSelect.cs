@@ -17,10 +17,10 @@ namespace YAVSRG.Interface.Screens
         public ScreenLevelSelect()
         {
             selector = new LevelSelector(this);
-            selector.PositionTopLeft(0, 0, AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
+            selector.PositionTopLeft(0, 0, AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
 
             diffDisplay = new ChartDifficulty();
-            diffDisplay.PositionTopLeft(100, 80, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 80, AnchorType.MIN, AnchorType.MAX);
+            diffDisplay.PositionTopLeft(100, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MIN, AnchorType.MAX);
             AddChild(diffDisplay);
             AddChild(selector);
             AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })

@@ -80,11 +80,6 @@ namespace YAVSRG.Interface
             Current = s;
         }
 
-        public void Toolbar(bool x)
-        {
-            if (x) { toolbar.Expand(); } else { toolbar.Collapse(); };
-        }
-
         public void Draw()
         {
             if (Loading)
@@ -99,18 +94,18 @@ namespace YAVSRG.Interface
             {
                 if (fade1.Running)
                 {
-                    Previous?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                    Previous?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
                     DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, Color.FromArgb((int)(255 * fade1), BackgroundDim));
                 }
                 else
                 {
-                    Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                    Current?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
                     DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
                 }
             }
             else
             {
-                Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                Current?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
             }
             if (dialogs.Count > 0)
             {
@@ -160,7 +155,7 @@ namespace YAVSRG.Interface
             }
             else
             {
-                Current?.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                Current?.Update(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
             }
             if (Previous != null)
             {

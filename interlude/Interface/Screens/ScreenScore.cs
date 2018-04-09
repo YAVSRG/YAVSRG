@@ -40,7 +40,7 @@ namespace YAVSRG.Interface.Screens
             rank = Content.LoadTextureFromAssets("rank-" + ranks[tier]);
 
             ChartDifficulty c = new ChartDifficulty();
-            c.PositionTopLeft(520, 80, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 80, AnchorType.MAX, AnchorType.MAX);
+            c.PositionTopLeft(520, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 0, AnchorType.MAX, AnchorType.MAX);
             AddChild(c);
 
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
@@ -52,12 +52,6 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
         }
 
-        public override void OnEnter(Screen prev)
-        {
-            base.OnEnter(prev);
-            Game.Screens.Toolbar(true);
-        }
-
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
@@ -66,23 +60,23 @@ namespace YAVSRG.Interface.Screens
             //you'll just have to change to the chart before showing the score screen
             //SpriteBatch.DrawCentredText(ChartLoader.SelectedChart.header.title + " [" + score.c.DifficultyName + "]", 30f, 0, -Height + 150, Color.White);
             //SpriteBatch.DrawCentredText(Utils.RoundNumber(Game.Options.Profile.Rate)+"x rate", 20f, 0, -Height + 200, Color.White);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.pack, -ScreenWidth + 300, -ScreenHeight + 80, ScreenWidth - 300, -ScreenHeight + 130, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.pack, left + 300, top, right - 300, top + 50, Game.Options.Theme.MenuFont);
             for (int i = 0; i < mods.Length; i++)
             {
-                SpriteBatch.DrawText(mods[i], 30f, -ScreenWidth, -ScreenHeight + 90 + i * 40, Game.Options.Theme.MenuFont);
+                SpriteBatch.DrawText(mods[i], 30f, left, top + 10 + i * 40, Game.Options.Theme.MenuFont);
             }
             SpriteBatch.DrawCentredText(score.Scoring.FormatAcc(), 50, 0, -50, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawCentredText(acc1.FormatAcc(), 30, -250, 50, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawCentredText(acc2.FormatAcc(), 30, 250, 50, Game.Options.Theme.MenuFont);
             for (int i = 0; i < 6; i++)
             {
-                SpriteBatch.DrawRect(-ScreenWidth + 50, 100 + i * 40, -ScreenWidth + 400, 140 + i * 40, Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawRect(-ScreenWidth + 50, 100 + i * 40, -ScreenWidth + 50 + 350f * score.Scoring.Judgements[i] / score.maxcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, -ScreenWidth + 50, 100 + i * 40, Color.White);
+                SpriteBatch.DrawRect(left + 50, 100 + i * 40, left + 400, 140 + i * 40, Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawRect(left + 50, 100 + i * 40, left + 50 + 350f * score.Scoring.Judgements[i] / score.maxcombo, 140 + i * 40, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawText(Game.Options.Theme.Judges[i], 30, left + 50, 100 + i * 40, Color.White);
                 SpriteBatch.DrawJustifiedText(score.Scoring.Judgements[i].ToString(), 30, -ScreenWidth + 400, 100 + i * 40, Color.White);
             }
-            SpriteBatch.DrawText(score.Scoring.BestCombo.ToString() + "x", 30, -ScreenWidth + 50, 340, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString() + "cbs", 30, -ScreenWidth + 400, 340, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawText(score.Scoring.BestCombo.ToString() + "x", 30, left + 50, 340, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawJustifiedText(score.Scoring.ComboBreaks.ToString() + "cbs", 30, left + 400, 340, Game.Options.Theme.MenuFont);
             DrawGraph();
         }
 

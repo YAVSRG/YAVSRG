@@ -35,14 +35,14 @@ namespace YAVSRG.Interface.Widgets
                 OnClick = action;
                 Highlight = highlight;
                 baseColor = c;
-                border = new AnimationColorMixer(Color.White);
-                fill = new AnimationColorMixer(c);
+                Animation.Add(border = new AnimationColorMixer(Color.White));
+                Animation.Add(fill = new AnimationColorMixer(c));
                 RecursivePopOut(0);
             }
 
             public void UpdatePosition(float y)
             {
-                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight) / 50f, 2), y);
+                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.toolbar.Height) / 48f, 2)*1.5f, y);
                 B.Target(-50, y + height);
             }
 
@@ -103,6 +103,7 @@ namespace YAVSRG.Interface.Widgets
 
             public override void Update(float left, float top, float right, float bottom)
             {
+                base.Update(left, top, right, bottom);
                 float x = BottomEdge();
                 if (Expand)
                 {
@@ -129,7 +130,6 @@ namespace YAVSRG.Interface.Widgets
                 }
                 border.Update();
                 fill.Update();
-                base.Update(left, top, right, bottom);
             }
         }
 
@@ -237,8 +237,8 @@ namespace YAVSRG.Interface.Widgets
                 g.Update(left, top, right, bottom);
                 y += g.GetHeight();
             }
-            if (y < ScreenUtils.ScreenHeight*2-100) scroll += 10; //prevents users from scrolling off the list
-            if (scroll > 100) scroll -= 10;
+            if (y < bottom-top) scroll += 10; //prevents users from scrolling off the list
+            if (scroll > 0) scroll -= 10;
             if (Input.KeyPress(OpenTK.Input.Key.Up))
             {
                 scroll += 15;
@@ -247,7 +247,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 scroll -= 15;
             }
-            scroll += Input.MouseScroll * 50;
+            scroll += Input.MouseScroll * 100;
         }
     }
 }

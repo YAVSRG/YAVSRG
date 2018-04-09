@@ -97,7 +97,7 @@ namespace YAVSRG.Interface.Screens
             //some misc stuff
             Utils.SetDiscordData("Playing", ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title + " [" + Game.CurrentChart.DifficultyName + "]");
             Game.Options.Profile.Stats.TimesPlayed++;
-            Game.Screens.Toolbar(false);
+            Game.Screens.toolbar.SetHidden(true);
 
             //prep audio and play from beginning
             Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
@@ -111,7 +111,7 @@ namespace YAVSRG.Interface.Screens
         {
             //some misc stuff
             Utils.SetDiscordData("Looking for something to play", "");
-            Game.Screens.Toolbar(true);
+            Game.Screens.toolbar.SetHidden(false);
             base.OnExit(next);
         }
 
