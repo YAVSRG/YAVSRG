@@ -35,13 +35,13 @@ namespace YAVSRG.Interface
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
-            slide = new AnimationSlider(0);
+            slide = new AnimationSlider(-10);
             Animation.Add(slide);
         }
 
         public void Collapse()
         {
-            slide.Target = 0;
+            slide.Target = -10;
         }
 
         public void Expand()
@@ -58,7 +58,7 @@ namespace YAVSRG.Interface
 
         public new float Height
         {
-            get { return slide.Val; }
+            get { return Math.Max(slide.Val,0); }
         }
 
         public override void Draw(float left, float top, float right, float bottom)
@@ -74,16 +74,15 @@ namespace YAVSRG.Interface
                     SpriteBatch.DrawRect(-ScreenWidth, -ScreenHeight + slide + i * s, -ScreenWidth + level, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
                     SpriteBatch.DrawRect(ScreenWidth - level, -ScreenHeight + slide + i * s, ScreenWidth, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
                 }
-
-                //SpriteBatch.Draw(texture,-Width, -Height, Width, -Height + 80, Game.Options.Theme.Dark);
+                
+                //top
                 Game.Screens.DrawStaticChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor);
+                SpriteBatch.Draw(texture, -ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Color.FromArgb(127, Game.Screens.BaseColor));
                 SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + slide + 5, 30f, Game.Screens.BaseColor);
-                //SpriteBatch.DrawRect(-Width, -Height + 80, Width, -Height + 85, Game.Screens.BaseColor);
-                //SpriteBatch.DrawRect(Width-725, -Height, Width-720, -Height + 80, Game.Screens.BaseColor);
 
-                //SpriteBatch.Draw(texture, -Width, Height-80, Width, Height, Game.Options.Theme.Dark);
+                //bottom
                 Game.Screens.DrawStaticChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor);
-                //SpriteBatch.DrawRect(-Width, Height - slide - 5, Width, Height - slide, Game.Screens.BaseColor);
+                SpriteBatch.Draw(texture, -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor),2);
                 SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
 
                 base.Draw(left, top + slide - 80, right, bottom);
@@ -104,7 +103,7 @@ namespace YAVSRG.Interface
             base.Update(left, top + slide - 80, right, bottom);
             if (!hidden && Input.KeyTap(OpenTK.Input.Key.T) && Input.KeyPress(OpenTK.Input.Key.ControlLeft))
             {
-                if (slide.Target == 0)
+                if (slide.Target <= 0)
                 {
                     Expand();
                 }

@@ -103,7 +103,6 @@ namespace YAVSRG.Interface.Widgets
 
             public override void Update(float left, float top, float right, float bottom)
             {
-                base.Update(left, top, right, bottom);
                 float x = BottomEdge();
                 if (Expand)
                 {
@@ -128,8 +127,7 @@ namespace YAVSRG.Interface.Widgets
                 {
                     fill.Target(Highlight() ? Utils.ColorInterp(baseColor, Color.White, 0.2f) : baseColor);
                 }
-                border.Update();
-                fill.Update();
+                base.Update(left, top, right, bottom);
             }
         }
 

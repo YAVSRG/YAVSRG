@@ -140,6 +140,7 @@ namespace YAVSRG.Interface
 
         public void Update()
         {
+            toolbar.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             if (Loading)
             {
                 Current?.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
@@ -171,7 +172,6 @@ namespace YAVSRG.Interface
                     Previous = null;
                 }
             }
-            toolbar.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             animation.Update();
             animation2.Update();
         }

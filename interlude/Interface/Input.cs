@@ -17,6 +17,7 @@ namespace YAVSRG.Interface
         public static int MouseX;
         public static int MouseY;
         public static int MouseScroll;
+        public static bool ClickHandled;
 
         public static void Init()
         {
@@ -72,7 +73,12 @@ namespace YAVSRG.Interface
 
         public static bool MouseClick(MouseButton b)
         {
-            return (m.Contains(b) && !om.Contains(b));
+            if (!ClickHandled && m.Contains(b) && !om.Contains(b))
+            {
+                ClickHandled = true;
+                return true;
+            }
+            return false;
         }
 
         public static bool MouseRelease(MouseButton b)
@@ -105,6 +111,7 @@ namespace YAVSRG.Interface
             ok = new List<Key>(k);
             om = new List<MouseButton>(m);
             MouseScroll = 0;
+            ClickHandled = false;
         }
     }
 }

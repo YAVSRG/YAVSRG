@@ -28,7 +28,7 @@ namespace YAVSRG.Interface
 
         public static bool CheckButtonClick(float left, float top, float right, float bottom)
         {
-            return Input.MouseClick(OpenTK.Input.MouseButton.Left) && MouseOver(left, top, right, bottom);
+            return MouseOver(left, top, right, bottom) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
         public static void DrawBanner(Sprite texture, float left, float top, float right, float bottom, Color c)

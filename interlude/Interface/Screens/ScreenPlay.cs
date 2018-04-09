@@ -182,7 +182,7 @@ namespace YAVSRG.Interface.Screens
             while (Chart.Notes.Points[i].Offset < now + missWindow) //search loop
             {
                 Snap s = Chart.Notes.Points[i];
-                BinarySwitcher b = release ? s.ends : new BinarySwitcher(s.taps.value + s.holds.value);
+                BinarySwitcher b = release ? new BinarySwitcher(s.ends.value + s.taps.value + s.holds.value) : new BinarySwitcher(s.taps.value + s.holds.value);
                 if (b.GetColumn(k)) //if there's a note here
                 {
                     d = (now - s.Offset);
@@ -197,7 +197,8 @@ namespace YAVSRG.Interface.Screens
             } //delta is misswindow if nothing found
             //LOOK AT THIS LINE \/ \/ \/ IT IS IMPORTANT I DO SOMETHING ABOUT IT
             if (release) delta *= 0.5f; //releasing long notes is more lenient (hit windows twice as big). needs a setting to turn on and off
-            if (hitAt >= 0) //if we found a note to hit (it's -1 if nothing found)
+            if (hitAt >= 0 && (!release || Chart.Notes.Points[hitAt].ends.GetColumn(k))) //if we found a note to hit (it's -1 if nothing found)
+                //this extra && is added because releasing looks for anything the the column and if a release was the closest it hits it. fixes some unhittable ln behaviours.
             {
                 delta /= (float)Game.Options.Profile.Rate; //convert back to time relative to what player observes instead of map data
                 //i.e on 2x rate if you hit 80ms away in the map data, you hit 40ms away in reality
