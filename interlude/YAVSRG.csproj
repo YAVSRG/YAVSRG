@@ -158,6 +158,7 @@
     <Compile Include="Interface\Dialogs\ConfirmDialog.cs" />
     <Compile Include="Interface\Dialogs\ProfileDialog.cs" />
     <Compile Include="Interface\Dialogs\TextDialog.cs" />
+    <Compile Include="Interface\InputMethod.cs" />
     <Compile Include="Interface\ScreenManager.cs" />
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
     <Compile Include="Interface\Screens\ScreenLoading.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="Interface\Widgets\BoolPicker.cs" />
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartDifficulty.cs" />
+    <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
     <Compile Include="Interface\Widgets\FlowContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\FramedButton.cs" />
@@ -181,6 +183,7 @@
     <Compile Include="Interface\Widgets\Gameplay\Playfield.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ProgressBar.cs" />
     <Compile Include="Interface\Widgets\MusicControls.cs" />
+    <Compile Include="Interface\Widgets\SimpleButton.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />

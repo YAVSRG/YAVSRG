@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets
 {
-    public class Button : Widget
+    public class SimpleButton : Widget //planned new button to replace FramedButton in most things in future
     {
-        protected Sprite icon;
         protected string text;
         protected Action action;
         protected Animations.AnimationColorMixer color;
+        protected Func<bool> highlight;
+        protected float fontsize;
 
-        public Button(string sprite, string label, Action onClick) : base()
+        public SimpleButton(string label, Action onClick, Func<bool> highlight, float size) : base()
         {
-            icon = Content.LoadTextureFromAssets(sprite);
+            fontsize = size;
             text = label;
             action = onClick;
+            this.highlight = highlight;
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.BaseColor));
         }
 
@@ -26,15 +27,15 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Draw(icon, left, top, right, bottom, color);
-            SpriteBatch.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawCentredText(text, fontsize, (left + right) / 2, top, color);
+            SpriteBatch.DrawRect(left, bottom - 10, right, bottom, color);
         }
 
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            color.Target(ScreenUtils.MouseOver(left, top, right, bottom) ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
+            color.Target(highlight() ? System.Drawing.Color.White :ScreenUtils.MouseOver(left, top, right, bottom) ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
             if (ScreenUtils.CheckButtonClick(left, top, right, bottom))
             {
                 action();

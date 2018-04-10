@@ -23,6 +23,7 @@ namespace YAVSRG.Beatmap.Stepmania
             int start = (beat) * l / meter;
             for (int i = start; i < end; i++)
             {
+                if (data[i] == "0000") { continue; }
                 Snap s = new Snap((float)(offset + (i - start) * sep), 0, 0, lntracker.value, 0, 0);
                 for (int c = 0; c < keys; c++)
                 {

@@ -107,8 +107,11 @@ namespace YAVSRG.Interface
         public virtual void Update(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            foreach (Widget w in Widgets)
+            int c = Widgets.Count;
+            Widget w;
+            for (int i = c - 1; i >= 0; i--)
             {
+                w = Widgets[i];
                 if (w.State > 0)
                 {
                     w.Update(left, top, right, bottom);

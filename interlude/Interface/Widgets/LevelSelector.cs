@@ -146,7 +146,7 @@ namespace YAVSRG.Interface.Widgets
         public void Refresh()
         {
             groups = new List<Group>();
-            foreach (ChartLoader.ChartGroup p in ChartLoader.Groups)
+            foreach (ChartLoader.ChartGroup p in ChartLoader.SearchResult)
             {
                 AddPack(p);
             }
@@ -203,7 +203,6 @@ namespace YAVSRG.Interface.Widgets
                                 x.AddItem(new Group(80, width, (y) =>
                                 {
                                     Game.Gameplay.ChangeChart(d);
-                                    ((Screens.ScreenLevelSelect)parent).OnChangeChart(); //some temp hack
                                     ChartLoader.SelectedChart = m;
                                 }, () => { return Game.CurrentChart.path + Game.CurrentChart.DifficultyName == d.path + d.DifficultyName; }, d.DifficultyName, "", Game.Options.Theme.SelectDiff));
                             }
@@ -219,6 +218,7 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             foreach (Group g in groups)
             {
                 g.Draw(left, top, right, bottom);
@@ -228,6 +228,7 @@ namespace YAVSRG.Interface.Widgets
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             int y = scroll;
             foreach (Group g in groups)
             {

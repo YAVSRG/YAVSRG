@@ -13,15 +13,20 @@ namespace YAVSRG
     {
 
         public static Func<CachedChart,string> GroupByPack = (c) => { return c.pack; };
-        public static Func<CachedChart, string> GroupByTitle = (c) => { return c.title.Substring(0,1).ToUpper(); };
+        public static Func<CachedChart, string> GroupByTitle = (c) => { return Utils.FormatFirstCharacter(c.title); };
         public static Func<CachedChart, string> GroupByDifficulty = (c) => { return "NYI"; };
-        public static Func<CachedChart, string> GroupByCreator = (c) => { return c.creator; };
-        public static Func<CachedChart, string> GroupByArtist = (c) => { return c.artist.Substring(0,1).ToUpper(); };
+        public static Func<CachedChart, string> GroupByCreator = (c) => { return Utils.FormatFirstCharacter(c.creator); };
+        public static Func<CachedChart, string> GroupByArtist = (c) => { return Utils.FormatFirstCharacter(c.artist); };
 
         public static Comparison<CachedChart> SortByDifficulty = (a,b) => (0.CompareTo(0));
         public static Comparison<CachedChart> SortByTitle = (a, b) => (a.title.CompareTo(b.title));
         public static Comparison<CachedChart> SortByCreator = (a, b) => (a.creator.CompareTo(b.creator));
         public static Comparison<CachedChart> SortByArtist = (a, b) => (a.artist.CompareTo(b.artist));
+
+        public static Comparison<CachedChart> SortMode = SortByTitle;
+        public static Func<CachedChart,string> GroupMode = GroupByPack;
+        public static string SearchString = "";
+        public static event Action OnRefreshGroups = () => { };
 
         public class ChartGroup
         {
@@ -54,6 +59,7 @@ namespace YAVSRG
 
         public static bool Loaded;
         public static List<ChartGroup> Groups;
+        public static List<ChartGroup> SearchResult;
         public static List<CachedChart> Cache;
         public static MultiChart SelectedChart;
 
@@ -88,6 +94,36 @@ namespace YAVSRG
                 g.Sort(sortBy, false);
                 Groups.Add(g);
             }
+            Groups.Sort((a, b) => { return a.label.CompareTo(b.label); });
+        }
+
+        public static void SearchGroups(string s)
+        {
+            s = s.ToLower();
+            SearchResult = new List<ChartGroup>();
+            foreach (ChartGroup g in Groups)
+            {
+                List<CachedChart> temp = new List<CachedChart>();
+                foreach (CachedChart c in g.charts)
+                {
+                    if (c.title.ToLower().Contains(s) || c.creator.ToLower().Contains(s) || c.artist.ToLower().Contains(s))
+                    {
+                        temp.Add(c);
+                    }
+                }
+                if (temp.Count > 0)
+                {
+                    SearchResult.Add(new ChartGroup(temp, g.label + " (" + temp.Count.ToString() + ")"));
+                }
+            }
+        }
+
+        public static void Refresh()
+        {
+            SortIntoGroups(GroupMode, SortMode);
+            SearchGroups(SearchString);
+            OnRefreshGroups();
+            //Search algorithm
         }
 
         public static void RandomChart()

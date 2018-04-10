@@ -7,12 +7,13 @@ using OpenTK.Input;
 
 namespace YAVSRG.Interface
 {
-    class Input
+    public class Input
     {
         private static List<Key> k;
         private static List<Key> ok;
         private static List<MouseButton> m;
         private static List<MouseButton> om;
+        private static InputMethod im;
 
         public static int MouseX;
         public static int MouseY;
@@ -91,9 +92,9 @@ namespace YAVSRG.Interface
             return (m.Contains(b));
         }
 
-        public static bool KeyTap(Key b)
+        public static bool KeyTap(Key b, bool imoverride = false)
         {
-            return (k.Contains(b) && !ok.Contains(b));
+            return (k.Contains(b) && !ok.Contains(b) && CheckIMOverride(imoverride));
         }
 
         public static bool KeyRelease(Key b)
@@ -101,13 +102,25 @@ namespace YAVSRG.Interface
             return (!k.Contains(b) && ok.Contains(b));
         }
 
-        public static bool KeyPress(Key b)
+        public static bool KeyPress(Key b, bool imoverride = false)
         {
-            return (k.Contains(b));
+            return (k.Contains(b)) && CheckIMOverride(imoverride);
+        }
+
+        static bool CheckIMOverride(bool o)
+        {
+            return o || (im == null);
+        }
+
+        public static void ChangeIM(InputMethod im)
+        {
+            Input.im?.Dispose();
+            Input.im = im;
         }
 
         public static void Update()
         {
+            im?.Update();
             ok = new List<Key>(k);
             om = new List<MouseButton>(m);
             MouseScroll = 0;

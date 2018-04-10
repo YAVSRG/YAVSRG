@@ -17,34 +17,41 @@ namespace YAVSRG.Interface.Screens
         public ScreenLevelSelect()
         {
             selector = new LevelSelector(this);
-            selector.PositionTopLeft(0, 0, AnchorType.CENTER,AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
+            selector.PositionTopLeft(0, 120, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
 
             diffDisplay = new ChartDifficulty();
-            diffDisplay.PositionTopLeft(100, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MIN, AnchorType.MAX);
+            diffDisplay.PositionTopLeft(100, 120, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MIN, AnchorType.MAX);
             AddChild(diffDisplay);
             AddChild(selector);
             AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
-                .PositionTopLeft(250,100,AnchorType.MIN,AnchorType.CENTER)
-                .PositionBottomRight(450,200,AnchorType.MIN,AnchorType.CENTER));
+                .PositionTopLeft(250, 100, AnchorType.MIN, AnchorType.CENTER)
+                .PositionBottomRight(450, 200, AnchorType.MIN, AnchorType.CENTER));
             //temp mod selection menu
-            FlowContainer f = new FlowContainer(20,20) { };
+            FlowContainer f = new FlowContainer(20, 20, false) { };
             foreach (Gameplay.Mods.Mod m in Game.Gameplay.mods)
             {
-                f.AddChild(new BoolPicker(m.GetName(), m.Enable, ModSelectClosure(m)).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
+                f.AddChild(new SimpleButton(m.GetName(), ModSelectClosure(m), () => { return m.Enable; }, 20f).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
             }
-            AddChild(f.PositionTopLeft(-100,0,AnchorType.CENTER,AnchorType.CENTER).PositionBottomRight(100,0,AnchorType.CENTER,AnchorType.MAX));
+            AddChild(f.PositionTopLeft(-100, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(100, 0, AnchorType.CENTER, AnchorType.MAX));
             //
+            AddChild(new ChartSortingControls().PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 120, AnchorType.MAX, AnchorType.MIN));
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
+            
         }
 
-        private Action<bool> ModSelectClosure(Gameplay.Mods.Mod m)
+        private Action ModSelectClosure(Gameplay.Mods.Mod m)
         {
-            return (b) => { m.Enable = b; };
+            return () => { m.Enable = !m.Enable; Game.Gameplay.UpdateChart(); };
         }
 
-        public void OnChangeChart()
+        private void OnUpdateGroups()
+        {
+            selector.Refresh();
+        }
+
+        private void OnUpdateChart()
         {
             diffDisplay.ChangeChart();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
@@ -55,11 +62,15 @@ namespace YAVSRG.Interface.Screens
             base.OnEnter(prev);
             A.Target(0, 0);
             B.Target(0, 0);
+            Game.Gameplay.OnUpdateChart += OnUpdateChart;
+            ChartLoader.OnRefreshGroups += OnUpdateGroups;
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
+            Game.Gameplay.OnUpdateChart -= OnUpdateChart;
+            ChartLoader.OnRefreshGroups -= OnUpdateGroups;
             A.Target(-ScreenWidth, 0);
             B.Target(-ScreenWidth, 0);
         }
@@ -84,8 +95,7 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Rate += change;
             Game.Options.Profile.Rate = Math.Round(Game.Options.Profile.Rate, 2, MidpointRounding.AwayFromZero);
             Game.Options.Profile.Rate = Math.Max(0.5, Math.Min(Game.Options.Profile.Rate,3.0));
-            Game.Audio.SetRate(Game.Options.Profile.Rate);
-            diffDisplay.ChangeChart();
+            OnUpdateChart();
         }
     }
 }

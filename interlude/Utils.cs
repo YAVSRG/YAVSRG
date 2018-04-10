@@ -23,6 +23,14 @@ namespace YAVSRG
             return string.Format("{0:0.00}", Math.Round(x, 2));
         }
 
+        public static string FormatFirstCharacter(string s)
+        {
+            if (s.Length == 0) return "?";
+            char c = s[0];
+            if (char.IsLetterOrDigit(c)) { return c.ToString().ToUpper(); }
+            return "?";
+        }
+
         public static void SetDiscordData(string main, string detail)
         {
             Discord.UpdatePresence(new Discord.RichPresence() { state = main, details = detail });

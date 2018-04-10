@@ -55,8 +55,8 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.DrawText(time, 40f, left + 20, bottom - 70, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawJustifiedText(bpm, 40f, right - 20, bottom - 70, Game.Options.Theme.MenuFont);
 
-            string[] text = new[] { "MORE RELEVANT INFORMATION"};
-            for (int i = 0; i < 1; i++)
+            string[] text = new[] { "MORE RELEVANT INFORMATION", ChartLoader.SelectedChart.header.pack};
+            for (int i = 0; i < 2; i++)
             {
                 SpriteBatch.DrawCentredText(text[i], 15f, (left + right) / 2, top + 340 + i * 60, Game.Options.Theme.MenuFont);
             }

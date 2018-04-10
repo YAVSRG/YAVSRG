@@ -10,11 +10,13 @@ namespace YAVSRG.Interface.Widgets
     {
         float padX;
         float padY;
+        bool horizontal;
 
-        public FlowContainer(float padx, float pady) : base() //variable to control vertical, horizontal or both
+        public FlowContainer(float padx, float pady, bool style) : base()
         {
             padX = padx;
             padY = pady;
+            horizontal = style;
             //all widgets must be anchored to top left
         }
 
@@ -22,19 +24,25 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Update(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            float x = left + padX;
-            float y = top + padY;
+            float x = padX;
+            float y = padY;
             foreach (Widget w in Widgets)
             {
                 if (w.State > 0)
                 {
                     w.B.Target(x + w.Width, y + w.Height);
                     w.A.Target(x, y);
-                    //x += padX + w.Width; //only vertical flow
-                    y += padY + w.Height;
+                    if (horizontal)
+                    {
+                        x += padX + w.Width;
+                    }
+                    else
+                    {
+                        y += padY + w.Height;
+                    }
                 }
             }
-            B.Target(x, y);
+            B.Target(A.AbsX+x, A.AbsY+y);
         }
     }
 }

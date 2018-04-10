@@ -17,6 +17,7 @@ namespace YAVSRG.Gameplay
         public Chart CurrentChart;
         public ChartWithModifiers ModifiedChart;
         public ChartSaveData ChartSaveData;
+        public event Action OnUpdateChart = () => { };
 
         public void ChangeChart(Chart c)
         {
@@ -45,6 +46,7 @@ namespace YAVSRG.Gameplay
                     m.Apply(ModifiedChart);
                 }
             }
+            OnUpdateChart();
             //mod it
         }
 

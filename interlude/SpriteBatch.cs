@@ -29,6 +29,7 @@ namespace YAVSRG
 
         static Dictionary<char, Sprite> FontLookup;
         static readonly int FONTSCALE = 60;
+        static readonly Font Font = new Font("Akrobat Black", FONTSCALE);
 
         static int VBO;
 
@@ -114,10 +115,10 @@ namespace YAVSRG
             foreach (char c in text)
             {
                 if (c == ' ') { x += FONTSCALE * 0.75f * scale; continue; }
-                if (!FontLookup.ContainsKey(c)) { s = FontLookup['?']; }
-                else { s = FontLookup[c]; }
+                if (!FontLookup.ContainsKey(c)) { GenChar(c); }
+                s = FontLookup[c];
                 Draw(s, x, y, x + s.Width * scale, y + s.Height * scale, color);
-                x += (s.Width - FONTSCALE * 0.5f) * scale;//kerning
+                x += (s.Width - FONTSCALE * 0.5f) * scale; //kerning
             }
         }
 
@@ -213,26 +214,30 @@ namespace YAVSRG
             GL.EnableClientState(ArrayCap.ColorArray);*/
 
             FontLookup = new Dictionary<char, Sprite>();
-            Font f = new Font("Century Gothic", FONTSCALE);
-            SizeF size;
 
             foreach (char c in @"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\|")
             {
-                using (var b = new Bitmap(1, 1))
-                {
-                    using (var g = Graphics.FromImage(b))
-                    {
-                        size = g.MeasureString(c.ToString(), f);
-                    }
-                }
-                var bmp = new Bitmap((int)size.Width, (int)size.Height);
-                using (var g = Graphics.FromImage(bmp))
-                {
-                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-                    g.DrawString(c.ToString(), f, Brushes.White, 0, 0);
-                }
-                FontLookup.Add(c, Content.UploadTexture(bmp, 1, 1, true));
+                GenChar(c);
             }
+        }
+
+        private static void GenChar(char c)
+        {
+            SizeF size;
+            using (var b = new Bitmap(1, 1))
+            {
+                using (var g = Graphics.FromImage(b))
+                {
+                    size = g.MeasureString(c.ToString(), Font);
+                }
+            }
+            var bmp = new Bitmap((int)size.Width, (int)size.Height);
+            using (var g = Graphics.FromImage(bmp))
+            {
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                g.DrawString(c.ToString(), Font, Brushes.White, 0, 0);
+            }
+            FontLookup.Add(c, Content.UploadTexture(bmp, 1, 1, true));
         }
     }
 }
