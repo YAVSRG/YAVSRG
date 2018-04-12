@@ -11,7 +11,7 @@ namespace YAVSRG.Interface.Screens
 {
     public class ScreenLevelSelect : Screen
     {
-        private ChartDifficulty diffDisplay;
+        private ChartInfoPanel diffDisplay;
         private LevelSelector selector;
 
         public ScreenLevelSelect()
@@ -19,7 +19,7 @@ namespace YAVSRG.Interface.Screens
             selector = new LevelSelector(this);
             selector.PositionTopLeft(0, 120, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
 
-            diffDisplay = new ChartDifficulty();
+            diffDisplay = new ChartInfoPanel();
             diffDisplay.PositionTopLeft(100, 120, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MIN, AnchorType.MAX);
             AddChild(diffDisplay);
             AddChild(selector);
@@ -38,7 +38,6 @@ namespace YAVSRG.Interface.Screens
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
-            
         }
 
         private Action ModSelectClosure(Gameplay.Mods.Mod m)

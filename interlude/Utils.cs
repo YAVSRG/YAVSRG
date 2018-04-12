@@ -33,7 +33,11 @@ namespace YAVSRG
 
         public static void SetDiscordData(string main, string detail)
         {
-            Discord.UpdatePresence(new Discord.RichPresence() { state = main, details = detail });
+            try
+            {
+                Discord.UpdatePresence(new Discord.RichPresence() { state = main, details = detail });
+            }
+            catch { }
         }
 
         public static string FormatTime(float ms)

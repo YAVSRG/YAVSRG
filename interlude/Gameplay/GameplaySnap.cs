@@ -19,5 +19,10 @@ namespace YAVSRG.Gameplay
         {
             colors = new int[10];
         }
+
+        public override OffsetItem Interpolate(float time)
+        {
+            return new GameplaySnap(time, 0, 0, holds.value + middles.value, 0, 0);
+        }
     }
 }

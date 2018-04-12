@@ -10,6 +10,6 @@ namespace YAVSRG.Beatmap
     {
         public float Offset;
 
-        public OffsetItem Interpolate(float time) { return null; }
+        public virtual OffsetItem Interpolate(float time) { return null; }
     }
 }

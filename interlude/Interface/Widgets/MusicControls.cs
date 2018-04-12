@@ -36,7 +36,7 @@ namespace YAVSRG.Interface.Widgets
             Game.Screens.DrawStaticChartBackground(left, top, right, bottom, Game.Screens.DarkColor);
             SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Game.Screens.HighlightColor);
             SpriteBatch.DrawRect(left + 40, bottom-30, left + 40 + (right - 300 - left) * Game.Audio.NowPercentage(), bottom - 20, Game.Screens.BaseColor);
-            SpriteBatch.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, left + 10, top, right - 260, top + 70, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, left + 10, top, right - 260, top + 70, Game.Options.Theme.MenuFont);
 
             DrawWidgets(left, top, right, bottom);
         }

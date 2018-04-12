@@ -124,6 +124,8 @@
     <Compile Include="Gameplay\ChartWithModifiers.cs" />
     <Compile Include="Gameplay\GameplayManager.cs" />
     <Compile Include="Gameplay\GameplaySnap.cs" />
+    <Compile Include="Gameplay\Mods\Inverse.cs" />
+    <Compile Include="Gameplay\Mods\Manipulate.cs" />
     <Compile Include="Gameplay\Mods\Mirror.cs" />
     <Compile Include="Gameplay\Mods\Mod.cs" />
     <Compile Include="Gameplay\Mods\NoSV.cs" />
@@ -171,6 +173,7 @@
     <Compile Include="Interface\Widgets\BoolPicker.cs" />
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartDifficulty.cs" />
+    <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
     <Compile Include="Interface\Widgets\FlowContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
@@ -209,6 +212,7 @@
     <Compile Include="Shader.cs" />
     <Compile Include="Sprite.cs" />
     <Compile Include="SpriteBatch.cs" />
+    <Compile Include="SpriteFont.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>

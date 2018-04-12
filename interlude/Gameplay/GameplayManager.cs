@@ -12,7 +12,7 @@ namespace YAVSRG.Gameplay
     public class GameplayManager
     {
         //"modded" chart
-        public Mod[] mods = new Mod[] { new Mirror(), new NoSV() };
+        public Mod[] mods = new Mod[] { new Mirror(), new NoSV(), new Inverse() };
 
         public Chart CurrentChart;
         public ChartWithModifiers ModifiedChart;
@@ -37,7 +37,6 @@ namespace YAVSRG.Gameplay
         public void UpdateChart()
         {
             ModifiedChart = new ChartWithModifiers(CurrentChart);
-            Options.Colorizer.Colorize(ModifiedChart, Game.Options.Profile.ColorStyle);
             //for i in mods
             foreach (Mod m in mods)
             {
@@ -46,6 +45,7 @@ namespace YAVSRG.Gameplay
                     m.Apply(ModifiedChart);
                 }
             }
+            Options.Colorizer.Colorize(ModifiedChart, Game.Options.Profile.ColorStyle);
             OnUpdateChart();
             //mod it
         }

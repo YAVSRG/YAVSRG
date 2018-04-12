@@ -29,7 +29,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             float s = Math.Min(50, scoreTracker.Scoring.Combo * 0.05f) + size;
-            SpriteBatch.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), s, left, top - s / 2, System.Drawing.Color.White);
+            SpriteBatch.Font1.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), s, left, top - s / 2, System.Drawing.Color.White);
         }
 
         public override void Update(float left, float top, float right, float bottom)

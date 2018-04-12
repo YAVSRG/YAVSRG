@@ -27,6 +27,11 @@ namespace YAVSRG.Beatmap
 
         public Snap(float offset) : this(offset, 0, 0, 0, 0, 0) { }
 
+        public override OffsetItem Interpolate(float time)
+        {
+            return new Snap(time, 0, 0, holds.value + middles.value, 0, 0);
+        }
+
         public Snap Mask(int mask)
         {
             return new Snap(Offset, taps.value & mask, holds.value & mask, middles.value & mask, ends.value & mask, mines.value & mask);

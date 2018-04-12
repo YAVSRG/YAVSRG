@@ -27,7 +27,7 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawCentredText(text, fontsize, (left + right) / 2, top, color);
+            SpriteBatch.Font1.DrawCentredText(text, fontsize, (left + right) / 2, top, color);
             SpriteBatch.DrawRect(left, bottom - 10, right, bottom, color);
         }
 

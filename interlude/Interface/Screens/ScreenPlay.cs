@@ -209,7 +209,7 @@ namespace YAVSRG.Interface.Screens
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            SpriteBatch.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -ScreenHeight + 70, Color.White); //acc needs to be moved to a widget
+            SpriteBatch.Font1.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -ScreenHeight + 70, Color.White); //acc needs to be moved to a widget
         }
     }
 }

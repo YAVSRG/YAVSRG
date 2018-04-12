@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             ScreenUtils.DrawBanner(icon, left, top, right, bottom, color);
-            SpriteBatch.DrawJustifiedText(text, 40f, right - (bottom-top), top + 15, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedText(text, 40f, right - (bottom-top), top + 15, Game.Options.Theme.MenuFont);
         }
     }
 }

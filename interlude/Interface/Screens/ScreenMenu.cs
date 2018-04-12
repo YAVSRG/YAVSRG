@@ -12,7 +12,10 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenMenu : Screen
     {
-        static readonly string[] splashes = new[] { "Yet Another Vertically Scrolling Rhythm Game", "Some funny flavourtext", "Based on the hit game, osu!mania", "Pausers never win", "Winners never pause", "Timing is everything", "Where's the pause button?", "Just play BMS", "Skill not included", "Click play already", "JUST MASH", "A cool name for a rhythm game", "Making rhythm games great again" };
+        static readonly string[] splashes = new[] { "Yet Another Vertically Scrolling Rhythm Game", "Some funny flavourtext", "Based on the hit game, osu!mania",
+            "Pausers never win", "Winners never pause", "Timing is everything", "Where's the pause button?", "Just play BMS", "Skill not included",
+            "Click play already", "JUST MASH", "A cool name for a rhythm game", "Making rhythm games great again", "The future is now, old man",
+            "https://en.wikipedia.org/wiki/Rhythm_game", "https://github.com/percyqaz/YAVSRG/issues/9", "Attention to detail" };
         string splash = splashes[new Random().Next(0, splashes.Length)];
         AnimationSlider slide;
         Sprite banner;
@@ -82,8 +85,8 @@ namespace YAVSRG.Interface.Screens
             base.Draw(left, top, right, bottom);
             float w = (right-100) * slide;
             ScreenUtils.DrawBanner(banner, -w, -300, w, -200, Game.Screens.HighlightColor);
-            SpriteBatch.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
-            SpriteBatch.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
+            SpriteBatch.Font1.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
+            SpriteBatch.Font2.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
         }
     }
 }

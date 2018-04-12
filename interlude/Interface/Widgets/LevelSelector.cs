@@ -98,7 +98,15 @@ namespace YAVSRG.Interface.Widgets
                 if (top > ScreenUtils.ScreenHeight || bottom < -ScreenUtils.ScreenHeight) { return; }
                 SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, 0, fill);
                 SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, border);
-                SpriteBatch.DrawTextToFill(title, left + 20, top + 20, left + width, bottom - 20, border);
+                if (subtitle == "")
+                {
+                    SpriteBatch.Font1.DrawTextToFill(title, left + 20, top + 22.5f, left + width, bottom - 20, border);
+                }
+                else
+                {
+                    SpriteBatch.Font1.DrawTextToFill(title, left + 20, top + 8f, left + width, bottom - 35, border);
+                    SpriteBatch.Font2.DrawTextToFill(subtitle, left + 20, bottom - 40, left + width, bottom - 5, border);
+                }
             }
 
             public override void Update(float left, float top, float right, float bottom)

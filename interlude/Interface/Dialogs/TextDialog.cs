@@ -43,8 +43,8 @@ namespace YAVSRG.Interface.Dialogs
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawTextToFill(val, left, top + 100, right, bottom, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawTextToFill(val, left, top + 100, right, bottom, Game.Options.Theme.MenuFont);
         }
     }
 }

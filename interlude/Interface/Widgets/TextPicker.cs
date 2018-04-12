@@ -27,8 +27,8 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawRect(left, top, left + 20, bottom, Game.Screens.BaseColor);
             SpriteBatch.DrawRect(right - 20, top, right, bottom, Game.Screens.BaseColor);
-            SpriteBatch.DrawCentredText(options[selection], 30, (left+right)/2, top, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawCentredText(label, 20, (left+right)/2, top - 30, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredText(options[selection], 30, (left+right)/2, top, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredText(label, 20, (left+right)/2, top - 30, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(float left, float top, float right, float bottom)

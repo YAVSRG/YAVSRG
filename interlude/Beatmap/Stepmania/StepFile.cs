@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace YAVSRG.Beatmap.Stepmania
 {
@@ -49,38 +50,51 @@ namespace YAVSRG.Beatmap.Stepmania
             string[] l = {"", ""};
             char c;
             byte state = 2;
+            bool commentFlag = false;
 
             while (!ts.EndOfStream)
             {
                 c = (char)ts.Read();
-                if (c == '/' && state != 2)
+                if (c == '/')
                 {
-                    ts.ReadLine();
-                }
-                else if (c == '#')
-                {
-                    state = 0;
-                }
-                else if (c == ':' && state == 0)
-                {
-                    state = 1;
-                }
-                else if (c == ';')
-                {
-                    if (l[0] == "NOTES")
+                    if (commentFlag)
                     {
-                        diffs.Add(new StepFileDifficulty(l[1]));
+                        ts.ReadLine();
+                        commentFlag = false;
                     }
                     else
                     {
-                        raw.Add(l[0], l[1]);
+                        commentFlag = true;
                     }
-                    l = new[] {"",""};
-                    state = 2;
                 }
-                else if (state < 2)
+                else
                 {
-                    l[state] += c;
+                    if (c == '#')
+                    {
+                        state = 0;
+                    }
+                    else if (c == ':' && state == 0)
+                    {
+                        state = 1;
+                    }
+                    else if (c == ';')
+                    {
+                        if (l[0] == "NOTES")
+                        {
+                            diffs.Add(new StepFileDifficulty(l[1]));
+                        }
+                        else
+                        {
+                            raw.Add(l[0], l[1]);
+                        }
+                        l = new[] { "", "" };
+                        state = 2;
+                    }
+                    else if (state < 2)
+                    {
+                        l[state] += c;
+                    }
+                    commentFlag = false;
                 }
             }
         }
@@ -90,9 +104,24 @@ namespace YAVSRG.Beatmap.Stepmania
             return raw.ContainsKey(id) ? raw[id] : "This file has broken tags!!! >:(";
         }
 
-        public string GetSubtitle()
+        public string GetCreator()
         {
-            return raw.ContainsKey("CREDIT") ? (raw["CREDIT"] == "" ? (raw.ContainsKey("SUBTITLE") ? raw["SUBTITLE"] : "retard") : raw["CREDIT"]) : "actual retard fix your tags";
+            if (raw.ContainsKey("CREDIT"))
+            {
+                if (raw["CREDIT"] != "")
+                {
+                    return raw["CREDIT"];
+                }
+            }
+            Regex r = new Regex(@"\(.*?\)"); //cheers to https://www.codeproject.com/Questions/296435/How-do-I-extract-a-string-of-text-that-lies-betwee
+            string temp = Path.GetFileNameWithoutExtension(path);
+            MatchCollection matches = r.Matches(temp);
+            if (matches.Count > 0)
+            {
+                temp = matches[matches.Count - 1].Value; //reuse of temp cause i'm lazy
+                return temp.Substring(1, temp.Length - 2);
+            }
+            return "-----";
         }
 
         public string GetBG()
@@ -102,7 +131,7 @@ namespace YAVSRG.Beatmap.Stepmania
 
         public MultiChart ConvertToRoot()
         {
-            MultiChart c = new MultiChart(new ChartHeader { title = GetTag("TITLE"), artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"), creator = GetSubtitle(), path = path });
+            MultiChart c = new MultiChart(new ChartHeader { title = GetTag("TITLE"), artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"), creator = GetCreator(), path = path });
             c.diffs = Convert();
             if (c.diffs.Count == 0) { return null; }
             return c;
@@ -147,7 +176,7 @@ namespace YAVSRG.Beatmap.Stepmania
                         }
                     }
                 }
-                Chart c = new Chart(states, points, diff.name, float.Parse(raw["SAMPLESTART"]) * 1000, keycount, path, raw["MUSIC"], GetBG());
+                Chart c = new Chart(states, points, (raw.ContainsKey("SUBTITLE") && raw["SUBTITLE"] != "" && diffs.Count == 1) ? raw["SUBTITLE"] : diff.name, float.Parse(raw["SAMPLESTART"]) * 1000, keycount, path, raw["MUSIC"], GetBG());
                 charts.Add(c);
             }
             return charts;

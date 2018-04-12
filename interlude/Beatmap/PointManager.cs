@@ -31,10 +31,20 @@ namespace YAVSRG.Beatmap
         {
             return (int)Math.Ceiling(GetInterpolatedIndex(offset) + 0.1f);
         }
+
+        public void AppendPoint(P point)
+        {
+            Points.Add(point);
+            Count += 1;
+        }
         
         //keep this
         public float GetInterpolatedIndex(float offset)
         {
+            if (Count == 1) //fix for edge case
+            {
+                return Points[0].Offset < offset ? 0.5f : 0;
+            }
             int low = 0;
             int high = Count - 1;
             int mid = -1;

@@ -32,7 +32,7 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.DrawRect(left, top + 20, right, bottom - 20, System.Drawing.Color.Gray);
             float p = left + (get() - min) / (max - min) * (right-left);
             SpriteBatch.DrawRect(p - 5, top, p + 5, bottom, System.Drawing.Color.White);
-            SpriteBatch.DrawCentredText(label+": "+get().ToString(), 20f, (left+right)/2, top-30, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredText(label+": "+get().ToString(), 20f, (left+right)/2, top-30, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(float left, float top, float right, float bottom)

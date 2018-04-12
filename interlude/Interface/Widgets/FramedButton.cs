@@ -22,7 +22,7 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawTilingTexture(icon, left, top, right, bottom, 200, scroll, 0, color);
             SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, System.Drawing.Color.White);
-            SpriteBatch.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(float left, float top, float right, float bottom)

@@ -28,7 +28,7 @@ namespace YAVSRG.Interface.Dialogs
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             ScreenUtils.DrawBanner(banner, left, top, right, bottom, System.Drawing.Color.Azure);
-            SpriteBatch.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
             DrawWidgets(left, top, right, bottom);
         }
     }

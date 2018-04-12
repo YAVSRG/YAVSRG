@@ -39,7 +39,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 {
                     float x = Math.Abs(1 - (now - h.time) * 0.01f) * (right-left)*0.2f;
                     //SpriteBatch.Draw(sprite, left, top, right, top + (right-left)*34f/256f, System.Drawing.Color.White, h.delta < 0 ? 1 : 0, h.tier);
-                    SpriteBatch.DrawCentredTextToFill(Game.Options.Theme.Judges[h.tier], left + x, top, right - x, bottom, Game.Options.Theme.JudgeColors[h.tier]);
+                    SpriteBatch.Font1.DrawCentredTextToFill(Game.Options.Theme.Judges[h.tier], left + x, top, right - x, bottom, Game.Options.Theme.JudgeColors[h.tier]);
                 }
             }
 
