@@ -39,7 +39,7 @@ namespace YAVSRG.Beatmap
 
         public bool IsEmpty()
         {
-            return (taps.value | holds.value | middles.value | ends.value | mines.value) == 0;
+            return (taps.value | holds.value | ends.value | mines.value) == 0;
         }
 
         public int Count

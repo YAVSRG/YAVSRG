@@ -63,7 +63,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
         protected float GetHandDifficulty(List<float> data)
         {
-            return DataSet.Mean(data)*data.Count; //temp
+            return DataSet.Mean(data); //temp
         }
 
         protected float GetSnapDifficulty(List<float> data)

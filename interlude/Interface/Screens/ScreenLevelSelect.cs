@@ -23,7 +23,7 @@ namespace YAVSRG.Interface.Screens
             diffDisplay.PositionTopLeft(100, 120, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MIN, AnchorType.MAX);
             AddChild(diffDisplay);
             AddChild(selector);
-            AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
+            AddChild(new FramedButton("buttonbase", "Play", () => { Input.ChangeIM(null); Game.Screens.AddScreen(new ScreenPlay()); })
                 .PositionTopLeft(250, 100, AnchorType.MIN, AnchorType.CENTER)
                 .PositionBottomRight(450, 200, AnchorType.MIN, AnchorType.CENTER));
             //temp mod selection menu

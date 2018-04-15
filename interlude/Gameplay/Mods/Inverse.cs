@@ -94,7 +94,7 @@ namespace YAVSRG.Gameplay.Mods
 
         public override string GetName()
         {
-            return "Inverse";
+            return "Inverse (not complete!)";
         }
     }
 }
