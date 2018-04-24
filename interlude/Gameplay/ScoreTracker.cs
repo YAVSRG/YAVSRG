@@ -47,7 +47,7 @@ namespace YAVSRG.Gameplay
         public ChartWithModifiers c;
         public ScoreSystem Scoring;
         public HitData[] hitdata;
-        public int maxcombo;
+        public int maxcombo; //max possible combo
 
         public ScoreTracker(ChartWithModifiers c)
         {
@@ -56,7 +56,7 @@ namespace YAVSRG.Gameplay
             maxcombo = 0;
             foreach (Snap s in c.Notes.Points)
             {
-                maxcombo += s.Count;
+                maxcombo += s.Count; //merge this down into other for loop?
             }
             Scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
 
@@ -94,9 +94,34 @@ namespace YAVSRG.Gameplay
             //OnHit(k, Scoring.JudgeHit(Math.Abs(delta)), delta);
         }
 
-        public bool EndOfChart()
+        public bool EndOfChart() //is end of chart?
         {
             return Scoring.EndOfChart(hitdata.Length);
+        }
+
+        public static string HitDataToString(HitData[] data)
+        {
+            int k = data[0].hit.Length;
+            byte[] result = new byte[data.Length * 5 * k];
+            for (int i = 0; i < data.Length; i++)
+            {
+                Array.Copy(data[i].hit, 0, result, k * (i * 5), k);
+                Buffer.BlockCopy(data[i].delta, 0, result, k * (i * 5 + 1), k * 4);
+            }
+            return Convert.ToBase64String(result);
+        }
+
+        public static HitData[] StringToHitData(string s, int k)
+        {
+            byte[] raw = Convert.FromBase64String(s);
+            HitData[] result = new HitData[raw.Length / (5 * k)];
+            for (int i = 0; i < result.Length; i++)
+            {
+                result[i] = new HitData(new GameplaySnap(0, 0, 0, 0, 0, 0), k);
+                Array.Copy(raw, k * (i * 5), result[i].hit, 0, k);
+                Buffer.BlockCopy(raw, k * (i * 5 + 1), result[i].delta, 0, k * 4);
+            }
+            return result;
         }
     }
 }

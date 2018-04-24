@@ -24,15 +24,15 @@ namespace YAVSRG.Interface.Screens
             AddChild(diffDisplay);
             AddChild(selector);
             AddChild(new FramedButton("buttonbase", "Play", () => { Input.ChangeIM(null); Game.Screens.AddScreen(new ScreenPlay()); })
-                .PositionTopLeft(250, 100, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(450, 200, AnchorType.MIN, AnchorType.CENTER));
+                .PositionTopLeft(-100, -200, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionBottomRight(100, -100, AnchorType.CENTER, AnchorType.CENTER));
             //temp mod selection menu
-            FlowContainer f = new FlowContainer(20, 20, false) { };
+            ScrollContainer f = new ScrollContainer(90, 20, false) { };
             foreach (Gameplay.Mods.Mod m in Game.Gameplay.mods)
             {
                 f.AddChild(new SimpleButton(m.GetName(), ModSelectClosure(m), () => { return m.Enable; }, 20f).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
             }
-            AddChild(f.PositionTopLeft(-100, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(100, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
             //
             AddChild(new ChartSortingControls().PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 120, AnchorType.MAX, AnchorType.MIN));
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);

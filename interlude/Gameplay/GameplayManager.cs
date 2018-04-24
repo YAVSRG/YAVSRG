@@ -78,7 +78,12 @@ namespace YAVSRG.Gameplay
 
         protected string[] GetBaseModifiers()
         {
-            return new string[] { "S" + Game.Options.Profile.ScrollSpeed.ToString() + "x", "R" + Game.Options.Profile.Rate.ToString() + "x", Game.Options.Profile.Skin };
+            return new string[] { Game.Options.Profile.Rate.ToString("0.0#") + "x" };
+        }
+
+        public void EmulateModifiers(string[] mods)
+        {
+            //stub
         }
 
         public string[] GetModifiers()

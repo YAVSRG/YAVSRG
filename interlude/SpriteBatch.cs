@@ -128,6 +128,29 @@ namespace YAVSRG
             GL.PopMatrix();
         }
 
+        public static void StencilMode(int m)
+        {
+            if (m == 1)
+            {
+                GL.StencilMask(0xFF);
+                GL.Enable(EnableCap.StencilTest);
+                GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
+            }
+            else if (m == 2)
+            {
+                GL.StencilMask(0x00);
+                GL.Enable(EnableCap.StencilTest);
+                GL.StencilFunc(StencilFunction.Less, 1, 0xFF);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+            }
+            else if (m == 0)
+            {
+                GL.ClearStencil(0x00);
+                GL.Disable(EnableCap.StencilTest);
+            }
+        }
+
         public static void Begin(int width, int height)
         {
             GL.MatrixMode(MatrixMode.Projection);
@@ -142,8 +165,8 @@ namespace YAVSRG
         public static void Init()
         {
             GL.Enable(EnableCap.Blend);
-            GL.ClearColor(0, 0, 0, 0);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.ClearColor(0, 0, 0, 0);
 
             /*
             VBO = GL.GenBuffer();

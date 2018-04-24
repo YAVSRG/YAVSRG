@@ -66,45 +66,11 @@ namespace YAVSRG.Gameplay
                 {
                     if (data[pos].hit[i] == 1)
                     {
-                        AddCCJudgement(5, data[pos].Count);
-                        OnHit(i, 5, MissWindow);
-                        ComboBreak();
+                        data[pos].delta[i] = MissWindow;
+                        HandleHit(i, pos, data);
                     }
                 }
-                    /*
-                    float t = 0;
-                    int n = 0;
-                    int judgement = 0;
-                    for (int i = 0; i < data[pos].hit.Length; i++)
-                    {
-                        if (data[pos].hit[i] == 1)
-                        {
-                            judgement += 1;
-                        }
-                        else if (data[pos].hit[i] == 2)
-                        {
-                            t += Math.Abs(data[pos].delta[i]);
-                            n += 1;
-                        }
-                    }
-                    if (n > 0 && judgement < 3)
-                    {
-                        float delta = t / n;
-                        if (judgement > 0) judgement++;
-                        judgement += JudgeHit(delta);
-                        if (judgement > 4)
-                        {
-                            judgement = 4;
-                        }
-                        AddJudgement(judgement);
-                        Combo++;
-                    }
-                    else
-                    {
-                        AddJudgement(5);
-                    }
-                    */
-                    pos++;
+                pos++;
             }
         }
     }

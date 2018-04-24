@@ -12,8 +12,8 @@ namespace YAVSRG.Interface.Widgets
     public class ChartSortingControls : Widget
     {
         Sprite frame;
-        FlowContainer sort;
-        FlowContainer group;
+        ScrollContainer sort;
+        ScrollContainer group;
         Widget sortB, groupB;
         bool focus;
         Animations.AnimationColorMixer color;
@@ -23,8 +23,8 @@ namespace YAVSRG.Interface.Widgets
             frame = Content.LoadTextureFromAssets("frame");
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
 
-            group = new FlowContainer(25, 5, true);
-            sort = new FlowContainer(20, 5, true);
+            group = new ScrollContainer(25, 5, true);
+            sort = new ScrollContainer(20, 5, true);
             sort.AddChild(SortButton("Difficulty", SortByDifficulty));
             sort.AddChild(SortButton("Artist", SortByArtist));
             sort.AddChild(SortButton("Creator", SortByCreator));

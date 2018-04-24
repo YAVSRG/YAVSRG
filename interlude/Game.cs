@@ -50,7 +50,7 @@ namespace YAVSRG
             get { return Instance.audio; }
         }
 
-        public Game() : base(1200,800)
+        public Game() : base(1200,800, new OpenTK.Graphics.GraphicsMode(32,24,8,0))
         {
             Sprite s = Content.UploadTexture(Utils.CaptureScreen(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";

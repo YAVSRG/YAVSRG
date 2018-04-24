@@ -175,7 +175,7 @@
     <Compile Include="Interface\Widgets\ChartDifficulty.cs" />
     <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
-    <Compile Include="Interface\Widgets\FlowContainer.cs" />
+    <Compile Include="Interface\Widgets\ScrollContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\FramedButton.cs" />
     <Compile Include="Interface\Widgets\Gameplay\GameplayWidget.cs" />
@@ -186,6 +186,8 @@
     <Compile Include="Interface\Widgets\Gameplay\Playfield.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ProgressBar.cs" />
     <Compile Include="Interface\Widgets\MusicControls.cs" />
+    <Compile Include="Interface\Widgets\Scoreboard.cs" />
+    <Compile Include="Interface\Widgets\ScoreCard.cs" />
     <Compile Include="Interface\Widgets\SimpleButton.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />

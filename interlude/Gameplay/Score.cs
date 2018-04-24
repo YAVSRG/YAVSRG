@@ -6,7 +6,13 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Gameplay
 {
-    class Score
+    public class Score
     {
+        public string date;
+        public string time;
+        public string hitdata;
+        public string player;
+        public List<string> mods;
+        public int keycount;
     }
 }

@@ -59,9 +59,8 @@ namespace YAVSRG.Gameplay
                 {
                     if (data[pos].hit[i] == 1)
                     {
-                        AddJudgement(5);
-                        OnHit(i, 5, MissWindow);
-                        ComboBreak();
+                        data[pos].delta[i] = MissWindow;
+                        HandleHit(i, pos, data);
                     }
                 }
                 pos++;

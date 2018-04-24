@@ -15,6 +15,7 @@ namespace YAVSRG.Interface.Widgets
         float technical;
         float rate;
         string time, bpm;
+        Scoreboard sb;
         Animations.AnimationCounter anim;
 
         Sprite texture, frame;
@@ -35,11 +36,16 @@ namespace YAVSRG.Interface.Widgets
             technical = diff.breakdown[1];
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
+            if (sb != null)
+            {
+                Widgets.Remove(sb);
+            }
+            sb = new Scoreboard();
+            AddChild(sb.PositionTopLeft(25, 310, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(25, 100, AnchorType.MAX, AnchorType.MAX));
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
-            base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawTilingTexture(texture, left, top, right, bottom, 400f, 0, anim.value/1000f, Game.Screens.BaseColor);
             Game.Screens.DrawStaticChartBackground(left, top, right, bottom, Color.FromArgb(127,255,255,255));
@@ -55,11 +61,7 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.Font1.DrawText(time, 40f, left + 20, bottom - 70, Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 20, bottom - 70, Game.Options.Theme.MenuFont);
 
-            string[] text = new[] { "MORE RELEVANT INFORMATION", ChartLoader.SelectedChart.header.pack };
-            for (int i = 0; i < 2; i++)
-            {
-                SpriteBatch.Font2.DrawCentredText(text[i], 15f, (left + right) / 2, top + 340 + i * 60, Game.Options.Theme.MenuFont);
-            }
+            DrawWidgets(left, top, right, bottom);
         }
     }
 }

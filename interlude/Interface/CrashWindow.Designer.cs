@@ -51,7 +51,7 @@
             this.button1.Location = new System.Drawing.Point(0, 238);
             this.button1.MaximumSize = new System.Drawing.Size(0, 24);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(284, 23);
+            this.button1.Size = new System.Drawing.Size(1055, 23);
             this.button1.TabIndex = 1;
             this.button1.Text = "Open Game Folder";
             this.button1.UseVisualStyleBackColor = true;
@@ -61,7 +61,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(1055, 261);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
             this.Name = "CrashWindow";
