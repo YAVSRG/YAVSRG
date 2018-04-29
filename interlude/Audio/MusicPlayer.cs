@@ -97,6 +97,7 @@ namespace YAVSRG.Audio
 
         public float NowPercentage()
         {
+            if (nowplaying == null) return 0;
             return (float)(Now() / nowplaying.Duration);
         }
 
@@ -115,7 +116,7 @@ namespace YAVSRG.Audio
             }
             for (int i = 0; i < 256; i++)
             {
-                WaveForm[i] = WaveForm[i] * 0.8f + temp[i] * 0.2f;
+                WaveForm[i] = WaveForm[i] * 0.9f + temp[i] * 0.1f;
             }
             if (LeadingIn && Playing && Now() + AudioOffset > 0)
             {

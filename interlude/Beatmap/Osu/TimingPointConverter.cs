@@ -26,11 +26,39 @@ namespace YAVSRG.Beatmap
             }
         }
 
-        public List<BPMPoint> Convert()
+        public float GetMostCommonBPM(float end)
+        {
+            float current = points[0].msPerBeat;
+            float t = 0;
+            Dictionary<float, float> data = new Dictionary<float, float>();
+            foreach (TimingPoint p in points)
+            {
+                if (data.ContainsKey(current))
+                {
+                    data[current] += (p.offset - t);
+                }
+                else
+                {
+                    data.Add(current, p.offset - t);
+                }
+                if (!p.inherited) { current = p.msPerBeat; t = p.offset; }
+            }
+            if (data.ContainsKey(current))
+            {
+                data[current] += (end - t);
+            }
+            else
+            {
+                data.Add(current, end - t);
+            }
+            return data.OrderBy(pair => pair.Value).First().Key;
+        }
+
+        public List<BPMPoint> Convert(float end)
         {
             List<BPMPoint> tp = new List<BPMPoint>();
-            float bpm = 125;
-            float basebpm = points[0].msPerBeat;
+            float bpm = 500;
+            float basebpm = GetMostCommonBPM(end);
             float inherit = points[0].offset;
             int meter = 4;
             float scroll = 1.0f;

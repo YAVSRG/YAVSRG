@@ -11,7 +11,8 @@ namespace YAVSRG.Interface.Widgets
     {
         Score c;
         Sprite frame;
-        string acc;
+        float acc;
+        string accdisplay;
         string combo;
         string rating;
         string mods;
@@ -22,7 +23,8 @@ namespace YAVSRG.Interface.Widgets
             PositionBottomRight(430, 100, AnchorType.MIN, AnchorType.MIN);
             ScoreSystem score = ScoreSystem.GetScoreSystem(ScoreType.Default);
             score.ProcessScore(ScoreTracker.StringToHitData(c.hitdata, c.keycount));
-            acc = Utils.RoundNumber(score.Accuracy()) + "%";
+            acc = score.Accuracy();
+            accdisplay = Utils.RoundNumber(acc) + "%";
             combo = score.BestCombo.ToString() + "x";
             rating = "0.00";
             mods = string.Join(",", c.mods);
@@ -35,11 +37,13 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Game.Screens.HighlightColor);
             SpriteBatch.Font1.DrawText(c.player, 35f, left + 5, top, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawTextToFill(mods, left, bottom - 40, right-80, bottom, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawTextToFill(mods, left, bottom - 40, right-180, bottom, Game.Options.Theme.MenuFont);
 
-            SpriteBatch.Font1.DrawJustifiedText(acc, 35f, right - 5, top, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedText(accdisplay, 35f, right - 5, top, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawJustifiedText(rating, 20f, right - 5, bottom - 60, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawJustifiedText(c.date + " " + c.time, 20f, right - 5, bottom - 35, Game.Options.Theme.MenuFont);
         }
+
+        public static Comparison<Widget> Compare = (a, b) => { return ((ScoreCard)b).acc.CompareTo(((ScoreCard)a).acc); };
     }
 }

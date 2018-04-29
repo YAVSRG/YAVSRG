@@ -37,11 +37,13 @@ namespace YAVSRG.Beatmap
 
         public float GetDuration()
         {
+            if (Notes.Points.Count == 0) { return 0; }
             return Notes.Points[Notes.Count - 1].Offset - Notes.Points[0].Offset;
         }
 
         public int GetBPM()
         {
+            if (Notes.Points.Count == 0) { return 120; }
             return (int)(60000f/Timing.Points[0].MSPerBeat);
         }
 
@@ -50,7 +52,7 @@ namespace YAVSRG.Beatmap
             var h = SHA256.Create();
             byte[] data = new byte[8 * Notes.Count];
             float offset;
-            if (Notes.Count > 0) { offset = Notes.Points[0].Offset; } else { return ""; } //no hash if empty chart
+            if (Notes.Count > 0) { offset = Notes.Points[0].Offset; } else { return "_"; } //no hash if empty chart
             int p = 0;
             foreach (Snap s in Notes.Points)
             {

@@ -18,6 +18,7 @@ namespace YAVSRG.Interface.Widgets
                 t.A.Move(0, -100);
                 t.B.Move(0, -100);
             }
+            Widgets.Sort(ScoreCard.Compare);
         }
 
         public override void Draw(float left, float top, float right, float bottom)

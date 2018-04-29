@@ -120,7 +120,7 @@ namespace YAVSRG.Interface
             float window = (right - left) / (bottom - top);
             float correction = window / bg;
             RectangleF uv = new RectangleF(0, (correction - 1) * 0.5f, 1, 2 - correction);
-            SpriteBatch.Draw(Background, left, top, right, bottom + 1, uv, c);
+            SpriteBatch.Draw(Background, left, top, right, bottom + 1, SpriteBatch.VecArray(uv), c);
         }
 
         public void DrawStaticChartBackground(float left, float top, float right, float bottom, Color c)
@@ -135,7 +135,7 @@ namespace YAVSRG.Interface
             float b = (correction + bottom / ScreenHeight) / (2 * correction);
 
             RectangleF uv = new RectangleF(l, t, r - l, b - t);
-            SpriteBatch.Draw(Background, left, top, right, bottom + 1, uv, c);
+            SpriteBatch.Draw(Background, left, top, right, bottom + 1, SpriteBatch.VecArray(uv), c);
         }
 
         public void Update()

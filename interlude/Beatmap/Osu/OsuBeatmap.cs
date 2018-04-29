@@ -91,7 +91,8 @@ namespace YAVSRG.Beatmap
         public Chart Convert()
         {
             if (Mode != 3) { return null; }
-            Chart c = new Chart(HitObjects.CreateSnapsFromObjects(Keys), TimingPoints.Convert(), Metadata.GetValue("Version"), General.GetNumber("PreviewTime"), Keys, path, General.GetValue("AudioFilename"), Events.GetBGPath());
+            List<Snap> hitdata = HitObjects.CreateSnapsFromObjects(Keys);
+            Chart c = new Chart(hitdata, TimingPoints.Convert(hitdata[hitdata.Count-1].Offset), Metadata.GetValue("Version"), General.GetNumber("PreviewTime"), Keys, path, General.GetValue("AudioFilename"), Events.GetBGPath());
             return c;
         }
     }

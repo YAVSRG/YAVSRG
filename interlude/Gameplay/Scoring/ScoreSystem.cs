@@ -76,7 +76,7 @@ namespace YAVSRG.Gameplay
             delta = Math.Abs(delta);
             for (int i = 0; i < windows.Length; i++)
             {
-                if (delta <= windows[i]) { return i; }
+                if (delta < windows[i]) { return i; }
             }
             return windows.Length;
         }

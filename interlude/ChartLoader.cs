@@ -11,7 +11,6 @@ namespace YAVSRG
 {
     public class ChartLoader
     {
-
         public static Func<CachedChart,string> GroupByPack = (c) => { return c.pack; };
         public static Func<CachedChart, string> GroupByTitle = (c) => { return Utils.FormatFirstCharacter(c.title); };
         public static Func<CachedChart, string> GroupByDifficulty = (c) => { return "NYI"; };
@@ -27,6 +26,8 @@ namespace YAVSRG
         public static Func<CachedChart,string> GroupMode = GroupByPack;
         public static string SearchString = "";
         public static event Action OnRefreshGroups = () => { };
+
+        static readonly string CacheVersion = "v1.1";
 
         public class ChartGroup
         {
@@ -48,13 +49,13 @@ namespace YAVSRG
 
         public struct CachedChart
         {
+            public string version;
             public string title;
             public string artist;
             public string creator;
             public string abspath;
             public string pack;
-            public string hash;
-            public float[] difficulty;
+            public string[] keys;
         }
 
         public static bool Loaded;
@@ -66,8 +67,11 @@ namespace YAVSRG
         public static void Init()
         {
             Groups = new List<ChartGroup>();
-            Cache = new List<CachedChart>();
-            UpdateCache();
+            LoadCache();
+            if (Cache.Count == 0)
+            {
+                UpdateCache();
+            }
             Loaded = true;
         }
 
@@ -101,12 +105,14 @@ namespace YAVSRG
         {
             s = s.ToLower();
             SearchResult = new List<ChartGroup>();
+            bool keymodeMatch;
             foreach (ChartGroup g in Groups)
             {
                 List<CachedChart> temp = new List<CachedChart>();
                 foreach (CachedChart c in g.charts)
                 {
-                    if (c.title.ToLower().Contains(s) || c.creator.ToLower().Contains(s) || c.artist.ToLower().Contains(s))
+                    keymodeMatch = Game.Options.Profile.Keymode == 0 || c.keys.Contains(Game.Options.Profile.Keymode.ToString());
+                    if (keymodeMatch && (c.title.ToLower().Contains(s) || c.creator.ToLower().Contains(s) || c.artist.ToLower().Contains(s)))
                     {
                         temp.Add(c);
                     }
@@ -123,41 +129,67 @@ namespace YAVSRG
             SortIntoGroups(GroupMode, SortMode);
             SearchGroups(SearchString);
             OnRefreshGroups();
-            //Search algorithm
         }
 
         public static void RandomChart()
         {
+            if (Cache.Count == 0) {
+                SelectedChart = new MultiChart(new ChartHeader { pack = "Nowhere", artist = "Percyqaz", creator = "Nobody", title = "You have no songs installed!", path = Content.WorkingDirectory });
+                Game.Gameplay.ChangeChart(new Chart(new List<Snap>(), new List<BPMPoint>(), "Default", 0, 4, Content.WorkingDirectory, "", ""));
+                return;
+            }
             SelectedChart = LoadFromCache(Cache[new Random().Next(0, Cache.Count)]);
-            RandomDifficulty();
-        }
-
-        public static void RandomDifficulty()
-        {
             Game.Gameplay.ChangeChart(SelectedChart.diffs[new Random().Next(0, SelectedChart.diffs.Count)]);
         }
 
-        private static void LoadCache()
+        public static void LoadCache()
         {
-            foreach (string s in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
+            Cache = new List<CachedChart>();
+            CachedChart c;
+            foreach (string s in Directory.GetFiles(Path.Combine(Content.WorkingDirectory, "Data", "Cache")))
             {
-                LoadPack(s, false);
+                c = LoadCacheFile(s);
+                if (!Directory.Exists(c.abspath))
+                {
+                    continue;
+                }
+                if (c.version != CacheVersion) //update this as i go
+                {
+                    continue;
+                }
+                Cache.Add(c);
             }
+            Refresh();
         }
 
-        private static void UpdateCache()
+        public static void UpdateCache()
         {
+            Cache = new List<CachedChart>();
             foreach (string s in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
             {
-                LoadPack(s, true);
+                CachePack(s, Path.GetFileName(s));
             }
+            if (Directory.Exists(GetOsuSongFolder()))
+            {
+                CachePack(GetOsuSongFolder(), "osu! Imports");
+            }
+            Refresh();
         }
 
         private static CachedChart LoadCacheFile(string path)
         {
             FileStream fs = new FileStream(path, FileMode.Open);
             TextReader t = new StreamReader(fs);
-            var c = new CachedChart { title = t.ReadLine(), creator = t.ReadLine(), artist = t.ReadLine(), abspath = t.ReadLine() };
+            string version = t.ReadLine();
+            CachedChart c;
+            if (version != CacheVersion) { c = new CachedChart { version = "" }; }
+            else
+            {
+                c = new CachedChart {
+                    version = CacheVersion,
+                    title = t.ReadLine(), artist = t.ReadLine(), creator = t.ReadLine(), abspath = t.ReadLine(), pack = t.ReadLine(), keys = t.ReadLine().Split(';')
+                }; //implement length and difficulty caching
+            }
             t.Close();
             fs.Close();
             return c;
@@ -167,45 +199,53 @@ namespace YAVSRG
         {
             FileStream fs = new FileStream(path, FileMode.Create);
             TextWriter t = new StreamWriter(fs);
-            t.WriteLine(c.title);
-            t.WriteLine(c.creator);
+            t.WriteLine(CacheVersion);
+            t.WriteLine(c.title); //could probably stand to make this neater
             t.WriteLine(c.artist);
+            t.WriteLine(c.creator);
             t.WriteLine(c.abspath);
+            t.WriteLine(c.pack);
+            t.WriteLine(string.Join(";",c.keys));
             t.Close();
             fs.Close();
         }
 
-        private static void LoadPack(string folder, bool loadnew)
+        private static void CachePack(string folder, string packname)
         {
             CachedChart c;
             string path;
-            string packname = Path.GetFileName(folder);
             foreach (string s in Directory.GetDirectories(folder))
             {
                 path = Path.Combine(Content.WorkingDirectory,"Data","Cache",packname+Path.GetFileNameWithoutExtension(s)+".cache");
-                if (File.Exists(path) && true) //replace true with verification that cache is not out of date
+                if (File.Exists(path) && true) //replace true with verification that file edit date is older than cache edit date
                 {
                     c = LoadCacheFile(path);
+                    if (c.version != CacheVersion) //update this as i go
+                    {
+                        try
+                        {
+                            c = CacheChart(LoadFromPath(s, packname));
+                            SaveCacheFile(path, c);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
                 }
-                else if (loadnew)
+                else
                 {
                     try
                     {
                         c = CacheChart(LoadFromPath(s,packname));
                         SaveCacheFile(path, c);
                     }
-                    catch (Exception e)
+                    catch
                     {
                         //normally when no difficulties are loadable
-                        Console.WriteLine("Failed to load chart: "+s+"\n"+e.ToString());
                         continue;
                     }
                 }
-                else
-                {
-                    continue;
-                }
-                c.pack = packname;
                 Cache.Add(c);
             }
         }
@@ -252,14 +292,29 @@ namespace YAVSRG
             return c;
         }
 
+        public static string GetOsuSongFolder()
+        {
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"osu!","Songs");
+        }
+
         private static CachedChart CacheChart(MultiChart c)
         {
+            List<string> keys = new List<string>();
+            foreach (Chart chart in c.diffs)
+            {
+                if (!keys.Contains(chart.Keys.ToString()))
+                {
+                    keys.Add(chart.Keys.ToString());
+                }
+            }
             return new CachedChart
             {
                 title = c.header.title,
                 artist = c.header.artist,
                 creator = c.header.creator,
-                abspath = c.header.path
+                abspath = c.header.path,
+                pack = c.header.pack,
+                keys = keys.ToArray()
             };
         }
 

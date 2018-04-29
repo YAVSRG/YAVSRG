@@ -26,8 +26,7 @@ namespace YAVSRG
                 this.color = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
             }
         }*/
-
-        static Dictionary<char, Sprite> FontLookup;
+        
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
@@ -35,50 +34,74 @@ namespace YAVSRG
 
         public static void Draw(Sprite texture, float left, float top, float right, float bottom, Color color, int rotation = 0)
         {
-            Draw(texture, left, top, right, bottom, new Rectangle(0, 0, 1, 1), color, rotation);
+            Draw(texture, left, top, right, bottom, new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color, rotation);
         }
 
         public static void Draw(Sprite texture, float left, float top, float right, float bottom, Color color, int ux, int uy, int rotation = 0)
         {
-            float x = 1f / texture.UV_X;
-            float y = 1f / texture.UV_Y;
-            RectangleF UV = new RectangleF(x * ux, y * uy, x, y);
-            Draw(texture, left, top, right, bottom, UV, color, rotation);
+            Vector2[] coords = new[]
+            {
+                new Vector2(left,top),
+                new Vector2(right,top),
+                new Vector2(right,bottom),
+                new Vector2(left,bottom)
+            };
+            Draw(texture, coords, color, ux, uy, rotation);
         }
 
-        public static void Draw(Sprite texture, float left, float top, float right, float bottom, RectangleF uv, Color color, int rotation = 0)
+        public static void Draw(Sprite texture, Vector2[] coords, Color color, int ux, int uy, int rotation = 0)
+        {
+            float x = 1f / texture.UV_X;
+            float y = 1f / texture.UV_Y;
+            Vector2[] texcoords = new[]
+            {
+                new Vector2(x * ux,y * uy),
+                new Vector2(x + x*ux,y * uy),
+                new Vector2(x + x*ux, y + y*uy),
+                new Vector2(x*ux, y + y*uy)
+            };
+            Draw(texture, coords, texcoords, new Color[] { color, color, color, color }, rotation);
+        }
+
+        public static void Draw(Sprite texture, Vector2[] coords, Vector2[] texcoords, Color[] color, int rotation)
         {
             GL.Enable(EnableCap.Texture2D);
-            Vector2[] texcoords = new[]
+            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
+            GL.Begin(PrimitiveType.Quads);
+            for (int i = 0; i < 4; i++)
+            {
+                GL.Color4(color[i]);
+                GL.TexCoord2(texcoords[(i + rotation) % 4]);
+                GL.Vertex2(coords[i]);
+            }
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
+        }
+
+        public static void Draw(Sprite texture, float left, float top, float right, float bottom, Vector2[] texcoords, Color color, int rotation = 0)
+        {
+            GL.Enable(EnableCap.Texture2D);
+            /*Vector2[] texcoords = new[]
             {
                 new Vector2(uv.Left,uv.Top),
                 new Vector2(uv.Right,uv.Top),
                 new Vector2(uv.Right,uv.Bottom),
                 new Vector2(uv.Left,uv.Bottom)
+            };*/
+            Vector2[] coords = new[]
+            {
+                new Vector2(left,top),
+                new Vector2(right,top),
+                new Vector2(right,bottom),
+                new Vector2(left,bottom)
             };
-
-            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
-            GL.Begin(PrimitiveType.Quads);
-
-            GL.Color4(color);
-
-            GL.TexCoord2(texcoords[rotation % 4]);
-            GL.Vertex2(left, top);
-            GL.TexCoord2(texcoords[(1 + rotation) % 4]);
-            GL.Vertex2(right, top);
-            GL.TexCoord2(texcoords[(2 + rotation) % 4]);
-            GL.Vertex2(right, bottom);
-            GL.TexCoord2(texcoords[(3 + rotation) % 4]);
-            GL.Vertex2(left, bottom);
-
-            GL.End();
-            GL.Disable(EnableCap.Texture2D);
+            Draw(texture, coords, texcoords, new[] { color, color, color, color }, rotation);
         }
 
         public static void DrawTilingTexture(Sprite texture, float left, float top, float right, float bottom, float scale, float x, float y, Color color)
         {
             RectangleF uv = new RectangleF(x+left/scale,y+top/scale,(right-left)/scale,(bottom-top)/scale);
-            Draw(texture, left, top, right, bottom, uv, color);
+            Draw(texture, left, top, right, bottom, VecArray(uv), color);
         }
 
         public static void DrawFrame(Sprite texture, float left, float top, float right, float bottom, float scale, Color color)
@@ -177,6 +200,17 @@ namespace YAVSRG
 
             Font1 = new SpriteFont(60, "Akrobat Black");
             Font2 = new SpriteFont(60, "Akrobat");
+        }
+
+        public static Vector2[] VecArray(RectangleF rect)
+        {
+            return new[]
+            {
+                new Vector2(rect.Left,rect.Top),
+                new Vector2(rect.Right,rect.Top),
+                new Vector2(rect.Right,rect.Bottom),
+                new Vector2(rect.Left,rect.Bottom)
+            };
         }
     }
 }

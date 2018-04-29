@@ -19,6 +19,7 @@ namespace YAVSRG.Interface.Screens
             selector = new LevelSelector(this);
             selector.PositionTopLeft(0, 120, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
 
+            AddChild(new ChartSortingControls().PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 120, AnchorType.MAX, AnchorType.MIN));
             diffDisplay = new ChartInfoPanel();
             diffDisplay.PositionTopLeft(100, 120, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MIN, AnchorType.MAX);
             AddChild(diffDisplay);
@@ -34,7 +35,6 @@ namespace YAVSRG.Interface.Screens
             }
             AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
             //
-            AddChild(new ChartSortingControls().PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 120, AnchorType.MAX, AnchorType.MIN));
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
@@ -86,6 +86,10 @@ namespace YAVSRG.Interface.Screens
             else if (Input.KeyTap(OpenTK.Input.Key.Minus))
             {
                 ChangeRate(-ratestep);
+            }
+            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R))
+            {
+                ChartLoader.UpdateCache();
             }
         }
 
