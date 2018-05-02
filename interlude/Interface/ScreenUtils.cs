@@ -17,6 +17,12 @@ namespace YAVSRG.Interface
         {
             ScreenWidth = Width / 2;
             ScreenHeight = Height / 2;
+            if (ScreenWidth < 800 || ScreenHeight < 450)
+            {
+                float r = Math.Max(800f / ScreenWidth, 450f / ScreenHeight);
+                ScreenWidth = (int)(ScreenWidth * r);
+                ScreenHeight = (int)(ScreenHeight * r);
+            }
         }
 
         public static bool MouseOver(float left, float top, float right, float bottom)
@@ -37,6 +43,21 @@ namespace YAVSRG.Interface
             SpriteBatch.Draw(texture, left, top, left + height, bottom, c, 0, 0);
             SpriteBatch.Draw(texture, left + height, top, right - height, bottom, c, 1, 0);
             SpriteBatch.Draw(texture, right - height, top, right, bottom, c, 2, 0);
+        }
+
+        public static void DrawParallelogramWithBG(Sprite frame, float left, float top, float right, float bottom, float amount)
+        {
+            float h = (bottom - top)*amount;
+            SpriteBatch.ParallelogramTransform(amount, top + h/amount * 0.5f);
+            SpriteBatch.StencilMode(1);
+            SpriteBatch.DrawRect(left-Math.Abs(h), top, right, bottom, Color.White);
+            SpriteBatch.DisableTransform();
+            SpriteBatch.StencilMode(2);
+            Game.Screens.DrawChartBackground(left, top, right+Math.Abs(h)*0.5f, bottom, Game.Screens.DarkColor, 0.5f);
+            SpriteBatch.StencilMode(0);
+            SpriteBatch.ParallelogramTransform(amount, top + h / amount * 0.5f);
+            SpriteBatch.DrawFrame(frame, left-Math.Abs(h), top, right, bottom, 30f, Color.White);
+            SpriteBatch.DisableTransform();
         }
     }
 }

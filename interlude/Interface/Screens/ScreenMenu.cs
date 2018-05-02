@@ -76,7 +76,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Screens.BackgroundDim.Target = 0;
+            Game.Screens.BackgroundDim.Target = 0.5f;
             slide.Target = 0;
         }
 

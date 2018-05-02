@@ -81,13 +81,6 @@ namespace YAVSRG
         public static void Draw(Sprite texture, float left, float top, float right, float bottom, Vector2[] texcoords, Color color, int rotation = 0)
         {
             GL.Enable(EnableCap.Texture2D);
-            /*Vector2[] texcoords = new[]
-            {
-                new Vector2(uv.Left,uv.Top),
-                new Vector2(uv.Right,uv.Top),
-                new Vector2(uv.Right,uv.Bottom),
-                new Vector2(uv.Left,uv.Bottom)
-            };*/
             Vector2[] coords = new[]
             {
                 new Vector2(left,top),
@@ -145,6 +138,21 @@ namespace YAVSRG
             GL.MultMatrix(mat);
         }
 
+        public static void ParallelogramTransform(float amount, float center)
+        {
+            double[] mat = new[] {
+                1.0, 0.0, 0.0, 0.0,
+                -amount, 1.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+            };
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
+            GL.Translate(0, center, 0);
+            GL.MultMatrix(mat);
+            GL.Translate(0, -center, 0);
+        }
+
         public static void DisableTransform()
         {
             GL.MatrixMode(MatrixMode.Modelview);
@@ -157,19 +165,20 @@ namespace YAVSRG
             {
                 GL.StencilMask(0xFF);
                 GL.Enable(EnableCap.StencilTest);
+                GL.ClearStencil(0x00);
+                GL.Clear(ClearBufferMask.StencilBufferBit);
                 GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
                 GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
             }
             else if (m == 2)
             {
                 GL.StencilMask(0x00);
-                GL.Enable(EnableCap.StencilTest);
-                GL.StencilFunc(StencilFunction.Less, 1, 0xFF);
-                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+                GL.StencilFunc(StencilFunction.Lequal, 1, 0xFF);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
             }
             else if (m == 0)
             {
-                GL.ClearStencil(0x00);
+                GL.Clear(ClearBufferMask.StencilBufferBit);
                 GL.Disable(EnableCap.StencilTest);
             }
         }
@@ -190,6 +199,7 @@ namespace YAVSRG
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.ClearColor(0, 0, 0, 0);
+            GL.ClearStencil(0x00);
 
             /*
             VBO = GL.GenBuffer();

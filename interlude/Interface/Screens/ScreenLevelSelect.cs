@@ -18,22 +18,22 @@ namespace YAVSRG.Interface.Screens
         {
             selector = new LevelSelector(this);
             selector.PositionTopLeft(0, 120, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
+            AddChild(selector);
 
             AddChild(new ChartSortingControls().PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 120, AnchorType.MAX, AnchorType.MIN));
             diffDisplay = new ChartInfoPanel();
-            diffDisplay.PositionTopLeft(100, 120, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MIN, AnchorType.MAX);
+            diffDisplay.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(700, 0, AnchorType.MAX, AnchorType.MAX);
             AddChild(diffDisplay);
-            AddChild(selector);
-            AddChild(new FramedButton("buttonbase", "Play", () => { Input.ChangeIM(null); Game.Screens.AddScreen(new ScreenPlay()); })
-                .PositionTopLeft(-100, -200, AnchorType.CENTER, AnchorType.CENTER)
-                .PositionBottomRight(100, -100, AnchorType.CENTER, AnchorType.CENTER));
+            AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
+                .PositionTopLeft(-150, 300, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionBottomRight(50, 400, AnchorType.CENTER, AnchorType.CENTER));
             //temp mod selection menu
             ScrollContainer f = new ScrollContainer(90, 20, false) { };
             foreach (Gameplay.Mods.Mod m in Game.Gameplay.mods)
             {
                 f.AddChild(new SimpleButton(m.GetName(), ModSelectClosure(m), () => { return m.Enable; }, 20f).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
             }
-            AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
+            //AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
             //
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
@@ -68,6 +68,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
+            Input.ChangeIM(null);
             Game.Gameplay.OnUpdateChart -= OnUpdateChart;
             ChartLoader.OnRefreshGroups -= OnUpdateGroups;
             A.Target(-ScreenWidth, 0);

@@ -50,7 +50,7 @@ namespace YAVSRG
             get { return Instance.audio; }
         }
 
-        public Game() : base(1200,800, new OpenTK.Graphics.GraphicsMode(32,24,8,0))
+        public Game() : base(800,600, new OpenTK.Graphics.GraphicsMode(32,24,8,0))
         {
             Sprite s = Content.UploadTexture(Utils.CaptureScreen(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";
@@ -103,7 +103,7 @@ namespace YAVSRG
         {
             base.OnRenderFrame(e);
             GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
-            SpriteBatch.Begin(Width, Height); //start my render code
+            SpriteBatch.Begin(ScreenUtils.ScreenWidth*2, ScreenUtils.ScreenHeight*2); //start my render code
             screens.Draw();
             SpriteBatch.End();
             SwapBuffers(); //send rendered pixels to screen

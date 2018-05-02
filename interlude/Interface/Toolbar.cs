@@ -76,12 +76,12 @@ namespace YAVSRG.Interface
                 }
                 
                 //top
-                Game.Screens.DrawStaticChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor);
+                Game.Screens.DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor,0.25f);
                 SpriteBatch.Draw(texture, -ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Color.FromArgb(127, Game.Screens.BaseColor));
                 SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + slide + 5, 30f, Game.Screens.BaseColor);
 
                 //bottom
-                Game.Screens.DrawStaticChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor);
+                Game.Screens.DrawChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor,0.25f);
                 SpriteBatch.Draw(texture, -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor),2);
                 SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
 

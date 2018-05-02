@@ -25,11 +25,10 @@ namespace YAVSRG.Interface.Widgets
             private AnimationColorMixer fill;
             private Color baseColor;
 
-            public Group(int height, int width, Action<Group> action, Func<bool> highlight, string line1, string line2, Color c)
+            public Group(int height, Action<Group> action, Func<bool> highlight, string line1, string line2, Color c)
             {
                 Children = new List<Group>();
                 this.height = height;
-                this.width = width;
                 title = line1;
                 subtitle = line2;
                 OnClick = action;
@@ -42,7 +41,8 @@ namespace YAVSRG.Interface.Widgets
 
             public void UpdatePosition(float y)
             {
-                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.toolbar.Height) / 48f, 2)*1.5f, y);
+                width = (int)(600);
+                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.toolbar.Height+120) / 48f, 2)*1.5f, y);
                 B.Target(-50, y + height);
             }
 
@@ -97,6 +97,7 @@ namespace YAVSRG.Interface.Widgets
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
                 if (top > ScreenUtils.ScreenHeight || bottom < -ScreenUtils.ScreenHeight) { return; }
                 SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, 0, fill);
+                Game.Screens.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,fill), 0.5f);
                 SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, border);
                 if (subtitle == "")
                 {
@@ -162,8 +163,7 @@ namespace YAVSRG.Interface.Widgets
 
         public void AddPack(ChartLoader.ChartGroup pack)
         {
-            int width = (int)(ScreenUtils.ScreenWidth*0.8f - 150);
-            Group g = new Group(100, width, (x) =>
+            Group g = new Group(100, (x) =>
             {
                 bool temp = x.Expand;
                 foreach (Group c in groups)
@@ -186,7 +186,7 @@ namespace YAVSRG.Interface.Widgets
             }, () => { return false; }, pack.label, "", Game.Options.Theme.SelectPack); //groups don't know when they're expanded :(
             foreach (ChartLoader.CachedChart chart in pack.charts)
             {
-                g.AddItem(new Group(80, width, (x) =>
+                g.AddItem(new Group(80, (x) =>
                 {
                     bool temp = x.Expand;
                     foreach (Group c in g.Children)
@@ -208,7 +208,7 @@ namespace YAVSRG.Interface.Widgets
                             MultiChart m = ChartLoader.LoadFromCache(chart);
                             foreach (Chart d in m.diffs)
                             {
-                                x.AddItem(new Group(80, width, (y) =>
+                                x.AddItem(new Group(80, (y) =>
                                 {
                                     Game.Gameplay.ChangeChart(d);
                                     ChartLoader.SelectedChart = m;

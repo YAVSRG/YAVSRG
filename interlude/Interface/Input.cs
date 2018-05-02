@@ -42,8 +42,8 @@ namespace YAVSRG.Interface
 
         private static void MouseMove(object sender, MouseMoveEventArgs e)
         {
-            MouseX = e.X - ScreenUtils.ScreenWidth;
-            MouseY = e.Y - ScreenUtils.ScreenHeight;
+            MouseX = (e.X - Game.Instance.Width / 2) * ScreenUtils.ScreenWidth / (Game.Instance.Width / 2);
+            MouseY = (e.Y - Game.Instance.Height / 2) * ScreenUtils.ScreenHeight / (Game.Instance.Height / 2);
         }
 
         private static void KeyUp(object sender, KeyboardKeyEventArgs e)

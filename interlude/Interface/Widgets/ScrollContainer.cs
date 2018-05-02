@@ -25,7 +25,7 @@ namespace YAVSRG.Interface.Widgets
 
         public override void Update(float left, float top, float right, float bottom)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(left, top, right, bottom); //todo: replace with code that checks if it's within the scroll view
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             float x = padX;
             float y = padY - scroll;
@@ -57,7 +57,7 @@ namespace YAVSRG.Interface.Widgets
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.StencilMode(1);
-            Game.Screens.DrawStaticChartBackground(left, top, right, bottom, Game.Screens.DarkColor);
+            Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 0.5f);
             SpriteBatch.StencilMode(2);
             DrawWidgets(left, top, right, bottom);
             SpriteBatch.StencilMode(0);

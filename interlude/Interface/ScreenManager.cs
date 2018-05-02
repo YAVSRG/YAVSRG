@@ -6,21 +6,22 @@ using System.Threading.Tasks;
 using System.Drawing;
 using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Interface.Animations;
+using OpenTK;
 
 namespace YAVSRG.Interface
 {
     class ScreenManager
     {
-        AnimationFade fade1;
-        AnimationFade fade2;
-        AnimationSlider parallax = new AnimationSlider(15);
+        AnimationFade fade1; //prev screen fade out 
+        AnimationFade fade2; //next screen fade in
+        AnimationSlider parallax = new AnimationSlider(20);
         public Toolbar toolbar;
         List<Screen> stack = new List<Screen>() {};
         List<Dialog> dialogs = new List<Dialog>();
         AnimationSeries animation = new AnimationSeries(true);
         AnimationGroup animation2 = new AnimationGroup(true);
         Screen Previous = null;
-        public ColorFade BackgroundDim = new ColorFade(Color.FromArgb(80, 80, 80), Color.White);
+        public ColorFade BackgroundDim = new ColorFade(Color.Black, Color.White);
         public Screen Current = null;
         public bool Loading = true;
         public Sprite Background;
@@ -45,7 +46,10 @@ namespace YAVSRG.Interface
 
         public void ChangeBackground(Sprite bg)
         {
-            Content.UnloadTexture(Oldbackground);
+            if (bg.ID != Oldbackground.ID)
+            {
+                Content.UnloadTexture(Oldbackground);
+            }
             Oldbackground = Background;
             Background = bg;
         }
@@ -87,20 +91,18 @@ namespace YAVSRG.Interface
                 Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
                 return;
             }
-            float parallaxX = Input.MouseX * parallax / ScreenWidth;
-            float parallaxY = Input.MouseY * parallax / ScreenHeight;
-            DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, BackgroundDim);
+            DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, BackgroundDim);
             if (animation.Running)
             {
                 if (fade1.Running)
                 {
                     Previous?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
-                    DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, Color.FromArgb((int)(255 * fade1), BackgroundDim));
+                    DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, Color.FromArgb((int)(255 * fade1), BackgroundDim));
                 }
                 else
                 {
                     Current?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
-                    DrawChartBackground(-ScreenWidth - parallaxX - parallax, -ScreenHeight - parallaxY - parallax, ScreenWidth - parallaxX + parallax, ScreenHeight - parallaxY + parallax, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
+                    DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
                 }
             }
             else
@@ -114,28 +116,28 @@ namespace YAVSRG.Interface
             toolbar.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
         }
 
-        public void DrawChartBackground(float left, float top, float right, float bottom, Color c)
+        public void DrawChartBackground(float left, float top, float right, float bottom, Color c, float parallaxMult = 1f)
         {
-            float bg = ((float)Background.Width / Background.Height);
-            float window = (right - left) / (bottom - top);
-            float correction = window / bg;
-            RectangleF uv = new RectangleF(0, (correction - 1) * 0.5f, 1, 2 - correction);
-            SpriteBatch.Draw(Background, left, top, right, bottom + 1, SpriteBatch.VecArray(uv), c);
-        }
+            float parallaxX = parallaxMult * Input.MouseX * parallax / ScreenWidth;
+            float parallaxY = parallaxMult * Input.MouseY * parallax / ScreenHeight;
 
-        public void DrawStaticChartBackground(float left, float top, float right, float bottom, Color c)
-        {
             float bg = ((float)Background.Width / Background.Height);
-            float window = ((float)ScreenWidth / ScreenHeight);
+            float window = (ScreenWidth + parallax) / (ScreenHeight + parallax);
             float correction = window / bg;
 
-            float l = (1 + left / ScreenWidth) / 2;
-            float r = (1 + right / ScreenWidth) / 2;
-            float t = (correction + top / ScreenHeight) / (2 * correction);
-            float b = (correction + bottom / ScreenHeight) / (2 * correction);
+            float l = (1 + (left + parallaxX) / (ScreenWidth + parallax * 2)) / 2;
+            float r = (1 + (right + parallaxX) / (ScreenWidth + parallax * 2)) / 2;
+            float t = (correction + (top + parallaxY) / (ScreenHeight + parallax * 2)) / (2 * correction);
+            float b = (correction + (bottom + parallaxY) / (ScreenHeight + parallax * 2)) / (2 * correction);
 
-            RectangleF uv = new RectangleF(l, t, r - l, b - t);
-            SpriteBatch.Draw(Background, left, top, right, bottom + 1, SpriteBatch.VecArray(uv), c);
+            Vector2[] v = new[]
+            {
+                new Vector2(l,t),
+                new Vector2(r,t),
+                new Vector2(r,b),
+                new Vector2(l,b)
+            };
+            SpriteBatch.Draw(Background, left, top, right, bottom + 1, v, c);
         }
 
         public void Update()
