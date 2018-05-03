@@ -74,6 +74,17 @@ namespace YAVSRG
             DrawText(text, scale * FONTSCALE, left, (top + bottom) * 0.5f - h * scale * 0.5f, c);
         }
 
+        public void DrawJustifiedTextToFill(string text, float left, float top, float right, float bottom, Color c)
+        {
+            float w = MeasureText(text);
+            int h = FontLookup['T'].Height;
+            float scale = Math.Min(
+                (right - left) / w,
+                (bottom - top) / h
+                );
+            DrawJustifiedText(text, scale * FONTSCALE, right, (top + bottom) * 0.5f - h * scale * 0.5f, c);
+        }
+
         public float MeasureText(string text)
         {
             float w = FONTSCALE / 2;

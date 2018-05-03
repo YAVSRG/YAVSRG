@@ -80,7 +80,6 @@ namespace YAVSRG
 
         public static void Draw(Sprite texture, float left, float top, float right, float bottom, Vector2[] texcoords, Color color, int rotation = 0)
         {
-            GL.Enable(EnableCap.Texture2D);
             Vector2[] coords = new[]
             {
                 new Vector2(left,top),
