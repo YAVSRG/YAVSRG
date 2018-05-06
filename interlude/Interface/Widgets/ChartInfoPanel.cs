@@ -63,8 +63,7 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.Font1.DrawText(time, 40f, left + 550, bottom - 220, Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 50, bottom - 220, Game.Options.Theme.MenuFont);
 
-            DrawGraph(left + 550, top + 350, right - 50, bottom - 250);
-            SpriteBatch.DrawFrame(frame, left + 550, top + 350, right - 50, bottom - 250, 30f, Color.White);
+            //DrawGraph(left + 550, top + 350, right - 50, bottom - 250);
 
             DrawWidgets(left, top, right, bottom);
         }
@@ -79,6 +78,7 @@ namespace YAVSRG.Interface.Widgets
                 SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.raw[i] - 5, left + x * i + 1, bottom - y * diff.raw[i] + 5, Color.Aqua);
             }
             SpriteBatch.Font2.DrawCentredTextToFill("Replace with NPS graph?",left, top, right, bottom, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Color.White);
         }
     }
 }

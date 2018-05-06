@@ -25,15 +25,19 @@ namespace YAVSRG.Interface.Screens
             diffDisplay.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(700, 0, AnchorType.MAX, AnchorType.MAX);
             AddChild(diffDisplay);
             AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
-                .PositionTopLeft(-150, 300, AnchorType.CENTER, AnchorType.CENTER)
-                .PositionBottomRight(50, 400, AnchorType.CENTER, AnchorType.CENTER));
+                .PositionTopLeft(-350, 75, AnchorType.CENTER, AnchorType.MAX)
+                .PositionBottomRight(750, 25, AnchorType.MAX, AnchorType.MAX));
             //temp mod selection menu
             ScrollContainer f = new ScrollContainer(90, 20, false) { };
             foreach (Gameplay.Mods.Mod m in Game.Gameplay.mods)
             {
                 f.AddChild(new SimpleButton(m.GetName(), ModSelectClosure(m), () => { return m.Enable; }, 20f).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
+                f.State = -1;
             }
-            //AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
+            AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
+            AddChild(new FramedButton("buttonbase", "Mods", () => { f.State *= -1; })
+                .PositionTopLeft(50, 75, AnchorType.MIN, AnchorType.MAX)
+                .PositionBottomRight(-400, 25, AnchorType.CENTER, AnchorType.MAX));
             //
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);

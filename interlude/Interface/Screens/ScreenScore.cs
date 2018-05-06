@@ -14,7 +14,7 @@ namespace YAVSRG.Interface.Screens
     {
         static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" };
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
-        string mods;
+        string mods, time, bpm;
         private ScoreTracker scoreData;
         Sprite rank, frame;
         int tier;
@@ -46,6 +46,9 @@ namespace YAVSRG.Interface.Screens
             acc1.ProcessScore(scoreData.hitdata);
             acc2.ProcessScore(scoreData.hitdata);
 
+            time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
+            bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
+
             AddChild(new Scoreboard().PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.MIN, AnchorType.MAX));
 
             Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
@@ -55,10 +58,7 @@ namespace YAVSRG.Interface.Screens
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            //you'll just have to change to the chart before showing the score screen
-            //SpriteBatch.Font1.DrawText(mods[i], 30f, left, top + 10 + i * 40, Game.Options.Theme.MenuFont);
-            //SpriteBatch.Font1.DrawCentredText(acc1.FormatAcc(), 30, -250, 50, Game.Options.Theme.MenuFont);
-            //SpriteBatch.Font1.DrawCentredText(acc2.FormatAcc(), 30, 250, 50, Game.Options.Theme.MenuFont);
+            //you'll just have to change to the chart before showing the score screen <- dont worry old me, this always happens :)
 
             //top panel
             DrawParallelogramWithBG(frame, left, top, right - 600, top + 150, 0.5f);
@@ -66,7 +66,9 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + ChartLoader.SelectedChart.header.creator + "         From " + ChartLoader.SelectedChart.header.pack, left + 50, top + 80, right - 650, top + 150, Game.Options.Theme.MenuFont);
 
             //judgements display
-            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), right - 500, top + 50, right - 50, top + 200, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), right - 500, top + 20, right - 50, top + 150, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), right - 500, top + 140, right - 275, top + 200, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), right - 275, top + 140, right - 50, top + 200, Game.Options.Theme.MenuFont);
             float r = 0;
             float h = (bottom - 250 - top) / 7;
             for (int i = 0; i < 6; i++)
@@ -85,8 +87,10 @@ namespace YAVSRG.Interface.Screens
 
             //middle stuff
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.DifficultyName, left + 550, top + 160, right - 550, top + 240, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredTextToFill(mods, left + 550, bottom - 400, right - 550, bottom - 350, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredTextToFill(mods, left + 550, bottom - 450, right - 550, bottom - 350, Game.Options.Theme.MenuFont);
             SpriteBatch.Draw(rank, -100, -200, 100, 0, Color.White);
+            SpriteBatch.Font1.DrawText(time, 40f, left + 550, bottom - 80, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 550, bottom - 80, Game.Options.Theme.MenuFont);
 
             //graph
             DrawGraph(left + 550, bottom - 350, right - 550, bottom - 150);
