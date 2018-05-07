@@ -155,6 +155,7 @@
     </Compile>
     <Compile Include="Interface\Dialog.cs" />
     <Compile Include="Interface\Dialogs\ConfirmDialog.cs" />
+    <Compile Include="Interface\Dialogs\LoadingDialog.cs" />
     <Compile Include="Interface\Dialogs\ProfileDialog.cs" />
     <Compile Include="Interface\Dialogs\TextDialog.cs" />
     <Compile Include="Interface\InputMethod.cs" />

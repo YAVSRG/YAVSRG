@@ -26,6 +26,11 @@ namespace YAVSRG
         public static Func<CachedChart,string> GroupMode = GroupByPack;
         public static string SearchString = "";
         public static event Action OnRefreshGroups = () => { };
+        public static bool Loaded;
+        public static List<ChartGroup> Groups;
+        public static List<ChartGroup> SearchResult;
+        public static List<CachedChart> Cache;
+        public static MultiChart SelectedChart;
 
         static readonly string CacheVersion = "v1.1";
 
@@ -58,11 +63,6 @@ namespace YAVSRG
             public string[] keys;
         }
 
-        public static bool Loaded;
-        public static List<ChartGroup> Groups;
-        public static List<ChartGroup> SearchResult;
-        public static List<CachedChart> Cache;
-        public static MultiChart SelectedChart;
 
         public static void Init()
         {
@@ -72,6 +72,7 @@ namespace YAVSRG
             {
                 UpdateCache();
             }
+            Refresh();
             Loaded = true;
         }
 
@@ -159,7 +160,6 @@ namespace YAVSRG
                 }
                 Cache.Add(c);
             }
-            Refresh();
         }
 
         public static void UpdateCache()
@@ -173,7 +173,13 @@ namespace YAVSRG
             {
                 CachePack(GetOsuSongFolder(), "osu! Imports");
             }
-            Refresh();
+        }
+
+        public static void UpdateCacheThreaded()
+        {
+            Loaded = false;
+            System.Threading.Thread t = new System.Threading.Thread(new System.Threading.ThreadStart(() => { UpdateCache(); Loaded = true; }));
+            t.Start();
         }
 
         private static CachedChart LoadCacheFile(string path)

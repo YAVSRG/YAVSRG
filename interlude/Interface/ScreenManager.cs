@@ -44,6 +44,11 @@ namespace YAVSRG.Interface
             dialogs.Insert(0, d);
         }
 
+        public bool InDialog()
+        {
+            return dialogs.Count > 0;
+        }
+
         public void ChangeBackground(Sprite bg)
         {
             if (bg.ID != Oldbackground.ID)

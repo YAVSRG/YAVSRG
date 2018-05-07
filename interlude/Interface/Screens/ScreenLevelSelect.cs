@@ -94,7 +94,8 @@ namespace YAVSRG.Interface.Screens
             }
             else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R))
             {
-                ChartLoader.UpdateCache();
+                ChartLoader.UpdateCacheThreaded();
+                Game.Screens.AddDialog(new Dialogs.LoadingDialog((s) => { ChartLoader.Refresh(); }));
             }
         }
 

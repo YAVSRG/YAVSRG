@@ -22,8 +22,8 @@ namespace YAVSRG.Interface
             frame = Content.LoadTextureFromAssets("frame");
             cursor = Content.LoadTextureFromAssets("cursor");
             AddChild(mc = new MusicControls()
-                .PositionTopLeft(0,80,AnchorType.MAX,AnchorType.MIN)
-                .PositionBottomRight(-1000,180,AnchorType.MAX,AnchorType.MIN)
+                .PositionTopLeft(0, 80, AnchorType.MAX, AnchorType.MIN)
+                .PositionBottomRight(-1000, 180, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
                 new Button("buttonback", "", () => { Game.Screens.PopScreen(); })
@@ -58,7 +58,7 @@ namespace YAVSRG.Interface
 
         public new float Height
         {
-            get { return Math.Max(slide.Val,0); }
+            get { return Math.Max(slide.Val, 0); }
         }
 
         public override void Draw(float left, float top, float right, float bottom)
@@ -74,15 +74,15 @@ namespace YAVSRG.Interface
                     SpriteBatch.DrawRect(-ScreenWidth, -ScreenHeight + slide + i * s, -ScreenWidth + level, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
                     SpriteBatch.DrawRect(ScreenWidth - level, -ScreenHeight + slide + i * s, ScreenWidth, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
                 }
-                
+
                 //top
-                Game.Screens.DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor,0.25f);
+                Game.Screens.DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor, 0.25f);
                 SpriteBatch.Draw(texture, -ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Color.FromArgb(127, Game.Screens.BaseColor));
                 SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + slide + 5, 30f, Game.Screens.BaseColor);
 
                 //bottom
-                Game.Screens.DrawChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor,0.25f);
-                SpriteBatch.Draw(texture, -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor),2);
+                Game.Screens.DrawChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor, 0.25f);
+                SpriteBatch.Draw(texture, -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor), 2);
                 SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
 
                 base.Draw(left, top + slide - 80, right, bottom);
@@ -100,16 +100,24 @@ namespace YAVSRG.Interface
 
         public override void Update(float left, float top, float right, float bottom)
         {
+            if (Game.Screens.InDialog()) { return; }
             base.Update(left, top + slide - 80, right, bottom);
-            if (!hidden && Input.KeyTap(OpenTK.Input.Key.T) && Input.KeyPress(OpenTK.Input.Key.ControlLeft))
+            if (!hidden)
             {
-                if (slide.Target <= 0)
+                if (Input.KeyTap(OpenTK.Input.Key.Escape))
                 {
-                    Expand();
+                    Game.Screens.PopScreen();
                 }
-                else
+                if (Input.KeyTap(OpenTK.Input.Key.T) && Input.KeyPress(OpenTK.Input.Key.ControlLeft))
                 {
-                    Collapse();
+                    if (slide.Target <= 0)
+                    {
+                        Expand();
+                    }
+                    else
+                    {
+                        Collapse();
+                    }
                 }
             }
         }

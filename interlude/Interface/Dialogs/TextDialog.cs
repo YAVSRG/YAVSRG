@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Dialogs
         string prompt;
         string val = "";
 
-        public TextDialog(string prompt, Action<string> action) : base(action)
+        public TextDialog(string prompt, Action<string> action) : base(action) //todo: edit this to use the IME system
         {
             this.prompt = prompt;
             PositionTopLeft(-200, -100, AnchorType.CENTER, AnchorType.CENTER);

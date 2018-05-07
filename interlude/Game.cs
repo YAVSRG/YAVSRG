@@ -15,7 +15,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "v0.2.4";
+        public static readonly string Version = "Interlude v0.2.5";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -113,8 +113,7 @@ namespace YAVSRG
         {
             base.OnUpdateFrame(e);
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
-            screens.Update();
-            //Screen.UpdateScreens(); //this is the fade to black transition between screens. needs removing for a fancy transition.
+            screens.Update(); //updates the current screen as well as animations and stuff to transition between them
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
         }
 
