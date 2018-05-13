@@ -9,9 +9,8 @@ namespace YAVSRG.Beatmap.DifficultyRating
 {
     public class RatingReport
     {
-        public List<float> raw;
+        public float[] physical,tech;
         public float[] breakdown;
-        public List<float> tech;
 
         float[] fingers;
 
@@ -21,8 +20,8 @@ namespace YAVSRG.Beatmap.DifficultyRating
             int hands = layout.hands.Count;
             fingers = new float[map.Keys];
 
-            raw = new List<float>();
-            tech = new List<float>();
+            physical = new float[map.Notes.Points.Count];
+            tech = new float[map.Notes.Points.Count];
             List<GameplaySnap> snaps = map.Notes.Points;
             Snap current;
             List<float> fingersOnHand = new List<float>();
@@ -48,27 +47,42 @@ namespace YAVSRG.Beatmap.DifficultyRating
                     }
                     handsInSnap.Add(GetHandDifficulty(fingersOnHand)); //calculate difficulty for this hand
                 }
-                raw.Add(GetSnapDifficulty(handsInSnap)); //calculate difficulty for hands overall (hand sync and shit idk)
+                physical[i] = GetSnapDifficulty(handsInSnap); //calculate difficulty for hands overall (hand sync and shit idk)
 
                 if (i > 1) //temp tech algorithm
                 {
                     float delta1 = snaps[i].Offset - snaps[i - 1].Offset;
                     float delta2 = snaps[i - 1].Offset - snaps[i - 2].Offset;
-                    tech.Add((float)Math.Abs(Math.Log(delta1 / delta2, 2))*GetStreamCurve(delta1)*rate*20);
+                    tech[i] = (float)Math.Abs(Math.Log(delta1 / delta2, 2))*GetStreamCurve(delta1)*rate*20;
                 }
             }
-            breakdown = new float[] { DataSet.Mean(raw), DataSet.Mean(tech)}; //final values are meaned because your accuracy is a mean average of hits
+            breakdown = new float[] { GetOverallDifficulty(physical), GetOverallDifficulty(tech)}; //final values are meaned because your accuracy is a mean average of hits
             //difficulty of each snap is assumed to be a measure of how unlikely it is you will hit it well
         }
 
-        protected float GetHandDifficulty(List<float> data)
+        protected float GetOverallDifficulty(float[] data)
         {
-            return DataSet.Mean(data); //temp
+            int c = 0;
+            float t = 0;
+            for (int i = 0; i < data.Length; i++)
+            {
+                if (data[i] > 0)
+                {
+                    c += 1;
+                }
+                t += data[i];
+            }
+            return t / c;
         }
 
         protected float GetSnapDifficulty(List<float> data)
         {
             return DataSet.Mean(data)*9; //not actually that temp
+        }
+
+        protected float GetHandDifficulty(List<float> data)
+        {
+            return DataSet.Mean(data); //temp
         }
 
         protected float GetNoteDifficulty(int c, float offset, int h, float rate)

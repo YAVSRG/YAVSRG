@@ -70,12 +70,12 @@ namespace YAVSRG.Interface.Widgets
 
         public void DrawGraph(float left, float top, float right, float bottom)
         {
-            int c = diff.raw.Count;
+            int c = diff.physical.Length;
             float x = (right - left) / c;
             float y = (bottom - top) / physical * 0.25f;
             for (int i = 0; i < c; i++)
             {
-                SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.raw[i] - 5, left + x * i + 1, bottom - y * diff.raw[i] + 5, Color.Aqua);
+                SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.physical[i] - 5, left + x * i + 1, bottom - y * diff.physical[i] + 5, Color.Aqua);
             }
             SpriteBatch.Font2.DrawCentredTextToFill("Replace with NPS graph?",left, top, right, bottom, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Color.White);

@@ -51,7 +51,7 @@ namespace YAVSRG.Beatmap
             {
                 data.Add(current, end - t);
             }
-            return data.OrderBy(pair => pair.Value).First().Key;
+            return data.OrderBy(pair => pair.Value).Last().Key;
         }
 
         public List<BPMPoint> Convert(float end)

@@ -67,13 +67,6 @@ namespace YAVSRG
         public static void Init()
         {
             Groups = new List<ChartGroup>();
-            LoadCache();
-            if (Cache.Count == 0)
-            {
-                UpdateCache();
-            }
-            Refresh();
-            Loaded = true;
         }
 
         public static void SortIntoGroups(Func<CachedChart,string> groupBy, Comparison<CachedChart> sortBy)
@@ -179,6 +172,13 @@ namespace YAVSRG
         {
             Loaded = false;
             System.Threading.Thread t = new System.Threading.Thread(new System.Threading.ThreadStart(() => { UpdateCache(); Loaded = true; }));
+            t.Start();
+        }
+
+        public static void LoadCacheThreaded()
+        {
+            Loaded = false;
+            System.Threading.Thread t = new System.Threading.Thread(new System.Threading.ThreadStart(() => { LoadCache(); Loaded = true; }));
             t.Start();
         }
 

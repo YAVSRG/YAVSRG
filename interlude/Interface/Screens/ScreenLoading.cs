@@ -11,9 +11,12 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenLoading : Screen
     {
+        static readonly string[] splashes = new[] { "Welcome to Interlude", "Give it a moment...", "Now Loading", "Hold on...", "(╯°□°）╯︵ ┻━┻", "Loading your charts...", "Here we go again", "Buckle up" };
+        string splash = splashes[new Random().Next(0, splashes.Length)];
         Sprite desktop, logo;
         AnimationFade fade;
         AnimationSeries transition;
+        AnimationCounter counter;
         bool exiting;
         OpenTK.WindowBorder wb;
 
@@ -22,6 +25,7 @@ namespace YAVSRG.Interface.Screens
             desktop = s;
             logo = Content.LoadTextureFromAssets("logo");
             Animation.Add(transition = new AnimationSeries(true));
+            Animation.Add(counter = new AnimationCounter(1000000000, true));
         }
 
         public override void OnEnter(Screen prev)
@@ -38,6 +42,8 @@ namespace YAVSRG.Interface.Screens
             }
             else
             {
+                ChartLoader.Init();
+                ChartLoader.LoadCacheThreaded();
                 Game.Screens.toolbar.SetHidden(false);
                 transition.Add(fade = new AnimationFade(0, 1, 0.996f));
                 transition.Add(new AnimationCounter(100, false));
@@ -53,19 +59,21 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.Draw(desktop, -ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, SpriteBatch.VecArray(UV), Color.White);
             int a = (int)(255 * fade);
             if (exiting) { a = 255 - a; }
+            else
+            {
+                float o = -15f * splash.Length;
+                for (int i = 0; i < splash.Length; i++)
+                {
+                    SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i*0.2f), Color.FromArgb(a, Color.White));
+                }
+            }
             SpriteBatch.Draw(logo, -250, -250, 250, 250, Color.FromArgb(a, Color.White));
         }
 
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
-
-            if (!fade.Running && !ChartLoader.Loaded)
-            {
-                ChartLoader.Init();
-                ChartLoader.RandomChart();
-            }
-            else if (exiting)
+            if (exiting)
             {
                 Game.Audio.SetVolume(Game.Options.General.AudioVolume * (1 - fade));
                 if (!transition.Running)
@@ -73,9 +81,11 @@ namespace YAVSRG.Interface.Screens
                     Game.Instance.Exit();
                 }
             }
-            else if (!transition.Running)
+            else if (ChartLoader.Loaded && !transition.Running)
             {
                 Game.Screens.Loading = false;
+                ChartLoader.Refresh();
+                ChartLoader.RandomChart();
                 Game.Screens.AddScreen(new ScreenMenu());
                 Game.Instance.WindowBorder = wb;
             }

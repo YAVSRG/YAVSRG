@@ -106,7 +106,7 @@
     <Compile Include="Beatmap\Osu\BeatmapHeader.cs" />
     <Compile Include="Beatmap\DifficultyRating\DataSet.cs" />
     <Compile Include="Beatmap\DifficultyRating\KeyLayout.cs" />
-    <Compile Include="Beatmap\DifficultyRating\RatingReportOld.cs" />
+    <Compile Include="Beatmap\DifficultyRating\PlayerRating.cs" />
     <Compile Include="Beatmap\Osu\HitObject.cs" />
     <Compile Include="Beatmap\Osu\HitObjectConverter.cs" />
     <Compile Include="Beatmap\PointManager.cs" />
