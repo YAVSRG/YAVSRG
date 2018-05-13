@@ -104,6 +104,10 @@ namespace YAVSRG.Audio
         public void Seek(double position)
         {
             ManagedBass.Bass.ChannelSetPosition(nowplaying, ManagedBass.Bass.ChannelSeconds2Bytes(nowplaying,position/1000));
+            if (LeadingIn)
+            {
+                LeadingIn = false;
+            }
         }
 
         public void Update()

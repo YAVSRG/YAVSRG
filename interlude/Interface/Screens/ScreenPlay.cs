@@ -135,6 +135,11 @@ namespace YAVSRG.Interface.Screens
                     Game.Audio.PlayLeadIn();
                 }));
             }
+            else if (Input.KeyTap(Key.Space) && (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000))
+            {
+                Game.Audio.Seek(Chart.Notes.Points[0].Offset - 5000);
+                Game.Audio.Play(); //incase leading in
+            }
             //actual input stuff
             for (int k = 0; k < Chart.Keys; k++)
             {
@@ -212,6 +217,10 @@ namespace YAVSRG.Interface.Screens
         {
             base.Draw(left, top, right, bottom);
             SpriteBatch.Font1.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -ScreenHeight + 70, Color.White); //acc needs to be moved to a widget
+            if (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000)
+            {
+                SpriteBatch.Font1.DrawJustifiedText("Press SPACE to Skip", 50f, ScreenWidth - 20f, ScreenHeight - 80f, Game.Options.Theme.MenuFont);
+            }
         }
     }
 }
