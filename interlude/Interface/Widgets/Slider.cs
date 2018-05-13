@@ -41,11 +41,11 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             if (ScreenUtils.MouseOver(left, top, right, bottom))
             {
-                if (Input.KeyTap(OpenTK.Input.Key.Left))
+                if (Input.KeyTap(OpenTK.Input.Key.Left) && get() - resolution > min)
                 {
                     set(get() - resolution);
                 }
-                if (Input.KeyTap(OpenTK.Input.Key.Right))
+                if (Input.KeyTap(OpenTK.Input.Key.Right) && get() + resolution < max)
                 {
                     set(get() + resolution);
                 }

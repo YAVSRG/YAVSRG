@@ -20,8 +20,13 @@ namespace YAVSRG.Options.Tabs
                 );
             AddChild(
                 new Slider("Hit Position", v => { Game.Options.Profile.HitPosition = (int)v; }, () => Game.Options.Profile.HitPosition, -100, 400, 1)
-                .PositionTopLeft(-100, 175, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(100, 225, AnchorType.CENTER, AnchorType.MIN)
+                .PositionTopLeft(-300, 175, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-50, 225, AnchorType.CENTER, AnchorType.MIN)
+                );
+            AddChild(
+                new Slider("Background Dim", v => { Game.Options.Profile.BackgroundDim = v; }, () => Game.Options.Profile.BackgroundDim, 0, 1, 0.01f)
+                .PositionTopLeft(50, 175, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(300, 225, AnchorType.CENTER, AnchorType.MIN)
                 );
             AddChild(
                 new Slider("Upwards Screencover", v => { Game.Options.Profile.ScreenCoverUp = v; }, () => Game.Options.Profile.ScreenCoverUp, 0, 1, 0.05f)
@@ -35,8 +40,8 @@ namespace YAVSRG.Options.Tabs
                 );
             AddChild(
                 new BoolPicker("Upscroll", Game.Options.Profile.Upscroll, v => { Game.Options.Profile.Upscroll = v; })
-                .PositionTopLeft(-400, 375, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(-250, 425, AnchorType.CENTER, AnchorType.MIN)
+                .PositionTopLeft(-200, 375, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-50, 425, AnchorType.CENTER, AnchorType.MIN)
                 );
             AddChild(
                 new BoolPicker("Arrows for 4k", Game.Options.Profile.UseArrowsFor4k, v => { Game.Options.Profile.UseArrowsFor4k = v; })

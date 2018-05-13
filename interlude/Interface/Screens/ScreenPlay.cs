@@ -95,6 +95,7 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.PopScreen(); return;
             }
             //some misc stuff
+            Game.Screens.BackgroundDim.Target = 1-Game.Options.Profile.BackgroundDim;
             Utils.SetDiscordData("Playing", ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title + " [" + Game.CurrentChart.DifficultyName + "]");
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.toolbar.SetHidden(true);
@@ -110,6 +111,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             //some misc stuff
+            Game.Screens.BackgroundDim.Target = 0.3f;
             Utils.SetDiscordData("Looking for something to play", "");
             Game.Screens.toolbar.SetHidden(false);
             base.OnExit(next);
