@@ -4,32 +4,32 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using YAVSRG.Beatmap.Osu;
+using YAVSRG.Charts.YAVSRG;
 
-namespace YAVSRG.Beatmap
+namespace YAVSRG.Charts.Osu
 {
     public class OsuBeatmap
     {
         public string filename;
         protected readonly string path;
 
-        public BeatmapHeader General;
-        public BeatmapHeader Editor;
-        public BeatmapHeader Metadata;
-        public BeatmapHeader Difficulty;
+        public ChartsHeader General;
+        public ChartsHeader Editor;
+        public ChartsHeader Metadata;
+        public ChartsHeader Difficulty;
 
         public HitObjectConverter HitObjects;
         public TimingPointConverter TimingPoints;
         public EventData Events;
 
-        public virtual int Mode
+        public virtual byte Mode
         {
-            get { return (int)General.GetNumber("Mode"); }
+            get { return (byte)General.GetNumber("Mode"); }
         }
 
-        public virtual int Keys
+        public virtual byte Keys
         {
-            get { return (int)Difficulty.GetNumber("CircleSize"); }
+            get { return (byte)Difficulty.GetNumber("CircleSize"); }
         }
 
         public OsuBeatmap(string filename, string path)
@@ -48,19 +48,19 @@ namespace YAVSRG.Beatmap
                 l = ts.ReadLine();
                 if (l == "[General]")
                 {
-                    General = new BeatmapHeader(ts);
+                    General = new ChartsHeader(ts);
                 }
                 else if (l == "[Editor]")
                 {
-                    Editor = new BeatmapHeader(ts);
+                    Editor = new ChartsHeader(ts);
                 }
                 else if (l == "[Metadata]")
                 {
-                    Metadata = new BeatmapHeader(ts);
+                    Metadata = new ChartsHeader(ts);
                 }
                 else if (l == "[Difficulty]")
                 {
-                    Difficulty = new BeatmapHeader(ts);
+                    Difficulty = new ChartsHeader(ts);
                 }
                 else if (l == "[TimingPoints]")
                 {
@@ -78,21 +78,22 @@ namespace YAVSRG.Beatmap
             }
         }
 
-        public MultiChart ConvertToRoot()
-        {
-            if (Mode != 3) { return null; }
-            ChartHeader header = new ChartHeader { title = Metadata.GetValue("Title"), artist = Metadata.GetValue("Artist"), creator = Metadata.GetValue("Creator"), path = path };
-            MultiChart diffs = new MultiChart(header);
-            Chart c = Convert();
-            diffs.diffs.Add(c);
-            return diffs;
-        }
-
         public Chart Convert()
         {
             if (Mode != 3) { return null; }
             List<Snap> hitdata = HitObjects.CreateSnapsFromObjects(Keys);
-            Chart c = new Chart(hitdata, TimingPoints.Convert(hitdata[hitdata.Count-1].Offset), Metadata.GetValue("Version"), General.GetNumber("PreviewTime"), Keys, path, General.GetValue("AudioFilename"), Events.GetBGPath());
+            Chart c = new Chart(hitdata, TimingPoints.Convert(hitdata[hitdata.Count - 1].Offset), new ChartHeader
+            {
+                Title = Metadata.GetValue("Title"),
+                Artist = Metadata.GetValue("Artist"),
+                Creator = Metadata.GetValue("Creator"),
+                SourcePath = path,
+                File = filename,
+                DiffName = Metadata.GetValue("Version"),
+                PreviewTime = General.GetNumber("PreviewTime"),
+                AudioFile = General.GetValue("AudioFilename"),
+                BGFile = Events.GetBGPath()
+            }, Keys);
             return c;
         }
     }

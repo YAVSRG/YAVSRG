@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Gameplay;
+using YAVSRG.Charts.YAVSRG;
 
-namespace YAVSRG.Beatmap.DifficultyRating
+namespace YAVSRG.Charts.DifficultyRating
 {
     public class RatingReport
     {
@@ -14,7 +15,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
 
         float[] fingers;
 
-        public RatingReport(ChartWithModifiers map, float rate, float hitwindow)
+        public RatingReport(ChartWithModifiers map, float rate)
         {
             KeyLayout layout = new KeyLayout(map.Keys);
             int hands = layout.hands.Count;
@@ -37,11 +38,11 @@ namespace YAVSRG.Beatmap.DifficultyRating
                     fingersOnHand.Clear();
                     current = snaps[i].Mask(layout.hands[h].Mask());
                     s = new BinarySwitcher(current.taps.value + current.holds.value);
-                    foreach (int k in s.GetColumns())
+                    foreach (byte k in s.GetColumns())
                     {
                         fingersOnHand.Add(GetNoteDifficulty(k, current.Offset, layout.hands[h].Mask(), rate)); //collect together difficulty of each note on each hand
                     }
-                    foreach (int k in s.GetColumns())
+                    foreach (byte k in s.GetColumns())
                     {
                         fingers[k] = current.Offset;
                     }
@@ -85,7 +86,7 @@ namespace YAVSRG.Beatmap.DifficultyRating
             return DataSet.Mean(data); //temp
         }
 
-        protected float GetNoteDifficulty(int c, float offset, int h, float rate)
+        protected float GetNoteDifficulty(byte c, float offset, int h, float rate)
         {
             float val = 0;
             BinarySwitcher s = new BinarySwitcher(h);

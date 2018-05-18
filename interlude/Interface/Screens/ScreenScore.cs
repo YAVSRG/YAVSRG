@@ -16,7 +16,7 @@ namespace YAVSRG.Interface.Screens
         static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
         string mods, time, bpm;
         private ScoreTracker scoreData;
-        Sprite rank, frame;
+        Sprite rank;
         int tier;
         int snapcount;
         ScoreSystem acc1, acc2;
@@ -37,8 +37,7 @@ namespace YAVSRG.Interface.Screens
                     tier = i; break;
                 }
             }
-            rank = Content.LoadTextureFromAssets("rank-" + ranks[tier]);
-            frame = Content.LoadTextureFromAssets("frame");
+            rank = Content.GetTexture("rank-" + ranks[tier]);
             Game.Gameplay.ChartSaveData.TEMP_SCORES2.Add(new Score() { player = Game.Options.Profile.Name, date = DateTime.Now.ToShortDateString(), hitdata = ScoreTracker.HitDataToString(scoreData.hitdata), keycount = scoreData.c.Keys, mods = Game.Gameplay.GetModifiers().ToList(), time = DateTime.Now.ToShortTimeString() });
 
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
@@ -61,9 +60,9 @@ namespace YAVSRG.Interface.Screens
             //you'll just have to change to the chart before showing the score screen <- dont worry old me, this always happens :)
 
             //top panel
-            DrawParallelogramWithBG(frame, left, top, right - 600, top + 150, 0.5f);
-            SpriteBatch.Font1.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, left, top, right - 600, top + 100, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + ChartLoader.SelectedChart.header.creator + "         From " + ChartLoader.SelectedChart.header.pack, left + 50, top + 80, right - 650, top + 150, Game.Options.Theme.MenuFont);
+            DrawParallelogramWithBG(left, top, right - 600, top + 150, 0.5f);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, left, top, right - 600, top + 100, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, left + 50, top + 80, right - 650, top + 150, Game.Options.Theme.MenuFont);
 
             //judgements display
             SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), right - 500, top + 20, right - 50, top + 150, Game.Options.Theme.MenuFont);
@@ -83,10 +82,10 @@ namespace YAVSRG.Interface.Screens
             }
             SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", right - 500, r + h, right - 225, r + h + h, Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.Scoring.ComboBreaks.ToString() + "cbs", right - 225, r + h, right - 50, r + h + h, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawFrame(frame, right - 500, top + 200, right - 50, r + h + h, 30f, Color.White);
+            SpriteBatch.DrawFrame(right - 500, top + 200, right - 50, r + h + h, 30f, Color.White);
 
             //middle stuff
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.DifficultyName, left + 550, top + 160, right - 550, top + 240, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName, left + 550, top + 160, right - 550, top + 240, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawCentredTextToFill(mods, left + 550, bottom - 450, right - 550, bottom - 350, Game.Options.Theme.MenuFont);
             SpriteBatch.Draw(rank, -100, -200, 100, 0, Color.White);
             SpriteBatch.Font1.DrawText(time, 40f, left + 550, bottom - 80, Game.Options.Theme.MenuFont);
@@ -121,7 +120,7 @@ namespace YAVSRG.Interface.Screens
                     }
                 }
             }
-            SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Color.White);
+            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
         }
     }
 }

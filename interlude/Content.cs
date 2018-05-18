@@ -37,7 +37,7 @@ namespace YAVSRG
         public static Sprite FindTextureWithUV(string name, string skin)
         {
             string filename;
-            foreach (string s in Directory.GetFiles(Path.Combine(AssetsDir, skin)))
+            foreach (string s in Directory.GetFiles(Path.Combine(AssetsDir, skin))) //lots of files in your skin folder slows this down
             {
                 filename = Path.GetFileNameWithoutExtension(s);
                 int ux = 1; int uy = 1;
@@ -55,10 +55,10 @@ namespace YAVSRG
                     return UploadTexture(bmp, ux, uy);
                 }
             }
-            return new Sprite();
+            return default(Sprite);
         }
 
-        public static Sprite LoadTextureFromAssets(string path)
+        public static Sprite GetTexture(string path)
         {
             if (!Store.ContainsKey(path))
             {
@@ -129,7 +129,7 @@ namespace YAVSRG
                     }
                 }
             }
-            return LoadTextureFromAssets("background");
+            return GetTexture("background");
         }
 
         public static Sprite UploadTexture(Bitmap bmp, int ux, int uy, bool font = false)

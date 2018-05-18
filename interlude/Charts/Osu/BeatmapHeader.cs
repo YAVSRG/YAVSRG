@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace YAVSRG.Beatmap
+namespace YAVSRG.Charts.Osu
 {
-    public class BeatmapHeader
+    public class ChartsHeader
     {
         private Dictionary<string, string> data;
 
@@ -38,7 +38,7 @@ namespace YAVSRG.Beatmap
             }
         }
 
-        public BeatmapHeader(TextReader fs)
+        public ChartsHeader(TextReader fs)
         {
             data = new Dictionary<string, string>();
             string l;

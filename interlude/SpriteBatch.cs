@@ -26,41 +26,53 @@ namespace YAVSRG
                 this.color = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
             }
         }*/
-        
+
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
-        static int VBO;
-
-        public static void Draw(Sprite texture, float left, float top, float right, float bottom, Color color, int rotation = 0)
+        //static int VBO;
+        
+        public static void Draw(Sprite sprite, float left, float top, float right, float bottom, Color color, int rotation = 0)
         {
-            Draw(texture, left, top, right, bottom, new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color, rotation);
+            Draw(sprite:sprite, left: left, top: top, right: right, bottom: bottom, texcoords: new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color: color, rotation: rotation);
         }
 
-        public static void Draw(Sprite texture, float left, float top, float right, float bottom, Color color, int ux, int uy, int rotation = 0)
+        public static void Draw(string texture = "", float left = 0, float top = 0, float right = 0, float bottom = 0, Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null)
         {
-            Vector2[] coords = new[]
+            if (sprite == null)
             {
-                new Vector2(left,top),
-                new Vector2(right,top),
-                new Vector2(right,bottom),
-                new Vector2(left,bottom)
-            };
-            Draw(texture, coords, color, ux, uy, rotation);
-        }
+                if (texture == "")
+                {
+                    return;//stub
+                }
+                sprite = Content.GetTexture(texture);
+            }
+            if (coords == null)
+            {
+                coords = new[] {
+                    new Vector2(left,top),
+                    new Vector2(right,top),
+                    new Vector2(right,bottom),
+                    new Vector2(left,bottom)
+                };
+            }
+            if (texcoords == null)
+            {
 
-        public static void Draw(Sprite texture, Vector2[] coords, Color color, int ux, int uy, int rotation = 0)
-        {
-            float x = 1f / texture.UV_X;
-            float y = 1f / texture.UV_Y;
-            Vector2[] texcoords = new[]
+                float x = 1f / ((Sprite)sprite).UV_X;
+                float y = 1f / ((Sprite)sprite).UV_Y;
+                texcoords = new[] {
+                    new Vector2(x * ux,y * uy),
+                    new Vector2(x + x*ux,y * uy),
+                    new Vector2(x + x*ux, y + y*uy),
+                    new Vector2(x*ux, y + y*uy)
+                };
+            }
+            if (colors == null)
             {
-                new Vector2(x * ux,y * uy),
-                new Vector2(x + x*ux,y * uy),
-                new Vector2(x + x*ux, y + y*uy),
-                new Vector2(x*ux, y + y*uy)
-            };
-            Draw(texture, coords, texcoords, new Color[] { color, color, color, color }, rotation);
+                colors = new[] { color, color, color, color };
+            }
+            Draw((Sprite)sprite, coords, texcoords, colors, rotation);
         }
 
         public static void Draw(Sprite texture, Vector2[] coords, Vector2[] texcoords, Color[] color, int rotation)
@@ -78,36 +90,24 @@ namespace YAVSRG
             GL.Disable(EnableCap.Texture2D);
         }
 
-        public static void Draw(Sprite texture, float left, float top, float right, float bottom, Vector2[] texcoords, Color color, int rotation = 0)
-        {
-            Vector2[] coords = new[]
-            {
-                new Vector2(left,top),
-                new Vector2(right,top),
-                new Vector2(right,bottom),
-                new Vector2(left,bottom)
-            };
-            Draw(texture, coords, texcoords, new[] { color, color, color, color }, rotation);
-        }
-
         public static void DrawTilingTexture(Sprite texture, float left, float top, float right, float bottom, float scale, float x, float y, Color color)
         {
-            RectangleF uv = new RectangleF(x+left/scale,y+top/scale,(right-left)/scale,(bottom-top)/scale);
-            Draw(texture, left, top, right, bottom, VecArray(uv), color);
+            RectangleF uv = new RectangleF(x + left / scale, y + top / scale, (right - left) / scale, (bottom - top) / scale);
+            Draw(sprite:texture, left:left, top:top, right:right, bottom:bottom, texcoords:VecArray(uv), color:color);
         }
 
-        public static void DrawFrame(Sprite texture, float left, float top, float right, float bottom, float scale, Color color)
+        public static void DrawFrame(float left, float top, float right, float bottom, float scale, Color color)
         {
             //corners
-            Draw(texture, left, top, left + scale, top + scale, color, 0, 0);
-            Draw(texture, right - scale, top, right, top + scale, color, 2, 0);
-            Draw(texture, left, bottom - scale, left + scale, bottom, color, 0, 2);
-            Draw(texture, right - scale, bottom - scale, right, bottom, color, 2, 2);
+            Draw("frame", left, top, left + scale, top + scale, color, 0, 0);
+            Draw("frame", right - scale, top, right, top + scale, color, 2, 0);
+            Draw("frame", left, bottom - scale, left + scale, bottom, color, 0, 2);
+            Draw("frame", right - scale, bottom - scale, right, bottom, color, 2, 2);
             //edges
-            Draw(texture, left + scale, top, right - scale, top + scale, color, 1, 0);
-            Draw(texture, left, top + scale, left + scale, bottom - scale, color, 0, 1);
-            Draw(texture, right - scale, top + scale, right, bottom - scale, color, 2, 1);
-            Draw(texture, left + scale, bottom - scale, right - scale, bottom, color, 1, 2);
+            Draw("frame", left + scale, top, right - scale, top + scale, color, 1, 0);
+            Draw("frame", left, top + scale, left + scale, bottom - scale, color, 0, 1);
+            Draw("frame", right - scale, top + scale, right, bottom - scale, color, 2, 1);
+            Draw("frame", left + scale, bottom - scale, right - scale, bottom, color, 1, 2);
         }
 
         public static void DrawRect(float left, float top, float right, float bottom, Color color)
@@ -133,7 +133,7 @@ namespace YAVSRG
             };
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
-            GL.Translate(0, (upscroll? -1 : 1) * ScreenUtils.ScreenHeight, 0);
+            GL.Translate(0, (upscroll ? -1 : 1) * ScreenUtils.ScreenHeight, 0);
             GL.MultMatrix(mat);
         }
 

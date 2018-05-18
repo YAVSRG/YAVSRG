@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
 using System.IO;
 using YAVSRG.Gameplay.Mods;
 
@@ -26,9 +26,9 @@ namespace YAVSRG.Gameplay
                 Utils.SaveObject(ChartSaveData, Path.Combine(Content.WorkingDirectory, "Data", "Scores", CurrentChart.GetHash() + ".json"));
             }
             CurrentChart = c;
-            Game.Screens.ChangeBackground(Content.LoadBackground(c.path, c.bgpath));
+            Game.Screens.ChangeBackground(Content.LoadBackground(c.Data.SourcePath, c.Data.BGFile));
             Game.Audio.ChangeTrack(c.AudioPath());
-            Game.Audio.Play((long)c.PreviewTime); //play from the preview point given in the chart data
+            Game.Audio.Play((long)c.Data.PreviewTime); //play from the preview point given in the chart data
             ChartSaveData = GetChartSaveData();
             UpdateChart();
             //Console.WriteLine(c.GetHash());

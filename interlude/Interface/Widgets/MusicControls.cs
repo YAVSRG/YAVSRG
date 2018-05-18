@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Widgets
 
         public MusicControls()
         {
-            frame = Content.LoadTextureFromAssets("frame");
+            frame = Content.GetTexture("frame");
             AddChild(
                 new Button("buttonplay", "", () => { Game.Audio.Play(); })
                 .PositionTopLeft(250, 10, AnchorType.MAX, AnchorType.MIN)
@@ -34,9 +34,9 @@ namespace YAVSRG.Interface.Widgets
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 0.25f);
-            SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Game.Screens.HighlightColor);
+            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
             SpriteBatch.DrawRect(left + 40, bottom-30, left + 40 + (right - 300 - left) * Game.Audio.NowPercentage(), bottom - 20, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title, left + 10, top, right - 260, top + 70, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, left + 10, top, right - 260, top + 70, Game.Options.Theme.MenuFont);
 
             DrawWidgets(left, top, right, bottom);
         }

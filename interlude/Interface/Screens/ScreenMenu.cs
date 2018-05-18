@@ -42,7 +42,7 @@ namespace YAVSRG.Interface.Screens
                 .PositionBottomRight(-ScreenUtils.ScreenWidth, 300, AnchorType.CENTER, AnchorType.CENTER)
                 );
             slide = new AnimationSlider(0);
-            banner = Content.LoadTextureFromAssets("banner");
+            banner = Content.GetTexture("banner");
             slide.Target = 1;
             Animation.Add(slide);
             Animation.Add(new Animation()); //this dummy animation ensures that ScreenManager handles the other animations
@@ -84,7 +84,7 @@ namespace YAVSRG.Interface.Screens
         {
             base.Draw(left, top, right, bottom);
             float w = (right-100) * slide;
-            ScreenUtils.DrawBanner(banner, -w, -300, w, -200, Game.Screens.HighlightColor);
+            ScreenUtils.DrawBanner(-w, -300, w, -200, Game.Screens.HighlightColor);
             SpriteBatch.Font1.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
             SpriteBatch.Font2.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
         }

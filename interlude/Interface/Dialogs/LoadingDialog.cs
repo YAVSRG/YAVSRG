@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Interface.Animations;
+using YAVSRG.Charts;
 
 namespace YAVSRG.Interface.Dialogs
 {

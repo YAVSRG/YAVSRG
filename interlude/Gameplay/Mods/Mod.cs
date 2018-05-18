@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts;
 
 namespace YAVSRG.Gameplay.Mods
 {

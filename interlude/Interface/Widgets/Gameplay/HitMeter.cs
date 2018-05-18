@@ -30,7 +30,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             public JudgementDisplay()
             {
                 h = new Hit(-10000, 0, 0);
-                sprite = Content.LoadTextureFromAssets("judgements");
+                sprite = Content.GetTexture("judgements");
             }
 
             public void Draw(float left, float top, float right, float bottom, float now)

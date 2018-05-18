@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace YAVSRG.Beatmap
+namespace YAVSRG.Charts.YAVSRG
 {
     public class PointManager<P> where P : OffsetItem
     {

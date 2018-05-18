@@ -142,7 +142,7 @@ namespace YAVSRG.Interface
                 new Vector2(r,b),
                 new Vector2(l,b)
             };
-            SpriteBatch.Draw(Background, left, top, right, bottom + 1, v, c);
+            SpriteBatch.Draw(sprite: Background, left: left, top: top, right: right, bottom: bottom + 1, texcoords: v, color: c);
         }
 
         public void Update()

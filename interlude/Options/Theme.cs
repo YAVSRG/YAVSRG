@@ -51,12 +51,12 @@ namespace YAVSRG.Options
 
         public void DrawNote(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw(s, left, top, right, bottom, GetColor(index), animation, index, GetRotation(column, keycount));
+            SpriteBatch.Draw("",left, top, right, bottom, GetColor(index), animation, index, GetRotation(column, keycount),sprite:s);
         }
 
         public void DrawMine(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw(s, left, top, right, bottom, GetColor(index), animation, index, 0); //fix it later
+            SpriteBatch.Draw("", left, top, right, bottom, GetColor(index), animation, index, 0, sprite: s); //fix it later
         }
 
         public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
@@ -85,32 +85,32 @@ namespace YAVSRG.Options
         {
             if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
-                return Content.LoadTextureFromAssets("arrow");
+                return Content.GetTexture("arrow");
             }
-            return Content.LoadTextureFromAssets("note");
+            return Content.GetTexture("note");
         }
 
         public Sprite GetHeadTexture(int keycount)
         {
             if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
-                return Content.LoadTextureFromAssets("arrowholdhead");
+                return Content.GetTexture("arrowholdhead");
             }
-            return Content.LoadTextureFromAssets("holdhead");
+            return Content.GetTexture("holdhead");
         }
 
         public Sprite GetBodyTexture(int keycount)
         {
-            return Content.LoadTextureFromAssets("holdbody");
+            return Content.GetTexture("holdbody");
         }
 
         public Sprite GetReceptorTexture(int keycount)
         {
             if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
-                return Content.LoadTextureFromAssets("arrowreceptor");
+                return Content.GetTexture("arrowreceptor");
             }
-            return Content.LoadTextureFromAssets("receptor");
+            return Content.GetTexture("receptor");
         }
     }
 }

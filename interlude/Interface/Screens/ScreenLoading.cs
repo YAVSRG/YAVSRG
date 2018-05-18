@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static YAVSRG.Interface.ScreenUtils;
+using YAVSRG.Charts;
 using System.Drawing;
 using YAVSRG.Interface.Animations;
 
@@ -13,7 +14,7 @@ namespace YAVSRG.Interface.Screens
     {
         static readonly string[] splashes = new[] { "Welcome to Interlude", "Give it a moment...", "Now Loading", "Hold on...", "(╯°□°）╯︵ ┻━┻", "Loading your charts...", "Here we go again", "Buckle up" };
         string splash = splashes[new Random().Next(0, splashes.Length)];
-        Sprite desktop, logo;
+        Sprite desktop;
         AnimationFade fade;
         AnimationSeries transition;
         AnimationCounter counter;
@@ -23,7 +24,6 @@ namespace YAVSRG.Interface.Screens
         public ScreenLoading(Sprite s)
         {
             desktop = s;
-            logo = Content.LoadTextureFromAssets("logo");
             Animation.Add(transition = new AnimationSeries(true));
             Animation.Add(counter = new AnimationCounter(1000000000, true));
         }
@@ -43,7 +43,6 @@ namespace YAVSRG.Interface.Screens
             else
             {
                 ChartLoader.Init();
-                ChartLoader.LoadCacheThreaded();
                 Game.Screens.toolbar.SetHidden(false);
                 transition.Add(fade = new AnimationFade(0, 1, 0.996f));
                 transition.Add(new AnimationCounter(100, false));
@@ -56,7 +55,7 @@ namespace YAVSRG.Interface.Screens
             var screen = OpenTK.DisplayDevice.Default;
             Rectangle bounds = new Rectangle(Game.Instance.Bounds.X, Game.Instance.Bounds.Y, Game.Instance.ClientRectangle.Width, Game.Instance.ClientRectangle.Height);
             RectangleF UV = new RectangleF((float)bounds.X/screen.Width,(float)bounds.Y/screen.Height,(float)bounds.Width/screen.Width,(float)bounds.Height/screen.Height);
-            SpriteBatch.Draw(desktop, -ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, SpriteBatch.VecArray(UV), Color.White);
+            SpriteBatch.Draw(sprite:desktop, left:-ScreenWidth, top:-ScreenHeight, right:ScreenWidth, bottom:ScreenHeight, texcoords:SpriteBatch.VecArray(UV), color:Color.White);
             int a = (int)(255 * fade);
             if (exiting) { a = 255 - a; }
             else
@@ -67,7 +66,7 @@ namespace YAVSRG.Interface.Screens
                     SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i*0.2f), Color.FromArgb(a, Color.White));
                 }
             }
-            SpriteBatch.Draw(logo, -250, -250, 250, 250, Color.FromArgb(a, Color.White));
+            SpriteBatch.Draw("logo", -250, -250, 250, 250, Color.FromArgb(a, Color.White));
         }
 
         public override void Update(float left, float top, float right, float bottom)

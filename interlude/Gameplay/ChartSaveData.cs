@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay
 {
@@ -17,7 +17,7 @@ namespace YAVSRG.Gameplay
         {
             return new ChartSaveData()
             {
-                Path = c.path, //this needs to be the absolute path
+                Path = c.Data.SourcePath, //this needs to be the absolute path
                 Offset = c.Notes.Count > 0 ? c.Notes.Points[0].Offset : 0
             };
         }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 
-namespace YAVSRG.Beatmap
+namespace YAVSRG.Charts.YAVSRG
 {
     public class Snap : OffsetItem
     {
@@ -15,7 +15,7 @@ namespace YAVSRG.Beatmap
         public BinarySwitcher ends;
         public BinarySwitcher mines;
 
-        public Snap(float offset, int taps, int holds, int middles, int ends, int mines)
+        public Snap(float offset, ushort taps, ushort holds, ushort middles, ushort ends, ushort mines)
         {
             Offset = offset;
             this.taps = new BinarySwitcher(taps);
@@ -29,12 +29,12 @@ namespace YAVSRG.Beatmap
 
         public override OffsetItem Interpolate(float time)
         {
-            return new Snap(time, 0, 0, holds.value + middles.value, 0, 0);
+            return new Snap(time, 0, 0, (ushort)(holds.value + middles.value), 0, 0);
         }
 
-        public Snap Mask(int mask)
+        public Snap Mask(ushort mask)
         {
-            return new Snap(Offset, taps.value & mask, holds.value & mask, middles.value & mask, ends.value & mask, mines.value & mask);
+            return new Snap(Offset, (ushort)(taps.value & mask), (ushort)(holds.value & mask), (ushort)(middles.value & mask), (ushort)(ends.value & mask), (ushort)(mines.value & mask));
         }
 
         public bool IsEmpty()

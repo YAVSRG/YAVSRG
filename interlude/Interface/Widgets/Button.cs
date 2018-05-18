@@ -9,14 +9,14 @@ namespace YAVSRG.Interface.Widgets
 {
     public class Button : Widget
     {
-        protected Sprite icon;
+        protected string icon;
         protected string text;
         protected Action action;
         protected Animations.AnimationColorMixer color;
 
         public Button(string sprite, string label, Action onClick) : base()
         {
-            icon = Content.LoadTextureFromAssets(sprite);
+            icon = sprite;
             text = label;
             action = onClick;
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.BaseColor));

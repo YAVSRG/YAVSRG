@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts;
+using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay
 {

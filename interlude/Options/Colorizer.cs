@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using YAVSRG.Gameplay;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Options
 {
@@ -102,7 +102,7 @@ namespace YAVSRG.Options
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
-                count = new BinarySwitcher(s.taps.value | s.holds.value).Count; //count number of lns/notes
+                count = new BinarySwitcher((ushort)(s.taps.value | s.holds.value)).Count; //count number of lns/notes
                 for (int i = 0; i < c.Keys; i++)
                 {
                     s.colors[i] = cs.GetColorIndex(count,c.Keys); //color notes in row based on number of notes. chord coloring.

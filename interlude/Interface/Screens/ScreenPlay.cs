@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using static YAVSRG.Interface.ScreenUtils;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Gameplay;
 using YAVSRG.Interface.Widgets.Gameplay;
 using OpenTK.Input;
@@ -18,7 +18,6 @@ namespace YAVSRG.Interface.Screens
         {
             public AnimationSlider NoteLight = new AnimationSlider(0);
             public AnimationSlider ReceptorLight = new AnimationSlider(0);
-            Sprite s = Content.LoadTextureFromAssets("receptorlighting");
 
             public HitLighting() : base()
             {
@@ -33,7 +32,7 @@ namespace YAVSRG.Interface.Screens
                 if (ReceptorLight.Val > 0.5f)
                 {
                     float w = (right - left);
-                    SpriteBatch.Draw(s, left + w * (1 - ReceptorLight.Val), top + 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
+                    SpriteBatch.Draw("receptorlighting", left + w * (1 - ReceptorLight.Val), top + 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
                 }
             }
         }
@@ -96,7 +95,7 @@ namespace YAVSRG.Interface.Screens
             }
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 1-Game.Options.Profile.BackgroundDim;
-            Utils.SetDiscordData("Playing", ChartLoader.SelectedChart.header.artist + " - " + ChartLoader.SelectedChart.header.title + " [" + Game.CurrentChart.DifficultyName + "]");
+            Utils.SetDiscordData("Playing", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]");
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.toolbar.SetHidden(true);
 
@@ -141,7 +140,7 @@ namespace YAVSRG.Interface.Screens
                 Game.Audio.Play(); //incase leading in
             }
             //actual input stuff
-            for (int k = 0; k < Chart.Keys; k++)
+            for (byte k = 0; k < Chart.Keys; k++)
             {
                 if (Input.KeyTap(binds[k])) //if you press a key
                 {
@@ -162,20 +161,20 @@ namespace YAVSRG.Interface.Screens
             base.Update(left, top, right, bottom);
         }
 
-        public void OnKeyDown(int k, float now) //handle but also do the hit lighting stuff
+        public void OnKeyDown(byte k, float now) //handle but also do the hit lighting stuff
         {
             HandleHit(k, now, false);
             lighting[k].ReceptorLight.Target = 1;
             lighting[k].ReceptorLight.Val = 1;
         }
 
-        public void OnKeyUp(int k, float now) //handle but also do the hit lighting stuff
+        public void OnKeyUp(byte k, float now) //handle but also do the hit lighting stuff
         {
             HandleHit(k, now, true);
             lighting[k].ReceptorLight.Target = 0;
         }
 
-        public void HandleHit(int k, float now, bool release)
+        public void HandleHit(byte k, float now, bool release)
         {
             //basically, this whole algorithm finds the closest snap to the receptors (above or below) that is relevant (has a note in the column you're pressing)
             //- missWindow and + missWindow are used because all snaps found in that time slice are considered. the closest note to now in that column is the one you hit

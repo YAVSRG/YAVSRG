@@ -39,7 +39,7 @@ namespace YAVSRG.Audio
             }
             if (ID == 0)
             {
-                Console.Out.WriteLine(Bass.LastError);
+                //Console.Out.WriteLine(Bass.LastError);
             }
         }
 

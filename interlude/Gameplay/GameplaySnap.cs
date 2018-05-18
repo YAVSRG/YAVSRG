@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts;
+using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay
 {
     public class GameplaySnap : Snap
     {
         public int[] colors;
-        public GameplaySnap(float offset, int taps, int holds, int middles, int ends, int mines): base(offset, taps, holds, middles, ends, mines)
+        public GameplaySnap(float offset, ushort taps, ushort holds, ushort middles, ushort ends, ushort mines): base(offset, taps, holds, middles, ends, mines)
         {
             colors = new int[10];
         }
@@ -22,7 +23,7 @@ namespace YAVSRG.Gameplay
 
         public override OffsetItem Interpolate(float time)
         {
-            return new GameplaySnap(time, 0, 0, holds.value + middles.value, 0, 0);
+            return new GameplaySnap(time, 0, 0, (ushort)(holds.value + middles.value), 0, 0);
         }
     }
 }

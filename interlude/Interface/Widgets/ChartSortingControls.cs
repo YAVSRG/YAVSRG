@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using static YAVSRG.ChartLoader;
+using YAVSRG.Charts;
+using static YAVSRG.Charts.ChartLoader;
 using OpenTK;
 
 namespace YAVSRG.Interface.Widgets
@@ -20,7 +21,7 @@ namespace YAVSRG.Interface.Widgets
 
         public ChartSortingControls() : base()
         {
-            frame = Content.LoadTextureFromAssets("frame");
+            frame = Content.GetTexture("frame");
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
 
             group = new ScrollContainer(25, 5, true);
@@ -70,8 +71,8 @@ namespace YAVSRG.Interface.Widgets
             Game.Screens.DrawChartBackground(left, top, right, bottom, Utils.ColorInterp(Color.FromArgb(255,0,0,0), Game.Screens.BaseColor, 0.8f),0.5f);
             SpriteBatch.DrawRect(right - 520, top + 10, right - 20, top + 70, Game.Screens.DarkColor);
             SpriteBatch.Font1.DrawText(SearchString != "" ? SearchString : "Press tab to search...", 20f, right - 500, top + 22.5f, color);
-            SpriteBatch.DrawFrame(frame, right - 520, top + 10, right - 20, top + 70, 25f, color);
-            SpriteBatch.DrawFrame(frame, left-30, top, right+30, bottom, 30f, Game.Screens.HighlightColor);
+            SpriteBatch.DrawFrame(right - 520, top + 10, right - 20, top + 70, 25f, color);
+            SpriteBatch.DrawFrame(left-30, top, right+30, bottom, 30f, Game.Screens.HighlightColor);
             DrawWidgets(left, top, right, bottom);
         }
 

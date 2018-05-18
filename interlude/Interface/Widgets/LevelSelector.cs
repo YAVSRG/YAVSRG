@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Charts;
 using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface.Widgets
@@ -98,7 +99,7 @@ namespace YAVSRG.Interface.Widgets
                 if (top > ScreenUtils.ScreenHeight || bottom < -ScreenUtils.ScreenHeight) { return; }
                 SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, 0, fill);
                 Game.Screens.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,fill), 0.5f);
-                SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30, border);
+                SpriteBatch.DrawFrame(left, top, right, bottom, 30, border);
                 if (subtitle == "")
                 {
                     SpriteBatch.Font1.DrawTextToFill(title, left + 20, top + 22.5f, left + width, bottom - 20, border);
@@ -147,8 +148,8 @@ namespace YAVSRG.Interface.Widgets
 
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {
-            box = Content.LoadTextureFromAssets("levelselectbase");
-            frame = Content.LoadTextureFromAssets("frame");
+            box = Content.GetTexture("levelselectbase");
+            frame = Content.GetTexture("frame");
             Refresh();
         }
 
@@ -184,7 +185,7 @@ namespace YAVSRG.Interface.Widgets
                 }
                 scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
             }, () => { return false; }, pack.label, "", Game.Options.Theme.SelectPack); //groups don't know when they're expanded :(
-            foreach (ChartLoader.CachedChart chart in pack.charts)
+            foreach (CachedChart chart in pack.charts)
             {
                 g.AddItem(new Group(80, (x) =>
                 {
@@ -205,20 +206,16 @@ namespace YAVSRG.Interface.Widgets
                     {
                         if (x.Children.Count == 0)
                         {
-                            MultiChart m = ChartLoader.LoadFromCache(chart);
-                            foreach (Chart d in m.diffs)
+                            Chart m = ChartLoader.Cache.LoadChart(chart);
+                            x.AddItem(new Group(80, (y) =>
                             {
-                                x.AddItem(new Group(80, (y) =>
-                                {
-                                    Game.Gameplay.ChangeChart(d);
-                                    ChartLoader.SelectedChart = m;
-                                }, () => { return Game.CurrentChart.path + Game.CurrentChart.DifficultyName == d.path + d.DifficultyName; }, d.DifficultyName, "", Game.Options.Theme.SelectDiff));
-                            }
+                                Game.Gameplay.ChangeChart(m);
+                            }, () => { return Game.CurrentChart.Data.SourcePath + Game.CurrentChart.Data.DiffName == m.Data.SourcePath + m.Data.DiffName; }, m.Data.DiffName, "", Game.Options.Theme.SelectDiff));
                         }
                         x.RecursivePopOutRooted();
                         scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
                     }
-                }, () => { return ChartLoader.SelectedChart.header.title == chart.title; }, chart.title, chart.artist, Game.Options.Theme.SelectChart));
+                }, () => { return Game.CurrentChart.Data.Title == chart.title; }, chart.title, chart.artist, Game.Options.Theme.SelectChart));
             }
             groups.Add(g);
         }

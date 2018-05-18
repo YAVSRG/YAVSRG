@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Beatmap.DifficultyRating
+namespace YAVSRG.Charts.DifficultyRating
 {
     public class KeyLayout
     {
@@ -22,12 +22,12 @@ namespace YAVSRG.Beatmap.DifficultyRating
                 fingers = f;
             }
 
-            public int Mask()
+            public ushort Mask()
             {
-                int r = 0;
+                ushort r = 0;
                 foreach (int f in fingers)
                 {
-                    r += (1 << f);
+                    r += (ushort)(1 << f);
                 }
                 return r;
             }

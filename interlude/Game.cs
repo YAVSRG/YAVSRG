@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Interface;
 using YAVSRG.Audio;
 using YAVSRG.Gameplay;
@@ -15,7 +15,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.2.6";
+        public static readonly string Version = "Interlude v0.2.7dev";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 

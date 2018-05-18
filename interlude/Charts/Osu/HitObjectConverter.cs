@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using YAVSRG.Charts.YAVSRG;
 
-namespace YAVSRG.Beatmap
+namespace YAVSRG.Charts.Osu
 {
     public class HitObjectConverter
     {
@@ -26,19 +27,19 @@ namespace YAVSRG.Beatmap
             }
         }
 
-        public List<Snap> CreateSnapsFromObjects(int keys)
+        public List<Snap> CreateSnapsFromObjects(byte keys)
         {
             List<Snap> states = new List<Snap>();
             Snap s = new Snap(-1);
             float[] holds = new float[keys];
-            for (int k = 0; k < keys; k++)
+            for (byte k = 0; k < keys; k++)
             {
                 holds[k] = -1;
             }
             float last = -1;
             bool ln;
             float time;
-            int col;
+            byte col;
             for (int i = 0; i < objects.Count; i++)
             {
                 time = objects[i].offset;
@@ -53,7 +54,7 @@ namespace YAVSRG.Beatmap
                     while (true) //THIS SECTION ROUNDS OFF ANY LONG NOTES THAT END BEFORE THE NEXT HIT OBJECT ARRIVES ----
                     {
                         float min = time; //This determines the earliest release of a long note between last object and now
-                        for (int k = 0; k < keys; k++)
+                        for (byte k = 0; k < keys; k++)
                         {
                             if (holds[k] == -1) { continue; }
                             if (holds[k] < min) { min = holds[k]; }
@@ -61,7 +62,7 @@ namespace YAVSRG.Beatmap
                         if (min < time) //This uses the above's information to add a state where 1 or more long notes end
                         {
                             Snap temp = new Snap(min);
-                            for (int k = 0; k < keys; k++)
+                            for (byte k = 0; k < keys; k++)
                             {
                                 if(holds[k] == min)
                                 {
@@ -81,7 +82,7 @@ namespace YAVSRG.Beatmap
                         }
                     } // ---------------------------------------------------------------------------------------------------
 
-                    for (int k = 0; k < keys; k++) //Now add markers for current holds in the upcoming state, and for new LN presses.
+                    for (byte k = 0; k < keys; k++) //Now add markers for current holds in the upcoming state, and for new LN presses.
                     {
                         if (holds[k] == -1) { continue; }
                         else if (holds[k] > time)
@@ -110,25 +111,25 @@ namespace YAVSRG.Beatmap
             while (true) //THIS IS A REPEATED SECTION FROM ABOVE, WE ARE ROUNDING OFF ANY HELD LONG NOTES AT THEIR CORRECT TIMES
             {
                 float min = 10000000;
-                for (int k = 0; k < keys; k++)
+                for (byte k = 0; k < keys; k++)
                 {
                     if (holds[k] == -1) { continue; }
                     if (holds[k] < min) { min = holds[k]; }
                 }
                 if (min < 10000000)
                 {
-                    int end = 0;
-                    int mid = 0;
-                    for (int k = 0; k < keys; k++)
+                    ushort end = 0;
+                    ushort mid = 0;
+                    for (byte k = 0; k < keys; k++)
                     {
                         if (holds[k] == min)
                         {
-                            end += (1 << k);
+                            end += (ushort)(1 << k);
                             holds[k] = -1;
                         }
                         else if (holds[k] > min)
                         {
-                            mid += (1 << k);
+                            mid += (ushort)(1 << k);
                         }
                     }
                     states.Add(new Snap(min, 0, 0, mid, end, 0));
@@ -147,9 +148,9 @@ namespace YAVSRG.Beatmap
             //nyi
         }
 
-        public int XToColumn(int x, int keys)
+        public byte XToColumn(int x, int keys)
         {
-            return (int)(x / (512f / keys));
+            return (byte)(x / (512f / keys));
         }
 
         public void Dump(TextWriter tw)

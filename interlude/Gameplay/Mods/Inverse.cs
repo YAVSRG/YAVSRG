@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay.Mods
 {
@@ -32,7 +32,7 @@ namespace YAVSRG.Gameplay.Mods
                 {
                     GameplaySnap temp2 = newSnaps.Points[newSnaps.Count - 1]; //last snap
                     GameplaySnap temp = (GameplaySnap)temp2.Interpolate(s.Offset - GetGapSize(c, s.Offset));//newSnaps.GetPointAt(s.Offset - GetGapSize(c, s.Offset), true); //find state to form gaps
-                    foreach (int k in s.taps.GetColumns()) //all taps
+                    foreach (byte k in s.taps.GetColumns()) //all taps
                     {
                         n.holds.SetColumn(k); //turn to start of lns
                         if (n.middles.GetColumn(k)) //if already holding make a gap
@@ -45,7 +45,7 @@ namespace YAVSRG.Gameplay.Mods
 
                     if (temp.Offset < temp2.Offset + 10) //replace with tap note when too close
                     {
-                        foreach (int k in temp.ends.GetColumns())
+                        foreach (byte k in temp.ends.GetColumns())
                         {
                             if (temp2.holds.GetColumn(k))
                             {
@@ -61,7 +61,7 @@ namespace YAVSRG.Gameplay.Mods
                         newSnaps.AppendPoint(temp);
                     }
                     //algo needed for notes closer than 1/8 snap together
-                    foreach (int k in s.holds.GetColumns()) //all taps
+                    foreach (byte k in s.holds.GetColumns()) //all taps
                     {
                         if (n.middles.GetColumn(k))
                         {

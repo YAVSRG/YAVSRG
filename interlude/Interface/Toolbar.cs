@@ -18,9 +18,6 @@ namespace YAVSRG.Interface
 
         public Toolbar()
         {
-            texture = Content.LoadTextureFromAssets("toolbar");
-            frame = Content.LoadTextureFromAssets("frame");
-            cursor = Content.LoadTextureFromAssets("cursor");
             AddChild(mc = new MusicControls()
                 .PositionTopLeft(0, 80, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(-1000, 180, AnchorType.MAX, AnchorType.MIN)
@@ -77,13 +74,13 @@ namespace YAVSRG.Interface
 
                 //top
                 Game.Screens.DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor, 0.25f);
-                SpriteBatch.Draw(texture, -ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Color.FromArgb(127, Game.Screens.BaseColor));
-                SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + slide + 5, 30f, Game.Screens.BaseColor);
+                SpriteBatch.Draw("toolbar", -ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Color.FromArgb(127, Game.Screens.BaseColor));
+                SpriteBatch.DrawFrame(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + slide + 5, 30f, Game.Screens.BaseColor);
 
                 //bottom
                 Game.Screens.DrawChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor, 0.25f);
-                SpriteBatch.Draw(texture, -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor), 2);
-                SpriteBatch.DrawFrame(frame, -ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
+                SpriteBatch.Draw("toolbar", -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor), 2);
+                SpriteBatch.DrawFrame(-ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
 
                 base.Draw(left, top + slide - 80, right, bottom);
 
@@ -95,7 +92,7 @@ namespace YAVSRG.Interface
                 SpriteBatch.Font1.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, ScreenWidth, ScreenHeight - slide + 45, Game.Options.Theme.MenuFont);
             }
 
-            if (!hidden) SpriteBatch.Draw(cursor, Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Screens.HighlightColor);
+            if (!hidden) SpriteBatch.Draw("cursor", Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Screens.HighlightColor);
         }
 
         public override void Update(float left, float top, float right, float bottom)

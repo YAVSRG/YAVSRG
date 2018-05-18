@@ -37,15 +37,15 @@ namespace YAVSRG.Interface
             return MouseOver(left, top, right, bottom) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
-        public static void DrawBanner(Sprite texture, float left, float top, float right, float bottom, Color c)
+        public static void DrawBanner(float left, float top, float right, float bottom, Color c)
         {
             float height = bottom - top;
-            SpriteBatch.Draw(texture, left, top, left + height, bottom, c, 0, 0);
-            SpriteBatch.Draw(texture, left + height, top, right - height, bottom, c, 1, 0);
-            SpriteBatch.Draw(texture, right - height, top, right, bottom, c, 2, 0);
+            SpriteBatch.Draw("banner", left, top, left + height, bottom, c, 0, 0);
+            SpriteBatch.Draw("banner", left + height, top, right - height, bottom, c, 1, 0);
+            SpriteBatch.Draw("banner", right - height, top, right, bottom, c, 2, 0);
         }
 
-        public static void DrawParallelogramWithBG(Sprite frame, float left, float top, float right, float bottom, float amount)
+        public static void DrawParallelogramWithBG(float left, float top, float right, float bottom, float amount)
         {
             float h = (bottom - top)*amount;
             SpriteBatch.ParallelogramTransform(amount, top + h/amount * 0.5f);
@@ -56,7 +56,7 @@ namespace YAVSRG.Interface
             Game.Screens.DrawChartBackground(left, top, right+Math.Abs(h)*0.5f, bottom, Game.Screens.DarkColor, 0.5f);
             SpriteBatch.StencilMode(0);
             SpriteBatch.ParallelogramTransform(amount, top + h / amount * 0.5f);
-            SpriteBatch.DrawFrame(frame, left-Math.Abs(h), top, right, bottom, 30f, Color.White);
+            SpriteBatch.DrawFrame(left-Math.Abs(h), top, right, bottom, 30f, Color.White);
             SpriteBatch.DisableTransform();
         }
     }

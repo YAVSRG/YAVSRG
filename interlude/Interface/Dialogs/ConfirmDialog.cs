@@ -10,12 +10,10 @@ namespace YAVSRG.Interface.Dialogs
     class ConfirmDialog : Dialog
     {
         string prompt;
-        Sprite banner;
 
         public ConfirmDialog(string prompt, Action<string> action) : base(action)
         {
             this.prompt = prompt;
-            banner = Content.LoadTextureFromAssets("banner");
             PositionTopLeft(ScreenUtils.ScreenWidth, -50, AnchorType.CENTER, AnchorType.CENTER);
             PositionBottomRight(ScreenUtils.ScreenWidth+100, 50, AnchorType.CENTER, AnchorType.CENTER);
             A.Target(-ScreenUtils.ScreenWidth, -50);
@@ -27,7 +25,7 @@ namespace YAVSRG.Interface.Dialogs
         public override void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawBanner(banner, left, top, right, bottom, System.Drawing.Color.Azure);
+            ScreenUtils.DrawBanner(left, top, right, bottom, System.Drawing.Color.Azure);
             SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
             DrawWidgets(left, top, right, bottom);
         }

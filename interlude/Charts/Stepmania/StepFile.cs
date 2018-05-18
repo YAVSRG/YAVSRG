@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
+using YAVSRG.Charts.YAVSRG;
 
-namespace YAVSRG.Beatmap.Stepmania
+namespace YAVSRG.Charts.Stepmania
 {
     public class StepFile
     {
@@ -129,14 +130,6 @@ namespace YAVSRG.Beatmap.Stepmania
             return raw["BACKGROUND"] == "" ? raw["TITLE"]+"-bg.jpg" : raw["BACKGROUND"];
         }
 
-        public MultiChart ConvertToRoot()
-        {
-            MultiChart c = new MultiChart(new ChartHeader { title = GetTag("TITLE"), artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"), creator = GetCreator(), path = path });
-            c.diffs = Convert();
-            if (c.diffs.Count == 0) { return null; }
-            return c;
-        }
-
         public List<Chart> Convert()
         {
             List<Chart> charts = new List<Chart>();
@@ -152,7 +145,7 @@ namespace YAVSRG.Beatmap.Stepmania
             foreach (StepFileDifficulty diff in diffs)
             {
                 if (diff.gamemode != "dance-single") { continue; }
-                int meter = 4;
+                byte meter = 4;
                 List<Snap> states = new List<Snap>();
                 List<BPMPoint> points = new List<BPMPoint>();
                 BinarySwitcher lntracker = new BinarySwitcher(0);
@@ -160,7 +153,7 @@ namespace YAVSRG.Beatmap.Stepmania
                 int bpm = 0;
                 points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now));
                 int totalbeats = 0;
-                int keycount = 4;
+                byte keycount = 4;
 
                 for (int i = 0; i < diff.measures.Count; i++)
                 {
@@ -169,14 +162,25 @@ namespace YAVSRG.Beatmap.Stepmania
                         diff.measures[i].ConvertBeat(now, bpms[bpm].Item2, lntracker, keycount, b, meter, states);
                         now += bpms[bpm].Item2;
                         totalbeats += 1;
-                        if (bpm < bpms.Count - 1 && bpms[bpm+1].Item1 <= totalbeats)
+                        if (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 <= totalbeats)
                         {
                             bpm += 1;
                             points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));
                         }
                     }
                 }
-                Chart c = new Chart(states, points, (raw.ContainsKey("SUBTITLE") && raw["SUBTITLE"] != "" && diffs.Count == 1) ? raw["SUBTITLE"] : diff.name, float.Parse(raw["SAMPLESTART"]) * 1000, keycount, path, raw["MUSIC"], GetBG());
+                Chart c = new Chart(states, points, new ChartHeader
+                {
+                    Title = GetTag("TITLE"),
+                    File = filename,
+                    Artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"),
+                    Creator = GetCreator(),
+                    SourcePath = path,
+                    DiffName = (raw.ContainsKey("SUBTITLE") && raw["SUBTITLE"] != "" && diffs.Count == 1) ? raw["SUBTITLE"] : diff.name,
+                    PreviewTime = float.Parse(raw["SAMPLESTART"]) * 1000,
+                    AudioFile = raw["MUSIC"],
+                    BGFile = GetBG()
+                }, keycount);
                 charts.Add(c);
             }
             return charts;

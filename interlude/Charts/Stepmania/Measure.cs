@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Charts.YAVSRG;
 
-namespace YAVSRG.Beatmap.Stepmania
+namespace YAVSRG.Charts.Stepmania
 {
     public class Measure
     {
@@ -15,7 +16,7 @@ namespace YAVSRG.Beatmap.Stepmania
             data = rows;
         }
 
-        public void ConvertBeat(double offset, double msPerBeat, BinarySwitcher lntracker, int keys, int beat, int meter, List<Snap> output)
+        public void ConvertBeat(double offset, double msPerBeat, BinarySwitcher lntracker, byte keys, int beat, byte meter, List<Snap> output)
         {
             int l = data.Length;
             double sep = msPerBeat * 4 / l;
@@ -25,7 +26,7 @@ namespace YAVSRG.Beatmap.Stepmania
             {
                 if (data[i] == "0000") { continue; }
                 Snap s = new Snap((float)(offset + (i - start) * sep), 0, 0, lntracker.value, 0, 0);
-                for (int c = 0; c < keys; c++)
+                for (byte c = 0; c < keys; c++)
                 {
                     if (data[i][c] == '1') { s.taps.SetColumn(c); }
                     else if (data[i][c] == 'M') { s.mines.SetColumn(c); }

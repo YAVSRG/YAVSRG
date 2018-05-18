@@ -19,7 +19,7 @@ namespace YAVSRG.Interface.Widgets
 
         public ScoreCard(Score c)
         {
-            frame = Content.LoadTextureFromAssets("frame");
+            frame = Content.GetTexture("frame");
             PositionBottomRight(430, 100, AnchorType.MIN, AnchorType.MIN);
             ScoreSystem score = ScoreSystem.GetScoreSystem(ScoreType.Default);
             score.ProcessScore(ScoreTracker.StringToHitData(c.hitdata, c.keycount));
@@ -35,7 +35,7 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Game.Screens.HighlightColor);
+            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
             SpriteBatch.Font1.DrawText(c.player, 35f, left + 5, top, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawTextToFill(mods, left, bottom - 40, right-180, bottom, Game.Options.Theme.MenuFont);
 

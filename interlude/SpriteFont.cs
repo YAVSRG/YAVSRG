@@ -35,7 +35,7 @@ namespace YAVSRG
                 if (c == ' ') { x += FONTSCALE * 0.75f * scale; continue; }
                 if (!FontLookup.ContainsKey(c)) { GenChar(c); }
                 s = FontLookup[c];
-                SpriteBatch.Draw(s, x, y, x + s.Width * scale, y + s.Height * scale, color);
+                SpriteBatch.Draw(sprite: s, left: x, top: y, right: x + s.Width * scale, bottom: y + s.Height * scale, color: color);
                 x += (s.Width - FONTSCALE * 0.5f) * scale; //kerning
             }
         }

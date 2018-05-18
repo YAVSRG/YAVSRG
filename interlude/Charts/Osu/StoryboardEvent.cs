@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Beatmap.Osu
+namespace YAVSRG.Charts.Osu
 {
     class StoryboardEvent
     {

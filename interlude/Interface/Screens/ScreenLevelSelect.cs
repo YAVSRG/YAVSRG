@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static YAVSRG.Interface.ScreenUtils;
+using YAVSRG.Charts;
 using System.Drawing;
 using YAVSRG.Interface.Widgets;
 
@@ -94,7 +95,7 @@ namespace YAVSRG.Interface.Screens
             }
             else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R))
             {
-                ChartLoader.UpdateCacheThreaded();
+                ChartLoader.RecacheThreaded();
                 Game.Screens.AddDialog(new Dialogs.LoadingDialog((s) => { ChartLoader.Refresh(); }));
             }
         }

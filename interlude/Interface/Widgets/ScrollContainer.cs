@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets
             padY = pady;
             horizontal = style;
             //all widgets must be anchored to top left
-            frame = Content.LoadTextureFromAssets("frame");
+            frame = Content.GetTexture("frame");
         }
 
         public override void Update(float left, float top, float right, float bottom)
@@ -61,7 +61,7 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.StencilMode(2);
             DrawWidgets(left, top, right, bottom);
             SpriteBatch.StencilMode(0);
-            SpriteBatch.DrawFrame(frame, left, top, right, bottom, 30f, Game.Screens.HighlightColor);
+            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace YAVSRG.Beatmap.Osu
+namespace YAVSRG.Charts.Osu
 {
     public class EventData
     {

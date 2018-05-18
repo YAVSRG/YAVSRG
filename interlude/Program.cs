@@ -27,7 +27,6 @@ namespace YAVSRG
                 g.Exit();
                 g.Dispose(); //clean up resources. i don't know if there's anything left to clean up but it's here i guess
             }
-
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Beatmap;
+using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Gameplay;
 using static YAVSRG.Interface.ScreenUtils;
 
@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     class Playfield : GameplayWidget
     {
-        Sprite mine, note, hold, holdhead, receptor, playfield, screencover;
+        Sprite mine, note, hold, holdhead, receptor;
 
         int lasti; int lastt;
         float[] holds;
@@ -28,13 +28,11 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         public Playfield(ScoreTracker s) : base(s)
         {
-            mine = Content.LoadTextureFromAssets("mine");
+            mine = Content.GetTexture("mine");
             note = Game.Options.Theme.GetNoteTexture(Game.CurrentChart.Keys);
             receptor = Game.Options.Theme.GetReceptorTexture(Game.CurrentChart.Keys);
             hold = Game.Options.Theme.GetBodyTexture(Game.CurrentChart.Keys);
             holdhead = Game.Options.Theme.GetHeadTexture(Game.CurrentChart.Keys);
-            playfield = Content.LoadTextureFromAssets("playfield");
-            screencover = Content.LoadTextureFromAssets("screencover");
 
             Animation.Add(animation = new Animations.AnimationCounter(25, true));
 
@@ -121,7 +119,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         private void DrawColumn(float offset, int i)
         {
-            SpriteBatch.Draw(playfield, i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, ScreenHeight * 2, Color.White);
+            SpriteBatch.Draw("playfield", i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, ScreenHeight * 2, Color.White);
         }
 
         private void DrawReceptor(float offset, int k)
@@ -131,7 +129,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         private void DrawSnap(GameplaySnap s, float offset, float pos)
         {
-            foreach (int k in s.middles.GetColumns())
+            foreach (byte k in s.middles.GetColumns())
             {
                 DrawLongTap(offset, k, holds[k], pos);
                 if (holds[k] == 0)
@@ -140,7 +138,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 }
                 holds[k] = pos; //negative ys mark middle so don't draw a hold head
             }
-            foreach (int k in s.ends.GetColumns())
+            foreach (byte k in s.ends.GetColumns())
             {
                 DrawLongTap(offset, k, holds[k], pos);
                 if (holds[k] == 0)
@@ -149,19 +147,19 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 }
                 holds[k] = ScreenHeight * 2;
             }
-            foreach (int k in s.holds.GetColumns())
+            foreach (byte k in s.holds.GetColumns())
             {
                 holds[k] = -pos;
             }
-            foreach (int k in s.taps.GetColumns())
+            foreach (byte k in s.taps.GetColumns())
             {
                 Game.Options.Theme.DrawNote(note, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % note.UV_X);
             }
-            foreach (int k in s.mines.GetColumns())
+            foreach (byte k in s.mines.GetColumns())
             {
                 Game.Options.Theme.DrawMine(mine, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % mine.UV_X);
             }
-            foreach (int k in s.ends.GetColumns())
+            foreach (byte k in s.ends.GetColumns())
             {
                 Game.Options.Theme.DrawTail(holdhead, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys);
             }
