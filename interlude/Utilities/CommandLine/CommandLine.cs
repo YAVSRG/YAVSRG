@@ -20,16 +20,16 @@ namespace YAVSRG.Utilities.CommandLine
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine(new string('-', Console.WindowWidth));
+                Console.WriteLine(Divider());
                 Console.WriteLine(CenteredText(title));
-                Console.WriteLine(new string('-', Console.WindowWidth));
+                Console.WriteLine(Divider());
                 List<string> o = options.Keys.ToList();
-                for (int i = 1; i < options.Count; i++)
+                for (int i = 1; i < options.Count+1; i++)
                 {
                     Console.WriteLine(i.ToString() + ". " + o[i - 1]);
                 }
                 Console.WriteLine("OR Enter B to go back");
-                Console.WriteLine(new string('-', Console.WindowWidth));
+                Console.WriteLine(Divider());
                 while (true)
                 {
                     Console.Write("> ");
@@ -56,9 +56,14 @@ namespace YAVSRG.Utilities.CommandLine
 
         static string CenteredText(string s)
         {
-            int l = (int)Math.Ceiling((Console.WindowWidth - s.Length) / 2f);
+            int l = (int)Math.Ceiling((Console.WindowWidth - s.Length) / 2f)-1;
             int r = (int)Math.Floor((Console.WindowWidth - s.Length) / 2f);
             return new string(' ', l) + s + new string(' ', r);
+        }
+
+        static string Divider()
+        {
+            return new string('-', Console.WindowWidth - 2);
         }
     }
 }
