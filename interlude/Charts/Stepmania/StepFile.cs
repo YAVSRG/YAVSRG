@@ -127,7 +127,18 @@ namespace YAVSRG.Charts.Stepmania
 
         public string GetBG()
         {
-            return raw["BACKGROUND"] == "" ? raw["TITLE"]+"-bg.jpg" : raw["BACKGROUND"];
+            string bgfile = raw["BACKGROUND"] == "" ? raw["TITLE"] + "-bg.jpg" : raw["BACKGROUND"];
+            if (!File.Exists(Path.Combine(path, bgfile)))
+            {
+                foreach (string s in Directory.GetFiles(path))
+                {
+                    if (Path.GetFileNameWithoutExtension(s).ToLower().Contains("bg"))
+                    {
+                        return Path.GetFileName(s);
+                    }
+                }
+            }
+            return bgfile; //still need to fix background videos crashing
         }
 
         public List<Chart> Convert()

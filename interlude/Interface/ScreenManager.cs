@@ -51,11 +51,11 @@ namespace YAVSRG.Interface
 
         public void ChangeBackground(Sprite bg)
         {
-            if (bg.ID != Oldbackground.ID)
+            if (!(bg.ID == Background.ID || Background.ID == Content.GetTexture("background").ID))
             {
-                Content.UnloadTexture(Oldbackground);
+                Content.UnloadTexture(Background);
             }
-            Oldbackground = Background;
+            Oldbackground = Background; //oldbackground is deprecated
             Background = bg;
         }
 

@@ -51,7 +51,7 @@ namespace YAVSRG.Options
             Profiles = new List<Profile>();
             foreach (string path in Directory.GetFiles(ProfilePath))
             {
-                if (Path.GetExtension(path) == ".json")
+                if (Path.GetExtension(path).ToLower() == ".json")
                 {
                     try
                     {

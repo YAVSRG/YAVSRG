@@ -118,17 +118,9 @@ namespace YAVSRG
 
         public static Sprite LoadBackground(string path, string filename)
         {
-            if (File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename),true);
-            else
-            {
-                foreach (string s in Directory.GetFiles(path))
-                {
-                    if (Path.GetFileNameWithoutExtension(s).ToLower().Contains("bg"))
-                    {
-                        return LoadTexture(s,true);
-                    }
-                }
-            }
+            string e = Path.GetExtension(filename).ToLower();
+            bool valid = (e == ".png" || e == ".jpg");
+            if (valid && File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename),true);
             return GetTexture("background");
         }
 

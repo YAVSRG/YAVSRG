@@ -54,8 +54,6 @@ namespace YAVSRG.Charts
         {
             Groups = new List<ChartGroup>();
             Cache = Cache.LoadCache();
-            //ConvertPack(GetOsuSongFolder(), "osu! Imports");
-            //Cache.Save();
             Loaded = true;
         }
 
@@ -127,30 +125,43 @@ namespace YAVSRG.Charts
         
         public static void Recache()
         {
-            foreach (string s in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
+            Cache.Charts = new Dictionary<string, CachedChart>(); //clear cache
+            foreach (string pack in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
             {
-                foreach (string f in Directory.GetFiles(s))
+                foreach (string song in Directory.GetDirectories(pack))
                 {
-                    if (Path.GetExtension(f) == ".yav")
+                    foreach (string f in Directory.GetFiles(song))
                     {
-                        Cache.CacheChart(Chart.FromFile(f));
+                        if (Path.GetExtension(f).ToLower() == ".yav")
+                        {
+                            try
+                            {
+                                Cache.CacheChart(Chart.FromFile(f));
+                            }
+                            catch
+                            {
+
+                            }
+                        }
                     }
                 }
             }
-            SaveCache();
+            Cache.Save();
         }
 
         public static void RecacheThreaded()
         {
-            //Loaded = false;
-            //Thread t = new Thread(new ThreadStart(() => { UpdateCache(); Loaded = true; }));
-            //t.Start();
+            Loaded = false;
+            Thread t = new Thread(new ThreadStart(() => { Recache(); Loaded = true; }));
+            t.Start();
         }
 
-        private static void SaveCache()
+        public static void ConvertAllPacks()
         {
-            string s = Path.Combine(Content.WorkingDirectory, "Data", "Cache.json");
-            Utils.SaveObject(Cache, s);
+            foreach (string s in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
+            {
+                ConvertPack(s, Path.GetFileName(s));
+            }
         }
 
         public static void ConvertPack(string path, string name) //name not derived from the folder so i can name the osu songs folder something other than "Songs".
@@ -169,57 +180,57 @@ namespace YAVSRG.Charts
                     }
                 }
             }
+            Cache.Save();
         }
 
         public static void ConvertChart(string absfilepath, string pack) //pack only used if importing from an external pack
         {
-            Chart c = null;
+            string sourceFolder = Path.GetDirectoryName(absfilepath);
+            string targetFolder = Path.Combine(Content.WorkingDirectory, "Songs", pack, Path.GetFileName(sourceFolder));
 
-            if (Path.GetExtension(absfilepath) == ".osu")
+            if (Path.GetExtension(absfilepath).ToLower() == ".osu")
             {
                 try
                 {
                     var o = new OsuBeatmap(Path.GetFileName(absfilepath), Path.GetDirectoryName(absfilepath));
-                    if (o.Mode == 3) { c = o.Convert(); }
+                    if (o.Mode == 3) { Chart c = o.Convert(); ConvertFile(c, sourceFolder, targetFolder); }
                 }
                 catch { }
             }
-            else if (Path.GetExtension(absfilepath) == ".sm")
+            else if (Path.GetExtension(absfilepath).ToLower() == ".sm")
             {
-                //some stuff
+                var sm = new StepFile(Path.GetFileName(absfilepath), Path.GetDirectoryName(absfilepath));
+                foreach (Chart c in sm.Convert())
+                {
+                    ConvertFile(c, sourceFolder, targetFolder);
+                }
             }
+        }
 
-            if (c != null)
+        private static void ConvertFile(Chart c, string sourceFolder, string targetFolder)
+        {
+            c.Data.SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder));
+            c.Data.SourcePath = targetFolder;
+            c.Data.File = Path.ChangeExtension(c.Data.File, ".yav");
+            Directory.CreateDirectory(targetFolder);
+            //this will copy the externally sourced chart to an appropriate folder in the songs folder
+            try
             {
-                c.Data.SourcePack = pack;
-                if (Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(absfilepath))) != Path.Combine(Content.WorkingDirectory, "Songs"))
-                {
-                    string sourceFolder = Path.GetDirectoryName(absfilepath);
-                    string targetFolder = Path.Combine(Content.WorkingDirectory,"Songs",pack,Path.GetFileName(sourceFolder));
-                    c.Data.SourcePath = targetFolder;
-                    c.Data.File = Path.ChangeExtension(c.Data.File, ".yav");
-                    Directory.CreateDirectory(targetFolder);
-                    //this will copy the externally sourced chart to an appropriate folder in the songs folder
-                    try
-                    {
-                        File.Copy(Path.Combine(sourceFolder, c.Data.AudioFile), Path.Combine(targetFolder, c.Data.AudioFile));
-                    }
-                    catch { }
-                    try
-                    {
-                        File.Copy(Path.Combine(sourceFolder, c.Data.BGFile), Path.Combine(targetFolder, c.Data.BGFile));
-                    }
-                    catch { }
-                    c.WriteToFile(Path.Combine(targetFolder, Path.GetFileNameWithoutExtension(absfilepath) + ".yav"));
-                }
-                else
-                {
-                    //this will create a new file here (in the songs folder) and rename the old file to .old
-                    c.WriteToFile(Path.ChangeExtension(absfilepath, ".yav"));
-                    File.Move(absfilepath, absfilepath + ".old");
-                }
-                Cache.CacheChart(c);
+                File.Copy(Path.Combine(sourceFolder, c.Data.AudioFile), Path.Combine(targetFolder, c.Data.AudioFile));
             }
+            catch { }
+            try
+            {
+                File.Copy(Path.Combine(sourceFolder, c.Data.BGFile), Path.Combine(targetFolder, c.Data.BGFile));
+            }
+            catch { }
+            c.WriteToFile(Path.Combine(targetFolder, c.Data.File));
+            Cache.CacheChart(c);
+        }
+
+        public static void ImportOsu()
+        {
+            ConvertPack(GetOsuSongFolder(), "osu! Imports");
         }
 
         public static string GetOsuSongFolder()
