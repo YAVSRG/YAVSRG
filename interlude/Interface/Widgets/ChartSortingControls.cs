@@ -24,45 +24,41 @@ namespace YAVSRG.Interface.Widgets
             frame = Content.GetTexture("frame");
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
 
-            group = new ScrollContainer(25, 5, true);
-            sort = new ScrollContainer(20, 5, true);
+            group = new ScrollContainer(20, 10, false, false) { State = 0 };
+            sort = new ScrollContainer(20, 10, false, false) { State = 0 };
+            AddChild(sortB = new SimpleButton("Sort by...", () => {
+                sort.State = (sort.State + 1) % 2;
+                sort.B.Move(0, sort.B.TargetY < 0 ? 300 : -300);
+            }, () => { return false; }, 20f).PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
+
             sort.AddChild(SortButton("Difficulty", SortByDifficulty));
             sort.AddChild(SortButton("Artist", SortByArtist));
             sort.AddChild(SortButton("Creator", SortByCreator));
             sort.AddChild(SortButton("Title", SortByTitle));
-            AddChild(sort.PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX));
+            AddChild(sort.PositionTopLeft(260, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20,-300,AnchorType.MAX,AnchorType.MAX));
 
+            AddChild(groupB = new SimpleButton("Group by...", () => {
+                group.State = (group.State + 1) % 2;
+                group.B.Move(0, group.B.TargetY < 0 ? 300 : -300);
+            }, () => { return false; }, 20f).PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
             group.AddChild(GroupButton("Pack", GroupByPack));
             group.AddChild(GroupButton("Difficulty", GroupByDifficulty));
             group.AddChild(GroupButton("Artist", GroupByArtist));
             group.AddChild(GroupButton("Creator", GroupByCreator));
             group.AddChild(GroupButton("Title", GroupByTitle));
-            AddChild(group.PositionTopLeft(0, 50, AnchorType.MAX, AnchorType.MAX));
-
-            AddChild(sortB = new SimpleButton("Sort by...", () => {
-                sortB.State = 0;
-                groupB.State = 1;
-                sort.A.Move(-520, 0);
-                group.A.Move(550, 0);
-            }, () => { return false; }, 15f).PositionTopLeft(640,50,AnchorType.MAX,AnchorType.MAX).PositionBottomRight(540,10,AnchorType.MAX,AnchorType.MAX));
-
-            AddChild(groupB = new SimpleButton("Group by...", () => {
-                sortB.State = 1;
-                groupB.State = 0;
-                sort.A.Move(520, 0);
-                group.A.Move(-550, 0);
-            }, () => { return false; }, 15f).PositionTopLeft(640, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(540, 10, AnchorType.MAX, AnchorType.MAX));
-            groupB.State = 0;
+            group.AddChild(GroupButton("Keymode", GroupByKeymode));
+            AddChild(group.PositionTopLeft(520, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, -300, AnchorType.MAX, AnchorType.MAX));
+            
         }
 
         private Widget SortButton(string l, Comparison<CachedChart> m)
         {
-            return new SimpleButton(l, () => { SortMode = m; Refresh(); }, () => { return SortMode == m; }, 15f).PositionBottomRight(100,35,AnchorType.MIN,AnchorType.MIN);
+            return new SimpleButton(l, () => { SortMode = m; Refresh(); }, () => { return SortMode == m; }, 15f).PositionBottomRight(200,35,AnchorType.MIN,AnchorType.MIN);
         }
 
         private Widget GroupButton(string l, Func<CachedChart,string> m)
         {
-            return new SimpleButton(l, () => { GroupMode = m; Refresh(); }, () => { return GroupMode == m; }, 15f).PositionBottomRight(80, 35, AnchorType.MIN, AnchorType.MIN);
+            return new SimpleButton(l, () => { GroupMode = m; Refresh(); }, () => { return GroupMode == m; }, 15f).PositionBottomRight(200, 35, AnchorType.MIN, AnchorType.MIN);
         }
 
         public override void Draw(float left, float top, float right, float bottom)

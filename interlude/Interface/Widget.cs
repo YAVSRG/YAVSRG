@@ -60,12 +60,12 @@ namespace YAVSRG.Interface
 
         public float Width
         {
-            get { return B.TargetX - A.TargetX; }
+            get { return Math.Abs(B.TargetX - A.TargetX); }
         }
 
         public float Height
         {
-            get { return B.TargetY - A.TargetY; }
+            get { return Math.Abs(B.TargetY - A.TargetY); }
         }
 
         protected void ConvertCoordinates(ref float l, ref float t, ref float r, ref float b)

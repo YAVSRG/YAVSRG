@@ -162,7 +162,7 @@ namespace YAVSRG.Interface.Widgets
             }
         }
 
-        public void AddPack(ChartLoader.ChartGroup pack)
+        public void AddPack(ChartLoader.ChartGroup group)
         {
             Group g = new Group(100, (x) =>
             {
@@ -184,10 +184,15 @@ namespace YAVSRG.Interface.Widgets
                     x.RecursivePopOutRooted();
                 }
                 scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
-            }, () => { return false; }, pack.label, "", Game.Options.Theme.SelectPack); //groups don't know when they're expanded :(
-            foreach (CachedChart chart in pack.charts)
+            }, () => { return false; }, group.label, "", Game.Options.Theme.SelectPack); //groups don't know when they're expanded :(
+            foreach (CachedChart chart in group.charts)
             {
                 g.AddItem(new Group(80, (x) =>
+                {
+                    Chart m = ChartLoader.Cache.LoadChart(chart);
+                    Game.Gameplay.ChangeChart(m);
+                }, () => { return false; }, chart.artist + " - " + chart.title, chart.diffname + " ("+chart.keymode.ToString()+"k)", Game.Options.Theme.SelectChart));
+                /*g.AddItem(new Group(80, (x) =>
                 {
                     bool temp = x.Expand;
                     foreach (Group c in g.Children)
@@ -215,7 +220,7 @@ namespace YAVSRG.Interface.Widgets
                         x.RecursivePopOutRooted();
                         scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
                     }
-                }, () => { return Game.CurrentChart.Data.Title == chart.title; }, chart.title, chart.artist, Game.Options.Theme.SelectChart));
+                }, () => { return Game.CurrentChart.Data.Title == chart.title; }, chart.title, chart.artist, Game.Options.Theme.SelectChart));*/
             }
             groups.Add(g);
         }

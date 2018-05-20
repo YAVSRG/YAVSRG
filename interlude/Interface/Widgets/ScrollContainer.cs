@@ -13,9 +13,11 @@ namespace YAVSRG.Interface.Widgets
         bool horizontal;
         float scroll;
         Sprite frame;
+        bool canscroll;
 
-        public ScrollContainer(float padx, float pady, bool style) : base()
+        public ScrollContainer(float padx, float pady, bool style, bool canscroll = true) : base()
         {
+            this.canscroll = canscroll;
             padX = padx;
             padY = pady;
             horizontal = style;
@@ -25,7 +27,6 @@ namespace YAVSRG.Interface.Widgets
 
         public override void Update(float left, float top, float right, float bottom)
         {
-            base.Update(left, top, right, bottom); //todo: replace with code that checks if it's within the scroll view
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             float x = padX;
             float y = padY - scroll;
@@ -33,6 +34,14 @@ namespace YAVSRG.Interface.Widgets
             {
                 if (w.State > 0)
                 {
+                    //if (ShouldRender(w))
+                    {
+                        w.Update(left, top, right, bottom);
+                    }
+                    //else
+                   // {
+                    //    w.Animation.Update();
+                    //}
                     w.B.Target(x + w.Width, y + w.Height);
                     w.A.Target(x, y);
                     if (horizontal)
@@ -45,12 +54,11 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
             }
-            if (ScreenUtils.MouseOver(left, top, right, bottom))
+            if (canscroll && ScreenUtils.MouseOver(left, top, right, bottom))
             {
                 scroll -= Input.MouseScroll * 100;
                 scroll = Math.Max(Math.Min(scroll, y), 0);
             }
-            //B.Target(A.AbsX+x, A.AbsY+y);
         }
 
         public override void Draw(float left, float top, float right, float bottom)
@@ -62,6 +70,13 @@ namespace YAVSRG.Interface.Widgets
             DrawWidgets(left, top, right, bottom);
             SpriteBatch.StencilMode(0);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
+        }
+
+        private bool ShouldRender(Widget w)
+        {
+            float t = w.A.AbsY - scroll;
+            float b = w.B.AbsY - scroll;
+            return (t >= 0 && t <= Height) || (b >= 0 && b <= Height);
         }
     }
 }
