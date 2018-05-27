@@ -57,7 +57,7 @@ namespace YAVSRG.Options
         }
         private static void DDR(ChartWithModifiers c, ColorScheme cs)
         {
-            //sorry, i'll comment it soon, but the code is likely to change around a bit
+            //i'll comment it soon, but the code is likely to change around a bit
             float v;
             float x;
             BPMPoint p;
@@ -66,7 +66,7 @@ namespace YAVSRG.Options
             {
                 p = c.Timing.GetPointAt(c.Timing.GetPointAt(s.Offset, false).InheritsFrom, false);
                 v = p.MSPerBeat;
-                x = (s.Offset - p.Offset) % v;
+                x = (s.Offset - p.Offset);
 
                 color = 7;
                 for (int i = 0; i < DDRValues.Length; i++)
@@ -112,9 +112,7 @@ namespace YAVSRG.Options
 
         private static bool RoughlyDivisibleBy(float a, float b)
         {
-            var x = a % b;
-
-            return Math.Min(Math.Abs(x),Math.Abs(b-x)) < 2;
+            return Math.Abs(a - b * Math.Round(a / b)) < 1;
         }
     }
 }

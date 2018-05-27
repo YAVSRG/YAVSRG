@@ -98,7 +98,7 @@ namespace YAVSRG.Interface.Widgets
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
                 if (top > ScreenUtils.ScreenHeight || bottom < -ScreenUtils.ScreenHeight) { return; }
                 SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, 0, fill);
-                Game.Screens.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,fill), 0.5f);
+                Game.Screens.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,fill), 1.5f);
                 SpriteBatch.DrawFrame(left, top, right, bottom, 30, border);
                 if (subtitle == "")
                 {

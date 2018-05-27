@@ -102,22 +102,29 @@ namespace YAVSRG.Charts.YAVSRG
 
         public static Chart FromFile(string path)
         {
-            var fs = new FileStream(path, FileMode.Open);
-            var file = new BinaryReader(fs);
-            byte keys = file.ReadByte();
-            ChartHeader header = Newtonsoft.Json.JsonConvert.DeserializeObject<ChartHeader>(file.ReadString()); //it's length prefixed so it knows where to stop
-            header.File = Path.GetFileName(path); //in case you rename the file
-            List<Snap> notes = new List<Snap>();
-            List<BPMPoint> timing = new List<BPMPoint>();
-            int c = file.ReadInt32();
-            for (int i = 0; i < c; i++)
+            byte keys;
+            ChartHeader header;
+            List<Snap> notes;
+            List<BPMPoint> timing;
+            using (var fs = new FileStream(path, FileMode.Open))
             {
-                notes.Add(new Snap(file.ReadSingle(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16()));
-            }
-            c = file.ReadInt32();
-            for (int i = 0; i < c; i++)
-            {
-                timing.Add(new BPMPoint(file.ReadSingle(),file.ReadInt32(),file.ReadSingle(),file.ReadSingle(),file.ReadSingle()));
+                var file = new BinaryReader(fs);
+                keys = file.ReadByte();
+                header = Newtonsoft.Json.JsonConvert.DeserializeObject<ChartHeader>(file.ReadString()); //it's length prefixed so it knows where to stop
+                header.File = Path.GetFileName(path); //in case you rename the file
+                notes = new List<Snap>();
+                timing = new List<BPMPoint>();
+                int c = file.ReadInt32();
+                for (int i = 0; i < c; i++)
+                {
+                    notes.Add(new Snap(file.ReadSingle(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16()));
+                }
+                c = file.ReadInt32();
+                for (int i = 0; i < c; i++)
+                {
+                    timing.Add(new BPMPoint(file.ReadSingle(), file.ReadInt32(), file.ReadSingle(), file.ReadSingle(), file.ReadSingle()));
+                }
+                file.Close();
             }
             return new Chart(notes, timing, header, keys);
         }

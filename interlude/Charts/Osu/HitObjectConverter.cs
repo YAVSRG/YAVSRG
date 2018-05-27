@@ -27,6 +27,11 @@ namespace YAVSRG.Charts.Osu
             }
         }
 
+        public void Sort()
+        {
+            objects.Sort((a, b) => { return a.offset.CompareTo(b.offset); });
+        }
+
         public List<Snap> CreateSnapsFromObjects(byte keys)
         {
             List<Snap> states = new List<Snap>();

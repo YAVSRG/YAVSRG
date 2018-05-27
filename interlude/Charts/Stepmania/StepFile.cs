@@ -156,43 +156,50 @@ namespace YAVSRG.Charts.Stepmania
             foreach (StepFileDifficulty diff in diffs)
             {
                 if (diff.gamemode != "dance-single") { continue; }
-                byte meter = 4;
-                List<Snap> states = new List<Snap>();
-                List<BPMPoint> points = new List<BPMPoint>();
-                BinarySwitcher lntracker = new BinarySwitcher(0);
-                double now = -double.Parse(raw["OFFSET"]) * 1000;
-                int bpm = 0;
-                points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now));
-                int totalbeats = 0;
-                byte keycount = 4;
-
-                for (int i = 0; i < diff.measures.Count; i++)
+                try
                 {
-                    for (int b = 0; b < meter; b++)
+                    byte meter = 4;
+                    List<Snap> states = new List<Snap>();
+                    List<BPMPoint> points = new List<BPMPoint>();
+                    BinarySwitcher lntracker = new BinarySwitcher(0);
+                    double now = -double.Parse(raw["OFFSET"]) * 1000;
+                    int bpm = 0;
+                    points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now));
+                    int totalbeats = 0;
+                    byte keycount = 4;
+
+                    for (int i = 0; i < diff.measures.Count; i++)
                     {
-                        diff.measures[i].ConvertBeat(now, bpms[bpm].Item2, lntracker, keycount, b, meter, states);
-                        now += bpms[bpm].Item2;
-                        totalbeats += 1;
-                        if (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 <= totalbeats)
+                        for (int b = 0; b < meter; b++)
                         {
-                            bpm += 1;
-                            points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));
+                            diff.measures[i].ConvertBeat(now, bpms[bpm].Item2, lntracker, keycount, b, meter, states);
+                            now += bpms[bpm].Item2;
+                            totalbeats += 1;
+                            if (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 <= totalbeats)
+                            {
+                                bpm += 1;
+                                points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));
+                            }
                         }
                     }
+                    Chart c = new Chart(states, points, new ChartHeader
+                    {
+                        Title = GetTag("TITLE"),
+                        File = filename,
+                        Artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"),
+                        Creator = GetCreator(),
+                        SourcePath = path,
+                        DiffName = (raw.ContainsKey("SUBTITLE") && raw["SUBTITLE"] != "" && diffs.Count == 1) ? raw["SUBTITLE"] : diff.name,
+                        PreviewTime = float.Parse(raw["SAMPLESTART"]) * 1000,
+                        AudioFile = raw["MUSIC"],
+                        BGFile = GetBG()
+                    }, keycount);
+                    charts.Add(c);
                 }
-                Chart c = new Chart(states, points, new ChartHeader
+                catch
                 {
-                    Title = GetTag("TITLE"),
-                    File = filename,
-                    Artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"),
-                    Creator = GetCreator(),
-                    SourcePath = path,
-                    DiffName = (raw.ContainsKey("SUBTITLE") && raw["SUBTITLE"] != "" && diffs.Count == 1) ? raw["SUBTITLE"] : diff.name,
-                    PreviewTime = float.Parse(raw["SAMPLESTART"]) * 1000,
-                    AudioFile = raw["MUSIC"],
-                    BGFile = GetBG()
-                }, keycount);
-                charts.Add(c);
+                    //
+                }
             }
             return charts;
         }

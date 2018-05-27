@@ -65,7 +65,7 @@ namespace YAVSRG.Interface.Widgets
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.StencilMode(1);
-            Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 0.5f);
+            Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 1.5f);
             SpriteBatch.StencilMode(2);
             DrawWidgets(left, top, right, bottom);
             SpriteBatch.StencilMode(0);

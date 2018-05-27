@@ -7,6 +7,7 @@ using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Charts;
 using System.Drawing;
 using YAVSRG.Interface.Animations;
+using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Interface.Screens
 {
@@ -33,6 +34,8 @@ namespace YAVSRG.Interface.Screens
             base.OnEnter(prev);
                 wb = Game.Instance.WindowBorder;
             Game.Instance.WindowBorder = OpenTK.WindowBorder.Hidden;
+            Game.Screens.Logo.A.Target(-300, -300);
+            Game.Screens.Logo.B.Target(300, 300);
             if (!Game.Screens.Loading)
             {
                 exiting = true;
@@ -66,14 +69,16 @@ namespace YAVSRG.Interface.Screens
                     SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i*0.2f), Color.FromArgb(a, Color.White));
                 }
             }
-            SpriteBatch.Draw("logo", -250, -250, 250, 250, Color.FromArgb(a, Color.White));
+            //SpriteBatch.Draw("logo", -300, -300+slide, 300, 300+slide, Color.FromArgb(a, Color.White));
         }
 
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
+            int a = (int)(255 * fade);
             if (exiting)
             {
+                a = 255 - a;
                 Game.Audio.SetVolume(Game.Options.General.AudioVolume * (1 - fade));
                 if (!transition.Running)
                 {
@@ -88,6 +93,7 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.AddScreen(new ScreenMenu());
                 Game.Instance.WindowBorder = wb;
             }
+            ((Logo)Game.Screens.Logo).c = Color.FromArgb(a, Color.White);
         }
     }
 }

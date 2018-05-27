@@ -33,7 +33,7 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 0.25f);
+            Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 2f);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
             SpriteBatch.DrawRect(left + 40, bottom-30, left + 40 + (right - 300 - left) * Game.Audio.NowPercentage(), bottom - 20, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, left + 10, top, right - 260, top + 70, Game.Options.Theme.MenuFont);

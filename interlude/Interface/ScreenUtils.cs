@@ -53,7 +53,7 @@ namespace YAVSRG.Interface
             SpriteBatch.DrawRect(left-Math.Abs(h), top, right, bottom, Color.White);
             SpriteBatch.DisableTransform();
             SpriteBatch.StencilMode(2);
-            Game.Screens.DrawChartBackground(left, top, right+Math.Abs(h)*0.5f, bottom, Game.Screens.DarkColor, 0.5f);
+            Game.Screens.DrawChartBackground(left, top, right+Math.Abs(h)*0.5f, bottom, Game.Screens.DarkColor, 1.5f);
             SpriteBatch.StencilMode(0);
             SpriteBatch.ParallelogramTransform(amount, top + h / amount * 0.5f);
             SpriteBatch.DrawFrame(left-Math.Abs(h), top, right, bottom, 30f, Color.White);

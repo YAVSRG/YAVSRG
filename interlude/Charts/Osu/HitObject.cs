@@ -33,7 +33,10 @@ namespace YAVSRG.Charts.Osu
             offset = float.Parse(parts[2]);
             type = int.Parse(parts[3]);
             hitsound = int.Parse(parts[4]);
-            addition = parts[5];
+            if (parts.Length > 5)
+            {
+                addition = parts[5];
+            }
         }
 
         public void Dump(System.IO.TextWriter tw)

@@ -67,6 +67,7 @@ namespace YAVSRG.Interface.Screens
             A.Target(0, 0);
             B.Target(0, 0);
             Game.Gameplay.OnUpdateChart += OnUpdateChart;
+            OnUpdateChart();
             ChartLoader.OnRefreshGroups += OnUpdateGroups;
         }
 

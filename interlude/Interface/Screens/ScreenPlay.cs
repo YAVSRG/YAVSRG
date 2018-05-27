@@ -29,10 +29,14 @@ namespace YAVSRG.Interface.Screens
             {
                 base.Draw(left, top, right, bottom);
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+                    float w = (right - left);
                 if (ReceptorLight.Val > 0.5f)
                 {
-                    float w = (right - left);
                     SpriteBatch.Draw("receptorlighting", left + w * (1 - ReceptorLight.Val), top + 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
+                }
+                if (NoteLight.Val > 0f)
+                {
+                    SpriteBatch.Draw("notelighting", left, bottom+w, right, bottom, Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
                 }
             }
         }
@@ -209,6 +213,7 @@ namespace YAVSRG.Interface.Screens
                 delta /= (float)Game.Options.Profile.Rate; //convert back to time relative to what player observes instead of map data
                 //i.e on 2x rate if you hit 80ms away in the map data, you hit 40ms away in reality
                 scoreTracker.RegisterHit(hitAt, k, delta); //handle the hit
+                lighting[k].NoteLight.Val = 1;
             } //put else statement here for cb on unecessary keypress if i ever want to do that
         }
         

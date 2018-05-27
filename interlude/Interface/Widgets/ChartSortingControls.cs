@@ -64,7 +64,7 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            Game.Screens.DrawChartBackground(left, top, right, bottom, Utils.ColorInterp(Color.FromArgb(255,0,0,0), Game.Screens.BaseColor, 0.8f),0.5f);
+            Game.Screens.DrawChartBackground(left, top, right, bottom, Utils.ColorInterp(Color.FromArgb(255,0,0,0), Game.Screens.BaseColor, 0.8f),1.5f);
             SpriteBatch.DrawRect(right - 520, top + 10, right - 20, top + 70, Game.Screens.DarkColor);
             SpriteBatch.Font1.DrawText(SearchString != "" ? SearchString : "Press tab to search...", 20f, right - 500, top + 22.5f, color);
             SpriteBatch.DrawFrame(right - 520, top + 10, right - 20, top + 70, 25f, color);

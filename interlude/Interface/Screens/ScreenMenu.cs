@@ -18,31 +18,31 @@ namespace YAVSRG.Interface.Screens
             "https://en.wikipedia.org/wiki/Rhythm_game", "https://github.com/percyqaz/YAVSRG/issues/9", "Attention to detail" };
         string splash = splashes[new Random().Next(0, splashes.Length)];
         AnimationSlider slide;
-        Sprite banner;
+        //Sprite banner;
         Widget play, options, quit;
 
         public ScreenMenu()
         {
             AddChild(
                 play = new BannerButton("Play", () => { Game.Screens.AddScreen(new ScreenLevelSelect()); })
-                .PositionTopLeft(-100, -100, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.ScreenWidth, 0, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionTopLeft(-100, -200, AnchorType.MIN, AnchorType.CENTER)
+                .PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(
                 options = new BannerButton("Options", () => { Game.Screens.AddScreen(new ScreenOptions()); })
-                .PositionTopLeft(-100, 50, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.ScreenWidth, 150, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionTopLeft(-100, -50, AnchorType.MIN, AnchorType.CENTER)
+                .PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(
                 quit = new BannerButton("Quit", () =>
                 {
                     Game.Screens.PopScreen();
                 })
-                .PositionTopLeft(-100, 200, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.ScreenWidth, 300, AnchorType.CENTER, AnchorType.CENTER)
+                .PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.CENTER)
+                .PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER)
                 );
             slide = new AnimationSlider(0);
-            banner = Content.GetTexture("banner");
+            //banner = Content.GetTexture("banner");
             slide.Target = 1;
             Animation.Add(slide);
             Animation.Add(new Animation()); //this dummy animation ensures that ScreenManager handles the other animations
@@ -52,23 +52,25 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnEnter(prev);
             splash = splashes[new Random().Next(0, splashes.Length)];
+            Game.Screens.Logo.A.Target(-ScreenUtils.ScreenWidth, -400);
+            Game.Screens.Logo.B.Target(-ScreenUtils.ScreenWidth + 800, 400);
             Game.Screens.BackgroundDim.Target = 1;
             slide.Target = 1;
-            play.B.Reposition(-ScreenUtils.ScreenWidth, 0, AnchorType.CENTER, AnchorType.CENTER);
-            options.B.Reposition(-ScreenUtils.ScreenWidth, 150, AnchorType.CENTER, AnchorType.CENTER);
-            quit.B.Reposition(-ScreenUtils.ScreenWidth, 300, AnchorType.CENTER, AnchorType.CENTER);
+            play.B.Reposition(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER);
+            options.B.Reposition(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER);
+            quit.B.Reposition(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER);
             var a = new AnimationSeries(false);
             a.Add(new AnimationCounter(10,false));
             a.Add(new AnimationAction(() => {
-                play.B.Target(0, 0);
+                play.B.Target(-ScreenUtils.ScreenWidth + 1200, -100);
             }));
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() => {
-                options.B.Target(-70, 150);
+                options.B.Target(-ScreenUtils.ScreenWidth + 1130, 50);
             }));
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() => {
-                quit.B.Target(-140, 300);
+                quit.B.Target(-ScreenUtils.ScreenWidth + 1060, 200);
             }));
             Animation.Add(a);
         }
@@ -76,6 +78,11 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
+            if (!(next is ScreenLoading))
+            {
+                Game.Screens.Logo.A.Target(-ScreenUtils.ScreenWidth - 400, -200);
+                Game.Screens.Logo.B.Target(-ScreenUtils.ScreenWidth, 200);
+            }
             Game.Screens.BackgroundDim.Target = 0.3f;
             slide.Target = 0;
         }
@@ -83,10 +90,10 @@ namespace YAVSRG.Interface.Screens
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            float w = (right-100) * slide;
-            ScreenUtils.DrawBanner(-w, -300, w, -200, Game.Screens.HighlightColor);
-            SpriteBatch.Font1.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
-            SpriteBatch.Font2.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
+            //float w = (right-100) * slide;
+            //ScreenUtils.DrawBanner(-w, -300, w, -200, Game.Screens.HighlightColor);
+            //SpriteBatch.Font1.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
+            //SpriteBatch.Font2.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace YAVSRG.Interface
     {
         AnimationFade fade1; //prev screen fade out 
         AnimationFade fade2; //next screen fade in
-        AnimationSlider parallax = new AnimationSlider(20);
+        AnimationSlider parallax = new AnimationSlider(15);
         public Toolbar toolbar;
         List<Screen> stack = new List<Screen>() {};
         List<Dialog> dialogs = new List<Dialog>();
@@ -29,6 +29,7 @@ namespace YAVSRG.Interface
         public AnimationColorMixer BaseColor;
         public AnimationColorMixer DarkColor;
         public AnimationColorMixer HighlightColor;
+        public Widget Logo;
 
         public ScreenManager()
         {
@@ -37,6 +38,7 @@ namespace YAVSRG.Interface
             animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
             animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
             animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
+            Logo = new Widgets.Logo().PositionTopLeft(-200, ScreenHeight, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(200, ScreenHeight + 400, AnchorType.CENTER, AnchorType.CENTER);
         }
 
         public void AddDialog(Dialog d)
@@ -94,6 +96,7 @@ namespace YAVSRG.Interface
             if (Loading)
             {
                 Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                Logo.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
                 return;
             }
             DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, BackgroundDim);
@@ -118,6 +121,7 @@ namespace YAVSRG.Interface
             {
                 dialogs[0].Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             }
+            Logo.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             toolbar.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
         }
 
@@ -151,6 +155,7 @@ namespace YAVSRG.Interface
             if (Loading)
             {
                 Current?.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                Logo.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
                 return;
             }
             if (dialogs.Count > 0)
@@ -179,6 +184,7 @@ namespace YAVSRG.Interface
                     Previous = null;
                 }
             }
+            Logo.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             animation.Update();
             animation2.Update();
         }

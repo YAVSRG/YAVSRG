@@ -13,6 +13,7 @@ namespace YAVSRG
         static void Main(string[] args)
         {
             Game g = new Game();
+            Utilities.Logging.SetLogAction((s,t) => { });
             try
             {
                 g.Run(120.0); //run the game

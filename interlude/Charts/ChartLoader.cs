@@ -9,6 +9,7 @@ using YAVSRG.Charts.Osu;
 using System.IO;
 using System.Net;
 using System.IO.Compression;
+using static YAVSRG.Utilities.Logging;
 
 namespace YAVSRG.Charts
 {
@@ -57,7 +58,7 @@ namespace YAVSRG.Charts
         {
             Groups = new List<ChartGroup>();
             Cache = Cache.LoadCache();
-            //DownloadBeatmap(720686);
+            DownloadBeatmap(720686);
             Loaded = true;
         }
 
@@ -142,9 +143,9 @@ namespace YAVSRG.Charts
                             {
                                 Cache.CacheChart(Chart.FromFile(f));
                             }
-                            catch
+                            catch (Exception e)
                             {
-
+                                Log("Could not cache chart: " + f + "\n" + e.Message + "\n" + e.StackTrace, LogType.Error);
                             }
                         }
                     }
@@ -197,16 +198,27 @@ namespace YAVSRG.Charts
                 try
                 {
                     var o = new OsuBeatmap(Path.GetFileName(absfilepath), Path.GetDirectoryName(absfilepath));
-                    if (o.Mode == 3) { Chart c = o.Convert(); ConvertFile(c, sourceFolder, targetFolder); }
+                    if (o.Mode == 3) { Chart c = o.Convert(); ConvertFile(c, sourceFolder, targetFolder); Log("Converted " + absfilepath);}
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    Log("Could not convert osu file:"+absfilepath+"\n" + e.Message + "\n" + e.StackTrace, LogType.Error);
+                }
             }
             else if (Path.GetExtension(absfilepath).ToLower() == ".sm")
             {
-                var sm = new StepFile(Path.GetFileName(absfilepath), Path.GetDirectoryName(absfilepath));
-                foreach (Chart c in sm.Convert())
+                try
                 {
-                    ConvertFile(c, sourceFolder, targetFolder);
+                    var sm = new StepFile(Path.GetFileName(absfilepath), Path.GetDirectoryName(absfilepath));
+                    foreach (Chart c in sm.Convert())
+                    {
+                        ConvertFile(c, sourceFolder, targetFolder);
+                        Log("Converted " + absfilepath);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log("Could not convert sm file:" + absfilepath + "\n" + e.Message + "\n" + e.StackTrace, LogType.Error);
                 }
             }
         }
@@ -236,15 +248,16 @@ namespace YAVSRG.Charts
         {
             ConvertPack(GetOsuSongFolder(), "osu! Imports");
         }
-        /*
         public static void DownloadBeatmap(int id)
         {
             using (var client = new WebClient())
             {
                 try
                 {
-                    
-                    client.DownloadFile("https://osu.ppy.sh/d/" + id.ToString(), Path.Combine(Content.WorkingDirectory, "Imports"));
+                    //string target = "https://osu.ppy.sh/beatmapsets/" + id.ToString() + "/download"
+                    string target = "https://api.github.com/repos/Percyqaz/YAVSRG/issues";
+                    Console.WriteLine(client.DownloadString(target));
+                    //client.DownloadFile(target, Path.Combine(Content.WorkingDirectory, "Imports"));
                 }
                 catch (WebException e)
                 {
@@ -253,11 +266,12 @@ namespace YAVSRG.Charts
                     Console.WriteLine(e.Source);
                 }
             }
-        }*/
+        }
 
+        /*
         public static void ExtractArchive(string path)
         {
-            if (Path.GetExtension(path).ToLower() == ".osu")
+            if (Path.GetExtension(path).ToLower() == ".osz")
             {
                 using (ZipArchive z = ZipFile.Open(path, ZipArchiveMode.Update))
                 {
@@ -266,7 +280,7 @@ namespace YAVSRG.Charts
                 File.Delete(path);
             }
             //no zip support yet, and no rar support until i know how
-        }
+        }*/
 
         public static string GetOsuSongFolder()
         {

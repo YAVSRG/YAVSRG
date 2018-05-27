@@ -73,7 +73,6 @@ namespace YAVSRG.Charts.Osu
                 else if (l == "[HitObjects]")
                 {
                     HitObjects = new HitObjectConverter(ts);
-                    HitObjects.CreateSnapsFromObjects(Keys);
                 }
             }
         }
@@ -81,6 +80,7 @@ namespace YAVSRG.Charts.Osu
         public Chart Convert()
         {
             if (Mode != 3) { return null; }
+            HitObjects.Sort();
             List<Snap> hitdata = HitObjects.CreateSnapsFromObjects(Keys);
             Chart c = new Chart(hitdata, TimingPoints.Convert(hitdata[hitdata.Count - 1].Offset), new ChartHeader
             {

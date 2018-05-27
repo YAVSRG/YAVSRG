@@ -11,7 +11,6 @@ namespace YAVSRG.Interface
 {
     public class Toolbar : Widget
     {
-        Sprite texture, cursor, frame;
         AnimationSlider slide;
         Widget mc;
         bool hidden;
@@ -28,7 +27,7 @@ namespace YAVSRG.Interface
                 .PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttonstop", "", () => { int m = mc.A.TargetX > 0 ? -1000 : 1000; mc.A.Move(m, 0); mc.B.Move(m, 0); })
+                new Button("buttoninfo", "", () => { int m = mc.A.TargetX > 0 ? -1000 : 1000; mc.A.Move(m, 0); mc.B.Move(m, 0); })
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
@@ -73,12 +72,12 @@ namespace YAVSRG.Interface
                 }
 
                 //top
-                Game.Screens.DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor, 0.25f);
+                Game.Screens.DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Game.Screens.DarkColor, 2f);
                 SpriteBatch.Draw("toolbar", -ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + slide, Color.FromArgb(127, Game.Screens.BaseColor));
                 SpriteBatch.DrawFrame(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + slide + 5, 30f, Game.Screens.BaseColor);
 
                 //bottom
-                Game.Screens.DrawChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor, 0.25f);
+                Game.Screens.DrawChartBackground(-ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Game.Screens.DarkColor, 2f);
                 SpriteBatch.Draw("toolbar", -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor), 2);
                 SpriteBatch.DrawFrame(-ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
 
