@@ -11,7 +11,7 @@ namespace YAVSRG.Gameplay
     {
         public string Path;
         public float Offset;
-        public List<Score> TEMP_SCORES2 = new List<Score>();
+        public List<Score> Scores = new List<Score>();
 
         public static ChartSaveData FromChart(Chart c)
         {

@@ -58,7 +58,7 @@ namespace YAVSRG.Charts
         {
             Groups = new List<ChartGroup>();
             Cache = Cache.LoadCache();
-            DownloadBeatmap(720686);
+            //DownloadBeatmap(720686);
             Loaded = true;
         }
 

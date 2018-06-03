@@ -13,8 +13,8 @@ namespace YAVSRG.Interface.Screens
     class ScreenScore : Screen
     {
         static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" };
-        static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
-        string mods, time, bpm;
+        //static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
+        string mods, time, bpm, perf;
         private ScoreTracker scoreData;
         Sprite rank;
         int tier;
@@ -25,7 +25,7 @@ namespace YAVSRG.Interface.Screens
         {
             scoreData = data;
             snapcount = scoreData.c.Notes.Count;
-            mods = string.Join(", ",Game.Gameplay.GetModifiers());
+            mods = string.Join(", ", new[] { Utils.RoundNumber(Game.Options.Profile.Rate) + "x", string.Join(", ", Game.Gameplay.GetModifiers()) });
             scoreData.Scoring.BestCombo = Math.Max(scoreData.Scoring.Combo, scoreData.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             float acc = scoreData.Accuracy();
@@ -38,8 +38,10 @@ namespace YAVSRG.Interface.Screens
                 }
             }
             rank = Content.GetTexture("rank-" + ranks[tier]);
-            Game.Gameplay.ChartSaveData.TEMP_SCORES2.Add(new Score() { player = Game.Options.Profile.Name, date = DateTime.Now.ToShortDateString(), hitdata = ScoreTracker.HitDataToString(scoreData.hitdata), keycount = scoreData.c.Keys, mods = Game.Gameplay.GetModifiers().ToList(), time = DateTime.Now.ToShortTimeString() });
-
+            if (ShouldSaveScore())
+            {
+                Game.Gameplay.ChartSaveData.Scores.Add(new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate });
+            }
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
             acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
             acc1.ProcessScore(scoreData.hitdata);
@@ -47,6 +49,7 @@ namespace YAVSRG.Interface.Screens
 
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
+            perf = Utils.RoundNumber(Charts.DifficultyRating.PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.hitdata));
 
             AddChild(new Scoreboard().PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.MIN, AnchorType.MAX));
 
@@ -54,10 +57,16 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
         }
 
+        public bool ShouldSaveScore()
+        {
+            //other options i.e dont save if i get an F, dont save if i dont hp clear, dont save if i dont pb
+            if (Game.Gameplay.GetModStatus(Game.Gameplay.SelectedMods) == 2) { return false; }
+            return true;
+        }
+
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            //you'll just have to change to the chart before showing the score screen <- dont worry old me, this always happens :)
 
             //top panel
             DrawParallelogramWithBG(left, top, right - 600, top + 150, 0.5f);
@@ -92,7 +101,10 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 550, bottom - 80, Game.Options.Theme.MenuFont);
 
             //graph
-            DrawGraph(left + 550, bottom - 350, right - 550, bottom - 150);
+            DrawGraph(left + 550, bottom - 350, right - 550, bottom - 180);
+
+            SpriteBatch.Font1.DrawCentredText("Your performance", 30f, 0, bottom - 170, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredText(perf, 100f, 0, bottom - 145, Game.Options.Theme.MenuFont);
         }
 
         private void DrawGraph(float left, float top, float right, float bottom)

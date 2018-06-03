@@ -125,10 +125,12 @@
     <Compile Include="Gameplay\ChartWithModifiers.cs" />
     <Compile Include="Gameplay\GameplayManager.cs" />
     <Compile Include="Gameplay\GameplaySnap.cs" />
+    <Compile Include="Gameplay\Mods\Autoplay.cs" />
     <Compile Include="Gameplay\Mods\Inverse.cs" />
     <Compile Include="Gameplay\Mods\Manipulate.cs" />
     <Compile Include="Gameplay\Mods\Mirror.cs" />
     <Compile Include="Gameplay\Mods\Mod.cs" />
+    <Compile Include="Gameplay\Mods\NoLN.cs" />
     <Compile Include="Gameplay\Mods\NoSV.cs" />
     <Compile Include="Gameplay\Scoring\CCScoring.cs" />
     <Compile Include="Gameplay\Scoring\DP.cs" />

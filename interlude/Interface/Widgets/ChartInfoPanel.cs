@@ -30,10 +30,10 @@ namespace YAVSRG.Interface.Widgets
 
         public void ChangeChart()
         {
-            diff = new RatingReport(Game.Gameplay.ModifiedChart, (float)Game.Options.Profile.Rate);
+            diff = Game.Gameplay.ChartDifficulty;
             rate = (float)Game.Options.Profile.Rate;
-            physical = diff.breakdown[0];
-            technical = diff.breakdown[1];
+            physical = diff.Physical;
+            technical = diff.Technical;
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
             if (sb != null)
@@ -62,19 +62,19 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.Font1.DrawText(time, 40f, left + 550, bottom - 220, Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 50, bottom - 220, Game.Options.Theme.MenuFont);
 
-            //DrawGraph(left + 550, top + 350, right - 50, bottom - 250);
+            DrawGraph(left + 550, top + 350, right - 50, bottom - 250);
 
             DrawWidgets(left, top, right, bottom);
         }
 
         public void DrawGraph(float left, float top, float right, float bottom)
         {
-            int c = diff.physical.Length;
+            int c = diff.PhysicalData.Length;
             float x = (right - left) / c;
             float y = (bottom - top) / physical * 0.25f;
             for (int i = 0; i < c; i++)
             {
-                SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.physical[i] - 5, left + x * i + 1, bottom - y * diff.physical[i] + 5, Color.Aqua);
+                SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.PhysicalData[i] - 5, left + x * i + 1, bottom - y * diff.PhysicalData[i] + 5, Color.Aqua);
             }
             SpriteBatch.Font2.DrawCentredTextToFill("Replace with NPS graph?",left, top, right, bottom, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);

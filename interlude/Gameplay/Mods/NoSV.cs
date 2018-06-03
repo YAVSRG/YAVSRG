@@ -9,7 +9,16 @@ namespace YAVSRG.Gameplay.Mods
 {
     public class NoSV : Mod
     {
-        public override void Apply(ChartWithModifiers c)
+        public override bool IsApplicable(ChartWithModifiers c, string data)
+        {
+            foreach (BPMPoint b in c.Timing.Points)
+            {
+                if (b.ScrollSpeed != 1) { return true; }
+            }
+            return false;
+        }
+
+        public override void Apply(ChartWithModifiers c, string data)
         {
             foreach (BPMPoint b in c.Timing.Points)
             {
@@ -17,7 +26,7 @@ namespace YAVSRG.Gameplay.Mods
             }
         }
 
-        public override string GetName()
+        public override string GetName(string data)
         {
             return "NoSV";
         }

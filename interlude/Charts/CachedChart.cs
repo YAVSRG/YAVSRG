@@ -36,8 +36,8 @@ namespace YAVSRG.Charts
                 length = c.GetDuration(),
                 bpm = c.GetBPM(),
                 diffname = c.Data.DiffName,
-                physical = r.breakdown[0],
-                technical = r.breakdown[1]
+                physical = r.Physical,
+                technical = r.Technical
             };
         }
     }

@@ -31,6 +31,7 @@ namespace YAVSRG
         public static SpriteFont Font2;
 
         //static int VBO;
+        static int Depth;
         
         public static void Draw(Sprite sprite, float left, float top, float right, float bottom, Color color, int rotation = 0)
         {
@@ -128,11 +129,13 @@ namespace YAVSRG
             double[] mat = new[] {
                 1.0, 0.0, 0.0, 0.0,
                 0.0, upscroll ? 1 : -1, 0.0, 0.0,
-                0.0, 1.0, 1.0, 0.0,
+                0.0, 100.0, 1.0, 0.0,
                 0.0, 0.0, 0.0, 1.0,
             };
+            Matrix4 m = Matrix4.LookAt(0, 0, 1000, 0, 0, 0, 0, 1, 0);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
+            GL.MultMatrix(ref m);
             GL.Translate(0, (upscroll ? -1 : 1) * ScreenUtils.ScreenHeight, 0);
             GL.MultMatrix(mat);
         }
@@ -199,7 +202,9 @@ namespace YAVSRG
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.ClearColor(0, 0, 0, 0);
             GL.ClearStencil(0x00);
-
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            
             /*
             VBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);

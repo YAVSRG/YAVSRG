@@ -30,11 +30,11 @@ namespace YAVSRG.Interface.Screens
                 .PositionBottomRight(750, 25, AnchorType.MAX, AnchorType.MAX));
             //temp mod selection menu
             ScrollContainer f = new ScrollContainer(90, 20, false) { };
-            foreach (Gameplay.Mods.Mod m in Game.Gameplay.mods)
+            foreach (string m in Game.Gameplay.mods.Keys)
             {
-                f.AddChild(new SimpleButton(m.GetName(), ModSelectClosure(m), () => { return m.Enable; }, 20f).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
-                f.State = -1;
+                f.AddChild(ModSelectClosure(m).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
             }
+            f.State = -1;
             AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
             AddChild(new FramedButton("buttonbase", "Mods", () => { f.State *= -1; })
                 .PositionTopLeft(50, 75, AnchorType.MIN, AnchorType.MAX)
@@ -45,9 +45,19 @@ namespace YAVSRG.Interface.Screens
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
         }
 
-        private Action ModSelectClosure(Gameplay.Mods.Mod m)
+        private SimpleButton ModSelectClosure(string m)
         {
-            return () => { m.Enable = !m.Enable; Game.Gameplay.UpdateChart(); };
+            return new SimpleButton(m, () => {
+                if (Game.Gameplay.SelectedMods.ContainsKey(m))
+                {
+                    Game.Gameplay.SelectedMods.Remove(m);
+                }
+                else
+                {
+                    Game.Gameplay.SelectedMods.Add(m, Game.Gameplay.mods[m].Settings.Length == 0 ? "" : Game.Gameplay.mods[m].Settings[0]);
+                }
+                Game.Gameplay.UpdateChart();
+            }, () => { return Game.Gameplay.SelectedMods.ContainsKey(m); }, 20f);
         }
 
         private void OnUpdateGroups()
@@ -106,6 +116,7 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Rate += change;
             Game.Options.Profile.Rate = Math.Round(Game.Options.Profile.Rate, 2, MidpointRounding.AwayFromZero);
             Game.Options.Profile.Rate = Math.Max(0.5, Math.Min(Game.Options.Profile.Rate,3.0));
+            Game.Gameplay.UpdateDifficulty();
             OnUpdateChart();
         }
     }

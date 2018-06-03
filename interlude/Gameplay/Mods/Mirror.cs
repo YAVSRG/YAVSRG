@@ -8,7 +8,7 @@ namespace YAVSRG.Gameplay.Mods
 {
     public class Mirror : Mod
     {
-        public override void Apply(ChartWithModifiers c)
+        public override void Apply(ChartWithModifiers c, string data)
         {
             foreach (GameplaySnap s in c.Notes.Points)
             {
@@ -33,7 +33,7 @@ namespace YAVSRG.Gameplay.Mods
             return o;
         }
 
-        public override string GetName()
+        public override string GetName(string data)
         {
             return "Mirror";
         }

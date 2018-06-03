@@ -10,24 +10,23 @@ namespace YAVSRG.Interface.Widgets
     public class ScoreCard : Widget
     {
         Score c;
-        Sprite frame;
         float acc;
         string accdisplay;
         string combo;
-        string rating;
+        float rating;
         string mods;
 
         public ScoreCard(Score c)
         {
-            frame = Content.GetTexture("frame");
             PositionBottomRight(430, 100, AnchorType.MIN, AnchorType.MIN);
             ScoreSystem score = ScoreSystem.GetScoreSystem(ScoreType.Default);
-            score.ProcessScore(ScoreTracker.StringToHitData(c.hitdata, c.keycount));
+            var hd = ScoreTracker.StringToHitData(c.hitdata, c.keycount);
+            score.ProcessScore(hd);
             acc = score.Accuracy();
             accdisplay = Utils.RoundNumber(acc) + "%";
             combo = score.BestCombo.ToString() + "x";
-            rating = "0.00";
-            mods = string.Join(",", c.mods);
+            rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(c.mods), c.rate), hd);
+            mods = string.Join(", ", Utils.RoundNumber(c.rate)+"x",string.Join(",", c.mods.Keys));
             this.c = c;
         }
 
@@ -40,10 +39,10 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.Font2.DrawTextToFill(mods, left, bottom - 40, right-180, bottom, Game.Options.Theme.MenuFont);
 
             SpriteBatch.Font1.DrawJustifiedText(accdisplay, 35f, right - 5, top, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawJustifiedText(rating, 20f, right - 5, bottom - 60, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawJustifiedText(c.date + " " + c.time, 20f, right - 5, bottom - 35, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawJustifiedText(Utils.RoundNumber(rating), 20f, right - 5, bottom - 60, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawJustifiedText(c.time.ToString(), 20f, right - 5, bottom - 35, Game.Options.Theme.MenuFont);
         }
 
-        public static Comparison<Widget> Compare = (a, b) => { return ((ScoreCard)b).acc.CompareTo(((ScoreCard)a).acc); };
+        public static Comparison<Widget> Compare = (a, b) => { return ((ScoreCard)b).rating.CompareTo(((ScoreCard)a).rating); };
     }
 }

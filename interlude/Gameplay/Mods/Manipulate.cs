@@ -9,7 +9,7 @@ namespace YAVSRG.Gameplay.Mods
 {
     public class Manipulate : Mod
     {
-        public override void Apply(ChartWithModifiers c)
+        public override void Apply(ChartWithModifiers c, string data)
         {
             List<GameplaySnap> newPoints = new List<GameplaySnap>();
             int count = c.Notes.Count;
@@ -35,7 +35,7 @@ namespace YAVSRG.Gameplay.Mods
             return (ushort)(s.ends.value + s.holds.value + s.taps.value + s.mines.value + s.middles.value);
         }
 
-        public override string GetName()
+        public override string GetName(string data)
         {
             return "Manipulate";
         }

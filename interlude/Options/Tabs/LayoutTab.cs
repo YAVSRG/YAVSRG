@@ -79,7 +79,7 @@ namespace YAVSRG.Options.Tabs
             Refresh();
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .PositionTopLeft(-500, 425, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-200, 475, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Skin [REQUIRES GAME RESTART]", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); })
+            AddChild(new TextPicker("Skin", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode); })
                 .PositionTopLeft(200, 425, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 475, AnchorType.CENTER, AnchorType.MIN));
         }
 

@@ -8,9 +8,9 @@ namespace YAVSRG.Gameplay
 {
     public abstract class ScoreSystem
     {
-        protected float[] windows;
-        protected int[] weights;
-        protected int maxweight;
+        public float[] windows;
+        public int[] weights;
+        public int maxweight;
         protected int pos = 0;
         protected float score = 0;
         protected float maxscore = 0;

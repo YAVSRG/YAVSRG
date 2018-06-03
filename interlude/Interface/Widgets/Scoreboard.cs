@@ -11,7 +11,7 @@ namespace YAVSRG.Interface.Widgets
     {
         public Scoreboard() : base(10, 10, false)
         {
-            foreach (Score s in Game.Gameplay.ChartSaveData.TEMP_SCORES2)
+            foreach (Score s in Game.Gameplay.ChartSaveData.Scores)
             {
                 ScoreCard t = new ScoreCard(s);
                 AddChild(t);

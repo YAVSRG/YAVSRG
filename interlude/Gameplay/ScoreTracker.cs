@@ -68,6 +68,8 @@ namespace YAVSRG.Gameplay
             {
                 hitdata[i] = new HitData(c.Notes.Points[i], c.Keys);
             }
+
+            Game.Gameplay.ApplyModsToHitData(c, ref hitdata);
         }
 
         public int Combo()
@@ -87,11 +89,10 @@ namespace YAVSRG.Gameplay
 
         public void RegisterHit(int i, int k, float delta)
         {
-            if (hitdata[i].hit[k] == 2) { return; } //ignore if the note is already hit. prevents mashing exploit.
-            hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit
+            if (hitdata[i].hit[k] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
+            hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)
             hitdata[i].delta[k] = delta;
             Scoring.HandleHit(k, i, hitdata);
-            //OnHit(k, Scoring.JudgeHit(Math.Abs(delta)), delta);
         }
 
         public bool EndOfChart() //is end of chart?

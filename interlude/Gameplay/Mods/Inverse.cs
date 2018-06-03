@@ -9,7 +9,7 @@ namespace YAVSRG.Gameplay.Mods
 {
     public class Inverse : Mod
     {
-        public override void Apply(ChartWithModifiers c)
+        public override void Apply(ChartWithModifiers c, string data)
         {
             PointManager<GameplaySnap> newSnaps = new PointManager<GameplaySnap>();
             int count = c.Notes.Count;
@@ -92,7 +92,7 @@ namespace YAVSRG.Gameplay.Mods
         //remove middles (implicitly)
         //replace ends with starts
 
-        public override string GetName()
+        public override string GetName(string data)
         {
             return "Inverse (not complete!)";
         }

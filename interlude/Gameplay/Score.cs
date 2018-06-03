@@ -8,11 +8,11 @@ namespace YAVSRG.Gameplay
 {
     public class Score
     {
-        public string date;
-        public string time;
+        public DateTime time;
         public string hitdata;
         public string player;
-        public List<string> mods;
+        public Dictionary<string,string> mods;
+        public float rate;
         public int keycount;
     }
 }
