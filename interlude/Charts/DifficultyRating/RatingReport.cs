@@ -37,7 +37,7 @@ namespace YAVSRG.Charts.DifficultyRating
 
             for (int i = 0; i < snaps.Count; i++)
             {
-                if (snaps[i].Count == 0) { continue; }
+                if (snaps[i].taps.value + snaps[i].holds.value == 0) { continue; }
 
                 //PHYSICAL ----
                 for (int h = 0; h < hands; h++)
@@ -131,7 +131,7 @@ namespace YAVSRG.Charts.DifficultyRating
             float heightScale = 10f;
             float curveExponent = 1f;
             float cutoffExponent = 10f;
-            return (float)Math.Max((1f * heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.001 * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
+            return (float)Math.Max((1f * heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.1 * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
         }
 
         protected float GetJackCurve(float delta) //how hard is it to hit these two notes in the same column? closer = exponentially harder
@@ -139,7 +139,7 @@ namespace YAVSRG.Charts.DifficultyRating
             float widthScale = 0.02f;
             float heightScale = 10f;
             float curveExponent = 1f;
-            return (float)Math.Min(1.4f * heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
+            return (float)Math.Min(1.7f * heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
         }
     }
 }
