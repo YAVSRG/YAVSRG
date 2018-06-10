@@ -71,7 +71,7 @@ namespace YAVSRG.Interface.Widgets
             if (canscroll && ScreenUtils.MouseOver(left, top, right, bottom))
             {
                 scroll -= Input.MouseScroll * 100;
-                scroll = Math.Max(Math.Min(scroll, y-Height), 0);
+                scroll = Math.Max(Math.Min(scroll, y+top-bottom), 0);
             }
         }
 
@@ -84,6 +84,24 @@ namespace YAVSRG.Interface.Widgets
             DrawWidgets(left, top, right, bottom);
             SpriteBatch.StencilMode(0);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
+            float x = padX;
+            float y = padY - scroll;
+            foreach (Widget w in Widgets)
+            {
+                if (w.State > 0)
+                {
+                    if (horizontal)
+                    {
+                        x += padX + w.Width;
+                    }
+                    else
+                    {
+                        y += padY + w.Height;
+                    }
+                }
+            }
+            SpriteBatch.DrawRect(left, top + y, right, top + y + 10, System.Drawing.Color.White);
+            SpriteBatch.DrawRect(left, bottom, right, bottom + 10, System.Drawing.Color.White);
         }
 
         private bool ShouldRender(Widget w)

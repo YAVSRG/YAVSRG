@@ -53,7 +53,7 @@ namespace YAVSRG.Options
 
         public void DrawNote(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw("",left, top, right, bottom, GetColor(index), animation, index, GetRotation(column, keycount),sprite:s);
+            SpriteBatch.Draw("",left, bottom, right, top, GetColor(index), animation, index, GetRotation(column, keycount),sprite:s);
         }
 
         public void DrawMine(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
