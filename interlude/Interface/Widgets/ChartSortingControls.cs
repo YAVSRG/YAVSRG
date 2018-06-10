@@ -12,7 +12,6 @@ namespace YAVSRG.Interface.Widgets
 {
     public class ChartSortingControls : Widget
     {
-        Sprite frame;
         ScrollContainer sort;
         ScrollContainer group;
         Widget sortB, groupB;
@@ -21,14 +20,13 @@ namespace YAVSRG.Interface.Widgets
 
         public ChartSortingControls() : base()
         {
-            frame = Content.GetTexture("frame");
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
 
             group = new ScrollContainer(20, 10, false, false) { State = 0 };
             sort = new ScrollContainer(20, 10, false, false) { State = 0 };
             AddChild(sortB = new SimpleButton("Sort by...", () => {
                 sort.State = (sort.State + 1) % 2;
-                sort.B.Move(0, sort.B.TargetY < 0 ? 300 : -300);
+                sort.B.MoveTarget(0, sort.B.TargetY < 0 ? 300 : -300);
             }, () => { return false; }, 20f).PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             sort.AddChild(SortButton("Difficulty", SortByDifficulty));
@@ -39,7 +37,7 @@ namespace YAVSRG.Interface.Widgets
 
             AddChild(groupB = new SimpleButton("Group by...", () => {
                 group.State = (group.State + 1) % 2;
-                group.B.Move(0, group.B.TargetY < 0 ? 300 : -300);
+                group.B.MoveTarget(0, group.B.TargetY < 0 ? 300 : -300);
             }, () => { return false; }, 20f).PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
             group.AddChild(GroupButton("Pack", GroupByPack));
             group.AddChild(GroupButton("Difficulty", GroupByDifficulty));

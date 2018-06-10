@@ -12,7 +12,6 @@ namespace YAVSRG.Interface.Widgets
         float padY;
         bool horizontal;
         float scroll;
-        Sprite frame;
         bool canscroll;
 
         public ScrollContainer(float padx, float pady, bool style, bool canscroll = true) : base()
@@ -22,7 +21,29 @@ namespace YAVSRG.Interface.Widgets
             padY = pady;
             horizontal = style;
             //all widgets must be anchored to top left
-            frame = Content.GetTexture("frame");
+        }
+
+        public override void AddChild(Widget child)
+        {
+            float x = padX;
+            float y = padY - scroll;
+            foreach (Widget w in Widgets)
+            {
+                if (w.State > 0)
+                {
+                    if (horizontal)
+                    {
+                        x += padX + w.Width;
+                    }
+                    else
+                    {
+                        y += padY + w.Height;
+                    }
+                }
+            }
+            base.AddChild(child);
+            child.B.Position(x + child.Width, y + child.Height);
+            child.A.Position(x, y);
         }
 
         public override void Update(float left, float top, float right, float bottom)
@@ -34,14 +55,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 if (w.State > 0)
                 {
-                    //if (ShouldRender(w))
-                    {
-                        w.Update(left, top, right, bottom);
-                    }
-                    //else
-                   // {
-                    //    w.Animation.Update();
-                    //}
+                    w.Update(left, top, right, bottom);
                     w.B.Target(x + w.Width, y + w.Height);
                     w.A.Target(x, y);
                     if (horizontal)
@@ -57,7 +71,7 @@ namespace YAVSRG.Interface.Widgets
             if (canscroll && ScreenUtils.MouseOver(left, top, right, bottom))
             {
                 scroll -= Input.MouseScroll * 100;
-                scroll = Math.Max(Math.Min(scroll, y), 0);
+                scroll = Math.Max(Math.Min(scroll, y-Height), 0);
             }
         }
 

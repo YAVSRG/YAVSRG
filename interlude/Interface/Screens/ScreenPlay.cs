@@ -8,6 +8,7 @@ using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Gameplay;
 using YAVSRG.Interface.Widgets.Gameplay;
+using YAVSRG.Interface.Animations;
 using OpenTK.Input;
 
 namespace YAVSRG.Interface.Screens
@@ -94,18 +95,17 @@ namespace YAVSRG.Interface.Screens
             //if returning from score screen, go straight to menu
             if (prev is ScreenScore)
             {
-                Game.Audio.Loop = true;
                 Game.Screens.PopScreen(); return;
             }
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 1-Game.Options.Profile.BackgroundDim;
             Utils.SetDiscordData("Playing", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]");
             Game.Options.Profile.Stats.TimesPlayed++;
-            Game.Screens.toolbar.SetHidden(true);
+            Game.Screens.Toolbar.SetHidden(true);
 
             //prep audio and play from beginning
             Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
-            Game.Audio.Loop = false;
+            Game.Audio.OnPlaybackFinish = null;
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
@@ -116,7 +116,7 @@ namespace YAVSRG.Interface.Screens
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 0.3f;
             Utils.SetDiscordData("Looking for something to play", "");
-            Game.Screens.toolbar.SetHidden(false);
+            Game.Screens.Toolbar.SetHidden(false);
             base.OnExit(next);
         }
 

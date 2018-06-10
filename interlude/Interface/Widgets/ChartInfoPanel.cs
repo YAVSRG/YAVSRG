@@ -54,15 +54,15 @@ namespace YAVSRG.Interface.Widgets
 
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName, left + 550, top + 160, right - 50, top + 240, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawText("Physical", 20f, left + 550, top + 240, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawText(Utils.RoundNumber(physical) + "*", 40f, left + 550, top + 260, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawText(Utils.RoundNumber(physical) + "⋆", 40f, left + 550, top + 260, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawJustifiedText("Technical", 20f, right - 50, top + 240, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedText(Utils.RoundNumber(technical) + "*", 40f, right - 50, top + 260, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedText(Utils.RoundNumber(technical) + "⋆", 40f, right - 50, top + 260, Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawCentredTextToFill(Utils.RoundNumber(rate) + "x Audio", left + 650, top + 270, right - 150, top + 310, Game.Options.Theme.MenuFont);
 
             SpriteBatch.Font1.DrawText(time, 40f, left + 550, bottom - 220, Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 50, bottom - 220, Game.Options.Theme.MenuFont);
 
-            DrawGraph(left + 550, top + 350, right - 50, bottom - 250);
+            //DrawGraph(left + 550, top + 350, right - 50, bottom - 250);
 
             DrawWidgets(left, top, right, bottom);
         }

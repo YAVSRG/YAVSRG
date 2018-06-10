@@ -15,8 +15,8 @@ namespace YAVSRG.Interface.Widgets
             {
                 ScoreCard t = new ScoreCard(s);
                 AddChild(t);
-                t.A.Move(0, -100);
-                t.B.Move(0, -100);
+                t.A.MoveTarget(0, -100);
+                t.B.MoveTarget(0, -100);
             }
             Widgets.Sort(ScoreCard.Compare);
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Gameplay;
+using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface.Widgets.Gameplay
 {

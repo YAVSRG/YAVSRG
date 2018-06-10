@@ -14,26 +14,27 @@ namespace YAVSRG.Interface
     {
         AnimationFade fade1; //prev screen fade out 
         AnimationFade fade2; //next screen fade in
-        AnimationSlider parallax = new AnimationSlider(15);
-        public Toolbar toolbar;
         List<Screen> stack = new List<Screen>() {};
         List<Dialog> dialogs = new List<Dialog>();
         AnimationSeries animation = new AnimationSeries(true);
         AnimationGroup animation2 = new AnimationGroup(true);
         Screen Previous = null;
-        public ColorFade BackgroundDim = new ColorFade(Color.Black, Color.White);
+
         public Screen Current = null;
         public bool Loading = true;
         public Sprite Background;
         public Sprite Oldbackground;
+        public AnimationColorFade BackgroundDim = new AnimationColorFade(Color.Black, Color.White);
         public AnimationColorMixer BaseColor;
         public AnimationColorMixer DarkColor;
         public AnimationColorMixer HighlightColor;
+        public AnimationSlider Parallax = new AnimationSlider(15);
         public Widget Logo;
+        public Toolbar Toolbar;
 
         public ScreenManager()
         {
-            animation2.Add(parallax);
+            animation2.Add(Parallax);
             animation2.Add(BackgroundDim);
             animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
             animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
@@ -85,8 +86,8 @@ namespace YAVSRG.Interface
 
         private void SetNextScreen(Screen s)
         {
-            s?.OnEnter(Current);
             Current?.OnExit(s);
+            s?.OnEnter(Current);
             Previous = Current;
             Current = s;
         }
@@ -104,40 +105,40 @@ namespace YAVSRG.Interface
             {
                 if (fade1.Running)
                 {
-                    Previous?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
+                    Previous?.Draw(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
                     DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, Color.FromArgb((int)(255 * fade1), BackgroundDim));
                 }
                 else
                 {
-                    Current?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
+                    Current?.Draw(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
                     DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
                 }
             }
             else
             {
-                Current?.Draw(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
+                Current?.Draw(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
             }
             if (dialogs.Count > 0)
             {
                 dialogs[0].Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             }
             Logo.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
-            toolbar.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Toolbar.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
         }
 
         public void DrawChartBackground(float left, float top, float right, float bottom, Color c, float parallaxMult = 1f)
         {
-            float parallaxX = parallaxMult * Input.MouseX * parallax / ScreenWidth;
-            float parallaxY = parallaxMult * Input.MouseY * parallax / ScreenHeight;
+            float parallaxX = parallaxMult * Input.MouseX * Parallax / ScreenWidth;
+            float parallaxY = parallaxMult * Input.MouseY * Parallax / ScreenHeight;
 
             float bg = ((float)Background.Width / Background.Height);
-            float window = (ScreenWidth + parallax) / (ScreenHeight + parallax);
+            float window = (ScreenWidth + Parallax) / (ScreenHeight + Parallax);
             float correction = window / bg;
 
-            float l = (1 + (left + parallaxX) / (ScreenWidth + parallax * 2)) / 2;
-            float r = (1 + (right + parallaxX) / (ScreenWidth + parallax * 2)) / 2;
-            float t = (correction + (top + parallaxY) / (ScreenHeight + parallax * 2)) / (2 * correction);
-            float b = (correction + (bottom + parallaxY) / (ScreenHeight + parallax * 2)) / (2 * correction);
+            float l = (1 + (left + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
+            float r = (1 + (right + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
+            float t = (correction + (top + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction);
+            float b = (correction + (bottom + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction);
 
             Vector2[] v = new[]
             {
@@ -151,7 +152,7 @@ namespace YAVSRG.Interface
 
         public void Update()
         {
-            toolbar.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Toolbar.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             if (Loading)
             {
                 Current?.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
@@ -168,7 +169,7 @@ namespace YAVSRG.Interface
             }
             else
             {
-                Current?.Update(-ScreenWidth, -ScreenHeight + toolbar.Height, ScreenWidth, ScreenHeight - toolbar.Height);
+                Current?.Update(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
             }
             if (Previous != null)
             {
@@ -187,6 +188,10 @@ namespace YAVSRG.Interface
             Logo.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             animation.Update();
             animation2.Update();
+            if (Input.KeyTap(OpenTK.Input.Key.Insert))
+            {
+                Game.Instance.CollapseToIcon();
+            }
         }
     }
 }

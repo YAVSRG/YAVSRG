@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Interface
+namespace YAVSRG.Interface.Animations
 {
     public class AnimationSlider : Animation
     {

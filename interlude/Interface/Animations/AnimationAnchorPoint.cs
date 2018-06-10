@@ -40,7 +40,7 @@ namespace YAVSRG.Interface.Animations
             YRel = ya;
         }
 
-        public void Move(float x, float y)
+        public void MoveTarget(float x, float y)
         {
             _X.Target += x;
             _Y.Target += y;
@@ -52,12 +52,18 @@ namespace YAVSRG.Interface.Animations
             _Y.Target = y;
         }
 
+        public void Position(float x, float y)
+        {
+            _X.Val = x;
+            _Y.Val = y;
+        }
+
         public float X(float min, float max)
         {
             switch (XRel)
             {
                 case (AnchorType.CENTER):
-                    return _X;
+                    return (max+min)*0.5f+_X;
                 case (AnchorType.MAX):
                     return max - _X;
                 case (AnchorType.MIN):

@@ -39,14 +39,14 @@ namespace YAVSRG.Interface.Screens
             if (!Game.Screens.Loading)
             {
                 exiting = true;
-                Game.Screens.toolbar.SetHidden(true);
+                Game.Screens.Toolbar.SetHidden(true);
                 transition.Add(new AnimationCounter(100, false));
                 transition.Add(fade = new AnimationFade(0, 1, 0.996f));
             }
             else
             {
                 ChartLoader.Init();
-                Game.Screens.toolbar.SetHidden(false);
+                Game.Screens.Toolbar.SetHidden(false);
                 transition.Add(fade = new AnimationFade(0, 1, 0.996f));
                 transition.Add(new AnimationCounter(100, false));
             }

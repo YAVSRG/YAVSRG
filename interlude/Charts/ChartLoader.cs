@@ -122,10 +122,10 @@ namespace YAVSRG.Charts
         {
             if (Cache.Charts.Count == 0)
             {
-                Game.Gameplay.ChangeChart(new Chart(new List<Snap>(), new List<BPMPoint>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Content.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0 }, 4));
+                Game.Gameplay.ChangeChart(null, new Chart(new List<Snap>(), new List<BPMPoint>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Content.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0 }, 4), false);
                 return;
             }
-            SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)]);
+            SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)],true);
         }
         
         public static void Recache()
@@ -248,6 +248,7 @@ namespace YAVSRG.Charts
         {
             ConvertPack(GetOsuSongFolder(), "osu! Imports");
         }
+
         public static void DownloadBeatmap(int id)
         {
             using (var client = new WebClient())
@@ -287,9 +288,9 @@ namespace YAVSRG.Charts
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs");
         }
 
-        public static void SwitchToChart(CachedChart c)
+        public static void SwitchToChart(CachedChart c, bool playFromPreview)
         {
-            Game.Gameplay.ChangeChart(Cache.LoadChart(c));
+            Game.Gameplay.ChangeChart(c, Cache.LoadChart(c), playFromPreview);
         }
     }
 }

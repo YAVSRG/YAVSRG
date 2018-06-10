@@ -119,7 +119,7 @@ namespace YAVSRG.Options.Tabs
                 colors[i].State = 0;
             }
             keyMode = k;
-            int c = Game.Options.Theme.ColumnWidth;
+            int c = k * Game.Options.Theme.ColumnWidth > Width ? (int)(Width / k) : Game.Options.Theme.ColumnWidth;
             int start = -k * c / 2;
             for (int i = 0; i < k; i++)
             {

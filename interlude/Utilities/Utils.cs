@@ -68,6 +68,13 @@ namespace YAVSRG
             return target;
         }
 
+        public static float GetBeat(int i)
+        {
+            float t = (float)Game.Audio.Now();
+            Charts.YAVSRG.BPMPoint p = Game.Gameplay.CurrentChart.Timing.GetPointAt(Game.Gameplay.CurrentChart.Timing.GetPointAt(t, false).InheritsFrom, false);
+            return (float)Math.Cos(((t - p.Offset) / (p.MSPerBeat * i)) % 1 * Math.PI * 2);
+        }
+
         public static Color ColorInterp(Color a, Color b, float val1)
         {
             float val2 = 1 - val1;

@@ -5,20 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 
-namespace YAVSRG.Interface
+namespace YAVSRG.Interface.Animations
 {
-    public class ColorFade : AnimationSlider
+    public class AnimationColorFade : AnimationSlider
     {
         protected Color a;
         protected Color b;
 
-        public ColorFade(Color a, Color b): base(0)
+        public AnimationColorFade(Color a, Color b): base(0)
         {
             this.a = a;
             this.b = b;
         }
 
-        public static implicit operator Color(ColorFade s)
+        public static implicit operator Color(AnimationColorFade s)
         {
             float val1 = s.Val;
             float val2 = 1 - s.Val;

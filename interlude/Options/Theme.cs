@@ -19,6 +19,8 @@ namespace YAVSRG.Options
         public bool FlipHoldTail = true;
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;
+        public string Font1 = "Akrobat Black";
+        public string Font2 = "Akrobat";
         public Color MenuFont = Color.White;
         public Color SelectPack = Color.FromArgb(100, 30, 180);
         public Color SelectChart = Color.FromArgb(0, 180, 110);

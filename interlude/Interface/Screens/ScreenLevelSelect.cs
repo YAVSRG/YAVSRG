@@ -63,6 +63,7 @@ namespace YAVSRG.Interface.Screens
         private void OnUpdateGroups()
         {
             selector.Refresh();
+            selector.ScrollToSelected();
         }
 
         private void OnUpdateChart()
@@ -77,7 +78,9 @@ namespace YAVSRG.Interface.Screens
             A.Target(0, 0);
             B.Target(0, 0);
             Game.Gameplay.OnUpdateChart += OnUpdateChart;
+            Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play((long)Game.CurrentChart.Data.PreviewTime); };
             OnUpdateChart();
+            selector.ScrollToSelected();
             ChartLoader.OnRefreshGroups += OnUpdateGroups;
         }
 

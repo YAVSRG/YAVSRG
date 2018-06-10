@@ -8,19 +8,17 @@ namespace YAVSRG.Interface.Widgets
 {
     class FramedButton : Button
     {
-        Sprite frame;
         float scroll;
 
         public FramedButton(string sprite, string label, Action onClick) : base(sprite, label, onClick)
         {
-            frame = Content.GetTexture("frame");
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            //SpriteBatch.DrawTilingTexture(icon, left, top, right, bottom, 200, scroll, 0, color);
+            SpriteBatch.DrawTilingTexture(icon, left, top, right, bottom, 200, scroll, 0, color);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, System.Drawing.Color.White);
             SpriteBatch.Font1.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
         }

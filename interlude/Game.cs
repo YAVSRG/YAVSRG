@@ -10,12 +10,13 @@ using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Interface;
 using YAVSRG.Audio;
 using YAVSRG.Gameplay;
+using YAVSRG.Utilities;
 
 namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.2.8";
+        public static readonly string Version = "Interlude v0.2.10";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -23,7 +24,7 @@ namespace YAVSRG
         protected MusicPlayer audio; //audio engine instance
         protected Options.Options options; //options handler instance
         protected ScreenManager screens;
-        //protected System.Windows.Forms.NotifyIcon test;
+        protected TrayIcon trayIcon;
 
         public static Options.Options Options
         {
@@ -54,6 +55,7 @@ namespace YAVSRG
         {
             Sprite s = Content.UploadTexture(Utils.CaptureScreen(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";
+            Icon = new Icon("icon.ico");
             Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on. best performance is no frame cap and no vsync otherwise you get stutters
@@ -67,7 +69,7 @@ namespace YAVSRG
 
             gameplay = new GameplayManager();
             screens = new ScreenManager();
-            screens.toolbar = new Toolbar();
+            screens.Toolbar = new Toolbar();
             screens.AddScreen(new Interface.Screens.ScreenLoading(s));
         }
 
@@ -89,6 +91,22 @@ namespace YAVSRG
                 WindowBorder = WindowBorder.Resizable;
             }
             Audio.SetVolume(settings.AudioVolume);
+        }
+
+        public void CollapseToIcon()
+        {
+            WindowState = WindowState.Minimized;
+            Visible = false;
+            Audio.SetVolume(0f);
+            trayIcon.Show();
+            trayIcon.Text("I'm down here!");
+        }
+
+        public void ExpandFromIcon()
+        {
+            trayIcon.Hide();
+            Visible = true;
+            ApplyWindowSettings(Options.General);
         }
 
         protected override void OnResize(EventArgs e) //handles resizing of the window. tells OpenGL the new resolution etc
@@ -121,23 +139,18 @@ namespace YAVSRG
         {
             base.OnLoad(e);
             Input.Init();
+            trayIcon = new TrayIcon();
             var test = new Discord.EventHandlers();
             Discord.Initialize("420320424199716864", ref test, true, "");
             Utils.SetDiscordData("Just started playing", "Pick a song already!");
             SpriteBatch.Init();
-            /*
-            test = new System.Windows.Forms.NotifyIcon();
-            test.Icon = new Icon(@"C:\Users\percy\Documents\thishadmynamehere\bird.ico");
-            test.Visible = true;
-            test.ShowBalloonTip(2000, "YAVSRG", "I'm down here!", System.Windows.Forms.ToolTipIcon.Info);
-            test.Text = "YAVSRG";*/
         }
 
         protected override void OnUnload(EventArgs e)
         {
             base.OnUnload(e);
             gameplay.Unload();
-            //test.Dispose();
+            trayIcon.Destroy();
             Discord.Shutdown();
             options.Save(); //remember to dump any updated profile settings to file
         }

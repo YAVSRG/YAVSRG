@@ -85,8 +85,34 @@ namespace YAVSRG
             DrawJustifiedText(text, scale * FONTSCALE, right, (top + bottom) * 0.5f - h * scale * 0.5f, c);
         }
 
+        public void DrawParagraph(string text, float scale, float left, float top, float right, float bottom, Color c)
+        {
+            string[] lines = text.Split('\n');
+            float x = left;
+            float y = top;
+            float h = FontLookup['T'].Height * scale / FONTSCALE;
+            foreach (string s in lines)
+            {
+                string[] split = s.Split(' ');
+                foreach (string word in split)
+                {
+                    float w = MeasureText(word) * scale / FONTSCALE;
+                    if (x + w > right)
+                    {
+                        x = left;
+                        y += h;
+                    }
+                    DrawText(word, scale, x, y, c);
+                    x += w;
+                }
+                x = left;
+                y += h;
+            }
+        }
+
         public float MeasureText(string text)
         {
+            if (text.Length == 0) return 0;
             float w = FONTSCALE / 2;
             foreach (char c in text)
             {

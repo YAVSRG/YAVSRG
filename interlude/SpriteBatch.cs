@@ -31,7 +31,6 @@ namespace YAVSRG
         public static SpriteFont Font2;
 
         //static int VBO;
-        static int Depth;
         
         public static void Draw(Sprite sprite, float left, float top, float right, float bottom, Color color, int rotation = 0)
         {
@@ -40,14 +39,6 @@ namespace YAVSRG
 
         public static void Draw(string texture = "", float left = 0, float top = 0, float right = 0, float bottom = 0, Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null)
         {
-            if (sprite == null)
-            {
-                if (texture == "")
-                {
-                    return;//stub
-                }
-                sprite = Content.GetTexture(texture);
-            }
             if (coords == null)
             {
                 coords = new[] {
@@ -57,9 +48,21 @@ namespace YAVSRG
                     new Vector2(left,bottom)
                 };
             }
+            if (colors == null)
+            {
+                colors = new[] { color, color, color, color };
+            }
+            if (sprite == null)
+            {
+                if (texture == "")
+                {
+                    Draw(coords, colors);
+                    return;
+                }
+                sprite = Content.GetTexture(texture);
+            }
             if (texcoords == null)
             {
-
                 float x = 1f / ((Sprite)sprite).UV_X;
                 float y = 1f / ((Sprite)sprite).UV_Y;
                 texcoords = new[] {
@@ -69,11 +72,18 @@ namespace YAVSRG
                     new Vector2(x*ux, y + y*uy)
                 };
             }
-            if (colors == null)
-            {
-                colors = new[] { color, color, color, color };
-            }
             Draw((Sprite)sprite, coords, texcoords, colors, rotation);
+        }
+
+        public static void Draw(Vector2[] coords, Color[] color)
+        {
+            GL.Begin(PrimitiveType.Quads);
+            for (int i = 0; i < 4; i++)
+            {
+                GL.Color4(color[i]);
+                GL.Vertex2(coords[i]);
+            }
+            GL.End();
         }
 
         public static void Draw(Sprite texture, Vector2[] coords, Vector2[] texcoords, Color[] color, int rotation)
@@ -91,10 +101,10 @@ namespace YAVSRG
             GL.Disable(EnableCap.Texture2D);
         }
 
-        public static void DrawTilingTexture(Sprite texture, float left, float top, float right, float bottom, float scale, float x, float y, Color color)
+        public static void DrawTilingTexture(string texture, float left, float top, float right, float bottom, float scale, float x, float y, Color color)
         {
             RectangleF uv = new RectangleF(x + left / scale, y + top / scale, (right - left) / scale, (bottom - top) / scale);
-            Draw(sprite:texture, left:left, top:top, right:right, bottom:bottom, texcoords:VecArray(uv), color:color);
+            Draw(texture:texture, left:left, top:top, right:right, bottom:bottom, texcoords:VecArray(uv), color:color);
         }
 
         public static void DrawFrame(float left, float top, float right, float bottom, float scale, Color color)
@@ -212,8 +222,8 @@ namespace YAVSRG
             GL.EnableClientState(ArrayCap.TextureCoordArray);
             GL.EnableClientState(ArrayCap.ColorArray);*/
 
-            Font1 = new SpriteFont(60, "Akrobat Black");
-            Font2 = new SpriteFont(60, "Akrobat");
+            Font1 = new SpriteFont(60, Game.Options.Theme.Font1);
+            Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
         }
 
         public static Vector2[] VecArray(RectangleF rect)

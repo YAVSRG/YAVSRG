@@ -57,6 +57,12 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
         }
 
+        public override void OnEnter(Screen prev)
+        {
+            base.OnEnter(prev);
+            Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play(); };
+        }
+
         public bool ShouldSaveScore()
         {
             //other options i.e dont save if i get an F, dont save if i dont hp clear, dont save if i dont pb

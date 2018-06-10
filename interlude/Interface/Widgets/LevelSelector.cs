@@ -16,12 +16,12 @@ namespace YAVSRG.Interface.Widgets
         {
             public List<Group> Children;
             public bool Expand;
+            public Func<bool> Highlight;
+            public Action<Group> OnClick;
             private string title;
             private string subtitle;
             private int height;
             private int width;
-            private Action<Group> OnClick;
-            private Func<bool> Highlight;
             private AnimationColorMixer border;
             private AnimationColorMixer fill;
             private Color baseColor;
@@ -37,13 +37,13 @@ namespace YAVSRG.Interface.Widgets
                 baseColor = c;
                 Animation.Add(border = new AnimationColorMixer(Color.White));
                 Animation.Add(fill = new AnimationColorMixer(c));
-                RecursivePopOut(0);
+                PopOut(0);
             }
 
             public void UpdatePosition(float y)
             {
-                width = (int)(600);
-                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.toolbar.Height+120) / 48f, 2)*1.5f, y);
+                width = 600;
+                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.Toolbar.Height+120) / 48f, 2)*1.5f, y);
                 B.Target(-50, y + height);
             }
 
@@ -57,19 +57,21 @@ namespace YAVSRG.Interface.Widgets
                 Children.Add(i);
             }
 
-            public void RecursivePopOutRooted()
+            public void PopOutChildren()
             {
+                float y = B.TargetY;
                 foreach (Group g in Children)
                 {
-                    g.RecursivePopOut(B.AbsY);
+                    g.PopOut(y);
+                    y += g.GetHeight();
                 }
             }
 
-            public void RecursivePopOut(float bottomedge)
+            public void PopOut(float bottomedge)
             {
                 PositionTopLeft(100, bottomedge, AnchorType.MAX, AnchorType.MIN);
                 PositionBottomRight(-50, bottomedge + height, AnchorType.MAX, AnchorType.MIN);
-                RecursivePopOutRooted();
+                PopOutChildren();
             }
 
             public virtual int GetHeight()
@@ -85,6 +87,11 @@ namespace YAVSRG.Interface.Widgets
                 return r;
             }
 
+            public void ScrollTo(ref int scroll)
+            {
+                scroll -= (int)(BottomEdge() - ScreenUtils.ScreenHeight + Game.Screens.Toolbar.Height + height / 2); //move scroll appropriately
+            }
+
             public override void Draw(float left, float top, float right, float bottom)
             {
                 base.Draw(left, top, right, bottom);
@@ -97,7 +104,7 @@ namespace YAVSRG.Interface.Widgets
                 }
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
                 if (top > ScreenUtils.ScreenHeight || bottom < -ScreenUtils.ScreenHeight) { return; }
-                SpriteBatch.DrawTilingTexture(box, left, top, right, bottom, 400, 0, 0, fill);
+                SpriteBatch.DrawTilingTexture("levelselectbase", left, top, right, bottom, 400, 0, 0, fill);
                 Game.Screens.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,fill), 1.5f);
                 SpriteBatch.DrawFrame(left, top, right, bottom, 30, border);
                 if (subtitle == "")
@@ -126,7 +133,7 @@ namespace YAVSRG.Interface.Widgets
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
                 if (ScreenUtils.MouseOver(left, top, right, bottom))
                 {
-                    A.Move(150, 0);
+                    A.MoveTarget(150, 0);
                     fill.Target(Utils.ColorInterp(baseColor, Color.White, 0.2f));
                     if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                     {
@@ -135,21 +142,18 @@ namespace YAVSRG.Interface.Widgets
                 }
                 else
                 {
-                    fill.Target(Highlight() ? Utils.ColorInterp(baseColor, Color.White, 0.2f) : baseColor);
+                    fill.Target(Highlight() ? Utils.ColorInterp(baseColor, Color.White, 0.5f) : baseColor);
                 }
                 base.Update(left, top, right, bottom);
             }
         }
 
         protected List<Group> groups;
-
-        static Sprite box, frame;
+        
         public int scroll = 0;
 
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {
-            box = Content.GetTexture("levelselectbase");
-            frame = Content.GetTexture("frame");
             Refresh();
         }
 
@@ -162,65 +166,83 @@ namespace YAVSRG.Interface.Widgets
             }
         }
 
+        public void ScrollToSelected()
+        {
+            int y = scroll;
+            foreach (Group g in groups)
+            {
+                g.UpdatePosition(y);
+                y += g.GetHeight();
+            }
+            foreach (Group g in groups)
+            {
+                if (g.Highlight())
+                {
+                    if (!g.Expand)
+                        ExpandGroup(g);
+
+                    foreach (Group c in g.Children)
+                    {
+                        if (c.Highlight())
+                        {
+                            c.ScrollTo(ref scroll);
+                            return;
+                        }
+                    }
+                }
+            }
+            scroll = 0;
+        }
+
+        private void ExpandGroup(Group x)
+        {
+            bool temp = x.Expand; //remember if the group in question was expanded or not
+            foreach (Group c in groups)
+            {
+                if (c.Expand)
+                {
+                    if (c.BottomEdge() < x.BottomEdge()) //collapse all groups (includes the one just clicked on)
+                    {
+                        scroll += c.GetHeight();
+                        c.Expand = false; //has to be in this order
+                        scroll -= c.GetHeight(); //for this correction to work
+                    }
+                    else
+                    {
+                        c.Expand = false;
+                    }
+                }
+            }
+            x.Expand = !temp; //toggle expansion of this group
+            if (x.Expand)
+            {
+                x.PopOutChildren(); //this makes the expanded items not all come from the same point, they are spread out and offscreen
+            }
+        }
+
         public void AddPack(ChartLoader.ChartGroup group)
         {
             Group g = new Group(100, (x) =>
             {
-                bool temp = x.Expand;
-                foreach (Group c in groups)
-                {
-                    if (c.Expand)
-                    {
-                        if (c.BottomEdge() < x.BottomEdge())
-                        {
-                            scroll += c.GetHeight();
-                        }
-                        c.Expand = false;
-                    }
-                }
-                x.Expand = !temp;
-                if (x.Expand)
-                {
-                    x.RecursivePopOutRooted();
-                }
-                scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
-            }, () => { return false; }, group.label, "", Game.Options.Theme.SelectPack); //groups don't know when they're expanded :(
-            foreach (CachedChart chart in group.charts)
+                ExpandGroup(x);
+                x.ScrollTo(ref scroll);
+            }, () => { return group.charts.Contains(Game.Gameplay.CurrentCachedChart); }, group.label, "", Game.Options.Theme.SelectPack);
+
+            foreach (CachedChart chart in group.charts) //populate group with items
             {
                 g.AddItem(new Group(80, (x) =>
                 {
-                    Chart m = ChartLoader.Cache.LoadChart(chart);
-                    Game.Gameplay.ChangeChart(m);
-                }, () => { return false; }, chart.artist + " - " + chart.title, chart.diffname + " ("+chart.keymode.ToString()+"k)", Game.Options.Theme.SelectChart));
-                /*g.AddItem(new Group(80, (x) =>
-                {
-                    bool temp = x.Expand;
-                    foreach (Group c in g.Children)
+                    if (x.Highlight())
                     {
-                        if (c.Expand)
-                        {
-                            if (c.BottomEdge() < x.BottomEdge())
-                            {
-                                scroll += c.GetHeight();
-                            }
-                            c.Expand = false;
-                        }
+                        Game.Screens.AddScreen(new Screens.ScreenPlay());
                     }
-                    x.Expand = !temp;
-                    if (x.Expand)
+                    else
                     {
-                        if (x.Children.Count == 0)
-                        {
-                            Chart m = ChartLoader.Cache.LoadChart(chart);
-                            x.AddItem(new Group(80, (y) =>
-                            {
-                                Game.Gameplay.ChangeChart(m);
-                            }, () => { return Game.CurrentChart.Data.SourcePath + Game.CurrentChart.Data.DiffName == m.Data.SourcePath + m.Data.DiffName; }, m.Data.DiffName, "", Game.Options.Theme.SelectDiff));
-                        }
-                        x.RecursivePopOutRooted();
-                        scroll -= (int)x.BottomEdge() - ScreenUtils.ScreenHeight;
+                        ChartLoader.SwitchToChart(chart, true);
+                        Input.ChangeIM(null);
+                        x.ScrollTo(ref scroll);
                     }
-                }, () => { return Game.CurrentChart.Data.Title == chart.title; }, chart.title, chart.artist, Game.Options.Theme.SelectChart));*/
+                }, () => { return Game.Gameplay.CurrentCachedChart == chart; }, chart.artist + " - " + chart.title, chart.diffname + " ("+chart.keymode.ToString()+"k)", Game.Options.Theme.SelectChart));
             }
             groups.Add(g);
         }

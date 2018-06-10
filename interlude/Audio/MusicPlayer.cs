@@ -16,11 +16,14 @@ namespace YAVSRG.Audio
         private double startTime;
         private double Rate;
 
+        private float[] fft = new float[1024];
+
         public float[] WaveForm;
+        public float Level;
         public bool Paused;
         public bool LeadingIn;
-        public bool Loop = true;
         public float LocalOffset = 0;
+        public Action OnPlaybackFinish;
 
         public MusicPlayer()
         {
@@ -40,6 +43,14 @@ namespace YAVSRG.Audio
         }
 
         protected double AudioOffset { get { return Game.Options.General.UniversalAudioOffset * Rate + LocalOffset; } }
+
+        public double Duration
+        {
+            get
+            {
+                return nowplaying.Duration;
+            }
+        }
 
         public bool Playing
         {
@@ -98,7 +109,7 @@ namespace YAVSRG.Audio
         public float NowPercentage()
         {
             if (nowplaying == null) return 0;
-            return (float)(Now() / nowplaying.Duration);
+            return (float)(Now() / Duration);
         }
 
         public void Seek(double position)
@@ -110,18 +121,37 @@ namespace YAVSRG.Audio
             }
         }
 
+        public void UpdateWaveform()
+        {
+            //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
+            ManagedBass.Bass.ChannelGetData(nowplaying, fft, (int)ManagedBass.DataFlags.FFT2048);
+            int b0 = 0;
+            int y;
+            for (int x = 0; x < 256; x++)
+            {
+                float peak = 0;
+                int b1 = (int)Math.Pow(2, x * 10.0 / 255);
+                if (b1 > 1023) b1 = 1023;
+                if (b1 <= b0) b1 = b0 + 1;
+                for (; b0 < b1; b0++)
+                {
+                    if (peak < fft[1 + b0]) peak = fft[1 + b0];
+                }
+                y = (int)(Math.Sqrt(peak) * 3 * 255 - 4);
+                if (y > 255) y = 255;
+                if (y < 0) y = 0;
+                WaveForm[x] = WaveForm[x] * 0.9f + y * 0.1f;
+            }
+        }
+
         public void Update()
         {
             float[] temp = new float[256];
             if (!Paused)
             {
-                //thanks peppy lad i stole this off you
-                ManagedBass.Bass.ChannelGetData(nowplaying, temp, (int)ManagedBass.DataFlags.FFT256);
+                UpdateWaveform();
             }
-            for (int i = 0; i < 256; i++)
-            {
-                WaveForm[i] = WaveForm[i] * 0.9f + temp[i] * 0.1f;
-            }
+            Level = Level * 0.9f + (ManagedBass.Bass.ChannelGetLevelRight(nowplaying) + ManagedBass.Bass.ChannelGetLevelLeft(nowplaying)) * 0.0000002f;
             if (LeadingIn && Playing && Now() + AudioOffset > 0)
             {
                 Seek(Now() + AudioOffset);
@@ -130,9 +160,9 @@ namespace YAVSRG.Audio
             }
             if (!Playing)
             {
-                if (Loop)
+                if (OnPlaybackFinish != null)
                 {
-                    Play(0);
+                    OnPlaybackFinish();
                 }
                 else if (!LeadingIn) { LeadingIn = true; }
             }

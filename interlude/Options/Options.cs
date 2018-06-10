@@ -61,7 +61,7 @@ namespace YAVSRG.Options
                     }
                     catch
                     {
-                        //:( log that you couldn't load the profile
+                        Utilities.Logging.Log("Could not load profile!\n" + path, Utilities.Logging.LogType.Error);
                     }
                 }
             }

@@ -6,28 +6,25 @@ using System.Threading.Tasks;
 using System.Drawing;
 using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Interface.Widgets;
+using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface
 {
     public class Toolbar : Widget
     {
         AnimationSlider slide;
-        Widget mc;
         bool hidden;
+        public bool cursor = true;
 
         public Toolbar()
         {
-            AddChild(mc = new MusicControls()
-                .PositionTopLeft(0, 80, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(-1000, 180, AnchorType.MAX, AnchorType.MIN)
-                );
             AddChild(
                 new Button("buttonback", "", () => { Game.Screens.PopScreen(); })
                 .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN)
                 .PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttoninfo", "", () => { int m = mc.A.TargetX > 0 ? -1000 : 1000; mc.A.Move(m, 0); mc.B.Move(m, 0); })
+                new Button("buttoninfo", "", () => { if (!(Game.Screens.Current is Screens.ScreenVisualiser))Game.Screens.AddScreen(new Screens.ScreenVisualiser()); })
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
@@ -66,7 +63,7 @@ namespace YAVSRG.Interface
                 {
                     float level = Game.Audio.WaveForm[i * 4] + Game.Audio.WaveForm[i * 4 + 1] + Game.Audio.WaveForm[i * 4 + 2] + Game.Audio.WaveForm[i * 4 + 3];
                     level += 0.01f;
-                    level *= slide * 5;
+                    level *= slide * 0.002f;
                     SpriteBatch.DrawRect(-ScreenWidth, -ScreenHeight + slide + i * s, -ScreenWidth + level, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
                     SpriteBatch.DrawRect(ScreenWidth - level, -ScreenHeight + slide + i * s, ScreenWidth, -ScreenHeight + slide - 2 + (i + 1) * s, Color.FromArgb(100, Game.Screens.HighlightColor));
                 }
@@ -91,7 +88,7 @@ namespace YAVSRG.Interface
                 SpriteBatch.Font1.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, ScreenWidth, ScreenHeight - slide + 45, Game.Options.Theme.MenuFont);
             }
 
-            if (!hidden) SpriteBatch.Draw("cursor", Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Screens.HighlightColor);
+            if (!(hidden || !cursor)) SpriteBatch.Draw("cursor", Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Screens.HighlightColor);
         }
 
         public override void Update(float left, float top, float right, float bottom)

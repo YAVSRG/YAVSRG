@@ -14,8 +14,6 @@ namespace YAVSRG.Charts.DifficultyRating
         public float Technical;
         public float[] PhysicalData;
         public float[] TechnicalData;
-        //public float[] physical, tech;
-        //public float[] breakdown;
 
         float[] fingers;
 
@@ -32,6 +30,8 @@ namespace YAVSRG.Charts.DifficultyRating
             BinarySwitcher s;
 
             float CurrentStrain = 0;
+            List<float> handDiff = new List<float>();
+            List<float> snapDiff = new List<float>();
             float now = 0;
             float delta;
 
@@ -40,21 +40,25 @@ namespace YAVSRG.Charts.DifficultyRating
                 if (snaps[i].taps.value + snaps[i].holds.value == 0) { continue; }
 
                 //PHYSICAL ----
+                delta = (snaps[i].Offset - now) / rate;
                 for (int h = 0; h < hands; h++)
                 {
                     current = snaps[i].Mask(layout.hands[h].Mask()); //bit mask to only look at notes corresponding to this hand
                     s = new BinarySwitcher(current.taps.value + current.holds.value); //s = consider button presses
-                    delta = (current.Offset - now) / rate;
                     foreach (byte k in s.GetColumns()) //calculate value for each note and put it through overall algorithm
                     {
-                        UpdateStrain(ref CurrentStrain, delta, GetNoteDifficulty(k, current.Offset, layout.hands[h].Mask(), rate));
-                        delta = 0;
+                        handDiff.Add(GetNoteDifficulty(k, current.Offset, layout.hands[h].Mask(), rate));
                     }
                     foreach (byte k in s.GetColumns()) //record times for calculation of the next snap
                     {
                         fingers[k] = current.Offset;
                     }
+                    snapDiff.Add(GetHandDifficulty(handDiff));
+                    handDiff.Clear();
                 }
+                //PhysicalData[i] = GetSnapDifficulty(snapDiff);
+                UpdateStrain(ref CurrentStrain, delta, GetSnapDifficulty(snapDiff));
+                snapDiff.Clear();
                 PhysicalData[i] = CurrentStrain; //calculate difficulty for hands overall (hand sync and shit idk)
                 //         ----
 
@@ -69,12 +73,12 @@ namespace YAVSRG.Charts.DifficultyRating
             //difficulty of each snap is assumed to be a measure of how unlikely it is you will hit it well
         }
 
+        
         protected void UpdateStrain(ref float result, float time, float value)
         {
-            double decay = -0.005;
-            float exponent = 10f; //this needs rewriting at SOON date
-            result *= (float)Math.Exp(decay * time); //decay value over time
-            result = (float)Math.Pow(Math.Pow(result, exponent) + Math.Pow(value, exponent), 1 / exponent); //bump up value according to new value
+            double decay = -3000;
+            double weight = Math.Exp(decay / time);
+            result = (float)(result + (value - result) * (1 - weight));
         }
 
         protected float GetOverallDifficulty(float[] data)
@@ -91,6 +95,30 @@ namespace YAVSRG.Charts.DifficultyRating
                 t += data[i];
             }
             return t / c;
+        }
+
+        protected float GetHandDifficulty(List<float> data)
+        {
+            if (data.Count == 0) { return 0; }
+            if (data.Count == 1) { return data[0]; };
+            double f = 0;
+            foreach (float v in data)
+            {
+                f += Math.Pow(v, 2);
+            }
+            return (float)Math.Pow(f / data.Count, 0.5);
+        }
+
+        protected float GetSnapDifficulty(List<float> data)
+        {
+            if (data.Count == 0) { return 0; }
+            if (data.Count == 1) { return data[0]; };
+            double f = 0;
+            foreach (float v in data)
+            {
+                f += Math.Pow(v, 3);
+            }
+            return (float)Math.Pow(f / data.Count, (1d/3));
         }
 
         protected float GetNoteDifficulty(byte c, float offset, int h, float rate)
@@ -131,7 +159,7 @@ namespace YAVSRG.Charts.DifficultyRating
             float heightScale = 10f;
             float curveExponent = 1f;
             float cutoffExponent = 10f;
-            return (float)Math.Max((1f * heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.1 * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
+            return (float)Math.Max((1.333f * heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.1333 * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
         }
 
         protected float GetJackCurve(float delta) //how hard is it to hit these two notes in the same column? closer = exponentially harder
@@ -139,7 +167,7 @@ namespace YAVSRG.Charts.DifficultyRating
             float widthScale = 0.02f;
             float heightScale = 10f;
             float curveExponent = 1f;
-            return (float)Math.Min(1.7f * heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
+            return (float)Math.Min(2.3f * heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
         }
     }
 }

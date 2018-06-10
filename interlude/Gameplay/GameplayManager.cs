@@ -15,22 +15,31 @@ namespace YAVSRG.Gameplay
         public Dictionary<string, Mod> mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() } };
 
         public Chart CurrentChart;
+        public Charts.CachedChart CurrentCachedChart;
         public ChartWithModifiers ModifiedChart;
         public RatingReport ChartDifficulty;
         public ChartSaveData ChartSaveData;
         public Dictionary<string, string> SelectedMods = new Dictionary<string, string>();
         public event Action OnUpdateChart = () => { };
 
-        public void ChangeChart(Chart c)
+        public void ChangeChart(Charts.CachedChart cache, Chart c, bool playFromPreview)
         {
-            if (CurrentChart != null && ChartSaveData.Scores.Count > 0)
+            if (CurrentChart != null && ChartSaveData != null && ChartSaveData.Scores.Count > 0)
             {
                 Utils.SaveObject(ChartSaveData, Path.Combine(Content.WorkingDirectory, "Data", "Scores", CurrentChart.GetHash() + ".json"));
             }
+            CurrentCachedChart = cache;
             CurrentChart = c;
             Game.Screens.ChangeBackground(Content.LoadBackground(c.Data.SourcePath, c.Data.BGFile));
             Game.Audio.ChangeTrack(c.AudioPath());
-            Game.Audio.Play((long)c.Data.PreviewTime); //play from the preview point given in the chart data
+            if (playFromPreview)
+            {
+                Game.Audio.Play((long)c.Data.PreviewTime); //play from the preview point given in the chart data
+            }
+            else
+            {
+                Game.Audio.Play();
+            }
             ChartSaveData = GetChartSaveData();
             UpdateChart();
         }
@@ -50,7 +59,7 @@ namespace YAVSRG.Gameplay
 
         public void Unload()
         {
-            if (CurrentChart != null && ChartSaveData.Scores.Count > 0)
+            if (CurrentChart != null && ChartSaveData != null && ChartSaveData.Scores.Count > 0)
             {
                 Utils.SaveObject(ChartSaveData, Path.Combine(Content.WorkingDirectory, "Data", "Scores", CurrentChart.GetHash() + ".json"));
             }

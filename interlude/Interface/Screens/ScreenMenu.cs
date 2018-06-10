@@ -87,6 +87,7 @@ namespace YAVSRG.Interface.Screens
             slide.Target = 0;
         }
 
+        /*
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
@@ -94,6 +95,6 @@ namespace YAVSRG.Interface.Screens
             //ScreenUtils.DrawBanner(-w, -300, w, -200, Game.Screens.HighlightColor);
             //SpriteBatch.Font1.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
             //SpriteBatch.Font2.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
-        }
+        }*/
     }
 }

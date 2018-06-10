@@ -152,7 +152,7 @@
     <Compile Include="Interface\Animations\AnimationGroup.cs" />
     <Compile Include="Interface\Animations\AnimationSeries.cs" />
     <Compile Include="Interface\Animations\AnimationCounter.cs" />
-    <Compile Include="Interface\ColorFade.cs" />
+    <Compile Include="Interface\Animations\AnimationColorFade.cs" />
     <Compile Include="Interface\CrashWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -171,12 +171,14 @@
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
     <Compile Include="Interface\Screens\ScreenScore.cs" />
     <Compile Include="Interface\Animations\AnimationSlider.cs" />
+    <Compile Include="Interface\Screens\ScreenVisualiser.cs" />
     <Compile Include="Interface\Widget.cs" />
     <Compile Include="Interface\Widgets\BannerButton.cs" />
     <Compile Include="Interface\Widgets\BoolPicker.cs" />
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
+    <Compile Include="Interface\Widgets\InfoBox.cs" />
     <Compile Include="Interface\Widgets\Logo.cs" />
     <Compile Include="Interface\Widgets\ScrollContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
@@ -188,19 +190,21 @@
     <Compile Include="Interface\Widgets\LevelSelector.cs" />
     <Compile Include="Interface\Widgets\Gameplay\Playfield.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ProgressBar.cs" />
-    <Compile Include="Interface\Widgets\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Scoreboard.cs" />
     <Compile Include="Interface\Widgets\ScoreCard.cs" />
     <Compile Include="Interface\Widgets\SimpleButton.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
+    <Compile Include="Interface\Widgets\TooltipContainer.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
     <Compile Include="Options\Colorizer.cs" />
     <Compile Include="Options\ColorScheme.cs" />
-    <Compile Include="Options\Discord.cs" />
+    <Compile Include="Options\OptionsPanel.cs" />
+    <Compile Include="Options\Panels\GameplayPanel.cs" />
+    <Compile Include="Options\Panels\GeneralPanel.cs" />
+    <Compile Include="Utilities\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
-    <Compile Include="Options\Tabs\GameplayTab.cs" />
     <Compile Include="Options\Tabs\GeneralTab.cs" />
     <Compile Include="Options\Tabs\LayoutTab.cs" />
     <Compile Include="Options\Theme.cs" />
@@ -219,6 +223,7 @@
     <Compile Include="Sprite.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="SpriteFont.cs" />
+    <Compile Include="Utilities\TrayIcon.cs" />
     <Compile Include="Utilities\Utils.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -246,11 +251,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="discord-rpc.dll">
+    <Content Include="icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
