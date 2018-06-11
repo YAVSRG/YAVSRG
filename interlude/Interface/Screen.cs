@@ -10,5 +10,7 @@ namespace YAVSRG.Interface
         public virtual void OnEnter(Screen prev) { }
 
         public virtual void OnExit(Screen next) { }
+
+        public virtual void OnResize() { }
     }
 }

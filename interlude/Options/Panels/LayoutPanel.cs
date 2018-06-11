@@ -7,9 +7,9 @@ using OpenTK.Input;
 using YAVSRG.Interface;
 using YAVSRG.Interface.Widgets;
 
-namespace YAVSRG.Options.Tabs
+namespace YAVSRG.Options.Panels
 {
-    class LayoutTab : Widget
+    class LayoutPanel : OptionsPanel
     {
         private Widget selectKeyMode;
         private KeyBinder[] binds = new KeyBinder[10];
@@ -64,10 +64,10 @@ namespace YAVSRG.Options.Tabs
             }
         }
 
-        public LayoutTab() : base()
+        public LayoutPanel(InfoBox ib) : base(ib, "Key Layout")
         {
             selectKeyMode = new TextPicker("Keys", new string[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, 1, (i) => { ChangeKeyMode(i + 3); })
-                .PositionTopLeft(-50, 25, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(50, 75, AnchorType.CENTER, AnchorType.MIN);
+                .PositionTopLeft(-50, 100, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(50, 150, AnchorType.CENTER, AnchorType.MIN);
             for (int i = 0; i < 10; i++)
             {
                 binds[i] = new KeyBinder("Column " + (i + 1).ToString(), Key.F35, (b) => { });
@@ -76,11 +76,10 @@ namespace YAVSRG.Options.Tabs
                 AddChild(colors[i]);
             }
             AddChild(selectKeyMode);
-            Refresh();
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
-                .PositionTopLeft(-500, 425, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-200, 475, AnchorType.CENTER, AnchorType.MIN));
+                .PositionTopLeft(-500, 525, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-200, 575, AnchorType.CENTER, AnchorType.MIN));
             AddChild(new TextPicker("Skin", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode); })
-                .PositionTopLeft(200, 425, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 475, AnchorType.CENTER, AnchorType.MIN));
+                .PositionTopLeft(200, 525, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 575, AnchorType.CENTER, AnchorType.MIN));
         }
 
         public void Refresh()
@@ -125,17 +124,19 @@ namespace YAVSRG.Options.Tabs
             {
                 binds[i].Change(Game.Options.Profile.Bindings[k][i], BindSetter(i, k));
                 binds[i].State = 1;
-                binds[i].PositionTopLeft(start + i * c, 100, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 150, AnchorType.CENTER, AnchorType.MIN);
+                binds[i].PositionTopLeft(start + i * c, 200, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 250, AnchorType.CENTER, AnchorType.MIN);
             }
+
             int colorCount = Game.Options.Profile.ColorStyle.GetColorCount(k);
             int availableColors = Game.Options.Theme.UseColor ? Game.Options.Theme.NoteColors.Length : texture.UV_Y;
+            c = colorCount * Game.Options.Theme.ColumnWidth > Width ? (int)(Width / colorCount) : Game.Options.Theme.ColumnWidth;
             start = -colorCount * c / 2;
             int keymodeIndex = Game.Options.Profile.ColorStyle.UseForAllKeyModes ? 0 : k;
             for (int i = 0; i < colorCount; i++)
             {
                 colors[i].Change("label NYI", ColorSetter(i,keymodeIndex), ColorGetter(i,keymodeIndex), texture, availableColors);
                 colors[i].State = 1;
-                colors[i].PositionTopLeft(start + i * c, 200, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 200+Game.Options.Theme.ColumnWidth, AnchorType.CENTER, AnchorType.MIN);
+                colors[i].PositionTopLeft(start + i * c, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 300+Game.Options.Theme.ColumnWidth, AnchorType.CENTER, AnchorType.MIN);
             }
         }
     }

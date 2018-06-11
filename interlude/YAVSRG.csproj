@@ -202,11 +202,10 @@
     <Compile Include="Options\OptionsPanel.cs" />
     <Compile Include="Options\Panels\GameplayPanel.cs" />
     <Compile Include="Options\Panels\GeneralPanel.cs" />
+    <Compile Include="Options\Panels\LayoutPanel.cs" />
     <Compile Include="Utilities\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
-    <Compile Include="Options\Tabs\GeneralTab.cs" />
-    <Compile Include="Options\Tabs\LayoutTab.cs" />
     <Compile Include="Options\Theme.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="Interface\Input.cs" />

@@ -12,24 +12,33 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenOptions : Screen
     {
-        private Widget tabs;
+        private LayoutPanel lp;
+
 
         public ScreenOptions()
         {
-            var ib = new InfoBox();
-            tabs = new ScrollContainer(5f, 5f, false, true);
-            tabs.AddChild(new GeneralPanel(ib).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
-            tabs.AddChild(new GameplayPanel(ib).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
-            tabs.AddChild(new Options.Tabs.LayoutTab().PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
+            OnResize();
+        }
 
-            AddChild(tabs.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 100, AnchorType.MAX, AnchorType.MAX));
+        public override void OnResize()
+        {
+            Widgets.Clear();
+            var ib = new InfoBox();
+            Widget tabs = new ScrollContainer(5f, 5f, false, true);
+            lp = new LayoutPanel(ib);
+            tabs.AddChild(new GeneralPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
+            tabs.AddChild(new GameplayPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
+            tabs.AddChild(lp.PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
+            lp.Refresh();
+
+            AddChild(tabs.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MAX, AnchorType.MAX));
             AddChild(ib.PositionTopLeft(550, 50, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(50, 50, AnchorType.MAX, AnchorType.MAX));
         }
 
-        public override void OnEnter(Screen prev)
+        public override void OnExit(Screen next)
         {
-            base.OnEnter(prev);
-            //tabs.Switch(0);
+            base.OnExit(next);
+            Game.Gameplay.UpdateChart(); //recolor notes based on settings if they've changed
         }
     }
 }

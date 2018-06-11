@@ -92,6 +92,12 @@ namespace YAVSRG.Interface
             Current = s;
         }
 
+        public void Resize()
+        {
+            Current?.OnResize();
+            Previous?.OnResize();
+        }
+
         public void Draw()
         {
             if (Loading)

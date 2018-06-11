@@ -11,14 +11,14 @@ namespace YAVSRG.Options.Panels
 {
     class GameplayPanel : OptionsPanel
     {
-        public GameplayPanel(InfoBox ib) : base(ib, "Gameplay")
+        public GameplayPanel(InfoBox ib, LayoutPanel lp) : base(ib, "Gameplay")
         {
             AddChild(
                 new TooltipContainer(
                 new Slider("Scroll speed", v => { Game.Options.Profile.ScrollSpeed = v; }, () => Game.Options.Profile.ScrollSpeed, 1, 4, 0.01f),
                 "Increasing this will increase the speed at which notes scroll across the screen.\nA scroll speed of 1 means that 1 pixel corresponds to 1ms, or 1000 pixels corresponds to 1 second.", ib)
-                .PositionTopLeft(-100, 75, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(100, 125, AnchorType.CENTER, AnchorType.MIN));
+                .PositionTopLeft(-100, 100, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(100, 150, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
                 new Slider("Hit Position", v => { Game.Options.Profile.HitPosition = (int)v; }, () => Game.Options.Profile.HitPosition, -100, 400, 1),
@@ -51,13 +51,13 @@ namespace YAVSRG.Options.Panels
                 .PositionBottomRight(-50, 425, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                new BoolPicker("Arrows for 4k", Game.Options.Profile.UseArrowsFor4k, v => { Game.Options.Profile.UseArrowsFor4k = v; }),
+                new BoolPicker("Arrows for 4k", Game.Options.Profile.UseArrowsFor4k, v => { Game.Options.Profile.UseArrowsFor4k = v; lp.Refresh(); }),
                 "Turn this on if you want to use arrow textures when playing with four keys. This uses the arrow texture provided by the skin, which will be rotated depending on the column.", ib)
                 .PositionTopLeft(50, 375, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 425, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; }),
+                new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; lp.Refresh(); }),
                 "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm i.e make every other beat red and the remaining beats green\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord", ib)
                 .PositionTopLeft(-200, 475, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(-50, 525, AnchorType.CENTER, AnchorType.MIN));

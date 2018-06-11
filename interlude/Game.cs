@@ -113,6 +113,7 @@ namespace YAVSRG
         {
             base.OnResize(e);
             ScreenUtils.UpdateBounds(Width, Height);
+            screens.Resize();
             ClientRectangle = new Rectangle(0, 0, Width, Height);
             GL.Viewport(ClientRectangle);
         }
