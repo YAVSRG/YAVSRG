@@ -25,8 +25,8 @@ namespace YAVSRG.Interface.Widgets
             acc = score.Accuracy();
             accdisplay = Utils.RoundNumber(acc) + "%";
             combo = score.BestCombo.ToString() + "x";
-            rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(c.mods), c.rate), hd);
-            mods = string.Join(", ", Utils.RoundNumber(c.rate)+"x",string.Join(",", c.mods.Keys));
+            rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(c.mods), c.rate, c.playstyle), hd);
+            mods = Game.Gameplay.GetModString(c.mods, c.rate, c.playstyle);
             this.c = c;
         }
 

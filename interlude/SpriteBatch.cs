@@ -108,7 +108,7 @@ namespace YAVSRG
         }
 
         public static void DrawFrame(float left, float top, float right, float bottom, float scale, Color color)
-        {
+        { //this should really be in ScreenUtils but i'm too lazy to move it :(
             //corners
             Draw("frame", left, top, left + scale, top + scale, color, 0, 0);
             Draw("frame", right - scale, top, right, top + scale, color, 2, 0);

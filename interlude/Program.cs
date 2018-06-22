@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YAVSRG.Interface;
+using YAVSRG.Utilities;
 
 namespace YAVSRG
 {
@@ -16,8 +17,9 @@ namespace YAVSRG
             Mutex m = new Mutex(true, "Interlude");
             if (m.WaitOne(TimeSpan.Zero, true))
             {
+                Logging.SetLogAction((s, t) => { });
+                PipeHandler.Open();
                 Game g = new Game();
-                Utilities.Logging.SetLogAction((s, t) => { });
                 try
                 {
                     g.Run(120.0); //run the game
@@ -32,7 +34,19 @@ namespace YAVSRG
                     g.Exit();
                     g.Dispose(); //clean up resources. i don't know if there's anything left to clean up but it's here i guess
                 }
+                PipeHandler.Close();
                 m.ReleaseMutex();
+            }
+            else
+            {
+                if (args.Length > 0)
+                {
+                    PipeHandler.SendData("open", args[0]);
+                }
+                else
+                {
+                    PipeHandler.SendData("show", "");
+                }
             }
         }
     }

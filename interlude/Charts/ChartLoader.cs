@@ -59,6 +59,7 @@ namespace YAVSRG.Charts
             Groups = new List<ChartGroup>();
             Cache = Cache.LoadCache();
             //DownloadBeatmap(720686);
+            //ImportArchive(Path.Combine(Content.WorkingDirectory, "Imports", "NKCP.zip"));
             Loaded = true;
         }
 
@@ -268,20 +269,75 @@ namespace YAVSRG.Charts
                 }
             }
         }
-
-        /*
-        public static void ExtractArchive(string path)
+        
+        public static void ImportArchive(string path)
         {
             if (Path.GetExtension(path).ToLower() == ".osz")
             {
-                using (ZipArchive z = ZipFile.Open(path, ZipArchiveMode.Update))
+                string dir = Path.Combine(Path.GetDirectoryName(path), "osu! Imports", Path.GetFileNameWithoutExtension(path));
+                using (ZipArchive z = ZipFile.Open(path, ZipArchiveMode.Read))
                 {
-                    z.ExtractToDirectory(Path.Combine(Path.GetDirectoryName(path), "osu! Imports", Path.GetFileNameWithoutExtension(path)));
+                    z.ExtractToDirectory(dir);
+                }
+                foreach (string file in Directory.GetFiles(dir))
+                {
+                    try
+                    {
+                        ConvertChart(file, "osu! Imports"); //if it's not a chart file it'll get ignored
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                Directory.Delete(dir, true);
+                File.Delete(path);
+            }
+            else if (Path.GetExtension(path).ToLower() == ".zip")
+            {
+                string root = "";
+                string ext;
+                using (ZipArchive z = ZipFile.Open(path, ZipArchiveMode.Read))
+                {
+                    foreach (ZipArchiveEntry e in z.Entries)
+                    {
+                        ext = Path.GetExtension(e.Name).ToLower();
+                        if (ext == ".sm" || ext == ".osu" || ext == ".yav")
+                        {
+                            root = Path.GetDirectoryName(Path.GetDirectoryName(e.FullName));
+                            break;
+                        }
+                    }
+                    string target = Path.Combine(Content.WorkingDirectory, "Imports", Path.GetFileNameWithoutExtension(path));
+                    foreach (ZipArchiveEntry e in z.Entries)
+                    {
+                        if (e.FullName.StartsWith(root, StringComparison.Ordinal))
+                        {
+                            string f = Path.Combine(target + e.FullName.Substring(root.Length));
+                            if (Path.GetExtension(f) != "")
+                            {
+                                e.ExtractToFile(Path.Combine(target + e.FullName.Substring(root.Length)));
+                            }
+                            else
+                            {
+                                Directory.CreateDirectory(f);
+                            }
+                        }
+                    }
+                    ConvertPack(target, Path.GetFileNameWithoutExtension(path));
+                    try
+                    {
+                        Directory.Delete(target, true);
+                    }
+                    catch
+                    {
+                        Log("Could not delete extracted files: " + target, LogType.Error);
+                    }
                 }
                 File.Delete(path);
             }
-            //no zip support yet, and no rar support until i know how
-        }*/
+            //no rar support until i know how
+        }
 
         public static string GetOsuSongFolder()
         {

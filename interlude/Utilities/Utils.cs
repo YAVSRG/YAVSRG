@@ -81,7 +81,7 @@ namespace YAVSRG
             return Color.FromArgb((int)(a.A * val2 + b.A * val1), (int)(a.R * val2 + b.R * val1), (int)(a.G * val2 + b.G * val1), (int)(a.B * val2 + b.B * val1));
         }
 
-        public static void SetThemeColor(Bitmap bitmap)
+        public static void SetThemeColorFromBG(Bitmap bitmap)
         {
             int goodness = 0;
             Color best = Color.White;
@@ -98,9 +98,14 @@ namespace YAVSRG
                     }
                 }
             }
-            Game.Screens.DarkColor.Target(ColorInterp(best, Color.Black, 0.5f));
-            Game.Screens.BaseColor.Target(best);
-            Game.Screens.HighlightColor.Target(ColorInterp(best, Color.White, 0.5f));
+            if (goodness > 127)
+            {
+                Game.Screens.ChangeThemeColor(best);
+            }
+            else
+            {
+                Game.Screens.ChangeThemeColor(Game.Options.Theme.ThemeColor);
+            }
         }
     }
 }

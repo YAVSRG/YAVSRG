@@ -47,8 +47,8 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawParallelogramWithBG(left, top, right, top + 150, 0.5f);
-            ScreenUtils.DrawParallelogramWithBG(left, bottom - 100, right, bottom, -0.5f);
+            ScreenUtils.DrawParallelogramWithBG(left, top, right, top + 150, 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
+            ScreenUtils.DrawParallelogramWithBG(left, bottom - 100, right, bottom, -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, left, top, right, top + 100, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, left + 50, top + 80, right - 50, top+150, Game.Options.Theme.MenuFont);
 

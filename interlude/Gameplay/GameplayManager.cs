@@ -54,7 +54,7 @@ namespace YAVSRG.Gameplay
 
         public void UpdateDifficulty()
         {
-            ChartDifficulty = new RatingReport(ModifiedChart, (float)Game.Options.Profile.Rate);
+            ChartDifficulty = new RatingReport(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[ModifiedChart.Keys]);
         }
 
         public void Unload()
@@ -107,19 +107,6 @@ namespace YAVSRG.Gameplay
             return c;
         }
 
-        public string[] GetModifiers()
-        {
-            List<string> l = new List<string>();
-            foreach (string m in SelectedMods.Keys)
-            {
-                if (mods[m].IsApplicable(ModifiedChart, SelectedMods[m]))
-                {
-                    l.Add(mods[m].GetName(SelectedMods[m]));
-                }
-            }
-            return l.ToArray();
-        }
-
         public int GetModStatus(Dictionary<string,string> SelectedMods)
         {
             int s = 0;
@@ -128,6 +115,19 @@ namespace YAVSRG.Gameplay
                 s = Math.Max(s, mods[m].GetStatus(SelectedMods[m]));
             }
             return s;
+        }
+
+        public string GetModString(Dictionary<string, string> SelectedMods, float rate, string playstyle)
+        {
+            string result = Utils.RoundNumber(rate) + "x, " + playstyle;
+            foreach (string m in SelectedMods.Keys)
+            {
+                if (mods[m].IsApplicable(ModifiedChart, SelectedMods[m]))
+                {
+                    result += ", "+mods[m].GetName(SelectedMods[m]);
+                }
+            }
+            return result;
         }
     }
 }

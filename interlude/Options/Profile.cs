@@ -46,5 +46,10 @@ namespace YAVSRG.Options
             new Key[] { Key.Z, Key.X, Key.C, Key.V, Key.Space, Key.Comma, Key.Period, Key.Slash, Key.RShift }, //9k
             new Key[] { Key.CapsLock, Key.Q, Key.W, Key.E, Key.V, Key.Space, Key.K, Key.L, Key.Semicolon, Key.Quote }, //10k
         };
+        public string[] Playstyles = new string[] //this needs redoing cause it turns out shit in the profile.json
+        {
+            "","","",
+            "2k + 1", "Spread", "3k + 2", "Spread", "4k + 3", "Spread", "5k + 4", "Spread"
+        };
     }
 }

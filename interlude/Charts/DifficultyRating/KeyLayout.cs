@@ -8,6 +8,61 @@ namespace YAVSRG.Charts.DifficultyRating
 {
     public class KeyLayout
     {
+        public static Dictionary<string, KeyLayout>[] LAYOUTS = new Dictionary<string, KeyLayout>[] {
+            null,null,null,
+            new Dictionary<string, KeyLayout>
+            { //3k
+                { "One Handed", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }) } } },
+                { "2k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2 }) } } },
+                { "1k + 2", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2 }) } } }
+            },
+            new Dictionary<string, KeyLayout>
+            { //4k
+                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3 }) } } },
+                { "One Handed", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }) } } },
+                { "3k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3 }) } } },
+                { "1k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3 }) } } }
+            },
+            new Dictionary<string, KeyLayout>
+            { //5k
+                { "3k + 2", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4 }) } } },
+                { "2k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3, 4 }) } } },
+                { "One Handed", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }) } } },
+                { "4k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4 }) } } },
+                { "1k + 4", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3, 4 }) } } }
+            },
+            new Dictionary<string, KeyLayout>
+            { //6k
+                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5 }) } } },
+                { "4k + 2", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5 }) } } },
+                { "2k + 4", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3, 4, 5 }) } } },
+                { "5k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5 }) } } },
+                { "1k + 5", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3, 4, 5 }) } } }
+            },
+            new Dictionary<string, KeyLayout>
+            { //7k
+                { "4k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6 }) } } },
+                { "3k + 4", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6 }) } } },
+                { "BMS/Left thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 3, 2 }), new Hand(new List<int> { 4, 5, 6 }) } } },
+                { "BMS/Right thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 4, 3, 5, 6 }) } } },
+            },
+            new Dictionary<string, KeyLayout>
+            { //8k
+                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6, 7 }) } } },
+                { "5k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7 }) } } },
+                { "3k + 5", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6, 7 }) } } },
+            },
+            new Dictionary<string, KeyLayout>
+            { //9k
+                { "Left thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7, 8 }) } } },
+                { "Right thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6, 7, 8 }) } } },
+            },
+            new Dictionary<string, KeyLayout>
+            { //10k
+                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7, 8, 9 }) } } },
+            }
+        };
+
         public class Hand
         {
             List<int> fingers;
@@ -35,39 +90,13 @@ namespace YAVSRG.Charts.DifficultyRating
 
         public List<Hand> hands;
 
-        public KeyLayout(int k)
+        public static KeyLayout GetLayout(string name, int k)
         {
-            hands = new List<Hand>();
-            if (k == 4)
+            if (LAYOUTS[k].ContainsKey(name))
             {
-                hands.Add(new Hand(new List<int> { 0, 1 }));
-                hands.Add(new Hand(new List<int> { 2, 3 }));
+                return LAYOUTS[k][name];
             }
-            else if (k == 5)
-            {
-                hands.Add(new Hand(new List<int> { 0, 1, 2 }));
-                hands.Add(new Hand(new List<int> { 3, 4 }));
-            }
-            else if (k == 6)
-            {
-                hands.Add(new Hand(new List<int> { 0, 1, 2 }));
-                hands.Add(new Hand(new List<int> { 3, 4, 5 }));
-            }
-            else if (k == 7)
-            {
-                hands.Add(new Hand(new List<int> { 0, 1, 2, 3 }));
-                hands.Add(new Hand(new List<int> { 4, 5, 6 }));
-            }
-            else if (k == 8)
-            {
-                hands.Add(new Hand(new List<int> { 0, 1, 2, 3 }));
-                hands.Add(new Hand(new List<int> { 4, 5, 6, 7 }));
-            }
-            else if (k == 9)
-            {
-                hands.Add(new Hand(new List<int> { 0, 1, 2, 3, 4 }));
-                hands.Add(new Hand(new List<int> { 5, 6, 7, 8 }));
-            }
+            return LAYOUTS[k].First().Value;
         }
     }
 }

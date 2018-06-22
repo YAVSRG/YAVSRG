@@ -25,7 +25,7 @@ namespace YAVSRG.Interface.Dialogs
         public override void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawBanner(left, top, right, bottom, System.Drawing.Color.Azure);
+            ScreenUtils.DrawParallelogramWithBG(left, top, right, bottom, 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
             DrawWidgets(left, top, right, bottom);
         }

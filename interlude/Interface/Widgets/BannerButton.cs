@@ -19,7 +19,7 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(float left, float top, float right, float bottom)
         {
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawBanner(left, top, right, bottom, color);
+            ScreenUtils.DrawParallelogramWithBG(left, top, right, bottom, 0.5f, color, color);
             SpriteBatch.Font1.DrawJustifiedText(text, 40f, right - (bottom-top), top + 15, Game.Options.Theme.MenuFont);
         }
     }

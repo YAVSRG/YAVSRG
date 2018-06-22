@@ -7,6 +7,7 @@ using System.Drawing;
 using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Interface.Widgets;
 using YAVSRG.Interface.Animations;
+using YAVSRG.Interface.Screens;
 
 namespace YAVSRG.Interface
 {
@@ -24,9 +25,19 @@ namespace YAVSRG.Interface
                 .PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttoninfo", "", () => { if (!(Game.Screens.Current is Screens.ScreenVisualiser))Game.Screens.AddScreen(new Screens.ScreenVisualiser()); })
+                new Button("buttoninfo", "", () => { if (!(Game.Screens.Current is ScreenVisualiser)) Game.Screens.AddScreen(new ScreenVisualiser()); })
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
+                );
+            AddChild(
+                new Button("buttonoptions", "", () => { if (!(Game.Screens.Current is ScreenOptions)) Game.Screens.AddScreen(new ScreenOptions()); })
+                .PositionTopLeft(160, 0, AnchorType.MAX, AnchorType.MIN)
+                .PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN)
+                );
+            AddChild(
+                new Button("buttonimport", "", () => { })
+                .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN)
+                .PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN)
                 );
             slide = new AnimationSlider(-10);
             Animation.Add(slide);

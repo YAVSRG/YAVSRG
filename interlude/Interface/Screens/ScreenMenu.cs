@@ -15,10 +15,10 @@ namespace YAVSRG.Interface.Screens
         static readonly string[] splashes = new[] { "Yet Another Vertically Scrolling Rhythm Game", "Some funny flavourtext", "Based on the hit game, osu!mania",
             "Pausers never win", "Winners never pause", "Timing is everything", "Where's the pause button?", "Just play BMS", "Skill not included",
             "Click play already", "JUST MASH", "A cool name for a rhythm game", "Making rhythm games great again", "The future is now, old man",
-            "https://en.wikipedia.org/wiki/Rhythm_game", "https://github.com/percyqaz/YAVSRG/issues/9", "Attention to detail" };
+            "https://en.wikipedia.org/wiki/Rhythm_game", "https://github.com/percyqaz/YAVSRG/issues/9", "Attention to detail", "Etternan't" };
         string splash = splashes[new Random().Next(0, splashes.Length)];
         AnimationSlider slide;
-        //Sprite banner;
+        AnimationCounter scroll;
         Widget play, options, quit;
 
         public ScreenMenu()
@@ -42,9 +42,9 @@ namespace YAVSRG.Interface.Screens
                 .PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER)
                 );
             slide = new AnimationSlider(0);
-            //banner = Content.GetTexture("banner");
             slide.Target = 1;
             Animation.Add(slide);
+            Animation.Add(scroll = new AnimationCounter(10000,true));
             Animation.Add(new Animation()); //this dummy animation ensures that ScreenManager handles the other animations
         }
 
@@ -87,14 +87,14 @@ namespace YAVSRG.Interface.Screens
             slide.Target = 0;
         }
 
-        /*
         public override void Draw(float left, float top, float right, float bottom)
         {
+            //ScreenUtils.DrawArrowConfetti(left, top, right, bottom, 100f, Color.FromArgb(10,255,255,255), Color.FromArgb(80, 255, 255, 255), scroll.value * 0.002f);
             base.Draw(left, top, right, bottom);
+            //ScreenUtils.DrawParallelogramWithBG(right - 500, top + 100, right, top + 200, 0.5f, Game.Screens.BaseColor, Game.Screens.HighlightColor);
+            //SpriteBatch.Font1.DrawText(splash, 30f, right - 480, top + 125, Game.Options.Theme.MenuFont);
             //float w = (right-100) * slide;
             //ScreenUtils.DrawBanner(-w, -300, w, -200, Game.Screens.HighlightColor);
-            //SpriteBatch.Font1.DrawCentredText("Interlude", 50f, 0, -300, Game.Screens.HighlightColor);
-            //SpriteBatch.Font2.DrawCentredText(splash, 20f, 0, -240, Game.Screens.HighlightColor);
-        }*/
+        }
     }
 }

@@ -25,6 +25,7 @@ namespace YAVSRG.Options
         public Color SelectPack = Color.FromArgb(100, 30, 180);
         public Color SelectChart = Color.FromArgb(0, 180, 110);
         public Color SelectDiff = Color.FromArgb(0, 140, 200);
+        public Color ThemeColor = Color.FromArgb(0, 255, 160);
         public string[] Judges = new[] { "Marvellous", "Perfect", "Ok", "Bad", "Terrible", "Miss" };
 
         public Color GetColor(int index)
@@ -63,7 +64,7 @@ namespace YAVSRG.Options
 
         public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
         {
-            SpriteBatch.Draw(s, left, top, right, bottom, Color.White, GetRotation(column,keycount));
+            SpriteBatch.Draw(s, left, bottom, right, top, Color.White, GetRotation(column,keycount));
         }
 
         public void DrawTail(Sprite s, float left, float top, float right, float bottom, int column, int keycount)

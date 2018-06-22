@@ -17,9 +17,9 @@ namespace YAVSRG.Charts.DifficultyRating
 
         float[] fingers;
 
-        public RatingReport(ChartWithModifiers map, float rate)
+        public RatingReport(ChartWithModifiers map, float rate, string playstyle)
         {
-            KeyLayout layout = new KeyLayout(map.Keys);
+            KeyLayout layout = KeyLayout.GetLayout(playstyle, map.Keys);
             int hands = layout.hands.Count;
             fingers = new float[map.Keys];
 
@@ -38,7 +38,6 @@ namespace YAVSRG.Charts.DifficultyRating
             for (int i = 0; i < snaps.Count; i++)
             {
                 if (snaps[i].taps.value + snaps[i].holds.value == 0) { continue; }
-
                 //PHYSICAL ----
                 delta = (snaps[i].Offset - now) / rate;
                 for (int h = 0; h < hands; h++)
@@ -56,7 +55,6 @@ namespace YAVSRG.Charts.DifficultyRating
                     snapDiff.Add(GetHandDifficulty(handDiff));
                     handDiff.Clear();
                 }
-                //PhysicalData[i] = GetSnapDifficulty(snapDiff);
                 UpdateStrain(ref CurrentStrain, delta, GetSnapDifficulty(snapDiff));
                 snapDiff.Clear();
                 PhysicalData[i] = CurrentStrain; //calculate difficulty for hands overall (hand sync and shit idk)
@@ -73,12 +71,11 @@ namespace YAVSRG.Charts.DifficultyRating
             //difficulty of each snap is assumed to be a measure of how unlikely it is you will hit it well
         }
 
-        
         protected void UpdateStrain(ref float result, float time, float value)
         {
-            double decay = -3000;
-            double weight = Math.Exp(decay / time);
-            result = (float)(result + (value - result) * (1 - weight));
+            double decay = -0.004;
+            double weight = Math.Exp(decay * time);
+            result = (float)(result * weight + value * (1 - weight));
         }
 
         protected float GetOverallDifficulty(float[] data)
@@ -92,9 +89,9 @@ namespace YAVSRG.Charts.DifficultyRating
                 {
                     c += 1;
                 }
-                t += data[i];
+                t += data[i] * data[i];
             }
-            return t / c;
+            return (float)Math.Pow(t / c, 0.5);
         }
 
         protected float GetHandDifficulty(List<float> data)
@@ -116,21 +113,22 @@ namespace YAVSRG.Charts.DifficultyRating
             double f = 0;
             foreach (float v in data)
             {
-                f += Math.Pow(v, 3);
+                f += Math.Pow(v, 1);
             }
-            return (float)Math.Pow(f / data.Count, (1d/3));
+            return (float)Math.Pow(f / data.Count, (1));
         }
 
         protected float GetNoteDifficulty(byte c, float offset, int h, float rate)
         {
-            float val = 0;
+            float ohtnerf = 1.75f;
+            double val = 0;
             BinarySwitcher s = new BinarySwitcher(h);
             s.RemoveColumn(c);
             float delta1;
             if (fingers[c] > 0) //if this is not the first note in this column in the map
             {
                 delta1 = (offset - fingers[c]) / rate;
-                val += GetJackCurve(delta1); //add base jack value
+                val += Math.Pow(GetJackCurve(delta1),ohtnerf); //add base jack value
             }
             else //if it is, this is some temp fix
             {
@@ -141,10 +139,10 @@ namespace YAVSRG.Charts.DifficultyRating
                 if (fingers[k] > 0) //if this is not the first note in this column in the map
                 {
                     float delta2 = (offset - fingers[k]) / rate;
-                    val += GetStreamCurve(delta2) * GetJackCompensation(delta1, delta2); //add trill part where applicable 
+                    val += Math.Pow(GetStreamCurve(delta2) * GetJackCompensation(delta1, delta2), ohtnerf); //add trill part where applicable 
                 }
             }
-            return val;
+            return (float)Math.Pow(val, 1 / ohtnerf);
         }
 
         protected float GetJackCompensation(float jackdelta, float streamdelta) //jumpjacks do not involve you swapping your fingers over to hit them, therefore ignore the stream part of a calc when there is a jack
@@ -156,18 +154,18 @@ namespace YAVSRG.Charts.DifficultyRating
         protected float GetStreamCurve(float delta) //how hard is it to hit these two adjacent notes? when they are VERY close together you can hit them at the same time so no difficulty added
         {
             float widthScale = 0.02f;
-            float heightScale = 10f;
+            float heightScale = 10f * 2.5f;
             float curveExponent = 1f;
             float cutoffExponent = 10f;
-            return (float)Math.Max((1.333f * heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.1333 * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
+            return (float)Math.Max((heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.0001f * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
         }
 
         protected float GetJackCurve(float delta) //how hard is it to hit these two notes in the same column? closer = exponentially harder
         {
             float widthScale = 0.02f;
-            float heightScale = 10f;
+            float heightScale = 10f * 3.3f;
             float curveExponent = 1f;
-            return (float)Math.Min(2.3f * heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
+            return (float)Math.Min(heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
         }
     }
 }

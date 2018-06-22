@@ -39,6 +39,15 @@ namespace YAVSRG.Charts.Osu
             Load();
         }
 
+        public OsuBeatmap(Chart c)
+        {
+            //unfinished
+            filename = Path.ChangeExtension(c.Data.File, ".osu");
+            path = c.Data.SourcePath;
+            HitObjects = new HitObjectConverter(c.Notes.Points, c.Keys);
+            //TimingPoints = new TimingPointConverter(c.Timing.Points);
+        }
+
         private void Load()
         {
             var ts = new StreamReader(Path.Combine(path, filename));

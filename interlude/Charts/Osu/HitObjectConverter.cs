@@ -27,6 +27,11 @@ namespace YAVSRG.Charts.Osu
             }
         }
 
+        public HitObjectConverter(List<Snap> s, byte k)
+        {
+            CreateObjectsFromSnaps(s, k);
+        }
+
         public void Sort()
         {
             objects.Sort((a, b) => { return a.offset.CompareTo(b.offset); });
@@ -148,19 +153,47 @@ namespace YAVSRG.Charts.Osu
             return states;
         }
 
-        public void CreateObjectsFromSnaps(List<Snap> states)
+        public void CreateObjectsFromSnaps(List<Snap> states, byte keys)
         {
-            //nyi
+            objects = new List<HitObject>();
+            HitObject[] ln = new HitObject[keys];
+            foreach (Snap s in states)
+            {
+                for (byte k = 0; k < keys; k++)
+                {
+                    if (s.taps.GetColumn(k))
+                    {
+                        objects.Add(new HitObject(ColumnToX(k, keys), 0, (int)s.Offset, 1, 0, "0:0:0:0:"));
+                    }
+                    else if (s.holds.GetColumn(k))
+                    {
+                        ln[k] = new HitObject(ColumnToX(k, keys), 0, (int)s.Offset, 128, 0, "0:0:0:0:0:");
+                        objects.Add(ln[k]);
+                    }
+                    else if (s.ends.GetColumn(k))
+                    {
+                        ln[k].addition = ((int)s.Offset).ToString()+":0:0:0:0:";
+                    }
+                }
+            }
         }
 
-        public byte XToColumn(int x, int keys)
+        public byte XToColumn(int x, byte keys)
         {
             return (byte)(x / (512f / keys));
         }
 
+        public int ColumnToX(int c, byte keys)
+        {
+            return (int)(c * (512f / keys));
+        }
+
         public void Dump(TextWriter tw)
         {
-            //nyi
+            foreach (HitObject o in objects)
+            {
+                o.Dump(tw);
+            }
         }
     }
 }

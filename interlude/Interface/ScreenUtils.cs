@@ -37,26 +37,44 @@ namespace YAVSRG.Interface
             return MouseOver(left, top, right, bottom) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
+        /*
         public static void DrawBanner(float left, float top, float right, float bottom, Color c)
         {
             float height = bottom - top;
             SpriteBatch.Draw("banner", left, top, left + height, bottom, c, 0, 0);
             SpriteBatch.Draw("banner", left + height, top, right - height, bottom, c, 1, 0);
             SpriteBatch.Draw("banner", right - height, top, right, bottom, c, 2, 0);
+        }*/
+
+        public static void DrawArrowConfetti(float left, float top, float right, float bottom, float size, Color min, Color max, float value)
+        {
+            left -= size; right += size; top -= size; bottom += size;
+            int amount = 100;
+            float width = right - left;
+            float height = bottom - top;
+            float l, t, s;
+            for (int i = 0; i < amount; i++)
+            {
+                s = (149 + i * 491) % (size / 2) + (size / 2);
+                l = (461 + i * 397) % (width-s);
+                t = (811 + i * 433 + value * s) % (height-s);
+                SpriteBatch.Draw("arrow", left + l, top + t, left + l + s, top + t + s, Utils.ColorInterp(min, max, (float)Math.Abs(Math.Sin(value + i * 83))), 0, i % 8, 0);
+            }
         }
 
-        public static void DrawParallelogramWithBG(float left, float top, float right, float bottom, float amount)
+        public static void DrawParallelogramWithBG(float left, float top, float right, float bottom, float amount, Color fill, Color frame)
         {
-            float h = (bottom - top)*amount;
-            SpriteBatch.ParallelogramTransform(amount, top + h/amount * 0.5f);
+            float h = (bottom - top) * 0.5f;
+            float t = h * Math.Abs(amount);
+            SpriteBatch.ParallelogramTransform(amount, top + h);
             SpriteBatch.StencilMode(1);
-            SpriteBatch.DrawRect(left-Math.Abs(h), top, right, bottom, Color.White);
+            SpriteBatch.DrawRect(left-t, top, right+t, bottom, Color.White);
             SpriteBatch.DisableTransform();
             SpriteBatch.StencilMode(2);
-            Game.Screens.DrawChartBackground(left, top, right+Math.Abs(h)*0.5f, bottom, Game.Screens.DarkColor, 1.5f);
+            Game.Screens.DrawChartBackground(left - h, top, right + h, bottom, fill, 1.5f);
             SpriteBatch.StencilMode(0);
-            SpriteBatch.ParallelogramTransform(amount, top + h / amount * 0.5f);
-            SpriteBatch.DrawFrame(left-Math.Abs(h), top, right, bottom, 30f, Color.White);
+            SpriteBatch.ParallelogramTransform(amount, top + h);
+            SpriteBatch.DrawFrame(left-t, top, right+t, bottom, 30f, frame);
             SpriteBatch.DisableTransform();
         }
     }

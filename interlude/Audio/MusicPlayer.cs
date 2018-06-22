@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using ManagedBass;
 
 namespace YAVSRG.Audio
 {
@@ -33,12 +34,12 @@ namespace YAVSRG.Audio
 
         public void SetVolume(float volume)
         {
-            ManagedBass.Bass.GlobalStreamVolume = (int)(volume * 10000);
+            Bass.GlobalStreamVolume = (int)(volume * 10000);
         }
 
         public void SetRate(double rate)
         {
-            ManagedBass.Bass.ChannelSetAttribute(nowplaying, ManagedBass.ChannelAttribute.Frequency, nowplaying.Frequency * rate);
+            Bass.ChannelSetAttribute(nowplaying, ChannelAttribute.Frequency, nowplaying.Frequency * rate);
             Rate = rate;
         }
 
@@ -78,14 +79,14 @@ namespace YAVSRG.Audio
 
         public void Play()
         {
-            ManagedBass.Bass.ChannelPlay(nowplaying);
+            Bass.ChannelPlay(nowplaying);
             timer.Start();
             Paused = false;
         }
 
         public void Stop()
         {
-            ManagedBass.Bass.ChannelStop(nowplaying);
+            Bass.ChannelStop(nowplaying);
             timer.Stop();
             timer.Reset();
             Seek(0);
@@ -94,7 +95,7 @@ namespace YAVSRG.Audio
 
         public void Pause()
         {
-            ManagedBass.Bass.ChannelPause(nowplaying);
+            Bass.ChannelPause(nowplaying);
             timer.Stop();
             Paused = true;
         }
@@ -103,7 +104,7 @@ namespace YAVSRG.Audio
         {
             if (nowplaying == null) return 0;
             if (LeadingIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - AudioOffset;
-            return ManagedBass.Bass.ChannelBytes2Seconds(nowplaying,ManagedBass.Bass.ChannelGetPosition(nowplaying))*1000 - AudioOffset;
+            return Bass.ChannelBytes2Seconds(nowplaying,Bass.ChannelGetPosition(nowplaying))*1000 - AudioOffset;
         }
 
         public float NowPercentage()
@@ -114,7 +115,7 @@ namespace YAVSRG.Audio
 
         public void Seek(double position)
         {
-            ManagedBass.Bass.ChannelSetPosition(nowplaying, ManagedBass.Bass.ChannelSeconds2Bytes(nowplaying,position/1000));
+            Bass.ChannelSetPosition(nowplaying, Bass.ChannelSeconds2Bytes(nowplaying,position/1000));
             if (LeadingIn)
             {
                 LeadingIn = false;
@@ -151,11 +152,11 @@ namespace YAVSRG.Audio
             {
                 UpdateWaveform();
             }
-            Level = Level * 0.9f + (ManagedBass.Bass.ChannelGetLevelRight(nowplaying) + ManagedBass.Bass.ChannelGetLevelLeft(nowplaying)) * 0.0000002f;
+            Level = Level * 0.9f + (Bass.ChannelGetLevelRight(nowplaying) + Bass.ChannelGetLevelLeft(nowplaying)) * 0.0000002f;
             if (LeadingIn && Playing && Now() + AudioOffset > 0)
             {
                 Seek(Now() + AudioOffset);
-                ManagedBass.Bass.ChannelPlay(nowplaying);
+                Bass.ChannelPlay(nowplaying);
                 LeadingIn = false;
             }
             if (!Playing)

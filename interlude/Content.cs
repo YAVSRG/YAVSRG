@@ -29,7 +29,7 @@ namespace YAVSRG
             Bitmap bmp = new Bitmap(path);
             if (getColors)
             {
-                Utils.SetThemeColor(bmp);
+                Utils.SetThemeColorFromBG(bmp);
             }
             return UploadTexture(bmp,1,1); //temp
         }
@@ -121,6 +121,7 @@ namespace YAVSRG
             string e = Path.GetExtension(filename).ToLower();
             bool valid = (e == ".png" || e == ".jpg");
             if (valid && File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename),true);
+            Game.Screens.ChangeThemeColor(Game.Options.Theme.ThemeColor);
             return GetTexture("background");
         }
 

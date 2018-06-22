@@ -25,7 +25,7 @@ namespace YAVSRG.Interface.Screens
         {
             scoreData = data;
             snapcount = scoreData.c.Notes.Count;
-            mods = string.Join(", ", new[] { Utils.RoundNumber(Game.Options.Profile.Rate) + "x", string.Join(", ", Game.Gameplay.GetModifiers()) });
+            mods = Game.Gameplay.GetModString(Game.Gameplay.SelectedMods, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[scoreData.c.Keys]);
             scoreData.Scoring.BestCombo = Math.Max(scoreData.Scoring.Combo, scoreData.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             float acc = scoreData.Accuracy();
@@ -40,7 +40,7 @@ namespace YAVSRG.Interface.Screens
             rank = Content.GetTexture("rank-" + ranks[tier]);
             if (ShouldSaveScore())
             {
-                Game.Gameplay.ChartSaveData.Scores.Add(new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate });
+                Game.Gameplay.ChartSaveData.Scores.Add(new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate, playstyle = Game.Options.Profile.Playstyles[scoreData.c.Keys] });
             }
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
             acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
@@ -75,7 +75,7 @@ namespace YAVSRG.Interface.Screens
             base.Draw(left, top, right, bottom);
 
             //top panel
-            DrawParallelogramWithBG(left, top, right - 600, top + 150, 0.5f);
+            DrawParallelogramWithBG(left, top, right - 600, top + 150, 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, left, top, right - 600, top + 100, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, left + 50, top + 80, right - 650, top + 150, Game.Options.Theme.MenuFont);
 

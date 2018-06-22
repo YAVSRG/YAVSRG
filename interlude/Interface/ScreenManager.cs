@@ -62,6 +62,13 @@ namespace YAVSRG.Interface
             Background = bg;
         }
 
+        public void ChangeThemeColor(Color c)
+        {
+            DarkColor.Target(Utils.ColorInterp(c, Color.Black, 0.5f));
+            BaseColor.Target(c);
+            HighlightColor.Target(Utils.ColorInterp(c, Color.White, 0.5f));
+        }
+
         public void AddScreen(Screen s)
         {
             stack.Insert(0, s);

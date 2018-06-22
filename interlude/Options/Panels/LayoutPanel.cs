@@ -11,7 +11,7 @@ namespace YAVSRG.Options.Panels
 {
     class LayoutPanel : OptionsPanel
     {
-        private Widget selectKeyMode;
+        private Widget selectKeyMode, selectLayout;
         private KeyBinder[] binds = new KeyBinder[10];
         private ColorPicker[] colors = new ColorPicker[10];
         private int keyMode = 4;
@@ -138,6 +138,13 @@ namespace YAVSRG.Options.Panels
                 colors[i].State = 1;
                 colors[i].PositionTopLeft(start + i * c, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 300+Game.Options.Theme.ColumnWidth, AnchorType.CENTER, AnchorType.MIN);
             }
+            if (selectLayout != null)
+            {
+                Widgets.Remove(selectLayout);
+            }
+            string[] layouts = Charts.DifficultyRating.KeyLayout.LAYOUTS[k].Keys.ToArray();
+            Widgets.Add(selectLayout = new TextPicker("Keyboard layout", layouts, Math.Max(0,Array.IndexOf(layouts, Game.Options.Profile.Playstyles[k])), (i) => { Game.Options.Profile.Playstyles[k] = layouts[i]; })
+                .PositionTopLeft(-150, 600, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(150, 650, AnchorType.CENTER, AnchorType.MIN));
         }
     }
 }

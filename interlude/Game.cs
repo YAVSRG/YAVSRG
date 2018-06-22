@@ -25,6 +25,7 @@ namespace YAVSRG
         protected Options.Options options; //options handler instance
         protected ScreenManager screens;
         protected TrayIcon trayIcon;
+        protected TaskManager taskManager;
 
         public static Options.Options Options
         {
@@ -49,6 +50,11 @@ namespace YAVSRG
         public static MusicPlayer Audio
         {
             get { return Instance.audio; }
+        }
+
+        public static TaskManager Tasks
+        {
+            get { return Instance.taskManager; }
         }
 
         public Game() : base(800,600, new OpenTK.Graphics.GraphicsMode(32,24,8,0))
@@ -139,6 +145,8 @@ namespace YAVSRG
         protected override void OnLoad(EventArgs e) //called when game loads up
         {
             base.OnLoad(e);
+            taskManager = new TaskManager();
+            taskManager.AddTask(() => { PipeHandler.ReadingThread(); }, "Cross Process Communicator");
             Input.Init();
             trayIcon = new TrayIcon();
             var test = new Discord.EventHandlers();
@@ -152,6 +160,7 @@ namespace YAVSRG
             base.OnUnload(e);
             gameplay.Unload();
             trayIcon.Destroy();
+            taskManager.Stop();
             Discord.Shutdown();
             options.Save(); //remember to dump any updated profile settings to file
         }

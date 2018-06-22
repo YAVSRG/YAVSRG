@@ -41,7 +41,7 @@ namespace YAVSRG.Charts.Osu
 
         public void Dump(System.IO.TextWriter tw)
         {
-
+            tw.WriteLine(x.ToString() + "," + y.ToString() + "," + offset.ToString() + "," + type.ToString() + "," + hitsound.ToString() + "," + addition);
         }
     }
 }

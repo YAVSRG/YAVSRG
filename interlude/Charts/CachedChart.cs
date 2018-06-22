@@ -23,7 +23,7 @@ namespace YAVSRG.Charts
 
         public static CachedChart FromChart(YAVSRG.Chart c)
         {
-            DifficultyRating.RatingReport r = new DifficultyRating.RatingReport(new Gameplay.ChartWithModifiers(c), 1.0f);
+            DifficultyRating.RatingReport r = new DifficultyRating.RatingReport(new Gameplay.ChartWithModifiers(c), 1.0f, "");
             return new CachedChart
             {
                 file = c.Data.File,

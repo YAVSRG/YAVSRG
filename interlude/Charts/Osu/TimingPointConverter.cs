@@ -81,6 +81,11 @@ namespace YAVSRG.Charts.Osu
             return tp;
         }
 
+        public void ConvertFromBPMPoints()
+        {
+
+        }
+
         public void Dump(TextWriter tw)
         {
 
