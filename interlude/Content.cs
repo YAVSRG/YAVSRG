@@ -16,8 +16,8 @@ namespace YAVSRG
     class Content
     {
         public static readonly string WorkingDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YAVSRG");
-        public static readonly string AssetsDir = Path.Combine(WorkingDirectory,"Data","Assets");
-        static Dictionary<string,Sprite> Store = new Dictionary<string,Sprite>();
+        public static readonly string AssetsDir = Path.Combine(WorkingDirectory, "Data", "Assets");
+        static Dictionary<string, Sprite> Store = new Dictionary<string, Sprite>();
         static Dictionary<string, int> SoundStore = new Dictionary<string, int>();
 
         public static Sprite LoadTexture(string path, bool getColors = false) //load texture from absolute path
@@ -31,7 +31,7 @@ namespace YAVSRG
             {
                 Utils.SetThemeColorFromBG(bmp);
             }
-            return UploadTexture(bmp,1,1); //temp
+            return UploadTexture(bmp, 1, 1); //temp
         }
 
         public static Sprite FindTextureWithUV(string name, string skin)
@@ -120,7 +120,7 @@ namespace YAVSRG
         {
             string e = Path.GetExtension(filename).ToLower();
             bool valid = (e == ".png" || e == ".jpg");
-            if (valid && File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename),true);
+            if (valid && File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename), true);
             Game.Screens.ChangeThemeColor(Game.Options.Theme.ThemeColor);
             return GetTexture("background");
         }

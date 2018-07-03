@@ -16,4 +16,13 @@ namespace YAVSRG.Gameplay
         public string playstyle = ""; //temp
         public int keycount;
     }
+
+    public class TopScore
+    {
+        public float rating;
+        public float accuracy;
+        public string mods;
+        public string hash;
+        public string abspath;
+    }
 }

@@ -12,11 +12,12 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     class Playfield : GameplayWidget
     {
-        Sprite mine, note, hold, holdhead, receptor;
+        Sprite mine, note, hold, holdtail, holdhead, receptor;
 
         int lasti; int lastt;
         float[] holds;
         BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
+        int[] colors;
 
         protected int Keys { get { return scoreTracker.c.Keys; } }
         protected int HitPos { get { return Game.Options.Profile.HitPosition; } }
@@ -33,6 +34,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             receptor = Game.Options.Theme.GetReceptorTexture(Game.CurrentChart.Keys);
             hold = Game.Options.Theme.GetBodyTexture(Game.CurrentChart.Keys);
             holdhead = Game.Options.Theme.GetHeadTexture(Game.CurrentChart.Keys);
+            holdtail = Game.Options.Theme.GetTailTexture(Game.CurrentChart.Keys);
 
             Animation.Add(animation = new Animations.AnimationCounter(25, true));
 
@@ -40,6 +42,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             lasti = Chart.Notes.Count;
             lastt = Chart.Timing.Count;
             holds = new float[Chart.Keys];
+            colors = new int[Chart.Keys];
         }
 
         public override void Update(float left, float top, float right, float bottom)
@@ -56,7 +59,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             float ob = bottom;
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.EnableTransform(Game.Options.Profile.Upscroll);
-            for (int c = 0; c < Keys; c++) //draw columns and empty receptors
+            for (byte c = 0; c < Keys; c++) //draw columns and empty receptors
             {
                 DrawColumn(left, c);
                 DrawReceptor(left, c);
@@ -69,7 +72,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             float v = 0; //needs a better name
 
             holdsInHitpos.value = 0; //tracker of hold notes that need to be shown in the hit position
-            for (int k = 0; k < Chart.Keys; k++) //more tracker data for drawing long notes
+            for (byte k = 0; k < Chart.Keys; k++) //more tracker data for drawing long notes
             {
                 holds[k] = 0;//used in DrawSnapWithHolds. it's only initialised once to reduce garbage collection
             }
@@ -90,11 +93,11 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
             if (holdsInHitpos.value > 0)//this has been updated by DrawSnapWithHolds
             {
-                DrawSnap(new GameplaySnap(0, 0, holdsInHitpos.value, 0, 0, 0), left, HitPos); //draw hold heads in hit position
+                //DrawSnap(new GameplaySnap(0, 0, holdsInHitpos.value, 0, 0, 0), left, HitPos); //draw hold heads in hit position
 
-                foreach (int k in holdsInHitpos.GetColumns())
+                foreach (byte k in holdsInHitpos.GetColumns())
                 {
-                    Game.Options.Theme.DrawHead(holdhead, k * ColumnWidth + left, HitPos, (k + 1) * ColumnWidth + left, HitPos + ColumnWidth, k, Keys);
+                    Game.Options.Theme.DrawHead(holdhead, k * ColumnWidth + left, HitPos, (k + 1) * ColumnWidth + left, HitPos + ColumnWidth, k, Keys, -1, animation.cycles % holdhead.UV_X);
                 }
             }
 
@@ -113,7 +116,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             SpriteBatch.Draw(hold, i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f, Color.White); //Math.Abs corrects neg number
             if (drawhead)
             {
-                Game.Options.Theme.DrawHead(holdhead, i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth, i, Keys);
+                Game.Options.Theme.DrawHead(holdhead, i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth, i, Keys, colors[i], animation.cycles % holdhead.UV_X);
             }
         }
 
@@ -150,6 +153,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             foreach (byte k in s.holds.GetColumns())
             {
                 holds[k] = -pos;
+                colors[k] = s.colors[k];
             }
             foreach (byte k in s.taps.GetColumns())
             {
@@ -161,7 +165,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (byte k in s.ends.GetColumns())
             {
-                Game.Options.Theme.DrawTail(holdhead, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys);
+                Game.Options.Theme.DrawTail(holdtail, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % holdtail.UV_X);
             }
         }
     }

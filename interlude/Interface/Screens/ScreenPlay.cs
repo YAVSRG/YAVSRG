@@ -140,6 +140,7 @@ namespace YAVSRG.Interface.Screens
             }
             else if (Input.KeyTap(Key.Space) && (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000))
             {
+                Game.Audio.Stop();
                 Game.Audio.Seek(Chart.Notes.Points[0].Offset - 5000);
                 Game.Audio.Play(); //incase leading in
             }
@@ -189,9 +190,11 @@ namespace YAVSRG.Interface.Screens
             float delta = missWindow; //default value for the final "found" delta"
             float d; //temp delta for the note we're looking at
             int hitAt = -1; //when we find the note with the smallest d, its index is put in here
+            int needsToHold = 1023;
             while (Chart.Notes.Points[i].Offset < now + missWindow) //search loop
             {
                 Snap s = Chart.Notes.Points[i];
+                needsToHold &= ~(s.ends.value + s.holds.value); //if there are any starts of hold or releases within range, don't worry about finger independence penalty
                 BinarySwitcher b = release ? new BinarySwitcher(s.ends.value + s.taps.value + s.holds.value) : new BinarySwitcher(s.taps.value + s.holds.value);
                 if (b.GetColumn(k)) //if there's a note here
                 {
@@ -207,9 +210,19 @@ namespace YAVSRG.Interface.Screens
             } //delta is misswindow if nothing found
             //LOOK AT THIS LINE \/ \/ \/ IT IS IMPORTANT I DO SOMETHING ABOUT IT
             if (release) delta *= 0.5f; //releasing long notes is more lenient (hit windows twice as big). needs a setting to turn on and off
+
+
             if (hitAt >= 0 && (!release || Chart.Notes.Points[hitAt].ends.GetColumn(k))) //if we found a note to hit (it's -1 if nothing found)
-                //this extra && is added because releasing looks for anything the the column and if a release was the closest it hits it. fixes some unhittable ln behaviours.
+            //this first && is added because releasing looks for anything the the column and if a release was the closest it hits it. fixes some unhittable ln behaviours.
+            //the second && checks that you are holding all the columns you're supposed to. it will just miss otherwise to prevent LN cheesing
             {
+                foreach (byte c in new BinarySwitcher(needsToHold & Chart.Notes.Points[hitAt].middles.value).GetColumns())
+                {
+                    if (!Input.KeyPress(binds[c]))
+                    {
+                        return;
+                    }
+                }
                 delta /= (float)Game.Options.Profile.Rate; //convert back to time relative to what player observes instead of map data
                 //i.e on 2x rate if you hit 80ms away in the map data, you hit 40ms away in reality
                 scoreTracker.RegisterHit(hitAt, k, delta); //handle the hit

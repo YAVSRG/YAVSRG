@@ -22,12 +22,10 @@ namespace YAVSRG.Gameplay
         public Dictionary<string, string> SelectedMods = new Dictionary<string, string>();
         public event Action OnUpdateChart = () => { };
 
+        public ScoresDB ScoreDatabase = ScoresDB.Load();
+
         public void ChangeChart(Charts.CachedChart cache, Chart c, bool playFromPreview)
         {
-            if (CurrentChart != null && ChartSaveData != null && ChartSaveData.Scores.Count > 0)
-            {
-                Utils.SaveObject(ChartSaveData, Path.Combine(Content.WorkingDirectory, "Data", "Scores", CurrentChart.GetHash() + ".json"));
-            }
             CurrentCachedChart = cache;
             CurrentChart = c;
             Game.Screens.ChangeBackground(Content.LoadBackground(c.Data.SourcePath, c.Data.BGFile));
@@ -40,7 +38,7 @@ namespace YAVSRG.Gameplay
             {
                 Game.Audio.Play();
             }
-            ChartSaveData = GetChartSaveData();
+            ChartSaveData = ScoreDatabase.GetChartSaveData(CurrentChart);
             UpdateChart();
         }
 
@@ -59,10 +57,6 @@ namespace YAVSRG.Gameplay
 
         public void Unload()
         {
-            if (CurrentChart != null && ChartSaveData != null && ChartSaveData.Scores.Count > 0)
-            {
-                Utils.SaveObject(ChartSaveData, Path.Combine(Content.WorkingDirectory, "Data", "Scores", CurrentChart.GetHash() + ".json"));
-            }
             CurrentChart = null;
             ModifiedChart = null;
             ChartSaveData = null;
@@ -71,16 +65,6 @@ namespace YAVSRG.Gameplay
         public float GetChartOffset()
         {
             return ChartSaveData.Offset - CurrentChart.Notes.Points[0].Offset;
-        }
-
-        protected ChartSaveData GetChartSaveData()
-        {
-            string absolutePath = Path.Combine(Content.WorkingDirectory, "Data", "Scores", CurrentChart.GetHash() + ".json");
-            if (File.Exists(absolutePath))
-            {
-                return Utils.LoadObject<ChartSaveData>(absolutePath);
-            }
-            return ChartSaveData.FromChart(CurrentChart);
         }
 
         public void ApplyModsToHitData(ChartWithModifiers c, ref ScoreTracker.HitData[] hitdata)
@@ -128,6 +112,11 @@ namespace YAVSRG.Gameplay
                 }
             }
             return result;
+        }
+
+        public void SaveScores()
+        {
+            ScoreDatabase.Save();
         }
     }
 }

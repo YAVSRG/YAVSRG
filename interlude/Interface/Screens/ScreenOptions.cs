@@ -39,6 +39,16 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnExit(next);
             Game.Gameplay.UpdateChart(); //recolor notes based on settings if they've changed
+
+            /*Game.Options.Profile.Stats.Scores = new List<TopScore>[8];
+            foreach (var d in Game.Gameplay.ScoreDatabase.data.Values)
+            {
+                Game.Gameplay.ChangeChart(null, Charts.YAVSRG.Chart.FromFile(d.Path), false);
+                foreach (var s in d.Scores)
+                {
+                    Game.Options.Profile.Stats.SetScore(s);
+                }
+            }*/
         }
     }
 }

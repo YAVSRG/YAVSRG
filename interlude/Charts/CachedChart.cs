@@ -14,6 +14,7 @@ namespace YAVSRG.Charts
         public string creator;
         public string abspath;
         public string pack;
+        public string hash;
         public int keymode;
         public float length;
         public int bpm;
@@ -32,6 +33,7 @@ namespace YAVSRG.Charts
                 creator = c.Data.Creator,
                 abspath = c.Data.SourcePath,
                 pack = c.Data.SourcePack,
+                hash = c.GetHash(),
                 keymode = c.Keys,
                 length = c.GetDuration(),
                 bpm = c.GetBPM(),

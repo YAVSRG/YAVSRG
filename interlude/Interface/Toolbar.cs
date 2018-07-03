@@ -35,7 +35,7 @@ namespace YAVSRG.Interface
                 .PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttonimport", "", () => { })
+                new Button("buttonimport", "", () => { if (!(Game.Screens.Current is ScreenOptions)) Game.Screens.AddScreen(new ScreenProfile()); })
                 .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN)
                 );

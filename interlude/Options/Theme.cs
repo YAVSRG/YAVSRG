@@ -17,6 +17,7 @@ namespace YAVSRG.Options
         public int ColumnWidth = 150;
         public bool UseColor = false;
         public bool FlipHoldTail = true;
+        public bool UseHoldTailTexture = true;
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;
         public string Font1 = "Akrobat Black";
@@ -62,20 +63,21 @@ namespace YAVSRG.Options
             SpriteBatch.Draw("", left, top, right, bottom, GetColor(index), animation, index, 0, sprite: s); //fix it later
         }
 
-        public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
+        public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw(s, left, bottom, right, top, Color.White, GetRotation(column,keycount));
+            SpriteBatch.Draw("", left, bottom, right, top, GetColor(index), animation, index, GetRotation(column, keycount), sprite: s);
         }
 
-        public void DrawTail(Sprite s, float left, float top, float right, float bottom, int column, int keycount)
+        public void DrawTail(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            if (FlipHoldTail)
+            int rotation = UseHoldTailTexture ? 0 : GetRotation(column, keycount);
+            if (FlipHoldTail && !UseHoldTailTexture)
             {
-                DrawHead(s, left, bottom, right, top, column, keycount);
+                SpriteBatch.Draw("", left, top, right, bottom, GetColor(index), animation, index, rotation, sprite: s);
             }
             else
             {
-                DrawHead(s, left, top, right, bottom, column, keycount);
+                SpriteBatch.Draw("", left, bottom, right, top, GetColor(index), animation, index, rotation, sprite: s);
             }
         }
 
@@ -95,6 +97,19 @@ namespace YAVSRG.Options
 
         public Sprite GetHeadTexture(int keycount)
         {
+            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
+            {
+                return Content.GetTexture("arrowholdhead");
+            }
+            return Content.GetTexture("holdhead");
+        }
+
+        public Sprite GetTailTexture(int keycount)
+        {
+            if (UseHoldTailTexture)
+            {
+                return Content.GetTexture("holdtail");
+            }
             if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
                 return Content.GetTexture("arrowholdhead");

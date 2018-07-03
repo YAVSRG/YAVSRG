@@ -41,8 +41,8 @@ namespace YAVSRG.Charts.DifficultyRating
             },
             new Dictionary<string, KeyLayout>
             { //7k
-                { "4k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6 }) } } },
-                { "3k + 4", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6 }) } } },
+                { "Keyboard/Left thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6 }) } } },
+                { "Keyboard/Right thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6 }) } } },
                 { "BMS/Left thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 3, 2 }), new Hand(new List<int> { 4, 5, 6 }) } } },
                 { "BMS/Right thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 4, 3, 5, 6 }) } } },
             },

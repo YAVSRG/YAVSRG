@@ -50,6 +50,10 @@ namespace YAVSRG.Charts
         {
             string id = Path.Combine(c.Data.SourcePath, c.Data.File);
             Charts[id] = CachedChart.FromChart(c);
+            //if (Game.Gameplay.ScoreDatabase.data.ContainsKey(Charts[id].hash))
+            //{
+            //    Game.Gameplay.ScoreDatabase.GetChartSaveData(c).Path = id;
+            //}
         }
 
         public void Save()

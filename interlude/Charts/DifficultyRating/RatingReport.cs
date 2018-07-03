@@ -28,21 +28,21 @@ namespace YAVSRG.Charts.DifficultyRating
             List<GameplaySnap> snaps = map.Notes.Points;
             Snap current;
             BinarySwitcher s;
-
-            float CurrentStrain = 0;
+            
+            float[] currentStrain = new float[hands];
+            float[] lastHandUse = new float[hands];
             List<float> handDiff = new List<float>();
-            List<float> snapDiff = new List<float>();
-            float now = 0;
             float delta;
 
             for (int i = 0; i < snaps.Count; i++)
             {
                 if (snaps[i].taps.value + snaps[i].holds.value == 0) { continue; }
                 //PHYSICAL ----
-                delta = (snaps[i].Offset - now) / rate;
                 for (int h = 0; h < hands; h++)
                 {
+                    delta = (snaps[i].Offset - lastHandUse[h]) / rate;
                     current = snaps[i].Mask(layout.hands[h].Mask()); //bit mask to only look at notes corresponding to this hand
+                    if (current.IsEmpty()) { continue; }
                     s = new BinarySwitcher(current.taps.value + current.holds.value); //s = consider button presses
                     foreach (byte k in s.GetColumns()) //calculate value for each note and put it through overall algorithm
                     {
@@ -52,20 +52,19 @@ namespace YAVSRG.Charts.DifficultyRating
                     {
                         fingers[k] = current.Offset;
                     }
-                    snapDiff.Add(GetHandDifficulty(handDiff));
+                    UpdateStrain(ref currentStrain[h], delta, GetHandDifficulty(handDiff));
                     handDiff.Clear();
+                    lastHandUse[h] = snaps[i].Offset;
                 }
-                UpdateStrain(ref CurrentStrain, delta, GetSnapDifficulty(snapDiff));
-                snapDiff.Clear();
-                PhysicalData[i] = CurrentStrain; //calculate difficulty for hands overall (hand sync and shit idk)
+                PhysicalData[i] = GetSnapDifficulty(currentStrain.ToList()); //calculate difficulty for hands overall
                 //         ----
 
                 //TECH ----
                 //temp algorithm
-                TechnicalData[i] = GetStreamCurve((snaps[i].Offset - now) / rate);
+                TechnicalData[i] = GetStreamCurve((snaps[i].Offset - lastHandUse[0]) / rate);
                 //    ----
-                now = snaps[i].Offset; //record this time also, time between notes (used for both physical and technical)
             }
+            //Console.WriteLine("["+string.Join(", ",PhysicalData)+"]");
             Physical = GetOverallDifficulty(PhysicalData);
             Technical = GetOverallDifficulty(TechnicalData); //final values are meaned because your accuracy is a mean average of hits
             //difficulty of each snap is assumed to be a measure of how unlikely it is you will hit it well
@@ -96,31 +95,17 @@ namespace YAVSRG.Charts.DifficultyRating
 
         protected float GetHandDifficulty(List<float> data)
         {
-            if (data.Count == 0) { return 0; }
-            if (data.Count == 1) { return data[0]; };
-            double f = 0;
-            foreach (float v in data)
-            {
-                f += Math.Pow(v, 2);
-            }
-            return (float)Math.Pow(f / data.Count, 0.5);
+            return Utils.RootMeanPower(data, 1);
         }
 
         protected float GetSnapDifficulty(List<float> data)
         {
-            if (data.Count == 0) { return 0; }
-            if (data.Count == 1) { return data[0]; };
-            double f = 0;
-            foreach (float v in data)
-            {
-                f += Math.Pow(v, 1);
-            }
-            return (float)Math.Pow(f / data.Count, (1));
+            return Utils.RootMeanPower(data, 1);
         }
 
         protected float GetNoteDifficulty(byte c, float offset, int h, float rate)
         {
-            float ohtnerf = 1.75f;
+            float ohtnerf = 2f;
             double val = 0;
             BinarySwitcher s = new BinarySwitcher(h);
             s.RemoveColumn(c);
@@ -154,7 +139,7 @@ namespace YAVSRG.Charts.DifficultyRating
         protected float GetStreamCurve(float delta) //how hard is it to hit these two adjacent notes? when they are VERY close together you can hit them at the same time so no difficulty added
         {
             float widthScale = 0.02f;
-            float heightScale = 10f * 2.5f;
+            float heightScale = 10f * 1.4f;
             float curveExponent = 1f;
             float cutoffExponent = 10f;
             return (float)Math.Max((heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.0001f * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
@@ -163,7 +148,7 @@ namespace YAVSRG.Charts.DifficultyRating
         protected float GetJackCurve(float delta) //how hard is it to hit these two notes in the same column? closer = exponentially harder
         {
             float widthScale = 0.02f;
-            float heightScale = 10f * 3.3f;
+            float heightScale = 10f * 2.7f;
             float curveExponent = 1f;
             return (float)Math.Min(heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
         }

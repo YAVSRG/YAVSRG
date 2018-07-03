@@ -70,6 +70,9 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ManagedBass, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ManagedBass.2.0.4\lib\net45\ManagedBass.dll</HintPath>
@@ -136,6 +139,7 @@
     <Compile Include="Gameplay\Mods\Mod.cs" />
     <Compile Include="Gameplay\Mods\NoLN.cs" />
     <Compile Include="Gameplay\Mods\NoSV.cs" />
+    <Compile Include="Gameplay\ScoresDB.cs" />
     <Compile Include="Gameplay\Scoring\CCScoring.cs" />
     <Compile Include="Gameplay\Scoring\DP.cs" />
     <Compile Include="Gameplay\Scoring\MSScoring.cs" />
@@ -173,6 +177,7 @@
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
     <Compile Include="Interface\Screens\ScreenLoading.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
+    <Compile Include="Interface\Screens\ScreenProfile.cs" />
     <Compile Include="Interface\Screens\ScreenScore.cs" />
     <Compile Include="Interface\Animations\AnimationSlider.cs" />
     <Compile Include="Interface\Screens\ScreenVisualiser.cs" />
@@ -184,6 +189,7 @@
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
     <Compile Include="Interface\Widgets\InfoBox.cs" />
     <Compile Include="Interface\Widgets\Logo.cs" />
+    <Compile Include="Interface\Widgets\ProfileInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ScrollContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\FramedButton.cs" />

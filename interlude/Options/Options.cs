@@ -35,6 +35,7 @@ namespace YAVSRG.Options
             catch
             {
                 //log that settings have been reset due to load failure
+                Utilities.Logging.Log("Couldn't load settings file / switch to profile", Utilities.Logging.LogType.Error);
             }
         }
 

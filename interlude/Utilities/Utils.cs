@@ -107,5 +107,17 @@ namespace YAVSRG
                 Game.Screens.ChangeThemeColor(Game.Options.Theme.ThemeColor);
             }
         }
+
+        public static float RootMeanPower(List<float> data, float power)
+        {
+            if (data.Count == 0) { return 0; }
+            if (data.Count == 1) { return data[0]; };
+            double f = 0;
+            foreach (float v in data)
+            {
+                f += Math.Pow(v, power);
+            }
+            return (float)Math.Pow(f / data.Count, 1f / power);
+        }
     }
 }

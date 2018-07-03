@@ -11,35 +11,48 @@ namespace YAVSRG.Charts.DifficultyRating
     {
         public static float GetRating(RatingReport r, ScoreTracker.HitData[] hitdata)
         {
-            ScoreSystem judge = ScoreSystem.GetScoreSystem(ScoreType.Default);
-            float v = 0;
-            int n = 0;
+            double v = 0;
+            int samplesize = 2;
+            List<float> sample = new List<float>();
+            float rms, sd;
             for (int i = 0; i < r.PhysicalData.Length; i++)
             {
                 if (r.PhysicalData[i] > 0)
                 {
-                    v += GetValue(hitdata[i], judge) * r.PhysicalData[i];
-                    n += 1;
+                    sample.Clear();
+                    for (int s = 0; s < samplesize; s++)
+                    {
+                        if (i > s)
+                        {
+                            for (byte k = 0; k < hitdata[i - s].hit.Length; k++)
+                            {
+                                if (hitdata[i - s].hit[k] > 0)
+                                {
+                                    sample.Add(hitdata[i - s].delta[k]);
+                                }
+                            }
+                        }
+                    }
+                    if (sample.Count > 0)
+                    {
+                        rms = Math.Max(2,Utils.RootMeanPower(sample, 2));
+                        sd = 9f;
+                        float w = Func((20 - rms) / sd);
+                        if (v <= 0.01 || double.IsNaN(v))
+                        {
+                            v = w * r.PhysicalData[i];
+                        }
+                        v *= Math.Exp(0.02 * w * Math.Max(0,Math.Log(w * r.PhysicalData[i] / v)));
+                    }
                 }
             }
-            if (n > 0)
-            {
-                return v / n;
-            }
-            return 0f;
+            return (float)v;
         }
 
-        static float GetValue(ScoreTracker.HitData h, ScoreSystem judge)
+        public static float Func(double value) //en.wikipedia.org/wiki/Normal_distribution#Cumulative_distribution_function
         {
-            float v = 0;
-            for (byte k = 0; k < h.hit.Length; k++)
-            {
-                if (h.hit[k] > 0)
-                {
-                    v += judge.weights[judge.JudgeHit(h.delta[k])];
-                }
-            }
-            return v / (h.Count * judge.maxweight) / 0.95f;
+            value /= 1.414213562f;
+            return (float)Math.Max(0,Math.Min((0.5f + Math.Pow(Math.PI, -0.5) * (value - Math.Pow(value, 3) / 3 + Math.Pow(value, 5) / 10 - Math.Pow(value, 7) / 42 + Math.Pow(value, 9) / 216)),1));
         }
     }
 }

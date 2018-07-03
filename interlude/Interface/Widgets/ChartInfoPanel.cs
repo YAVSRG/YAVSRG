@@ -8,7 +8,7 @@ using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets
 {
-    public class ChartInfoPanel : Widget //planned replacement for ChartDifficulty.
+    public class ChartInfoPanel : Widget
     {
         RatingReport diff;
         float physical;
@@ -18,14 +18,10 @@ namespace YAVSRG.Interface.Widgets
         Scoreboard sb;
         Animations.AnimationCounter anim;
 
-        Sprite texture, frame;
-
         public ChartInfoPanel() : base()
         {
             ChangeChart();
             Animation.Add(anim = new Animations.AnimationCounter(400000, true));
-            texture = Content.GetTexture("levelselectbase");
-            frame = Content.GetTexture("frame");
         }
 
         public void ChangeChart()
