@@ -25,7 +25,7 @@ namespace YAVSRG.Gameplay
 
         public static ScoresDB Load()
         {
-            string path = Path.Combine(Content.WorkingDirectory, "Data", "Scores.json");
+            string path = Path.Combine(Game.WorkingDirectory, "Data", "Scores.json");
             if (File.Exists(path))
             {
                 return Utils.LoadObject<ScoresDB>(path);
@@ -44,7 +44,7 @@ namespace YAVSRG.Gameplay
 
         public void Save()
         {
-            string path = Path.Combine(Content.WorkingDirectory, "Data", "Scores.json");
+            string path = Path.Combine(Game.WorkingDirectory, "Data", "Scores.json");
             Utils.SaveObject(this, path);
         }
     }

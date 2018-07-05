@@ -43,7 +43,7 @@ namespace YAVSRG.Audio
             Rate = rate;
         }
 
-        protected double AudioOffset { get { return Game.Options.General.UniversalAudioOffset * Rate + LocalOffset; } }
+        protected double AudioOffset { get { return Options.Options.General.UniversalAudioOffset * Rate + LocalOffset; } }
 
         public double Duration
         {

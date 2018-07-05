@@ -57,8 +57,15 @@ namespace YAVSRG
             get { return Instance.taskManager; }
         }
 
+        public static string WorkingDirectory
+        {
+            get { return YAVSRG.Options.Options.General.WorkingDirectory; }
+        }
+
         public Game() : base(800,600, new OpenTK.Graphics.GraphicsMode(32,24,8,0))
         {
+            YAVSRG.Options.Options.Init(); //init options i.e load profiles
+            options = new Options.Options(); //create options data from profile
             Sprite s = Content.UploadTexture(Utils.CaptureScreen(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";
             Icon = new Icon("icon.ico");
@@ -68,10 +75,8 @@ namespace YAVSRG
             ManagedBass.Bass.Init(); //init bass
             audio = new MusicPlayer(); //init my music player
 
-            YAVSRG.Options.Options.Init(); //init options i.e load profiles
-            options = new Options.Options(); //create options data from profile
-            ApplyWindowSettings(options.General); //apply window settings from options
-            ScreenUtils.UpdateBounds(Width, Height);
+            ApplyWindowSettings(YAVSRG.Options.Options.General); //apply window settings from options
+            //ScreenUtils.UpdateBounds(Width, Height);
 
             gameplay = new GameplayManager();
             screens = new ScreenManager();
@@ -112,7 +117,7 @@ namespace YAVSRG
         {
             trayIcon.Hide();
             Visible = true;
-            ApplyWindowSettings(Options.General);
+            ApplyWindowSettings(YAVSRG.Options.Options.General);
         }
 
         protected override void OnResize(EventArgs e) //handles resizing of the window. tells OpenGL the new resolution etc

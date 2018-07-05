@@ -79,7 +79,7 @@ namespace YAVSRG.Interface.Screens
             if (exiting)
             {
                 a = 255 - a;
-                Game.Audio.SetVolume(Game.Options.General.AudioVolume * (1 - fade));
+                Game.Audio.SetVolume(Options.Options.General.AudioVolume * (1 - fade));
                 if (!transition.Running)
                 {
                     Game.Instance.Exit();

@@ -15,7 +15,7 @@ namespace YAVSRG.Charts
 
         static string GetCachePath()
         {
-            return Path.Combine(Content.WorkingDirectory, "Data", "Cache.json");
+            return Path.Combine(Game.WorkingDirectory, "Data", "Cache.json");
         }
 
         public static Cache LoadCache()

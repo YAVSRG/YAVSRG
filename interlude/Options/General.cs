@@ -16,9 +16,10 @@ namespace YAVSRG.Options
         }
 
         public float UniversalAudioOffset = 0f;
-        public float AudioVolume = 0.2f;
+        public float AudioVolume = 0.1f;
         public int FrameLimiter = 0;
         public WindowType WindowMode = WindowType.Borderless;
         public string CurrentProfile = "Default.json";
+        public string WorkingDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YAVSRG");
     }
 }

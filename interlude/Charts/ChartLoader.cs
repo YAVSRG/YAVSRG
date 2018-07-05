@@ -123,7 +123,7 @@ namespace YAVSRG.Charts
         {
             if (Cache.Charts.Count == 0)
             {
-                Game.Gameplay.ChangeChart(null, new Chart(new List<Snap>(), new List<BPMPoint>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Content.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0 }, 4), false);
+                Game.Gameplay.ChangeChart(null, new Chart(new List<Snap>(), new List<BPMPoint>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Game.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0 }, 4), false);
                 return;
             }
             SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)],true);
@@ -132,7 +132,7 @@ namespace YAVSRG.Charts
         public static void Recache()
         {
             Cache.Charts = new Dictionary<string, CachedChart>(); //clear cache
-            foreach (string pack in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
+            foreach (string pack in Directory.GetDirectories(Path.Combine(Game.WorkingDirectory, "Songs")))
             {
                 foreach (string song in Directory.GetDirectories(pack))
                 {
@@ -164,7 +164,7 @@ namespace YAVSRG.Charts
 
         public static void ConvertAllPacks()
         {
-            foreach (string s in Directory.GetDirectories(Path.Combine(Content.WorkingDirectory, "Songs")))
+            foreach (string s in Directory.GetDirectories(Path.Combine(Game.WorkingDirectory, "Songs")))
             {
                 ConvertPack(s, Path.GetFileName(s));
             }
@@ -192,7 +192,7 @@ namespace YAVSRG.Charts
         public static void ConvertChart(string absfilepath, string pack) //pack only used if importing from an external pack
         {
             string sourceFolder = Path.GetDirectoryName(absfilepath);
-            string targetFolder = Path.Combine(Content.WorkingDirectory, "Songs", pack, Path.GetFileName(sourceFolder));
+            string targetFolder = Path.Combine(Game.WorkingDirectory, "Songs", pack, Path.GetFileName(sourceFolder));
 
             if (Path.GetExtension(absfilepath).ToLower() == ".osu")
             {
@@ -308,7 +308,7 @@ namespace YAVSRG.Charts
                             break;
                         }
                     }
-                    string target = Path.Combine(Content.WorkingDirectory, "Imports", Path.GetFileNameWithoutExtension(path));
+                    string target = Path.Combine(Game.WorkingDirectory, "Imports", Path.GetFileNameWithoutExtension(path));
                     foreach (ZipArchiveEntry e in z.Entries)
                     {
                         if (e.FullName.StartsWith(root, StringComparison.Ordinal))
