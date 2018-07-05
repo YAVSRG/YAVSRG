@@ -42,6 +42,21 @@ namespace YAVSRG.Charts
                 technical = r.Technical
             };
         }
+
+        public static bool operator ==(CachedChart a, CachedChart b)
+        {
+            return (a.abspath+a.file == b.abspath+b.file);
+        }
+
+        public static bool operator !=(CachedChart a, CachedChart b)
+        {
+            return (a.abspath+a.file != b.abspath+b.file);
+        }
+
+        public override bool Equals(object other)
+        {
+            return this == (other as CachedChart);
+        }
     }
 }
 

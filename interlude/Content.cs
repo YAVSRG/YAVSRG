@@ -87,6 +87,21 @@ namespace YAVSRG
             return t;
         }
 
+        public static Options.WidgetPositionData LoadWidgetData(string name)
+        {
+            string path = Path.Combine(AssetsDir, Game.Options.Profile.Skin, name + ".json");
+            if (File.Exists(path)) //attempt to find and load in current assets folder
+            {
+                return Utils.LoadObject<Options.WidgetPositionData>(path);
+            }
+            path = Path.Combine(AssetsDir, "_fallback", name + ".json");
+            if (File.Exists(path)) //attempt to find and load in fallback assets folder
+            {
+                return Utils.LoadObject<Options.WidgetPositionData>(path);
+            }
+            return new Options.WidgetPositionData(); //return blank data
+        }
+
         public static int LoadSoundFromAssets(string path)
         {
             if (!SoundStore.ContainsKey(path))

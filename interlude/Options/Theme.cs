@@ -7,7 +7,7 @@ using System.Drawing;
 
 namespace YAVSRG.Options
 {
-    class Theme
+    public class Theme
     {
         public Color[] NoteColors = new[] { Color.Red, Color.Blue, Color.Yellow, Color.LightBlue, Color.Green, Color.Purple, Color.Cyan, Color.White };
         public Color[] JudgeColors = new[] { Color.FromArgb(0, 255, 255), Color.FromArgb(255, 255, 0), Color.FromArgb(0, 255, 100), Color.FromArgb(0, 0, 255), Color.Fuchsia, Color.FromArgb(255, 0, 0) };

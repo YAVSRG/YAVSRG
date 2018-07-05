@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Options
 {
-    class General
+    public class General
     {
         public enum WindowType
         {

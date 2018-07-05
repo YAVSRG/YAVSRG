@@ -9,7 +9,7 @@ using YAVSRG.Gameplay;
 
 namespace YAVSRG.Options
 {
-    class Profile
+    public class Profile
     {
         [JsonIgnore]
         public string ProfilePath = "Default.json";

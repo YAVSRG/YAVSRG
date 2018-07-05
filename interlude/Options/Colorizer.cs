@@ -9,7 +9,7 @@ using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Options
 {
-    class Colorizer
+    public class Colorizer
     {
         public static readonly int[] DDRValues = { 1, 2, 4, 8, 3, 6, 12 };
 

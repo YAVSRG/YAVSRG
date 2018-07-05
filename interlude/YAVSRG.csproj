@@ -187,6 +187,7 @@
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\HitLighting.cs" />
     <Compile Include="Interface\Widgets\InfoBox.cs" />
     <Compile Include="Interface\Widgets\Logo.cs" />
     <Compile Include="Interface\Widgets\ProfileInfoPanel.cs" />
@@ -213,6 +214,8 @@
     <Compile Include="Options\Panels\GameplayPanel.cs" />
     <Compile Include="Options\Panels\GeneralPanel.cs" />
     <Compile Include="Options\Panels\LayoutPanel.cs" />
+    <Compile Include="Options\WidgetPosition.cs" />
+    <Compile Include="Options\WidgetPositionData.cs" />
     <Compile Include="Utilities\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />

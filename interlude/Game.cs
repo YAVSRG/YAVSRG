@@ -16,7 +16,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.2.11";
+        public static readonly string Version = "Interlude v0.2.12";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 

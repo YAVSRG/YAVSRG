@@ -7,7 +7,7 @@ using System.IO;
 
 namespace YAVSRG.Options
 {
-    class Options
+    public class Options
     {
         public static List<Profile> Profiles;
         public static string[] Skins;

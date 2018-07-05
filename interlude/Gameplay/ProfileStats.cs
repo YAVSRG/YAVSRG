@@ -7,7 +7,7 @@ using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay
 {
-    class ProfileStats
+    public class ProfileStats
     {
         public int SecondsPlayed;
         public int TimesPlayed;

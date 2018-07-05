@@ -15,35 +15,6 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenPlay : Screen //i cleaned up this file a little but it's a bit of a mess. sorry!
     {
-        class HitLighting : Widget //this is the hitlighting widget and needs to be moved to its own file
-        {
-            public AnimationSlider NoteLight = new AnimationSlider(0);
-            public AnimationSlider ReceptorLight = new AnimationSlider(0);
-
-            public HitLighting() : base()
-            {
-                Animation.Add(NoteLight);
-                Animation.Add(ReceptorLight);
-            }
-
-            public override void Draw(float left, float top, float right, float bottom) //draws hitlight, right now just the receptor light and not a flash when you hit a note
-            {
-                base.Draw(left, top, right, bottom);
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                    float w = (right - left);
-                if (ReceptorLight.Val > 0.5f)
-                {
-                    SpriteBatch.Draw("receptorlighting", left + w * (1 - ReceptorLight.Val), top + 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
-                }
-                if (NoteLight.Val > 0f)
-                {
-                    SpriteBatch.Draw("notelighting", left, bottom+w, right, bottom, Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
-                }
-            }
-        }
-
-        int COLUMNWIDTH = Game.Options.Theme.ColumnWidth; //some constants that really ought not to be here any more
-        int HITPOSITION = Game.Options.Profile.HitPosition;
         
         int lasti; int lastt; //the number of snaps and number of timing points respectively. used to be an optimisation and now they're just a convenience
         ChartWithModifiers Chart;
@@ -52,11 +23,15 @@ namespace YAVSRG.Interface.Screens
         float missWindow;
         Key[] binds;
         HitLighting[] lighting;
+        AnimationFade bannerIn, bannerOut;
 
         public ScreenPlay()
         {
             Chart = Game.Gameplay.ModifiedChart;
             scoreTracker = new ScoreTracker(Game.Gameplay.ModifiedChart);
+
+            int columnwidth = Game.Options.Theme.ColumnWidth;
+            int hitposition = Game.Options.Profile.HitPosition;
 
             //i make all this stuff ahead of time as a small optimisation
             lasti = Chart.Notes.Count;
@@ -64,9 +39,9 @@ namespace YAVSRG.Interface.Screens
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
 
-            //this stuff is absolutely fine to stay here
-            AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-COLUMNWIDTH * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(COLUMNWIDTH * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
-            AddChild(new HitMeter(scoreTracker).PositionTopLeft(-COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(COLUMNWIDTH * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
+            //this stuff is ok to stay here
+            AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(new HitMeter(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
             AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
             AddChild(new ComboDisplay(scoreTracker).PositionTopLeft(0, -100, AnchorType.CENTER, AnchorType.CENTER));
 
@@ -78,8 +53,8 @@ namespace YAVSRG.Interface.Screens
             for (int i = 0; i < Chart.Keys; i++)
             {
                 lighting[i] = new HitLighting();
-                lighting[i].PositionTopLeft(COLUMNWIDTH * i, HITPOSITION + COLUMNWIDTH * 2, AnchorType.MIN, AnchorType.CENTER)
-                    .PositionBottomRight(COLUMNWIDTH * (i + 1), HITPOSITION, AnchorType.MIN, AnchorType.CENTER);
+                lighting[i].PositionTopLeft(columnwidth * i, hitposition + columnwidth * 2, AnchorType.MIN, AnchorType.CENTER)
+                    .PositionBottomRight(columnwidth * (i + 1), hitposition, AnchorType.MIN, AnchorType.CENTER);
                 playfield.AddChild(lighting[i]);
             }
             //this places the screencovers
@@ -98,10 +73,15 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.PopScreen(); return;
             }
             //some misc stuff
-            Game.Screens.BackgroundDim.Target = 1-Game.Options.Profile.BackgroundDim;
+            Game.Screens.BackgroundDim.Target = 1 - Game.Options.Profile.BackgroundDim;
             Utils.SetDiscordData("Playing", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]");
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.Toolbar.SetHidden(true);
+            AnimationSeries s = new AnimationSeries(false);
+            s.Add(bannerIn = new AnimationFade(0, 2.001f, 2f));
+            s.Add(new AnimationCounter(60, false));
+            s.Add(bannerOut = new AnimationFade(0, 255, 254));
+            Animation.Add(s);
 
             //prep audio and play from beginning
             Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
@@ -142,7 +122,7 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Audio.Stop();
                 Game.Audio.Seek(Chart.Notes.Points[0].Offset - 5000);
-                Game.Audio.Play(); //incase leading in
+                Game.Audio.Play(); //in case of leading in
             }
             //actual input stuff
             for (byte k = 0; k < Chart.Keys; k++)
@@ -208,8 +188,9 @@ namespace YAVSRG.Interface.Screens
                 i++;
                 if (i == lasti) { break; }
             } //delta is misswindow if nothing found
-            //LOOK AT THIS LINE \/ \/ \/ IT IS IMPORTANT I DO SOMETHING ABOUT IT
-            if (release) delta *= 0.5f; //releasing long notes is more lenient (hit windows twice as big). needs a setting to turn on and off
+
+            //LOOK AT THIS LINE \/ \/ \/ IT IS IMPORTANT I DO SOMETHING ABOUT IT I.E REMOVE IT LATER
+            if (release) delta *= 0.5f; //releasing long notes is more lenient (hit windows twice as big). needs a setting to turn on and off or to be removed
 
 
             if (hitAt >= 0 && (!release || Chart.Notes.Points[hitAt].ends.GetColumn(k))) //if we found a note to hit (it's -1 if nothing found)
@@ -237,6 +218,15 @@ namespace YAVSRG.Interface.Screens
             if (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000)
             {
                 SpriteBatch.Font1.DrawJustifiedText("Press SPACE to Skip", 50f, ScreenWidth - 20f, ScreenHeight - 80f, Game.Options.Theme.MenuFont);
+            }
+            if (Animation.Running)
+            {
+                int a = 255 - (int)bannerOut;
+                SpriteBatch.DrawRect(left, -55, left + ScreenWidth * bannerIn, -50, Color.FromArgb(a,Game.Screens.DarkColor));
+                SpriteBatch.DrawRect(left, 50, left + ScreenWidth * bannerIn, 55, Color.FromArgb(a,Game.Screens.DarkColor));
+                Game.Screens.DrawChartBackground(right - ScreenWidth * bannerIn, -50, right, 50, Color.FromArgb(a, Game.Screens.BaseColor));
+                SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, right - ScreenWidth * bannerIn, -50, right, 30, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                SpriteBatch.Font2.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName + " // " + Game.CurrentChart.Data.Creator, left, 10, left + ScreenWidth * bannerIn, 50, Color.FromArgb(a, Game.Options.Theme.MenuFont));
             }
         }
     }

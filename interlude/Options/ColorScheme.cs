@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Options
 {
-    class ColorScheme
+    public class ColorScheme
     {
         public Colorizer.ColorStyle Style;
         public int[,] ColorMap;

@@ -75,11 +75,19 @@ namespace YAVSRG.Interface
             l = Left(l, r); t = Top(t, b); r = Right(ol, r); b = Bottom(ot, b);
         }
 
+        public Widget Position(Options.WidgetPosition pos)
+        {
+            PositionTopLeft(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor);
+            PositionBottomRight(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
+            return this;
+        }
+
         public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay)
         {
             A.Reposition(x, y, ax, ay);
             return this; //allows for method chaining
         }
+
 
         public Widget PositionBottomRight(float x, float y, AnchorType ax, AnchorType ay)
         {
