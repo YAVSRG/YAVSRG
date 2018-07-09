@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Gameplay
 {
@@ -46,7 +47,8 @@ namespace YAVSRG.Gameplay
 
         public ChartWithModifiers c;
         public ScoreSystem Scoring;
-        public HitData[] hitdata;
+        public HitData[] Hitdata;
+        public AnimationColorFade WidgetColor;
         public int maxcombo; //max possible combo
 
         public ScoreTracker(ChartWithModifiers c)
@@ -63,13 +65,13 @@ namespace YAVSRG.Gameplay
             Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); };
 
             int count = c.Notes.Count;
-            hitdata = new HitData[count];
+            Hitdata = new HitData[count];
             for (int i = 0; i < count; i++)
             {
-                hitdata[i] = new HitData(c.Notes.Points[i], c.Keys);
+                Hitdata[i] = new HitData(c.Notes.Points[i], c.Keys);
             }
-
-            Game.Gameplay.ApplyModsToHitData(c, ref hitdata);
+            WidgetColor = new AnimationColorFade(System.Drawing.Color.FromArgb(0, Game.Options.Theme.MenuFont), Game.Options.Theme.MenuFont);
+            Game.Gameplay.ApplyModsToHitData(c, ref Hitdata);
         }
 
         public int Combo()
@@ -84,20 +86,21 @@ namespace YAVSRG.Gameplay
 
         public void Update(float time)
         {
-            Scoring.Update(time,hitdata);
+            Scoring.Update(time,Hitdata);
+            WidgetColor.Update();
         }
 
         public void RegisterHit(int i, int k, float delta)
         {
-            if (hitdata[i].hit[k] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
-            hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)
-            hitdata[i].delta[k] = delta;
-            Scoring.HandleHit(k, i, hitdata);
+            if (Hitdata[i].hit[k] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
+            Hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)
+            Hitdata[i].delta[k] = delta;
+            Scoring.HandleHit(k, i, Hitdata);
         }
 
         public bool EndOfChart() //is end of chart?
         {
-            return Scoring.EndOfChart(hitdata.Length);
+            return Scoring.EndOfChart(Hitdata.Length);
         }
 
         public static string HitDataToString(HitData[] data)

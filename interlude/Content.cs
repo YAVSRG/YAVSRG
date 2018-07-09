@@ -84,20 +84,28 @@ namespace YAVSRG
                 t = Utils.LoadObject<Options.Theme>(newpath);
             }
             Utils.SaveObject(t, newpath);
+            t.Gameplay = LoadWidgetData(name, "gameplay");
             return t;
         }
 
-        public static Options.WidgetPositionData LoadWidgetData(string name)
+        public static Options.WidgetPositionData LoadWidgetData(string theme, string name)
         {
-            string path = Path.Combine(AssetsDir, Game.Options.Profile.Skin, name + ".json");
-            if (File.Exists(path)) //attempt to find and load in current assets folder
+            try
             {
-                return Utils.LoadObject<Options.WidgetPositionData>(path);
+                string path = Path.Combine(AssetsDir, theme, name + ".json");
+                if (File.Exists(path)) //attempt to find and load in current assets folder
+                {
+                    return Utils.LoadObject<Options.WidgetPositionData>(path);
+                }
+                path = Path.Combine(AssetsDir, "_fallback", name + ".json");
+                if (File.Exists(path)) //attempt to find and load in fallback assets folder
+                {
+                    return Utils.LoadObject<Options.WidgetPositionData>(path);
+                }
             }
-            path = Path.Combine(AssetsDir, "_fallback", name + ".json");
-            if (File.Exists(path)) //attempt to find and load in fallback assets folder
+            catch (Exception e)
             {
-                return Utils.LoadObject<Options.WidgetPositionData>(path);
+                Utilities.Logging.Log("Could not load widget position data: " + name + " !", Utilities.Logging.LogType.Error);
             }
             return new Options.WidgetPositionData(); //return blank data
         }

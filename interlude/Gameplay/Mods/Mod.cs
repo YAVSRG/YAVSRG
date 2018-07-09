@@ -25,13 +25,12 @@ namespace YAVSRG.Gameplay.Mods
 
         }
 
-        public virtual string GetName(string data)
-        {
-            return "?";
-        }
+        public virtual string GetName(string data) { return "?"; }
+
+        public virtual string GetDescription(string data) { return "No description set"; }
 
         public virtual int GetStatus(string data) { return 0; } //0 = ranked, 1 = save but not ranked, 2 = do not save
 
-        public virtual string[] Settings { get { return new string[] { }; } } 
+        public virtual string[] Settings { get { return new string[] { }; } }
     }
 }

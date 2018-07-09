@@ -30,5 +30,7 @@ namespace YAVSRG.Gameplay.Mods
         {
             return "NoSV";
         }
+
+        public override string GetDescription(string data) { return "Removes all slider velocity (scroll speed) changes from a chart."; }
     }
 }

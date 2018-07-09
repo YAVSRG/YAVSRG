@@ -40,19 +40,19 @@ namespace YAVSRG.Interface.Screens
             rank = Content.GetTexture("rank-" + ranks[tier]);
             if (ShouldSaveScore())
             {
-                Score score = new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate, playstyle = Game.Options.Profile.Playstyles[scoreData.c.Keys] };
+                Score score = new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.Hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate, playstyle = Game.Options.Profile.Playstyles[scoreData.c.Keys] };
                 Game.Gameplay.ChartSaveData.Scores.Add(score);
                 Game.Options.Profile.Stats.SetScore(score);
                 Game.Gameplay.SaveScores();
             }
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
             acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
-            acc1.ProcessScore(scoreData.hitdata);
-            acc2.ProcessScore(scoreData.hitdata);
+            acc1.ProcessScore(scoreData.Hitdata);
+            acc2.ProcessScore(scoreData.Hitdata);
 
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
-            perf = Utils.RoundNumber(Charts.DifficultyRating.PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.hitdata));
+            perf = Utils.RoundNumber(Charts.DifficultyRating.PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
 
             AddChild(new Scoreboard().PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.MIN, AnchorType.MAX));
 
@@ -127,11 +127,11 @@ namespace YAVSRG.Interface.Screens
             float o;
             for (int i = 0; i < snapcount; i++)
             {
-                for (int k = 0; k < scoreData.hitdata[i].hit.Length; k++)
+                for (int k = 0; k < scoreData.Hitdata[i].hit.Length; k++)
                 {
-                    if (scoreData.hitdata[i].hit[k] > 0)
+                    if (scoreData.Hitdata[i].hit[k] > 0)
                     {
-                        o = scoreData.hitdata[i].delta[k];
+                        o = scoreData.Hitdata[i].delta[k];
                         j = scoreData.Scoring.JudgeHit(o);
                         if (j > 2)
                         {

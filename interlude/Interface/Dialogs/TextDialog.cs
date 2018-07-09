@@ -1,9 +1,11 @@
 ﻿using OpenTK;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface.Dialogs
 {
@@ -11,40 +13,38 @@ namespace YAVSRG.Interface.Dialogs
     {
         string prompt;
         string val = "";
+        InputMethod im;
+        AnimationSlider slide;
 
         public TextDialog(string prompt, Action<string> action) : base(action) //todo: edit this to use the IME system
         {
             this.prompt = prompt;
-            PositionTopLeft(-200, -100, AnchorType.CENTER, AnchorType.CENTER);
-            PositionBottomRight(200, 100, AnchorType.CENTER, AnchorType.CENTER);
-            Game.Instance.KeyPress += PressKey;
-        }
-
-        public void PressKey(object sender, KeyPressEventArgs e)
-        {
-            val += e.KeyChar;
+            Input.ChangeIM(im = new InputMethod((s) => { val = s; }, () => { return val; }, () => { }));
+            Animation.Add(slide = new AnimationSlider(0) { Target = 1f });
         }
 
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
-            if (Input.KeyTap(OpenTK.Input.Key.BackSpace) && val.Length > 0)
+            if (Input.KeyTap(OpenTK.Input.Key.Enter, true))
             {
-                val = val.Remove(val.Length-1);
-            }
-            if (Input.KeyTap(OpenTK.Input.Key.Enter))
-            {
-                Game.Instance.KeyPress -= PressKey;
+                im.Dispose();
+                Input.ChangeIM(null);
                 Close(val);
             }
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
+            int a = (int)(slide * 255);
+            float w = ScreenUtils.ScreenWidth * slide * 2;
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawTextToFill(val, left, top + 100, right, bottom, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawRect(left, -105, left + w, -100, Color.FromArgb(a, Game.Screens.HighlightColor));
+            SpriteBatch.DrawRect(left, 100, left + w, 105, Color.FromArgb(a, Game.Screens.HighlightColor));
+            Game.Screens.DrawChartBackground(right - w, -100, right, 100, Color.FromArgb(a, Game.Screens.DarkColor));
+            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, -100, right, -50, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredTextToFill(val, left, -50, right, 100, Game.Options.Theme.MenuFont);
         }
     }
 }

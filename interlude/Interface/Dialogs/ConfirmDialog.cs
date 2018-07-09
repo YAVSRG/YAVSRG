@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Interface.Animations;
 using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Interface.Dialogs
@@ -10,24 +12,26 @@ namespace YAVSRG.Interface.Dialogs
     class ConfirmDialog : Dialog
     {
         string prompt;
+        AnimationSlider slide;
 
         public ConfirmDialog(string prompt, Action<string> action) : base(action)
         {
             this.prompt = prompt;
-            PositionTopLeft(ScreenUtils.ScreenWidth, -50, AnchorType.CENTER, AnchorType.CENTER);
-            PositionBottomRight(ScreenUtils.ScreenWidth+100, 50, AnchorType.CENTER, AnchorType.CENTER);
-            A.Target(-ScreenUtils.ScreenWidth, -50);
-            AddChild(new BannerButton("Yes", () => { Close("Y"); }).PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(ScreenUtils.ScreenWidth, 200, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new BannerButton("No", () => { Close("N"); }).PositionTopLeft(ScreenUtils.ScreenWidth, 100, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(-100, 200, AnchorType.MAX, AnchorType.MAX));
-
+            AddChild(new BannerButton("Yes", () => { Close("Y"); }).PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(ScreenUtils.ScreenWidth - 100, 200, AnchorType.MIN, AnchorType.CENTER));
+            AddChild(new BannerButton("No", () => { Close("N"); }).PositionTopLeft(ScreenUtils.ScreenWidth - 100, 100, AnchorType.MAX, AnchorType.CENTER).PositionBottomRight(-100, 200, AnchorType.MAX, AnchorType.CENTER));
+            Animation.Add(slide = new AnimationSlider(0) { Target = 1f });
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
+            int a = (int)(slide * 255);
+            float w = ScreenUtils.ScreenWidth * slide * 2;
+            base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawParallelogramWithBG(left, top, right, bottom, 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, top, right, top + 100, Game.Options.Theme.MenuFont);
-            DrawWidgets(left, top, right, bottom);
+            SpriteBatch.DrawRect(left, -55, left + w, -50, Color.FromArgb(a, Game.Screens.DarkColor));
+            SpriteBatch.DrawRect(left, 50, left + w, 55, Color.FromArgb(a, Game.Screens.DarkColor));
+            Game.Screens.DrawChartBackground(right - w, -50, right, 50, Color.FromArgb(a, Game.Screens.BaseColor));
+            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, -50, right, 50, Game.Options.Theme.MenuFont);
         }
     }
 }

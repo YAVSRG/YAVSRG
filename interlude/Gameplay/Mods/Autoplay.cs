@@ -28,5 +28,7 @@ namespace YAVSRG.Gameplay.Mods
         {
             return "Auto";
         }
+
+        public override string GetDescription(string data) { return "Automatically plays the chart for you! (With perfect accuracy)"; }
     }
 }

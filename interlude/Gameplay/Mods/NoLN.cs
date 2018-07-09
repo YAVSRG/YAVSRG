@@ -48,7 +48,7 @@ namespace YAVSRG.Gameplay.Mods
                     return true;
                 }
             }
-            return false;
+            return true; //debug
         }
 
         public override string[] Settings { get { return new string[] { "release", "all" }; } }
@@ -57,5 +57,7 @@ namespace YAVSRG.Gameplay.Mods
         {
             return data == "release" ? "NoReleases" : "NoHolds";
         }
+
+        public override string GetDescription(string data) { return  data == "release" ? "Disables the need to release the ends of hold notes with exact timing, as these are not given judgements.\nYou are still required to be holding them while hitting another other simultaneous notes." : "Removes all hold notes from a chart and replaces them with a tap note where they began."; }
     }
 }

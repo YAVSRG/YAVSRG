@@ -39,12 +39,31 @@ namespace YAVSRG.Interface.Screens
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
 
+            var widgetData = Game.Options.Theme.Gameplay;
+
             //this stuff is ok to stay here
             AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
             AddChild(new HitMeter(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
-            AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new ComboDisplay(scoreTracker).PositionTopLeft(0, -100, AnchorType.CENTER, AnchorType.CENTER));
-
+            if (widgetData.IsEnabled("progressBar"))
+            {
+                AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
+            }
+            if (widgetData.IsEnabled("combo"))
+            {
+                AddChild(new ComboDisplay(scoreTracker).Position(widgetData.GetPosition("combo")));
+            }
+            if (widgetData.IsEnabled("accuracy"))
+            {
+                AddChild(new AccMeter(scoreTracker).Position(widgetData.GetPosition("accuracy")));
+            }
+            if (widgetData.IsEnabled("time"))
+            {
+                AddChild(new MiscInfoDisplay(scoreTracker, () => { return DateTime.Now.ToLongTimeString(); }).Position(widgetData.GetPosition("time")));
+            }
+            if (widgetData.IsEnabled("timeLeft"))
+            {
+                AddChild(new MiscInfoDisplay(scoreTracker, () => { return Utils.FormatTime(Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) + " left"; }).Position(widgetData.GetPosition("timeLeft")));
+            }
             //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
             //playfield.InitGameplay();
             lighting = new HitLighting[Chart.Keys];
@@ -80,6 +99,7 @@ namespace YAVSRG.Interface.Screens
             AnimationSeries s = new AnimationSeries(false);
             s.Add(bannerIn = new AnimationFade(0, 2.001f, 2f));
             s.Add(new AnimationCounter(60, false));
+            s.Add(new AnimationAction(() => { scoreTracker.WidgetColor.Target = 1; }));
             s.Add(bannerOut = new AnimationFade(0, 255, 254));
             Animation.Add(s);
 
@@ -214,16 +234,15 @@ namespace YAVSRG.Interface.Screens
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
-            SpriteBatch.Font1.DrawCentredText(Utils.RoundNumber(scoreTracker.Accuracy()), 40f, 0, -ScreenHeight + 70, Color.White); //acc needs to be moved to a widget
             if (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000)
             {
-                SpriteBatch.Font1.DrawJustifiedText("Press SPACE to Skip", 50f, ScreenWidth - 20f, ScreenHeight - 80f, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawCentredText("Press SPACE to Skip", 50f, 0, 100, Game.Options.Theme.MenuFont);
             }
             if (Animation.Running)
             {
                 int a = 255 - (int)bannerOut;
-                SpriteBatch.DrawRect(left, -55, left + ScreenWidth * bannerIn, -50, Color.FromArgb(a,Game.Screens.DarkColor));
-                SpriteBatch.DrawRect(left, 50, left + ScreenWidth * bannerIn, 55, Color.FromArgb(a,Game.Screens.DarkColor));
+                SpriteBatch.DrawRect(left, -55, left + ScreenWidth * bannerIn, -50, Color.FromArgb(a, Game.Screens.DarkColor));
+                SpriteBatch.DrawRect(left, 50, left + ScreenWidth * bannerIn, 55, Color.FromArgb(a, Game.Screens.DarkColor));
                 Game.Screens.DrawChartBackground(right - ScreenWidth * bannerIn, -50, right, 50, Color.FromArgb(a, Game.Screens.BaseColor));
                 SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, right - ScreenWidth * bannerIn, -50, right, 30, Color.FromArgb(a, Game.Options.Theme.MenuFont));
                 SpriteBatch.Font2.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName + " // " + Game.CurrentChart.Data.Creator, left, 10, left + ScreenWidth * bannerIn, 50, Color.FromArgb(a, Game.Options.Theme.MenuFont));

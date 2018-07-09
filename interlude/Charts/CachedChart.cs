@@ -43,19 +43,14 @@ namespace YAVSRG.Charts
             };
         }
 
-        public static bool operator ==(CachedChart a, CachedChart b)
+        public override bool Equals(object other) //reminder to fix this in future, in an optimised way
         {
-            return (a.abspath+a.file == b.abspath+b.file);
+            return ReferenceEquals(this, other);
         }
-
-        public static bool operator !=(CachedChart a, CachedChart b)
+        
+        public override int GetHashCode()
         {
-            return (a.abspath+a.file != b.abspath+b.file);
-        }
-
-        public override bool Equals(object other)
-        {
-            return this == (other as CachedChart);
+            return 0;
         }
     }
 }

@@ -187,7 +187,10 @@
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\AccMeter.cs" />
     <Compile Include="Interface\Widgets\Gameplay\HitLighting.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\MiscInfoDisplay.cs" />
+    <Compile Include="Interface\Widgets\ModMenu.cs" />
     <Compile Include="Interface\Widgets\InfoBox.cs" />
     <Compile Include="Interface\Widgets\Logo.cs" />
     <Compile Include="Interface\Widgets\ProfileInfoPanel.cs" />

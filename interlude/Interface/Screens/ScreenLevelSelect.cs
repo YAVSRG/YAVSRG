@@ -18,46 +18,24 @@ namespace YAVSRG.Interface.Screens
         public ScreenLevelSelect()
         {
             selector = new LevelSelector(this);
-            selector.PositionTopLeft(0, 120, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX);
-            AddChild(selector);
-
+            AddChild(selector.PositionTopLeft(0, 120, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
             AddChild(new ChartSortingControls().PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 120, AnchorType.MAX, AnchorType.MIN));
             diffDisplay = new ChartInfoPanel();
-            diffDisplay.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(700, 0, AnchorType.MAX, AnchorType.MAX);
-            AddChild(diffDisplay);
+            AddChild(diffDisplay.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(700, 0, AnchorType.MAX, AnchorType.MAX));
+
+            ModMenu modMenu = new ModMenu();
+            AddChild(modMenu.PositionTopLeft(0, 150, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(720, 100, AnchorType.MAX, AnchorType.MAX));
+
             AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
                 .PositionTopLeft(-350, 75, AnchorType.CENTER, AnchorType.MAX)
                 .PositionBottomRight(750, 25, AnchorType.MAX, AnchorType.MAX));
-            //temp mod selection menu
-            ScrollContainer f = new ScrollContainer(90, 20, false) { };
-            foreach (string m in Game.Gameplay.mods.Keys)
-            {
-                f.AddChild(ModSelectClosure(m).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(120, 40, AnchorType.MIN, AnchorType.MIN));
-            }
-            f.State = -1;
-            AddChild(f.PositionTopLeft(-150, -100, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(150, 100, AnchorType.CENTER, AnchorType.CENTER));
-            AddChild(new FramedButton("buttonbase", "Mods", () => { f.State *= -1; })
+            AddChild(new FramedButton("buttonbase", "Mods", () => { modMenu.Toggle(); })
                 .PositionTopLeft(50, 75, AnchorType.MIN, AnchorType.MAX)
                 .PositionBottomRight(-400, 25, AnchorType.CENTER, AnchorType.MAX));
-            //
+
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
-        }
-
-        private SimpleButton ModSelectClosure(string m)
-        {
-            return new SimpleButton(m, () => {
-                if (Game.Gameplay.SelectedMods.ContainsKey(m))
-                {
-                    Game.Gameplay.SelectedMods.Remove(m);
-                }
-                else
-                {
-                    Game.Gameplay.SelectedMods.Add(m, Game.Gameplay.mods[m].Settings.Length == 0 ? "" : Game.Gameplay.mods[m].Settings[0]);
-                }
-                Game.Gameplay.UpdateChart();
-            }, () => { return Game.Gameplay.SelectedMods.ContainsKey(m); }, 20f);
         }
 
         private void OnUpdateGroups()

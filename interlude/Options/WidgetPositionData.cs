@@ -8,15 +8,24 @@ namespace YAVSRG.Options
 {
     public class WidgetPositionData
     {
-        public Dictionary<string, WidgetPosition> data = new Dictionary<string, WidgetPosition>();
+        public Dictionary<string, WidgetPosition> Data = new Dictionary<string, WidgetPosition>();
 
         public bool IsEnabled(string name)
         {
-            if (data.ContainsKey(name))
+            if (Data.ContainsKey(name))
             {
-                return data[name].Enable;
+                return Data[name].Enable;
             }
             return false;
+        }
+
+        public WidgetPosition GetPosition(string name)
+        {
+            if (Data.ContainsKey(name))
+            {
+                return Data[name];
+            }
+            return new WidgetPosition();
         }
     }
 }

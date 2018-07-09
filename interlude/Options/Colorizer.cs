@@ -55,6 +55,7 @@ namespace YAVSRG.Options
                 last = current;
             }
         }
+
         private static void DDR(ChartWithModifiers c, ColorScheme cs)
         {
             //i'll comment it soon, but the code is likely to change around a bit

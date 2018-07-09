@@ -37,5 +37,7 @@ namespace YAVSRG.Gameplay.Mods
         {
             return "Mirror";
         }
+
+        public override string GetDescription(string data) { return "Horizontally flips an entire chart."; }
     }
 }
