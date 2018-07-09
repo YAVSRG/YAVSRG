@@ -95,15 +95,17 @@ namespace YAVSRG
                 string path = Path.Combine(AssetsDir, theme, name + ".json");
                 if (File.Exists(path)) //attempt to find and load in current assets folder
                 {
-                    return Utils.LoadObject<Options.WidgetPositionData>(path);
+                    var d = Utils.LoadObject<Options.WidgetPositionData>(path);
+                    if (d != null) { return d; }
                 }
                 path = Path.Combine(AssetsDir, "_fallback", name + ".json");
                 if (File.Exists(path)) //attempt to find and load in fallback assets folder
                 {
-                    return Utils.LoadObject<Options.WidgetPositionData>(path);
+                    var d = Utils.LoadObject<Options.WidgetPositionData>(path);
+                    if (d != null) { return d; }
                 }
             }
-            catch (Exception e)
+            catch
             {
                 Utilities.Logging.Log("Could not load widget position data: " + name + " !", Utilities.Logging.LogType.Error);
             }
