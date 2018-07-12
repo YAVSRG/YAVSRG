@@ -90,6 +90,10 @@ namespace YAVSRG.Interface.Screens
                 ChartLoader.RecacheThreaded();
                 Game.Screens.AddDialog(new Dialogs.LoadingDialog((s) => { ChartLoader.Refresh(); }));
             }
+            else if (Input.KeyTap(OpenTK.Input.Key.F))
+            {
+                Game.Gameplay.Collections.GetCollection("Favourites").AddItem(Game.Gameplay.CurrentCachedChart);
+            }
         }
 
         public void ChangeRate(double change)

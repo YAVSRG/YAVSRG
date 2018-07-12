@@ -25,7 +25,7 @@ namespace YAVSRG.Interface.Widgets
             group = new ScrollContainer(20, 10, false, false) { State = 0 };
             sort = new ScrollContainer(20, 10, false, false) { State = 0 };
             AddChild(sortB = new SimpleButton("Sort by...", () => {
-                sort.State = (sort.State + 1) % 2;
+                sort.State = 1 - sort.State;
                 sort.B.MoveTarget(0, sort.B.TargetY < 0 ? 300 : -300);
             }, () => { return false; }, 20f).PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
 
@@ -36,8 +36,8 @@ namespace YAVSRG.Interface.Widgets
             AddChild(sort.PositionTopLeft(260, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20,-300,AnchorType.MAX,AnchorType.MAX));
 
             AddChild(groupB = new SimpleButton("Group by...", () => {
-                group.State = (group.State + 1) % 2;
-                group.B.MoveTarget(0, group.B.TargetY < 0 ? 300 : -300);
+                group.State = 1 - group.State;
+                group.B.MoveTarget(0, group.B.TargetY < 0 ? 400 : -400);
             }, () => { return false; }, 20f).PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
             group.AddChild(GroupButton("Pack", GroupByPack));
             group.AddChild(GroupButton("Difficulty", GroupByDifficulty));
@@ -45,7 +45,8 @@ namespace YAVSRG.Interface.Widgets
             group.AddChild(GroupButton("Creator", GroupByCreator));
             group.AddChild(GroupButton("Title", GroupByTitle));
             group.AddChild(GroupButton("Keymode", GroupByKeymode));
-            AddChild(group.PositionTopLeft(520, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, -300, AnchorType.MAX, AnchorType.MAX));
+            group.AddChild(GroupButton("Collection", GroupByCollection));
+            AddChild(group.PositionTopLeft(520, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, -400, AnchorType.MAX, AnchorType.MAX));
             
         }
 

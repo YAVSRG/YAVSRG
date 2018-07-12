@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Charts.Osu
 {
-    public class HitObject
+    public class HitObject //represents a hit object
     {
+        //https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)
+
         public int x, y;
         public float offset;
         public int type;
@@ -24,7 +26,7 @@ namespace YAVSRG.Charts.Osu
             this.addition = addition;
         }
 
-        public HitObject(string parse)
+        public HitObject(string parse) //splits line into parts and interprets it
         {
             string[] parts = parse.Split(',');
 
@@ -39,7 +41,7 @@ namespace YAVSRG.Charts.Osu
             }
         }
 
-        public void Dump(System.IO.TextWriter tw)
+        public void Dump(System.IO.TextWriter tw) //writes to text file
         {
             tw.WriteLine(x.ToString() + "," + y.ToString() + "," + offset.ToString() + "," + type.ToString() + "," + hitsound.ToString() + "," + addition);
         }

@@ -7,26 +7,26 @@ using System.IO;
 
 namespace YAVSRG.Charts.Osu
 {
-    public class ChartsHeader
+    public class BeatmapHeader //represents those big blocks of data like [GENERAL]
     {
         private Dictionary<string, string> data;
 
-        public float GetNumber(string key)
+        public float GetNumber(string key) //parses and retrieves a number
         {
             return float.Parse(data[key]);
         }
 
-        public string GetValue(string key)
+        public string GetValue(string key) //retrieves a piece of text
         {
             return data[key];
         }
 
-        public void SetNumber(string key, float value)
+        public void SetNumber(string key, float value) //assigns a number to a key
         {
             SetValue(key, value.ToString());
         }
 
-        public void SetValue(string key, string value)
+        public void SetValue(string key, string value) //assigns a value to a key
         {
             if (data.ContainsKey(key))
             {
@@ -38,7 +38,7 @@ namespace YAVSRG.Charts.Osu
             }
         }
 
-        public ChartsHeader(TextReader fs)
+        public BeatmapHeader(TextReader fs) //reads from a text file
         {
             data = new Dictionary<string, string>();
             string l;
@@ -46,7 +46,7 @@ namespace YAVSRG.Charts.Osu
             while (true)
             {
                 l = fs.ReadLine();
-                if (l == "")
+                if (l == "") //headers are separated by blank lines so this is how we know we got to the end
                 {
                     return;
                 }
@@ -57,7 +57,7 @@ namespace YAVSRG.Charts.Osu
 
         public void Dump(TextWriter fs)
         {
-
+            //stub. this will write the header to a text file to save .osu chart data
         }
     }
 }

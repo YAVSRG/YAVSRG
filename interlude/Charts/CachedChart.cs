@@ -52,6 +52,11 @@ namespace YAVSRG.Charts
         {
             return 0;
         }
+
+        public string GetFileIdentifier()
+        {
+            return System.IO.Path.Combine(abspath, file);
+        }
     }
 }
 

@@ -103,6 +103,8 @@
   <ItemGroup>
     <Compile Include="Charts\Cache.cs" />
     <Compile Include="Charts\CachedChart.cs" />
+    <Compile Include="Charts\Collections\Collection.cs" />
+    <Compile Include="Charts\Collections\CollectionsManager.cs" />
     <Compile Include="Charts\YAVSRG\BinarySwitcher.cs" />
     <Compile Include="Charts\DifficultyRating\RatingReport.cs" />
     <Compile Include="Charts\Osu\EventData.cs" />
@@ -115,7 +117,6 @@
     <Compile Include="Charts\YAVSRG\OffsetItem.cs" />
     <Compile Include="Charts\Osu\OsuBeatmap.cs" />
     <Compile Include="Charts\Osu\BeatmapHeader.cs" />
-    <Compile Include="Charts\DifficultyRating\DataSet.cs" />
     <Compile Include="Charts\DifficultyRating\KeyLayout.cs" />
     <Compile Include="Charts\DifficultyRating\PlayerRating.cs" />
     <Compile Include="Charts\Osu\HitObject.cs" />

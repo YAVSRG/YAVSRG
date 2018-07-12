@@ -168,6 +168,7 @@ namespace YAVSRG
             base.OnUnload(e);
             gameplay.Unload();
             gameplay.SaveScores();
+            gameplay.Collections.Save();
             trayIcon.Destroy();
             taskManager.Stop();
             Discord.Shutdown();

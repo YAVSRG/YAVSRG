@@ -11,6 +11,7 @@ namespace YAVSRG.Charts.Stepmania
 {
     public class StepFile
     {
+        //i'm not gonna comment this for a lil while (cause i'll clean it up), sorry
         public class StepFileDifficulty
         {
             public List<Measure> measures;
@@ -173,7 +174,7 @@ namespace YAVSRG.Charts.Stepmania
                     {
                         totalbeats += meter;
                         from = 0;
-                        while (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 <= totalbeats)
+                        while (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 < totalbeats)
                         {
                             to = bpms[bpm + 1].Item1 - totalbeats + meter;
                             diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, to, meter, states);
@@ -182,11 +183,8 @@ namespace YAVSRG.Charts.Stepmania
                             points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));
                             from = to;
                         }
-                        if (from < meter)
-                        {
-                            diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, meter, meter, states);
-                            now += bpms[bpm].Item2 * (meter - from);
-                        }
+                        diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, meter, meter, states);
+                        now += bpms[bpm].Item2 * (meter - from);
                     }
                     Chart c = new Chart(states, points, new ChartHeader
                     {

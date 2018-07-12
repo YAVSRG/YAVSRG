@@ -7,6 +7,7 @@ using YAVSRG.Charts.YAVSRG;
 using System.IO;
 using YAVSRG.Gameplay.Mods;
 using YAVSRG.Charts.DifficultyRating;
+using YAVSRG.Charts.Collections;
 
 namespace YAVSRG.Gameplay
 {
@@ -19,6 +20,7 @@ namespace YAVSRG.Gameplay
         public ChartWithModifiers ModifiedChart;
         public RatingReport ChartDifficulty;
         public ChartSaveData ChartSaveData;
+        public CollectionsManager Collections = CollectionsManager.LoadCollections();
         public Dictionary<string, string> SelectedMods = new Dictionary<string, string>();
         public event Action OnUpdateChart = () => { };
 

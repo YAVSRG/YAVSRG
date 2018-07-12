@@ -10,15 +10,18 @@ namespace YAVSRG.Audio
 {
     public class MusicPlayer
     {
-        private static readonly int BUFFER = 2000;
+        private static readonly int BUFFER = 2000; //poorly named. This is the time in ms to lead into the song before it begins
+        //this is necessary for songs that start close to 0ms into the song (notes would instantly be there when you click play)
 
         private Track nowplaying;
         private Stopwatch timer;
         private double startTime;
         private double Rate;
 
+        //raw waveform data from bass
         private float[] fft = new float[1024];
 
+        //my smooth waveform data. updated 60 times a second and can be accessed publicly
         public float[] WaveForm;
         public float Level;
         public bool Paused;
@@ -29,23 +32,23 @@ namespace YAVSRG.Audio
         public MusicPlayer()
         {
             WaveForm = new float[256];
-            timer = new Stopwatch();
+            timer = new Stopwatch(); //simple timer to wait 2 seconds before song starts. it's accurate enough
         }
 
-        public void SetVolume(float volume)
+        public void SetVolume(float volume) //sets volume of audio output
         {
             Bass.GlobalStreamVolume = (int)(volume * 10000);
         }
 
-        public void SetRate(double rate)
+        public void SetRate(double rate) //sets playback rate (needs to be done every time song is switched)
         {
             Bass.ChannelSetAttribute(nowplaying, ChannelAttribute.Frequency, nowplaying.Frequency * rate);
             Rate = rate;
         }
 
-        protected double AudioOffset { get { return Options.Options.General.UniversalAudioOffset * Rate + LocalOffset; } }
+        protected double AudioOffset { get { return Options.Options.General.UniversalAudioOffset * Rate + LocalOffset; } } //local offset doesn't scale with rate. universal does
 
-        public double Duration
+        public double Duration //gets duration of the song (NOT THE CHART) - used for progress bar through song not chart
         {
             get
             {
@@ -53,7 +56,7 @@ namespace YAVSRG.Audio
             }
         }
 
-        public bool Playing
+        public bool Playing //gets whether audio player is playing
         {
             get
             {
@@ -61,7 +64,7 @@ namespace YAVSRG.Audio
             }
         }
 
-        public void PlayLeadIn()
+        public void PlayLeadIn() //plays the song but starting with a 2 second lead in
         {
             startTime = -BUFFER;
             LeadingIn = true;
@@ -69,7 +72,7 @@ namespace YAVSRG.Audio
             Paused = false;
         }
 
-        public void Play(long start)
+        public void Play(long start) //plays the song from a given point (in ms) into the song. negative ms (to lead in) not supported.
         {
             Stop();
             Seek(start);
@@ -77,14 +80,14 @@ namespace YAVSRG.Audio
             startTime = start;
         }
 
-        public void Play()
+        public void Play() //plays the song from the beginning (0ms) OR unpauses the song if paused
         {
             Bass.ChannelPlay(nowplaying);
             timer.Start();
             Paused = false;
         }
 
-        public void Stop()
+        public void Stop() //stops song playback (it resets to the start)
         {
             Bass.ChannelStop(nowplaying);
             timer.Stop();
@@ -93,27 +96,29 @@ namespace YAVSRG.Audio
             Paused = true;
         }
 
-        public void Pause()
+        public void Pause() //pauses the song. Play() will resume
         {
             Bass.ChannelPause(nowplaying);
             timer.Stop();
             Paused = true;
         }
 
-        public double Now()
+        public double Now() //gets position (in ms) we are into the song. This value is directly used in gameplay to sync notes to audio
+            //audio offset is accounted for here to sync things. the number can be negative when leading into the audio file and will continue running once the audio file is over
+            //some files like Go for it (golgo) and 1hr54 js challenge have notes continuing after audio ends so this is necessary
         {
             if (nowplaying == null) return 0;
             if (LeadingIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - AudioOffset;
             return Bass.ChannelBytes2Seconds(nowplaying,Bass.ChannelGetPosition(nowplaying))*1000 - AudioOffset;
         }
 
-        public float NowPercentage()
+        public float NowPercentage() //gets position through the song (NOT THE CHART) as a percentage (0-1)
         {
             if (nowplaying == null) return 0;
             return (float)(Now() / Duration);
         }
 
-        public void Seek(double position)
+        public void Seek(double position) //jumps to a position in a song (doesn't do anything to pause, play or stop)
         {
             Bass.ChannelSetPosition(nowplaying, Bass.ChannelSeconds2Bytes(nowplaying,position/1000));
             if (LeadingIn)
@@ -122,13 +127,15 @@ namespace YAVSRG.Audio
             }
         }
 
-        public void UpdateWaveform()
+        public void UpdateWaveform() //updates the waveform. done every update frame
         {
+            //algorithm adapted from here
             //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
-            ManagedBass.Bass.ChannelGetData(nowplaying, fft, (int)ManagedBass.DataFlags.FFT2048);
+            //thanks very much it was significantly better than my old algorithm
+            Bass.ChannelGetData(nowplaying, fft, (int)DataFlags.FFT2048); //pull new raw waveform data
             int b0 = 0;
             int y;
-            for (int x = 0; x < 256; x++)
+            for (int x = 0; x < 256; x++) //just some maths u dont need to understand
             {
                 float peak = 0;
                 int b1 = (int)Math.Pow(2, x * 10.0 / 255);
@@ -141,39 +148,40 @@ namespace YAVSRG.Audio
                 y = (int)(Math.Sqrt(peak) * 3 * 255 - 4);
                 if (y > 255) y = 255;
                 if (y < 0) y = 0;
-                WaveForm[x] = WaveForm[x] * 0.9f + y * 0.1f;
+                WaveForm[x] = WaveForm[x] * 0.9f + y * 0.1f; //causes smooth movement of waveform rather than being EXACTLY the amplitudes at this very moment
             }
         }
 
-        public void Update()
+        public void Update() //updates the music player every update frame
         {
             float[] temp = new float[256];
-            if (!Paused)
+            if (!Paused) //waveform freezes in position when paused
             {
                 UpdateWaveform();
             }
-            Level = Level * 0.9f + (Bass.ChannelGetLevelRight(nowplaying) + Bass.ChannelGetLevelLeft(nowplaying)) * 0.0000002f;
-            if (LeadingIn && Playing && Now() + AudioOffset > 0)
+            Level = Level * 0.9f + (Bass.ChannelGetLevelRight(nowplaying) + Bass.ChannelGetLevelLeft(nowplaying)) * 0.0000002f; //overall level/volume of audio
+            //it's like a single bar waveform (should probably be moved to UpdateWaveform()
+            if (LeadingIn && Playing && Now() + AudioOffset > 0) //if leadin timer is complete
             {
-                Seek(Now() + AudioOffset);
+                Seek(Now() + AudioOffset); //synchronise to the audio and start playing (sounds smooth and avoids the bug where notes teleport to receptors)
                 Bass.ChannelPlay(nowplaying);
                 LeadingIn = false;
             }
-            if (!Playing)
+            if (!Playing) //if the song is over run the callback which can be assigned from elsewhere in the game
             {
                 if (OnPlaybackFinish != null)
                 {
-                    OnPlaybackFinish();
+                    OnPlaybackFinish(); //this is can restart the song from the beginning, select another song at random, etc
                 }
-                else if (!LeadingIn) { LeadingIn = true; }
+                else if (!LeadingIn) { LeadingIn = true; } //if not assigned the timer will just keep running (used in gameplay)
             }
         }
 
-        public void ChangeTrack(string path)
+        public void ChangeTrack(string path) //switches to a different audio file given an absolute file path (supports ogg, wav, mp3 and i think some others)
         {
             var t = new Track(path);
             //if (t.ID == 0) return;
-            nowplaying?.Dispose();
+            nowplaying?.Dispose(); //destroy old track / free resources
             nowplaying = t;
         }
     }

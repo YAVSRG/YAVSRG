@@ -13,10 +13,10 @@ namespace YAVSRG.Charts.Osu
         public string filename;
         protected readonly string path;
 
-        public ChartsHeader General;
-        public ChartsHeader Editor;
-        public ChartsHeader Metadata;
-        public ChartsHeader Difficulty;
+        public BeatmapHeader General;
+        public BeatmapHeader Editor;
+        public BeatmapHeader Metadata;
+        public BeatmapHeader Difficulty;
 
         public HitObjectConverter HitObjects;
         public TimingPointConverter TimingPoints;
@@ -57,19 +57,19 @@ namespace YAVSRG.Charts.Osu
                 l = ts.ReadLine();
                 if (l == "[General]")
                 {
-                    General = new ChartsHeader(ts);
+                    General = new BeatmapHeader(ts);
                 }
                 else if (l == "[Editor]")
                 {
-                    Editor = new ChartsHeader(ts);
+                    Editor = new BeatmapHeader(ts);
                 }
                 else if (l == "[Metadata]")
                 {
-                    Metadata = new ChartsHeader(ts);
+                    Metadata = new BeatmapHeader(ts);
                 }
                 else if (l == "[Difficulty]")
                 {
-                    Difficulty = new ChartsHeader(ts);
+                    Difficulty = new BeatmapHeader(ts);
                 }
                 else if (l == "[TimingPoints]")
                 {

@@ -7,11 +7,11 @@ using System.IO;
 
 namespace YAVSRG.Charts.Osu
 {
-    public class EventData
+    public class EventData //this is the block that stores storyboard events. one of such is what bg image to use
     {
         private List<StoryboardEvent> points;
 
-        public EventData(TextReader fs)
+        public EventData(TextReader fs) //reads from text file
         {
             points = new List<StoryboardEvent>();
             string l;
@@ -19,16 +19,16 @@ namespace YAVSRG.Charts.Osu
             {
                 l = fs.ReadLine();
                 if (l == "") return;
-                if (l.StartsWith("//")) continue;
-                points.Add(new StoryboardEvent(l));
+                if (l.StartsWith("//")) continue; //ignore comments
+                points.Add(new StoryboardEvent(l)); //parses storyboard event
             }
         }
 
-        public string GetBGPath()
+        public string GetBGPath() //just rudimentary hack to locate bg path from data
         {
             foreach (StoryboardEvent s in points)
             {
-                if (s.data[0] == "0")
+                if (s.data[0] == "0") //0 means bg event
                 {
                     return s.data[2].Trim('"');
                 }
@@ -38,7 +38,7 @@ namespace YAVSRG.Charts.Osu
 
         public void Dump(TextWriter tw)
         {
-
+            //stub. will write to text file
         }
     }
 }

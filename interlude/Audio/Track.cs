@@ -9,32 +9,32 @@ namespace YAVSRG.Audio
 {
     public class Track
     {
-        public int ID;
-        public int Frequency;
-        public double Duration;
+        public int ID; //id used by Bass
+        public int Frequency; //frequency the file is encoded in, so it knows how to up and downrate the audio correctly
+        public double Duration; //duration of the song so it doesn't have to be tediously recalculated in case of mp3 and stuff
 
         public Track(string file)
         {
-            ID = Bass.CreateStream(file);
-            if (ID == 0)
+            ID = Bass.CreateStream(file); //loads file
+            if (ID == 0) //this means it didn't work
             {
-                Utilities.Logging.Log(Bass.LastError.ToString(), Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Couldn't load audio track from "+file+": "+Bass.LastError.ToString(), Utilities.Logging.LogType.Error);
             }
             else
             {
-                var d = Bass.ChannelGetInfo(ID);
+                var d = Bass.ChannelGetInfo(ID); //asks bass for info about the track
                 Duration = Bass.ChannelBytes2Seconds(ID,Bass.ChannelGetLength(ID))*1000;
                 Frequency = d.Frequency;
             }
         }
 
-        public void Dispose()
+        public void Dispose() //cleans up after a track doesn't need to be used any more
         {
-            Bass.StreamFree(ID);
             Bass.StreamFree(ID);
         }
         
-        public static implicit operator int(Track t)
+        public static implicit operator int(Track t) //you can throw around this track object as if it is the ID used in bass
+        //track can be used instead of track.ID in bass commands
         {
             if (t == null) { return 0; }
             return t.ID;

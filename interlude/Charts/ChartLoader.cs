@@ -21,6 +21,7 @@ namespace YAVSRG.Charts
         public static Func<CachedChart, string> GroupByCreator = (c) => { return Utils.FormatFirstCharacter(c.creator); };
         public static Func<CachedChart, string> GroupByArtist = (c) => { return Utils.FormatFirstCharacter(c.artist); };
         public static Func<CachedChart, string> GroupByKeymode = (c) => { return c.keymode.ToString() + "k"; };
+        public static Func<CachedChart, string> GroupByCollection = (c) => { return ""; };
 
         public static Comparison<CachedChart> SortByDifficulty = (a, b) => (a.physical.CompareTo(b.physical));
         public static Comparison<CachedChart> SortByTitle = (a, b) => (a.title.CompareTo(b.title));
@@ -58,8 +59,6 @@ namespace YAVSRG.Charts
         {
             Groups = new List<ChartGroup>();
             Cache = Cache.LoadCache();
-            //DownloadBeatmap(720686);
-            //ImportArchive(Path.Combine(Content.WorkingDirectory, "Imports", "NKCP.zip"));
             Loaded = true;
         }
 
@@ -67,20 +66,34 @@ namespace YAVSRG.Charts
         {
             Groups = new List<ChartGroup>();
             Dictionary<string, List<CachedChart>> temp = new Dictionary<string, List<CachedChart>>();
-            string s;
-            foreach (CachedChart c in Cache.Charts.Values)
+            if (groupBy == GroupByCollection)
             {
-                s = groupBy(c);
-                if (temp.ContainsKey(s))
+                foreach (string c in Game.Gameplay.Collections.Collections.Keys)
                 {
-                    temp[s].Add(c);
-                }
-                else
-                {
-                    temp.Add(s, new List<CachedChart> { c });
+                    temp.Add(c, new List<CachedChart>());
+                    foreach (string id in Game.Gameplay.Collections.GetCollection(c).Entries)
+                    {
+                        temp[c].Add(Cache.Charts[id]);
+                    }
                 }
             }
-            foreach (string k in temp.Keys)
+            else
+            {
+                string s;
+                foreach (CachedChart c in Cache.Charts.Values)
+                {
+                    s = groupBy(c);
+                    if (temp.ContainsKey(s))
+                    {
+                        temp[s].Add(c);
+                    }
+                    else
+                    {
+                        temp.Add(s, new List<CachedChart> { c });
+                    }
+                }
+            }
+            foreach (string k in temp.Keys) //why do i do it like this
             {
                 ChartGroup g = new ChartGroup(temp[k], k);
                 g.Sort(sortBy, false);

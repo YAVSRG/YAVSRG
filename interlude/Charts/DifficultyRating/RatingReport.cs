@@ -17,7 +17,9 @@ namespace YAVSRG.Charts.DifficultyRating
 
         float[] fingers;
 
-        public RatingReport(ChartWithModifiers map, float rate, string playstyle)
+        //this code is subject to so much change that comments may not be complete or up to date, sorry about that
+
+        public RatingReport(ChartWithModifiers map, float rate, string playstyle) //calculates difficulty of a chart to play - i.e how capable you must be to attain an S
         {
             KeyLayout layout = KeyLayout.GetLayout(playstyle, map.Keys);
             int hands = layout.hands.Count;

@@ -8,6 +8,9 @@ namespace YAVSRG.Charts.Osu
 {
     public class TimingPoint
     {
+        //https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)
+        //see also: HitObject, which is commented
+
         public float offset;
         public float msPerBeat;
         public int meter, sampleType, sampleSet, volume;

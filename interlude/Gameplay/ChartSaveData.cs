@@ -17,7 +17,7 @@ namespace YAVSRG.Gameplay
         {
             return new ChartSaveData()
             {
-                Path = System.IO.Path.Combine(c.Data.SourcePath, c.Data.File), //this needs to be the absolute path
+                Path = c.GetFileIdentifier(), //this needs to be the absolute path to the file (just self reminder)
                 Offset = c.Notes.Count > 0 ? c.Notes.Points[0].Offset : 0
             };
         }

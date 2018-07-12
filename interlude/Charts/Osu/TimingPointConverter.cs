@@ -9,6 +9,7 @@ using YAVSRG.Charts.YAVSRG;
 namespace YAVSRG.Charts.Osu
 {
     public class TimingPointConverter
+        //see also: HitObjectConverter, which is commented
     {
         private List<TimingPoint> points;
 
@@ -27,7 +28,7 @@ namespace YAVSRG.Charts.Osu
             }
         }
 
-        public float GetMostCommonBPM(float end)
+        public float GetMostCommonBPM(float end) //this doesn't work and needs to be fixeddd
         {
             float current = points[0].msPerBeat;
             float t = 0;
@@ -81,7 +82,7 @@ namespace YAVSRG.Charts.Osu
             return tp;
         }
 
-        public void ConvertFromBPMPoints()
+        public void ConvertFromBPMPoints() //reverse process for above algorithm NYI (because it's harder)
         {
 
         }

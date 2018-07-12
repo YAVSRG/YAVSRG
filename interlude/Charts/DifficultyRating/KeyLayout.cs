@@ -8,7 +8,7 @@ namespace YAVSRG.Charts.DifficultyRating
 {
     public class KeyLayout
     {
-        public static Dictionary<string, KeyLayout>[] LAYOUTS = new Dictionary<string, KeyLayout>[] {
+        public static Dictionary<string, KeyLayout>[] LAYOUTS = new Dictionary<string, KeyLayout>[] { //store of available key layouts for each mode
             null,null,null,
             new Dictionary<string, KeyLayout>
             { //3k
@@ -63,21 +63,21 @@ namespace YAVSRG.Charts.DifficultyRating
             }
         };
 
-        public class Hand
+        public class Hand //model of a hand
         {
-            List<int> fingers;
+            List<int> fingers; //ordered list of columns covered by this hand
 
-            public int GetFingerPosition(int column)
+            public int GetFingerPosition(int column) //used to work out how many fingers apart two columns are (matters for BMS layout)
             {
                 return fingers.IndexOf(column);
             }
 
-            public Hand(List<int> f)
+            public Hand(List<int> f) //constructor
             {
                 fingers = f;
             }
 
-            public ushort Mask()
+            public ushort Mask() //creates a bit mask to use with snaps to isolate notes involving this hand
             {
                 ushort r = 0;
                 foreach (int f in fingers)
@@ -88,9 +88,9 @@ namespace YAVSRG.Charts.DifficultyRating
             }
         }
 
-        public List<Hand> hands;
+        public List<Hand> hands; //a key layout is just a list of hands (unordered)
 
-        public static KeyLayout GetLayout(string name, int k)
+        public static KeyLayout GetLayout(string name, int k) //static retrieval of key layout being used
         {
             if (LAYOUTS[k].ContainsKey(name))
             {

@@ -9,7 +9,10 @@ namespace YAVSRG.Charts.DifficultyRating
 {
     public class PlayerRating
     {
-        public static float GetRating(RatingReport r, ScoreTracker.HitData[] hitdata)
+        
+        //uncommented due to being subject to change
+        //how it works may be explained in design document
+        public static float GetRating(RatingReport r, ScoreTracker.HitData[] hitdata) //calculates rating of a play - i.e how capable you showed you were when you played this chart
         {
             double v = 0;
             int samplesize = 2;

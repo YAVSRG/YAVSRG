@@ -8,7 +8,7 @@ using YAVSRG.Charts.YAVSRG;
 
 namespace YAVSRG.Charts.Osu
 {
-    public class HitObjectConverter
+    public class HitObjectConverter //encapsulates all hitobjects in a map. it is called HitObjectConverter because that's all it does, with no tools for manipulating the hitobjects
     {
         private List<HitObject> objects;
 
@@ -37,7 +37,8 @@ namespace YAVSRG.Charts.Osu
             objects.Sort((a, b) => { return a.offset.CompareTo(b.offset); });
         }
 
-        public List<Snap> CreateSnapsFromObjects(byte keys)
+        public List<Snap> CreateSnapsFromObjects(byte keys) //old algorithm, originally in python for a hobby script
+        //this converts a list of hitobjects from o!m to a list of "snaps" or rows containing objects (and LN ends) in line with each other
         {
             List<Snap> states = new List<Snap>();
             Snap s = new Snap(-1);
@@ -154,6 +155,7 @@ namespace YAVSRG.Charts.Osu
         }
 
         public void CreateObjectsFromSnaps(List<Snap> states, byte keys)
+        //this is the reverse of the above algorithm (and untested)
         {
             objects = new List<HitObject>();
             HitObject[] ln = new HitObject[keys];
@@ -178,17 +180,17 @@ namespace YAVSRG.Charts.Osu
             }
         }
 
-        public byte XToColumn(int x, byte keys)
+        public byte XToColumn(int x, byte keys) //converts osu x coordinate to column number
         {
             return (byte)(x / (512f / keys));
         }
 
-        public int ColumnToX(int c, byte keys)
+        public int ColumnToX(int c, byte keys) //converts column number to osu x coordinate
         {
             return (int)(c * (512f / keys));
         }
 
-        public void Dump(TextWriter tw)
+        public void Dump(TextWriter tw) //writes objects to text file
         {
             foreach (HitObject o in objects)
             {

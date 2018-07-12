@@ -128,5 +128,10 @@ namespace YAVSRG.Charts.YAVSRG
             }
             return new Chart(notes, timing, header, keys);
         }
+        
+        public string GetFileIdentifier()
+        {
+            return Path.Combine(Data.SourcePath, Data.File);
+        }
     }
 }

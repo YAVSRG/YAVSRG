@@ -37,8 +37,7 @@ namespace YAVSRG.Charts
         
         public Chart LoadChart(CachedChart c)
         {
-            string path = Path.Combine(c.abspath, c.file);
-            Chart m = Chart.FromFile(path); //could be null
+            Chart m = Chart.FromFile(c.GetFileIdentifier()); //could be null
             if (m != null)
             {
                 CacheChart(m);
@@ -48,12 +47,8 @@ namespace YAVSRG.Charts
 
         public void CacheChart(Chart c)
         {
-            string id = Path.Combine(c.Data.SourcePath, c.Data.File);
+            string id = c.GetFileIdentifier();
             Charts[id] = CachedChart.FromChart(c);
-            //if (Game.Gameplay.ScoreDatabase.data.ContainsKey(Charts[id].hash))
-            //{
-            //    Game.Gameplay.ScoreDatabase.GetChartSaveData(c).Path = id;
-            //}
         }
 
         public void Save()
