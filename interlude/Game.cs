@@ -27,6 +27,8 @@ namespace YAVSRG
         protected TrayIcon trayIcon;
         protected TaskManager taskManager;
 
+        public float FPS;
+
         public static Options.Options Options
         {
             get { return Instance.options; }
@@ -137,6 +139,7 @@ namespace YAVSRG
             screens.Draw();
             SpriteBatch.End();
             SwapBuffers(); //send rendered pixels to screen
+            FPS = FPS * 0.999f + (float)(0.001f / e.Time);
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e) //this is update loop code (tries to hit 120 times a second)

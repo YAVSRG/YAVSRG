@@ -167,19 +167,25 @@ namespace YAVSRG.Charts.Stepmania
                     points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now));
                     int totalbeats = 0;
                     byte keycount = 4;
+                    double from, to;
 
                     for (int i = 0; i < diff.measures.Count; i++)
                     {
-                        for (int b = 0; b < meter; b++)
+                        totalbeats += meter;
+                        from = 0;
+                        while (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 <= totalbeats)
                         {
-                            diff.measures[i].ConvertBeat(now, bpms[bpm].Item2, lntracker, keycount, b, meter, states);
-                            now += bpms[bpm].Item2;
-                            totalbeats += 1;
-                            if (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 <= totalbeats)
-                            {
-                                bpm += 1;
-                                points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));
-                            }
+                            to = bpms[bpm + 1].Item1 - totalbeats + meter;
+                            diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, to, meter, states);
+                            now += bpms[bpm].Item2 * (to - from);
+                            bpm += 1;
+                            points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));
+                            from = to;
+                        }
+                        if (from < meter)
+                        {
+                            diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, meter, meter, states);
+                            now += bpms[bpm].Item2 * (meter - from);
                         }
                     }
                     Chart c = new Chart(states, points, new ChartHeader
@@ -196,9 +202,9 @@ namespace YAVSRG.Charts.Stepmania
                     }, keycount);
                     charts.Add(c);
                 }
-                catch
+                catch (Exception e)
                 {
-                    //
+                    Utilities.Logging.Log("Could not convert SM difficulty: " + e.ToString(), Utilities.Logging.LogType.Error);
                 }
             }
             return charts;

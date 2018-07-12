@@ -65,7 +65,7 @@
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
             this.Name = "CrashWindow";
-            this.Text = "YAVSRG has crashed :(";
+            this.Text = "Interlude has crashed :(";
             this.ResumeLayout(false);
             this.PerformLayout();
 

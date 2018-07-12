@@ -64,6 +64,10 @@ namespace YAVSRG.Interface.Screens
             {
                 AddChild(new MiscInfoDisplay(scoreTracker, () => { return Utils.FormatTime(Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) + " left"; }).Position(widgetData.GetPosition("timeLeft")));
             }
+            if (widgetData.IsEnabled("fps"))
+            {
+                AddChild(new MiscInfoDisplay(scoreTracker, () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }).Position(widgetData.GetPosition("fps")));
+            }
             //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
             //playfield.InitGameplay();
             lighting = new HitLighting[Chart.Keys];

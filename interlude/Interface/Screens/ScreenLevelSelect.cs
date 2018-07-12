@@ -76,7 +76,7 @@ namespace YAVSRG.Interface.Screens
         {
             base.Update(left, top, right, bottom);
 
-            double ratestep = Input.KeyPress(OpenTK.Input.Key.ControlLeft) ? 0.2d : 0.05d;
+            double ratestep = Input.KeyPress(OpenTK.Input.Key.ControlLeft) ? 0.2d : Input.KeyPress(OpenTK.Input.Key.ShiftLeft) ? 0.01d : 0.05d;
             if (Input.KeyTap(OpenTK.Input.Key.Plus))
             {
                 ChangeRate(ratestep);

@@ -211,10 +211,16 @@ namespace YAVSRG.Charts
                 try
                 {
                     var sm = new StepFile(Path.GetFileName(absfilepath), Path.GetDirectoryName(absfilepath));
+                    int i = 0;
                     foreach (Chart c in sm.Convert())
                     {
+                        if (i > 0)
+                        {
+                            c.Data.File = c.Data.File.Replace(".sm", "_" + i.ToString() + ".sm");
+                        }
                         ConvertFile(c, sourceFolder, targetFolder);
                         Log("Converted " + absfilepath);
+                        i++;
                     }
                 }
                 catch (Exception e)
