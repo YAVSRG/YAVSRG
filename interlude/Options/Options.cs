@@ -11,10 +11,14 @@ namespace YAVSRG.Options
     {
         public static List<Profile> Profiles;
         public static string[] Skins;
-        public static General General;
+        public static General general;
 
         public Profile Profile;
         public Theme Theme;
+        public General General
+        {
+            get { return general; }
+        }
 
         public Options()
         {
@@ -24,7 +28,7 @@ namespace YAVSRG.Options
             {
                 foreach (Profile p in Profiles) //linear search cause i'm lazy, this runs once and you're not gonna have more than like 20 profiles ever
                 {
-                    if (p.ProfilePath == General.CurrentProfile)
+                    if (p.ProfilePath == general.CurrentProfile)
                     {
                         ChangeProfile(p);
                     }
@@ -41,25 +45,25 @@ namespace YAVSRG.Options
         {
             get
             {
-                return Path.Combine(General.WorkingDirectory, "Data", "Profiles");
+                return Path.Combine(general.WorkingDirectory, "Data", "Profiles");
             }
         }
 
         public static void EnsureFoldersExist()
         {
-            Directory.CreateDirectory(Path.Combine(General.WorkingDirectory, "Songs"));
-            Directory.CreateDirectory(Path.Combine(General.WorkingDirectory, "Imports"));
-            Directory.CreateDirectory(Path.Combine(General.WorkingDirectory, "Data", "Profiles"));
-            Directory.CreateDirectory(Path.Combine(General.WorkingDirectory, "Data", "Assets", "_Fallback"));
+            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Songs"));
+            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Imports"));
+            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Profiles"));
+            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Assets", "_Fallback"));
         }
 
         public static void Init()
         {
             Profiles = new List<Profile>();
-            General = new General();
+            general = new General();
             try
             {
-                General = Utils.LoadObject<General>("Options.json");
+                general = Utils.LoadObject<General>("Options.json");
             }
             catch
             {
@@ -82,7 +86,7 @@ namespace YAVSRG.Options
                     }
                 }
             }
-            string[] s = Directory.GetDirectories(Path.Combine(General.WorkingDirectory, "Data", "Assets"));
+            string[] s = Directory.GetDirectories(Path.Combine(general.WorkingDirectory, "Data", "Assets"));
             Skins = new string[s.Length];
             for (int i = 0; i < s.Length; i++)
             {
@@ -95,7 +99,7 @@ namespace YAVSRG.Options
             //remember to save the old one
             SaveProfile(Profile);
             Profile = p;
-            General.CurrentProfile = p.ProfilePath;
+            general.CurrentProfile = p.ProfilePath;
             Theme = Content.LoadThemeData(p.Skin);
         }
 
@@ -107,7 +111,7 @@ namespace YAVSRG.Options
         public void Save()
         {
             SaveProfile(Profile);
-            Utils.SaveObject(General, "Options.json");
+            Utils.SaveObject(general, "Options.json");
         }
     }
 }

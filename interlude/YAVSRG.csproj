@@ -214,6 +214,7 @@
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
     <Compile Include="Options\Colorizer.cs" />
     <Compile Include="Options\ColorScheme.cs" />
+    <Compile Include="Options\Keybinds.cs" />
     <Compile Include="Options\OptionsPanel.cs" />
     <Compile Include="Options\Panels\GameplayPanel.cs" />
     <Compile Include="Options\Panels\GeneralPanel.cs" />

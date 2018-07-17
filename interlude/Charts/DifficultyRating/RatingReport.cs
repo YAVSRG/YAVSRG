@@ -135,7 +135,7 @@ namespace YAVSRG.Charts.DifficultyRating
         protected float GetJackCompensation(float jackdelta, float streamdelta) //jumpjacks do not involve you swapping your fingers over to hit them, therefore ignore the stream part of a calc when there is a jack
         {
             float n = jackdelta / streamdelta;
-            return (float)Math.Min(Math.Max(Math.Log(n, 2), 0), 1);
+            return (float)Math.Min(Math.Pow(Math.Max(Math.Log(n, 2), 0), 2), 1);
         }
 
         protected float GetStreamCurve(float delta) //how hard is it to hit these two adjacent notes? when they are VERY close together you can hit them at the same time so no difficulty added
@@ -144,13 +144,13 @@ namespace YAVSRG.Charts.DifficultyRating
             float heightScale = 10f * 1.4f;
             float curveExponent = 1f;
             float cutoffExponent = 10f;
-            return (float)Math.Max((heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.0001f * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
+            return (float)Math.Max((heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.1f * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
         }
 
         protected float GetJackCurve(float delta) //how hard is it to hit these two notes in the same column? closer = exponentially harder
         {
             float widthScale = 0.02f;
-            float heightScale = 10f * 2.7f;
+            float heightScale = 10f * 3f;
             float curveExponent = 1f;
             return (float)Math.Min(heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
         }

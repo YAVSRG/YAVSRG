@@ -62,6 +62,37 @@ namespace YAVSRG.Interface
             }
         }
 
+        public static void DrawLoadingAnimation(float scale, float x, float y, float time)
+        {
+            float tx, ty;
+            for (int i = 0; i < 6; i++)
+            {
+                tx = x + scale * 1.2f * (float)Math.Cos(time + i * Math.PI / 3);
+                ty = y + scale * 1.2f * (float)Math.Sin(time + i * Math.PI / 3);
+                SpriteBatch.DrawRect(tx - 10, ty - 10, tx + 10, ty + 10, Color.Aquamarine);
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                SpriteBatch.Draw(coords: new OpenTK.Vector2[] {
+                    new OpenTK.Vector2(x - (0.8f*scale-10) * (float)Math.Cos(time + i * Math.PI / 3), y + (0.8f*scale-10) * (float)Math.Sin(time+i*Math.PI/3)),
+                    new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) + 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) + 10 * (float)Math.Cos(time+i*Math.PI/3)),
+                    new OpenTK.Vector2(x - (0.8f*scale+10) * (float)Math.Cos(time + i * Math.PI / 3), y + (0.8f*scale+10) * (float)Math.Sin(time+i*Math.PI/3)),
+                    new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) - 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) - 10 * (float)Math.Cos(time+i*Math.PI/3)),
+                }, color: Color.AliceBlue);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                SpriteBatch.Draw(coords: new OpenTK.Vector2[] {
+                    new OpenTK.Vector2(x + (0.2f*scale) * (float)Math.Cos(time + i * Math.PI / 1.5 + 0.04), y + (0.2f*scale) * (float)Math.Sin(time+i*Math.PI/1.5 + 0.04)),
+                    new OpenTK.Vector2(x + (scale) * (float)Math.Cos(time + i * Math.PI / 1.5 + 0.04), y + (scale) * (float)Math.Sin(time+i*Math.PI/1.5 + 0.04)),
+                    new OpenTK.Vector2(x + (scale) * (float)Math.Cos(time + i * Math.PI / 1.5 - 0.04), y + (scale) * (float)Math.Sin(time+i*Math.PI/1.5 - 0.04)),
+                    new OpenTK.Vector2(x + (0.2f*scale) * (float)Math.Cos(time + i * Math.PI / 1.5 - 0.04), y + (0.2f*scale) * (float)Math.Sin(time+i*Math.PI/1.5 - 0.04)),
+                }, color: Color.Aqua);
+            }
+        }
+
         public static void DrawParallelogramWithBG(float left, float top, float right, float bottom, float amount, Color fill, Color frame)
         {
             float h = (bottom - top) * 0.5f;

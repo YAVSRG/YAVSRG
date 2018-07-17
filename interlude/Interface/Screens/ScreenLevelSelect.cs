@@ -77,20 +77,20 @@ namespace YAVSRG.Interface.Screens
             base.Update(left, top, right, bottom);
 
             double ratestep = Input.KeyPress(OpenTK.Input.Key.ControlLeft) ? 0.2d : Input.KeyPress(OpenTK.Input.Key.ShiftLeft) ? 0.01d : 0.05d;
-            if (Input.KeyTap(OpenTK.Input.Key.Plus))
+            if (Input.KeyTap(Game.Options.General.Binds.UpRate))
             {
                 ChangeRate(ratestep);
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.Minus))
+            else if (Input.KeyTap(Game.Options.General.Binds.DownRate))
             {
                 ChangeRate(-ratestep);
             }
-            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R))
+            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R)) //temp
             {
                 ChartLoader.RecacheThreaded();
                 Game.Screens.AddDialog(new Dialogs.LoadingDialog((s) => { ChartLoader.Refresh(); }));
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.F))
+            else if (Input.KeyTap(OpenTK.Input.Key.F)) //also temp
             {
                 Game.Gameplay.Collections.GetCollection("Favourites").AddItem(Game.Gameplay.CurrentCachedChart);
             }

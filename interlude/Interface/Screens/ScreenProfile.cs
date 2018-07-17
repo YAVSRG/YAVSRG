@@ -25,7 +25,8 @@ namespace YAVSRG.Interface.Screens
                 {
                     TopScore s = Game.Options.Profile.Stats.Scores[1][i];
                     SpriteBatch.DrawRect(left, top + 100 + 30 * i, right, top + 130 + 30 * i, Color.FromArgb(50, i % 2 == 0 ? Color.Gray : Color.Black));
-                    SpriteBatch.Font2.DrawText(Charts.ChartLoader.Cache.Charts[s.abspath].title, 24f, left + 10, top + 100 + 30 * i, Game.Options.Theme.MenuFont);
+                    
+                    SpriteBatch.Font2.DrawText(Charts.ChartLoader.Cache.Charts.ContainsKey(s.abspath) ? Charts.ChartLoader.Cache.Charts[s.abspath].title : "THE DATA IS MISSING", 24f, left + 10, top + 100 + 30 * i, Game.Options.Theme.MenuFont);
                     SpriteBatch.Font2.DrawText(s.mods, 24f, left + 800, top + 100 + 30 * i, Game.Options.Theme.MenuFont);
                     SpriteBatch.Font2.DrawJustifiedText(Utils.RoundNumber(s.accuracy) + "%", 24f, right - 100, top + 100 + 30 * i, Game.Options.Theme.MenuFont);
                     SpriteBatch.Font2.DrawJustifiedText(Utils.RoundNumber(s.rating), 24f, right - 10, top + 100 + 30 * i, Game.Options.Theme.MenuFont);

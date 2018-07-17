@@ -33,6 +33,7 @@ namespace YAVSRG.Audio
         {
             WaveForm = new float[256];
             timer = new Stopwatch(); //simple timer to wait 2 seconds before song starts. it's accurate enough
+            
         }
 
         public void SetVolume(float volume) //sets volume of audio output
@@ -46,7 +47,7 @@ namespace YAVSRG.Audio
             Rate = rate;
         }
 
-        protected double AudioOffset { get { return Options.Options.General.UniversalAudioOffset * Rate + LocalOffset; } } //local offset doesn't scale with rate. universal does
+        protected double AudioOffset { get { return Game.Options.General.UniversalAudioOffset * Rate + LocalOffset; } } //local offset doesn't scale with rate. universal does
 
         public double Duration //gets duration of the song (NOT THE CHART) - used for progress bar through song not chart
         {
@@ -183,6 +184,14 @@ namespace YAVSRG.Audio
             //if (t.ID == 0) return;
             nowplaying?.Dispose(); //destroy old track / free resources
             nowplaying = t;
+        }
+
+        public void PlaySFX(string name)
+        {
+            int i = Content.LoadSoundFromAssets(name);
+            int s = Bass.SampleGetChannel(i);
+            Bass.ChannelSetAttribute(s, ChannelAttribute.Volume, Game.Options.General.AudioVolume);
+            Bass.ChannelPlay(s);
         }
     }
 }

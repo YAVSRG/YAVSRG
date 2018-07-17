@@ -201,7 +201,7 @@ namespace YAVSRG.Interface
             Logo.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             animation.Update();
             animation2.Update();
-            if (Input.KeyTap(OpenTK.Input.Key.Insert))
+            if (Input.KeyTap(Game.Options.General.Binds.CollapseToToolbar))
             {
                 Game.Instance.CollapseToIcon();
             }

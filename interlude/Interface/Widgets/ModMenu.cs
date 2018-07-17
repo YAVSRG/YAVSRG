@@ -74,6 +74,7 @@ namespace YAVSRG.Interface.Widgets
                             Game.Gameplay.SelectedMods.Add(mod, o.Length == 0 ? "" : Game.Gameplay.Mods[mod].Settings[0]);
                             color.Target = 1;
                         }
+                        Game.Gameplay.UpdateChart();
                     }
                 }
                 else if (hover)

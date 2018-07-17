@@ -365,7 +365,15 @@ namespace YAVSRG.Charts
 
         public static void SwitchToChart(CachedChart c, bool playFromPreview)
         {
-            Game.Gameplay.ChangeChart(c, Cache.LoadChart(c), playFromPreview);
+            Chart chart = Cache.LoadChart(c);
+            if (chart != null)
+            {
+                Game.Gameplay.ChangeChart(c, chart, playFromPreview);
+            }
+            else
+            {
+                Log("Can't switch to chart because it can't be found!", LogType.Error);
+            }
         }
     }
 }

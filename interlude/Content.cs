@@ -121,7 +121,7 @@ namespace YAVSRG
                 {
                     newpath = Path.Combine(AssetsDir, "_fallback", path + ".wav");
                 }
-                SoundStore.Add(path, Bass.CreateStream(newpath));
+                SoundStore.Add(path, Bass.SampleLoad(newpath, 0, 0, 65535, BassFlags.AutoFree));
             }
             return SoundStore[path];
         }
@@ -134,7 +134,7 @@ namespace YAVSRG
             }
             foreach (string k in SoundStore.Keys)
             {
-                Bass.StreamFree(SoundStore[k]);
+                Bass.SampleFree(SoundStore[k]);
             }
             Store = new Dictionary<string, Sprite>();
             SoundStore = new Dictionary<string, int>();

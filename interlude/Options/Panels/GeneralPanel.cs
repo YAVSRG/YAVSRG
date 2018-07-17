@@ -15,31 +15,31 @@ namespace YAVSRG.Options.Panels
         {
             AddChild(
                 new TooltipContainer(
-                new Slider("Volume", (v) => { Options.General.AudioVolume = v; }, () => { return Options.General.AudioVolume; }, 0, 1, 0.01f),
+                new Slider("Volume", (v) => { Options.general.AudioVolume = v; }, () => { return Options.general.AudioVolume; }, 0, 1, 0.01f),
                 "Global audio volume setting.\n1 is the loudest and 0 is muted.", ib)
                 .PositionTopLeft(-200, 125, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 150, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new Slider("Audio Offset", (v) => { Options.General.UniversalAudioOffset = v; }, () => { return Options.General.UniversalAudioOffset; }, -100, 100, 1f),
+                    new Slider("Audio Offset", (v) => { Options.general.UniversalAudioOffset = v; }, () => { return Options.general.UniversalAudioOffset; }, -100, 100, 1f),
                 "This will offset audio (in milliseconds) relative to charts and may be useful if you have consistent input latency or always hit early.\nThis number should be lower if you are hitting early and higher if you are hitting late.", ib)
                 .PositionTopLeft(-200, 225, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 250, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Fullscreen" }, (int)Options.General.WindowMode, (v) => { Options.General.WindowMode = (General.WindowType)v; }),
+                    new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Fullscreen" }, (int)Options.general.WindowMode, (v) => { Options.general.WindowMode = (General.WindowType)v; }),
                 "This selects what kind of window the game should be.\nWindowed = Regular, resizable window\nBorderless = Maximised window with no title bar or border around it\nFullscreen = Fullscreen mode", ib)
                 .PositionTopLeft(-200, 325, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(-50, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new TextPicker("Frame Limit", new string[] { "Unlimited", "60", "120", "180", "240" }, Options.General.FrameLimiter / 60, (v) => { Options.General.FrameLimiter = v * 60; }),
+                    new TextPicker("Frame Limit", new string[] { "Unlimited", "60", "120", "180", "240" }, Options.general.FrameLimiter / 60, (v) => { Options.general.FrameLimiter = v * 60; }),
                 "This limits the number of frames per second that the game will run at.\nUnlimited is recommended as it gives the smoothest experience.\nUsing a frame limit can save on power consumption or strain on your GPU.", ib)
                 .PositionTopLeft(50, 325, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new FramedButton("buttonbase", "Apply", () => { Game.Instance.ApplyWindowSettings(Options.General); }),
+                    new FramedButton("buttonbase", "Apply", () => { Game.Instance.ApplyWindowSettings(Options.general); }),
                 "Applies the selected settings (above). Without this they won't be applied until you restart the game so you don't accidentally mess them up.", ib)
                 .PositionTopLeft(-150, 450, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(150, 525, AnchorType.CENTER, AnchorType.MIN));

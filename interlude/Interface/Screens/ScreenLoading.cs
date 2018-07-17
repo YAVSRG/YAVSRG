@@ -69,6 +69,7 @@ namespace YAVSRG.Interface.Screens
                     SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i*0.2f), Color.FromArgb(a, Color.White));
                 }
             }
+            DrawLoadingAnimation(100f * fade, 0, top + 200, counter.value * 0.01f);
             //SpriteBatch.Draw("logo", -300, -300+slide, 300, 300+slide, Color.FromArgb(a, Color.White));
         }
 
@@ -79,7 +80,7 @@ namespace YAVSRG.Interface.Screens
             if (exiting)
             {
                 a = 255 - a;
-                Game.Audio.SetVolume(Options.Options.General.AudioVolume * (1 - fade));
+                Game.Audio.SetVolume(Game.Options.General.AudioVolume * (1 - fade));
                 if (!transition.Running)
                 {
                     Game.Instance.Exit();

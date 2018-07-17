@@ -65,7 +65,7 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             Game.Screens.DrawChartBackground(left, top, right, bottom, Utils.ColorInterp(Color.FromArgb(255,0,0,0), Game.Screens.BaseColor, 0.8f),1.5f);
             SpriteBatch.DrawRect(right - 520, top + 10, right - 20, top + 70, Game.Screens.DarkColor);
-            SpriteBatch.Font1.DrawText(SearchString != "" ? SearchString : "Press tab to search...", 20f, right - 500, top + 22.5f, color);
+            SpriteBatch.Font1.DrawText(SearchString != "" ? SearchString : "Press "+Game.Options.General.Binds.Search.ToString().ToUpper()+" to search...", 20f, right - 500, top + 22.5f, color);
             SpriteBatch.DrawFrame(right - 520, top + 10, right - 20, top + 70, 25f, color);
             SpriteBatch.DrawFrame(left-30, top, right+30, bottom, 30f, Game.Screens.HighlightColor);
             DrawWidgets(left, top, right, bottom);
@@ -76,12 +76,12 @@ namespace YAVSRG.Interface.Widgets
             base.Update(left, top, right, bottom);
             color.Target(focus ? Color.White : Game.Screens.HighlightColor);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (!focus && Input.KeyTap(OpenTK.Input.Key.Tab))
+            if (!focus && Input.KeyTap(Game.Options.General.Binds.Search))
             {
                 Input.ChangeIM(new InputMethod((s)=> { SearchString = s; },()=> { return SearchString; }, ()=> { Refresh(); }));
                 focus = true;
             }
-            else if (focus && Input.KeyTap(OpenTK.Input.Key.Tab, true))
+            else if (focus && Input.KeyTap(Game.Options.General.Binds.Search, true))
             {
                 Input.ChangeIM(null);
                 focus = false;

@@ -19,8 +19,8 @@ namespace YAVSRG.Gameplay
         private void AddCCJudgement(int i, int count)
         {
             Judgements[i] += 1;
-            score += weights[i] / count;
-            maxscore += maxweight / count;
+            score += (float)weights[i] / count;
+            maxscore += (float)maxweight / count;
         }
 
         public override void HandleHit(int k, int index, ScoreTracker.HitData[] data)

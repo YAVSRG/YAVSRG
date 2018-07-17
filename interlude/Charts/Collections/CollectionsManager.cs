@@ -13,7 +13,7 @@ namespace YAVSRG.Charts.Collections
 
         public static CollectionsManager LoadCollections()
         {
-            string path = Path.Combine(Options.Options.General.WorkingDirectory, "Data", "Collections.json");
+            string path = Path.Combine(Game.WorkingDirectory, "Data", "Collections.json");
             if (File.Exists(path))
             {
                 return Utils.LoadObject<CollectionsManager>(path);
@@ -32,7 +32,7 @@ namespace YAVSRG.Charts.Collections
 
         public void Save()
         {
-            string path = Path.Combine(Options.Options.General.WorkingDirectory, "Data", "Collections.json");
+            string path = Path.Combine(Game.WorkingDirectory, "Data", "Collections.json");
             Utils.SaveObject(this, path);
         }
     }

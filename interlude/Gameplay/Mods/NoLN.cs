@@ -15,7 +15,7 @@ namespace YAVSRG.Gameplay.Mods
                 foreach (GameplaySnap s in c.Notes.Points)
                 {
                     s.ends.value = 0;
-                    s.holds.value = 0;
+                    s.middles.value = 0;
                     s.taps.value += s.holds.value;
                     s.holds.value = 0;
                 }

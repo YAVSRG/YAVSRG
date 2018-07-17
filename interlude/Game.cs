@@ -16,7 +16,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.2.12";
+        public static readonly string Version = "Interlude v0.3-pre1";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -61,7 +61,7 @@ namespace YAVSRG
 
         public static string WorkingDirectory
         {
-            get { return YAVSRG.Options.Options.General.WorkingDirectory; }
+            get { return YAVSRG.Options.Options.general.WorkingDirectory; }
         }
 
         public Game() : base(800,600, new OpenTK.Graphics.GraphicsMode(32,24,8,0))
@@ -77,7 +77,7 @@ namespace YAVSRG
             ManagedBass.Bass.Init(); //init bass
             audio = new MusicPlayer(); //init my music player
 
-            ApplyWindowSettings(YAVSRG.Options.Options.General); //apply window settings from options
+            ApplyWindowSettings(Options.General); //apply window settings from options
             //ScreenUtils.UpdateBounds(Width, Height);
 
             gameplay = new GameplayManager();
@@ -119,7 +119,7 @@ namespace YAVSRG
         {
             trayIcon.Hide();
             Visible = true;
-            ApplyWindowSettings(YAVSRG.Options.Options.General);
+            ApplyWindowSettings(Options.General);
         }
 
         protected override void OnResize(EventArgs e) //handles resizing of the window. tells OpenGL the new resolution etc
