@@ -76,15 +76,21 @@ namespace YAVSRG.Interface.Widgets
             base.Update(left, top, right, bottom);
             color.Target(focus ? Color.White : Game.Screens.HighlightColor);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (!focus && Input.KeyTap(Game.Options.General.Binds.Search))
+            if (focus)
             {
-                Input.ChangeIM(new InputMethod((s)=> { SearchString = s; },()=> { return SearchString; }, ()=> { Refresh(); }));
-                focus = true;
+                if (Input.KeyTap(Game.Options.General.Binds.Search, true) || !Input.HasIM() || ScreenUtils.CheckButtonClick(right - 520, top + 10, right - 20, top + 70))
+                {
+                    Input.ChangeIM(null);
+                    focus = false;
+                }
             }
-            else if (focus && Input.KeyTap(Game.Options.General.Binds.Search, true))
+            else
             {
-                Input.ChangeIM(null);
-                focus = false;
+                if (Input.KeyTap(Game.Options.General.Binds.Search) || ScreenUtils.CheckButtonClick(right - 520, top + 10, right - 20, top + 70))
+                {
+                    Input.ChangeIM(new InputMethod((s) => { SearchString = s; }, () => { return SearchString; }, () => { Refresh(); }));
+                    focus = true;
+                }
             }
         }
     }

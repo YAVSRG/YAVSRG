@@ -107,7 +107,7 @@ namespace YAVSRG.Charts.DifficultyRating
 
         protected float GetNoteDifficulty(byte c, float offset, int h, float rate)
         {
-            float ohtnerf = 2f;
+            float ohtnerf = 3f;
             double val = 0;
             BinarySwitcher s = new BinarySwitcher(h);
             s.RemoveColumn(c);
@@ -153,6 +153,22 @@ namespace YAVSRG.Charts.DifficultyRating
             float heightScale = 10f * 3f;
             float curveExponent = 1f;
             return (float)Math.Min(heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
+        }
+
+        public static void StaminaAlgorithm(ref double currentValue, float input, float timedelta)
+        {
+            currentValue *= StaminaDecayFunc(timedelta);
+            currentValue *= StaminaFunc(input/currentValue, timedelta);
+        }
+
+        public static double StaminaFunc(double ratio, float timedelta)
+        {
+            return (1 + 0.01f * ratio); //needs to account for time or jacks underscale and streams overscale
+        }
+
+        public static double StaminaDecayFunc(float timedelta)
+        {
+            return Math.Exp(-0.004 * timedelta);
         }
     }
 }

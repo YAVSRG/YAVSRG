@@ -31,7 +31,7 @@ namespace YAVSRG.Charts.Stepmania
                 {
                     if (data[i][c] == '1') { s.taps.SetColumn(c); }
                     else if (data[i][c] == 'M') { s.mines.SetColumn(c); }
-                    else if (data[i][c] == '2') { s.holds.SetColumn(c); lntracker.SetColumn(c); }
+                    else if (data[i][c] == '2' || data[i][c] == '4') { s.holds.SetColumn(c); lntracker.SetColumn(c); }
                     else if (data[i][c] == '3') { s.ends.SetColumn(c); lntracker.RemoveColumn(c); }
                 }
                 if (!s.IsEmpty())

@@ -120,6 +120,11 @@ namespace YAVSRG.Interface
             Input.im = im;
         }
 
+        public static bool HasIM()
+        {
+            return im != null;
+        }
+
         public static void Update()
         {
             im?.Update();
