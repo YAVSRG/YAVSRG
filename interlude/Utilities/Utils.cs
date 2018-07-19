@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using YAVSRG.Interface;
 
 namespace YAVSRG
 {
@@ -58,13 +59,23 @@ namespace YAVSRG
             System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented));
         }
 
-        public static Bitmap CaptureScreen(Rectangle screenSize)
+        public static Bitmap CaptureDesktop(Rectangle screenSize)
         {
             Bitmap target = new Bitmap(screenSize.Width, screenSize.Height);
             using (Graphics g = Graphics.FromImage(target))
             {
                 g.CopyFromScreen(0, 0, 0, 0, new Size(screenSize.Width, screenSize.Height));
             }
+            return target;
+        }
+
+        public static Bitmap CaptureWindow()
+        {
+            Bitmap target = new Bitmap(ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2);
+            System.Drawing.Imaging.BitmapData data = target.LockBits(new Rectangle(0, 0, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            OpenTK.Graphics.OpenGL.GL.ReadPixels(0, 0, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, OpenTK.Graphics.OpenGL.PixelFormat.Bgr, OpenTK.Graphics.OpenGL.PixelType.UnsignedByte, data.Scan0);
+            target.UnlockBits(data);
+            target.RotateFlip(RotateFlipType.Rotate180FlipX);
             return target;
         }
 

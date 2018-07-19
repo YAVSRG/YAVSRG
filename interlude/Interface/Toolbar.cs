@@ -16,6 +16,7 @@ namespace YAVSRG.Interface
         AnimationSlider slide;
         bool hidden;
         public bool cursor = true;
+        public List<string> log = new List<string>();
 
         public Toolbar()
         {
@@ -25,7 +26,7 @@ namespace YAVSRG.Interface
                 .PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttoninfo", "", () => { if (!(Game.Screens.Current is ScreenVisualiser)) Game.Screens.AddScreen(new ScreenVisualiser()); })
+                new Button("buttoninfo", "", () => { if (!(Game.Screens.Current is ScreenVisualiser && Game.Gameplay.CurrentCachedChart != null)) Game.Screens.AddScreen(new ScreenVisualiser()); })
                 .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
                 );
@@ -67,6 +68,7 @@ namespace YAVSRG.Interface
 
         public override void Draw(float left, float top, float right, float bottom)
         {
+
             if (slide > 1)
             {
                 float s = (ScreenHeight * 2 - slide * 2) / 24f;
@@ -98,6 +100,14 @@ namespace YAVSRG.Interface
                 SpriteBatch.Font1.DrawJustifiedText(Game.Version, 25f, ScreenWidth, ScreenHeight - slide + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, ScreenWidth, ScreenHeight - slide + 45, Game.Options.Theme.MenuFont);
             }
+
+            /* temp log test
+            float y = top;
+            foreach (string s in log)
+            {
+                SpriteBatch.Font2.DrawText(s, 20f, left, y, Color.White);
+                y += 20f;
+            }*/
 
             if (!(hidden || !cursor)) SpriteBatch.Draw("cursor", Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Screens.HighlightColor);
         }

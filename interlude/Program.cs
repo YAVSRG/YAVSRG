@@ -12,28 +12,48 @@ namespace YAVSRG
 {
     class Program
     {
+        [STAThread()]
         static void Main(string[] args)
         {
             Mutex m = new Mutex(true, "Interlude");
             if (m.WaitOne(TimeSpan.Zero, true))
             {
-                Logging.SetLogAction((s, t) => { });
+                var LogFile = new System.IO.FileStream("log.txt", System.IO.FileMode.Append);
+                var LogFileWriter = new System.IO.StreamWriter(LogFile);
+                Logging.SetLogAction((s, t) => { LogFileWriter.WriteLine("[" + t.ToString() + "] " + s); if (Game.Instance != null) { Game.Screens.Toolbar.log.Add(t.ToString() + ": " + s);} });
                 PipeHandler.Open();
-                Game g = new Game();
+                Logging.Log("Launching "+Game.Version+", the date/time is " + DateTime.Now.ToString());
+                Game g = null;
                 try
                 {
-                    g.Run(120.0); //run the game
+                    g = new Game();
+                    Logging.Log("Looks good");
                 }
                 catch (Exception e)
                 {
-                    g.Exit(); //if it crashes close it and give a neat crash log
                     Application.Run(new CrashWindow(e.ToString()));
+                    Logging.Log("Game failed to launch: " + e.ToString(), Logging.LogType.Critical);
                 }
-                finally
+                if (g != null)
                 {
-                    g.Exit();
-                    g.Dispose(); //clean up resources. i don't know if there's anything left to clean up but it's here i guess
+                    try
+                    {
+                        g.Run(120.0); //run the game
+                    }
+                    catch (Exception e)
+                    {
+                        g.Exit(); //if it crashes close it and give a neat crash log
+                        Application.Run(new CrashWindow(e.ToString()));
+                        Logging.Log("Game crashed: " + e.ToString(), Logging.LogType.Critical);
+                    }
+                    finally
+                    {
+                        g.Exit();
+                        g.Dispose(); //clean up resources. i don't know if there's anything left to clean up but it's here i guess
+                    }
                 }
+                LogFileWriter.Close();
+                LogFile.Close();
                 PipeHandler.Close();
                 m.ReleaseMutex();
             }

@@ -43,16 +43,16 @@ namespace YAVSRG.Interface.Widgets
             {
                 if (Input.KeyTap(OpenTK.Input.Key.Left) && get() - resolution > min)
                 {
-                    set(get() - resolution);
+                    set((float)Math.Round(get() - resolution,2));
                 }
                 if (Input.KeyTap(OpenTK.Input.Key.Right) && get() + resolution < max)
                 {
-                    set(get() + resolution);
+                    set((float)Math.Round(get() + resolution,2));
                 }
                 if (Input.MousePress(OpenTK.Input.MouseButton.Left))
                 {
                     set(min + (Input.MouseX - left) / (right - left) * (max - min));
-                    set(get() - get() % resolution);
+                    set((float)Math.Round(get() - get() % resolution,2));
                 }
             }
         }

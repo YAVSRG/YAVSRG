@@ -94,6 +94,10 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Gameplay.Collections.GetCollection("Favourites").AddItem(Game.Gameplay.CurrentCachedChart);
             }
+            else if (Input.KeyTap(Game.Options.General.Binds.Select))
+            {
+                Game.Screens.AddScreen(new ScreenPlay());
+            }
         }
 
         public void ChangeRate(double change)

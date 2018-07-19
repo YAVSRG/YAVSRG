@@ -72,10 +72,21 @@ namespace YAVSRG.Interface.Screens
             if (Game.Gameplay.GetModStatus(Game.Gameplay.SelectedMods) == 2) { return false; }
             return true;
         }
+        
+        public override void Update(float left, float top, float right, float bottom)
+        {
+            base.Update(left, top, right, bottom);
+            if (Input.KeyTap(Game.Options.General.Binds.Screenshot))
+            {
+                Bitmap bm = Utils.CaptureWindow();
+                System.Windows.Forms.Clipboard.SetImage(bm);
+            }
+        }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
             base.Draw(left, top, right, bottom);
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
 
             //top panel
             DrawParallelogramWithBG(left, top, right - 600, top + 150, 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);

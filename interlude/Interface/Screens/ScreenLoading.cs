@@ -13,14 +13,14 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenLoading : Screen
     {
-        static readonly string[] splashes = new[] { "Welcome to Interlude", "Give it a moment...", "Now Loading", "Hold on...", "(╯°□°）╯︵ ┻━┻", "Loading your charts...", "Here we go again", "Buckle up" };
+        static readonly string[] splashes = new[] { "Welcome to Interlude", "Give it a moment...", "Loading some stuff" };
         string splash = splashes[new Random().Next(0, splashes.Length)];
         Sprite desktop;
         AnimationFade fade;
         AnimationSeries transition;
         AnimationCounter counter;
         bool exiting;
-        OpenTK.WindowBorder wb;
+        OpenTK.WindowBorder wb; //remembers if it needs to reenable the window border
 
         public ScreenLoading(Sprite s)
         {
@@ -69,8 +69,7 @@ namespace YAVSRG.Interface.Screens
                     SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i*0.2f), Color.FromArgb(a, Color.White));
                 }
             }
-            DrawLoadingAnimation(100f * fade, 0, top + 200, counter.value * 0.01f);
-            //SpriteBatch.Draw("logo", -300, -300+slide, 300, 300+slide, Color.FromArgb(a, Color.White));
+            DrawLoadingAnimation(350f * (exiting ? 1 - fade : fade), 0, 0, counter.value * 0.01f);
         }
 
         public override void Update(float left, float top, float right, float bottom)

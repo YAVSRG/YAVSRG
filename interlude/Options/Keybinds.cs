@@ -17,5 +17,6 @@ namespace YAVSRG.Options
         public Key Skip = Key.Space;
         public Key Search = Key.Tab;
         public Key CollapseToToolbar = Key.Insert;
+        public Key Screenshot = Key.F12;
     }
 }

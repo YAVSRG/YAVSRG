@@ -62,6 +62,20 @@ namespace YAVSRG.Interface
             }
         }
 
+        public static void DrawArc(float x, float y, float r1, float r2, float start, float end, Color c)
+        {
+            float s = (end - start) / 60;
+            for (int i = 0; i < 60; i++)
+            {
+                SpriteBatch.Draw(coords: new OpenTK.Vector2[] {
+                    new OpenTK.Vector2(x + r1 * (float)Math.Cos(start + s*i), y + r1 * (float)Math.Sin(start + s*i)),
+                    new OpenTK.Vector2(x + r2 * (float)Math.Cos(start + s*i), y + r2 * (float)Math.Sin(start + s*i)),
+                    new OpenTK.Vector2(x + r2 * (float)Math.Cos(start + s + s*i), y + r2 * (float)Math.Sin(start + s + s*i)),
+                    new OpenTK.Vector2(x + r1 * (float)Math.Cos(start + s + s*i), y + r1 * (float)Math.Sin(start + s + s*i)),
+                }, color: c);
+            }
+        }
+
         public static void DrawLoadingAnimation(float scale, float x, float y, float time)
         {
             float tx, ty;
@@ -69,7 +83,7 @@ namespace YAVSRG.Interface
             {
                 tx = x + scale * 1.2f * (float)Math.Cos(time + i * Math.PI / 3);
                 ty = y + scale * 1.2f * (float)Math.Sin(time + i * Math.PI / 3);
-                SpriteBatch.DrawRect(tx - 10, ty - 10, tx + 10, ty + 10, Color.Aquamarine);
+                SpriteBatch.DrawRect(tx - 10, ty - 10, tx + 10, ty + 10, Color.Aqua);
             }
 
             for (int i = 0; i < 6; i++)
@@ -79,18 +93,14 @@ namespace YAVSRG.Interface
                     new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) + 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) + 10 * (float)Math.Cos(time+i*Math.PI/3)),
                     new OpenTK.Vector2(x - (0.8f*scale+10) * (float)Math.Cos(time + i * Math.PI / 3), y + (0.8f*scale+10) * (float)Math.Sin(time+i*Math.PI/3)),
                     new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) - 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) - 10 * (float)Math.Cos(time+i*Math.PI/3)),
-                }, color: Color.AliceBlue);
-            }
-
-            for (int i = 0; i < 3; i++)
-            {
-                SpriteBatch.Draw(coords: new OpenTK.Vector2[] {
-                    new OpenTK.Vector2(x + (0.2f*scale) * (float)Math.Cos(time + i * Math.PI / 1.5 + 0.04), y + (0.2f*scale) * (float)Math.Sin(time+i*Math.PI/1.5 + 0.04)),
-                    new OpenTK.Vector2(x + (scale) * (float)Math.Cos(time + i * Math.PI / 1.5 + 0.04), y + (scale) * (float)Math.Sin(time+i*Math.PI/1.5 + 0.04)),
-                    new OpenTK.Vector2(x + (scale) * (float)Math.Cos(time + i * Math.PI / 1.5 - 0.04), y + (scale) * (float)Math.Sin(time+i*Math.PI/1.5 - 0.04)),
-                    new OpenTK.Vector2(x + (0.2f*scale) * (float)Math.Cos(time + i * Math.PI / 1.5 - 0.04), y + (0.2f*scale) * (float)Math.Sin(time+i*Math.PI/1.5 - 0.04)),
                 }, color: Color.Aqua);
             }
+
+            DrawArc(x, y, scale * 0.5f, scale * 0.55f, time, time + 2 * (float)Math.Sin(time), Color.Aquamarine);
+            DrawArc(x, y, scale * 0.5f, scale * 0.55f, time + 3.14f, 3.14f + time + 2 * (float)Math.Sin(time), Color.Aquamarine);
+
+            DrawArc(x, y, scale * 0.95f, scale, -time + 1.57f, 1.57f - time + 2 * (float)Math.Cos(time), Color.Aquamarine);
+            DrawArc(x, y, scale * 0.95f, scale, -time + 4.71f, 4.71f - time + 2 * (float)Math.Cos(time), Color.Aquamarine);
         }
 
         public static void DrawParallelogramWithBG(float left, float top, float right, float bottom, float amount, Color fill, Color frame)

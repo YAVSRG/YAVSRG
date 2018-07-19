@@ -25,19 +25,17 @@ namespace YAVSRG.Interface.Dialogs
             base.Update(left, top, right, bottom);
             if (ChartLoader.Loaded)
             {
-                SpriteBatch.DisableTransform();
                 Close("");
             }
         }
 
         public override void Draw(float left, float top, float right, float bottom)
         {
-            SpriteBatch.DisableTransform();
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawRect(left, top, right, bottom, c);
             SpriteBatch.Font1.DrawCentredTextToFill("Loading...", -300, -100, 300, 100, Game.Options.Theme.MenuFont);
-            SpriteBatch.ParallelogramTransform((float)Math.Sin(anim.value * 0.01f), ScreenUtils.ScreenHeight * (float)Math.Cos(anim.value * 0.01f));
+            ScreenUtils.DrawLoadingAnimation(100f, 0, 200, anim.value * 0.01f);
         }
     }
 }

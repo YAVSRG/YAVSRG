@@ -16,7 +16,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3-pre1";
+        public static readonly string Version = "Interlude v0.3";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -68,7 +68,7 @@ namespace YAVSRG
         {
             YAVSRG.Options.Options.Init(); //init options i.e load profiles
             options = new Options.Options(); //create options data from profile
-            Sprite s = Content.UploadTexture(Utils.CaptureScreen(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
+            Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";
             Icon = new Icon("icon.ico");
             Instance = this;
