@@ -7,7 +7,6 @@ using YAVSRG.Charts.Stepmania;
 using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Charts.Osu;
 using System.IO;
-using System.Net;
 using System.IO.Compression;
 using static YAVSRG.Utilities.Logging;
 
@@ -267,26 +266,6 @@ namespace YAVSRG.Charts
         public static void ImportOsu()
         {
             ConvertPack(GetOsuSongFolder(), "osu! Imports");
-        }
-
-        public static void DownloadBeatmap(int id)
-        {
-            using (var client = new WebClient())
-            {
-                try
-                {
-                    //string target = "https://osu.ppy.sh/beatmapsets/" + id.ToString() + "/download"
-                    string target = "https://api.github.com/repos/Percyqaz/YAVSRG/issues";
-                    Console.WriteLine(client.DownloadString(target));
-                    //client.DownloadFile(target, Path.Combine(Content.WorkingDirectory, "Imports"));
-                }
-                catch (WebException e)
-                {
-                    Console.WriteLine(e.Status);
-                    Console.WriteLine(e.Response);
-                    Console.WriteLine(e.Source);
-                }
-            }
         }
         
         public static void ImportArchive(string path)

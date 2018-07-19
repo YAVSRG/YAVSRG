@@ -41,6 +41,7 @@ namespace YAVSRG.Interface.Screens
                 .PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.CENTER)
                 .PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER)
                 );
+            AddChild(new NewsBox());
             slide = new AnimationSlider(0);
             slide.Target = 1;
             Animation.Add(slide);
