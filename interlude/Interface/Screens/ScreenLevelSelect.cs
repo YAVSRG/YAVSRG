@@ -87,7 +87,7 @@ namespace YAVSRG.Interface.Screens
             }
             else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R)) //temp
             {
-                ChartLoader.RecacheThreaded();
+                ChartLoader.TaskThreaded(() => { ChartLoader.Recache(); });
                 Game.Screens.AddDialog(new Dialogs.LoadingDialog((s) => { ChartLoader.Refresh(); }));
             }
             else if (Input.KeyTap(OpenTK.Input.Key.F)) //also temp

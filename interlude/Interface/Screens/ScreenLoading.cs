@@ -85,7 +85,7 @@ namespace YAVSRG.Interface.Screens
                     Game.Instance.Exit();
                 }
             }
-            else if (ChartLoader.Loaded && !transition.Running)
+            else if (!transition.Running)
             {
                 Game.Screens.Loading = false;
                 ChartLoader.Refresh();

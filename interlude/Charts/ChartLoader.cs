@@ -31,10 +31,19 @@ namespace YAVSRG.Charts
         public static Func<CachedChart, string> GroupMode = GroupByPack;
         public static string SearchString = "";
         public static event Action OnRefreshGroups = () => { };
-        public static bool Loaded;
         public static List<ChartGroup> Groups;
         public static List<ChartGroup> SearchResult;
         public static Cache Cache;
+
+        public enum ChartLoadingStatus
+        {
+            InProgress,
+            Failed,
+            Completed
+        }
+
+        public static string LastOutput = "";
+        public static ChartLoadingStatus LastStatus = ChartLoadingStatus.InProgress;
 
         public class ChartGroup
         {
@@ -58,7 +67,7 @@ namespace YAVSRG.Charts
         {
             Groups = new List<ChartGroup>();
             Cache = Cache.LoadCache();
-            Loaded = true;
+            LastStatus = ChartLoadingStatus.Completed;
         }
 
         public static void SortIntoGroups(Func<CachedChart, string> groupBy, Comparison<CachedChart> sortBy)
@@ -143,17 +152,19 @@ namespace YAVSRG.Charts
         
         public static void Recache()
         {
+            LastStatus = ChartLoadingStatus.InProgress;
             Cache.Charts = new Dictionary<string, CachedChart>(); //clear cache
-            foreach (string pack in Directory.GetDirectories(Path.Combine(Game.WorkingDirectory, "Songs")))
+            foreach (string pack in Directory.EnumerateDirectories(Path.Combine(Game.WorkingDirectory, "Songs")))
             {
-                foreach (string song in Directory.GetDirectories(pack))
+                foreach (string song in Directory.EnumerateDirectories(pack))
                 {
-                    foreach (string f in Directory.GetFiles(song))
+                    foreach (string f in Directory.EnumerateFiles(song))
                     {
                         if (Path.GetExtension(f).ToLower() == ".yav")
                         {
                             try
                             {
+                                LastOutput = "Caching: " + f;
                                 Cache.CacheChart(Chart.FromFile(f));
                             }
                             catch (Exception e)
@@ -165,18 +176,23 @@ namespace YAVSRG.Charts
                 }
             }
             Cache.Save();
+            LastOutput = "Saved cache.";
+            LastStatus = ChartLoadingStatus.Completed;
         }
 
-        public static void RecacheThreaded()
+        public static void TaskThreaded(Action task)
         {
-            Loaded = false;
-            Thread t = new Thread(new ThreadStart(() => { Recache(); Loaded = true; }));
-            t.Start();
+            if (LastStatus != ChartLoadingStatus.InProgress)
+            {
+                Thread t = new Thread(new ThreadStart(task));
+                t.Start();
+                Game.Screens.AddDialog(new Interface.Dialogs.LoadingDialog((d) => { }));
+            }
         }
 
         public static void ConvertAllPacks()
         {
-            foreach (string s in Directory.GetDirectories(Path.Combine(Game.WorkingDirectory, "Songs")))
+            foreach (string s in Directory.EnumerateDirectories(Path.Combine(Game.WorkingDirectory, "Songs")))
             {
                 ConvertPack(s, Path.GetFileName(s));
             }
@@ -184,9 +200,10 @@ namespace YAVSRG.Charts
 
         public static void ConvertPack(string path, string name) //name not derived from the folder so i can name the osu songs folder something other than "Songs".
         {
-            foreach (string songfolder in Directory.GetDirectories(path))
+            foreach (string songfolder in Directory.EnumerateDirectories(path))
             {
-                foreach (string file in Directory.GetFiles(songfolder))
+                LastOutput = "Converting: " + songfolder;
+                foreach (string file in Directory.EnumerateFiles(songfolder))
                 {
                     try
                     {
@@ -199,6 +216,7 @@ namespace YAVSRG.Charts
                 }
             }
             Cache.Save();
+            LastOutput = "Converted: " + path;
         }
 
         public static void ConvertChart(string absfilepath, string pack) //pack only used if importing from an external pack
@@ -263,11 +281,59 @@ namespace YAVSRG.Charts
             Cache.CacheChart(c);
         }
 
-        public static void ImportOsu()
+        public static void ImportOsu_OldVersionUsedByTools()
         {
             ConvertPack(GetOsuSongFolder(), "osu! Imports");
         }
         
+        public static void ImportOsu()
+        {
+            LastStatus = ChartLoadingStatus.InProgress;
+            string folder = GetOsuSongFolder();
+            if (Directory.Exists(folder))
+            {
+                LastOutput = "Detected osu! Folder";
+                ConvertPack(folder, "osu! Imports");
+                LastStatus = ChartLoadingStatus.Completed;
+                LastOutput = "Converted osu! songs folder successfully.";
+            }
+            else
+            {
+                LastStatus = ChartLoadingStatus.Failed;
+                LastOutput = "Could not detect osu! folder! You'll have to drop it here if it's installed in a custom location.";
+            }
+        }
+
+        public static void ImportStepmania()
+        {
+            LastStatus = ChartLoadingStatus.InProgress;
+            string dir = Path.Combine(Path.GetPathRoot(Game.WorkingDirectory), "Games", "Etterna", "Songs");
+            if (Directory.Exists(dir))
+            {
+                LastOutput = "Detected Etterna!";
+            }
+            else
+            {
+                dir = Path.Combine(Path.GetPathRoot(Game.WorkingDirectory), "Games", "Stepmania 5", "Songs");
+                if (Directory.Exists(dir))
+                {
+                    LastOutput = "Detected Stepmania 5!";
+                }
+                else
+                {
+                    LastOutput = "Could not detect Stepmania/Etterna song folders. You'll have to drop it here if in a custom location.";
+                    LastStatus = ChartLoadingStatus.Failed;
+                    return;
+                }
+            }
+            foreach (string path in Directory.EnumerateDirectories(dir))
+            {
+                ConvertPack(path, Path.GetFileName(path));
+            }
+            LastStatus = ChartLoadingStatus.Completed;
+            LastOutput = "Converted stepmania files successfully.";
+        }
+                
         public static void ImportArchive(string path)
         {
             if (Path.GetExtension(path).ToLower() == ".osz")
@@ -277,7 +343,7 @@ namespace YAVSRG.Charts
                 {
                     z.ExtractToDirectory(dir);
                 }
-                foreach (string file in Directory.GetFiles(dir))
+                foreach (string file in Directory.EnumerateFiles(dir))
                 {
                     try
                     {
@@ -288,8 +354,15 @@ namespace YAVSRG.Charts
 
                     }
                 }
-                Directory.Delete(dir, true);
-                File.Delete(path);
+                try
+                {
+                    Directory.Delete(dir, true);
+                    File.Delete(path);
+                }
+                catch
+                {
+                    Log("Couldn't delete files after extraction", LogType.Warning);
+                }
             }
             else if (Path.GetExtension(path).ToLower() == ".zip")
             {
@@ -329,12 +402,44 @@ namespace YAVSRG.Charts
                     }
                     catch
                     {
-                        Log("Could not delete extracted files: " + target, LogType.Error);
+                        Log("Could not delete files after extraction: " + target, LogType.Warning);
                     }
                 }
                 File.Delete(path);
             }
             //no rar support until i know how
+        }
+
+        public static void AutoImportFromPath(string path)
+        {
+            LastStatus = ChartLoadingStatus.InProgress;
+            string ext = Path.GetExtension(path).ToLower();
+            if (ext == "")
+            {
+                LastStatus = ChartLoadingStatus.Completed;
+                LastOutput = "Not yet implemented";
+            }
+            else if (ext == ".zip" || ext == ".osz")
+            {
+                LastOutput = "Importing archive...";
+                try
+                {
+                    ImportArchive(path);
+                    LastStatus = ChartLoadingStatus.Completed;
+                    LastOutput = "Extracted archive successfully!";
+                }
+                catch (Exception e)
+                {
+                    Log("Error extracting archive: " + e.ToString(), LogType.Error);
+                    LastStatus = ChartLoadingStatus.Failed;
+                    LastOutput = "An error occured while extracting!";
+                }
+            }
+            else
+            {
+                LastStatus = ChartLoadingStatus.Failed;
+                LastOutput = "This cannot be converted!";
+            }
         }
 
         public static string GetOsuSongFolder()

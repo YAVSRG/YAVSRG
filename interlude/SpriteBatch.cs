@@ -209,7 +209,7 @@ namespace YAVSRG
         public static void Init()
         {
             GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.ClearColor(0, 0, 0, 0);
             GL.ClearStencil(0x00);
             GL.MatrixMode(MatrixMode.Projection);

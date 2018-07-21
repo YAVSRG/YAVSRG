@@ -86,8 +86,8 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="OpenTK, Version=2.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
-      <HintPath>..\packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
+    <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenTK.3.0.1\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -176,6 +176,7 @@
     <Compile Include="Interface\Dialogs\TextDialog.cs" />
     <Compile Include="Interface\InputMethod.cs" />
     <Compile Include="Interface\ScreenManager.cs" />
+    <Compile Include="Interface\Screens\ScreenImport.cs" />
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
     <Compile Include="Interface\Screens\ScreenLoading.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />

@@ -26,6 +26,7 @@ namespace YAVSRG
                 Game g = null;
                 try
                 {
+                    Options.Options.Init(); //init options i.e load profiles
                     g = new Game();
                     Logging.Log("Looks good");
                 }
@@ -59,14 +60,14 @@ namespace YAVSRG
             }
             else
             {
-                if (args.Length > 0)
-                {
-                    PipeHandler.SendData("open", args[0]);
-                }
-                else
-                {
+                //if (args.Length > 0)
+                //{
+                //    PipeHandler.SendData("open", args[0]); disabled for now cause it's a liability
+                //}
+                //else
+                //{
                     PipeHandler.SendData("show", "");
-                }
+                //}
             }
         }
     }

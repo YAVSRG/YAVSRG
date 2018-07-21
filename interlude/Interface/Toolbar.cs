@@ -22,24 +22,16 @@ namespace YAVSRG.Interface
         {
             AddChild(
                 new Button("buttonback", "", () => { Game.Screens.PopScreen(); })
-                .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN)
-                .PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN)
-                );
+                .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN));
             AddChild(
-                new Button("buttoninfo", "", () => { if (!(Game.Screens.Current is ScreenVisualiser && Game.Gameplay.CurrentCachedChart != null)) Game.Screens.AddScreen(new ScreenVisualiser()); })
-                .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN)
-                );
+                new Button("buttonmusic", "", () => { if (!(Game.Screens.Current is ScreenVisualiser && Game.Gameplay.CurrentCachedChart != null)) Game.Screens.AddScreen(new ScreenVisualiser()); })
+                .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
                 new Button("buttonoptions", "", () => { if (!(Game.Screens.Current is ScreenOptions)) Game.Screens.AddScreen(new ScreenOptions()); })
-                .PositionTopLeft(160, 0, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN)
-                );
+                .PositionTopLeft(160, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
-                new Button("buttonimport", "", () => { if (!(Game.Screens.Current is ScreenProfile)) Game.Screens.AddScreen(new ScreenProfile()); })
-                .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN)
-                );
+                new Button("buttonimport", "", () => { if (!(Game.Screens.Current is ScreenImport)) Game.Screens.AddScreen(new ScreenImport()); })
+                .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN));
             slide = new AnimationSlider(-10);
             Animation.Add(slide);
         }

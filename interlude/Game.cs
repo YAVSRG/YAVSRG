@@ -11,6 +11,7 @@ using YAVSRG.Interface;
 using YAVSRG.Audio;
 using YAVSRG.Gameplay;
 using YAVSRG.Utilities;
+using OpenTK.Input;
 
 namespace YAVSRG
 {
@@ -64,13 +65,11 @@ namespace YAVSRG
             get { return YAVSRG.Options.Options.general.WorkingDirectory; }
         }
 
-        public Game() : base(800,600, new OpenTK.Graphics.GraphicsMode(32,24,8,0))
+        public Game() : base(800,600, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
         {
-            YAVSRG.Options.Options.Init(); //init options i.e load profiles
             options = new Options.Options(); //create options data from profile
             Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";
-            Icon = new Icon("icon.ico");
             Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on. best performance is no frame cap and no vsync otherwise you get stutters
@@ -78,6 +77,7 @@ namespace YAVSRG
             audio = new MusicPlayer(); //init my music player
 
             ApplyWindowSettings(Options.General); //apply window settings from options
+            Visible = false;
             //ScreenUtils.UpdateBounds(Width, Height);
 
             gameplay = new GameplayManager();
@@ -161,6 +161,7 @@ namespace YAVSRG
             Discord.Initialize("420320424199716864", ref test, true, "");
             Utils.SetDiscordData("Just started playing", "Pick a song already!");
             SpriteBatch.Init();
+            Icon = new Icon("icon.ico");
         }
 
         protected override void OnUnload(EventArgs e)
