@@ -16,7 +16,7 @@ namespace YAVSRG.Charts.DifficultyRating
         {
             double v = 0;
             int samplesize = 2;
-            List<float> sample = new List<float>();
+            List<double> sample = new List<double>();
             float rms, sd;
             for (int i = 0; i < r.PhysicalData.Length; i++)
             {
@@ -38,7 +38,7 @@ namespace YAVSRG.Charts.DifficultyRating
                     }
                     if (sample.Count > 0)
                     {
-                        rms = Math.Max(2,Utils.RootMeanPower(sample, 2));
+                        rms = (float)Math.Max(2,Utils.RootMeanPower(sample, 2));
                         sd = 9f;
                         float w = Func((20 - rms) / sd);
                         if (v <= 0.01 || double.IsNaN(v))

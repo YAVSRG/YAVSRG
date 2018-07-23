@@ -190,12 +190,17 @@ namespace YAVSRG.Charts
             }
         }
 
-        public static void ConvertAllPacks()
+        public static void ConvertAllPacks(string path)
         {
-            foreach (string s in Directory.EnumerateDirectories(Path.Combine(Game.WorkingDirectory, "Songs")))
+            foreach (string s in Directory.EnumerateDirectories(path))
             {
                 ConvertPack(s, Path.GetFileName(s));
             }
+        }
+
+        public static void ConvertAllPacks() //deprecate me in future
+        {
+            ConvertAllPacks(Path.Combine(Game.WorkingDirectory, "Songs")); 
         }
 
         public static void ConvertPack(string path, string name) //name not derived from the folder so i can name the osu songs folder something other than "Songs".
@@ -414,10 +419,40 @@ namespace YAVSRG.Charts
         {
             LastStatus = ChartLoadingStatus.InProgress;
             string ext = Path.GetExtension(path).ToLower();
-            if (ext == "")
+            if (Directory.Exists(path))
             {
-                LastStatus = ChartLoadingStatus.Completed;
-                LastOutput = "Not yet implemented";
+                foreach (string folder in Directory.EnumerateDirectories(path))
+                {
+                    foreach (string entry in Directory.EnumerateFileSystemEntries(folder))
+                    {
+                        ext = Path.GetExtension(entry).ToLower();
+                        if (ext == ".sm" || ext == ".osu")
+                        {
+                            //we've found a pack: folder of song folders
+                            ConvertPack(path, Path.GetFileName(path));
+                            LastStatus = ChartLoadingStatus.Completed;
+                            LastOutput = "Imported pack successfully.";
+                            return;
+                        }
+                        else if (Directory.Exists(entry))
+                        {
+                            foreach (string file in Directory.EnumerateFiles(entry))
+                            {
+                                ext = Path.GetExtension(file).ToLower();
+                                if (ext == ".sm" || ext == ".osu")
+                                {
+                                    //we've found a song folder: folder of packs
+                                    ConvertAllPacks(path);
+                                    LastStatus = ChartLoadingStatus.Completed;
+                                    LastOutput = "Imported songs folder successfully.";
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                }
+                LastStatus = ChartLoadingStatus.Failed;
+                LastOutput = "Found nothing to import in this folder.";
             }
             else if (ext == ".zip" || ext == ".osz")
             {

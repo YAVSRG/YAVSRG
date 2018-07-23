@@ -12,28 +12,28 @@ namespace YAVSRG.Charts.DifficultyRating
     {
         public float Physical;
         public float Technical;
-        public float[] PhysicalData;
-        public float[] TechnicalData;
+        public double[] PhysicalData;
+        public double[] TechnicalData;
 
         float[] fingers;
 
         //this code is subject to so much change that comments may not be complete or up to date, sorry about that
 
-        public RatingReport(ChartWithModifiers map, float rate, string playstyle) //calculates difficulty of a chart to play - i.e how capable you must be to attain an S
+        public RatingReport(ChartWithModifiers chart, float rate, string playstyle) //calculates difficulty of a chart to play - i.e how capable you must be to attain an S
         {
-            KeyLayout layout = KeyLayout.GetLayout(playstyle, map.Keys);
+            KeyLayout layout = KeyLayout.GetLayout(playstyle, chart.Keys);
             int hands = layout.hands.Count;
-            fingers = new float[map.Keys];
+            fingers = new float[chart.Keys];
 
-            PhysicalData = new float[map.Notes.Points.Count];
-            TechnicalData = new float[map.Notes.Points.Count];
-            List<GameplaySnap> snaps = map.Notes.Points;
+            PhysicalData = new double[chart.Notes.Points.Count];
+            TechnicalData = new double[chart.Notes.Points.Count];
+            List<GameplaySnap> snaps = chart.Notes.Points;
             Snap current;
             BinarySwitcher s;
             
-            float[] currentStrain = new float[hands];
+            double[] currentStrain = new double[hands];
             float[] lastHandUse = new float[hands];
-            List<float> handDiff = new List<float>();
+            List<double> handDiff = new List<double>();
             float delta;
 
             for (int i = 0; i < snaps.Count; i++)
@@ -71,36 +71,35 @@ namespace YAVSRG.Charts.DifficultyRating
             Technical = GetOverallDifficulty(TechnicalData); //final values are meaned because your accuracy is a mean average of hits
             //difficulty of each snap is assumed to be a measure of how unlikely it is you will hit it well
         }
-
-        protected void UpdateStrain(ref float result, float time, float value)
+        protected void UpdateStrain(ref double result, float time, double value)
         {
             double decay = -0.004;
             double weight = Math.Exp(decay * time);
-            result = (float)(result * weight + value * (1 - weight));
+            result = (result * weight + value * (1 - weight));
         }
 
-        protected float GetOverallDifficulty(float[] data)
+        protected float GetOverallDifficulty(double[] data)
         { 
             //todo: stop ignoring 0s
             int c = 0;
-            float t = 0;
+            double t = 0;
             for (int i = 0; i < data.Length; i++)
             {
+                t += data[i] * data[i];
                 if (data[i] > 0)
                 {
                     c += 1;
                 }
-                t += data[i] * data[i];
             }
             return (float)Math.Pow(t / c, 0.5);
         }
 
-        protected float GetHandDifficulty(List<float> data)
+        protected double GetHandDifficulty(List<double> data)
         {
             return Utils.RootMeanPower(data, 1);
         }
 
-        protected float GetSnapDifficulty(List<float> data)
+        protected double GetSnapDifficulty(List<double> data)
         {
             return Utils.RootMeanPower(data, 1);
         }
@@ -155,20 +154,25 @@ namespace YAVSRG.Charts.DifficultyRating
             return (float)Math.Min(heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
         }
 
-        public static void StaminaAlgorithm(ref double currentValue, float input, float timedelta)
+        public static void StaminaAlgorithm(ref double currentValue, double input, float timedelta)
         {
             currentValue *= StaminaDecayFunc(timedelta);
             currentValue *= StaminaFunc(input/currentValue, timedelta);
         }
 
+        public static double StaminaBaseFunc(double ratio)
+        {
+            return (1 + 0.05f * ratio); //needs to account for time or jacks underscale and streams overscale
+        }
+
         public static double StaminaFunc(double ratio, float timedelta)
         {
-            return (1 + 0.01f * ratio); //needs to account for time or jacks underscale and streams overscale
+            return StaminaBaseFunc(ratio);
         }
 
         public static double StaminaDecayFunc(float timedelta)
         {
-            return Math.Exp(-0.004 * timedelta);
+            return Math.Exp(-0.001 * timedelta);
         }
     }
 }

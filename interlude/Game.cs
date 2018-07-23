@@ -11,7 +11,6 @@ using YAVSRG.Interface;
 using YAVSRG.Audio;
 using YAVSRG.Gameplay;
 using YAVSRG.Utilities;
-using OpenTK.Input;
 
 namespace YAVSRG
 {

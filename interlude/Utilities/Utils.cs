@@ -119,7 +119,7 @@ namespace YAVSRG
             }
         }
 
-        public static float RootMeanPower(List<float> data, float power)
+        public static double RootMeanPower(List<double> data, float power)
         {
             if (data.Count == 0) { return 0; }
             if (data.Count == 1) { return data[0]; };
@@ -128,7 +128,7 @@ namespace YAVSRG
             {
                 f += Math.Pow(v, power);
             }
-            return (float)Math.Pow(f / data.Count, 1f / power);
+            return Math.Pow(f / data.Count, 1f / power);
         }
     }
 }

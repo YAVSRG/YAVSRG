@@ -70,7 +70,7 @@ namespace YAVSRG.Interface.Widgets
             float y = (bottom - top) / physical * 0.25f;
             for (int i = 0; i < c; i++)
             {
-                SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.PhysicalData[i] - 5, left + x * i + 1, bottom - y * diff.PhysicalData[i] + 5, Color.Aqua);
+                //SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.PhysicalData[i] - 5, left + x * i + 1, bottom - y * diff.PhysicalData[i] + 5, Color.Aqua);
             }
             SpriteBatch.Font2.DrawCentredTextToFill("Replace with NPS graph?",left, top, right, bottom, Game.Options.Theme.MenuFont);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
