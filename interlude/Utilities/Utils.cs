@@ -43,6 +43,7 @@ namespace YAVSRG
 
         public static string FormatTime(float ms)
         {
+            if (ms < 0) return ""; //fix for "time left" saying "-1:00"
             int seconds = (int)(ms / 1000) % 60;
             int minutes = (int)Math.Floor(ms % 3600000 / 60000);
             int hours = (int)Math.Floor(ms / 3600000);

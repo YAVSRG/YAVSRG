@@ -98,6 +98,10 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Screens.AddScreen(new ScreenPlay());
             }
+            else if (Input.KeyTap(OpenTK.Input.Key.E))
+            {
+                Game.Screens.AddScreen(new ScreenEditor());
+            }
         }
 
         public void ChangeRate(double change)

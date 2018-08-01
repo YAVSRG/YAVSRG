@@ -86,6 +86,11 @@ namespace YAVSRG.Charts.DifficultyRating
                 }
                 return r;
             }
+
+            public int Count
+            {
+                get { return fingers.Count; }
+            }
         }
 
         public List<Hand> hands; //a key layout is just a list of hands (unordered)

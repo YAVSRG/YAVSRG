@@ -15,27 +15,24 @@ namespace YAVSRG.Options.Panels
         private KeyBinder[] binds = new KeyBinder[10];
         private ColorPicker[] colors = new ColorPicker[10];
         private int keyMode = 4;
-        private Sprite texture;
 
         protected class ColorPicker : Widget
         {
             string label;
             Action<int> select;
             Func<int> get;
-            Sprite s;
             int max;
 
-            public ColorPicker(string label, Action<int> select, Func<int> get, Sprite s, int max)
+            public ColorPicker(string label, Action<int> select, Func<int> get, int max)
             {
-                Change(label, select, get, s, max);
+                Change(label, select, get, max);
             }
 
-            public void Change(string label, Action<int> select, Func<int> get, Sprite s, int max)
+            public void Change(string label, Action<int> select, Func<int> get, int max)
             {
                 this.label = label;
                 this.select = select;
                 this.get = get;
-                this.s = s;
                 this.max = max;
             }
 
@@ -43,7 +40,7 @@ namespace YAVSRG.Options.Panels
             {
                 base.Draw(left, top, right, bottom);
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                Game.Options.Theme.DrawNote(s, left, top, right, bottom, 0, 0, get(), 0);
+                Game.Options.Theme.DrawNote(left, top, right, bottom, 0, 0, get(), 0);
             }
 
             public override void Update(float left, float top, float right, float bottom)
@@ -72,7 +69,7 @@ namespace YAVSRG.Options.Panels
             {
                 binds[i] = new KeyBinder("Column " + (i + 1).ToString(), Key.F35, (b) => { });
                 AddChild(binds[i]);
-                colors[i] = new ColorPicker("", null, null, new Sprite(), 1);
+                colors[i] = new ColorPicker("", null, null, 1);
                 AddChild(colors[i]);
             }
             AddChild(selectKeyMode);
@@ -111,7 +108,6 @@ namespace YAVSRG.Options.Panels
 
         private void ChangeKeyMode(int k)
         {
-            texture = Game.Options.Theme.GetNoteTexture(k);
             for (int i = 0; i < 10; i++)
             {
                 binds[i].State = 0;
@@ -128,13 +124,13 @@ namespace YAVSRG.Options.Panels
             }
 
             int colorCount = Game.Options.Profile.ColorStyle.GetColorCount(k);
-            int availableColors = Game.Options.Theme.UseColor ? Game.Options.Theme.NoteColors.Length : texture.UV_Y;
+            int availableColors = Game.Options.Theme.CountNoteColors(k);
             c = colorCount * Game.Options.Theme.ColumnWidth > Width ? (int)(Width / colorCount) : Game.Options.Theme.ColumnWidth;
             start = -colorCount * c / 2;
             int keymodeIndex = Game.Options.Profile.ColorStyle.UseForAllKeyModes ? 0 : k;
             for (int i = 0; i < colorCount; i++)
             {
-                colors[i].Change("label NYI", ColorSetter(i,keymodeIndex), ColorGetter(i,keymodeIndex), texture, availableColors);
+                colors[i].Change("label NYI", ColorSetter(i,keymodeIndex), ColorGetter(i,keymodeIndex), availableColors);
                 colors[i].State = 1;
                 colors[i].PositionTopLeft(start + i * c, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 300+Game.Options.Theme.ColumnWidth, AnchorType.CENTER, AnchorType.MIN);
             }

@@ -12,8 +12,6 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     class Playfield : GameplayWidget
     {
-        Sprite mine, note, hold, holdtail, holdhead, receptor;
-
         int lasti; int lastt;
         float[] holds;
         BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
@@ -29,12 +27,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         public Playfield(ScoreTracker s) : base(s)
         {
-            mine = Content.GetTexture("mine");
-            note = Game.Options.Theme.GetNoteTexture(Game.CurrentChart.Keys);
-            receptor = Game.Options.Theme.GetReceptorTexture(Game.CurrentChart.Keys);
-            hold = Game.Options.Theme.GetBodyTexture(Game.CurrentChart.Keys);
-            holdhead = Game.Options.Theme.GetHeadTexture(Game.CurrentChart.Keys);
-            holdtail = Game.Options.Theme.GetTailTexture(Game.CurrentChart.Keys);
+            Game.Options.Theme.LoadTextures(Chart.Keys);
 
             Animation.Add(animation = new Animations.AnimationCounter(25, true));
 
@@ -59,6 +52,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             float ob = bottom;
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.EnableTransform(Game.Options.Profile.Upscroll);
+            SpriteBatch.Enable3D();
             for (byte c = 0; c < Keys; c++) //draw columns and empty receptors
             {
                 DrawColumn(left, c);
@@ -97,11 +91,12 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
                 foreach (byte k in holdsInHitpos.GetColumns())
                 {
-                    Game.Options.Theme.DrawHead(holdhead, k * ColumnWidth + left, HitPos, (k + 1) * ColumnWidth + left, HitPos + ColumnWidth, k, Keys, -1, animation.cycles % holdhead.UV_X);
+                    Game.Options.Theme.DrawHead(k * ColumnWidth + left, HitPos, (k + 1) * ColumnWidth + left, HitPos + ColumnWidth, k, Keys, -1, animation.cycles % 8);
                 }
             }
 
             base.Draw(ol, ot, or, ob);
+            SpriteBatch.Disable3D();
             SpriteBatch.DisableTransform();
         }
 
@@ -113,10 +108,10 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             bool drawhead = start < 0; //if y was negative
             start = Math.Abs(start);
-            SpriteBatch.Draw(hold, i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f, Color.White); //Math.Abs corrects neg number
+            Game.Options.Theme.DrawHold(i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f, i, Keys, 0, animation.cycles % 8); //Math.Abs corrects neg number
             if (drawhead)
             {
-                Game.Options.Theme.DrawHead(holdhead, i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth, i, Keys, colors[i], animation.cycles % holdhead.UV_X);
+                Game.Options.Theme.DrawHead(i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth, i, Keys, colors[i], animation.cycles % 8);
             }
         }
 
@@ -127,7 +122,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         private void DrawReceptor(float offset, int k)
         {
-            Game.Options.Theme.DrawReceptor(receptor, k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos, k, Keys, Input.KeyPress(Game.Options.Profile.Bindings[Keys][k]));
+            Game.Options.Theme.DrawReceptor(k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos, k, Keys, Input.KeyPress(Game.Options.Profile.Bindings[Keys][k]));
         }
 
         private void DrawSnap(GameplaySnap s, float offset, float pos)
@@ -157,15 +152,15 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (byte k in s.taps.GetColumns())
             {
-                Game.Options.Theme.DrawNote(note, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % note.UV_X);
+                Game.Options.Theme.DrawNote(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.mines.GetColumns())
             {
-                Game.Options.Theme.DrawMine(mine, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % mine.UV_X);
+                Game.Options.Theme.DrawMine(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.ends.GetColumns())
             {
-                Game.Options.Theme.DrawTail(holdtail, k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % holdtail.UV_X);
+                Game.Options.Theme.DrawTail(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % 8);
             }
         }
     }

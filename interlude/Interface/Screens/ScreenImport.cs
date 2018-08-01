@@ -35,6 +35,7 @@ namespace YAVSRG.Interface.Screens
             },
             () => { return false; }, 50f)
             .PositionTopLeft(0, 100, AnchorType.CENTER, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
+            //Net.Web.WebUtils.DownloadJsonObject<Net.Web.EtternaPackData>("https://api.etternaonline.com/v2/packs/", (d) => { AddChild(new Widgets.DownloadManager(d)); });
         }
 
         public override void OnEnter(Screen prev)

@@ -14,9 +14,11 @@ namespace YAVSRG.Charts
 {
     public class ChartLoader
     {
+        //this file is a real mess and i need to clean it up
+
         public static Func<CachedChart, string> GroupByPack = (c) => { return c.pack; };
         public static Func<CachedChart, string> GroupByTitle = (c) => { return Utils.FormatFirstCharacter(c.title); };
-        public static Func<CachedChart, string> GroupByDifficulty = (c) => { int i = (int)(c.physical / 2) * 2; return i.ToString()+" - "+(i+2).ToString(); };
+        public static Func<CachedChart, string> GroupByDifficulty = (c) => { int i = (int)(c.physical / 2) * 2; return i.ToString().PadLeft(2,'0')+" - "+(i+2).ToString().PadLeft(2,'0'); };
         public static Func<CachedChart, string> GroupByCreator = (c) => { return Utils.FormatFirstCharacter(c.creator); };
         public static Func<CachedChart, string> GroupByArtist = (c) => { return Utils.FormatFirstCharacter(c.artist); };
         public static Func<CachedChart, string> GroupByKeymode = (c) => { return c.keymode.ToString() + "k"; };
@@ -27,8 +29,8 @@ namespace YAVSRG.Charts
         public static Comparison<CachedChart> SortByCreator = (a, b) => (a.creator.CompareTo(b.creator));
         public static Comparison<CachedChart> SortByArtist = (a, b) => (a.artist.CompareTo(b.artist));
 
-        public static Comparison<CachedChart> SortMode = SortByDifficulty;
-        public static Func<CachedChart, string> GroupMode = GroupByPack;
+        public static Comparison<CachedChart> SortMode = SortByDifficulty; //default (should load from settings)
+        public static Func<CachedChart, string> GroupMode = GroupByPack; //default
         public static string SearchString = "";
         public static event Action OnRefreshGroups = () => { };
         public static List<ChartGroup> Groups;
@@ -70,6 +72,7 @@ namespace YAVSRG.Charts
             LastStatus = ChartLoadingStatus.Completed;
         }
 
+        #region sorting and searching
         public static void SortIntoGroups(Func<CachedChart, string> groupBy, Comparison<CachedChart> sortBy)
         {
             Groups = new List<ChartGroup>();
@@ -81,7 +84,14 @@ namespace YAVSRG.Charts
                     temp.Add(c, new List<CachedChart>());
                     foreach (string id in Game.Gameplay.Collections.GetCollection(c).Entries)
                     {
-                        temp[c].Add(Cache.Charts[id]);
+                        if (Cache.Charts.ContainsKey(id))
+                        {
+                            temp[c].Add(Cache.Charts[id]);
+                        }
+                        else
+                        {
+                            Log(id + "isn't present in the cache! Maybe it was deleted?", LogType.Warning);
+                        }
                     }
                 }
             }
@@ -140,6 +150,8 @@ namespace YAVSRG.Charts
             OnRefreshGroups();
         }
 
+        #endregion
+
         public static void RandomChart()
         {
             if (Cache.Charts.Count == 0)
@@ -184,11 +196,14 @@ namespace YAVSRG.Charts
         {
             if (LastStatus != ChartLoadingStatus.InProgress)
             {
+                LastStatus = ChartLoadingStatus.InProgress; //makes sure dialog doesn't quit before thread starts working
                 Thread t = new Thread(new ThreadStart(task));
                 t.Start();
                 Game.Screens.AddDialog(new Interface.Dialogs.LoadingDialog((d) => { }));
             }
         }
+
+        #region conversions
 
         public static void ConvertAllPacks(string path)
         {
@@ -286,6 +301,28 @@ namespace YAVSRG.Charts
             Cache.CacheChart(c);
         }
 
+        #endregion
+
+        #region imports
+
+        public static void DownloadAndImportPack(string url, string packname)
+        {
+            string path = Path.Combine(Game.WorkingDirectory, "Imports", packname + ".zip");
+            LastOutput = "Downloading from " + url + " ...";
+            if (Net.Web.WebUtils.DownloadFile(url, path, (i) => { LastOutput = i.ToString() + "%"; }))
+            {
+                LastOutput = "Downloaded!";
+                ImportArchive(path);
+                LastOutput = "Downloaded and installed pack successfully!";
+                LastStatus = ChartLoadingStatus.Completed;
+            }
+            else
+            {
+                LastOutput = "An error occured while downloading!";
+                LastStatus = ChartLoadingStatus.Failed;
+            }
+        }
+
         public static void ImportOsu_OldVersionUsedByTools()
         {
             ConvertPack(GetOsuSongFolder(), "osu! Imports");
@@ -341,9 +378,9 @@ namespace YAVSRG.Charts
                 
         public static void ImportArchive(string path)
         {
-            if (Path.GetExtension(path).ToLower() == ".osz")
+            if (Path.GetExtension(path).ToLower() == ".osz") //ASSUMES IT IS A CORRECTLY FORMATTED .OSZ AND NOT MALICIOUSLY STRUCTURED. TAKE CARE OF YOURSELF
             {
-                string dir = Path.Combine(Path.GetDirectoryName(path), "osu! Imports", Path.GetFileNameWithoutExtension(path));
+                string dir = Path.Combine(Game.WorkingDirectory, "Imports", "osu! Imports", Path.GetFileNameWithoutExtension(path));
                 using (ZipArchive z = ZipFile.Open(path, ZipArchiveMode.Read))
                 {
                     z.ExtractToDirectory(dir);
@@ -372,6 +409,7 @@ namespace YAVSRG.Charts
             else if (Path.GetExtension(path).ToLower() == ".zip")
             {
                 string root = "";
+                bool valid = false;
                 string ext;
                 using (ZipArchive z = ZipFile.Open(path, ZipArchiveMode.Read))
                 {
@@ -381,10 +419,16 @@ namespace YAVSRG.Charts
                         if (ext == ".sm" || ext == ".osu" || ext == ".yav")
                         {
                             root = Path.GetDirectoryName(Path.GetDirectoryName(e.FullName));
+                            valid = true;
                             break;
                         }
                     }
                     string target = Path.Combine(Game.WorkingDirectory, "Imports", Path.GetFileNameWithoutExtension(path));
+                    if (!valid)
+                    {
+                        Log("Couldn't find anything to extract in this archive.", LogType.Info);
+                        return;
+                    }
                     foreach (ZipArchiveEntry e in z.Entries)
                     {
                         if (e.FullName.StartsWith(root, StringComparison.Ordinal))
@@ -392,7 +436,14 @@ namespace YAVSRG.Charts
                             string f = Path.Combine(target + e.FullName.Substring(root.Length));
                             if (Path.GetExtension(f) != "")
                             {
-                                e.ExtractToFile(Path.Combine(target + e.FullName.Substring(root.Length)));
+                                try
+                                {
+                                    e.ExtractToFile(Path.Combine(target + e.FullName.Substring(root.Length)));
+                                }
+                                catch
+                                {
+                                    //probably already exists, don't worry about it
+                                }
                             }
                             else
                             {
@@ -481,6 +532,8 @@ namespace YAVSRG.Charts
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs");
         }
+
+        #endregion imports
 
         public static void SwitchToChart(CachedChart c, bool playFromPreview)
         {

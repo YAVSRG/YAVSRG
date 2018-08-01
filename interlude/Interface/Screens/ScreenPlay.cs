@@ -81,9 +81,11 @@ namespace YAVSRG.Interface.Screens
                 playfield.AddChild(lighting[i]);
             }
             //this places the screencovers
+            if (Game.Options.Profile.ScreenCoverUp > 0)
             playfield.AddChild(new Screencover(scoreTracker, false)
                 .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
-            playfield.AddChild(new Screencover(scoreTracker, true)
+            if (Game.Options.Profile.ScreenCoverDown > 0)
+                playfield.AddChild(new Screencover(scoreTracker, true)
                 .PositionTopLeft(0, ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverDown), AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2, AnchorType.MAX, AnchorType.CENTER));
         }
 

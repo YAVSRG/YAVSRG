@@ -161,6 +161,7 @@ namespace YAVSRG
             Utils.SetDiscordData("Just started playing", "Pick a song already!");
             SpriteBatch.Init();
             Icon = new Icon("icon.ico");
+            //Net.Web.WebUtils.DownloadString("http://percyqaz.000webhostapp.com/", (s) => { Console.WriteLine(s); });
         }
 
         protected override void OnUnload(EventArgs e)

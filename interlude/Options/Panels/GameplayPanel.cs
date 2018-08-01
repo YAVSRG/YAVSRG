@@ -17,12 +17,18 @@ namespace YAVSRG.Options.Panels
                 new TooltipContainer(
                 new Slider("Scroll speed", v => { Game.Options.Profile.ScrollSpeed = v; }, () => Game.Options.Profile.ScrollSpeed, 1, 4, 0.01f),
                 "Increasing this will increase the speed at which notes scroll across the screen.\nA scroll speed of 1 means that 1 pixel corresponds to 1ms, or 1000 pixels corresponds to 1 second.", ib)
-                .PositionTopLeft(-100, 100, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(100, 150, AnchorType.CENTER, AnchorType.MIN));
+                .PositionTopLeft(-300, 100, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-50, 150, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
                 new Slider("Hit Position", v => { Game.Options.Profile.HitPosition = (int)v; }, () => Game.Options.Profile.HitPosition, -100, 400, 1),
                 "This moves the position that notes need to be on your screen when you hit them (by moving the receptors).\nBigger numbers move the receptors closer to the centre of the screen.", ib)
+                .PositionTopLeft(50, 100, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(300, 150, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(
+                new TooltipContainer(
+                new Slider("3D Perspective", v => { Game.Options.Profile.PerspectiveTilt = v; }, () => Game.Options.Profile.PerspectiveTilt, -0.75f, 0.75f, 0.01f),
+                "This tilts the playfield to give a 3D perspective.\nNegative numbers tilt away from receptors and positive numbers tilt towards receptors.", ib)
                 .PositionTopLeft(-300, 175, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(-50, 225, AnchorType.CENTER, AnchorType.MIN));
             AddChild(

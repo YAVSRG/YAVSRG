@@ -34,7 +34,10 @@ namespace YAVSRG.Interface
 
         public virtual void AddChild(Widget child)
         {
-            Widgets.Add(child);
+            lock (Widgets)
+            {
+                Widgets.Add(child);
+            }
             child.AddToContainer(this);
         }
 
@@ -67,6 +70,17 @@ namespace YAVSRG.Interface
         {
             get { return Math.Abs(B.TargetY - A.TargetY); }
         }
+
+        /*
+        public float GetWidth(float l, float r)
+        {
+            return Right(l, r) - Left(l, r);
+        }
+
+        public float GetHeight(float t, float b)
+        {
+            return Bottom(t, b) - Top(t, b);
+        }*/
 
         protected void ConvertCoordinates(ref float l, ref float t, ref float r, ref float b)
         {
@@ -103,11 +117,14 @@ namespace YAVSRG.Interface
 
         protected void DrawWidgets(float left, float top, float right, float bottom)
         {
-            foreach (Widget w in Widgets)
+            lock (Widgets) //anti crash measure (probably temp)
             {
-                if (w.State > 0)
+                foreach (Widget w in Widgets)
                 {
-                    w.Draw(left, top, right, bottom);
+                    if (w.State > 0)
+                    {
+                        w.Draw(left, top, right, bottom);
+                    }
                 }
             }
         }

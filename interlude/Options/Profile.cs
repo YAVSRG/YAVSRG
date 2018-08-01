@@ -27,6 +27,7 @@ namespace YAVSRG.Options
         public bool Upscroll = false;
         public float ScreenCoverUp = 0f;
         public float ScreenCoverDown = 0f;
+        public float PerspectiveTilt = 0f;
         public float BackgroundDim = 0.5f;
         public ScoreType ScoreSystem = ScoreType.Default;
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);

@@ -27,6 +27,24 @@ namespace YAVSRG.Net.Web
             }
         }
 
+        public static bool DownloadFile(string url, string target, Action<int> callback) //downloads a file, not async (cause i couldn't make it work)
+        {
+            using (var client = new WebClient())
+            {
+                try
+                {
+                    client.DownloadProgressChanged += (o, e) => { callback(e.ProgressPercentage); };
+                    client.DownloadFile(new Uri(url), target);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Utilities.Logging.Log("Failed to download file from " + url + ": " + e.ToString(), Utilities.Logging.LogType.Error);
+                    return false;
+                }
+            }
+        }
+
         public static void DownloadJsonObject<T>(string url, Action<T> callback) //fetches a json object from a url
         {
             DownloadString(url, (s) => {

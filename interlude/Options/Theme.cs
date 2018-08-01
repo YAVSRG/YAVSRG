@@ -12,13 +12,11 @@ namespace YAVSRG.Options
     {
         [JsonIgnore]
         public WidgetPositionData Gameplay;
-        public Color[] NoteColors = new[] { Color.Red, Color.Blue, Color.Yellow, Color.LightBlue, Color.Green, Color.Purple, Color.Cyan, Color.White };
         public Color[] JudgeColors = new[] { Color.FromArgb(0, 255, 255), Color.FromArgb(255, 255, 0), Color.FromArgb(0, 255, 100), Color.FromArgb(0, 0, 255), Color.Fuchsia, Color.FromArgb(255, 0, 0) };
         public Color HoldBody = Color.White;
         public Color PressedReceptor = Color.LightBlue;
         public Color Receptor = Color.White;
         public int ColumnWidth = 150;
-        public bool UseColor = false;
         public bool FlipHoldTail = true;
         public bool UseHoldTailTexture = true;
         public bool JudgementPerColumn = false;
@@ -32,16 +30,7 @@ namespace YAVSRG.Options
         public Color ThemeColor = Color.FromArgb(0, 255, 160);
         public string[] Judges = new[] { "Marvellous", "Perfect", "Ok", "Bad", "Terrible", "Miss" };
 
-        public Color GetColor(int index)
-        {
-            if (UseColor && index < NoteColors.Length)
-            {
-                return NoteColors[index];
-            }
-            return Color.White;
-        }
-
-        public int GetRotation(int column, int keycount)
+        protected int GetRotation(int column, int keycount)
         {
             if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
             {
@@ -56,82 +45,93 @@ namespace YAVSRG.Options
             return 0;
         }
 
-        public void DrawNote(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
+        public void DrawNote(float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw("",left, bottom, right, top, GetColor(index), animation, index, GetRotation(column, keycount),sprite:s);
+            SpriteBatch.Draw(NoteTexture(keycount), left, bottom, right, top, Color.White, animation, index, GetRotation(column, keycount));
+            //SpriteBatch.Draw("noteoverlay", left, bottom, right, top, GetColor(index), animation, index, GetRotation(column, keycount), depth: -20f);
         }
 
-        public void DrawMine(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
+        public void DrawMine(float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw("", left, top, right, bottom, GetColor(index), animation, index, 0, sprite: s); //fix it later
+            SpriteBatch.Draw(MineTexture(keycount), left, top, right, bottom, Color.White, animation, index, 0); //fix it later
         }
 
-        public void DrawHead(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
+        public void DrawHead(float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw("", left, bottom, right, top, GetColor(index), animation, index, GetRotation(column, keycount), sprite: s);
+            SpriteBatch.Draw(HeadTexture(keycount), left, bottom, right, top, Color.White, animation, index, GetRotation(column, keycount));
         }
 
-        public void DrawTail(Sprite s, float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
+        public void DrawTail(float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
             int rotation = UseHoldTailTexture ? 0 : GetRotation(column, keycount);
             if (FlipHoldTail && !UseHoldTailTexture)
             {
-                SpriteBatch.Draw("", left, top, right, bottom, GetColor(index), animation, index, rotation, sprite: s);
+                SpriteBatch.Draw(TailTexture(keycount), left, top, right, bottom, Color.White, animation, index, rotation);
             }
             else
             {
-                SpriteBatch.Draw("", left, bottom, right, top, GetColor(index), animation, index, rotation, sprite: s);
+                SpriteBatch.Draw(TailTexture(keycount), left, bottom, right, top, Color.White, animation, index, rotation);
             }
         }
 
-        public void DrawReceptor(Sprite s, float left, float top, float right, float bottom, int column, int keycount, bool pressed)
+        public void DrawHold(float left, float top, float right, float bottom, int column, int keycount, int index, int animation)
         {
-            SpriteBatch.Draw(s, left, top, right, bottom, pressed ? PressedReceptor : Receptor, GetRotation(column, keycount));
+            SpriteBatch.Draw(BodyTexture(keycount), left, top, right, bottom, Color.White, animation, index, 0);
         }
 
-        public Sprite GetNoteTexture(int keycount)
+        public void DrawReceptor(float left, float top, float right, float bottom, int column, int keycount, bool pressed)
         {
-            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
-            {
-                return Content.GetTexture("arrow");
-            }
-            return Content.GetTexture("note");
+            SpriteBatch.Draw(ReceptorTexture(keycount), left, top, right, bottom, pressed ? PressedReceptor : Receptor, GetRotation(column, keycount), depth: pressed ? -20f : 0f);
         }
 
-        public Sprite GetHeadTexture(int keycount)
+        protected string Arrow(int keycount)
         {
-            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
-            {
-                return Content.GetTexture("arrowholdhead");
-            }
-            return Content.GetTexture("holdhead");
+            return (Game.Options.Profile.UseArrowsFor4k && keycount == 4) ? "arrow" : "";
         }
 
-        public Sprite GetTailTexture(int keycount)
+        protected string NoteTexture(int keycount)
         {
-            if (UseHoldTailTexture)
-            {
-                return Content.GetTexture("holdtail");
-            }
-            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
-            {
-                return Content.GetTexture("arrowholdhead");
-            }
-            return Content.GetTexture("holdhead");
+            return (Game.Options.Profile.UseArrowsFor4k && keycount == 4) ? "arrow" : "note";
         }
 
-        public Sprite GetBodyTexture(int keycount)
+        protected string HeadTexture(int keycount)
         {
-            return Content.GetTexture("holdbody");
+            return Arrow(keycount) + "holdhead";
         }
 
-        public Sprite GetReceptorTexture(int keycount)
+        protected string TailTexture(int keycount)
         {
-            if (Game.Options.Profile.UseArrowsFor4k && keycount == 4)
-            {
-                return Content.GetTexture("arrowreceptor");
-            }
-            return Content.GetTexture("receptor");
+            return Arrow(keycount) + "hold" + (UseHoldTailTexture ? "tail" : "head");
+        }
+
+        protected string BodyTexture(int keycount)
+        {
+            return "holdbody";
+        }
+
+        protected string ReceptorTexture(int keycount)
+        {
+            return Arrow(keycount) + "receptor";
+        }
+
+        protected string MineTexture(int keycount)
+        {
+            return "mine";
+        }
+
+        public int CountNoteColors(int keycount)
+        {
+            return Content.GetTexture(NoteTexture(keycount)).UV_Y;
+        }
+
+        public void LoadTextures(int keycount)
+        {
+            Content.GetTexture(MineTexture(keycount));
+            Content.GetTexture(NoteTexture(keycount));
+            Content.GetTexture(HeadTexture(keycount));
+            Content.GetTexture(TailTexture(keycount));
+            Content.GetTexture(BodyTexture(keycount));
+            Content.GetTexture(ReceptorTexture(keycount));
         }
     }
 }

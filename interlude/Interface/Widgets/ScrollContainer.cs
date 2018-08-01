@@ -85,16 +85,15 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.StencilMode(1);
             Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 1.5f);
             SpriteBatch.StencilMode(2);
-            DrawWidgets(left, top, right, bottom);
+            foreach (Widget w in Widgets)
+            {
+                if (w.State > 0 && w.B.Y(top, bottom) > top && w.A.Y(top, bottom) < bottom)
+                {
+                    w.Draw(left, top, right, bottom);
+                }
+            }
             SpriteBatch.StencilMode(0);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
-        }
-
-        private bool ShouldRender(Widget w)
-        {
-            float t = w.A.AbsY - scroll;
-            float b = w.B.AbsY - scroll;
-            return (t >= 0 && t <= Height) || (b >= 0 && b <= Height);
         }
     }
 }
