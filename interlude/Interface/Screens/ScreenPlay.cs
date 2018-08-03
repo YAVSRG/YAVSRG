@@ -62,11 +62,15 @@ namespace YAVSRG.Interface.Screens
             }
             if (widgetData.IsEnabled("timeLeft"))
             {
-                AddChild(new MiscInfoDisplay(scoreTracker, () => { return Utils.FormatTime(Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) + " left"; }).Position(widgetData.GetPosition("timeLeft")));
+                AddChild(new MiscInfoDisplay(scoreTracker, () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now())/(float)Game.Options.Profile.Rate) + " left"; }).Position(widgetData.GetPosition("timeLeft")));
             }
             if (widgetData.IsEnabled("fps"))
             {
                 AddChild(new MiscInfoDisplay(scoreTracker, () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }).Position(widgetData.GetPosition("fps")));
+            }
+            if (widgetData.IsEnabled("judgements"))
+            {
+                AddChild(new JudgementDisplay(scoreTracker).Position(widgetData.GetPosition("judgements")));
             }
             //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
             //playfield.InitGameplay();

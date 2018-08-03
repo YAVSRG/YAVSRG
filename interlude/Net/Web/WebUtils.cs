@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Net;
 using System.Net.Http;
 
@@ -22,7 +22,7 @@ namespace YAVSRG.Net.Web
                 }
                 catch (Exception e)
                 {
-                    Utilities.Logging.Log("Couldn't get web data from " + url + ": " + e.ToString(), Utilities.Logging.LogType.Error);
+                    Utilities.Logging.Log("Failed to get web data from " + url + ": " + e.ToString(), Utilities.Logging.LogType.Error);
                 }
             }
         }

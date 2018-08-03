@@ -38,7 +38,7 @@ namespace YAVSRG
             string filename;
             foreach (string s in Directory.GetFiles(Path.Combine(AssetsDir, skin))) //lots of files in your skin folder slows this down
             {
-                filename = Path.GetFileNameWithoutExtension(s);
+                filename = Path.GetFileNameWithoutExtension(s).ToLower();
                 int ux = 1; int uy = 1;
                 if (filename.StartsWith(name))
                 {
@@ -50,8 +50,11 @@ namespace YAVSRG
                         int.TryParse(split[1], out uy);
                     }
                     //needs some way to check format isn't being abused
-                    Bitmap bmp = new Bitmap(s);
-                    return UploadTexture(bmp, ux, uy);
+                    if (filename == name || filename == name + " " + ux.ToString() + "x" + uy.ToString())
+                    {
+                        Bitmap bmp = new Bitmap(s);
+                        return UploadTexture(bmp, ux, uy);
+                    }
                 }
             }
             return default(Sprite);

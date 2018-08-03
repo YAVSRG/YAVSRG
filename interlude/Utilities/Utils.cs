@@ -24,7 +24,7 @@ namespace YAVSRG
             return string.Format("{0:0.00}", Math.Round(x, 2));
         }
 
-        public static string FormatFirstCharacter(string s)
+        public static string FormatFirstCharacter(string s) //used for grouping by first letter (always capital letter / question mark for non alphanumeric)
         {
             if (s.Length == 0) return "?";
             char c = s[0];
@@ -32,7 +32,7 @@ namespace YAVSRG
             return "?";
         }
 
-        public static void SetDiscordData(string main, string detail)
+        public static void SetDiscordData(string main, string detail) //needs better wrapper in future, move this
         {
             try
             {
@@ -43,24 +43,24 @@ namespace YAVSRG
 
         public static string FormatTime(float ms)
         {
-            if (ms < 0) return ""; //fix for "time left" saying "-1:00"
+            if (ms < 0) return "0:00"; //fix for "time left" saying "-1:00"
             int seconds = (int)(ms / 1000) % 60;
             int minutes = (int)Math.Floor(ms % 3600000 / 60000);
             int hours = (int)Math.Floor(ms / 3600000);
             return hours > 0 ? hours.ToString() + ":" +minutes.ToString().PadLeft(2,'0') + ":" + seconds.ToString().PadLeft(2, '0') : minutes.ToString() + ":" + seconds.ToString().PadLeft(2, '0');
         }
 
-        public static T LoadObject<T>(string path)
+        public static T LoadObject<T>(string path) //reads an object of a given type from a file (this is how most data is stored and loaded)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(System.IO.File.ReadAllText(path));
         }
 
-        public static void SaveObject<T>(T obj, string path)
+        public static void SaveObject<T>(T obj, string path) //saves an object to a file
         {
             System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented));
         }
 
-        public static Bitmap CaptureDesktop(Rectangle screenSize)
+        public static Bitmap CaptureDesktop(Rectangle screenSize) //this is only used when the game starts to create the "fade in effect" (you can't have translucent windows)
         {
             Bitmap target = new Bitmap(screenSize.Width, screenSize.Height);
             using (Graphics g = Graphics.FromImage(target))
@@ -70,13 +70,13 @@ namespace YAVSRG
             return target;
         }
 
-        public static Bitmap CaptureWindow()
+        public static Bitmap CaptureWindow() //this is used to screenshot the game. it pulls the screen pixels from the GPU because this always works (other methods dont work for fullscreen)
         {
             Bitmap target = new Bitmap(ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2);
             System.Drawing.Imaging.BitmapData data = target.LockBits(new Rectangle(0, 0, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2), System.Drawing.Imaging.ImageLockMode.WriteOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
             OpenTK.Graphics.OpenGL.GL.ReadPixels(0, 0, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, OpenTK.Graphics.OpenGL.PixelFormat.Bgr, OpenTK.Graphics.OpenGL.PixelType.UnsignedByte, data.Scan0);
             target.UnlockBits(data);
-            target.RotateFlip(RotateFlipType.Rotate180FlipX);
+            target.RotateFlip(RotateFlipType.Rotate180FlipX); //the data comes out upside down and rotated
             return target;
         }
 
@@ -87,13 +87,13 @@ namespace YAVSRG
             return (float)Math.Cos(((t - p.Offset) / (p.MSPerBeat * i)) % 1 * Math.PI * 2);
         }
 
-        public static Color ColorInterp(Color a, Color b, float val1)
+        public static Color ColorInterp(Color a, Color b, float val1) //merges between two colors. 0 just gives a, 1 just gives b, 0.5 is exactly in between (in R G and B)
         {
             float val2 = 1 - val1;
             return Color.FromArgb((int)(a.A * val2 + b.A * val1), (int)(a.R * val2 + b.R * val1), (int)(a.G * val2 + b.G * val1), (int)(a.B * val2 + b.B * val1));
         }
 
-        public static void SetThemeColorFromBG(Bitmap bitmap)
+        public static void SetThemeColorFromBG(Bitmap bitmap) //algorithm to pick nice theme color from bg
         {
             int goodness = 0;
             Color best = Color.White;
@@ -110,7 +110,7 @@ namespace YAVSRG
                     }
                 }
             }
-            if (goodness > 127)
+            if (goodness > 127) //goodness measures how vibrant the color is. if less than 127 it's likely a shade of grey/black/white so the default color is used instead
             {
                 Game.Screens.ChangeThemeColor(best);
             }
@@ -120,7 +120,7 @@ namespace YAVSRG
             }
         }
 
-        public static double RootMeanPower(List<double> data, float power)
+        public static double RootMeanPower(List<double> data, float power) //powers items of a list by a power. finds the mean and then roots the mean by the power. used for calc.
         {
             if (data.Count == 0) { return 0; }
             if (data.Count == 1) { return data[0]; };

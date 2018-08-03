@@ -32,23 +32,23 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-                wb = Game.Instance.WindowBorder;
+            wb = Game.Instance.WindowBorder;
+            Game.Screens.Toolbar.SetHidden(true);
             Game.Instance.WindowBorder = OpenTK.WindowBorder.Hidden;
             Game.Screens.Logo.A.Target(-300, -300);
             Game.Screens.Logo.B.Target(300, 300);
             if (!Game.Screens.Loading)
             {
                 exiting = true;
-                Game.Screens.Toolbar.SetHidden(true);
                 transition.Add(new AnimationCounter(100, false));
                 transition.Add(fade = new AnimationFade(0, 1, 0.996f));
             }
             else
             {
                 ChartLoader.Init();
-                Game.Screens.Toolbar.SetHidden(false);
                 transition.Add(fade = new AnimationFade(0, 1, 0.996f));
                 transition.Add(new AnimationCounter(100, false));
+                Game.Audio.PlaySFX("hello");
             }
         }
 
@@ -91,6 +91,7 @@ namespace YAVSRG.Interface.Screens
                 ChartLoader.Refresh();
                 ChartLoader.RandomChart();
                 Game.Screens.AddScreen(new ScreenMenu());
+                Game.Screens.Toolbar.SetHidden(false);
                 Game.Instance.WindowBorder = wb;
             }
             ((Logo)Game.Screens.Logo).c = Color.FromArgb(a, Color.White);

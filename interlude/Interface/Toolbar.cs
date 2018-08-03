@@ -32,6 +32,7 @@ namespace YAVSRG.Interface
             AddChild(
                 new Button("buttonimport", "", () => { if (!(Game.Screens.Current is ScreenImport)) Game.Screens.AddScreen(new ScreenImport()); })
                 .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN));
+            //AddChild(new TaskDisplay());
             slide = new AnimationSlider(-10);
             Animation.Add(slide);
         }
@@ -83,7 +84,7 @@ namespace YAVSRG.Interface
                 SpriteBatch.Draw("toolbar", -ScreenWidth, ScreenHeight - slide, ScreenWidth, ScreenHeight, Color.FromArgb(127, Game.Screens.BaseColor), 2);
                 SpriteBatch.DrawFrame(-ScreenWidth - 30, ScreenHeight - slide - 5, ScreenWidth + 30, ScreenHeight + 30, 30f, Game.Screens.BaseColor);
 
-                base.Draw(left, top + slide - 80, right, bottom);
+                base.Draw(left, top + slide - 80, right, bottom - slide + 80);
 
                 SpriteBatch.Font1.DrawText(Game.Options.Profile.Name, 30f, -ScreenWidth, ScreenHeight - slide + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("Plays: " + Game.Options.Profile.Stats.TimesPlayed.ToString(), 18f, 0, ScreenHeight - slide + 5, Game.Options.Theme.MenuFont);

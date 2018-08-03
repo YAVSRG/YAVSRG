@@ -43,7 +43,7 @@ namespace YAVSRG.Gameplay
             }
         }
 
-        public event Action<int, int, float> OnHit;
+        public event Action<int, int, float> OnHit; //COLUMM, AWARDED JUDGE, MS DELTA
 
         public ChartWithModifiers c;
         public ScoreSystem Scoring;

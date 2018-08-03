@@ -44,10 +44,6 @@ namespace YAVSRG.Gameplay
             }
         }
 
-        //{
-        //    Update(data[data.Length - 1].Offset, data);
-        //}
-
         public virtual void ComboBreak()
         {
             if (Combo > BestCombo)

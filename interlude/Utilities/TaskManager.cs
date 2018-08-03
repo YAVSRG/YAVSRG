@@ -14,7 +14,7 @@ namespace YAVSRG.Utilities
         public class NamedTask
         {
             Task t;
-            string name;
+            public string name;
 
             public NamedTask(Task t, string name)
             {

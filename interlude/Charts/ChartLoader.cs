@@ -197,8 +197,9 @@ namespace YAVSRG.Charts
             if (LastStatus != ChartLoadingStatus.InProgress)
             {
                 LastStatus = ChartLoadingStatus.InProgress; //makes sure dialog doesn't quit before thread starts working
-                Thread t = new Thread(new ThreadStart(task));
-                t.Start();
+                Game.Tasks.AddTask(task, "Task test");
+                //Thread t = new Thread(new ThreadStart(task));
+                //t.Start();
                 Game.Screens.AddDialog(new Interface.Dialogs.LoadingDialog((d) => { }));
             }
         }

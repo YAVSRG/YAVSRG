@@ -14,6 +14,7 @@ namespace YAVSRG.Charts.DifficultyRating
         //how it works may be explained in design document
         public static float GetRating(RatingReport r, ScoreTracker.HitData[] hitdata) //calculates rating of a play - i.e how capable you showed you were when you played this chart
         {
+            double miss = 0f;
             double v = 0;
             int samplesize = 2;
             List<double> sample = new List<double>();
@@ -32,6 +33,8 @@ namespace YAVSRG.Charts.DifficultyRating
                                 if (hitdata[i - s].hit[k] > 0)
                                 {
                                     sample.Add(hitdata[i - s].delta[k]);
+                                    if (hitdata[i-s].delta[k] == 180f) { miss = 1f; }
+                                    else { miss *= 0.9f; }
                                 }
                             }
                         }
@@ -40,7 +43,7 @@ namespace YAVSRG.Charts.DifficultyRating
                     {
                         rms = (float)Math.Max(2,Utils.RootMeanPower(sample, 2));
                         sd = 9f;
-                        float w = Func((20 - rms) / sd);
+                        double w = Func((20 - rms) / sd) * (1-miss);
                         if (v <= 0.01 || double.IsNaN(v))
                         {
                             v = w * r.PhysicalData[i];
@@ -52,10 +55,10 @@ namespace YAVSRG.Charts.DifficultyRating
             return (float)v;
         }
 
-        public static float Func(double value) //en.wikipedia.org/wiki/Normal_distribution#Cumulative_distribution_function
+        public static double Func(double value) //en.wikipedia.org/wiki/Normal_distribution#Cumulative_distribution_function
         {
             value /= 1.414213562f;
-            return (float)Math.Max(0,Math.Min((0.5f + Math.Pow(Math.PI, -0.5) * (value - Math.Pow(value, 3) / 3 + Math.Pow(value, 5) / 10 - Math.Pow(value, 7) / 42 + Math.Pow(value, 9) / 216)),1));
+            return Math.Max(0,Math.Min((0.5f + Math.Pow(Math.PI, -0.5) * (value - Math.Pow(value, 3) / 3 + Math.Pow(value, 5) / 10 - Math.Pow(value, 7) / 42 + Math.Pow(value, 9) / 216)),1));
         }
     }
 }

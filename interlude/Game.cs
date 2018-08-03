@@ -16,7 +16,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.1";
+        public static readonly string Version = "Interlude v0.3.2";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -153,7 +153,7 @@ namespace YAVSRG
         {
             base.OnLoad(e);
             taskManager = new TaskManager();
-            taskManager.AddTask(() => { PipeHandler.ReadingThread(); }, "Cross Process Communicator");
+            //taskManager.AddTask(() => { PipeHandler.ReadingThread(); }, "Cross Process Communicator");
             Input.Init();
             trayIcon = new TrayIcon();
             var test = new Discord.EventHandlers();
@@ -161,7 +161,11 @@ namespace YAVSRG
             Utils.SetDiscordData("Just started playing", "Pick a song already!");
             SpriteBatch.Init();
             Icon = new Icon("icon.ico");
-            //Net.Web.WebUtils.DownloadString("http://percyqaz.000webhostapp.com/", (s) => { Console.WriteLine(s); });
+            /*Net.P2P.Protocol.Packets.PacketPing.OnReceive += (p) => { Console.WriteLine(p.id); };
+            using (System.IO.FileStream fs = new System.IO.FileStream("test.dat", System.IO.FileMode.Open))
+            {
+                Net.P2P.Protocol.Protocol.ReceivePacket(fs);
+            }*/
         }
 
         protected override void OnUnload(EventArgs e)

@@ -196,7 +196,9 @@
     <Compile Include="Interface\Widgets\Editor\Timeline.cs" />
     <Compile Include="Interface\Widgets\Gameplay\AccMeter.cs" />
     <Compile Include="Interface\Widgets\Gameplay\HitLighting.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\JudgementDisplay.cs" />
     <Compile Include="Interface\Widgets\Gameplay\MiscInfoDisplay.cs" />
+    <Compile Include="Interface\Widgets\TaskDisplay.cs" />
     <Compile Include="Interface\Widgets\ModMenu.cs" />
     <Compile Include="Interface\Widgets\InfoBox.cs" />
     <Compile Include="Interface\Widgets\Logo.cs" />
@@ -219,6 +221,9 @@
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\TooltipContainer.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\Packet.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\PacketPing.cs" />
+    <Compile Include="Net\P2P\Protocol\Protocol.cs" />
     <Compile Include="Net\Web\EtternaPackData.cs" />
     <Compile Include="Net\Web\GithubReleaseData.cs" />
     <Compile Include="Net\Web\WebUtils.cs" />
@@ -284,9 +289,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Net\P2P\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
