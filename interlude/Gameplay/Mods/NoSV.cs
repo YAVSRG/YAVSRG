@@ -20,10 +20,12 @@ namespace YAVSRG.Gameplay.Mods
 
         public override void Apply(ChartWithModifiers c, string data)
         {
+            List <BPMPoint> newPoints = new List<BPMPoint>();
             foreach (BPMPoint b in c.Timing.Points)
             {
-                b.ScrollSpeed = 1;
+                newPoints.Add(new BPMPoint(b.Offset, b.Meter, b.MSPerBeat, 1, b.InheritsFrom));
             }
+            c.Timing.Points = newPoints; //todo: this is stupid please clean it up and make it sensible
         }
 
         public override string GetName(string data)
