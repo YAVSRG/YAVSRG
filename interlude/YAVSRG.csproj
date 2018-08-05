@@ -218,6 +218,7 @@
     <Compile Include="Interface\Widgets\ScoreCard.cs" />
     <Compile Include="Interface\Widgets\SimpleButton.cs" />
     <Compile Include="Interface\Widgets\Slider.cs" />
+    <Compile Include="Interface\Widgets\TextEntryBox.cs" />
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\TooltipContainer.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />

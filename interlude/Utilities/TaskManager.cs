@@ -9,17 +9,17 @@ namespace YAVSRG.Utilities
 {
     public class TaskManager
     {
-        CancellationTokenSource token;
-
         public class NamedTask
         {
+            CancellationTokenSource token = new CancellationTokenSource();
             Task t;
             public string name;
+            public Action callback;
 
-            public NamedTask(Task t, string name)
+            public NamedTask(Action a, string name, Action callback)
             {
-                this.t = t;
                 this.name = name;
+                t = new Task(a, token.Token);
             }
 
             public void Start()
@@ -27,9 +27,13 @@ namespace YAVSRG.Utilities
                 t.Start();
             }
 
+            public void Cancel()
+            {
+                token.Cancel();
+            }
+
             public TaskStatus Status
             {
-                
                 get { return t.Status; }
             }
         }
@@ -39,20 +43,20 @@ namespace YAVSRG.Utilities
         public TaskManager()
         {
             tasks = new List<NamedTask>();
-            token = new CancellationTokenSource();
+        }
+
+        public void AddTask(NamedTask t)
+        {
+            tasks.Add(t);
+            t.Start();
         }
 
         public void Stop()
         {
-            token.Cancel();
-        }
-
-        public NamedTask AddTask(Action a, string name)
-        {
-            NamedTask t = new NamedTask(new Task(a, token.Token), name);
-            tasks.Add(t);
-            t.Start();
-            return t;
+            foreach (NamedTask t in tasks)
+            {
+                t.Cancel();
+            }
         }
     }
 }

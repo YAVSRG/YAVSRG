@@ -27,7 +27,7 @@ namespace YAVSRG.Interface.Widgets
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.Draw(icon, left, top, right, bottom, color);
-            SpriteBatch.Font1.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
+            //SpriteBatch.Font1.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(float left, float top, float right, float bottom)

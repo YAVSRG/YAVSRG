@@ -28,8 +28,8 @@ namespace YAVSRG.Utilities
                     if (l[0] == "open")
                     {
                         //Game.Screens.AddDialog(new Interface.Dialogs.TextDialog(l[1], (g) => { }));
-                        Charts.ChartLoader.ImportArchive(l[1]);
-                        Charts.ChartLoader.Refresh();
+                        //Charts.ChartLoader.ImportArchive(l[1]);
+                        //Charts.ChartLoader.Refresh();
                     }
                     else if (l[0] == "show")
                     {

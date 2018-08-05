@@ -10,6 +10,8 @@ namespace YAVSRG.Utilities
     {
         static Action<string, LogType> LogAction;
 
+        public static List<string> LogBuffer = new List<string>();
+
         public enum LogType
         {
             Info,
@@ -26,6 +28,11 @@ namespace YAVSRG.Utilities
         public static void Log(string s, LogType type = LogType.Info)
         {
             LogAction(s, type);
+            LogBuffer.Add("[" + type.ToString() + "] " + s);
+            if (LogBuffer.Count > 20)
+            {
+                LogBuffer.RemoveAt(0);
+            }
         }
     }
 }

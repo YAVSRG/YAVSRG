@@ -9,7 +9,7 @@ namespace YAVSRG.Interface.Widgets
 {
     class DownloadCard : Widget
     {
-        EtternaPackData.EtternaPack item;
+        public EtternaPackData.EtternaPack item;
         string size;
         string difficulty;
 
@@ -43,7 +43,7 @@ namespace YAVSRG.Interface.Widgets
 
         private void Download()
         {
-            Charts.ChartLoader.TaskThreaded(() => { Charts.ChartLoader.DownloadAndImportPack(item.attributes.download, item.attributes.name); });
+            Charts.ChartLoader.TaskThreaded(() => { Charts.ChartLoader.DownloadAndImportPack(item.attributes.download, item.attributes.name); }, "Downloading pack: " + item.attributes.name);
         }
     }
 }

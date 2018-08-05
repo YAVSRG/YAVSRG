@@ -16,12 +16,11 @@ namespace YAVSRG.Interface.Widgets
         float rate;
         string time, bpm;
         Scoreboard sb;
-        Animations.AnimationCounter anim;
+        object lastChart = null;
 
         public ChartInfoPanel() : base()
         {
             ChangeChart();
-            Animation.Add(anim = new Animations.AnimationCounter(400000, true));
         }
 
         public void ChangeChart()
@@ -32,12 +31,16 @@ namespace YAVSRG.Interface.Widgets
             technical = diff.Technical;
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
-            if (sb != null)
+            if (Game.Gameplay.CurrentChart != lastChart)
             {
-                Widgets.Remove(sb);
+                if (sb != null)
+                {
+                    Widgets.Remove(sb);
+                }
+                sb = new Scoreboard();
+                AddChild(sb.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 150, AnchorType.MIN, AnchorType.MAX));
+                lastChart = Game.Gameplay.CurrentChart;
             }
-            sb = new Scoreboard();
-            AddChild(sb.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 150, AnchorType.MIN, AnchorType.MAX));
         }
 
         public override void Draw(float left, float top, float right, float bottom)

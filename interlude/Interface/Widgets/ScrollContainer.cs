@@ -95,5 +95,10 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.StencilMode(0);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
         }
+
+        public List<Widget> Items()
+        {
+            return Widgets;
+        }
     }
 }

@@ -32,11 +32,11 @@ namespace YAVSRG
             return "?";
         }
 
-        public static void SetDiscordData(string main, string detail) //needs better wrapper in future, move this
+        public static void SetDiscordData(string text, string subtitle) //needs better wrapper in future, move this
         {
             try
             {
-                Discord.UpdatePresence(new Discord.RichPresence() { state = main, details = detail });
+                Discord.UpdatePresence(new Discord.RichPresence() { state = subtitle, details = text });
             }
             catch { }
         }

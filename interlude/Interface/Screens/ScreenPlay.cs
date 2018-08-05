@@ -103,7 +103,7 @@ namespace YAVSRG.Interface.Screens
             }
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 1 - Game.Options.Profile.BackgroundDim;
-            Utils.SetDiscordData("Playing", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]");
+            Utils.SetDiscordData("Playing " + Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]", "From " + Game.CurrentChart.Data.SourcePack);
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.Toolbar.SetHidden(true);
             AnimationSeries s = new AnimationSeries(false);

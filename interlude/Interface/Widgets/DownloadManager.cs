@@ -7,14 +7,36 @@ using YAVSRG.Net.Web;
 
 namespace YAVSRG.Interface.Widgets
 {
-    class DownloadManager : ScrollContainer
+    class DownloadManager : Widget
     {
-        public DownloadManager(EtternaPackData data) : base(10f, 10f, false)
+        string searchtext = "";
+        ScrollContainer sc;
+
+        public DownloadManager(EtternaPackData data)
         {
-            PositionTopLeft(-510, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(510, 0, AnchorType.CENTER, AnchorType.MAX);
+            sc = new ScrollContainer(10f, 10f, false);
+            PositionTopLeft(0, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(-620, 0, AnchorType.MAX, AnchorType.MAX);
             foreach (EtternaPackData.EtternaPack p in data.data)
             {
-                AddChild(new DownloadCard(p).PositionBottomRight(1000, 50, AnchorType.MIN, AnchorType.MIN));
+                sc.AddChild(new DownloadCard(p).PositionBottomRight(600, 50, AnchorType.MIN, AnchorType.MIN));
+            }
+            AddChild(new TextEntryBox((s) => { searchtext = s; }, () => { return searchtext; }, Filter).PositionTopLeft(0,0,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0,55,AnchorType.MAX,AnchorType.MIN));
+            AddChild(sc.PositionTopLeft(0, 55, AnchorType.MIN, AnchorType.MIN));
+        }
+
+        void Filter()
+        {
+            string f = searchtext.ToLower();
+            foreach (Widget w in sc.Items())
+            {
+                if (!((DownloadCard)w).item.attributes.name.ToLower().Contains(f))
+                {
+                    w.State = 0;
+                }
+                else
+                {
+                    w.State = 1;
+                }
             }
         }
     }
