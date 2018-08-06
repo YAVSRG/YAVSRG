@@ -29,14 +29,25 @@ namespace YAVSRG.Options.Panels
                 new TooltipContainer(
                     new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Fullscreen" }, (int)Options.general.WindowMode, (v) => { Options.general.WindowMode = (General.WindowType)v; }),
                 "This selects what kind of window the game should be.\nWindowed = Regular, resizable window\nBorderless = Maximised window with no title bar or border around it\nFullscreen = Fullscreen mode", ib)
-                .PositionTopLeft(-200, 325, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(-50, 350, AnchorType.CENTER, AnchorType.MIN));
+                .PositionTopLeft(-75, 325, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(75, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
                     new TextPicker("Frame Limit", new string[] { "Unlimited", "60", "120", "180", "240" }, Options.general.FrameLimiter / 60, (v) => { Options.general.FrameLimiter = v * 60; }),
                 "This limits the number of frames per second that the game will run at.\nUnlimited is recommended as it gives the smoothest experience.\nUsing a frame limit can save on power consumption or strain on your GPU.", ib)
-                .PositionTopLeft(50, 325, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(200, 350, AnchorType.CENTER, AnchorType.MIN));
+                .PositionTopLeft(150, 325, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(300, 350, AnchorType.CENTER, AnchorType.MIN));
+            List<string> res = new List<string>();
+            foreach (var x in General.RESOLUTIONS)
+            {
+                res.Add(x.Item1.ToString() + "x" + x.Item2.ToString());
+            }
+            AddChild(
+                new TooltipContainer(
+                    new TextPicker("Screen Resolution", res.ToArray(), Options.general.Resolution, (v) => { Options.general.Resolution = v; }),
+                "This selects the screen resolution for the game when in windowed mode.", ib)
+                .PositionTopLeft(-300, 325, AnchorType.CENTER, AnchorType.MIN)
+                .PositionBottomRight(-150, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
                     new FramedButton("buttonbase", "Apply", () => { Game.Instance.ApplyWindowSettings(Options.general); }),

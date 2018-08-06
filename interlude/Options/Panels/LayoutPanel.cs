@@ -40,7 +40,7 @@ namespace YAVSRG.Options.Panels
             {
                 base.Draw(left, top, right, bottom);
                 ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                Game.Options.Theme.DrawNote(left, top, right, bottom, 0, 0, get(), 0);
+                Game.Options.Theme.DrawNote(left, top, right, bottom, 1, ((LayoutPanel)parent).keyMode, get(), 0);
             }
 
             public override void Update(float left, float top, float right, float bottom)

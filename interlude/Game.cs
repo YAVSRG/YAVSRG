@@ -16,7 +16,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.2";
+        public static readonly string Version = "Interlude v0.3.2.1";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -64,7 +64,7 @@ namespace YAVSRG
             get { return YAVSRG.Options.Options.general.WorkingDirectory; }
         }
 
-        public Game() : base(800,600, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
+        public Game() : base(YAVSRG.Options.General.RESOLUTIONS[YAVSRG.Options.Options.general.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[YAVSRG.Options.Options.general.Resolution].Item2, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
         {
             options = new Options.Options(); //create options data from profile
             Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
@@ -76,8 +76,6 @@ namespace YAVSRG
             audio = new MusicPlayer(); //init my music player
 
             ApplyWindowSettings(Options.General); //apply window settings from options
-            Visible = false;
-            //ScreenUtils.UpdateBounds(Width, Height);
 
             gameplay = new GameplayManager();
             screens = new ScreenManager();
@@ -101,6 +99,8 @@ namespace YAVSRG
             {//settings for windowed
                 WindowState = WindowState.Normal;
                 WindowBorder = WindowBorder.Resizable;
+                Size = new Size(YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item2);
+                
             }
             Audio.SetVolume(settings.AudioVolume);
         }
