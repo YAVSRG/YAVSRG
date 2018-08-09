@@ -4,30 +4,31 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Threading.Tasks;
-using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
 
 namespace YAVSRG.Net.P2P.Protocol
 {
     public class Protocol
     {
-        public static void SendPacket(Stream s, object Packet)
+        public static readonly int PROTOCOLVERSION = 1;
+
+        public static string WritePacket(object Packet)
         {
-            using (StreamWriter w = new StreamWriter(s))
-            {
-                w.Write(Packet.GetType().ToString() + "\r");
-                w.Write(JsonConvert.SerializeObject(Packet, Formatting.None) + "\n");
-            }
+            return Packet.GetType().ToString() + "\r" + JsonConvert.SerializeObject(Packet, Formatting.None) + "\n";
         }
 
-        public static void ReceivePacket(Stream s)
+        public static void HandlePacket(string s, int id)
         {
-            var bf = new BinaryFormatter();
-            using (StreamReader r = new StreamReader(s))
-            {
-                Type t = Type.GetType(r.ReadLine());
-                t.GetMethod("HandlePacket").Invoke(null, new[] { Convert.ChangeType(typeof(JsonConvert).GetMethod("DeserializeObject", new[] { typeof(string), typeof(Type) }).Invoke(null, new object[] { r.ReadLine(), t }), t) });
-            }
+            string[] split = s.Split(new[] { '\r' }, 2);
+            Type t = Type.GetType(split[0]);
+            var m = typeof(Protocol).GetMethod("DeserializePacket").MakeGenericMethod(t);
+            var o = Convert.ChangeType(m.Invoke(null, new object[] { split[1] }), t);
+            typeof(Packets.Packet<>).MakeGenericType(t).GetMethod("HandlePacket").Invoke(null, new[] { o, id });
+        }
+
+        public static T DeserializePacket<T>(string s) //unambiguous method for reflection
+        {
+            return JsonConvert.DeserializeObject<T>(s);
         }
     }
 }

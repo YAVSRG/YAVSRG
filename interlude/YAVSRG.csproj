@@ -86,6 +86,10 @@
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Open.Nat, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f22a6a4582336c76, processorArchitecture=MSIL">
+      <HintPath>..\packages\Open.NAT.2.1.0.0\lib\net45\Open.Nat.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.3.0.1\lib\net20\OpenTK.dll</HintPath>
       <Private>True</Private>
@@ -222,9 +226,16 @@
     <Compile Include="Interface\Widgets\TextPicker.cs" />
     <Compile Include="Interface\Widgets\TooltipContainer.cs" />
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
+    <Compile Include="Net\P2P\ClientWrapper.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\PacketAuth.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\PacketMessage.cs" />
+    <Compile Include="Net\P2P\SocketClient.cs" />
+    <Compile Include="Net\P2P\SocketWrapper.cs" />
+    <Compile Include="Net\P2P\P2PManager.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\Packet.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketPing.cs" />
     <Compile Include="Net\P2P\Protocol\Protocol.cs" />
+    <Compile Include="Net\P2P\SocketServer.cs" />
     <Compile Include="Net\Web\EtternaPackData.cs" />
     <Compile Include="Net\Web\GithubReleaseData.cs" />
     <Compile Include="Net\Web\WebUtils.cs" />

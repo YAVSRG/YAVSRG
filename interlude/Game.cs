@@ -11,6 +11,7 @@ using YAVSRG.Interface;
 using YAVSRG.Audio;
 using YAVSRG.Gameplay;
 using YAVSRG.Utilities;
+using YAVSRG.Net.P2P;
 
 namespace YAVSRG
 {
@@ -26,6 +27,7 @@ namespace YAVSRG
         protected ScreenManager screens;
         protected TrayIcon trayIcon;
         protected TaskManager taskManager;
+        protected P2PManager netManager;
 
         public float FPS;
 
@@ -147,6 +149,7 @@ namespace YAVSRG
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             screens.Update(); //updates the current screen as well as animations and stuff to transition between them
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
+            netManager.Update();
         }
 
         protected override void OnLoad(EventArgs e) //called when game loads up
@@ -156,16 +159,13 @@ namespace YAVSRG
             //taskManager.AddTask(() => { PipeHandler.ReadingThread(); }, "Cross Process Communicator");
             Input.Init();
             trayIcon = new TrayIcon();
-            var test = new Discord.EventHandlers();
+            var test = new Discord.EventHandlers() { requestCallback = Discord.RichPresence.RequestHandler };
             Discord.Initialize("420320424199716864", ref test, true, "");
             Utils.SetDiscordData("Just started playing", "Pick a song already!");
             SpriteBatch.Init();
             Icon = new Icon("icon.ico");
-            /*Net.P2P.Protocol.Packets.PacketPing.OnReceive += (p) => { Console.WriteLine(p.id); };
-            using (System.IO.FileStream fs = new System.IO.FileStream("test.dat", System.IO.FileMode.Open))
-            {
-                Net.P2P.Protocol.Protocol.ReceivePacket(fs);
-            }*/
+            netManager = new P2PManager();
+            //netManager.HostLobby();
         }
 
         protected override void OnUnload(EventArgs e)

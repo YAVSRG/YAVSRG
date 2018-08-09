@@ -213,5 +213,13 @@ public class Discord
                 _buffers.RemoveAt(i);
             }
         }
+
+
+
+        //my stuff
+        public static void RequestHandler(ref JoinRequest data)
+        {
+            YAVSRG.Game.Screens.AddDialog(new YAVSRG.Interface.Dialogs.ConfirmDialog(data.username + "#" + data.discriminator + " wants to join your lobby", (s) => { }));
+        }
     }
 }

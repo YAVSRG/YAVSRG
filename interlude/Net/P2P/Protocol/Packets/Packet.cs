@@ -8,11 +8,11 @@ namespace YAVSRG.Net.P2P.Protocol.Packets
 {
     public class Packet<T>
     {
-        public static event Action<T> OnReceive;
+        public static event Action<T,int> OnReceive;
 
-        public static void HandlePacket(T Packet)
+        public static void HandlePacket(T Packet, int id)
         {
-            OnReceive(Packet);
+            OnReceive(Packet, id);
         }
     }
 }
