@@ -36,7 +36,7 @@ namespace YAVSRG
         {
             try
             {
-                Discord.UpdatePresence(new Discord.RichPresence() { state = subtitle, details = text });
+                Discord.UpdatePresence(new Discord.RichPresence() { state = subtitle, details = text, joinSecret = Game.Multiplayer.LobbyKey });
             }
             catch { }
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Open.Nat;
+using YAVSRG.Net.P2P.Protocol.Packets;
 
 namespace YAVSRG.Net.P2P
 {
@@ -12,11 +13,13 @@ namespace YAVSRG.Net.P2P
         SocketServer server;
         SocketClient client;
 
+        public string LobbyKey = "";
+
         public bool Hosting
         {
             get
             {
-                return server != null;
+                return server?.Running == true;
             }
         }
 
@@ -32,9 +35,17 @@ namespace YAVSRG.Net.P2P
         {
             var discoverer = new NatDiscoverer();
             NatDevice device = await discoverer.DiscoverDeviceAsync();
-            var ip = await device.GetExternalIPAsync();
-            await device.CreatePortMapAsync(new Mapping(Open.Nat.Protocol.Tcp, 32767, 32767, 3600000, "Interlude-Lobby"));
-            Utilities.Logging.Log("Port mapping seems to have worked. External IP is " + ip.ToString());
+            try
+            {
+                var ip = await device.GetExternalIPAsync();
+                await device.CreatePortMapAsync(new Mapping(Open.Nat.Protocol.Tcp, 32767, 32767, 3600000, "Interlude-Lobby"));
+                Utilities.Logging.Log("Port mapping seems to have worked. External IP is " + ip.ToString());
+                LobbyKey = Convert.ToBase64String(ip.GetAddressBytes());
+            }
+            catch (Exception e)
+            {
+                Utilities.Logging.Log("Port mapping failed: " + e.ToString(), Utilities.Logging.LogType.Error);
+            }
         }
 
         public void HostLobby()
@@ -43,12 +54,27 @@ namespace YAVSRG.Net.P2P
             {
                 SetupNAT();
                 server = new SocketServer();
-                server.Start();
+                if (!server.Start())
+                {
+                    Utilities.Logging.Log("Couldn't host lobby!", Utilities.Logging.LogType.Warning);
+                    server = null;
+                    return;
+                }
                 JoinLobby(16777343);
             }
         }
 
-        public void JoinLobby(long address)
+        public void CloseLobby()
+        {
+            if (Hosting)
+            {
+                server?.Shutdown();
+                client?.Disconnect();
+                LobbyKey = "";
+            }
+        }
+
+        private void JoinLobby(long address)
         {
             if (!Connected)
             {
@@ -56,10 +82,38 @@ namespace YAVSRG.Net.P2P
             }
         }
 
+        public void JoinLobby(string key)
+        {
+            try
+            {
+                JoinLobby(KeyToIP(key));
+            }
+            catch (Exception e)
+            {
+                Utilities.Logging.Log("Invalid lobby code: " + key, Utilities.Logging.LogType.Warning);
+            }
+        }
+
         public void Update()
         {
             server?.Update();
             client?.Update();
+        }
+
+        public void SendMessage(string msg)
+        {
+            client?.SendPacket(new PacketMessage() { text = msg });
+        }
+
+        private long KeyToIP(string key)
+        {
+            byte[] b = Convert.FromBase64String(key);
+            return b[0] + ((long)b[1] << 8) + ((long)b[2] << 16) + ((long)b[3] << 24);
+        }
+
+        private string IPToKey(long ip)
+        {
+            return Convert.ToBase64String(BitConverter.GetBytes(ip));
         }
     }
 }

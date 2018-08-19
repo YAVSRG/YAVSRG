@@ -16,7 +16,7 @@ namespace YAVSRG.Interface
         AnimationSlider slide;
         bool hidden;
         public bool cursor = true;
-        public List<string> log = new List<string>();
+        public ChatBox Chat;
 
         public Toolbar()
         {
@@ -32,6 +32,8 @@ namespace YAVSRG.Interface
             AddChild(
                 new Button("buttonimport", "Import", () => { if (!(Game.Screens.Current is ScreenImport)) Game.Screens.AddScreen(new ScreenImport()); })
                 .PositionTopLeft(320, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MAX, AnchorType.MIN));
+            Chat = new ChatBox();
+            AddChild(Chat.PositionTopLeft(0, 80, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MAX));
             AddChild(new TaskDisplay());
             slide = new AnimationSlider(-10);
             Animation.Add(slide);
@@ -92,14 +94,6 @@ namespace YAVSRG.Interface
 
                 base.Draw(left, top + slide - 80, right, bottom - slide + 80);
             }
-
-            /* temp log test
-            float y = top;
-            foreach (string s in log)
-            {
-                SpriteBatch.Font2.DrawText(s, 20f, left, y, Color.White);
-                y += 20f;
-            }*/
 
             if (!(hidden || !cursor)) SpriteBatch.Draw("cursor", Input.MouseX, Input.MouseY, Input.MouseX + 48, Input.MouseY + 48, Game.Screens.HighlightColor);
         }

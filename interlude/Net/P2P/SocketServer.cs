@@ -14,12 +14,10 @@ namespace YAVSRG.Net.P2P
         private Socket sock;
         private SocketAsyncEventArgs accept;
         private ClientWrapper[] clients = new ClientWrapper[16];
+        public bool Running = false;
 
         public SocketServer()
         {
-            PacketPing.OnReceive += HandlePing;
-            PacketAuth.OnReceive += HandleAuth;
-            PacketMessage.OnReceive += HandleMessage;
         }
 
         public bool Start()
@@ -34,6 +32,12 @@ namespace YAVSRG.Net.P2P
                 accept.Completed += OnAccept;
                 sock.AcceptAsync(accept);
                 Utilities.Logging.Log("Looks good. Server is awaiting connections.");
+
+                PacketPing.OnReceive += HandlePing;
+                PacketAuth.OnReceive += HandleAuth;
+                PacketMessage.OnReceive += HandleMessage;
+
+                Running = true;
                 return true;
             }
             catch (Exception e)
@@ -45,13 +49,22 @@ namespace YAVSRG.Net.P2P
             }
         }
 
-        public void ShutDown()
+        public void Shutdown()
         {
-            sock.Close();
-            sock.Dispose();
+            for (int i = 0; i < clients.Length; i++)
+            {
+                Kick("Host closed the lobby", i);
+            }
 
             PacketPing.OnReceive -= HandlePing;
             PacketAuth.OnReceive -= HandleAuth;
+            PacketMessage.OnReceive -= HandleMessage;
+            accept.Completed -= OnAccept;
+
+            sock.Close();
+            sock.Dispose();
+
+            Running = false;
         }
 
         public void Update()
@@ -60,14 +73,13 @@ namespace YAVSRG.Net.P2P
             {
                 if (clients[i] != null)
                 {
+                    clients[i].Update(i);
                     if (clients[i].Closed)
                     {
                         Utilities.Logging.Log("Dropped client with id " + i.ToString());
+                        clients[i].Destroy();
+                        if (clients[i].LoggedIn) Broadcast(clients[i].Username + " left the lobby.");
                         clients[i] = null;
-                    }
-                    else
-                    {
-                        clients[i].Update(i);
                     }
                 }
             }
@@ -111,6 +123,7 @@ namespace YAVSRG.Net.P2P
                 else
                 {
                     clients[id].Auth(packet);
+                    Broadcast(clients[id].Username + " joined the lobby!");
                 }
             }
             else
@@ -135,6 +148,7 @@ namespace YAVSRG.Net.P2P
                     freeslot = true;
                     clients[i] = new ClientWrapper(e.AcceptSocket);
                     Utilities.Logging.Log("Accepted new connection, client id is " + i.ToString());
+                    Message("Welcome to " + Game.Options.Profile.Name + "'s lobby!", i);
                     break;
                 }
             }

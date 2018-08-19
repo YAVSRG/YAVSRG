@@ -26,7 +26,7 @@ namespace YAVSRG.Interface.Screens
             ModMenu modMenu = new ModMenu();
             AddChild(modMenu.PositionTopLeft(0, 150, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(720, 100, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(new FramedButton("buttonbase", "Play", () => { Game.Screens.AddScreen(new ScreenPlay()); })
+            AddChild(new FramedButton("buttonbase", "Play", () => { PlaySelectedChart(); })
                 .PositionTopLeft(-350, 75, AnchorType.CENTER, AnchorType.MAX)
                 .PositionBottomRight(750, 25, AnchorType.MAX, AnchorType.MAX));
             AddChild(new FramedButton("buttonbase", "Mods", () => { modMenu.Toggle(); })
@@ -36,6 +36,15 @@ namespace YAVSRG.Interface.Screens
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
+        }
+
+        private void PlaySelectedChart()
+        {
+            Game.Screens.AddScreen(new ScreenPlay());
+            if (Game.Multiplayer.Connected)
+            {
+                Game.Multiplayer.SendMessage("I AM PLAYING " + Game.CurrentChart.Data.Title + " FROM " + Game.CurrentChart.Data.SourcePack);
+            }
         }
 
         private void OnUpdateGroups()
@@ -95,11 +104,11 @@ namespace YAVSRG.Interface.Screens
             }
             else if (Input.KeyTap(Game.Options.General.Binds.Select))
             {
-                Game.Screens.AddScreen(new ScreenPlay());
+                PlaySelectedChart();
             }
             else if (Input.KeyTap(OpenTK.Input.Key.E))
             {
-                Game.Screens.AddScreen(new ScreenEditor());
+                Game.Screens.AddScreen(new ScreenLobby());
             }
         }
 

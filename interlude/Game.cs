@@ -17,7 +17,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.2.1";
+        public static readonly string Version = "Interlude v0.3.3-pre";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -59,6 +59,11 @@ namespace YAVSRG
         public static TaskManager Tasks
         {
             get { return Instance.taskManager; }
+        }
+
+        public static P2PManager Multiplayer
+        {
+            get { return Instance.netManager; }
         }
 
         public static string WorkingDirectory
@@ -165,7 +170,6 @@ namespace YAVSRG
             SpriteBatch.Init();
             Icon = new Icon("icon.ico");
             netManager = new P2PManager();
-            //netManager.HostLobby();
         }
 
         protected override void OnUnload(EventArgs e)

@@ -12,7 +12,6 @@ namespace YAVSRG.Interface.Widgets
         Score c;
         float acc;
         string accdisplay;
-        string combo;
         float rating;
         string mods;
 
@@ -24,7 +23,6 @@ namespace YAVSRG.Interface.Widgets
             score.ProcessScore(hd);
             acc = score.Accuracy();
             accdisplay = Utils.RoundNumber(acc) + "%";
-            combo = score.BestCombo.ToString() + "x";
             rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(c.mods), c.rate, c.playstyle), hd);
             mods = Game.Gameplay.GetModString(c.mods, c.rate, c.playstyle);
             this.c = c;
@@ -36,11 +34,12 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
             SpriteBatch.Font1.DrawText(c.player, 35f, left + 5, top, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawTextToFill(mods, left, bottom - 40, right-180, bottom, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawTextToFill(mods, left, bottom - 40,
+                right - SpriteBatch.Font2.DrawJustifiedText(c.time.ToString(), 20f, right - 5, bottom - 35, Game.Options.Theme.MenuFont) - 10,
+                bottom, Game.Options.Theme.MenuFont);
 
             SpriteBatch.Font1.DrawJustifiedText(accdisplay, 35f, right - 5, top, Game.Options.Theme.MenuFont);
             SpriteBatch.Font2.DrawJustifiedText(Utils.RoundNumber(rating), 20f, right - 5, bottom - 60, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawJustifiedText(c.time.ToString(), 20f, right - 5, bottom - 35, Game.Options.Theme.MenuFont);
         }
 
         public static Comparison<Widget> Compare = (a, b) => { return ((ScoreCard)b).rating.CompareTo(((ScoreCard)a).rating); };

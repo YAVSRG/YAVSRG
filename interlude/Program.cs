@@ -20,7 +20,7 @@ namespace YAVSRG
             {
                 var LogFile = new System.IO.FileStream("log.txt", System.IO.FileMode.Append);
                 var LogFileWriter = new System.IO.StreamWriter(LogFile);
-                Logging.SetLogAction((s, t) => { LogFileWriter.WriteLine("[" + t.ToString() + "] " + s); if (Game.Instance != null) { Game.Screens.Toolbar.log.Add(t.ToString() + ": " + s);} });
+                Logging.SetLogAction((s, t) => { LogFileWriter.WriteLine("[" + t.ToString() + "] " + s); if (Game.Instance != null) { Game.Screens.Toolbar.Chat.AddLine(t.ToString(),s);} });
                 PipeHandler.Open();
                 Logging.Log("Launching "+Game.Version+", the date/time is " + DateTime.Now.ToString());
                 Game g = null;

@@ -13,6 +13,7 @@ namespace YAVSRG.Net.P2P
         protected Socket sock;
         private string buffer = "";
         public bool Closed = false;
+        public bool Destroyed = false;
 
         public SocketWrapper(Socket sock)
         {
@@ -41,14 +42,19 @@ namespace YAVSRG.Net.P2P
         public virtual void Disconnect()
         {
             if (Closed) return;
+            Closed = true;
+        }
+
+        public virtual void Destroy() //happens after disconnection, but is different method so that remaining data can be read first
+        {
             sock.Close();
             sock.Dispose();
-            Closed = true;
+            Destroyed = true;
         }
 
         public virtual void Update(int id)
         {
-            if (Closed) return;
+            if (Destroyed) return;
             if (sock.Available > 0)
             {
                 try

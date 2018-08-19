@@ -16,12 +16,16 @@ namespace YAVSRG.Interface.Widgets
         Action<string> set;
         Func<string> get;
         Action update;
+        Func<string> text;
+        Action onSend;
 
-        public TextEntryBox(Action<string> setter, Func<string> getter, Action updater)
+        public TextEntryBox(Action<string> setter, Func<string> getter, Action updater, Action send, Func<string> label)
         {
             set = setter;
             get = getter;
             update = updater;
+            onSend = send;
+            text = label;
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
         }
 
@@ -30,7 +34,7 @@ namespace YAVSRG.Interface.Widgets
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawRect(left, top, right, bottom, Game.Screens.DarkColor);
-            SpriteBatch.Font1.DrawText(get() != "" ? get() : "Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search...", 20f, left + 20, top + 10, color);
+            SpriteBatch.Font1.DrawText(get() != "" ? get() : text(), 20f, left + 20, top + 12.5f, color);
             SpriteBatch.DrawFrame(left, top, right, bottom, 25f, color);
         }
 
@@ -43,6 +47,13 @@ namespace YAVSRG.Interface.Widgets
             {
                 if (Input.KeyTap(Game.Options.General.Binds.Search, true) || !Input.HasIM() || ScreenUtils.CheckButtonClick(left, top, right, bottom))
                 {
+                    Input.ChangeIM(null);
+                    focus = false;
+                }
+                else if (onSend != null && Input.KeyTap(OpenTK.Input.Key.Enter, true) && get() != "")
+                {
+                    onSend();
+                    set("");
                     Input.ChangeIM(null);
                     focus = false;
                 }

@@ -18,5 +18,6 @@ namespace YAVSRG.Options
         public Key Search = Key.Tab;
         public Key CollapseToToolbar = Key.Insert;
         public Key Screenshot = Key.F12;
+        public Key Chat = Key.F8;
     }
 }

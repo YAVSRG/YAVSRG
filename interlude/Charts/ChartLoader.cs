@@ -16,6 +16,9 @@ namespace YAVSRG.Charts
     {
         //this file is a real mess and i need to clean it up
 
+        public static readonly string[] CHARTFORMATS = { ".sm", ".osu", ".yav" };
+        public static readonly string[] ARCHIVEFORMATS = { ".osz", ".zip" };
+        
         public static Func<CachedChart, string> GroupByPack = (c) => { return c.pack; };
         public static Func<CachedChart, string> GroupByTitle = (c) => { return Utils.FormatFirstCharacter(c.title); };
         public static Func<CachedChart, string> GroupByDifficulty = (c) => { int i = (int)(c.physical / 2) * 2; return i.ToString().PadLeft(2,'0')+" - "+(i+2).ToString().PadLeft(2,'0'); };
@@ -198,13 +201,6 @@ namespace YAVSRG.Charts
         public static void TaskThreaded(Action task, string desc)
         {
             Game.Tasks.AddTask(new Utilities.TaskManager.NamedTask(task, desc, () => { }));
-            /*
-            if (LastStatus != ChartLoadingStatus.InProgress)
-            {
-                LastStatus = ChartLoadingStatus.InProgress; //makes sure dialog doesn't quit before thread starts working
-                Game.Tasks.AddTask(new Utilities.TaskManager.NamedTask(task, desc, () => { }));
-                Game.Screens.AddDialog(new Interface.Dialogs.LoadingDialog((d) => { }));
-            }*/
         }
 
         #region conversions
@@ -489,7 +485,7 @@ namespace YAVSRG.Charts
                         foreach (string entry in Directory.EnumerateFileSystemEntries(folder))
                         {
                             ext = Path.GetExtension(entry).ToLower();
-                            if (ext == ".sm" || ext == ".osu")
+                            if (CHARTFORMATS.Contains(ext))
                             {
                                 //we've found a pack: folder of song folders
                                 ConvertPack(path, Path.GetFileName(path));
@@ -502,9 +498,9 @@ namespace YAVSRG.Charts
                                 foreach (string file in Directory.EnumerateFiles(entry))
                                 {
                                     ext = Path.GetExtension(file).ToLower();
-                                    if (ext == ".sm" || ext == ".osu")
+                                    if (CHARTFORMATS.Contains(ext))
                                     {
-                                        //we've found a song folder: folder of packs
+                                        //we've found a songs folder: folder of packs
                                         ConvertAllPacks(path);
                                         LastStatus = ChartLoadingStatus.Completed;
                                         LastOutput = "Imported songs folder successfully.";
@@ -514,10 +510,15 @@ namespace YAVSRG.Charts
                             }
                         }
                     }
+                    //if you're here this could be a song folder: folder with audio file and chart file
+                    //it could also be just a random folder some idiot dragged in
+                    //foreach (string file in Directory.EnumerateFiles(path))
+                    //{
+                    //}
                     LastStatus = ChartLoadingStatus.Failed;
                     LastOutput = "Found nothing to import in this folder.";
                 }
-                else if (ext == ".zip" || ext == ".osz")
+                else if (ARCHIVEFORMATS.Contains(ext))
                 {
                     LastOutput = "Importing archive...";
                     try

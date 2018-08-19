@@ -184,6 +184,7 @@
     <Compile Include="Interface\Screens\ScreenImport.cs" />
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
     <Compile Include="Interface\Screens\ScreenLoading.cs" />
+    <Compile Include="Interface\Screens\ScreenLobby.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
     <Compile Include="Interface\Screens\ScreenProfile.cs" />
     <Compile Include="Interface\Screens\ScreenScore.cs" />
@@ -195,6 +196,7 @@
     <Compile Include="Interface\Widgets\Button.cs" />
     <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
+    <Compile Include="Interface\Widgets\ChatBox.cs" />
     <Compile Include="Interface\Widgets\DownloadCard.cs" />
     <Compile Include="Interface\Widgets\DownloadManager.cs" />
     <Compile Include="Interface\Widgets\Editor\Timeline.cs" />

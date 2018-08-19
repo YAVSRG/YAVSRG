@@ -20,8 +20,10 @@ namespace YAVSRG.Interface.Widgets
             {
                 sc.AddChild(new DownloadCard(p).PositionBottomRight(600, 50, AnchorType.MIN, AnchorType.MIN));
             }
-            AddChild(new TextEntryBox((s) => { searchtext = s; }, () => { return searchtext; }, Filter).PositionTopLeft(0,0,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0,55,AnchorType.MAX,AnchorType.MIN));
-            AddChild(sc.PositionTopLeft(0, 55, AnchorType.MIN, AnchorType.MIN));
+            AddChild(new TextEntryBox((s) => { searchtext = s; }, () => { return searchtext; },
+                Filter, null, () => { return "Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."; })
+                .PositionTopLeft(0,0,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0,60,AnchorType.MAX,AnchorType.MIN));
+            AddChild(sc.PositionTopLeft(0, 60, AnchorType.MIN, AnchorType.MIN));
         }
 
         void Filter()

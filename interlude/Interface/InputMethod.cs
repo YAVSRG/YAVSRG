@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace YAVSRG.Interface
 {
@@ -31,6 +32,16 @@ namespace YAVSRG.Interface
             if (Input.KeyTap(OpenTK.Input.Key.BackSpace, true) && getter().Length > 0)
             {
                 setter(getter().Remove(getter().Length - 1));
+                onUpdate();
+            }
+            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft, true) && Input.KeyTap(OpenTK.Input.Key.C, true))
+            {
+                Clipboard.SetText(getter());
+                onUpdate();
+            }
+            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft, true) && Input.KeyTap(OpenTK.Input.Key.V, true))
+            {
+                setter(getter() + Clipboard.GetText());
                 onUpdate();
             }
         }

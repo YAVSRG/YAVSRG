@@ -26,8 +26,9 @@ namespace YAVSRG
             }
         }
 
-        public void DrawText(string text, float scale, float x, float y, Color color)
+        public float DrawText(string text, float scale, float x, float y, Color color)
         {
+            float start = x;
             scale /= FONTSCALE;
             Sprite s;
             foreach (char c in text)
@@ -38,18 +39,19 @@ namespace YAVSRG
                 SpriteBatch.Draw(sprite: s, left: x, top: y, right: x + s.Width * scale, bottom: y + s.Height * scale, color: color);
                 x += (s.Width - FONTSCALE * 0.5f) * scale; //kerning
             }
+            return x - start;
         }
 
-        public void DrawCentredText(string text, float scale, float x, float y, Color c)
+        public float DrawCentredText(string text, float scale, float x, float y, Color c)
         {
             x -= scale / FONTSCALE * 0.5f * MeasureText(text);
-            DrawText(text, scale, x, y, c);
+            return DrawText(text, scale, x, y, c);
         }
 
-        public void DrawJustifiedText(string text, float scale, float x, float y, Color c)
+        public float DrawJustifiedText(string text, float scale, float x, float y, Color c)
         {
             x -= scale / FONTSCALE * MeasureText(text);
-            DrawText(text, scale, x, y, c);
+            return DrawText(text, scale, x, y, c);
         }
 
         public void DrawCentredTextToFill(string text, float left, float top, float right, float bottom, Color c)

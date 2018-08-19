@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Interface.Screens
 {
-    public class ScreenImport : Screen
+    class ScreenImport : Screen
     {
         public ScreenImport() : base()
         {
