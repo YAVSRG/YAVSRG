@@ -13,7 +13,7 @@ namespace YAVSRG.Gameplay
         public string player;
         public Dictionary<string,string> mods;
         public float rate;
-        public string playstyle = ""; //temp
+        public string playstyle;
         public int keycount;
     }
 

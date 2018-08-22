@@ -231,6 +231,9 @@
     <Compile Include="Net\P2P\ClientWrapper.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketAuth.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketMessage.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\PacketPlay.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\PacketScore.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\PacketScoreboard.cs" />
     <Compile Include="Net\P2P\SocketClient.cs" />
     <Compile Include="Net\P2P\SocketWrapper.cs" />
     <Compile Include="Net\P2P\P2PManager.cs" />

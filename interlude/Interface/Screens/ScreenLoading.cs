@@ -32,9 +32,12 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            wb = Game.Instance.WindowBorder;
+            wb = Game.Options.General.WindowMode == Options.General.WindowType.Borderless ? OpenTK.WindowBorder.Hidden : OpenTK.WindowBorder.Resizable;
             Game.Screens.Toolbar.SetHidden(true);
-            Game.Instance.WindowBorder = OpenTK.WindowBorder.Hidden;
+            if (Game.Instance.WindowBorder != OpenTK.WindowBorder.Hidden)
+            {
+                Game.Instance.WindowBorder = OpenTK.WindowBorder.Hidden;
+            }
             Game.Screens.Logo.A.Target(-300, -300);
             Game.Screens.Logo.B.Target(300, 300);
             if (!Game.Screens.Loading)

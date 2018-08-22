@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using YAVSRG.Net.P2P.Protocol.Packets;
+using YAVSRG.Gameplay;
 
 namespace YAVSRG.Net.P2P
 {
@@ -15,9 +16,14 @@ namespace YAVSRG.Net.P2P
         private SocketAsyncEventArgs accept;
         private ClientWrapper[] clients = new ClientWrapper[16];
         public bool Running = false;
+        public int ChartPicker = 0;
+        private bool Playing = false;
+        private DateTime? ScoreTimeout;
+        private List<Score> Scores;
 
         public SocketServer()
         {
+
         }
 
         public bool Start()
@@ -36,6 +42,8 @@ namespace YAVSRG.Net.P2P
                 PacketPing.OnReceive += HandlePing;
                 PacketAuth.OnReceive += HandleAuth;
                 PacketMessage.OnReceive += HandleMessage;
+                PacketPlay.OnReceive += HandlePlay;
+                PacketScore.OnReceive += HandleScore;
 
                 Running = true;
                 return true;
@@ -59,6 +67,8 @@ namespace YAVSRG.Net.P2P
             PacketPing.OnReceive -= HandlePing;
             PacketAuth.OnReceive -= HandleAuth;
             PacketMessage.OnReceive -= HandleMessage;
+            PacketPlay.OnReceive -= HandlePlay;
+            PacketScore.OnReceive -= HandleScore;
             accept.Completed -= OnAccept;
 
             sock.Close();
@@ -80,17 +90,34 @@ namespace YAVSRG.Net.P2P
                         clients[i].Destroy();
                         if (clients[i].LoggedIn) Broadcast(clients[i].Username + " left the lobby.");
                         clients[i] = null;
+                        if (i == 0) //host left for whatever reason
+                        {
+                            Shutdown();
+                        }
                     }
                 }
+            }
+            if (Playing && ScoreTimeout != null && (DateTime.Now - ScoreTimeout).Value.TotalMilliseconds > 3000)
+            {
+                SendToAll(new PacketScoreboard() { scores = Scores });
+                Playing = false;
+                Scores.Clear();
+                ScoreTimeout = null;
+                Utilities.Logging.Log("Timed out while waiting for scores from players");
+            }
+        }
+
+        public void SendToAll(object packet)
+        {
+            for (int i = 0; i < clients.Length; i++)
+            {
+                clients[i]?.SendPacket(packet);
             }
         }
 
         public void Broadcast(string message)
         {
-            for (int i = 0; i < clients.Length; i++)
-            {
-                clients[i]?.SendPacket(new PacketMessage() { text = message });
-            }
+            SendToAll(new PacketMessage() { text = message });
         }
 
         public void Message(string message, int id)
@@ -108,7 +135,14 @@ namespace YAVSRG.Net.P2P
         {
             if (id >= 0 && clients[id]?.LoggedIn == true)
             {
-                Broadcast(clients[id].Username + ": " + packet.text);
+                if (packet.text.StartsWith("*"))
+                {
+                    Broadcast("*" + clients[id].Username + " " + packet.text.Substring(1));
+                }
+                else
+                {
+                    Broadcast(clients[id].Username + ": " + packet.text);
+                }
             }
         }
 
@@ -136,6 +170,70 @@ namespace YAVSRG.Net.P2P
         {
             if (id >= 0)
                 clients[id]?.Ping();
+        }
+
+        private void HandlePlay(PacketPlay packet, int id)
+        {
+            if (id >= 0)
+            {
+                if (id == ChartPicker)
+                {
+                    Playing = true;
+                    Scores = new List<Score>();
+                    for (int i = 0; i < clients.Length; i++)
+                    {
+                        if (clients[i] != null && clients[i].LoggedIn)
+                        {
+                            clients[i].ExpectingScore = true;
+                            if (i != ChartPicker)
+                            {
+                                clients[i].SendPacket(packet);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Broadcast(clients[id].Username + " is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
+                    if (Playing)
+                    {
+                        clients[id].ExpectingScore = false;
+                    }
+                }
+            }
+        }
+
+        private void HandleScore(PacketScore packet, int id)
+        {
+            if (Playing)
+            {
+                if (packet.score != null && clients[id].ExpectingScore)
+                {
+                    Scores.Add(packet.score);
+                    if (ScoreTimeout == null)
+                    {
+                        ScoreTimeout = DateTime.Now;
+                    }
+                }
+                clients[id].ExpectingScore = false;
+                bool ExpectingMoreScores = false;
+                for (int i = 0; i < clients.Length; i++)
+                {
+                    if (clients[i]?.ExpectingScore == true)
+                    {
+                        ExpectingMoreScores = true;
+                        break;
+                    }
+                }
+                if (!ExpectingMoreScores)
+                {
+                    SendToAll(new PacketScoreboard() { scores = Scores });
+                    Playing = false;
+                    Scores.Clear();
+                    ScoreTimeout = null;
+                    Utilities.Logging.Log("Got score from all participating players :)");
+                }
+            }
         }
 
         private void OnAccept(object o, SocketAsyncEventArgs e)

@@ -7,6 +7,7 @@ using YAVSRG.Gameplay;
 using static YAVSRG.Interface.ScreenUtils;
 using System.Drawing;
 using YAVSRG.Interface.Widgets;
+using YAVSRG.Net.P2P.Protocol.Packets;
 
 namespace YAVSRG.Interface.Screens
 {
@@ -20,6 +21,7 @@ namespace YAVSRG.Interface.Screens
         int tier;
         int snapcount;
         ScoreSystem acc1, acc2;
+        Scoreboard scoreboard;
 
         public ScreenScore(ScoreTracker data)
         {
@@ -38,12 +40,18 @@ namespace YAVSRG.Interface.Screens
                 }
             }
             rank = Content.GetTexture("rank-" + ranks[tier]);
+
+            Score score = new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.Hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate, playstyle = Game.Options.Profile.Playstyles[scoreData.c.Keys] };
+
             if (ShouldSaveScore())
             {
-                Score score = new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.Hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate, playstyle = Game.Options.Profile.Playstyles[scoreData.c.Keys] };
                 Game.Gameplay.ChartSaveData.Scores.Add(score);
                 Game.Options.Profile.Stats.SetScore(score);
                 Game.Gameplay.SaveScores();
+            }
+            if (Game.Multiplayer.SyncCharts)
+            {
+                Game.Multiplayer.SendPacket(new PacketScore() { score = score });
             }
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
             acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
@@ -54,7 +62,9 @@ namespace YAVSRG.Interface.Screens
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
             perf = Utils.RoundNumber(Charts.DifficultyRating.PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
 
-            AddChild(new Scoreboard().PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.MIN, AnchorType.MAX));
+            scoreboard = new Scoreboard();
+            scoreboard.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
+            AddChild(scoreboard.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.MIN, AnchorType.MAX));
 
             Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
@@ -64,6 +74,13 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnEnter(prev);
             //Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play(); }; dd didnt like it
+            PacketScoreboard.OnReceive += HandleMultiplayerScoreboard;
+        }
+
+        public override void OnExit(Screen next)
+        {
+            base.OnExit(next);
+            PacketScoreboard.OnReceive += HandleMultiplayerScoreboard;
         }
 
         public bool ShouldSaveScore()
@@ -153,6 +170,19 @@ namespace YAVSRG.Interface.Screens
                 }
             }
             SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
+        }
+
+        private void HandleMultiplayerScoreboard(PacketScoreboard packet, int id)
+        {
+            if (!Game.Multiplayer.SyncCharts) return;
+            try
+            {
+                scoreboard.UseScoreList(packet.scores);
+            }
+            catch (Exception e)
+            {
+                Utilities.Logging.Log("Something went wrong displaying multiplayer scores: "+e.ToString(), Utilities.Logging.LogType.Error);
+            }
         }
     }
 }

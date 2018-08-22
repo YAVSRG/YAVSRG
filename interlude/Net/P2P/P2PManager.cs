@@ -13,6 +13,8 @@ namespace YAVSRG.Net.P2P
         SocketServer server;
         SocketClient client;
 
+        public bool SyncCharts = false;
+
         public string LobbyKey = "";
 
         public bool Hosting
@@ -74,6 +76,14 @@ namespace YAVSRG.Net.P2P
             }
         }
 
+        public void Disconnect()
+        {
+            if (Connected)
+            {
+                client?.Disconnect();
+            }
+        }
+
         private void JoinLobby(long address)
         {
             if (!Connected)
@@ -88,7 +98,7 @@ namespace YAVSRG.Net.P2P
             {
                 JoinLobby(KeyToIP(key));
             }
-            catch (Exception e)
+            catch
             {
                 Utilities.Logging.Log("Invalid lobby code: " + key, Utilities.Logging.LogType.Warning);
             }
@@ -103,6 +113,11 @@ namespace YAVSRG.Net.P2P
         public void SendMessage(string msg)
         {
             client?.SendPacket(new PacketMessage() { text = msg });
+        }
+
+        public void SendPacket(object packet)
+        {
+            client?.SendPacket(packet);
         }
 
         private long KeyToIP(string key)

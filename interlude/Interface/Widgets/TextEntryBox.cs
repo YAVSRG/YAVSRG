@@ -9,7 +9,6 @@ namespace YAVSRG.Interface.Widgets
 {
     class TextEntryBox : Widget
     {
-
         bool focus;
         Animations.AnimationColorMixer color;
 

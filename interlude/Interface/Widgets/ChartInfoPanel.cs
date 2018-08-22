@@ -20,10 +20,12 @@ namespace YAVSRG.Interface.Widgets
 
         public ChartInfoPanel() : base()
         {
-            ChangeChart();
+            sb = new Scoreboard();
+            AddChild(sb.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 150, AnchorType.MIN, AnchorType.MAX));
+            ChangeChart(true);
         }
 
-        public void ChangeChart()
+        public void ChangeChart(bool force)
         {
             diff = Game.Gameplay.ChartDifficulty;
             rate = (float)Game.Options.Profile.Rate;
@@ -31,14 +33,9 @@ namespace YAVSRG.Interface.Widgets
             technical = diff.Technical;
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
-            if (Game.Gameplay.CurrentChart != lastChart)
+            if (Game.Gameplay.CurrentChart != lastChart || force)
             {
-                if (sb != null)
-                {
-                    Widgets.Remove(sb);
-                }
-                sb = new Scoreboard();
-                AddChild(sb.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 150, AnchorType.MIN, AnchorType.MAX));
+                sb.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
                 lastChart = Game.Gameplay.CurrentChart;
             }
         }

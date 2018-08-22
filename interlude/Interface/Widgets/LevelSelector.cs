@@ -234,7 +234,7 @@ namespace YAVSRG.Interface.Widgets
                 {
                     if (x.Highlight())
                     {
-                        Game.Screens.AddScreen(new Screens.ScreenPlay());
+                        Game.Gameplay.PlaySelectedChart();
                     }
                     else
                     {

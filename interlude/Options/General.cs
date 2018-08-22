@@ -22,7 +22,11 @@ namespace YAVSRG.Options
             new Tuple<int, int>(1280,800),
             new Tuple<int, int>(1280, 1024),
             new Tuple<int, int>(1366,768),
+            new Tuple<int, int>(1600,900),
+            new Tuple<int, int>(1600,1024),
+            new Tuple<int, int>(1680,1050),
             new Tuple<int, int>(1920,1080),
+            new Tuple<int, int>(2715,1527),
         };
 
         public float UniversalAudioOffset = 0f;

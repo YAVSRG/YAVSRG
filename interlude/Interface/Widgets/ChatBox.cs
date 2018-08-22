@@ -78,7 +78,7 @@ namespace YAVSRG.Interface.Widgets
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             if (collapsed)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Chat))
+                if (Input.KeyTap(Game.Options.General.Binds.Chat) && Game.Screens.Toolbar.Height > 0)
                 {
                     A.Target(0, 480);
                     Input.ChangeIM(new InputMethod((s) => { entryText = s; }, () => { return entryText; }, () => { }));

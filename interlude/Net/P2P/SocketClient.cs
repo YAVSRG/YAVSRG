@@ -22,6 +22,7 @@ namespace YAVSRG.Net.P2P
 
                 PacketPing.OnReceive += HandlePing;
                 PacketMessage.OnReceive += HandleMessage;
+                PacketPlay.OnReceive += HandlePlay;
             }
             catch (Exception e)
             {
@@ -36,6 +37,7 @@ namespace YAVSRG.Net.P2P
             {
                 PacketPing.OnReceive -= HandlePing;
                 PacketMessage.OnReceive -= HandleMessage;
+                PacketPlay.OnReceive -= HandlePlay;
                 Destroy();
             }
         }
@@ -53,6 +55,34 @@ namespace YAVSRG.Net.P2P
             if (id == -1) //id is -1 when you receive the packet from the server as a client. if you are hosting the id will be 0 or above and should be handled by the server, NOT here
             {
                 Game.Screens.Toolbar.Chat.AddLine("Lobby", packet.text);
+            }
+        }
+
+        private void HandlePlay(PacketPlay packet, int id)
+        {
+            if (id == -1)
+            {
+                if (!(Game.Screens.Current is Interface.Screens.ScreenPlay) && Game.Multiplayer.SyncCharts)
+                {
+                    foreach (string path in Charts.ChartLoader.Cache.Charts.Keys)
+                    {
+                        var c = Charts.ChartLoader.Cache.Charts[path];
+                        if (c.hash == packet.hash)
+                        {
+                            //needs some sanity checks on it
+                            Game.Options.Profile.Rate = packet.rate;
+                            Game.Gameplay.SelectedMods = packet.mods;
+                            Charts.ChartLoader.SwitchToChart(c, false);
+                            Game.Gameplay.PlaySelectedChart();
+                            return;
+                        }
+                    }
+                    Utilities.Logging.Log("Couldn't find the chart being playing in the lobby: " + packet.name + " [" + packet.diff + "] from " + packet.pack);
+                }
+                else
+                {
+                    SendPacket(new PacketScore());
+                }
             }
         }
     }

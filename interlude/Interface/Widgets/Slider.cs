@@ -30,29 +30,29 @@ namespace YAVSRG.Interface.Widgets
             base.Draw(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawRect(left, top + 20, right, bottom - 20, System.Drawing.Color.Gray);
-            float p = left + (get() - min) / (max - min) * (right-left);
+            float p = left + (get() - min) / (max - min) * (right - left);
             SpriteBatch.DrawRect(p - 5, top, p + 5, bottom, System.Drawing.Color.White);
-            SpriteBatch.Font2.DrawCentredText(label+": "+get().ToString(), 20f, (left+right)/2, top-30, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, (left + right) / 2, top - 30, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(float left, float top, float right, float bottom)
         {
             base.Update(left, top, right, bottom);
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (ScreenUtils.MouseOver(left, top, right, bottom))
+            if (ScreenUtils.MouseOver(left-1, top, right+1, bottom))
             {
-                if (Input.KeyTap(OpenTK.Input.Key.Left) && get() - resolution > min)
+                if (Input.KeyTap(OpenTK.Input.Key.Left) && get() - resolution >= min)
                 {
-                    set((float)Math.Round(get() - resolution,2));
+                    set((float)Math.Round(get() - resolution, 2));
                 }
-                if (Input.KeyTap(OpenTK.Input.Key.Right) && get() + resolution < max)
+                if (Input.KeyTap(OpenTK.Input.Key.Right) && get() + resolution <= max)
                 {
-                    set((float)Math.Round(get() + resolution,2));
+                    set((float)Math.Round(get() + resolution, 2));
                 }
                 if (Input.MousePress(OpenTK.Input.MouseButton.Left))
                 {
                     set(min + (Input.MouseX - left) / (right - left) * (max - min));
-                    set((float)Math.Round(get() - get() % resolution,2));
+                    set((float)Math.Round(get() - get() % resolution, 2));
                 }
             }
         }

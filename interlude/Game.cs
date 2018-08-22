@@ -17,7 +17,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.3-pre";
+        public static readonly string Version = "Interlude v0.3.3";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -28,6 +28,7 @@ namespace YAVSRG
         protected TrayIcon trayIcon;
         protected TaskManager taskManager;
         protected P2PManager netManager;
+        bool init;
 
         public float FPS;
 
@@ -71,7 +72,7 @@ namespace YAVSRG
             get { return YAVSRG.Options.Options.general.WorkingDirectory; }
         }
 
-        public Game() : base(YAVSRG.Options.General.RESOLUTIONS[YAVSRG.Options.Options.general.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[YAVSRG.Options.Options.general.Resolution].Item2, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
+        public Game() : base(500, 200, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
         {
             options = new Options.Options(); //create options data from profile
             Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
@@ -79,15 +80,30 @@ namespace YAVSRG
             Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on. best performance is no frame cap and no vsync otherwise you get stutters
+
+            Input.Init();
+            SpriteBatch.Init();
             ManagedBass.Bass.Init(); //init bass
             audio = new MusicPlayer(); //init my music player
-
-            ApplyWindowSettings(Options.General); //apply window settings from options
 
             gameplay = new GameplayManager();
             screens = new ScreenManager();
             screens.Toolbar = new Toolbar();
             screens.AddScreen(new Interface.Screens.ScreenLoading(s));
+            taskManager = new TaskManager();
+            netManager = new P2PManager();
+            trayIcon = new TrayIcon();
+        }
+
+        void PostWindowInit()
+        {
+            ApplyWindowSettings(Options.General); //apply window settings from options
+
+            //Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
+            //screens.AddScreen(new Interface.Screens.ScreenLoading(s));
+            var test = new Discord.EventHandlers() { requestCallback = Discord.RichPresence.RequestHandler };
+            Discord.Initialize("420320424199716864", ref test, true, "");
+            Utils.SetDiscordData("Just started playing", "Pick a song already!");
         }
 
         public void ApplyWindowSettings(Options.General settings) //apply video settings
@@ -107,7 +123,6 @@ namespace YAVSRG
                 WindowState = WindowState.Normal;
                 WindowBorder = WindowBorder.Resizable;
                 Size = new Size(YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item2);
-                
             }
             Audio.SetVolume(settings.AudioVolume);
         }
@@ -151,6 +166,7 @@ namespace YAVSRG
         protected override void OnUpdateFrame(FrameEventArgs e) //this is update loop code (tries to hit 120 times a second)
         {
             base.OnUpdateFrame(e);
+            if (!init) { PostWindowInit(); init = true; }
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             screens.Update(); //updates the current screen as well as animations and stuff to transition between them
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
@@ -160,16 +176,7 @@ namespace YAVSRG
         protected override void OnLoad(EventArgs e) //called when game loads up
         {
             base.OnLoad(e);
-            taskManager = new TaskManager();
-            //taskManager.AddTask(() => { PipeHandler.ReadingThread(); }, "Cross Process Communicator");
-            Input.Init();
-            trayIcon = new TrayIcon();
-            var test = new Discord.EventHandlers() { requestCallback = Discord.RichPresence.RequestHandler };
-            Discord.Initialize("420320424199716864", ref test, true, "");
-            Utils.SetDiscordData("Just started playing", "Pick a song already!");
-            SpriteBatch.Init();
             Icon = new Icon("icon.ico");
-            netManager = new P2PManager();
         }
 
         protected override void OnUnload(EventArgs e)

@@ -11,7 +11,13 @@ namespace YAVSRG.Interface.Widgets
     {
         public Scoreboard() : base(10, 10, false)
         {
-            foreach (Score s in Game.Gameplay.ChartSaveData.Scores)
+
+        }
+
+        public void UseScoreList(List<Score> scores)
+        {
+            Widgets.Clear();
+            foreach (Score s in scores)
             {
                 ScoreCard t = new ScoreCard(s);
                 AddChild(t);

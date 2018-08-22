@@ -32,6 +32,9 @@ namespace YAVSRG.Interface
             AddChild(
                 new Button("buttonimport", "Import", () => { if (!(Game.Screens.Current is ScreenImport)) Game.Screens.AddScreen(new ScreenImport()); })
                 .PositionTopLeft(320, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MAX, AnchorType.MIN));
+            AddChild(
+                new Button("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby)) Game.Screens.AddScreen(new ScreenLobby()); })
+                .PositionTopLeft(400, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(320, 80, AnchorType.MAX, AnchorType.MIN));
             Chat = new ChatBox();
             AddChild(Chat.PositionTopLeft(0, 80, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MAX));
             AddChild(new TaskDisplay());

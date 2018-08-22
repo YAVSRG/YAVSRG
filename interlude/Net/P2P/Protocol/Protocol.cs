@@ -10,7 +10,7 @@ namespace YAVSRG.Net.P2P.Protocol
 {
     public class Protocol
     {
-        public static readonly int PROTOCOLVERSION = 1;
+        public static readonly int PROTOCOLVERSION = 2;
 
         public static string WritePacket(object Packet)
         {
@@ -20,10 +20,17 @@ namespace YAVSRG.Net.P2P.Protocol
         public static void HandlePacket(string s, int id)
         {
             string[] split = s.Split(new[] { '\r' }, 2);
-            Type t = Type.GetType(split[0]);
-            var m = typeof(Protocol).GetMethod("DeserializePacket").MakeGenericMethod(t);
-            var o = Convert.ChangeType(m.Invoke(null, new object[] { split[1] }), t);
-            typeof(Packets.Packet<>).MakeGenericType(t).GetMethod("HandlePacket").Invoke(null, new[] { o, id });
+            try
+            {
+                Type t = Type.GetType(split[0]);
+                var m = typeof(Protocol).GetMethod("DeserializePacket").MakeGenericMethod(t);
+                var o = Convert.ChangeType(m.Invoke(null, new object[] { split[1] }), t);
+                typeof(Packets.Packet<>).MakeGenericType(t).GetMethod("HandlePacket").Invoke(null, new[] { o, id });
+            }
+            catch (Exception e)
+            {
+                Utilities.Logging.Log("Error parsing packet for id " + id.ToString() + ": " + e.ToString() + "\n" + split[0] + "\n" + split[1], Utilities.Logging.LogType.Error);
+            }
         }
 
         public static T DeserializePacket<T>(string s) //unambiguous method for reflection

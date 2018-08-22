@@ -12,6 +12,7 @@ namespace YAVSRG.Net.P2P
         private DateTime lastPingSent = DateTime.Now.AddMinutes(-1);
         private DateTime lastPingReceived = DateTime.Now;
         public bool LoggedIn = false;
+        public bool ExpectingScore = false;
         public string Username = "";
 
         public ClientWrapper(Socket s): base(s)

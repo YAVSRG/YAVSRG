@@ -18,6 +18,7 @@ namespace YAVSRG.Interface.Screens
             AddChild(hostButton = new FramedButton("buttonbase", "Host a lobby", Game.Multiplayer.HostLobby).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
             AddChild(new TextEntryBox((s) => { lobbyCode = s; }, () => { return lobbyCode; }, () => { }, () => { Game.Multiplayer.JoinLobby(lobbyCode); }, () => { return "Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to enter lobby code..."; })
      .PositionTopLeft(-250, 20, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(250, 80, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new BoolPicker("Play charts together", Game.Multiplayer.SyncCharts, (v) => { Game.Multiplayer.SyncCharts = v; }).PositionTopLeft(-50, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(50, 350, AnchorType.CENTER, AnchorType.MIN));
         }
 
         public override void Draw(float left, float top, float right, float bottom)

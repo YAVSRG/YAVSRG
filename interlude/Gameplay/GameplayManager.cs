@@ -69,6 +69,17 @@ namespace YAVSRG.Gameplay
             return ChartSaveData.Offset - CurrentChart.Notes.Points[0].Offset;
         }
 
+        public void PlaySelectedChart()
+        {
+            Game.Screens.AddScreen(new Interface.Screens.ScreenPlay());
+            if (Game.Multiplayer.Connected)
+            {
+                Game.Multiplayer.SendPacket(new Net.P2P.Protocol.Packets.PacketPlay() {
+                    diff = CurrentChart.Data.DiffName, mods = SelectedMods, rate = (float)Game.Options.Profile.Rate,
+                    hash = CurrentChart.GetHash(), name = CurrentChart.Data.Title, pack = CurrentChart.Data.SourcePack });
+            }
+        }
+
         public void ApplyModsToHitData(ChartWithModifiers c, ref ScoreTracker.HitData[] hitdata)
         {
             foreach (string m in SelectedMods.Keys)
