@@ -230,6 +230,7 @@
     <Compile Include="Interface\Widgets\WidgetSwitcher.cs" />
     <Compile Include="Net\P2P\ClientWrapper.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketAuth.cs" />
+    <Compile Include="Net\P2P\Protocol\Packets\PacketDisconnect.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketMessage.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketPlay.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketScore.cs" />

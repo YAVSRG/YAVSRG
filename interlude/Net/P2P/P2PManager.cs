@@ -10,8 +10,8 @@ namespace YAVSRG.Net.P2P
 {
     public class P2PManager
     {
-        SocketServer server;
-        SocketClient client;
+        public SocketServer Server;
+        public SocketClient Client;
 
         public bool SyncCharts = false;
 
@@ -21,7 +21,7 @@ namespace YAVSRG.Net.P2P
         {
             get
             {
-                return server?.Running == true;
+                return Server?.Running == true;
             }
         }
 
@@ -29,7 +29,7 @@ namespace YAVSRG.Net.P2P
         {
             get
             {
-                return client?.Closed == false;
+                return Client?.Closed == false;
             }
         }
 
@@ -55,11 +55,11 @@ namespace YAVSRG.Net.P2P
             if (!Hosting && !Connected)
             {
                 SetupNAT();
-                server = new SocketServer();
-                if (!server.Start())
+                Server = new SocketServer();
+                if (!Server.Start())
                 {
                     Utilities.Logging.Log("Couldn't host lobby!", Utilities.Logging.LogType.Warning);
-                    server = null;
+                    Server = null;
                     return;
                 }
                 JoinLobby(16777343);
@@ -70,17 +70,22 @@ namespace YAVSRG.Net.P2P
         {
             if (Hosting)
             {
-                server?.Shutdown();
-                client?.Disconnect();
+                Server?.Shutdown();
+                Client?.Disconnect();
                 LobbyKey = "";
             }
         }
 
         public void Disconnect()
         {
+            if (Hosting)
+            {
+                CloseLobby();
+                return;
+            }
             if (Connected)
             {
-                client?.Disconnect();
+                Client?.Disconnect();
             }
         }
 
@@ -88,7 +93,7 @@ namespace YAVSRG.Net.P2P
         {
             if (!Connected)
             {
-                client = new SocketClient(address);
+                Client = new SocketClient(address);
             }
         }
 
@@ -104,20 +109,28 @@ namespace YAVSRG.Net.P2P
             }
         }
 
+        public ClientWrapper[] Clients
+        {
+            get
+            {
+                return Server?.Clients;
+            }
+        }
+
         public void Update()
         {
-            server?.Update();
-            client?.Update();
+            Server?.Update();
+            Client?.Update();
         }
 
         public void SendMessage(string msg)
         {
-            client?.SendPacket(new PacketMessage() { text = msg });
+            Client?.SendPacket(new PacketMessage() { text = msg });
         }
 
         public void SendPacket(object packet)
         {
-            client?.SendPacket(packet);
+            Client?.SendPacket(packet);
         }
 
         private long KeyToIP(string key)

@@ -43,6 +43,7 @@ namespace YAVSRG.Interface.Widgets
 
         public override void Draw(float left, float top, float right, float bottom)
         {
+            SpriteBatch.DrawRect(left, top, right, bottom, System.Drawing.Color.FromArgb((int)(A.AbsY/4), 0, 0, 0));
             ConvertCoordinates(ref left, ref top, ref right, ref bottom);
             SpriteBatch.DrawRect(left, top, right, bottom, System.Drawing.Color.FromArgb(180, 0, 0, 0));
             if (newMsgFade.Val > 0.01f)
@@ -69,6 +70,7 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
                 SpriteBatch.Font1.DrawText("> " + entryText, 20f, left + 120, bottom - 40, Game.Options.Theme.MenuFont);
+                SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
             }
         }
 
@@ -97,6 +99,10 @@ namespace YAVSRG.Interface.Widgets
                 {
                     SendMessage(selectedChannel, entryText);
                     entryText = "";
+                }
+                if (ScreenUtils.CheckButtonClick(left, top, right, bottom))
+                {
+                    Input.ChangeIM(new InputMethod((s) => { entryText = s; }, () => { return entryText; }, () => { }));
                 }
             }
         }

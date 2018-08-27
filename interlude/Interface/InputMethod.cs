@@ -34,7 +34,7 @@ namespace YAVSRG.Interface
                 setter(getter().Remove(getter().Length - 1));
                 onUpdate();
             }
-            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft, true) && Input.KeyTap(OpenTK.Input.Key.C, true))
+            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft, true) && Input.KeyTap(OpenTK.Input.Key.C, true) && getter() != "")
             {
                 Clipboard.SetText(getter());
                 onUpdate();

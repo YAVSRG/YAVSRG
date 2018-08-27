@@ -35,7 +35,7 @@ namespace YAVSRG.Options
         public int Resolution = 4;
         public WindowType WindowMode = WindowType.Borderless;
         public string CurrentProfile = "Default.json";
-        public string WorkingDirectory = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "YAVSRG");
+        public string WorkingDirectory = "";
         public Keybinds Binds = new Keybinds();
     }
 }

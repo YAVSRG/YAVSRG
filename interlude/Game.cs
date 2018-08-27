@@ -187,6 +187,7 @@ namespace YAVSRG
             gameplay.Collections.Save();
             trayIcon.Destroy();
             taskManager.Stop();
+            netManager.Disconnect();
             Discord.Shutdown();
             options.Save(); //remember to dump any updated profile settings to file
         }

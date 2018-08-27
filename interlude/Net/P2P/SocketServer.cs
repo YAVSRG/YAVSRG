@@ -14,10 +14,11 @@ namespace YAVSRG.Net.P2P
     {
         private Socket sock;
         private SocketAsyncEventArgs accept;
-        private ClientWrapper[] clients = new ClientWrapper[16];
+        public ClientWrapper[] Clients = new ClientWrapper[16];
         public bool Running = false;
         public int ChartPicker = 0;
         private bool Playing = false;
+        private string PlayingHash;
         private DateTime? ScoreTimeout;
         private List<Score> Scores;
 
@@ -44,6 +45,7 @@ namespace YAVSRG.Net.P2P
                 PacketMessage.OnReceive += HandleMessage;
                 PacketPlay.OnReceive += HandlePlay;
                 PacketScore.OnReceive += HandleScore;
+                PacketDisconnect.OnReceive += HandleDisconnect;
 
                 Running = true;
                 return true;
@@ -59,7 +61,7 @@ namespace YAVSRG.Net.P2P
 
         public void Shutdown()
         {
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < Clients.Length; i++)
             {
                 Kick("Host closed the lobby", i);
             }
@@ -69,6 +71,7 @@ namespace YAVSRG.Net.P2P
             PacketMessage.OnReceive -= HandleMessage;
             PacketPlay.OnReceive -= HandlePlay;
             PacketScore.OnReceive -= HandleScore;
+            PacketDisconnect.OnReceive -= HandleDisconnect;
             accept.Completed -= OnAccept;
 
             sock.Close();
@@ -79,17 +82,17 @@ namespace YAVSRG.Net.P2P
 
         public void Update()
         {
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < Clients.Length; i++)
             {
-                if (clients[i] != null)
+                if (Clients[i] != null)
                 {
-                    clients[i].Update(i);
-                    if (clients[i].Closed)
+                    Clients[i].Update(i);
+                    if (Clients[i].Closed)
                     {
                         Utilities.Logging.Log("Dropped client with id " + i.ToString());
-                        clients[i].Destroy();
-                        if (clients[i].LoggedIn) Broadcast(clients[i].Username + " left the lobby.");
-                        clients[i] = null;
+                        Clients[i].Destroy();
+                        if (Clients[i].LoggedIn) Broadcast(Clients[i].Username + " left the lobby.");
+                        Clients[i] = null;
                         if (i == 0) //host left for whatever reason
                         {
                             Shutdown();
@@ -109,9 +112,9 @@ namespace YAVSRG.Net.P2P
 
         public void SendToAll(object packet)
         {
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < Clients.Length; i++)
             {
-                clients[i]?.SendPacket(packet);
+                Clients[i]?.SendPacket(packet);
             }
         }
 
@@ -122,42 +125,43 @@ namespace YAVSRG.Net.P2P
 
         public void Message(string message, int id)
         {
-            clients[id]?.SendPacket(new PacketMessage() { text = message });
+            Clients[id]?.SendPacket(new PacketMessage() { text = message });
         }
 
         public void Kick(string reason, int id)
         {
             Message("You have been kicked: "+reason, id);
-            clients[id]?.Disconnect();
+            Clients[id]?.SendPacket(new PacketDisconnect());
+            Clients[id]?.Disconnect();
         }
 
         private void HandleMessage(PacketMessage packet, int id)
         {
-            if (id >= 0 && clients[id]?.LoggedIn == true)
+            if (id >= 0 && Clients[id]?.LoggedIn == true)
             {
                 if (packet.text.StartsWith("*"))
                 {
-                    Broadcast("*" + clients[id].Username + " " + packet.text.Substring(1));
+                    Broadcast("*" + Clients[id].Username + " " + packet.text.Substring(1));
                 }
                 else
                 {
-                    Broadcast(clients[id].Username + ": " + packet.text);
+                    Broadcast(Clients[id].Username + ": " + packet.text);
                 }
             }
         }
 
         private void HandleAuth(PacketAuth packet, int id)
         {
-            if (clients[id] != null)
+            if (Clients[id] != null)
             {
-                if (clients[id].LoggedIn)
+                if (Clients[id].LoggedIn)
                 {
                     Utilities.Logging.Log("Client tried to log in twice!", Utilities.Logging.LogType.Warning);
                 }
                 else
                 {
-                    clients[id].Auth(packet);
-                    Broadcast(clients[id].Username + " joined the lobby!");
+                    Clients[id].Auth(packet);
+                    Broadcast(Clients[id].Username + " joined the lobby!");
                 }
             }
             else
@@ -169,35 +173,37 @@ namespace YAVSRG.Net.P2P
         private void HandlePing(PacketPing packet, int id)
         {
             if (id >= 0)
-                clients[id]?.Ping();
+                Clients[id]?.Ping();
         }
 
         private void HandlePlay(PacketPlay packet, int id)
         {
-            if (id >= 0)
+            if (id >= 0 && Clients[id].LoggedIn)
             {
                 if (id == ChartPicker)
                 {
+                    Broadcast(Clients[id].Username + " (Chart picker) is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
                     Playing = true;
+                    PlayingHash = packet.hash;
                     Scores = new List<Score>();
-                    for (int i = 0; i < clients.Length; i++)
+                    for (int i = 0; i < Clients.Length; i++)
                     {
-                        if (clients[i] != null && clients[i].LoggedIn)
+                        if (Clients[i] != null && Clients[i].LoggedIn)
                         {
-                            clients[i].ExpectingScore = true;
+                            Clients[i].ExpectingScore = true;
                             if (i != ChartPicker)
                             {
-                                clients[i].SendPacket(packet);
+                                Clients[i].SendPacket(packet);
                             }
                         }
                     }
                 }
                 else
                 {
-                    Broadcast(clients[id].Username + " is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
-                    if (Playing)
+                    Broadcast(Clients[id].Username + " is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
+                    if (Playing && packet.hash != PlayingHash)
                     {
-                        clients[id].ExpectingScore = false;
+                        Clients[id].ExpectingScore = false;
                     }
                 }
             }
@@ -207,7 +213,7 @@ namespace YAVSRG.Net.P2P
         {
             if (Playing)
             {
-                if (packet.score != null && clients[id].ExpectingScore)
+                if (packet.score != null && Clients[id].ExpectingScore)
                 {
                     Scores.Add(packet.score);
                     if (ScoreTimeout == null)
@@ -215,11 +221,11 @@ namespace YAVSRG.Net.P2P
                         ScoreTimeout = DateTime.Now;
                     }
                 }
-                clients[id].ExpectingScore = false;
+                Clients[id].ExpectingScore = false;
                 bool ExpectingMoreScores = false;
-                for (int i = 0; i < clients.Length; i++)
+                for (int i = 0; i < Clients.Length; i++)
                 {
-                    if (clients[i]?.ExpectingScore == true)
+                    if (Clients[i]?.ExpectingScore == true)
                     {
                         ExpectingMoreScores = true;
                         break;
@@ -236,15 +242,23 @@ namespace YAVSRG.Net.P2P
             }
         }
 
+        private void HandleDisconnect(PacketDisconnect packet, int id)
+        {
+            if (id >= 0)
+            {
+                Clients[id]?.Disconnect();
+            }
+        }
+
         private void OnAccept(object o, SocketAsyncEventArgs e)
         {
             bool freeslot = false;
-            for (int i = 0; i < clients.Length; i++)
+            for (int i = 0; i < Clients.Length; i++)
             {
-                if (clients[i] == null)
+                if (Clients[i] == null)
                 {
                     freeslot = true;
-                    clients[i] = new ClientWrapper(e.AcceptSocket);
+                    Clients[i] = new ClientWrapper(e.AcceptSocket);
                     Utilities.Logging.Log("Accepted new connection, client id is " + i.ToString());
                     Message("Welcome to " + Game.Options.Profile.Name + "'s lobby!", i);
                     break;

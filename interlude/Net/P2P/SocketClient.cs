@@ -23,6 +23,7 @@ namespace YAVSRG.Net.P2P
                 PacketPing.OnReceive += HandlePing;
                 PacketMessage.OnReceive += HandleMessage;
                 PacketPlay.OnReceive += HandlePlay;
+                PacketDisconnect.OnReceive += HandleDisconnect;
             }
             catch (Exception e)
             {
@@ -38,8 +39,15 @@ namespace YAVSRG.Net.P2P
                 PacketPing.OnReceive -= HandlePing;
                 PacketMessage.OnReceive -= HandleMessage;
                 PacketPlay.OnReceive -= HandlePlay;
+                PacketDisconnect.OnReceive -= HandleDisconnect;
                 Destroy();
             }
+        }
+
+        public override void Disconnect()
+        {
+            SendPacket(new PacketDisconnect());
+            base.Disconnect();
         }
 
         private void HandlePing(PacketPing packet, int id)
@@ -83,6 +91,14 @@ namespace YAVSRG.Net.P2P
                 {
                     SendPacket(new PacketScore());
                 }
+            }
+        }
+
+        private void HandleDisconnect(PacketDisconnect packet, int id)
+        {
+            if (id == -1)
+            {
+                Disconnect();
             }
         }
     }
