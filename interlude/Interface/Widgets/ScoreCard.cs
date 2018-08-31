@@ -42,6 +42,16 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.Font2.DrawJustifiedText(Utils.RoundNumber(rating), 20f, right - 5, bottom - 60, Game.Options.Theme.MenuFont);
         }
 
+        public override void Update(float left, float top, float right, float bottom)
+        {
+            base.Update(left, top, right, bottom);
+            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            if (ScreenUtils.CheckButtonClick(left, top, right, bottom))
+            {
+                Game.Screens.AddDialog(new Dialogs.ScoreInfoDialog(c, (s) => { }));
+            }
+        }
+
         public static Comparison<Widget> Compare = (a, b) => { return ((ScoreCard)b).rating.CompareTo(((ScoreCard)a).rating); };
     }
 }

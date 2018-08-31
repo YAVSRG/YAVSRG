@@ -30,10 +30,10 @@ namespace YAVSRG
             {
                 Utils.SetThemeColorFromBG(bmp);
             }
-            return UploadTexture(bmp, 1, 1); //temp
+            return UploadTexture(bmp, 1, 1, getColors); //temp (?)
         }
 
-        public static Sprite FindTextureWithUV(string name, string skin)
+        public static Sprite FindTexture(string name, string skin)
         {
             string filename;
             foreach (string s in Directory.GetFiles(Path.Combine(AssetsDir, skin))) //lots of files in your skin folder slows this down
@@ -64,10 +64,10 @@ namespace YAVSRG
         {
             if (!Store.ContainsKey(path))
             {
-                Sprite s = FindTextureWithUV(path, Game.Options.Profile.Skin);
+                Sprite s = FindTexture(path, Game.Options.Profile.Skin);
                 if (s.Height == 0)
                 {
-                    s = FindTextureWithUV(path, "_fallback");
+                    s = FindTexture(path, "_fallback");
                 }
                 Store.Add(path, s);
             }

@@ -15,6 +15,8 @@ namespace YAVSRG.Options.Panels
         private KeyBinder[] binds = new KeyBinder[10];
         private ColorPicker[] colors = new ColorPicker[10];
         private int keyMode = 4;
+        private float width;
+        private InfoBox infobox;
 
         protected class ColorPicker : Widget
         {
@@ -22,6 +24,7 @@ namespace YAVSRG.Options.Panels
             Action<int> select;
             Func<int> get;
             int max;
+            bool hover;
 
             public ColorPicker(string label, Action<int> select, Func<int> get, int max)
             {
@@ -57,13 +60,22 @@ namespace YAVSRG.Options.Panels
                     {
                         select(Utils.Modulus(get() - 1, max));
                     }
+                    ((LayoutPanel)parent).infobox.SetText(label);
+                    hover = true;
+                }
+                else if (hover)
+                {
+                    hover = false;
+                    ((LayoutPanel)parent).infobox.SetText("");
                 }
             }
         }
 
         public LayoutPanel(InfoBox ib) : base(ib, "Key Layout")
         {
-            selectKeyMode = new TextPicker("Keys", new string[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, 1, (i) => { ChangeKeyMode(i + 3); })
+            infobox = ib;
+            width = ScreenUtils.ScreenWidth * 2 - 600;
+            selectKeyMode = new TextPicker("Keys", new string[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, 1, (i) => { ChangeKeyMode(i + 3, width); })
                 .PositionTopLeft(-50, 100, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(50, 150, AnchorType.CENTER, AnchorType.MIN);
             for (int i = 0; i < 10; i++)
             {
@@ -75,7 +87,7 @@ namespace YAVSRG.Options.Panels
             AddChild(selectKeyMode);
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .PositionTopLeft(-500, 525, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Skin", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode); })
+            AddChild(new TextPicker("Skin", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode, width); })
                 .PositionTopLeft(200, 525, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 575, AnchorType.CENTER, AnchorType.MIN));
         }
 
@@ -90,7 +102,7 @@ namespace YAVSRG.Options.Panels
                 keyMode = Game.Options.Profile.Keymode;
                 selectKeyMode.State = 0;
             }
-            ChangeKeyMode(keyMode);
+            ChangeKeyMode(keyMode, width);
         }
 
         private Action<Key> BindSetter(int i, int k)
@@ -106,7 +118,7 @@ namespace YAVSRG.Options.Panels
             return () => { return Game.Options.Profile.ColorStyle.GetColorIndex(i, k); };
         }
 
-        private void ChangeKeyMode(int k)
+        private void ChangeKeyMode(int k, float Width)
         {
             for (int i = 0; i < 10; i++)
             {
@@ -130,7 +142,7 @@ namespace YAVSRG.Options.Panels
             int keymodeIndex = Game.Options.Profile.ColorStyle.UseForAllKeyModes ? 0 : k;
             for (int i = 0; i < colorCount; i++)
             {
-                colors[i].Change("label NYI", ColorSetter(i,keymodeIndex), ColorGetter(i,keymodeIndex), availableColors);
+                colors[i].Change(Game.Options.Profile.ColorStyle.GetDescription(i), ColorSetter(i,keymodeIndex), ColorGetter(i,keymodeIndex), availableColors);
                 colors[i].State = 1;
                 colors[i].PositionTopLeft(start + i * c, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 300+Game.Options.Theme.ColumnWidth, AnchorType.CENTER, AnchorType.MIN);
             }

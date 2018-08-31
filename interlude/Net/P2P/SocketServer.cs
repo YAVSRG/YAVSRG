@@ -52,7 +52,7 @@ namespace YAVSRG.Net.P2P
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log("Failed to start server: "+ e.ToString(), Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Failed to start server: " + e.ToString(), Utilities.Logging.LogType.Error);
                 sock.Disconnect(false);
                 sock.Dispose();
                 return false;
@@ -91,7 +91,7 @@ namespace YAVSRG.Net.P2P
                     {
                         Utilities.Logging.Log("Dropped client with id " + i.ToString());
                         Clients[i].Destroy();
-                        if (Clients[i].LoggedIn) Broadcast(Clients[i].Username + " left the lobby.");
+                        if (Clients[i].LoggedIn) Broadcast("{c:FFFF00}" + Clients[i].Username + " left the lobby.");
                         Clients[i] = null;
                         if (i == 0) //host left for whatever reason
                         {
@@ -130,7 +130,7 @@ namespace YAVSRG.Net.P2P
 
         public void Kick(string reason, int id)
         {
-            Message("You have been kicked: "+reason, id);
+            Message("You have been kicked: " + reason, id);
             Clients[id]?.SendPacket(new PacketDisconnect());
             Clients[id]?.Disconnect();
         }
@@ -161,7 +161,7 @@ namespace YAVSRG.Net.P2P
                 else
                 {
                     Clients[id].Auth(packet);
-                    Broadcast(Clients[id].Username + " joined the lobby!");
+                    Broadcast("{c:FFFF00}" + Clients[id].Username + " joined the lobby!");
                 }
             }
             else
@@ -182,7 +182,7 @@ namespace YAVSRG.Net.P2P
             {
                 if (id == ChartPicker)
                 {
-                    Broadcast(Clients[id].Username + " (Chart picker) is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
+                    Broadcast("{c:DDDDEE}" + Clients[id].Username + " (Chart picker) is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
                     Playing = true;
                     PlayingHash = packet.hash;
                     Scores = new List<Score>();
@@ -200,7 +200,7 @@ namespace YAVSRG.Net.P2P
                 }
                 else
                 {
-                    Broadcast(Clients[id].Username + " is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
+                    Broadcast("{c:BBBBCC}" + Clients[id].Username + " is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
                     if (Playing && packet.hash != PlayingHash)
                     {
                         Clients[id].ExpectingScore = false;

@@ -87,6 +87,32 @@ namespace YAVSRG
             DrawJustifiedText(text, scale * FONTSCALE, right, (top + bottom) * 0.5f - h * scale * 0.5f, c);
         }
 
+        public float DrawDynamicText(string text, float left, float top, float right, float bottom, Color c, AnchorType position, float size)
+        {
+            switch (position)
+            {
+                case (AnchorType.CENTER):
+                    return DrawCentredText(text, size, (right + left) * 0.5f, top, c);
+                case (AnchorType.MAX):
+                    return DrawJustifiedText(text, size, right, top, c);
+                default:
+                    return DrawText(text, size, left, top, c);
+            }
+        }
+
+        public void DrawDynamicTextToFill(string text, float left, float top, float right, float bottom, Color c, AnchorType position)
+        {
+            switch (position)
+            {
+                case (AnchorType.CENTER):
+                    DrawCentredTextToFill(text, left, top, right, bottom, c); return;
+                case (AnchorType.MAX):
+                    DrawJustifiedTextToFill(text, left, top, right, bottom, c); return;
+                default:
+                    DrawTextToFill(text, left, top, right, bottom, c); return;
+            }
+        }
+
         public void DrawParagraph(string text, float scale, float left, float top, float right, float bottom, Color c)
         {
             string[] lines = text.Split('\n');

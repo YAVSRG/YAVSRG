@@ -10,6 +10,7 @@ namespace YAVSRG.Interface
     {
         MIN, //top left
         CENTER,
-        MAX //bottom right
+        MAX, //bottom right
+        LERP
     }
 }

@@ -37,14 +37,34 @@ namespace YAVSRG.Interface
             return MouseOver(left, top, right, bottom) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
-        /*
-        public static void DrawBanner(float left, float top, float right, float bottom, Color c)
+        public static void DrawGraph(float left, float top, float right, float bottom, Gameplay.ScoreSystem scoring, Gameplay.ScoreTracker.HitData[] data)
         {
-            float height = bottom - top;
-            SpriteBatch.Draw("banner", left, top, left + height, bottom, c, 0, 0);
-            SpriteBatch.Draw("banner", left + height, top, right - height, bottom, c, 1, 0);
-            SpriteBatch.Draw("banner", right - height, top, right, bottom, c, 2, 0);
-        }*/
+            int snapcount = data.Length;
+            SpriteBatch.DrawRect(left, top, right, bottom, Color.FromArgb(150, 0, 0, 0));
+            float w = (right - left - 10) / snapcount;
+            float middle = (top + bottom) * 0.5f;
+            float scale = (bottom - top - 20) * 0.5f / scoring.MissWindow;
+            SpriteBatch.DrawRect(left, middle - 3, right, middle + 3, Color.Green);
+            int j;
+            float o;
+            for (int i = 0; i < snapcount; i++)
+            {
+                for (int k = 0; k < data[i].hit.Length; k++)
+                {
+                    if (data[i].hit[k] > 0)
+                    {
+                        o = data[i].delta[k];
+                        j = scoring.JudgeHit(o);
+                        if (j > 2)
+                        {
+                            SpriteBatch.DrawRect(left + i * w + 4, top, left + i * w + 6, bottom, Color.FromArgb(80, Game.Options.Theme.JudgeColors[5]));
+                        }
+                        SpriteBatch.DrawRect(left + i * w + 3, middle - o * scale - 2, left + i * w + 8, middle - o * scale + 2, Game.Options.Theme.JudgeColors[j]);
+                    }
+                }
+            }
+            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
+        }
 
         public static void DrawArrowConfetti(float left, float top, float right, float bottom, float size, Color min, Color max, float value)
         {

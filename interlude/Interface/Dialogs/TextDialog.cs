@@ -16,7 +16,7 @@ namespace YAVSRG.Interface.Dialogs
         InputMethod im;
         AnimationSlider slide;
 
-        public TextDialog(string prompt, Action<string> action) : base(action) //todo: edit this to use the IME system
+        public TextDialog(string prompt, Action<string> action) : base(action)
         {
             this.prompt = prompt;
             Input.ChangeIM(im = new InputMethod((s) => { val = s; }, () => { return val; }, () => { }));

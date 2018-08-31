@@ -24,7 +24,7 @@ namespace YAVSRG.Interface.Screens
         {
             Widgets.Clear();
             var ib = new InfoBox();
-            Widget tabs = new ScrollContainer(5f, 5f, false, true);
+            Widget tabs = new ScrollContainer(5f, 5f, false);
             lp = new LayoutPanel(ib);
             tabs.AddChild(new GeneralPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
             tabs.AddChild(new GameplayPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));

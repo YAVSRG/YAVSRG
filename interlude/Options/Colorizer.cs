@@ -11,7 +11,7 @@ namespace YAVSRG.Options
 {
     public class Colorizer
     {
-        public static readonly int[] DDRValues = { 1, 2, 4, 8, 3, 6, 12 };
+        public static readonly int[] DDRValues = { 1, 2, 3, 4, 6, 8, 12, 16 };
 
         public enum ColorStyle
         {

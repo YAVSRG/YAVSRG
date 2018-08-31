@@ -39,7 +39,7 @@ namespace YAVSRG.Interface
             animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
             animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
             animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
-            Logo = new Widgets.Logo().PositionTopLeft(-200, ScreenHeight, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(200, ScreenHeight + 400, AnchorType.CENTER, AnchorType.CENTER);
+            Logo = new Widgets.ImageBox("logo").PositionTopLeft(-200, ScreenHeight, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(200, ScreenHeight + 400, AnchorType.CENTER, AnchorType.CENTER);
         }
 
         public void AddDialog(Dialog d)

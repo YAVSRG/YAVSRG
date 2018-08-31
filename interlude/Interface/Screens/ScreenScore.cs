@@ -14,7 +14,6 @@ namespace YAVSRG.Interface.Screens
     class ScreenScore : Screen
     {
         static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" };
-        //static Color[] rankColors = new[] { Color.Gold, Color.Orange, Color.Green, Color.Blue, Color.Purple, Color.Gray };
         string mods, time, bpm, perf;
         private ScoreTracker scoreData;
         Sprite rank;
@@ -25,11 +24,13 @@ namespace YAVSRG.Interface.Screens
 
         public ScreenScore(ScoreTracker data)
         {
+
             scoreData = data;
             snapcount = scoreData.c.Notes.Count;
             mods = Game.Gameplay.GetModString(Game.Gameplay.SelectedMods, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[scoreData.c.Keys]);
             scoreData.Scoring.BestCombo = Math.Max(scoreData.Scoring.Combo, scoreData.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
+            //awards the rank for your acc
             float acc = scoreData.Accuracy();
             tier = 5;
             for (int i = 0; i < Game.Options.Profile.AccGradeThresholds.Length; i++) //custom grade boundaries
@@ -41,6 +42,7 @@ namespace YAVSRG.Interface.Screens
             }
             rank = Content.GetTexture("rank-" + ranks[tier]);
 
+            //score saving logic including multiplayer
             Score score = new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.Hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate, playstyle = Game.Options.Profile.Playstyles[scoreData.c.Keys] };
 
             if (ShouldSaveScore())
@@ -53,34 +55,38 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Multiplayer.SendPacket(new PacketScore() { score = score });
             }
+            //update stats
+            Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
+            Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
+
+            //alternative acc calculations
             acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
             acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
             acc1.ProcessScore(scoreData.Hitdata);
             acc2.ProcessScore(scoreData.Hitdata);
 
+            //more info pre calculated so it isn't calculated every frame
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
             perf = Utils.RoundNumber(Charts.DifficultyRating.PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
 
+            //build up UI
             scoreboard = new Scoreboard();
             scoreboard.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
             AddChild(scoreboard.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.MIN, AnchorType.MAX));
-
-            Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
-            Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
         }
 
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            //Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play(); }; dd didnt like it
+            Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); };
             PacketScoreboard.OnReceive += HandleMultiplayerScoreboard;
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            PacketScoreboard.OnReceive += HandleMultiplayerScoreboard;
+            PacketScoreboard.OnReceive -= HandleMultiplayerScoreboard;
         }
 
         public bool ShouldSaveScore()
@@ -138,38 +144,10 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 550, bottom - 80, Game.Options.Theme.MenuFont);
 
             //graph
-            DrawGraph(left + 550, bottom - 350, right - 550, bottom - 180);
+            DrawGraph(left + 550, bottom - 350, right - 550, bottom - 180, scoreData.Scoring, scoreData.Hitdata);
 
             SpriteBatch.Font1.DrawCentredText("Your performance", 30f, 0, bottom - 170, Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawCentredText(perf, 100f, 0, bottom - 145, Game.Options.Theme.MenuFont);
-        }
-
-        private void DrawGraph(float left, float top, float right, float bottom)
-        {
-            SpriteBatch.DrawRect(left, top, right, bottom, Color.FromArgb(150, 0, 0, 0));
-            float w = (right - left) / snapcount;
-            float middle = (top + bottom) * 0.5f;
-            float scale = (bottom - top) * 0.5f / scoreData.Scoring.MissWindow;
-            SpriteBatch.DrawRect(left, middle - 3, right, middle + 3, Color.Green);
-            int j;
-            float o;
-            for (int i = 0; i < snapcount; i++)
-            {
-                for (int k = 0; k < scoreData.Hitdata[i].hit.Length; k++)
-                {
-                    if (scoreData.Hitdata[i].hit[k] > 0)
-                    {
-                        o = scoreData.Hitdata[i].delta[k];
-                        j = scoreData.Scoring.JudgeHit(o);
-                        if (j > 2)
-                        {
-                            SpriteBatch.DrawRect(left + i * w - 1, top, left + i * w + 1, bottom, Color.FromArgb(80, Game.Options.Theme.JudgeColors[5]));
-                        }
-                        SpriteBatch.DrawRect(left + i * w - 2, middle - o * scale - 2, left + i * w + 2, middle - o * scale + 2, Game.Options.Theme.JudgeColors[j]);
-                    }
-                }
-            }
-            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
         }
 
         private void HandleMultiplayerScoreboard(PacketScoreboard packet, int id)

@@ -18,8 +18,8 @@ namespace YAVSRG.Interface.Widgets
 
         public ChartSortingControls() : base()
         {
-            group = new ScrollContainer(20, 10, false, false) { State = 0 };
-            sort = new ScrollContainer(20, 10, false, false) { State = 0 };
+            group = new ScrollContainer(20, 10, false, 0) { State = 0 };
+            sort = new ScrollContainer(20, 10, false, 0) { State = 0 };
             AddChild(sortB = new SimpleButton("Sort by...", () => {
                 sort.State = 1 - sort.State;
                 sort.B.MoveTarget(0, sort.B.TargetY < 0 ? 300 : -300);

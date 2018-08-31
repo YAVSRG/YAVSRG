@@ -97,7 +97,7 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.Toolbar.SetHidden(false);
                 Game.Instance.WindowBorder = wb;
             }
-            ((Logo)Game.Screens.Logo).c = Color.FromArgb(a, Color.White);
+            ((ImageBox)Game.Screens.Logo).c = Color.FromArgb(a, Color.White);
         }
     }
 }

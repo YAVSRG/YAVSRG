@@ -63,11 +63,13 @@ namespace YAVSRG.Interface.Animations
             switch (XRel)
             {
                 case (AnchorType.CENTER):
-                    return (max+min)*0.5f+_X;
+                    return (max + min) * 0.5f + _X;
                 case (AnchorType.MAX):
                     return max - _X;
                 case (AnchorType.MIN):
                     return min + _X;
+                case (AnchorType.LERP):
+                    return min + (max - min) * _X;
             }
             return _X;
         }
@@ -82,6 +84,8 @@ namespace YAVSRG.Interface.Animations
                     return max - _Y;
                 case (AnchorType.MIN):
                     return min + _Y;
+                case (AnchorType.LERP):
+                    return min + (max - min) * _Y;
             }
             return _Y;
         }

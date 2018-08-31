@@ -10,7 +10,7 @@ namespace YAVSRG.Audio
 {
     public class MusicPlayer
     {
-        private static readonly int BUFFER = 2000; //poorly named. This is the time in ms to lead into the song before it begins
+        private static readonly int BUFFER = 3000; //poorly named. This is the time in ms to lead into the song before it begins
         //this is necessary for songs that start close to 0ms into the song (notes would instantly be there when you click play)
 
         private Track nowplaying;

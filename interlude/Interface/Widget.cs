@@ -61,26 +61,20 @@ namespace YAVSRG.Interface
             return B.Y(t, b);
         }
 
-        public float Width
-        {
-            get { return Math.Abs(B.TargetX - A.TargetX); }
-        }
-
-        public float Height
-        {
-            get { return Math.Abs(B.TargetY - A.TargetY); }
-        }
-
-        /*
-        public float GetWidth(float l, float r)
+        public float Width(float l, float r)
         {
             return Right(l, r) - Left(l, r);
         }
 
-        public float GetHeight(float t, float b)
+        public float Height(float t, float b)
         {
             return Bottom(t, b) - Top(t, b);
-        }*/
+        }
+
+        public RectangleF Bounds(RectangleF bounds)
+        {
+            return new RectangleF();
+        }
 
         protected void ConvertCoordinates(ref float l, ref float t, ref float r, ref float b)
         {
