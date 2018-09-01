@@ -51,11 +51,11 @@ namespace YAVSRG.Interface.Screens
             }*/
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Font2.DrawText("u can scroll down btw", 25f, ScreenUtils.ScreenWidth - 500, top + 20, Color.White);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.Font2.DrawText("u can scroll down btw", 25f, ScreenUtils.ScreenWidth - 500, bounds.Top + 20, Color.White);
         }
     }
 }

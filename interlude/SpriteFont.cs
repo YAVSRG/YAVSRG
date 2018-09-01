@@ -10,6 +10,7 @@ namespace YAVSRG
 {
     public class SpriteFont
     {
+        //todo: comment everything and change to bounds system
         Dictionary<char, Sprite> FontLookup;
         int FONTSCALE;
         Font Font;
@@ -36,7 +37,7 @@ namespace YAVSRG
                 if (c == ' ') { x += FONTSCALE * 0.75f * scale; continue; }
                 if (!FontLookup.ContainsKey(c)) { GenChar(c); }
                 s = FontLookup[c];
-                SpriteBatch.Draw(sprite: s, left: x, top: y, right: x + s.Width * scale, bottom: y + s.Height * scale, color: color);
+                SpriteBatch.Draw(sprite: s, bounds: new Rect(x, y, x + s.Width * scale, y + s.Height * scale), color: color);
                 x += (s.Width - FONTSCALE * 0.5f) * scale; //kerning
             }
             return x - start;
@@ -54,70 +55,70 @@ namespace YAVSRG
             return DrawText(text, scale, x, y, c);
         }
 
-        public void DrawCentredTextToFill(string text, float left, float top, float right, float bottom, Color c)
+        public void DrawCentredTextToFill(string text, Rect bounds, Color c)
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
             float scale = Math.Min(
-                (right - left) / w,
-                (bottom - top) / h
+                bounds.Width / w,
+                bounds.Height / h
                 );
-            DrawCentredText(text, scale * FONTSCALE, (left + right) * 0.5f, (top + bottom) * 0.5f - h * scale * 0.5f, c);
+            DrawCentredText(text, scale * FONTSCALE, bounds.CenterX, bounds.CenterY - h * scale * 0.5f, c);
         }
 
-        public void DrawTextToFill(string text, float left, float top, float right, float bottom, Color c)
+        public void DrawTextToFill(string text, Rect bounds, Color c)
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
             float scale = Math.Min(
-                (right - left) / w,
-                (bottom - top) / h
+                bounds.Width / w,
+                bounds.Height / h
                 );
-            DrawText(text, scale * FONTSCALE, left, (top + bottom) * 0.5f - h * scale * 0.5f, c);
+            DrawText(text, scale * FONTSCALE, bounds.Left, bounds.CenterY - h * scale * 0.5f, c);
         }
 
-        public void DrawJustifiedTextToFill(string text, float left, float top, float right, float bottom, Color c)
+        public void DrawJustifiedTextToFill(string text, Rect bounds, Color c)
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
             float scale = Math.Min(
-                (right - left) / w,
-                (bottom - top) / h
+                bounds.Width / w,
+                bounds.Height / h
                 );
-            DrawJustifiedText(text, scale * FONTSCALE, right, (top + bottom) * 0.5f - h * scale * 0.5f, c);
+            DrawJustifiedText(text, scale * FONTSCALE, bounds.Right, bounds.CenterY - h * scale * 0.5f, c);
         }
 
-        public float DrawDynamicText(string text, float left, float top, float right, float bottom, Color c, AnchorType position, float size)
+        public float DrawDynamicText(string text, Rect bounds, Color c, AnchorType position, float size)
         {
             switch (position)
             {
                 case (AnchorType.CENTER):
-                    return DrawCentredText(text, size, (right + left) * 0.5f, top, c);
+                    return DrawCentredText(text, size, bounds.CenterX, bounds.Top, c);
                 case (AnchorType.MAX):
-                    return DrawJustifiedText(text, size, right, top, c);
+                    return DrawJustifiedText(text, size, bounds.Right, bounds.Top, c);
                 default:
-                    return DrawText(text, size, left, top, c);
+                    return DrawText(text, size, bounds.Left, bounds.Top, c);
             }
         }
 
-        public void DrawDynamicTextToFill(string text, float left, float top, float right, float bottom, Color c, AnchorType position)
+        public void DrawDynamicTextToFill(string text, Rect bounds, Color c, AnchorType position)
         {
             switch (position)
             {
                 case (AnchorType.CENTER):
-                    DrawCentredTextToFill(text, left, top, right, bottom, c); return;
+                    DrawCentredTextToFill(text, bounds, c); return;
                 case (AnchorType.MAX):
-                    DrawJustifiedTextToFill(text, left, top, right, bottom, c); return;
+                    DrawJustifiedTextToFill(text, bounds, c); return;
                 default:
-                    DrawTextToFill(text, left, top, right, bottom, c); return;
+                    DrawTextToFill(text, bounds, c); return;
             }
         }
 
-        public void DrawParagraph(string text, float scale, float left, float top, float right, float bottom, Color c)
+        public void DrawParagraph(string text, float scale, Rect bounds, Color c)
         {
             string[] lines = text.Split('\n');
-            float x = left;
-            float y = top;
+            float x = bounds.Left;
+            float y = bounds.Top;
             float h = FontLookup['T'].Height * scale / FONTSCALE;
             foreach (string s in lines)
             {
@@ -125,15 +126,15 @@ namespace YAVSRG
                 foreach (string word in split)
                 {
                     float w = MeasureText(word) * scale / FONTSCALE;
-                    if (x + w > right)
+                    if (x + w > bounds.Right)
                     {
-                        x = left;
+                        x = bounds.Left;
                         y += h;
                     }
                     DrawText(word, scale, x, y, c);
                     x += w;
                 }
-                x = left;
+                x = bounds.Left;
                 y += h;
             }
         }

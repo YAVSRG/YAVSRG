@@ -21,26 +21,27 @@ namespace YAVSRG.Interface.Widgets
             selection = start;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left,top,right,bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, top, left + 20, bottom, Game.Screens.BaseColor);
-            SpriteBatch.DrawRect(right - 20, top, right, bottom, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredText(options[selection], 30, (left+right)/2, top, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredText(label, 20, (left+right)/2, top - 30, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top, bounds.Left + 20, bounds.Bottom), Game.Screens.BaseColor);
+            SpriteBatch.DrawRect(new Rect(bounds.Right - 20, bounds.Top, bounds.Right, bounds.Bottom), Game.Screens.BaseColor);
+            SpriteBatch.Font1.DrawCentredText(options[selection], 30, bounds.CenterX, bounds.Top, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredText(label, 20, bounds.CenterX, bounds.Top - 30, Game.Options.Theme.MenuFont);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left,top,right,bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (ScreenUtils.CheckButtonClick(left, top, left + 20, bottom))
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            //todo: rectangle slicing methods
+            if (ScreenUtils.CheckButtonClick(new Rect(bounds.Left, bounds.Top, bounds.Left + 20, bounds.Bottom)))
             {
                 selection = Utils.Modulus(selection - 1, options.Length);
                 set(selection);
             }
-            else if (ScreenUtils.CheckButtonClick(right - 20, top, right, bottom))
+            else if (ScreenUtils.CheckButtonClick(new Rect(bounds.Right - 20, bounds.Top, bounds.Right, bounds.Bottom)))
             {
                 selection = Utils.Modulus(selection + 1, options.Length);
                 set(selection);

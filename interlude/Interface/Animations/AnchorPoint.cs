@@ -32,7 +32,7 @@ namespace YAVSRG.Interface.Animations
             _Y.Update();
         }
 
-        public void Reposition(float x, float y, AnchorType xa, AnchorType ya)
+        public void Reposition(float x, float y, AnchorType xa, AnchorType ya) //totally resets the anchor point to new positioning
         {
             _X = new AnimationSlider(x);
             _Y = new AnimationSlider(y);
@@ -40,22 +40,38 @@ namespace YAVSRG.Interface.Animations
             YRel = ya;
         }
 
-        public void MoveTarget(float x, float y)
+        private float FunctionName(float target, float min, float max, AnchorType rel)
         {
-            _X.Target += x;
-            _Y.Target += y;
+            switch (rel)
+            {
+                case (AnchorType.CENTER):
+                    return target - (max + min) * 0.5f; // ??
+                case (AnchorType.MAX):
+                    return (max - min) - target;
+                case (AnchorType.MIN):
+                    return target;
+                case (AnchorType.LERP):
+                default:
+                    return 0f; //nyi for lerp
+            }
         }
 
-        public void Target(float x, float y)
+        public void Target(float x, float y, Rect bounds) //targets a new location smoothly
+        {
+            _X.Target = FunctionName(x, bounds.Left, bounds.Right, XRel);
+            _Y.Target = FunctionName(y, bounds.Top, bounds.Bottom, YRel);
+        }
+
+        public void Target(float x, float y) //targets a new location smoothly, no respect to anchor types or bounds
         {
             _X.Target = x;
             _Y.Target = y;
         }
 
-        public void Position(float x, float y)
+        public void Position(float x, float y, Rect bounds) //moves instantly to a new location
         {
-            _X.Val = x;
-            _Y.Val = y;
+            _X.Val = FunctionName(x, bounds.Left, bounds.Right, XRel);
+            _Y.Val = FunctionName(y, bounds.Top, bounds.Bottom, YRel);
         }
 
         public float X(float min, float max)
@@ -79,7 +95,7 @@ namespace YAVSRG.Interface.Animations
             switch (YRel)
             {
                 case (AnchorType.CENTER):
-                    return _Y;
+                    return (max + min) * 0.5f + _Y;
                 case (AnchorType.MAX):
                     return max - _Y;
                 case (AnchorType.MIN):
@@ -89,8 +105,8 @@ namespace YAVSRG.Interface.Animations
             }
             return _Y;
         }
-
-        public float AbsX
+        
+        public float AbsoluteX
         {
             get
             {
@@ -98,7 +114,7 @@ namespace YAVSRG.Interface.Animations
             }
         }
 
-        public float AbsY
+        public float AbsoluteY
         {
             get
             {
@@ -106,7 +122,7 @@ namespace YAVSRG.Interface.Animations
             }
         }
 
-        public float TargetX
+        public float AbsoluteTargetX
         {
             get
             {
@@ -114,7 +130,7 @@ namespace YAVSRG.Interface.Animations
             }
         }
 
-        public float TargetY
+        public float AbsoluteTargetY
         {
             get
             {

@@ -16,13 +16,13 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             if (type == "(YAV)") type = "";
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            float h = bottom-top;
-            SpriteBatch.Font1.DrawCentredTextToFill(Utils.RoundNumber(scoreTracker.Accuracy()) + "%", left, top, right, top + h * 0.75f, scoreTracker.WidgetColor);
-            SpriteBatch.Font2.DrawCentredTextToFill(type, left, bottom - h * 0.4f, right, bottom, scoreTracker.WidgetColor);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            float h = bounds.Height;
+            SpriteBatch.Font1.DrawCentredTextToFill(Utils.RoundNumber(scoreTracker.Accuracy()) + "%", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h * 0.75f), scoreTracker.WidgetColor);
+            SpriteBatch.Font2.DrawCentredTextToFill(type, new Rect(bounds.Left, bounds.Bottom - h * 0.4f, bounds.Right, bounds.Bottom), scoreTracker.WidgetColor);
         }
     }
 }

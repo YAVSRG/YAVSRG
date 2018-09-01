@@ -30,63 +30,65 @@ namespace YAVSRG.Interface.Widgets
 
         public override void AddChild(Widget child)
         {
-            /*
+            Rect bounds = GetBounds();
             float x = padX;
             float y = padY - scroll;
+            Rect widgetBounds;
             foreach (Widget w in Widgets)
             {
                 if (w.State > 0)
                 {
+                    widgetBounds = w.GetBounds(bounds);
                     if (horizontal)
                     {
-                        x += padX + w.Width;
+                        x += padX + widgetBounds.Width;
                     }
                     else
                     {
-                        y += padY + w.Height;
+                        y += padY + widgetBounds.Height;
                     }
                 }
             }
             base.AddChild(child);
-            child.B.Position(x + child.Width, y + child.Height);
-            child.A.Position(x, y);*/
-            base.AddChild(child);
+            widgetBounds = child.GetBounds(bounds);
+            child.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            bounds = GetBounds(bounds);
             float x = padX;
             float y = padY - scroll;
+            Rect widgetBounds;
             foreach (Widget w in Widgets)
             {
                 if (w.State > 0)
                 {
-                    w.Update(left, top, right, bottom);
-                    w.B.Target(x + w.Width(left, right), y + w.Height(top, bottom));
-                    w.A.Target(x, y);
+                    w.Update(bounds);
+                    widgetBounds = w.GetBounds(bounds);
+                    w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
                     if (horizontal)
                     {
-                        x += padX + w.Width(left, right);
+                        x += padX + widgetBounds.Width;
                     }
                     else
                     {
-                        y += padY + w.Height(top, bottom);
+                        y += padY + widgetBounds.Height;
                     }
                 }
             }
-            if (canscroll > 0 && ScreenUtils.MouseOver(left, top, right, bottom))
+            if (canscroll > 0 && ScreenUtils.MouseOver(bounds))
             {
                 if (canscroll > 1)
                 {
                     scrollcolor.Target(Color.FromArgb(127,Game.Screens.HighlightColor));
                 }
                 scroll -= Input.MouseScroll * 100;
-                if (top + y < bottom)
+                if (bounds.Top + y < bounds.Bottom) //prevents scrolling off the bottom
                 {
-                    scroll -= bottom - (top + y);
+                    scroll -= bounds.Bottom - (bounds.Top + y);
                 }
-                scroll = Math.Max(scroll, 0);
+                scroll = Math.Max(scroll, 0); //prevents scrolling off the top
             }
             else
             {
@@ -95,35 +97,35 @@ namespace YAVSRG.Interface.Widgets
             contentsHeight = y + scroll;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.StencilMode(1);
-            SpriteBatch.DrawRect(left, top, right, bottom, Color.Transparent);
+            bounds = GetBounds(bounds);
+            SpriteBatch.StencilMode(1); //draw a mask preventing widgets from drawing outside the bounds of this one
+            SpriteBatch.DrawRect(bounds, Color.Transparent);
             if (frame)
             {
-                Game.Screens.DrawChartBackground(left, top, right, bottom - 2, Game.Screens.DarkColor, 1.5f);
+                Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1.5f);
             }
-            SpriteBatch.StencilMode(2);
+            SpriteBatch.StencilMode(2); //draw with consideration to this mask
             foreach (Widget w in Widgets)
             {
-                if (w.State > 0 && w.B.Y(top, bottom) > top && w.A.Y(top, bottom) < bottom)
+                if (w.State > 0 && w.Bottom(bounds) > bounds.Top && w.Top(bounds) < bounds.Bottom) //optimisation for large numbers of items
                 {
-                    w.Draw(left, top, right, bottom);
+                    w.Draw(bounds);
                 }
             }
-            SpriteBatch.StencilMode(0);
+            SpriteBatch.StencilMode(0); //masking mode off
             if (frame)
             {
-                SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Game.Screens.HighlightColor);
+                ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
             }
-            if (canscroll > 1)
+            if (canscroll > 1) //draw scroll bar (doesn't work)
             {
-                float y = (bottom - top) / contentsHeight;
+                float y = bounds.Height / contentsHeight;
                 //if (y < 0.95f)
                 {
-                    float percentage = (scroll) / (contentsHeight - (bottom - top));
-                    SpriteBatch.DrawRect(left, top + 25 + (bottom - top - 100) * percentage, right - 5, top + 75 + (bottom - top - 100) * percentage, scrollcolor);
+                    float percentage = (scroll) / (contentsHeight - bounds.Height);
+                    SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + 25 + (bounds.Height - 100) * percentage, bounds.Right - 5, bounds.Top + 75 + (bounds.Height - 100) * percentage), scrollcolor);
                 }
             }
         }

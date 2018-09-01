@@ -21,8 +21,7 @@ namespace YAVSRG.Interface.Dialogs
         public ScoreInfoDialog(Score score, Action<string> a) : base(a)
         {
             PositionTopLeft(ScreenUtils.ScreenWidth, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth, 200, AnchorType.MAX, AnchorType.MAX);
-            A.Target(300, 200);
-            B.Target(300, 200);
+            Move(new Rect(200, 200, 200, 200));
             Animation.Add(slide = new AnimationSlider(0) { Target = 1 });
 
             scoring = ScoreSystem.GetScoreSystem(ScoreType.Default);
@@ -33,23 +32,24 @@ namespace YAVSRG.Interface.Dialogs
             mods = Game.Gameplay.GetModString(score.mods, score.rate, score.playstyle);
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
             int a = (int)(slide * 127);
-            SpriteBatch.DrawRect(left, top, right, bottom, System.Drawing.Color.FromArgb(a, 0, 0, 0));
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            Game.Screens.DrawChartBackground(left, top, right, bottom, Game.Screens.DarkColor, 1f);
-            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, System.Drawing.Color.White);
+            SpriteBatch.DrawRect(bounds, System.Drawing.Color.FromArgb(a, 0, 0, 0));
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1f);
+            ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
 
-            ScreenUtils.DrawGraph(left + 20, bottom - 200, right - 20, bottom - 20, scoring, data);
+            ScreenUtils.DrawGraph(new Rect(bounds.Left + 20, bounds.Bottom - 200, bounds.Right - 20, bounds.Bottom - 20), scoring, data);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (!ScreenUtils.MouseOver(left,top,right,bottom) && Input.MouseClick(OpenTK.Input.MouseButton.Left))
+            //todo: make base "fading" dialog that dims game to show you something
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            if (!ScreenUtils.MouseOver(bounds) && Input.MouseClick(OpenTK.Input.MouseButton.Left))
             {
                 Close("");
             }

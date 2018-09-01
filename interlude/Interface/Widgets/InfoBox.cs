@@ -32,14 +32,14 @@ namespace YAVSRG.Interface.Widgets
             }
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
             int f = (int)(255 * fade);
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            Game.Screens.DrawChartBackground(left, top, right, bottom, Color.FromArgb(f, 100, 100, 100));
-            SpriteBatch.DrawFrame(left, top, right, bottom, 20f, Color.FromArgb(f,Color.White));
-            SpriteBatch.Font1.DrawParagraph(text, 30f, left+10, top+10, right-10, bottom-10, Color.FromArgb(f,Game.Options.Theme.MenuFont));
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            Game.Screens.DrawChartBackground(bounds, Color.FromArgb(f, 100, 100, 100));
+            ScreenUtils.DrawFrame(bounds, 30f, Color.FromArgb(f,Color.White));
+            SpriteBatch.Font1.DrawParagraph(text, 30f, bounds.Expand(-10,-10), Color.FromArgb(f,Game.Options.Theme.MenuFont));
         }
     }
 }

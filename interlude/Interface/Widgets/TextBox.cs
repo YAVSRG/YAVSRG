@@ -25,13 +25,13 @@ namespace YAVSRG.Interface.Widgets
             Animation.Add(color = new Animations.AnimationColorMixer(c));
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
             if (fill)
             {
-                (font ? SpriteBatch.Font1 : SpriteBatch.Font2).DrawDynamicTextToFill(text(), left, top, right, bottom, color, style);
+                (font ? SpriteBatch.Font1 : SpriteBatch.Font2).DrawDynamicTextToFill(text(), bounds, color, style);
             }
         }
 

@@ -9,30 +9,30 @@ namespace YAVSRG.Interface.Widgets.Editor
 {
     public class Timeline : Widget
     {
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, top, right, bottom, Color.FromArgb(127, 0, 0, 0));
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawRect(bounds, Color.FromArgb(127, 0, 0, 0));
             float nowPos;
             foreach (Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.Points)
             {
-                nowPos = (float)(left + b.Offset / Game.Audio.Duration * (right - left));
-                SpriteBatch.DrawRect(nowPos - 1, top, nowPos + 1, top + 25, (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);
+                nowPos = (float)(bounds.Left + b.Offset / Game.Audio.Duration * bounds.Width);
+                SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);
             }
-            nowPos = left + (right - left) * Game.Audio.NowPercentage();
-            SpriteBatch.DrawRect(nowPos - 2, top, nowPos + 2, bottom, Color.White);
+            nowPos = bounds.Left + bounds.Width * Game.Audio.NowPercentage();
+            SpriteBatch.DrawRect(new Rect(nowPos - 2, bounds.Top, nowPos + 2, bounds.Bottom), Color.White);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (ScreenUtils.MouseOver(left, top, right, bottom))
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            if (ScreenUtils.MouseOver(bounds))
             {
                 if (Input.MousePress(OpenTK.Input.MouseButton.Left))
                 {
-                    double percent = (Input.MouseX - left) / (right - left);
+                    double percent = (Input.MouseX - bounds.Left) / bounds.Width;
                     Game.Audio.Seek(Game.Audio.Duration * percent);
                 }
             }

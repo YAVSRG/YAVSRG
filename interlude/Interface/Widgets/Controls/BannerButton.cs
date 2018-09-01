@@ -16,11 +16,11 @@ namespace YAVSRG.Interface.Widgets
             textPosition = new AnchorPoint(0,0,text,AnchorType.CENTER);
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            ScreenUtils.DrawParallelogramWithBG(left, top, right, bottom, 0.5f, color, color);
-            SpriteBatch.Font1.DrawJustifiedText(text, 40f, right - (bottom-top), top + 15, Game.Options.Theme.MenuFont);
+            bounds = GetBounds(bounds);
+            ScreenUtils.DrawParallelogramWithBG(bounds, 0.5f, color, color);
+            SpriteBatch.Font1.DrawJustifiedText(text, 40f, bounds.Right - bounds.Height, bounds.Top + 15, Game.Options.Theme.MenuFont);
         }
     }
 }

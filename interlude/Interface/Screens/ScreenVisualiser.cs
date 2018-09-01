@@ -41,8 +41,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Screens.Logo.A.Target(-400, -400);
-            Game.Screens.Logo.B.Target(400, 400);
+            Game.Screens.Logo.Move(new Rect(-400, -400, 400, 400), GetBounds());
             Game.Screens.BackgroundDim.Target = 1;
             Game.Screens.Toolbar.Collapse();
             Game.Screens.Parallax.Target *= 4;
@@ -52,8 +51,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Screens.Logo.A.Target(-ScreenUtils.ScreenWidth - 400, -200);
-            Game.Screens.Logo.B.Target(-ScreenUtils.ScreenWidth, 200);
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200), GetBounds());
             Game.Screens.BackgroundDim.Target = 0.3f;
             Game.Screens.Toolbar.cursor = true;
             Input.LockMouse = false;
@@ -61,10 +59,10 @@ namespace YAVSRG.Interface.Screens
             Game.Screens.Parallax.Target *= 0.25f;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
             int alpha = (int)(hideUI * 255);
-            base.Draw(left, top, right, bottom);
+            base.Draw(bounds);
             float l = 1f + Game.Audio.Level - (0.05f) * Utils.GetBeat(2);
             float r1, r2;
             double a1, a2;
@@ -94,20 +92,19 @@ namespace YAVSRG.Interface.Screens
                 }
             }
 
-            SpriteBatch.DrawRect(left, bottom - 30, right, bottom, Game.Screens.DarkColor);
-            SpriteBatch.DrawRect(left + 5, bottom - 25, left + 5 + (right - 10 - left) * Game.Audio.NowPercentage(), bottom - 5,  Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, left + 500, top, right - 500, -330, Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
-            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Now()), left, bottom - 150, left + 200, bottom - 75, Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
-            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Duration), right-200, bottom - 150, right, bottom - 75, Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
+            SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Bottom - 30, bounds.Right, bounds.Bottom), Game.Screens.DarkColor);
+            SpriteBatch.DrawRect(new Rect(bounds.Left + 5, bounds.Bottom - 25, bounds.Left + 5 + (bounds.Right - 10 - bounds.Left) * Game.Audio.NowPercentage(), bounds.Bottom - 5),  Game.Screens.BaseColor);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left + 500, bounds.Top, bounds.Right - 500, -330), Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
+            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Now()), new Rect(bounds.Left, bounds.Bottom - 150, bounds.Left + 200, bounds.Bottom - 75), Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
+            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Duration), new Rect(bounds.Right-200, bounds.Bottom - 150, bounds.Right, bounds.Bottom - 75), Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             float f = Utils.GetBeat(1);
             float r = 400 + Utils.GetBeat(1) * 20;
-            Game.Screens.Logo.A.Target(-r, -r);
-            Game.Screens.Logo.B.Target(r, r);
+            Game.Screens.Logo.Move(new Rect(-r, -r, r, r), bounds);
 
             if (hideUI.Val < 0.99f)
             {

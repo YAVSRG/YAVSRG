@@ -22,18 +22,16 @@ namespace YAVSRG.Interface.Widgets
             sort = new ScrollContainer(20, 10, false, 0) { State = 0 };
             AddChild(sortB = new SimpleButton("Sort by...", () => {
                 sort.State = 1 - sort.State;
-                sort.B.MoveTarget(0, sort.B.TargetY < 0 ? 300 : -300);
             }, () => { return false; }, 20f).PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             sort.AddChild(SortButton("Difficulty", SortByDifficulty));
             sort.AddChild(SortButton("Artist", SortByArtist));
             sort.AddChild(SortButton("Creator", SortByCreator));
             sort.AddChild(SortButton("Title", SortByTitle));
-            AddChild(sort.PositionTopLeft(260, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20,-300,AnchorType.MAX,AnchorType.MAX));
+            AddChild(sort.PositionTopLeft(260, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20,-400,AnchorType.MAX,AnchorType.MAX));
 
             AddChild(groupB = new SimpleButton("Group by...", () => {
                 group.State = 1 - group.State;
-                group.B.MoveTarget(0, group.B.TargetY < 0 ? 400 : -400);
             }, () => { return false; }, 20f).PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
             group.AddChild(GroupButton("Pack", GroupByPack));
             group.AddChild(GroupButton("Difficulty", GroupByDifficulty));
@@ -59,12 +57,12 @@ namespace YAVSRG.Interface.Widgets
             return new SimpleButton(l, () => { GroupMode = m; Refresh(); }, () => { return GroupMode == m; }, 15f).PositionBottomRight(200, 35, AnchorType.MIN, AnchorType.MIN);
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            Game.Screens.DrawChartBackground(left, top, right, bottom, Utils.ColorInterp(Color.FromArgb(255,0,0,0), Game.Screens.BaseColor, 0.8f),1.5f);
-            SpriteBatch.DrawFrame(left-30, top, right+30, bottom, 30f, Game.Screens.HighlightColor);
-            DrawWidgets(left, top, right, bottom);
+            bounds = GetBounds(bounds);
+            Game.Screens.DrawChartBackground(bounds, Utils.ColorInterp(Color.FromArgb(255,0,0,0), Game.Screens.BaseColor, 0.8f),1.5f);
+            ScreenUtils.DrawFrame(bounds.ExpandX(30), 30f, Game.Screens.HighlightColor);
+            DrawWidgets(bounds);
         }
     }
 }

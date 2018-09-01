@@ -39,18 +39,18 @@ namespace YAVSRG.Options.Panels
                 this.max = max;
             }
 
-            public override void Draw(float left, float top, float right, float bottom)
+            public override void Draw(Rect bounds)
             {
-                base.Draw(left, top, right, bottom);
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                Game.Options.Theme.DrawNote(left, top, right, bottom, 1, ((LayoutPanel)parent).keyMode, get(), 0);
+                base.Draw(bounds);
+                bounds = GetBounds(bounds);
+                Game.Options.Theme.DrawNote(bounds, 1, ((LayoutPanel)parent).keyMode, get(), 0);
             }
 
-            public override void Update(float left, float top, float right, float bottom)
+            public override void Update(Rect bounds)
             {
-                base.Update(left, top, right, bottom);
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                if (ScreenUtils.MouseOver(left, top, right, bottom))
+                base.Update(bounds);
+                bounds = GetBounds(bounds);
+                if (ScreenUtils.MouseOver(bounds))
                 {
                     if (Input.MouseClick(MouseButton.Left))
                     {

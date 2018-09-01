@@ -25,26 +25,26 @@ namespace YAVSRG.Interface
             }
         }
 
-        public static bool MouseOver(float left, float top, float right, float bottom)
+        public static bool MouseOver(Rect bounds)
         {
             int mx = Input.MouseX;
             int my = Input.MouseY;
-            return (mx > left && mx < right && my > top && my < bottom);
+            return (mx > bounds.Left && mx < bounds.Right && my > bounds.Top && my < bounds.Bottom);
         }
 
-        public static bool CheckButtonClick(float left, float top, float right, float bottom)
+        public static bool CheckButtonClick(Rect bounds)
         {
-            return MouseOver(left, top, right, bottom) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
+            return MouseOver(bounds) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
-        public static void DrawGraph(float left, float top, float right, float bottom, Gameplay.ScoreSystem scoring, Gameplay.ScoreTracker.HitData[] data)
+        public static void DrawGraph(Rect bounds, Gameplay.ScoreSystem scoring, Gameplay.ScoreTracker.HitData[] data)
         {
             int snapcount = data.Length;
-            SpriteBatch.DrawRect(left, top, right, bottom, Color.FromArgb(150, 0, 0, 0));
-            float w = (right - left - 10) / snapcount;
-            float middle = (top + bottom) * 0.5f;
-            float scale = (bottom - top - 20) * 0.5f / scoring.MissWindow;
-            SpriteBatch.DrawRect(left, middle - 3, right, middle + 3, Color.Green);
+            SpriteBatch.DrawRect(bounds, Color.FromArgb(150, 0, 0, 0));
+            float w = (bounds.Width - 10) / snapcount;
+            float middle = bounds.CenterY;
+            float scale = (bounds.Height - 20) * 0.5f / scoring.MissWindow;
+            SpriteBatch.DrawRect(new Rect(bounds.Left, middle - 3, bounds.Right, middle + 3), Color.Green);
             int j;
             float o;
             for (int i = 0; i < snapcount; i++)
@@ -57,15 +57,29 @@ namespace YAVSRG.Interface
                         j = scoring.JudgeHit(o);
                         if (j > 2)
                         {
-                            SpriteBatch.DrawRect(left + i * w + 4, top, left + i * w + 6, bottom, Color.FromArgb(80, Game.Options.Theme.JudgeColors[5]));
+                            SpriteBatch.DrawRect(new Rect(bounds.Left + i * w + 4, bounds.Top, bounds.Left + i * w + 6, bounds.Bottom), Color.FromArgb(80, Game.Options.Theme.JudgeColors[5]));
                         }
-                        SpriteBatch.DrawRect(left + i * w + 3, middle - o * scale - 2, left + i * w + 8, middle - o * scale + 2, Game.Options.Theme.JudgeColors[j]);
+                        SpriteBatch.DrawRect(new Rect(bounds.Left + i * w + 3, middle - o * scale - 2, bounds.Left + i * w + 8, middle - o * scale + 2), Game.Options.Theme.JudgeColors[j]);
                     }
                 }
             }
-            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
+            DrawFrame(bounds, 30f, Color.White);
         }
 
+        public static void DrawFrame(Rect bounds, float scale, Color color)
+        {
+            //corners
+            SpriteBatch.Draw("frame", new Rect(bounds.Left, bounds.Top, bounds.Left + scale, bounds.Top + scale), color, 0, 0);
+            SpriteBatch.Draw("frame", new Rect(bounds.Right - scale, bounds.Top, bounds.Right, bounds.Top + scale), color, 2, 0);
+            SpriteBatch.Draw("frame", new Rect(bounds.Left, bounds.Bottom - scale, bounds.Left + scale, bounds.Bottom), color, 0, 2);
+            SpriteBatch.Draw("frame", new Rect(bounds.Right - scale, bounds.Bottom - scale, bounds.Right, bounds.Bottom), color, 2, 2);
+            //edges
+            SpriteBatch.Draw("frame", new Rect(bounds.Left + scale, bounds.Top, bounds.Right - scale, bounds.Top + scale), color, 1, 0);
+            SpriteBatch.Draw("frame", new Rect(bounds.Left, bounds.Top + scale, bounds.Left + scale, bounds.Bottom - scale), color, 0, 1);
+            SpriteBatch.Draw("frame", new Rect(bounds.Right - scale, bounds.Top + scale, bounds.Right, bounds.Bottom - scale), color, 2, 1);
+            SpriteBatch.Draw("frame", new Rect(bounds.Left + scale, bounds.Bottom - scale, bounds.Right - scale, bounds.Bottom), color, 1, 2);
+        }
+        /*
         public static void DrawArrowConfetti(float left, float top, float right, float bottom, float size, Color min, Color max, float value)
         {
             left -= size; right += size; top -= size; bottom += size;
@@ -80,7 +94,7 @@ namespace YAVSRG.Interface
                 t = (811 + i * 433 + value * s) % (height-s);
                 SpriteBatch.Draw("arrow", left + l, top + t, left + l + s, top + t + s, Utils.ColorInterp(min, max, (float)Math.Abs(Math.Sin(value + i * 83))), 0, i % 8, 0);
             }
-        }
+        }*/
 
         public static void DrawArc(float x, float y, float r1, float r2, float start, float end, Color c)
         {
@@ -103,7 +117,7 @@ namespace YAVSRG.Interface
             {
                 tx = x + scale * 1.2f * (float)Math.Cos(time + i * Math.PI / 3);
                 ty = y + scale * 1.2f * (float)Math.Sin(time + i * Math.PI / 3);
-                SpriteBatch.DrawRect(tx - 10, ty - 10, tx + 10, ty + 10, Color.Aqua);
+                SpriteBatch.DrawRect(new Rect(tx - 10, ty - 10, tx + 10, ty + 10), Color.Aqua);
             }
 
             for (int i = 0; i < 6; i++)
@@ -123,19 +137,20 @@ namespace YAVSRG.Interface
             DrawArc(x, y, scale * 0.95f, scale, -time + 4.71f, 4.71f - time + 2 * (float)Math.Cos(time), Color.Aquamarine);
         }
 
-        public static void DrawParallelogramWithBG(float left, float top, float right, float bottom, float amount, Color fill, Color frame)
+        public static void DrawParallelogramWithBG(Rect bounds, float amount, Color fill, Color frame)
         {
-            float h = (bottom - top) * 0.5f;
+            //todo: bounds shrink function
+            float h = bounds.Height * 0.5f;
             float t = h * Math.Abs(amount);
-            SpriteBatch.ParallelogramTransform(amount, top + h);
+            SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
             SpriteBatch.StencilMode(1);
-            SpriteBatch.DrawRect(left-t, top, right+t, bottom, Color.White);
+            SpriteBatch.DrawRect(new Rect(bounds.Left-t, bounds.Top, bounds.Right+t, bounds.Bottom), Color.White);
             SpriteBatch.DisableTransform();
             SpriteBatch.StencilMode(2);
-            Game.Screens.DrawChartBackground(left - h, top, right + h, bottom, fill, 1.5f);
+            Game.Screens.DrawChartBackground(new Rect(bounds.Left - h, bounds.Top, bounds.Right + h, bounds.Bottom), fill, 1.5f);
             SpriteBatch.StencilMode(0);
-            SpriteBatch.ParallelogramTransform(amount, top + h);
-            SpriteBatch.DrawFrame(left-t, top, right+t, bottom, 30f, frame);
+            SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
+            DrawFrame(new Rect(bounds.Left-t, bounds.Top, bounds.Right+t, bounds.Bottom), 30f, frame);
             SpriteBatch.DisableTransform();
         }
     }

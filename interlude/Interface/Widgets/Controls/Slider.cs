@@ -25,21 +25,21 @@ namespace YAVSRG.Interface.Widgets
             resolution = res;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, top + 20, right, bottom - 20, System.Drawing.Color.Gray);
-            float p = left + (get() - min) / (max - min) * (right - left);
-            SpriteBatch.DrawRect(p - 5, top, p + 5, bottom, System.Drawing.Color.White);
-            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, (left + right) / 2, top - 30, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawRect(bounds.ExpandY(-20), System.Drawing.Color.Gray);
+            float p = bounds.Left + (get() - min) / (max - min) * bounds.Width;
+            SpriteBatch.DrawRect(new Rect(p - 5, bounds.Top, p + 5, bounds.Bottom), System.Drawing.Color.White);
+            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, bounds.CenterX, bounds.Top - 30, Game.Options.Theme.MenuFont);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (ScreenUtils.MouseOver(left-1, top, right+1, bottom))
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            if (ScreenUtils.MouseOver(bounds.ExpandX(2)))
             {
                 if (Input.KeyTap(OpenTK.Input.Key.Left) && get() - resolution >= min)
                 {
@@ -51,7 +51,7 @@ namespace YAVSRG.Interface.Widgets
                 }
                 if (Input.MousePress(OpenTK.Input.MouseButton.Left))
                 {
-                    set(min + (Input.MouseX - left) / (right - left) * (max - min));
+                    set(min + (Input.MouseX - bounds.Left) / bounds.Width * (max - min));
                     set((float)Math.Round(get() - get() % resolution, 2));
                 }
             }

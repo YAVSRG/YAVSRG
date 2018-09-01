@@ -22,20 +22,20 @@ namespace YAVSRG.Interface.Widgets
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.BaseColor));
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Draw(icon, left, top, right, bottom, color);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.Draw(icon, bounds, color);
             //SpriteBatch.Font1.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            color.Target(ScreenUtils.MouseOver(left, top, right, bottom) ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
-            if (ScreenUtils.CheckButtonClick(left, top, right, bottom))
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            color.Target(ScreenUtils.MouseOver(bounds) ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
+            if (ScreenUtils.CheckButtonClick(bounds))
             {
                 action();
             }

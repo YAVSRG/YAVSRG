@@ -130,7 +130,7 @@ namespace YAVSRG.Interface.Screens
             base.OnExit(next);
         }
 
-        public override void Update(float left, float top, float right, float bottom) //update loop
+        public override void Update(Rect bounds) //update loop
         {
             float now = (float)Game.Audio.Now(); //get where we are now
             if (Input.KeyTap(Key.Escape)) //escape quits
@@ -173,7 +173,7 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.AddScreen(new ScreenScore(scoreTracker));
                 Widgets.Clear();
             }
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
         }
 
         public void OnKeyDown(byte k, float now) //handle but also do the hit lighting stuff
@@ -241,9 +241,9 @@ namespace YAVSRG.Interface.Screens
             } //put else statement here for cb on unecessary keypress if i ever want to do that
         }
         
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
+            base.Draw(bounds);
             if (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000)
             {
                 SpriteBatch.Font1.DrawCentredText("Press "+Game.Options.General.Binds.Skip.ToString().ToUpper()+" to Skip", 50f, 0, 100, Game.Options.Theme.MenuFont);
@@ -251,11 +251,11 @@ namespace YAVSRG.Interface.Screens
             if (Animation.Running)
             {
                 int a = 255 - (int)bannerOut;
-                SpriteBatch.DrawRect(left, -55, left + ScreenWidth * bannerIn, -50, Color.FromArgb(a, Game.Screens.DarkColor));
-                SpriteBatch.DrawRect(left, 50, left + ScreenWidth * bannerIn, 55, Color.FromArgb(a, Game.Screens.DarkColor));
-                Game.Screens.DrawChartBackground(right - ScreenWidth * bannerIn, -50, right, 50, Color.FromArgb(a, Game.Screens.BaseColor));
-                SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, right - ScreenWidth * bannerIn, -50, right, 30, Color.FromArgb(a, Game.Options.Theme.MenuFont));
-                SpriteBatch.Font2.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName + " // " + Game.CurrentChart.Data.Creator, left, 10, left + ScreenWidth * bannerIn, 50, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                SpriteBatch.DrawRect(new Rect(bounds.Left, -55, bounds.Left + ScreenWidth * bannerIn, -50), Color.FromArgb(a, Game.Screens.DarkColor));
+                SpriteBatch.DrawRect(new Rect(bounds.Left, 50, bounds.Left + ScreenWidth * bannerIn, 55), Color.FromArgb(a, Game.Screens.DarkColor));
+                Game.Screens.DrawChartBackground(new Rect(bounds.Right - ScreenWidth * bannerIn, -50, bounds.Right, 50), Color.FromArgb(a, Game.Screens.BaseColor));
+                SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Right - ScreenWidth * bannerIn, -50, bounds.Right, 30), Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                SpriteBatch.Font2.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName + " // " + Game.CurrentChart.Data.Creator, new Rect(bounds.Left, 10, bounds.Left + ScreenWidth * bannerIn, 50), Color.FromArgb(a, Game.Options.Theme.MenuFont));
             }
         }
     }

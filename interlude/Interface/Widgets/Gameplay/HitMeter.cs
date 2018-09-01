@@ -33,13 +33,13 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 sprite = Content.GetTexture("judgements");
             }
 
-            public void Draw(float left, float top, float right, float bottom, float now)
+            public void Draw(Rect bounds, float now)
             {
                 if (now-h.time < 200)
                 {
-                    float x = Math.Abs(1 - (now - h.time) * 0.01f) * (right-left)*0.2f;
+                    float x = Math.Abs(1 - (now - h.time) * 0.01f) * bounds.Width*0.4f;
                     //SpriteBatch.Draw(sprite, left, top, right, top + (right-left)*34f/256f, System.Drawing.Color.White, h.delta < 0 ? 1 : 0, h.tier);
-                    SpriteBatch.Font1.DrawCentredTextToFill(Game.Options.Theme.Judges[h.tier], left + x, top, right - x, bottom, Game.Options.Theme.JudgeColors[h.tier]);
+                    SpriteBatch.Font1.DrawCentredTextToFill(Game.Options.Theme.Judges[h.tier], new Rect(bounds.Left + x, bounds.Top, bounds.Right - x, bounds.Bottom), Game.Options.Theme.JudgeColors[h.tier]);
                 }
             }
 
@@ -89,10 +89,11 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             hits.Add(h);
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            //todo: rewrite to fit to bounds
 
             float now = (float)Game.Audio.Now();
 
@@ -100,25 +101,25 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 for (int i = 0; i < disp.Length; i++)
                 {
-                    disp[i].Draw(left + i * Game.Options.Theme.ColumnWidth, top, left + (i + 1) * Game.Options.Theme.ColumnWidth, bottom, now);
+                    disp[i].Draw(new Rect(bounds.Left + i * Game.Options.Theme.ColumnWidth, bounds.Top, bounds.Left + (i + 1) * Game.Options.Theme.ColumnWidth, bounds.Bottom), now);
                 }
             }
             else
             {
-                disp[0].Draw(-Game.Options.Theme.ColumnWidth, top, Game.Options.Theme.ColumnWidth, bottom, now);
+                disp[0].Draw(new Rect(-Game.Options.Theme.ColumnWidth, bounds.Top, Game.Options.Theme.ColumnWidth, bounds.Bottom), now);
             }
 
             foreach (Hit h in hits)
             {
                 int alpha = (int)((2500 + h.time - now) * 0.1f); //you do not understand how many cancerous crashes this has caused
                 alpha = Math.Max(0, Math.Min(alpha, 255)); //so i did this
-                SpriteBatch.DrawRect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20, System.Drawing.Color.FromArgb(alpha,Game.Options.Theme.JudgeColors[h.tier]));
+                SpriteBatch.DrawRect(new Rect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20), System.Drawing.Color.FromArgb(alpha,Game.Options.Theme.JudgeColors[h.tier]));
             }
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             float now = (float)Game.Audio.Now();
             List<Hit> temp = new List<Hit>();
             foreach (Hit h in hits)

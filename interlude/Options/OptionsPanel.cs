@@ -17,11 +17,11 @@ namespace YAVSRG.Options
             this.title = title;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Font1.DrawCentredText(title, 30f, (right + left) * 0.5f, top + 10f, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.Font1.DrawCentredText(title, 30f, bounds.CenterX, bounds.Top + 10f, Game.Options.Theme.MenuFont);
         }
     }
 }

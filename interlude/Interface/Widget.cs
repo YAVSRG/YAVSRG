@@ -10,20 +10,20 @@ namespace YAVSRG.Interface
 {
     public class Widget
     {
-        public AnchorPoint A;
-        public AnchorPoint B;
+        public AnchorPoint TopLeft; //probably need better names. this is the top left corner
+        public AnchorPoint BottomRight; //this is the bottom left corner
         public int State = 1; //0 is hidden, 2 is focussed
-        public AnimationGroup Animation;
+        public AnimationGroup Animation; //animation manager for this widget
         protected Widget parent;
-        protected List<Widget> Widgets;
+        protected List<Widget> Widgets; //children of the widget
 
         public Widget()
         {
-            A = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN);
-            B = new AnchorPoint(0, 0, AnchorType.MAX, AnchorType.MAX);
+            TopLeft = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN); //these defaults were put in later for widgets to auto-fill the space they're in
+            BottomRight = new AnchorPoint(0, 0, AnchorType.MAX, AnchorType.MAX);
             Animation = new AnimationGroup(true);
-            Animation.Add(A);
-            Animation.Add(B);
+            Animation.Add(TopLeft);
+            Animation.Add(BottomRight);
             Widgets = new List<Widget>();
         }
 
@@ -41,75 +41,92 @@ namespace YAVSRG.Interface
             child.AddToContainer(this);
         }
 
-        public float Left(float l, float r)
+        public float Left(Rect bounds)
         {
-            return A.X(l, r);
+            return TopLeft.X(bounds.Left, bounds.Right);
         }
 
-        public float Top(float t, float b)
+        public float Top(Rect bounds)
         {
-            return A.Y(t, b);
+            return TopLeft.Y(bounds.Top, bounds.Bottom);
         }
 
-        public float Right(float l, float r)
+        public float Right(Rect bounds)
         {
-            return B.X(l, r);
+            return BottomRight.X(bounds.Left, bounds.Right);
         }
 
-        public float Bottom(float t, float b)
+        public float Bottom(Rect bounds)
         {
-            return B.Y(t, b);
+            return BottomRight.Y(bounds.Top, bounds.Bottom);
         }
 
-        public float Width(float l, float r)
+        /*
+        protected float Width(Rect bounds)
         {
-            return Right(l, r) - Left(l, r);
+            return Right(bounds) - Left(bounds);
         }
 
-        public float Height(float t, float b)
+        public float Height(Rect bounds)
         {
-            return Bottom(t, b) - Top(t, b);
+            return Bottom(bounds) - Top(bounds);
+        }*/
+
+        public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its container
+        {
+            return new Rect(Left(containerBounds), Top(containerBounds), Right(containerBounds), Bottom(containerBounds));
         }
 
-        public RectangleF Bounds(RectangleF bounds)
+        public Rect GetBounds() //returns the bounds of *this widget* when no bounds are given (useful for some unusual cases but otherwise you shouldn't be using this)
+            //only use this when you need access to the widget bounds and you're not inside a draw or update call (where you're given them)
         {
-            return new RectangleF();
-        }
-
-        protected void ConvertCoordinates(ref float l, ref float t, ref float r, ref float b)
-        {
-            float ol = l;//otherwise it will fuck up
-            float ot = t;
-            l = Left(l, r); t = Top(t, b); r = Right(ol, r); b = Bottom(ot, b);
+            if (parent != null)
+            {
+                return GetBounds(parent.GetBounds());
+            }
+            else
+            {
+                return GetBounds(new Rect(-ScreenUtils.ScreenWidth, -ScreenUtils.ScreenHeight, ScreenUtils.ScreenWidth, ScreenUtils.ScreenHeight));
+            }
         }
 
         public Widget Position(Options.WidgetPosition pos)
         {
-            PositionTopLeft(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor);
-            PositionBottomRight(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
-            return this;
+            return PositionTopLeft(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor).PositionBottomRight(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
         }
 
-        public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay)
+        public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay) //deprecate soon
         {
-            A.Reposition(x, y, ax, ay);
+            TopLeft.Reposition(x, y, ax, ay);
             return this; //allows for method chaining
         }
 
-
         public Widget PositionBottomRight(float x, float y, AnchorType ax, AnchorType ay)
         {
-            B.Reposition(x, y, ax, ay);
+            BottomRight.Reposition(x, y, ax, ay);
             return this;
         }
 
-        public virtual void Draw(float left, float top, float right, float bottom)
+        public Widget Move(Rect bounds, Rect parentBounds)
         {
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            DrawWidgets(left, top, right, bottom);
+            TopLeft.Target(bounds.Left, bounds.Top, parentBounds);
+            BottomRight.Target(bounds.Right, bounds.Bottom, parentBounds);
+            return this;
         }
 
-        protected void DrawWidgets(float left, float top, float right, float bottom)
+        public Widget Move(Rect bounds)
+        {
+            TopLeft.Target(bounds.Left, bounds.Top);
+            BottomRight.Target(bounds.Right, bounds.Bottom);
+            return this;
+        }
+
+        public virtual void Draw(Rect bounds)
+        {
+            DrawWidgets(GetBounds(bounds));
+        }
+
+        protected void DrawWidgets(Rect bounds)
         {
             lock (Widgets) //anti crash measure (probably temp)
             {
@@ -117,15 +134,15 @@ namespace YAVSRG.Interface
                 {
                     if (w.State > 0)
                     {
-                        w.Draw(left, top, right, bottom);
+                        w.Draw(bounds);
                     }
                 }
             }
         }
 
-        public virtual void Update(float left, float top, float right, float bottom)
+        public virtual void Update(Rect bounds)
         {
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            bounds = GetBounds(bounds);
             int c = Widgets.Count;
             Widget w;
             for (int i = c - 1; i >= 0; i--)
@@ -133,7 +150,7 @@ namespace YAVSRG.Interface
                 w = Widgets[i];
                 if (w.State > 0)
                 {
-                    w.Update(left, top, right, bottom);
+                    w.Update(bounds);
                 }
             }
             Animation.Update();

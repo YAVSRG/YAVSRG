@@ -13,17 +13,17 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         {
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, top, right, bottom, Game.Screens.DarkColor);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawRect(bounds, Game.Screens.DarkColor);
             float temp;
-            float x = left;
+            float x = bounds.Left;
             for(int i = 5; i >= 0; i--)
             {
-                temp = scoreTracker.Scoring.Judgements[i] * (right - left) / scoreTracker.maxcombo;
-                SpriteBatch.DrawRect(x, top, x + temp, bottom, Game.Options.Theme.JudgeColors[i]);
+                temp = scoreTracker.Scoring.Judgements[i] * bounds.Width / scoreTracker.maxcombo;
+                SpriteBatch.DrawRect(new Rect(x, bounds.Top, x + temp, bounds.Bottom), Game.Options.Theme.JudgeColors[i]);
                 x += temp;
             }
         }

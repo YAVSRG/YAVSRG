@@ -96,9 +96,9 @@ namespace YAVSRG.Interface.Screens
             return true;
         }
         
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             if (Input.KeyTap(Game.Options.General.Binds.Screenshot))
             {
                 Bitmap bm = Utils.CaptureWindow();
@@ -106,48 +106,49 @@ namespace YAVSRG.Interface.Screens
             }
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            //todo: rewrite with text boxes
 
             //top panel
-            DrawParallelogramWithBG(left, top, right - 600, top + 150, 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, left, top, right - 600, top + 100, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, left + 50, top + 80, right - 650, top + 150, Game.Options.Theme.MenuFont);
+            DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Top, bounds.Right - 600, bounds.Top + 150), 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left, bounds.Top, bounds.Right - 600, bounds.Top + 100), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 650, bounds.Top + 150), Game.Options.Theme.MenuFont);
 
             //judgements display
-            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), right - 500, top + 20, right - 50, top + 150, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), right - 500, top + 140, right - 275, top + 200, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), right - 275, top + 140, right - 50, top + 200, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), new Rect(bounds.Right - 500, bounds.Top + 20, bounds.Right - 50, bounds.Top + 150), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), new Rect(bounds.Right - 500, bounds.Top + 140, bounds.Right - 275, bounds.Top + 200), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), new Rect(bounds.Right - 275, bounds.Top + 140, bounds.Right - 50, bounds.Top + 200), Game.Options.Theme.MenuFont);
             float r = 0;
-            float h = (bottom - 250 - top) / 7;
+            float h = (bounds.Bottom - 250 - bounds.Top) / 7;
             for (int i = 0; i < 6; i++)
             {
-                r = top + 200 + i * h;
-                SpriteBatch.DrawRect(right - 500, r, right - 50, r + h, Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawRect(right - 500, r, right - 500 + 450f * scoreData.Scoring.Judgements[i] / scoreData.maxcombo, r + h, Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.Font2.DrawTextToFill(Game.Options.Theme.Judges[i], right - 500, r, right - 250, r + h, Color.White);
+                r = bounds.Top + 200 + i * h;
+                SpriteBatch.DrawRect(new Rect(bounds.Right - 500, r, bounds.Right - 50, r + h), Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawRect(new Rect(bounds.Right - 500, r, bounds.Right - 500 + 450f * scoreData.Scoring.Judgements[i] / scoreData.maxcombo, r + h), Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.Font2.DrawTextToFill(Game.Options.Theme.Judges[i], new Rect(bounds.Right - 500, r, bounds.Right - 250, r + h), Color.White);
                 SpriteBatch.Font2.DrawJustifiedTextToFill(
                     "(" + Utils.RoundNumber(scoreData.Scoring.Judgements[i] * 100f / scoreData.maxcombo) + "%) " + scoreData.Scoring.Judgements[i].ToString(),
-                    right - 250, r, right - 50, r + h, Color.White);
+                    new Rect(bounds.Right - 250, r, bounds.Right - 50, r + h), Color.White);
             }
-            SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", right - 500, r + h, right - 225, r + h + h, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.Scoring.ComboBreaks.ToString() + "cbs", right - 225, r + h, right - 50, r + h + h, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawFrame(right - 500, top + 200, right - 50, r + h + h, 30f, Color.White);
+            SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", new Rect(bounds.Right - 500, r + h, bounds.Right - 225, r + h + h), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.Scoring.ComboBreaks.ToString() + "cbs", new Rect(bounds.Right - 225, r + h, bounds.Right - 50, r + h + h), Game.Options.Theme.MenuFont);
+            ScreenUtils.DrawFrame(new Rect(bounds.Right - 500, bounds.Top + 200, bounds.Right - 50, r + h + h), 30f, Color.White);
 
             //middle stuff
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName, left + 550, top + 160, right - 550, top + 240, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredTextToFill(mods, left + 550, bottom - 450, right - 550, bottom - 350, Game.Options.Theme.MenuFont);
-            SpriteBatch.Draw(rank, -100, -200, 100, 0, Color.White);
-            SpriteBatch.Font1.DrawText(time, 40f, left + 550, bottom - 80, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, right - 550, bottom - 80, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName, new Rect(bounds.Left + 550, bounds.Top + 160, bounds.Right - 550, bounds.Top + 240), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredTextToFill(mods, new Rect(bounds.Left + 550, bounds.Bottom - 450, bounds.Right - 550, bounds.Bottom - 350), Game.Options.Theme.MenuFont);
+            SpriteBatch.Draw(rank, new Rect(-100, -200, 100, 0), Color.White);
+            SpriteBatch.Font1.DrawText(time, 40f, bounds.Left + 550, bounds.Bottom - 80, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, bounds.Right - 550, bounds.Bottom - 80, Game.Options.Theme.MenuFont);
 
             //graph
-            DrawGraph(left + 550, bottom - 350, right - 550, bottom - 180, scoreData.Scoring, scoreData.Hitdata);
+            DrawGraph(new Rect(bounds.Left + 550, bounds.Bottom - 350, bounds.Right - 550, bounds.Bottom - 180), scoreData.Scoring, scoreData.Hitdata);
 
-            SpriteBatch.Font1.DrawCentredText("Your performance", 30f, 0, bottom - 170, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawCentredText(perf, 100f, 0, bottom - 145, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredText("Your performance", 30f, 0, bounds.Bottom - 170, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredText(perf, 100f, 0, bounds.Bottom - 145, Game.Options.Theme.MenuFont);
         }
 
         private void HandleMultiplayerScoreboard(PacketScoreboard packet, int id)

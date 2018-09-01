@@ -19,18 +19,19 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             Animation.Add(ReceptorLight);
         }
 
-        public override void Draw(float left, float top, float right, float bottom) //draws hitlight, right now just the receptor light and not a flash when you hit a note
+        public override void Draw(Rect bounds) //draws hitlight, right now just the receptor light and not a flash when you hit a note
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            float w = (right - left);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            float w = bounds.Width;
             if (ReceptorLight.Val > 0.5f)
             {
-                SpriteBatch.Draw("receptorlighting", left + w * (1 - ReceptorLight.Val), top + 3 * w * (1 - ReceptorLight.Val), right - w * (1 - ReceptorLight.Val), bottom, Color.White);
+                SpriteBatch.Draw("receptorlighting", new Rect(bounds.Left + w * (1 - ReceptorLight.Val), bounds.Top + 3 * w * (1 - ReceptorLight.Val), bounds.Right - w * (1 - ReceptorLight.Val), bounds.Bottom), Color.White);
             }
             if (NoteLight.Val > 0f)
             {
-                SpriteBatch.Draw("notelighting", left, bottom + w, right, bottom, Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
+                //slice
+                SpriteBatch.Draw("notelighting", new Rect(bounds.Left, bounds.Bottom + w, bounds.Right, bounds.Bottom), Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
             }
         }
     }

@@ -16,11 +16,11 @@ namespace YAVSRG.Interface.Widgets
             this.sprite = sprite;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Draw(sprite, left, top, right, bottom, c);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.Draw(sprite, bounds, c);
         }
     }
 }

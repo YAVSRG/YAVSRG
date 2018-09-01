@@ -25,20 +25,21 @@ namespace YAVSRG.Interface.Widgets
             }
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            float w = right - 100 - left;
-            SpriteBatch.DrawRect(left, top, right, bottom, System.Drawing.Color.FromArgb(127, 0, 0, 0));
-            SpriteBatch.Font1.DrawTextToFill(item.attributes.name, left, top, left + w * 0.7f, bottom, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedTextToFill(size, left + w * 0.75f, top, left + w * 0.9f, bottom, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedTextToFill(difficulty, left + w * 0.9f, top, left + w, bottom, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            float w = bounds.Width - 100;
+            SpriteBatch.DrawRect(bounds, System.Drawing.Color.FromArgb(127, 0, 0, 0));
+            //todo: move to textbox widgets
+            SpriteBatch.Font1.DrawTextToFill(item.attributes.name, new Rect(bounds.Left, bounds.Top, bounds.Left + w * 0.7f, bounds.Bottom), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedTextToFill(size, new Rect(bounds.Left + w * 0.75f, bounds.Top, bounds.Left + w * 0.9f, bounds.Bottom), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawJustifiedTextToFill(difficulty, new Rect(bounds.Left + w * 0.9f, bounds.Top, bounds.Left + w, bounds.Bottom), Game.Options.Theme.MenuFont);
             if (item.attributes.download == "")
             {
-                SpriteBatch.Font1.DrawCentredTextToFill("No DL Link", right - 100, top, right, bottom, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawCentredTextToFill("No DL Link", new Rect(bounds.Right - 100, bounds.Top, bounds.Right, bounds.Bottom), Game.Options.Theme.MenuFont);
             }
-            SpriteBatch.DrawFrame(left, top, right, bottom, 20f, System.Drawing.Color.White);
+            ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
         }
 
         private void Download()

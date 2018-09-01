@@ -25,17 +25,17 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             };
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
             float s = Math.Min(50, scoreTracker.Scoring.Combo * 0.05f) + size;
-            SpriteBatch.Font1.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), s, (left + right) / 2, top - s / 2, scoreTracker.WidgetColor);
+            SpriteBatch.Font1.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), s, bounds.CenterX, bounds.Top - s / 2, scoreTracker.WidgetColor);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             size.Update();
         }
     }

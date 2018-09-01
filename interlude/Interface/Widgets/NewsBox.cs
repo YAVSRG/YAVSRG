@@ -20,8 +20,7 @@ namespace YAVSRG.Interface.Widgets
             Animation.Add(loading = new Animations.AnimationCounter(1000000,true));
             PositionTopLeft(0, 0, AnchorType.MAX, AnchorType.MIN);
             PositionBottomRight(-400, 0, AnchorType.MAX, AnchorType.MAX);
-            A.Target(400, 0);
-            B.Target(0, 0);
+            Move(new Rect(400, 0, 0, 0));
         }
 
         public void ReceieveData(GithubReleaseData data)
@@ -29,47 +28,47 @@ namespace YAVSRG.Interface.Widgets
             this.data = data;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            left -= 200 * slide;
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            bounds.Left -= 200 * slide;
             int h = 60;
-            float t = top + h + (bottom - top - h * 2) * slide;
-            SpriteBatch.DrawRect(left, top + h, right, t, System.Drawing.Color.FromArgb(100, Game.Screens.BaseColor));
-            ScreenUtils.DrawParallelogramWithBG(left, top, right, top + h, -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill("Updates & News", left, top, right, top + h, Game.Options.Theme.MenuFont);
-            ScreenUtils.DrawParallelogramWithBG(left + h * 0.5f * (1 - slide), t, right, t + h, slide - 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill("Read the Wiki", left + h * 0.5f, t, right, t + h, Game.Options.Theme.MenuFont);
+            float t = bounds.Top + h + (bounds.Height - h * 2) * slide;
+            SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + h, bounds.Right, t), System.Drawing.Color.FromArgb(100, Game.Screens.BaseColor));
+            ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
+            SpriteBatch.Font1.DrawCentredTextToFill("Updates & News", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h), Game.Options.Theme.MenuFont);
+            ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left + h * 0.5f * (1 - slide), t, bounds.Right, t + h), slide - 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
+            SpriteBatch.Font1.DrawCentredTextToFill("Read the Wiki", new Rect(bounds.Left + h * 0.5f, t, bounds.Right, t + h), Game.Options.Theme.MenuFont);
 
             SpriteBatch.StencilMode(1);
-            SpriteBatch.DrawRect(left, top + h, right, t, System.Drawing.Color.Transparent);
+            SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + h, bounds.Right, t), System.Drawing.Color.Transparent);
             SpriteBatch.StencilMode(2);
             if (data != null)
             {
-                SpriteBatch.Font1.DrawCentredTextToFill(data.name, left, top + h, right, top + 2 * h, Game.Options.Theme.MenuFont);
-                SpriteBatch.Font2.DrawParagraph(data.body, 20f, left + 10, top + h * 2, left + 600, t, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawCentredTextToFill(data.name, new Rect(bounds.Left, bounds.Top + h, bounds.Right, bounds.Top + 2 * h), Game.Options.Theme.MenuFont);
+                SpriteBatch.Font2.DrawParagraph(data.body, 20f, new Rect(bounds.Left + 10, bounds.Top + h * 2, bounds.Left + 600, t), Game.Options.Theme.MenuFont);
             }
             else
             {
-                SpriteBatch.Font1.DrawCentredTextToFill("Loading...", left, top + h, right, top + 2 * h, Game.Options.Theme.MenuFont);
-                ScreenUtils.DrawLoadingAnimation(100f * slide, (left + right) / 2, (top + t) / 2, loading.value * 0.01f);
+                SpriteBatch.Font1.DrawCentredTextToFill("Loading...", new Rect(bounds.Left, bounds.Top + h, bounds.Right, bounds.Top + 2 * h), Game.Options.Theme.MenuFont);
+                ScreenUtils.DrawLoadingAnimation(100f * slide, bounds.CenterX, (bounds.Top + t) / 2, loading.value * 0.01f);
             }
             SpriteBatch.StencilMode(0);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            left -= 200 * slide;
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            bounds.Left -= 200 * slide;
             int h = 60;
-            float t = top + h + (bottom - top - h * 2) * slide;
-            if (ScreenUtils.CheckButtonClick(left, top, right, top + h))
+            float t = bounds.Top + h + (bounds.Height - h * 2) * slide;
+            if (ScreenUtils.CheckButtonClick(new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h)))
             {
                 slide.Target = 1 - slide.Target;
             }
-            else if (ScreenUtils.CheckButtonClick(left + h * 0.5f * (1 - slide), t, right, t + h))
+            else if (ScreenUtils.CheckButtonClick(new Rect(bounds.Left + h * 0.5f * (1 - slide), t, bounds.Right, t + h)))
             {
                 System.Diagnostics.Process.Start("https://github.com/percyqaz/YAVSRG/wiki");
             }

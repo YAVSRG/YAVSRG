@@ -22,19 +22,17 @@ namespace YAVSRG.Interface.Widgets
             {
                 ScoreCard t = new ScoreCard(s);
                 AddChild(t);
-                t.A.MoveTarget(0, -100);
-                t.B.MoveTarget(0, -100);
             }
             Widgets.Sort(ScoreCard.Compare);
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
             if (Widgets.Count == 0)
             {
-                SpriteBatch.Font1.DrawTextToFill("No local scores", left, top, right, bottom, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawTextToFill("No local scores", bounds, Game.Options.Theme.MenuFont);
             }
         }
     }

@@ -53,8 +53,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            A.Target(0, 0);
-            B.Target(0, 0);
+            Move(new Rect(0, 0, 0, 0));
             Game.Gameplay.OnUpdateChart += OnUpdateChart;
             Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play((long)Game.CurrentChart.Data.PreviewTime); };
             diffDisplay.ChangeChart(true);
@@ -68,13 +67,12 @@ namespace YAVSRG.Interface.Screens
             Input.ChangeIM(null);
             Game.Gameplay.OnUpdateChart -= OnUpdateChart;
             ChartLoader.OnRefreshGroups -= OnUpdateGroups;
-            A.Target(-ScreenWidth, 0);
-            B.Target(-ScreenWidth, 0);
+            Move(new Rect(-ScreenWidth, 0, -ScreenWidth, 0));
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
 
             double ratestep = Input.KeyPress(OpenTK.Input.Key.ControlLeft) ? 0.2d : Input.KeyPress(OpenTK.Input.Key.ShiftLeft) ? 0.01d : 0.05d;
             if (Input.KeyTap(Game.Options.General.Binds.UpRate))

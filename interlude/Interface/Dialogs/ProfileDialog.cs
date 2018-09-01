@@ -38,9 +38,9 @@ namespace YAVSRG.Interface.Dialogs
             }));
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
         }
     }
 }

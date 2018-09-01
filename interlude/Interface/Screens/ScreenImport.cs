@@ -35,7 +35,7 @@ namespace YAVSRG.Interface.Screens
             },
             () => { return false; }, 40f)
             .PositionTopLeft(0, 100, AnchorType.CENTER, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
-            Net.Web.WebUtils.DownloadJsonObject<Net.Web.EtternaPackData>("https://api.etternaonline.com/v2/packs/", (d) => { B.Target(620, 0); AddChild(new Widgets.DownloadManager(d)); });
+            Net.Web.WebUtils.DownloadJsonObject<Net.Web.EtternaPackData>("https://api.etternaonline.com/v2/packs/", (d) => { BottomRight.Target(620, 0); AddChild(new Widgets.DownloadManager(d)); });
         }
 
         public override void OnEnter(Screen prev)
@@ -50,13 +50,13 @@ namespace YAVSRG.Interface.Screens
             Game.Instance.FileDrop -= HandleFileDrop;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Font1.DrawCentredTextToFill("Drag and drop a file or folder to import it.", left, top + 100, right, top + 200, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.Font1.DrawCentredTextToFill("Drag and drop a file or folder to import it.", new Rect(bounds.Left, bounds.Top + 100, bounds.Right, bounds.Top + 200), Game.Options.Theme.MenuFont);
             //if (Charts.ChartLoader.LastStatus != Charts.ChartLoader.ChartLoadingStatus.InProgress)
-            SpriteBatch.Font1.DrawCentredTextToFill(Charts.ChartLoader.LastOutput, left, -300, right, 300, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(Charts.ChartLoader.LastOutput, new Rect(bounds.Left, -300, bounds.Right, 300), Game.Options.Theme.MenuFont);
         }
 
         protected void HandleFileDrop(object sender, FileDropEventArgs e)

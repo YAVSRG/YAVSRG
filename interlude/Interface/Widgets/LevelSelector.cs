@@ -43,13 +43,12 @@ namespace YAVSRG.Interface.Widgets
             public void UpdatePosition(float y)
             {
                 width = 600;
-                A.Target(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.Toolbar.Height+120) / 48f, 2)*1.5f, y);
-                B.Target(-50, y + height);
+                Move(new Rect(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.Toolbar.Height+120) / 48f, 2)*1.5f, y, -50, y + height));
             }
 
             public float BottomEdge()
             {
-                return B.TargetY;
+                return BottomRight.AbsoluteTargetY;
             }
 
             public void AddItem(Group i)
@@ -59,7 +58,7 @@ namespace YAVSRG.Interface.Widgets
 
             public void PopOutChildren()
             {
-                float y = B.TargetY;
+                float y = BottomRight.AbsoluteTargetY;
                 foreach (Group g in Children)
                 {
                     g.PopOut(y);
@@ -92,33 +91,33 @@ namespace YAVSRG.Interface.Widgets
                 scroll -= (int)(BottomEdge() - ScreenUtils.ScreenHeight + Game.Screens.Toolbar.Height + height / 2); //move scroll appropriately
             }
 
-            public override void Draw(float left, float top, float right, float bottom)
+            public override void Draw(Rect bounds)
             {
-                base.Draw(left, top, right, bottom);
+                base.Draw(bounds);
                 if (Expand)
                 {
                     foreach (Group g in Children)
                     {
-                        g.Draw(left, top, right, bottom);
+                        g.Draw(bounds);
                     }
                 }
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                if (top > ScreenUtils.ScreenHeight || bottom < -ScreenUtils.ScreenHeight) { return; }
-                SpriteBatch.DrawTilingTexture("levelselectbase", left, top, right, bottom, 400, 0, 0, fill);
-                Game.Screens.DrawChartBackground(left, top, right, bottom, Color.FromArgb(80,fill), 1.5f);
-                SpriteBatch.DrawFrame(left, top, right, bottom, 30, border);
+                bounds = GetBounds(bounds);
+                if (bounds.Top > ScreenUtils.ScreenHeight || bounds.Bottom < -ScreenUtils.ScreenHeight) { return; }
+                SpriteBatch.DrawTilingTexture("levelselectbase", bounds, 400, 0, 0, fill);
+                Game.Screens.DrawChartBackground(bounds, Color.FromArgb(80,fill), 1.5f);
+                ScreenUtils.DrawFrame(bounds, 30f, border);
                 if (subtitle == "")
                 {
-                    SpriteBatch.Font1.DrawTextToFill(title, left + 20, top + 22.5f, left + width, bottom - 20, border);
+                    SpriteBatch.Font1.DrawTextToFill(title, new Rect(bounds.Left + 20, bounds.Top + 22.5f, bounds.Left + width, bounds.Bottom - 20), border);
                 }
                 else
                 {
-                    SpriteBatch.Font1.DrawTextToFill(title, left + 20, top + 8f, left + width, bottom - 35, border);
-                    SpriteBatch.Font2.DrawTextToFill(subtitle, left + 20, bottom - 40, left + width, bottom - 5, border);
+                    SpriteBatch.Font1.DrawTextToFill(title, new Rect(bounds.Left + 20, bounds.Top + 8f, bounds.Left + width, bounds.Bottom - 35), border);
+                    SpriteBatch.Font2.DrawTextToFill(subtitle, new Rect(bounds.Left + 20, bounds.Bottom - 40, bounds.Left + width, bounds.Bottom - 5), border);
                 }
             }
 
-            public override void Update(float left, float top, float right, float bottom)
+            public override void Update(Rect bounds)
             {
                 float x = BottomEdge();
                 if (Expand)
@@ -126,14 +125,15 @@ namespace YAVSRG.Interface.Widgets
                     foreach (Group g in Children)
                     {
                         g.UpdatePosition(x);
-                        g.Update(left, top, right, bottom);
+                        g.Update(bounds);
                         x += g.GetHeight();
                     }
                 }
-                ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-                if (ScreenUtils.MouseOver(left, top, right, bottom))
+                Rect parentBounds = bounds;
+                bounds = GetBounds(bounds);
+                if (ScreenUtils.MouseOver(bounds))
                 {
-                    A.MoveTarget(150, 0);
+                    TopLeft.Target(TopLeft.AbsoluteTargetX + 150, TopLeft.AbsoluteTargetY);
                     fill.Target(Utils.ColorInterp(baseColor, Color.White, 0.2f));
                     if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                     {
@@ -144,7 +144,7 @@ namespace YAVSRG.Interface.Widgets
                 {
                     fill.Target(Highlight() ? Utils.ColorInterp(baseColor, Color.White, 0.5f) : baseColor);
                 }
-                base.Update(left, top, right, bottom);
+                base.Update(parentBounds);
             }
         }
 
@@ -247,28 +247,28 @@ namespace YAVSRG.Interface.Widgets
             groups.Add(g);
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
             foreach (Group g in groups)
             {
-                g.Draw(left, top, right, bottom);
+                g.Draw(bounds);
             }
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
             int y = scroll;
             foreach (Group g in groups)
             {
                 g.UpdatePosition(y);
-                g.Update(left, top, right, bottom);
+                g.Update(bounds);
                 y += g.GetHeight();
             }
-            if (y < bottom-top) scroll += 10; //prevents users from scrolling off the list
+            if (y < bounds.Height) scroll += 10; //prevents users from scrolling off the list
             if (scroll > 0) scroll -= 10;
             if (Input.KeyPress(OpenTK.Input.Key.Up))
             {

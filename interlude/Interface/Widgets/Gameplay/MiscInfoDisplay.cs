@@ -16,11 +16,11 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             this.data = data;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.Font1.DrawCentredTextToFill(data(), left, top, right, bottom, scoreTracker.WidgetColor);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.Font1.DrawCentredTextToFill(data(), bounds, scoreTracker.WidgetColor);
         }
     }
 }

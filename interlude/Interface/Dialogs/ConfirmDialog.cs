@@ -22,16 +22,16 @@ namespace YAVSRG.Interface.Dialogs
             Animation.Add(slide = new AnimationSlider(0) { Target = 1f });
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
             int a = (int)(slide * 255);
             float w = ScreenUtils.ScreenWidth * slide * 2;
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, -55, left + w, -50, Color.FromArgb(a, Game.Screens.DarkColor));
-            SpriteBatch.DrawRect(left, 50, left + w, 55, Color.FromArgb(a, Game.Screens.DarkColor));
-            Game.Screens.DrawChartBackground(right - w, -50, right, 50, Color.FromArgb(a, Game.Screens.BaseColor));
-            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, -50, right, 50, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawRect(new Rect(bounds.Left, -55, bounds.Left + w, -50), Color.FromArgb(a, Game.Screens.DarkColor));
+            SpriteBatch.DrawRect(new Rect(bounds.Left, 50, bounds.Left + w, 55), Color.FromArgb(a, Game.Screens.DarkColor));
+            Game.Screens.DrawChartBackground(new Rect(bounds.Right - w, -50, bounds.Right, 50), Color.FromArgb(a, Game.Screens.BaseColor));
+            SpriteBatch.Font1.DrawCentredTextToFill(prompt, new Rect(bounds.Left, -50, bounds.Right, 50), Game.Options.Theme.MenuFont);
         }
     }
 }

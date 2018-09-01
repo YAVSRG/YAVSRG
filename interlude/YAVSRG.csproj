@@ -180,6 +180,7 @@
     <Compile Include="Interface\Dialogs\ScoreInfoDialog.cs" />
     <Compile Include="Interface\Dialogs\TextDialog.cs" />
     <Compile Include="Interface\InputMethod.cs" />
+    <Compile Include="Interface\Rect.cs" />
     <Compile Include="Interface\ScreenManager.cs" />
     <Compile Include="Interface\Screens\ScreenEditor.cs" />
     <Compile Include="Interface\Screens\ScreenImport.cs" />
@@ -229,7 +230,6 @@
     <Compile Include="Interface\Widgets\Controls\TextPicker.cs" />
     <Compile Include="Interface\Widgets\TextBox.cs" />
     <Compile Include="Interface\Widgets\TooltipContainer.cs" />
-    <Compile Include="Interface\Widgets\WaterTest.cs" />
     <Compile Include="Net\P2P\ClientWrapper.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketAuth.cs" />
     <Compile Include="Net\P2P\Protocol\Packets\PacketDisconnect.cs" />

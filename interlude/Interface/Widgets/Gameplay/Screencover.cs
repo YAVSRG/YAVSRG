@@ -15,19 +15,19 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             flip = d;
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
             if (flip)
             {
-                SpriteBatch.Draw("screencover", left, top + Game.Options.Theme.ColumnWidth, right, bottom, System.Drawing.Color.White, 0, 1);
-                SpriteBatch.Draw("screencover", left, top, right, top + Game.Options.Theme.ColumnWidth, System.Drawing.Color.White, 0, 0);
+                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top + Game.Options.Theme.ColumnWidth, bounds.Right, bounds.Bottom), System.Drawing.Color.White, 0, 1);
+                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + Game.Options.Theme.ColumnWidth), System.Drawing.Color.White, 0, 0);
             }
             else
             {
-                SpriteBatch.Draw("screencover", left, top, right, bottom - Game.Options.Theme.ColumnWidth, System.Drawing.Color.White, 0, 1);
-                SpriteBatch.Draw("screencover", left, bottom - Game.Options.Theme.ColumnWidth, right, bottom, System.Drawing.Color.White, 0, 0, 2);
+                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom - Game.Options.Theme.ColumnWidth), System.Drawing.Color.White, 0, 1);
+                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Bottom - Game.Options.Theme.ColumnWidth, bounds.Right, bounds.Bottom), System.Drawing.Color.White, 0, 0, 2);
             }
         }
     }

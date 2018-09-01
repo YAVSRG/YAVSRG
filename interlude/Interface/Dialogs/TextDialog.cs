@@ -23,9 +23,9 @@ namespace YAVSRG.Interface.Dialogs
             Animation.Add(slide = new AnimationSlider(0) { Target = 1f });
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             if (Input.KeyTap(OpenTK.Input.Key.Enter, true))
             {
                 im.Dispose();
@@ -34,17 +34,17 @@ namespace YAVSRG.Interface.Dialogs
             }
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
             int a = (int)(slide * 255);
             float w = ScreenUtils.ScreenWidth * slide * 2;
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, -105, left + w, -100, Color.FromArgb(a, Game.Screens.HighlightColor));
-            SpriteBatch.DrawRect(left, 100, left + w, 105, Color.FromArgb(a, Game.Screens.HighlightColor));
-            Game.Screens.DrawChartBackground(right - w, -100, right, 100, Color.FromArgb(a, Game.Screens.DarkColor));
-            SpriteBatch.Font1.DrawCentredTextToFill(prompt, left, -100, right, -50, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredTextToFill(val, left, -50, right, 100, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawRect(new Rect(bounds.Left, -105, bounds.Left + w, -100), Color.FromArgb(a, Game.Screens.HighlightColor));
+            SpriteBatch.DrawRect(new Rect(bounds.Left, 100, bounds.Left + w, 105), Color.FromArgb(a, Game.Screens.HighlightColor));
+            Game.Screens.DrawChartBackground(new Rect(bounds.Right - w, -100, bounds.Right, 100), Color.FromArgb(a, Game.Screens.DarkColor));
+            SpriteBatch.Font1.DrawCentredTextToFill(prompt, new Rect(bounds.Left, -100, bounds.Right, -50), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredTextToFill(val, new Rect(bounds.Left, -50, bounds.Right, 100), Game.Options.Theme.MenuFont);
         }
     }
 }

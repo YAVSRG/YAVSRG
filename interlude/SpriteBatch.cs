@@ -32,20 +32,20 @@ namespace YAVSRG
 
         //static int VBO;
         
-        public static void Draw(Sprite sprite, float left, float top, float right, float bottom, Color color, int rotation = 0)
+        public static void Draw(Sprite sprite, Rect bounds, Color color, int rotation = 0)
         {
-            Draw(sprite:sprite, left: left, top: top, right: right, bottom: bottom, texcoords: new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color: color, rotation: rotation);
+            Draw(sprite:sprite, bounds: bounds, texcoords: new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color: color, rotation: rotation);
         }
 
-        public static void Draw(string texture = "", float left = 0, float top = 0, float right = 0, float bottom = 0, Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null, float depth = 0)
+        public static void Draw(string texture = "", Rect bounds = default(Rect), Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null, float depth = 0)
         {
             if (coords == null)
             {
                 coords = new[] {
-                    new Vector2(left,top),
-                    new Vector2(right,top),
-                    new Vector2(right,bottom),
-                    new Vector2(left,bottom)
+                    new Vector2(bounds.Left,bounds.Top),
+                    new Vector2(bounds.Right,bounds.Top),
+                    new Vector2(bounds.Right,bounds.Bottom),
+                    new Vector2(bounds.Left,bounds.Bottom)
                 };
             }
             if (colors == null)
@@ -101,35 +101,21 @@ namespace YAVSRG
             GL.Disable(EnableCap.Texture2D);
         }
 
-        public static void DrawTilingTexture(string texture, float left, float top, float right, float bottom, float scale, float x, float y, Color color)
+        public static void DrawTilingTexture(string texture, Rect bounds, float scale, float x, float y, Color color)
         {
-            RectangleF uv = new RectangleF(x + left / scale, y + top / scale, (right - left) / scale, (bottom - top) / scale);
-            Draw(texture:texture, left:left, top:top, right:right, bottom:bottom, texcoords:VecArray(uv), color:color);
+            RectangleF uv = new RectangleF(x + bounds.Left / scale, y + bounds.Top / scale, bounds.Width / scale, bounds.Height / scale);
+            Draw(texture:texture, bounds: bounds, texcoords:VecArray(uv), color:color);
         }
 
-        public static void DrawFrame(float left, float top, float right, float bottom, float scale, Color color)
-        { //this should really be in ScreenUtils but i'm too lazy to move it :(
-            //corners
-            Draw("frame", left, top, left + scale, top + scale, color, 0, 0);
-            Draw("frame", right - scale, top, right, top + scale, color, 2, 0);
-            Draw("frame", left, bottom - scale, left + scale, bottom, color, 0, 2);
-            Draw("frame", right - scale, bottom - scale, right, bottom, color, 2, 2);
-            //edges
-            Draw("frame", left + scale, top, right - scale, top + scale, color, 1, 0);
-            Draw("frame", left, top + scale, left + scale, bottom - scale, color, 0, 1);
-            Draw("frame", right - scale, top + scale, right, bottom - scale, color, 2, 1);
-            Draw("frame", left + scale, bottom - scale, right - scale, bottom, color, 1, 2);
-        }
-
-        public static void DrawRect(float left, float top, float right, float bottom, Color color)
+        public static void DrawRect(Rect bounds, Color color)
         {
             GL.Begin(PrimitiveType.Quads);
             GL.Color4(color);
 
-            GL.Vertex2(left, top);
-            GL.Vertex2(right, top);
-            GL.Vertex2(right, bottom);
-            GL.Vertex2(left, bottom);
+            GL.Vertex2(bounds.Left, bounds.Top);
+            GL.Vertex2(bounds.Right, bounds.Top);
+            GL.Vertex2(bounds.Right, bounds.Bottom);
+            GL.Vertex2(bounds.Left, bounds.Bottom);
 
             GL.End();
         }

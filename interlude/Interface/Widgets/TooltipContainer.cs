@@ -19,11 +19,11 @@ namespace YAVSRG.Interface.Widgets
             target = ib;
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            if (ScreenUtils.MouseOver(left, top, right, bottom))
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            if (ScreenUtils.MouseOver(bounds))
             {
                 if (!hover)
                 {

@@ -38,25 +38,22 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             colors = new int[Chart.Keys];
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
         }
 
         //This is the core rhythm game engine bit
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            float ol = left;
-            float or = right;
-            float ot = top;
-            float ob = bottom;
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            Rect parentBounds = bounds;
+            bounds = GetBounds(bounds);
             SpriteBatch.EnableTransform(Game.Options.Profile.Upscroll);
             SpriteBatch.Enable3D();
             for (byte c = 0; c < Keys; c++) //draw columns and empty receptors
             {
-                DrawColumn(left, c);
-                DrawReceptor(left, c);
+                DrawColumn(bounds.Left, c);
+                DrawReceptor(bounds.Left, c);
             }
 
             float now = (float)Game.Audio.Now(); //where are we in the song
@@ -81,7 +78,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                     now = Chart.Timing.Points[t].Offset; //we're now drawing relative to the most recent timing point
                 }
                 v = Chart.Timing.Points[t].ScrollSpeed * (Chart.Notes.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
-                DrawSnap(Chart.Notes.Points[i], left, y + v);//draw whole row of notes
+                DrawSnap(Chart.Notes.Points[i], bounds.Left, y + v);//draw whole row of notes
                 i++;//move on to next row of notes
             }
 
@@ -91,11 +88,12 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
                 foreach (byte k in holdsInHitpos.GetColumns())
                 {
-                    Game.Options.Theme.DrawHead(k * ColumnWidth + left, HitPos, (k + 1) * ColumnWidth + left, HitPos + ColumnWidth, k, Keys, -1, animation.cycles % 8);
+                    //todo: fix bug where these render wrong
+                    Game.Options.Theme.DrawHead(new Rect(k * ColumnWidth + bounds.Left, HitPos, (k + 1) * ColumnWidth + bounds.Left, HitPos + ColumnWidth), k, Keys, -1, animation.cycles % 8);
                 }
             }
 
-            base.Draw(ol, ot, or, ob);
+            base.Draw(parentBounds);
             SpriteBatch.Disable3D();
             SpriteBatch.DisableTransform();
         }
@@ -108,21 +106,21 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             bool drawhead = start < 0; //if y was negative
             start = Math.Abs(start);
-            Game.Options.Theme.DrawHold(i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f, i, Keys, 0, animation.cycles % 8); //Math.Abs corrects neg number
+            Game.Options.Theme.DrawHold(new Rect(i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f), i, Keys, 0, animation.cycles % 8); //Math.Abs corrects neg number
             if (drawhead)
             {
-                Game.Options.Theme.DrawHead(i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth, i, Keys, colors[i], animation.cycles % 8);
+                Game.Options.Theme.DrawHead(new Rect(i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth), i, Keys, colors[i], animation.cycles % 8);
             }
         }
 
         private void DrawColumn(float offset, int i)
         {
-            SpriteBatch.Draw("playfield", i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, ScreenHeight * 2, Color.White);
+            SpriteBatch.Draw("playfield", new Rect(i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, ScreenHeight * 2), Color.White);
         }
 
         private void DrawReceptor(float offset, int k)
         {
-            Game.Options.Theme.DrawReceptor(k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos, k, Keys, Input.KeyPress(Game.Options.Profile.Bindings[Keys][k]));
+            Game.Options.Theme.DrawReceptor(new Rect(k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos), k, Keys, Input.KeyPress(Game.Options.Profile.Bindings[Keys][k]));
         }
 
         private void DrawSnap(GameplaySnap s, float offset, float pos)
@@ -152,15 +150,16 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (byte k in s.taps.GetColumns())
             {
-                Game.Options.Theme.DrawNote(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % 8);
+                //todo: optimise by generating rect once
+                Game.Options.Theme.DrawNote(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.mines.GetColumns())
             {
-                Game.Options.Theme.DrawMine(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % 8);
+                Game.Options.Theme.DrawMine(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.ends.GetColumns())
             {
-                Game.Options.Theme.DrawTail(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth, k, Keys, s.colors[k], animation.cycles % 8);
+                Game.Options.Theme.DrawTail(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
         }
     }

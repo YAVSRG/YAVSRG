@@ -14,18 +14,18 @@ namespace YAVSRG.Interface.Widgets
         {
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawTilingTexture(icon, left, top, right, bottom, 200, scroll, 0, color);
-            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, System.Drawing.Color.White);
-            SpriteBatch.Font1.DrawCentredText(text, 30f, (left + right) / 2, (top + bottom) / 2 - 20, Game.Options.Theme.MenuFont);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawTilingTexture(icon, bounds, 200, scroll, 0, color);
+            ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
+            SpriteBatch.Font1.DrawCentredText(text, 30f, bounds.CenterX, bounds.CenterY - 20, Game.Options.Theme.MenuFont);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             scroll += 0.002f;
         }
     }

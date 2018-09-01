@@ -107,74 +107,79 @@ namespace YAVSRG.Interface
 
         public void Draw()
         {
+            //todo: create one rect and also rect shrink function
             if (Loading)
             {
-                Current?.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
-                Logo.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                Current?.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+                Logo.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
                 return;
             }
-            DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, BackgroundDim);
+            DrawChartBackground(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), BackgroundDim);
             if (animation.Running)
             {
                 if (fade1.Running)
                 {
-                    Previous?.Draw(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
-                    DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, Color.FromArgb((int)(255 * fade1), BackgroundDim));
+                    Previous?.Draw(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
+                    DrawChartBackground(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), Color.FromArgb((int)(255 * fade1), BackgroundDim));
                 }
                 else
                 {
-                    Current?.Draw(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
-                    DrawChartBackground(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight, Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
+                    Current?.Draw(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
+                    DrawChartBackground(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
                 }
             }
             else
             {
-                Current?.Draw(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
+                Current?.Draw(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
             }
             if (dialogs.Count > 0)
             {
-                dialogs[0].Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                dialogs[0].Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
             }
-            Logo.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
-            Toolbar.Draw(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Logo.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+            Toolbar.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
         }
 
-        public void DrawChartBackground(float left, float top, float right, float bottom, Color c, float parallaxMult = 1f)
+        public void DrawChartBackground(Rect bounds, Color c, float parallaxMult = 1f)
         {
-            float parallaxX = parallaxMult * Input.MouseX * Parallax / ScreenWidth;
+            //this draws the background of the chart on the screen
+            //a section of the texture is selected such all parts of the screen line up with the overall background image being fitted to the whole screen
+
+            float parallaxX = parallaxMult * Input.MouseX * Parallax / ScreenWidth; //this calculates parallax from mouse position
             float parallaxY = parallaxMult * Input.MouseY * Parallax / ScreenHeight;
 
             float bg = ((float)Background.Width / Background.Height);
             float window = (ScreenWidth + Parallax) / (ScreenHeight + Parallax);
-            float correction = window / bg;
+            float correction = window / bg; //this is aspect ratio correction (otherwise image would stretch wrong if not same ratio as window)
 
-            float l = (1 + (left + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
-            float r = (1 + (right + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
-            float t = (correction + (top + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction);
-            float b = (correction + (bottom + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction);
+            float l = (1 + (bounds.Left + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
+            float r = (1 + (bounds.Right + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
+            float t = (correction + (bounds.Top + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction);
+            float b = (correction + (bounds.Bottom + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction); //this determines the texcoords to use to achieve the effect
 
-            Vector2[] v = new[]
+            Vector2[] v = new[] //package texcoords into array to use them
             {
                 new Vector2(l,t),
                 new Vector2(r,t),
                 new Vector2(r,b),
                 new Vector2(l,b)
             };
-            SpriteBatch.Draw(sprite: Background, left: left, top: top, right: right, bottom: bottom + 1, texcoords: v, color: c);
+            bounds.Bottom += 1; //fix for rounding issues causing bgs to be 1 pixel too short on the screen
+            SpriteBatch.Draw(sprite: Background, bounds: bounds, texcoords: v, color: c);
         }
 
         public void Update()
         {
-            Toolbar.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Toolbar.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
             if (Loading)
             {
-                Current?.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
-                Logo.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                Current?.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+                Logo.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
                 return;
             }
             if (dialogs.Count > 0)
             {
-                dialogs[0].Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+                dialogs[0].Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
                 if (dialogs[0].Closed)
                 {
                     dialogs.RemoveAt(0);
@@ -182,7 +187,7 @@ namespace YAVSRG.Interface
             }
             else
             {
-                Current?.Update(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height);
+                Current?.Update(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
             }
             if (Previous != null)
             {
@@ -198,7 +203,7 @@ namespace YAVSRG.Interface
                     Previous = null;
                 }
             }
-            Logo.Update(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Logo.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
             animation.Update();
             animation2.Update();
             if (Input.KeyTap(Game.Options.General.Binds.CollapseToToolbar))

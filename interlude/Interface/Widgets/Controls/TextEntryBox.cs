@@ -28,23 +28,23 @@ namespace YAVSRG.Interface.Widgets
             Animation.Add(color = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
-            SpriteBatch.DrawRect(left, top, right, bottom, Game.Screens.DarkColor);
-            SpriteBatch.Font1.DrawText(get() != "" ? get() : text(), 20f, left + 20, top + 12.5f, color);
-            SpriteBatch.DrawFrame(left, top, right, bottom, 25f, color);
+            base.Draw(bounds);
+            bounds = GetBounds(bounds);
+            SpriteBatch.DrawRect(bounds, Game.Screens.DarkColor);
+            SpriteBatch.Font1.DrawText(get() != "" ? get() : text(), 20f, bounds.Left + 20, bounds.Top + 12.5f, color);
+            ScreenUtils.DrawFrame(bounds, 30f, color);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             color.Target(focus ? Color.White : Game.Screens.HighlightColor);
-            ConvertCoordinates(ref left, ref top, ref right, ref bottom);
+            bounds = GetBounds(bounds);
             if (focus)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Search, true) || !Input.HasIM() || ScreenUtils.CheckButtonClick(left, top, right, bottom))
+                if (Input.KeyTap(Game.Options.General.Binds.Search, true) || !Input.HasIM() || ScreenUtils.CheckButtonClick(bounds))
                 {
                     Input.ChangeIM(null);
                     focus = false;
@@ -59,7 +59,7 @@ namespace YAVSRG.Interface.Widgets
             }
             else
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Search) || ScreenUtils.CheckButtonClick(left, top, right, bottom))
+                if (Input.KeyTap(Game.Options.General.Binds.Search) || ScreenUtils.CheckButtonClick(bounds))
                 {
                     Input.ChangeIM(new InputMethod(set, get, update));
                     focus = true;

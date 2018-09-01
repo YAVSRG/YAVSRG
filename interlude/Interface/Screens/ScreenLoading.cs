@@ -38,8 +38,7 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Instance.WindowBorder = OpenTK.WindowBorder.Hidden;
             }
-            Game.Screens.Logo.A.Target(-300, -300);
-            Game.Screens.Logo.B.Target(300, 300);
+            Game.Screens.Logo.Move(new Rect(-300, -300, 300, 300));
             if (!Game.Screens.Loading)
             {
                 exiting = true;
@@ -55,13 +54,13 @@ namespace YAVSRG.Interface.Screens
             }
         }
 
-        public override void Draw(float left, float top, float right, float bottom)
+        public override void Draw(Rect bounds)
         {
-            base.Draw(left, top, right, bottom);
+            base.Draw(bounds);
             var screen = OpenTK.DisplayDevice.Default;
-            Rectangle bounds = new Rectangle(Game.Instance.Bounds.X, Game.Instance.Bounds.Y, Game.Instance.ClientRectangle.Width, Game.Instance.ClientRectangle.Height);
-            RectangleF UV = new RectangleF((float)bounds.X/screen.Width,(float)bounds.Y/screen.Height,(float)bounds.Width/screen.Width,(float)bounds.Height/screen.Height);
-            SpriteBatch.Draw(sprite:desktop, left:-ScreenWidth, top:-ScreenHeight, right:ScreenWidth, bottom:ScreenHeight, texcoords:SpriteBatch.VecArray(UV), color:Color.White);
+            Rectangle screenBounds = new Rectangle(Game.Instance.Bounds.X, Game.Instance.Bounds.Y, Game.Instance.ClientRectangle.Width, Game.Instance.ClientRectangle.Height);
+            RectangleF UV = new RectangleF((float)screenBounds.X / screen.Width, (float)screenBounds.Y / screen.Height, (float)screenBounds.Width / screen.Width, (float)screenBounds.Height / screen.Height);
+            SpriteBatch.Draw(sprite: desktop, bounds: new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), texcoords: SpriteBatch.VecArray(UV), color: Color.White);
             int a = (int)(255 * fade);
             if (exiting) { a = 255 - a; }
             else
@@ -69,15 +68,15 @@ namespace YAVSRG.Interface.Screens
                 float o = -15f * splash.Length;
                 for (int i = 0; i < splash.Length; i++)
                 {
-                    SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i*0.2f), Color.FromArgb(a, Color.White));
+                    SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i * 0.2f), Color.FromArgb(a, Color.White));
                 }
             }
             DrawLoadingAnimation(350f * (exiting ? 1 - fade : fade), 0, 0, counter.value * 0.01f);
         }
 
-        public override void Update(float left, float top, float right, float bottom)
+        public override void Update(Rect bounds)
         {
-            base.Update(left, top, right, bottom);
+            base.Update(bounds);
             int a = (int)(255 * fade);
             if (exiting)
             {
