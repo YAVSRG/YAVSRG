@@ -63,6 +63,7 @@ namespace YAVSRG.Options
             float x;
             BPMPoint p;
             int color;
+            int[] prev = null;
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 p = c.Timing.GetPointAt(c.Timing.GetPointAt(s.Offset, false).InheritsFrom, false);
@@ -78,15 +79,24 @@ namespace YAVSRG.Options
                         break;
                     }
                 }
-                for (int k = 0; k < c.Keys; k++)
+                for (byte k = 0; k < c.Keys; k++)
                 {
                     s.colors[k] = cs.GetColorIndex(color,c.Keys);
                 }
+                if (prev != null)
+                {
+                    foreach (byte k in s.middles.GetColumns())
+                    {
+                        s.colors[k] = prev[k];
+                    }
+                }
+                prev = s.colors;
             }
         }
 
         private static void Column(ChartWithModifiers c, ColorScheme cs)
         {
+            GameplaySnap prev = null;
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
@@ -94,12 +104,23 @@ namespace YAVSRG.Options
                 {
                     s.colors[i] = cs.GetColorIndex(i,c.Keys); //color notes based on column.
                 }
+                if (prev != null)
+                {
+                    foreach (byte k in s.middles.GetColumns())
+                    {
+                        s.colors[k] = prev.colors[k];
+                    }
+                }
+                prev = s;
             }
         }
 
         private static void Chord(ChartWithModifiers c, ColorScheme cs)
         {
+            //todo: address bug where index of 0 is used for 0 notes instead of 1
+            //probably just make it intentional (affects mines)
             int count;
+            GameplaySnap prev = null;
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
@@ -108,6 +129,14 @@ namespace YAVSRG.Options
                 {
                     s.colors[i] = cs.GetColorIndex(count,c.Keys); //color notes in row based on number of notes. chord coloring.
                 }
+                if (prev != null)
+                {
+                    foreach (byte k in s.middles.GetColumns())
+                    {
+                        s.colors[k] = prev.colors[k];
+                    }
+                }
+                prev = s;
             }
         }
 

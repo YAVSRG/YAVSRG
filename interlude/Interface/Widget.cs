@@ -61,23 +61,12 @@ namespace YAVSRG.Interface
             return BottomRight.Y(bounds.Top, bounds.Bottom);
         }
 
-        /*
-        protected float Width(Rect bounds)
-        {
-            return Right(bounds) - Left(bounds);
-        }
-
-        public float Height(Rect bounds)
-        {
-            return Bottom(bounds) - Top(bounds);
-        }*/
-
         public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its container
         {
             return new Rect(Left(containerBounds), Top(containerBounds), Right(containerBounds), Bottom(containerBounds));
         }
 
-        public Rect GetBounds() //returns the bounds of *this widget* when no bounds are given (useful for some unusual cases but otherwise you shouldn't be using this)
+        public virtual Rect GetBounds() //returns the bounds of *this widget* when no bounds are given (useful for some unusual cases but otherwise you shouldn't be using this)
             //only use this when you need access to the widget bounds and you're not inside a draw or update call (where you're given them)
         {
             if (parent != null)

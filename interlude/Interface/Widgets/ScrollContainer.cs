@@ -51,7 +51,8 @@ namespace YAVSRG.Interface.Widgets
             }
             base.AddChild(child);
             widgetBounds = child.GetBounds(bounds);
-            child.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
+            child.TopLeft.Position(x, y, bounds);
+            child.BottomRight.Position(x + widgetBounds.Width, y + widgetBounds.Height, bounds);
         }
 
         public override void Update(Rect bounds)

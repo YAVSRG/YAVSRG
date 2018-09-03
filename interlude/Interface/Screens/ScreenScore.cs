@@ -79,7 +79,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); };
+            Game.Audio.OnPlaybackFinish = null;
             PacketScoreboard.OnReceive += HandleMultiplayerScoreboard;
         }
 

@@ -128,7 +128,7 @@ namespace YAVSRG.Options
             return Content.GetTexture(NoteTexture(keycount)).UV_Y;
         }
 
-        public void LoadTextures(int keycount)
+        public void LoadTextures(int keycount) //makes sure they're all in memory to avoid lag spikes while playing
         {
             Content.GetTexture(MineTexture(keycount));
             Content.GetTexture(NoteTexture(keycount));

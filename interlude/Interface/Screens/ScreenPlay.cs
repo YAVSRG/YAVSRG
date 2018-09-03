@@ -200,28 +200,43 @@ namespace YAVSRG.Interface.Screens
             float delta = missWindow; //default value for the final "found" delta"
             float d; //temp delta for the note we're looking at
             int hitAt = -1; //when we find the note with the smallest d, its index is put in here
-            int needsToHold = 1023;
+            int needsToHold = release ? 0 : 1023;
+            bool canHitLN = true;
             while (Chart.Notes.Points[i].Offset < now + missWindow) //search loop
             {
                 Snap s = Chart.Notes.Points[i];
                 needsToHold &= ~(s.ends.value + s.holds.value); //if there are any starts of hold or releases within range, don't worry about finger independence penalty
-                BinarySwitcher b = release ? new BinarySwitcher(s.ends.value + s.taps.value + s.holds.value) : new BinarySwitcher(s.taps.value + s.holds.value);
+                BinarySwitcher b = release ? new BinarySwitcher(s.ends.value + s.holds.value) : new BinarySwitcher(s.taps.value + s.holds.value);
                 if (b.GetColumn(k)) //if there's a note here
                 {
                     d = (now - s.Offset);
-                    if (Math.Abs(d) < Math.Abs(delta))
+                    if (release)
                     {
-                        delta = d;
-                        hitAt = i;
+                        if (Chart.Notes.Points[i].ends.GetColumn(k) && canHitLN)
+                        {
+                            if (Math.Abs(d) < Math.Abs(delta))
+                            {
+                                delta = d;
+                                hitAt = i;
+                            }
+                        }
+                        else
+                        {
+                            canHitLN = scoreTracker.Hitdata[i].hit[k] != 1;
+                        }
+                    }
+                    else
+                    {
+                        if (Math.Abs(d) < Math.Abs(delta))
+                        {
+                            delta = d;
+                            hitAt = i;
+                        }
                     }
                 }
                 i++;
                 if (i == lasti) { break; }
             } //delta is misswindow if nothing found
-
-            //LOOK AT THIS LINE \/ \/ \/ IT IS IMPORTANT I DO SOMETHING ABOUT IT I.E REMOVE IT LATER
-            if (release) delta *= 0.5f; //releasing long notes is more lenient (hit windows twice as big). needs a setting to turn on and off or to be removed
-
 
             if (hitAt >= 0 && (!release || Chart.Notes.Points[hitAt].ends.GetColumn(k))) //if we found a note to hit (it's -1 if nothing found)
             //this first && is added because releasing looks for anything the the column and if a release was the closest it hits it. fixes some unhittable ln behaviours.
@@ -236,6 +251,8 @@ namespace YAVSRG.Interface.Screens
                 }
                 delta /= (float)Game.Options.Profile.Rate; //convert back to time relative to what player observes instead of map data
                 //i.e on 2x rate if you hit 80ms away in the map data, you hit 40ms away in reality
+                if (release) { delta = Math.Max(Math.Min(delta, scoreTracker.Scoring.windows[2] - 0.1f), -scoreTracker.Scoring.windows[2] + 0.1f); }
+                //else { Game.Audio.PlaySFX("hit", pitch: 1f - delta * 0.5f / missWindow, volume: 1f - Math.Abs(delta) / missWindow); } //auditory feedback tests (causes performance issues)
                 scoreTracker.RegisterHit(hitAt, k, delta); //handle the hit
                 lighting[k].NoteLight.Val = 1;
             } //put else statement here for cb on unecessary keypress if i ever want to do that

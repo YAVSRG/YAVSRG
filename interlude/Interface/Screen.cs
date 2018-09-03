@@ -12,5 +12,10 @@ namespace YAVSRG.Interface
         public virtual void OnExit(Screen next) { }
 
         public virtual void OnResize() { }
+
+        public override Rect GetBounds()
+        {
+            return GetBounds(new Rect(-ScreenUtils.ScreenWidth, -ScreenUtils.ScreenHeight, ScreenUtils.ScreenWidth, ScreenUtils.ScreenHeight).ExpandY(-Game.Screens.Toolbar.Height));
+        }
     }
 }

@@ -37,6 +37,7 @@ namespace YAVSRG.Interface.Widgets
             color.Target(ScreenUtils.MouseOver(bounds) ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
             if (ScreenUtils.CheckButtonClick(bounds))
             {
+                Game.Audio.PlaySFX("click");
                 action();
             }
         }
