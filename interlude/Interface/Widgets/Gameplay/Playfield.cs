@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     class Playfield : GameplayWidget
     {
-        int lasti; int lastt;
+        int lasti; int lastt; //final indices for notes and timing points to avoid index out of bounds at end of chart
 
         //all storage variables for LN logic
         float[] holds;

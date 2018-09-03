@@ -30,30 +30,26 @@ namespace YAVSRG.Charts.Osu
 
         public float GetMostCommonBPM(float end) //this doesn't work and needs to be fixeddd
         {
-            float current = points[0].msPerBeat;
-            float t = 0;
+            float current = points[0].msPerBeat; //should always be a normal timing point
+            float t = points[0].offset;
             Dictionary<float, float> data = new Dictionary<float, float>();
             foreach (TimingPoint p in points)
             {
-                if (data.ContainsKey(current))
+                if (!data.ContainsKey(current))
                 {
-                    data[current] += (p.offset - t);
+                    data.Add(current, 0);
                 }
-                else
+                if (!p.inherited)
                 {
-                    data.Add(current, p.offset - t);
+                    data[current] += (p.offset - t); current = p.msPerBeat; t = p.offset;
                 }
-                if (!p.inherited) { current = p.msPerBeat; t = p.offset; }
             }
-            if (data.ContainsKey(current))
+            if (!data.ContainsKey(current))
             {
-                data[current] += (end - t);
+                data.Add(current, 0);
             }
-            else
-            {
-                data.Add(current, end - t);
-            }
-            return data.OrderBy(pair => pair.Value).Last().Key;
+            data[current] += (end - t);
+            return data.OrderBy(pair => pair.Value).Last().Key; //should select bpm value that has the most time during the map
         }
 
         public List<BPMPoint> Convert(float end)
@@ -64,6 +60,7 @@ namespace YAVSRG.Charts.Osu
             float inherit = points[0].offset;
             int meter = 4;
             float scroll = 1.0f;
+            BPMPoint prev = null;
             foreach (TimingPoint point in points)
             {
                 if (!point.inherited)
@@ -72,7 +69,11 @@ namespace YAVSRG.Charts.Osu
                     scroll = basebpm / point.msPerBeat;
                     bpm = point.msPerBeat;
                     inherit = point.offset;
-                    tp.Add(new BPMPoint(point.offset, meter, bpm, scroll, point.offset));
+                    tp.Add(prev = new BPMPoint(point.offset, meter, bpm, scroll, point.offset));
+                }
+                else if (point.offset == prev?.Offset) //fix for when red and green line are on top of each other
+                {
+                    prev.ScrollSpeed *= (-100 / point.msPerBeat);
                 }
                 else
                 {
@@ -84,12 +85,12 @@ namespace YAVSRG.Charts.Osu
 
         public void ConvertFromBPMPoints() //reverse process for above algorithm NYI (because it's harder)
         {
-
+            //nyi
         }
 
         public void Dump(TextWriter tw)
         {
-
+            //nyi
         }
     }
 }
