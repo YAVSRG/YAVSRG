@@ -200,7 +200,7 @@ namespace YAVSRG.Interface.Screens
             float delta = missWindow; //default value for the final "found" delta"
             float d; //temp delta for the note we're looking at
             int hitAt = -1; //when we find the note with the smallest d, its index is put in here
-            int needsToHold = release ? 0 : 1023;
+            int needsToHold = 1023;
             bool canHitLN = true;
             while (Chart.Notes.Points[i].Offset < now + missWindow) //search loop
             {
@@ -251,7 +251,7 @@ namespace YAVSRG.Interface.Screens
                 }
                 delta /= (float)Game.Options.Profile.Rate; //convert back to time relative to what player observes instead of map data
                 //i.e on 2x rate if you hit 80ms away in the map data, you hit 40ms away in reality
-                if (release) { delta = Math.Max(Math.Min(delta, scoreTracker.Scoring.windows[2] - 0.1f), -scoreTracker.Scoring.windows[2] + 0.1f); }
+                if (release) { delta *= 0.5f; }
                 //else { Game.Audio.PlaySFX("hit", pitch: 1f - delta * 0.5f / missWindow, volume: 1f - Math.Abs(delta) / missWindow); } //auditory feedback tests (causes performance issues)
                 scoreTracker.RegisterHit(hitAt, k, delta); //handle the hit
                 lighting[k].NoteLight.Val = 1;

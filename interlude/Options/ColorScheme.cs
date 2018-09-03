@@ -11,6 +11,7 @@ namespace YAVSRG.Options
         public Colorizer.ColorStyle Style;
         public int[,] ColorMap;
         public bool UseForAllKeyModes = true;
+        public bool LNEndsMatchBody = true;
 
         public ColorScheme(Colorizer.ColorStyle s)
         {

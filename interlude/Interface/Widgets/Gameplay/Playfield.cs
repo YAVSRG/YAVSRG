@@ -16,7 +16,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         //all storage variables for LN logic
         float[] holds;
-        bool[] holdMiddles;
+        BinarySwitcher holdMiddles, bugFix;
         BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
         int[] holdColors, holdColorsHitpos;
 
@@ -38,7 +38,8 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             lasti = Chart.Notes.Count;
             lastt = Chart.Timing.Count;
             holds = new float[Chart.Keys];
-            holdMiddles = new bool[Chart.Keys];
+            holdMiddles = new BinarySwitcher(0);
+            bugFix = new BinarySwitcher(0);
             holdColors = new int[Chart.Keys];
             holdColorsHitpos = new int[Chart.Keys];
         }
@@ -66,7 +67,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             for (byte k = 0; k < Chart.Keys; k++) //more tracker data for drawing long notes
             {
                 holds[k] = 0; //used in DrawSnapWithHolds. it's only initialised once to reduce garbage collection
-                holdMiddles[k] = false;
+                holdMiddles.RemoveColumn(k);
             }
 
             while (y + v < ScreenHeight * 2 && i < lasti) //continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
@@ -90,6 +91,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                     //todo: fix bug where these render wrong
                     Game.Options.Theme.DrawHead(new Rect(k * ColumnWidth + bounds.Left, HitPos, (k + 1) * ColumnWidth + bounds.Left, HitPos + ColumnWidth), k, Keys, holdColorsHitpos[k], animation.cycles % 8);
                 }
+                bugFix.value &= (ushort)~holdsInHitpos.value;
             }
 
             base.Draw(parentBounds);
@@ -97,22 +99,22 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             SpriteBatch.DisableTransform();
         }
 
-        private void DrawLongTap(float offset, int i, float start, float end, int color) //method name is an old inside joke
+        private void DrawLongTap(float offset, byte i, float start, float end, int color) //method name is an old inside joke
         {
             if (start == 0)
             {
                 start = HitPos;
             }
             Game.Options.Theme.DrawHold(new Rect(i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f), i, Keys, color, animation.cycles % 8); //Math.Abs corrects neg number
-            if (holdMiddles[i]) //draw hold head if this isn't a middle section of a long note
-            { holdMiddles[i] = false; }
+            if (holdMiddles.GetColumn(i)) //draw hold head if this isn't a middle section of a long note
+            { holdMiddles.RemoveColumn(i); }
             else
             {
                 Game.Options.Theme.DrawHead(new Rect(i * ColumnWidth + offset, start, (i + 1) * ColumnWidth + offset, start + ColumnWidth), i, Keys, color, animation.cycles % 8);
             }
         }
 
-        private void DrawColumn(float offset, int i)
+        private void DrawColumn(float offset, byte i)
         {
             SpriteBatch.Draw("playfield", new Rect(i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, ScreenHeight * 2), Color.White);
         }
@@ -129,6 +131,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 if (holds[k] == 0)
                 {
+                    holdMiddles.SetColumn(k);
                     DrawLongTap(offset, k, holds[k], pos, holdColorsHitpos[k]);
                     holdsInHitpos.SetColumn(k);
                 }
@@ -138,12 +141,13 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 }
                 holds[k] = pos;
                 holdColors[k] = s.colors[k];
-                holdMiddles[k] = true;
+                holdMiddles.SetColumn(k);
             }
             foreach (byte k in s.ends.GetColumns())
             {
                 if (holds[k] == 0)
                 {
+                    holdMiddles.SetColumn(k);
                     DrawLongTap(offset, k, holds[k], pos, holdColorsHitpos[k]);
                     holdsInHitpos.SetColumn(k);
                 }
@@ -152,15 +156,16 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                     DrawLongTap(offset, k, holds[k], pos, holdColors[k]);
                 }
                 holds[k] = ScreenHeight * 2;
-                holdMiddles[k] = false;
+                holdMiddles.RemoveColumn(k);
             }
             foreach (byte k in s.holds.GetColumns())
             {
                 holds[k] = pos;
                 holdColors[k] = s.colors[k];
-                if (!holdsInHitpos.GetColumn(k))
+                if (!(holdsInHitpos.GetColumn(k) || bugFix.GetColumn(k)))
                 {
                     holdColorsHitpos[k] = s.colors[k];
+                    bugFix.SetColumn(k);
                 }
             }
             foreach (byte k in s.taps.GetColumns())

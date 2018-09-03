@@ -87,7 +87,7 @@ namespace YAVSRG.Options.Panels
             AddChild(selectKeyMode);
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .PositionTopLeft(-500, 525, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Skin", Options.Skins, 0, (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode, width); })
+            AddChild(new TextPicker("Skin", Options.Skins, Math.Max(0,Array.IndexOf(Options.Skins,Game.Options.Profile.Skin)), (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode, width); })
                 .PositionTopLeft(200, 525, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 575, AnchorType.CENTER, AnchorType.MIN));
         }
 

@@ -85,7 +85,7 @@ namespace YAVSRG.Options
                 }
                 if (prev != null)
                 {
-                    foreach (byte k in s.middles.GetColumns())
+                    foreach (byte k in new BinarySwitcher(s.middles.value + (cs.LNEndsMatchBody ? s.ends.value : 0)).GetColumns())
                     {
                         s.colors[k] = prev[k];
                     }
@@ -96,7 +96,7 @@ namespace YAVSRG.Options
 
         private static void Column(ChartWithModifiers c, ColorScheme cs)
         {
-            GameplaySnap prev = null;
+            int[] prev = null;
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
@@ -106,12 +106,12 @@ namespace YAVSRG.Options
                 }
                 if (prev != null)
                 {
-                    foreach (byte k in s.middles.GetColumns())
+                    foreach (byte k in new BinarySwitcher(s.middles.value + (cs.LNEndsMatchBody ? s.ends.value : 0)).GetColumns())
                     {
-                        s.colors[k] = prev.colors[k];
+                        s.colors[k] = prev[k];
                     }
                 }
-                prev = s;
+                prev = s.colors;
             }
         }
 
@@ -120,7 +120,7 @@ namespace YAVSRG.Options
             //todo: address bug where index of 0 is used for 0 notes instead of 1
             //probably just make it intentional (affects mines)
             int count;
-            GameplaySnap prev = null;
+            int[] prev = null;
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
@@ -131,12 +131,12 @@ namespace YAVSRG.Options
                 }
                 if (prev != null)
                 {
-                    foreach (byte k in s.middles.GetColumns())
+                    foreach (byte k in new BinarySwitcher(s.middles.value | (cs.LNEndsMatchBody ? s.ends.value : 0)).GetColumns())
                     {
-                        s.colors[k] = prev.colors[k];
+                        s.colors[k] = prev[k];
                     }
                 }
-                prev = s;
+                prev = s.colors;
             }
         }
 
