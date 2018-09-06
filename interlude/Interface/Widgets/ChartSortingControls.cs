@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Charts;
 using static YAVSRG.Charts.ChartLoader;
 using OpenTK;
 
@@ -12,53 +11,45 @@ namespace YAVSRG.Interface.Widgets
 {
     public class ChartSortingControls : Widget
     {
-        ScrollContainer sort;
-        ScrollContainer group;
-        Widget sortB, groupB;
+        string selectedCollection = "Favourites";
 
         public ChartSortingControls() : base()
         {
-            group = new ScrollContainer(20, 10, false, 0, autosize: true) { State = 0 };
-            sort = new ScrollContainer(20, 10, false, 0, autosize: true) { State = 0 };
-            AddChild(sortB = new SimpleButton("Sort by...", () => {
-                sort.State = 1 - sort.State;
-            }, () => { return false; }, 20f).PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
+            //AddChild(new DropDown((x) => { selectedCollection = x; }, () => (selectedCollection), "Collection")
+            //    .SetItems(Game.Gameplay.Collections.Collections.Keys.ToList())
+            //    .PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
 
-            foreach (string k in SortBy.Keys)
-            {
-                sort.AddChild(SortButton(k));
-            }
-            AddChild(sort.PositionTopLeft(260, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20,-400,AnchorType.MAX,AnchorType.MAX));
+            AddChild(new DropDown((x) => { Game.Options.Profile.ChartGroupMode = x; Refresh(); }, () => (Game.Options.Profile.ChartGroupMode), "Group by")
+                .SetItems(GroupBy.Keys.ToList())
+                .PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(groupB = new SimpleButton("Group by...", () => {
-                group.State = 1 - group.State;
-            }, () => { return false; }, 20f).PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
-            foreach (string k in GroupBy.Keys)
-            {
-                group.AddChild(GroupButton(k));
-            }
-            AddChild(group.PositionTopLeft(520, 0, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, -400, AnchorType.MAX, AnchorType.MAX));
+            AddChild(new DropDown((x) => { Game.Options.Profile.ChartSortMode = x; Refresh(); }, () => (Game.Options.Profile.ChartSortMode), "Sort by")
+                .SetItems(SortBy.Keys.ToList())
+                .PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => { return SearchString; }, () => { Refresh(); }, null, () => { return "Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."; })
+            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => (SearchString), () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
                 .PositionTopLeft(520,10,AnchorType.MAX,AnchorType.MIN).PositionBottomRight(20,70,AnchorType.MAX,AnchorType.MIN));
-        }
-
-        private Widget SortButton(string m)
-        {
-            return new SimpleButton(m, () => { Game.Options.Profile.ChartSortMode = m; Refresh(); }, () => { return Game.Options.Profile.ChartSortMode == m; }, 15f).PositionBottomRight(200,35,AnchorType.MIN,AnchorType.MIN);
-        }
-
-        private Widget GroupButton(string m)
-        {
-            return new SimpleButton(m, () => { Game.Options.Profile.ChartGroupMode = m; Refresh(); }, () => { return Game.Options.Profile.ChartGroupMode == m; }, 15f).PositionBottomRight(200, 35, AnchorType.MIN, AnchorType.MIN);
         }
 
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            Game.Screens.DrawChartBackground(bounds, Utils.ColorInterp(Color.FromArgb(255,0,0,0), Game.Screens.BaseColor, 0.8f),1.5f);
+            Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1.5f);
             ScreenUtils.DrawFrame(bounds.ExpandX(30), 30f, Game.Screens.HighlightColor);
             DrawWidgets(bounds);
+        }
+
+        public override void Update(Rect bounds)
+        {
+            base.Update(bounds);
+            if (Input.KeyPress(OpenTK.Input.Key.KeypadPlus))
+            {
+                Game.Gameplay.Collections.GetCollection(selectedCollection).AddItem(Game.Gameplay.CurrentCachedChart);
+            }
+            else if (Input.KeyPress(OpenTK.Input.Key.KeypadMinus))
+            {
+                Game.Gameplay.Collections.GetCollection(selectedCollection).RemoveItem(Game.Gameplay.CurrentCachedChart);
+            }
         }
     }
 }
