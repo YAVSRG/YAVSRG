@@ -22,6 +22,80 @@ namespace YAVSRG.Interface.Widgets
             }
         }
 
+        class EmojiPicker : Widget
+        {
+            bool expand;
+            Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow, Color.Aqua, Color.Purple, Color.Orange, Color.Indigo, Color.Lavender, Color.HotPink };
+
+            public override void Draw(Rect bounds)
+            {
+                base.Draw(bounds);
+                bounds = GetBounds(bounds);
+                float spacing = 40f;
+                if (expand)
+                {
+                    ScreenUtils.DrawFrame(bounds, 30f, Color.White);
+                    for (int x = 0; x < 5; x++)
+                    {
+                        for (int y = 0; y < 4; y++)
+                        {
+                            SpriteBatch.Draw("emoji", new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.White, x + y * 5, 0);
+                        }
+                        for (int y = 4; y < 6; y++)
+                        {
+                            SpriteBatch.DrawRect(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), colors[x + y * 5 - 20]);
+                        }
+                    }
+                }
+                else
+                {
+                    SpriteBatch.Draw("emoji", new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.White, 0, 0);
+                }
+            }
+
+            public override void Update(Rect bounds)
+            {
+                base.Update(bounds);
+                bounds = GetBounds(bounds);
+                float spacing = 40f;
+                if (expand)
+                {
+                    for (int x = 0; x < 5; x++)
+                    {
+                        for (int y = 0; y < 4; y++)
+                        {
+                            if (ScreenUtils.CheckButtonClick(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y)))
+                            {
+                                ((ChatBox)parent).entryText += "{e:" + (x + y * 5).ToString() + "}";
+                                if (!Input.KeyPress(OpenTK.Input.Key.ControlLeft, true))
+                                {
+                                    expand = false;
+                                }
+                            }
+                        }
+                        for (int y = 4; y < 6; y++)
+                        {
+                            if (ScreenUtils.CheckButtonClick(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y)))
+                            {
+                                Color c = colors[x + y * 5 - 20];
+                                ((ChatBox)parent).entryText += "{c:" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2") + "}";
+                                if (!Input.KeyPress(OpenTK.Input.Key.ControlLeft, true))
+                                {
+                                    expand = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (ScreenUtils.CheckButtonClick(new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing)))
+                    {
+                        expand = true;
+                    }
+                }
+            }
+        }
 
         bool collapsed
         {
@@ -40,6 +114,7 @@ namespace YAVSRG.Interface.Widgets
             channels = new Dictionary<string, ChatChannel>();
             channelSelector = new ScrollContainer(10f, 10f, false);
             AddChild(channelSelector.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(100, 0, AnchorType.MIN, AnchorType.MAX));
+            AddChild(new EmojiPicker().PositionTopLeft(220, 10, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 10, AnchorType.MAX, AnchorType.MAX));
             Animation.Add(newMsgFade = new Animations.AnimationSlider(0));
         }
 
@@ -71,7 +146,7 @@ namespace YAVSRG.Interface.Widgets
                         RenderText(l[i], bounds.Left + 120, bounds.Bottom - 70 - 25 * i);
                     }
                 }
-                SpriteBatch.Font1.DrawText("> " + entryText, 20f, bounds.Left + 120, bounds.Bottom - 40, Game.Options.Theme.MenuFont);
+                RenderText("> " + entryText, bounds.Left + 120, bounds.Bottom - 40);
                 ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
             }
         }

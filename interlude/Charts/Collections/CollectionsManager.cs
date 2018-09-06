@@ -30,6 +30,14 @@ namespace YAVSRG.Charts.Collections
             return Collections[name];
         }
 
+        public void DeleteCollection(string name)
+        {
+            if (Collections.ContainsKey(name))
+            {
+                Collections.Remove(name);
+            }
+        }
+
         public void Save()
         {
             string path = Path.Combine(Game.WorkingDirectory, "Data", "Collections.json");
