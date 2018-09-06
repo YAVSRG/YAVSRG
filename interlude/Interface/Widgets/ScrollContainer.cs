@@ -15,16 +15,18 @@ namespace YAVSRG.Interface.Widgets
         protected float scroll;
         int canscroll; //2 is freely scrollable WITH scrollbar, 1 is scroll without scrollbar, 0 is no scrolling
         bool frame;
+        bool autoSize;
         Animations.AnimationColorMixer scrollcolor;
         float contentsHeight = 0;
 
-        public ScrollContainer(float padx, float pady, bool horizontal, int scroll = 2, bool frame = true) : base()
+        public ScrollContainer(float padx, float pady, bool horizontal, int scroll = 2, bool frame = true, bool autosize = true) : base()
         {
             canscroll = scroll;
             this.frame = frame;
             padX = padx;
             padY = pady;
             this.horizontal = horizontal;
+            autoSize = autosize;
             Animation.Add(scrollcolor = new Animations.AnimationColorMixer(Color.Transparent));
         }
 
@@ -57,6 +59,7 @@ namespace YAVSRG.Interface.Widgets
 
         public override void Update(Rect bounds)
         {
+            Rect parentBounds = bounds;
             bounds = GetBounds(bounds);
             float x = padX;
             float y = padY - scroll;
@@ -78,6 +81,18 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
             }
+            /*
+            if (autoSize)
+            {
+                if (horizontal)
+                {
+
+                }
+                else
+                {
+                    BottomRight.Target(bounds.Right, bounds.Top + y + scroll, parentBounds);
+                }
+            }*/
             if (canscroll > 0 && ScreenUtils.MouseOver(bounds))
             {
                 if (canscroll > 1)
@@ -95,7 +110,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 scrollcolor.Target(Color.Transparent);
             }
-            contentsHeight = y + scroll;
+            Animation.Update();
         }
 
         public override void Draw(Rect bounds)
@@ -120,15 +135,16 @@ namespace YAVSRG.Interface.Widgets
             {
                 ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
             }
+            /*
             if (canscroll > 1) //draw scroll bar (doesn't work)
             {
                 float y = bounds.Height / contentsHeight;
                 //if (y < 0.95f)
                 {
-                    float percentage = (scroll) / (contentsHeight - bounds.Height);
-                    SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + 25 + (bounds.Height - 100) * percentage, bounds.Right - 5, bounds.Top + 75 + (bounds.Height - 100) * percentage), scrollcolor);
+                    //float percentage = (scroll) / (contentsHeight - bounds.Height);
+                    //SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + 25 + (bounds.Height - 100) * percentage, bounds.Right - 5, bounds.Top + 75 + (bounds.Height - 100) * percentage), scrollcolor);
                 }
-            }
+            }*/
         }
 
         public List<Widget> Items()

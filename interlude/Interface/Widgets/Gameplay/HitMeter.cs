@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets.Gameplay
 {
@@ -25,22 +26,15 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         class JudgementDisplay
         {
             Hit h;
-            Sprite sprite;
 
             public JudgementDisplay()
             {
                 h = new Hit(-10000, 0, 0);
-                sprite = Content.GetTexture("judgements");
             }
 
             public void Draw(Rect bounds, float now)
             {
-                if (now-h.time < 200)
-                {
-                    float x = Math.Abs(1 - (now - h.time) * 0.01f) * bounds.Width*0.4f;
-                    //SpriteBatch.Draw(sprite, left, top, right, top + (right-left)*34f/256f, System.Drawing.Color.White, h.delta < 0 ? 1 : 0, h.tier);
-                    SpriteBatch.Font1.DrawCentredTextToFill(Game.Options.Theme.Judges[h.tier], new Rect(bounds.Left + x, bounds.Top, bounds.Right - x, bounds.Bottom), Game.Options.Theme.JudgeColors[h.tier]);
-                }
+                SpriteBatch.Draw("judgements", bounds, Color.FromArgb(Alpha((now - h.time) * 2), Color.White), h.delta < 0 ? 0 : 1, h.tier);
             }
 
             public void NewHit(Hit newhit)
@@ -54,6 +48,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         JudgementDisplay[] disp;
         List<Hit> hits;
+        float aspectRatio; //used to scale judgement text correctly
 
         public HitMeter(YAVSRG.Gameplay.ScoreTracker st) : base(st)
         {
@@ -72,6 +67,8 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 disp[0] = new JudgementDisplay();
             }
             hits = new List<Hit>();
+            Sprite sprite = Content.GetTexture("judgements");
+            aspectRatio = ((float)sprite.Height / sprite.UV_Y) / ((float)sprite.Width / sprite.UV_X);
         }
 
         private void AddHit(int k, int tier, float delta)
@@ -101,19 +98,19 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 for (int i = 0; i < disp.Length; i++)
                 {
-                    disp[i].Draw(new Rect(bounds.Left + i * Game.Options.Theme.ColumnWidth, bounds.Top, bounds.Left + (i + 1) * Game.Options.Theme.ColumnWidth, bounds.Bottom), now);
+                    disp[i].Draw(new Rect(bounds.Left + i * Game.Options.Theme.ColumnWidth, bounds.Top, bounds.Left + (i + 1) * Game.Options.Theme.ColumnWidth, bounds.Top + Game.Options.Theme.ColumnWidth * aspectRatio), now);
                 }
             }
             else
             {
-                disp[0].Draw(new Rect(-Game.Options.Theme.ColumnWidth, bounds.Top, Game.Options.Theme.ColumnWidth, bounds.Bottom), now);
+                //slice
+                disp[0].Draw(new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + bounds.Width * aspectRatio), now);
             }
 
+            float c = bounds.CenterX;
             foreach (Hit h in hits)
             {
-                int alpha = (int)((2500 + h.time - now) * 0.1f); //you do not understand how many cancerous crashes this has caused
-                alpha = Math.Max(0, Math.Min(alpha, 255)); //so i did this
-                SpriteBatch.DrawRect(new Rect(h.delta * 4 - 4, -20, h.delta * 4 + 4, 20), System.Drawing.Color.FromArgb(alpha,Game.Options.Theme.JudgeColors[h.tier]));
+                SpriteBatch.DrawRect(new Rect(c + h.delta * 4 - 4, bounds.Bottom-40, c + h.delta * 4 + 4, bounds.Bottom), Color.FromArgb(Alpha(now - h.time), Game.Options.Theme.JudgeColors[h.tier]));
             }
         }
 
@@ -122,9 +119,9 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             base.Update(bounds);
             float now = (float)Game.Audio.Now();
             List<Hit> temp = new List<Hit>();
-            foreach (Hit h in hits)
+            foreach (Hit h in hits) //todo: optimise this
             {
-                if (now - h.time > 5000)
+                if (now - h.time > Game.Options.Theme.JudgementFadeTime)
                 {
                     temp.Add(h);
                 }
@@ -134,6 +131,11 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 hits.Remove(h);
             }
+        }
+
+        static int Alpha(float delta)
+        {
+            return (int)Math.Max(0,Math.Min(255,(255f*(1 - delta / Game.Options.Theme.JudgementFadeTime))));
         }
     }
 }

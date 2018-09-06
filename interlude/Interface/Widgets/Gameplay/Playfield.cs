@@ -88,7 +88,6 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 foreach (byte k in holdsInHitpos.GetColumns())
                 {
-                    //todo: fix bug where these render wrong
                     Game.Options.Theme.DrawHead(new Rect(k * ColumnWidth + bounds.Left, HitPos, (k + 1) * ColumnWidth + bounds.Left, HitPos + ColumnWidth), k, Keys, holdColorsHitpos[k], animation.cycles % 8);
                 }
                 bugFix.value &= (ushort)~holdsInHitpos.value;

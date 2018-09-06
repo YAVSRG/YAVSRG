@@ -14,7 +14,7 @@ namespace YAVSRG.Net.Web
         {
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Interlude"); //github requires this and i dunno why
+                client.DefaultRequestHeaders.Add("User-Agent", "Interlude"); //sites require this to prevent against random web clients downloading
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12; //ensures TLS 1.2 connection can be made to github (no support for TSL 1.1 or 1.0 i dont think)
                 try
                 {
@@ -31,6 +31,7 @@ namespace YAVSRG.Net.Web
         {
             using (var client = new WebClient())
             {
+                client.Headers.Add("User-Agent", "Interlude"); //sites require this to prevent against random web clients downloading
                 try
                 {
                     client.DownloadProgressChanged += (o, e) => { callback(e.ProgressPercentage); };

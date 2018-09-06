@@ -25,7 +25,7 @@ namespace YAVSRG.Charts.Stepmania
                 string[] split = raw.Split(':');
                 gamemode = split[0].Trim();
                 name = split[2].Trim() + " " + split[3].Trim();
-                foreach (string s in split[5].Trim().Split(','))
+                foreach (string s in split[5].Trim().Split(',')) //stupid hack that can likely fail with some oddly formatted .sm files
                 {
                     measures.Add(new Measure(s.Trim().Split('\n')));
                 }
@@ -126,20 +126,20 @@ namespace YAVSRG.Charts.Stepmania
             return "-----";
         }
 
-        public string GetBG()
+        public string GetBG() //sm files are dumb as fuck and sm basically looks around for the bg for you
         {
             string bgfile = raw["BACKGROUND"] == "" ? raw["TITLE"] + "-bg.jpg" : raw["BACKGROUND"];
             if (!File.Exists(Path.Combine(path, bgfile)))
             {
                 foreach (string s in Directory.GetFiles(path))
                 {
-                    if (Path.GetFileNameWithoutExtension(s).ToLower().Contains("bg"))
+                    if (Path.GetFileNameWithoutExtension(s).ToLower().Contains("bg") || Path.GetFileNameWithoutExtension(s).ToLower().Contains("background"))
                     {
                         return Path.GetFileName(s);
                     }
                 }
             }
-            return bgfile; //still need to fix background videos crashing
+            return bgfile;
         }
 
         public List<Chart> Convert()
@@ -148,43 +148,74 @@ namespace YAVSRG.Charts.Stepmania
             List<Tuple<double, double>> bpms = new List<Tuple<double, double>>();
             string[] split;
 
-            foreach (string s in new string(raw["BPMS"].Where((c) => { return !char.IsWhiteSpace(c); }).ToArray()).Split(','))
+            foreach (string s in new string(raw["BPMS"].Where((c) => { return !char.IsWhiteSpace(c); }).ToArray()).Split(',')) //removes all whitespace, splits by ,
             {
-                split = s.Split('=');
-                bpms.Add(new Tuple<double, double>(double.Parse(split[0]), 60000/double.Parse(split[1])));
+                split = s.Split('='); //then splits these comma separated strings by = to get beat:bpm
+                bpms.Add(new Tuple<double, double>(double.Parse(split[0]), 60000/double.Parse(split[1]))); //parses bpms and puts them in this list format
             }
 
             foreach (StepFileDifficulty diff in diffs)
             {
-                if (diff.gamemode != "dance-single") { continue; }
+                byte keycount;
+
+                switch (diff.gamemode)
+                {
+                    case "dance-threepanel":
+                        keycount = 3;
+                        break;
+                    case "dance-single":
+                        keycount = 4;
+                        break;
+                    case "pump-single":
+                        keycount = 5;
+                        break;
+                    case "dance-solo":
+                    case "pump-halfdouble":
+                        keycount = 6;
+                        break;
+                    case "kb7-single":
+                        keycount = 7;
+                        break;
+                    case "dance-double":
+                    case "dance-couple": //and dance-routine? but im not sure so i didnt add it
+                        keycount = 8;
+                        break;
+                    case "pump-double":
+                    case "pump-couple": //and pump-routine? but im not sure so i didnt add it
+                        keycount = 10;
+                        break;
+                    default:
+                        Utilities.Logging.Log("SM gamemode not supported: " + diff.gamemode, Utilities.Logging.LogType.Warning);
+                        continue;
+                }
+
                 try
                 {
-                    byte meter = 4;
+                    byte meter = 4; //sm only supports 4 beats in a bar. to add ssc support take this from the file
                     List<Snap> states = new List<Snap>();
                     List<BPMPoint> points = new List<BPMPoint>();
                     BinarySwitcher lntracker = new BinarySwitcher(0);
-                    double now = -double.Parse(raw["OFFSET"]) * 1000;
-                    int bpm = 0;
-                    points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now));
-                    int totalbeats = 0;
-                    byte keycount = 4;
+                    double now = -double.Parse(raw["OFFSET"]) * 1000; //start time (in ms) into audio file for first measure
+                    int bpm = 0; //index of bpm point for the list of tuples we generated earlier
+                    points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now)); //convert the first bpm to a timing point
+                    int totalbeats = 0; //beat counter
                     double from, to;
 
-                    for (int i = 0; i < diff.measures.Count; i++)
+                    for (int i = 0; i < diff.measures.Count; i++) //iterate through measures
                     {
-                        totalbeats += meter;
+                        totalbeats += meter; //stores what beat we arrive at at the END of this measure
                         from = 0;
-                        while (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 < totalbeats)
+                        while (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 < totalbeats) //iterate through all BPM changes within this measure
                         {
-                            to = bpms[bpm + 1].Item1 - totalbeats + meter;
-                            diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, to, meter, states);
-                            now += bpms[bpm].Item2 * (to - from);
-                            bpm += 1;
-                            points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now));
+                            to = bpms[bpm + 1].Item1 - totalbeats + meter; //finds number between 0 and 4 (meter)
+                            diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, to, meter, states); //correctly converts this slice
+                            now += bpms[bpm].Item2 * (to - from); //updates time we're on
+                            bpm += 1; //increments bpm index so we know what point we're up to
+                            points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now)); //adds timing point to chart
                             from = to;
                         }
                         diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, meter, meter, states);
-                        now += bpms[bpm].Item2 * (meter - from);
+                        now += bpms[bpm].Item2 * (meter - from); //converts rest of measure after all bpm changes inside are complete (normally no bpm changes therefore this does the whole measure)
                     }
                     Chart c = new Chart(states, points, new ChartHeader
                     {

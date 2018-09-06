@@ -8,11 +8,11 @@ using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface.Widgets.Gameplay
 {
-    class JudgementDisplay : GameplayWidget
+    class JudgementCounter : GameplayWidget
     {
         List<AnimationSlider> flashes;
 
-        public JudgementDisplay(YAVSRG.Gameplay.ScoreTracker st) : base(st)
+        public JudgementCounter(YAVSRG.Gameplay.ScoreTracker st) : base(st)
         {
             flashes = new List<AnimationSlider>();
             for (int i = 0; i < 6; i++)

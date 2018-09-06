@@ -85,7 +85,7 @@ namespace YAVSRG.Options
                 }
                 if (prev != null)
                 {
-                    foreach (byte k in new BinarySwitcher(s.middles.value + (cs.LNEndsMatchBody ? s.ends.value : 0)).GetColumns())
+                    foreach (byte k in new BinarySwitcher(s.middles.value | (cs.LNEndsMatchBody ? s.ends.value : 0)).GetColumns())
                     {
                         s.colors[k] = prev[k];
                     }
@@ -106,7 +106,7 @@ namespace YAVSRG.Options
                 }
                 if (prev != null)
                 {
-                    foreach (byte k in new BinarySwitcher(s.middles.value + (cs.LNEndsMatchBody ? s.ends.value : 0)).GetColumns())
+                    foreach (byte k in new BinarySwitcher(s.middles.value | (cs.LNEndsMatchBody ? s.ends.value : 0)).GetColumns())
                     {
                         s.colors[k] = prev[k];
                     }
@@ -117,17 +117,15 @@ namespace YAVSRG.Options
 
         private static void Chord(ChartWithModifiers c, ColorScheme cs)
         {
-            //todo: address bug where index of 0 is used for 0 notes instead of 1
-            //probably just make it intentional (affects mines)
-            int count;
+            int color;
             int[] prev = null;
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.colors = new int[c.Keys];
-                count = new BinarySwitcher((ushort)(s.taps.value | s.holds.value)).Count; //count number of lns/notes
+                color = cs.GetColorIndex(Math.Max(0,new BinarySwitcher((ushort)(s.taps.value | s.holds.value)).Count - 1), c.Keys); //count number of lns/notes
                 for (int i = 0; i < c.Keys; i++)
                 {
-                    s.colors[i] = cs.GetColorIndex(count,c.Keys); //color notes in row based on number of notes. chord coloring.
+                    s.colors[i] = color; //color notes in row based on number of notes. chord coloring.
                 }
                 if (prev != null)
                 {

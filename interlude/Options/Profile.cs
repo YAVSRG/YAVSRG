@@ -29,6 +29,8 @@ namespace YAVSRG.Options
         public float ScreenCoverDown = 0f;
         public float PerspectiveTilt = 0f;
         public float BackgroundDim = 0.5f;
+        public string ChartSortMode = "Title";
+        public string ChartGroupMode = "Pack";
         public ScoreType ScoreSystem = ScoreType.Default;
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
         public float[] AccGradeThresholds = new float[] { 98, 95, 93, 91, 89 };

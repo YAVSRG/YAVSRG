@@ -28,6 +28,7 @@ namespace YAVSRG.Options
         public float NoteDepth = 20f;
         public bool FlipHoldTail = true;
         public bool UseHoldTailTexture = true;
+        public float JudgementFadeTime = 1500f; //milliseconds
 
         protected int GetRotation(int column, int keycount)
         {

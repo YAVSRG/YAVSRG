@@ -18,22 +18,28 @@ namespace YAVSRG.Charts
 
         public static readonly string[] CHARTFORMATS = { ".sm", ".osu", ".yav" };
         public static readonly string[] ARCHIVEFORMATS = { ".osz", ".zip" };
-        
-        public static Func<CachedChart, string> GroupByPack = (c) => { return c.pack; };
-        public static Func<CachedChart, string> GroupByTitle = (c) => { return Utils.FormatFirstCharacter(c.title); };
-        public static Func<CachedChart, string> GroupByDifficulty = (c) => { int i = (int)(c.physical / 2) * 2; return i.ToString().PadLeft(2,'0')+" - "+(i+2).ToString().PadLeft(2,'0'); };
-        public static Func<CachedChart, string> GroupByCreator = (c) => { return Utils.FormatFirstCharacter(c.creator); };
-        public static Func<CachedChart, string> GroupByArtist = (c) => { return Utils.FormatFirstCharacter(c.artist); };
-        public static Func<CachedChart, string> GroupByKeymode = (c) => { return c.keymode.ToString() + "k"; };
-        public static Func<CachedChart, string> GroupByCollection = (c) => { return ""; };
 
-        public static Comparison<CachedChart> SortByDifficulty = (a, b) => (a.physical.CompareTo(b.physical));
-        public static Comparison<CachedChart> SortByTitle = (a, b) => (a.title.CompareTo(b.title));
-        public static Comparison<CachedChart> SortByCreator = (a, b) => (a.creator.CompareTo(b.creator));
-        public static Comparison<CachedChart> SortByArtist = (a, b) => (a.artist.CompareTo(b.artist));
+        public static Dictionary<string, Func<CachedChart, string>> GroupBy = new Dictionary<string, Func<CachedChart, string>>()
+        {
+            { "Physical", (c) => { int i = (int)(c.physical / 2) * 2; return i.ToString().PadLeft(2,'0')+" - "+(i+2).ToString().PadLeft(2,'0'); } },
+            { "Technical", (c) => { int i = (int)(c.technical / 2) * 2; return i.ToString().PadLeft(2,'0')+" - "+(i+2).ToString().PadLeft(2,'0'); } },
+            { "Creator", (c) => { return Utils.FormatFirstCharacter(c.creator); } },
+            { "Artist", (c) => { return Utils.FormatFirstCharacter(c.artist); } },
+            { "Pack", (c) =>  { return c.pack; } },
+            { "Title", (c) => { return Utils.FormatFirstCharacter(c.title); } },
+            { "Keymode",  (c) => { return c.keymode.ToString() + "k"; } },
+            { "Collection",  (c) => { return ""; } }
+        };
 
-        public static Comparison<CachedChart> SortMode = SortByDifficulty; //default (should load from settings)
-        public static Func<CachedChart, string> GroupMode = GroupByPack; //default
+        public static Dictionary<string, Comparison<CachedChart>> SortBy = new Dictionary<string, Comparison<CachedChart>>()
+        {
+            { "Physical", (a, b) => (a.physical.CompareTo(b.physical)) },
+            { "Technical", (a, b) => (a.technical.CompareTo(b.technical)) },
+            { "Title", (a, b) => (a.title.CompareTo(b.title)) },
+            { "Creator ",(a, b) => (a.creator.CompareTo(b.creator)) },
+            { "Artist", (a, b) => (a.artist.CompareTo(b.artist)) },
+        };
+
         public static string SearchString = "";
         public static event Action OnRefreshGroups = () => { };
         public static List<ChartGroup> Groups;
@@ -76,11 +82,12 @@ namespace YAVSRG.Charts
         }
 
         #region sorting and searching
+
         public static void SortIntoGroups(Func<CachedChart, string> groupBy, Comparison<CachedChart> sortBy)
         {
             Groups = new List<ChartGroup>();
             Dictionary<string, List<CachedChart>> temp = new Dictionary<string, List<CachedChart>>();
-            if (groupBy == GroupByCollection)
+            if (groupBy == GroupBy["Collection"])
             {
                 foreach (string c in Game.Gameplay.Collections.Collections.Keys)
                 {
@@ -148,7 +155,12 @@ namespace YAVSRG.Charts
 
         public static void Refresh()
         {
-            SortIntoGroups(GroupMode, SortMode);
+            if (!(GroupBy.ContainsKey(Game.Options.Profile.ChartGroupMode) && (SortBy.ContainsKey(Game.Options.Profile.ChartSortMode))))
+            {
+                Log("Invalid sort or search mode", LogType.Warning);
+                return;
+            }
+            SortIntoGroups(GroupBy[Game.Options.Profile.ChartGroupMode], SortBy[Game.Options.Profile.ChartSortMode]);
             SearchGroups(SearchString);
             OnRefreshGroups();
         }
@@ -162,7 +174,7 @@ namespace YAVSRG.Charts
                 Game.Gameplay.ChangeChart(null, new Chart(new List<Snap>(), new List<BPMPoint>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Game.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0, File = "" }, 4), false);
                 return;
             }
-            SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)],true);
+            SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
         }
         
         public static void Recache()
@@ -202,6 +214,32 @@ namespace YAVSRG.Charts
         {
             Game.Tasks.AddTask(new Utilities.TaskManager.NamedTask(task, desc, () => { }));
         }
+
+        #region deleting
+
+        public static void DeleteChart(CachedChart c)
+        {
+            try
+            {
+                Cache.Charts.Remove(c.GetFileIdentifier());
+                Directory.Delete(Path.GetDirectoryName(c.GetFileIdentifier()), true);
+            }
+            catch
+            {
+                //folders will be "deleted" twice for multi difficulties so errors are expected
+            }
+        }
+
+        public static void DeleteGroup(ChartGroup group)
+        {
+            foreach (CachedChart c in group.charts)
+            {
+                DeleteChart(c);
+            }
+            Cache.Save();
+        }
+
+        #endregion
 
         #region conversions
 

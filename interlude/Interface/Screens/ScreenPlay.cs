@@ -43,7 +43,11 @@ namespace YAVSRG.Interface.Screens
 
             //this stuff is ok to stay here
             AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
-            AddChild(new HitMeter(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
+            //AddChild(new HitMeter(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
+            if (widgetData.IsEnabled("hitMeter"))
+            {
+                AddChild(new HitMeter(scoreTracker).Position(widgetData.GetPosition("hitMeter")));
+            }
             if (widgetData.IsEnabled("progressBar"))
             {
                 AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
@@ -70,7 +74,7 @@ namespace YAVSRG.Interface.Screens
             }
             if (widgetData.IsEnabled("judgements"))
             {
-                AddChild(new JudgementDisplay(scoreTracker).Position(widgetData.GetPosition("judgements")));
+                AddChild(new JudgementCounter(scoreTracker).Position(widgetData.GetPosition("judgements")));
             }
             //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
             //playfield.InitGameplay();

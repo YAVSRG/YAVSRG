@@ -17,7 +17,7 @@ namespace YAVSRG.Interface.Widgets
             public List<Group> Children;
             public bool Expand;
             public Func<bool> Highlight;
-            public Action<Group> OnClick;
+            public Action<Group> OnClick, OnRightClick;
             private string title;
             private string subtitle;
             private int height;
@@ -26,13 +26,14 @@ namespace YAVSRG.Interface.Widgets
             private AnimationColorMixer fill;
             private Color baseColor;
 
-            public Group(int height, Action<Group> action, Func<bool> highlight, string line1, string line2, Color c)
+            public Group(int height, Action<Group> action, Action<Group> rightClickAction, Func<bool> highlight, string line1, string line2, Color c)
             {
                 Children = new List<Group>();
                 this.height = height;
                 title = line1;
                 subtitle = line2;
                 OnClick = action;
+                OnRightClick = rightClickAction;
                 Highlight = highlight;
                 baseColor = c;
                 Animation.Add(border = new AnimationColorMixer(Color.White));
@@ -137,7 +138,13 @@ namespace YAVSRG.Interface.Widgets
                     fill.Target(Utils.ColorInterp(baseColor, Color.White, 0.2f));
                     if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                     {
+                        Game.Audio.PlaySFX("click", pitch: 0.8f, volume: 0.5f);
                         OnClick(this);
+                    }
+                    else if (Input.MouseClick(OpenTK.Input.MouseButton.Right))
+                    {
+                        Game.Audio.PlaySFX("click", pitch: 1.2f, volume: 0.5f);
+                        OnRightClick(this);
                     }
                 }
                 else
@@ -226,6 +233,18 @@ namespace YAVSRG.Interface.Widgets
             {
                 ExpandGroup(x);
                 x.ScrollTo(ref scroll);
+            },
+            (x) => {
+                if (Input.KeyPress(OpenTK.Input.Key.Delete))
+                {
+                    Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Are you SURE you want to delete ALL CHARTS in this group?",(d) => {
+                        if (d == "Y")
+                        {
+                            ChartLoader.DeleteGroup(group);
+                            ChartLoader.Refresh();
+                        }
+                    }));
+                }
             }, () => { return group.charts.Contains(Game.Gameplay.CurrentCachedChart); }, group.label, "", Game.Options.Theme.SelectPack);
 
             foreach (CachedChart chart in group.charts) //populate group with items
@@ -241,6 +260,22 @@ namespace YAVSRG.Interface.Widgets
                         ChartLoader.SwitchToChart(chart, true);
                         Input.ChangeIM(null);
                         x.ScrollTo(ref scroll);
+                    }
+                },
+                (x) => {
+                    if (Input.KeyPress(OpenTK.Input.Key.Delete))
+                    {
+                        Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Are you SURE you want to delete this chart from your computer?", (d) => {
+                            if (d == "Y")
+                            {
+                                ChartLoader.DeleteChart(chart);
+                                ChartLoader.Refresh();
+                            }
+                        }));
+                    }
+                    else
+                    {
+                        ExpandGroup(g);
                     }
                 }, () => { return Game.Gameplay.CurrentCachedChart == chart; }, chart.artist + " - " + chart.title, chart.diffname + " ("+chart.keymode.ToString()+"k)", Game.Options.Theme.SelectChart));
             }

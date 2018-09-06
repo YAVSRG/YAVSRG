@@ -199,12 +199,13 @@
     <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
     <Compile Include="Interface\Widgets\ChatBox.cs" />
+    <Compile Include="Interface\Widgets\Controls\DropDown.cs" />
     <Compile Include="Interface\Widgets\DownloadCard.cs" />
     <Compile Include="Interface\Widgets\DownloadManager.cs" />
     <Compile Include="Interface\Widgets\Editor\Timeline.cs" />
     <Compile Include="Interface\Widgets\Gameplay\AccMeter.cs" />
     <Compile Include="Interface\Widgets\Gameplay\HitLighting.cs" />
-    <Compile Include="Interface\Widgets\Gameplay\JudgementDisplay.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\JudgementCounter.cs" />
     <Compile Include="Interface\Widgets\Gameplay\MiscInfoDisplay.cs" />
     <Compile Include="Interface\Widgets\TaskDisplay.cs" />
     <Compile Include="Interface\Widgets\ModMenu.cs" />

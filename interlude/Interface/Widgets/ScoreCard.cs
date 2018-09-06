@@ -48,7 +48,7 @@ namespace YAVSRG.Interface.Widgets
             bounds = GetBounds(bounds);
             if (ScreenUtils.CheckButtonClick(bounds))
             {
-                Game.Screens.AddDialog(new Dialogs.ScoreInfoDialog(c, (s) => { }));
+                //Game.Screens.AddDialog(new Dialogs.ScoreInfoDialog(c, (s) => { }));
             }
         }
 

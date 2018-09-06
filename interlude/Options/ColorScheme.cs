@@ -42,7 +42,6 @@ namespace YAVSRG.Options
                 case Colorizer.ColorStyle.DDR:
                     return Colorizer.DDRValues.Length + 1;
                 case Colorizer.ColorStyle.Chord:
-                case Colorizer.ColorStyle.Column:
                 default:
                     return keys;
             }
