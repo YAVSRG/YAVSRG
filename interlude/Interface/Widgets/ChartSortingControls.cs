@@ -16,7 +16,6 @@ namespace YAVSRG.Interface.Widgets
 
         public ChartSortingControls() : base()
         {
-
             DropDown d = new DropDown((x) => { selectedCollection = x; }, () => (selectedCollection), "Collection"); //referencable later so delete/create buttons can update list (nyi)
             AddChild(sortControls = new Widget());
             AddChild(collectionControls = new Widget() { State = 0 });

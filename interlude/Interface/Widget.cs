@@ -144,5 +144,13 @@ namespace YAVSRG.Interface
             }
             Animation.Update();
         }
+
+        public virtual void OnResize()
+        {
+            foreach (Widget w in Widgets)
+            {
+                w.OnResize();
+            }
+        }
     }
 }

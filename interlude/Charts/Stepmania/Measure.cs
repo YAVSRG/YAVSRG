@@ -22,7 +22,7 @@ namespace YAVSRG.Charts.Stepmania
             double sep = msPerBeat * meter / l;
             int start = (int)Math.Ceiling(from * l / meter);
             int end = (int)Math.Ceiling(to * l / meter);
-            Utilities.Logging.Log(start.ToString() + "|" + end.ToString());
+            //Utilities.Logging.Log(start.ToString() + "|" + end.ToString());
             offset += (((double)start * meter / l) - from) * msPerBeat;
             for (int i = start; i < end; i++) //if start and end are the same no conversions occur
             {
@@ -39,7 +39,7 @@ namespace YAVSRG.Charts.Stepmania
                 if (!s.IsEmpty())
                 {
                     output.Add(s);
-                    Utilities.Logging.Log(s.Offset.ToString());
+                    //Utilities.Logging.Log(s.Offset.ToString());
                 }
             }
         }

@@ -135,13 +135,15 @@ namespace YAVSRG.Charts
             s = s.ToLower();
             SearchResult = new List<ChartGroup>();
             bool keymodeMatch;
+            string summaryData;
             foreach (ChartGroup g in Groups)
             {
                 List<CachedChart> temp = new List<CachedChart>();
                 foreach (CachedChart c in g.charts)
                 {
                     keymodeMatch = Game.Options.Profile.Keymode == 0 || c.keymode == Game.Options.Profile.Keymode;
-                    if (keymodeMatch && (c.title.ToLower().Contains(s) || c.creator.ToLower().Contains(s) || c.artist.ToLower().Contains(s)))
+                    summaryData = (c.title + " " + c.creator + " " + c.artist + " " + c.diffname + " " + c.pack).ToLower();
+                    if (keymodeMatch && summaryData.Contains(s))
                     {
                         temp.Add(c);
                     }
@@ -313,23 +315,43 @@ namespace YAVSRG.Charts
             }
         }
 
-        private static void ConvertFile(Chart c, string sourceFolder, string targetFolder)
+        private static void ConvertFile(Chart c, string sourceFolder, string targetFolder) //todo: swap names of ConvertFile and ConvertChart
         {
             c.Data.SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder));
             c.Data.SourcePath = targetFolder;
             c.Data.File = Path.ChangeExtension(c.Data.File, ".yav");
             Directory.CreateDirectory(targetFolder);
             //this will copy the externally sourced chart to an appropriate folder in the songs folder
-            try
+            for (int i = 0; i < 5; i++) //it attempts 5 times because windows is often snooping at freshly extracted files for viruses which prevents it from copying
             {
-                File.Copy(Path.Combine(sourceFolder, c.Data.AudioFile), Path.Combine(targetFolder, c.Data.AudioFile));
+                try
+                {
+                    if (File.Exists(Path.Combine(sourceFolder, c.Data.AudioFile)) && !File.Exists(Path.Combine(targetFolder, c.Data.AudioFile)))
+                    {
+                        File.Copy(Path.Combine(sourceFolder, c.Data.AudioFile), Path.Combine(targetFolder, c.Data.AudioFile));
+                    }
+                    break;
+                }
+                catch
+                {
+                    Thread.Sleep(1000);
+                }
             }
-            catch { }
-            try
+            for (int i = 0; i < 5; i++) //it attempts 5 times because windows is often snooping at freshly extracted files for viruses which prevents it from copying
             {
-                File.Copy(Path.Combine(sourceFolder, c.Data.BGFile), Path.Combine(targetFolder, c.Data.BGFile));
+                try
+                {
+                    if (File.Exists(Path.Combine(sourceFolder, c.Data.BGFile)) && !File.Exists(Path.Combine(targetFolder, c.Data.BGFile)))
+                    {
+                        File.Copy(Path.Combine(sourceFolder, c.Data.BGFile), Path.Combine(targetFolder, c.Data.BGFile));
+                    }
+                    break;
+                }
+                catch
+                {
+                    Thread.Sleep(1000);
+                }
             }
-            catch { }
             c.WriteToFile(Path.Combine(targetFolder, c.Data.File));
             Cache.CacheChart(c);
         }

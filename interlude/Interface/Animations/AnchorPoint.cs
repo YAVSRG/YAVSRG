@@ -45,14 +45,15 @@ namespace YAVSRG.Interface.Animations
             switch (rel)
             {
                 case (AnchorType.CENTER):
-                    return target - (max + min) * 0.5f; // ??
+                    return target - (max - min) * 0.5f; // ??
                 case (AnchorType.MAX):
                     return (max - min) - target;
                 case (AnchorType.MIN):
                     return target;
                 case (AnchorType.LERP):
+                    return target / (max - min);
                 default:
-                    return 0f; //nyi for lerp
+                    return 0f;
             }
         }
 

@@ -13,7 +13,7 @@ using OpenTK.Input;
 
 namespace YAVSRG.Interface.Screens
 {
-    class ScreenPlay : Screen //i cleaned up this file a little but it's a bit of a mess. sorry!
+    class ScreenPlay : Screen //i cleaned up this file a little but it's a bit of a mess. sorry! update: a lot of a mess
     {
         
         int lasti; int lastt; //the number of snaps and number of timing points respectively. used to be an optimisation and now they're just a convenience
@@ -43,7 +43,7 @@ namespace YAVSRG.Interface.Screens
 
             //this stuff is ok to stay here
             AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
-            //AddChild(new HitMeter(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(columnwidth * Chart.Keys / 2, 0, AnchorType.CENTER, AnchorType.MAX));
+            //AddChild(new PerformanceMeter(scoreTracker));
             if (widgetData.IsEnabled("hitMeter"))
             {
                 AddChild(new HitMeter(scoreTracker).Position(widgetData.GetPosition("hitMeter")));
@@ -84,8 +84,8 @@ namespace YAVSRG.Interface.Screens
             for (int i = 0; i < Chart.Keys; i++)
             {
                 lighting[i] = new HitLighting();
-                lighting[i].PositionTopLeft(columnwidth * i, hitposition + columnwidth * 2, AnchorType.MIN, AnchorType.CENTER)
-                    .PositionBottomRight(columnwidth * (i + 1), hitposition, AnchorType.MIN, AnchorType.CENTER);
+                lighting[i].PositionTopLeft(columnwidth * i, hitposition, AnchorType.MIN, AnchorType.CENTER)
+                    .PositionBottomRight(columnwidth * (i + 1), hitposition + columnwidth, AnchorType.MIN, AnchorType.CENTER);
                 playfield.AddChild(lighting[i]);
             }
             //this places the screencovers
@@ -267,7 +267,7 @@ namespace YAVSRG.Interface.Screens
             base.Draw(bounds);
             if (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000)
             {
-                SpriteBatch.Font1.DrawCentredText("Press "+Game.Options.General.Binds.Skip.ToString().ToUpper()+" to Skip", 50f, 0, 100, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawCentredText("Press "+Game.Options.General.Binds.Skip.ToString().ToUpper()+" to Skip", 50f, 0, 130, Game.Options.Theme.MenuFont);
             }
             if (Animation.Running)
             {

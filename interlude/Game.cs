@@ -17,7 +17,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.4";
+        public static readonly string Version = "Interlude v0.3.5";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -123,6 +123,7 @@ namespace YAVSRG
                 WindowState = WindowState.Normal;
                 WindowBorder = WindowBorder.Resizable;
                 Size = new Size(YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item2);
+                Location = new Point((DisplayDevice.Default.Width-Size.Width)/2, (DisplayDevice.Default.Height - Size.Height) / 2);
             }
             Audio.SetVolume(settings.AudioVolume);
         }
@@ -166,7 +167,7 @@ namespace YAVSRG
         protected override void OnUpdateFrame(FrameEventArgs e) //this is update loop code (tries to hit 120 times a second)
         {
             base.OnUpdateFrame(e);
-            if (!init) { PostWindowInit(); init = true; }
+            if (!init) { PostWindowInit(); init = true; return; }
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             screens.Update(); //updates the current screen as well as animations and stuff to transition between them
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button

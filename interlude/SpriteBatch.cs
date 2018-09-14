@@ -27,6 +27,15 @@ namespace YAVSRG
             }
         }*/
 
+        public enum StencilMode
+        {
+            Disable,
+            Create,
+            Draw
+        }
+
+        static int StencilDepth = 0;
+
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
@@ -99,6 +108,12 @@ namespace YAVSRG
             }
             GL.End();
             GL.Disable(EnableCap.Texture2D);
+        }
+
+        public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
+        {
+            Sprite s = Content.GetTexture(texture);
+            Draw(texture: texture, bounds: new Rect(x + s.Width * alignX * scaleX, y + s.Height * alignY * scaleY, x + s.Width * (alignX + 1) * scaleX, y + s.Height * (alignY + 1) * scaleY), color: color);
         }
 
         public static void DrawTilingTexture(string texture, Rect bounds, float scale, float x, float y, Color color)
@@ -174,27 +189,50 @@ namespace YAVSRG
             GL.PopMatrix();
         }
 
-        public static void StencilMode(int m)
+        public static void AlphaTest(bool value) //works with stencil
         {
-            if (m == 1)
+            if (value)
             {
-                GL.StencilMask(0xFF);
-                GL.Enable(EnableCap.StencilTest);
-                GL.ClearStencil(0x00);
-                GL.Clear(ClearBufferMask.StencilBufferBit);
-                GL.StencilFunc(StencilFunction.Always, 1, 0xFF);
-                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
+                GL.Enable(EnableCap.AlphaTest);
+                GL.AlphaFunc(AlphaFunction.Greater, 0);
             }
-            else if (m == 2)
+            else
             {
-                GL.StencilMask(0x00);
-                GL.StencilFunc(StencilFunction.Lequal, 1, 0xFF);
+                GL.Disable(EnableCap.AlphaTest);
+            }
+        }
+
+        public static void Stencil(StencilMode m)
+        {
+            if (m == StencilMode.Create)
+            {
+                if (StencilDepth == 0)
+                {
+                    GL.Enable(EnableCap.StencilTest);
+                    GL.ClearStencil(0x00);
+                    GL.Clear(ClearBufferMask.StencilBufferBit);
+                }
+                GL.StencilFunc(StencilFunction.Equal, StencilDepth, 0xFF);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
+                StencilDepth += 1;
+            }
+            else if (m == StencilMode.Draw)
+            {
+                GL.StencilFunc(StencilFunction.Equal, StencilDepth, 0xFF);
                 GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep);
             }
-            else if (m == 0)
+            else if (m == StencilMode.Disable)
             {
-                GL.Clear(ClearBufferMask.StencilBufferBit);
-                GL.Disable(EnableCap.StencilTest);
+                StencilDepth -= 1;
+                if (StencilDepth == 0)
+                {
+                    GL.Clear(ClearBufferMask.StencilBufferBit);
+                    GL.Disable(EnableCap.StencilTest);
+                }
+                else
+                {
+                    GL.StencilFunc(StencilFunction.Lequal, StencilDepth, 0xFF);
+                }
             }
         }
 

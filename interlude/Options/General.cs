@@ -17,16 +17,16 @@ namespace YAVSRG.Options
 
         public static readonly List<Tuple<int, int>> RESOLUTIONS = new List<Tuple<int, int>>
         {
-            new Tuple<int, int>(800,600),
-            new Tuple<int, int>(1024,768),
-            new Tuple<int, int>(1280,800),
+            new Tuple<int, int>(800, 600),
+            new Tuple<int, int>(1024, 768),
+            new Tuple<int, int>(1280, 800),
             new Tuple<int, int>(1280, 1024),
-            new Tuple<int, int>(1366,768),
-            new Tuple<int, int>(1600,900),
-            new Tuple<int, int>(1600,1024),
-            new Tuple<int, int>(1680,1050),
-            new Tuple<int, int>(1920,1080),
-            new Tuple<int, int>(2715,1527),
+            new Tuple<int, int>(1366, 768),
+            new Tuple<int, int>(1600, 900),
+            new Tuple<int, int>(1600, 1024),
+            new Tuple<int, int>(1680, 1050),
+            new Tuple<int, int>(1920, 1080),
+            new Tuple<int, int>(2715, 1527),
         };
 
         public float UniversalAudioOffset = 0f;

@@ -168,7 +168,7 @@ namespace YAVSRG.Audio
                 Bass.ChannelPlay(nowplaying);
                 LeadingIn = false;
             }
-            if (!Playing) //if the song is over run the callback which can be assigned from elsewhere in the game
+            if (!Playing || (!Paused && Playing && Bass.ChannelIsActive(nowplaying) == PlaybackState.Stopped)) //if the song is over run the callback which can be assigned from elsewhere in the game
             {
                 if (OnPlaybackFinish != null)
                 {

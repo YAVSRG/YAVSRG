@@ -110,14 +110,14 @@ namespace YAVSRG.Interface
             }
         }
 
-        public static void DrawLoadingAnimation(float scale, float x, float y, float time)
+        public static void DrawLoadingAnimation(float scale, float x, float y, float time, int alpha)
         {
             float tx, ty;
             for (int i = 0; i < 6; i++)
             {
                 tx = x + scale * 1.2f * (float)Math.Cos(time + i * Math.PI / 3);
                 ty = y + scale * 1.2f * (float)Math.Sin(time + i * Math.PI / 3);
-                SpriteBatch.DrawRect(new Rect(tx - 10, ty - 10, tx + 10, ty + 10), Color.Aqua);
+                SpriteBatch.DrawRect(new Rect(tx - 10, ty - 10, tx + 10, ty + 10), Color.FromArgb(alpha,Color.Aqua));
             }
 
             for (int i = 0; i < 6; i++)
@@ -127,7 +127,7 @@ namespace YAVSRG.Interface
                     new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) + 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) + 10 * (float)Math.Cos(time+i*Math.PI/3)),
                     new OpenTK.Vector2(x - (0.8f*scale+10) * (float)Math.Cos(time + i * Math.PI / 3), y + (0.8f*scale+10) * (float)Math.Sin(time+i*Math.PI/3)),
                     new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) - 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) - 10 * (float)Math.Cos(time+i*Math.PI/3)),
-                }, color: Color.Aqua);
+                }, color: Color.FromArgb(alpha, Color.Aqua));
             }
 
             DrawArc(x, y, scale * 0.5f, scale * 0.55f, time, time + 2 * (float)Math.Sin(time), Color.Aquamarine);
@@ -143,12 +143,12 @@ namespace YAVSRG.Interface
             float h = bounds.Height * 0.5f;
             float t = h * Math.Abs(amount);
             SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
-            SpriteBatch.StencilMode(1);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
             SpriteBatch.DrawRect(new Rect(bounds.Left-t, bounds.Top, bounds.Right+t, bounds.Bottom), Color.White);
             SpriteBatch.DisableTransform();
-            SpriteBatch.StencilMode(2);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
             Game.Screens.DrawChartBackground(new Rect(bounds.Left - h, bounds.Top, bounds.Right + h, bounds.Bottom), fill, 1.5f);
-            SpriteBatch.StencilMode(0);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
             SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
             DrawFrame(new Rect(bounds.Left-t, bounds.Top, bounds.Right+t, bounds.Bottom), 30f, frame);
             SpriteBatch.DisableTransform();

@@ -17,7 +17,7 @@ namespace YAVSRG.Interface.Widgets
 
         public ScoreCard(Score c)
         {
-            PositionBottomRight(430, 100, AnchorType.MIN, AnchorType.MIN);
+            PositionBottomRight(20, 100, AnchorType.MAX, AnchorType.MIN);
             ScoreSystem score = ScoreSystem.GetScoreSystem(ScoreType.Default);
             var hd = ScoreTracker.StringToHitData(c.hitdata, c.keycount);
             score.ProcessScore(hd);

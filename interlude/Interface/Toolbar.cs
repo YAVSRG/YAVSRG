@@ -24,16 +24,16 @@ namespace YAVSRG.Interface
                 new Button("buttonback", "Back", () => { Game.Screens.PopScreen(); })
                 .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN));
             AddChild(
-                new Button("buttonmusic", "Visualiser", () => { if (!(Game.Screens.Current is ScreenVisualiser && Game.Gameplay.CurrentCachedChart != null)) Game.Screens.AddScreen(new ScreenVisualiser()); })
+                new Button("buttonmusic", "Visualiser", () => { if (!(Game.Screens.Current is ScreenVisualiser) && !(Game.Screens.Current is ScreenScore) && Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); })
                 .PositionTopLeft(160, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
-                new Button("buttonoptions", "Options", () => { if (!(Game.Screens.Current is ScreenOptions)) Game.Screens.AddScreen(new ScreenOptions()); })
+                new Button("buttonoptions", "Options", () => { if (!(Game.Screens.Current is ScreenOptions) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenOptions()); })
                 .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
-                new Button("buttonimport", "Import", () => { if (!(Game.Screens.Current is ScreenImport)) Game.Screens.AddScreen(new ScreenImport()); })
+                new Button("buttonimport", "Import", () => { if (!(Game.Screens.Current is ScreenImport) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenImport()); })
                 .PositionTopLeft(320, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
-                new Button("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby)) Game.Screens.AddScreen(new ScreenLobby()); })
+                new Button("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenLobby()); })
                 .PositionTopLeft(400, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(320, 80, AnchorType.MAX, AnchorType.MIN));
             Chat = new ChatBox();
             AddChild(Chat.PositionTopLeft(0, 80, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MAX));
@@ -59,7 +59,7 @@ namespace YAVSRG.Interface
             else { Expand(); }
         }
 
-        public new float Height
+        public float Height
         {
             get { return Math.Max(slide.Val, 0); }
         }

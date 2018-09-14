@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         string type;
         public AccMeter(ScoreTracker st) : base(st)
         {
-            type = st.Scoring.FormatAcc().Split(' ')[1];
+            type = st.Scoring.FormatAcc().Split(new[] { ' ' }, 2)[1];
             if (type == "(YAV)") type = "";
         }
 

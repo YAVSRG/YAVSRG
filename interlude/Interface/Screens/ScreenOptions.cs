@@ -13,8 +13,7 @@ namespace YAVSRG.Interface.Screens
     class ScreenOptions : Screen
     {
         private LayoutPanel lp;
-
-
+        
         public ScreenOptions()
         {
             OnResize();
@@ -30,6 +29,9 @@ namespace YAVSRG.Interface.Screens
             tabs.AddChild(new GameplayPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
             tabs.AddChild(lp.PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
             lp.Refresh();
+
+            ModMenu modMenu = new ModMenu();
+            AddChild(modMenu.PositionTopLeft(0, 150, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(20, 100, AnchorType.MAX, AnchorType.MAX));
 
             AddChild(tabs.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MAX, AnchorType.MAX));
             AddChild(ib.PositionTopLeft(550, 50, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(50, 50, AnchorType.MAX, AnchorType.MAX));

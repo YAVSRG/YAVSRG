@@ -11,17 +11,17 @@ namespace YAVSRG.Interface.Widgets
         Func<string> text;
         AnchorType style;
         bool font;
-        bool fill;
+        float size;
         Animations.AnimationColorMixer color;
 
-        public TextBox(string text, AnchorType position, bool useFill, bool altFont, System.Drawing.Color c) : this(() => { return text; }, position, useFill, altFont, c) { }
+        public TextBox(string text, AnchorType position, float textSize, bool altFont, System.Drawing.Color c) : this(() => { return text; }, position, textSize, altFont, c) { }
 
-        public TextBox(Func<string> text, AnchorType position, bool useFill, bool altFont, System.Drawing.Color c)
+        public TextBox(Func<string> text, AnchorType position, float textSize, bool altFont, System.Drawing.Color c)
         {
             this.text = text;
             style = position;
             font = altFont;
-            fill = useFill;
+            size = textSize;
             Animation.Add(color = new Animations.AnimationColorMixer(c));
         }
 
@@ -29,9 +29,13 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            if (fill)
+            if (size == 0)
             {
                 (font ? SpriteBatch.Font1 : SpriteBatch.Font2).DrawDynamicTextToFill(text(), bounds, color, style);
+            }
+            else
+            {
+                (font ? SpriteBatch.Font1 : SpriteBatch.Font2).DrawDynamicText(text(), bounds, color, style, size);
             }
         }
 

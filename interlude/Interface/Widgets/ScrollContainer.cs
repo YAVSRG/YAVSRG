@@ -19,7 +19,7 @@ namespace YAVSRG.Interface.Widgets
         Animations.AnimationColorMixer scrollcolor;
         float contentsHeight = 0;
 
-        public ScrollContainer(float padx, float pady, bool horizontal, int scroll = 2, bool frame = true, bool autosize = true) : base()
+        public ScrollContainer(float padx, float pady, bool horizontal, int scroll = 2, bool frame = true, bool autosize = false) : base()
         {
             canscroll = scroll;
             this.frame = frame;
@@ -33,8 +33,8 @@ namespace YAVSRG.Interface.Widgets
         public override void AddChild(Widget child)
         {
             Rect bounds = GetBounds();
-            float x = padX;
-            float y = padY - scroll;
+            float x = padX - (horizontal ? scroll : 0);
+            float y = padY - (horizontal ? 0 : scroll);
             Rect widgetBounds;
             foreach (Widget w in Widgets)
             {
@@ -51,26 +51,26 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
             }
-            base.AddChild(child);
             widgetBounds = child.GetBounds(bounds);
             child.TopLeft.Position(x, y, bounds);
             child.BottomRight.Position(x + widgetBounds.Width, y + widgetBounds.Height, bounds);
+            base.AddChild(child);
         }
 
         public override void Update(Rect bounds)
         {
             Rect parentBounds = bounds;
             bounds = GetBounds(bounds);
-            float x = padX;
-            float y = padY - scroll;
+            float x = padX - (horizontal ? scroll : 0);
+            float y = padY - (horizontal ? 0 : scroll);
             Rect widgetBounds;
             foreach (Widget w in Widgets)
             {
                 if (w.State > 0)
                 {
-                    w.Update(bounds);
                     widgetBounds = w.GetBounds(bounds);
                     w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
+                    w.Update(bounds);
                     if (horizontal)
                     {
                         x += padX + widgetBounds.Width;
@@ -100,9 +100,19 @@ namespace YAVSRG.Interface.Widgets
                     scrollcolor.Target(Color.FromArgb(127,Game.Screens.HighlightColor));
                 }
                 scroll -= Input.MouseScroll * 100;
-                if (bounds.Top + y < bounds.Bottom) //prevents scrolling off the bottom
+                if (horizontal)
                 {
-                    scroll -= bounds.Bottom - (bounds.Top + y);
+                    if (bounds.Left + x < bounds.Right) //prevents scrolling off the right
+                    {
+                        scroll -= bounds.Right - (bounds.Left + x);
+                    }
+                }
+                else
+                {
+                    if (bounds.Top + y < bounds.Bottom) //prevents scrolling off the bottom
+                    {
+                        scroll -= bounds.Bottom - (bounds.Top + y);
+                    }
                 }
                 scroll = Math.Max(scroll, 0); //prevents scrolling off the top
             }
@@ -116,13 +126,13 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            SpriteBatch.StencilMode(1); //draw a mask preventing widgets from drawing outside the bounds of this one
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Create); //draw a mask preventing widgets from drawing outside the bounds of this one
             SpriteBatch.DrawRect(bounds, Color.Transparent);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw); //draw with consideration to this mask
             if (frame)
             {
                 Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1.5f);
             }
-            SpriteBatch.StencilMode(2); //draw with consideration to this mask
             foreach (Widget w in Widgets)
             {
                 if (w.State > 0 && w.Bottom(bounds) > bounds.Top && w.Top(bounds) < bounds.Bottom) //optimisation for large numbers of items
@@ -130,11 +140,11 @@ namespace YAVSRG.Interface.Widgets
                     w.Draw(bounds);
                 }
             }
-            SpriteBatch.StencilMode(0); //masking mode off
             if (frame)
             {
                 ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
             }
+                SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable); //masking mode off
             /*
             if (canscroll > 1) //draw scroll bar (doesn't work)
             {

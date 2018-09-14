@@ -18,7 +18,7 @@ namespace YAVSRG.Interface
         public static int MouseX;
         public static int MouseY;
         public static bool LockMouse;
-        public static int MouseScroll;
+        private static int _MouseScroll;
         public static bool ClickHandled;
 
         public static void Init()
@@ -38,7 +38,17 @@ namespace YAVSRG.Interface
 
         private static void MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            MouseScroll = e.Delta;
+            _MouseScroll = e.Delta;
+        }
+
+        public static int MouseScroll
+        {
+            get
+            {
+                var m = _MouseScroll;
+                _MouseScroll = 0;
+                return m;
+            }
         }
 
         private static void MouseMove(object sender, MouseMoveEventArgs e)
@@ -130,7 +140,7 @@ namespace YAVSRG.Interface
             im?.Update();
             ok = new List<Key>(k);
             om = new List<MouseButton>(m);
-            MouseScroll = 0;
+            _MouseScroll = 0;
             ClickHandled = false;
         }
     }

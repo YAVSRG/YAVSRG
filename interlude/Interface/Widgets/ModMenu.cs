@@ -113,10 +113,10 @@ namespace YAVSRG.Interface.Widgets
         {
             bounds = GetBounds(bounds);
             int a = (int)(255 * slide);
-            SpriteBatch.StencilMode(1);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
             SpriteBatch.DrawRect(bounds, Color.Transparent);
             float h = bounds.Height;
-            SpriteBatch.StencilMode(2);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
             Game.Screens.DrawChartBackground(new Rect(bounds.Left, bounds.Bottom - h * slide, bounds.Right, bounds.Bottom - 1), Color.FromArgb(a, Game.Screens.DarkColor), 1.25f);
             SpriteBatch.Font1.DrawCentredTextToFill(Game.Gameplay.GetModString(), new Rect(bounds.Left + 50, bounds.Bottom - h * slide + 50, bounds.Right - 50, bounds.Bottom - h * slide + 200), Color.FromArgb(a, Game.Options.Theme.MenuFont));
 
@@ -124,7 +124,7 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.Draw("frame", new Rect(bounds.Right - 30, bounds.Bottom - h * slide, bounds.Right, bounds.Bottom), Color.FromArgb(a, Game.Screens.BaseColor), 2, 1);
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Bottom - h * slide - 5, bounds.Right, bounds.Bottom - h * slide), Color.FromArgb(a, Game.Screens.BaseColor));
             SpriteBatch.Font2.DrawCentredTextToFill("Mod Select", new Rect(bounds.Left, bounds.Bottom - h * slide - 50, bounds.Right, bounds.Bottom - h * slide), Color.FromArgb(a, Game.Options.Theme.MenuFont));
-            SpriteBatch.StencilMode(0);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
         }
 
         public override void Update(Rect bounds)

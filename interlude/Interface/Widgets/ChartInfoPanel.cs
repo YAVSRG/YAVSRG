@@ -3,79 +3,49 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Charts.DifficultyRating;
-using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets
 {
     public class ChartInfoPanel : Widget
     {
-        RatingReport diff;
-        float physical;
-        float technical;
-        float rate;
         string time, bpm;
-        Scoreboard sb;
-        object lastChart = null;
 
-        public ChartInfoPanel() : base()
+        public ChartInfoPanel()
         {
-            sb = new Scoreboard();
-            AddChild(sb.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 150, AnchorType.MIN, AnchorType.MAX));
-            ChangeChart(true);
+            ChangeChart();
+            AddChild(new TextBox(() => (Game.CurrentChart.Data.DiffName), AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont).PositionBottomRight(0, 0.2f, AnchorType.MAX, AnchorType.LERP));
+            AddChild(new TextBox(Game.Gameplay.GetModString, AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(0, 0.15f, AnchorType.MIN, AnchorType.LERP).PositionBottomRight(0, 0.3f, AnchorType.MAX, AnchorType.LERP));
+            AddChild(new TextBox(() => (Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Physical) + "*"), AnchorType.MIN, 50f, true, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(15, 0.35f, AnchorType.MIN, AnchorType.LERP).PositionBottomRight(0, 0.5f, AnchorType.CENTER, AnchorType.LERP));
+            AddChild(new TextBox(() => ("*" + Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Technical)), AnchorType.MAX, 50f, true, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(0, 0.35f, AnchorType.CENTER, AnchorType.LERP).PositionBottomRight(15, 0.5f, AnchorType.MAX, AnchorType.LERP));
+            AddChild(new TextBox("Physical", AnchorType.MIN, 20f, false, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(15, 0.3f, AnchorType.MIN, AnchorType.LERP).PositionBottomRight(0, 0.4f, AnchorType.CENTER, AnchorType.LERP));
+            AddChild(new TextBox("Technical", AnchorType.MAX, 20f, false, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(0, 0.3f, AnchorType.CENTER, AnchorType.LERP).PositionBottomRight(15, 0.4f, AnchorType.MAX, AnchorType.LERP));
+            
+            AddChild(new TextBox("Skillset breakdown coming soon", AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(0, 0.5f, AnchorType.MIN, AnchorType.LERP).PositionBottomRight(0, 90, AnchorType.MAX, AnchorType.MAX));
+
+            AddChild(new TextBox(() => (bpm), AnchorType.MIN, 30f, false, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(15, 70, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(new TextBox(() => (time), AnchorType.MAX, 30f, false, Game.Options.Theme.MenuFont)
+                .PositionTopLeft(0, 70, AnchorType.CENTER, AnchorType.MAX).PositionBottomRight(15, 0, AnchorType.MAX, AnchorType.MAX));
         }
 
-        public void ChangeChart(bool force)
+        public void ChangeChart()
         {
-            diff = Game.Gameplay.ChartDifficulty;
-            rate = (float)Game.Options.Profile.Rate;
-            physical = diff.Physical;
-            technical = diff.Technical;
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
-            if (Game.Gameplay.CurrentChart != lastChart || force)
-            {
-                sb.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
-                lastChart = Game.Gameplay.CurrentChart;
-            }
         }
 
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            //slice
-            ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + 150), 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Bottom - 100, bounds.Right, bounds.Bottom), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + 100), Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 50, bounds.Top+150), Game.Options.Theme.MenuFont);
-
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.DiffName, new Rect(bounds.Left + 550, bounds.Top + 160, bounds.Right - 50, bounds.Top + 240), Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawText("Physical", 20f, bounds.Left + 550, bounds.Top + 240, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawText(Utils.RoundNumber(physical) + "⋆", 40f, bounds.Left + 550, bounds.Top + 260, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawJustifiedText("Technical", 20f, bounds.Right - 50, bounds.Top + 240, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedText(Utils.RoundNumber(technical) + "⋆", 40f, bounds.Right - 50, bounds.Top + 260, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawCentredTextToFill(Utils.RoundNumber(rate) + "x Audio", new Rect(bounds.Left + 650, bounds.Top + 270, bounds.Right - 150, bounds.Top + 310), Game.Options.Theme.MenuFont);
-
-            SpriteBatch.Font1.DrawText(time, 40f, bounds.Left + 550, bounds.Bottom - 220, Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedText(bpm, 40f, bounds.Right - 50, bounds.Bottom - 220, Game.Options.Theme.MenuFont);
-
-            //DrawGraph(bounds.Left + 550, bounds.Top + 350, bounds.Right - 50, bounds.Bottom - 250);
-
+            Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor);
+            ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
             DrawWidgets(bounds);
         }
-
-        /*
-        public void DrawGraph(float left, float top, float right, float bottom)
-        {
-            int c = diff.PhysicalData.Length;
-            float x = (right - left) / c;
-            float y = (bottom - top) / physical * 0.25f;
-            for (int i = 0; i < c; i++)
-            {
-                //SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.PhysicalData[i] - 5, left + x * i + 1, bottom - y * diff.PhysicalData[i] + 5, Color.Aqua);
-            }
-            SpriteBatch.Font2.DrawCentredTextToFill("Replace with NPS graph?",left, top, right, bottom, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
-        }*/
     }
 }

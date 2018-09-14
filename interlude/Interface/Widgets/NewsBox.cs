@@ -41,9 +41,9 @@ namespace YAVSRG.Interface.Widgets
             ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left + h * 0.5f * (1 - slide), t, bounds.Right, t + h), slide - 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill("Read the Wiki", new Rect(bounds.Left + h * 0.5f, t, bounds.Right, t + h), Game.Options.Theme.MenuFont);
 
-            SpriteBatch.StencilMode(1);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + h, bounds.Right, t), System.Drawing.Color.Transparent);
-            SpriteBatch.StencilMode(2);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
             if (data != null)
             {
                 SpriteBatch.Font1.DrawCentredTextToFill(data.name, new Rect(bounds.Left, bounds.Top + h, bounds.Right, bounds.Top + 2 * h), Game.Options.Theme.MenuFont);
@@ -52,9 +52,9 @@ namespace YAVSRG.Interface.Widgets
             else
             {
                 SpriteBatch.Font1.DrawCentredTextToFill("Loading...", new Rect(bounds.Left, bounds.Top + h, bounds.Right, bounds.Top + 2 * h), Game.Options.Theme.MenuFont);
-                ScreenUtils.DrawLoadingAnimation(100f * slide, bounds.CenterX, (bounds.Top + t) / 2, loading.value * 0.01f);
+                ScreenUtils.DrawLoadingAnimation(100f * slide, bounds.CenterX, (bounds.Top + t) / 2, loading.value * 0.01f, 255);
             }
-            SpriteBatch.StencilMode(0);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
         }
 
         public override void Update(Rect bounds)

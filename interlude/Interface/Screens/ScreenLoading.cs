@@ -38,19 +38,24 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Instance.WindowBorder = OpenTK.WindowBorder.Hidden;
             }
-            Game.Screens.Logo.Move(new Rect(-300, -300, 300, 300));
             if (!Game.Screens.Loading)
             {
+                Game.Screens.Logo.Move(new Rect(-300, -300, 300, 300));
                 exiting = true;
                 transition.Add(new AnimationCounter(100, false));
-                transition.Add(fade = new AnimationFade(0, 1, 0.996f));
+                transition.Add(fade = new AnimationFade(0, 1, 0.999f));
             }
             else
             {
                 ChartLoader.Init();
+                transition.Add(new AnimationCounter(10, false));
+                transition.Add(new AnimationAction(() =>
+                {
+                    Game.Audio.PlaySFX("hello");
+                    Game.Screens.Logo.Move(new Rect(-300, -300, 300, 300));
+                }));
                 transition.Add(fade = new AnimationFade(0, 1, 0.996f));
                 transition.Add(new AnimationCounter(100, false));
-                Game.Audio.PlaySFX("hello");
             }
         }
 
@@ -71,7 +76,7 @@ namespace YAVSRG.Interface.Screens
                     SpriteBatch.Font1.DrawCentredText(splash[i].ToString(), 50f, o + 30 * i, -400 + 50f * (float)Math.Sin(counter.value * 0.01f + i * 0.2f), Color.FromArgb(a, Color.White));
                 }
             }
-            DrawLoadingAnimation(350f * (exiting ? 1 - fade : fade), 0, 0, counter.value * 0.01f);
+            DrawLoadingAnimation(350f * (exiting ? 1 - fade : fade), 0, 0, counter.value * 0.01f, a);
         }
 
         public override void Update(Rect bounds)
@@ -96,7 +101,7 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.Toolbar.SetHidden(false);
                 Game.Instance.WindowBorder = wb;
             }
-            ((ImageBox)Game.Screens.Logo).c = Color.FromArgb(a, Color.White);
+            Game.Screens.Logo.alpha = a / 255f;
         }
     }
 }

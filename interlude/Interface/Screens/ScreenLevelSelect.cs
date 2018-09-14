@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Screens
 {
     public class ScreenLevelSelect : Screen
     {
-        private ChartInfoPanel diffDisplay;
+        private ChartInfoControls diffDisplay;
         private LevelSelector selector;
 
         public ScreenLevelSelect()
@@ -20,18 +20,8 @@ namespace YAVSRG.Interface.Screens
             selector = new LevelSelector(this);
             AddChild(selector.PositionTopLeft(0, 120, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
             AddChild(new ChartSortingControls().PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 120, AnchorType.MAX, AnchorType.MIN));
-            diffDisplay = new ChartInfoPanel();
-            AddChild(diffDisplay.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(700, 0, AnchorType.MAX, AnchorType.MAX));
-
-            ModMenu modMenu = new ModMenu();
-            AddChild(modMenu.PositionTopLeft(0, 150, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(720, 100, AnchorType.MAX, AnchorType.MAX));
-
-            AddChild(new FramedButton("buttonbase", "Play", () => { Game.Gameplay.PlaySelectedChart(); })
-                .PositionTopLeft(-350, 75, AnchorType.CENTER, AnchorType.MAX)
-                .PositionBottomRight(750, 25, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new FramedButton("buttonbase", "Mods", () => { modMenu.Toggle(); })
-                .PositionTopLeft(50, 75, AnchorType.MIN, AnchorType.MAX)
-                .PositionBottomRight(-400, 25, AnchorType.CENTER, AnchorType.MAX));
+            diffDisplay = new ChartInfoControls();
+            AddChild(diffDisplay.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(750, 0, AnchorType.MAX, AnchorType.MAX));
 
             PositionTopLeft(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
             PositionBottomRight(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);

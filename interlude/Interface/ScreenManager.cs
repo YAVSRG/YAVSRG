@@ -23,13 +23,13 @@ namespace YAVSRG.Interface
         public Screen Current = null;
         public bool Loading = true;
         public Sprite Background;
-        public Sprite Oldbackground;
+        public Sprite Oldbackground; //unlikely to ever be used for fading because it needs to calculate two separate aspect ratio adjustments
         public AnimationColorFade BackgroundDim = new AnimationColorFade(Color.Black, Color.White);
         public AnimationColorMixer BaseColor;
         public AnimationColorMixer DarkColor;
         public AnimationColorMixer HighlightColor;
         public AnimationSlider Parallax = new AnimationSlider(15);
-        public Widget Logo;
+        public Widgets.Logo Logo;
         public Toolbar Toolbar;
 
         public ScreenManager()
@@ -39,7 +39,8 @@ namespace YAVSRG.Interface
             animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
             animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
             animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
-            Logo = new Widgets.ImageBox("logo").PositionTopLeft(-200, ScreenHeight, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(200, ScreenHeight + 400, AnchorType.CENTER, AnchorType.CENTER);
+            Logo = new Widgets.Logo();
+            Logo.PositionTopLeft(-200, 1000, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(200, 1400, AnchorType.CENTER, AnchorType.CENTER);
         }
 
         public void AddDialog(Dialog d)

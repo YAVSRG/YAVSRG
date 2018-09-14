@@ -37,7 +37,7 @@ namespace YAVSRG.Interface.Dialogs
             SpriteBatch.Font1.DrawCentredTextToFill("Loading...", new Rect(-300, bounds.Top + 100, 300, bounds.Top + 300), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawCentredTextToFill(ChartLoader.LastOutput, new Rect(bounds.Left, -400, bounds.Right, 0), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawCentredTextToFill("You can press " + Game.Options.General.Binds.CollapseToToolbar.ToString().ToUpper() + " to hide the game to the taskbar and do something else while you wait. Such as minesweeper...", new Rect(bounds.Left, -200, bounds.Right, 200), Game.Options.Theme.MenuFont);
-            ScreenUtils.DrawLoadingAnimation(100f, 0, 200, anim.value * 0.01f);
+            ScreenUtils.DrawLoadingAnimation(100f, 0, 200, anim.value * 0.01f, 255);
         }
     }
 }

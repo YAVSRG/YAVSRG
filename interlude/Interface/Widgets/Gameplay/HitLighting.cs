@@ -12,26 +12,29 @@ namespace YAVSRG.Interface.Widgets.Gameplay
     {
         public AnimationSlider NoteLight = new AnimationSlider(0);
         public AnimationSlider ReceptorLight = new AnimationSlider(0);
+        float scale;
 
         public HitLighting() : base()
         {
+            scale = Game.Options.Theme.ColumnWidth / Content.GetTexture("receptorlighting").Width;
             Animation.Add(NoteLight);
             Animation.Add(ReceptorLight);
         }
 
-        public override void Draw(Rect bounds) //draws hitlight, right now just the receptor light and not a flash when you hit a note
+        public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
             float w = bounds.Width;
-            if (ReceptorLight.Val > 0.5f)
+            if (ReceptorLight.Val > Game.Options.Theme.ColumnLightTime)
             {
-                SpriteBatch.Draw("receptorlighting", new Rect(bounds.Left + w * (1 - ReceptorLight.Val), bounds.Top + 3 * w * (1 - ReceptorLight.Val), bounds.Right - w * (1 - ReceptorLight.Val), bounds.Bottom), Color.White);
+                int a = (int)(255 * (ReceptorLight.Val - Game.Options.Theme.ColumnLightTime) / Game.Options.Theme.ColumnLightTime);
+                SpriteBatch.DrawAlignedTexture("receptorlighting", bounds.CenterX, bounds.Top, scale * ReceptorLight.Val, scale / ReceptorLight.Val, -0.5f, 0, Color.FromArgb(a,Color.White));
             }
             if (NoteLight.Val > 0f)
             {
                 //slice
-                SpriteBatch.Draw("notelighting", new Rect(bounds.Left, bounds.Bottom + w, bounds.Right, bounds.Bottom), Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
+                SpriteBatch.Draw("notelighting", new Rect(bounds.Left, bounds.Bottom, bounds.Right, bounds.Bottom - w), Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
             }
         }
     }

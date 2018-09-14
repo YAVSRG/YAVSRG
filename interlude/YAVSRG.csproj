@@ -25,7 +25,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>0.3.2.%2a</ApplicationVersion>
+    <ApplicationVersion>0.3.4.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -140,6 +140,7 @@
     <Compile Include="Gameplay\GameplaySnap.cs" />
     <Compile Include="Gameplay\Mods\Autoplay.cs" />
     <Compile Include="Gameplay\Mods\Inverse.cs" />
+    <Compile Include="Gameplay\Mods\Keychange.cs" />
     <Compile Include="Gameplay\Mods\Manipulate.cs" />
     <Compile Include="Gameplay\Mods\Mirror.cs" />
     <Compile Include="Gameplay\Mods\Mod.cs" />
@@ -193,10 +194,11 @@
     <Compile Include="Interface\Animations\AnimationSlider.cs" />
     <Compile Include="Interface\Screens\ScreenVisualiser.cs" />
     <Compile Include="Interface\Widget.cs" />
+    <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\Controls\BannerButton.cs" />
     <Compile Include="Interface\Widgets\Controls\BoolPicker.cs" />
     <Compile Include="Interface\Widgets\Controls\Button.cs" />
-    <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
+    <Compile Include="Interface\Widgets\ChartInfoControls.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
     <Compile Include="Interface\Widgets\ChatBox.cs" />
     <Compile Include="Interface\Widgets\Controls\DropDown.cs" />
@@ -207,6 +209,8 @@
     <Compile Include="Interface\Widgets\Gameplay\HitLighting.cs" />
     <Compile Include="Interface\Widgets\Gameplay\JudgementCounter.cs" />
     <Compile Include="Interface\Widgets\Gameplay\MiscInfoDisplay.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\PerformanceMeter.cs" />
+    <Compile Include="Interface\Widgets\Logo.cs" />
     <Compile Include="Interface\Widgets\TaskDisplay.cs" />
     <Compile Include="Interface\Widgets\ModMenu.cs" />
     <Compile Include="Interface\Widgets\InfoBox.cs" />
@@ -277,6 +281,7 @@
     <Compile Include="Sprite.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="SpriteFont.cs" />
+    <Compile Include="Utilities\SkinConverter.cs" />
     <Compile Include="Utilities\TaskManager.cs" />
     <Compile Include="Utilities\TrayIcon.cs" />
     <Compile Include="Utilities\Utils.cs" />

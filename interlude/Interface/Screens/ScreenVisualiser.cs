@@ -51,7 +51,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200), GetBounds());
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200));
             Game.Screens.BackgroundDim.Target = 0.3f;
             Game.Screens.Toolbar.cursor = true;
             Input.LockMouse = false;
@@ -104,7 +104,7 @@ namespace YAVSRG.Interface.Screens
             base.Update(bounds);
             float f = Utils.GetBeat(1);
             float r = 400 + Utils.GetBeat(1) * 20;
-            Game.Screens.Logo.Move(new Rect(-r, -r, r, r), bounds);
+            Game.Screens.Logo.Move(new Rect(-r, -r, r, r));
 
             if (hideUI.Val < 0.99f)
             {

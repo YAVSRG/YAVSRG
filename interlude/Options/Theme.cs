@@ -24,11 +24,12 @@ namespace YAVSRG.Options
         public Color ThemeColor = Color.FromArgb(0, 255, 160);
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;
+        public float JudgementFadeTime = 1500f; //milliseconds
         public int ColumnWidth = 150;
         public float NoteDepth = 20f;
         public bool FlipHoldTail = true;
         public bool UseHoldTailTexture = true;
-        public float JudgementFadeTime = 1500f; //milliseconds
+        public float ColumnLightTime = 0.8f;
 
         protected int GetRotation(int column, int keycount)
         {
