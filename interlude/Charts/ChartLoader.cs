@@ -464,7 +464,7 @@ namespace YAVSRG.Charts
                 try
                 {
                     Directory.Delete(dir, true);
-                    File.Delete(path);
+                    //File.Delete(path);
                 }
                 catch
                 {
@@ -526,7 +526,7 @@ namespace YAVSRG.Charts
                         Log("Could not delete files after extraction: " + target, LogType.Warning);
                     }
                 }
-                File.Delete(path);
+                //File.Delete(path);
             }
             //no rar support until i know how
         }

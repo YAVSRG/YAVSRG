@@ -12,11 +12,7 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenMenu : Screen
     {
-        static readonly string[] splashes = new[] { "Yet Another Vertically Scrolling Rhythm Game", "Some funny flavourtext", "Based on the hit game, osu!mania",
-            "Pausers never win", "Winners never pause", "Timing is everything", "Where's the pause button?", "Just play BMS", "Skill not included",
-            "Click play already", "JUST MASH", "A cool name for a rhythm game", "Making rhythm games great again", "The future is now, old man",
-            "https://en.wikipedia.org/wiki/Rhythm_game", "https://github.com/percyqaz/YAVSRG/issues/9", "Attention to detail", "Etternan't" };
-        string splash = splashes[new Random().Next(0, splashes.Length)];
+        string splash = Utilities.Splashes.MenuSplash();
         AnimationSlider slide;
         AnimationCounter scroll;
         Widget play, options, quit;
@@ -52,10 +48,9 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            splash = splashes[new Random().Next(0, splashes.Length)];
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400,-ScreenUtils.ScreenWidth + 800, 400));
+            splash = Utilities.Splashes.MenuSplash();
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
             Game.Screens.BackgroundDim.Target = 1;
-            slide.Target = 1;
             play.PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER);
             options.PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER);
             quit.PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER);
@@ -69,8 +64,13 @@ namespace YAVSRG.Interface.Screens
                 options.BottomRight.Target(-ScreenUtils.ScreenWidth + 1130, 50);
             }));
             a.Add(new AnimationCounter(10, false));
-            a.Add(new AnimationAction(() => {
+            a.Add(new AnimationAction(() =>
+            {
                 quit.BottomRight.Target(-ScreenUtils.ScreenWidth + 1060, 200);
+            }));
+            a.Add(new AnimationCounter(20, false));
+            a.Add(new AnimationAction(() => {
+                slide.Target = 1;
             }));
             Animation.Add(a);
         }
@@ -88,12 +88,12 @@ namespace YAVSRG.Interface.Screens
 
         public override void Draw(Rect bounds)
         {
-            //ScreenUtils.DrawArrowConfetti(left, top, right, bottom, 100f, Color.FromArgb(10,255,255,255), Color.FromArgb(80, 255, 255, 255), scroll.value * 0.002f);
             base.Draw(bounds);
-            //ScreenUtils.DrawParallelogramWithBG(right - 500, top + 100, right, top + 200, 0.5f, Game.Screens.BaseColor, Game.Screens.HighlightColor);
-            //SpriteBatch.Font1.DrawText(splash, 30f, right - 480, top + 125, Game.Options.Theme.MenuFont);
-            //float w = (right-100) * slide;
-            //ScreenUtils.DrawBanner(-w, -300, w, -200, Game.Screens.HighlightColor);
+            float w = SpriteBatch.Font1.MeasureText(splash, 30f) / 2 + 10;
+            SpriteBatch.DrawRect(
+                new Rect(bounds.CenterX - w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 30, bounds.CenterX + w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 100),
+                Color.FromArgb(100,Game.Screens.DarkColor));
+            SpriteBatch.Font1.DrawCentredText(splash, 30f, bounds.CenterX + (ScreenUtils.ScreenWidth) * (slide - 1), bounds.Top + 40, Color.FromArgb((int)(slide * 255), Game.Options.Theme.MenuFont));
         }
     }
 }

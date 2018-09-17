@@ -98,9 +98,7 @@ namespace YAVSRG
         void PostWindowInit()
         {
             ApplyWindowSettings(Options.General); //apply window settings from options
-
-            //Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
-            //screens.AddScreen(new Interface.Screens.ScreenLoading(s));
+            
             var test = new Discord.EventHandlers() { requestCallback = Discord.RichPresence.RequestHandler };
             Discord.Initialize("420320424199716864", ref test, true, "");
             Utils.SetDiscordData("Just started playing", "Pick a song already!");

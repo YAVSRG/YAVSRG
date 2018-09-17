@@ -282,6 +282,7 @@
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="SpriteFont.cs" />
     <Compile Include="Utilities\SkinConverter.cs" />
+    <Compile Include="Utilities\Splashes.cs" />
     <Compile Include="Utilities\TaskManager.cs" />
     <Compile Include="Utilities\TrayIcon.cs" />
     <Compile Include="Utilities\Utils.cs" />
@@ -314,6 +315,9 @@
     <Content Include="icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\Credits.txt" />
+    <EmbeddedResource Include="Resources\LoadingSplashes.txt" />
+    <EmbeddedResource Include="Resources\MenuSplashes.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

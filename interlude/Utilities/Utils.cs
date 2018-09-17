@@ -112,7 +112,7 @@ namespace YAVSRG
             }
             if (goodness > 127) //goodness measures how vibrant the color is. if less than 127 it's likely a shade of grey/black/white so the default color is used instead
             {
-                Game.Screens.ChangeThemeColor(best);
+                Game.Screens.ChangeThemeColor(Color.FromArgb(255,best));
             }
             else
             {

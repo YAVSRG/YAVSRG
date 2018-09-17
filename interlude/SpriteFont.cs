@@ -139,7 +139,7 @@ namespace YAVSRG
             }
         }
 
-        public float MeasureText(string text)
+        private float MeasureText(string text)
         {
             if (text.Length == 0) return 0;
             float w = FONTSCALE / 2;
@@ -151,6 +151,11 @@ namespace YAVSRG
                 w -= FONTSCALE / 2;
             }
             return w;
+        }
+
+        public float MeasureText(string text, float scale)
+        {
+            return MeasureText(text) * scale / FONTSCALE;
         }
 
         private void GenChar(char c)

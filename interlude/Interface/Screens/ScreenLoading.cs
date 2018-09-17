@@ -7,14 +7,12 @@ using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Charts;
 using System.Drawing;
 using YAVSRG.Interface.Animations;
-using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Interface.Screens
 {
     class ScreenLoading : Screen
     {
-        static readonly string[] splashes = new[] { "Welcome to Interlude", "Give it a moment...", "Loading some stuff" };
-        string splash = splashes[new Random().Next(0, splashes.Length)];
+        string splash = Utilities.Splashes.LoadingSplash();
         Sprite desktop;
         AnimationFade fade;
         AnimationSeries transition;

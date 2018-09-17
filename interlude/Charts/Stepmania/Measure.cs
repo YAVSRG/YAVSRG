@@ -22,12 +22,14 @@ namespace YAVSRG.Charts.Stepmania
             double sep = msPerBeat * meter / l;
             int start = (int)Math.Ceiling(from * l / meter);
             int end = (int)Math.Ceiling(to * l / meter);
-            //Utilities.Logging.Log(start.ToString() + "|" + end.ToString());
-            offset += (((double)start * meter / l) - from) * msPerBeat;
+            offset += (start - from * l / meter) * sep;
+            //offset += (((double)start * meter / l) - from) * msPerBeat;
+            //WTF ^ this was the bugged line of code but i can't see what is mathematically different between it and the one in use
+            //probably some typing/rounding issue and im blind
             for (int i = start; i < end; i++) //if start and end are the same no conversions occur
             {
                 if (data[i] == "0000") { continue; } //optimisation won't work on non 4k but no idea how effective it is anyway
-                Snap s = new Snap((float)(offset + (i - start) * sep), 0, 0, lntracker.value, 0, 0);
+                Snap s = new Snap((float)(offset + (i - start) * sep), 0, 0, lntracker.value);
                 for (byte c = 0; c < keys; c++)
                 {
                     //no support for fakes (yet(?))
@@ -39,7 +41,6 @@ namespace YAVSRG.Charts.Stepmania
                 if (!s.IsEmpty())
                 {
                     output.Add(s);
-                    //Utilities.Logging.Log(s.Offset.ToString());
                 }
             }
         }

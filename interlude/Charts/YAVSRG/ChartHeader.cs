@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,8 @@ namespace YAVSRG.Charts.YAVSRG
         public string DiffName;
         public string BGFile;
         public string AudioFile;
-        public string File;
         public float PreviewTime;
+        [JsonIgnore]
+        public string File; //should not be saved, only used in memory to track the file name for renaming to .yav and such
     }
 }
