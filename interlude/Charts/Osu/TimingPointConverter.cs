@@ -61,6 +61,7 @@ namespace YAVSRG.Charts.Osu
             float inherit = points[0].offset;
             int meter = 4;
             float scroll = 1.0f;
+            SVPoint prev = null;
             foreach (TimingPoint point in points)
             {
                 if (!point.inherited)
@@ -70,7 +71,11 @@ namespace YAVSRG.Charts.Osu
                     bpm = point.msPerBeat;
                     inherit = point.offset;
                     bpms.Add(new BPMPoint(point.offset, meter, bpm));
-                    sv.Add(new SVPoint(point.offset, scroll));
+                    sv.Add(prev = new SVPoint(point.offset, scroll));
+                }
+                else if (point.offset == prev?.Offset)
+                {
+                    prev.ScrollSpeed = scroll * (-100 / point.msPerBeat);
                 }
                 else
                 {
