@@ -12,13 +12,12 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     class Playfield : GameplayWidget
     {
-        int lasti; int lastt; //final indices for notes and timing points to avoid index out of bounds at end of chart
-
         //all storage variables for LN logic
         float[] holds;
         BinarySwitcher holdMiddles, bugFix;
         BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
         int[] holdColors, holdColorsHitpos;
+        float[] pos1, pos2;
 
         protected int Keys { get { return scoreTracker.c.Keys; } }
         protected int HitPos { get { return Game.Options.Profile.HitPosition; } }
@@ -35,13 +34,13 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             Animation.Add(animation = new Animations.AnimationCounter(25, true));
 
             //i make all this stuff ahead of time so i'm not creating a ton of new objects/recalculating the same thing/sending stuff to garbage every frame
-            lasti = Chart.Notes.Count;
-            lastt = Chart.Timing.Count;
             holds = new float[Chart.Keys];
             holdMiddles = new BinarySwitcher(0);
             bugFix = new BinarySwitcher(0);
             holdColors = new int[Chart.Keys];
             holdColorsHitpos = new int[Chart.Keys];
+            pos1 = new float[Chart.Keys];
+            pos2 = new float[Chart.Keys];
         }
 
         //This is the core rhythm game engine bit
@@ -55,13 +54,14 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 DrawColumn(bounds.Left, c);
                 DrawReceptor(bounds.Left, c);
+                pos1[c] = HitPos;
+                pos2[c] = 0;
             }
 
             float now = (float)Game.Audio.Now(); //where are we in the song
-            int i = Chart.Notes.GetNextIndex(now); //we need a copy of this number so we can increase it without messing the thing up next frame
-            int t = Chart.Timing.GetLastIndex(now); //no catch up algorithm used for SV because there are less SVs and this is optimised pretty neatly
-            float y = HitPos; //keeps track of where we're drawing vertically on the screen
-            float v = 0; //needs a better name
+            int i = Chart.Notes.GetNextIndex(now); //find next row above hitpos to render
+            int t = Chart.Timing.SV[0].GetLastIndex(now);
+            float baseScroll = t == -1 ? 1f : Chart.Timing.SV[0].Points[t].ScrollSpeed;
             
             holdsInHitpos.value = 0; //tracker of hold notes that need to be shown in the hit position
             for (byte k = 0; k < Chart.Keys; k++) //more tracker data for drawing long notes
@@ -70,18 +70,26 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 holdMiddles.RemoveColumn(k);
             }
 
-            while (y + v < ScreenHeight * 2 && i < lasti) //continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
+            float min = 0;
+            while (min < ScreenHeight * 2 && i < Chart.Notes.Count) //continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
             {
-                while (t < lastt - 1 && Chart.Timing.Points[t + 1].Offset < Chart.Notes.Points[i].Offset) //check if we've gone past any timing points
+                while (t < Chart.Timing.SV[0].Count - 1 && Chart.Timing.SV[0].Points[t + 1].Offset < Chart.Notes.Points[i].Offset) //check if we've gone past any timing points
                 {
-                    y += ScrollSpeed * Chart.Timing.Points[t].ScrollSpeed * (Chart.Timing.Points[t + 1].Offset - now); //handle scrollspeed adjustments
-                    //SpriteBatch.DrawRect(offset, Height - y, -offset, Height - y + 5, Color.White); //bar line <-- uncomment this for white lines where timing points are (may no longer work)
+                    for (byte k = 0; k < pos1.Length; k++)
+                    {
+                        pos1[k] += ScrollSpeed * baseScroll * (Chart.Timing.SV[0].Points[t + 1].Offset - now); //handle scrollspeed adjustments
+                    }
                     t++; //tracks which timing point we're looking at
-                    now = Chart.Timing.Points[t].Offset; //we're now drawing relative to the most recent timing point
+                    baseScroll = Chart.Timing.SV[0].Points[t].ScrollSpeed;
+                    now = Chart.Timing.SV[0].Points[t].Offset; //we're now drawing relative to the most recent timing point
                 }
-                v = Chart.Timing.Points[t].ScrollSpeed * (Chart.Notes.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
-                DrawSnap(Chart.Notes.Points[i], bounds.Left, y + v); //draw whole row of notes
+                for (byte k = 0; k < pos2.Length; k++)
+                {
+                    pos2[k] = baseScroll * (Chart.Notes.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
+                }
+                DrawSnap(Chart.Notes.Points[i], bounds.Left); //draw whole row of notes
                 i++; //move on to next row of notes
+                min = MinPos(pos1, pos2);
             }
 
             if (holdsInHitpos.value > 0) //this has been updated by DrawSnapWithHolds
@@ -96,6 +104,19 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             base.Draw(parentBounds);
             SpriteBatch.Disable3D();
             SpriteBatch.DisableTransform();
+        }
+
+        private float MinPos(float[] pos1, float[] pos2)
+        {
+            float min = ScreenHeight * 2;
+            for (int i = 0; i < pos2.Length; i++)
+            {
+                if (pos1[i] + pos2[i] < min)
+                {
+                    min = pos1[i] + pos2[i];
+                }
+            }
+            return min;
         }
 
         private void DrawLongTap(float offset, byte i, float start, float end, int color) //method name is an old inside joke
@@ -124,10 +145,11 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         }
 
 
-        private void DrawSnap(GameplaySnap s, float offset, float pos)
+        private void DrawSnap(GameplaySnap s, float offset)
         {
             foreach (byte k in s.middles.GetColumns())
             {
+                float pos = pos1[k] + pos2[k];
                 if (holds[k] == 0)
                 {
                     holdMiddles.SetColumn(k);
@@ -144,6 +166,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (byte k in s.ends.GetColumns())
             {
+                float pos = pos1[k] + pos2[k];
                 if (holds[k] == 0)
                 {
                     holdMiddles.SetColumn(k);
@@ -159,6 +182,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (byte k in s.holds.GetColumns())
             {
+                float pos = pos1[k] + pos2[k];
                 holds[k] = pos;
                 holdColors[k] = s.colors[k];
                 if (!(holdsInHitpos.GetColumn(k) || bugFix.GetColumn(k)))
@@ -169,15 +193,18 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (byte k in s.taps.GetColumns())
             {
+                float pos = pos1[k] + pos2[k];
                 //todo: optimise by generating rect once
                 Game.Options.Theme.DrawNote(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.mines.GetColumns())
             {
+                float pos = pos1[k] + pos2[k];
                 Game.Options.Theme.DrawMine(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.ends.GetColumns())
             {
+                float pos = pos1[k] + pos2[k];
                 Game.Options.Theme.DrawTail(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
         }

@@ -15,10 +15,10 @@ namespace YAVSRG.Interface.Widgets.Editor
             bounds = GetBounds(bounds);
             SpriteBatch.DrawRect(bounds, Color.FromArgb(127, 0, 0, 0));
             float nowPos;
-            foreach (Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.Points)
+            foreach (Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
             {
                 nowPos = (float)(bounds.Left + b.Offset / Game.Audio.Duration * bounds.Width);
-                SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);
+                //SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);
             }
             nowPos = bounds.Left + bounds.Width * Game.Audio.NowPercentage();
             SpriteBatch.DrawRect(new Rect(nowPos - 2, bounds.Top, nowPos + 2, bounds.Bottom), Color.White);

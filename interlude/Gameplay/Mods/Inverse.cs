@@ -85,7 +85,7 @@ namespace YAVSRG.Gameplay.Mods
 
         float GetGapSize(ChartWithModifiers c, float time)
         {
-            return c.Timing.GetPointAt(c.Timing.GetPointAt(time, false).InheritsFrom, false).MSPerBeat / 4;
+            return c.Timing.BPM.GetPointAt(time, false).MSPerBeat / 4;
         }
         //replace tap with start AND place end IF middle <- if end is before start, put tap back
         //replace start with end IF middle

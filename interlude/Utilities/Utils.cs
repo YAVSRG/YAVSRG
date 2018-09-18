@@ -83,7 +83,7 @@ namespace YAVSRG
         public static float GetBeat(int i)
         {
             float t = (float)Game.Audio.Now();
-            Charts.YAVSRG.BPMPoint p = Game.Gameplay.CurrentChart.Timing.GetPointAt(Game.Gameplay.CurrentChart.Timing.GetPointAt(t, false).InheritsFrom, false);
+            Charts.YAVSRG.BPMPoint p = Game.Gameplay.CurrentChart.Timing.BPM.GetPointAt(t, false);
             return (float)Math.Cos(((t - p.Offset) / (p.MSPerBeat * i)) % 1 * Math.PI * 2);
         }
 

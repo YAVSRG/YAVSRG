@@ -12,12 +12,13 @@ namespace YAVSRG.Gameplay
     {
         public int Keys;
         public PointManager<GameplaySnap> Notes;
-        public PointManager<BPMPoint> Timing;
+        public SVManager Timing;
 
         public ChartWithModifiers(Chart baseChart)
         {
             Keys = baseChart.Keys;
-            Timing = new PointManager<BPMPoint>(baseChart.Timing.Points); //WATCH OUT FOR REFERENCING ERRORS
+            Timing = new SVManager(baseChart.Timing);
+            //WATCH OUT FOR REFERENCING ERRORS
             //NO MOD SHOULD EDIT EXISTING TIMING POINTS RATHER THAN RECREATING THEM
             Notes = new PointManager<GameplaySnap>();
             foreach (Snap s in baseChart.Notes.Points)

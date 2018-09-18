@@ -15,8 +15,6 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenPlay : Screen //i cleaned up this file a little but it's a bit of a mess. sorry! update: a lot of a mess
     {
-        
-        int lasti; int lastt; //the number of snaps and number of timing points respectively. used to be an optimisation and now they're just a convenience
         ChartWithModifiers Chart;
         ScoreTracker scoreTracker;
         Widget playfield;
@@ -32,10 +30,7 @@ namespace YAVSRG.Interface.Screens
 
             int columnwidth = Game.Options.Theme.ColumnWidth;
             int hitposition = Game.Options.Profile.HitPosition;
-
-            //i make all this stuff ahead of time as a small optimisation
-            lasti = Chart.Notes.Count;
-            lastt = Chart.Timing.Count;
+            
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
 
@@ -200,7 +195,7 @@ namespace YAVSRG.Interface.Screens
             //this mechanic is different to other rhythm games where it finds the earliest unhit note in this window
             //you will miss more, but get fucked by column lockouts in jacks and dense streams less
             int i = Chart.Notes.GetNextIndex(now - missWindow);
-            if (i >= lasti) { return; } //if there are no more notes, stop
+            if (i >= Chart.Notes.Count) { return; } //if there are no more notes, stop
             float delta = missWindow; //default value for the final "found" delta"
             float d; //temp delta for the note we're looking at
             int hitAt = -1; //when we find the note with the smallest d, its index is put in here
@@ -239,7 +234,7 @@ namespace YAVSRG.Interface.Screens
                     }
                 }
                 i++;
-                if (i == lasti) { break; }
+                if (i == Chart.Notes.Count) { break; }
             } //delta is misswindow if nothing found
 
             if (hitAt >= 0 && (!release || Chart.Notes.Points[hitAt].ends.GetColumn(k))) //if we found a note to hit (it's -1 if nothing found)

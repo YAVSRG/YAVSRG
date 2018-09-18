@@ -13,13 +13,15 @@ namespace YAVSRG.Charts.YAVSRG
         public ChartHeader Data;
         public byte Keys; //keycount is separate from the header to keep it consistent with the "Chart" instance for gameplay, which has no header, just notes.
         public PointManager<Snap> Notes;
-        public PointManager<BPMPoint> Timing;
+        //public PointManager<BPMPoint> _Timing;
+        public SVManager Timing;
 
-        public Chart(List<Snap> data, List<BPMPoint> timing, ChartHeader header, byte keys)
+        public Chart(List<Snap> data, ChartHeader header, byte keys)
         {
             Data = header;
             Keys = keys;
-            Timing = new PointManager<BPMPoint>(timing);
+            //_Timing = new PointManager<BPMPoint>(timing);
+            Timing = new SVManager(Keys); //put data in here after constructor
             Notes = new PointManager<Snap>(data);
         }
 
@@ -37,13 +39,13 @@ namespace YAVSRG.Charts.YAVSRG
         public int GetBPM()
         {
             if (Notes.Points.Count == 0) { return 120; }
-            return (int)(60000f / Timing.Points[0].MSPerBeat);
+            return (int)(60000f / Timing.BPM.Points[0].MSPerBeat); //todo: min and max
         }
 
         public string GetHash()
         {
             var h = SHA256.Create();
-            byte[] data = new byte[8 * Notes.Count];
+            byte[] data = new byte[16 * Notes.Count];
             float offset;
             if (Notes.Count > 0) { offset = Notes.Points[0].Offset; } else { return "_"; } //no hash if empty chart
             int p = 0;
@@ -51,24 +53,27 @@ namespace YAVSRG.Charts.YAVSRG
             {
                 BitConverter.GetBytes((int)(s.Offset - offset)).CopyTo(data, p);
                 p += 4;
-                data[p] = (byte)s.taps.value;
-                data[p + 1] = (byte)s.holds.value;
-                data[p + 2] = (byte)s.ends.value;
-                data[p + 3] = (byte)s.middles.value;
-                p += 4;
+                for (int i = 0; i < 6; i++)
+                {
+                    BitConverter.GetBytes(s[i].value).CopyTo(data, p + 2 * i);
+                }
+                p += 12;
             }
 
-            float speed = float.PositiveInfinity;
-            foreach (BPMPoint s in Timing.Points)
+            for (int i = 0; i < Timing.SV.Length; i++)
             {
-                if (speed != s.ScrollSpeed)
+                float speed = 1f;
+                foreach (SVPoint sv in Timing.SV[i].Points)
                 {
-                    Array.Resize(ref data, data.Length + 8);
-                    BitConverter.GetBytes((int)(s.Offset - offset)).CopyTo(data, p);
-                    p += 4;
-                    BitConverter.GetBytes(s.ScrollSpeed).CopyTo(data, p);
-                    p += 4;
-                    speed = s.ScrollSpeed;
+                    if (speed != sv.ScrollSpeed)
+                    {
+                        Array.Resize(ref data, data.Length + 8);
+                        BitConverter.GetBytes((int)(sv.Offset - offset)).CopyTo(data, p);
+                        p += 4;
+                        BitConverter.GetBytes(sv.ScrollSpeed).CopyTo(data, p);
+                        p += 4;
+                        speed = sv.ScrollSpeed;
+                    }
                 }
             }
             return BitConverter.ToString(h.ComputeHash(data)).Replace("-", "");
@@ -80,21 +85,29 @@ namespace YAVSRG.Charts.YAVSRG
             var fs = new FileStream(path, FileMode.Create);
             var file = new BinaryWriter(fs);
             file.Write(Keys);
-            file.Write(header);
-            file.Write(Notes.Count);
-            foreach (Snap s in Notes.Points)
+            file.Write(header); //write keycount and header. keys is not in the header because the header is not in ChartWithModifiers (chart after mods are applied in memory) and keys is needed
+
+            file.Write(Notes.Count); //possible todo: add method to OffsetPoint to read and write bytes, then method to PointManager to read and write (cleans up this code neatly)
+            foreach (Snap s in Notes.Points) //write all notes to file
             {
                 file.Write(s.Offset);
-                file.Write(s.taps.value); file.Write(s.holds.value); file.Write(s.middles.value); file.Write(s.ends.value); file.Write(s.mines.value);
+                s.WriteToFile(file);
             }
-            file.Write(Timing.Count);
-            foreach (BPMPoint p in Timing.Points)
+            file.Write(Timing.BPM.Count);
+            foreach (BPMPoint p in Timing.BPM.Points) //write all bpms to file
             {
                 file.Write(p.Offset);
                 file.Write(p.Meter);
                 file.Write(p.MSPerBeat);
-                file.Write(p.ScrollSpeed);
-                file.Write(p.InheritsFrom);
+            }
+            for (int i = -1; i < Keys; i++) //write all SV "channels" to file; -1 is overall scroll mult, others are column independent multipliers
+            {
+                file.Write(Timing.SV[i + 1].Count);
+                foreach (SVPoint p in Timing.SV[i + 1].Points)
+                {
+                    file.Write(p.Offset);
+                    file.Write(p.ScrollSpeed);
+                }
             }
             file.Close();
             fs.Close();
@@ -108,27 +121,42 @@ namespace YAVSRG.Charts.YAVSRG
                 ChartHeader header;
                 List<Snap> notes;
                 List<BPMPoint> timing;
+                List<SVPoint> sv;
+                Chart chart;
                 using (var fs = new FileStream(path, FileMode.Open))
                 {
                     var file = new BinaryReader(fs);
                     keys = file.ReadByte();
                     header = Newtonsoft.Json.JsonConvert.DeserializeObject<ChartHeader>(file.ReadString()); //it's length prefixed so it knows where to stop
-                    header.File = Path.GetFileName(path); //in case you rename the file
+                    header.File = Path.GetFileName(path); //set for use later (not loaded from the header in the file)
+
                     notes = new List<Snap>();
                     timing = new List<BPMPoint>();
                     int c = file.ReadInt32();
                     for (int i = 0; i < c; i++)
                     {
-                        notes.Add(new Snap(file.ReadSingle(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16(), file.ReadUInt16()));
+                        notes.Add(new Snap(file.ReadSingle()).ReadFromFile(file));
                     }
+                    chart = new Chart(notes, header, keys);
                     c = file.ReadInt32();
                     for (int i = 0; i < c; i++)
                     {
-                        timing.Add(new BPMPoint(file.ReadSingle(), file.ReadInt32(), file.ReadSingle(), file.ReadSingle(), file.ReadSingle()));
+                        timing.Add(new BPMPoint(file.ReadSingle(), file.ReadInt32(), file.ReadSingle()));
+                    }
+                    chart.Timing.SetTimingData(timing);
+                    for (int lane = -1; lane < keys; lane++)
+                    {
+                        sv = new List<SVPoint>();
+                        c = file.ReadInt32();
+                        for (int i = 0; i < c; i++)
+                        {
+                            sv.Add(new SVPoint(file.ReadSingle(), file.ReadSingle()));
+                        }
+                        chart.Timing.SetSVData(lane, sv);
                     }
                     file.Close();
                 }
-                return new Chart(notes, timing, header, keys);
+                return chart;
             }
             catch
             {

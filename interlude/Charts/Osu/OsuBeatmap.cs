@@ -91,7 +91,7 @@ namespace YAVSRG.Charts.Osu
             if (Mode != 3) { return null; }
             HitObjects.Sort();
             List<Snap> hitdata = HitObjects.CreateSnapsFromObjects(Keys);
-            Chart c = new Chart(hitdata, TimingPoints.Convert(hitdata[hitdata.Count - 1].Offset), new ChartHeader
+            Chart c = new Chart(hitdata, new ChartHeader
             {
                 Title = Metadata.GetValue("Title"),
                 Artist = Metadata.GetValue("Artist"),
@@ -103,6 +103,7 @@ namespace YAVSRG.Charts.Osu
                 AudioFile = General.GetValue("AudioFilename"),
                 BGFile = Events.GetBGPath()
             }, Keys);
+            TimingPoints.Convert(hitdata[hitdata.Count - 1].Offset, c.Timing);
             return c;
         }
     }

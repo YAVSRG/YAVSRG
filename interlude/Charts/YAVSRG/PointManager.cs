@@ -41,7 +41,11 @@ namespace YAVSRG.Charts.YAVSRG
         //keep this
         public float GetInterpolatedIndex(float offset)
         {
-            if (Count == 1) //fix for edge case
+            if (Count == 0)
+            {
+                return -1;
+            }
+            else if (Count == 1) //fix for edge case
             {
                 return Points[0].Offset < offset ? 0.5f : 0;
             }

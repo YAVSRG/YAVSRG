@@ -197,7 +197,7 @@ namespace YAVSRG.Charts.Stepmania
                     BinarySwitcher lntracker = new BinarySwitcher(0);
                     double now = -double.Parse(raw["OFFSET"]) * 1000; //start time (in ms) into audio file for first measure
                     int bpm = 0; //index of bpm point for the list of tuples we generated earlier
-                    points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2, 1, (float)now)); //convert the first bpm to a timing point
+                    points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2)); //convert the first bpm to a timing point
                     int totalbeats = 0; //beat counter
                     double from, to;
 
@@ -211,13 +211,13 @@ namespace YAVSRG.Charts.Stepmania
                             diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, to, meter, states); //correctly converts this slice
                             now += bpms[bpm].Item2 * (to - from); //updates time we're on
                             bpm += 1; //increments bpm index so we know what point we're up to
-                            points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2, 1, (float)now)); //adds timing point to chart
+                            points.Add(new BPMPoint((float)now, meter, (float)bpms[bpm].Item2)); //adds timing point to chart
                             from = to;
                         }
                         diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, meter, meter, states);
                         now += bpms[bpm].Item2 * (meter - from); //converts rest of measure after all bpm changes inside are complete (normally no bpm changes therefore this does the whole measure)
                     }
-                    Chart c = new Chart(states, points, new ChartHeader
+                    Chart c = new Chart(states, new ChartHeader
                     {
                         Title = GetTag("TITLE"),
                         File = filename,
@@ -229,6 +229,7 @@ namespace YAVSRG.Charts.Stepmania
                         AudioFile = raw["MUSIC"],
                         BGFile = GetBG()
                     }, keycount);
+                    c.Timing.SetTimingData(points);
                     charts.Add(c);
                 }
                 catch (Exception e)

@@ -28,7 +28,7 @@ namespace YAVSRG.Charts.Osu
             }
         }
 
-        public float GetMostCommonBPM(float end) //this doesn't work and needs to be fixeddd
+        public float GetMostCommonBPM(float end)
         {
             float current = points[0].msPerBeat; //should always be a normal timing point
             float t = points[0].offset;
@@ -52,15 +52,15 @@ namespace YAVSRG.Charts.Osu
             return data.OrderBy(pair => pair.Value).Last().Key; //should select bpm value that has the most time during the map
         }
 
-        public List<BPMPoint> Convert(float end)
+        public void Convert(float end, SVManager output) //time of last note is used for most common bpm
         {
-            List<BPMPoint> tp = new List<BPMPoint>();
+            List<BPMPoint> bpms = new List<BPMPoint>();
+            List<SVPoint> sv = new List<SVPoint>();
             float bpm = 500;
             float basebpm = GetMostCommonBPM(end);
             float inherit = points[0].offset;
             int meter = 4;
             float scroll = 1.0f;
-            BPMPoint prev = null;
             foreach (TimingPoint point in points)
             {
                 if (!point.inherited)
@@ -69,21 +69,19 @@ namespace YAVSRG.Charts.Osu
                     scroll = basebpm / point.msPerBeat;
                     bpm = point.msPerBeat;
                     inherit = point.offset;
-                    tp.Add(prev = new BPMPoint(point.offset, meter, bpm, scroll, point.offset));
-                }
-                else if (point.offset == prev?.Offset) //fix for when red and green line are on top of each other
-                {
-                    prev.ScrollSpeed *= (-100 / point.msPerBeat);
+                    bpms.Add(new BPMPoint(point.offset, meter, bpm));
+                    sv.Add(new SVPoint(point.offset, scroll));
                 }
                 else
                 {
-                    tp.Add(new BPMPoint(point.offset, meter, bpm, scroll * (-100 / point.msPerBeat), inherit));
+                    sv.Add(new SVPoint(point.offset, scroll * (-100 / point.msPerBeat)));
                 }
             }
-            return tp;
+            output.SetTimingData(bpms);
+            output.SetSVData(-1, sv);
         }
 
-        public void ConvertFromBPMPoints() //reverse process for above algorithm NYI (because it's harder)
+        public void ConvertFromBPMPoints(SVManager input) //reverse process for above algorithm NYI (because it's harder)
         {
             //nyi
         }

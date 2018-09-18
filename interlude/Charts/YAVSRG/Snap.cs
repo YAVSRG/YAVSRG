@@ -77,6 +77,7 @@ namespace YAVSRG.Charts.YAVSRG
             }
             set
             {
+                if (index > 5) return; //future proof for other things i could store (hitsounds)
                 SetValue(index, value.value);
             }
         }
@@ -86,7 +87,7 @@ namespace YAVSRG.Charts.YAVSRG
             this[index].value = value;
         }
 
-        public void ReadFromFile(BinaryReader file)
+        public Snap ReadFromFile(BinaryReader file)
         {
             byte data = file.ReadByte();
             for (byte i = 0; i < 6; i++)
@@ -96,6 +97,7 @@ namespace YAVSRG.Charts.YAVSRG
                     SetValue(i, file.ReadUInt16());
                 }
             }
+            return this;
         }
 
         public void WriteToFile(BinaryWriter file)

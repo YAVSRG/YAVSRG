@@ -133,6 +133,8 @@
     <Compile Include="Charts\Stepmania\Measure.cs" />
     <Compile Include="Charts\Stepmania\StepFile.cs" />
     <Compile Include="Charts\ChartLoader.cs" />
+    <Compile Include="Charts\YAVSRG\SVManager.cs" />
+    <Compile Include="Charts\YAVSRG\SVPoint.cs" />
     <Compile Include="Content.cs" />
     <Compile Include="Gameplay\ChartSaveData.cs" />
     <Compile Include="Gameplay\ChartWithModifiers.cs" />

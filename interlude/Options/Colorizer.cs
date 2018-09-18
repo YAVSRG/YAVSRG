@@ -66,7 +66,7 @@ namespace YAVSRG.Options
             int[] prev = null;
             foreach (GameplaySnap s in c.Notes.Points)
             {
-                p = c.Timing.GetPointAt(c.Timing.GetPointAt(s.Offset, false).InheritsFrom, false);
+                p = c.Timing.BPM.GetPointAt(s.Offset, false);
                 v = p.MSPerBeat;
                 x = (s.Offset - p.Offset);
 

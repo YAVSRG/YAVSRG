@@ -173,7 +173,9 @@ namespace YAVSRG.Charts
         {
             if (Cache.Charts.Count == 0)
             {
-                Game.Gameplay.ChangeChart(null, new Chart(new List<Snap>(), new List<BPMPoint>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Game.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0, File = "" }, 4), false);
+                Chart def = new Chart(new List<Snap>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Game.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0, File = "" }, 4);
+                def.Timing.SetTimingData(new List<BPMPoint>());
+                Game.Gameplay.ChangeChart(null, def, false);
                 return;
             }
             SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
