@@ -14,7 +14,7 @@ namespace YAVSRG.Interface.Screens
     class ScreenScore : Screen
     {
         static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" }; //todo: remove these in favour of more "modular" rank system
-        string perf;
+        string perf, badge;
         private ScoreTracker scoreData;
         int tier;
         int snapcount;
@@ -65,6 +65,7 @@ namespace YAVSRG.Interface.Screens
 
             //more info pre calculated so it isn't calculated every frame
             perf = Utils.RoundNumber(Charts.DifficultyRating.PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
+            badge = Score.GetScoreBadge(scoreData.Scoring.Judgements);
 
             //build up UI
             scoreboard = new Scoreboard();
@@ -130,6 +131,7 @@ namespace YAVSRG.Interface.Screens
                 SpriteBatch.Font2.DrawCentredTextToFill(Utils.RoundNumber(scoreData.Scoring.Judgements[i] * 100f / scoreData.maxcombo) + "%", new Rect(r, bounds.Top + 150, r + h, bounds.Top + 250), Color.White);
             }
             SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", new Rect(bounds.Right - 490, bounds.Top + 250, bounds.Right - 225, bounds.Top + 300), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(badge, new Rect(bounds.Right - 390, bounds.Top + 250, bounds.Right - 160, bounds.Top + 300), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.Scoring.ComboBreaks.ToString() + "cbs", new Rect(bounds.Right - 225, bounds.Top + 250, bounds.Right - 60, bounds.Top + 300), Game.Options.Theme.MenuFont);
             DrawFrame(new Rect(bounds.Right - 500, bounds.Top + 50, bounds.Right - 50, bounds.Top + 300), 30f, Color.White);
 

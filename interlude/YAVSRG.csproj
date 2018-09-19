@@ -148,6 +148,7 @@
     <Compile Include="Gameplay\Mods\Mod.cs" />
     <Compile Include="Gameplay\Mods\NoLN.cs" />
     <Compile Include="Gameplay\Mods\NoSV.cs" />
+    <Compile Include="Gameplay\Mods\Wave.cs" />
     <Compile Include="Gameplay\ScoresDB.cs" />
     <Compile Include="Gameplay\Scoring\CCScoring.cs" />
     <Compile Include="Gameplay\Scoring\DP.cs" />

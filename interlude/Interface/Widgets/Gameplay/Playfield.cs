@@ -12,12 +12,14 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     class Playfield : GameplayWidget
     {
-        //all storage variables for LN logic
+        //all storage variables for LN and SV logic
+        //they're members/semi global to prevent creating new arrays every frame which is constantly reallocating ram -> lowers performance
+        //at least i think it does that, haven't tested <- update: yeah arrays are a reference type so this is indeed a nice optimisation
         float[] holds;
         BinarySwitcher holdMiddles, bugFix;
         BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
-        int[] holdColors, holdColorsHitpos;
-        float[] pos1, pos2;
+        int[] holdColors, holdColorsHitpos, svindex;
+        float[] pos, time, sv;
 
         protected int Keys { get { return scoreTracker.c.Keys; } }
         protected int HitPos { get { return Game.Options.Profile.HitPosition; } }
@@ -33,14 +35,16 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
             Animation.Add(animation = new Animations.AnimationCounter(25, true));
 
-            //i make all this stuff ahead of time so i'm not creating a ton of new objects/recalculating the same thing/sending stuff to garbage every frame
+            //i make all this stuff ahead of time so i'm not creating a ton of new arrays/recalculating the same thing/sending stuff to garbage every frame
             holds = new float[Chart.Keys];
             holdMiddles = new BinarySwitcher(0);
             bugFix = new BinarySwitcher(0);
             holdColors = new int[Chart.Keys];
             holdColorsHitpos = new int[Chart.Keys];
-            pos1 = new float[Chart.Keys];
-            pos2 = new float[Chart.Keys];
+            pos = new float[Chart.Keys];
+            time = new float[Chart.Keys];
+            sv = new float[Chart.Keys + 1];
+            svindex = new int[Chart.Keys + 1];
         }
 
         //This is the core rhythm game engine bit
@@ -50,18 +54,22 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             bounds = GetBounds(bounds);
             SpriteBatch.EnableTransform(Game.Options.Profile.Upscroll);
             SpriteBatch.Enable3D();
+            float now = (float)Game.Audio.Now(); //where are we in the song
+
             for (byte c = 0; c < Keys; c++) //draw columns and empty receptors
             {
                 DrawColumn(bounds.Left, c);
                 DrawReceptor(bounds.Left, c);
-                pos1[c] = HitPos;
-                pos2[c] = 0;
+                pos[c] = HitPos;
+                time[c] = now;
             }
 
-            float now = (float)Game.Audio.Now(); //where are we in the song
             int i = Chart.Notes.GetNextIndex(now); //find next row above hitpos to render
-            int t = Chart.Timing.SV[0].GetLastIndex(now);
-            float baseScroll = t == -1 ? 1f : Chart.Timing.SV[0].Points[t].ScrollSpeed;
+            for (byte k = 0; k < Keys + 1; k++)
+            {
+                svindex[k] = Chart.Timing.SV[k].GetLastIndex(now);
+                sv[k] = svindex[k] == -1 ? 1f : Chart.Timing.SV[k].Points[svindex[k]].ScrollSpeed;
+            }
             
             holdsInHitpos.value = 0; //tracker of hold notes that need to be shown in the hit position
             for (byte k = 0; k < Chart.Keys; k++) //more tracker data for drawing long notes
@@ -73,23 +81,44 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             float min = 0;
             while (min < ScreenHeight * 2 && i < Chart.Notes.Count) //continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
             {
-                while (t < Chart.Timing.SV[0].Count - 1 && Chart.Timing.SV[0].Points[t + 1].Offset < Chart.Notes.Points[i].Offset) //check if we've gone past any timing points
+                min = ScreenHeight * 2; //used to see if we've gone off the screen in all columns yet (and therefore stop rendering more notes, they'd be offscreen)
+
+                //calculates main SV, affecting all columns
+                while (svindex[0] < Chart.Timing.SV[0].Count - 1 && Chart.Timing.SV[0].Points[svindex[0] + 1].Offset < Chart.Notes.Points[i].Offset)
                 {
-                    for (byte k = 0; k < pos1.Length; k++)
+                    for (byte k = 0; k < Keys; k++)
                     {
-                        pos1[k] += ScrollSpeed * baseScroll * (Chart.Timing.SV[0].Points[t + 1].Offset - now); //handle scrollspeed adjustments
+                        pos[k] += ScrollSpeed * sv[0] * sv[k + 1] * (Chart.Timing.SV[0].Points[svindex[0] + 1].Offset - time[k]);
+                        time[k] = Chart.Timing.SV[0].Points[svindex[0] + 1].Offset;
                     }
-                    t++; //tracks which timing point we're looking at
-                    baseScroll = Chart.Timing.SV[0].Points[t].ScrollSpeed;
-                    now = Chart.Timing.SV[0].Points[t].Offset; //we're now drawing relative to the most recent timing point
+                    svindex[0]++;
+                    sv[0] = Chart.Timing.SV[0].Points[svindex[0]].ScrollSpeed;
                 }
-                for (byte k = 0; k < pos2.Length; k++)
+
+                //calculates column specific SV
+                for (byte k = 0; k < Keys; k++)
                 {
-                    pos2[k] = baseScroll * (Chart.Notes.Points[i].Offset - now) * ScrollSpeed; //draw distance between "now" and the row of notes
+                    byte j = (byte)(k + 1); //for sv and svindex
+                    while (svindex[j] < Chart.Timing.SV[j].Count - 1 && Chart.Timing.SV[j].Points[svindex[j] + 1].Offset < Chart.Notes.Points[i].Offset)
+                    {
+                        pos[k] += ScrollSpeed * sv[0] * sv[j] * (Chart.Timing.SV[j].Points[svindex[j] + 1].Offset - time[k]);
+                        time[k] = Chart.Timing.SV[j].Points[svindex[j] + 1].Offset;
+                        svindex[j]++;
+                        sv[j] = Chart.Timing.SV[j].Points[svindex[j]].ScrollSpeed;
+                    }
                 }
-                DrawSnap(Chart.Notes.Points[i], bounds.Left); //draw whole row of notes
+
+                //updates position of notes after SV changes (if any)
+                for (byte k = 0; k < Keys; k++)
+                {
+                    pos[k] += ScrollSpeed * sv[0] * sv[k + 1] * (Chart.Notes.Points[i].Offset - time[k]); //draw distance between "now" and the row of notes
+                    time[k] = Chart.Notes.Points[i].Offset;
+                    min = Math.Min(pos[k], min);
+                }
+
+                //renders next row of notes (positions per column are globally accessible)
+                DrawSnap(Chart.Notes.Points[i], bounds.Left);
                 i++; //move on to next row of notes
-                min = MinPos(pos1, pos2);
             }
 
             if (holdsInHitpos.value > 0) //this has been updated by DrawSnapWithHolds
@@ -104,19 +133,6 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             base.Draw(parentBounds);
             SpriteBatch.Disable3D();
             SpriteBatch.DisableTransform();
-        }
-
-        private float MinPos(float[] pos1, float[] pos2)
-        {
-            float min = ScreenHeight * 2;
-            for (int i = 0; i < pos2.Length; i++)
-            {
-                if (pos1[i] + pos2[i] < min)
-                {
-                    min = pos1[i] + pos2[i];
-                }
-            }
-            return min;
         }
 
         private void DrawLongTap(float offset, byte i, float start, float end, int color) //method name is an old inside joke
@@ -149,41 +165,38 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         {
             foreach (byte k in s.middles.GetColumns())
             {
-                float pos = pos1[k] + pos2[k];
                 if (holds[k] == 0)
                 {
                     holdMiddles.SetColumn(k);
-                    DrawLongTap(offset, k, holds[k], pos, holdColorsHitpos[k]);
+                    DrawLongTap(offset, k, holds[k], pos[k], holdColorsHitpos[k]);
                     holdsInHitpos.SetColumn(k);
                 }
                 else
                 {
-                    DrawLongTap(offset, k, holds[k], pos, holdColors[k]);
+                    DrawLongTap(offset, k, holds[k], pos[k], holdColors[k]);
                 }
-                holds[k] = pos;
+                holds[k] = pos[k];
                 holdColors[k] = s.colors[k];
                 holdMiddles.SetColumn(k);
             }
             foreach (byte k in s.ends.GetColumns())
             {
-                float pos = pos1[k] + pos2[k];
                 if (holds[k] == 0)
                 {
                     holdMiddles.SetColumn(k);
-                    DrawLongTap(offset, k, holds[k], pos, holdColorsHitpos[k]);
+                    DrawLongTap(offset, k, holds[k], pos[k], holdColorsHitpos[k]);
                     holdsInHitpos.SetColumn(k);
                 }
                 else
                 {
-                    DrawLongTap(offset, k, holds[k], pos, holdColors[k]);
+                    DrawLongTap(offset, k, holds[k], pos[k], holdColors[k]);
                 }
                 holds[k] = ScreenHeight * 2;
                 holdMiddles.RemoveColumn(k);
             }
             foreach (byte k in s.holds.GetColumns())
             {
-                float pos = pos1[k] + pos2[k];
-                holds[k] = pos;
+                holds[k] = pos[k];
                 holdColors[k] = s.colors[k];
                 if (!(holdsInHitpos.GetColumn(k) || bugFix.GetColumn(k)))
                 {
@@ -193,19 +206,16 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             foreach (byte k in s.taps.GetColumns())
             {
-                float pos = pos1[k] + pos2[k];
                 //todo: optimise by generating rect once
-                Game.Options.Theme.DrawNote(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
+                Game.Options.Theme.DrawNote(new Rect(k * ColumnWidth + offset, pos[k], (k + 1) * ColumnWidth + offset, pos[k] + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.mines.GetColumns())
             {
-                float pos = pos1[k] + pos2[k];
-                Game.Options.Theme.DrawMine(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
+                Game.Options.Theme.DrawMine(new Rect(k * ColumnWidth + offset, pos[k], (k + 1) * ColumnWidth + offset, pos[k] + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
             foreach (byte k in s.ends.GetColumns())
             {
-                float pos = pos1[k] + pos2[k];
-                Game.Options.Theme.DrawTail(new Rect(k * ColumnWidth + offset, pos, (k + 1) * ColumnWidth + offset, pos + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
+                Game.Options.Theme.DrawTail(new Rect(k * ColumnWidth + offset, pos[k], (k + 1) * ColumnWidth + offset, pos[k] + ColumnWidth), k, Keys, s.colors[k], animation.cycles % 8);
             }
         }
     }

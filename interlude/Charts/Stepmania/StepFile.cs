@@ -158,6 +158,7 @@ namespace YAVSRG.Charts.Stepmania
             {
                 byte keycount;
 
+                //https://github.com/etternagame/etterna/blob/master/src/GameManager.cpp actual list is here
                 switch (diff.gamemode)
                 {
                     case "dance-threepanel":
@@ -177,11 +178,11 @@ namespace YAVSRG.Charts.Stepmania
                         keycount = 7;
                         break;
                     case "dance-double":
-                    case "dance-couple": //and dance-routine? but im not sure so i didnt add it
+                    case "dance-couple":
                         keycount = 8;
                         break;
                     case "pump-double":
-                    case "pump-couple": //and pump-routine? but im not sure so i didnt add it
+                    case "pump-couple":
                         keycount = 10;
                         break;
                     default:

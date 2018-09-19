@@ -30,6 +30,10 @@ namespace YAVSRG.Utilities
             public void Cancel()
             {
                 token.Cancel();
+                if (t.Exception != null)
+                {
+                    Logging.Log(t.Exception.ToString());
+                }
             }
 
             public TaskStatus Status

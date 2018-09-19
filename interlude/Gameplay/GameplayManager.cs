@@ -13,7 +13,7 @@ namespace YAVSRG.Gameplay
 {
     public class GameplayManager
     {
-        public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() } };
+        public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
 
         public Chart CurrentChart;
         public Charts.CachedChart CurrentCachedChart;
