@@ -35,7 +35,7 @@ namespace YAVSRG.Interface.Widgets
             bounds.Left -= 200 * slide;
             int h = 60;
             float t = bounds.Top + h + (bounds.Height - h * 2) * slide;
-            SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + h, bounds.Right, t), System.Drawing.Color.FromArgb(100, Game.Screens.BaseColor));
+            SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + h, bounds.Right, t), System.Drawing.Color.FromArgb(127, Game.Screens.DarkColor));
             ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill("Updates & News", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h), Game.Options.Theme.MenuFont);
             ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left + h * 0.5f * (1 - slide), t, bounds.Right, t + h), slide - 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);

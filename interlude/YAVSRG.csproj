@@ -182,6 +182,7 @@
     <Compile Include="Interface\Dialogs\LoadingDialog.cs" />
     <Compile Include="Interface\Dialogs\ProfileDialog.cs" />
     <Compile Include="Interface\Dialogs\ScoreInfoDialog.cs" />
+    <Compile Include="Interface\Dialogs\SkinConvertDialog.cs" />
     <Compile Include="Interface\Dialogs\TextDialog.cs" />
     <Compile Include="Interface\InputMethod.cs" />
     <Compile Include="Interface\Rect.cs" />
@@ -284,7 +285,6 @@
     <Compile Include="Sprite.cs" />
     <Compile Include="SpriteBatch.cs" />
     <Compile Include="SpriteFont.cs" />
-    <Compile Include="Utilities\SkinConverter.cs" />
     <Compile Include="Utilities\Splashes.cs" />
     <Compile Include="Utilities\TaskManager.cs" />
     <Compile Include="Utilities\TrayIcon.cs" />

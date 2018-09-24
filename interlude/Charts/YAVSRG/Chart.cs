@@ -13,14 +13,12 @@ namespace YAVSRG.Charts.YAVSRG
         public ChartHeader Data;
         public byte Keys; //keycount is separate from the header to keep it consistent with the "Chart" instance for gameplay, which has no header, just notes.
         public PointManager<Snap> Notes;
-        //public PointManager<BPMPoint> _Timing;
         public SVManager Timing;
 
         public Chart(List<Snap> data, ChartHeader header, byte keys)
         {
             Data = header;
             Keys = keys;
-            //_Timing = new PointManager<BPMPoint>(timing);
             Timing = new SVManager(Keys); //put data in here after constructor
             Notes = new PointManager<Snap>(data);
         }
@@ -38,7 +36,7 @@ namespace YAVSRG.Charts.YAVSRG
 
         public int GetBPM()
         {
-            if (Notes.Points.Count == 0) { return 120; }
+            if (Notes.Points.Count == 0 || Timing.BPM.Points.Count == 0) { return 120; }
             return (int)(60000f / Timing.BPM.Points[0].MSPerBeat); //todo: min and max
         }
 
