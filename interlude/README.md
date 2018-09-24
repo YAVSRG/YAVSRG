@@ -7,6 +7,8 @@ Read about what this is [here](https://percyqaz.github.io/YAVSRG)
 
 Coming soon (especially for mac and linux users)
 
+For now there are pre-built windows installers including the game assets for it to work in [releases](https://github.com/percyqaz/YAVSRG/releases).
+
 ### Legal stuff
 
 The source code is under the GNU General Public License.
