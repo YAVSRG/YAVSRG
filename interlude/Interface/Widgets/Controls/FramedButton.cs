@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets
             bounds = GetBounds(bounds);
             SpriteBatch.DrawTilingTexture(icon, bounds, 200, scroll, 0, color);
             ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
-            SpriteBatch.Font1.DrawCentredText(text, 30f, bounds.CenterX, bounds.CenterY - 20, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredText(text, 30f, bounds.CenterX, bounds.CenterY - 20, Game.Options.Theme.MenuFont, true, Utils.ColorInterp(color,System.Drawing.Color.Black,0.5f));
         }
 
         public override void Update(Rect bounds)

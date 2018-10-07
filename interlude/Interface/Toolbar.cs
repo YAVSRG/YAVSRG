@@ -107,7 +107,7 @@ namespace YAVSRG.Interface
             base.Update(bounds.ExpandY(80 - slide));
             if (!hidden)
             {
-                if (Input.KeyTap(OpenTK.Input.Key.Escape))
+                if (Input.KeyTap(Game.Options.General.Binds.Exit))
                 {
                     Game.Screens.PopScreen();
                 }

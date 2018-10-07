@@ -8,24 +8,27 @@ using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Interface.Dialogs
 {
-    class ProfileDialog : Dialog
+    class ProfileDialog : FadeDialog
     {
+        ScrollContainer profileSelector;
+
         public ProfileDialog(Action<string> action) : base(action)
         {
-            PositionTopLeft(-200, -100, AnchorType.CENTER, AnchorType.CENTER);
-            PositionBottomRight(200, 100, AnchorType.CENTER, AnchorType.CENTER);
-            AddChild(new FramedButton("buttonbase","New Profile",NewProfile)
-                .PositionTopLeft(0,-100,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0,0,AnchorType.MAX,AnchorType.MIN));
+            //PositionTopLeft(-200, -100, AnchorType.CENTER, AnchorType.CENTER);
+            //PositionBottomRight(200, 100, AnchorType.CENTER, AnchorType.CENTER);
+            //AddChild(new FramedButton("buttonbase","New Profile",NewProfile)
+                //.PositionTopLeft(0,-100,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0,0,AnchorType.MAX,AnchorType.MIN));
+            profileSelector = new ScrollContainer(5, 5, false);
             for (int i = 0; i < Options.Options.Profiles.Count; i++)
             {
-                AddChild(new FramedButton("buttonbase", Options.Options.Profiles[i].Name, ClosureToChangeProfile(Options.Options.Profiles[i]))
-                    .PositionTopLeft(0, i*100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 100+i*100, AnchorType.MAX, AnchorType.MIN));
+                profileSelector.AddChild(ProfileButton(Options.Options.Profiles[i]));
             }
+            AddChild(profileSelector.PositionTopLeft(200, 0, AnchorType.MAX, AnchorType.MIN));
         }
 
-        public Action ClosureToChangeProfile(Options.Profile p)
+        public Widget ProfileButton(Options.Profile p)
         {
-            return () => { Game.Options.ChangeProfile(p); Close(p.Name); };
+            return new SimpleButton(p.Name, () => { Game.Options.ChangeProfile(p); }, () => (Game.Options.Profile == p), 20f).PositionBottomRight(0,50,AnchorType.MAX,AnchorType.MIN);
         }
 
         public void NewProfile()
@@ -36,11 +39,6 @@ namespace YAVSRG.Interface.Dialogs
                 Game.Options.ChangeProfile(p);
                 Close(p.Name);
             }));
-        }
-
-        public override void Update(Rect bounds)
-        {
-            base.Update(bounds);
         }
     }
 }

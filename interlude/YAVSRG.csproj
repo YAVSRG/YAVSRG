@@ -136,6 +136,9 @@
     <Compile Include="Charts\YAVSRG\SVManager.cs" />
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
     <Compile Include="Content.cs" />
+    <Compile Include="Editor\ChartInEditor.cs" />
+    <Compile Include="Editor\EditorData.cs" />
+    <Compile Include="Editor\Filter.cs" />
     <Compile Include="Gameplay\ChartSaveData.cs" />
     <Compile Include="Gameplay\ChartWithModifiers.cs" />
     <Compile Include="Gameplay\GameplayManager.cs" />
@@ -179,6 +182,7 @@
     </Compile>
     <Compile Include="Interface\Dialog.cs" />
     <Compile Include="Interface\Dialogs\ConfirmDialog.cs" />
+    <Compile Include="Interface\Dialogs\FadeDialog.cs" />
     <Compile Include="Interface\Dialogs\LoadingDialog.cs" />
     <Compile Include="Interface\Dialogs\ProfileDialog.cs" />
     <Compile Include="Interface\Dialogs\ScoreInfoDialog.cs" />
@@ -322,7 +326,9 @@
     <EmbeddedResource Include="Resources\LoadingSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Editor\Filters\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

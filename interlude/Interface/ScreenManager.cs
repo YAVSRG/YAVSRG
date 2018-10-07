@@ -14,7 +14,7 @@ namespace YAVSRG.Interface
     {
         AnimationFade fade1; //prev screen fade out 
         AnimationFade fade2; //next screen fade in
-        List<Screen> stack = new List<Screen>() {};
+        List<Screen> stack = new List<Screen>() { };
         List<Dialog> dialogs = new List<Dialog>();
         AnimationSeries animation = new AnimationSeries(true);
         AnimationGroup animation2 = new AnimationGroup(true);
@@ -23,7 +23,7 @@ namespace YAVSRG.Interface
         public Screen Current = null;
         public bool Loading = true;
         public Sprite Background;
-        public Sprite Oldbackground; //unlikely to ever be used for fading because it needs to calculate two separate aspect ratio adjustments
+        public Sprite Oldbackground; //unlikely to ever be used / would be for fading because it needs to calculate two separate aspect ratio adjustments
         public AnimationColorFade BackgroundDim = new AnimationColorFade(Color.Black, Color.White);
         public AnimationColorMixer BaseColor;
         public AnimationColorMixer DarkColor;
@@ -59,7 +59,7 @@ namespace YAVSRG.Interface
             {
                 Content.UnloadTexture(Background);
             }
-            Oldbackground = Background; //oldbackground is deprecated
+            Oldbackground = Background; //oldbackground is unused
             Background = bg;
         }
 
@@ -109,36 +109,37 @@ namespace YAVSRG.Interface
         public void Draw()
         {
             //todo: create one rect and also rect shrink function
+            Rect bounds = new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             if (Loading)
             {
-                Current?.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
-                Logo.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+                Current?.Draw(bounds);
+                Logo.Draw(bounds);
                 return;
             }
-            DrawChartBackground(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), BackgroundDim);
+            DrawChartBackground(bounds, BackgroundDim);
             if (animation.Running)
             {
                 if (fade1.Running)
                 {
-                    Previous?.Draw(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
-                    DrawChartBackground(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), Color.FromArgb((int)(255 * fade1), BackgroundDim));
+                    Previous?.Draw(bounds.ExpandY(-Toolbar.Height));
+                    DrawChartBackground(bounds, Color.FromArgb((int)(255 * fade1), BackgroundDim));
                 }
                 else
                 {
-                    Current?.Draw(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
-                    DrawChartBackground(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), Color.FromArgb((int)(255 * (1-fade2)), BackgroundDim));
+                    Current?.Draw(bounds.ExpandY(-Toolbar.Height));
+                    DrawChartBackground(bounds, Color.FromArgb((int)(255 * (1 - fade2)), BackgroundDim));
                 }
             }
             else
             {
-                Current?.Draw(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
+                Current?.Draw(bounds.ExpandY(-Toolbar.Height));
             }
             if (dialogs.Count > 0)
             {
-                dialogs[0].Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+                dialogs[0].Draw(bounds.ExpandY(-Toolbar.Height));
             }
-            Logo.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
-            Toolbar.Draw(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+            Logo.Draw(bounds);
+            Toolbar.Draw(bounds);
         }
 
         public void DrawChartBackground(Rect bounds, Color c, float parallaxMult = 1f)
@@ -171,16 +172,17 @@ namespace YAVSRG.Interface
 
         public void Update()
         {
-            Toolbar.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+            Rect bounds = new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Toolbar.Update(bounds);
+            Logo.Update(bounds);
             if (Loading)
             {
-                Current?.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
-                Logo.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+                Current?.Update(bounds);
                 return;
             }
             if (dialogs.Count > 0)
             {
-                dialogs[0].Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
+                dialogs[0].Update(bounds.ExpandY(-Toolbar.Height));
                 if (dialogs[0].Closed)
                 {
                     dialogs.RemoveAt(0);
@@ -188,7 +190,7 @@ namespace YAVSRG.Interface
             }
             else
             {
-                Current?.Update(new Rect(-ScreenWidth, -ScreenHeight + Toolbar.Height, ScreenWidth, ScreenHeight - Toolbar.Height));
+                Current?.Update(bounds.ExpandY(-Toolbar.Height));
             }
             if (Previous != null)
             {
@@ -204,7 +206,6 @@ namespace YAVSRG.Interface
                     Previous = null;
                 }
             }
-            Logo.Update(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight));
             animation.Update();
             animation2.Update();
             if (Input.KeyTap(Game.Options.General.Binds.CollapseToToolbar))

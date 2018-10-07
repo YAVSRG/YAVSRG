@@ -29,8 +29,8 @@ namespace YAVSRG.Interface.Screens
             {
                 if (Game.Multiplayer.LobbyKey != "")
                 {
-                    SpriteBatch.Font1.DrawCentredText("Your lobby code is: " + Game.Multiplayer.LobbyKey, 30f, 0, bounds.Top + 100, Game.Options.Theme.MenuFont);
-                    SpriteBatch.Font1.DrawCentredText("Press Ctrl+C to put it on the clipboard", 20f, 0, bounds.Top + 150, Game.Options.Theme.MenuFont);
+                    SpriteBatch.Font1.DrawCentredText("Your lobby code is: " + Game.Multiplayer.LobbyKey, 30f, 0, bounds.Top + 100, Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor);
+                    SpriteBatch.Font1.DrawCentredText("Press Ctrl+C to put it on the clipboard", 20f, 0, bounds.Top + 150, Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor);
                 }
                 float y = bounds.Top + 150;
                 for (int i = 0; i < Game.Multiplayer.Clients.Length; i++)
@@ -38,7 +38,7 @@ namespace YAVSRG.Interface.Screens
                     if (Game.Multiplayer.Clients[i]?.LoggedIn == true)
                     {
                         SpriteBatch.DrawRect(new Rect(bounds.Left + 10, y, bounds.Left + 310, y + 40), i == Game.Multiplayer.Server.ChartPicker ? System.Drawing.Color.FromArgb(127, Game.Screens.BaseColor) : System.Drawing.Color.FromArgb(127, 0, 0, 0));
-                        SpriteBatch.Font1.DrawText(Game.Multiplayer.Clients[i].Username, 25f, bounds.Left + 20, y, Game.Options.Theme.MenuFont);
+                        SpriteBatch.Font1.DrawText(Game.Multiplayer.Clients[i].Username, 25f, bounds.Left + 20, y, Game.Options.Theme.MenuFont, true);
                         y += 50;
                     }
                 }

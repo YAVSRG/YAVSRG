@@ -57,7 +57,7 @@ namespace YAVSRG.Options.Panels
             AddChild(
                 new TooltipContainer(
                     new FramedButton("buttonbase", "Change profile", () => { Game.Screens.AddDialog(new ProfileDialog((s) => { lp.Refresh(); Content.ClearStore(); })); }),
-                "Switch your profile to another one OR create a new profile.\n(Not fully complete)", ib)
+                "WIP", ib)
                 .PositionTopLeft(-350, 550, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(-50, 625, AnchorType.CENTER, AnchorType.MIN));
             AddChild(

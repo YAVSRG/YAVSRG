@@ -34,7 +34,7 @@ namespace YAVSRG.Interface.Widgets
             //slice
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top, bounds.Left + 20, bounds.Bottom), Game.Screens.BaseColor);
             SpriteBatch.DrawRect(new Rect(bounds.Right - 20, bounds.Top, bounds.Right, bounds.Bottom), Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredText(bind.ToString(), 30, bounds.CenterX, bounds.Top, listening ? System.Drawing.Color.Fuchsia : Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredText(bind.ToString(), 30, bounds.CenterX, bounds.Top, listening ? System.Drawing.Color.Fuchsia : Game.Options.Theme.MenuFont, true, Game.Screens.BaseColor);
             SpriteBatch.Font2.DrawCentredText(label, 20, bounds.CenterX, bounds.Top - 30, Game.Options.Theme.MenuFont);
         }
 

@@ -10,21 +10,22 @@ namespace YAVSRG.Interface.Screens
     {
         public ScreenEditor()
         {
-            AddChild(new Widgets.Gameplay.Playfield(new Gameplay.ScoreTracker(Game.Gameplay.ModifiedChart)).PositionTopLeft(-400, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(1000, 0, AnchorType.CENTER, AnchorType.MAX));
-            AddChild(new Widgets.Editor.Timeline().PositionTopLeft(0, 50, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
+            AddChild(new Widgets.Gameplay.Playfield(new Gameplay.ScoreTracker(Game.Gameplay.ModifiedChart)).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 0, AnchorType.MAX, AnchorType.MAX));
+            AddChild(new Widgets.Editor.Timeline().PositionTopLeft(0, 50, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(500, 0, AnchorType.MAX, AnchorType.MAX));
+            AddChild(new Widgets.Button("buttonclose", "Exit", () => { Game.Screens.PopScreen(); }).PositionTopLeft(500, 0, AnchorType.MAX, AnchorType.MIN));
         }
 
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Screens.Toolbar.Collapse();
+            Game.Screens.Toolbar.SetHidden(true);
             Game.Audio.SetRate(1.0);
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Screens.Toolbar.Expand();
+            Game.Screens.Toolbar.SetHidden(false);
         }
     }
 }

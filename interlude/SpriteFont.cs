@@ -14,6 +14,7 @@ namespace YAVSRG
         Dictionary<char, Sprite> FontLookup;
         int FONTSCALE;
         Font Font;
+        readonly float ShadowAmount = 0.09f;
 
         public SpriteFont(int scale, string f)
         {
@@ -27,8 +28,12 @@ namespace YAVSRG
             }
         }
 
-        public float DrawText(string text, float scale, float x, float y, Color color)
+        public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default(Color))
         {
+            if (dropShadow)
+            {
+                DrawText(text, scale, x + scale * ShadowAmount, y + scale * ShadowAmount, Color.FromArgb(color.A, shadowColor), false);
+            }
             float start = x;
             scale /= FONTSCALE;
             Sprite s;
@@ -43,19 +48,27 @@ namespace YAVSRG
             return x - start;
         }
 
-        public float DrawCentredText(string text, float scale, float x, float y, Color c)
+        public float DrawCentredText(string text, float scale, float x, float y, Color c, bool dropShadow = false, Color shadowColor = default(Color))
         {
+            if (dropShadow)
+            {
+                DrawCentredText(text, scale, x + scale * ShadowAmount, y + scale * ShadowAmount, Color.FromArgb(c.A, shadowColor), false);
+            }
             x -= scale / FONTSCALE * 0.5f * MeasureText(text);
             return DrawText(text, scale, x, y, c);
         }
 
-        public float DrawJustifiedText(string text, float scale, float x, float y, Color c)
+        public float DrawJustifiedText(string text, float scale, float x, float y, Color c, bool dropShadow = false, Color shadowColor = default(Color))
         {
+            if (dropShadow)
+            {
+                DrawJustifiedText(text, scale, x + scale * ShadowAmount, y + scale * ShadowAmount, Color.FromArgb(c.A, shadowColor), false);
+            }
             x -= scale / FONTSCALE * MeasureText(text);
             return DrawText(text, scale, x, y, c);
         }
 
-        public void DrawCentredTextToFill(string text, Rect bounds, Color c)
+        public float DrawCentredTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default(Color))
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
@@ -63,10 +76,10 @@ namespace YAVSRG
                 bounds.Width / w,
                 bounds.Height / h
                 );
-            DrawCentredText(text, scale * FONTSCALE, bounds.CenterX, bounds.CenterY - h * scale * 0.5f, c);
+            return DrawCentredText(text, scale * FONTSCALE, bounds.CenterX, bounds.CenterY - h * scale * 0.5f, c, dropShadow, shadowColor);
         }
 
-        public void DrawTextToFill(string text, Rect bounds, Color c)
+        public float DrawTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default(Color))
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
@@ -74,10 +87,10 @@ namespace YAVSRG
                 bounds.Width / w,
                 bounds.Height / h
                 );
-            DrawText(text, scale * FONTSCALE, bounds.Left, bounds.CenterY - h * scale * 0.5f, c);
+            return DrawText(text, scale * FONTSCALE, bounds.Left, bounds.CenterY - h * scale * 0.5f, c, dropShadow, shadowColor);
         }
 
-        public void DrawJustifiedTextToFill(string text, Rect bounds, Color c)
+        public float DrawJustifiedTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default(Color))
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
@@ -85,32 +98,32 @@ namespace YAVSRG
                 bounds.Width / w,
                 bounds.Height / h
                 );
-            DrawJustifiedText(text, scale * FONTSCALE, bounds.Right, bounds.CenterY - h * scale * 0.5f, c);
+            return DrawJustifiedText(text, scale * FONTSCALE, bounds.Right, bounds.CenterY - h * scale * 0.5f, c, dropShadow, shadowColor);
         }
 
-        public float DrawDynamicText(string text, Rect bounds, Color c, AnchorType position, float size)
+        public float DrawDynamicText(string text, Rect bounds, Color c, AnchorType position, float size, bool dropShadow = false, Color shadowColor = default(Color))
         {
             switch (position)
             {
                 case (AnchorType.CENTER):
-                    return DrawCentredText(text, size, bounds.CenterX, bounds.Top, c);
+                    return DrawCentredText(text, size, bounds.CenterX, bounds.Top, c, dropShadow, shadowColor);
                 case (AnchorType.MAX):
-                    return DrawJustifiedText(text, size, bounds.Right, bounds.Top, c);
+                    return DrawJustifiedText(text, size, bounds.Right, bounds.Top, c, dropShadow, shadowColor);
                 default:
-                    return DrawText(text, size, bounds.Left, bounds.Top, c);
+                    return DrawText(text, size, bounds.Left, bounds.Top, c, dropShadow, shadowColor);
             }
         }
 
-        public void DrawDynamicTextToFill(string text, Rect bounds, Color c, AnchorType position)
+        public float DrawDynamicTextToFill(string text, Rect bounds, Color c, AnchorType position, bool dropShadow = false, Color shadowColor = default(Color))
         {
             switch (position)
             {
                 case (AnchorType.CENTER):
-                    DrawCentredTextToFill(text, bounds, c); return;
+                    return DrawCentredTextToFill(text, bounds, c, dropShadow, shadowColor);
                 case (AnchorType.MAX):
-                    DrawJustifiedTextToFill(text, bounds, c); return;
+                    return DrawJustifiedTextToFill(text, bounds, c, dropShadow, shadowColor);
                 default:
-                    DrawTextToFill(text, bounds, c); return;
+                    return DrawTextToFill(text, bounds, c, dropShadow, shadowColor);
             }
         }
 

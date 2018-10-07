@@ -273,6 +273,10 @@ namespace YAVSRG.Interface.Widgets
                             }
                         }));
                     }
+                    else if (Input.KeyPress(OpenTK.Input.Key.E))
+                    {
+                        Game.Screens.AddScreen(new Screens.ScreenEditor());
+                    }
                     else
                     {
                         ExpandGroup(g);

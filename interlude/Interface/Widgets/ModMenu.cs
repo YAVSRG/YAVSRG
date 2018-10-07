@@ -36,7 +36,7 @@ namespace YAVSRG.Interface.Widgets
                 float b = color.Val * 5;
                 ScreenUtils.DrawFrame(bounds.Expand(b,b), 30f, color);
                 b = bounds.Height; //variable reuse lol.
-                SpriteBatch.Font1.DrawCentredTextToFill(mod, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + b/2), Game.Options.Theme.MenuFont); //todo: replace with textbox
+                SpriteBatch.Font1.DrawCentredTextToFill(mod, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + b/2), Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor); //todo: replace with textbox
                 string s = "Off";
                 if (Game.Gameplay.SelectedMods.ContainsKey(mod))
                 {

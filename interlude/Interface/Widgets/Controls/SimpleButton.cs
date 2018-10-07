@@ -31,7 +31,7 @@ namespace YAVSRG.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            SpriteBatch.Font1.DrawCentredText(text(), fontsize, bounds.CenterX, bounds.Top, color);
+            SpriteBatch.Font1.DrawCentredText(text(), fontsize, bounds.CenterX, bounds.Top, color, true, Utils.ColorInterp(color,System.Drawing.Color.Black, 0.7f));
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Bottom - 10, bounds.Right, bounds.Bottom), color); //slice
         }
 

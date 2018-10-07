@@ -40,11 +40,11 @@ namespace YAVSRG.Interface.Widgets
                 float y = bounds.Top + 160f;
                 foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.tasks)
                 {
-                    SpriteBatch.Font1.DrawJustifiedText(t.name, 30f, bounds.Right, y, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                    SpriteBatch.Font1.DrawJustifiedText(t.name, 30f, bounds.Right, y, Color.FromArgb(a, Game.Options.Theme.MenuFont), true);
                     SpriteBatch.Font2.DrawJustifiedText(t.Status.ToString(), 20f, bounds.Right, y + 30f, Color.FromArgb(a, Game.Options.Theme.MenuFont));
                     y += 50f;
                 }
-                SpriteBatch.Font1.DrawCentredText("Notifications", 40f, 0, bounds.Top + 50, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                SpriteBatch.Font1.DrawCentredText("Notifications", 40f, 0, bounds.Top + 50, Color.FromArgb(a, Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
                 SpriteBatch.Font2.DrawCentredText("Right click on stuff >> to remove / cancel", 20f, 0, bounds.Top + 100, Color.FromArgb(a, Game.Options.Theme.MenuFont));
                 y = bounds.Bottom - Utilities.Logging.LogBuffer.Count * 30;
                 for (int i = 0; i < Utilities.Logging.LogBuffer.Count; i++)

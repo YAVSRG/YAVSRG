@@ -36,9 +36,9 @@ namespace YAVSRG.Net.P2P
         private async void SetupNAT()
         {
             var discoverer = new NatDiscoverer();
-            NatDevice device = await discoverer.DiscoverDeviceAsync();
             try
             {
+                NatDevice device = await discoverer.DiscoverDeviceAsync();
                 var ip = await device.GetExternalIPAsync();
                 await device.CreatePortMapAsync(new Mapping(Open.Nat.Protocol.Tcp, 32767, 32767, 3600000, "Interlude-Lobby"));
                 Utilities.Logging.Log("Port mapping seems to have worked. External IP is " + ip.ToString());

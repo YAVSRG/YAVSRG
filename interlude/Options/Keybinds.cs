@@ -9,7 +9,8 @@ namespace YAVSRG.Options
 {
     public class Keybinds
     {
-        //imcomplete bind list
+        //incomplete bind list
+        public Key Exit = Key.Escape;
         public Key Select = Key.Enter;
         public Key UpRate = Key.Plus;
         public Key DownRate = Key.Minus;

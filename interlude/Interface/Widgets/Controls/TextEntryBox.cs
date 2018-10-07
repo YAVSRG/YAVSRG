@@ -33,7 +33,7 @@ namespace YAVSRG.Interface.Widgets
             base.Draw(bounds);
             bounds = GetBounds(bounds);
             SpriteBatch.DrawRect(bounds, Game.Screens.DarkColor);
-            SpriteBatch.Font1.DrawText(get() != "" ? get() : text(), 20f, bounds.Left + 20, bounds.Top + 12.5f, color);
+            SpriteBatch.Font1.DrawText(get() != "" ? get() : text(), 20f, bounds.Left + 20, bounds.Top + 12.5f, color, true, Game.Screens.DarkColor);
             ScreenUtils.DrawFrame(bounds, 30f, color);
         }
 

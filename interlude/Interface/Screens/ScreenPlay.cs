@@ -132,7 +132,7 @@ namespace YAVSRG.Interface.Screens
         public override void Update(Rect bounds) //update loop
         {
             float now = (float)Game.Audio.Now(); //get where we are now
-            if (Input.KeyTap(Key.Escape)) //escape quits
+            if (Input.KeyTap(Game.Options.General.Binds.Exit)) //escape quits
             {
                 Game.Screens.PopScreen();
                 Widgets.Clear();

@@ -15,6 +15,7 @@ namespace YAVSRG.Interface.Screens
     {
         AnimationCounter rotation;
         AnimationSlider hideUI;
+        bool hideLogo;
         int oldmx, oldmy;
 
         public ScreenVisualiser()
@@ -57,6 +58,7 @@ namespace YAVSRG.Interface.Screens
             Input.LockMouse = false;
             Game.Screens.Toolbar.Expand();
             Game.Screens.Parallax.Target *= 0.25f;
+            Game.Screens.Logo.alpha = 1;
         }
 
         public override void Draw(Rect bounds)
@@ -94,9 +96,9 @@ namespace YAVSRG.Interface.Screens
 
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Bottom - 30, bounds.Right, bounds.Bottom), Game.Screens.DarkColor);
             SpriteBatch.DrawRect(new Rect(bounds.Left + 5, bounds.Bottom - 25, bounds.Left + 5 + (bounds.Right - 10 - bounds.Left) * Game.Audio.NowPercentage(), bounds.Bottom - 5),  Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left + 500, bounds.Top, bounds.Right - 500, -330), Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
-            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Now()), new Rect(bounds.Left, bounds.Bottom - 150, bounds.Left + 200, bounds.Bottom - 75), Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
-            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Duration), new Rect(bounds.Right-200, bounds.Bottom - 150, bounds.Right, bounds.Bottom - 75), Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left + 500, bounds.Top, bounds.Right - 500, -330), Color.FromArgb(alpha, Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
+            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Now()), new Rect(bounds.Left, bounds.Bottom - 150, bounds.Left + 200, bounds.Bottom - 75), Color.FromArgb(alpha, Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
+            SpriteBatch.Font1.DrawCentredTextToFill(Utils.FormatTime((float)Game.Audio.Duration), new Rect(bounds.Right-200, bounds.Bottom - 150, bounds.Right, bounds.Bottom - 75), Color.FromArgb(alpha, Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
         }
 
         public override void Update(Rect bounds)
@@ -112,12 +114,14 @@ namespace YAVSRG.Interface.Screens
                 int ny = (int)(ScreenUtils.ScreenHeight * Math.Sin(rotation.value * 0.004f));
                 Input.MouseX = (int)(nx + (oldmx - nx) * hideUI);
                 Input.MouseY = (int)(ny + (oldmy - ny) * hideUI);
+                if (hideLogo) { Game.Screens.Logo.alpha = hideUI; }
             }
 
             if (Input.LockMouse && hideUI.Val >= 0.99f && hideUI.Target == 1)
             {
                 Input.LockMouse = false;
                 Game.Screens.Toolbar.cursor = true;
+                hideLogo = false;
             }
 
             if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
@@ -125,7 +129,11 @@ namespace YAVSRG.Interface.Screens
                 hideUI.Target = 1 - hideUI.Target;
                 if (hideUI.Target == 0)
                 {
-                Game.Screens.Toolbar.cursor = false;
+                    if (Input.KeyPress(OpenTK.Input.Key.ShiftLeft))
+                    {
+                        hideLogo = true;
+                    }
+                    Game.Screens.Toolbar.cursor = false;
                     Input.LockMouse = true;
                     oldmx = Input.MouseX;
                     oldmy = Input.MouseY;
@@ -135,6 +143,10 @@ namespace YAVSRG.Interface.Screens
             if (Input.KeyTap(OpenTK.Input.Key.Right))
             {
                 NextTrack();
+            }
+            else if (Input.KeyTap(OpenTK.Input.Key.Left))
+            {
+                PrevTrack();
             }
         }
 

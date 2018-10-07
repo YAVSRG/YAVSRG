@@ -8,9 +8,8 @@ using YAVSRG.Gameplay;
 
 namespace YAVSRG.Interface.Dialogs
 {
-    public class ScoreInfoDialog : Dialog
+    public class ScoreInfoDialog : FadeDialog
     {
-        AnimationSlider slide;
 
         ScoreTracker.HitData[] data;
         string acc;
@@ -20,9 +19,8 @@ namespace YAVSRG.Interface.Dialogs
 
         public ScoreInfoDialog(Score score, Action<string> a) : base(a)
         {
-            PositionTopLeft(ScreenUtils.ScreenWidth, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth, 200, AnchorType.MAX, AnchorType.MAX);
+            PositionTopLeft(-ScreenUtils.ScreenWidth * 2 + 200, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth * 2 + 200, 200, AnchorType.MAX, AnchorType.MAX);
             Move(new Rect(200, 200, 200, 200));
-            Animation.Add(slide = new AnimationSlider(0) { Target = 1 });
 
             scoring = ScoreSystem.GetScoreSystem(ScoreType.Default);
             data = ScoreTracker.StringToHitData(score.hitdata, score.keycount);
@@ -34,8 +32,6 @@ namespace YAVSRG.Interface.Dialogs
 
         public override void Draw(Rect bounds)
         {
-            int a = (int)(slide * 127);
-            SpriteBatch.DrawRect(bounds, System.Drawing.Color.FromArgb(a, 0, 0, 0));
             base.Draw(bounds);
             bounds = GetBounds(bounds);
             Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1f);
@@ -44,15 +40,10 @@ namespace YAVSRG.Interface.Dialogs
             ScreenUtils.DrawGraph(new Rect(bounds.Left + 20, bounds.Bottom - 200, bounds.Right - 20, bounds.Bottom - 20), scoring, data);
         }
 
-        public override void Update(Rect bounds)
+        protected override void OnClosing()
         {
-            //todo: make base "fading" dialog that dims game to show you something
-            base.Update(bounds);
-            bounds = GetBounds(bounds);
-            if (!ScreenUtils.MouseOver(bounds) && Input.MouseClick(OpenTK.Input.MouseButton.Left))
-            {
-                Close("");
-            }
+            base.OnClosing();
+            Move(new Rect(-ScreenUtils.ScreenWidth * 2 + 200, 200, ScreenUtils.ScreenWidth * 2 + 200, 200));
         }
     }
 }
