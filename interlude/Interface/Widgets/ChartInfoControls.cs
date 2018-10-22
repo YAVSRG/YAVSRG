@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets
             sb = new Scoreboard();
             ip = new ChartInfoPanel();
 
-            scroll = new ScrollContainer(10, 10, true, frame: false);
+            scroll = new ScrollContainer(10, 10, true, 1, false);
 
             AddChild(scroll.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 750, 150, AnchorType.MIN, AnchorType.MAX));
             scroll.AddChild(sb.PositionBottomRight(-15, 20, AnchorType.CENTER, AnchorType.MAX));
@@ -61,8 +61,8 @@ namespace YAVSRG.Interface.Widgets
             //slice
             ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + 150), 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Bottom - 100, bounds.Right, bounds.Bottom), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + 100), Game.Options.Theme.MenuFont, true, Utils.ColorInterp(Game.Screens.HighlightColor, Color.Black, 0.7f));
-            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 50, bounds.Top+150), Game.Options.Theme.MenuFont, true, Utils.ColorInterp(Game.Screens.HighlightColor, Color.Black, 0.7f));
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + 100), Game.Options.Theme.MenuFont, true, Color.Black);
+            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 50, bounds.Top+150), Game.Options.Theme.MenuFont, true, Color.Black);
             
             //DrawGraph(bounds.Left + 550, bounds.Top + 350, bounds.Right - 50, bounds.Bottom - 250);
 

@@ -21,7 +21,7 @@ namespace YAVSRG.Interface.Screens
 
         public override void OnResize()
         {
-            Widgets.Clear();
+            Children.Clear();
             var ib = new InfoBox();
             Widget tabs = new ScrollContainer(5f, 5f, false);
             lp = new LayoutPanel(ib);

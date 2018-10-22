@@ -154,7 +154,7 @@ namespace YAVSRG
 
         private float MeasureText(string text)
         {
-            if (text.Length == 0) return 0;
+            if (text == null || text.Length == 0) return 0;
             float w = FONTSCALE / 2;
             foreach (char c in text)
             {

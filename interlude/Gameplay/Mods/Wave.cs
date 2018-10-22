@@ -10,6 +10,7 @@ namespace YAVSRG.Gameplay.Mods
     {
         public override void Apply(ChartWithModifiers c, string data)
         {
+            base.Apply(c, data);
             if (c.Timing.BPM.Count == 0) return;
             float t = c.Timing.BPM.Points[0].Offset;
             float step = c.Timing.BPM.Points[0].MSPerBeat;

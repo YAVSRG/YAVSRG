@@ -11,28 +11,91 @@ namespace YAVSRG.Gameplay.Mods
     {
         public override void Apply(ChartWithModifiers c, string data)
         {
+            if (c.Keys != 4) return;
+            base.Apply(c, data);
             List<GameplaySnap> newPoints = new List<GameplaySnap>();
             int count = c.Notes.Count;
-            for (int i = 1; i < count; i++)
+            ushort left, right;
+            ushort lmask = 3;
+            ushort rmask = 12;
+            List<float> ltimes = new List<float>();
+            List<float> rtimes = new List<float>();
+
+            int i = 0;
+            float lim;
+            while (i < count)
             {
-                GameplaySnap a = c.Notes.Points[i];
-                GameplaySnap b = c.Notes.Points[i - 1];
-                if (a.Offset - b.Offset < 100)
+                left = 0; right = 0;
+                ltimes.Clear();
+                var p = c.Timing.BPM.GetPointAt(c.Notes.Points[i].Offset, false);
+                lim = c.Notes.Points[i].Offset - (c.Notes.Points[i].Offset - p.Offset) % (p.MSPerBeat) + (p.MSPerBeat);
+
+                while (i < count && c.Notes.Points[i].Offset <= lim)
                 {
-                    if (b.middles.value == 0 && b.Mask(Val(a)).IsEmpty())
+                    if ((left & c.Notes.Points[i].taps.value & lmask) > 0)
                     {
-                        newPoints.Add(new GameplaySnap((a.Offset + b.Offset) * 0.5f,(ushort)(a.taps.value + b.taps.value), (ushort)(a.holds.value + b.holds.value), (ushort)(a.middles.value + b.middles.value), (ushort)(a.ends.value + b.ends.value), (ushort)(a.mines.value + b.mines.value)));
-                        i++; continue;
+                        newPoints.Add(new GameplaySnap(mean(ltimes), left, 0, 0, 0, 0));
+                        left = 0;
+                        ltimes.Clear();
+                    }
+                    if ((right & c.Notes.Points[i].taps.value & rmask) > 0)
+                    {
+                        //if (newPoints.Count > 0 && mean(rtimes) == newPoints[newPoints.Count - 1].Offset)
+                        {
+                        //    newPoints[newPoints.Count - 1].taps.value |= right;
+                        }
+                        //else
+                        {
+                            newPoints.Add(new GameplaySnap(mean(rtimes), right, 0, 0, 0, 0));
+                        }
+                        right = 0;
+                        rtimes.Clear();
+                    }
+                    if ((c.Notes.Points[i].taps.value & lmask) > 0)
+                    {
+                        left |= (ushort)(c.Notes.Points[i].taps.value & lmask);
+                        ltimes.Add(c.Notes.Points[i].Offset);
+                    }
+                    if ((c.Notes.Points[i].taps.value & rmask) > 0)
+                    {
+                        right |= (ushort)(c.Notes.Points[i].taps.value & rmask);
+                        rtimes.Add(c.Notes.Points[i].Offset);
+                    }
+                    i++;
+                }
+                if (ltimes.Count > 0)
+                {
+                    newPoints.Add(new GameplaySnap(mean(ltimes), left, 0, 0, 0, 0));
+                }
+                if (rtimes.Count > 0)
+                {
+                    //if (newPoints.Count > 0 && mean(rtimes) == newPoints[newPoints.Count - 1].Offset)
+                    {
+                    //    newPoints[newPoints.Count - 1].taps.value |= right;
+                    }
+                    //else
+                    {
+                        newPoints.Add(new GameplaySnap(mean(rtimes), right, 0, 0, 0, 0));
                     }
                 }
-                newPoints.Add(b);
-            }//missing last snap but who cares
+            }
+            newPoints.Sort((a, b) => a.Offset.CompareTo(b.Offset));
             c.Notes = new PointManager<GameplaySnap>(newPoints);
         }
 
-        private ushort Val(GameplaySnap s)
+        private float mean(List<float> data)
         {
-            return (ushort)(s.ends.value + s.holds.value + s.taps.value + s.mines.value + s.middles.value);
+            float r = 0;
+            foreach (float f in data)
+            {
+                r += f;
+            }
+            return r / data.Count;
+        }
+
+        public override int GetStatus(string data)
+        {
+            return 2;
         }
 
         public override string GetName(string data)

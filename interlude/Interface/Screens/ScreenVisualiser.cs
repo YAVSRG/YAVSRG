@@ -16,7 +16,7 @@ namespace YAVSRG.Interface.Screens
         AnimationCounter rotation;
         AnimationSlider hideUI;
         bool hideLogo;
-        int oldmx, oldmy;
+        bool parallax;
 
         public ScreenVisualiser()
         {
@@ -44,7 +44,7 @@ namespace YAVSRG.Interface.Screens
             base.OnEnter(prev);
             Game.Screens.Logo.Move(new Rect(-400, -400, 400, 400), GetBounds());
             Game.Screens.BackgroundDim.Target = 1;
-            Game.Screens.Toolbar.Collapse();
+            Game.Screens.Toolbar.SetState(WidgetState.NORMAL);
             Game.Screens.Parallax.Target *= 4;
             Game.Audio.OnPlaybackFinish = () => { NextTrack(); };
         }
@@ -54,9 +54,8 @@ namespace YAVSRG.Interface.Screens
             base.OnExit(next);
             Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200));
             Game.Screens.BackgroundDim.Target = 0.3f;
-            Game.Screens.Toolbar.cursor = true;
-            Input.LockMouse = false;
-            Game.Screens.Toolbar.Expand();
+            Game.Screens.SetParallaxOverride(null);
+            Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
             Game.Screens.Parallax.Target *= 0.25f;
             Game.Screens.Logo.alpha = 1;
         }
@@ -110,17 +109,12 @@ namespace YAVSRG.Interface.Screens
 
             if (hideUI.Val < 0.99f)
             {
-                int nx = (int)(ScreenUtils.ScreenWidth * Math.Sin(rotation.value * 0.002f));
-                int ny = (int)(ScreenUtils.ScreenHeight * Math.Sin(rotation.value * 0.004f));
-                Input.MouseX = (int)(nx + (oldmx - nx) * hideUI);
-                Input.MouseY = (int)(ny + (oldmy - ny) * hideUI);
                 if (hideLogo) { Game.Screens.Logo.alpha = hideUI; }
             }
 
-            if (Input.LockMouse && hideUI.Val >= 0.99f && hideUI.Target == 1)
+            if (parallax && hideUI.Val >= 0.99f && hideUI.Target == 1)
             {
-                Input.LockMouse = false;
-                Game.Screens.Toolbar.cursor = true;
+                parallax = false;
                 hideLogo = false;
             }
 
@@ -133,10 +127,12 @@ namespace YAVSRG.Interface.Screens
                     {
                         hideLogo = true;
                     }
-                    Game.Screens.Toolbar.cursor = false;
-                    Input.LockMouse = true;
-                    oldmx = Input.MouseX;
-                    oldmy = Input.MouseY;
+                    Game.Screens.SetParallaxOverride(() => new Point((int)(ScreenUtils.ScreenWidth * Math.Sin(rotation.value * 0.002f)), (int)(ScreenUtils.ScreenHeight * Math.Sin(rotation.value * 0.004f))));
+                    parallax = true;
+                }
+                else
+                {
+                    Game.Screens.SetParallaxOverride(null);
                 }
             }
 

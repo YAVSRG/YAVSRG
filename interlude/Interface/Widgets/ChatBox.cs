@@ -66,7 +66,7 @@ namespace YAVSRG.Interface.Widgets
                         {
                             if (ScreenUtils.CheckButtonClick(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y)))
                             {
-                                ((ChatBox)parent).entryText += "{e:" + (x + y * 5).ToString() + "}";
+                                ((ChatBox)Parent).entryText += "{e:" + (x + y * 5).ToString() + "}";
                                 if (!Input.KeyPress(OpenTK.Input.Key.ControlLeft, true))
                                 {
                                     expand = false;
@@ -78,7 +78,7 @@ namespace YAVSRG.Interface.Widgets
                             if (ScreenUtils.CheckButtonClick(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y)))
                             {
                                 Color c = colors[x + y * 5 - 20];
-                                ((ChatBox)parent).entryText += "{c:" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2") + "}";
+                                ((ChatBox)Parent).entryText += "{c:" + c.R.ToString("X2") + c.G.ToString("X2") + c.B.ToString("X2") + "}";
                                 if (!Input.KeyPress(OpenTK.Input.Key.ControlLeft, true))
                                 {
                                     expand = false;

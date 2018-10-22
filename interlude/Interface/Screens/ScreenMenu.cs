@@ -93,7 +93,7 @@ namespace YAVSRG.Interface.Screens
             SpriteBatch.DrawRect(
                 new Rect(bounds.CenterX - w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 30, bounds.CenterX + w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 100),
                 Color.FromArgb(100,Game.Screens.DarkColor));
-            SpriteBatch.Font1.DrawCentredText(splash, 30f, bounds.CenterX + (ScreenUtils.ScreenWidth) * (slide - 1), bounds.Top + 40, Color.FromArgb((int)(slide * 255), Game.Options.Theme.MenuFont));
+            SpriteBatch.Font1.DrawCentredText(splash, 30f, bounds.CenterX + (ScreenUtils.ScreenWidth) * (slide - 1), bounds.Top + 40, Color.FromArgb((int)(slide * 255), Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
         }
     }
 }

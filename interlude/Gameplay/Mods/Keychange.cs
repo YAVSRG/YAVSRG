@@ -20,6 +20,7 @@ namespace YAVSRG.Gameplay.Mods
 
         public override void Apply(ChartWithModifiers c, string data)
         {
+            base.Apply(c, data);
             ushort prev = 0;
             List<GameplaySnap> newNotes = new List<GameplaySnap>();
             c.Keys = 5;

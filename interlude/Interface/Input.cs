@@ -17,7 +17,6 @@ namespace YAVSRG.Interface
 
         public static int MouseX;
         public static int MouseY;
-        public static bool LockMouse;
         private static int _MouseScroll;
         public static bool ClickHandled;
 
@@ -53,7 +52,6 @@ namespace YAVSRG.Interface
 
         private static void MouseMove(object sender, MouseMoveEventArgs e)
         {
-            if (LockMouse) return;
             MouseX = (e.X - Game.Instance.Width / 2) * ScreenUtils.ScreenWidth / (Game.Instance.Width / 2);
             MouseY = (e.Y - Game.Instance.Height / 2) * ScreenUtils.ScreenHeight / (Game.Instance.Height / 2);
         }

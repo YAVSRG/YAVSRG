@@ -18,9 +18,10 @@ namespace YAVSRG.Interface.Widgets
             this.label = label;
             setter = set;
             getter = get;
-            selector = new ScrollContainer(20, 10, false) { State = 0 };
+            selector = new ScrollContainer(20, 10, false);
+            selector.ToggleState();
             AddChild(selector.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, -400, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new SimpleButton(() => (label + ": " + getter()), () => { selector.State = 1-selector.State; }, () => (selector.State == 1), 20f));
+            AddChild(new SimpleButton(() => label + ": " + getter(), () => { selector.ToggleState(); }, () => selector.State == WidgetState.NORMAL, 20f));
         }
 
         public DropDown SetItems(List<string> items)

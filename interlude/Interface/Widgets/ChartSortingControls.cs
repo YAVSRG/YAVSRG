@@ -18,7 +18,8 @@ namespace YAVSRG.Interface.Widgets
         {
             DropDown d = new DropDown((x) => { selectedCollection = x; }, () => (selectedCollection), "Collection"); //referencable later so delete/create buttons can update list (nyi)
             AddChild(sortControls = new Widget());
-            AddChild(collectionControls = new Widget() { State = 0 });
+            AddChild(collectionControls = new Widget());
+            collectionControls.ToggleState();
             collectionControls.AddChild(d.SetItems(Game.Gameplay.Collections.Collections.Keys.ToList())
                 .PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
 
@@ -38,7 +39,7 @@ namespace YAVSRG.Interface.Widgets
             AddChild(new TextEntryBox((s) => { SearchString = s; }, () => (SearchString), () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
                 .PositionTopLeft(520, 10, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 70, AnchorType.MAX, AnchorType.MIN));
 
-            AddChild(new Button("buttoninfo", "Collections", () => { collectionControls.State = 1 - collectionControls.State; sortControls.State = 1 - sortControls.State; }).PositionTopLeft(600, 0, AnchorType.MAX,AnchorType.MIN).PositionBottomRight(520,80,AnchorType.MAX,AnchorType.MIN));
+            AddChild(new Button("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }).PositionTopLeft(600, 0, AnchorType.MAX,AnchorType.MIN).PositionBottomRight(520,80,AnchorType.MAX,AnchorType.MIN));
         }
 
         public override void Draw(Rect bounds)

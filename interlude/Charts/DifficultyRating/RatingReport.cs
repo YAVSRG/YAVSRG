@@ -45,7 +45,7 @@ namespace YAVSRG.Charts.DifficultyRating
                     delta = (snaps[i].Offset - lastHandUse[h]) / rate;
                     current = snaps[i].Mask(layout.hands[h].Mask()); //bit mask to only look at notes corresponding to this hand
                     if (current.IsEmpty()) { continue; }
-                    s = new BinarySwitcher(current.taps.value + current.holds.value); //s = consider button presses
+                    s = new BinarySwitcher(current.taps.value | current.holds.value); //s = consider button presses
                     foreach (byte k in s.GetColumns()) //calculate value for each note and put it through overall algorithm
                     {
                         handDiff.Add(GetNoteDifficulty(k, current.Offset, layout.hands[h].Mask(), rate));

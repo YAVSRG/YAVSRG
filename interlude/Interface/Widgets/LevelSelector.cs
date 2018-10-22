@@ -14,7 +14,7 @@ namespace YAVSRG.Interface.Widgets
     {
         protected class Group : Widget
         {
-            public List<Group> Children;
+            public new List<Group> Children;
             public bool Expand;
             public Func<bool> Highlight;
             public Action<Group> OnClick, OnRightClick;
@@ -109,12 +109,12 @@ namespace YAVSRG.Interface.Widgets
                 ScreenUtils.DrawFrame(bounds, 30f, border);
                 if (subtitle == "")
                 {
-                    SpriteBatch.Font1.DrawTextToFill(title, new Rect(bounds.Left + 20, bounds.Top + 22.5f, bounds.Left + width, bounds.Bottom - 20), border);
+                    SpriteBatch.Font1.DrawTextToFill(title, new Rect(bounds.Left + 20, bounds.Top + 22.5f, bounds.Left + width, bounds.Bottom - 20), border, true, Utils.ColorInterp(fill, Color.Black, 0.7f));
                 }
                 else
                 {
-                    SpriteBatch.Font1.DrawTextToFill(title, new Rect(bounds.Left + 20, bounds.Top + 8f, bounds.Left + width, bounds.Bottom - 35), border);
-                    SpriteBatch.Font2.DrawTextToFill(subtitle, new Rect(bounds.Left + 20, bounds.Bottom - 40, bounds.Left + width, bounds.Bottom - 5), border);
+                    SpriteBatch.Font1.DrawTextToFill(title, new Rect(bounds.Left + 20, bounds.Top + 8f, bounds.Left + width, bounds.Bottom - 35), border, true, Utils.ColorInterp(fill, Color.Black, 0.5f));
+                    SpriteBatch.Font2.DrawTextToFill(subtitle, new Rect(bounds.Left + 20, bounds.Bottom - 40, bounds.Left + width, bounds.Bottom - 5), border, true, Utils.ColorInterp(border, Color.Black, 0.7f));
                 }
             }
 

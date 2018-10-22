@@ -10,6 +10,7 @@ namespace YAVSRG.Gameplay.Mods
     {
         public override void Apply(ChartWithModifiers c, string data)
         {
+            base.Apply(c, data);
             if (data == "all")
             {
                 foreach (GameplaySnap s in c.Notes.Points)

@@ -18,14 +18,14 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Screens.Toolbar.SetHidden(true);
+            Game.Screens.Toolbar.SetState(WidgetState.NORMAL);
             Game.Audio.SetRate(1.0);
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Screens.Toolbar.SetHidden(false);
+            Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
         }
     }
 }

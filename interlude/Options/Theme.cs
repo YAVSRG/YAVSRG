@@ -30,6 +30,7 @@ namespace YAVSRG.Options
         public bool FlipHoldTail = true;
         public bool UseHoldTailTexture = true;
         public float ColumnLightTime = 0.8f;
+        public int CursorSize = 50;
 
         protected int GetRotation(int column, int keycount)
         {

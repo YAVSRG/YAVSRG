@@ -17,7 +17,7 @@ namespace YAVSRG.Gameplay.Mods
 
         public virtual void Apply(ChartWithModifiers c, string data)
         {
-
+            c.Mods = GetName(data);
         }
 
         public virtual void ApplyToHitData(ChartWithModifiers c, ref ScoreTracker.HitData[] hitdata, string data)

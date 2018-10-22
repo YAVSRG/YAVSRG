@@ -52,11 +52,11 @@ namespace YAVSRG.Interface.Screens
             base.Update(bounds);
             if (!Game.Multiplayer.Connected)
             {
-                hostButton.State = 1;
+                hostButton.SetState(WidgetState.NORMAL);
             }
             else
             {
-                hostButton.State = 0;
+                hostButton.SetState(WidgetState.DISABLED);
                 if (Game.Multiplayer.Hosting)
                 {
                     if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.C))

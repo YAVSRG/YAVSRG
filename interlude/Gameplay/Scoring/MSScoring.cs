@@ -8,13 +8,14 @@ namespace YAVSRG.Gameplay
 {
     public class MSScoring : DP
     {
-        float CurveBegin = 18f; //named exactly like etterna wiki
-        float CurveEnd = 150f;
-        float linFac = 9.5f;
-        float expFac = 2f;
+        float CurveEnd = 180f;
+        float scale = 95*95;
 
         public MSScoring(int judge) : base(judge)
         {
+            float m = (10 - judge) / 6f;
+            scale *= m;
+            CurveEnd *= m;
         }
 
         public override void AddJudgement(int i)
@@ -41,14 +42,13 @@ namespace YAVSRG.Gameplay
 
         private float CalculatePoints(float ms)
         {
-            if (ms <= CurveBegin) { return maxweight; }
-            if (ms >= CurveEnd) { return maxweight-linFac; }; //max penalty
-            return maxweight - (linFac * (float)Math.Pow((ms - CurveBegin) / (CurveEnd - CurveBegin), expFac));
+            if (ms >= CurveEnd) { return -8; }; //max penalty
+            return (float)(2 - 10 * Math.Pow(1 - Math.Pow(Math.Pow(2, -(ms * ms) / scale),2), 2));
         }
 
         public override string FormatAcc()
         {
-            return Utils.RoundNumber(Accuracy()) + "% (Wife J5)";
+            return base.FormatAcc().Replace("DP", "Wife");
         }
     }
 }

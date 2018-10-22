@@ -120,6 +120,34 @@ namespace YAVSRG
             }
         }
 
+        public static Color PhysicalColor(float val)
+        {
+            try
+            {
+                float a = Math.Min(1, val * 0.1f);
+                float b = Math.Max(1, val * 0.1f) - 1;
+                return Color.FromArgb((int)(255 * a), (int)(255 * (1 - a)), (int)(255 * b));
+            }
+            catch
+            {
+                return Color.Red;
+            }
+        }
+
+        public static Color TechnicalColor(float val)
+        {
+            try
+            {
+                float a = Math.Min(1, val * 0.1f);
+                float b = Math.Max(1, val * 0.1f) - 1;
+                return Color.FromArgb((int)(255 * (1 - a)), (int)(255 * b), (int)(255 * a));
+            }
+            catch
+            {
+                return Color.Blue;
+            }
+        }
+
         public static double RootMeanPower(List<double> data, float power) //powers items of a list by a power. finds the mean and then roots the mean by the power. used for calc.
         {
             if (data.Count == 0) { return 0; }

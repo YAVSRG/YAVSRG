@@ -43,7 +43,7 @@ namespace YAVSRG.Options.Panels
             {
                 base.Draw(bounds);
                 bounds = GetBounds(bounds);
-                Game.Options.Theme.DrawNote(bounds, 1, ((LayoutPanel)parent).keyMode, get(), 0);
+                Game.Options.Theme.DrawNote(bounds, 1, ((LayoutPanel)Parent).keyMode, get(), 0);
             }
 
             public override void Update(Rect bounds)
@@ -60,13 +60,13 @@ namespace YAVSRG.Options.Panels
                     {
                         select(Utils.Modulus(get() - 1, max));
                     }
-                    ((LayoutPanel)parent).infobox.SetText(label);
+                    ((LayoutPanel)Parent).infobox.SetText(label);
                     hover = true;
                 }
                 else if (hover)
                 {
                     hover = false;
-                    ((LayoutPanel)parent).infobox.SetText("");
+                    ((LayoutPanel)Parent).infobox.SetText("");
                 }
             }
         }
@@ -95,12 +95,12 @@ namespace YAVSRG.Options.Panels
         {
             if (Game.Options.Profile.Keymode == 0)
             {
-                selectKeyMode.State = 1;
+                selectKeyMode.SetState(WidgetState.NORMAL);
             }
             else
             {
                 keyMode = Game.Options.Profile.Keymode;
-                selectKeyMode.State = 0;
+                selectKeyMode.SetState(WidgetState.DISABLED);
             }
             ChangeKeyMode(keyMode, width);
         }
@@ -122,8 +122,8 @@ namespace YAVSRG.Options.Panels
         {
             for (int i = 0; i < 10; i++)
             {
-                binds[i].State = 0;
-                colors[i].State = 0;
+                binds[i].SetState(WidgetState.DISABLED);
+                colors[i].SetState(WidgetState.DISABLED);
             }
             keyMode = k;
             int c = k * Game.Options.Theme.ColumnWidth > Width ? (int)(Width / k) : Game.Options.Theme.ColumnWidth;
@@ -131,7 +131,7 @@ namespace YAVSRG.Options.Panels
             for (int i = 0; i < k; i++)
             {
                 binds[i].Change(Game.Options.Profile.Bindings[k][i], BindSetter(i, k));
-                binds[i].State = 1;
+                binds[i].SetState(WidgetState.NORMAL);
                 binds[i].PositionTopLeft(start + i * c, 200, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 250, AnchorType.CENTER, AnchorType.MIN);
             }
 
@@ -143,15 +143,15 @@ namespace YAVSRG.Options.Panels
             for (int i = 0; i < colorCount; i++)
             {
                 colors[i].Change(Game.Options.Profile.ColorStyle.GetDescription(i), ColorSetter(i,keymodeIndex), ColorGetter(i,keymodeIndex), availableColors);
-                colors[i].State = 1;
+                colors[i].SetState(WidgetState.NORMAL);
                 colors[i].PositionTopLeft(start + i * c, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(start + c + i * c, 300+Game.Options.Theme.ColumnWidth, AnchorType.CENTER, AnchorType.MIN);
             }
             if (selectLayout != null)
             {
-                Widgets.Remove(selectLayout);
+                Children.Remove(selectLayout);
             }
             string[] layouts = Charts.DifficultyRating.KeyLayout.LAYOUTS[k].Keys.ToArray();
-            Widgets.Add(selectLayout = new TextPicker("Keyboard layout", layouts, Math.Max(0,Array.IndexOf(layouts, Game.Options.Profile.Playstyles[k])), (i) => { Game.Options.Profile.Playstyles[k] = layouts[i]; })
+            Children.Add(selectLayout = new TextPicker("Keyboard layout", layouts, Math.Max(0,Array.IndexOf(layouts, Game.Options.Profile.Playstyles[k])), (i) => { Game.Options.Profile.Playstyles[k] = layouts[i]; })
                 .PositionTopLeft(-150, 600, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(150, 650, AnchorType.CENTER, AnchorType.MIN));
         }
     }

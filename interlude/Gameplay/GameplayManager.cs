@@ -13,7 +13,7 @@ namespace YAVSRG.Gameplay
 {
     public class GameplayManager
     {
-        public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
+        public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Random", new Mods.Random() }, { "Manipulate", new Manipulate() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
 
         public Chart CurrentChart;
         public Charts.CachedChart CurrentCachedChart;
@@ -94,9 +94,9 @@ namespace YAVSRG.Gameplay
         public ChartWithModifiers GetModifiedChart(Dictionary<string,string> SelectedMods)
         {
             ChartWithModifiers c = new ChartWithModifiers(CurrentChart);
-            foreach (string m in SelectedMods.Keys)
+            foreach (string m in Mods.Keys)
             {
-                if (Mods[m].IsApplicable(c, SelectedMods[m]))
+                if (SelectedMods.ContainsKey(m) && Mods[m].IsApplicable(c, SelectedMods[m]))
                 {
                     Mods[m].Apply(c, SelectedMods[m]);
                 }
@@ -114,22 +114,14 @@ namespace YAVSRG.Gameplay
             return s;
         }
 
-        public string GetModString(Dictionary<string, string> SelectedMods, float rate, string playstyle)
+        public string GetModString(ChartWithModifiers chart, float rate, string playstyle)
         {
-            string result = Utils.RoundNumber(rate) + "x, " + playstyle;
-            foreach (string m in SelectedMods.Keys)
-            {
-                if (Mods[m].IsApplicable(ModifiedChart, SelectedMods[m]))
-                {
-                    result += ", "+Mods[m].GetName(SelectedMods[m]);
-                }
-            }
-            return result;
+            return Utils.RoundNumber(rate) + "x, " + playstyle + chart.Mods;
         }
 
         public string GetModString()
         {
-            return GetModString(SelectedMods, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[ModifiedChart.Keys]);
+            return GetModString(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[ModifiedChart.Keys]);
         }
 
         public void SaveScores()

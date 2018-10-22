@@ -18,7 +18,8 @@ namespace YAVSRG.Interface.Widgets
         bool autoSize;
         Animations.AnimationColorMixer scrollcolor;
         Animations.AnimationSlider scrollposition;
-        float contentsHeight = 0;
+        float contentsSize = 0;
+        int selectedItem = -1;
 
         public ScrollContainer(float padx, float pady, bool horizontal, int scroll = 2, bool frame = true, bool autosize = false) : base()
         {
@@ -38,7 +39,7 @@ namespace YAVSRG.Interface.Widgets
             float x = padX - (horizontal ? scroll : 0);
             float y = padY - (horizontal ? 0 : scroll);
             Rect widgetBounds;
-            foreach (Widget w in Widgets)
+            foreach (Widget w in Children)
             {
                 if (w.State > 0)
                 {
@@ -61,17 +62,22 @@ namespace YAVSRG.Interface.Widgets
 
         public override void Update(Rect bounds)
         {
+            selectedItem = 0;
             Rect parentBounds = bounds;
             bounds = GetBounds(bounds);
             float x = padX - (horizontal ? scroll : 0);
             float y = padY - (horizontal ? 0 : scroll);
             Rect widgetBounds;
-            foreach (Widget w in Widgets)
+            foreach (Widget w in Children)
             {
                 if (w.State > 0)
                 {
                     widgetBounds = w.GetBounds(bounds);
                     w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
+                    if (w.GetBounds(bounds).Bottom < bounds.Top)
+                    {
+                        selectedItem += 1;
+                    }
                     w.Update(bounds);
                     if (horizontal)
                     {
@@ -83,7 +89,7 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
             }
-            contentsHeight = y + (horizontal ? 0 : scroll);
+            contentsSize = (horizontal ? x : y) + scroll;
             /*
             if (autoSize)
             {
@@ -105,14 +111,11 @@ namespace YAVSRG.Interface.Widgets
                 scroll -= Input.MouseScroll * 100;
                 if (horizontal)
                 {
-                    if (bounds.Left + x < bounds.Right) //prevents scrolling off the right
-                    {
-                        scroll -= bounds.Right - (bounds.Left + x);
-                    }
+                    scroll = Math.Min(scroll, contentsSize - bounds.Width); //prevents scrolling off the side
                 }
                 else
                 {
-                    scroll = Math.Min(scroll, contentsHeight - bounds.Height); //prevents scrolling off the bottom
+                    scroll = Math.Min(scroll, contentsSize - bounds.Height); //prevents scrolling off the bottom
                 }
                 scroll = Math.Max(scroll, 0); //prevents scrolling off the top
             }
@@ -133,7 +136,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1.5f);
             }
-            foreach (Widget w in Widgets)
+            foreach (Widget w in Children)
             {
                 if (w.State > 0 && w.Bottom(bounds) > bounds.Top && w.Top(bounds) < bounds.Bottom) //optimisation for large numbers of items
                 {
@@ -148,18 +151,27 @@ namespace YAVSRG.Interface.Widgets
             
             if (canscroll > 1) //draw scroll bar (doesn't work)
             {
-                float y = bounds.Height / contentsHeight;
+                float y = bounds.Height / contentsSize;
                 if (y < 0.95f)
                 {
-                    float percentage = scroll / (contentsHeight - bounds.Height);
+                    float percentage = scroll / (contentsSize - bounds.Height);
                     SpriteBatch.DrawRect(new Rect(bounds.Right - 25, bounds.Top + 25 + (bounds.Height - 100) * percentage, bounds.Right - 5, bounds.Top + 75 + (bounds.Height - 100) * percentage), scrollcolor);
                 }
             }
         }
 
+        public void ScrollToItem(int id)
+        {
+            if (Children.Count > id)
+            {
+                var b = GetBounds();
+                //Widgets[id].
+            }
+        }
+
         public List<Widget> Items()
         {
-            return Widgets;
+            return Children;
         }
     }
 }

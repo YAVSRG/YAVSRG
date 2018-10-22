@@ -26,8 +26,9 @@ namespace YAVSRG.Interface.Dialogs
             data = ScoreTracker.StringToHitData(score.hitdata, score.keycount);
             scoring.ProcessScore(data);
             acc = Utils.RoundNumber(scoring.Accuracy()) + "%";
-            rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(score.mods), score.rate, score.playstyle), data);
-            mods = Game.Gameplay.GetModString(score.mods, score.rate, score.playstyle);
+            var chart = Game.Gameplay.GetModifiedChart(score.mods);
+            rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(chart, score.rate, score.playstyle), data);
+            mods = Game.Gameplay.GetModString(chart, score.rate, score.playstyle);
         }
 
         public override void Draw(Rect bounds)

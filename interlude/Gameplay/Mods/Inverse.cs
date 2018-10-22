@@ -11,6 +11,7 @@ namespace YAVSRG.Gameplay.Mods
     {
         public override void Apply(ChartWithModifiers c, string data)
         {
+            base.Apply(c, data);
             PointManager<GameplaySnap> newSnaps = new PointManager<GameplaySnap>();
             int count = c.Notes.Count;
             GameplaySnap s,n;

@@ -12,10 +12,12 @@ namespace YAVSRG.Interface
     {
         public AnchorPoint TopLeft; //probably need better names. this is the top left corner
         public AnchorPoint BottomRight; //this is the bottom left corner
-        public int State = 1; //0 is hidden, 2 is focussed
         public AnimationGroup Animation; //animation manager for this widget
-        protected Widget parent;
-        protected List<Widget> Widgets; //children of the widget
+
+        protected Widget Parent;
+        protected List<Widget> Children; //children of the widget
+
+        protected WidgetState _State = WidgetState.NORMAL; //0 is hidden, 2 is focussed
 
         public Widget()
         {
@@ -24,19 +26,19 @@ namespace YAVSRG.Interface
             Animation = new AnimationGroup(true);
             Animation.Add(TopLeft);
             Animation.Add(BottomRight);
-            Widgets = new List<Widget>();
+            Children = new List<Widget>();
         }
 
         public virtual void AddToContainer(Widget parent)
         {
-            this.parent = parent;
+            Parent = parent;
         }
 
         public virtual void AddChild(Widget child)
         {
-            lock (Widgets)
+            lock (Children)
             {
-                Widgets.Add(child);
+                Children.Add(child);
             }
             child.AddToContainer(this);
         }
@@ -61,17 +63,18 @@ namespace YAVSRG.Interface
             return BottomRight.Y(bounds.Top, bounds.Bottom);
         }
 
-        public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its container
+        public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its *container*
         {
             return new Rect(Left(containerBounds), Top(containerBounds), Right(containerBounds), Bottom(containerBounds));
         }
 
         public virtual Rect GetBounds() //returns the bounds of *this widget* when no bounds are given (useful for some unusual cases but otherwise you shouldn't be using this)
             //only use this when you need access to the widget bounds and you're not inside a draw or update call (where you're given them)
+            //it works backwards to find the bounds the widget should have
         {
-            if (parent != null)
+            if (Parent != null)
             {
-                return GetBounds(parent.GetBounds());
+                return GetBounds(Parent.GetBounds());
             }
             else
             {
@@ -115,13 +118,31 @@ namespace YAVSRG.Interface
             DrawWidgets(GetBounds(bounds));
         }
 
+        public virtual void SetState(WidgetState s)
+        {
+            _State = s;
+        }
+
+        public virtual void ToggleState()
+        {
+            _State = _State > 0 ? WidgetState.DISABLED : WidgetState.NORMAL;
+        }
+
+        public WidgetState State
+        {
+            get
+            {
+                return _State;
+            }
+        }
+
         protected void DrawWidgets(Rect bounds)
         {
-            lock (Widgets) //anti crash measure (probably temp)
+            lock (Children) //anti crash measure for cross-thread widget operations
             {
-                foreach (Widget w in Widgets)
+                foreach (Widget w in Children)
                 {
-                    if (w.State > 0)
+                    if (w._State > 0)
                     {
                         w.Draw(bounds);
                     }
@@ -132,12 +153,12 @@ namespace YAVSRG.Interface
         public virtual void Update(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            int c = Widgets.Count;
+            int c = Children.Count;
             Widget w;
             for (int i = c - 1; i >= 0; i--)
             {
-                w = Widgets[i];
-                if (w.State > 0)
+                w = Children[i];
+                if (w._State > 0)
                 {
                     w.Update(bounds);
                 }
@@ -147,7 +168,7 @@ namespace YAVSRG.Interface
 
         public virtual void OnResize()
         {
-            foreach (Widget w in Widgets)
+            foreach (Widget w in Children)
             {
                 w.OnResize();
             }

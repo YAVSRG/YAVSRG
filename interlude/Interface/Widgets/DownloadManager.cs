@@ -33,11 +33,11 @@ namespace YAVSRG.Interface.Widgets
             {
                 if (!((DownloadCard)w).item.attributes.name.ToLower().Contains(f))
                 {
-                    w.State = 0;
+                    w.SetState(WidgetState.DISABLED);
                 }
                 else
                 {
-                    w.State = 1;
+                    w.SetState(WidgetState.NORMAL);
                 }
             }
         }

@@ -16,8 +16,8 @@ namespace YAVSRG.Interface.Dialogs
         {
             //PositionTopLeft(-200, -100, AnchorType.CENTER, AnchorType.CENTER);
             //PositionBottomRight(200, 100, AnchorType.CENTER, AnchorType.CENTER);
-            //AddChild(new FramedButton("buttonbase","New Profile",NewProfile)
-                //.PositionTopLeft(0,-100,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(0,0,AnchorType.MAX,AnchorType.MIN));
+            AddChild(new FramedButton("buttonbase","New Profile",NewProfile)
+                .PositionTopLeft(0,0,AnchorType.MIN,AnchorType.MIN).PositionBottomRight(400,100,AnchorType.MIN,AnchorType.MIN));
             profileSelector = new ScrollContainer(5, 5, false);
             for (int i = 0; i < Options.Options.Profiles.Count; i++)
             {

@@ -17,19 +17,20 @@ namespace YAVSRG.Gameplay
 
         public List<TopScore>[] Scores = new List<TopScore>[8];
 
-        public void SetScore(Score c)
+        public void SetScore(Score score)
         {
-            if (Scores[c.keycount - 3] == null)
+            if (Scores[score.keycount - 3] == null)
             {
-                Scores[c.keycount - 3] = new List<TopScore>();
+                Scores[score.keycount - 3] = new List<TopScore>();
             }
-            List<TopScore> KeymodeScores = Scores[c.keycount - 3];
-            ScoreSystem score = ScoreSystem.GetScoreSystem(ScoreType.Default);
-            var hd = ScoreTracker.StringToHitData(c.hitdata, c.keycount);
-            score.ProcessScore(hd);
-            float acc = score.Accuracy();
-            float rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(c.mods), c.rate, c.playstyle), hd);
-            TopScore ts = new TopScore() { rating = rating, accuracy = acc, abspath = System.IO.Path.Combine(Game.CurrentChart.Data.SourcePath, Game.CurrentChart.Data.File), hash = Game.CurrentChart.GetHash(), mods = Game.Gameplay.GetModString(c.mods, c.rate, c.playstyle) };
+            List<TopScore> KeymodeScores = Scores[score.keycount - 3];
+            ScoreSystem scoring = ScoreSystem.GetScoreSystem(ScoreType.Default);
+            var hd = ScoreTracker.StringToHitData(score.hitdata, score.keycount);
+            scoring.ProcessScore(hd);
+            float acc = scoring.Accuracy();
+            var chart = Game.Gameplay.GetModifiedChart(score.mods);
+            float rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(chart, score.rate, score.playstyle), hd);
+            TopScore ts = new TopScore() { rating = rating, accuracy = acc, abspath = System.IO.Path.Combine(Game.CurrentChart.Data.SourcePath, Game.CurrentChart.Data.File), hash = Game.CurrentChart.GetHash(), mods = Game.Gameplay.GetModString(chart, score.rate, score.playstyle)};
             bool inserted = false;
 
             for (int i = 0; i < KeymodeScores.Count; i++) //two passes cause im dumb

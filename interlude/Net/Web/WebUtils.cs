@@ -14,7 +14,8 @@ namespace YAVSRG.Net.Web
         {
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "Interlude"); //sites require this to prevent against random web clients downloading
+                client.DefaultRequestHeaders.Add("User-Agent", "Interlude");
+                //impersonates a web browser so interlude isnt blocked as a bot
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12; //ensures TLS 1.2 connection can be made to github (no support for TSL 1.1 or 1.0 i dont think)
                 try
                 {
@@ -31,7 +32,7 @@ namespace YAVSRG.Net.Web
         {
             using (var client = new WebClient())
             {
-                client.Headers.Add("User-Agent", "Interlude"); //sites require this to prevent against random web clients downloading
+                client.Headers.Add("User-Agent", "Interlude");
                 try
                 {
                     client.DownloadProgressChanged += (o, e) => { callback(e.ProgressPercentage); };

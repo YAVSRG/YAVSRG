@@ -16,6 +16,7 @@ namespace YAVSRG.Gameplay.Mods
 
         public override void Apply(ChartWithModifiers c, string data)
         {
+            base.Apply(c, data);
             c.Timing.SetBlankSVData();
         }
 

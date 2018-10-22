@@ -31,7 +31,7 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnEnter(prev);
             wb = Game.Options.General.WindowMode == Options.General.WindowType.Borderless ? OpenTK.WindowBorder.Hidden : OpenTK.WindowBorder.Resizable;
-            Game.Screens.Toolbar.SetHidden(true);
+            Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
             if (Game.Instance.WindowBorder != OpenTK.WindowBorder.Hidden)
             {
                 Game.Instance.WindowBorder = OpenTK.WindowBorder.Hidden;
@@ -96,7 +96,7 @@ namespace YAVSRG.Interface.Screens
                 ChartLoader.Refresh();
                 ChartLoader.RandomChart();
                 Game.Screens.AddScreen(new ScreenMenu());
-                Game.Screens.Toolbar.SetHidden(false);
+                Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
                 Game.Instance.WindowBorder = wb;
             }
             Game.Screens.Logo.alpha = a / 255f;

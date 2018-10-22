@@ -16,23 +16,23 @@ namespace YAVSRG.Interface.Widgets
 
         public void UseScoreList(List<Score> scores)
         {
-            Widgets.Clear();
+            Children.Clear();
             scroll = 0;
             foreach (Score s in scores)
             {
                 ScoreCard t = new ScoreCard(s);
                 AddChild(t);
             }
-            Widgets.Sort(ScoreCard.Compare);
+            Children.Sort(ScoreCard.Compare);
         }
 
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            if (Widgets.Count == 0)
+            if (Children.Count == 0)
             {
-                SpriteBatch.Font1.DrawTextToFill("No local scores", bounds, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawTextToFill("No local scores", bounds, Game.Options.Theme.MenuFont, true, System.Drawing.Color.Black);
             }
         }
     }

@@ -14,27 +14,35 @@ namespace YAVSRG.Interface
     {
         AnimationFade fade1; //prev screen fade out 
         AnimationFade fade2; //next screen fade in
-        List<Screen> stack = new List<Screen>() { };
-        List<Dialog> dialogs = new List<Dialog>();
+
         AnimationSeries animation = new AnimationSeries(true);
         AnimationGroup animation2 = new AnimationGroup(true);
-        Screen Previous = null;
 
+        List<Screen> stack = new List<Screen>() { };
+        List<Dialog> dialogs = new List<Dialog>();
+        Screen Previous = null;
         public Screen Current = null;
         public bool Loading = true;
+
         public Sprite Background;
         public Sprite Oldbackground; //unlikely to ever be used / would be for fading because it needs to calculate two separate aspect ratio adjustments
         public AnimationColorFade BackgroundDim = new AnimationColorFade(Color.Black, Color.White);
+
         public AnimationColorMixer BaseColor;
         public AnimationColorMixer DarkColor;
         public AnimationColorMixer HighlightColor;
+
         public AnimationSlider Parallax = new AnimationSlider(15);
         public Widgets.Logo Logo;
         public Toolbar Toolbar;
 
+        private AnchorPoint ParallaxPos = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN);
+        private Func<Point> ParallaxFunc = () => new Point(Input.MouseX, Input.MouseY);
+
         public ScreenManager()
         {
             animation2.Add(Parallax);
+            animation2.Add(ParallaxPos);
             animation2.Add(BackgroundDim);
             animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
             animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
@@ -46,11 +54,6 @@ namespace YAVSRG.Interface
         public void AddDialog(Dialog d)
         {
             dialogs.Insert(0, d);
-        }
-
-        public bool InDialog()
-        {
-            return dialogs.Count > 0;
         }
 
         public void ChangeBackground(Sprite bg)
@@ -106,6 +109,15 @@ namespace YAVSRG.Interface
             Previous?.OnResize();
         }
 
+        public void SetParallaxOverride(Func<Point> f) //used to move the parallax effect to some place other than the mouse position i.e in visualiser
+        {
+            if (f == null)
+            {
+                f = () => new Point(Input.MouseX, Input.MouseY);
+            }
+            ParallaxFunc = f;
+        }
+
         public void Draw()
         {
             //todo: create one rect and also rect shrink function
@@ -147,8 +159,8 @@ namespace YAVSRG.Interface
             //this draws the background of the chart on the screen
             //a section of the texture is selected such all parts of the screen line up with the overall background image being fitted to the whole screen
 
-            float parallaxX = parallaxMult * Input.MouseX * Parallax / ScreenWidth; //this calculates parallax from mouse position
-            float parallaxY = parallaxMult * Input.MouseY * Parallax / ScreenHeight;
+            float parallaxX = parallaxMult * ParallaxPos.AbsoluteX * Parallax / ScreenWidth; //this calculates parallax from mouse position
+            float parallaxY = parallaxMult * ParallaxPos.AbsoluteY * Parallax / ScreenHeight;
 
             float bg = ((float)Background.Width / Background.Height);
             float window = (ScreenWidth + Parallax) / (ScreenHeight + Parallax);
@@ -173,7 +185,7 @@ namespace YAVSRG.Interface
         public void Update()
         {
             Rect bounds = new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
-            Toolbar.Update(bounds);
+            if (dialogs.Count == 0) Toolbar.Update(bounds);
             Logo.Update(bounds);
             if (Loading)
             {
@@ -208,6 +220,8 @@ namespace YAVSRG.Interface
             }
             animation.Update();
             animation2.Update();
+            var p = ParallaxFunc();
+            ParallaxPos.Target(p.X, p.Y);
             if (Input.KeyTap(Game.Options.General.Binds.CollapseToToolbar))
             {
                 Game.Instance.CollapseToIcon();

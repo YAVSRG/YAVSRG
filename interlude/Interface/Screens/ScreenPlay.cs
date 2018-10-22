@@ -104,7 +104,8 @@ namespace YAVSRG.Interface.Screens
             Game.Screens.BackgroundDim.Target = 1 - Game.Options.Profile.BackgroundDim;
             Utils.SetDiscordData("Playing " + Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]", "From " + Game.CurrentChart.Data.SourcePack);
             Game.Options.Profile.Stats.TimesPlayed++;
-            Game.Screens.Toolbar.SetHidden(true);
+            Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
+            Game.Screens.Toolbar.SetCursorState(false);
             AnimationSeries s = new AnimationSeries(false);
             s.Add(bannerIn = new AnimationFade(0, 2.001f, 2f));
             s.Add(new AnimationCounter(60, false));
@@ -125,7 +126,8 @@ namespace YAVSRG.Interface.Screens
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 0.3f;
             Utils.SetDiscordData("Looking for something to play", "");
-            Game.Screens.Toolbar.SetHidden(false);
+            Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
+            Game.Screens.Toolbar.SetCursorState(true);
             base.OnExit(next);
         }
 
@@ -135,7 +137,7 @@ namespace YAVSRG.Interface.Screens
             if (Input.KeyTap(Game.Options.General.Binds.Exit)) //escape quits
             {
                 Game.Screens.PopScreen();
-                Widgets.Clear();
+                Children.Clear();
                 Game.Options.Profile.Stats.TimesQuit++;
             }
             else if (Game.Audio.LeadingIn && Input.KeyTap(Game.Options.General.Binds.ChangeOffset)) //if map hasn't started you can sync it with + key
@@ -170,7 +172,7 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Screens.PopScreen();
                 Game.Screens.AddScreen(new ScreenScore(scoreTracker));
-                Widgets.Clear();
+                Children.Clear();
             }
             base.Update(bounds);
         }

@@ -10,6 +10,7 @@ namespace YAVSRG.Gameplay.Mods
     {
         public override void Apply(ChartWithModifiers c, string data)
         {
+            base.Apply(c, data);
             foreach (GameplaySnap s in c.Notes.Points)
             {
                 s.taps.value = BitMirror(s.taps.value, c.Keys);
