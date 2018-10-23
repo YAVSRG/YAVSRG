@@ -22,7 +22,7 @@ namespace YAVSRG.Gameplay
 
         public override string FormatAcc()
         {
-            return base.FormatAcc() + " (YAV)";
+            return base.FormatAcc() + " (SC)";
         }
     }
 }

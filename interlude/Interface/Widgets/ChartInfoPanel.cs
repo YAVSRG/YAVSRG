@@ -38,7 +38,7 @@ namespace YAVSRG.Interface.Widgets
                 .PositionTopLeft(0, 70, AnchorType.CENTER, AnchorType.MAX).PositionBottomRight(15, 0, AnchorType.MAX, AnchorType.MAX));
             Animation.Add(physical = new AnimationColorMixer(Color.White));
             Animation.Add(technical = new AnimationColorMixer(Color.White));
-            Animation.Add(text = new AnimationColorMixer(Game.Options.Theme.MenuFont));
+            Animation.Add(text = new AnimationColorMixer(Color.Black));
             ChangeChart();
         }
 
@@ -48,7 +48,7 @@ namespace YAVSRG.Interface.Widgets
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
             physical.Target(Utils.PhysicalColor(Game.Gameplay.ChartDifficulty.Physical));
             technical.Target(Utils.TechnicalColor(Game.Gameplay.ChartDifficulty.Physical));
-            text.Target(Utils.ColorInterp(Game.Options.Theme.MenuFont, Color.Black, 0.7f));
+            text.Target(Color.Black);
         }
 
         public override void Draw(Rect bounds)

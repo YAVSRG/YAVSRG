@@ -113,13 +113,13 @@ namespace YAVSRG.Interface.Screens
 
             //top panel
             DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Top, bounds.Right - 600, bounds.Top + 150), 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left, bounds.Top, bounds.Right - 600, bounds.Top + 100), Game.Options.Theme.MenuFont);
-            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 650, bounds.Top + 150), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, new Rect(bounds.Left, bounds.Top, bounds.Right - 600, bounds.Top + 100), Game.Options.Theme.MenuFont, true);
+            SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 650, bounds.Top + 150), Game.Options.Theme.MenuFont, true);
 
             //judgements display
-            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 350, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), new Rect(bounds.Left + 550, bounds.Top + 500, bounds.CenterX - 50, bounds.Top + 600), Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), new Rect(bounds.CenterX + 50, bounds.Top + 500, bounds.Right - 550, bounds.Top + 600), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 350, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
+            SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), new Rect(bounds.Left + 550, bounds.Top + 500, bounds.CenterX - 50, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
+            SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), new Rect(bounds.CenterX + 50, bounds.Top + 500, bounds.Right - 550, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
             float r = 0;
             float h = 450/scoreData.Scoring.Judgements.Length;
             for (int i = 0; i < scoreData.Scoring.Judgements.Length; i++)
@@ -127,12 +127,12 @@ namespace YAVSRG.Interface.Screens
                 r = bounds.Right - 500 + i * h;
                 SpriteBatch.DrawRect(new Rect(r, bounds.Top + 50, r + h, bounds.Top + 250), Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.DrawRect(new Rect(r, bounds.Top + 250 - 200f * scoreData.Scoring.Judgements[i] / scoreData.maxcombo, r + h, bounds.Top + 250), Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.Font2.DrawCentredTextToFill(scoreData.Scoring.Judgements[i].ToString(), new Rect(r, bounds.Top + 50, r + h, bounds.Top + 150), Color.White);
-                SpriteBatch.Font2.DrawCentredTextToFill(Utils.RoundNumber(scoreData.Scoring.Judgements[i] * 100f / scoreData.maxcombo) + "%", new Rect(r, bounds.Top + 150, r + h, bounds.Top + 250), Color.White);
+                SpriteBatch.Font2.DrawCentredTextToFill(scoreData.Scoring.Judgements[i].ToString(), new Rect(r, bounds.Top + 50, r + h, bounds.Top + 150), Color.White, true);
+                SpriteBatch.Font2.DrawCentredTextToFill(Utils.RoundNumber(scoreData.Scoring.Judgements[i] * 100f / scoreData.maxcombo) + "%", new Rect(r, bounds.Top + 150, r + h, bounds.Top + 250), Color.White, true);
             }
-            SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", new Rect(bounds.Right - 490, bounds.Top + 250, bounds.Right - 225, bounds.Top + 300), Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawCentredTextToFill(badge, new Rect(bounds.Right - 390, bounds.Top + 250, bounds.Right - 160, bounds.Top + 300), Game.Options.Theme.MenuFont);
-            SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.Scoring.ComboBreaks.ToString() + "cbs", new Rect(bounds.Right - 225, bounds.Top + 250, bounds.Right - 60, bounds.Top + 300), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", new Rect(bounds.Right - 490, bounds.Top + 250, bounds.Right - 225, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
+            SpriteBatch.Font1.DrawCentredTextToFill(badge, new Rect(bounds.Right - 390, bounds.Top + 250, bounds.Right - 160, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
+            SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.Scoring.ComboBreaks.ToString() + "cbs", new Rect(bounds.Right - 225, bounds.Top + 250, bounds.Right - 60, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
             DrawFrame(new Rect(bounds.Right - 500, bounds.Top + 50, bounds.Right - 50, bounds.Top + 300), 30f, Color.White);
 
             //graph

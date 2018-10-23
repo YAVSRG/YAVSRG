@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ManagedBass;
+using ManagedBass.Fx;
 
 namespace YAVSRG.Audio
 {
@@ -15,7 +16,7 @@ namespace YAVSRG.Audio
 
         public Track(string file)
         {
-            ID = Bass.CreateStream(file); //loads file
+            ID = Bass.CreateStream(file, 0, 0, BassFlags.Decode); //loads file
             if (ID == 0) //this means it didn't work
             {
                 Utilities.Logging.Log("Couldn't load audio track from "+file+": "+Bass.LastError.ToString(), Utilities.Logging.LogType.Error);
@@ -25,6 +26,7 @@ namespace YAVSRG.Audio
                 var d = Bass.ChannelGetInfo(ID); //asks bass for info about the track
                 Duration = Bass.ChannelBytes2Seconds(ID,Bass.ChannelGetLength(ID))*1000;
                 Frequency = d.Frequency;
+                ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource);
             }
         }
 

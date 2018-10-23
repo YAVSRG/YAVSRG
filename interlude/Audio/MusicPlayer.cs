@@ -43,6 +43,7 @@ namespace YAVSRG.Audio
 
         public void SetRate(double rate) //sets playback rate (needs to be done every time song is switched)
         {
+            //Bass.ChannelSetAttribute(nowplaying, ChannelAttribute.Pitch, -Math.Log(rate, 2) * 12);
             Bass.ChannelSetAttribute(nowplaying, ChannelAttribute.Frequency, nowplaying.Frequency * rate);
             Rate = rate;
         }
