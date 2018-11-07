@@ -39,6 +39,7 @@ namespace YAVSRG.Interface.Screens
             if (!Game.Screens.Loading)
             {
                 Game.Screens.Logo.Move(new Rect(-300, -300, 300, 300));
+                Game.Screens.Toolbar.SetCursorState(false);
                 exiting = true;
                 transition.Add(new AnimationCounter(100, false));
                 transition.Add(fade = new AnimationFade(0, 1, 0.999f));

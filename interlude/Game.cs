@@ -101,7 +101,6 @@ namespace YAVSRG
             
             var test = new Discord.EventHandlers() { requestCallback = Discord.RichPresence.RequestHandler };
             Discord.Initialize("420320424199716864", ref test, true, "");
-            Utils.SetDiscordData("Just started playing", "Pick a song already!");
         }
 
         public void ApplyWindowSettings(Options.General settings) //apply video settings
@@ -154,6 +153,7 @@ namespace YAVSRG
         protected override void OnRenderFrame(FrameEventArgs e) //frame rendering code. runs every frame.
         {
             base.OnRenderFrame(e);
+            if (!Visible) return;
             GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
             SpriteBatch.Begin(ScreenUtils.ScreenWidth*2, ScreenUtils.ScreenHeight*2); //start my render code
             screens.Draw();
@@ -166,6 +166,7 @@ namespace YAVSRG
         {
             base.OnUpdateFrame(e);
             if (!init) { PostWindowInit(); init = true; return; }
+            if (!Visible) return;
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             screens.Update(); //updates the current screen as well as animations and stuff to transition between them
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
@@ -185,7 +186,7 @@ namespace YAVSRG
             gameplay.SaveScores();
             gameplay.Collections.Save();
             trayIcon.Destroy();
-            taskManager.Stop();
+            taskManager.StopAll();
             netManager.Disconnect();
             Discord.Shutdown();
             options.Save(); //remember to dump any updated profile settings to file

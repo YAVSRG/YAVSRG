@@ -31,7 +31,7 @@ namespace YAVSRG.Interface
         public AnimationColorMixer BaseColor;
         public AnimationColorMixer DarkColor;
         public AnimationColorMixer HighlightColor;
-
+        
         public AnimationSlider Parallax = new AnimationSlider(15);
         public Widgets.Logo Logo;
         public Toolbar Toolbar;
@@ -120,7 +120,6 @@ namespace YAVSRG.Interface
 
         public void Draw()
         {
-            //todo: create one rect and also rect shrink function
             Rect bounds = new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
             if (Loading)
             {

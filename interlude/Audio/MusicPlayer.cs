@@ -68,10 +68,10 @@ namespace YAVSRG.Audio
 
         public void PlayLeadIn() //plays the song but starting with a 2 second lead in
         {
+            Paused = false;
             startTime = -BUFFER;
             LeadingIn = true;
             timer.Start();
-            Paused = false;
         }
 
         public void Play(long start) //plays the song from a given point (in ms) into the song. negative ms (to lead in) not supported.
@@ -84,25 +84,25 @@ namespace YAVSRG.Audio
 
         public void Play() //plays the song from the beginning (0ms) OR unpauses the song if paused
         {
+            Paused = false;
             Bass.ChannelPlay(nowplaying);
             timer.Start();
-            Paused = false;
         }
 
         public void Stop() //stops song playback (it resets to the start)
         {
+            Paused = true;
             Bass.ChannelStop(nowplaying);
             timer.Stop();
             timer.Reset();
             Seek(0);
-            Paused = true;
         }
 
         public void Pause() //pauses the song. Play() will resume
         {
+            Paused = true;
             Bass.ChannelPause(nowplaying);
             timer.Stop();
-            Paused = true;
         }
 
         public double Now() //gets position (in ms) we are into the song. This value is directly used in gameplay to sync notes to audio
@@ -134,6 +134,14 @@ namespace YAVSRG.Audio
             //algorithm adapted from here
             //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
             //thanks very much it was significantly better than my old algorithm
+            if (Paused || !Playing)
+            {
+                for (int x = 0; x < 256; x++)
+                {
+                    WaveForm[x] = WaveForm[x] * 0.9f;
+                }
+                return;
+            }
             Bass.ChannelGetData(nowplaying, fft, (int)DataFlags.FFT2048); //pull new raw waveform data
             int b0 = 0;
             int y;
@@ -157,10 +165,7 @@ namespace YAVSRG.Audio
         public void Update() //updates the music player every update frame
         {
             float[] temp = new float[256];
-            if (!Paused) //waveform freezes in position when paused
-            {
-                UpdateWaveform();
-            }
+            UpdateWaveform();
             Level = Level * 0.9f + (Bass.ChannelGetLevelRight(nowplaying) + Bass.ChannelGetLevelLeft(nowplaying)) * 0.0000002f; //overall level/volume of audio
             //it's like a single bar waveform (should probably be moved to UpdateWaveform()
             if (LeadingIn && Playing && Now() + AudioOffset > 0) //if leadin timer is complete

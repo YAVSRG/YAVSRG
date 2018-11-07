@@ -29,27 +29,28 @@ namespace YAVSRG.Interface.Widgets
 
             public override void Draw(Rect bounds)
             {
+                int alpha = (int)(((ChatBox)Parent).fade * 255);
                 base.Draw(bounds);
                 bounds = GetBounds(bounds);
                 float spacing = 40f;
                 if (expand)
                 {
-                    ScreenUtils.DrawFrame(bounds, 30f, Color.White);
+                    ScreenUtils.DrawFrame(bounds, 30f, Color.FromArgb(alpha, Color.White));
                     for (int x = 0; x < 5; x++)
                     {
                         for (int y = 0; y < 4; y++)
                         {
-                            SpriteBatch.Draw("emoji", new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.White, x + y * 5, 0);
+                            SpriteBatch.Draw("emoji", new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.FromArgb(alpha,Color.White), x + y * 5, 0);
                         }
                         for (int y = 4; y < 6; y++)
                         {
-                            SpriteBatch.DrawRect(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), colors[x + y * 5 - 20]);
+                            SpriteBatch.DrawRect(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.FromArgb(alpha, colors[x + y * 5 - 20]));
                         }
                     }
                 }
                 else
                 {
-                    SpriteBatch.Draw("emoji", new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.White, 0, 0);
+                    SpriteBatch.Draw("emoji", new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.FromArgb(alpha, Color.White), 0, 0);
                 }
             }
 
@@ -99,7 +100,10 @@ namespace YAVSRG.Interface.Widgets
 
         bool collapsed
         {
-            get { return TopLeft.AbsoluteTargetY == 80; }
+            get
+            {
+                return fade.Target == 0;
+            }
         }
 
         Dictionary<string, ChatChannel> channels;
@@ -107,35 +111,36 @@ namespace YAVSRG.Interface.Widgets
         string entryText = "";
         int newMessages = 0;
         ScrollContainer channelSelector;
-        Animations.AnimationSlider newMsgFade;
+        Animations.AnimationSlider newMsgFade, fade;
 
         public ChatBox()
         {
             channels = new Dictionary<string, ChatChannel>();
-            channelSelector = new ScrollContainer(10f, 10f, false);
-            AddChild(channelSelector.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(100, 0, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new EmojiPicker().PositionTopLeft(220, 10, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 10, AnchorType.MAX, AnchorType.MAX));
+            channelSelector = new ScrollContainer(10f, 10f, false, 2, false);
+            AddChild(channelSelector.PositionTopLeft(20, 20, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(220, 20, AnchorType.MIN, AnchorType.MAX));
+            AddChild(new EmojiPicker().PositionTopLeft(240, 30, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(30, 30, AnchorType.MAX, AnchorType.MAX));
             Animation.Add(newMsgFade = new Animations.AnimationSlider(0));
+            Animation.Add(fade = new Animations.AnimationSlider(0));
         }
 
         public override void Draw(Rect bounds)
         {
-            SpriteBatch.DrawRect(bounds, Color.FromArgb((int)((Bottom(bounds)-Top(bounds))*0.25f), 0, 0, 0));
             bounds = GetBounds(bounds);
-            SpriteBatch.DrawRect(bounds, Color.FromArgb(180, 0, 0, 0));
             if (newMsgFade.Val > 0.01f)
             {
                 int a = (int)(255 * newMsgFade.Val);
                 var c = Color.FromArgb(0, 0, 0, 0);
-                SpriteBatch.Draw(bounds: new Rect(bounds.Right - 1200, bounds.Top - 300, bounds.Right, bounds.Top), colors: new[] { c, c, Color.FromArgb(a, Color.Black), c });
-                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Binds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Top - 50, Color.FromArgb(a,Game.Options.Theme.MenuFont));
+                SpriteBatch.Draw(bounds: new Rect(bounds.Right - 1200, bounds.Bottom - 380, bounds.Right, bounds.Bottom - 80), colors: new[] { c, c, Color.FromArgb(a, Color.Black), c });
+                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Binds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a,Game.Options.Theme.MenuFont));
             }
-            if (collapsed)
+            if (fade > 0.01f)
             {
-                
-            }
-            else
-            {
+                int alpha = (int)(fade * 255);
+                SpriteBatch.DrawRect(bounds, Color.FromArgb((int)(fade * 180), 0, 0, 0));
+                SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb((int)(fade * 127), Color.Black));
+                var b = channelSelector.GetBounds(bounds);
+                SpriteBatch.DrawRect(b, Color.FromArgb((int)(fade * 127), Color.Black));
+                ScreenUtils.DrawFrame(b, 30f, Color.FromArgb(alpha, Game.Screens.HighlightColor));
                 DrawWidgets(bounds);
                 if (selectedChannel != "")
                 {
@@ -143,34 +148,37 @@ namespace YAVSRG.Interface.Widgets
                     int c = Math.Min(l.Count, (int)(bounds.Height / 25 - 2));
                     for (int i = 0; i < c; i++)
                     {
-                        RenderText(l[i], bounds.Left + 120, bounds.Bottom - 70 - 25 * i);
+                        RenderText(l[i], bounds.Left + 260, bounds.Bottom - 90 - 25 * i, alpha);
                     }
                 }
-                RenderText("> " + entryText, bounds.Left + 120, bounds.Bottom - 40);
-                ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
+                RenderText("> " + entryText, bounds.Left + 260, bounds.Bottom - 60, alpha);
+                ScreenUtils.DrawFrame(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), 30f, Color.FromArgb(alpha, Game.Screens.HighlightColor));
             }
         }
 
         public override void Update(Rect bounds)
         {
-            base.Update(bounds);
+            if (!collapsed)
+            {
+                base.Update(bounds);
+            }
+            else
+            {
+                Animation.Update();
+            }
             bounds = GetBounds(bounds);
             if (collapsed)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Chat) && Game.Screens.Toolbar.Height > 0)
+                if (Input.KeyTap(Game.Options.General.Binds.Chat) && Game.Screens.Toolbar.State == WidgetState.ACTIVE)
                 {
-                    Move(new Rect(0, 480, 0, 80));
-                    Input.ChangeIM(new InputMethod((s) => { entryText = s; }, () => { return entryText; }, () => { }));
-                    newMessages = 0;
-                    newMsgFade.Target = 0;
+                    Expand();
                 }
             }
             else
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Chat, true))
+                if (Input.KeyTap(Game.Options.General.Binds.Chat, true) || Input.KeyTap(Game.Options.General.Binds.Exit, true))
                 {
-                    Move(new Rect(0, 80, 0, 80));
-                    Input.ChangeIM(null);
+                    Collapse();
                 }
                 else if (entryText != "" && Input.KeyTap(OpenTK.Input.Key.Enter, true))
                 {
@@ -184,7 +192,7 @@ namespace YAVSRG.Interface.Widgets
             }
         }
 
-        public void AddLine(string channel, string text)
+        public void AddLine(string channel, string text, bool important)
         {
             if (!channels.ContainsKey(channel))
             {
@@ -193,14 +201,28 @@ namespace YAVSRG.Interface.Widgets
             var l = channels[channel];
             l.lines.Insert(0,text); //no limit to chat history
             //if i want one, put it here
-            if (collapsed)
+            if (collapsed && important)
             {
                 newMessages += 1;
                 newMsgFade.Target = 1;
             }
         }
 
-        void RenderText(string text, float x, float y)
+        public void Collapse()
+        {
+            fade.Target = 0;
+            Input.ChangeIM(null);
+        }
+
+        public void Expand()
+        {
+            fade.Target = 1;
+            Input.ChangeIM(new InputMethod((s) => { entryText = s; }, () => { return entryText; }, () => { }));
+            newMessages = 0;
+            newMsgFade.Target = 0;
+        }
+
+        void RenderText(string text, float x, float y, int alpha)
         {
             int index = 0;
             Color c = Color.White;
@@ -208,7 +230,7 @@ namespace YAVSRG.Interface.Widgets
             {
                 if (text[i] == '{')
                 {
-                    x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, c);
+                    x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, Color.FromArgb(alpha,c));
                     index = i;
                 }
                 else if (text[i] == '}')
@@ -228,19 +250,19 @@ namespace YAVSRG.Interface.Widgets
                         {
                             int id = 0;
                             int.TryParse(parse[1], out id);
-                            SpriteBatch.Draw("emoji", new Rect(x, y, x + 35, y + 35), c, id, 0, 0);
+                            SpriteBatch.Draw("emoji", new Rect(x, y, x + 35, y + 35), Color.FromArgb(alpha, c), id, 0, 0);
                             x += 35;
                             valid = true;
                         }
                     }
                     if (!valid)
                     {
-                        x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, c);
+                        x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, Color.FromArgb(alpha, c));
                     }
                     index = i + (valid ? 1 : 0);
                 }
             }
-            x += SpriteBatch.Font2.DrawText(text.Substring(index), 20f, x, y, c);
+            x += SpriteBatch.Font2.DrawText(text.Substring(index), 20f, x, y, Color.FromArgb(alpha, c));
         }
 
         void SendMessage(string channel, string msg)
@@ -254,7 +276,7 @@ namespace YAVSRG.Interface.Widgets
         void CreateChannel(string channel)
         {
             channels.Add(channel, new ChatChannel(new SimpleButton(channel, () => { selectedChannel = channel; }, () => { return selectedChannel == channel; }, 20f)));
-            channelSelector.AddChild(channels[channel].button.PositionBottomRight(80, 40, AnchorType.MIN, AnchorType.MIN));
+            channelSelector.AddChild(channels[channel].button.PositionBottomRight(180, 40, AnchorType.MIN, AnchorType.MIN));
             if (selectedChannel == "") { selectedChannel = channel; }
         }
 

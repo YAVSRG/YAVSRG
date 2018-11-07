@@ -13,12 +13,13 @@ namespace YAVSRG.Utilities
         {
             CancellationTokenSource token = new CancellationTokenSource();
             Task t;
-            public string name;
-            public Action callback;
+            Action callback;
+            public string Name;
 
             public NamedTask(Action a, string name, Action callback)
             {
-                this.name = name;
+                Name = name;
+                this.callback = callback; //not used
                 t = new Task(a, token.Token);
             }
 
@@ -32,7 +33,7 @@ namespace YAVSRG.Utilities
                 token.Cancel();
                 if (t.Exception != null)
                 {
-                    Logging.Log(t.Exception.ToString());
+                    Logging.Log("Exception in task " + Name + ": " + t.Exception.ToString());
                 }
             }
 
@@ -42,25 +43,51 @@ namespace YAVSRG.Utilities
             }
         }
 
-        public List<NamedTask> tasks;
+        public List<NamedTask> Tasks;
 
         public TaskManager()
         {
-            tasks = new List<NamedTask>();
+            Tasks = new List<NamedTask>();
         }
 
         public void AddTask(NamedTask t)
         {
-            tasks.Add(t);
+            Tasks.Add(t);
+            if (t.Name != "")
+            {
+                Game.Screens.Toolbar.Chat.AddLine("Tasks", "Added task: " + t.Name, true);
+            }
             t.Start();
         }
 
-        public void Stop()
+        public void AddTask(Action a, string Name)
         {
-            foreach (NamedTask t in tasks)
+            AddTask(new NamedTask(a, "", () => { }));
+        }
+
+        public void AddAnonymousTask(Action a)
+        {
+            new NamedTask(a, "", () => { }).Start();
+        }
+
+        public void StopAll()
+        {
+            foreach (NamedTask t in Tasks)
             {
                 t.Cancel();
             }
+        }
+
+        public bool HasTasksRunning()
+        {
+            foreach (NamedTask t in Tasks)
+            {
+                if (t.Status == TaskStatus.Running)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

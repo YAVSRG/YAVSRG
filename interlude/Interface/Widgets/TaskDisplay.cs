@@ -38,9 +38,9 @@ namespace YAVSRG.Interface.Widgets
                 bounds = GetBounds(bounds);
                 SpriteBatch.DrawRect(bounds, Color.FromArgb((int)(a*0.75f), Color.Black));
                 float y = bounds.Top + 160f;
-                foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.tasks)
+                foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.Tasks)
                 {
-                    SpriteBatch.Font1.DrawJustifiedText(t.name, 30f, bounds.Right, y, Color.FromArgb(a, Game.Options.Theme.MenuFont), true);
+                    SpriteBatch.Font1.DrawJustifiedText(t.Name, 30f, bounds.Right, y, Color.FromArgb(a, Game.Options.Theme.MenuFont), true);
                     SpriteBatch.Font2.DrawJustifiedText(t.Status.ToString(), 20f, bounds.Right, y + 30f, Color.FromArgb(a, Game.Options.Theme.MenuFont));
                     y += 50f;
                 }
@@ -64,27 +64,23 @@ namespace YAVSRG.Interface.Widgets
                 {
                     slide.Target = 0;
                 }
-                else if (Input.KeyTap(OpenTK.Input.Key.BackSlash))
-                {
-                    Game.Tasks.AddTask(new Utilities.TaskManager.NamedTask(() => { System.Threading.Thread.Sleep(1000); }, "Dummy task", () => { }));
-                }
                 float y = bounds.Top + 160f;
-                for (int i = 0; i < Game.Tasks.tasks.Count; i++)
+                for (int i = 0; i < Game.Tasks.Tasks.Count; i++)
                 {
                     if (ScreenUtils.MouseOver(new Rect(bounds.Right - 250, y, bounds.Right, y + 40)) && Input.MouseClick(OpenTK.Input.MouseButton.Right))
                     {
-                        if (Game.Tasks.tasks[i].Status != TaskStatus.Running)
+                        if (Game.Tasks.Tasks[i].Status != TaskStatus.Running)
                         {
-                            Game.Tasks.tasks[i].Cancel();
-                            Game.Tasks.tasks.RemoveAt(i);
+                            Game.Tasks.Tasks[i].Cancel();
+                            Game.Tasks.Tasks.RemoveAt(i);
                         }
                     }
                     y += 50f;
                 }
             }
-            if (Game.Tasks.tasks.Count > 0)
+            if (Game.Tasks.Tasks.Count > 0)
             {
-                b.Color(Game.Tasks.tasks[Game.Tasks.tasks.Count - 1].Status == TaskStatus.RanToCompletion ? Color.Green : Color.Orange);
+                b.Color(Game.Tasks.Tasks[Game.Tasks.Tasks.Count - 1].Status == TaskStatus.RanToCompletion ? Color.Green : Color.Orange);
             }
         }
 

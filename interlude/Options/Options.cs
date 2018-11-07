@@ -60,14 +60,13 @@ namespace YAVSRG.Options
         public static void Init()
         {
             Profiles = new List<Profile>();
-            general = new General();
-            try
+            if (File.Exists("Options.json"))
             {
                 general = Utils.LoadObject<General>("Options.json");
             }
-            catch
+            else
             {
-                Utilities.Logging.Log("Couldn't load settings file", Utilities.Logging.LogType.Error);
+                general = new General();
             }
             EnsureFoldersExist();
             foreach (string path in Directory.GetFiles(ProfilePath))

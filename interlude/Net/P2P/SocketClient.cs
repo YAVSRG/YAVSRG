@@ -62,7 +62,7 @@ namespace YAVSRG.Net.P2P
         {
             if (id == -1) //id is -1 when you receive the packet from the server as a client. if you are hosting the id will be 0 or above and should be handled by the server, NOT here
             {
-                Game.Screens.Toolbar.Chat.AddLine("Lobby", packet.text);
+                Game.Screens.Toolbar.Chat.AddLine("Lobby", packet.text, true);
             }
         }
 

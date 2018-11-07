@@ -23,18 +23,24 @@ namespace YAVSRG.Interface.Screens
         {
             Children.Clear();
             var ib = new InfoBox();
-            Widget tabs = new ScrollContainer(5f, 5f, false);
+            ScrollContainer tabs = new ScrollContainer(5f, 5f, false);
             lp = new LayoutPanel(ib);
             tabs.AddChild(new GeneralPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
             tabs.AddChild(new GameplayPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
             tabs.AddChild(lp.PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
             lp.Refresh();
 
-            ModMenu modMenu = new ModMenu();
-            AddChild(modMenu.PositionTopLeft(0, 150, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(20, 100, AnchorType.MAX, AnchorType.MAX));
-
             AddChild(tabs.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MAX, AnchorType.MAX));
             AddChild(ib.PositionTopLeft(550, 50, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(50, 50, AnchorType.MAX, AnchorType.MAX));
+
+            //AddChild(ScrollButton("General",0,tabs));
+            //AddChild(ScrollButton("Gameplay", 1, tabs));
+            //AddChild(ScrollButton("Layout", 2, tabs));
+        }
+
+        private Widget ScrollButton(string name, int id, ScrollContainer container)
+        {
+            return new SimpleButton(name, () => { container.ScrollToItem(id); }, () => container.selectedItem == id, 20f).PositionTopLeft(0, id * 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(100, id * 100 + 50, AnchorType.MIN, AnchorType.MIN);
         }
 
         public override void OnExit(Screen next)

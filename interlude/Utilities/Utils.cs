@@ -32,11 +32,11 @@ namespace YAVSRG
             return "?";
         }
 
-        public static void SetDiscordData(string text, string subtitle) //needs better wrapper in future, move this
+        public static void SetDiscordData(string state) //needs better wrapper in future, move this
         {
             try
             {
-                Discord.UpdatePresence(new Discord.RichPresence() { state = subtitle, details = text, joinSecret = Game.Multiplayer.LobbyKey });
+                Discord.UpdatePresence(new Discord.RichPresence() { state = state, details = Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, joinSecret = Game.Multiplayer.LobbyKey, largeImageKey = "logo", largeImageText = "It's a rhythm game" });
             }
             catch { }
         }
@@ -57,6 +57,7 @@ namespace YAVSRG
 
         public static void SaveObject<T>(T obj, string path) //saves an object to a file
         {
+            if (obj == null) return;
             System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented));
         }
 

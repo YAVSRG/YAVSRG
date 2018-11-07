@@ -45,6 +45,26 @@ namespace YAVSRG.Interface
             return new Rect(Left - x, Top - y, Right + x, Bottom + y);
         }
 
+        public Rect SliceTop(float y)
+        {
+            return new Rect(Left, Top, Right, Top + y);
+        }
+
+        public Rect SliceBottom(float y)
+        {
+            return new Rect(Left, Bottom - y, Right, Bottom);
+        }
+
+        public Rect SliceLeft(float x)
+        {
+            return new Rect(Left, Top, Left + x, Bottom);
+        }
+
+        public Rect SliceRight(float x)
+        {
+            return new Rect(Right - x, Top, Right, Bottom);
+        }
+
         public Rect FlipX()
         {
             return new Rect(Right, Top, Left, Bottom);

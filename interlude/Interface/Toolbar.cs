@@ -20,7 +20,7 @@ namespace YAVSRG.Interface
         public Toolbar()
         {
             AddChild(
-                new Button("buttonback", "Back", () => { Game.Screens.PopScreen(); })
+                new Button("buttonback", "Back", Back)
                 .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN));
             AddChild(
                 new Button("buttonmusic", "Visualiser", () => { if (!(Game.Screens.Current is ScreenVisualiser) && !(Game.Screens.Current is ScreenScore) && Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); })
@@ -35,15 +35,28 @@ namespace YAVSRG.Interface
                 new Button("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenLobby()); })
                 .PositionTopLeft(400, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(320, 80, AnchorType.MAX, AnchorType.MIN));
             Chat = new ChatBox();
-            AddChild(Chat.PositionTopLeft(0, 80, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MAX));
             AddChild(new TaskDisplay());
+            AddChild(Chat);
             _Height = new AnimationSlider(-10);
             Animation.Add(_Height);
         }
 
+        private void Back()
+        {
+            if (Game.Screens.Current is ScreenMenu && Game.Tasks.HasTasksRunning())
+            {
+                Game.Screens.AddDialog(new Dialogs.ConfirmDialog("You have background tasks running. Are you sure you want to cancel them and quit?", (r) => { if (r == "Y") Game.Screens.PopScreen(); }));
+            }
+            else
+            {
+                Game.Screens.PopScreen();
+            }
+        }
+
         private void Collapse()
         {
-            _Height.Target = -10;
+            _Height.Target = 0;
+            Chat.Collapse();
         }
 
         private void Expand()
@@ -78,25 +91,24 @@ namespace YAVSRG.Interface
         {
             if (_Height > 1)
             {
-                float s = (ScreenHeight * 2 - _Height * 2) / 24f;
-                for (int i = 0; i < 24; i++) //draws the waveform
+                Game.Screens.DrawChartBackground(bounds.SliceTop(_Height), Game.Screens.DarkColor, 2f);
+                Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Game.Screens.DarkColor, 2f);
+
+                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 5), 30f, Game.Screens.BaseColor);
+                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 5, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
+                
+                float s = ScreenWidth / 24f;
+                for (int i = 0; i < 48; i++) //draws the waveform
                 {
-                    float level = Game.Audio.WaveForm[i * 4] + Game.Audio.WaveForm[i * 4 + 1] + Game.Audio.WaveForm[i * 4 + 2] + Game.Audio.WaveForm[i * 4 + 3];
+                    float level = Game.Audio.WaveForm[i];
                     level += 0.01f;
-                    level *= _Height * 0.002f;
-                    SpriteBatch.DrawRect(new Rect(-ScreenWidth, -ScreenHeight + _Height + i * s, -ScreenWidth + level, -ScreenHeight + _Height - 2 + (i + 1) * s), Color.FromArgb(100, Game.Screens.HighlightColor));
-                    SpriteBatch.DrawRect(new Rect(ScreenWidth - level, -ScreenHeight + _Height + i * s, ScreenWidth, -ScreenHeight + _Height - 2 + (i + 1) * s), Color.FromArgb(100, Game.Screens.HighlightColor));
+                    level *= _Height * 0.005f;
+                    level = Math.Min(_Height, level);
+                    SpriteBatch.DrawRect(new Rect(-ScreenWidth + i * s + 2, -ScreenHeight, -ScreenWidth + (i + 1) * s - 2, -ScreenHeight + level), Color.FromArgb((int)level, Game.Screens.HighlightColor));
+                    
+                    SpriteBatch.DrawRect(new Rect(ScreenWidth - i * s - 2, ScreenHeight - level, ScreenWidth - (i + 1) * s + 2, ScreenHeight), Color.FromArgb((int)level, Game.Screens.HighlightColor));
                 }
 
-                //top
-                Game.Screens.DrawChartBackground(new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + _Height), Game.Screens.DarkColor, 2f);
-                SpriteBatch.Draw("toolbar", new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, -ScreenHeight + _Height), Color.FromArgb(127, Game.Screens.BaseColor));
-                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 5), 30f, Game.Screens.BaseColor);
-
-                //bottom
-                Game.Screens.DrawChartBackground(new Rect(-ScreenWidth, ScreenHeight - _Height, ScreenWidth, ScreenHeight), Game.Screens.DarkColor, 2f);
-                SpriteBatch.Draw("toolbar", new Rect(-ScreenWidth, ScreenHeight - _Height, ScreenWidth, ScreenHeight), Color.FromArgb(127, Game.Screens.BaseColor), 2);
-                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 5, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
 
                 SpriteBatch.Font1.DrawText(Game.Options.Profile.Name, 30f, -ScreenWidth, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("Plays: " + Game.Options.Profile.Stats.TimesPlayed.ToString(), 18f, 0, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
@@ -113,7 +125,6 @@ namespace YAVSRG.Interface
 
         public override void Update(Rect bounds)
         {
-            base.Update(bounds.ExpandY(80 - _Height));
             if (State != WidgetState.DISABLED)
             {
                 if (Input.KeyTap(Game.Options.General.Binds.Exit))
@@ -131,6 +142,11 @@ namespace YAVSRG.Interface
                         SetState(WidgetState.NORMAL);
                     }
                 }
+                base.Update(bounds.ExpandY(80 - _Height));
+            }
+            else
+            {
+                Animation.Update();
             }
         }
     }

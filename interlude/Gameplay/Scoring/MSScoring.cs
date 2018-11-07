@@ -43,7 +43,7 @@ namespace YAVSRG.Gameplay
         private float CalculatePoints(float ms)
         {
             if (ms >= CurveEnd) { return -8; }; //max penalty
-            return (float)(2 - 10 * Math.Pow(1 - Math.Pow(Math.Pow(2, -(ms * ms) / scale),2), 2));
+            return (float)(2 - 10 * Math.Pow(1 - Math.Pow(2, -(ms * ms) / scale), 2));
         }
 
         public override string FormatAcc()

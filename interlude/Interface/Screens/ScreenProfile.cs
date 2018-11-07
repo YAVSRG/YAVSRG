@@ -14,7 +14,7 @@ namespace YAVSRG.Interface.Screens
         {
             bounds = GetBounds(bounds);
             //slice
-            SpriteBatch.Font1.DrawCentredTextToFill(Game.Options.Profile.Name, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + 100), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill(Game.Options.Profile.Name, bounds.SliceTop(100), Game.Options.Theme.MenuFont);
             if (Game.Options.Profile.Stats.Scores[1] == null)
             {
                 SpriteBatch.Font1.DrawCentredTextToFill("You have no (4k) scores", bounds.Expand(-100,-100), Color.White);

@@ -19,7 +19,7 @@ namespace YAVSRG.Interface.Widgets
         Animations.AnimationColorMixer scrollcolor;
         Animations.AnimationSlider scrollposition;
         float contentsSize = 0;
-        int selectedItem = -1;
+        public int selectedItem = -1;
 
         public ScrollContainer(float padx, float pady, bool horizontal, int scroll = 2, bool frame = true, bool autosize = false) : base()
         {
@@ -74,7 +74,7 @@ namespace YAVSRG.Interface.Widgets
                 {
                     widgetBounds = w.GetBounds(bounds);
                     w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
-                    if (w.GetBounds(bounds).Bottom < bounds.Top)
+                    if (y + widgetBounds.Height <= 0)
                     {
                         selectedItem += 1;
                     }
@@ -165,7 +165,7 @@ namespace YAVSRG.Interface.Widgets
             if (Children.Count > id)
             {
                 var b = GetBounds();
-                //Widgets[id].
+                scroll += Children[id].Top(b) - b.Top;
             }
         }
 
