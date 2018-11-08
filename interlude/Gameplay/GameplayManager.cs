@@ -93,7 +93,12 @@ namespace YAVSRG.Gameplay
 
         public ChartWithModifiers GetModifiedChart(Dictionary<string,string> SelectedMods)
         {
-            ChartWithModifiers c = new ChartWithModifiers(CurrentChart);
+            return GetModifiedChart(SelectedMods, CurrentChart);
+        }
+
+        public ChartWithModifiers GetModifiedChart(Dictionary<string, string> SelectedMods, Chart Base)
+        {
+            ChartWithModifiers c = new ChartWithModifiers(Base);
             foreach (string m in Mods.Keys)
             {
                 if (SelectedMods.ContainsKey(m) && Mods[m].IsApplicable(c, SelectedMods[m]))

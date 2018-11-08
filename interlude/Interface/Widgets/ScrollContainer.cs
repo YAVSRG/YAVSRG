@@ -39,18 +39,21 @@ namespace YAVSRG.Interface.Widgets
             float x = padX - (horizontal ? scroll : 0);
             float y = padY - (horizontal ? 0 : scroll);
             Rect widgetBounds;
-            foreach (Widget w in Children)
+            lock (Children)
             {
-                if (w.State > 0)
+                foreach (Widget w in Children)
                 {
-                    widgetBounds = w.GetBounds(bounds);
-                    if (horizontal)
+                    if (w.State > 0)
                     {
-                        x += padX + widgetBounds.Width;
-                    }
-                    else
-                    {
-                        y += padY + widgetBounds.Height;
+                        widgetBounds = w.GetBounds(bounds);
+                        if (horizontal)
+                        {
+                            x += padX + widgetBounds.Width;
+                        }
+                        else
+                        {
+                            y += padY + widgetBounds.Height;
+                        }
                     }
                 }
             }
@@ -68,24 +71,27 @@ namespace YAVSRG.Interface.Widgets
             float x = padX - (horizontal ? scroll : 0);
             float y = padY - (horizontal ? 0 : scroll);
             Rect widgetBounds;
-            foreach (Widget w in Children)
+            lock (Children)
             {
-                if (w.State > 0)
+                foreach (Widget w in Children)
                 {
-                    widgetBounds = w.GetBounds(bounds);
-                    w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
-                    if (y + widgetBounds.Height <= 0)
+                    if (w.State > 0)
                     {
-                        selectedItem += 1;
-                    }
-                    w.Update(bounds);
-                    if (horizontal)
-                    {
-                        x += padX + widgetBounds.Width;
-                    }
-                    else
-                    {
-                        y += padY + widgetBounds.Height;
+                        widgetBounds = w.GetBounds(bounds);
+                        w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
+                        if (y + widgetBounds.Height <= 0)
+                        {
+                            selectedItem += 1;
+                        }
+                        w.Update(bounds);
+                        if (horizontal)
+                        {
+                            x += padX + widgetBounds.Width;
+                        }
+                        else
+                        {
+                            y += padY + widgetBounds.Height;
+                        }
                     }
                 }
             }
@@ -136,11 +142,14 @@ namespace YAVSRG.Interface.Widgets
             {
                 Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1.5f);
             }
-            foreach (Widget w in Children)
+            lock (Children)
             {
-                if (w.State > 0 && w.Bottom(bounds) > bounds.Top && w.Top(bounds) < bounds.Bottom) //optimisation for large numbers of items
+                foreach (Widget w in Children)
                 {
-                    w.Draw(bounds);
+                    if (w.State > 0 && w.Bottom(bounds) > bounds.Top && w.Top(bounds) < bounds.Bottom) //optimisation for large numbers of items
+                    {
+                        w.Draw(bounds);
+                    }
                 }
             }
             if (frame)

@@ -40,7 +40,7 @@ namespace YAVSRG.Charts
             Chart m = Chart.FromFile(c.GetFileIdentifier()); //could be null
             if (m != null)
             {
-                CacheChart(m);
+                CacheChart(m); //refreshes data in case the chart has been externally modified or diff calc has changed
             }
             return m;
         }
@@ -48,12 +48,12 @@ namespace YAVSRG.Charts
         public void CacheChart(Chart c)
         {
             string id = c.GetFileIdentifier();
-            Charts[id] = CachedChart.FromChart(c);
+            lock (this) { Charts[id] = CachedChart.FromChart(c); }
         }
 
         public void Save()
         {
-            Utils.SaveObject(this, GetCachePath());
+            lock (this) { Utils.SaveObject(this, GetCachePath()); }
         }
     }
 }

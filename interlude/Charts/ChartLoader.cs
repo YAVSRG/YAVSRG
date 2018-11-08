@@ -15,11 +15,13 @@ namespace YAVSRG.Charts
 {
     public class ChartLoader
     {
-        //this file is a real mess and i need to clean it up
+        //A lot of operations have been reformatted as UserTasks. To run them, use Game.Tasks.AddTask(<Method>,<Callback to run when it completes>,<Name to display for it>,<Should it be displayed in task list>)
 
+        //Constant lists indicating what is supported for conversion. Extend them here if support for a new archive or file format is implemented
         public static readonly string[] CHARTFORMATS = { ".sm", ".osu", ".yav" };
         public static readonly string[] ARCHIVEFORMATS = { ".osz", ".zip" };
 
+        //All of the grouping methods for charts
         public static Dictionary<string, Func<CachedChart, string>> GroupBy = new Dictionary<string, Func<CachedChart, string>>()
         {
             { "Physical", (c) => { int i = (int)(c.physical / 2) * 2; return i.ToString().PadLeft(2,'0')+" - "+(i+2).ToString().PadLeft(2,'0'); } },
@@ -32,21 +34,22 @@ namespace YAVSRG.Charts
             { "Collection",  (c) => { return ""; } }
         };
 
+        //All of the sorting methods for charts
         public static Dictionary<string, Comparison<CachedChart>> SortBy = new Dictionary<string, Comparison<CachedChart>>()
         {
-            { "Physical", (a, b) => (a.physical.CompareTo(b.physical)) },
-            { "Technical", (a, b) => (a.technical.CompareTo(b.technical)) },
-            { "Title", (a, b) => (a.title.CompareTo(b.title)) },
-            { "Creator ",(a, b) => (a.creator.CompareTo(b.creator)) },
-            { "Artist", (a, b) => (a.artist.CompareTo(b.artist)) },
+            { "Physical", (a, b) => a.physical.CompareTo(b.physical) },
+            { "Technical", (a, b) => a.technical.CompareTo(b.technical) },
+            { "Title", (a, b) => a.title.CompareTo(b.title) },
+            { "Creator ",(a, b) => a.creator.CompareTo(b.creator) },
+            { "Artist", (a, b) => a.artist.CompareTo(b.artist) },
         };
 
         public static string SearchString = "";
         public static event Action OnRefreshGroups = () => { };
-        public static List<ChartGroup> Groups;
-        public static List<ChartGroup> SearchResult;
+        public static List<ChartGroup> GroupedCharts;
         public static Cache Cache;
 
+        //Structure to hold grouped charts (for level selection menu)
         public class ChartGroup
         {
             public List<CachedChart> charts;
@@ -65,19 +68,21 @@ namespace YAVSRG.Charts
             }
         }
 
+        //Loads charts/cache from file. Called when game starts
         public static void Init()
         {
-            Groups = new List<ChartGroup>();
+            GroupedCharts = new List<ChartGroup>();
             Cache = Cache.LoadCache();
         }
 
         #region sorting and searching
 
-        private static void SortIntoGroups(Func<CachedChart, string> groupBy, Comparison<CachedChart> sortBy)
+        //Groups all cached charts by the selected criteria - Used by level select screen
+        private static List<ChartGroup> SortIntoGroups(Func<CachedChart, string> groupBy, Comparison<CachedChart> sortBy)
         {
-            Groups = new List<ChartGroup>();
-            Dictionary<string, List<CachedChart>> temp = new Dictionary<string, List<CachedChart>>();
-            if (groupBy == GroupBy["Collection"])
+            List<ChartGroup> Groups = new List<ChartGroup>();
+            Dictionary<string, List<CachedChart>> temp = new Dictionary<string, List<CachedChart>>(); //holds the temp data as groups are being put together
+            if (groupBy == GroupBy["Collection"]) //Collections have different behaviour (can't look up collection from chart, only reverse)
             {
                 foreach (string c in Game.Gameplay.Collections.Collections.Keys)
                 {
@@ -90,17 +95,18 @@ namespace YAVSRG.Charts
                         }
                         else
                         {
+                            //todo: alert the user of this and/or remove chart from collection
                             Log(id + "isn't present in the cache! Maybe it was deleted?", LogType.Warning);
                         }
                     }
                 }
             }
-            else
+            else //Grouping logic
             {
                 string s;
                 foreach (CachedChart c in Cache.Charts.Values)
                 {
-                    s = groupBy(c);
+                    s = groupBy(c); //Gets group (as a string) to put this chart in
                     if (temp.ContainsKey(s))
                     {
                         temp[s].Add(c);
@@ -111,19 +117,21 @@ namespace YAVSRG.Charts
                     }
                 }
             }
-            foreach (string k in temp.Keys) //why do i do it like this
+            foreach (string k in temp.Keys) //Sort completed groups and make them accessible by level select
             {
                 ChartGroup g = new ChartGroup(temp[k], k);
                 g.Sort(sortBy, false);
                 Groups.Add(g);
             }
-            Groups.Sort((a, b) => { return a.label.CompareTo(b.label); });
+            Groups.Sort((a, b) => { return a.label.CompareTo(b.label); }); //Sort overall list of groups alphabetically
+            return Groups;
         }
 
-        private static void SearchGroups(string s)
+        //Filters all groups by search criteria - Used by level select screen
+        private static List<ChartGroup> SearchGroups(string Criteria, List<ChartGroup> Groups)
         {
-            s = s.ToLower();
-            SearchResult = new List<ChartGroup>();
+            Criteria = Criteria.ToLower();
+            List<ChartGroup> Result = new List<ChartGroup>();
             bool keymodeMatch;
             string summaryData;
             foreach (ChartGroup g in Groups)
@@ -131,32 +139,37 @@ namespace YAVSRG.Charts
                 List<CachedChart> temp = new List<CachedChart>();
                 foreach (CachedChart c in g.charts)
                 {
+                    //todo: rewrite match algorithm to allow for more detailed filters
                     keymodeMatch = Game.Options.Profile.Keymode == 0 || c.keymode == Game.Options.Profile.Keymode;
                     summaryData = (c.title + " " + c.creator + " " + c.artist + " " + c.diffname + " " + c.pack).ToLower();
-                    if (keymodeMatch && summaryData.Contains(s))
+                    if (keymodeMatch && summaryData.Contains(Criteria))
                     {
                         temp.Add(c);
                     }
                 }
                 if (temp.Count > 0)
                 {
-                    SearchResult.Add(new ChartGroup(temp, g.label + " (" + temp.Count.ToString() + ")"));
+                    //Finalised groups as shown on level select - Including number of charts in this group
+                    Result.Add(new ChartGroup(temp, g.label + " (" + temp.Count.ToString() + ")"));
                 }
             }
+            return Result;
         }
 
+        //Re-sorts/searches charts for use in level select screen.
         public static void Refresh()
         {
             if (!(GroupBy.ContainsKey(Game.Options.Profile.ChartGroupMode) && (SortBy.ContainsKey(Game.Options.Profile.ChartSortMode))))
             {
-                Log("Invalid sort or search mode", LogType.Warning);
+                Log("Invalid sort or search mode. Use the level select screen to change them.", LogType.Warning);
                 return;
             }
-            SortIntoGroups(GroupBy[Game.Options.Profile.ChartGroupMode], SortBy[Game.Options.Profile.ChartSortMode]);
-            SearchGroups(SearchString);
+            
+            GroupedCharts = SearchGroups(SearchString, SortIntoGroups(GroupBy[Game.Options.Profile.ChartGroupMode], SortBy[Game.Options.Profile.ChartSortMode]));
             OnRefreshGroups();
         }
 
+        //Shorthand for when usertasks complete that require the groups to be refreshed as charts are now added
         public static void RefreshCallback(bool b)
         {
             if (b) Refresh();
@@ -164,6 +177,7 @@ namespace YAVSRG.Charts
 
         #endregion
 
+        //todo: remove the need for a placeholder
         public static void RandomChart()
         {
             if (Cache.Charts.Count == 0)
@@ -175,7 +189,9 @@ namespace YAVSRG.Charts
             }
             SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
         }
-        
+
+        //Task to recache all charts (useful if you deleted them manually but they're still cached, or the cache is broken and charts are missing from it)
+        //It's essentially a repair tool and you shouldn't need to use it normally
         public static UserTask Recache()
         {
             return (Output) =>
@@ -244,21 +260,25 @@ namespace YAVSRG.Charts
 
         #region conversions
 
-        public static UserTask ConvertAllPacks(string path, bool trackChildren)
+        //Converts all packs in a given songs folder (i.e Songs folder for Stepmania)
+        //It just creates a pack conversion task for every pack in the folder.
+        //TrackChildren flags if the subtasks should be visible to the user
+        public static UserTask ConvertAllPacks(string Path, bool TrackChildren)
         {
             return (Output) =>
             {
-                foreach (string s in Directory.EnumerateDirectories(path))
+                foreach (string s in Directory.EnumerateDirectories(Path))
                 {
-                    Output("Converting: " + Path.GetFileName(s));
-                    Game.Tasks.AddTask(ConvertPack(s, Path.GetFileName(s), false), (b) => { }, "Convert pack: " + Path.GetFileName(s), trackChildren);
+                    Output("Converting: " + System.IO.Path.GetFileName(s));
+                    Game.Tasks.AddTask(ConvertPack(s, System.IO.Path.GetFileName(s)), (b) => { }, "Convert pack: " + System.IO.Path.GetFileName(s), TrackChildren);
                 }
-                Cache.Save();
                 return true;
             };
         }
 
-        public static UserTask ConvertPack(string PackFolder, string PackName, bool SaveAfter) //name not derived from the folder so i can name the osu songs folder something other than "Songs".
+        //Converts all charts in a pack to interlude (and moves them to the right place)
+        //PackName is the name of the new pack they are moved to
+        public static UserTask ConvertPack(string PackFolder, string PackName)
         {
             return (Output) =>
             {
@@ -267,11 +287,13 @@ namespace YAVSRG.Charts
                     Output("Converting files in: " + Path.GetFileName(SongFolder));
                     ConvertSongFolder(SongFolder, PackName)(Output);
                 }
-                if (SaveAfter) Cache.Save();
+                Cache.Save();
                 return true;
             };
         }
 
+        //Converts a song folder (contains mp3, bg, chart file) to .yav and copies it to correct place
+        //Cache is not saved after this operation (to reduce amount of times saved) so if you run this as a one off, remember to save the cache!
         public static UserTask ConvertSongFolder(string SongFolder, string PackName)
         {
             return (Output) =>
@@ -280,13 +302,15 @@ namespace YAVSRG.Charts
                 {
                     if (CHARTFORMATS.Contains(Path.GetExtension(File).ToLower()))
                     {
-                        ConvertFile(File, PackName); //errors are handled inside here
+                        ConvertFile(File, PackName); //errors are handled inside here so no catching needed
                     }
                 }
                 return true;
             };
         }
 
+        //Converts a single file (.sm, .osu, .yav etc) from its exact path to .yav in the correct location.
+        //This just inteprets Chart instances from the file and then runs ConvertToInterlude on them.
         private static void ConvertFile(string AbsFilepath, string TargetPack) //pack only used if importing from an external pack
         {
             string SongFolder = Path.GetDirectoryName(AbsFilepath);
@@ -342,41 +366,45 @@ namespace YAVSRG.Charts
             }
         }
 
-        private static void ConvertToInterlude(Chart chart, string sourceFolder, string targetFolder) //todo: swap names of ConvertFile and ConvertChart
+        //Converts a Chart (the note data read from a file) by saving it as .yav in the correct place and copying BG/audio files if needed
+        private static void ConvertToInterlude(Chart Chart, string SourceFolder, string TargetFolder)
         {
-            chart.Data.SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder));
-            chart.Data.SourcePath = targetFolder;
-            chart.Data.File = Path.ChangeExtension(chart.Data.File, ".yav");
-            Directory.CreateDirectory(targetFolder); //only creates if needs to
+            //rewrite metadata
+            Chart.Data.SourcePack = Path.GetFileName(Path.GetDirectoryName(TargetFolder));
+            Chart.Data.SourcePath = TargetFolder;
+            Chart.Data.File = Path.ChangeExtension(Chart.Data.File, ".yav");
+
+            Directory.CreateDirectory(TargetFolder); //only creates if needs to
+
             //this will copy the externally sourced chart to an appropriate folder in the songs folder
-            CopyFile(Path.Combine(sourceFolder, chart.Data.AudioFile), Path.Combine(targetFolder, chart.Data.AudioFile));
-            CopyFile(Path.Combine(sourceFolder, chart.Data.BGFile), Path.Combine(targetFolder, chart.Data.BGFile));
-            chart.WriteToFile(Path.Combine(targetFolder, chart.Data.File));
-            lock (Cache)
-            {
-                Cache.CacheChart(chart);
-            }
+            CopyFile(Path.Combine(SourceFolder, Chart.Data.AudioFile), Path.Combine(TargetFolder, Chart.Data.AudioFile));
+            CopyFile(Path.Combine(SourceFolder, Chart.Data.BGFile), Path.Combine(TargetFolder, Chart.Data.BGFile));
+            Chart.WriteToFile(Path.Combine(TargetFolder, Chart.Data.File));
+
+            //add chart to cache
+            Cache.CacheChart(Chart);
         }
 
-        private static void CopyFile(string source, string target)
+        //Copies a media file (bg/audio) from a source to a target location
+        private static void CopyFile(string SourcePath, string TargetPath)
         {
-            if (File.Exists(source))
+            if (File.Exists(SourcePath))
             {
-                if (!File.Exists(target))
+                if (!File.Exists(TargetPath))
                 {
                     try
                     {
-                        File.Copy(source, target);
+                        File.Copy(SourcePath, TargetPath);
                     }
                     catch (Exception e)
                     {
-                        Log("Couldn't copy media file from " + source + ": " + e.ToString(), LogType.Error);
+                        Log("Couldn't copy media file from " + SourcePath + ": " + e.ToString(), LogType.Error);
                     }
                 }
             }
             else
             {
-                Log("Missing media file for a chart: " + source, LogType.Warning);
+                Log("Missing media file for a chart: " + SourcePath, LogType.Warning);
             }
         }
 
@@ -412,7 +440,7 @@ namespace YAVSRG.Charts
                     if (Directory.Exists(Folder))
                     {
                         Output("Detected osu! Folder");
-                        Game.Tasks.AddTask(ConvertPack(Folder, "osu! Imports", true), RefreshCallback, "Importing osu! songs", true);
+                        Game.Tasks.AddTask(ConvertPack(Folder, "osu! Imports"), RefreshCallback, "Importing osu! songs", true);
                         Output("Converted osu! songs folder successfully.");
                         return true;
                     }
@@ -524,7 +552,7 @@ namespace YAVSRG.Charts
                                 }
                             }
                         }
-                        Game.Tasks.AddTask(ConvertPack(target, Path.GetFileNameWithoutExtension(path), true), (b) =>
+                        Game.Tasks.AddTask(ConvertPack(target, Path.GetFileNameWithoutExtension(path)), (b) =>
                         {
                             RefreshCallback(b);
                             try
@@ -567,7 +595,7 @@ namespace YAVSRG.Charts
                             {
                                 //we've found a pack: folder of song folders
                                 Output("Detected pack!");
-                                Game.Tasks.AddTask(ConvertPack(path, Path.GetFileName(path), true), RefreshCallback, "Import pack: " + Path.GetFileName(path), true);
+                                Game.Tasks.AddTask(ConvertPack(path, Path.GetFileName(path)), RefreshCallback, "Import pack: " + Path.GetFileName(path), true);
                                 Output("Imported pack successfully.");
                                 return true;
                             }

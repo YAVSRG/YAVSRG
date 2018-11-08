@@ -167,7 +167,7 @@ namespace YAVSRG.Interface.Widgets
         public void Refresh()
         {
             groups = new List<Group>();
-            foreach (ChartLoader.ChartGroup p in ChartLoader.SearchResult)
+            foreach (ChartLoader.ChartGroup p in ChartLoader.GroupedCharts)
             {
                 AddPack(p);
             }

@@ -33,7 +33,7 @@ namespace YAVSRG.Utilities
                     }
                     catch (Exception e)
                     {
-                        Logging.Log("Exception occured in task: " + Name + "\n" + e.ToString());
+                        Logging.Log("Exception occured in task " + Name + ": " + e.ToString());
                     }
                     finally
                     {

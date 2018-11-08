@@ -39,7 +39,7 @@ namespace YAVSRG.Options
         //these are default binds
         public Key[][] Bindings = new Key[][] //this needs redoing cause it turns out shit in the profile.json
         {
-            null, null, null, //0k 1k 2k
+            null, null, null, //0k 1k 2k (to make indexing easier)
             new Key[] { Key.Left, Key.Down, Key.Right }, //3K
             new Key[] { Key.Z, Key.X, Key.Period, Key.Slash }, //4k
             new Key[] { Key.Z, Key.X, Key.Space, Key.Period, Key.Slash }, //5k
@@ -49,7 +49,7 @@ namespace YAVSRG.Options
             new Key[] { Key.Z, Key.X, Key.C, Key.V, Key.Space, Key.Comma, Key.Period, Key.Slash, Key.RShift }, //9k
             new Key[] { Key.CapsLock, Key.Q, Key.W, Key.E, Key.V, Key.Space, Key.K, Key.L, Key.Semicolon, Key.Quote }, //10k
         };
-        public string[] Playstyles = new string[] //this needs redoing cause it turns out shit in the profile.json
+        public string[] Playstyles = new string[] //default playstyles
         {
             "","","",
             "2k + 1", "Spread", "3k + 2", "Spread", "4k + 3", "Spread", "5k + 4", "Spread"

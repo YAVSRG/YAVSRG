@@ -33,7 +33,7 @@ namespace YAVSRG.Interface.Widgets
             //todo: reduce duplication between this and the switchers
             SpriteBatch.DrawRect(bounds.SliceLeft(20), Game.Screens.BaseColor);
             SpriteBatch.DrawRect(bounds.SliceRight(20), Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredText(bind.ToString(), 30, bounds.CenterX, bounds.Top, listening ? System.Drawing.Color.Fuchsia : Game.Options.Theme.MenuFont, true, Game.Screens.BaseColor);
+            SpriteBatch.Font1.DrawCentredText(bind.ToString(), 30, bounds.CenterX, bounds.Top, listening ? System.Drawing.Color.Fuchsia : Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor);
             SpriteBatch.Font2.DrawCentredText(label, 20, bounds.CenterX, bounds.Top - 30, Game.Options.Theme.MenuFont);
         }
 

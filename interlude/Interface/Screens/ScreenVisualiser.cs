@@ -149,7 +149,7 @@ namespace YAVSRG.Interface.Screens
         public void NextTrack()
         {
             bool flag = false;
-            foreach (ChartLoader.ChartGroup g in ChartLoader.Groups)
+            foreach (ChartLoader.ChartGroup g in ChartLoader.GroupedCharts)
             {
                 foreach (CachedChart c in g.charts)
                 {
@@ -169,7 +169,7 @@ namespace YAVSRG.Interface.Screens
         public void PrevTrack()
         {
             CachedChart prev = null;
-            foreach (ChartLoader.ChartGroup g in ChartLoader.Groups)
+            foreach (ChartLoader.ChartGroup g in ChartLoader.GroupedCharts)
             {
                 foreach (CachedChart c in g.charts)
                 {

@@ -46,7 +46,7 @@ namespace YAVSRG.Interface.Screens
             if (ShouldSaveScore())
             {
                 Game.Gameplay.ChartSaveData.Scores.Add(score);
-                Game.Options.Profile.Stats.SetScore(score);
+                Game.Options.Profile.Stats.SetScore(score, Game.Gameplay.CurrentChart);
                 Game.Gameplay.SaveScores();
             }
             if (Game.Multiplayer.SyncCharts)

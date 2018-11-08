@@ -31,14 +31,6 @@ namespace YAVSRG.Gameplay
                 return Utils.LoadObject<ScoresDB>(path);
             }
             var x = new ScoresDB() { data = new Dictionary<string, ChartSaveData>() };
-            /*foreach (string s in Directory.GetFiles(Path.Combine(Content.WorkingDirectory, "Data", "Scores")))
-            {
-                var o = Utils.LoadObject<ChartSaveData>(s);
-                if (o != null && o.Scores.Count > 0)
-                {
-                    x.data.Add(Path.GetFileNameWithoutExtension(s), o);
-                }
-            }*/
             return x;
         }
 
