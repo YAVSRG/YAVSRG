@@ -44,7 +44,7 @@ namespace YAVSRG.Interface.Widgets
 
         private void Download()
         {
-            Charts.ChartLoader.TaskThreaded(() => { Charts.ChartLoader.DownloadAndImportPack(item.attributes.download, item.attributes.name); }, "Downloading pack: " + item.attributes.name);
+            Game.Tasks.AddTask(Charts.ChartLoader.DownloadAndImportPack(item.attributes.download, item.attributes.name), (b) => { }, "Downloading pack: " + item.attributes.name, true);
         }
     }
 }

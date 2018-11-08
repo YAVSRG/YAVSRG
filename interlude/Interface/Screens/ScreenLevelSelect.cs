@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Charts;
-using System.Drawing;
 using YAVSRG.Interface.Widgets;
 
 namespace YAVSRG.Interface.Screens
@@ -31,7 +30,19 @@ namespace YAVSRG.Interface.Screens
         private void OnUpdateGroups()
         {
             selector.Refresh();
-            selector.ScrollToSelected();
+            Game.Tasks.AddTask((Output) =>
+            {
+                string id = Game.Gameplay.CurrentCachedChart.GetFileIdentifier();
+                foreach (CachedChart c in ChartLoader.Cache.Charts.Values)
+                {
+                    if (c.GetFileIdentifier() == id)
+                    {
+                        Game.Gameplay.CurrentCachedChart = c;
+                        return true;
+                    }
+                }
+                return false;
+            }, (b) => { selector.ScrollToSelected(); }, "ScrollToSelected", false);
         }
 
         private void OnUpdateChart()
@@ -75,7 +86,7 @@ namespace YAVSRG.Interface.Screens
             }
             else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R)) //temp
             {
-                ChartLoader.TaskThreaded(() => { ChartLoader.Recache(); }, "Recaching charts");
+                Game.Tasks.AddTask(ChartLoader.Recache(), ChartLoader.RefreshCallback, "Recaching charts", true);
             }
             else if (Input.KeyTap(Game.Options.General.Binds.Select))
             {

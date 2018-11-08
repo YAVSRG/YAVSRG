@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Charts;
 
 namespace YAVSRG.Interface.Screens
 {
@@ -13,11 +14,11 @@ namespace YAVSRG.Interface.Screens
         {
             AddChild(new Widgets.SimpleButton("Import from osu!", () =>
             {
-                Game.Screens.AddDialog(new Dialogs.ConfirmDialog("If you already imported and modified charts, background images or audio from osu!, they will be overwritten. This will take a while. Continue?", (s) =>
+                Game.Screens.AddDialog(new Dialogs.ConfirmDialog("If you already imported and modified charts, background images or audio from osu!, they will be overwritten. Continue?", (s) =>
                 {
                     if (s == "Y")
                     {
-                        Charts.ChartLoader.TaskThreaded(() => { Charts.ChartLoader.ImportOsu(); }, "Import from osu!");
+                        Game.Tasks.AddTask(ChartLoader.ImportOsu(), (b) => { }, "Import from osu!", true);
                     }
                 }));
             },
@@ -25,11 +26,11 @@ namespace YAVSRG.Interface.Screens
             .PositionTopLeft(0,100,AnchorType.MIN,AnchorType.MAX).PositionBottomRight(0,0,AnchorType.CENTER,AnchorType.MAX));
             AddChild(new Widgets.SimpleButton("Import from Stepmania/Etterna", () =>
             {
-                Game.Screens.AddDialog(new Dialogs.ConfirmDialog("If you already imported and modified charts, background images or audio, they will be overwritten. This will take a while. Continue?", (s) =>
+                Game.Screens.AddDialog(new Dialogs.ConfirmDialog("If you already imported and modified charts, background images or audio, they will be overwritten. Continue?", (s) =>
                 {
                     if (s == "Y")
                     {
-                        Charts.ChartLoader.TaskThreaded(() => { Charts.ChartLoader.ImportStepmania(); }, "Import from Stepmania/Etterna");
+                        Game.Tasks.AddTask(ChartLoader.ImportStepmania(), (b) => { }, "Import from Stepmania/Etterna", true);
                     }
                 }));
             },
@@ -56,13 +57,13 @@ namespace YAVSRG.Interface.Screens
             bounds = GetBounds(bounds);
             SpriteBatch.Font1.DrawCentredTextToFill("Drag and drop a file or folder to import it.", new Rect(bounds.Left, bounds.Top + 100, bounds.Right, bounds.Top + 200), Game.Options.Theme.MenuFont);
             //if (Charts.ChartLoader.LastStatus != Charts.ChartLoader.ChartLoadingStatus.InProgress)
-            SpriteBatch.Font1.DrawCentredTextToFill(Charts.ChartLoader.LastOutput, new Rect(bounds.Left, -300, bounds.Right, 300), Game.Options.Theme.MenuFont);
+            //SpriteBatch.Font1.DrawCentredTextToFill(Charts.ChartLoader.LastOutput, new Rect(bounds.Left, -300, bounds.Right, 300), Game.Options.Theme.MenuFont);
         }
 
         protected void HandleFileDrop(object sender, FileDropEventArgs e)
         {
             string s = e.FileName;
-            Charts.ChartLoader.TaskThreaded(() => { Charts.ChartLoader.AutoImportFromPath(s); }, "Import from " + System.IO.Path.GetFileName(e.FileName));
+            Game.Tasks.AddTask(ChartLoader.AutoImportFromPath(s), (b) => { }, "Import from " + System.IO.Path.GetFileName(e.FileName), true);
         }
     }
 }

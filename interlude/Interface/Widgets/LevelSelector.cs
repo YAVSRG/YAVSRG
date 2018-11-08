@@ -280,6 +280,7 @@ namespace YAVSRG.Interface.Widgets
                     else
                     {
                         ExpandGroup(g);
+                        g.ScrollTo(ref scroll);
                     }
                 }, () => { return Game.Gameplay.CurrentCachedChart == chart; }, chart.artist + " - " + chart.title, chart.diffname + " ("+chart.keymode.ToString()+"k)", Game.Options.Theme.SelectChart));
             }

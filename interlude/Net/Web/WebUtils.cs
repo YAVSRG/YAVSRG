@@ -28,23 +28,30 @@ namespace YAVSRG.Net.Web
             }
         }
 
-        public static bool DownloadFile(string url, string target, Action<int> callback) //downloads a file, not async (cause i couldn't make it work)
+        public static Utilities.TaskManager.UserTask DownloadFile(string url, string target) //downloads a file as a user task
         {
-            using (var client = new WebClient())
+            return (Output) =>
             {
-                client.Headers.Add("User-Agent", "Interlude");
-                try
+                using (var client = new WebClient())
                 {
-                    client.DownloadProgressChanged += (o, e) => { callback(e.ProgressPercentage); };
-                    client.DownloadFile(new Uri(url), target);
-                    return true;
+                    client.Headers.Add("User-Agent", "Interlude");
+                    bool wait = true;
+                    Exception error = null;
+                    client.DownloadProgressChanged += (o, e) => { Output(url + " (" + e.ProgressPercentage.ToString() + "%)"); };
+                    client.DownloadFileCompleted += (o, e) => { wait = false; error = e.Error; };
+                    client.DownloadFileAsync(new Uri(url), target);
+                    while (wait) { }
+                    if (error == null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        Utilities.Logging.Log("Failed to download file from " + url + ": " + error.ToString(), Utilities.Logging.LogType.Error);
+                        return false;
+                    }
                 }
-                catch (Exception e)
-                {
-                    Utilities.Logging.Log("Failed to download file from " + url + ": " + e.ToString(), Utilities.Logging.LogType.Error);
-                    return false;
-                }
-            }
+            };
         }
 
         public static void DownloadJsonObject<T>(string url, Action<T> callback) //fetches a json object from a url

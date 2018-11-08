@@ -38,19 +38,22 @@ namespace YAVSRG.Interface.Widgets
                 bounds = GetBounds(bounds);
                 SpriteBatch.DrawRect(bounds, Color.FromArgb((int)(a*0.75f), Color.Black));
                 float y = bounds.Top + 160f;
-                foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.Tasks)
+                lock (Game.Tasks.Tasks)
                 {
-                    SpriteBatch.Font1.DrawJustifiedText(t.Name, 30f, bounds.Right, y, Color.FromArgb(a, Game.Options.Theme.MenuFont), true);
-                    SpriteBatch.Font2.DrawJustifiedText(t.Status.ToString(), 20f, bounds.Right, y + 30f, Color.FromArgb(a, Game.Options.Theme.MenuFont));
-                    y += 50f;
-                }
-                SpriteBatch.Font1.DrawCentredText("Notifications", 40f, 0, bounds.Top + 50, Color.FromArgb(a, Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
-                SpriteBatch.Font2.DrawCentredText("Right click on stuff >> to remove / cancel", 20f, 0, bounds.Top + 100, Color.FromArgb(a, Game.Options.Theme.MenuFont));
-                y = bounds.Bottom - Utilities.Logging.LogBuffer.Count * 30;
-                for (int i = 0; i < Utilities.Logging.LogBuffer.Count; i++)
-                {
-                    SpriteBatch.Font2.DrawText(Utilities.Logging.LogBuffer[i], 20f, bounds.Left, y, Color.FromArgb(a, Game.Options.Theme.MenuFont));
-                    y += 30;
+                    foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.Tasks)
+                    {
+                        SpriteBatch.Font1.DrawJustifiedText(t.Name, 30f, bounds.Right, y, Color.FromArgb(a, Game.Options.Theme.MenuFont), true);
+                        SpriteBatch.Font2.DrawJustifiedText(t.Progress + " // " + t.Status.ToString(), 20f, bounds.Right, y + 35f, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                        y += 50f;
+                    }
+                    SpriteBatch.Font1.DrawCentredText("Notifications", 40f, 0, bounds.Top + 50, Color.FromArgb(a, Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
+                    SpriteBatch.Font2.DrawCentredText("Right click on stuff >> to remove / cancel", 20f, 0, bounds.Top + 100, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                    y = bounds.Bottom - Utilities.Logging.LogBuffer.Count * 30;
+                    for (int i = 0; i < Utilities.Logging.LogBuffer.Count; i++)
+                    {
+                        SpriteBatch.Font2.DrawText(Utilities.Logging.LogBuffer[i], 20f, bounds.Left, y, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                        y += 30;
+                    }
                 }
             }
         }
@@ -63,19 +66,6 @@ namespace YAVSRG.Interface.Widgets
                 if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                 {
                     slide.Target = 0;
-                }
-                float y = bounds.Top + 160f;
-                for (int i = 0; i < Game.Tasks.Tasks.Count; i++)
-                {
-                    if (ScreenUtils.MouseOver(new Rect(bounds.Right - 250, y, bounds.Right, y + 40)) && Input.MouseClick(OpenTK.Input.MouseButton.Right))
-                    {
-                        if (Game.Tasks.Tasks[i].Status != TaskStatus.Running)
-                        {
-                            Game.Tasks.Tasks[i].Cancel();
-                            Game.Tasks.Tasks.RemoveAt(i);
-                        }
-                    }
-                    y += 50f;
                 }
             }
             if (Game.Tasks.Tasks.Count > 0)
