@@ -3,32 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Gameplay.Watchers.Scoring;
 
-namespace YAVSRG.Gameplay
+namespace YAVSRG.Gameplay.Watchers
 {
-    public abstract class ScoreSystem
+    public abstract class IScoreSystem : IGameplayWatcher
     {
-        public float[] windows;
-        public int[] weights;
-        public int maxweight;
-        protected int pos = 0;
-        protected float score = 0;
-        protected float maxscore = 0;
+        public enum ScoreType
+        {
+            Default,
+            Osu,
+            DP,
+            Wife
+        }
+
+        public float[] JudgementWindows;
+        public int[] PointsPerJudgement;
+        public int MaxPointsPerNote;
+        public float MissWindow = 180f;
+
+        protected float PossiblePoints = 0;
+        protected float PointsScored = 0;
         public int Combo = 0;
         public int ComboBreaks = 0;
-        public int[] Judgements;
         public int BestCombo = 0;
-        public float MissWindow = 180f;
-        public string name;
+        public int[] Judgements;
+
         public Action<int, int, float> OnHit = (a, b, c) => { };
 
-        public abstract void Update(float now, ScoreTracker.HitData[] data);
-
-        public abstract void HandleHit(int k, int index, ScoreTracker.HitData[] data);
-
-        public abstract void ProcessScore(ScoreTracker.HitData[] data);
-
-        public static ScoreSystem GetScoreSystem(ScoreType s)
+        public static IScoreSystem GetScoreSystem(ScoreType s)
         {
             switch (s)
             {
@@ -57,24 +60,24 @@ namespace YAVSRG.Gameplay
         public virtual void AddJudgement(int i)
         {
             Judgements[i] += 1;
-            score += weights[i];
-            maxscore += maxweight;
+            PointsScored += PointsPerJudgement[i];
+            PossiblePoints += MaxPointsPerNote;
         }
 
         public virtual float Accuracy()
         {
-            if (maxscore == 0) return 100;
-            return score * 100f / maxscore;
+            if (PossiblePoints == 0) return 100;
+            return PointsScored * 100f / PossiblePoints;
         }
 
         public virtual int JudgeHit(float delta)
         {
             delta = Math.Abs(delta);
-            for (int i = 0; i < windows.Length; i++)
+            for (int i = 0; i < JudgementWindows.Length; i++)
             {
-                if (delta < windows[i]) { return i; }
+                if (delta < JudgementWindows[i]) { return i; }
             }
-            return windows.Length;
+            return JudgementWindows.Length;
         }
 
         public virtual string FormatAcc()
@@ -84,7 +87,7 @@ namespace YAVSRG.Gameplay
 
         public bool EndOfChart(int snaps)
         {
-            return pos == snaps;
+            return Cursor == snaps;
         }
     }
 }

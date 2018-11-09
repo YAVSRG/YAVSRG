@@ -16,6 +16,7 @@ namespace YAVSRG
         static void Main(string[] args)
         {
             Mutex m = new Mutex(true, "Interlude");
+            System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
             if (m.WaitOne(TimeSpan.Zero, true))
             {
                 var LogFile = new System.IO.FileStream("log.txt", System.IO.FileMode.Append);

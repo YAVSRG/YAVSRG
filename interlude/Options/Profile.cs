@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK.Input;
 using Newtonsoft.Json;
 using YAVSRG.Gameplay;
+using YAVSRG.Gameplay.Watchers;
 
 namespace YAVSRG.Options
 {
@@ -31,9 +32,9 @@ namespace YAVSRG.Options
         public float BackgroundDim = 0.5f;
         public string ChartSortMode = "Title";
         public string ChartGroupMode = "Pack";
-        public ScoreType ScoreSystem = ScoreType.Default;
+        public IScoreSystem.ScoreType ScoreSystem = IScoreSystem.ScoreType.Default;
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
-        public float[] AccGradeThresholds = new float[] { 98, 95, 93, 91, 89 };
+        public float[] AccGradeThresholds = new float[] { 98.5f, 95, 93, 91, 89 };
         public ProfileStats Stats = new ProfileStats();
 
         //these are default binds

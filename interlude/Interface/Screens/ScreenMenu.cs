@@ -49,7 +49,7 @@ namespace YAVSRG.Interface.Screens
         {
             base.OnEnter(prev);
             splash = Utilities.Splashes.MenuSplash();
-            Utils.SetDiscordData("Main Menu");
+            Utilities.Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
             Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
             Game.Screens.BackgroundDim.Target = 1;
             play.PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER);

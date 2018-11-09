@@ -102,7 +102,7 @@ namespace YAVSRG.Interface.Screens
             }
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 1 - Game.Options.Profile.BackgroundDim;
-            Utils.SetDiscordData("Playing a chart");
+            Utilities.Discord.SetPresence("Playing a chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, false); ;
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
             Game.Screens.Toolbar.SetCursorState(false);
@@ -125,7 +125,7 @@ namespace YAVSRG.Interface.Screens
         {
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 0.3f;
-            Utils.SetDiscordData("Selecting another chart");
+            Utilities.Discord.SetPresence("Selecting another chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
             Game.Screens.Toolbar.SetCursorState(true);
             base.OnExit(next);

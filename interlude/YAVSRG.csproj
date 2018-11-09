@@ -74,6 +74,10 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DiscordRPC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\DiscordRPC.dll</HintPath>
+    </Reference>
     <Reference Include="ManagedBass, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ManagedBass.2.0.4\lib\net45\ManagedBass.dll</HintPath>
       <Private>True</Private>
@@ -154,17 +158,18 @@
     <Compile Include="Gameplay\Mods\NoSV.cs" />
     <Compile Include="Gameplay\Mods\Wave.cs" />
     <Compile Include="Gameplay\ScoresDB.cs" />
-    <Compile Include="Gameplay\Scoring\CCScoring.cs" />
-    <Compile Include="Gameplay\Scoring\DP.cs" />
-    <Compile Include="Gameplay\Scoring\MSScoring.cs" />
-    <Compile Include="Gameplay\Scoring\NoCCScoring.cs" />
-    <Compile Include="Gameplay\Scoring\OD.cs" />
+    <Compile Include="Gameplay\Watchers\ILifeMeter.cs" />
+    <Compile Include="Gameplay\Watchers\Scoring\CCScoring.cs" />
+    <Compile Include="Gameplay\Watchers\Scoring\DP.cs" />
+    <Compile Include="Gameplay\Watchers\IGameplayWatcher.cs" />
+    <Compile Include="Gameplay\Watchers\Scoring\MSScoring.cs" />
+    <Compile Include="Gameplay\Watchers\Scoring\NoCCScoring.cs" />
+    <Compile Include="Gameplay\Watchers\Scoring\OD.cs" />
     <Compile Include="Gameplay\ScoreTracker.cs" />
     <Compile Include="Gameplay\ProfileStats.cs" />
     <Compile Include="Gameplay\Score.cs" />
-    <Compile Include="Gameplay\Scoring\ScoreSystem.cs" />
-    <Compile Include="Gameplay\Scoring\ScoreType.cs" />
-    <Compile Include="Gameplay\Scoring\StandardScoring.cs" />
+    <Compile Include="Gameplay\Watchers\IScoreSystem.cs" />
+    <Compile Include="Gameplay\Watchers\Scoring\StandardScoring.cs" />
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\Animation.cs" />
     <Compile Include="Interface\Animations\AnimationAction.cs" />

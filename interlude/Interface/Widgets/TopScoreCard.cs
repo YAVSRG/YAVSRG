@@ -35,7 +35,7 @@ namespace YAVSRG.Interface.Widgets
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            SpriteBatch.DrawRect(bounds, Color.FromArgb(127, Light ? Color.Gray : Color.Black));
+            SpriteBatch.DrawRect(bounds, Color.FromArgb(127, Light ? Color.DimGray : Color.Black));
             DrawWidgets(bounds);
         }
 

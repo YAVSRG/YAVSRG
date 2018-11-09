@@ -4,23 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay
+namespace YAVSRG.Gameplay.Watchers.Scoring
 {
-    public class CCScoring : ScoreSystem
+    public class CCScoring : IScoreSystem
     {
         public CCScoring(float[] windows, int[] weights, int max)
         {
-            maxweight = max;
-            this.windows = windows;
-            this.weights = weights;
+            MaxPointsPerNote = max;
+            JudgementWindows = windows;
+            PointsPerJudgement = weights;
             Judgements = new int[weights.Length];
         }
 
         private void AddCCJudgement(int i, int count)
         {
             Judgements[i] += 1;
-            score += (float)weights[i] / count;
-            maxscore += (float)maxweight / count;
+            PointsScored += (float)PointsPerJudgement[i] / count;
+            PossiblePoints += (float)MaxPointsPerNote / count;
         }
 
         public override void HandleHit(int k, int index, ScoreTracker.HitData[] data)
@@ -40,37 +40,38 @@ namespace YAVSRG.Gameplay
 
         public override void ProcessScore(ScoreTracker.HitData[] data)
         {
-            while (pos < data.Length)
+            while (Cursor < data.Length)
             {
-                for (int i = 0; i < data[pos].hit.Length; i++)
+                for (int i = 0; i < data[Cursor].hit.Length; i++)
                 {
-                    if (data[pos].hit[i] == 1)
+                    if (data[Cursor].hit[i] == 1)
                     {
-                        data[pos].delta[i] = MissWindow;
-                        HandleHit(i, pos, data);
+                        data[Cursor].delta[i] = MissWindow;
+                        HandleHit(i, Cursor, data);
                     }
-                    else if (data[pos].hit[i] == 2)
+                    else if (data[Cursor].hit[i] == 2)
                     {
-                        HandleHit(i, pos, data);
+                        HandleHit(i, Cursor, data);
                     }
                 }
-                pos++;
+                Cursor++;
             }
+            BestCombo = Math.Max(Combo, BestCombo);
         }
 
         public override void Update(float now, ScoreTracker.HitData[] data)
         {
-            while (pos < data.Length && data[pos].Offset <= now)
+            while (Cursor < data.Length && data[Cursor].Offset <= now)
             {
-                for (int i = 0; i < data[pos].hit.Length; i++)
+                for (int i = 0; i < data[Cursor].hit.Length; i++)
                 {
-                    if (data[pos].hit[i] == 1)
+                    if (data[Cursor].hit[i] == 1)
                     {
-                        data[pos].delta[i] = MissWindow;
-                        HandleHit(i, pos, data);
+                        data[Cursor].delta[i] = MissWindow;
+                        HandleHit(i, Cursor, data);
                     }
                 }
-                pos++;
+                Cursor++;
             }
         }
     }

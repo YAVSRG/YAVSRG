@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Gameplay.Watchers;
 
 namespace YAVSRG.Gameplay
 {
@@ -71,7 +72,7 @@ namespace YAVSRG.Gameplay
         Chart _chart;
         Charts.DifficultyRating.RatingReport _rating;
         string _mods;
-        ScoreSystem _scoring;
+        IScoreSystem _scoring;
         ScoreTracker.HitData[] _hitdata;
         float? _physical, _technical;
 
@@ -94,12 +95,12 @@ namespace YAVSRG.Gameplay
 
         public string Accuracy
         {
-            get { if (_scoring == null) { _scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(_hitdata); } return _scoring.FormatAcc(); }
+            get { if (_scoring == null) { _scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(_hitdata); } return _scoring.FormatAcc(); }
         }
 
         public int BestCombo
         {
-            get { if (_scoring == null) { _scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(_hitdata); } return _scoring.BestCombo; }
+            get { if (_scoring == null) { _scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(_hitdata); } return _scoring.BestCombo; }
         }
 
         public Charts.DifficultyRating.RatingReport RatingData

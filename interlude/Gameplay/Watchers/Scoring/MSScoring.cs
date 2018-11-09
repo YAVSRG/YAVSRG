@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay
+namespace YAVSRG.Gameplay.Watchers.Scoring
 {
     public class MSScoring : DP
     {
@@ -27,8 +27,8 @@ namespace YAVSRG.Gameplay
         {
             int j = JudgeHit(data[index].delta[k]);
             AddJudgement(j);
-            maxscore += maxweight;
-            score += CalculatePoints(Math.Abs(data[index].delta[k]));
+            PossiblePoints += MaxPointsPerNote;
+            PointsScored += CalculatePoints(Math.Abs(data[index].delta[k]));
             if (j >= 3)
             {
                 ComboBreak();

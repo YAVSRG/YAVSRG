@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay
+namespace YAVSRG.Gameplay.Watchers.Scoring
 {
     class OD : NoCCScoring
     {
@@ -12,7 +12,7 @@ namespace YAVSRG.Gameplay
         public OD (float od) : base(null, new int[] { 300, 300, 200, 100, 50, 0 },300)
         {
             this.od = od;
-            windows = new float[] {
+            JudgementWindows = new float[] {
                 16.5f,
                 64.5f - od*3,
                 97.5f - od*3,

@@ -8,6 +8,7 @@ using static YAVSRG.Interface.ScreenUtils;
 using System.Drawing;
 using YAVSRG.Interface.Widgets;
 using YAVSRG.Net.P2P.Protocol.Packets;
+using YAVSRG.Gameplay.Watchers;
 
 namespace YAVSRG.Interface.Screens
 {
@@ -18,7 +19,7 @@ namespace YAVSRG.Interface.Screens
         private ScoreTracker scoreData;
         int tier;
         int snapcount;
-        ScoreSystem acc1, acc2;
+        IScoreSystem acc1, acc2;
         Scoreboard scoreboard;
 
         public ScreenScore(ScoreTracker data)
@@ -26,7 +27,6 @@ namespace YAVSRG.Interface.Screens
 
             scoreData = data;
             snapcount = scoreData.c.Notes.Count;
-            //mods = Game.Gameplay.GetModString(Game.Gameplay.SelectedMods, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[scoreData.c.Keys]);
             scoreData.Scoring.BestCombo = Math.Max(scoreData.Scoring.Combo, scoreData.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             //awards the rank for your acc
@@ -58,8 +58,8 @@ namespace YAVSRG.Interface.Screens
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
 
             //alternative acc calculations
-            acc1 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Osu) ? ScoreType.Default : ScoreType.Osu);
-            acc2 = ScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreType.DP) ? ScoreType.Default : ScoreType.Wife);
+            acc1 = IScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Osu) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Osu);
+            acc2 = IScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.DP) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Wife);
             acc1.ProcessScore(scoreData.Hitdata);
             acc2.ProcessScore(scoreData.Hitdata);
 

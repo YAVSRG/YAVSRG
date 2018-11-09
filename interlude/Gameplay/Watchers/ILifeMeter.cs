@@ -4,13 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay
+namespace YAVSRG.Gameplay.Watchers
 {
-    public enum ScoreType
+    public class ILifeMeter
     {
-        Default,
-        Osu,
-        DP,
-        Wife
     }
 }

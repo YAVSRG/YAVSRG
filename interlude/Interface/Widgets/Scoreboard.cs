@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets
             scroll = 0;
             foreach (Score s in scores)
             {
-                ScoreCard t = new ScoreCard(s);
+                ScoreCard t = new ScoreCard(new ScoreInfoProvider(s,Game.CurrentChart));
                 AddChild(t);
             }
             Children.Sort(ScoreCard.Compare);

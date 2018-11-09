@@ -32,15 +32,6 @@ namespace YAVSRG
             return "?";
         }
 
-        public static void SetDiscordData(string state) //needs better wrapper in future, move this
-        {
-            try
-            {
-                Discord.UpdatePresence(new Discord.RichPresence() { state = state, details = Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, joinSecret = Game.Multiplayer.LobbyKey, largeImageKey = "logo", largeImageText = "It's a rhythm game" });
-            }
-            catch { }
-        }
-
         public static string FormatTime(float ms)
         {
             if (ms < 0) return "0:00"; //fix for "time left" saying "-1:00"

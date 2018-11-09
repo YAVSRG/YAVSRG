@@ -39,7 +39,7 @@ namespace YAVSRG.Interface.Dialogs
                 bool l = false;
                 foreach (ScoreInfoProvider si in Game.Options.Profile.Stats.GetPhysicalTop(keymode))
                 {
-                    physicalTop.AddChild(new TopScoreCard(si, false, l).PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MIN));
+                    physicalTop.AddChild(new TopScoreCard(si, l, false).PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MIN));
                     l = !l;
                 }
                 return true;

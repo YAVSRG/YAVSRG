@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using YAVSRG.Gameplay.Watchers;
 
 namespace YAVSRG.Interface
 {
@@ -37,7 +38,7 @@ namespace YAVSRG.Interface
             return MouseOver(bounds) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
-        public static void DrawGraph(Rect bounds, Gameplay.ScoreSystem scoring, Gameplay.ScoreTracker.HitData[] data)
+        public static void DrawGraph(Rect bounds, IScoreSystem scoring, Gameplay.ScoreTracker.HitData[] data)
         {
             int snapcount = data.Length;
             SpriteBatch.DrawRect(bounds, Color.FromArgb(150, 0, 0, 0));

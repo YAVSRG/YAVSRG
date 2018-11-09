@@ -28,7 +28,6 @@ namespace YAVSRG
         protected TrayIcon trayIcon;
         protected TaskManager taskManager;
         protected P2PManager netManager;
-        bool init;
 
         public float FPS;
 
@@ -93,14 +92,10 @@ namespace YAVSRG
             taskManager = new TaskManager();
             netManager = new P2PManager();
             trayIcon = new TrayIcon();
-        }
 
-        void PostWindowInit()
-        {
             ApplyWindowSettings(Options.General); //apply window settings from options
             
-            var test = new Discord.EventHandlers() { requestCallback = Discord.RichPresence.RequestHandler };
-            Discord.Initialize("420320424199716864", ref test, true, "");
+            Discord.Init();
         }
 
         public void ApplyWindowSettings(Options.General settings) //apply video settings
@@ -165,12 +160,12 @@ namespace YAVSRG
         protected override void OnUpdateFrame(FrameEventArgs e) //this is update loop code (tries to hit 120 times a second)
         {
             base.OnUpdateFrame(e);
-            if (!init) { PostWindowInit(); init = true; return; }
             if (!Visible) return;
             audio.Update(); //audio needs updating to handle pauses before song starts and automatic looping
             screens.Update(); //updates the current screen as well as animations and stuff to transition between them
             Input.Update(); //input engine is polling based. let's hope noone exceeds some 40kps with one button
             netManager.Update();
+            Discord.Update();
         }
 
         protected override void OnLoad(EventArgs e) //called when game loads up

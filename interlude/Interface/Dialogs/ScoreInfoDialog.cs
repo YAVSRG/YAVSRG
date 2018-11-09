@@ -5,30 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Interface.Animations;
 using YAVSRG.Gameplay;
+using YAVSRG.Gameplay.Watchers;
 
 namespace YAVSRG.Interface.Dialogs
 {
     public class ScoreInfoDialog : FadeDialog
     {
+        ScoreInfoProvider Data;
 
-        ScoreTracker.HitData[] data;
-        string acc;
-        float rating;
-        string mods;
-        ScoreSystem scoring;
-
-        public ScoreInfoDialog(Score score, Action<string> a) : base(a)
+        public ScoreInfoDialog(ScoreInfoProvider data, Action<string> a) : base(a)
         {
             PositionTopLeft(-ScreenUtils.ScreenWidth * 2 + 200, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth * 2 + 200, 200, AnchorType.MAX, AnchorType.MAX);
             Move(new Rect(200, 200, 200, 200));
 
-            scoring = ScoreSystem.GetScoreSystem(ScoreType.Default);
-            data = ScoreTracker.StringToHitData(score.hitdata, score.keycount);
-            scoring.ProcessScore(data);
-            acc = Utils.RoundNumber(scoring.Accuracy()) + "%";
-            var chart = Game.Gameplay.GetModifiedChart(score.mods);
-            rating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(chart, score.rate, score.playstyle), data);
-            mods = Game.Gameplay.GetModString(chart, score.rate, score.playstyle);
+            Data = data;
         }
 
         public override void Draw(Rect bounds)
@@ -38,7 +28,7 @@ namespace YAVSRG.Interface.Dialogs
             Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1f);
             ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
 
-            ScreenUtils.DrawGraph(new Rect(bounds.Left + 20, bounds.Bottom - 200, bounds.Right - 20, bounds.Bottom - 20), scoring, data);
+            //ScreenUtils.DrawGraph(new Rect(bounds.Left + 20, bounds.Bottom - 200, bounds.Right - 20, bounds.Bottom - 20), scoring, data);
         }
 
         protected override void OnClosing()

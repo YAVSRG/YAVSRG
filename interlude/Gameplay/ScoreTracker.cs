@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Interface.Animations;
+using YAVSRG.Gameplay.Watchers;
 
 namespace YAVSRG.Gameplay
 {
@@ -46,7 +47,7 @@ namespace YAVSRG.Gameplay
         public event Action<int, int, float> OnHit; //COLUMM, AWARDED JUDGE, MS DELTA
 
         public ChartWithModifiers c;
-        public ScoreSystem Scoring;
+        public IScoreSystem Scoring;
         public HitData[] Hitdata;
         public AnimationColorFade WidgetColor;
         public int maxcombo; //max possible combo
@@ -60,7 +61,7 @@ namespace YAVSRG.Gameplay
             {
                 maxcombo += s.Count; //merge this down into other for loop?
             }
-            Scoring = ScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
+            Scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
 
             Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); };
 

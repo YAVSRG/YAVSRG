@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay
+namespace YAVSRG.Gameplay.Watchers.Scoring
 {
     public class DP : NoCCScoring
     {
@@ -13,7 +13,7 @@ namespace YAVSRG.Gameplay
         {
             this.judge = judge;
             float hw = 45f / 6 * (10 - judge);
-            windows = new float[] {
+            JudgementWindows = new float[] {
                 hw/2,
                 hw,
                 hw*2,
