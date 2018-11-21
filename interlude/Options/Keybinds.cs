@@ -15,6 +15,7 @@ namespace YAVSRG.Options
         public Key UpRate = Key.Plus;
         public Key DownRate = Key.Minus;
         public Key ChangeOffset = Key.Plus;
+        public Key Volume = Key.AltLeft;
         public Key Skip = Key.Space;
         public Key Search = Key.Tab;
         public Key CollapseToToolbar = Key.Insert;

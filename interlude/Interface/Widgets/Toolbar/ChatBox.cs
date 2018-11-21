@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using System.Globalization;
 
-namespace YAVSRG.Interface.Widgets
+namespace YAVSRG.Interface.Widgets.Toolbar
 {
-    public class ChatBox : Widget
+    public class ChatBox : ToolbarWidget
     {
         class ChatChannel
         {
@@ -187,7 +184,7 @@ namespace YAVSRG.Interface.Widgets
             bounds = GetBounds(bounds);
             if (collapsed)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Chat) && Game.Screens.Toolbar.State == WidgetState.ACTIVE)
+                if (Input.KeyTap(Game.Options.General.Binds.Chat) && !ToolbarCollapsed)
                 {
                     Expand();
                 }
@@ -208,6 +205,12 @@ namespace YAVSRG.Interface.Widgets
                     Input.ChangeIM(new InputMethod((s) => { entryText = s; }, () => { return entryText; }, () => { }));
                 }
             }
+        }
+
+        public override void OnToolbarCollapse()
+        {
+            base.OnToolbarCollapse();
+            Collapse();
         }
 
         public void AddLine(string channel, string text, bool important)

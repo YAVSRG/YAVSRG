@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using YAVSRG.Gameplay;
 using System.Drawing;
 
-namespace YAVSRG.Interface.Widgets
+namespace YAVSRG.Interface.Widgets.Toolbar
 {
     public class ProfileInfoPanel : Widget
     {

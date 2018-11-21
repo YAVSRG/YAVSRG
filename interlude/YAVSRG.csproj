@@ -139,6 +139,8 @@
     <Compile Include="Charts\ChartLoader.cs" />
     <Compile Include="Charts\YAVSRG\SVManager.cs" />
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
+    <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
+    <Compile Include="Interface\Widgets\Toolbar\ToolbarWidget.cs" />
     <Compile Include="Render\DrawableFBO.cs" />
     <Compile Include="Utilities\Content.cs" />
     <Compile Include="Editor\ChartInEditor.cs" />
@@ -214,7 +216,7 @@
     <Compile Include="Interface\Widgets\Controls\Button.cs" />
     <Compile Include="Interface\Widgets\ChartInfoControls.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
-    <Compile Include="Interface\Widgets\ChatBox.cs" />
+    <Compile Include="Interface\Widgets\Toolbar\ChatBox.cs" />
     <Compile Include="Interface\Widgets\Controls\DropDown.cs" />
     <Compile Include="Interface\Widgets\DownloadCard.cs" />
     <Compile Include="Interface\Widgets\DownloadManager.cs" />
@@ -230,7 +232,7 @@
     <Compile Include="Interface\Widgets\InfoBox.cs" />
     <Compile Include="Interface\Widgets\ImageBox.cs" />
     <Compile Include="Interface\Widgets\NewsBox.cs" />
-    <Compile Include="Interface\Widgets\ProfileInfoPanel.cs" />
+    <Compile Include="Interface\Widgets\Toolbar\ProfileInfoPanel.cs" />
     <Compile Include="Interface\Widgets\ScrollContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\Controls\FramedButton.cs" />

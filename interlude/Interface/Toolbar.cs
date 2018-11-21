@@ -8,6 +8,7 @@ using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Interface.Widgets;
 using YAVSRG.Interface.Animations;
 using YAVSRG.Interface.Screens;
+using YAVSRG.Interface.Widgets.Toolbar;
 
 namespace YAVSRG.Interface
 {
@@ -16,7 +17,7 @@ namespace YAVSRG.Interface
         AnimationSlider _Height, _NotifFade;
         AnimationSeries _NotifAnimation;
         string Notification = "";
-        AnimationColorMixer NotificationColor;
+        //AnimationColorMixer NotificationColor;
         public ChatBox Chat;
         WidgetState CursorMode = WidgetState.NORMAL;
 
@@ -41,12 +42,13 @@ namespace YAVSRG.Interface
                 new Button("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenLobby()); })
                 .PositionTopLeft(400, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(320, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(Chat = new ChatBox());
+            AddChild(new MusicControls());
             Animation.Add(_Height = new AnimationSlider(-5));
             Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
             Utilities.Logging.OnLog += (s, d, t) => { if (t != Utilities.Logging.LogType.Debug) AddNotification(s, Color.White); };
         }
 
-        public void AddNotification(string notif, Color color)
+        public void AddNotification(string notif, Color color) //todo: use color
         {
             Notification = notif;
             _NotifAnimation.Clear();
@@ -70,7 +72,16 @@ namespace YAVSRG.Interface
         private void Collapse()
         {
             _Height.Target = -5;
-            Chat.Collapse();
+            lock (Children)
+            {
+                foreach (Widget w in Children)
+                {
+                    if (w is ToolbarWidget)
+                    {
+                        ((ToolbarWidget)w).OnToolbarCollapse();
+                    }
+                }
+            }
         }
 
         private void Expand()
