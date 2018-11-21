@@ -30,7 +30,7 @@ namespace YAVSRG.Interface.Screens
 
             int columnwidth = Game.Options.Theme.ColumnWidth;
             int hitposition = Game.Options.Profile.HitPosition;
-            
+
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
             binds = Game.Options.Profile.Bindings[Chart.Keys];
 
@@ -39,38 +39,14 @@ namespace YAVSRG.Interface.Screens
             //this stuff is ok to stay here
             AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
             //AddChild(new PerformanceMeter(scoreTracker));
-            if (widgetData.IsEnabled("hitMeter"))
-            {
-                AddChild(new HitMeter(scoreTracker).Position(widgetData.GetPosition("hitMeter")));
-            }
-            if (widgetData.IsEnabled("progressBar"))
-            {
-                AddChild(new ProgressBar(scoreTracker).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
-            }
-            if (widgetData.IsEnabled("combo"))
-            {
-                AddChild(new ComboDisplay(scoreTracker).Position(widgetData.GetPosition("combo")));
-            }
-            if (widgetData.IsEnabled("accuracy"))
-            {
-                AddChild(new AccMeter(scoreTracker).Position(widgetData.GetPosition("accuracy")));
-            }
-            if (widgetData.IsEnabled("time"))
-            {
-                AddChild(new MiscInfoDisplay(scoreTracker, () => { return DateTime.Now.ToLongTimeString(); }).Position(widgetData.GetPosition("time")));
-            }
-            if (widgetData.IsEnabled("timeLeft"))
-            {
-                AddChild(new MiscInfoDisplay(scoreTracker, () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now())/(float)Game.Options.Profile.Rate) + " left"; }).Position(widgetData.GetPosition("timeLeft")));
-            }
-            if (widgetData.IsEnabled("fps"))
-            {
-                AddChild(new MiscInfoDisplay(scoreTracker, () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }).Position(widgetData.GetPosition("fps")));
-            }
-            if (widgetData.IsEnabled("judgements"))
-            {
-                AddChild(new JudgementCounter(scoreTracker).Position(widgetData.GetPosition("judgements")));
-            }
+            AddChild(new HitMeter(scoreTracker, widgetData.GetPosition("hitMeter")));
+            AddChild(new ComboDisplay(scoreTracker, widgetData.GetPosition("combo")));
+            AddChild(new ProgressBar(scoreTracker, widgetData.GetPosition("progressBar")).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new AccMeter(scoreTracker, widgetData.GetPosition("accuracy")));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("time"), () => { return DateTime.Now.ToLongTimeString(); }));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("timeLeft"), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("fps"), () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }));
+            AddChild(new JudgementCounter(scoreTracker, widgetData.GetPosition("judgements")));
             //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
             //playfield.InitGameplay();
             lighting = new HitLighting[Chart.Keys];
@@ -85,8 +61,8 @@ namespace YAVSRG.Interface.Screens
             }
             //this places the screencovers
             if (Game.Options.Profile.ScreenCoverUp > 0)
-            playfield.AddChild(new Screencover(scoreTracker, false)
-                .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
+                playfield.AddChild(new Screencover(scoreTracker, false)
+                    .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
             if (Game.Options.Profile.ScreenCoverDown > 0)
                 playfield.AddChild(new Screencover(scoreTracker, true)
                 .PositionTopLeft(0, ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverDown), AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2, AnchorType.MAX, AnchorType.CENTER));
@@ -168,7 +144,7 @@ namespace YAVSRG.Interface.Screens
                 }
             }
             scoreTracker.Update(now - missWindow); //check for notes you've missed and handle them
-            if (scoreTracker.EndOfChart()) //if the chart is over, go to score screen
+            if (scoreTracker.ReachedEnd()) //if the chart is over, go to score screen
             {
                 Game.Screens.PopScreen();
                 Game.Screens.AddScreen(new ScreenScore(scoreTracker));

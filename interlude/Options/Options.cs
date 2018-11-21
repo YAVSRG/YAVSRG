@@ -34,10 +34,10 @@ namespace YAVSRG.Options
                     }
                 }
             }
-            catch
+            catch (Exception e)
             {
                 //log that settings have been reset due to load failure
-                Utilities.Logging.Log("Couldn't switch to selected profile", Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Couldn't switch to selected profile", e.ToString(), Utilities.Logging.LogType.Error);
             }
         }
 
@@ -79,9 +79,9 @@ namespace YAVSRG.Options
                         p.ProfilePath = Path.GetFileName(path);
                         Profiles.Add(p);
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        Utilities.Logging.Log("Could not load profile!\n" + path, Utilities.Logging.LogType.Error);
+                        Utilities.Logging.Log("Could not load profile from " + path, e.ToString(), Utilities.Logging.LogType.Error);
                     }
                 }
             }

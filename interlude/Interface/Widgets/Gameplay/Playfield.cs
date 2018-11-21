@@ -21,15 +21,15 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         int[] holdColors, holdColorsHitpos, svindex;
         float[] pos, time, sv;
 
-        protected int Keys { get { return scoreTracker.c.Keys; } }
+        protected int Keys { get { return scoreTracker.Chart.Keys; } }
         protected int HitPos { get { return Game.Options.Profile.HitPosition; } }
         protected int ColumnWidth { get { return Game.Options.Theme.ColumnWidth; } }
         protected float ScrollSpeed { get { return Game.Options.Profile.ScrollSpeed / (float)Game.Options.Profile.Rate; } }
-        protected ChartWithModifiers Chart { get { return scoreTracker.c; } }
+        protected ChartWithModifiers Chart { get { return scoreTracker.Chart; } }
 
         protected Animations.AnimationCounter animation;
 
-        public Playfield(ScoreTracker s) : base(s)
+        public Playfield(ScoreTracker s) : base(s, new Options.WidgetPosition() { Enable = true }) //todo: allow settings for playfield
         {
             Game.Options.Theme.LoadTextures(Chart.Keys);
 
@@ -141,7 +141,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             {
                 start = HitPos;
             }
-            Game.Options.Theme.DrawHold(new Rect(i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f), i, Keys, color, animation.cycles % 8); //Math.Abs corrects neg number
+            Game.Options.Theme.DrawHold(new Rect(i * ColumnWidth + offset, start + ColumnWidth * 0.5f, (i + 1) * ColumnWidth + offset, end + ColumnWidth * 0.5f), i, Keys, color, animation.cycles % 8);
             if (holdMiddles.GetColumn(i)) //draw hold head if this isn't a middle section of a long note
             { holdMiddles.RemoveColumn(i); }
             else

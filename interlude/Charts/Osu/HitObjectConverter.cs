@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using YAVSRG.Charts.YAVSRG;
 
@@ -111,7 +108,7 @@ namespace YAVSRG.Charts.Osu
                 if (ln) //After all this is done, add single notes or new arriving long notes to the current state
                 {
                     s.holds.SetColumn(col);
-                    holds[col] = float.Parse(objects[i].addition.Split(':')[0]);
+                    holds[col] = float.Parse(objects[i].addition.Split(':')[0], CultureInfo.InvariantCulture);
                 }
                 else
                 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace YAVSRG.Charts.Osu
 {
@@ -30,11 +26,11 @@ namespace YAVSRG.Charts.Osu
         {
             string[] parts = parse.Split(',');
 
-            x = int.Parse(parts[0]);
-            y = int.Parse(parts[1]);
-            offset = float.Parse(parts[2]);
-            type = int.Parse(parts[3]);
-            hitsound = int.Parse(parts[4]);
+            x = int.Parse(parts[0], CultureInfo.InvariantCulture);
+            y = int.Parse(parts[1], CultureInfo.InvariantCulture);
+            offset = float.Parse(parts[2], CultureInfo.InvariantCulture);
+            type = int.Parse(parts[3], CultureInfo.InvariantCulture);
+            hitsound = int.Parse(parts[4], CultureInfo.InvariantCulture);
             if (parts.Length > 5)
             {
                 addition = parts[5];

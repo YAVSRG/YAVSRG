@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Open.Nat;
+using YAVSRG.Utilities;
 using YAVSRG.Net.P2P.Protocol.Packets;
 
 namespace YAVSRG.Net.P2P
@@ -41,12 +42,12 @@ namespace YAVSRG.Net.P2P
                 NatDevice device = await discoverer.DiscoverDeviceAsync();
                 var ip = await device.GetExternalIPAsync();
                 await device.CreatePortMapAsync(new Mapping(Open.Nat.Protocol.Tcp, 32767, 32767, 3600000, "Interlude-Lobby"));
-                Utilities.Logging.Log("Port mapping seems to have worked. External IP is " + ip.ToString());
+                Logging.Log("Port mapping seems to have worked. External IP is " + ip.ToString(), "");
                 LobbyKey = Convert.ToBase64String(ip.GetAddressBytes());
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log("Port mapping failed: " + e.ToString(), Utilities.Logging.LogType.Error);
+                Logging.Log("Port mapping failed", e.ToString(), Logging.LogType.Error);
             }
         }
 
@@ -58,7 +59,7 @@ namespace YAVSRG.Net.P2P
                 Server = new SocketServer();
                 if (!Server.Start())
                 {
-                    Utilities.Logging.Log("Couldn't host lobby!", Utilities.Logging.LogType.Warning);
+                    Logging.Log("Couldn't host lobby!", "", Logging.LogType.Warning);
                     Server = null;
                     return;
                 }
@@ -105,7 +106,7 @@ namespace YAVSRG.Net.P2P
             }
             catch
             {
-                Utilities.Logging.Log("Invalid lobby code: " + key, Utilities.Logging.LogType.Warning);
+                Logging.Log("Invalid lobby code: " + key, "", Logging.LogType.Warning);
             }
         }
 

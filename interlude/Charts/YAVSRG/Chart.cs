@@ -40,22 +40,25 @@ namespace YAVSRG.Charts.YAVSRG
             return (int)(60000f / Timing.BPM.Points[0].MSPerBeat); //todo: min and max
         }
 
-        public string GetHash()
+        public string GetHash() //unique identifier for the content of the chart - identical charts stored in different locations can use the same score data because if two charts are the same, they have the same hash
+            //it can be assumed that if two charts have the same hash, they are identical since hash collisions (the case when this is not true) is astronomically rare
         {
             var h = SHA256.Create();
-            byte[] data = new byte[16 * Notes.Count];
-            float offset;
+            byte[] data = new byte[16 * Notes.Count]; //maybe find a way to optimise resizing of arrays
+            float offset; //used to calculate note's time relative to the first note. prevents identical charts but with everything shifted in time having different hashes
             if (Notes.Count > 0) { offset = Notes.Points[0].Offset; } else { return "_"; } //no hash if empty chart
-            int p = 0;
+
+            int p = 0; //pointer variable
             foreach (Snap s in Notes.Points)
             {
-                BitConverter.GetBytes((int)(s.Offset - offset)).CopyTo(data, p);
+                BitConverter.GetBytes((int)(s.Offset - offset)).CopyTo(data, p); //write bytes for time into the chart this row of notes is
                 p += 4;
                 for (int i = 0; i < 6; i++)
                 {
-                    BitConverter.GetBytes(s[i].value).CopyTo(data, p + 2 * i);
+                    BitConverter.GetBytes(s[i].value).CopyTo(data, p + 2 * i); //write bytes for each component (regular notes, start of holds, middle of holds, end of holds, mines, special; in that order)
+                    //special is always 0 for now but in future will be used for scratch lanes from BMS and/or lasers from SDVX (or any other stuff i might add)
                 }
-                p += 12;
+                p += 12; //move pointer in byte array by 12 to put next block of data in the right place
             }
 
             for (int i = 0; i < Timing.SV.Length; i++)
@@ -63,18 +66,21 @@ namespace YAVSRG.Charts.YAVSRG
                 float speed = 1f;
                 foreach (SVPoint sv in Timing.SV[i].Points)
                 {
-                    if (speed != sv.ScrollSpeed)
+                    if (speed != sv.ScrollSpeed) //only write data if the new SV line changes the scroll speed from what it was
                     {
-                        Array.Resize(ref data, data.Length + 8);
+                        Array.Resize(ref data, data.Length + 8); //array resizing is inefficiently done here since it depends on if the SV changes scroll speed or not
                         BitConverter.GetBytes((int)(sv.Offset - offset)).CopyTo(data, p);
                         p += 4;
                         BitConverter.GetBytes(sv.ScrollSpeed).CopyTo(data, p);
+                        //hash is affected by both time and new scroll speed at this time
                         p += 4;
                         speed = sv.ScrollSpeed;
                     }
                 }
             }
-            return BitConverter.ToString(h.ComputeHash(data)).Replace("-", "");
+            //so in the end, data represents a compacted byte array representing the chart data (and is 100% unique for unique charts)
+            return BitConverter.ToString(h.ComputeHash(data)).Replace("-", ""); //the hashing algorithm transforms this data into something only 256 bits long, in a manner where these 256 bits are (VERY) probably still unique.
+            //the hash is converted to a hexadecimal string for ease of handling (although i may switch to base64 in the future)
         }
 
         public void WriteToFile(string path)
@@ -156,9 +162,9 @@ namespace YAVSRG.Charts.YAVSRG
                 }
                 return chart;
             }
-            catch
+            catch (Exception e)
             {
-                Utilities.Logging.Log("Could not load chart at " + path, Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Could not load chart at " + path, e.ToString(), Utilities.Logging.LogType.Error);
                 return null;
             }
         }

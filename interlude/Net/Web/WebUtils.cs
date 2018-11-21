@@ -23,7 +23,7 @@ namespace YAVSRG.Net.Web
                 }
                 catch (Exception e)
                 {
-                    Utilities.Logging.Log("Failed to get web data from " + url + ": " + e.ToString(), Utilities.Logging.LogType.Error);
+                    Utilities.Logging.Log("Failed to get web data from " + url, e.ToString(), Utilities.Logging.LogType.Error);
                 }
             }
         }
@@ -47,7 +47,7 @@ namespace YAVSRG.Net.Web
                     }
                     else
                     {
-                        Utilities.Logging.Log("Failed to download file from " + url + ": " + error.ToString(), Utilities.Logging.LogType.Error);
+                        Utilities.Logging.Log("Failed to download file from " + url, error.ToString(), Utilities.Logging.LogType.Error);
                         return false;
                     }
                 }
@@ -59,7 +59,7 @@ namespace YAVSRG.Net.Web
             DownloadString(url, (s) => {
                 try { callback(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(s)); } //just does the string downloader and converts it
                 catch (Exception e)
-                { Utilities.Logging.Log("Failed to get json data from " + url + ": " + e.ToString(), Utilities.Logging.LogType.Error); } }); //error if json decoding failed, all web errors happen in DownloadString
+                { Utilities.Logging.Log("Failed to get json data from " + url, e.ToString(), Utilities.Logging.LogType.Error); } }); //error if json decoding failed, all web errors happen in DownloadString
         }
     }
 }

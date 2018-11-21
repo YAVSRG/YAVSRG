@@ -21,20 +21,20 @@ namespace YAVSRG
             {
                 var LogFile = new System.IO.FileStream("log.txt", System.IO.FileMode.Append);
                 var LogFileWriter = new System.IO.StreamWriter(LogFile);
-                Logging.SetLogAction((s, t) => { LogFileWriter.WriteLine("[" + t.ToString() + "] " + s); if (Game.Instance != null) Game.Screens?.Toolbar?.Chat?.AddLine("Log", "[" + t.ToString() + "] " + s, t != Logging.LogType.Info); });
+                Logging.OnLog += (s, d, t) => { LogFileWriter.WriteLine("[" + t.ToString() + "] " + s + (d != "" ? ": "+d : "")); };
                 PipeHandler.Open();
-                Logging.Log("Launching "+Game.Version+", the date/time is " + DateTime.Now.ToString());
+                Logging.Log("Launching " + Game.Version + ", the date/time is " + DateTime.Now.ToString(), "");
                 Game g = null;
                 try
                 {
                     Options.Options.Init(); //init options i.e load profiles
                     g = new Game();
-                    Logging.Log("Looks good");
+                    Logging.Log("Looks good", "");
                 }
                 catch (Exception e)
                 {
                     Application.Run(new CrashWindow(e.ToString()));
-                    Logging.Log("Game failed to launch: " + e.ToString(), Logging.LogType.Critical);
+                    Logging.Log("Game failed to launch ", e.ToString(), Logging.LogType.Critical);
                 }
                 if (g != null)
                 {
@@ -46,7 +46,7 @@ namespace YAVSRG
                     {
                         g.Exit(); //if it crashes close it and give a neat crash log
                         Application.Run(new CrashWindow(e.ToString()));
-                        Logging.Log("Game crashed: " + e.ToString(), Logging.LogType.Critical);
+                        Logging.Log("Game crashed (that's bad)", e.ToString(), Logging.LogType.Critical);
                     }
                     finally
                     {

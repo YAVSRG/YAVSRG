@@ -29,11 +29,11 @@ namespace YAVSRG.Utilities
                     try
                     {
                         Callback(Task((v) => { Progress = v; }));
-                        if (Track) Logging.Log("Completed task: " + Name);
+                        if (Track) Logging.Log("Completed task: " + Name, "");
                     }
                     catch (Exception e)
                     {
-                        Logging.Log("Exception occured in task " + Name + ": " + e.ToString());
+                        Logging.Log("Exception occured in task " + Name, e.ToString(), Logging.LogType.Error);
                     }
                     finally
                     {
@@ -49,11 +49,11 @@ namespace YAVSRG.Utilities
 
             public void Cancel()
             {
-                if (_token.IsCancellationRequested) { Logging.Log("Tried to cancel " + Name + " but it has already been cancelled", Logging.LogType.Warning); return; }
+                if (_token.IsCancellationRequested) { Logging.Log("Tried to cancel " + Name + " but it has already been cancelled", "", Logging.LogType.Warning); return; }
                 _token.Cancel();
                 if (_task.Exception != null)
                 {
-                    Logging.Log("Exception in task " + Name + ": " + _task.Exception.ToString());
+                    Logging.Log("Exception occured in task " + Name, _task.Exception.ToString(), Logging.LogType.Error);
                 }
             }
 
@@ -84,7 +84,7 @@ namespace YAVSRG.Utilities
             {
                 Tasks.Add(Task);
             }
-            if (Task.Track) Game.Screens.Toolbar.Chat.AddLine("Tasks", "Added task: " + Task.Name, true);
+            if (Task.Track) Logging.Log("Added task: " + Task.Name, "");
             Task.Start();
         }
 

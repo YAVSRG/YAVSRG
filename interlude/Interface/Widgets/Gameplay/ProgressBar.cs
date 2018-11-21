@@ -9,7 +9,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 {
     public class ProgressBar : GameplayWidget
     {
-        public ProgressBar(ScoreTracker playing) : base(playing)
+        public ProgressBar(ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
         }
 
@@ -22,7 +22,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             float x = bounds.Left;
             for(int i = 5; i >= 0; i--)
             {
-                temp = scoreTracker.Scoring.Judgements[i] * bounds.Width / scoreTracker.maxcombo;
+                temp = scoreTracker.Scoring.Judgements[i] * bounds.Width / scoreTracker.MaxCombo;
                 SpriteBatch.DrawRect(new Rect(x, bounds.Top, x + temp, bounds.Bottom), Game.Options.Theme.JudgeColors[i]);
                 x += temp;
             }

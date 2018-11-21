@@ -85,7 +85,7 @@ namespace YAVSRG.Net.P2P
                             return;
                         }
                     }
-                    Utilities.Logging.Log("Couldn't find the chart being playing in the lobby: " + packet.name + " [" + packet.diff + "] from " + packet.pack);
+                    Utilities.Logging.Log("You don't have the chart being played", packet.name + " [" + packet.diff + "] from " + packet.pack);
                 }
                 else
                 {

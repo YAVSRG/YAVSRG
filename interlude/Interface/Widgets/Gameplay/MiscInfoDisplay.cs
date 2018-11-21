@@ -11,7 +11,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
     {
         Func<string> data;
 
-        public MiscInfoDisplay(ScoreTracker scoreTracker, Func<string> data) : base(scoreTracker)
+        public MiscInfoDisplay(ScoreTracker scoreTracker, Options.WidgetPosition pos, Func<string> data) : base(scoreTracker, pos)
         {
             this.data = data;
         }

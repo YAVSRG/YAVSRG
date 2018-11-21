@@ -112,15 +112,18 @@ namespace YAVSRG.Interface.Widgets
         int newMessages = 0;
         ScrollContainer channelSelector;
         Animations.AnimationSlider newMsgFade, fade;
+        Widget emoji;
 
         public ChatBox()
         {
             channels = new Dictionary<string, ChatChannel>();
             channelSelector = new ScrollContainer(10f, 10f, false, 2, false);
             AddChild(channelSelector.PositionTopLeft(20, 20, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(220, 20, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new EmojiPicker().PositionTopLeft(240, 30, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(30, 30, AnchorType.MAX, AnchorType.MAX));
+            AddChild(emoji = new EmojiPicker().PositionTopLeft(240, 30, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(30, 30, AnchorType.MAX, AnchorType.MAX));
+            emoji.SetState(WidgetState.DISABLED);
             Animation.Add(newMsgFade = new Animations.AnimationSlider(0));
             Animation.Add(fade = new Animations.AnimationSlider(0));
+            Utilities.Logging.OnLog += (s, d, t) => AddLine("Log", "[" + t.ToString() + "] " + s + (d != "" ? " (See log.txt for details)" : ""), false);
         }
 
         public override void Draw(Rect bounds)
@@ -131,7 +134,7 @@ namespace YAVSRG.Interface.Widgets
                 int a = (int)(255 * newMsgFade.Val);
                 var c = Color.FromArgb(0, 0, 0, 0);
                 SpriteBatch.Draw(bounds: new Rect(bounds.Right - 1200, bounds.Bottom - 380, bounds.Right, bounds.Bottom - 80), colors: new[] { c, c, Color.FromArgb(a, Color.Black), c });
-                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Binds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a,Game.Options.Theme.MenuFont));
+                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Binds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a, Game.Options.Theme.MenuFont));
             }
             if (fade > 0.01f)
             {
@@ -152,6 +155,21 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
                 RenderText("> " + entryText, bounds.Left + 260, bounds.Bottom - 60, alpha);
+
+                if (emoji.State == WidgetState.DISABLED)
+                {
+                    lock (Game.Tasks.Tasks)
+                    {
+                        float y = bounds.Top + 30;
+                        foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.Tasks)
+                        {
+                            SpriteBatch.Font1.DrawJustifiedText(t.Name, 30f, bounds.Right - 30, y, Color.FromArgb(alpha, Game.Options.Theme.MenuFont), true);
+                            SpriteBatch.Font2.DrawJustifiedText(t.Progress + " // " + t.Status.ToString(), 20f, bounds.Right - 30, y + 40f, Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
+                            y += 60f;
+                        }
+                    }
+                }
+
                 ScreenUtils.DrawFrame(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), 30f, Color.FromArgb(alpha, Game.Screens.HighlightColor));
             }
         }
@@ -275,7 +293,7 @@ namespace YAVSRG.Interface.Widgets
 
         void CreateChannel(string channel)
         {
-            channels.Add(channel, new ChatChannel(new SimpleButton(channel, () => { selectedChannel = channel; }, () => { return selectedChannel == channel; }, 20f)));
+            channels.Add(channel, new ChatChannel(new SimpleButton(channel, () => { selectedChannel = channel; emoji.SetState(channel == "Log" ? WidgetState.DISABLED : WidgetState.NORMAL); }, () => { return selectedChannel == channel; }, 20f)));
             channelSelector.AddChild(channels[channel].button.PositionBottomRight(180, 40, AnchorType.MIN, AnchorType.MIN));
             if (selectedChannel == "") { selectedChannel = channel; }
         }

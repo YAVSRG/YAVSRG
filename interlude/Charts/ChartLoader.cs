@@ -96,7 +96,7 @@ namespace YAVSRG.Charts
                         else
                         {
                             //todo: alert the user of this and/or remove chart from collection
-                            Log(id + "isn't present in the cache! Maybe it was deleted?", LogType.Warning);
+                            Log(id + "isn't present in the cache! Maybe it was deleted?", "", LogType.Warning);
                         }
                     }
                 }
@@ -161,7 +161,7 @@ namespace YAVSRG.Charts
         {
             if (!(GroupBy.ContainsKey(Game.Options.Profile.ChartGroupMode) && (SortBy.ContainsKey(Game.Options.Profile.ChartSortMode))))
             {
-                Log("Invalid sort or search mode. Use the level select screen to change them.", LogType.Warning);
+                Log("Invalid sort or search mode. Use the level select screen to change them.", "", LogType.Warning);
                 return;
             }
             
@@ -214,7 +214,7 @@ namespace YAVSRG.Charts
                                     }
                                     catch (Exception e)
                                     {
-                                        Log("Could not cache chart: " + f + "\n" + e.Message + "\n" + e.StackTrace, LogType.Error);
+                                        Log("Could not cache chart from " + f, e.ToString(), LogType.Error);
                                     }
                                 }
                             }
@@ -322,11 +322,11 @@ namespace YAVSRG.Charts
                 try
                 {
                     OsuBeatmap Beatmap = new OsuBeatmap(Path.GetFileName(AbsFilepath), Path.GetDirectoryName(AbsFilepath));
-                    if (Beatmap.Mode == 3) { Chart Converted = Beatmap.Convert(); ConvertToInterlude(Converted, SongFolder, TargetSongFolder); Log("Converted " + AbsFilepath); }
+                    if (Beatmap.Mode == 3) { Chart Converted = Beatmap.Convert(); ConvertToInterlude(Converted, SongFolder, TargetSongFolder); Log("Converted " + AbsFilepath, "", LogType.Debug); }
                 }
                 catch (Exception e)
                 {
-                    Log("Could not convert .osu file: " + AbsFilepath + "\n    " + e.ToString(), LogType.Error);
+                    Log("Could not convert .osu file " + AbsFilepath, e.ToString(), LogType.Error);
                 }
             }
             else if (ext == ".sm")
@@ -344,11 +344,11 @@ namespace YAVSRG.Charts
                         ConvertToInterlude(Difficulty, SongFolder, TargetSongFolder);
                         i++;
                     }
-                    Log("Converted " + AbsFilepath + " (" + i.ToString() + ")");
+                    Log("Converted " + AbsFilepath + " (" + i.ToString() + ")", "", LogType.Debug);
                 }
                 catch (Exception e)
                 {
-                    Log("Could not convert .sm file: " + AbsFilepath + "\n    " + e.ToString(), LogType.Error);
+                    Log("Could not convert .sm file " + AbsFilepath, e.ToString(), LogType.Error);
                 }
             }
             else if (ext == ".yav")
@@ -357,11 +357,11 @@ namespace YAVSRG.Charts
                 {
                     Chart Chart = Chart.FromFile(AbsFilepath);
                     ConvertToInterlude(Chart, SongFolder, TargetSongFolder);
-                    Log("Converted " + AbsFilepath);
+                    Log("Converted " + AbsFilepath, "", LogType.Debug);
                 }
                 catch (Exception e)
                 {
-                    Log("Could not \"convert\" .yav file: " + AbsFilepath + "\n    " + e.ToString(), LogType.Error);
+                    Log("Could not \"convert\" .yav file " + AbsFilepath, e.ToString(), LogType.Error);
                 }
             }
         }
@@ -398,13 +398,13 @@ namespace YAVSRG.Charts
                     }
                     catch (Exception e)
                     {
-                        Log("Couldn't copy media file from " + SourcePath + ": " + e.ToString(), LogType.Error);
+                        Log("Couldn't copy media file from " + SourcePath, e.ToString(), LogType.Error);
                     }
                 }
             }
             else
             {
-                Log("Missing media file for a chart: " + SourcePath, LogType.Warning);
+                Log("Missing media file for a chart ", SourcePath, LogType.Warning);
             }
         }
 
@@ -501,7 +501,7 @@ namespace YAVSRG.Charts
                         }
                         catch (Exception e)
                         {
-                            Log("Couldn't delete files after extracting .osz: " + e.ToString(), LogType.Warning);
+                            Log("Couldn't delete files after extracting .osz", e.ToString(), LogType.Warning);
                         }
 
                     }, "Import .osz files", false);
@@ -562,7 +562,7 @@ namespace YAVSRG.Charts
                             }
                             catch (Exception e)
                             {
-                                Log("Couldn't delete files after extracting .zip: " + e.ToString(), LogType.Warning);
+                                Log("Couldn't delete files after extracting .zip", e.ToString(), LogType.Warning);
                             }
 
                         }, "Importing pack: " + Path.GetFileNameWithoutExtension(path), true);
@@ -654,7 +654,7 @@ namespace YAVSRG.Charts
             }
             else
             {
-                Log("Can't switch to chart because it can't be found!", LogType.Error);
+                Log("Can't switch to chart because it can't be found!", "", LogType.Error);
             }
         }
     }

@@ -85,7 +85,7 @@ namespace YAVSRG.Gameplay
                 }
                 catch (Exception e)
                 {
-                    Utilities.Logging.Log("Could not retrieve score data from " + score.FileIdentifier + ": " + e.ToString(), Utilities.Logging.LogType.Error);
+                    Utilities.Logging.Log("Could not retrieve score data from " + score.FileIdentifier, e.ToString(), Utilities.Logging.LogType.Error);
                     continue;
                 }
                 yield return new ScoreInfoProvider(s, c);
@@ -104,14 +104,14 @@ namespace YAVSRG.Gameplay
                     ChartSaveData d = Game.Gameplay.ScoreDatabase.data[hash];
                     if (!ChartLoader.Cache.Charts.ContainsKey(d.Path))
                     {
-                        Utilities.Logging.Log("Found score data for " + d.Path + " - the file has been deleted so this will be deleted");
+                        Utilities.Logging.Log("Found score data for " + d.Path + " - the file no longer exists; will be deleted", "");
                         oldHashes.Add(hash);
                         continue;
                     }
                     Chart c = ChartLoader.Cache.LoadChart(ChartLoader.Cache.Charts[d.Path]);
                     if (c.GetHash() != hash)
                     {
-                        Utilities.Logging.Log("Found old score data for " + d.Path + " - the file is different so this will be deleted");
+                        Utilities.Logging.Log("Found old score data for " + d.Path + " - the file is different; will be deleted", "");
                         oldHashes.Add(hash);
                         continue;
                     }

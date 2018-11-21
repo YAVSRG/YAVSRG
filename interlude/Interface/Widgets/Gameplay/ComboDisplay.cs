@@ -11,16 +11,24 @@ namespace YAVSRG.Interface.Widgets.Gameplay
     public class ComboDisplay : GameplayWidget
     {
         AnimationSlider size;
+        int baseSize, bumpAmount, cbAmount, comboCap;
+        float scaleWithCombo;
 
-        public ComboDisplay(ScoreTracker st) : base(st)
+        public ComboDisplay(ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
-            size = new AnimationSlider(40);
-            st.OnHit += (x,y,z) =>
+            baseSize = pos.GetValue("baseSize", 40);
+            bumpAmount = pos.GetValue("hitBumpAmount", 5);
+            cbAmount = pos.GetValue("missBumpAmount", 40);
+            comboCap = pos.GetValue("comboCap", 1000);
+            scaleWithCombo = pos.GetValue("scaleWithCombo", 0.02f);
+
+            size = new AnimationSlider(baseSize);
+            scoreTracker.OnHit += (x,y,z) =>
             {
-                size.Val = 60;
-                if (st.Scoring.Combo == 0)
+                size.Val = baseSize + bumpAmount;
+                if (scoreTracker.Scoring.Combo == 0)
                 {
-                    size.Val = 80;
+                    size.Val = baseSize + cbAmount;
                 }
             };
         }
@@ -29,7 +37,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            float s = Math.Min(50, scoreTracker.Scoring.Combo * 0.05f) + size;
+            float s = Math.Min(comboCap, scoreTracker.Scoring.Combo) * scaleWithCombo + size;
             SpriteBatch.Font1.DrawCentredText(scoreTracker.Scoring.Combo.ToString(), s, bounds.CenterX, bounds.Top - s / 2, scoreTracker.WidgetColor);
         }
 

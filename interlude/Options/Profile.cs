@@ -18,6 +18,7 @@ namespace YAVSRG.Options
         public double Rate = 1.0f;
 
         public string Name = "Default Profile";
+        public string UUID = Guid.NewGuid().ToString();
         public int Keymode = 0;
         public string Skin = "_fallback";
         public float ScrollSpeed = 2.05f;

@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using YAVSRG.Net.P2P.Protocol.Packets;
+using YAVSRG.Utilities;
 using YAVSRG.Gameplay;
 
 namespace YAVSRG.Net.P2P
@@ -31,14 +32,14 @@ namespace YAVSRG.Net.P2P
         {
             try
             {
-                Utilities.Logging.Log("Trying to host server..");
+                Logging.Log("Trying to host server..", "");
                 sock = new Socket(SocketType.Stream, ProtocolType.Tcp);
                 sock.Bind(new IPEndPoint(0, 32767));
                 sock.Listen(3);
                 accept = new SocketAsyncEventArgs();
                 accept.Completed += OnAccept;
                 sock.AcceptAsync(accept);
-                Utilities.Logging.Log("Looks good. Server is awaiting connections.");
+                Logging.Log("Looks good. Server is awaiting connections.", "");
 
                 PacketPing.OnReceive += HandlePing;
                 PacketAuth.OnReceive += HandleAuth;
@@ -52,7 +53,7 @@ namespace YAVSRG.Net.P2P
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log("Failed to start server: " + e.ToString(), Utilities.Logging.LogType.Error);
+                Logging.Log("Failed to start server", e.ToString(), Logging.LogType.Error);
                 sock.Disconnect(false);
                 sock.Dispose();
                 return false;
@@ -89,7 +90,7 @@ namespace YAVSRG.Net.P2P
                     Clients[i].Update(i);
                     if (Clients[i].Closed)
                     {
-                        Utilities.Logging.Log("Dropped client with id " + i.ToString());
+                        Logging.Log("Dropped client with id " + i.ToString(), "");
                         Clients[i].Destroy();
                         if (Clients[i].LoggedIn) Broadcast("{c:FFFF00}" + Clients[i].Username + " left the lobby.");
                         Clients[i] = null;
@@ -106,7 +107,7 @@ namespace YAVSRG.Net.P2P
                 Playing = false;
                 Scores.Clear();
                 ScoreTimeout = null;
-                Utilities.Logging.Log("Timed out while waiting for scores from players");
+                Logging.Log("Timed out while waiting for scores from players", "");
             }
         }
 
@@ -156,7 +157,7 @@ namespace YAVSRG.Net.P2P
             {
                 if (Clients[id].LoggedIn)
                 {
-                    Utilities.Logging.Log("Client tried to log in twice!", Utilities.Logging.LogType.Warning);
+                    Logging.Log("Client tried to log in twice!", "", Logging.LogType.Warning);
                 }
                 else
                 {
@@ -166,7 +167,7 @@ namespace YAVSRG.Net.P2P
             }
             else
             {
-                Utilities.Logging.Log("Received auth packet for empty slot!", Utilities.Logging.LogType.Warning);
+                Logging.Log("Received auth packet for empty slot!", "", Logging.LogType.Warning);
             }
         }
 
@@ -237,7 +238,7 @@ namespace YAVSRG.Net.P2P
                     Playing = false;
                     Scores.Clear();
                     ScoreTimeout = null;
-                    Utilities.Logging.Log("Got score from all participating players :)");
+                    Logging.Log("Got score from all participating players :)", "");
                 }
             }
         }
@@ -259,14 +260,14 @@ namespace YAVSRG.Net.P2P
                 {
                     freeslot = true;
                     Clients[i] = new ClientWrapper(e.AcceptSocket);
-                    Utilities.Logging.Log("Accepted new connection, client id is " + i.ToString());
+                    Logging.Log("Accepted new connection, client id is " + i.ToString(), "");
                     Message("Welcome to " + Game.Options.Profile.Name + "'s lobby!", i);
                     break;
                 }
             }
             if (!freeslot)
             {
-                Utilities.Logging.Log("There was a new connection, but the server slots are full!", Utilities.Logging.LogType.Warning);
+                Logging.Log("There was a new connection, but the server slots are full!", "", Logging.LogType.Warning);
                 e.AcceptSocket.Close();
             }
 

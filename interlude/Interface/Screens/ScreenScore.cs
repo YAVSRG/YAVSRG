@@ -26,11 +26,11 @@ namespace YAVSRG.Interface.Screens
         {
 
             scoreData = data;
-            snapcount = scoreData.c.Notes.Count;
+            snapcount = scoreData.Chart.Notes.Count;
             scoreData.Scoring.BestCombo = Math.Max(scoreData.Scoring.Combo, scoreData.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             //awards the rank for your acc
-            float acc = scoreData.Accuracy();
+            float acc = scoreData.Scoring.Accuracy();
             tier = 5;
             for (int i = 0; i < Game.Options.Profile.AccGradeThresholds.Length; i++) //custom grade boundaries
             {
@@ -40,9 +40,16 @@ namespace YAVSRG.Interface.Screens
                 }
             }
 
-            //score saving logic including multiplayer
-            Score score = new Score() { player = Game.Options.Profile.Name, time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.Hitdata), keycount = scoreData.c.Keys, mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods), rate = (float)Game.Options.Profile.Rate, playstyle = Game.Options.Profile.Playstyles[scoreData.c.Keys] };
-
+            //score saving logic including multiplayer handling
+            Score score = new Score()
+            {
+                player = Game.Options.Profile.Name,
+                time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.Hitdata),
+                keycount = scoreData.Chart.Keys,
+                mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods),
+                rate = (float)Game.Options.Profile.Rate,
+                playstyle = Game.Options.Profile.Playstyles[scoreData.Chart.Keys]
+            };
             if (ShouldSaveScore())
             {
                 Game.Gameplay.ChartSaveData.Scores.Add(score);
@@ -53,6 +60,7 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Multiplayer.SendPacket(new PacketScore() { score = score });
             }
+
             //update stats
             Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
@@ -78,7 +86,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Audio.OnPlaybackFinish = null;
+            Game.Audio.OnPlaybackFinish = Game.Audio.Stop;
             PacketScoreboard.OnReceive += HandleMultiplayerScoreboard;
         }
 
@@ -126,9 +134,9 @@ namespace YAVSRG.Interface.Screens
             {
                 r = bounds.Right - 500 + i * h;
                 SpriteBatch.DrawRect(new Rect(r, bounds.Top + 50, r + h, bounds.Top + 250), Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawRect(new Rect(r, bounds.Top + 250 - 200f * scoreData.Scoring.Judgements[i] / scoreData.maxcombo, r + h, bounds.Top + 250), Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
+                SpriteBatch.DrawRect(new Rect(r, bounds.Top + 250 - 200f * scoreData.Scoring.Judgements[i] / scoreData.MaxCombo, r + h, bounds.Top + 250), Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.Font2.DrawCentredTextToFill(scoreData.Scoring.Judgements[i].ToString(), new Rect(r, bounds.Top + 50, r + h, bounds.Top + 150), Color.White, true);
-                SpriteBatch.Font2.DrawCentredTextToFill(Utils.RoundNumber(scoreData.Scoring.Judgements[i] * 100f / scoreData.maxcombo) + "%", new Rect(r, bounds.Top + 150, r + h, bounds.Top + 250), Color.White, true);
+                SpriteBatch.Font2.DrawCentredTextToFill(Utils.RoundNumber(scoreData.Scoring.Judgements[i] * 100f / scoreData.MaxCombo) + "%", new Rect(r, bounds.Top + 150, r + h, bounds.Top + 250), Color.White, true);
             }
             SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", new Rect(bounds.Right - 490, bounds.Top + 250, bounds.Right - 225, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Font1.DrawCentredTextToFill(badge, new Rect(bounds.Right - 390, bounds.Top + 250, bounds.Right - 160, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
@@ -151,7 +159,7 @@ namespace YAVSRG.Interface.Screens
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log("Something went wrong displaying multiplayer scores: "+e.ToString(), Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Something went wrong displaying multiplayer scores", e.ToString(), Utilities.Logging.LogType.Error);
             }
         }
     }

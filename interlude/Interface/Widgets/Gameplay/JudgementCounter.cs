@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
     {
         List<AnimationSlider> flashes;
 
-        public JudgementCounter(YAVSRG.Gameplay.ScoreTracker st) : base(st)
+        public JudgementCounter(YAVSRG.Gameplay.ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
             flashes = new List<AnimationSlider>();
             for (int i = 0; i < 6; i++)
@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 flashes.Add(new AnimationSlider(0));
                 Animation.Add(flashes[i]);
             }
-            st.OnHit += (k, j, d) => { flashes[j].Val = 1; };
+            scoreTracker.OnHit += (k, j, d) => { flashes[j].Val = 1; };
         }
 
         public override void Draw(Rect bounds)

@@ -35,7 +35,7 @@ namespace YAVSRG.Net.P2P
 
         protected void Error(Exception e)
         {
-            Utilities.Logging.Log("An error has occured in a socket: " + e.ToString(), Utilities.Logging.LogType.Error);
+            Utilities.Logging.Log("An error has occured in a socket", e.ToString(), Utilities.Logging.LogType.Error);
             Disconnect();
         }
 

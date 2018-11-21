@@ -13,6 +13,25 @@ namespace YAVSRG.Options
         public int Left = 0; public AnchorType LeftAnchor = AnchorType.MIN;
         public int Right = 0; public AnchorType RightAnchor = AnchorType.MAX;
         public int Bottom = 0; public AnchorType BottomAnchor = AnchorType.MAX;
-        public bool Enable;
+        public bool Enable = false;
+
+        public Dictionary<string, object> Extra = new Dictionary<string, object>();
+
+        public T GetValue<T>(string tag, T def)
+        {
+            if (Extra.ContainsKey(tag))
+            {
+                var v = Extra[tag];
+                if (v is T)
+                {
+                    return (T)Extra[tag];
+                }
+            }
+            else
+            {
+                Extra[tag] = def;
+            }
+            return def;
+        }
     }
 }

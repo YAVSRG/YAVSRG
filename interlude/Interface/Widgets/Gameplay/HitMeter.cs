@@ -49,14 +49,16 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         JudgementDisplay[] disp;
         List<Hit> hits;
         float aspectRatio; //used to scale judgement text correctly
+        float hScale, vScale;
+        int thickness;
 
-        public HitMeter(YAVSRG.Gameplay.ScoreTracker st) : base(st)
+        public HitMeter(YAVSRG.Gameplay.ScoreTracker st, Options.WidgetPosition pos) : base(st, pos)
         {
             st.OnHit += AddHit;
             if (Game.Options.Theme.JudgementPerColumn)
             {
-                disp = new JudgementDisplay[st.c.Keys];
-                for (int k = 0; k < st.c.Keys; k++)
+                disp = new JudgementDisplay[st.Chart.Keys];
+                for (int k = 0; k < st.Chart.Keys; k++)
                 {
                     disp[k] = new JudgementDisplay();
                 }
@@ -68,7 +70,10 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             hits = new List<Hit>();
             Sprite sprite = Content.GetTexture("judgements");
-            aspectRatio = ((float)sprite.Height / sprite.UV_Y) / ((float)sprite.Width / sprite.UV_X);
+            aspectRatio = (float)sprite.Height / sprite.UV_Y / ((float)sprite.Width / sprite.UV_X);
+            hScale = pos.GetValue("HitHorizontalScale", 3f) * Game.Options.Theme.ColumnWidth / st.Scoring.MissWindow;
+            vScale = pos.GetValue("HitVerticalScale", 0.25f) * Game.Options.Theme.ColumnWidth;
+            thickness = pos.GetValue("HitThickness", 4);
         }
 
         private void AddHit(int k, int tier, float delta)
@@ -110,7 +115,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             float c = bounds.CenterX;
             foreach (Hit h in hits)
             {
-                SpriteBatch.DrawRect(new Rect(c + h.delta * 4 - 4, bounds.Bottom-40, c + h.delta * 4 + 4, bounds.Bottom), Color.FromArgb(Alpha(now - h.time), Game.Options.Theme.JudgeColors[h.tier]));
+                SpriteBatch.DrawRect(new Rect(c + h.delta * hScale - thickness, bounds.Bottom - vScale, c + h.delta * hScale + thickness, bounds.Bottom), Color.FromArgb(Alpha(now - h.time), Game.Options.Theme.JudgeColors[h.tier]));
             }
         }
 

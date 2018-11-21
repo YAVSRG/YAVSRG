@@ -108,9 +108,9 @@ namespace YAVSRG
                     if (d != null) { return d; }
                 }
             }
-            catch
+            catch (Exception e)
             {
-                Utilities.Logging.Log("Could not load widget position data: " + name + " !", Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Could not load widget position data from " + name, e.ToString(), Utilities.Logging.LogType.Error);
             }
             return new Options.WidgetPositionData(); //return blank data
         }

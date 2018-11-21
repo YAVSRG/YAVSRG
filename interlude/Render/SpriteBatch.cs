@@ -11,22 +11,7 @@ using YAVSRG.Interface;
 namespace YAVSRG
 {
     class SpriteBatch
-    {/*
-        struct Vertex
-        {
-            public static int SizeInBytes { get { return Vector2.SizeInBytes * 2 + Vector4.SizeInBytes; } }
-
-            public Vector2 position;
-            public Vector2 texCoord;
-            public Vector4 color;
-            public Vertex(Vector2 position, Vector2 texCoord, Color color)
-            {
-                this.position = position;
-                this.texCoord = texCoord;
-                this.color = new Vector4(color.R / 255f, color.G / 255f, color.B / 255f, color.A / 255f);
-            }
-        }*/
-
+    {
         public enum StencilMode
         {
             Disable,
@@ -39,11 +24,11 @@ namespace YAVSRG
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
-        //static int VBO;
-        
+        //static DrawableFBO FBO;
+
         public static void Draw(Sprite sprite, Rect bounds, Color color, int rotation = 0)
         {
-            Draw(sprite:sprite, bounds: bounds, texcoords: new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color: color, rotation: rotation);
+            Draw(sprite: sprite, bounds: bounds, texcoords: new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color: color, rotation: rotation);
         }
 
         public static void Draw(string texture = "", Rect bounds = default(Rect), Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null, float depth = 0)
@@ -119,7 +104,7 @@ namespace YAVSRG
         public static void DrawTilingTexture(string texture, Rect bounds, float scale, float x, float y, Color color)
         {
             RectangleF uv = new RectangleF(x + bounds.Left / scale, y + bounds.Top / scale, bounds.Width / scale, bounds.Height / scale);
-            Draw(texture:texture, bounds: bounds, texcoords:VecArray(uv), color:color);
+            Draw(texture: texture, bounds: bounds, texcoords: VecArray(uv), color: color);
         }
 
         public static void DrawRect(Rect bounds, Color color)
@@ -145,7 +130,7 @@ namespace YAVSRG
                 0.0, 0.0, 0.0, 1.0,
             };
             float position = ScreenUtils.ScreenHeight * Game.Options.Profile.PerspectiveTilt * i;
-            float height = (float)-Math.Pow(Math.Pow(-ScreenUtils.ScreenHeight, 2) - Math.Pow(position,2),0.5);
+            float height = (float)-Math.Pow(Math.Pow(-ScreenUtils.ScreenHeight, 2) - Math.Pow(position, 2), 0.5);
             Matrix4 m = Matrix4.LookAt(0, position, height, 0, 0, ScreenUtils.ScreenHeight, 0, -1, 0);
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
@@ -238,6 +223,7 @@ namespace YAVSRG
 
         public static void Begin(int width, int height)
         {
+            GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
             GL.Ortho(-width * 0.5f, width * 0.5f, height * 0.5f, -height * 0.5f, -height, height);
@@ -253,15 +239,18 @@ namespace YAVSRG
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.ClearColor(0, 0, 0, 0);
             GL.ClearStencil(0x00);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-            
-            /*
-            VBO = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VBO);
-            GL.EnableClientState(ArrayCap.VertexArray);
-            GL.EnableClientState(ArrayCap.TextureCoordArray);
-            GL.EnableClientState(ArrayCap.ColorArray);*/
+
+            Shader s = new Shader(
+                @"in vec4 position;
+            void main()
+            {
+                gl_Position = position;
+            }",
+                @"void main()
+            {
+                gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+            }");
+            GL.UseProgram(s.Program);
 
             Font1 = new SpriteFont(60, Game.Options.Theme.Font1);
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);

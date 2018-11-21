@@ -27,7 +27,7 @@ namespace YAVSRG.Options.Panels
                 .PositionBottomRight(200, 250, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Fullscreen" }, (int)Options.general.WindowMode, (v) => { Options.general.WindowMode = (General.WindowType)v; }),
+                    new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Borderless 2", "Fullscreen" }, (int)Options.general.WindowMode, (v) => { Options.general.WindowMode = (General.WindowType)v; }),
                 "This selects what kind of window the game should be.\nWindowed = Regular, resizable window\nBorderless = Maximised window with no title bar or border around it\nFullscreen = Fullscreen mode", ib)
                 .PositionTopLeft(-75, 325, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(75, 350, AnchorType.CENTER, AnchorType.MIN));

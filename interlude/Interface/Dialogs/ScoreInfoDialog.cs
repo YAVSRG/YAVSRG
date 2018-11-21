@@ -15,8 +15,8 @@ namespace YAVSRG.Interface.Dialogs
 
         public ScoreInfoDialog(ScoreInfoProvider data, Action<string> a) : base(a)
         {
-            PositionTopLeft(-ScreenUtils.ScreenWidth * 2 + 200, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth * 2 + 200, 200, AnchorType.MAX, AnchorType.MAX);
-            Move(new Rect(200, 200, 200, 200));
+            PositionTopLeft(-ScreenUtils.ScreenWidth * 2 + 100, 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth * 2 + 100, 100, AnchorType.MAX, AnchorType.MAX);
+            Move(new Rect(100, 100, 100, 100));
 
             Data = data;
         }
@@ -27,14 +27,13 @@ namespace YAVSRG.Interface.Dialogs
             bounds = GetBounds(bounds);
             Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1f);
             ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
-
-            //ScreenUtils.DrawGraph(new Rect(bounds.Left + 20, bounds.Bottom - 200, bounds.Right - 20, bounds.Bottom - 20), scoring, data);
+            ScreenUtils.DrawGraph(new Rect(bounds.Left + 20, bounds.Bottom - 200, bounds.Right - 20, bounds.Bottom - 20), Data.ScoreSystem, Data.HitData);
         }
 
         protected override void OnClosing()
         {
             base.OnClosing();
-            Move(new Rect(-ScreenUtils.ScreenWidth * 2 + 200, 200, ScreenUtils.ScreenWidth * 2 + 200, 200));
+            Move(new Rect(-ScreenUtils.ScreenWidth * 2 + 100, 100, ScreenUtils.ScreenWidth * 2 + 100, 100));
         }
     }
 }

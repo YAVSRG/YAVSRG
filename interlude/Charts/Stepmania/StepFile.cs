@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text.RegularExpressions;
 using YAVSRG.Charts.YAVSRG;
+using System.Globalization;
 
 namespace YAVSRG.Charts.Stepmania
 {
@@ -151,7 +152,7 @@ namespace YAVSRG.Charts.Stepmania
             foreach (string s in new string(raw["BPMS"].Where((c) => { return !char.IsWhiteSpace(c); }).ToArray()).Split(',')) //removes all whitespace, splits by ,
             {
                 split = s.Split('='); //then splits these comma separated strings by = to get beat:bpm
-                bpms.Add(new Tuple<double, double>(double.Parse(split[0]), 60000/double.Parse(split[1]))); //parses bpms and puts them in this list format
+                bpms.Add(new Tuple<double, double>(double.Parse(split[0], CultureInfo.InvariantCulture), 60000/double.Parse(split[1], CultureInfo.InvariantCulture))); //parses bpms and puts them in this list format
             }
 
             foreach (StepFileDifficulty diff in diffs)
@@ -186,7 +187,7 @@ namespace YAVSRG.Charts.Stepmania
                         keycount = 10;
                         break;
                     default:
-                        Utilities.Logging.Log("SM gamemode not supported: " + diff.gamemode, Utilities.Logging.LogType.Warning);
+                        Utilities.Logging.Log("SM gamemode not supported: " + diff.gamemode, "", Utilities.Logging.LogType.Warning);
                         continue;
                 }
 
@@ -196,7 +197,7 @@ namespace YAVSRG.Charts.Stepmania
                     List<Snap> states = new List<Snap>();
                     List<BPMPoint> points = new List<BPMPoint>();
                     BinarySwitcher lntracker = new BinarySwitcher(0);
-                    double now = -double.Parse(raw["OFFSET"]) * 1000; //start time (in ms) into audio file for first measure
+                    double now = -double.Parse(raw["OFFSET"], CultureInfo.InvariantCulture) * 1000; //start time (in ms) into audio file for first measure
                     int bpm = 0; //index of bpm point for the list of tuples we generated earlier
                     points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2)); //convert the first bpm to a timing point
                     int totalbeats = 0; //beat counter
@@ -208,7 +209,7 @@ namespace YAVSRG.Charts.Stepmania
                         from = 0;
                         while (bpm < bpms.Count - 1 && bpms[bpm + 1].Item1 < totalbeats) //iterate through all BPM changes within this measure
                         {
-                            to = bpms[bpm + 1].Item1 - totalbeats + meter; //finds number between 0 and 4 (meter)
+                            to = bpms[bpm + 1].Item1 - totalbeats + meter; //finds number between 0 and 4 (meter = 4)
                             diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, to, meter, states); //correctly converts this slice
                             now += bpms[bpm].Item2 * (to - from); //updates time we're on
                             bpm += 1; //increments bpm index so we know what point we're up to
@@ -226,7 +227,7 @@ namespace YAVSRG.Charts.Stepmania
                         Creator = GetCreator(),
                         SourcePath = path,
                         DiffName = (raw.ContainsKey("SUBTITLE") && raw["SUBTITLE"] != "" && diffs.Count == 1) ? raw["SUBTITLE"] : diff.name,
-                        PreviewTime = float.Parse(raw["SAMPLESTART"]) * 1000,
+                        PreviewTime = float.Parse(raw["SAMPLESTART"], CultureInfo.InvariantCulture) * 1000,
                         AudioFile = raw["MUSIC"],
                         BGFile = GetBG()
                     }, keycount);
@@ -235,7 +236,7 @@ namespace YAVSRG.Charts.Stepmania
                 }
                 catch (Exception e)
                 {
-                    Utilities.Logging.Log("Could not convert SM difficulty: " + e.ToString(), Utilities.Logging.LogType.Error);
+                    Utilities.Logging.Log("Could not convert SM difficulty", e.ToString(), Utilities.Logging.LogType.Error);
                 }
             }
             return charts;

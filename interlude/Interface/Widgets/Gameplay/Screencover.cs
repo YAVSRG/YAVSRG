@@ -10,7 +10,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
     {
         bool flip;
 
-        public Screencover(YAVSRG.Gameplay.ScoreTracker st, bool d) : base(st)
+        public Screencover(YAVSRG.Gameplay.ScoreTracker st, bool d) : base(st, new Options.WidgetPosition() { Enable = true })
         {
             flip = d;
         }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Globalization;
 
 namespace YAVSRG.Charts.Osu
 {
@@ -32,14 +28,14 @@ namespace YAVSRG.Charts.Osu
         {
             string[] parts = parse.Split(',');
 
-            offset = float.Parse(parts[0]);
-            msPerBeat = float.Parse(parts[1]);
-            meter = int.Parse(parts[2]);
-            sampleSet = int.Parse(parts[3]);
-            sampleType = int.Parse(parts[4]);
-            volume = int.Parse(parts[5]);
-            inherited = int.Parse(parts[6]) == 0;
-            kiai = int.Parse(parts[7]) == 1;
+            offset = float.Parse(parts[0], CultureInfo.InvariantCulture);
+            msPerBeat = float.Parse(parts[1], CultureInfo.InvariantCulture);
+            meter = int.Parse(parts[2], CultureInfo.InvariantCulture);
+            sampleSet = int.Parse(parts[3], CultureInfo.InvariantCulture);
+            sampleType = int.Parse(parts[4], CultureInfo.InvariantCulture);
+            volume = int.Parse(parts[5], CultureInfo.InvariantCulture);
+            inherited = int.Parse(parts[6], CultureInfo.InvariantCulture) == 0;
+            kiai = int.Parse(parts[7], CultureInfo.InvariantCulture) == 1;
         }
 
         public float ScrollSpeed()

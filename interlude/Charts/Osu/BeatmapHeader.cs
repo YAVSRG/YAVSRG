@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Globalization;
 
 namespace YAVSRG.Charts.Osu
 {
@@ -13,7 +14,7 @@ namespace YAVSRG.Charts.Osu
 
         public float GetNumber(string key) //parses and retrieves a number
         {
-            return float.Parse(data[key]);
+            return float.Parse(data[key], CultureInfo.InvariantCulture);
         }
 
         public string GetValue(string key) //retrieves a piece of text
@@ -46,12 +47,19 @@ namespace YAVSRG.Charts.Osu
             while (true)
             {
                 l = fs.ReadLine();
-                if (l == "") //headers are separated by blank lines so this is how we know we got to the end
+                if (l.Trim() == "") //headers are separated by blank lines so this is how we know we got to the end
                 {
                     return;
                 }
                 parts = l.Split(new char[] { ':' }, 2);
-                data.Add(parts[0], parts[1].Trim());
+                try
+                {
+                    data.Add(parts[0], parts.Length > 1 ? parts[1].Trim() : "");
+                }
+                catch
+                {
+                    Utilities.Logging.Log("Malformed .osu header? " + l, "", Utilities.Logging.LogType.Error);
+                }
             }
         }
 

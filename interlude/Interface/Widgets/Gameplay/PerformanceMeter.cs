@@ -13,10 +13,10 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         int lasti;
         double nps;
 
-        public PerformanceMeter(YAVSRG.Gameplay.ScoreTracker scoreTracker): base(scoreTracker)
+        public PerformanceMeter(YAVSRG.Gameplay.ScoreTracker scoreTracker): base(scoreTracker, new Options.WidgetPosition() { Enable = true })
         {
             scoreTracker.OnHit += HandleHit;
-            lasti = scoreTracker.c.Notes.Count;
+            lasti = scoreTracker.Chart.Notes.Count;
         }
 
         void HandleHit(int column, int judge, float delta)
@@ -37,18 +37,18 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             base.Update(bounds);
             float now = (float)Game.Audio.Now();
             value *= 0.995f;
-            while (i < lasti && scoreTracker.c.Notes.Points[i].Offset <= now)
+            while (i < lasti && scoreTracker.Chart.Notes.Points[i].Offset <= now)
             {
-                for (byte k = 0; k < scoreTracker.c.Notes.Points[i].Count; k++)
+                for (byte k = 0; k < scoreTracker.Chart.Notes.Points[i].Count; k++)
                 {
                     value *= func(Game.Gameplay.ChartDifficulty.PhysicalData[i] / value);
                 }
                 i++;
             }
             nps = 0;
-            for (int index = scoreTracker.c.Notes.GetNextIndex(now - 100); index < scoreTracker.c.Notes.Count && scoreTracker.c.Notes.Points[index].Offset < now + 100; index++)
+            for (int index = scoreTracker.Chart.Notes.GetNextIndex(now - 100); index < scoreTracker.Chart.Notes.Count && scoreTracker.Chart.Notes.Points[index].Offset < now + 100; index++)
             {
-                nps += scoreTracker.c.Notes.Points[index].Count * (1 - Math.Pow((scoreTracker.c.Notes.Points[index].Offset - now) / 100f, 2));
+                nps += scoreTracker.Chart.Notes.Points[index].Count * (1 - Math.Pow((scoreTracker.Chart.Notes.Points[index].Offset - now) / 100f, 2));
             }
         }
 

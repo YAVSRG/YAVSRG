@@ -25,7 +25,7 @@ namespace YAVSRG.Utilities
 
         public static void JoinRequest(object sender, DiscordRPC.Message.JoinRequestMessage e)
         {
-            Logging.Log("Request to join from " + e.User.Username + "#" + e.User.Discriminator);
+            Logging.Log("Request to join from " + e.User.Username + "#" + e.User.Discriminator, "");
         }
 
         public static void Shutdown()
@@ -50,7 +50,7 @@ namespace YAVSRG.Utilities
                     },
                     Party = AcceptJoin ? new Party()
                     {
-                        ID = "Interlude Lobby",
+                        ID = "InterludeLobby",
                         Max = 16,
                         Size = 1,
                     } : null,
@@ -62,7 +62,7 @@ namespace YAVSRG.Utilities
             }
             catch (Exception e)
             {
-                Logging.Log("Couln't update rich prescence: " + e.ToString(), Logging.LogType.Warning);
+                Logging.Log("Couln't update rich prescence", e.ToString(), Logging.LogType.Warning);
             }
         }
     }

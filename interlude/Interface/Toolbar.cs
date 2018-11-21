@@ -13,15 +13,21 @@ namespace YAVSRG.Interface
 {
     public class Toolbar : Widget
     {
-        AnimationSlider _Height;
-        WidgetState CursorMode = WidgetState.NORMAL;
+        AnimationSlider _Height, _NotifFade;
+        AnimationSeries _NotifAnimation;
+        string Notification = "";
+        AnimationColorMixer NotificationColor;
         public ChatBox Chat;
+        WidgetState CursorMode = WidgetState.NORMAL;
 
         public Toolbar()
         {
             AddChild(
                 new Button("buttonback", "Back", Back)
                 .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN));
+            AddChild(
+                new Button("buttoninfo", "Notifications", () => { Chat.Expand(); })
+                .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
                 new Button("buttonmusic", "Visualiser", () => { if (!(Game.Screens.Current is ScreenVisualiser) && !(Game.Screens.Current is ScreenScore) && Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); })
                 .PositionTopLeft(160, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN));
@@ -34,11 +40,19 @@ namespace YAVSRG.Interface
             AddChild(
                 new Button("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenLobby()); })
                 .PositionTopLeft(400, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(320, 80, AnchorType.MAX, AnchorType.MIN));
-            Chat = new ChatBox();
-            AddChild(new TaskDisplay());
-            AddChild(Chat);
-            _Height = new AnimationSlider(-10);
-            Animation.Add(_Height);
+            AddChild(Chat = new ChatBox());
+            Animation.Add(_Height = new AnimationSlider(-5));
+            Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
+            Utilities.Logging.OnLog += (s, d, t) => { if (t != Utilities.Logging.LogType.Debug) AddNotification(s, Color.White); };
+        }
+
+        public void AddNotification(string notif, Color color)
+        {
+            Notification = notif;
+            _NotifAnimation.Clear();
+            _NotifFade.Target = 1;
+            _NotifAnimation.Add(new AnimationCounter(240, false));
+            _NotifAnimation.Add(new AnimationAction(() => { _NotifFade.Target = 0; }));
         }
 
         private void Back()
@@ -55,7 +69,7 @@ namespace YAVSRG.Interface
 
         private void Collapse()
         {
-            _Height.Target = 0;
+            _Height.Target = -5;
             Chat.Collapse();
         }
 
@@ -94,9 +108,6 @@ namespace YAVSRG.Interface
                 Game.Screens.DrawChartBackground(bounds.SliceTop(_Height), Game.Screens.DarkColor, 2f);
                 Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Game.Screens.DarkColor, 2f);
 
-                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 5), 30f, Game.Screens.BaseColor);
-                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 5, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
-                
                 float s = ScreenWidth / 24f;
                 for (int i = 0; i < 48; i++) //draws the waveform
                 {
@@ -105,7 +116,7 @@ namespace YAVSRG.Interface
                     level *= _Height * 0.005f;
                     level = Math.Min(_Height, level);
                     SpriteBatch.DrawRect(new Rect(-ScreenWidth + i * s + 2, -ScreenHeight, -ScreenWidth + (i + 1) * s - 2, -ScreenHeight + level), Color.FromArgb((int)level, Game.Screens.HighlightColor));
-                    
+
                     SpriteBatch.DrawRect(new Rect(ScreenWidth - i * s - 2, ScreenHeight - level, ScreenWidth - (i + 1) * s + 2, ScreenHeight), Color.FromArgb((int)level, Game.Screens.HighlightColor));
                 }
 
@@ -117,7 +128,13 @@ namespace YAVSRG.Interface
                 SpriteBatch.Font1.DrawJustifiedText(Game.Version, 25f, ScreenWidth, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, ScreenWidth, ScreenHeight - _Height + 45, Game.Options.Theme.MenuFont);
 
-                base.Draw(bounds.ExpandY(80-_Height));
+                Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Screens.DarkColor), 2f);
+                SpriteBatch.Font1.DrawCentredTextToFill(Notification, bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Options.Theme.MenuFont), true);
+
+                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 5), 30f, Game.Screens.BaseColor);
+                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 5, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
+
+                base.Draw(bounds.ExpandY(80 - _Height));
             }
 
             if (CursorMode > WidgetState.DISABLED) SpriteBatch.Draw("cursor", new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor);
@@ -129,7 +146,7 @@ namespace YAVSRG.Interface
             {
                 if (Input.KeyTap(Game.Options.General.Binds.Exit))
                 {
-                    Game.Screens.PopScreen();
+                    Back();
                 }
                 if (Input.KeyTap(OpenTK.Input.Key.T) && Input.KeyPress(OpenTK.Input.Key.ControlLeft))
                 {

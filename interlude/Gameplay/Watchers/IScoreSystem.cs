@@ -85,7 +85,7 @@ namespace YAVSRG.Gameplay.Watchers
             return Utils.RoundNumber(Accuracy()) + "%";
         }
 
-        public bool EndOfChart(int snaps)
+        public bool ReachedEnd(int snaps)
         {
             return Cursor == snaps;
         }

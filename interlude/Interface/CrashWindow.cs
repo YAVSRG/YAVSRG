@@ -15,7 +15,8 @@ namespace YAVSRG.Interface
         public CrashWindow(string error)
         {
             InitializeComponent();
-            label1.Text = "[22:48] Xonica: why do you complain about other rhythm games when yours just crashes\n\n"+error; //set display to the error message
+            Text = "Interlude has crashed: " + Utilities.Splashes.CrashSplash();
+            label1.Text = Utilities.Splashes.CrashSplash()+"\n\n"+error; //set display to the error message
         }
 
         private void button1_Click(object sender, EventArgs e)

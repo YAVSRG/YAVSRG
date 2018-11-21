@@ -19,7 +19,7 @@ namespace YAVSRG.Audio
             ID = Bass.CreateStream(file, 0, 0, BassFlags.Decode); //loads file
             if (ID == 0) //this means it didn't work
             {
-                Utilities.Logging.Log("Couldn't load audio track from "+file+": "+Bass.LastError.ToString(), Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Couldn't load audio track from "+file, Bass.LastError.ToString(), Utilities.Logging.LogType.Error);
             }
             else
             {

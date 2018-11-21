@@ -12,6 +12,7 @@ namespace YAVSRG.Utilities
     {
         static readonly string[] menu = LoadSplashes("YAVSRG.Resources.MenuSplashes.txt");
         static readonly string[] loading = LoadSplashes("YAVSRG.Resources.LoadingSplashes.txt");
+        static readonly string[] crash = LoadSplashes("YAVSRG.Resources.CrashSplashes.txt");
 
         static Random random = new Random();
 
@@ -37,6 +38,11 @@ namespace YAVSRG.Utilities
         public static string LoadingSplash()
         {
             return RandomSplash(loading);
+        }
+
+        public static string CrashSplash()
+        {
+            return RandomSplash(crash);
         }
     }
 }

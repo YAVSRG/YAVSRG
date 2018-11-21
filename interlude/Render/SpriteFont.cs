@@ -184,7 +184,7 @@ namespace YAVSRG
             var bmp = new Bitmap((int)size.Width, (int)size.Height);
             using (var g = Graphics.FromImage(bmp))
             {
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 g.DrawString(c.ToString(), Font, Brushes.White, 0, 0);
             }
             FontLookup.Add(c, Content.UploadTexture(bmp, 1, 1, true));

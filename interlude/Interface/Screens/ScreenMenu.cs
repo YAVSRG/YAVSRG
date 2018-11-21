@@ -12,20 +12,27 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenMenu : Screen
     {
-        string splash = Utilities.Splashes.MenuSplash();
-        AnimationSlider slide;
-        AnimationCounter scroll;
+        string splash;
+        string splashSub;
+        AnimationSlider splashAnim, splashSubAnim;
+        //AnimationCounter scroll;
         Widget play, options, quit;
 
         public ScreenMenu()
         {
             AddChild(
-                play = new BannerButton("Play", () => { Game.Screens.AddScreen(new ScreenLevelSelect()); })
+                play = new BannerButton("Play", () =>
+                {
+                    Game.Screens.AddScreen(new ScreenLevelSelect());
+                })
                 .PositionTopLeft(-100, -200, AnchorType.MIN, AnchorType.CENTER)
                 .PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(
-                options = new BannerButton("Options", () => { Game.Screens.AddScreen(new ScreenOptions()); })
+                options = new BannerButton("Options", () =>
+                {
+                    Game.Screens.AddScreen(new ScreenOptions());
+                })
                 .PositionTopLeft(-100, -50, AnchorType.MIN, AnchorType.CENTER)
                 .PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER)
                 );
@@ -38,30 +45,40 @@ namespace YAVSRG.Interface.Screens
                 .PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER)
                 );
             AddChild(new NewsBox());
-            slide = new AnimationSlider(0);
-            slide.Target = 1;
-            Animation.Add(slide);
-            Animation.Add(scroll = new AnimationCounter(10000,true));
+            Animation.Add(splashAnim = new AnimationSlider(0));
+            Animation.Add(splashSubAnim = new AnimationSlider(0));
+            //Animation.Add(scroll = new AnimationCounter(10000,true));
             Animation.Add(new Animation()); //this dummy animation ensures that ScreenManager handles the other animations
         }
 
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            splash = Utilities.Splashes.MenuSplash();
+            var s = Utilities.Splashes.MenuSplash().Split('¬');
+            splash = s[0];
+            splashSub = s.Length > 1 ? s[1] : "";
             Utilities.Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
             Game.Screens.BackgroundDim.Target = 1;
             play.PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER);
             options.PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER);
             quit.PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER);
+            OnResize();
+            //this won't run in OnResize since we're transitioning to this screen
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
+        }
+
+        public override void OnResize()
+        {
+            base.OnResize();
             var a = new AnimationSeries(false);
-            a.Add(new AnimationCounter(10,false));
-            a.Add(new AnimationAction(() => {
+            a.Add(new AnimationCounter(10, false));
+            a.Add(new AnimationAction(() =>
+            {
                 play.BottomRight.Target(-ScreenUtils.ScreenWidth + 1200, -100);
             }));
             a.Add(new AnimationCounter(10, false));
-            a.Add(new AnimationAction(() => {
+            a.Add(new AnimationAction(() =>
+            {
                 options.BottomRight.Target(-ScreenUtils.ScreenWidth + 1130, 50);
             }));
             a.Add(new AnimationCounter(10, false));
@@ -70,10 +87,13 @@ namespace YAVSRG.Interface.Screens
                 quit.BottomRight.Target(-ScreenUtils.ScreenWidth + 1060, 200);
             }));
             a.Add(new AnimationCounter(20, false));
-            a.Add(new AnimationAction(() => {
-                slide.Target = 1;
+            a.Add(new AnimationAction(() =>
+            {
+                splashAnim.Target = 1;
             }));
             Animation.Add(a);
+            if (Game.Screens.Current is ScreenMenu) //prevents logo moving mid transition
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
         }
 
         public override void OnExit(Screen next)
@@ -84,17 +104,26 @@ namespace YAVSRG.Interface.Screens
                 Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth - 400, -200, -ScreenUtils.ScreenWidth, 200));
             }
             Game.Screens.BackgroundDim.Target = 0.3f;
-            slide.Target = 0;
+            splashAnim.Target = 0;
+        }
+
+        public override void Update(Rect bounds)
+        {
+            base.Update(bounds);
+            bounds = GetBounds(bounds);
+            splashSubAnim.Target = ScreenUtils.MouseOver(bounds.ExpandX(-400).SliceTop(100)) ? 1 : 0;
         }
 
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
-            float w = SpriteBatch.Font1.MeasureText(splash, 30f) / 2 + 10;
-            SpriteBatch.DrawRect(
-                new Rect(bounds.CenterX - w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 30, bounds.CenterX + w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 100),
-                Color.FromArgb(100,Game.Screens.DarkColor));
-            SpriteBatch.Font1.DrawCentredText(splash, 30f, bounds.CenterX + (ScreenUtils.ScreenWidth) * (slide - 1), bounds.Top + 40, Color.FromArgb((int)(slide * 255), Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
+            bounds = GetBounds(bounds);
+            //float w = SpriteBatch.Font1.MeasureText(splash, 30f) / 2 + 10;
+            //SpriteBatch.DrawRect(
+            //    new Rect(bounds.CenterX - w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 30, bounds.CenterX + w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 100),
+            //    Color.FromArgb(100,Game.Screens.DarkColor));
+            SpriteBatch.Font1.DrawCentredText(splashSub, 20f, bounds.CenterX, bounds.Top + 50 + 40 * splashSubAnim, Color.FromArgb((int)(splashSubAnim * splashAnim * 255), Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
+            SpriteBatch.Font1.DrawCentredText(splash, 40f, bounds.CenterX, bounds.Top - 60 + 80 * splashAnim, Color.FromArgb((int)(splashAnim * 255), Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
         }
     }
 }

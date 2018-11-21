@@ -46,48 +46,39 @@ namespace YAVSRG.Gameplay
 
         public event Action<int, int, float> OnHit; //COLUMM, AWARDED JUDGE, MS DELTA
 
-        public ChartWithModifiers c;
+        public ChartWithModifiers Chart;
         public IScoreSystem Scoring;
         public HitData[] Hitdata;
+        public List<IGameplayWatcher> Watchers;
         public AnimationColorFade WidgetColor;
-        public int maxcombo; //max possible combo
+        public int MaxCombo = 0; //max possible combo
 
         public ScoreTracker(ChartWithModifiers c)
         {
-            this.c = c;
-            //some temp hack until i move this inside ScoreSystem
-            maxcombo = 0;
-            foreach (Snap s in c.Notes.Points)
-            {
-                maxcombo += s.Count; //merge this down into other for loop?
-            }
+            WidgetColor = new AnimationColorFade(System.Drawing.Color.FromArgb(0, Game.Options.Theme.MenuFont), Game.Options.Theme.MenuFont);
+            Watchers = new List<IGameplayWatcher>();
+            Chart = c;
             Scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
+            Watchers.Add(Scoring);
 
-            Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); };
+            Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); }; //feed current score system into gameplay ui handlers for hits
 
             int count = c.Notes.Count;
             Hitdata = new HitData[count];
             for (int i = 0; i < count; i++)
             {
                 Hitdata[i] = new HitData(c.Notes.Points[i], c.Keys);
+                MaxCombo += c.Notes.Points[i].Count;
             }
-            WidgetColor = new AnimationColorFade(System.Drawing.Color.FromArgb(0, Game.Options.Theme.MenuFont), Game.Options.Theme.MenuFont);
             Game.Gameplay.ApplyModsToHitData(c, ref Hitdata);
-        }
-
-        public int Combo()
-        {
-            return Scoring.Combo;
-        }
-
-        public float Accuracy()
-        {
-            return Scoring.Accuracy();
         }
 
         public void Update(float time)
         {
-            Scoring.Update(time,Hitdata);
+            foreach (IGameplayWatcher w in Watchers)
+            {
+                w.Update(time, Hitdata);
+            }
             WidgetColor.Update();
         }
 
@@ -96,12 +87,15 @@ namespace YAVSRG.Gameplay
             if (Hitdata[i].hit[k] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
             Hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)
             Hitdata[i].delta[k] = delta;
-            Scoring.HandleHit(k, i, Hitdata);
+            foreach (IGameplayWatcher w in Watchers)
+            {
+                w.HandleHit(k, i, Hitdata);
+            }
         }
 
-        public bool EndOfChart() //is end of chart?
+        public bool ReachedEnd() //is end of chart?
         {
-            return Scoring.EndOfChart(Hitdata.Length);
+            return Scoring.ReachedEnd(Hitdata.Length);
         }
 
         public static string HitDataToString(HitData[] data)

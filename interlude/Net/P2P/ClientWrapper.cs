@@ -29,7 +29,7 @@ namespace YAVSRG.Net.P2P
             }
             else if ((lastPingSent - lastPingReceived).TotalMilliseconds > 15000)
             {
-                Utilities.Logging.Log("Client with id " + id.ToString() + " has not responded to ping request in time.");
+                Utilities.Logging.Log("Client with id " + id.ToString() + " didn't respond to ping request", "");
                 Disconnect();
             }
             base.Update(id);
@@ -44,7 +44,7 @@ namespace YAVSRG.Net.P2P
         {
             if (data.protocolversion != Protocol.Protocol.PROTOCOLVERSION)
             {
-                Utilities.Logging.Log("Client has a version mismatch.");
+                Utilities.Logging.Log("Client has a version mismatch", "");
                 Disconnect();
             }
             else

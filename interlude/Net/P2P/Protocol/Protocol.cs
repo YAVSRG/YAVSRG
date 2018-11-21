@@ -29,7 +29,7 @@ namespace YAVSRG.Net.P2P.Protocol
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log("Error parsing packet for id " + id.ToString() + ": " + e.ToString() + "\n" + split[0] + "\n" + split[1], Utilities.Logging.LogType.Error);
+                Utilities.Logging.Log("Error parsing packet for id " + id.ToString(), e.ToString() + "\n" + split[0] + "\n" + split[1], Utilities.Logging.LogType.Error);
             }
         }
 

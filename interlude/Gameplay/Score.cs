@@ -88,19 +88,33 @@ namespace YAVSRG.Gameplay
             get { return _chart.Data; }
         }
 
+        public ScoreTracker.HitData[] HitData
+        {
+            get { return _hitdata; }
+        }
+
         public string Mods
         {
             get { if (_mods == null) { _mods = Game.Gameplay.GetModString(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.playstyle); } return _mods; }
         }
 
+        public IScoreSystem ScoreSystem
+        {
+            get
+            {
+                if (_scoring == null) { _scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(HitData); }
+                return _scoring;
+            }
+        }
+
         public string Accuracy
         {
-            get { if (_scoring == null) { _scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(_hitdata); } return _scoring.FormatAcc(); }
+            get { return ScoreSystem.FormatAcc(); }
         }
 
         public int BestCombo
         {
-            get { if (_scoring == null) { _scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(_hitdata); } return _scoring.BestCombo; }
+            get { return ScoreSystem.BestCombo; }
         }
 
         public Charts.DifficultyRating.RatingReport RatingData
@@ -110,7 +124,7 @@ namespace YAVSRG.Gameplay
 
         public float PhysicalPerformance
         {
-            get { if (_physical == null) { _physical = Charts.DifficultyRating.PlayerRating.GetRating(RatingData, _hitdata); } return (float)_physical; }
+            get { if (_physical == null) { _physical = Charts.DifficultyRating.PlayerRating.GetRating(RatingData, HitData); } return (float)_physical; }
         }
 
         public float TechnicalPerformance

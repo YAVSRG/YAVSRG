@@ -18,9 +18,9 @@ namespace YAVSRG.Interface
         {
             ScreenWidth = Width / 2;
             ScreenHeight = Height / 2;
-            if (ScreenWidth < 800 || ScreenHeight < 450)
+            if (ScreenWidth < 960 || ScreenHeight < 500)
             {
-                float r = Math.Max(800f / ScreenWidth, 450f / ScreenHeight);
+                float r = Math.Max(960f / ScreenWidth, 500f / ScreenHeight);
                 ScreenWidth = (int)(ScreenWidth * r);
                 ScreenHeight = (int)(ScreenHeight * r);
             }

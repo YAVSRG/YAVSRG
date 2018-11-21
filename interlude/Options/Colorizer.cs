@@ -70,7 +70,7 @@ namespace YAVSRG.Options
                 v = p.MSPerBeat;
                 x = (s.Offset - p.Offset);
 
-                color = 7;
+                color = DDRValues.Length;
                 for (int i = 0; i < DDRValues.Length; i++)
                 {
                     if (RoughlyDivisibleBy(x, v / DDRValues[i]))

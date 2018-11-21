@@ -17,7 +17,7 @@ namespace YAVSRG
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.6";
+        public static readonly string Version = "Interlude v0.3.6-dev_build";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -101,21 +101,21 @@ namespace YAVSRG
         public void ApplyWindowSettings(Options.General settings) //apply video settings
         {
             TargetRenderFrequency = settings.FrameLimiter; //set frame limit
-            if (settings.WindowMode == YAVSRG.Options.General.WindowType.Borderless)
-            { //settings for borderless
-                WindowState = WindowState.Maximized;
-                WindowBorder = WindowBorder.Hidden;
+            if (settings.WindowMode == YAVSRG.Options.General.WindowType.Window)
+            { //settings for windows
+                WindowState = WindowState.Normal;
+                WindowBorder = WindowBorder.Resizable;
+                Size = new Size(YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item2);
+                Location = new Point((DisplayDevice.Default.Width - Size.Width) / 2, (DisplayDevice.Default.Height - Size.Height) / 2);
             }
             else if (settings.WindowMode == YAVSRG.Options.General.WindowType.Fullscreen)
             {//settings for fullscreen
                 WindowState = WindowState.Fullscreen;
             }
             else
-            {//settings for windowed
-                WindowState = WindowState.Normal;
-                WindowBorder = WindowBorder.Resizable;
-                Size = new Size(YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item2);
-                Location = new Point((DisplayDevice.Default.Width-Size.Width)/2, (DisplayDevice.Default.Height - Size.Height) / 2);
+            {//settings for borderless
+                WindowBorder = WindowBorder.Hidden;
+                WindowState = WindowState.Maximized;
             }
             Audio.SetVolume(settings.AudioVolume);
         }
@@ -149,7 +149,6 @@ namespace YAVSRG
         {
             base.OnRenderFrame(e);
             if (!Visible) return;
-            GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
             SpriteBatch.Begin(ScreenUtils.ScreenWidth*2, ScreenUtils.ScreenHeight*2); //start my render code
             screens.Draw();
             SpriteBatch.End();
