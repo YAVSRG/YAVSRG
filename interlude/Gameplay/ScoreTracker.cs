@@ -16,9 +16,8 @@ namespace YAVSRG.Gameplay
             public float[] delta;
             public byte[] hit;
 
-            public HitData(GameplaySnap s, int keycount)
+            public HitData(GameplaySnap s, int keycount) : base(s.Offset)
             {
-                Offset = s.Offset;
                 hit = new byte[keycount];
                 foreach (int k in s.Combine().GetColumns())
                 {

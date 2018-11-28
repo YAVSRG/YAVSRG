@@ -130,31 +130,31 @@ namespace YAVSRG.Charts.YAVSRG
                 using (var fs = new FileStream(path, FileMode.Open))
                 {
                     var file = new BinaryReader(fs);
-                    keys = file.ReadByte();
+                    keys = file.ReadByte(); //first byte is keycount
                     header = Newtonsoft.Json.JsonConvert.DeserializeObject<ChartHeader>(file.ReadString()); //it's length prefixed so it knows where to stop
-                    header.File = Path.GetFileName(path); //set for use later (not loaded from the header in the file)
+                    header.File = Path.GetFileName(path); //set for use in memory later (not saved/loaded from the header in the file)
 
                     notes = new List<Snap>();
                     timing = new List<BPMPoint>();
-                    int c = file.ReadInt32();
+                    int c = file.ReadInt32(); //next is 4 bytes representing number of snaps to read
                     for (int i = 0; i < c; i++)
                     {
-                        notes.Add(new Snap(file.ReadSingle()).ReadFromFile(file));
+                        notes.Add(new Snap(file.ReadSingle()).ReadFromFile(file)); //read snap from bytes
                     }
                     chart = new Chart(notes, header, keys);
-                    c = file.ReadInt32();
+                    c = file.ReadInt32(); //next is 4 bytes representing number of BPM points to read
                     for (int i = 0; i < c; i++)
                     {
-                        timing.Add(new BPMPoint(file.ReadSingle(), file.ReadInt32(), file.ReadSingle()));
+                        timing.Add(new BPMPoint(file.ReadSingle(), file.ReadInt32(), file.ReadSingle())); //read bpm point data
                     }
                     chart.Timing.SetTimingData(timing);
-                    for (int lane = -1; lane < keys; lane++)
+                    for (int lane = -1; lane < keys; lane++) //there are keys+1 SV channels to read
                     {
                         sv = new List<SVPoint>();
-                        c = file.ReadInt32();
+                        c = file.ReadInt32(); //read 4 bytes for number of points
                         for (int i = 0; i < c; i++)
                         {
-                            sv.Add(new SVPoint(file.ReadSingle(), file.ReadSingle()));
+                            sv.Add(new SVPoint(file.ReadSingle(), file.ReadSingle())); //read that number of points into the channel
                         }
                         chart.Timing.SetSVData(lane, sv);
                     }
@@ -169,6 +169,7 @@ namespace YAVSRG.Charts.YAVSRG
             }
         }
         
+        //easy to generate/use "identifier" for where to find this chart or data for it
         public string GetFileIdentifier()
         {
             return Path.Combine(Data.SourcePath, Data.File);

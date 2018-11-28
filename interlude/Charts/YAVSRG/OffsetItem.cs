@@ -10,6 +10,11 @@ namespace YAVSRG.Charts.YAVSRG
     {
         public float Offset;
 
+        public OffsetItem(float offset)
+        {
+            Offset = offset;
+        }
+
         public virtual OffsetItem Interpolate(float time) { return null; }
     }
 }

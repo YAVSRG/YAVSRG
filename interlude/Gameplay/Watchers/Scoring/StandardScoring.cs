@@ -8,7 +8,7 @@ namespace YAVSRG.Gameplay.Watchers.Scoring
 {
     class StandardScoring : CCScoring
     {
-        public StandardScoring() : base(null, new int[] { 10, 9, 5, 1, -25, 0 }, 10)
+        public StandardScoring() : base(null, new int[] { 10, 9, 5, 1, -5, 0 }, 10)
         {
             float hw = 45f;
             JudgementWindows = new float[] {

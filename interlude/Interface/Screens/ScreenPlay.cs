@@ -184,7 +184,7 @@ namespace YAVSRG.Interface.Screens
                 Snap s = Chart.Notes.Points[i];
                 needsToHold &= ~(s.ends.value + s.holds.value); //if there are any starts of hold or releases within range, don't worry about finger independence penalty
                 BinarySwitcher b = release ? new BinarySwitcher(s.ends.value + s.holds.value) : new BinarySwitcher(s.taps.value + s.holds.value);
-                if (b.GetColumn(k)) //if there's a note here
+                if (b.GetColumn(k) && (scoreTracker.Hitdata[i].hit[k] != 2 || scoreTracker.Hitdata[i].delta[k] < -missWindow/2)) //todo: finalise
                 {
                     d = (now - s.Offset);
                     if (release)

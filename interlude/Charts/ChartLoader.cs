@@ -412,9 +412,9 @@ namespace YAVSRG.Charts
 
         #region imports
 
-        public static UserTask DownloadAndImportPack(string Url, string PackTitle)
+        public static UserTask DownloadAndImportPack(string Url, string PackTitle, string FileExtension)
         {
-            string DownloadPath = Path.Combine(Game.WorkingDirectory, "Imports", PackTitle + ".zip");
+            string DownloadPath = Path.Combine(Game.WorkingDirectory, "Imports", PackTitle + FileExtension);
             return (Output) =>
             {
                 Output("Downloading from " + Url + " ...");

@@ -141,6 +141,7 @@
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
     <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarWidget.cs" />
+    <Compile Include="Net\Web\BloodcatChartData.cs" />
     <Compile Include="Render\DrawableFBO.cs" />
     <Compile Include="Utilities\Content.cs" />
     <Compile Include="Editor\ChartInEditor.cs" />
@@ -292,6 +293,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Logging.cs" />
+    <Compile Include="Utilities\ObjectPool.cs" />
     <Compile Include="Utilities\PipeHandler.cs" />
     <Compile Include="Render\Shader.cs" />
     <Compile Include="Render\Sprite.cs" />

@@ -9,20 +9,31 @@ namespace YAVSRG.Interface.Widgets
 {
     class DownloadCard : Widget
     {
-        public EtternaPackData.EtternaPack item;
+        public string name;
         string size;
         string difficulty;
 
         public DownloadCard(EtternaPackData.EtternaPack data)
         {
-            item = data;
-            difficulty = Utils.RoundNumber(item.attributes.average / 2.5) + "*";
-            size = Utils.RoundNumber(item.attributes.size / 1000000) + "MB";
-            if (item.attributes.download != "")
+            name = data.attributes.name;
+            difficulty = Utils.RoundNumber(data.attributes.average / 2.5) + "*";
+            size = Utils.RoundNumber(data.attributes.size / 1000000) + "MB";
+            if (data.attributes.download != "")
             {
-                AddChild(new SimpleButton("Download", Download, () => { return false; }, 20f)
+                AddChild(new SimpleButton("Download",
+                    () => Game.Tasks.AddTask(Charts.ChartLoader.DownloadAndImportPack(data.attributes.download, data.attributes.name, ".zip"), (b) => { }, "Downloading pack: " + data.attributes.name, true), () => false, 20f)
                     .PositionTopLeft(100, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 0, AnchorType.MAX, AnchorType.MAX));
             }
+        }
+
+        public DownloadCard(BloodcatChartData data)
+        {
+            name = data.title;
+            difficulty = data.creator;
+            size = "";
+            AddChild(new SimpleButton("Download",
+                () => Game.Tasks.AddTask(Charts.ChartLoader.DownloadAndImportPack("https://osu.ppy.sh/beatmapsets/"+data.id.ToString()+"/download?noVideo=1", data.id.ToString(), ".osz"), (b) => { }, "Downloading beatmap: " + data.title, true), () => false, 20f)
+                .PositionTopLeft(100, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 0, AnchorType.MAX, AnchorType.MAX));
         }
 
         public override void Draw(Rect bounds)
@@ -32,19 +43,10 @@ namespace YAVSRG.Interface.Widgets
             float w = bounds.Width - 100;
             SpriteBatch.DrawRect(bounds, System.Drawing.Color.FromArgb(127, 0, 0, 0));
             //todo: move to textbox widgets
-            SpriteBatch.Font1.DrawTextToFill(item.attributes.name, new Rect(bounds.Left, bounds.Top, bounds.Left + w * 0.7f, bounds.Bottom), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawTextToFill(name, new Rect(bounds.Left, bounds.Top, bounds.Left + w * 0.7f, bounds.Bottom), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedTextToFill(size, new Rect(bounds.Left + w * 0.75f, bounds.Top, bounds.Left + w * 0.9f, bounds.Bottom), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedTextToFill(difficulty, new Rect(bounds.Left + w * 0.9f, bounds.Top, bounds.Left + w, bounds.Bottom), Game.Options.Theme.MenuFont);
-            if (item.attributes.download == "")
-            {
-                SpriteBatch.Font1.DrawCentredTextToFill("No DL Link", new Rect(bounds.Right - 100, bounds.Top, bounds.Right, bounds.Bottom), Game.Options.Theme.MenuFont);
-            }
             ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
-        }
-
-        private void Download()
-        {
-            Game.Tasks.AddTask(Charts.ChartLoader.DownloadAndImportPack(item.attributes.download, item.attributes.name), (b) => { }, "Downloading pack: " + item.attributes.name, true);
         }
     }
 }

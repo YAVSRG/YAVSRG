@@ -64,6 +64,7 @@ namespace YAVSRG.Interface.Screens
         {
             int alpha = (int)(hideUI * 255);
             base.Draw(bounds);
+            
             float l = 1f + Game.Audio.Level - (0.05f) * Utils.GetBeat(2);
             float r1, r2;
             double a1, a2;
@@ -92,6 +93,16 @@ namespace YAVSRG.Interface.Screens
                     a1 += Math.PI / 3;
                 }
             }
+            /*
+            float spacing = ScreenUtils.ScreenWidth / 256f;
+            for (int i = 0; i < 256; i++) //draws the waveform
+            {
+                float level = Game.Audio.WaveForm[i];
+                level += 10f;
+                float s = Math.Min(level * 0.1f, spacing - 5);
+                SpriteBatch.Draw("", color: Color.FromArgb(100, Game.Screens.HighlightColor), bounds: new Rect(bounds.Left + spacing * (i * 2 - 1) + s, 5 - spacing + level, bounds.Left + spacing * (i * 2 + 1) - s, spacing - 5 + level));
+                SpriteBatch.Draw("", color: Color.FromArgb(100, Game.Screens.HighlightColor), bounds: new Rect(bounds.Left + spacing * (i * 2 - 1) + s, 5 - spacing - level, bounds.Left + spacing * (i * 2 + 1) - s, spacing - 5 - level));
+            }*/
 
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Bottom - 30, bounds.Right, bounds.Bottom), Game.Screens.DarkColor);
             SpriteBatch.DrawRect(new Rect(bounds.Left + 5, bounds.Bottom - 25, bounds.Left + 5 + (bounds.Right - 10 - bounds.Left) * Game.Audio.NowPercentage(), bounds.Bottom - 5),  Game.Screens.BaseColor);

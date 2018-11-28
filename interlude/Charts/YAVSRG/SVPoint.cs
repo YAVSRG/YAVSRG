@@ -10,9 +10,8 @@ namespace YAVSRG.Charts.YAVSRG
     {
         public float ScrollSpeed;
 
-        public SVPoint(float offset, float sv)
+        public SVPoint(float offset, float sv) : base(offset)
         {
-            Offset = offset;
             ScrollSpeed = sv;
         }
 

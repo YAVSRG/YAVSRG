@@ -11,9 +11,8 @@ namespace YAVSRG.Charts.YAVSRG
         public int Meter;
         public float MSPerBeat;
          
-        public BPMPoint(float offset, int meter, float bpm)
+        public BPMPoint(float offset, int meter, float bpm) : base(offset)
         {
-            Offset = offset;
             Meter = meter;
             MSPerBeat = bpm;
         }

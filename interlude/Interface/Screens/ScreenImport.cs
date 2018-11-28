@@ -37,6 +37,7 @@ namespace YAVSRG.Interface.Screens
             () => { return false; }, 40f)
             .PositionTopLeft(0, 100, AnchorType.CENTER, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
             Net.Web.WebUtils.DownloadJsonObject<Net.Web.EtternaPackData>("https://api.etternaonline.com/v2/packs/", (d) => { BottomRight.Target(620, 0); AddChild(new Widgets.DownloadManager(d)); });
+            //Net.Web.WebUtils.DownloadJsonObject<List<Net.Web.BloodcatChartData>>("https://bloodcat.com/osu/?m=3&mod=json&q=put_query_here", (d) => { BottomRight.Target(620, 0); AddChild(new Widgets.DownloadManager(d)); });
         }
 
         public override void OnEnter(Screen prev)

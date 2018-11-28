@@ -10,13 +10,13 @@ using System.Globalization;
 
 namespace YAVSRG.Charts.Stepmania
 {
+    //sm file format sux and if stuff breaks it's not really my fault
     public class StepFile
     {
-        //i'm not gonna comment this for a lil while (cause i'll clean it up), sorry
+        //stores an individual difficulty/chart for a song
         public class StepFileDifficulty
         {
             public List<Measure> measures;
-
             public string gamemode;
             public string name;
 
@@ -35,24 +35,27 @@ namespace YAVSRG.Charts.Stepmania
 
         public string filename;
         protected readonly string path;
-        public Dictionary<string, string> raw;
-        public List<StepFileDifficulty> diffs;
+        public Dictionary<string, string> Metadata;
+        public List<StepFileDifficulty> Difficulties;
 
         public StepFile(string filename, string path)
         {
             this.filename = filename;
             this.path = path;
-            raw = new Dictionary<string, string>();
-            diffs = new List<StepFileDifficulty>();
+            Metadata = new Dictionary<string, string>();
+            Difficulties = new List<StepFileDifficulty>();
+
             Load();
         }
 
+        //loads file from filepath
         private void Load()
         {
             var ts = new StreamReader(Path.Combine(path, filename));
+            //basically a simple parsing algorithm
             string[] l = {"", ""};
-            char c;
-            byte state = 2;
+            char c; //char we're looking at
+            byte state = 2; //what we're reading (key or value, etc)
             bool commentFlag = false;
 
             while (!ts.EndOfStream)
@@ -60,6 +63,8 @@ namespace YAVSRG.Charts.Stepmania
                 c = (char)ts.Read();
                 if (c == '/')
                 {
+                    //handle comments (covers most cases)
+                    //todo: more robust handling
                     if (commentFlag)
                     {
                         ts.ReadLine();
@@ -72,31 +77,37 @@ namespace YAVSRG.Charts.Stepmania
                 }
                 else
                 {
+                    //this is a key
                     if (c == '#')
                     {
                         state = 0;
                     }
+                    //start of a value after a key
                     else if (c == ':' && state == 0)
                     {
                         state = 1;
                     }
+                    //end of key:value pair
                     else if (c == ';')
                     {
+                        //if the key was "NOTES" it's a difficulty, store it as such
                         if (l[0] == "NOTES")
                         {
-                            diffs.Add(new StepFileDifficulty(l[1]));
+                            Difficulties.Add(new StepFileDifficulty(l[1]));
                         }
-                        else
+                        else //otherwise store in the metadata dictionary
                         {
-                            raw.Add(l[0], l[1]);
+                            Metadata.Add(l[0], l[1]);
                         }
-                        l = new[] { "", "" };
+                        l = new[] { "", "" }; //prepare to parse new key:value
                         state = 2;
                     }
+                    //if no special characters, keep reading the string into the right place
                     else if (state < 2)
                     {
                         l[state] += c;
                     }
+                    //forget about comments if there was just a / on its own
                     commentFlag = false;
                 }
             }
@@ -104,32 +115,40 @@ namespace YAVSRG.Charts.Stepmania
 
         public string GetTag(string id)
         {
-            return raw.ContainsKey(id) ? raw[id] : "This file has broken tags!!! >:(";
+            return Metadata.ContainsKey(id) ? Metadata[id] : "This file has broken tags!!! >:(";
+            //dumbass stepmania charters missing important metadata
         }
 
+        //tries to figure out who made the chart because NOONE FORMATS THIS CONSISTENTLY
         public string GetCreator()
         {
-            if (raw.ContainsKey("CREDIT"))
+            if (Metadata.ContainsKey("CREDIT")) //check if credit is set
             {
-                if (raw["CREDIT"] != "")
+                if (Metadata["CREDIT"] != "")
                 {
-                    return raw["CREDIT"];
+                    return Metadata["CREDIT"]; //if so use that
                 }
             }
+
+            //if not, regex the damn folder name in the hopes it's "Song name (Charter)" format which is quite common
+
             Regex r = new Regex(@"\(.*?\)"); //cheers to https://www.codeproject.com/Questions/296435/How-do-I-extract-a-string-of-text-that-lies-betwee
             string temp = Path.GetFileNameWithoutExtension(path);
             MatchCollection matches = r.Matches(temp);
             if (matches.Count > 0)
             {
                 temp = matches[matches.Count - 1].Value; //reuse of temp cause i'm lazy
-                return temp.Substring(1, temp.Length - 2);
+                return temp.Substring(1, temp.Length - 2); //cut off the brackets
             }
+            //if all that failed, give up
             return "-----";
         }
 
         public string GetBG() //sm files are dumb as fuck and sm basically looks around for the bg for you
         {
-            string bgfile = raw["BACKGROUND"] == "" ? raw["TITLE"] + "-bg.jpg" : raw["BACKGROUND"];
+            string bgfile = Metadata["BACKGROUND"] == "" ? Metadata["TITLE"] + "-bg.jpg" : Metadata["BACKGROUND"]; //if background is not set, try "Song title-bg.jpg"
+            //if this file doesn't exist the bg is otherwise invalid, root around the folder manually to find something named "bg" or "background"
+            //i hate my life
             if (!File.Exists(Path.Combine(path, bgfile)))
             {
                 foreach (string s in Directory.GetFiles(path))
@@ -143,19 +162,22 @@ namespace YAVSRG.Charts.Stepmania
             return bgfile;
         }
 
+        //Converts all difficulties in this file to a list of Charts
         public List<Chart> Convert()
         {
             List<Chart> charts = new List<Chart>();
-            List<Tuple<double, double>> bpms = new List<Tuple<double, double>>();
+            List<Tuple<double, double>> bpms = new List<Tuple<double, double>>(); //bpm data for the charts
             string[] split;
 
-            foreach (string s in new string(raw["BPMS"].Where((c) => { return !char.IsWhiteSpace(c); }).ToArray()).Split(',')) //removes all whitespace, splits by ,
+            //this parses the bpms value into meaningful data
+            foreach (string s in new string(Metadata["BPMS"].Where((c) => { return !char.IsWhiteSpace(c); }).ToArray()).Split(',')) //removes all whitespace, splits by ,
             {
                 split = s.Split('='); //then splits these comma separated strings by = to get beat:bpm
                 bpms.Add(new Tuple<double, double>(double.Parse(split[0], CultureInfo.InvariantCulture), 60000/double.Parse(split[1], CultureInfo.InvariantCulture))); //parses bpms and puts them in this list format
             }
 
-            foreach (StepFileDifficulty diff in diffs)
+            //turns gamemode into key count
+            foreach (StepFileDifficulty diff in Difficulties)
             {
                 byte keycount;
 
@@ -190,14 +212,14 @@ namespace YAVSRG.Charts.Stepmania
                         Utilities.Logging.Log("SM gamemode not supported: " + diff.gamemode, "", Utilities.Logging.LogType.Warning);
                         continue;
                 }
-
+                
                 try
                 {
                     byte meter = 4; //sm only supports 4 beats in a bar. to add ssc support take this from the file
                     List<Snap> states = new List<Snap>();
                     List<BPMPoint> points = new List<BPMPoint>();
                     BinarySwitcher lntracker = new BinarySwitcher(0);
-                    double now = -double.Parse(raw["OFFSET"], CultureInfo.InvariantCulture) * 1000; //start time (in ms) into audio file for first measure
+                    double now = -double.Parse(Metadata["OFFSET"], CultureInfo.InvariantCulture) * 1000; //start time (in ms) into audio file for first measure
                     int bpm = 0; //index of bpm point for the list of tuples we generated earlier
                     points.Add(new BPMPoint((float)now, meter, (float)bpms[0].Item2)); //convert the first bpm to a timing point
                     int totalbeats = 0; //beat counter
@@ -219,18 +241,20 @@ namespace YAVSRG.Charts.Stepmania
                         diff.measures[i].ConvertSection(now, bpms[bpm].Item2, lntracker, keycount, from, meter, meter, states);
                         now += bpms[bpm].Item2 * (meter - from); //converts rest of measure after all bpm changes inside are complete (normally no bpm changes therefore this does the whole measure)
                     }
+                    //construct chart with metadata and note data
                     Chart c = new Chart(states, new ChartHeader
                     {
                         Title = GetTag("TITLE"),
                         File = filename,
-                        Artist = raw.ContainsKey("ARTIST") ? raw["ARTIST"] : GetTag("ARTISTTRANSLIT"),
+                        Artist = Metadata.ContainsKey("ARTIST") ? Metadata["ARTIST"] : GetTag("ARTISTTRANSLIT"),
                         Creator = GetCreator(),
                         SourcePath = path,
-                        DiffName = (raw.ContainsKey("SUBTITLE") && raw["SUBTITLE"] != "" && diffs.Count == 1) ? raw["SUBTITLE"] : diff.name,
-                        PreviewTime = float.Parse(raw["SAMPLESTART"], CultureInfo.InvariantCulture) * 1000,
-                        AudioFile = raw["MUSIC"],
+                        DiffName = (Metadata.ContainsKey("SUBTITLE") && Metadata["SUBTITLE"] != "" && Difficulties.Count == 1) ? Metadata["SUBTITLE"] : diff.name,
+                        PreviewTime = float.Parse(Metadata["SAMPLESTART"], CultureInfo.InvariantCulture) * 1000,
+                        AudioFile = Metadata["MUSIC"],
                         BGFile = GetBG()
                     }, keycount);
+                    //set bpm data of chart (no scroll speed changes)
                     c.Timing.SetTimingData(points);
                     charts.Add(c);
                 }

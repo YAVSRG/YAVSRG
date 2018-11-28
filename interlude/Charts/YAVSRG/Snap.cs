@@ -19,9 +19,8 @@ namespace YAVSRG.Charts.YAVSRG
         //scratch will be implemented if i add bms support - this is otherwise just future proofing
         public ushort hitsound = 0;
 
-        public Snap(float offset, ushort taps = 0, ushort holds = 0, ushort middles = 0, ushort ends = 0, ushort mines = 0, ushort special = 0, ushort hitsound = 0)
+        public Snap(float offset, ushort taps = 0, ushort holds = 0, ushort middles = 0, ushort ends = 0, ushort mines = 0, ushort special = 0, ushort hitsound = 0) : base(offset)
         {
-            Offset = offset;
             this.taps = new BinarySwitcher(taps);
             this.holds = new BinarySwitcher(holds);
             this.middles = new BinarySwitcher(middles);
