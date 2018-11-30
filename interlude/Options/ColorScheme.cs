@@ -40,6 +40,7 @@ namespace YAVSRG.Options
             switch (Style)
             {
                 case Colorizer.ColorStyle.DDR:
+                case Colorizer.ColorStyle.Jackhammer:
                     return Colorizer.DDRValues.Length + 1;
                 case Colorizer.ColorStyle.Chord:
                 default:

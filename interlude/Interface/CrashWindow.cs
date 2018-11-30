@@ -15,8 +15,8 @@ namespace YAVSRG.Interface
         public CrashWindow(string error)
         {
             InitializeComponent();
-            Text = "Interlude has crashed: " + Utilities.Splashes.CrashSplash();
-            label1.Text = Utilities.Splashes.CrashSplash()+"\n\n"+error; //set display to the error message
+            Text = "Interlude has crashed: " + Utilities.ResourceGetter.CrashSplash();
+            label1.Text = Utilities.ResourceGetter.CrashSplash()+"\n\n"+error; //set display to the error message
         }
 
         private void button1_Click(object sender, EventArgs e)

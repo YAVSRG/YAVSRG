@@ -24,6 +24,8 @@ namespace YAVSRG
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
+        public static Shader WaterShader = new Shader("void main() {}", Utilities.ResourceGetter.GetShader("Water.fsh"));
+
         //static DrawableFBO FBO;
 
         public static void Draw(Sprite sprite, Rect bounds, Color color, int rotation = 0)
@@ -107,6 +109,12 @@ namespace YAVSRG
             Draw(texture: texture, bounds: bounds, texcoords: VecArray(uv), color: color);
         }
 
+        public static void DrawTilingTexture(Sprite texture, Rect bounds, float scaleX, float scaleY, float x, float y, Color[] colors)
+        {
+            RectangleF uv = new RectangleF(x + bounds.Left / scaleX, y + bounds.Top / scaleY, bounds.Width / scaleX, bounds.Height / scaleY);
+            Draw(sprite: texture, bounds: bounds, texcoords: VecArray(uv), colors: colors);
+        }
+
         public static void DrawRect(Rect bounds, Color color)
         {
             GL.Begin(PrimitiveType.Quads);
@@ -187,6 +195,26 @@ namespace YAVSRG
             }
         }
 
+        public static void StencilAlpha(StencilMode m)
+        {
+            if (m == StencilMode.Create)
+            {
+                GL.Arb.BlendFuncSeparate(0, BlendingFactor.Zero, BlendingFactor.One, BlendingFactor.SrcAlpha, BlendingFactor.Zero);
+                GL.ColorMask(false, false, false, true);
+                DrawRect(ScreenUtils.Bounds, Color.Transparent);
+            }
+            else if (m == StencilMode.Draw)
+            {
+                GL.ColorMask(true, true, true, false);
+                GL.Arb.BlendFuncSeparate(0, BlendingFactor.DstAlpha, BlendingFactor.OneMinusDstAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+            }
+            else if (m == StencilMode.Disable)
+            {
+                GL.ColorMask(true, true, true, true);
+                GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
+            }
+        }
+
         public static void Stencil(StencilMode m)
         {
             if (m == StencilMode.Create)
@@ -231,6 +259,7 @@ namespace YAVSRG
 
         public static void End()
         {
+
         }
 
         public static void Init()
@@ -240,20 +269,10 @@ namespace YAVSRG
             GL.ClearColor(0, 0, 0, 0);
             GL.ClearStencil(0x00);
 
-            Shader s = new Shader(
-                @"in vec4 position;
-            void main()
-            {
-                gl_Position = position;
-            }",
-                @"void main()
-            {
-                gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-            }");
-            GL.UseProgram(s.Program);
-
             Font1 = new SpriteFont(60, Game.Options.Theme.Font1);
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
+
+            GL.UseProgram(WaterShader.Program);
         }
 
         public static Vector2[] VecArray(RectangleF rect)

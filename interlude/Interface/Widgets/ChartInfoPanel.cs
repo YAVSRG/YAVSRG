@@ -8,7 +8,7 @@ using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface.Widgets
 {
-    public class ChartInfoPanel : Widget
+    public class ChartInfoPanel : FrameContainer
     {
         string time, bpm;
         AnimationColorMixer physical, technical, text;
@@ -49,14 +49,6 @@ namespace YAVSRG.Interface.Widgets
             physical.Target(Utils.PhysicalColor(Game.Gameplay.ChartDifficulty.Physical));
             technical.Target(Utils.TechnicalColor(Game.Gameplay.ChartDifficulty.Physical));
             text.Target(Color.Black);
-        }
-
-        public override void Draw(Rect bounds)
-        {
-            bounds = GetBounds(bounds);
-            Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor);
-            ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
-            DrawWidgets(bounds);
         }
     }
 }

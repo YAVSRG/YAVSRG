@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Screens
 {
     class ScreenLoading : Screen
     {
-        string splash = Utilities.Splashes.LoadingSplash();
+        string splash = Utilities.ResourceGetter.LoadingSplash();
         Sprite desktop;
         AnimationFade fade;
         AnimationSeries transition;
@@ -64,7 +64,7 @@ namespace YAVSRG.Interface.Screens
             var screen = OpenTK.DisplayDevice.Default;
             Rectangle screenBounds = new Rectangle(Game.Instance.Bounds.X, Game.Instance.Bounds.Y, Game.Instance.ClientRectangle.Width, Game.Instance.ClientRectangle.Height);
             RectangleF UV = new RectangleF((float)screenBounds.X / screen.Width, (float)screenBounds.Y / screen.Height, (float)screenBounds.Width / screen.Width, (float)screenBounds.Height / screen.Height);
-            SpriteBatch.Draw(sprite: desktop, bounds: new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight), texcoords: SpriteBatch.VecArray(UV), color: Color.White);
+            SpriteBatch.Draw(sprite: desktop, bounds: Bounds, texcoords: SpriteBatch.VecArray(UV), color: Color.White);
             int a = (int)(255 * fade);
             if (exiting) { a = 255 - a; }
             else

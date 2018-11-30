@@ -120,7 +120,7 @@ namespace YAVSRG.Interface
 
         public void Draw()
         {
-            Rect bounds = new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Rect bounds = Bounds;
             if (Loading)
             {
                 Current?.Draw(bounds);
@@ -183,7 +183,7 @@ namespace YAVSRG.Interface
 
         public void Update()
         {
-            Rect bounds = new Rect(-ScreenWidth, -ScreenHeight, ScreenWidth, ScreenHeight);
+            Rect bounds = Bounds;
             if (dialogs.Count == 0) Toolbar.Update(bounds);
             Logo.Update(bounds);
             if (Loading)

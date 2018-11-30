@@ -7,20 +7,20 @@ using YAVSRG.Gameplay;
 
 namespace YAVSRG.Interface.Widgets
 {
-    public class Scoreboard : ScrollContainer
+    public class Scoreboard : FlowContainer
     {
-        public Scoreboard() : base(10, 10, false)
+        public Scoreboard()
         {
-
+            MarginX = MarginY = 10;
         }
 
         public void UseScoreList(List<Score> scores)
         {
             Children.Clear();
-            scroll = 0;
+            ScrollPosition = 0;
             foreach (Score s in scores)
             {
-                ScoreCard t = new ScoreCard(new ScoreInfoProvider(s,Game.CurrentChart));
+                ScoreCard t = new ScoreCard(new ScoreInfoProvider(s, Game.CurrentChart));
                 AddChild(t);
             }
             Children.Sort(ScoreCard.Compare);

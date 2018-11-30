@@ -78,7 +78,7 @@ namespace YAVSRG.Interface
             }
             else
             {
-                return GetBounds(new Rect(-ScreenUtils.ScreenWidth, -ScreenUtils.ScreenHeight, ScreenUtils.ScreenWidth, ScreenUtils.ScreenHeight));
+                return GetBounds(ScreenUtils.Bounds);
             }
         }
 

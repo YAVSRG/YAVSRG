@@ -8,18 +8,18 @@ using YAVSRG.Interface;
 
 namespace YAVSRG
 {
-    public class DrawableFBO
+    public class DrawableFBO : IDisposable
     {
         int Texture_ID;
         int FBO_ID;
-        public readonly Sprite Sprite;
+        readonly Sprite Sprite;
 
-        public DrawableFBO(int Width, int Height)
+        public DrawableFBO(Shader shader)
         {
             // Generate the texture.
             Texture_ID = GL.GenTexture();
             GL.BindTexture(TextureTarget.Texture2D, Texture_ID);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, Width, Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
@@ -29,15 +29,26 @@ namespace YAVSRG
             GL.Ext.GenFramebuffers(1, out FBO_ID);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBO_ID);
             GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
-                FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, FBO_ID, 0);
+                FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, Texture_ID, 0);
 
-            Sprite = new Sprite(Texture_ID, Width, Height, 1, 1);
+            Sprite = new Sprite(Texture_ID, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 1, 1);
+            GL.Ortho(-1, 1, 1, -1, -1, 1);
+            if (shader != null)
+            {
+                GL.UseProgram(shader.Program);
+            }
         }
 
-        public void Draw(Rect bounds)
+        public void Unbind()
         {
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
-            SpriteBatch.Draw(Sprite, bounds, System.Drawing.Color.White);
+            GL.Ortho(-1, 1, 1, -1, -1, 1);
+            GL.UseProgram(0);
+        }
+
+        public static implicit operator Sprite(DrawableFBO fbo)
+        {
+            return fbo.Sprite;
         }
 
         public void Dispose()

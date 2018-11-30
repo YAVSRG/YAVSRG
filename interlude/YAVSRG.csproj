@@ -139,6 +139,8 @@
     <Compile Include="Charts\ChartLoader.cs" />
     <Compile Include="Charts\YAVSRG\SVManager.cs" />
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
+    <Compile Include="Interface\Widgets\FlowContainer.cs" />
+    <Compile Include="Interface\Widgets\FrameWidget.cs" />
     <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarWidget.cs" />
     <Compile Include="Net\Web\BloodcatChartData.cs" />
@@ -299,7 +301,7 @@
     <Compile Include="Render\Sprite.cs" />
     <Compile Include="Render\SpriteBatch.cs" />
     <Compile Include="Render\SpriteFont.cs" />
-    <Compile Include="Utilities\Splashes.cs" />
+    <Compile Include="Utilities\ResourceGetter.cs" />
     <Compile Include="Utilities\TaskManager.cs" />
     <Compile Include="Utilities\TrayIcon.cs" />
     <Compile Include="Utilities\Utils.cs" />
@@ -309,6 +311,7 @@
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
+    <EmbeddedResource Include="Resources\Shaders\Water.fsh" />
     <None Include="YAVSRG_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -332,6 +335,7 @@
     <Content Include="icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\Shaders\Blur.fsh" />
     <EmbeddedResource Include="Resources\StatSplashes.txt" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\Credits.txt" />

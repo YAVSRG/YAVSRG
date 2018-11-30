@@ -14,7 +14,7 @@ namespace YAVSRG.Interface.Widgets
 
         public ScoreCard(ScoreInfoProvider data)
         {
-            PositionBottomRight(20, 100, AnchorType.MAX, AnchorType.MIN);
+            PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MIN);
             Data = data;
         }
 

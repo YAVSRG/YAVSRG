@@ -54,7 +54,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            var s = Utilities.Splashes.MenuSplash().Split('¬');
+            var s = Utilities.ResourceGetter.MenuSplash().Split('¬');
             splash = s[0];
             splashSub = s.Length > 1 ? s[1] : "";
             Utilities.Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);

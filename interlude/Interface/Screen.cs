@@ -13,7 +13,7 @@ namespace YAVSRG.Interface
 
         public override Rect GetBounds()
         {
-            return GetBounds(new Rect(-ScreenUtils.ScreenWidth, -ScreenUtils.ScreenHeight, ScreenUtils.ScreenWidth, ScreenUtils.ScreenHeight).ExpandY(-Game.Screens.Toolbar.Height));
+            return GetBounds(ScreenUtils.Bounds.ExpandY(-Game.Screens.Toolbar.Height));
         }
     }
 }

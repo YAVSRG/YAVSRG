@@ -63,7 +63,7 @@ namespace YAVSRG.Options.Panels
                 .PositionBottomRight(200, 425, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; lp.Refresh(); }),
+                new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord", "Jackhammer" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; lp.Refresh(); }),
                 "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm i.e make every other beat red and the remaining beats green\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord", ib)
                 .PositionTopLeft(-200, 475, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(-50, 525, AnchorType.CENTER, AnchorType.MIN));

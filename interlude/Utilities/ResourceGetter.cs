@@ -8,7 +8,7 @@ using System.IO;
 
 namespace YAVSRG.Utilities
 {
-    public class Splashes
+    public class ResourceGetter
     {
         static readonly string[] menu = LoadSplashes("YAVSRG.Resources.MenuSplashes.txt");
         static readonly string[] loading = LoadSplashes("YAVSRG.Resources.LoadingSplashes.txt");
@@ -44,5 +44,15 @@ namespace YAVSRG.Utilities
         {
             return RandomSplash(crash);
         }
+
+        public static string GetShader(string name)
+        {
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("YAVSRG.Resources.Shaders."+name))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
     }
 }

@@ -18,8 +18,8 @@ namespace YAVSRG.Options
             DDR,
             Column,
             Chord,
+            Jackhammer,
             //LongNote,
-            //Jackhammer,
             //Manipulate
         }
 
@@ -36,23 +36,41 @@ namespace YAVSRG.Options
                 case (ColorStyle.Chord):
                     Chord(c, s);
                     return;
+                case (ColorStyle.Jackhammer):
+                    Jackhammer(c, s);
+                    return;
             }
         }
 
         private static void Jackhammer(ChartWithModifiers c, ColorScheme cs)
         {
-            //DO NOT USE UNTIL FINISHED/FIXED
-            int last = c.Notes.Points[0].taps.value;
-            int current;
-            for (int i = 1; i < c.Notes.Count; i++)
+            float[] last = new float[c.Keys];
+            GameplaySnap s;
+            float v;
+            float x;
+            BPMPoint p;
+            int color;
+            for (int i = 0; i < c.Notes.Count; i++)
             {
-                current = c.Notes.Points[i].taps.value;
-                foreach (int k in new BinarySwitcher(current & last).GetColumns())
+                s = c.Notes.Points[i];
+                foreach (int k in new BinarySwitcher(s.taps.value + s.holds.value).GetColumns())
                 {
-                    c.Notes.Points[i - 1].colors[k] = 3;
-                    c.Notes.Points[i].colors[k] += 1;
+                    p = c.Timing.BPM.GetPointAt(s.Offset, false);
+                    v = p.MSPerBeat;
+                    x = (s.Offset - last[k] - 2);
+
+                    color = DDRValues.Length;
+                    for (int j = DDRValues.Length - 1; j >= 0; j--)
+                    {
+                        if (x < v / DDRValues[j])
+                        {
+                            color = j;
+                            break;
+                        }
+                    }
+                    s.colors[k] = cs.GetColorIndex(color, c.Keys);
+                    last[k] = s.Offset;
                 }
-                last = current;
             }
         }
 
