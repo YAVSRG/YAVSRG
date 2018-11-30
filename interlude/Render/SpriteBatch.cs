@@ -272,7 +272,7 @@ namespace YAVSRG
             Font1 = new SpriteFont(60, Game.Options.Theme.Font1);
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
 
-            GL.UseProgram(WaterShader.Program);
+            //GL.UseProgram(WaterShader.Program);
         }
 
         public static Vector2[] VecArray(RectangleF rect)
