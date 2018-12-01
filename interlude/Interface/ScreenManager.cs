@@ -18,6 +18,10 @@ namespace YAVSRG.Interface
         AnimationSeries animation = new AnimationSeries(true);
         AnimationGroup animation2 = new AnimationGroup(true);
 
+        DrawableFBO FBO;
+
+        AnimationSlider bgFade;
+
         List<Screen> stack = new List<Screen>() { };
         List<Dialog> dialogs = new List<Dialog>();
         Screen Previous = null;
@@ -47,6 +51,7 @@ namespace YAVSRG.Interface
             animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
             animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
             animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
+            animation2.Add(bgFade = new AnimationSlider(1));
             Logo = new Widgets.Logo();
             Logo.PositionTopLeft(-200, 1000, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(200, 1400, AnchorType.CENTER, AnchorType.CENTER);
         }
@@ -58,12 +63,13 @@ namespace YAVSRG.Interface
 
         public void ChangeBackground(Sprite bg)
         {
-            if (!(bg.ID == Background.ID || Background.ID == Content.GetTexture("background").ID))
+            if (!(Oldbackground.ID == Background.ID || Oldbackground.ID == Content.GetTexture("background").ID))
             {
-                Content.UnloadTexture(Background);
+                Content.UnloadTexture(Oldbackground);
             }
-            Oldbackground = Background; //oldbackground is unused
+            Oldbackground = Background;
             Background = bg;
+            bgFade.Val = 0;
         }
 
         public void ChangeThemeColor(Color c)
@@ -118,39 +124,54 @@ namespace YAVSRG.Interface
             ParallaxFunc = f;
         }
 
+        void DrawScaledBG(Sprite bg, int alpha)
+        {
+            //use math.min for "fit inside screen with letterbox"
+            //math.max is "scale up until the screen is filled which cuts off the sides/top if aspect ratio is different"
+            float scale = Math.Max((float)ScreenWidth * 2 / bg.Width, (float)ScreenHeight * 2 / bg.Height);
+            Color c = Color.FromArgb(alpha, Color.White);
+            SpriteBatch.DrawTilingTexture(bg, Bounds, bg.Width * scale, bg.Height * scale, 0.5f, 0.5f, new Color[] { c, c, c, c });
+        }
+
         public void Draw()
         {
             Rect bounds = Bounds;
-            if (Loading)
+            using (FBO = new DrawableFBO(null))
             {
-                Current?.Draw(bounds);
-                Logo.Draw(bounds);
-                return;
-            }
-            DrawChartBackground(bounds, BackgroundDim);
-            if (animation.Running)
-            {
-                if (fade1.Running)
+                DrawScaledBG(Oldbackground, 255);
+                DrawScaledBG(Background, (int)(bgFade * 255));
+                FBO.Unbind();
+                if (Loading)
                 {
-                    Previous?.Draw(bounds.ExpandY(-Toolbar.Height));
-                    DrawChartBackground(bounds, Color.FromArgb((int)(255 * fade1), BackgroundDim));
+                    Current?.Draw(bounds);
+                    Logo.Draw(bounds);
+                    return;
+                }
+                DrawChartBackground(bounds, BackgroundDim);
+                if (animation.Running)
+                {
+                    if (fade1.Running)
+                    {
+                        Previous?.Draw(bounds.ExpandY(-Toolbar.Height));
+                        DrawChartBackground(bounds, Color.FromArgb((int)(255 * fade1), BackgroundDim));
+                    }
+                    else
+                    {
+                        Current?.Draw(bounds.ExpandY(-Toolbar.Height));
+                        DrawChartBackground(bounds, Color.FromArgb((int)(255 * (1 - fade2)), BackgroundDim));
+                    }
                 }
                 else
                 {
                     Current?.Draw(bounds.ExpandY(-Toolbar.Height));
-                    DrawChartBackground(bounds, Color.FromArgb((int)(255 * (1 - fade2)), BackgroundDim));
                 }
+                if (dialogs.Count > 0)
+                {
+                    dialogs[0].Draw(bounds.ExpandY(-Toolbar.Height));
+                }
+                Logo.Draw(bounds);
+                Toolbar.Draw(bounds);
             }
-            else
-            {
-                Current?.Draw(bounds.ExpandY(-Toolbar.Height));
-            }
-            if (dialogs.Count > 0)
-            {
-                dialogs[0].Draw(bounds.ExpandY(-Toolbar.Height));
-            }
-            Logo.Draw(bounds);
-            Toolbar.Draw(bounds);
         }
 
         public void DrawChartBackground(Rect bounds, Color c, float parallaxMult = 1f)
@@ -158,27 +179,10 @@ namespace YAVSRG.Interface
             //this draws the background of the chart on the screen
             //a section of the texture is selected such all parts of the screen line up with the overall background image being fitted to the whole screen
 
-            float parallaxX = parallaxMult * ParallaxPos.AbsoluteX * Parallax / ScreenWidth; //this calculates parallax from mouse position
-            float parallaxY = parallaxMult * ParallaxPos.AbsoluteY * Parallax / ScreenHeight;
-
-            float bg = ((float)Background.Width / Background.Height);
-            float window = (ScreenWidth + Parallax) / (ScreenHeight + Parallax);
-            float correction = window / bg; //this is aspect ratio correction (otherwise image would stretch wrong if not same ratio as window)
-
-            float l = (1 + (bounds.Left + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
-            float r = (1 + (bounds.Right + parallaxX) / (ScreenWidth + Parallax * 2)) / 2;
-            float t = (correction + (bounds.Top + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction);
-            float b = (correction + (bounds.Bottom + parallaxY) / (ScreenHeight + Parallax * 2)) / (2 * correction); //this determines the texcoords to use to achieve the effect
-
-            Vector2[] v = new[] //package texcoords into array to use them
-            {
-                new Vector2(l,t),
-                new Vector2(r,t),
-                new Vector2(r,b),
-                new Vector2(l,b)
-            };
-            bounds.Bottom += 1; //fix for rounding issues causing bgs to be 1 pixel too short on the screen
-            SpriteBatch.Draw(sprite: Background, bounds: bounds, texcoords: v, color: c);
+            float parallaxX = parallaxMult * Parallax * ParallaxPos.AbsoluteX / ScreenWidth / 2; //this calculates parallax from mouse position
+            float parallaxY = parallaxMult * Parallax * ParallaxPos.AbsoluteY / ScreenHeight / 2;
+            //SpriteBatch.DrawTiling(sprite: FBO, bounds: bounds, color: c, scaleX: (ScreenWidth + Parallax * parallaxMult) * 2, scaleY: (ScreenHeight + Parallax * parallaxMult) * 2, offsetX: parallaxX + ScreenWidth, offsetY: parallaxY + ScreenHeight);
+            SpriteBatch.DrawTilingTexture(FBO, bounds, (ScreenWidth + Parallax * parallaxMult) * 2, (ScreenHeight + Parallax * parallaxMult) * 2, parallaxX / ScreenWidth + 0.5f, parallaxY / ScreenHeight + 0.5f, new Color[] { c, c, c, c });
         }
 
         public void Update()

@@ -29,9 +29,14 @@ namespace YAVSRG.Interface
             Children = new List<Widget>();
         }
 
-        public virtual void AddToContainer(Widget parent)
+        protected virtual void AddToContainer(Widget parent)
         {
             Parent = parent;
+        }
+
+        protected virtual void RemoveFromContainer(Widget parent)
+        {
+            Parent = null;
         }
 
         public virtual void AddChild(Widget child)
@@ -41,6 +46,15 @@ namespace YAVSRG.Interface
                 Children.Add(child);
             }
             child.AddToContainer(this);
+        }
+
+        public virtual void RemoveChild(Widget child)
+        {
+            lock (Children)
+            {
+                Children.Remove(child);
+            }
+            child.RemoveFromContainer(this);
         }
 
         public float Left(Rect bounds)

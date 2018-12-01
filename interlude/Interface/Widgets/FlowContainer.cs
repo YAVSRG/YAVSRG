@@ -10,7 +10,7 @@ namespace YAVSRG.Interface.Widgets
 {
     public class FlowContainer : FrameContainer
     {
-        public float MarginX, MarginY;
+        public float MarginX = 10, MarginY = 10;
         public float ScrollPosition;
         protected float ContentSize;
         AnimationSlider ScrollBarPosition;

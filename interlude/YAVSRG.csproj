@@ -140,7 +140,7 @@
     <Compile Include="Charts\YAVSRG\SVManager.cs" />
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
     <Compile Include="Interface\Widgets\FlowContainer.cs" />
-    <Compile Include="Interface\Widgets\FrameWidget.cs" />
+    <Compile Include="Interface\Widgets\FrameContainer.cs" />
     <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarWidget.cs" />
     <Compile Include="Net\Web\BloodcatChartData.cs" />

@@ -85,10 +85,13 @@ namespace YAVSRG.Interface
             SpriteBatch.Draw("frame", new Rect(bounds.Right - scale, bounds.Top + scale, bounds.Right, bounds.Bottom - scale), color, 2, 1);
             SpriteBatch.Draw("frame", new Rect(bounds.Left + scale, bounds.Bottom - scale, bounds.Right - scale, bounds.Bottom), color, 1, 2);*/
 
-            SpriteBatch.Draw(bounds: bounds.SliceTop(shadow), colors: new[] { Color.Black, Color.Black, Color.FromArgb(0, Color.Black), Color.FromArgb(0, Color.Black) });
-            SpriteBatch.Draw(bounds: bounds.SliceBottom(shadow), colors: new[] { Color.FromArgb(0, Color.Black), Color.FromArgb(0, Color.Black), Color.Black, Color.Black });
-            SpriteBatch.Draw(bounds: bounds.SliceLeft(shadow), colors: new[] { Color.Black,  Color.FromArgb(0, Color.Black), Color.FromArgb(0, Color.Black), Color.Black });
-            SpriteBatch.Draw(bounds: bounds.SliceRight(shadow), colors: new[] { Color.FromArgb(0, Color.Black), Color.Black, Color.Black, Color.FromArgb(0, Color.Black) });
+            Color back = Color.FromArgb(color.A, Color.Black);
+            Color transparent = Color.FromArgb(0, 0, 0, 0);
+
+            SpriteBatch.Draw(bounds: bounds.SliceTop(shadow), colors: new[] { back, back, transparent, transparent });
+            SpriteBatch.Draw(bounds: bounds.SliceBottom(shadow), colors: new[] { transparent, transparent, back, back });
+            SpriteBatch.Draw(bounds: bounds.SliceLeft(shadow), colors: new[] { back,  transparent, transparent, back });
+            SpriteBatch.Draw(bounds: bounds.SliceRight(shadow), colors: new[] { transparent, back, back, transparent });
             SpriteBatch.Draw(bounds: bounds.SliceTop(thickness), color: color);
             SpriteBatch.Draw(bounds: bounds.SliceBottom(thickness), color: color);
             SpriteBatch.Draw(bounds: bounds.SliceLeft(thickness), color: color);
@@ -154,18 +157,17 @@ namespace YAVSRG.Interface
 
         public static void DrawParallelogramWithBG(Rect bounds, float amount, Color fill, Color frame)
         {
-            //todo: bounds shrink function
             float h = bounds.Height * 0.5f;
             float t = h * Math.Abs(amount);
             SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
-            SpriteBatch.DrawRect(new Rect(bounds.Left-t, bounds.Top, bounds.Right+t, bounds.Bottom), Color.White);
+            SpriteBatch.DrawRect(bounds.ExpandX(t), Color.Transparent);
             SpriteBatch.DisableTransform();
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
-            Game.Screens.DrawChartBackground(new Rect(bounds.Left - h, bounds.Top, bounds.Right + h, bounds.Bottom), fill, 1.5f);
+            Game.Screens.DrawChartBackground(bounds.ExpandX(h), fill, 1.5f);
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
             SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
-            DrawFrame(new Rect(bounds.Left-t, bounds.Top, bounds.Right+t, bounds.Bottom), 30f, frame);
+            DrawFrame(bounds.ExpandX(t), 30f, frame);
             SpriteBatch.DisableTransform();
         }
     }

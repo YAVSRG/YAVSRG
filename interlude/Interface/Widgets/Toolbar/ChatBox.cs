@@ -26,28 +26,27 @@ namespace YAVSRG.Interface.Widgets.Toolbar
 
             public override void Draw(Rect bounds)
             {
-                int alpha = (int)(((ChatBox)Parent).fade * 255);
                 base.Draw(bounds);
                 bounds = GetBounds(bounds);
                 float spacing = 40f;
                 if (expand)
                 {
-                    ScreenUtils.DrawFrame(bounds, 30f, Color.FromArgb(alpha, Color.White));
+                    ScreenUtils.DrawFrame(bounds, 30f, Color.White);
                     for (int x = 0; x < 5; x++)
                     {
                         for (int y = 0; y < 4; y++)
                         {
-                            SpriteBatch.Draw("emoji", new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.FromArgb(alpha,Color.White), x + y * 5, 0);
+                            SpriteBatch.Draw("emoji", new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.White, x + y * 5, 0);
                         }
                         for (int y = 4; y < 6; y++)
                         {
-                            SpriteBatch.DrawRect(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.FromArgb(alpha, colors[x + y * 5 - 20]));
+                            SpriteBatch.DrawRect(new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), colors[x + y * 5 - 20]);
                         }
                     }
                 }
                 else
                 {
-                    SpriteBatch.Draw("emoji", new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.FromArgb(alpha, Color.White), 0, 0);
+                    SpriteBatch.Draw("emoji", new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.White, 0, 0);
                 }
             }
 
@@ -107,14 +106,14 @@ namespace YAVSRG.Interface.Widgets.Toolbar
         string selectedChannel = "";
         string entryText = "";
         int newMessages = 0;
-        ScrollContainer channelSelector;
+        FlowContainer channelSelector;
         Animations.AnimationSlider newMsgFade, fade;
         Widget emoji;
 
         public ChatBox()
         {
             channels = new Dictionary<string, ChatChannel>();
-            channelSelector = new ScrollContainer(10f, 10f, false, 2, false);
+            channelSelector = new FlowContainer() { BackColor = () => Color.FromArgb(220, 0, 0, 0), UseBackground = false, VerticalFade = 0 };
             AddChild(channelSelector.PositionTopLeft(20, 20, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(220, 20, AnchorType.MIN, AnchorType.MAX));
             AddChild(emoji = new EmojiPicker().PositionTopLeft(240, 30, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(30, 30, AnchorType.MAX, AnchorType.MAX));
             emoji.SetState(WidgetState.DISABLED);
@@ -135,39 +134,40 @@ namespace YAVSRG.Interface.Widgets.Toolbar
             }
             if (fade > 0.01f)
             {
-                int alpha = (int)(fade * 255);
-                SpriteBatch.DrawRect(bounds, Color.FromArgb((int)(fade * 180), 0, 0, 0));
-                SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb((int)(fade * 127), Color.Black));
-                var b = channelSelector.GetBounds(bounds);
-                SpriteBatch.DrawRect(b, Color.FromArgb((int)(fade * 127), Color.Black));
-                ScreenUtils.DrawFrame(b, 30f, Color.FromArgb(alpha, Game.Screens.HighlightColor));
-                DrawWidgets(bounds);
-                if (selectedChannel != "")
+                using (DrawableFBO fbo = new DrawableFBO(null))
                 {
-                    var l = channels[selectedChannel].lines;
-                    int c = Math.Min(l.Count, (int)(bounds.Height / 25 - 2));
-                    for (int i = 0; i < c; i++)
+                    SpriteBatch.DrawRect(bounds, Color.FromArgb(180, 0, 0, 0));
+                    SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb(220, Color.Black));
+                    DrawWidgets(bounds);
+                    if (selectedChannel != "")
                     {
-                        RenderText(l[i], bounds.Left + 260, bounds.Bottom - 90 - 25 * i, alpha);
-                    }
-                }
-                RenderText("> " + entryText, bounds.Left + 260, bounds.Bottom - 60, alpha);
-
-                if (emoji.State == WidgetState.DISABLED)
-                {
-                    lock (Game.Tasks.Tasks)
-                    {
-                        float y = bounds.Top + 30;
-                        foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.Tasks)
+                        var l = channels[selectedChannel].lines;
+                        int c = Math.Min(l.Count, (int)(bounds.Height / 25 - 2));
+                        for (int i = 0; i < c; i++)
                         {
-                            SpriteBatch.Font1.DrawJustifiedText(t.Name, 30f, bounds.Right - 30, y, Color.FromArgb(alpha, Game.Options.Theme.MenuFont), true);
-                            SpriteBatch.Font2.DrawJustifiedText(t.Progress + " // " + t.Status.ToString(), 20f, bounds.Right - 30, y + 40f, Color.FromArgb(alpha, Game.Options.Theme.MenuFont));
-                            y += 60f;
+                            RenderText(l[i], bounds.Left + 260, bounds.Bottom - 90 - 25 * i);
                         }
                     }
-                }
+                    RenderText("> " + entryText, bounds.Left + 260, bounds.Bottom - 60);
 
-                ScreenUtils.DrawFrame(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), 30f, Color.FromArgb(alpha, Game.Screens.HighlightColor));
+                    if (emoji.State == WidgetState.DISABLED)
+                    {
+                        lock (Game.Tasks.Tasks)
+                        {
+                            float y = bounds.Top + 30;
+                            foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.Tasks)
+                            {
+                                SpriteBatch.Font1.DrawJustifiedText(t.Name, 30f, bounds.Right - 30, y, Game.Options.Theme.MenuFont, true);
+                                SpriteBatch.Font2.DrawJustifiedText(t.Progress + " // " + t.Status.ToString(), 20f, bounds.Right - 30, y + 40f, Game.Options.Theme.MenuFont);
+                                y += 60f;
+                            }
+                        }
+                    }
+
+                    ScreenUtils.DrawFrame(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), 30f, Game.Screens.HighlightColor);
+                    fbo.Unbind();
+                    SpriteBatch.Draw(fbo, ScreenUtils.Bounds, Color.FromArgb((int)(255 * fade), Color.White));
+                }
             }
         }
 
@@ -243,7 +243,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
             newMsgFade.Target = 0;
         }
 
-        void RenderText(string text, float x, float y, int alpha)
+        void RenderText(string text, float x, float y)
         {
             int index = 0;
             Color c = Color.White;
@@ -251,7 +251,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
             {
                 if (text[i] == '{')
                 {
-                    x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, Color.FromArgb(alpha,c));
+                    x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, c);
                     index = i;
                 }
                 else if (text[i] == '}')
@@ -271,19 +271,19 @@ namespace YAVSRG.Interface.Widgets.Toolbar
                         {
                             int id = 0;
                             int.TryParse(parse[1], out id);
-                            SpriteBatch.Draw("emoji", new Rect(x, y, x + 35, y + 35), Color.FromArgb(alpha, c), id, 0, 0);
+                            SpriteBatch.Draw("emoji", new Rect(x, y, x + 35, y + 35), c, id, 0, 0);
                             x += 35;
                             valid = true;
                         }
                     }
                     if (!valid)
                     {
-                        x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, Color.FromArgb(alpha, c));
+                        x += SpriteBatch.Font2.DrawText(text.Substring(index, i - index), 20f, x, y, c);
                     }
                     index = i + (valid ? 1 : 0);
                 }
             }
-            x += SpriteBatch.Font2.DrawText(text.Substring(index), 20f, x, y, Color.FromArgb(alpha, c));
+            x += SpriteBatch.Font2.DrawText(text.Substring(index), 20f, x, y, c);
         }
 
         void SendMessage(string channel, string msg)
@@ -303,7 +303,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
 
         void RemoveChannel(string channel)
         {
-            channelSelector.Items().Remove(channels[channel].button);
+            channelSelector.RemoveChild(channels[channel].button);
             channels.Remove(channel);
             if (channel == selectedChannel) { selectedChannel = ""; }
             //the data just gets garbage collected

@@ -10,7 +10,8 @@ namespace YAVSRG.Interface.Widgets
 {
     public class FrameContainer : Widget
     {
-        public Func<Color> FrameColor = () => Game.Screens.HighlightColor, BackColor = () => Color.FromArgb(255,Game.Screens.BaseColor);
+        public Func<Color> FrameColor = () => Game.Screens.HighlightColor, BackColor = () => Game.Screens.DarkColor;
+        public bool UseBackground = true;
         public float VerticalFade = 200, HorizontalFade = 0;
         public AnimationSlider Alpha;
         private DrawableFBO FBO;
@@ -31,7 +32,14 @@ namespace YAVSRG.Interface.Widgets
 
         protected void DrawBackplate(Rect bounds)
         {
-            Game.Screens.DrawChartBackground(bounds, BackColor(), 2f);
+            if (UseBackground)
+            {
+                Game.Screens.DrawChartBackground(bounds, BackColor(), 2f);
+            }
+            else
+            {
+                SpriteBatch.DrawRect(bounds, BackColor());
+            }
             ScreenUtils.DrawFrame(bounds, 30f, FrameColor());
         }
 

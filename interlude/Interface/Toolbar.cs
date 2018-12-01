@@ -142,10 +142,11 @@ namespace YAVSRG.Interface
                 Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Screens.DarkColor), 2f);
                 SpriteBatch.Font1.DrawCentredTextToFill(Notification, bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Options.Theme.MenuFont), true);
 
-                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 5), 30f, Game.Screens.BaseColor);
-                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 5, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
+                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 3), 30f, Game.Screens.BaseColor);
+                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 3, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
 
                 base.Draw(bounds.ExpandY(80 - _Height));
+
             }
 
             if (CursorMode > WidgetState.DISABLED) SpriteBatch.Draw("cursor", new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor);

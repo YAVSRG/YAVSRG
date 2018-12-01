@@ -14,6 +14,8 @@ namespace YAVSRG
         int FBO_ID;
         readonly Sprite Sprite;
 
+        static List<int> FBO_Stack = new List<int>();
+
         public DrawableFBO(Shader shader)
         {
             // Generate the texture.
@@ -37,11 +39,20 @@ namespace YAVSRG
             {
                 GL.UseProgram(shader.Program);
             }
+            FBO_Stack.Add(FBO_ID);
         }
 
         public void Unbind()
         {
-            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+            FBO_Stack.RemoveAt(FBO_Stack.Count - 1);
+            if (FBO_Stack.Count == 0)
+            {
+                GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+            }
+            else
+            {
+                GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBO_Stack[FBO_Stack.Count - 1]);
+            }
             GL.Ortho(-1, 1, 1, -1, -1, 1);
             GL.UseProgram(0);
         }
