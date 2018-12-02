@@ -69,7 +69,7 @@ namespace YAVSRG.Options.Panels
             AddChild(
                 new TooltipContainer(
                     new FramedButton("buttonbase", "Open Data Folder",
-                () => { System.Diagnostics.Process.Start("file://" + Game.WorkingDirectory); }),
+                () => { System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory)); }),
                 "Opens the folder which Interlude works in. This is where you put skins, charts and other settings.", ib)
             .PositionTopLeft(-150, 650, AnchorType.CENTER, AnchorType.MIN)
             .PositionBottomRight(150, 725, AnchorType.CENTER, AnchorType.MIN));

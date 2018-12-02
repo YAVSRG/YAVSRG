@@ -15,6 +15,7 @@ namespace YAVSRG
         readonly Sprite Sprite;
 
         static List<int> FBO_Stack = new List<int>();
+        static bool AlreadyBound = false;
 
         public DrawableFBO(Shader shader)
         {
@@ -23,23 +24,29 @@ namespace YAVSRG
             GL.BindTexture(TextureTarget.Texture2D, Texture_ID);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToBorder);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToBorder);
 
             // Create a FBO and attach the texture.
             GL.Ext.GenFramebuffers(1, out FBO_ID);
             GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBO_ID);
-            GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt,
-                FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, Texture_ID, 0);
+            GL.RenderbufferStorage(RenderbufferTarget.RenderbufferExt, RenderbufferStorage.Depth24Stencil8, ScreenUtils.ScreenWidth*2, ScreenUtils.ScreenHeight*2);
+            //GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.DepthStencilAttachment, TextureTarget.Texture2D, Texture_ID, 0);
+            GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, Texture_ID, 0);
 
             Sprite = new Sprite(Texture_ID, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 1, 1);
-            GL.Ortho(-1, 1, 1, -1, -1, 1);
+            if (!AlreadyBound)
+            {
+                GL.Ortho(-1, 1, 1, -1, -1, 1);
+                GL.Viewport(0, 0, ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2);
+            }
             if (shader != null)
             {
                 GL.UseProgram(shader.Program);
             }
             FBO_Stack.Add(FBO_ID);
+            AlreadyBound = true;
         }
 
         public void Unbind()
@@ -48,12 +55,14 @@ namespace YAVSRG
             if (FBO_Stack.Count == 0)
             {
                 GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+                GL.Ortho(-1, 1, 1, -1, -1, 1);
+                GL.Viewport(Game.Instance.ClientRectangle);
+                AlreadyBound = false;
             }
             else
             {
                 GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, FBO_Stack[FBO_Stack.Count - 1]);
             }
-            GL.Ortho(-1, 1, 1, -1, -1, 1);
             GL.UseProgram(0);
         }
 

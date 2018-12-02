@@ -26,7 +26,7 @@ namespace YAVSRG.Interface.Widgets
             int a = (int)(255 * alpha);
             SpriteBatch.Draw(coords: new Vector2[] {
                 new Vector2(bounds.Left + 0.08f * w, bounds.Top + 0.09f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w),
-                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.Right - 0.08f * w, bounds.Top + 0.09f * w) }, color: Color.FromArgb(a,Color.DarkBlue));
+                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.Right - 0.08f * w, bounds.Top + 0.09f * w) }, color: Color.FromArgb(a, Color.DarkBlue));
             SpriteBatch.Draw(coords: new Vector2[] {
                 new Vector2(bounds.Left + 0.08f * w, bounds.Top + 0.29f * w), new Vector2(bounds.Left + 0.22f * w, bounds.Top + 0.29f * w),
                 new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.46875f * w) }, color: Color.FromArgb(a, Color.DarkBlue));
@@ -47,14 +47,14 @@ namespace YAVSRG.Interface.Widgets
                 new Vector2(bounds.CenterX, bounds.CenterY + 0.2875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.45f * w) }, color: Color.Transparent);
 
             SpriteBatch.AlphaTest(true);
-            SpriteBatch.Draw("logo", bounds, Color.FromArgb(a,Color.White));
+            SpriteBatch.Draw("logo", bounds, Color.FromArgb(a, Color.White));
             SpriteBatch.AlphaTest(false);
 
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
 
-            Game.Screens.DrawChartBackground(bounds, Color.FromArgb(a,Color.Aqua));
+            Game.Screens.DrawChartBackground(bounds, Color.FromArgb(a, Color.Aqua));
             SpriteBatch.DrawRect(bounds, Color.FromArgb((int)(alpha * 180), Color.Aqua));
-            SpriteBatch.DrawTilingTexture("rain", bounds, 320, animation.value * -0.0006f, animation.value * -0.0007f, color: Color.FromArgb((int)(alpha*80), Color.Blue));
+            SpriteBatch.DrawTilingTexture("rain", bounds, 320, animation.value * -0.0006f, animation.value * -0.0007f, color: Color.FromArgb((int)(alpha * 80), Color.Blue));
             SpriteBatch.DrawTilingTexture("rain", bounds, 512, animation.value * -0.001f, animation.value * -0.0011f, color: Color.FromArgb((int)(alpha * 150), Color.Blue));
             SpriteBatch.DrawTilingTexture("rain", bounds, 800, animation.value * -0.0015f, animation.value * -0.0016f, color: Color.FromArgb((int)(alpha * 220), Color.Blue));
 

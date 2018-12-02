@@ -21,7 +21,7 @@ namespace YAVSRG.Interface
 
         private void button1_Click(object sender, EventArgs e)
         {
-            System.Diagnostics.Process.Start("file://" + Game.WorkingDirectory); //multiplatform hack (i think)
+            System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory)); //multiplatform hack (i think)
         }
     }
 }

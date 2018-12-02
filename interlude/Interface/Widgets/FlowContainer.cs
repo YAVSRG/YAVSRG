@@ -10,7 +10,7 @@ namespace YAVSRG.Interface.Widgets
 {
     public class FlowContainer : FrameContainer
     {
-        public float MarginX = 10, MarginY = 10;
+        public float MarginX = 10, MarginY = 10, RowSpacing = 5;
         public float ScrollPosition;
         protected float ContentSize;
         AnimationSlider ScrollBarPosition;
@@ -42,6 +42,9 @@ namespace YAVSRG.Interface.Widgets
             DrawBackplate(bounds);
             PostDraw(bounds);
             Rect newBounds = bounds.Expand(-MarginX, -MarginY);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
+            SpriteBatch.DrawRect(bounds, Color.Transparent);
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
             lock (Children)
             {
                 foreach (Widget w in Children)
@@ -52,11 +55,11 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
             }
+            SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
         }
 
         private void FlowContent(Rect bounds)
         {
-            Rect parentBounds = bounds;
             bounds = GetBounds(bounds).Expand(-MarginX, -MarginY);
             float x = 0;
             float y = -ScrollPosition;
@@ -72,14 +75,61 @@ namespace YAVSRG.Interface.Widgets
                         if (x > bounds.Width)
                         {
                             x = widgetBounds.Width;
-                            y += widgetBounds.Height;
+                            y += widgetBounds.Height + RowSpacing;
                         }
                         ContentSize = y + widgetBounds.Height;
                         w.Move(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds);
                     }
                 }
             }
-            ContentSize += ScrollPosition;
+            ContentSize += ScrollPosition + 4 * MarginY + RowSpacing;
+        }
+
+        public override void AddChild(Widget child)
+        {
+            //inserts new object where it should be
+            Rect bounds = GetBounds().Expand(-MarginX, -MarginY);
+            float x = 0;
+            float y = -ScrollPosition;
+            Rect widgetBounds;
+            lock (Children)
+            {
+                foreach (Widget w in Children)
+                {
+                    if (w.State > 0)
+                    {
+                        widgetBounds = w.GetBounds(bounds);
+                        x += widgetBounds.Width;
+                        if (x > bounds.Width)
+                        {
+                            x = widgetBounds.Width;
+                            y += widgetBounds.Height + RowSpacing; 
+                        }
+                    }
+                }
+            }
+            widgetBounds = child.GetBounds(bounds);
+            x += widgetBounds.Width;
+            if (x > bounds.Width)
+            {
+                x = widgetBounds.Width;
+                y += widgetBounds.Height + RowSpacing;
+            }
+            base.AddChild(child);
+            child.TopLeft.Position(x - widgetBounds.Width, y, bounds);
+            child.BottomRight.Position(x, y + widgetBounds.Height, bounds);
+        }
+
+        public void Clear()
+        {
+            lock (Children)
+            {
+                foreach (Widget w in Children)
+                {
+                    w.RemoveFromContainer(this);
+                }
+                Children.Clear();
+            }
         }
     }
 }

@@ -58,6 +58,7 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.DrawTilingTexture(FBO, bounds.SliceLeft(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { Color.Transparent, c, c, Color.Transparent });
             SpriteBatch.DrawTilingTexture(FBO, bounds.SliceRight(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { c, Color.Transparent, Color.Transparent, c });
             SpriteBatch.DrawTilingTexture(FBO, bounds.ExpandX(-HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { c, c, c, c });
+            //SpriteBatch.DrawTiling(sprite:FBO, bounds: bounds.ExpandX(-HorizontalFade).ExpandY(-VerticalFade), color:c, scaleX: ScreenUtils.ScreenWidth*2, scaleY: ScreenUtils.ScreenHeight*2, offsetX: ScreenUtils.ScreenWidth, offsetY: ScreenUtils.ScreenHeight,)
             FBO.Dispose();
         }
     }

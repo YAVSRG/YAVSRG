@@ -17,7 +17,7 @@ namespace YAVSRG.Interface.Widgets
         {
             WebUtils.DownloadJsonObject<GithubReleaseData>("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", (d) => { ReceieveData(d); });
             Animation.Add(slide = new Animations.AnimationSlider(0));
-            Animation.Add(loading = new Animations.AnimationCounter(1000000,true));
+            Animation.Add(loading = new Animations.AnimationCounter(1000000, true));
             PositionTopLeft(0, 0, AnchorType.MAX, AnchorType.MIN);
             PositionBottomRight(-400, 0, AnchorType.MAX, AnchorType.MAX);
             Move(new Rect(400, 0, 0, 0));

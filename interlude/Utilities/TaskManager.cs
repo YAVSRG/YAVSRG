@@ -89,9 +89,11 @@ namespace YAVSRG.Utilities
         }
 
         //schedules a task - track marks whether the user should be able to see it in the task list/view its progress/cancel it
-        public void AddTask(UserTask Task, Action<bool> Callback, string Name, bool Track)
+        public NamedTask AddTask(UserTask Task, Action<bool> Callback, string Name, bool Track)
         {
-            AddTask(new NamedTask(Task, Name, Callback, Track));
+            var t = new NamedTask(Task, Name, Callback, Track);
+            AddTask(t);
+            return t;
         }
 
         public void StopAll()

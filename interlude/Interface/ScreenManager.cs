@@ -165,11 +165,11 @@ namespace YAVSRG.Interface
                 {
                     Current?.Draw(bounds.ExpandY(-Toolbar.Height));
                 }
+                Logo.Draw(bounds);
                 if (dialogs.Count > 0)
                 {
                     dialogs[0].Draw(bounds.ExpandY(-Toolbar.Height));
                 }
-                Logo.Draw(bounds);
                 Toolbar.Draw(bounds);
             }
         }

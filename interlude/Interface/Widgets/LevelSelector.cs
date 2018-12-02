@@ -44,7 +44,7 @@ namespace YAVSRG.Interface.Widgets
             public void UpdatePosition(float y)
             {
                 width = 600;
-                Move(new Rect(width - (float)Math.Pow((y-ScreenUtils.ScreenHeight+Game.Screens.Toolbar.Height+120) / 48f, 2)*1.5f, y, -50, y + height));
+                Move(new Rect(width - (float)Math.Pow((y - ScreenUtils.ScreenHeight + Game.Screens.Toolbar.Height + 120) / 48f, 2) * 1.5f, y, -50, y + height));
             }
 
             public float BottomEdge()
@@ -105,7 +105,7 @@ namespace YAVSRG.Interface.Widgets
                 bounds = GetBounds(bounds);
                 if (bounds.Top > ScreenUtils.ScreenHeight || bounds.Bottom < -ScreenUtils.ScreenHeight) { return; }
                 SpriteBatch.DrawTilingTexture("levelselectbase", bounds, 400, 0, 0, fill);
-                Game.Screens.DrawChartBackground(bounds, Color.FromArgb(80,fill), 1.5f);
+                Game.Screens.DrawChartBackground(bounds, Color.FromArgb(80, fill), 1.5f);
                 ScreenUtils.DrawFrame(bounds, 30f, border);
                 if (subtitle == "")
                 {
@@ -156,7 +156,7 @@ namespace YAVSRG.Interface.Widgets
         }
 
         protected List<Group> groups;
-        
+
         public int scroll = 0;
 
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
@@ -234,10 +234,12 @@ namespace YAVSRG.Interface.Widgets
                 ExpandGroup(x);
                 x.ScrollTo(ref scroll);
             },
-            (x) => {
+            (x) =>
+            {
                 if (Input.KeyPress(OpenTK.Input.Key.Delete))
                 {
-                    Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Are you SURE you want to delete ALL CHARTS in this group?",(d) => {
+                    Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Are you SURE you want to delete ALL CHARTS in this group?", (d) =>
+                    {
                         if (d == "Y")
                         {
                             ChartLoader.DeleteGroup(group);
@@ -262,10 +264,12 @@ namespace YAVSRG.Interface.Widgets
                         x.ScrollTo(ref scroll);
                     }
                 },
-                (x) => {
+                (x) =>
+                {
                     if (Input.KeyPress(OpenTK.Input.Key.Delete))
                     {
-                        Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Are you SURE you want to delete this chart from your computer?", (d) => {
+                        Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Are you SURE you want to delete this chart from your computer?", (d) =>
+                        {
                             if (d == "Y")
                             {
                                 ChartLoader.DeleteChart(chart);
@@ -282,7 +286,7 @@ namespace YAVSRG.Interface.Widgets
                         ExpandGroup(g);
                         g.ScrollTo(ref scroll);
                     }
-                }, () => { return Game.Gameplay.CurrentCachedChart == chart; }, chart.artist + " - " + chart.title, chart.diffname + " ("+chart.keymode.ToString()+"k)", Game.Options.Theme.SelectChart));
+                }, () => { return Game.Gameplay.CurrentCachedChart == chart; }, chart.artist + " - " + chart.title, chart.diffname + " (" + chart.keymode.ToString() + "k)", Game.Options.Theme.SelectChart));
             }
             groups.Add(g);
         }

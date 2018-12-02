@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Dialogs
 {
     class ProfileDialog : FadeDialog
     {
-        ScrollContainer profileSelector, physicalTop;
+        ScrollContainer profileSelector;
 
         public ProfileDialog(Action<string> action) : base(action)
         {
@@ -23,27 +23,8 @@ namespace YAVSRG.Interface.Dialogs
             {
                 profileSelector.AddChild(ProfileButton(Options.Options.Profiles[i]));
             }
-            AddChild(profileSelector.PositionTopLeft(200, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new TextPicker("Keymode", new[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, 1, (i) => { ChangeKeymode(i); }).PositionBottomRight(100,50,AnchorType.MIN,AnchorType.MIN));
-            physicalTop = new ScrollContainer(5, 5, false, 2, false, false);
-            AddChild(physicalTop.PositionTopLeft(50, 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(250, 50, AnchorType.MAX, AnchorType.MAX));
-
-            ChangeKeymode(1);
+            AddChild(profileSelector.PositionTopLeft(0.9f, 0, AnchorType.LERP, AnchorType.MIN).PositionBottomRight(0.99f, 100, AnchorType.LERP, AnchorType.MAX));
             //Game.Tasks.AddTask(Game.Options.Profile.Stats.RecalculateTop(), (b) => { ChangeKeymode(1); }, "RecalculateTop", false);
-        }
-
-        private void ChangeKeymode(int keymode)
-        {
-            Game.Tasks.AddTask((Output) => {
-                physicalTop.Items().Clear();
-                bool l = false;
-                foreach (ScoreInfoProvider si in Game.Options.Profile.Stats.GetPhysicalTop(keymode))
-                {
-                    physicalTop.AddChild(new TopScoreCard(si, l, false).PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MIN));
-                    l = !l;
-                }
-                return true;
-            }, (b) => { }, "TopScores", false);
         }
 
         private Widget ProfileButton(Options.Profile p)

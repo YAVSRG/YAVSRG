@@ -13,6 +13,7 @@ namespace YAVSRG.Gameplay
         public DateTime time;
         public string hitdata;
         public string player;
+        public string playerUUID = Game.Options.Profile.UUID;
         public Dictionary<string, string> mods;
         public float rate;
         public string playstyle;

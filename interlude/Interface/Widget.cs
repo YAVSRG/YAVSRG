@@ -29,12 +29,12 @@ namespace YAVSRG.Interface
             Children = new List<Widget>();
         }
 
-        protected virtual void AddToContainer(Widget parent)
+        public virtual void AddToContainer(Widget parent)
         {
             Parent = parent;
         }
 
-        protected virtual void RemoveFromContainer(Widget parent)
+        public virtual void RemoveFromContainer(Widget parent)
         {
             Parent = null;
         }

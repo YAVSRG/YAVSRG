@@ -41,6 +41,7 @@ namespace YAVSRG.Interface
             AddChild(
                 new Button("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenLobby()); })
                 .PositionTopLeft(400, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(320, 80, AnchorType.MAX, AnchorType.MIN));
+            AddChild(new ProfileInfoPanel());
             AddChild(Chat = new ChatBox());
             AddChild(new MusicControls());
             Animation.Add(_Height = new AnimationSlider(-5));
@@ -131,22 +132,22 @@ namespace YAVSRG.Interface
                     SpriteBatch.DrawRect(new Rect(ScreenWidth - i * s - 2, ScreenHeight - level, ScreenWidth - (i + 1) * s + 2, ScreenHeight), Color.FromArgb((int)level, Game.Screens.HighlightColor));
                 }
 
-
-                SpriteBatch.Font1.DrawText(Game.Options.Profile.Name, 30f, -ScreenWidth, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
+                //SpriteBatch.Font1.DrawText(Game.Options.Profile.Name, 30f, -ScreenWidth, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("Plays: " + Game.Options.Profile.Stats.TimesPlayed.ToString(), 18f, 0, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("Playtime: " + Utils.FormatTime(Game.Options.Profile.Stats.SecondsPlayed * 1000), 18f, 0, ScreenHeight - _Height + 28, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("S Ranks: " + Game.Options.Profile.Stats.SRanks, 18f, 0, ScreenHeight - _Height + 51, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(Game.Version, 25f, ScreenWidth, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 25f, ScreenWidth, ScreenHeight - _Height + 45, Game.Options.Theme.MenuFont);
 
-                Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Screens.DarkColor), 2f);
-                SpriteBatch.Font1.DrawCentredTextToFill(Notification, bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Options.Theme.MenuFont), true);
-
                 DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 3), 30f, Game.Screens.BaseColor);
                 DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 3, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
 
                 base.Draw(bounds.ExpandY(80 - _Height));
-
+                if (Chat.Collapsed)
+                {
+                    Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Screens.DarkColor), 2f);
+                    SpriteBatch.Font1.DrawCentredTextToFill(Notification, bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Options.Theme.MenuFont), true);
+                }
             }
 
             if (CursorMode > WidgetState.DISABLED) SpriteBatch.Draw("cursor", new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor);

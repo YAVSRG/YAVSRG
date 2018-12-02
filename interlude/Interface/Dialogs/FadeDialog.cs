@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 using YAVSRG.Interface.Animations;
 
 namespace YAVSRG.Interface.Dialogs
@@ -12,6 +13,7 @@ namespace YAVSRG.Interface.Dialogs
         protected AnimationSlider Fade;
         bool Closing;
         protected string Output = "";
+        DrawableFBO FBO;
 
         public FadeDialog(Action<string> action) : base(action)
         {
@@ -20,14 +22,16 @@ namespace YAVSRG.Interface.Dialogs
 
         public override void Draw(Rect bounds)
         {
-            SpriteBatch.DrawRect(bounds, System.Drawing.Color.FromArgb((int)(Fade * 127), 0, 0, 0));
+            PreDraw(bounds);
+            SpriteBatch.DrawRect(bounds, Color.FromArgb(127, 0, 0, 0));
             base.Draw(bounds);
+            PostDraw(bounds);
         }
 
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
-            if (Closing && Fade < 0.05f)
+            if (Closing && Fade < 0.02f)
             {
                 Close(Output);
             }
@@ -35,6 +39,19 @@ namespace YAVSRG.Interface.Dialogs
             {
                 OnClosing();
             }
+        }
+
+        protected void PreDraw(Rect bounds)
+        {
+            FBO = new DrawableFBO(null);
+        }
+
+        protected void PostDraw(Rect bounds)
+        {
+            FBO.Unbind();
+            Color c = Color.FromArgb((int)(255 * Fade), Color.White);
+            SpriteBatch.Draw(FBO, ScreenUtils.Bounds, c);
+            FBO.Dispose();
         }
 
         protected virtual void OnClosing()

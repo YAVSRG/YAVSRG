@@ -18,7 +18,7 @@ namespace YAVSRG.Interface.Widgets
             Data = data;
             Light = light;
 
-            AddChild(new TextBox(data.Data.Artist + " - " + data.Data.Title, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black)
+            AddChild(new TextBox(data.Data.Title, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black)
                 .PositionTopLeft(0, 0, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(0.4f, 0.6f, AnchorType.LERP, AnchorType.LERP));
             AddChild(new TextBox(data.Data.DiffName + " // " + data.Data.Creator, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black)
                 .PositionTopLeft(0, 0.6f, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(0.4f, 1, AnchorType.LERP, AnchorType.LERP));

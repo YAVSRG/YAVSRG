@@ -10,14 +10,25 @@ namespace YAVSRG.Gameplay
 {
     public class ProfileStats
     {
-        public int SecondsPlayed;
-        public int TimesPlayed;
-        //public int NotesHit;
-        public int TimesQuit;
-        public int SRanks;
+        public int SecondsPlayed, TimesPlayed, TimesQuit, SRanks;
 
-        public List<TopScore>[] PhysicalBest = new List<TopScore>[8];
-        public List<TopScore>[] TechnicalBest = new List<TopScore>[8];
+        public List<TopScore>[] PhysicalBest = new List<TopScore>[8], TechnicalBest = new List<TopScore>[8];
+
+        public float[] PhysicalMean = new float[8], TechnicalMean = new float[8];
+
+        public void UpdateMeans(int i)
+        {
+            TechnicalMean[i] = 1;
+            if (PhysicalBest[i] != null)
+            {
+                PhysicalMean[i] = 0;
+                foreach (TopScore t in PhysicalBest[i])
+                {
+                    PhysicalMean[i] += t.Rating;
+                }
+                PhysicalMean[i] /= 50f;
+            }
+        }
 
         public void SetScore(Score Score, Chart Chart)
         {
@@ -70,6 +81,7 @@ namespace YAVSRG.Gameplay
             {
                 KeymodeScores.RemoveAt(50); //remove a score if there are more than 50 now
             }
+            UpdateMeans(k);
         }
 
         public IEnumerable<ScoreInfoProvider> GetPhysicalTop(int i)
@@ -90,6 +102,11 @@ namespace YAVSRG.Gameplay
                 }
                 yield return new ScoreInfoProvider(s, c);
             }
+        }
+
+        public IEnumerable<ScoreInfoProvider> GetTechnicalTop(int i)
+        {
+            yield break; //nyi
         }
 
         public Utilities.TaskManager.UserTask RecalculateTop()
@@ -117,7 +134,8 @@ namespace YAVSRG.Gameplay
                     }
                     foreach (Score s in d.Scores)
                     {
-                        SetScore(s, c);
+                        if (s.playerUUID == Game.Options.Profile.UUID)
+                            SetScore(s, c);
                     }
                 }
                 lock (Game.Gameplay.ScoreDatabase.data) //nothing really interferes but this is just in case

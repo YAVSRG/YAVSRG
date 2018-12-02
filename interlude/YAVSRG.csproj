@@ -139,10 +139,12 @@
     <Compile Include="Charts\ChartLoader.cs" />
     <Compile Include="Charts\YAVSRG\SVManager.cs" />
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
+    <Compile Include="Interface\Dialogs\TopScoreDialog.cs" />
     <Compile Include="Interface\Widgets\FlowContainer.cs" />
     <Compile Include="Interface\Widgets\FrameContainer.cs" />
     <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarWidget.cs" />
+    <Compile Include="Interface\Widgets\TopScoreDisplay.cs" />
     <Compile Include="Net\Web\BloodcatChartData.cs" />
     <Compile Include="Render\DrawableFBO.cs" />
     <Compile Include="Utilities\Content.cs" />

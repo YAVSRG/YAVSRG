@@ -94,7 +94,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
             }
         }
 
-        bool collapsed
+        public bool Collapsed
         {
             get
             {
@@ -113,7 +113,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
         public ChatBox()
         {
             channels = new Dictionary<string, ChatChannel>();
-            channelSelector = new FlowContainer() { BackColor = () => Color.FromArgb(220, 0, 0, 0), UseBackground = false, VerticalFade = 0 };
+            channelSelector = new FlowContainer() { BackColor = () => Color.FromArgb(127, 0, 0, 0), UseBackground = false, VerticalFade = 0 };
             AddChild(channelSelector.PositionTopLeft(20, 20, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(220, 20, AnchorType.MIN, AnchorType.MAX));
             AddChild(emoji = new EmojiPicker().PositionTopLeft(240, 30, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(30, 30, AnchorType.MAX, AnchorType.MAX));
             emoji.SetState(WidgetState.DISABLED);
@@ -137,7 +137,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
                 using (DrawableFBO fbo = new DrawableFBO(null))
                 {
                     SpriteBatch.DrawRect(bounds, Color.FromArgb(180, 0, 0, 0));
-                    SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb(220, Color.Black));
+                    SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb(127, Color.Black));
                     DrawWidgets(bounds);
                     if (selectedChannel != "")
                     {
@@ -173,7 +173,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
 
         public override void Update(Rect bounds)
         {
-            if (!collapsed)
+            if (!Collapsed)
             {
                 base.Update(bounds);
             }
@@ -182,7 +182,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
                 Animation.Update();
             }
             bounds = GetBounds(bounds);
-            if (collapsed)
+            if (Collapsed)
             {
                 if (Input.KeyTap(Game.Options.General.Binds.Chat) && !ToolbarCollapsed)
                 {
@@ -222,7 +222,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
             var l = channels[channel];
             l.lines.Insert(0,text); //no limit to chat history
             //if i want one, put it here
-            if (collapsed && important)
+            if (Collapsed && important)
             {
                 newMessages += 1;
                 newMsgFade.Target = 1;
