@@ -99,6 +99,7 @@ namespace YAVSRG.Options
             SaveProfile(Profile);
             Profile = p;
             general.CurrentProfile = p.ProfilePath;
+            Content.ClearStore();
             Theme = Content.LoadThemeData(p.Skin);
         }
 

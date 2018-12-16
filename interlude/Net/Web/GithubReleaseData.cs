@@ -11,7 +11,6 @@ namespace YAVSRG.Net.Web
         public string url;
         public string tag_name;
         public string name;
-        public bool prerelease;
         public string published_at;
         public string body;
         public List<GithubAsset> assets;

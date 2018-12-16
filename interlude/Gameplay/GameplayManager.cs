@@ -54,7 +54,7 @@ namespace YAVSRG.Gameplay
 
         public void UpdateDifficulty()
         {
-            ChartDifficulty = new RatingReport(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[ModifiedChart.Keys]);
+            ChartDifficulty = new RatingReport(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.KeymodeLayouts[ModifiedChart.Keys]);
         }
 
         public void Unload()
@@ -119,14 +119,14 @@ namespace YAVSRG.Gameplay
             return s;
         }
 
-        public string GetModString(ChartWithModifiers chart, float rate, string playstyle)
+        public string GetModString(ChartWithModifiers chart, float rate, KeyLayout.Layout layout)
         {
-            return Utils.RoundNumber(rate) + "x, " + playstyle + chart.Mods;
+            return Utils.RoundNumber(rate) + "x, " + KeyLayout.GetLayoutName(layout, chart.Keys) + chart.Mods;
         }
 
         public string GetModString()
         {
-            return GetModString(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[ModifiedChart.Keys]);
+            return GetModString(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.KeymodeLayouts[ModifiedChart.Keys]);
         }
 
         public void SaveScores()

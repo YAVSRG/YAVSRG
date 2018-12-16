@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YAVSRG.Charts.DifficultyRating;
 
 namespace YAVSRG.Charts
 {
@@ -24,7 +25,7 @@ namespace YAVSRG.Charts
 
         public static CachedChart FromChart(YAVSRG.Chart c)
         {
-            DifficultyRating.RatingReport r = new DifficultyRating.RatingReport(new Gameplay.ChartWithModifiers(c),1,"");
+            RatingReport r = new RatingReport(new Gameplay.ChartWithModifiers(c),1,KeyLayout.Layout.Spread);
             return new CachedChart
             {
                 file = c.Data.File,

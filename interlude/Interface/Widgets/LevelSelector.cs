@@ -132,6 +132,7 @@ namespace YAVSRG.Interface.Widgets
                 }
                 Rect parentBounds = bounds;
                 bounds = GetBounds(bounds);
+                if (bounds.Top > ScreenUtils.ScreenHeight || bounds.Bottom < -ScreenUtils.ScreenHeight) { BottomRight.Update(); TopLeft.Update(); return; }
                 if (ScreenUtils.MouseOver(bounds))
                 {
                     TopLeft.Target(TopLeft.AbsoluteTargetX + 150, TopLeft.AbsoluteTargetY);
@@ -162,6 +163,57 @@ namespace YAVSRG.Interface.Widgets
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {
             Refresh();
+        }
+
+        public void Forward()
+        {
+            int i;
+            for (int g = 0; g < ChartLoader.GroupedCharts.Count; g++)
+            {
+                if ((i = ChartLoader.GroupedCharts[g].charts.IndexOf(Game.Gameplay.CurrentCachedChart)) >= 0)
+                {
+                    if (i + 1 == ChartLoader.GroupedCharts[g].charts.Count)
+                    {
+                        ChartLoader.SwitchToChart(ChartLoader.GroupedCharts[(g + 1) % ChartLoader.GroupedCharts.Count].charts[0], true);
+                    }
+                    else
+                    {
+                        ChartLoader.SwitchToChart(ChartLoader.GroupedCharts[g].charts[i + 1], true);
+                    }
+                    ScrollToSelected();
+                    return;
+                }
+            }
+        }
+
+        public void Back()
+        {
+            int i;
+            for (int g = 0; g < ChartLoader.GroupedCharts.Count; g++)
+            {
+                if ((i = ChartLoader.GroupedCharts[g].charts.IndexOf(Game.Gameplay.CurrentCachedChart)) >= 0)
+                {
+                    if (i == 0)
+                    {
+                        var c = ChartLoader.GroupedCharts[(g - 1 + ChartLoader.GroupedCharts.Count) % ChartLoader.GroupedCharts.Count];
+                        ChartLoader.SwitchToChart(c.charts[c.charts.Count - 1], true);
+                    }
+                    else
+                    {
+                        ChartLoader.SwitchToChart(ChartLoader.GroupedCharts[g].charts[i - 1], true);
+                    }
+                    ScrollToSelected();
+                    return;
+                }
+            }
+        }
+
+        public void Random()
+        {
+            int g = new Random().Next(0, ChartLoader.GroupedCharts.Count);
+            int i = new Random().Next(0, ChartLoader.GroupedCharts[g].charts.Count);
+            ChartLoader.SwitchToChart(ChartLoader.GroupedCharts[g].charts[i], true);
+            ScrollToSelected();
         }
 
         public void Refresh()
@@ -321,6 +373,18 @@ namespace YAVSRG.Interface.Widgets
             else if (Input.KeyPress(OpenTK.Input.Key.Down))
             {
                 scroll -= 15;
+            }
+            else if (Input.KeyTap(OpenTK.Input.Key.Right))
+            {
+                Forward();
+            }
+            else if (Input.KeyTap(OpenTK.Input.Key.Left))
+            {
+                Back();
+            }
+            else if (Input.KeyTap(OpenTK.Input.Key.F2))
+            {
+                Random();
             }
             scroll += Input.MouseScroll * 100;
         }

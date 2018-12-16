@@ -38,11 +38,12 @@ namespace YAVSRG.Interface.Screens
 
             //this stuff is ok to stay here
             AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
-            //AddChild(new PerformanceMeter(scoreTracker));
+            AddChild(new PerformanceMeter(scoreTracker));
             AddChild(new HitMeter(scoreTracker, widgetData.GetPosition("hitMeter")));
             AddChild(new ComboDisplay(scoreTracker, widgetData.GetPosition("combo")));
             AddChild(new ProgressBar(scoreTracker, widgetData.GetPosition("progressBar")).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
             AddChild(new AccMeter(scoreTracker, widgetData.GetPosition("accuracy")));
+            AddChild(new HPMeter(scoreTracker, widgetData.GetPosition("healthBar")));
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("time"), () => { return DateTime.Now.ToLongTimeString(); }));
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("timeLeft"), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("fps"), () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }));

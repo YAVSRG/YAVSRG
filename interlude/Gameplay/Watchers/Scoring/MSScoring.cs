@@ -18,7 +18,7 @@ namespace YAVSRG.Gameplay.Watchers.Scoring
             CurveEnd *= m;
         }
 
-        public override void AddJudgement(int i)
+        protected override void AddJudgement(int i)
         {
             Judgements[i]++;
         }

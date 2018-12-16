@@ -82,38 +82,51 @@ namespace YAVSRG.Charts
         {
             List<ChartGroup> Groups = new List<ChartGroup>();
             Dictionary<string, List<CachedChart>> temp = new Dictionary<string, List<CachedChart>>(); //holds the temp data as groups are being put together
+            List<string> toRemove;
             if (groupBy == GroupBy["Collection"]) //Collections have different behaviour (can't look up collection from chart, only reverse)
             {
                 foreach (string c in Game.Gameplay.Collections.Collections.Keys)
                 {
                     temp.Add(c, new List<CachedChart>());
-                    foreach (string id in Game.Gameplay.Collections.GetCollection(c).Entries)
+                    toRemove = new List<string>();
+                    lock (Cache)
                     {
-                        if (Cache.Charts.ContainsKey(id))
+                        foreach (string id in Game.Gameplay.Collections.GetCollection(c).Entries)
                         {
-                            temp[c].Add(Cache.Charts[id]);
+                            if (Cache.Charts.ContainsKey(id))
+                            {
+                                temp[c].Add(Cache.Charts[id]);
+                            }
+                            else
+                            {
+                                //todo: alert the user of this and/or remove chart from collection
+                                toRemove.Add(id);
+                                Log(id + "isn't present in the cache! Maybe it was deleted?", "", LogType.Warning);
+                            }
                         }
-                        else
-                        {
-                            //todo: alert the user of this and/or remove chart from collection
-                            Log(id + "isn't present in the cache! Maybe it was deleted?", "", LogType.Warning);
-                        }
+                    }
+                    foreach (string id in toRemove)
+                    {
+                        Game.Gameplay.Collections.GetCollection(c).Entries.Remove(id);
                     }
                 }
             }
             else //Grouping logic
             {
                 string s;
-                foreach (CachedChart c in Cache.Charts.Values)
+                lock (Cache)
                 {
-                    s = groupBy(c); //Gets group (as a string) to put this chart in
-                    if (temp.ContainsKey(s))
+                    foreach (CachedChart c in Cache.Charts.Values)
                     {
-                        temp[s].Add(c);
-                    }
-                    else
-                    {
-                        temp.Add(s, new List<CachedChart> { c });
+                        s = groupBy(c); //Gets group (as a string) to put this chart in
+                        if (temp.ContainsKey(s))
+                        {
+                            temp[s].Add(c);
+                        }
+                        else
+                        {
+                            temp.Add(s, new List<CachedChart> { c });
+                        }
                     }
                 }
             }

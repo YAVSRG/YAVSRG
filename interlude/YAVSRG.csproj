@@ -114,6 +114,7 @@
     <Compile Include="Charts\CachedChart.cs" />
     <Compile Include="Charts\Collections\Collection.cs" />
     <Compile Include="Charts\Collections\CollectionsManager.cs" />
+    <Compile Include="Charts\DifficultyRating\CalcUtils.cs" />
     <Compile Include="Charts\YAVSRG\BinarySwitcher.cs" />
     <Compile Include="Charts\DifficultyRating\RatingReport.cs" />
     <Compile Include="Charts\Osu\EventData.cs" />
@@ -139,9 +140,11 @@
     <Compile Include="Charts\ChartLoader.cs" />
     <Compile Include="Charts\YAVSRG\SVManager.cs" />
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
+    <Compile Include="Gameplay\Watchers\HP\HPSystem.cs" />
     <Compile Include="Interface\Dialogs\TopScoreDialog.cs" />
     <Compile Include="Interface\Widgets\FlowContainer.cs" />
     <Compile Include="Interface\Widgets\FrameContainer.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\HPMeter.cs" />
     <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarWidget.cs" />
     <Compile Include="Interface\Widgets\TopScoreDisplay.cs" />

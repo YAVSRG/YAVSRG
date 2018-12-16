@@ -16,7 +16,7 @@ namespace YAVSRG.Gameplay
         public string playerUUID = Game.Options.Profile.UUID;
         public Dictionary<string, string> mods;
         public float rate;
-        public string playstyle;
+        public Charts.DifficultyRating.KeyLayout.Layout layout;
         public int keycount;
 
         public static string GetScoreBadge(int[] judgements)
@@ -96,7 +96,7 @@ namespace YAVSRG.Gameplay
 
         public string Mods
         {
-            get { if (_mods == null) { _mods = Game.Gameplay.GetModString(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.playstyle); } return _mods; }
+            get { if (_mods == null) { _mods = Game.Gameplay.GetModString(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _mods; }
         }
 
         public IScoreSystem ScoreSystem
@@ -120,7 +120,7 @@ namespace YAVSRG.Gameplay
 
         public Charts.DifficultyRating.RatingReport RatingData
         {
-            get { if (_rating == null) { _rating = new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.playstyle); } return _rating; }
+            get { if (_rating == null) { _rating = new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _rating; }
         }
 
         public float PhysicalPerformance

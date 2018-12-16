@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OpenTK.Input;
 using YAVSRG.Interface;
 using YAVSRG.Interface.Widgets;
+using YAVSRG.Charts.DifficultyRating;
 
 namespace YAVSRG.Options.Panels
 {
@@ -150,8 +151,9 @@ namespace YAVSRG.Options.Panels
             {
                 Children.Remove(selectLayout);
             }
-            string[] layouts = Charts.DifficultyRating.KeyLayout.LAYOUTS[k].Keys.ToArray();
-            Children.Add(selectLayout = new TextPicker("Keyboard layout", layouts, Math.Max(0,Array.IndexOf(layouts, Game.Options.Profile.Playstyles[k])), (i) => { Game.Options.Profile.Playstyles[k] = layouts[i]; })
+            List<KeyLayout.Layout> layouts = KeyLayout.GetPossibleLayouts(k);
+            string[] layoutNames = layouts.Select((x) => KeyLayout.GetLayoutName(x,k)).ToArray();
+            Children.Add(selectLayout = new TextPicker("Keyboard layout", layoutNames, Math.Max(0,layouts.IndexOf(Game.Options.Profile.KeymodeLayouts[k])), (i) => { Game.Options.Profile.KeymodeLayouts[k] = layouts[i]; })
                 .PositionTopLeft(-150, 600, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(150, 650, AnchorType.CENTER, AnchorType.MIN));
         }
     }

@@ -56,18 +56,6 @@ namespace YAVSRG.Options.Panels
                 .PositionBottomRight(150, 525, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new FramedButton("buttonbase", "Change profile", () => { Game.Screens.AddDialog(new ProfileDialog((s) => { lp.Refresh(); Content.ClearStore(); })); }),
-                "WIP", ib)
-                .PositionTopLeft(-350, 550, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(-50, 625, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(
-                new TooltipContainer(
-                    new FramedButton("buttonbase", "Rename profile", () => { Game.Screens.AddDialog(new TextDialog("New Profile Name:", (s) => { Game.Options.Profile.Name = s; })); }),
-                "Rename your profile to a different name.\n(Not fully complete)", ib)
-                .PositionTopLeft(50, 550, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(350, 625, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(
-                new TooltipContainer(
                     new FramedButton("buttonbase", "Open Data Folder",
                 () => { System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory)); }),
                 "Opens the folder which Interlude works in. This is where you put skins, charts and other settings.", ib)

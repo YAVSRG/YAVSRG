@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using YAVSRG.Interface.Animations;
+using YAVSRG.Charts.DifficultyRating;
 
 namespace YAVSRG.Interface.Widgets
 {
@@ -46,8 +47,8 @@ namespace YAVSRG.Interface.Widgets
         {
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
             bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
-            physical.Target(Utils.PhysicalColor(Game.Gameplay.ChartDifficulty.Physical));
-            technical.Target(Utils.TechnicalColor(Game.Gameplay.ChartDifficulty.Physical));
+            physical.Target(CalcUtils.PhysicalColor(Game.Gameplay.ChartDifficulty.Physical));
+            technical.Target(CalcUtils.TechnicalColor(Game.Gameplay.ChartDifficulty.Physical));
             text.Target(Color.Black);
         }
     }

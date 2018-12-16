@@ -47,10 +47,11 @@ namespace YAVSRG.Gameplay
 
         public ChartWithModifiers Chart;
         public IScoreSystem Scoring;
+        public ILifeMeter HP;
         public HitData[] Hitdata;
         public List<IGameplayWatcher> Watchers;
         public AnimationColorFade WidgetColor;
-        public int MaxCombo = 0; //max possible combo
+        public int MaxCombo; //max possible combo, not best combo achieved
 
         public ScoreTracker(ChartWithModifiers c)
         {
@@ -58,7 +59,9 @@ namespace YAVSRG.Gameplay
             Watchers = new List<IGameplayWatcher>();
             Chart = c;
             Scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
+            HP = new Watchers.HP.HPSystem(Scoring);
             Watchers.Add(Scoring);
+            Watchers.Add(HP);
 
             Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); }; //feed current score system into gameplay ui handlers for hits
 
@@ -81,14 +84,14 @@ namespace YAVSRG.Gameplay
             WidgetColor.Update();
         }
 
-        public void RegisterHit(int i, int k, float delta)
+        public void RegisterHit(int index, int column, float delta)
         {
-            if (Hitdata[i].hit[k] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
-            Hitdata[i].hit[k] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)
-            Hitdata[i].delta[k] = delta;
+            if (Hitdata[index].hit[column] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
+            Hitdata[index].hit[column] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)
+            Hitdata[index].delta[column] = delta;
             foreach (IGameplayWatcher w in Watchers)
             {
-                w.HandleHit(k, i, Hitdata);
+                w.HandleHit(column, index, Hitdata);
             }
         }
 

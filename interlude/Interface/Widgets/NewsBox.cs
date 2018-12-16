@@ -12,6 +12,7 @@ namespace YAVSRG.Interface.Widgets
         GithubReleaseData data;
         Animations.AnimationSlider slide;
         Animations.AnimationCounter loading;
+        bool updateAvailable;
 
         public NewsBox() : base()
         {
@@ -26,6 +27,7 @@ namespace YAVSRG.Interface.Widgets
         public void ReceieveData(GithubReleaseData data)
         {
             this.data = data;
+            updateAvailable = !Game.Version.Contains(data.tag_name);
         }
 
         public override void Draw(Rect bounds)
@@ -37,7 +39,7 @@ namespace YAVSRG.Interface.Widgets
             float t = bounds.Top + h + (bounds.Height - h * 2) * slide;
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Top + h, bounds.Right, t), System.Drawing.Color.FromArgb(127, Game.Screens.DarkColor));
             ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredTextToFill("Updates & News", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h), Game.Options.Theme.MenuFont);
+            SpriteBatch.Font1.DrawCentredTextToFill("Updates & News", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + h), updateAvailable ? System.Drawing.Color.Yellow : Game.Options.Theme.MenuFont);
             ScreenUtils.DrawParallelogramWithBG(new Rect(bounds.Left + h * 0.5f * (1 - slide), t, bounds.Right, t + h), slide - 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill("Read the Wiki", new Rect(bounds.Left + h * 0.5f, t, bounds.Right, t + h), Game.Options.Theme.MenuFont);
 

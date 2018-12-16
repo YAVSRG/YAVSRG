@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using YAVSRG.Gameplay;
 using System.Drawing;
+using YAVSRG.Charts.DifficultyRating;
 
 namespace YAVSRG.Interface.Widgets
 {
@@ -26,7 +27,7 @@ namespace YAVSRG.Interface.Widgets
                 .PositionTopLeft(0.4f, 0, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(0.8f, 0.6f, AnchorType.LERP, AnchorType.LERP));
             AddChild(new TextBox(data.Time.ToString(), AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
                 .PositionTopLeft(0.4f, 0.6f, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(0.8f, 1, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(Utils.RoundNumber(data.PhysicalPerformance), AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont, Utils.PhysicalColor(data.PhysicalPerformance))
+            AddChild(new TextBox(Utils.RoundNumber(data.PhysicalPerformance), AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont, CalcUtils.PhysicalColor(data.PhysicalPerformance))
                 .PositionTopLeft(0.8f, 0, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(1, 0.6f, AnchorType.LERP, AnchorType.LERP));
             AddChild(new TextBox(data.Accuracy, AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
                 .PositionTopLeft(0.8f, 0.6f, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(1, 1, AnchorType.LERP, AnchorType.LERP));

@@ -48,7 +48,7 @@ namespace YAVSRG.Interface.Screens
                 keycount = scoreData.Chart.Keys,
                 mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods),
                 rate = (float)Game.Options.Profile.Rate,
-                playstyle = Game.Options.Profile.Playstyles[scoreData.Chart.Keys]
+                layout = Game.Options.Profile.KeymodeLayouts[scoreData.Chart.Keys]
             };
             if (ShouldSaveScore())
             {

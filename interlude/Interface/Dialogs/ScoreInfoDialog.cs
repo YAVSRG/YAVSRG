@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Interface.Animations;
 using YAVSRG.Gameplay;
-using YAVSRG.Gameplay.Watchers;
+using YAVSRG.Interface.Widgets;
+using System.Drawing;
 
 namespace YAVSRG.Interface.Dialogs
 {
@@ -15,25 +15,28 @@ namespace YAVSRG.Interface.Dialogs
 
         public ScoreInfoDialog(ScoreInfoProvider data, Action<string> a) : base(a)
         {
-            PositionTopLeft(-ScreenUtils.ScreenWidth * 2 + 100, 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth * 2 + 100, 100, AnchorType.MAX, AnchorType.MAX);
+            PositionTopLeft(100, ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(100, -ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MAX, AnchorType.MAX);
             Move(new Rect(100, 100, 100, 100));
-
             Data = data;
+            AddChild(new TextBox(Data.Accuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
         }
 
         public override void Draw(Rect bounds)
         {
-            base.Draw(bounds);
+            PreDraw(bounds);
+            SpriteBatch.DrawRect(bounds, Color.FromArgb(127, 0, 0, 0));
             bounds = GetBounds(bounds);
             Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1f);
-            ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
+            ScreenUtils.DrawFrame(bounds, 30f, Color.White);
+            DrawWidgets(bounds);
             ScreenUtils.DrawGraph(new Rect(bounds.Left + 20, bounds.Bottom - 200, bounds.Right - 20, bounds.Bottom - 20), Data.ScoreSystem, Data.HitData);
+            PostDraw(bounds);
         }
 
         protected override void OnClosing()
         {
             base.OnClosing();
-            Move(new Rect(-ScreenUtils.ScreenWidth * 2 + 100, 100, ScreenUtils.ScreenWidth * 2 + 100, 100));
+            Move(new Rect(100, ScreenUtils.ScreenHeight * 2 + 100, 100, -ScreenUtils.ScreenHeight * 2 + 100));
         }
     }
 }

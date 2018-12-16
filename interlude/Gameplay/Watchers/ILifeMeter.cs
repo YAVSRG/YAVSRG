@@ -6,7 +6,21 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Gameplay.Watchers
 {
-    public class ILifeMeter
+    public abstract class ILifeMeter : IGameplayWatcher
     {
+        protected float MaximumHP = 100;
+        protected float CurrentHP = 100;
+        protected float[] PointsPerJudgement;
+        protected bool Failed;
+
+        public virtual bool HasFailed()
+        {
+            return Failed;
+        }
+
+        public override float GetValue()
+        {
+            return CurrentHP / MaximumHP;
+        }
     }
 }

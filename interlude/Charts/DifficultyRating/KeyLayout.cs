@@ -8,58 +8,70 @@ namespace YAVSRG.Charts.DifficultyRating
 {
     public class KeyLayout
     {
-        public static Dictionary<string, KeyLayout>[] LAYOUTS = new Dictionary<string, KeyLayout>[] { //store of available key layouts for each mode
+        public enum Layout
+        {
+            Spread,
+            OneHand,
+            LeftOne,
+            RightOne,
+            LeftTwo,
+            RightTwo,
+            BMSLeft,
+            BMSRight
+        }
+
+        public static Dictionary<Layout, KeyLayout>[] LAYOUTS = new Dictionary<Layout, KeyLayout>[] { //store of available key layouts for each mode
             null,null,null,
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //3k
-                { "One Handed", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }) } } },
-                { "2k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2 }) } } },
-                { "1k + 2", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2 }) } } }
+                { Layout.OneHand, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }) } } },
+                { Layout.LeftOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2 }) } } },
+                { Layout.RightOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2 }) } } }
             },
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //4k
-                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3 }) } } },
-                { "One Handed", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }) } } },
-                { "3k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3 }) } } },
-                { "1k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3 }) } } }
+                { Layout.Spread, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3 }) } } },
+                { Layout.OneHand, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }) } } },
+                { Layout.LeftOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3 }) } } },
+                { Layout.RightOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3 }) } } }
             },
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //5k
-                { "3k + 2", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4 }) } } },
-                { "2k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3, 4 }) } } },
-                { "One Handed", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }) } } },
-                { "4k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4 }) } } },
-                { "1k + 4", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3, 4 }) } } }
+                { Layout.LeftOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4 }) } } },
+                { Layout.RightOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3, 4 }) } } },
+                { Layout.OneHand, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }) } } },
+                { Layout.LeftTwo, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4 }) } } },
+                { Layout.RightTwo, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3, 4 }) } } }
             },
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //6k
-                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5 }) } } },
-                { "4k + 2", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5 }) } } },
-                { "2k + 4", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3, 4, 5 }) } } },
-                { "5k + 1", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5 }) } } },
-                { "1k + 5", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3, 4, 5 }) } } }
+                { Layout.Spread, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5 }) } } },
+                { Layout.LeftOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5 }) } } },
+                { Layout.RightOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1 }), new Hand(new List<int> { 2, 3, 4, 5 }) } } },
+                { Layout.LeftTwo, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5 }) } } },
+                { Layout.RightTwo, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0 }), new Hand(new List<int> { 1, 2, 3, 4, 5 }) } } }
             },
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //7k
-                { "Keyboard/Left thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6 }) } } },
-                { "Keyboard/Right thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6 }) } } },
-                { "BMS/Left thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 3, 2 }), new Hand(new List<int> { 4, 5, 6 }) } } },
-                { "BMS/Right thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 4, 3, 5, 6 }) } } },
+                { Layout.LeftOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6 }) } } },
+                { Layout.RightOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6 }) } } },
+                { Layout.BMSLeft, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 3, 2 }), new Hand(new List<int> { 4, 5, 6 }) } } },
+                { Layout.BMSRight, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 4, 3, 5, 6 }) } } },
             },
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //8k
-                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6, 7 }) } } },
-                { "5k + 3", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7 }) } } },
-                { "3k + 5", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6, 7 }) } } },
+                { Layout.Spread, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6, 7 }) } } },
+                { Layout.LeftOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7 }) } } },
+                { Layout.RightOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2 }), new Hand(new List<int> { 3, 4, 5, 6, 7 }) } } },
             },
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //9k
-                { "Left thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7, 8 }) } } },
-                { "Right thumb", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6, 7, 8 }) } } },
+                { Layout.LeftOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7, 8 }) } } },
+                { Layout.RightOne, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3 }), new Hand(new List<int> { 4, 5, 6, 7, 8 }) } } },
             },
-            new Dictionary<string, KeyLayout>
+            new Dictionary<Layout, KeyLayout>
             { //10k
-                { "Spread", new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7, 8, 9 }) } } },
+                { Layout.Spread, new KeyLayout() { hands = new List<Hand> { new Hand(new List<int> { 0, 1, 2, 3, 4 }), new Hand(new List<int> { 5, 6, 7, 8, 9 }) } } },
             }
         };
 
@@ -95,13 +107,44 @@ namespace YAVSRG.Charts.DifficultyRating
 
         public List<Hand> hands; //a key layout is just a list of hands (unordered)
 
-        public static KeyLayout GetLayout(string name, int k) //static retrieval of key layout being used
+        public static string GetLayoutName(Layout layout, int keys)
         {
-            if (LAYOUTS[k].ContainsKey(name))
+            bool even = keys % 2 == 0;
+            switch (layout)
             {
-                return LAYOUTS[k][name];
+                case Layout.Spread:
+                    return "Spread";
+                case Layout.OneHand:
+                    return "One-Handed";
+                case Layout.LeftOne:
+                    return (keys / 2 + 1).ToString() + "k+" + (keys - keys / 2 - 1).ToString();
+                case Layout.RightOne:
+                    return (keys / 2 - (even ? 1 : 0)).ToString() + "k+" + (keys - keys / 2 + (even ? 1 : 0)).ToString();
+                case Layout.LeftTwo:
+                    return (keys / 2 + 2).ToString() + "k+" + (keys - keys / 2 - 2).ToString();
+                case Layout.RightTwo:
+                    return (keys / 2 - (even ? 2 : 1)).ToString() + "k+" + (keys - keys / 2 + (even ? 2 : 1)).ToString();
+                case Layout.BMSLeft:
+                    return "IIDX " + GetLayoutName(Layout.LeftOne, keys);
+                case Layout.BMSRight:
+                    return "IIDX " + GetLayoutName(Layout.RightOne, keys);
+                default:
+                    return "Unknown Layout";
             }
-            return LAYOUTS[k].First().Value;
+        }
+
+        public static List<Layout> GetPossibleLayouts(int keys)
+        {
+            return LAYOUTS[keys].Keys.ToList();
+        }
+
+        public static KeyLayout GetLayout(Layout layout, int k) //static retrieval of key layout being used
+        {
+            if (LAYOUTS[k].ContainsKey(layout))
+            {
+                return LAYOUTS[k][layout];
+            }
+            return LAYOUTS[k].First().Value; //get default (most common) playstyle
         }
     }
 }

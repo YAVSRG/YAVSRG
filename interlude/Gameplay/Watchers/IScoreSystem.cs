@@ -47,7 +47,7 @@ namespace YAVSRG.Gameplay.Watchers
             }
         }
 
-        public virtual void ComboBreak()
+        protected virtual void ComboBreak()
         {
             if (Combo > BestCombo)
             {
@@ -57,7 +57,7 @@ namespace YAVSRG.Gameplay.Watchers
             ComboBreaks += 1;
         }
 
-        public virtual void AddJudgement(int i)
+        protected virtual void AddJudgement(int i)
         {
             Judgements[i] += 1;
             PointsScored += PointsPerJudgement[i];
@@ -66,8 +66,13 @@ namespace YAVSRG.Gameplay.Watchers
 
         public virtual float Accuracy()
         {
-            if (PossiblePoints == 0) return 100;
-            return PointsScored * 100f / PossiblePoints;
+            return 100f * GetValue();
+        }
+
+        public override float GetValue()
+        {
+            if (PossiblePoints == 0) return 1;
+            return PointsScored / PossiblePoints;
         }
 
         public virtual int JudgeHit(float delta)
@@ -83,11 +88,6 @@ namespace YAVSRG.Gameplay.Watchers
         public virtual string FormatAcc()
         {
             return Utils.RoundNumber(Accuracy()) + "%";
-        }
-
-        public bool ReachedEnd(int snaps)
-        {
-            return Cursor == snaps;
         }
     }
 }

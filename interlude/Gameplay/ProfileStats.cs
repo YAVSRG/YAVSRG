@@ -47,7 +47,7 @@ namespace YAVSRG.Gameplay
             List<TopScore> KeymodeScores = PhysicalBest[k];
             var HitData = ScoreTracker.StringToHitData(Score.hitdata, Score.keycount);
             ChartWithModifiers ModdedChart = Game.Gameplay.GetModifiedChart(Score.mods, Chart);
-            float ScoreRating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(ModdedChart, Score.rate, Score.playstyle), HitData);
+            float ScoreRating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(ModdedChart, Score.rate, Score.layout), HitData);
             TopScore NewTopScore = new TopScore(Chart.GetFileIdentifier(), Game.Gameplay.ScoreDatabase.GetChartSaveData(Chart).Scores.IndexOf(Score), ScoreRating); //score is added to list after this function is over, so .Count gives correct id
             bool inserted = false;
 
@@ -116,30 +116,30 @@ namespace YAVSRG.Gameplay
                 PhysicalBest = new List<TopScore>[8];
                 TechnicalBest = new List<TopScore>[8];
                 List<string> oldHashes = new List<string>();
-                foreach (string hash in Game.Gameplay.ScoreDatabase.data.Keys)
-                {
-                    ChartSaveData d = Game.Gameplay.ScoreDatabase.data[hash];
-                    if (!ChartLoader.Cache.Charts.ContainsKey(d.Path))
-                    {
-                        Utilities.Logging.Log("Found score data for " + d.Path + " - the file no longer exists; will be deleted", "");
-                        oldHashes.Add(hash);
-                        continue;
-                    }
-                    Chart c = ChartLoader.Cache.LoadChart(ChartLoader.Cache.Charts[d.Path]);
-                    if (c.GetHash() != hash)
-                    {
-                        Utilities.Logging.Log("Found old score data for " + d.Path + " - the file is different; will be deleted", "");
-                        oldHashes.Add(hash);
-                        continue;
-                    }
-                    foreach (Score s in d.Scores)
-                    {
-                        if (s.playerUUID == Game.Options.Profile.UUID)
-                            SetScore(s, c);
-                    }
-                }
                 lock (Game.Gameplay.ScoreDatabase.data) //nothing really interferes but this is just in case
                 {
+                    foreach (string hash in Game.Gameplay.ScoreDatabase.data.Keys)
+                    {
+                        ChartSaveData d = Game.Gameplay.ScoreDatabase.data[hash];
+                        if (!ChartLoader.Cache.Charts.ContainsKey(d.Path))
+                        {
+                            Utilities.Logging.Log("Found score data for " + d.Path + " - the file no longer exists; will be deleted", "");
+                            oldHashes.Add(hash);
+                            continue;
+                        }
+                        Chart c = ChartLoader.Cache.LoadChart(ChartLoader.Cache.Charts[d.Path]);
+                        if (c.GetHash() != hash)
+                        {
+                            Utilities.Logging.Log("Found old score data for " + d.Path + " - the file is different; will be deleted", "");
+                            oldHashes.Add(hash);
+                            continue;
+                        }
+                        foreach (Score s in d.Scores)
+                        {
+                            if (s.playerUUID == Game.Options.Profile.UUID)
+                                SetScore(s, c);
+                        }
+                    }
                     foreach (string hash in oldHashes)
                     {
                         Game.Gameplay.ScoreDatabase.data.Remove(hash);

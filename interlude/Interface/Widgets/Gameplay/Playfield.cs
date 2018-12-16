@@ -26,6 +26,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         protected int ColumnWidth { get { return Game.Options.Theme.ColumnWidth; } }
         protected float ScrollSpeed { get { return Game.Options.Profile.ScrollSpeed / (float)Game.Options.Profile.Rate; } }
         protected ChartWithModifiers Chart { get { return scoreTracker.Chart; } }
+        protected int Height { get { return ScreenHeight * 2; } }
 
         protected Animations.AnimationCounter animation;
 
@@ -79,9 +80,9 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
 
             float min = 0;
-            while (min < ScreenHeight * 2 && i < Chart.Notes.Count) //continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
+            while (min < Height && i < Chart.Notes.Count) //continue drawing until we reach the end of the map or the top of the screen (don't need to draw notes beyond it)
             {
-                min = ScreenHeight * 2; //used to see if we've gone off the screen in all columns yet (and therefore stop rendering more notes, they'd be offscreen)
+                min = Height; //used to see if we've gone off the screen in all columns yet (and therefore stop rendering more notes, they'd be offscreen)
 
                 //calculates main SV, affecting all columns
                 while (svindex[0] < Chart.Timing.SV[0].Count - 1 && Chart.Timing.SV[0].Points[svindex[0] + 1].Offset < Chart.Notes.Points[i].Offset)
@@ -152,7 +153,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         private void DrawColumn(float offset, byte i)
         {
-            SpriteBatch.Draw("playfield", new Rect(i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, ScreenHeight * 2), Color.White);
+            SpriteBatch.Draw("playfield", new Rect(i * ColumnWidth + offset, 0, (i + 1) * ColumnWidth + offset, Height), Color.White);
         }
 
         private void DrawReceptor(float offset, int k)
@@ -191,7 +192,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
                 {
                     DrawLongTap(offset, k, holds[k], pos[k], holdColors[k]);
                 }
-                holds[k] = ScreenHeight * 2;
+                holds[k] = Height;
                 holdMiddles.RemoveColumn(k);
             }
             foreach (byte k in s.holds.GetColumns())

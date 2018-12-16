@@ -7,6 +7,7 @@ using OpenTK.Input;
 using Newtonsoft.Json;
 using YAVSRG.Gameplay;
 using YAVSRG.Gameplay.Watchers;
+using static YAVSRG.Charts.DifficultyRating.KeyLayout;
 
 namespace YAVSRG.Options
 {
@@ -51,10 +52,11 @@ namespace YAVSRG.Options
             new Key[] { Key.Z, Key.X, Key.C, Key.V, Key.Space, Key.Comma, Key.Period, Key.Slash, Key.RShift }, //9k
             new Key[] { Key.CapsLock, Key.Q, Key.W, Key.E, Key.V, Key.Space, Key.K, Key.L, Key.Semicolon, Key.Quote }, //10k
         };
-        public string[] Playstyles = new string[] //default playstyles
+
+        public Layout[] KeymodeLayouts = new Layout[] //default playstyles
         {
-            "","","",
-            "2k + 1", "Spread", "3k + 2", "Spread", "4k + 3", "Spread", "5k + 4", "Spread"
+            Layout.Spread,Layout.Spread,Layout.Spread, //placeholders
+            Layout.OneHand, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread
         };
     }
 }

@@ -166,9 +166,9 @@ namespace YAVSRG.Interface
                     Current?.Draw(bounds.ExpandY(-Toolbar.Height));
                 }
                 Logo.Draw(bounds);
-                if (dialogs.Count > 0)
+                for (int i = dialogs.Count - 1; i >= 0; i--)
                 {
-                    dialogs[0].Draw(bounds.ExpandY(-Toolbar.Height));
+                    dialogs[i].Draw(bounds.ExpandY(-Toolbar.Height));
                 }
                 Toolbar.Draw(bounds);
             }
