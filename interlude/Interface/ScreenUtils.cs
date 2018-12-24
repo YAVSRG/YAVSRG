@@ -72,30 +72,28 @@ namespace YAVSRG.Interface
             DrawFrame(bounds, 30f, Color.White);
         }
 
-        public static void DrawFrame(Rect bounds, float ignore, Color color, float shadow = 10f, float thickness = 3f)
-        {/*
-            //corners
-            SpriteBatch.Draw("frame", new Rect(bounds.Left, bounds.Top, bounds.Left + scale, bounds.Top + scale), color, 0, 0);
-            SpriteBatch.Draw("frame", new Rect(bounds.Right - scale, bounds.Top, bounds.Right, bounds.Top + scale), color, 2, 0);
-            SpriteBatch.Draw("frame", new Rect(bounds.Left, bounds.Bottom - scale, bounds.Left + scale, bounds.Bottom), color, 0, 2);
-            SpriteBatch.Draw("frame", new Rect(bounds.Right - scale, bounds.Bottom - scale, bounds.Right, bounds.Bottom), color, 2, 2);
-            //edges
-            SpriteBatch.Draw("frame", new Rect(bounds.Left + scale, bounds.Top, bounds.Right - scale, bounds.Top + scale), color, 1, 0);
-            SpriteBatch.Draw("frame", new Rect(bounds.Left, bounds.Top + scale, bounds.Left + scale, bounds.Bottom - scale), color, 0, 1);
-            SpriteBatch.Draw("frame", new Rect(bounds.Right - scale, bounds.Top + scale, bounds.Right, bounds.Bottom - scale), color, 2, 1);
-            SpriteBatch.Draw("frame", new Rect(bounds.Left + scale, bounds.Bottom - scale, bounds.Right - scale, bounds.Bottom), color, 1, 2);*/
-
+        public static void DrawFrame(Rect bounds, float ignore, Color color, byte components = 255, float shadow = 10f, float thickness = 3f)
+        {
             Color back = Color.FromArgb(color.A, Color.Black);
             Color transparent = Color.FromArgb(0, 0, 0, 0);
 
-            SpriteBatch.Draw(bounds: bounds.SliceTop(shadow), colors: new[] { back, back, transparent, transparent });
-            SpriteBatch.Draw(bounds: bounds.SliceBottom(shadow), colors: new[] { transparent, transparent, back, back });
-            SpriteBatch.Draw(bounds: bounds.SliceLeft(shadow), colors: new[] { back,  transparent, transparent, back });
-            SpriteBatch.Draw(bounds: bounds.SliceRight(shadow), colors: new[] { transparent, back, back, transparent });
-            SpriteBatch.Draw(bounds: bounds.SliceTop(thickness), color: color);
-            SpriteBatch.Draw(bounds: bounds.SliceBottom(thickness), color: color);
-            SpriteBatch.Draw(bounds: bounds.SliceLeft(thickness), color: color);
-            SpriteBatch.Draw(bounds: bounds.SliceRight(thickness), color: color);
+            if ((components & 16) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceLeft(shadow), colors: new[] { back, transparent, transparent, back });
+            if ((components & 32) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceTop(shadow), colors: new[] { back, back, transparent, transparent });
+            if ((components & 64) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceRight(shadow), colors: new[] { transparent, back, back, transparent });
+            if ((components & 128) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceBottom(shadow), colors: new[] { transparent, transparent, back, back });
+
+            if ((components & 1) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceLeft(thickness), color: color);
+            if ((components & 2) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceTop(thickness), color: color);
+            if ((components & 4) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceRight(thickness), color: color);
+            if ((components & 8) > 0)
+                SpriteBatch.Draw(bounds: bounds.SliceBottom(thickness), color: color);
         }
         /*
         public static void DrawArrowConfetti(float left, float top, float right, float bottom, float size, Color min, Color max, float value)

@@ -14,7 +14,8 @@ namespace YAVSRG.Gameplay.Watchers
             Default,
             Osu,
             DP,
-            Wife
+            Wife,
+            SCPlus
         }
 
         public float[] JudgementWindows;
@@ -41,6 +42,8 @@ namespace YAVSRG.Gameplay.Watchers
                     return new OD(Game.Options.Profile.OD);
                 case ScoreType.Wife:
                     return new MSScoring(Game.Options.Profile.Judge);
+                case ScoreType.SCPlus:
+                    return new StandardScoringPlus(Game.Options.Profile.Judge);
                 case ScoreType.Default:
                 default:
                     return new StandardScoring();

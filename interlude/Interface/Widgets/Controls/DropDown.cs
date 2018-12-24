@@ -11,14 +11,14 @@ namespace YAVSRG.Interface.Widgets
         private Action<string> setter;
         private Func<string> getter;
         private string label;
-        private ScrollContainer selector;
+        private FlowContainer selector;
 
         public DropDown(Action<string> set, Func<string> get, string label)
         {
             this.label = label;
             setter = set;
             getter = get;
-            selector = new ScrollContainer(20, 10, false);
+            selector = new FlowContainer() { MarginY = 25, MarginX = 20, VerticalFade = 30, Frame = 85 };
             selector.ToggleState();
             AddChild(selector.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, -400, AnchorType.MAX, AnchorType.MAX));
             AddChild(new SimpleButton(() => label + ": " + getter(), () => { selector.ToggleState(); }, () => selector.State == WidgetState.NORMAL, 20f));
@@ -35,7 +35,7 @@ namespace YAVSRG.Interface.Widgets
 
         private Widget Item(string label)
         {
-            return new SimpleButton(label, () => { setter(label); }, () => { return getter() == label; }, 15f).PositionBottomRight(40, 35, AnchorType.MAX, AnchorType.MIN);
+            return new SimpleButton(label, () => { setter(label); }, () => { return getter() == label; }, 15f).PositionBottomRight(0, 35, AnchorType.MAX, AnchorType.MIN);
         }
     }
 }

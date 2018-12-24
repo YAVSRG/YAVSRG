@@ -64,7 +64,7 @@ namespace YAVSRG.Interface.Screens
             quit.PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER);
             OnResize();
             //this won't run in OnResize since we're transitioning to this screen
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400), false);
         }
 
         public override void OnResize()
@@ -74,17 +74,17 @@ namespace YAVSRG.Interface.Screens
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() =>
             {
-                play.BottomRight.Target(-ScreenUtils.ScreenWidth + 1200, -100);
+                play.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1200, false);
             }));
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() =>
             {
-                options.BottomRight.Target(-ScreenUtils.ScreenWidth + 1130, 50);
+                options.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1130, false);
             }));
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() =>
             {
-                quit.BottomRight.Target(-ScreenUtils.ScreenWidth + 1060, 200);
+                quit.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1060, false);
             }));
             a.Add(new AnimationCounter(20, false));
             a.Add(new AnimationAction(() =>
@@ -93,7 +93,7 @@ namespace YAVSRG.Interface.Screens
             }));
             Animation.Add(a);
             if (Game.Screens.Current is ScreenMenu) //prevents logo moving mid transition
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400), false);
         }
 
         public override void OnExit(Screen next)
@@ -101,7 +101,7 @@ namespace YAVSRG.Interface.Screens
             base.OnExit(next);
             if (!(next is ScreenLoading))
             {
-                Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth - 400, -200, -ScreenUtils.ScreenWidth, 200));
+                Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth - 400, -200, -ScreenUtils.ScreenWidth, 200), false);
             }
             Game.Screens.BackgroundDim.Target = 0.3f;
             splashAnim.Target = 0;

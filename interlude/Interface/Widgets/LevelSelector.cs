@@ -44,12 +44,12 @@ namespace YAVSRG.Interface.Widgets
             public void UpdatePosition(float y)
             {
                 width = 600;
-                Move(new Rect(width - (float)Math.Pow((y - ScreenUtils.ScreenHeight + Game.Screens.Toolbar.Height + 120) / 48f, 2) * 1.5f, y, -50, y + height));
+                Move(new Rect(width - (float)Math.Pow((y - ScreenUtils.ScreenHeight + Game.Screens.Toolbar.Height + 120) / 48f, 2) * 1.5f, y, -50, y + height), false);
             }
 
             public float BottomEdge()
             {
-                return BottomRight.AbsoluteTargetY;
+                return BottomAnchor.StaticPos(true);
             }
 
             public void AddItem(Group i)
@@ -59,7 +59,7 @@ namespace YAVSRG.Interface.Widgets
 
             public void PopOutChildren()
             {
-                float y = BottomRight.AbsoluteTargetY;
+                float y = BottomEdge();
                 foreach (Group g in Children)
                 {
                     g.PopOut(y);
@@ -132,10 +132,10 @@ namespace YAVSRG.Interface.Widgets
                 }
                 Rect parentBounds = bounds;
                 bounds = GetBounds(bounds);
-                if (bounds.Top > ScreenUtils.ScreenHeight || bounds.Bottom < -ScreenUtils.ScreenHeight) { BottomRight.Update(); TopLeft.Update(); return; }
+                //if (bounds.Top > ScreenUtils.ScreenHeight || bounds.Bottom < -ScreenUtils.ScreenHeight) { BottomRight.Update(); TopLeft.Update(); return; }
                 if (ScreenUtils.MouseOver(bounds))
                 {
-                    TopLeft.Target(TopLeft.AbsoluteTargetX + 150, TopLeft.AbsoluteTargetY);
+                    LeftAnchor.Move(LeftAnchor.StaticPos(true)+150, false);
                     fill.Target(Utils.ColorInterp(baseColor, Color.White, 0.2f));
                     if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                     {

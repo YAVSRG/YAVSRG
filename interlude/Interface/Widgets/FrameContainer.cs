@@ -12,7 +12,8 @@ namespace YAVSRG.Interface.Widgets
     {
         public Func<Color> FrameColor = () => Game.Screens.HighlightColor, BackColor = () => Game.Screens.DarkColor;
         public bool UseBackground = true;
-        public float VerticalFade = 200, HorizontalFade = 0;
+        public float VerticalFade = 0, HorizontalFade = 0;
+        public byte Frame = 255;
         public AnimationSlider Alpha;
         private DrawableFBO FBO;
 
@@ -25,13 +26,14 @@ namespace YAVSRG.Interface.Widgets
         {
             bounds = GetBounds(bounds);
             PreDraw(bounds);
-            DrawBackplate(bounds);
+            ScreenUtils.DrawFrame(bounds, 30f, FrameColor(), components: Frame);
             PostDraw(bounds);
             DrawWidgets(bounds);
         }
 
-        protected void DrawBackplate(Rect bounds)
+        protected void PreDraw(Rect bounds)
         {
+            FBO = new DrawableFBO(null);
             if (UseBackground)
             {
                 Game.Screens.DrawChartBackground(bounds, BackColor(), 2f);
@@ -40,12 +42,6 @@ namespace YAVSRG.Interface.Widgets
             {
                 SpriteBatch.DrawRect(bounds, BackColor());
             }
-            ScreenUtils.DrawFrame(bounds, 30f, FrameColor());
-        }
-
-        protected void PreDraw(Rect bounds)
-        {
-            FBO = new DrawableFBO(null);
         }
 
         protected void PostDraw(Rect bounds)
@@ -58,7 +54,6 @@ namespace YAVSRG.Interface.Widgets
             SpriteBatch.DrawTilingTexture(FBO, bounds.SliceLeft(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { Color.Transparent, c, c, Color.Transparent });
             SpriteBatch.DrawTilingTexture(FBO, bounds.SliceRight(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { c, Color.Transparent, Color.Transparent, c });
             SpriteBatch.DrawTilingTexture(FBO, bounds.ExpandX(-HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { c, c, c, c });
-            //SpriteBatch.DrawTiling(sprite:FBO, bounds: bounds.ExpandX(-HorizontalFade).ExpandY(-VerticalFade), color:c, scaleX: ScreenUtils.ScreenWidth*2, scaleY: ScreenUtils.ScreenHeight*2, offsetX: ScreenUtils.ScreenWidth, offsetY: ScreenUtils.ScreenHeight,)
             FBO.Dispose();
         }
     }

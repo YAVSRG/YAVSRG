@@ -54,7 +54,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Move(new Rect(0, 0, 0, 0));
+            Move(new Rect(0, 0, 0, 0), false);
             Game.Gameplay.OnUpdateChart += OnUpdateChart;
             Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play((long)Game.CurrentChart.Data.PreviewTime); };
             diffDisplay.ChangeChart(true);
@@ -68,7 +68,7 @@ namespace YAVSRG.Interface.Screens
             Input.ChangeIM(null);
             Game.Gameplay.OnUpdateChart -= OnUpdateChart;
             ChartLoader.OnRefreshGroups -= OnUpdateGroups;
-            Move(new Rect(-ScreenWidth, 0, -ScreenWidth, 0));
+            Move(new Rect(-ScreenWidth, 0, -ScreenWidth, 0), false);
         }
 
         public override void Update(Rect bounds)

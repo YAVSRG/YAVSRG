@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Drawing;
 using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Interface.Animations;
-using OpenTK;
 
 namespace YAVSRG.Interface
 {
@@ -40,13 +39,15 @@ namespace YAVSRG.Interface
         public Widgets.Logo Logo;
         public Toolbar Toolbar;
 
-        private AnchorPoint ParallaxPos = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN);
+        private AnimationSlider ParallaxPosX = new AnimationSlider(0);
+        private AnimationSlider ParallaxPosY = new AnimationSlider(0);
         private Func<Point> ParallaxFunc = () => new Point(Input.MouseX, Input.MouseY);
 
         public ScreenManager()
         {
             animation2.Add(Parallax);
-            animation2.Add(ParallaxPos);
+            animation2.Add(ParallaxPosX);
+            animation2.Add(ParallaxPosY);
             animation2.Add(BackgroundDim);
             animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
             animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
@@ -179,9 +180,8 @@ namespace YAVSRG.Interface
             //this draws the background of the chart on the screen
             //a section of the texture is selected such all parts of the screen line up with the overall background image being fitted to the whole screen
 
-            float parallaxX = parallaxMult * Parallax * ParallaxPos.AbsoluteX / ScreenWidth / 2; //this calculates parallax from mouse position
-            float parallaxY = parallaxMult * Parallax * ParallaxPos.AbsoluteY / ScreenHeight / 2;
-            //SpriteBatch.DrawTiling(sprite: FBO, bounds: bounds, color: c, scaleX: (ScreenWidth + Parallax * parallaxMult) * 2, scaleY: (ScreenHeight + Parallax * parallaxMult) * 2, offsetX: parallaxX + ScreenWidth, offsetY: parallaxY + ScreenHeight);
+            float parallaxX = parallaxMult * Parallax * ParallaxPosX / ScreenWidth / 2; //this calculates parallax from mouse position
+            float parallaxY = parallaxMult * Parallax * ParallaxPosY / ScreenHeight / 2;
             SpriteBatch.DrawTilingTexture(FBO, bounds, (ScreenWidth + Parallax * parallaxMult) * 2, (ScreenHeight + Parallax * parallaxMult) * 2, parallaxX / ScreenWidth + 0.5f, parallaxY / ScreenHeight + 0.5f, new Color[] { c, c, c, c });
         }
 
@@ -224,7 +224,8 @@ namespace YAVSRG.Interface
             animation.Update();
             animation2.Update();
             var p = ParallaxFunc();
-            ParallaxPos.Target(p.X, p.Y);
+            ParallaxPosX.Target = p.X;
+            ParallaxPosY.Target = p.Y;
             if (Input.KeyTap(Game.Options.General.Binds.CollapseToToolbar))
             {
                 Game.Instance.CollapseToIcon();

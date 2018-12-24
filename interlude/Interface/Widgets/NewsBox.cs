@@ -21,7 +21,7 @@ namespace YAVSRG.Interface.Widgets
             Animation.Add(loading = new Animations.AnimationCounter(1000000, true));
             PositionTopLeft(0, 0, AnchorType.MAX, AnchorType.MIN);
             PositionBottomRight(-400, 0, AnchorType.MAX, AnchorType.MAX);
-            Move(new Rect(400, 0, 0, 0));
+            Move(new Rect(400, 0, 0, 0), false);
         }
 
         public void ReceieveData(GithubReleaseData data)

@@ -10,8 +10,7 @@ namespace YAVSRG.Interface
 {
     public class Widget
     {
-        public AnchorPoint TopLeft; //probably need better names. this is the top left corner
-        public AnchorPoint BottomRight; //this is the bottom left corner
+        public AnimationAnchorPoint LeftAnchor, TopAnchor, RightAnchor, BottomAnchor;
         public AnimationGroup Animation; //animation manager for this widget
 
         protected Widget Parent;
@@ -21,11 +20,11 @@ namespace YAVSRG.Interface
 
         public Widget()
         {
-            TopLeft = new AnchorPoint(0, 0, AnchorType.MIN, AnchorType.MIN); //these defaults were put in later for widgets to auto-fill the space they're in
-            BottomRight = new AnchorPoint(0, 0, AnchorType.MAX, AnchorType.MAX);
             Animation = new AnimationGroup(true);
-            Animation.Add(TopLeft);
-            Animation.Add(BottomRight);
+            Animation.Add(LeftAnchor = new AnimationAnchorPoint(0, AnchorType.MIN));
+            Animation.Add(TopAnchor = new AnimationAnchorPoint(0, AnchorType.MIN));
+            Animation.Add(RightAnchor = new AnimationAnchorPoint(0, AnchorType.MAX));
+            Animation.Add(BottomAnchor = new AnimationAnchorPoint(0, AnchorType.MAX));
             Children = new List<Widget>();
         }
 
@@ -59,22 +58,22 @@ namespace YAVSRG.Interface
 
         public float Left(Rect bounds)
         {
-            return TopLeft.X(bounds.Left, bounds.Right);
+            return LeftAnchor.RelativePos(bounds.Left, bounds.Right, false);
         }
 
         public float Top(Rect bounds)
         {
-            return TopLeft.Y(bounds.Top, bounds.Bottom);
+            return TopAnchor.RelativePos(bounds.Top, bounds.Bottom, false);
         }
 
         public float Right(Rect bounds)
         {
-            return BottomRight.X(bounds.Left, bounds.Right);
+            return RightAnchor.RelativePos(bounds.Left, bounds.Right, false);
         }
 
         public float Bottom(Rect bounds)
         {
-            return BottomRight.Y(bounds.Top, bounds.Bottom);
+            return BottomAnchor.RelativePos(bounds.Top, bounds.Bottom, false);
         }
 
         public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its *container*
@@ -84,7 +83,7 @@ namespace YAVSRG.Interface
 
         public virtual Rect GetBounds() //returns the bounds of *this widget* when no bounds are given (useful for some unusual cases but otherwise you shouldn't be using this)
             //only use this when you need access to the widget bounds and you're not inside a draw or update call (where you're given them)
-            //it works backwards to find the bounds the widget should have
+            //it works backwards to find the bounds the widget should have and therefore takes more steps than the one above
         {
             if (Parent != null)
             {
@@ -101,29 +100,35 @@ namespace YAVSRG.Interface
             return PositionTopLeft(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor).PositionBottomRight(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
         }
 
-        public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay) //deprecate soon
+        public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay) //todo: deprecate these
         {
-            TopLeft.Reposition(x, y, ax, ay);
+            LeftAnchor.Move(x, ax);
+            TopAnchor.Move(y, ay);
             return this; //allows for method chaining
         }
 
         public Widget PositionBottomRight(float x, float y, AnchorType ax, AnchorType ay)
         {
-            BottomRight.Reposition(x, y, ax, ay);
+            RightAnchor.Move(x, ax);
+            BottomAnchor.Move(y, ay);
             return this;
         }
 
-        public Widget Move(Rect bounds, Rect parentBounds)
+        public Widget Move(Rect bounds, Rect parentBounds, bool instant)
         {
-            TopLeft.Target(bounds.Left, bounds.Top, parentBounds);
-            BottomRight.Target(bounds.Right, bounds.Bottom, parentBounds);
+            LeftAnchor.Move(bounds.Left, instant, parentBounds.Left, parentBounds.Right);
+            TopAnchor.Move(bounds.Top, instant, parentBounds.Top, parentBounds.Bottom);
+            RightAnchor.Move(bounds.Right, instant, parentBounds.Left, parentBounds.Right);
+            BottomAnchor.Move(bounds.Bottom, instant, parentBounds.Top, parentBounds.Bottom);
             return this;
         }
 
-        public Widget Move(Rect bounds)
+        public Widget Move(Rect bounds, bool instant)
         {
-            TopLeft.Target(bounds.Left, bounds.Top);
-            BottomRight.Target(bounds.Right, bounds.Bottom);
+            LeftAnchor.Move(bounds.Left, instant);
+            TopAnchor.Move(bounds.Top, instant);
+            RightAnchor.Move(bounds.Right, instant);
+            BottomAnchor.Move(bounds.Bottom, instant);
             return this;
         }
 

@@ -39,7 +39,7 @@ namespace YAVSRG.Interface.Widgets
             AddChild(new TextEntryBox((s) => { SearchString = s; }, () => (SearchString), () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
                 .PositionTopLeft(520, 10, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 70, AnchorType.MAX, AnchorType.MIN));
 
-            AddChild(new Button("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }).PositionTopLeft(600, 0, AnchorType.MAX,AnchorType.MIN).PositionBottomRight(520,80,AnchorType.MAX,AnchorType.MIN));
+            AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }).PositionTopLeft(600, 0, AnchorType.MAX,AnchorType.MIN).PositionBottomRight(520,80,AnchorType.MAX,AnchorType.MIN));
         }
 
         public override void Draw(Rect bounds)

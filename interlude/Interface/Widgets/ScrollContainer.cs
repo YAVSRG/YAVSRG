@@ -58,8 +58,7 @@ namespace YAVSRG.Interface.Widgets
                 }
             }
             widgetBounds = child.GetBounds(bounds);
-            child.TopLeft.Position(x, y, bounds);
-            child.BottomRight.Position(x + widgetBounds.Width, y + widgetBounds.Height, bounds);
+            child.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds, true);
             base.AddChild(child);
         }
 
@@ -78,7 +77,7 @@ namespace YAVSRG.Interface.Widgets
                     if (w.State > 0)
                     {
                         widgetBounds = w.GetBounds(bounds);
-                        w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
+                        w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds, false);
                         if (y + widgetBounds.Height <= 0)
                         {
                             selectedItem += 1;

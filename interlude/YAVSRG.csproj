@@ -141,6 +141,8 @@
     <Compile Include="Charts\YAVSRG\SVManager.cs" />
     <Compile Include="Charts\YAVSRG\SVPoint.cs" />
     <Compile Include="Gameplay\Watchers\HP\HPSystem.cs" />
+    <Compile Include="Gameplay\Watchers\Scoring\StandardScoringPlus.cs" />
+    <Compile Include="Interface\Animations\AnimationAnchorPoint.cs" />
     <Compile Include="Interface\Dialogs\TopScoreDialog.cs" />
     <Compile Include="Interface\Widgets\FlowContainer.cs" />
     <Compile Include="Interface\Widgets\FrameContainer.cs" />
@@ -185,7 +187,6 @@
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\Animation.cs" />
     <Compile Include="Interface\Animations\AnimationAction.cs" />
-    <Compile Include="Interface\Animations\AnchorPoint.cs" />
     <Compile Include="Interface\Animations\AnimationColorMixer.cs" />
     <Compile Include="Interface\Animations\AnimationFade.cs" />
     <Compile Include="Interface\Animations\AnimationGroup.cs" />
@@ -221,7 +222,7 @@
     <Compile Include="Interface\Widgets\ChartInfoPanel.cs" />
     <Compile Include="Interface\Widgets\Controls\BannerButton.cs" />
     <Compile Include="Interface\Widgets\Controls\BoolPicker.cs" />
-    <Compile Include="Interface\Widgets\Controls\Button.cs" />
+    <Compile Include="Interface\Widgets\Controls\SpriteButton.cs" />
     <Compile Include="Interface\Widgets\ChartInfoControls.cs" />
     <Compile Include="Interface\Widgets\ChartSortingControls.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ChatBox.cs" />

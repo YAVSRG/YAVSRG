@@ -3,30 +3,44 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets
 {
-    class FramedButton : Button
+    class FramedButton : FrameContainer
     {
-        float scroll;
+        Action OnClick;
+        Animations.AnimationColorMixer Fill, Border;
+        public Func<bool> Highlight = () => false;
 
-        public FramedButton(string sprite, string label, Action onClick) : base(sprite, label, onClick)
+        public FramedButton(string label, Action onClick)
         {
-        }
-
-        public override void Draw(Rect bounds)
-        {
-            base.Draw(bounds);
-            bounds = GetBounds(bounds);
-            SpriteBatch.DrawTilingTexture(icon, bounds, 200, scroll, 0, color);
-            ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
-            SpriteBatch.Font1.DrawCentredText(text, 30f, bounds.CenterX, bounds.CenterY - 20, Game.Options.Theme.MenuFont, true, Utils.ColorInterp(color,System.Drawing.Color.Black,0.5f));
+            OnClick = onClick;
+            Animation.Add(Fill = new Animations.AnimationColorMixer(Game.Screens.DarkColor));
+            Animation.Add(Border = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
+            FrameColor = () => Border;
+            BackColor = () => Fill;
+            AddChild(new TextBox(() => label, AnchorType.CENTER, 0, true, () => Game.Options.Theme.MenuFont, BackColor));
         }
 
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
-            scroll += 0.002f;
+            if (ScreenUtils.MouseOver(GetBounds(bounds)))
+            {
+                Fill.Target(Game.Screens.BaseColor);
+                Border.Target(Game.Options.Theme.MenuFont);
+                if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
+                {
+                    Game.Audio.PlaySFX("click");
+                    OnClick();
+                }
+            }
+            else
+            {
+                Fill.Target(Highlight() ? Game.Screens.BaseColor : Game.Screens.DarkColor);
+                Border.Target(Game.Screens.HighlightColor);
+            }
         }
     }
 }

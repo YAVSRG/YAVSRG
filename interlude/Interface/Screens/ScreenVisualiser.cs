@@ -21,17 +21,17 @@ namespace YAVSRG.Interface.Screens
         public ScreenVisualiser()
         {
             AddChild(
-                new Button("buttonplay", "", () => { Game.Audio.Play(); })
+                new SpriteButton("buttonplay", "", () => { Game.Audio.Play(); })
                 .PositionTopLeft(250, 10, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(170, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttonpause", "", () => { Game.Audio.Pause(); })
+                new SpriteButton("buttonpause", "", () => { Game.Audio.Pause(); })
                 .PositionTopLeft(170, 10, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(90, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
-                new Button("buttonstop", "", () => { Game.Audio.Stop(); })
+                new SpriteButton("buttonstop", "", () => { Game.Audio.Stop(); })
                 .PositionTopLeft(90, 10, AnchorType.MAX, AnchorType.MIN)
                 .PositionBottomRight(10, 90, AnchorType.MAX, AnchorType.MIN)
                 );
@@ -42,7 +42,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Screens.Logo.Move(new Rect(-400, -400, 400, 400), GetBounds());
+            Game.Screens.Logo.Move(new Rect(-400, -400, 400, 400), GetBounds(), false);
             Game.Screens.BackgroundDim.Target = 1;
             Game.Screens.Toolbar.SetState(WidgetState.NORMAL);
             Game.Screens.Parallax.Target *= 4;
@@ -52,7 +52,7 @@ namespace YAVSRG.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200));
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200), false);
             Game.Screens.BackgroundDim.Target = 0.3f;
             Game.Screens.SetParallaxOverride(null);
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
@@ -116,7 +116,7 @@ namespace YAVSRG.Interface.Screens
             base.Update(bounds);
             float f = Utils.GetBeat(1);
             float r = 400 + Utils.GetBeat(1) * 20;
-            Game.Screens.Logo.Move(new Rect(-r, -r, r, r));
+            Game.Screens.Logo.Move(new Rect(-r, -r, r, r), false);
 
             if (hideUI.Val < 0.99f)
             {

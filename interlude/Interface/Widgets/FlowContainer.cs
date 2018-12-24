@@ -12,6 +12,7 @@ namespace YAVSRG.Interface.Widgets
     {
         public float MarginX = 10, MarginY = 10, RowSpacing = 5;
         public float ScrollPosition;
+        public int VisibleIndexTop, VisibleIndexBottom;
         protected float ContentSize;
         AnimationSlider ScrollBarPosition;
         AnimationColorMixer ScrollBarColor;
@@ -24,50 +25,52 @@ namespace YAVSRG.Interface.Widgets
 
         public override void Update(Rect bounds)
         {
-            Rect newBounds = GetBounds(bounds);
-            FlowContent(newBounds);
-            base.Update(bounds);
-            if (ScreenUtils.MouseOver(newBounds))
+            bounds = GetBounds(bounds);
+            FlowContent(bounds);
+            if (ScreenUtils.MouseOver(bounds))
             {
                 ScrollBarColor.Target(Color.FromArgb(127, Game.Screens.HighlightColor));
                 ScrollPosition -= Input.MouseScroll * 100;
                 ScrollPosition = Math.Max(Math.Min(ScrollPosition, ContentSize - bounds.Height), 0);
             }
+            Animation.Update();
         }
 
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
             PreDraw(bounds);
-            DrawBackplate(bounds);
-            PostDraw(bounds);
             Rect newBounds = bounds.Expand(-MarginX, -MarginY);
-            SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
-            SpriteBatch.DrawRect(bounds, Color.Transparent);
-            SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
+            //SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
+            //SpriteBatch.DrawRect(newBounds, Color.Transparent);
+            //SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
             lock (Children)
             {
                 foreach (Widget w in Children)
                 {
-                    if (w.State > 0 && w.Bottom(newBounds) > newBounds.Top && w.Top(newBounds) < newBounds.Bottom) //optimisation for large numbers of items
+                    if (w.State > 0 && w.Bottom(newBounds) > bounds.Top && w.Top(newBounds) < bounds.Bottom) //optimisation for large numbers of items
                     {
                         w.Draw(newBounds);
                     }
                 }
             }
-            SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
+            //SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
+            ScreenUtils.DrawFrame(bounds, 30f, FrameColor(), components: Frame);
+            PostDraw(bounds);
         }
 
         private void FlowContent(Rect bounds)
         {
-            bounds = GetBounds(bounds).Expand(-MarginX, -MarginY);
+            VisibleIndexTop = VisibleIndexBottom = -1;
+            bounds = bounds.Expand(-MarginX, -MarginY);
             float x = 0;
             float y = -ScrollPosition;
             Rect widgetBounds;
             lock (Children)
             {
-                foreach (Widget w in Children)
+                for (int i = 0; i < Children.Count; i++)
                 {
+                    Widget w = Children[i];
                     if (w.State > 0)
                     {
                         widgetBounds = w.GetBounds(bounds);
@@ -78,7 +81,13 @@ namespace YAVSRG.Interface.Widgets
                             y += widgetBounds.Height + RowSpacing;
                         }
                         ContentSize = y + widgetBounds.Height;
-                        w.Move(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds);
+                        w.Move(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds, false);
+                        if (ContentSize > bounds.Top && y < bounds.Bottom)
+                        {
+                            if (VisibleIndexTop < 0) VisibleIndexTop = i;
+                            VisibleIndexBottom = i;
+                        }
+                        w.Update(bounds);
                     }
                 }
             }
@@ -116,8 +125,16 @@ namespace YAVSRG.Interface.Widgets
                 y += widgetBounds.Height + RowSpacing;
             }
             base.AddChild(child);
-            child.TopLeft.Position(x - widgetBounds.Width, y, bounds);
-            child.BottomRight.Position(x, y + widgetBounds.Height, bounds);
+            child.Move(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds, true);
+        }
+
+        public void ScrollTo(int index)
+        {
+            if (index >= 0 && index < Children.Count)
+            {
+                Rect bounds = GetBounds().Expand(-MarginX, -MarginY);
+                ScrollPosition += Children[index].TopAnchor.RelativePos(bounds.Top, bounds.Bottom, true) - bounds.Top;
+            }
         }
 
         public void Clear()
@@ -129,6 +146,22 @@ namespace YAVSRG.Interface.Widgets
                     w.RemoveFromContainer(this);
                 }
                 Children.Clear();
+            }
+        }
+
+        public void Filter(Func<Widget,bool> filter)
+        {
+            foreach (Widget w in Children)
+            {
+                w.SetState(filter(w) ? WidgetState.NORMAL : WidgetState.DISABLED);
+            }
+        }
+
+        public void Sort(Comparison<Widget> compare)
+        {
+            lock (Children)
+            {
+                Children.Sort(compare);
             }
         }
     }

@@ -16,7 +16,7 @@ namespace YAVSRG.Interface.Dialogs
         public ScoreInfoDialog(ScoreInfoProvider data, Action<string> a) : base(a)
         {
             PositionTopLeft(100, ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(100, -ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MAX, AnchorType.MAX);
-            Move(new Rect(100, 100, 100, 100));
+            Move(new Rect(100, 100, 100, 100), false);
             Data = data;
             AddChild(new TextBox(Data.Accuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
         }
@@ -36,7 +36,7 @@ namespace YAVSRG.Interface.Dialogs
         protected override void OnClosing()
         {
             base.OnClosing();
-            Move(new Rect(100, ScreenUtils.ScreenHeight * 2 + 100, 100, -ScreenUtils.ScreenHeight * 2 + 100));
+            Move(new Rect(100, ScreenUtils.ScreenHeight * 2 + 100, 100, -ScreenUtils.ScreenHeight * 2 + 100), false);
         }
     }
 }

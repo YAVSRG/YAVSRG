@@ -139,7 +139,7 @@ namespace YAVSRG.Interface.Widgets
                     int i = 1;
                     foreach (var mb in modbuttons)
                     {
-                        mb.Move(new Rect(100 + spacing * i, 250, 200 + spacing * i, 350), bounds);
+                        mb.Move(new Rect(100 + spacing * i, 250, 200 + spacing * i, 350), bounds, false);
                         i++;
                     }
                 }
@@ -147,7 +147,7 @@ namespace YAVSRG.Interface.Widgets
                 {
                     foreach (var mb in modbuttons)
                     {
-                        mb.Move(new Rect(-150, 250, -50, 350), bounds);
+                        mb.Move(new Rect(-150, 250, -50, 350), bounds, false);
                     }
                 }
             }

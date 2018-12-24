@@ -7,14 +7,14 @@ using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets
 {
-    public class Button : Widget
+    public class SpriteButton : Widget
     {
         protected string icon;
         protected string text;
         protected Action action;
         protected Animations.AnimationColorMixer color;
 
-        public Button(string sprite, string label, Action onClick) : base()
+        public SpriteButton(string sprite, string label, Action onClick) : base()
         {
             icon = sprite;
             text = label;

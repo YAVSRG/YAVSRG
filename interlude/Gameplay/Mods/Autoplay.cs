@@ -17,7 +17,6 @@ namespace YAVSRG.Gameplay.Mods
                     if (hitdata[i].hit[k] == 1)
                     {
                         hitdata[i].hit[k] = 2;
-                        hitdata[i].delta[k] = 17.952f;
                     }
                 }
             }

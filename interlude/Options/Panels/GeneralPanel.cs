@@ -50,13 +50,13 @@ namespace YAVSRG.Options.Panels
                 .PositionBottomRight(-150, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new FramedButton("buttonbase", "Apply", () => { Game.Instance.ApplyWindowSettings(Options.general); }),
+                    new FramedButton("Apply", () => { Game.Instance.ApplyWindowSettings(Options.general); }),
                 "Applies the selected settings (above). Without this they won't be applied until you restart the game so you don't accidentally mess them up.", ib)
                 .PositionTopLeft(-150, 450, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(150, 525, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new FramedButton("buttonbase", "Open Data Folder",
+                    new FramedButton("Open Data Folder",
                 () => { System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory)); }),
                 "Opens the folder which Interlude works in. This is where you put skins, charts and other settings.", ib)
             .PositionTopLeft(-150, 650, AnchorType.CENTER, AnchorType.MIN)

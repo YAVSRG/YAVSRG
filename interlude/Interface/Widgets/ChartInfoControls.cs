@@ -30,10 +30,10 @@ namespace YAVSRG.Interface.Widgets
             ModMenu modMenu = new ModMenu();
             AddChild(modMenu.PositionTopLeft(0, 150, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(new FramedButton("buttonbase", "Play", () => { Game.Gameplay.PlaySelectedChart(); })
+            AddChild(new FramedButton("Play", () => { Game.Gameplay.PlaySelectedChart(); })
                 .PositionTopLeft(0.55f, 75, AnchorType.LERP, AnchorType.MAX)
                 .PositionBottomRight(0.9f, 25, AnchorType.LERP, AnchorType.MAX));
-            AddChild(new FramedButton("buttonbase", "Mods", () => { modMenu.Toggle(); })
+            AddChild(new FramedButton("Mods", () => { modMenu.Toggle(); })
                 .PositionTopLeft(0.1f, 75, AnchorType.LERP, AnchorType.MAX)
                 .PositionBottomRight(0.45f, 25, AnchorType.LERP, AnchorType.MAX));
         }
@@ -41,7 +41,7 @@ namespace YAVSRG.Interface.Widgets
         public override void OnResize()
         {
             base.OnResize();
-            scroll.BottomRight.Reposition(ScreenUtils.ScreenWidth * 2 - 750, 150, AnchorType.MIN, AnchorType.MAX);
+            scroll.Move(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150), true);
         }
 
         public void ChangeChart(bool force)
@@ -51,7 +51,7 @@ namespace YAVSRG.Interface.Widgets
                 sb.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
                 lastChart = Game.Gameplay.CurrentChart;
             }
-            scroll.BottomRight.Reposition(ScreenUtils.ScreenWidth * 2 - 750, 150, AnchorType.MIN, AnchorType.MAX); //just to make sure
+            scroll.Move(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150), true); //just to make sure
             ip.ChangeChart(); //ip needs to change length/bpm. difficulty is already recalculated
         }
 

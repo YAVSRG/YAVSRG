@@ -23,47 +23,30 @@ namespace YAVSRG.Interface.Screens
         {
             Children.Clear();
             var ib = new InfoBox();
-            ScrollContainer tabs = new ScrollContainer(5f, 5f, false);
+            FlowContainer tabs = new FlowContainer();
             lp = new LayoutPanel(ib);
-            tabs.AddChild(new GeneralPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
-            tabs.AddChild(new GameplayPanel(ib, lp).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
-            tabs.AddChild(lp.PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 600, 800, AnchorType.MIN, AnchorType.MIN));
+            tabs.AddChild(new GeneralPanel(ib, lp).PositionBottomRight(0, 900, AnchorType.MAX, AnchorType.MIN));
+            tabs.AddChild(new GameplayPanel(ib, lp).PositionBottomRight(0, 900, AnchorType.MAX, AnchorType.MIN));
+            tabs.AddChild(lp.PositionBottomRight(0, 900, AnchorType.MAX, AnchorType.MIN));
             lp.Refresh();
 
             AddChild(tabs.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MAX, AnchorType.MAX));
             AddChild(ib.PositionTopLeft(550, 50, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(50, 50, AnchorType.MAX, AnchorType.MAX));
 
-            //AddChild(ScrollButton("General",0,tabs));
-            //AddChild(ScrollButton("Gameplay", 1, tabs));
-            //AddChild(ScrollButton("Layout", 2, tabs));
+            AddChild(ScrollButton("General", 0, tabs));
+            AddChild(ScrollButton("Gameplay", 1, tabs));
+            AddChild(ScrollButton("Layout", 2, tabs));
         }
 
-        private Widget ScrollButton(string name, int id, ScrollContainer container)
+        private Widget ScrollButton(string name, int id, FlowContainer container)
         {
-            return new SimpleButton(name, () => { container.ScrollToItem(id); }, () => container.selectedItem == id, 20f).PositionTopLeft(0, id * 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(100, id * 100 + 50, AnchorType.MIN, AnchorType.MIN);
+            return new FramedButton(name, () => { container.ScrollTo(id); }) { Highlight = () => container.VisibleIndexBottom == id, Frame = 170, HorizontalFade = 50 }.PositionTopLeft(0, id * 60, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(250, id * 60 + 60, AnchorType.MIN, AnchorType.MIN);
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
             Game.Gameplay.UpdateChart(); //recolor notes based on settings if they've changed
-
-            /*Game.Options.Profile.Stats.Scores = new List<TopScore>[8];
-            foreach (var d in Game.Gameplay.ScoreDatabase.data.Values)
-            {
-                Game.Gameplay.ChangeChart(null, Charts.YAVSRG.Chart.FromFile(d.Path), false);
-                foreach (var s in d.Scores)
-                {
-                    Game.Options.Profile.Stats.SetScore(s);
-                }
-            }*/
-        }
-
-        public override void Draw(Rect bounds)
-        {
-            base.Draw(bounds);
-            bounds = GetBounds(bounds);
-            SpriteBatch.Font2.DrawText("u can scroll down btw", 25f, ScreenUtils.ScreenWidth - 500, bounds.Top + 20, Color.White);
         }
     }
 }

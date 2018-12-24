@@ -8,13 +8,10 @@ using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets
 {
-    class BannerButton : Button
+    class BannerButton : SpriteButton
     {
-        AnchorPoint textPosition;
-
         public BannerButton(string label, Action onClick, AnchorType text = AnchorType.CENTER) : base("banner", label, onClick)
         {
-            textPosition = new AnchorPoint(0,0,text,AnchorType.CENTER);
         }
 
         public override void Draw(Rect bounds)
