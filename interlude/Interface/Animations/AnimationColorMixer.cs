@@ -47,5 +47,10 @@ namespace YAVSRG.Interface.Animations
         {
             return Color.FromArgb((int)s.A.Val, (int)s.R.Val, (int)s.G.Val, (int)s.B.Val);
         }
+
+        public void Skip()
+        {
+            R.Val = R.Target; G.Val = G.Target; B.Val = B.Target; A.Val = A.Target;
+        }
     }
 }

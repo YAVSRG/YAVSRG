@@ -30,19 +30,6 @@ namespace YAVSRG.Interface.Screens
         private void OnUpdateGroups()
         {
             selector.Refresh();
-            Game.Tasks.AddTask((Output) =>
-            {
-                string id = Game.Gameplay.CurrentCachedChart.GetFileIdentifier();
-                foreach (CachedChart c in ChartLoader.Cache.Charts.Values)
-                {
-                    if (c.GetFileIdentifier() == id)
-                    {
-                        Game.Gameplay.CurrentCachedChart = c;
-                        return true;
-                    }
-                }
-                return false;
-            }, (b) => { selector.ScrollToSelected(); }, "ScrollToSelected", false);
         }
 
         private void OnUpdateChart()
@@ -58,7 +45,6 @@ namespace YAVSRG.Interface.Screens
             Game.Gameplay.OnUpdateChart += OnUpdateChart;
             Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play((long)Game.CurrentChart.Data.PreviewTime); };
             diffDisplay.ChangeChart(true);
-            selector.ScrollToSelected();
             ChartLoader.OnRefreshGroups += OnUpdateGroups;
         }
 

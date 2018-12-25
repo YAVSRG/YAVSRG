@@ -95,6 +95,7 @@ namespace YAVSRG.Interface
             if ((components & 8) > 0)
                 SpriteBatch.Draw(bounds: bounds.SliceBottom(thickness), color: color);
         }
+
         /*
         public static void DrawArrowConfetti(float left, float top, float right, float bottom, float size, Color min, Color max, float value)
         {

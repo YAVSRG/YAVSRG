@@ -12,6 +12,181 @@ namespace YAVSRG.Interface.Widgets
 {
     public class LevelSelector : Widget
     {
+        protected class SelectableItem
+        {
+            List<SelectableItem> Children = new List<SelectableItem>();
+            SelectableItem Parent;
+            bool Expanded;
+            AnimationColorMixer FrameColor, FillColor;
+            AnimationSlider MouseOver;
+
+            public bool ScrollFlag;
+            public Func<bool> Highlight = () => false;
+            public float Height = 80f;
+            public string Title = "?", Subtitle = "";
+            public Action OnClick, OnRightClick;
+
+            public SelectableItem()
+            {
+                OnClick = () => { if (Expanded) Collapse(); else Expand(); };
+                OnRightClick = () => { Parent.Collapse(); Parent.ScrollFlag = true; };
+                FrameColor = new AnimationColorMixer(Color.White);
+                FillColor = new AnimationColorMixer(Game.Screens.BaseColor);
+                MouseOver = new AnimationSlider(0);
+            }
+
+            public float Draw(ref float topEdge, float minBound, float maxBound)
+            {
+                if (Parent != null)
+                {
+                    if (topEdge < maxBound && topEdge + Height > minBound)
+                    {
+                        Rect bounds = new Rect(ScreenUtils.ScreenWidth - 600 - MouseOver + (float)Math.Pow(topEdge * 0.021, 2) * 1.5f, topEdge, ScreenUtils.ScreenWidth, topEdge + Height);
+                        SpriteBatch.DrawTilingTexture("levelselectbase", bounds, 400, 0, 0, FillColor);
+                        Game.Screens.DrawChartBackground(bounds, Color.FromArgb(80, FillColor), 1.5f);
+                        ScreenUtils.DrawFrame(bounds, 30f, FrameColor, components: 187);
+                        if (Subtitle == "")
+                        {
+                            SpriteBatch.Font1.DrawTextToFill(Title, new Rect(bounds.Left + 20, bounds.Top + 22.5f, bounds.Left + 600, bounds.Bottom - 20), FrameColor, true, Utils.ColorInterp(FillColor, Color.Black, 0.7f));
+                        }
+                        else
+                        {
+                            SpriteBatch.Font1.DrawTextToFill(Title, new Rect(bounds.Left + 20, bounds.Top + 8f, bounds.Left + 600, bounds.Bottom - 35), FrameColor, true, Utils.ColorInterp(FillColor, Color.Black, 0.5f));
+                            SpriteBatch.Font2.DrawTextToFill(Subtitle, new Rect(bounds.Left + 20, bounds.Bottom - 40, bounds.Left + 600, bounds.Bottom - 5), FrameColor, true, Utils.ColorInterp(FrameColor, Color.Black, 0.7f));
+                        }
+                    }
+                    topEdge += Height;
+                }
+                if (Expanded)
+                {
+                    foreach (SelectableItem c in Children)
+                    {
+                        c.Draw(ref topEdge, minBound, maxBound);
+                    }
+                }
+                return topEdge;
+            }
+
+            public float Update(ref float topEdge, float minBound, float maxBound)
+            {
+                if (Parent != null)
+                {
+                    if (ScrollFlag)
+                    {
+                        ScrollFlag = false;
+                        ScrollTo(topEdge);
+                    }
+                    if (topEdge < maxBound && topEdge + Height > minBound)
+                    {
+                        Rect bounds = new Rect(ScreenUtils.ScreenWidth - 600 - MouseOver + (float)Math.Pow(topEdge * 0.021, 2) * 1.5f, topEdge, ScreenUtils.ScreenWidth, topEdge + Height);
+                        if (ScreenUtils.MouseOver(bounds))
+                        {
+                            FillColor.Target(Game.Screens.BaseColor);
+                            MouseOver.Target = 150;
+                            if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
+                            {
+                                Game.Audio.PlaySFX("click", pitch: 0.8f, volume: 0.5f);
+                                OnClick();
+                                if (Children.Count == 0)
+                                {
+                                    ScrollFlag = true;
+                                }
+                            }
+                            else if (Input.MouseClick(OpenTK.Input.MouseButton.Right))
+                            {
+                                Game.Audio.PlaySFX("click", pitch: 1.2f, volume: 0.5f);
+                                OnRightClick();
+                            }
+                        }
+                        else
+                        {
+                            FillColor.Target(Highlight() ? Game.Screens.BaseColor : Game.Screens.DarkColor); //Color by options
+                            MouseOver.Target = 0;
+                        }
+                        FillColor.Update(); FrameColor.Update(); MouseOver.Update();
+                    }
+                    else
+                    {
+                        FillColor.Target(Game.Screens.DarkColor);
+                        FillColor.Skip(); FrameColor.Skip(); MouseOver.Val = 0;
+                    }
+                    topEdge += Height;
+                }
+                if (Expanded)
+                {
+                    foreach (SelectableItem c in Children)
+                    {
+                        c.Update(ref topEdge, minBound, maxBound);
+                    }
+                }
+                return topEdge;
+            }
+
+            protected void ScrollTo(float topEdge)
+            {
+                GetRoot().Height -= topEdge;
+            }
+
+            public void AddChild(SelectableItem item)
+            {
+                item.Parent = this;
+                Children.Add(item);
+            }
+
+            public float GetHeight()
+            {
+                float height = Parent != null ? Height : 0;
+                if (Expanded)
+                {
+                    foreach (SelectableItem c in Children)
+                    {
+                        height += c.GetHeight();
+                    }
+                }
+                return height;
+            }
+
+            public SelectableItem GetRoot()
+            {
+                if (Parent != null)
+                {
+                    return Parent.GetRoot();
+                }
+                return this;
+            }
+
+            public void Collapse()
+            {
+                //GetRoot().Height -= GetHeight() - Height;
+                if (Parent != null)
+                    Expanded = false;
+            }
+
+            public void Expand()
+            {
+                Expanded = true;
+                //GetRoot().Height += GetHeight() - Height;
+            }
+
+            public void ExpandToRoot()
+            {
+                Expand();
+                Parent?.ExpandToRoot();
+            }
+
+            public IEnumerable<SelectableItem> Iter()
+            {
+                foreach (SelectableItem c in Children)
+                {
+                    foreach (SelectableItem i in c.Iter())
+                    {
+                        yield return i;
+                    }
+                }
+                yield return this;
+            }
+        }
+
         protected class Group : Widget
         {
             public new List<Group> Children;
@@ -156,9 +331,10 @@ namespace YAVSRG.Interface.Widgets
             }
         }
 
-        protected List<Group> groups;
+        //protected List<Group> groups;
+        protected SelectableItem items;
 
-        public int scroll = 0;
+        public AnimationSlider scroll = new AnimationSlider(0);
 
         public LevelSelector(Screens.ScreenLevelSelect parent) : base()
         {
@@ -218,41 +394,68 @@ namespace YAVSRG.Interface.Widgets
 
         public void Refresh()
         {
-            groups = new List<Group>();
+            items = new SelectableItem();
             foreach (ChartLoader.ChartGroup p in ChartLoader.GroupedCharts)
             {
-                AddPack(p);
+                SelectableItem pack = new SelectableItem() { Height = 100, Title = p.label, Highlight = () => { return p.charts.Contains(Game.Gameplay.CurrentCachedChart); } };
+                foreach (CachedChart chart in p.charts)
+                {
+                    pack.AddChild(new SelectableItem() { Highlight = () => { return Game.Gameplay.CurrentCachedChart == chart; },
+                        OnClick = () =>
+                        {
+                            if (Game.Gameplay.CurrentCachedChart == chart)
+                            {
+                                Game.Gameplay.PlaySelectedChart();
+                            }
+                            else
+                            {
+                                ChartLoader.SwitchToChart(chart, true);
+                                Input.ChangeIM(null);
+                            }
+                        },
+                        Title = chart.artist + " - " + chart.title, Subtitle = chart.diffname + " (" + chart.keymode.ToString() + "k)" });
+                }
+                items.AddChild(pack);
             }
+            items.Expand();
+            ScrollToSelectedAsync();
         }
 
         public void ScrollToSelected()
         {
-            int y = scroll;
-            foreach (Group g in groups)
+            scroll.Val = scroll.Target;
+            foreach (SelectableItem g in items.Iter())
             {
-                g.UpdatePosition(y);
-                y += g.GetHeight();
-            }
-            foreach (Group g in groups)
-            {
-                if (g.Highlight())
+                if (g.Height == 80 && g.Highlight())
                 {
-                    if (!g.Expand)
-                        ExpandGroup(g);
+                    g.ExpandToRoot();
+                    g.ScrollFlag = true;
+                    break;
+                }
+            }
+        }
 
-                    foreach (Group c in g.Children)
+        public void ScrollToSelectedAsync()
+        {
+            Game.Tasks.AddTask((Output) =>
+            {
+                string id = Game.Gameplay.CurrentCachedChart.GetFileIdentifier();
+                foreach (ChartLoader.ChartGroup g in ChartLoader.GroupedCharts)
+                {
+                    foreach (CachedChart c in g.charts)
                     {
-                        if (c.Highlight())
+                        if (c.GetFileIdentifier() == id)
                         {
-                            c.ScrollTo(ref scroll);
-                            return;
+                            Game.Gameplay.CurrentCachedChart = c;
+                            return true;
                         }
                     }
                 }
-            }
-            scroll = 0;
+                return false;
+            }, (b) => { ScrollToSelected(); }, "ScrollToSelected", false);
         }
 
+        /*
         private void ExpandGroup(Group x)
         {
             bool temp = x.Expand; //remember if the group in question was expanded or not
@@ -262,9 +465,9 @@ namespace YAVSRG.Interface.Widgets
                 {
                     if (c.BottomEdge() < x.BottomEdge()) //collapse all groups (includes the one just clicked on)
                     {
-                        scroll += c.GetHeight();
+                        scroll.Target += c.GetHeight();
                         c.Expand = false; //has to be in this order
-                        scroll -= c.GetHeight(); //for this correction to work
+                        scroll.Target -= c.GetHeight(); //for this correction to work
                     }
                     else
                     {
@@ -278,13 +481,13 @@ namespace YAVSRG.Interface.Widgets
                 x.PopOutChildren(); //this makes the expanded items not all come from the same point, they are spread out and offscreen
             }
         }
-
+        /*
         public void AddPack(ChartLoader.ChartGroup group)
         {
             Group g = new Group(100, (x) =>
             {
                 ExpandGroup(x);
-                x.ScrollTo(ref scroll);
+                //x.ScrollTo(ref scroll.Target);
             },
             (x) =>
             {
@@ -313,7 +516,7 @@ namespace YAVSRG.Interface.Widgets
                     {
                         ChartLoader.SwitchToChart(chart, true);
                         Input.ChangeIM(null);
-                        x.ScrollTo(ref scroll);
+                        //x.ScrollTo(ref scroll);
                     }
                 },
                 (x) =>
@@ -336,43 +539,38 @@ namespace YAVSRG.Interface.Widgets
                     else
                     {
                         ExpandGroup(g);
-                        g.ScrollTo(ref scroll);
+                        //g.ScrollTo(ref scroll);
                     }
                 }, () => { return Game.Gameplay.CurrentCachedChart == chart; }, chart.artist + " - " + chart.title, chart.diffname + " (" + chart.keymode.ToString() + "k)", Game.Options.Theme.SelectChart));
             }
             groups.Add(g);
-        }
+        }*/
 
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            foreach (Group g in groups)
-            {
-                g.Draw(bounds);
-            }
+            float r = scroll + bounds.Top;
+            items.Draw(ref r, bounds.Top, bounds.Bottom);
         }
 
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
             bounds = GetBounds(bounds);
-            int y = scroll;
-            foreach (Group g in groups)
-            {
-                g.UpdatePosition(y);
-                g.Update(bounds);
-                y += g.GetHeight();
-            }
-            if (y < bounds.Height) scroll += 10; //prevents users from scrolling off the list
-            if (scroll > 0) scroll -= 10;
+            float r = scroll + bounds.Top;
+            items.Height = 0;
+            items.Update(ref r, bounds.Top, bounds.Bottom);
+            scroll.Target += items.Height;
+            scroll.Target = Math.Max(bounds.Height - items.GetHeight(), scroll.Target);
+            scroll.Target = Math.Min(scroll.Target, 0);
             if (Input.KeyPress(OpenTK.Input.Key.Up))
             {
-                scroll += 15;
+                scroll.Target += 15;
             }
             else if (Input.KeyPress(OpenTK.Input.Key.Down))
             {
-                scroll -= 15;
+                scroll.Target -= 15;
             }
             else if (Input.KeyTap(OpenTK.Input.Key.Right))
             {
@@ -386,7 +584,8 @@ namespace YAVSRG.Interface.Widgets
             {
                 Random();
             }
-            scroll += Input.MouseScroll * 100;
+            scroll.Target += Input.MouseScroll * 100;
+            scroll.Update();
         }
     }
 }
