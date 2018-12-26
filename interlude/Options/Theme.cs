@@ -18,10 +18,8 @@ namespace YAVSRG.Options
         public string Font1 = "Akrobat Black";
         public string Font2 = "Akrobat";
         public Color MenuFont = Color.White;
-        public Color SelectPack = Color.FromArgb(100, 30, 180);
         public Color SelectChart = Color.FromArgb(0, 180, 110);
-        public Color SelectDiff = Color.FromArgb(0, 140, 200);
-        public Color ThemeColor = Color.FromArgb(0, 255, 160);
+        public Color DefaultThemeColor = Color.FromArgb(0, 255, 160);
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;
         public float JudgementFadeTime = 1500f; //milliseconds

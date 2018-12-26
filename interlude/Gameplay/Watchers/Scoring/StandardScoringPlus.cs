@@ -9,12 +9,13 @@ namespace YAVSRG.Gameplay.Watchers.Scoring
     public class StandardScoringPlus : DP
     {
         float CurveEnd = 180f;
-        float scale = 32f;
+        float scale = 1f;
 
         public StandardScoringPlus(int judge) : base(judge)
         {
             float m = (10 - judge) / 6f;
             scale *= m;
+            JudgementWindows[4] = 180f;
         }
 
         protected override void AddJudgement(int i)
@@ -42,7 +43,7 @@ namespace YAVSRG.Gameplay.Watchers.Scoring
         private float CalculatePoints(float ms)
         {
             if (ms >= CurveEnd) { return 0; };
-            return (float)(10 - Math.Pow(ms / scale, 2))/5f;
+            return (float)Math.Max(-1, (1 - Math.Pow(ms / scale, 2.8) * 0.0000056d) * 2f);
         }
 
         public override string FormatAcc()

@@ -56,21 +56,27 @@ namespace YAVSRG.Gameplay
             {
                 if (KeymodeScores[i].FileIdentifier == NewTopScore.FileIdentifier) //if there is already a score on this file
                 {
-                    if (ScoreRating > KeymodeScores[i].Rating) //if this is a new best, edit it to this score
+                    if (ScoreRating > KeymodeScores[i].Rating) //if this is a new best, remove it
                     {
-                        KeymodeScores[i].Rating = ScoreRating;
-                        KeymodeScores[i].ScoreID = NewTopScore.ScoreID;
-                        KeymodeScores.Sort((a, b) => b.Rating.CompareTo(a.Rating)); //cba to make two passes again, just gonna sort
+                        KeymodeScores.RemoveAt(i);
                     }
-                    //(otherwise do nothing)
-                    inserted = true;
+                    else //(otherwise do nothing)
+                    {
+                        inserted = true;
+                    }
                     break; //score has now been handled
                 }
-                else if (KeymodeScores[i].Rating < ScoreRating) //find a score below this one
+            }
+            if (!inserted)
+            {
+                for (int i = 0; i < KeymodeScores.Count; i++)
                 {
-                    inserted = true;
-                    KeymodeScores.Insert(i, NewTopScore); //insert it here
-                    break; //score has now been handled
+                    if (KeymodeScores[i].Rating < ScoreRating) //find a score below this one
+                    {
+                        inserted = true;
+                        KeymodeScores.Insert(i, NewTopScore); //insert it here
+                        break; //score has now been handled
+                    }
                 }
             }
             if (!inserted) //if we couldn't find a place for the score

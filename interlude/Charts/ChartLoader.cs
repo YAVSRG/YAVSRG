@@ -10,6 +10,7 @@ using System.IO;
 using System.IO.Compression;
 using static YAVSRG.Utilities.Logging;
 using static YAVSRG.Utilities.TaskManager;
+using System.Drawing;
 
 namespace YAVSRG.Charts
 {
@@ -42,6 +43,15 @@ namespace YAVSRG.Charts
             { "Title", (a, b) => a.title.CompareTo(b.title) },
             { "Creator ",(a, b) => a.creator.CompareTo(b.creator) },
             { "Artist", (a, b) => a.artist.CompareTo(b.artist) },
+        };
+
+        public static Dictionary<string, Func<CachedChart, Color>> ColorBy = new Dictionary<string, Func<CachedChart, Color>>()
+        {
+            { "Nothing", (c) => { return Game.Options.Theme.SelectChart; } },
+            { "Physical", (c) => { return DifficultyRating.CalcUtils.PhysicalColor(c.physical); } },
+            { "Technical", (c) => { return DifficultyRating.CalcUtils.TechnicalColor(c.technical); } },
+            { "BPM", (c) => { return DifficultyRating.CalcUtils.TechnicalColor(c.bpm*0.05f); } },
+            { "Length", (c) => { return DifficultyRating.CalcUtils.TechnicalColor(c.length*0.000033f); } },
         };
 
         public static string SearchString = "";

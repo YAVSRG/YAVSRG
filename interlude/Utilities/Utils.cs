@@ -108,7 +108,7 @@ namespace YAVSRG
             }
             else
             {
-                Game.Screens.ChangeThemeColor(Game.Options.Theme.ThemeColor);
+                Game.Screens.ChangeThemeColor(Game.Options.Theme.DefaultThemeColor);
             }
         }
     }

@@ -30,11 +30,15 @@ namespace YAVSRG.Interface.Widgets
 
             sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartGroupMode = x; Refresh(); }, () => (Game.Options.Profile.ChartGroupMode), "Group by")
                 .SetItems(GroupBy.Keys.ToList())
-                .PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
+                .PositionTopLeft(680, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(480, 10, AnchorType.MAX, AnchorType.MAX));
 
             sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartSortMode = x; Refresh(); }, () => (Game.Options.Profile.ChartSortMode), "Sort by")
                 .SetItems(SortBy.Keys.ToList())
-                .PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
+                .PositionTopLeft(450, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(250, 10, AnchorType.MAX, AnchorType.MAX));
+
+            sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartColorMode = x; Refresh(); }, () => (Game.Options.Profile.ChartColorMode), "Color by")
+                .SetItems(ColorBy.Keys.ToList())
+                .PositionTopLeft(220, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             AddChild(new TextEntryBox((s) => { SearchString = s; }, () => (SearchString), () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
                 .PositionTopLeft(520, 10, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 70, AnchorType.MAX, AnchorType.MIN));

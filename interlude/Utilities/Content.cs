@@ -148,7 +148,7 @@ namespace YAVSRG
             string e = Path.GetExtension(filename).ToLower();
             bool valid = (e == ".png" || e == ".jpg");
             if (valid && File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename), true);
-            Game.Screens.ChangeThemeColor(Game.Options.Theme.ThemeColor);
+            Game.Screens.ChangeThemeColor(Game.Options.Theme.DefaultThemeColor);
             return GetTexture("background");
         }
 
