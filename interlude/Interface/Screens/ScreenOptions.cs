@@ -30,17 +30,21 @@ namespace YAVSRG.Interface.Screens
             tabs.AddChild(lp.PositionBottomRight(0, 900, AnchorType.MAX, AnchorType.MIN));
             lp.Refresh();
 
-            AddChild(tabs.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(600, 0, AnchorType.MAX, AnchorType.MAX));
-            AddChild(ib.PositionTopLeft(550, 50, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(50, 50, AnchorType.MAX, AnchorType.MAX));
+            AddChild(tabs.PositionTopLeft(200, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(200, 0, AnchorType.MAX, AnchorType.MAX));
 
             AddChild(ScrollButton("General", 0, tabs));
             AddChild(ScrollButton("Gameplay", 1, tabs));
             AddChild(ScrollButton("Layout", 2, tabs));
+            AddChild(ScrollButton("-", 3, tabs));
+            AddChild(ScrollButton("-", 4, tabs));
+
+            AddChild(ib.PositionTopLeft(0, 200, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, 0, AnchorType.MAX, AnchorType.MAX));
+
         }
 
         private Widget ScrollButton(string name, int id, FlowContainer container)
         {
-            return new FramedButton(name, () => { container.ScrollTo(id); }) { Highlight = () => container.VisibleIndexBottom == id, Frame = 170, HorizontalFade = 50 }.PositionTopLeft(0, id * 60, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(250, id * 60 + 60, AnchorType.MIN, AnchorType.MIN);
+            return new FramedButton(name, () => { container.ScrollTo(id); }) { Highlight = () => container.VisibleIndexBottom == id, Frame = 170, HorizontalFade = 50 }.PositionTopLeft(id * 0.2f, 80, AnchorType.LERP, AnchorType.MAX).PositionBottomRight(0.2f + id * 0.2f, 0, AnchorType.LERP, AnchorType.MAX);
         }
 
         public override void OnExit(Screen next)

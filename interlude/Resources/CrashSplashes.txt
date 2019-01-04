@@ -18,3 +18,4 @@ Womp Womp
 go fetch my trombone. the sad one.
 Looks like we've got another mystery on our hands, gang
 while (going_to_crash) { dont(); }
+[22:50] Nick12: its not a bug youre just an idiot

@@ -20,7 +20,7 @@ namespace YAVSRG.Interface.Widgets
             Animation.Add(Border = new Animations.AnimationColorMixer(Game.Screens.HighlightColor));
             FrameColor = () => Border;
             BackColor = () => Fill;
-            AddChild(new TextBox(() => label, AnchorType.CENTER, 0, true, () => Game.Options.Theme.MenuFont, BackColor));
+            AddChild(new TextBox(() => label, AnchorType.CENTER, 0, true, () => Game.Options.Theme.MenuFont, () => Color.Black));
         }
 
         public override void Update(Rect bounds)

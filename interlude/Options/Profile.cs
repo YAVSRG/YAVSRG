@@ -17,10 +17,33 @@ namespace YAVSRG.Options
         public string ProfilePath = "Default.json";
         [JsonIgnore]
         public double Rate = 1.0f;
+        [JsonIgnore]
+        public Keymode DefaultKeymode
+        {
+            get { return KeymodePreference ? PreferredKeymode : ToKeymode(Game.CurrentChart != null ? Game.CurrentChart.Keys : 4); }
+        }
+
+        public enum Keymode
+        {
+            Key3 = 0,
+            Key4 = 1,
+            Key5 = 2,
+            Key6 = 3,
+            Key7 = 4,
+            Key8 = 5,
+            Key9 = 6,
+            Key10 = 7
+        }
+
+        public static Keymode ToKeymode(int keys)
+        {
+            return (Keymode)(keys - 3);
+        }
 
         public string Name = "Default Profile";
         public string UUID = Guid.NewGuid().ToString();
-        public int Keymode = 0;
+        public Keymode PreferredKeymode = Keymode.Key4;
+        public bool KeymodePreference = false;
         public string Skin = "_fallback";
         public float ScrollSpeed = 2.05f;
         public bool UseArrowsFor4k = false;
@@ -41,9 +64,8 @@ namespace YAVSRG.Options
         public ProfileStats Stats = new ProfileStats();
 
         //these are default binds
-        public Key[][] Bindings = new Key[][] //this needs redoing cause it turns out shit in the profile.json
+        public Key[][] KeymodeBindings = new Key[][] //this needs redoing cause it turns out shit in the profile.json
         {
-            null, null, null, //0k 1k 2k (to make indexing easier)
             new Key[] { Key.Left, Key.Down, Key.Right }, //3K
             new Key[] { Key.Z, Key.X, Key.Period, Key.Slash }, //4k
             new Key[] { Key.Z, Key.X, Key.Space, Key.Period, Key.Slash }, //5k

@@ -43,6 +43,10 @@ namespace YAVSRG.Interface.Widgets
                 {
                     if (topEdge < maxBound && topEdge + Height > minBound)
                     {
+                        if (BaseColor.A == 0)
+                        {
+                            QuickColor(); //prevents black flashing
+                        }
                         Rect bounds = new Rect(ScreenUtils.ScreenWidth - 600 - MouseOver + (float)Math.Pow(topEdge * 0.021, 2) * 1.5f, topEdge, ScreenUtils.ScreenWidth, topEdge + Height);
                         SpriteBatch.DrawTilingTexture("levelselectbase", bounds, 400, 0, 0, FillColor);
                         Game.Screens.DrawChartBackground(bounds, Color.FromArgb(80, FillColor), 1.5f);
@@ -107,8 +111,7 @@ namespace YAVSRG.Interface.Widgets
                         }
                         if (BaseColor.A == 0 || Height == 100)
                         {
-                            BaseColor = Colorizer();
-                            FillColor.QuickTarget(Utils.ColorInterp(BaseColor, Color.Black, 0.25f));
+                            QuickColor();
                         }
                         FillColor.Update(); FrameColor.Update(); MouseOver.Update();
                     }
@@ -127,6 +130,12 @@ namespace YAVSRG.Interface.Widgets
                     }
                 }
                 return topEdge;
+            }
+
+            protected void QuickColor()
+            {
+                BaseColor = Colorizer();
+                FillColor.QuickTarget(Utils.ColorInterp(BaseColor, Color.Black, 0.25f));
             }
 
             protected void ScrollTo(float topEdge)

@@ -29,6 +29,8 @@ namespace YAVSRG.Interface.Dialogs
                 recalcScores = true;
             }, () => recalcScores, 30f)
                 .PositionTopLeft(220, 130, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(10, 180, AnchorType.MAX, AnchorType.MIN));
+            f.AddChild(new TextPicker("", new[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, (int)Game.Options.Profile.DefaultKeymode, (i) => { Game.Options.Profile.PreferredKeymode = (Options.Profile.Keymode)i; }).PositionTopLeft(220, 60, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(10, 10, AnchorType.MAX, AnchorType.MAX));
+            f.AddChild(new TickBox("I only play", Game.Options.Profile.KeymodePreference, (b) => { Game.Options.Profile.KeymodePreference = b; }).PositionTopLeft(220, 110, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(10, 60, AnchorType.MAX, AnchorType.MAX));
 
             var profileSelector = new FlowContainer();
             for (int i = 0; i < Options.Options.Profiles.Count; i++)

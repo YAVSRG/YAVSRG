@@ -20,11 +20,12 @@ namespace YAVSRG
         }
 
         static int StencilDepth = 0;
+        static float shader = 0f;
 
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
-        public static Shader WaterShader = new Shader("void main() {}", Utilities.ResourceGetter.GetShader("Water.fsh"));
+        public static Shader WaterShader;
 
         public static void Draw(Sprite sprite, Rect bounds, Color color, int rotation = 0)
         {
@@ -234,6 +235,26 @@ namespace YAVSRG
             }
         }
 
+        public static DrawableFBO WaterTest(DrawableFBO input)
+        {
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.BindTexture(TextureTarget.Texture2D, ((Sprite)input).ID);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            int sampler;
+            GL.GenSamplers(1, out sampler);
+            GL.BindSampler(((Sprite)input).ID, sampler);
+            DrawableFBO output = new DrawableFBO(WaterShader);
+            GL.UseProgram(WaterShader.Program);
+            GL.Uniform1(GL.GetUniformLocation(WaterShader.Program, "tex"), sampler);
+            GL.Uniform1(GL.GetUniformLocation(WaterShader.Program, "time"), shader);
+            shader += 0.4f;
+            DrawRect(ScreenUtils.Bounds, Color.White);
+            output.Unbind();
+            input.Dispose();
+            GL.DeleteSampler(sampler);
+            return output;
+        }
+
         public static void Begin(int width, int height)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit); //clear screen
@@ -257,7 +278,7 @@ namespace YAVSRG
             Font1 = new SpriteFont(60, Game.Options.Theme.Font1);
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
 
-            //GL.UseProgram(WaterShader.Program);
+            WaterShader = new Shader(Utilities.ResourceGetter.GetShader("Vertex.vsh"), Utilities.ResourceGetter.GetShader("Water.fsh"));
         }
 
         public static Vector2[] VecArray(RectangleF rect)

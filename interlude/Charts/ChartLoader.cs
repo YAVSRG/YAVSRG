@@ -157,13 +157,14 @@ namespace YAVSRG.Charts
             List<ChartGroup> Result = new List<ChartGroup>();
             bool keymodeMatch;
             string summaryData;
+            int keymode = (int)Game.Options.Profile.PreferredKeymode + 3;
             foreach (ChartGroup g in Groups)
             {
                 List<CachedChart> temp = new List<CachedChart>();
                 foreach (CachedChart c in g.charts)
                 {
                     //todo: rewrite match algorithm to allow for more detailed filters
-                    keymodeMatch = Game.Options.Profile.Keymode == 0 || c.keymode == Game.Options.Profile.Keymode;
+                    keymodeMatch = !Game.Options.Profile.KeymodePreference || c.keymode == keymode;
                     summaryData = (c.title + " " + c.creator + " " + c.artist + " " + c.diffname + " " + c.pack).ToLower();
                     if (keymodeMatch && summaryData.Contains(Criteria))
                     {

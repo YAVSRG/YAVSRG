@@ -32,7 +32,7 @@ namespace YAVSRG.Interface.Screens
             int hitposition = Game.Options.Profile.HitPosition;
 
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
-            binds = Game.Options.Profile.Bindings[Chart.Keys];
+            binds = Game.Options.Profile.KeymodeBindings[Chart.Keys - 3];
 
             var widgetData = Game.Options.Theme.Gameplay;
 
@@ -120,7 +120,8 @@ namespace YAVSRG.Interface.Screens
             else if (Game.Audio.LeadingIn && Input.KeyTap(Game.Options.General.Binds.ChangeOffset)) //if map hasn't started you can sync it with + key
             {
                 Game.Audio.Stop();
-                Game.Screens.AddDialog(new Dialogs.TextDialog("Change sync by... (ms)", (x) => {
+                Game.Screens.AddDialog(new Dialogs.TextDialog("Change sync by... (ms)", (x) =>
+                {
                     float f = 0; float.TryParse(x, out f); Game.Gameplay.ChartSaveData.Offset += f;
                     Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
                     Game.Audio.PlayLeadIn();
@@ -185,7 +186,7 @@ namespace YAVSRG.Interface.Screens
                 Snap s = Chart.Notes.Points[i];
                 needsToHold &= ~(s.ends.value + s.holds.value); //if there are any starts of hold or releases within range, don't worry about finger independence penalty
                 BinarySwitcher b = release ? new BinarySwitcher(s.ends.value + s.holds.value) : new BinarySwitcher(s.taps.value + s.holds.value);
-                if (b.GetColumn(k) && (scoreTracker.Hitdata[i].hit[k] != 2 || scoreTracker.Hitdata[i].delta[k] < -missWindow/2)) //todo: finalise
+                if (b.GetColumn(k) && (scoreTracker.Hitdata[i].hit[k] != 2 || scoreTracker.Hitdata[i].delta[k] < -missWindow / 2)) //todo: finalise
                 {
                     d = (now - s.Offset);
                     if (release)
@@ -235,13 +236,13 @@ namespace YAVSRG.Interface.Screens
                 lighting[k].NoteLight.Val = 1;
             } //put else statement here for cb on unecessary keypress if i ever want to do that
         }
-        
+
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
             if (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000)
             {
-                SpriteBatch.Font1.DrawCentredText("Press "+Game.Options.General.Binds.Skip.ToString().ToUpper()+" to Skip", 50f, 0, 130, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawCentredText("Press " + Game.Options.General.Binds.Skip.ToString().ToUpper() + " to Skip", 50f, 0, 130, Game.Options.Theme.MenuFont);
             }
             if (Animation.Running)
             {

@@ -118,11 +118,7 @@ namespace YAVSRG.Interface.Screens
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            //float w = SpriteBatch.Font1.MeasureText(splash, 30f) / 2 + 10;
-            //SpriteBatch.DrawRect(
-            //    new Rect(bounds.CenterX - w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 30, bounds.CenterX + w + (ScreenUtils.ScreenWidth) * (1 - slide), bounds.Top + 100),
-            //    Color.FromArgb(100,Game.Screens.DarkColor));
-            SpriteBatch.Font1.DrawCentredText(splashSub, 20f, bounds.CenterX, bounds.Top + 50 + 40 * splashSubAnim, Color.FromArgb((int)(splashSubAnim * splashAnim * 255), Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
+            SpriteBatch.Font1.DrawCentredText(splashSub, 20f, bounds.CenterX, bounds.Top + 50 + 30 * splashSubAnim, Color.FromArgb((int)(splashSubAnim * splashAnim * 255), Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
             SpriteBatch.Font1.DrawCentredText(splash, 40f, bounds.CenterX, bounds.Top - 60 + 80 * splashAnim, Color.FromArgb((int)(splashAnim * 255), Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
         }
     }

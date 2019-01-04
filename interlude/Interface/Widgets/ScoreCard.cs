@@ -8,7 +8,7 @@ using System.Drawing;
 
 namespace YAVSRG.Interface.Widgets
 {
-    public class ScoreCard : Widget
+    public class ScoreCard : FrameContainer
     {
         ScoreInfoProvider Data;
 
@@ -16,20 +16,10 @@ namespace YAVSRG.Interface.Widgets
         {
             PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MIN);
             Data = data;
-        }
-
-        public override void Draw(Rect bounds)
-        {
-            base.Draw(bounds);
-            bounds = GetBounds(bounds);
-            ScreenUtils.DrawFrame(bounds, 30f, Game.Screens.HighlightColor);
-            SpriteBatch.Font1.DrawText(Data.Player, 35f, bounds.Left + 5, bounds.Top, Game.Options.Theme.MenuFont, true, Color.Black);
-            SpriteBatch.Font2.DrawTextToFill(Data.Mods, new Rect(bounds.Left, bounds.Bottom - 40,
-                bounds.Right - SpriteBatch.Font2.DrawJustifiedText(Data.Time.ToString(), 20f, bounds.Right - 5, bounds.Bottom - 35, Game.Options.Theme.MenuFont, true, Color.Black) - 10,
-                bounds.Bottom), Game.Options.Theme.MenuFont, true, Color.Black);
-
-            SpriteBatch.Font1.DrawJustifiedText(Data.Accuracy, 35f, bounds.Right - 5, bounds.Top, Game.Options.Theme.MenuFont, true, Color.Black);
-            SpriteBatch.Font2.DrawJustifiedText(Utils.RoundNumber(Data.PhysicalPerformance), 20f, bounds.Right - 5, bounds.Bottom - 60, Game.Options.Theme.MenuFont, true, Color.Black);
+            AddChild(new TextBox(Data.Player, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black).PositionBottomRight(0.5f, 0.6f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Data.Mods, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black).PositionTopLeft(0f, 0.6f, AnchorType.LERP,AnchorType.LERP).PositionBottomRight(0.6f, 1f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Data.Accuracy, AnchorType.MAX, 0, true, Game.Options.Theme.MenuFont, Color.Black).PositionTopLeft(0.5f, 0f, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(1f, 0.6f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Utils.RoundNumber(Data.PhysicalPerformance)+" // "+Data.Time.ToShortDateString(), AnchorType.MAX, 0, false, Game.Options.Theme.MenuFont, Color.Black).PositionTopLeft(0.6f, 0.6f, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(1f, 1f, AnchorType.LERP, AnchorType.LERP));
         }
 
         public override void Update(Rect bounds)

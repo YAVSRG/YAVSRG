@@ -32,7 +32,7 @@ namespace YAVSRG
 
             Program = GL.CreateProgram();
             GL.AttachShader(Program, FragmentShader);
-            GL.AttachShader(Program, VertexShader);
+            //GL.AttachShader(Program, VertexShader);
 
             GL.LinkProgram(Program);
         }

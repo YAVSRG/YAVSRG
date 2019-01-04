@@ -68,10 +68,17 @@
     <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DiscordRPC, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -144,6 +151,7 @@
     <Compile Include="Gameplay\Watchers\Scoring\StandardScoringPlus.cs" />
     <Compile Include="Interface\Animations\AnimationAnchorPoint.cs" />
     <Compile Include="Interface\Dialogs\TopScoreDialog.cs" />
+    <Compile Include="Interface\Widgets\Controls\TickBox.cs" />
     <Compile Include="Interface\Widgets\FlowContainer.cs" />
     <Compile Include="Interface\Widgets\FrameContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\HPMeter.cs" />
@@ -318,7 +326,6 @@
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <EmbeddedResource Include="Resources\Shaders\Water.fsh" />
-    <None Include="YAVSRG_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
@@ -344,6 +351,7 @@
     <Content Include="icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\Shaders\Vertex.vsh" />
     <EmbeddedResource Include="Resources\Shaders\Blur.fsh" />
     <EmbeddedResource Include="Resources\StatSplashes.txt" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />

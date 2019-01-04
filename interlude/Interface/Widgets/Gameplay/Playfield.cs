@@ -158,7 +158,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
 
         private void DrawReceptor(float offset, int k)
         {
-            Game.Options.Theme.DrawReceptor(new Rect(k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos), k, Keys, Input.KeyPress(Game.Options.Profile.Bindings[Keys][k]));
+            Game.Options.Theme.DrawReceptor(new Rect(k * ColumnWidth + offset, HitPos + ColumnWidth, (k + 1) * ColumnWidth + offset, HitPos), k, Keys, Input.KeyPress(Game.Options.Profile.KeymodeBindings[Keys-3][k]));
         }
 
 

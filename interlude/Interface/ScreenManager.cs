@@ -137,11 +137,13 @@ namespace YAVSRG.Interface
         public void Draw()
         {
             Rect bounds = Bounds;
-            using (FBO = new DrawableFBO(null))
+            //using (FBO = new DrawableFBO(null))
+            FBO = new DrawableFBO(null);
             {
                 DrawScaledBG(Oldbackground, 255);
                 DrawScaledBG(Background, (int)(bgFade * 255));
                 FBO.Unbind();
+                //FBO = SpriteBatch.WaterTest(FBO);
                 if (Loading)
                 {
                     Current?.Draw(bounds);
@@ -173,6 +175,7 @@ namespace YAVSRG.Interface
                 }
                 Toolbar.Draw(bounds);
             }
+            FBO.Dispose();
         }
 
         public void DrawChartBackground(Rect bounds, Color c, float parallaxMult = 1f)
