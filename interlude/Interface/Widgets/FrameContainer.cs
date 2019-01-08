@@ -33,7 +33,7 @@ namespace YAVSRG.Interface.Widgets
 
         protected void PreDraw(Rect bounds)
         {
-            FBO = new DrawableFBO(null);
+            FBO = new DrawableFBO();
             if (UseBackground)
             {
                 Game.Screens.DrawChartBackground(bounds, BackColor(), 2f);

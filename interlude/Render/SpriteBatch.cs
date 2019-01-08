@@ -237,13 +237,13 @@ namespace YAVSRG
 
         public static DrawableFBO WaterTest(DrawableFBO input)
         {
+            //input should already be unbound
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, ((Sprite)input).ID);
             GL.ActiveTexture(TextureUnit.Texture0);
-            int sampler;
-            GL.GenSamplers(1, out sampler);
+            GL.GenSamplers(1, out int sampler);
             GL.BindSampler(((Sprite)input).ID, sampler);
-            DrawableFBO output = new DrawableFBO(WaterShader);
+            DrawableFBO output = new DrawableFBO();
             GL.UseProgram(WaterShader.Program);
             GL.Uniform1(GL.GetUniformLocation(WaterShader.Program, "tex"), sampler);
             GL.Uniform1(GL.GetUniformLocation(WaterShader.Program, "time"), shader);

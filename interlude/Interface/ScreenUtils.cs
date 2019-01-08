@@ -29,6 +29,7 @@ namespace YAVSRG.Interface
                 ScreenWidth = (int)(ScreenWidth * r);
                 ScreenHeight = (int)(ScreenHeight * r);
             }
+            DrawableFBO.ClearPool();
         }
 
         public static bool MouseOver(Rect bounds)

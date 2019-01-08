@@ -22,7 +22,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
         class EmojiPicker : Widget
         {
             bool expand;
-            Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow, Color.Aqua, Color.Purple, Color.Orange, Color.Indigo, Color.Lavender, Color.HotPink };
+            readonly Color[] colors = new Color[] { Color.Red, Color.Green, Color.Blue, Color.Yellow, Color.Aqua, Color.Purple, Color.Orange, Color.Indigo, Color.Lavender, Color.HotPink };
 
             public override void Draw(Rect bounds)
             {
@@ -134,7 +134,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
             }
             if (fade > 0.01f)
             {
-                using (DrawableFBO fbo = new DrawableFBO(null))
+                using (DrawableFBO fbo = new DrawableFBO())
                 {
                     SpriteBatch.DrawRect(bounds, Color.FromArgb(180, 0, 0, 0));
                     SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb(127, Color.Black));
@@ -269,8 +269,7 @@ namespace YAVSRG.Interface.Widgets.Toolbar
                         }
                         else if (parse[0] == "e")
                         {
-                            int id = 0;
-                            int.TryParse(parse[1], out id);
+                            int.TryParse(parse[1], out int id);
                             SpriteBatch.Draw("emoji", new Rect(x, y, x + 35, y + 35), c, id, 0, 0);
                             x += 35;
                             valid = true;

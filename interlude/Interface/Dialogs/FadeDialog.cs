@@ -43,7 +43,7 @@ namespace YAVSRG.Interface.Dialogs
 
         protected void PreDraw(Rect bounds)
         {
-            FBO = new DrawableFBO(null);
+            FBO = new DrawableFBO();
         }
 
         protected void PostDraw(Rect bounds)
