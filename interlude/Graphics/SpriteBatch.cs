@@ -56,7 +56,7 @@ namespace YAVSRG.Graphics
                     Draw(coords, colors);
                     return;
                 }
-                //todo: have this stuff cached in theme data
+                //todo: have this stuff cached in theme data instead
                 sprite = Content.GetTexture(texture);
             }
             if (texcoords == null)
@@ -73,15 +73,10 @@ namespace YAVSRG.Graphics
             Draw((Sprite)sprite, coords, texcoords, colors, rotation, depth);
         }
 
-        public static void Draw(Vector2[] coords, Color[] color)
+        //todo: deprecate
+        private static void Draw(Vector2[] coords, Color[] color)
         {
-            GL.Begin(PrimitiveType.Quads);
-            for (int i = 0; i < 4; i++)
-            {
-                GL.Color4(color[i]);
-                GL.Vertex2(coords[i]);
-            }
-            GL.End();
+            Draw(new RenderTarget(default(Sprite), coords[0], coords[1], coords[2], coords[3], color[0], color[1], color[2], color[3], default(Vector2), default(Vector2), default(Vector2), default(Vector2)));
         }
 
         public static void Draw(Sprite texture, Vector2[] coords, Vector2[] texcoords, Color[] color, int rotation, float depth)
@@ -100,9 +95,35 @@ namespace YAVSRG.Graphics
             GL.Disable(EnableCap.Texture2D);
         }
 
+        public static void Draw(RenderTarget target, float depth = 0)
+        {
+            GL.Enable(EnableCap.Texture2D);
+            GL.BindTexture(TextureTarget.Texture2D, target.Texture.ID);
+            GL.Begin(PrimitiveType.Quads);
+            calls += 1;
+
+            GL.Color4(target.Color1);
+            GL.TexCoord2(target.Texcoord1);
+            GL.Vertex3(target.Coord1.X, target.Coord1.Y, depth);
+
+            GL.Color4(target.Color2);
+            GL.TexCoord2(target.Texcoord2);
+            GL.Vertex3(target.Coord2.X, target.Coord2.Y, depth);
+
+            GL.Color4(target.Color3);
+            GL.TexCoord2(target.Texcoord3);
+            GL.Vertex3(target.Coord3.X, target.Coord3.Y, depth);
+
+            GL.Color4(target.Color4);
+            GL.TexCoord2(target.Texcoord4);
+            GL.Vertex3(target.Coord4.X, target.Coord4.Y, depth);
+
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
+        }
+
         public static void DrawTiling(string texture = "", Rect bounds = default(Rect), Color color = default(Color), float scaleX = 1f, float scaleY = 1f, float offsetX = 0, float offsetY = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Color[] colors = null, float depth = 0)
         {
-            //vector2 coords not supported
             RectangleF uv = new RectangleF((offsetX + bounds.Left) / scaleX, (offsetY + bounds.Top) / scaleY, bounds.Width / scaleX, bounds.Height / scaleY);
             Draw(texture: texture, bounds: bounds, color: color, rotation: rotation, sprite: sprite, coords: coords, texcoords: VecArray(uv), colors: colors, depth: depth);
         }
@@ -126,16 +147,7 @@ namespace YAVSRG.Graphics
 
         public static void DrawRect(Rect bounds, Color color)
         {
-            GL.Begin(PrimitiveType.Quads);
-            calls += 1;
-            GL.Color4(color);
-
-            GL.Vertex2(bounds.Left, bounds.Top);
-            GL.Vertex2(bounds.Right, bounds.Top);
-            GL.Vertex2(bounds.Right, bounds.Bottom);
-            GL.Vertex2(bounds.Left, bounds.Bottom);
-
-            GL.End();
+            Draw(new RenderTarget(default(Sprite), bounds, color, 0, 0));
         }
 
         public static void EnableTransform(bool upscroll)
@@ -269,7 +281,7 @@ namespace YAVSRG.Graphics
 
         public static void End()
         {
-            Console.WriteLine(calls);
+            //Console.WriteLine(calls);
         }
 
         public static void Init()
