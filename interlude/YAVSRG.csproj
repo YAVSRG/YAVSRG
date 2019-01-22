@@ -117,36 +117,38 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Charts\Cache.cs" />
-    <Compile Include="Charts\CachedChart.cs" />
-    <Compile Include="Charts\Collections\Collection.cs" />
-    <Compile Include="Charts\Collections\CollectionsManager.cs" />
-    <Compile Include="Charts\DifficultyRating\CalcUtils.cs" />
-    <Compile Include="Charts\YAVSRG\BinarySwitcher.cs" />
-    <Compile Include="Charts\DifficultyRating\RatingReport.cs" />
-    <Compile Include="Charts\Osu\EventData.cs" />
-    <Compile Include="Charts\Osu\StoryboardEvent.cs" />
-    <Compile Include="Audio\MusicPlayer.cs" />
-    <Compile Include="Audio\Track.cs" />
-    <Compile Include="Charts\YAVSRG\BPMPoint.cs" />
-    <Compile Include="Charts\YAVSRG\Chart.cs" />
-    <Compile Include="Charts\YAVSRG\ChartHeader.cs" />
-    <Compile Include="Charts\YAVSRG\OffsetItem.cs" />
-    <Compile Include="Charts\Osu\OsuBeatmap.cs" />
-    <Compile Include="Charts\Osu\BeatmapHeader.cs" />
-    <Compile Include="Charts\DifficultyRating\KeyLayout.cs" />
-    <Compile Include="Charts\DifficultyRating\PlayerRating.cs" />
-    <Compile Include="Charts\Osu\HitObject.cs" />
-    <Compile Include="Charts\Osu\HitObjectConverter.cs" />
-    <Compile Include="Charts\YAVSRG\PointManager.cs" />
-    <Compile Include="Charts\YAVSRG\Snap.cs" />
-    <Compile Include="Charts\Osu\TimingPointConverter.cs" />
-    <Compile Include="Charts\Osu\TimingPoint.cs" />
-    <Compile Include="Charts\Stepmania\Measure.cs" />
-    <Compile Include="Charts\Stepmania\StepFile.cs" />
-    <Compile Include="Charts\ChartLoader.cs" />
-    <Compile Include="Charts\YAVSRG\SVManager.cs" />
-    <Compile Include="Charts\YAVSRG\SVPoint.cs" />
+    <Compile Include="Gameplay\Cache.cs" />
+    <Compile Include="Gameplay\CachedChart.cs" />
+    <Compile Include="Gameplay\Collections\Collection.cs" />
+    <Compile Include="Gameplay\Collections\CollectionsManager.cs" />
+    <Compile Include="Gameplay\DifficultyRating\CalcUtils.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\BinarySwitcher.cs" />
+    <Compile Include="Gameplay\DifficultyRating\RatingReport.cs" />
+    <Compile Include="Gameplay\Charts\Osu\EventData.cs" />
+    <Compile Include="Gameplay\Charts\Osu\StoryboardEvent.cs" />
+    <Compile Include="Graphics\RenderTarget.cs" />
+    <Compile Include="Interface\WidgetState.cs" />
+    <Compile Include="IO\Audio\MusicPlayer.cs" />
+    <Compile Include="IO\Audio\Track.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\BPMPoint.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\Chart.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\ChartHeader.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\OffsetItem.cs" />
+    <Compile Include="Gameplay\Charts\Osu\OsuBeatmap.cs" />
+    <Compile Include="Gameplay\Charts\Osu\BeatmapHeader.cs" />
+    <Compile Include="Gameplay\DifficultyRating\KeyLayout.cs" />
+    <Compile Include="Gameplay\DifficultyRating\PlayerRating.cs" />
+    <Compile Include="Gameplay\Charts\Osu\HitObject.cs" />
+    <Compile Include="Gameplay\Charts\Osu\HitObjectConverter.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\PointManager.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\Snap.cs" />
+    <Compile Include="Gameplay\Charts\Osu\TimingPointConverter.cs" />
+    <Compile Include="Gameplay\Charts\Osu\TimingPoint.cs" />
+    <Compile Include="Gameplay\Charts\Stepmania\Measure.cs" />
+    <Compile Include="Gameplay\Charts\Stepmania\StepFile.cs" />
+    <Compile Include="Gameplay\ChartLoader.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\SVManager.cs" />
+    <Compile Include="Gameplay\Charts\YAVSRG\SVPoint.cs" />
     <Compile Include="Gameplay\Watchers\HP\HPSystem.cs" />
     <Compile Include="Gameplay\Watchers\Scoring\StandardScoringPlus.cs" />
     <Compile Include="Interface\Animations\AnimationAnchorPoint.cs" />
@@ -158,9 +160,9 @@
     <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarWidget.cs" />
     <Compile Include="Interface\Widgets\TopScoreDisplay.cs" />
-    <Compile Include="Net\Web\BloodcatChartData.cs" />
-    <Compile Include="Render\DrawableFBO.cs" />
-    <Compile Include="Utilities\Content.cs" />
+    <Compile Include="IO\Net\Web\BloodcatChartData.cs" />
+    <Compile Include="Graphics\DrawableFBO.cs" />
+    <Compile Include="IO\Content.cs" />
     <Compile Include="Editor\ChartInEditor.cs" />
     <Compile Include="Editor\EditorData.cs" />
     <Compile Include="Editor\EditorManager.cs" />
@@ -201,10 +203,10 @@
     <Compile Include="Interface\Animations\AnimationSeries.cs" />
     <Compile Include="Interface\Animations\AnimationCounter.cs" />
     <Compile Include="Interface\Animations\AnimationColorFade.cs" />
-    <Compile Include="Interface\CrashWindow.cs">
+    <Compile Include="Utilities\CrashWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Interface\CrashWindow.Designer.cs">
+    <Compile Include="Utilities\CrashWindow.Designer.cs">
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </Compile>
     <Compile Include="Interface\Dialog.cs" />
@@ -214,7 +216,7 @@
     <Compile Include="Interface\Dialogs\ScoreInfoDialog.cs" />
     <Compile Include="Interface\Dialogs\SkinConvertDialog.cs" />
     <Compile Include="Interface\Dialogs\TextDialog.cs" />
-    <Compile Include="Interface\InputMethod.cs" />
+    <Compile Include="IO\InputMethod.cs" />
     <Compile Include="Interface\Rect.cs" />
     <Compile Include="Interface\ScreenManager.cs" />
     <Compile Include="Interface\Screens\ScreenEditor.cs" />
@@ -268,23 +270,23 @@
     <Compile Include="Interface\Widgets\Controls\TextPicker.cs" />
     <Compile Include="Interface\Widgets\TextBox.cs" />
     <Compile Include="Interface\Widgets\TooltipContainer.cs" />
-    <Compile Include="Net\P2P\ClientWrapper.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\PacketAuth.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\PacketDisconnect.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\PacketMessage.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\PacketPlay.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\PacketScore.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\PacketScoreboard.cs" />
-    <Compile Include="Net\P2P\SocketClient.cs" />
-    <Compile Include="Net\P2P\SocketWrapper.cs" />
-    <Compile Include="Net\P2P\P2PManager.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\Packet.cs" />
-    <Compile Include="Net\P2P\Protocol\Packets\PacketPing.cs" />
-    <Compile Include="Net\P2P\Protocol\Protocol.cs" />
-    <Compile Include="Net\P2P\SocketServer.cs" />
-    <Compile Include="Net\Web\EtternaPackData.cs" />
-    <Compile Include="Net\Web\GithubReleaseData.cs" />
-    <Compile Include="Net\Web\WebUtils.cs" />
+    <Compile Include="IO\Net\P2P\ClientWrapper.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\PacketAuth.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\PacketDisconnect.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\PacketMessage.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\PacketPlay.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\PacketScore.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\PacketScoreboard.cs" />
+    <Compile Include="IO\Net\P2P\SocketClient.cs" />
+    <Compile Include="IO\Net\P2P\SocketWrapper.cs" />
+    <Compile Include="IO\Net\P2P\P2PManager.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\Packet.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Packets\PacketPing.cs" />
+    <Compile Include="IO\Net\P2P\Protocol\Protocol.cs" />
+    <Compile Include="IO\Net\P2P\SocketServer.cs" />
+    <Compile Include="IO\Net\Web\EtternaPackData.cs" />
+    <Compile Include="IO\Net\Web\GithubReleaseData.cs" />
+    <Compile Include="IO\Net\Web\WebUtils.cs" />
     <Compile Include="Options\Colorizer.cs" />
     <Compile Include="Options\ColorScheme.cs" />
     <Compile Include="Options\Keybinds.cs" />
@@ -294,28 +296,28 @@
     <Compile Include="Options\Panels\LayoutPanel.cs" />
     <Compile Include="Options\WidgetPosition.cs" />
     <Compile Include="Options\WidgetPositionData.cs" />
-    <Compile Include="Utilities\Discord.cs" />
+    <Compile Include="IO\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
     <Compile Include="Options\Theme.cs" />
     <Compile Include="Game.cs" />
-    <Compile Include="Interface\Input.cs" />
+    <Compile Include="IO\Input.cs" />
     <Compile Include="Interface\Screen.cs" />
     <Compile Include="Interface\Screens\ScreenMenu.cs" />
     <Compile Include="Interface\Screens\ScreenPlay.cs" />
     <Compile Include="Interface\ScreenUtils.cs" />
-    <Compile Include="Interface\Toolbar.cs" />
+    <Compile Include="Interface\Widgets\Toolbar.cs" />
     <Compile Include="Options\Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\Logging.cs" />
     <Compile Include="Utilities\ObjectPool.cs" />
-    <Compile Include="Utilities\PipeHandler.cs" />
-    <Compile Include="Render\Shader.cs" />
-    <Compile Include="Render\Sprite.cs" />
-    <Compile Include="Render\SpriteBatch.cs" />
-    <Compile Include="Render\SpriteFont.cs" />
-    <Compile Include="Utilities\ResourceGetter.cs" />
+    <Compile Include="IO\PipeHandler.cs" />
+    <Compile Include="Graphics\Shader.cs" />
+    <Compile Include="Graphics\Sprite.cs" />
+    <Compile Include="Graphics\SpriteBatch.cs" />
+    <Compile Include="Graphics\SpriteFont.cs" />
+    <Compile Include="IO\ResourceGetter.cs" />
     <Compile Include="Utilities\TaskManager.cs" />
     <Compile Include="Utilities\TrayIcon.cs" />
     <Compile Include="Utilities\Utils.cs" />
@@ -340,7 +342,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Interface\CrashWindow.resx">
+    <EmbeddedResource Include="Utilities\CrashWindow.resx">
       <DependentUpon>CrashWindow.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>

@@ -7,7 +7,7 @@ using OpenTK.Input;
 using Newtonsoft.Json;
 using YAVSRG.Gameplay;
 using YAVSRG.Gameplay.Watchers;
-using static YAVSRG.Charts.DifficultyRating.KeyLayout;
+using static YAVSRG.Gameplay.DifficultyRating.KeyLayout;
 
 namespace YAVSRG.Options
 {

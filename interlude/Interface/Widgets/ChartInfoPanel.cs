@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using YAVSRG.Interface.Animations;
-using YAVSRG.Charts.DifficultyRating;
+using YAVSRG.Gameplay.DifficultyRating;
 
 namespace YAVSRG.Interface.Widgets
 {

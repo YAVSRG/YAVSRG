@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Interface;
+﻿using YAVSRG.Interface;
 using YAVSRG.Interface.Widgets;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Options
 {

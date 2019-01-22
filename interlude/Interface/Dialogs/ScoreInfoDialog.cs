@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using YAVSRG.Gameplay;
 using YAVSRG.Interface.Widgets;
-using System.Drawing;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Dialogs
 {

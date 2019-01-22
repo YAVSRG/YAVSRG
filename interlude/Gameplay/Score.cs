@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 using YAVSRG.Gameplay.Watchers;
 
 namespace YAVSRG.Gameplay
@@ -16,7 +16,7 @@ namespace YAVSRG.Gameplay
         public string playerUUID = Game.Options.Profile.UUID;
         public Dictionary<string, string> mods;
         public float rate;
-        public Charts.DifficultyRating.KeyLayout.Layout layout;
+        public DifficultyRating.KeyLayout.Layout layout;
         public int keycount;
 
         public static string GetScoreBadge(int[] judgements)
@@ -71,7 +71,7 @@ namespace YAVSRG.Gameplay
     {
         Score _score;
         Chart _chart;
-        Charts.DifficultyRating.RatingReport _rating;
+        DifficultyRating.RatingReport _rating;
         string _mods;
         IScoreSystem _scoring;
         ScoreTracker.HitData[] _hitdata;
@@ -118,14 +118,14 @@ namespace YAVSRG.Gameplay
             get { return ScoreSystem.BestCombo; }
         }
 
-        public Charts.DifficultyRating.RatingReport RatingData
+        public DifficultyRating.RatingReport RatingData
         {
-            get { if (_rating == null) { _rating = new Charts.DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _rating; }
+            get { if (_rating == null) { _rating = new DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _rating; }
         }
 
         public float PhysicalPerformance
         {
-            get { if (_physical == null) { _physical = Charts.DifficultyRating.PlayerRating.GetRating(RatingData, HitData); } return (float)_physical; }
+            get { if (_physical == null) { _physical = DifficultyRating.PlayerRating.GetRating(RatingData, HitData); } return (float)_physical; }
         }
 
         public float TechnicalPerformance

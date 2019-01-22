@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Charts.YAVSRG;
+﻿using System.Collections.Generic;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay
 {
@@ -12,6 +8,7 @@ namespace YAVSRG.Gameplay
         public string Path;
         public float Offset;
         public List<Score> Scores = new List<Score>();
+        //todo: grade achieved and stuff in here
 
         public static ChartSaveData FromChart(Chart c)
         {

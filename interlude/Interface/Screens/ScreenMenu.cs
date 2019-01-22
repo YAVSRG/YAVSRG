@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Interface;
+﻿using System.Drawing;
 using YAVSRG.Interface.Widgets;
 using YAVSRG.Interface.Animations;
-using System.Drawing;
+using YAVSRG.IO;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Screens
 {
@@ -54,10 +50,10 @@ namespace YAVSRG.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            var s = Utilities.ResourceGetter.MenuSplash().Split('¬');
+            var s = ResourceGetter.MenuSplash().Split('¬');
             splash = s[0];
             splashSub = s.Length > 1 ? s[1] : "";
-            Utilities.Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
+            Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
             Game.Screens.BackgroundDim.Target = 1;
             play.PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER);
             options.PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER);

@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using System.Drawing;
-using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Graphics;
 using YAVSRG.Interface;
-using YAVSRG.Audio;
-using YAVSRG.Gameplay;
 using YAVSRG.Utilities;
 using YAVSRG.Net.P2P;
+using YAVSRG.IO;
+using YAVSRG.IO.Audio;
+using YAVSRG.Gameplay;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 
 namespace YAVSRG
 {

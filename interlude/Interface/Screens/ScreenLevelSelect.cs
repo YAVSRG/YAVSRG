@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static YAVSRG.Interface.ScreenUtils;
-using YAVSRG.Charts;
+using YAVSRG.Gameplay;
 using YAVSRG.Interface.Widgets;
+using YAVSRG.IO;
+using static YAVSRG.Interface.ScreenUtils;
 
 namespace YAVSRG.Interface.Screens
 {

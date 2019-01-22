@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
+﻿using System.Drawing;
+using YAVSRG.IO;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Widgets.Editor
 {
@@ -15,7 +12,7 @@ namespace YAVSRG.Interface.Widgets.Editor
             bounds = GetBounds(bounds);
             SpriteBatch.DrawRect(bounds, Color.FromArgb(127, 0, 0, 0));
             float nowPos;
-            foreach (Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
+            foreach (YAVSRG.Gameplay.Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
             {
                 nowPos = (float)(bounds.Left + b.Offset / Game.Audio.Duration * bounds.Width);
                 //SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);

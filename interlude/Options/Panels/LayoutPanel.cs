@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using OpenTK.Input;
 using YAVSRG.Interface;
 using YAVSRG.Interface.Widgets;
-using YAVSRG.Charts.DifficultyRating;
+using YAVSRG.Gameplay.DifficultyRating;
+using YAVSRG.IO;
 
 namespace YAVSRG.Options.Panels
 {

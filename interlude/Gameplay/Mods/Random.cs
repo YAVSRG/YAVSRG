@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Charts.YAVSRG;
+﻿using System.Linq;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay.Mods
 {

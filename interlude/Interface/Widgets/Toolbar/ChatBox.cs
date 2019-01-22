@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using YAVSRG.IO;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Widgets.Toolbar
 {

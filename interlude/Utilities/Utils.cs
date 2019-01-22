@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Interface;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 
 namespace YAVSRG
 {
@@ -55,7 +51,7 @@ namespace YAVSRG
         public static Bitmap CaptureDesktop(Rectangle screenSize) //this is only used when the game starts to create the "fade in effect" (you can't have translucent windows)
         {
             Bitmap target = new Bitmap(screenSize.Width, screenSize.Height);
-            using (Graphics g = Graphics.FromImage(target))
+            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(target))
             {
                 g.CopyFromScreen(0, 0, 0, 0, new Size(screenSize.Width, screenSize.Height));
             }
@@ -75,7 +71,7 @@ namespace YAVSRG
         public static float GetBeat(int i)
         {
             float t = (float)Game.Audio.Now();
-            Charts.YAVSRG.BPMPoint p = Game.Gameplay.CurrentChart.Timing.BPM.GetPointAt(t, false);
+            BPMPoint p = Game.Gameplay.CurrentChart.Timing.BPM.GetPointAt(t, false);
             return (float)Math.Cos(((t - p.Offset) / (p.MSPerBeat * i)) % 1 * Math.PI * 2);
         }
 

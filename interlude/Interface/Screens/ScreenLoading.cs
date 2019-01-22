@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static YAVSRG.Interface.ScreenUtils;
-using YAVSRG.Charts;
 using System.Drawing;
+using YAVSRG.Gameplay;
 using YAVSRG.Interface.Animations;
+using YAVSRG.Graphics;
+using static YAVSRG.Interface.ScreenUtils;
 
 namespace YAVSRG.Interface.Screens
 {
     class ScreenLoading : Screen
     {
-        string splash = Utilities.ResourceGetter.LoadingSplash();
+        string splash = IO.ResourceGetter.LoadingSplash();
         Sprite desktop;
         AnimationFade fade;
         AnimationSeries transition;

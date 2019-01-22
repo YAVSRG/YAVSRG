@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Gameplay;
-using static YAVSRG.Interface.ScreenUtils;
 using System.Drawing;
+using YAVSRG.IO;
+using YAVSRG.Graphics;
+using YAVSRG.Gameplay;
+using YAVSRG.Gameplay.Watchers;
+using YAVSRG.Gameplay.DifficultyRating;
 using YAVSRG.Interface.Widgets;
 using YAVSRG.Net.P2P.Protocol.Packets;
-using YAVSRG.Gameplay.Watchers;
+using static YAVSRG.Interface.ScreenUtils;
 
 namespace YAVSRG.Interface.Screens
 {
@@ -72,7 +72,7 @@ namespace YAVSRG.Interface.Screens
             acc2.ProcessScore(scoreData.Hitdata);
 
             //more info pre calculated so it isn't calculated every frame
-            perf = Utils.RoundNumber(Charts.DifficultyRating.PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
+            perf = Utils.RoundNumber(PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
             badge = Score.GetScoreBadge(scoreData.Scoring.Judgements);
 
             //build up UI

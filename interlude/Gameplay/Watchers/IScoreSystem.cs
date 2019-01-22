@@ -9,6 +9,7 @@ namespace YAVSRG.Gameplay.Watchers
 {
     public abstract class IScoreSystem : IGameplayWatcher
     {
+        //todo: remove and replace with dynamic score system list
         public enum ScoreType
         {
             Default,

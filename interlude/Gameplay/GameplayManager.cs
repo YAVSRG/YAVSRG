@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Charts.YAVSRG;
-using System.IO;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 using YAVSRG.Gameplay.Mods;
-using YAVSRG.Charts.DifficultyRating;
-using YAVSRG.Charts.Collections;
+using YAVSRG.Gameplay.DifficultyRating;
+using YAVSRG.Gameplay.Charts.Collections;
+using YAVSRG.IO;
 
 namespace YAVSRG.Gameplay
 {
@@ -16,7 +13,7 @@ namespace YAVSRG.Gameplay
         public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Random", new Mods.Random() }, { "Manipulate", new Manipulate() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
 
         public Chart CurrentChart;
-        public Charts.CachedChart CurrentCachedChart;
+        public CachedChart CurrentCachedChart;
         public ChartWithModifiers ModifiedChart;
         public RatingReport ChartDifficulty;
         public ChartSaveData ChartSaveData;
@@ -26,7 +23,7 @@ namespace YAVSRG.Gameplay
 
         public ScoresDB ScoreDatabase = ScoresDB.Load();
 
-        public void ChangeChart(Charts.CachedChart cache, Chart c, bool playFromPreview)
+        public void ChangeChart(CachedChart cache, Chart c, bool playFromPreview)
         {
             CurrentCachedChart = cache;
             CurrentChart = c;

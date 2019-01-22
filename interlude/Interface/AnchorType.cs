@@ -13,11 +13,4 @@ namespace YAVSRG.Interface
         MAX, //bottom right
         LERP
     }
-
-    public enum WidgetState
-    {
-        DISABLED,
-        NORMAL,
-        ACTIVE
-    }
 }

@@ -1,10 +1,7 @@
-﻿using OpenTK.Input;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Charts;
+﻿using System;
+using OpenTK.Input;
+using YAVSRG.Gameplay;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Screens
 {

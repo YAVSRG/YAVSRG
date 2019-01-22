@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using YAVSRG.Net.Web;
+﻿using YAVSRG.Net.Web;
+using YAVSRG.Gameplay;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Widgets
 {
@@ -21,7 +18,7 @@ namespace YAVSRG.Interface.Widgets
             if (data.attributes.download != "")
             {
                 AddChild(new SimpleButton("Download",
-                    () => Game.Tasks.AddTask(Charts.ChartLoader.DownloadAndImportPack(data.attributes.download, data.attributes.name, ".zip"), (b) => { }, "Downloading pack: " + data.attributes.name, true), () => false, 20f)
+                    () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack(data.attributes.download, data.attributes.name, ".zip"), (b) => { }, "Downloading pack: " + data.attributes.name, true), () => false, 20f)
                     .PositionTopLeft(100, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 0, AnchorType.MAX, AnchorType.MAX));
             }
         }
@@ -32,7 +29,7 @@ namespace YAVSRG.Interface.Widgets
             difficulty = data.creator;
             size = "";
             AddChild(new SimpleButton("Download",
-                () => Game.Tasks.AddTask(Charts.ChartLoader.DownloadAndImportPack("https://osu.ppy.sh/beatmapsets/"+data.id.ToString()+"/download?noVideo=1", data.id.ToString(), ".osz"), (b) => { }, "Downloading beatmap: " + data.title, true), () => false, 20f)
+                () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack("https://osu.ppy.sh/beatmapsets/"+data.id.ToString()+"/download?noVideo=1", data.id.ToString(), ".osz"), (b) => { }, "Downloading beatmap: " + data.title, true), () => false, 20f)
                 .PositionTopLeft(100, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 0, AnchorType.MAX, AnchorType.MAX));
         }
 

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using YAVSRG.Gameplay;
-using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 
 namespace YAVSRG.Options
 {

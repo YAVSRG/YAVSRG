@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
+using YAVSRG.IO;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Widgets
 {
     public class ScrollContainer : Widget
     {
+        //todo: deprecate in favour of flowcontainer
         float padX;
         float padY;
         bool horizontal;

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Charts.YAVSRG;
 using YAVSRG.Gameplay;
+using YAVSRG.Gameplay.Charts.YAVSRG;
+using YAVSRG.IO;
+using YAVSRG.Graphics;
 using static YAVSRG.Interface.ScreenUtils;
 
 namespace YAVSRG.Interface.Widgets.Gameplay

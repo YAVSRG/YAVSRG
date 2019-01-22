@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using static YAVSRG.Interface.ScreenUtils;
-using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 using YAVSRG.Gameplay;
 using YAVSRG.Interface.Widgets.Gameplay;
 using YAVSRG.Interface.Animations;
-using OpenTK.Input;
+using YAVSRG.IO;
+using YAVSRG.Graphics;
 
 namespace YAVSRG.Interface.Screens
 {
@@ -19,7 +16,7 @@ namespace YAVSRG.Interface.Screens
         ScoreTracker scoreTracker;
         Widget playfield;
         float missWindow;
-        Key[] binds;
+        OpenTK.Input.Key[] binds;
         HitLighting[] lighting;
         AnimationFade bannerIn, bannerOut;
 
@@ -79,7 +76,7 @@ namespace YAVSRG.Interface.Screens
             }
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 1 - Game.Options.Profile.BackgroundDim;
-            Utilities.Discord.SetPresence("Playing a chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, false); ;
+            IO.Discord.SetPresence("Playing a chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, false); ;
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
             Game.Screens.Toolbar.SetCursorState(false);
@@ -102,7 +99,7 @@ namespace YAVSRG.Interface.Screens
         {
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 0.3f;
-            Utilities.Discord.SetPresence("Selecting another chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
+            IO.Discord.SetPresence("Selecting another chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
             Game.Screens.Toolbar.SetCursorState(true);
             base.OnExit(next);

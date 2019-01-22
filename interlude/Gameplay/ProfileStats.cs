@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Charts;
-using YAVSRG.Charts.YAVSRG;
+using YAVSRG.Gameplay.Charts;
+using YAVSRG.Gameplay.Charts.YAVSRG;
 
 namespace YAVSRG.Gameplay
 {
     public class ProfileStats
     {
+        //todo: move this to profile namespace
         public int SecondsPlayed, TimesPlayed, TimesQuit, SRanks;
 
         public List<TopScore>[] PhysicalBest = new List<TopScore>[8], TechnicalBest = new List<TopScore>[8];
@@ -47,7 +48,7 @@ namespace YAVSRG.Gameplay
             List<TopScore> KeymodeScores = PhysicalBest[k];
             var HitData = ScoreTracker.StringToHitData(Score.hitdata, Score.keycount);
             ChartWithModifiers ModdedChart = Game.Gameplay.GetModifiedChart(Score.mods, Chart);
-            float ScoreRating = Charts.DifficultyRating.PlayerRating.GetRating(new Charts.DifficultyRating.RatingReport(ModdedChart, Score.rate, Score.layout), HitData);
+            float ScoreRating = DifficultyRating.PlayerRating.GetRating(new DifficultyRating.RatingReport(ModdedChart, Score.rate, Score.layout), HitData);
             TopScore NewTopScore = new TopScore(Chart.GetFileIdentifier(), Game.Gameplay.ScoreDatabase.GetChartSaveData(Chart).Scores.IndexOf(Score), ScoreRating); //score is added to list after this function is over, so .Count gives correct id
             bool inserted = false;
 

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using static YAVSRG.Charts.ChartLoader;
-using OpenTK;
+using static YAVSRG.Gameplay.ChartLoader;
+using YAVSRG.IO;
 
 namespace YAVSRG.Interface.Widgets
 {
@@ -16,16 +13,16 @@ namespace YAVSRG.Interface.Widgets
 
         public ChartSortingControls() : base()
         {
-            DropDown d = new DropDown((x) => { selectedCollection = x; }, () => (selectedCollection), "Collection"); //referencable later so delete/create buttons can update list (nyi)
+            DropDown d = new DropDown((x) => { selectedCollection = x; }, () => selectedCollection, "Collection"); //referencable later so delete/create buttons can update list (nyi)
             AddChild(sortControls = new Widget());
             AddChild(collectionControls = new Widget());
             collectionControls.ToggleState();
             collectionControls.AddChild(d.SetItems(Game.Gameplay.Collections.Collections.Keys.ToList())
                 .PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
 
-            collectionControls.AddChild(new SimpleButton("Create", () => { Game.Screens.AddDialog(new Dialogs.TextDialog("Enter name for collection: ", (s) => { if (s != "") { selectedCollection = s; } })); }, () => (false), 20f)
+            collectionControls.AddChild(new SimpleButton("Create", () => { Game.Screens.AddDialog(new Dialogs.TextDialog("Enter name for collection: ", (s) => { if (s != "") { selectedCollection = s; } })); }, () => false, 20f)
                 .PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(150, 10, AnchorType.MAX, AnchorType.MAX));
-            collectionControls.AddChild(new SimpleButton("Delete", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Really delete this collection?", (s) => { if (s == "Y") { Game.Gameplay.Collections.DeleteCollection(selectedCollection); } })); }, () => (false), 20f)
+            collectionControls.AddChild(new SimpleButton("Delete", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Really delete this collection?", (s) => { if (s == "Y") { Game.Gameplay.Collections.DeleteCollection(selectedCollection); } })); }, () => false, 20f)
                 .PositionTopLeft(130, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartGroupMode = x; Refresh(); }, () => (Game.Options.Profile.ChartGroupMode), "Group by")
@@ -40,7 +37,7 @@ namespace YAVSRG.Interface.Widgets
                 .SetItems(ColorBy.Keys.ToList())
                 .PositionTopLeft(220, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => (SearchString), () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
+            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
                 .PositionTopLeft(520, 10, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 70, AnchorType.MAX, AnchorType.MIN));
 
             AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }).PositionTopLeft(600, 0, AnchorType.MAX,AnchorType.MIN).PositionBottomRight(520,80,AnchorType.MAX,AnchorType.MIN));
