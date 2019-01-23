@@ -46,11 +46,11 @@ namespace YAVSRG.Interface.Widgets
             //todo: cleanup
             Color c = Color.FromArgb((int)(255 * Alpha), Color.White);
             FBO.Unbind();
-            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceTop(VerticalFade).ExpandX(-HorizontalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { Color.Transparent, Color.Transparent, c, c });
-            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceBottom(VerticalFade).ExpandX(-HorizontalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { c, c, Color.Transparent, Color.Transparent });
-            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceLeft(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { Color.Transparent, c, c, Color.Transparent });
-            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceRight(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { c, Color.Transparent, Color.Transparent, c });
-            SpriteBatch.DrawTilingTexture(FBO, bounds.ExpandX(-HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, new[] { c, c, c, c });
+            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceTop(VerticalFade).ExpandX(-HorizontalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, Color.Transparent, Color.Transparent, c, c);
+            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceBottom(VerticalFade).ExpandX(-HorizontalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, c, c, Color.Transparent, Color.Transparent);
+            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceLeft(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, Color.Transparent, c, c, Color.Transparent);
+            SpriteBatch.DrawTilingTexture(FBO, bounds.SliceRight(HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, c, Color.Transparent, Color.Transparent, c);
+            SpriteBatch.DrawTilingTexture(FBO, bounds.ExpandX(-HorizontalFade).ExpandY(-VerticalFade), ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, c, c, c, c);
             FBO.Dispose();
         }
     }

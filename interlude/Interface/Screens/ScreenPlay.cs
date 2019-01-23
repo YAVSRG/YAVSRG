@@ -93,6 +93,9 @@ namespace YAVSRG.Interface.Screens
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
+
+            Utilities.Logging.Log(System.Runtime.GCSettings.LatencyMode.ToString(),"");
+            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.LowLatency;
         }
 
         public override void OnExit(Screen next)
@@ -103,6 +106,7 @@ namespace YAVSRG.Interface.Screens
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
             Game.Screens.Toolbar.SetCursorState(true);
             base.OnExit(next);
+            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
         }
 
         public override void Update(Rect bounds) //update loop

@@ -59,7 +59,7 @@ namespace YAVSRG.IO
             }
             catch (Exception e)
             {
-                Logging.Log("Couln't update rich prescence", e.ToString(), Logging.LogType.Warning);
+                Logging.Log("Couldn't update rich prescence", e.ToString(), Logging.LogType.Warning);
             }
         }
     }

@@ -130,7 +130,7 @@ namespace YAVSRG.Interface
             //math.max is "scale up until the screen is filled which cuts off the sides/top if aspect ratio is different"
             float scale = Math.Max((float)ScreenWidth * 2 / bg.Width, (float)ScreenHeight * 2 / bg.Height);
             Color c = Color.FromArgb(alpha, Color.White);
-            SpriteBatch.DrawTilingTexture(bg, Bounds, bg.Width * scale, bg.Height * scale, 0.5f, 0.5f, new Color[] { c, c, c, c });
+            SpriteBatch.DrawTilingTexture(bg, Bounds, bg.Width * scale, bg.Height * scale, 0.5f, 0.5f, c, c, c, c);
         }
 
         public void Draw()
@@ -182,7 +182,7 @@ namespace YAVSRG.Interface
 
             float parallaxX = parallaxMult * Parallax * ParallaxPosX / ScreenWidth / 2; //this calculates parallax from mouse position
             float parallaxY = parallaxMult * Parallax * ParallaxPosY / ScreenHeight / 2;
-            SpriteBatch.DrawTilingTexture(FBO, bounds, (ScreenWidth + Parallax * parallaxMult) * 2, (ScreenHeight + Parallax * parallaxMult) * 2, parallaxX / ScreenWidth + 0.5f, parallaxY / ScreenHeight + 0.5f, new Color[] { c, c, c, c });
+            SpriteBatch.DrawTilingTexture(FBO, bounds, (ScreenWidth + Parallax * parallaxMult) * 2, (ScreenHeight + Parallax * parallaxMult) * 2, parallaxX / ScreenWidth + 0.5f, parallaxY / ScreenHeight + 0.5f, c, c, c, c);
         }
 
         public void Update()

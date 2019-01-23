@@ -299,7 +299,7 @@
     <Compile Include="IO\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
-    <Compile Include="Options\Theme.cs" />
+    <Compile Include="Options\Theme\ThemeData.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="IO\Input.cs" />
     <Compile Include="Interface\Screen.cs" />

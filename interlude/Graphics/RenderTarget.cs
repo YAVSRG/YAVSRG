@@ -51,6 +51,26 @@ namespace YAVSRG.Graphics
             Texture = texture;
         }
 
+        public RenderTarget(Sprite texture, Rect bounds, Color col1, Color col2, Color col3, Color col4, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4)
+        {
+            Coord1 = new Vector2(bounds.Left, bounds.Top);
+            Coord2 = new Vector2(bounds.Right, bounds.Top);
+            Coord3 = new Vector2(bounds.Right, bounds.Bottom);
+            Coord4 = new Vector2(bounds.Left, bounds.Bottom);
+
+            Texcoord1 = uv1;
+            Texcoord2 = uv2;
+            Texcoord3 = uv3;
+            Texcoord4 = uv4;
+
+            Color1 = col1;
+            Color2 = col2;
+            Color3 = col3;
+            Color4 = col4;
+
+            Texture = texture;
+        }
+
         public RenderTarget(Sprite texture, Vector2 pos1, Vector2 pos2, Vector2 pos3, Vector2 pos4, Color col1, Color col2, Color col3, Color col4, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4)
         {
             Coord1 = pos1;

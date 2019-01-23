@@ -9,6 +9,7 @@ using YAVSRG.Gameplay.Charts.YAVSRG;
 
 namespace YAVSRG.Options
 {
+    //todo: move me to gameplay namespace (and modularise)
     public class Colorizer
     {
         public static readonly int[] DDRValues = { 1, 2, 3, 4, 6, 8, 12, 16 };

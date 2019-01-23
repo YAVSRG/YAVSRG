@@ -23,6 +23,12 @@ namespace YAVSRG.Graphics
         static int StencilDepth = 0;
         static float shader = 0f;
         static int calls = 0;
+        static double[] mat = new[] {
+                1.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 0.0, 0.0,
+                0.0, 0.0, 1.0, 0.0,
+                0.0, 0.0, 0.0, 1.0,
+            };
 
         public static SpriteFont Font1;
         public static SpriteFont Font2;
@@ -31,49 +37,73 @@ namespace YAVSRG.Graphics
 
         public static void Draw(Sprite sprite, Rect bounds, Color color, int rotation = 0)
         {
-            Draw(sprite: sprite, bounds: bounds, texcoords: new Vector2[] { new Vector2(0, 0), new Vector2(1, 0), new Vector2(1, 1), new Vector2(0, 1) }, color: color, rotation: rotation);
+            Draw(sprite: sprite, bounds: bounds, ux: 0, uy: 0, color: color, rotation: rotation);
         }
 
         public static void Draw(string texture = "", Rect bounds = default(Rect), Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null, float depth = 0)
         {
+            Vector2 Coord1, Coord2, Coord3, Coord4;
+            Vector2 Tex1, Tex2, Tex3, Tex4;
+            Color Col1, Col2, Col3, Col4;
             if (coords == null)
             {
-                coords = new[] {
-                    new Vector2(bounds.Left,bounds.Top),
-                    new Vector2(bounds.Right,bounds.Top),
-                    new Vector2(bounds.Right,bounds.Bottom),
-                    new Vector2(bounds.Left,bounds.Bottom)
-                };
+                Coord1 = new Vector2(bounds.Left, bounds.Top);
+                Coord2 = new Vector2(bounds.Right, bounds.Top);
+                Coord3 = new Vector2(bounds.Right, bounds.Bottom);
+                Coord4 = new Vector2(bounds.Left, bounds.Bottom);
+            }
+            else
+            {
+                Coord1 = coords[0];
+                Coord2 = coords[1];
+                Coord3 = coords[2];
+                Coord4 = coords[3];
             }
             if (colors == null)
             {
-                colors = new[] { color, color, color, color };
+                Col1 = Col2 = Col3 = Col4 = color;
+            }
+            else
+            {
+                Col1 = colors[0];
+                Col2 = colors[1];
+                Col3 = colors[2];
+                Col4 = colors[3];
             }
             if (sprite == null)
             {
                 if (texture == "")
                 {
-                    Draw(coords, colors);
-                    return;
+                    sprite = default(Sprite);
                 }
-                //todo: have this stuff cached in theme data instead
-                sprite = Content.GetTexture(texture);
+                else
+                {
+                    //todo: have this stuff cached in theme data instead
+                    sprite = Content.GetTexture(texture);
+                }
             }
             if (texcoords == null)
             {
                 float x = 1f / ((Sprite)sprite).UV_X;
                 float y = 1f / ((Sprite)sprite).UV_Y;
-                texcoords = new[] {
-                    new Vector2(x * ux,y * uy),
-                    new Vector2(x + x*ux,y * uy),
-                    new Vector2(x + x*ux, y + y*uy),
-                    new Vector2(x*ux, y + y*uy)
-                };
+
+                Tex1 = new Vector2(x * ux, y * uy);
+                Tex2 = new Vector2(x + x * ux, y * uy);
+                Tex3 = new Vector2(x + x * ux, y + y * uy);
+                Tex4 = new Vector2(x * ux, y + y * uy);
             }
-            Draw((Sprite)sprite, coords, texcoords, colors, rotation, depth);
+            else
+            {
+                Tex1 = texcoords[0];
+                Tex2 = texcoords[1];
+                Tex3 = texcoords[2];
+                Tex4 = texcoords[3];
+            }
+            //Draw((Sprite)sprite, coords, texcoords, colors, rotation, depth);
+            Draw(new RenderTarget((Sprite)sprite, Coord1, Coord2, Coord3, Coord4, Col1, Col2, Col3, Col4, Tex1, Tex2, Tex3, Tex4).Rotate(rotation), depth);
         }
 
-        //todo: deprecate
+        /*
         private static void Draw(Vector2[] coords, Color[] color)
         {
             Draw(new RenderTarget(default(Sprite), coords[0], coords[1], coords[2], coords[3], color[0], color[1], color[2], color[3], default(Vector2), default(Vector2), default(Vector2), default(Vector2)));
@@ -93,7 +123,7 @@ namespace YAVSRG.Graphics
             }
             GL.End();
             GL.Disable(EnableCap.Texture2D);
-        }
+        }*/
 
         public static void Draw(RenderTarget target, float depth = 0)
         {
@@ -122,11 +152,27 @@ namespace YAVSRG.Graphics
             GL.Disable(EnableCap.Texture2D);
         }
 
+        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col1 = default(Color), Color col2 = default(Color), Color col3 = default(Color), Color col4 = default(Color))
+        {
+            float l = offsetX + bounds.Left / scaleX;
+            float t = offsetY + bounds.Top / scaleY;
+            float r = offsetX + bounds.Right / scaleX;
+            float b = offsetY + bounds.Bottom / scaleY;
+
+            return new RenderTarget(texture, bounds, col1, col2, col3, col4, new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b));
+        }
+
+        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col = default(Color))
+        {
+            return Tiling(texture, bounds, offsetX, offsetY, scaleX, scaleY, col, col, col, col);
+        }
+
+        /*
         public static void DrawTiling(string texture = "", Rect bounds = default(Rect), Color color = default(Color), float scaleX = 1f, float scaleY = 1f, float offsetX = 0, float offsetY = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Color[] colors = null, float depth = 0)
         {
             RectangleF uv = new RectangleF((offsetX + bounds.Left) / scaleX, (offsetY + bounds.Top) / scaleY, bounds.Width / scaleX, bounds.Height / scaleY);
             Draw(texture: texture, bounds: bounds, color: color, rotation: rotation, sprite: sprite, coords: coords, texcoords: VecArray(uv), colors: colors, depth: depth);
-        }
+        }*/
 
         public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
         {
@@ -136,13 +182,12 @@ namespace YAVSRG.Graphics
 
         public static void DrawTilingTexture(string texture, Rect bounds, float scale, float x, float y, Color color)
         {
-            DrawTilingTexture(Content.GetTexture(texture), bounds, scale, scale, x, y, new Color[] { color, color, color, color });
+            DrawTilingTexture(Content.GetTexture(texture), bounds, scale, scale, x, y, color, color, color, color);
         }
 
-        public static void DrawTilingTexture(Sprite texture, Rect bounds, float scaleX, float scaleY, float x, float y, Color[] colors)
+        public static void DrawTilingTexture(Sprite texture, Rect bounds, float scaleX, float scaleY, float x, float y, Color col1, Color col2, Color col3, Color col4)
         {
-            RectangleF uv = new RectangleF(x + bounds.Left / scaleX, y + bounds.Top / scaleY, bounds.Width / scaleX, bounds.Height / scaleY);
-            Draw(sprite: texture, bounds: bounds, texcoords: VecArray(uv), colors: colors);
+            Draw(Tiling(texture, bounds, x, y, scaleX, scaleY, col1, col2, col3, col4));
         }
 
         public static void DrawRect(Rect bounds, Color color)
@@ -153,12 +198,8 @@ namespace YAVSRG.Graphics
         public static void EnableTransform(bool upscroll)
         {
             int i = upscroll ? -1 : 1;
-            double[] mat = new[] {
-                1.0, 0.0, 0.0, 0.0,
-                0.0, -i, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
-            };
+            mat[5] = -i;
+            mat[4] = 0;
             float position = ScreenUtils.ScreenHeight * Game.Options.Profile.PerspectiveTilt * i;
             float height = (float)-Math.Pow(Math.Pow(-ScreenUtils.ScreenHeight, 2) - Math.Pow(position, 2), 0.5);
             Matrix4 m = Matrix4.LookAt(0, position, height, 0, 0, ScreenUtils.ScreenHeight, 0, -1, 0);
@@ -185,12 +226,8 @@ namespace YAVSRG.Graphics
 
         public static void ParallelogramTransform(float amount, float center)
         {
-            double[] mat = new[] {
-                1.0, 0.0, 0.0, 0.0,
-                -amount, 1.0, 0.0, 0.0,
-                0.0, 0.0, 1.0, 0.0,
-                0.0, 0.0, 0.0, 1.0,
-            };
+            mat[4] = -amount;
+            mat[5] = 1;
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
             GL.Translate(0, center, 0);
@@ -295,17 +332,6 @@ namespace YAVSRG.Graphics
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
 
             WaterShader = new Shader(IO.ResourceGetter.GetShader("Vertex.vsh"), IO.ResourceGetter.GetShader("Water.fsh"));
-        }
-
-        public static Vector2[] VecArray(RectangleF rect)
-        {
-            return new[]
-            {
-                new Vector2(rect.Left,rect.Top),
-                new Vector2(rect.Right,rect.Top),
-                new Vector2(rect.Right,rect.Bottom),
-                new Vector2(rect.Left,rect.Bottom)
-            };
         }
     }
 }

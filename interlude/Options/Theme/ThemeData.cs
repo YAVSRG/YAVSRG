@@ -6,7 +6,7 @@ using YAVSRG.Graphics;
 
 namespace YAVSRG.Options
 {
-    public class Theme
+    public class ThemeData
     {
         [JsonIgnore]
         public WidgetPositionData Gameplay;
@@ -17,6 +17,7 @@ namespace YAVSRG.Options
         public Color MenuFont = Color.White;
         public Color SelectChart = Color.FromArgb(0, 180, 110);
         public Color DefaultThemeColor = Color.FromArgb(0, 255, 160);
+        //todo: move to widget data
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;
         public float JudgementFadeTime = 1500f; //milliseconds

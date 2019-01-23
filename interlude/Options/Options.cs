@@ -12,7 +12,7 @@ namespace YAVSRG.Options
         public static General general;
 
         public Profile Profile;
-        public Theme Theme;
+        public ThemeData Theme;
         public General General
         {
             get { return general; }
@@ -21,7 +21,7 @@ namespace YAVSRG.Options
         public Options()
         {
             Profile = new Profile();
-            Theme = new Theme();
+            Theme = new ThemeData();
             try
             {
                 foreach (Profile p in Profiles) //linear search cause i'm lazy, this runs once and you're not gonna have more than like 20 profiles ever

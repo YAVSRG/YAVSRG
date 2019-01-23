@@ -71,17 +71,17 @@ namespace YAVSRG.IO
             return Store[path];
         }
 
-        public static Options.Theme LoadThemeData(string name)
+        public static Options.ThemeData LoadThemeData(string name)
         {
             string newpath = Path.Combine(AssetsDir, name, "skin.json");
-            Options.Theme t;
+            Options.ThemeData t;
             if (!File.Exists(newpath))
             {
-                t = new Options.Theme();
+                t = new Options.ThemeData();
             }
             else
             {
-                t = Utils.LoadObject<Options.Theme>(newpath);
+                t = Utils.LoadObject<Options.ThemeData>(newpath);
             }
             Utils.SaveObject(t, newpath);
             t.Gameplay = LoadWidgetData(name, "gameplay");
