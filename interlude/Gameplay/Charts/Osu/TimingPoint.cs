@@ -29,7 +29,7 @@ namespace YAVSRG.Gameplay.Charts.Osu
             string[] parts = parse.Split(',');
 
             offset = float.Parse(parts[0], CultureInfo.InvariantCulture);
-            msPerBeat = float.Parse(parts[1], CultureInfo.InvariantCulture);
+            msPerBeat = (float)double.Parse(parts[1], CultureInfo.InvariantCulture);
             meter = int.Parse(parts[2], CultureInfo.InvariantCulture);
             sampleSet = int.Parse(parts[3], CultureInfo.InvariantCulture);
             sampleType = int.Parse(parts[4], CultureInfo.InvariantCulture);

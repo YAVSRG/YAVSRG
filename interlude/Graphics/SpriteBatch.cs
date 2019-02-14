@@ -99,31 +99,8 @@ namespace YAVSRG.Graphics
                 Tex3 = texcoords[2];
                 Tex4 = texcoords[3];
             }
-            //Draw((Sprite)sprite, coords, texcoords, colors, rotation, depth);
             Draw(new RenderTarget((Sprite)sprite, Coord1, Coord2, Coord3, Coord4, Col1, Col2, Col3, Col4, Tex1, Tex2, Tex3, Tex4).Rotate(rotation), depth);
         }
-
-        /*
-        private static void Draw(Vector2[] coords, Color[] color)
-        {
-            Draw(new RenderTarget(default(Sprite), coords[0], coords[1], coords[2], coords[3], color[0], color[1], color[2], color[3], default(Vector2), default(Vector2), default(Vector2), default(Vector2)));
-        }
-
-        public static void Draw(Sprite texture, Vector2[] coords, Vector2[] texcoords, Color[] color, int rotation, float depth)
-        {
-            GL.Enable(EnableCap.Texture2D);
-            GL.BindTexture(TextureTarget.Texture2D, texture.ID);
-            GL.Begin(PrimitiveType.Quads);
-            calls += 1;
-            for (int i = 0; i < 4; i++)
-            {
-                GL.Color4(color[i]);
-                GL.TexCoord2(texcoords[(i + rotation) % 4]);
-                GL.Vertex3(coords[i].X, coords[i].Y, depth);
-            }
-            GL.End();
-            GL.Disable(EnableCap.Texture2D);
-        }*/
 
         public static void Draw(RenderTarget target, float depth = 0)
         {
@@ -166,13 +143,6 @@ namespace YAVSRG.Graphics
         {
             return Tiling(texture, bounds, offsetX, offsetY, scaleX, scaleY, col, col, col, col);
         }
-
-        /*
-        public static void DrawTiling(string texture = "", Rect bounds = default(Rect), Color color = default(Color), float scaleX = 1f, float scaleY = 1f, float offsetX = 0, float offsetY = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Color[] colors = null, float depth = 0)
-        {
-            RectangleF uv = new RectangleF((offsetX + bounds.Left) / scaleX, (offsetY + bounds.Top) / scaleY, bounds.Width / scaleX, bounds.Height / scaleY);
-            Draw(texture: texture, bounds: bounds, color: color, rotation: rotation, sprite: sprite, coords: coords, texcoords: VecArray(uv), colors: colors, depth: depth);
-        }*/
 
         public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
         {
@@ -331,7 +301,7 @@ namespace YAVSRG.Graphics
             Font1 = new SpriteFont(60, Game.Options.Theme.Font1);
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
 
-            WaterShader = new Shader(IO.ResourceGetter.GetShader("Vertex.vsh"), IO.ResourceGetter.GetShader("Water.fsh"));
+            WaterShader = new Shader(ResourceGetter.GetShader("Vertex.vsh"), ResourceGetter.GetShader("Water.fsh"));
         }
     }
 }

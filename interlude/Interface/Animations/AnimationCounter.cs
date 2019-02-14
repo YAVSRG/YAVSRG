@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace YAVSRG.Interface.Animations
 {
-    class AnimationCounter : Animation
+    public class AnimationCounter : Animation
     {
         public int value = 0;
         public int cycles = 0;

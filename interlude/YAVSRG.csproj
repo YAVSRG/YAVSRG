@@ -126,6 +126,8 @@
     <Compile Include="Gameplay\DifficultyRating\RatingReport.cs" />
     <Compile Include="Gameplay\Charts\Osu\EventData.cs" />
     <Compile Include="Gameplay\Charts\Osu\StoryboardEvent.cs" />
+    <Compile Include="Gameplay\Mods\IVisualMod.cs" />
+    <Compile Include="Gameplay\NoteRenderer.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
     <Compile Include="Interface\WidgetState.cs" />
     <Compile Include="IO\Audio\MusicPlayer.cs" />
@@ -171,16 +173,16 @@
     <Compile Include="Gameplay\ChartWithModifiers.cs" />
     <Compile Include="Gameplay\GameplayManager.cs" />
     <Compile Include="Gameplay\GameplaySnap.cs" />
-    <Compile Include="Gameplay\Mods\Autoplay.cs" />
-    <Compile Include="Gameplay\Mods\Random.cs" />
-    <Compile Include="Gameplay\Mods\Inverse.cs" />
-    <Compile Include="Gameplay\Mods\Keychange.cs" />
-    <Compile Include="Gameplay\Mods\Manipulate.cs" />
-    <Compile Include="Gameplay\Mods\Mirror.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Autoplay.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Random.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Inverse.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Keychange.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Manipulate.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Mirror.cs" />
     <Compile Include="Gameplay\Mods\Mod.cs" />
-    <Compile Include="Gameplay\Mods\NoLN.cs" />
-    <Compile Include="Gameplay\Mods\NoSV.cs" />
-    <Compile Include="Gameplay\Mods\Wave.cs" />
+    <Compile Include="Gameplay\Mods\Chart\NoLN.cs" />
+    <Compile Include="Gameplay\Mods\Chart\NoSV.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Wave.cs" />
     <Compile Include="Gameplay\ScoresDB.cs" />
     <Compile Include="Gameplay\Watchers\ILifeMeter.cs" />
     <Compile Include="Gameplay\Watchers\Scoring\CCScoring.cs" />
@@ -363,6 +365,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Editor\Filters\" />
+    <Folder Include="Gameplay\Mods\Visual\" />
+    <Folder Include="Gameplay\VisualMods\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
