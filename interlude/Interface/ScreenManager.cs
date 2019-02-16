@@ -188,7 +188,7 @@ namespace YAVSRG.Interface
         public void Update()
         {
             Rect bounds = Bounds;
-            if (dialogs.Count == 0) Toolbar.Update(bounds);
+            if (dialogs.Count == 0) Toolbar.Update(bounds); else Toolbar.Animation.Update();
             Logo.Update(bounds);
             if (Loading)
             {
@@ -202,6 +202,7 @@ namespace YAVSRG.Interface
                 {
                     dialogs.RemoveAt(0);
                 }
+                Current?.Animation.Update();
             }
             else
             {

@@ -145,7 +145,7 @@ namespace YAVSRG.Interface
                 if (Chat.Collapsed && _NotifFade > 0.01f)
                 {
                     Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Screens.DarkColor), 2f);
-                    SpriteBatch.Font1.DrawCentredTextToFill(Notification, bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Options.Theme.MenuFont), true);
+                    SpriteBatch.Font1.DrawCentredTextToFill(Notification, new Rect(bounds.Left, bounds.Bottom - _Height, bounds.Right, bounds.Bottom + 80 - _Height), Color.FromArgb((int)(255 * _NotifFade), Game.Options.Theme.MenuFont), true);
                 }
             }
 
