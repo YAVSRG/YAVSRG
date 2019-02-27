@@ -127,8 +127,12 @@
     <Compile Include="Gameplay\Charts\Osu\EventData.cs" />
     <Compile Include="Gameplay\Charts\Osu\StoryboardEvent.cs" />
     <Compile Include="Gameplay\Mods\IVisualMod.cs" />
+    <Compile Include="Gameplay\Mods\Visual\UpScroll.cs" />
+    <Compile Include="Gameplay\Mods\Visual\DownScroll.cs" />
     <Compile Include="Gameplay\NoteRenderer.cs" />
+    <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
+    <Compile Include="Interface\Bindable.cs" />
     <Compile Include="Interface\WidgetState.cs" />
     <Compile Include="IO\Audio\MusicPlayer.cs" />
     <Compile Include="IO\Audio\Track.cs" />
@@ -296,8 +300,8 @@
     <Compile Include="Options\Panels\GameplayPanel.cs" />
     <Compile Include="Options\Panels\GeneralPanel.cs" />
     <Compile Include="Options\Panels\LayoutPanel.cs" />
-    <Compile Include="Options\WidgetPosition.cs" />
-    <Compile Include="Options\WidgetPositionData.cs" />
+    <Compile Include="Options\Theme\WidgetPosition.cs" />
+    <Compile Include="Options\Theme\WidgetPositionData.cs" />
     <Compile Include="IO\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
@@ -349,9 +353,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="DiscordRPC.dll">
+    <None Include="DiscordRPC.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
     <Content Include="icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -365,8 +369,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Editor\Filters\" />
-    <Folder Include="Gameplay\Mods\Visual\" />
-    <Folder Include="Gameplay\VisualMods\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

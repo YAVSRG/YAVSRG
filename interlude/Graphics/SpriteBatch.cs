@@ -129,6 +129,35 @@ namespace YAVSRG.Graphics
             GL.Disable(EnableCap.Texture2D);
         }
 
+        public static void Draw(string texture, Plane pos, int ux, int uy)
+        {
+            GL.Enable(EnableCap.Texture2D);
+            Sprite s = Content.GetTexture(texture);
+            GL.BindTexture(TextureTarget.Texture2D, s.ID);
+            GL.Begin(PrimitiveType.Quads);
+            calls += 1;
+
+            float x = 1f / s.UV_X;
+            float y = 1f / s.UV_Y;
+
+            GL.Color4(Color.White);
+
+            GL.TexCoord2(x * ux, y * uy);
+            GL.Vertex3(pos.P1);
+            
+            GL.TexCoord2(x + x * ux, y * uy);
+            GL.Vertex3(pos.P2);
+
+            GL.TexCoord2(x + x * ux, y + y * uy);
+            GL.Vertex3(pos.P3);
+
+            GL.TexCoord2(x * ux, y + y * uy);
+            GL.Vertex3(pos.P4);
+
+            GL.End();
+            GL.Disable(EnableCap.Texture2D);
+        }
+
         public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col1 = default(Color), Color col2 = default(Color), Color col3 = default(Color), Color col4 = default(Color))
         {
             float l = offsetX + bounds.Left / scaleX;
@@ -176,8 +205,8 @@ namespace YAVSRG.Graphics
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
             GL.MultMatrix(ref m);
-            GL.Translate(0, i * ScreenUtils.ScreenHeight, 0);
-            GL.MultMatrix(mat);
+            //GL.Translate(0, i * ScreenUtils.ScreenHeight, 0);
+            //GL.MultMatrix(mat);
         }
 
         public static void Enable3D()

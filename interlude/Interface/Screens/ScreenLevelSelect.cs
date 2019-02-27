@@ -75,6 +75,10 @@ namespace YAVSRG.Interface.Screens
             {
                 Game.Gameplay.PlaySelectedChart();
             }
+            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.E))
+            {
+                Game.Screens.AddScreen(new ScreenEditor());
+            }
         }
 
         public void ChangeRate(double change)

@@ -21,27 +21,27 @@ namespace YAVSRG.Interface.Widgets
             bounds = GetBounds(bounds);
             float w = bounds.Width; //equal to height hopefully
             int a = (int)(255 * alpha);
-            SpriteBatch.Draw(coords: new Vector2[] {
+            SpriteBatch.Draw(new RenderTarget(
                 new Vector2(bounds.Left + 0.08f * w, bounds.Top + 0.09f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w),
-                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.Right - 0.08f * w, bounds.Top + 0.09f * w) }, color: Color.FromArgb(a, Color.DarkBlue));
-            SpriteBatch.Draw(coords: new Vector2[] {
+                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.Right - 0.08f * w, bounds.Top + 0.09f * w),  Color.FromArgb(a, Color.DarkBlue)));
+            SpriteBatch.Draw(new RenderTarget(
                 new Vector2(bounds.Left + 0.08f * w, bounds.Top + 0.29f * w), new Vector2(bounds.Left + 0.22f * w, bounds.Top + 0.29f * w),
-                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.46875f * w) }, color: Color.FromArgb(a, Color.DarkBlue));
-            SpriteBatch.Draw(coords: new Vector2[] {
+                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.46875f * w), Color.FromArgb(a, Color.DarkBlue)));
+            SpriteBatch.Draw(new RenderTarget(
                 new Vector2(bounds.Right - 0.08f * w, bounds.Top + 0.29f * w), new Vector2(bounds.Right - 0.22f * w, bounds.Top + 0.29f * w),
-                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.46875f * w) }, color: Color.FromArgb(a, Color.DarkBlue));
+                new Vector2(bounds.CenterX, bounds.CenterY + 0.26875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.46875f * w), Color.FromArgb(a, Color.DarkBlue)));
 
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Create);
 
-            SpriteBatch.Draw(coords: new Vector2[] {
+            SpriteBatch.Draw(new RenderTarget(
                 new Vector2(bounds.Left + 0.1f * w, bounds.Top + 0.1f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.25f * w),
-                new Vector2(bounds.CenterX, bounds.CenterY + 0.25f * w), new Vector2(bounds.Right - 0.1f * w, bounds.Top + 0.1f * w) }, color: Color.Transparent);
-            SpriteBatch.Draw(coords: new Vector2[] {
+                new Vector2(bounds.CenterX, bounds.CenterY + 0.25f * w), new Vector2(bounds.Right - 0.1f * w, bounds.Top + 0.1f * w), Color.Transparent));
+            SpriteBatch.Draw(new RenderTarget(
                 new Vector2(bounds.Left + 0.1f * w, bounds.Top + 0.3f * w), new Vector2(bounds.Left + 0.2f * w, bounds.Top + 0.3f * w),
-                new Vector2(bounds.CenterX, bounds.CenterY + 0.2875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.45f * w) }, color: Color.Transparent);
-            SpriteBatch.Draw(coords: new Vector2[] {
+                new Vector2(bounds.CenterX, bounds.CenterY + 0.2875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.45f * w), Color.Transparent));
+            SpriteBatch.Draw(new RenderTarget(
                 new Vector2(bounds.Right - 0.1f * w, bounds.Top + 0.3f * w), new Vector2(bounds.Right - 0.2f * w, bounds.Top + 0.3f * w),
-                new Vector2(bounds.CenterX, bounds.CenterY + 0.2875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.45f * w) }, color: Color.Transparent);
+                new Vector2(bounds.CenterX, bounds.CenterY + 0.2875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.45f * w), Color.Transparent));
 
             SpriteBatch.AlphaTest(true);
             SpriteBatch.Draw("logo", bounds, Color.FromArgb(a, Color.White));
@@ -65,9 +65,9 @@ namespace YAVSRG.Interface.Widgets
                     level += Game.Audio.WaveForm[i * 8 + t];
                 }
                 level *= 0.1f;
-                SpriteBatch.Draw(coords: new Vector2[] {
+                SpriteBatch.Draw(new RenderTarget(
                 new Vector2(bounds.Left + i * w/32, m - prev), new Vector2(bounds.Left + (i+1) * w/32, m - level),
-                new Vector2(bounds.Left + (i+1) * w/32, bounds.Bottom), new Vector2(bounds.Left + (i) * w/32, bounds.Bottom) }, color: Color.FromArgb(a >> 1, Color.Blue));
+                new Vector2(bounds.Left + (i+1) * w/32, bounds.Bottom), new Vector2(bounds.Left + (i) * w/32, bounds.Bottom), Color.FromArgb(a >> 1, Color.Blue)));
                 prev = level;
             }
 

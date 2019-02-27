@@ -3,6 +3,8 @@ using System.Drawing;
 using static YAVSRG.Interface.ScreenUtils;
 using YAVSRG.Gameplay.Charts.YAVSRG;
 using YAVSRG.Gameplay;
+using YAVSRG.Gameplay.Mods.Visual;
+using YAVSRG.Gameplay.Mods;
 using YAVSRG.Interface.Widgets.Gameplay;
 using YAVSRG.Interface.Animations;
 using YAVSRG.IO;
@@ -34,7 +36,7 @@ namespace YAVSRG.Interface.Screens
             var widgetData = Game.Options.Theme.Gameplay;
 
             //this stuff is ok to stay here
-            AddChild(playfield = new Playfield(scoreTracker).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
             AddChild(new PerformanceMeter(scoreTracker));
             AddChild(new HitMeter(scoreTracker, widgetData.GetPosition("hitMeter")));
             AddChild(new ComboDisplay(scoreTracker, widgetData.GetPosition("combo")));

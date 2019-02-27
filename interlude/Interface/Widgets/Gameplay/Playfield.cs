@@ -8,6 +8,7 @@ using static YAVSRG.Interface.ScreenUtils;
 
 namespace YAVSRG.Interface.Widgets.Gameplay
 {
+    //DEPRECATED
     class Playfield : GameplayWidget
     {
         //all storage variables for LN and SV logic

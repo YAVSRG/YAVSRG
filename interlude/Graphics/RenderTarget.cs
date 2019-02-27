@@ -91,6 +91,23 @@ namespace YAVSRG.Graphics
             Texture = texture;
         }
 
+        public RenderTarget(Vector2 pos1, Vector2 pos2, Vector2 pos3, Vector2 pos4, Color col)
+        {
+            Coord1 = pos1;
+            Coord2 = pos2;
+            Coord3 = pos3;
+            Coord4 = pos4;
+
+            Texcoord1 = Texcoord2= Texcoord3 = Texcoord4 = default(Vector2);
+
+            Color1 = col;
+            Color2 = col;
+            Color3 = col;
+            Color4 = col;
+
+            Texture = default(Sprite);
+        }
+
         public Vector2 GetTexCoord(int i)
         {
             switch (i)
@@ -102,6 +119,7 @@ namespace YAVSRG.Graphics
             }
         }
 
+        /*
         public void SetTexCoord(int i, Vector2 val)
         {
             switch (i)
@@ -112,7 +130,7 @@ namespace YAVSRG.Graphics
                 case 0: Texcoord1 = val; return;
                 default: return;
             }
-        }
+        }*/
 
         public RenderTarget Rotate(int r)
         {

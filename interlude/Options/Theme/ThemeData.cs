@@ -35,8 +35,8 @@ namespace YAVSRG.Options
                 switch (column)
                 {
                     case 0: { return 3; }
-                    case 1: { return Game.Options.Profile.Upscroll ? 2 : 0; }
-                    case 2: { return Game.Options.Profile.Upscroll ? 0 : 2; }
+                    case 1: { return 0; }
+                    case 2: { return 2; }
                     case 3: { return 1; }
                 }
             }
@@ -85,6 +85,52 @@ namespace YAVSRG.Options
         {
             SpriteBatch.Draw(ReceptorTexture(keycount), bounds, Color.White, 0, pressed ? 1 : 0, GetRotation(column, keycount));
             SpriteBatch.Draw(ReceptorTexture(keycount) + "-overlay", bounds, Color.White, 0, pressed ? 1 : 0, GetRotation(column, keycount), depth: -NoteDepth);
+        }
+
+        //NEW STUFF
+        public void DrawNote(Plane bounds, int column, int keycount, int index, int animation)
+        {
+            bounds = bounds.Rotate(GetRotation(column, keycount));
+            SpriteBatch.Draw(NoteTexture(keycount), bounds, animation, index);
+            SpriteBatch.Draw(NoteTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+        }
+
+        public void DrawMine(Plane bounds, int column, int keycount, int index, int animation)
+        {
+            SpriteBatch.Draw(MineTexture(keycount), bounds, animation, index);
+            SpriteBatch.Draw(MineTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+        }
+
+        public void DrawHead(Plane bounds, int column, int keycount, int index, int animation)
+        {
+            bounds = bounds.Rotate(GetRotation(column, keycount));
+            SpriteBatch.Draw(HeadTexture(keycount), bounds, animation, index);
+            SpriteBatch.Draw(HeadTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+        }
+
+        public void DrawTail(Plane bounds, int column, int keycount, int index, int animation)
+        {
+            int rotation = UseHoldTailTexture ? 0 : GetRotation(column, keycount);
+            if (!(FlipHoldTail && !UseHoldTailTexture))
+            {
+                //
+            }
+            bounds = bounds.Rotate(rotation);
+            SpriteBatch.Draw(TailTexture(keycount), bounds, animation, index);
+            SpriteBatch.Draw(TailTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+        }
+
+        public void DrawHold(Plane bounds, int column, int keycount, int index, int animation)
+        {
+            SpriteBatch.Draw(BodyTexture(keycount), bounds, animation, index);
+            SpriteBatch.Draw(BodyTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+        }
+
+        public void DrawReceptor(Plane bounds, int column, int keycount, bool pressed)
+        {
+            bounds = bounds.Rotate(GetRotation(column, keycount));
+            SpriteBatch.Draw(ReceptorTexture(keycount), bounds, 0, pressed ? 1 : 0);
+            SpriteBatch.Draw(ReceptorTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), 0, pressed ? 1 : 0);
         }
 
         protected string Arrow(int keycount)
