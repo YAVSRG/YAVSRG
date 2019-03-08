@@ -127,6 +127,8 @@
     <Compile Include="Gameplay\Charts\Osu\EventData.cs" />
     <Compile Include="Gameplay\Charts\Osu\StoryboardEvent.cs" />
     <Compile Include="Gameplay\Mods\IVisualMod.cs" />
+    <Compile Include="Gameplay\Mods\Visual\ManipScroll.cs" />
+    <Compile Include="Gameplay\Mods\Visual\SpiralScroll.cs" />
     <Compile Include="Gameplay\Mods\Visual\UpScroll.cs" />
     <Compile Include="Gameplay\Mods\Visual\DownScroll.cs" />
     <Compile Include="Gameplay\NoteRenderer.cs" />

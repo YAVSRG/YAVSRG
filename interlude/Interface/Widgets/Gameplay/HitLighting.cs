@@ -30,8 +30,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
             }
             if (NoteLight.Val > 0f)
             {
-                //slice
-                SpriteBatch.Draw("notelighting", new Rect(bounds.Left, bounds.Bottom, bounds.Right, bounds.Bottom - w), Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
+                SpriteBatch.Draw("notelighting", bounds.SliceBottom(w), Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
             }
         }
     }

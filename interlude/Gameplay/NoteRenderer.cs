@@ -49,6 +49,11 @@ namespace YAVSRG.Gameplay
             svindex = new int[Chart.Keys + 1];
         }
 
+        public void AddHitlights()
+        {
+
+        }
+
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
@@ -133,8 +138,10 @@ namespace YAVSRG.Gameplay
                 bugFix.value &= (ushort)~holdsInHitpos.value;
             }
 
+            //DrawWidgets(bounds);
             SpriteBatch.DisableTransform();
             SpriteBatch.Disable3D();
+
         }
 
         private void DrawLongTap(float offset, byte i, float start, float end, int color)
