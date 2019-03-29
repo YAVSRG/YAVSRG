@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Open.Nat;
 using Interlude.Utilities;
 using Interlude.Net.P2P.Protocol.Packets;
 
