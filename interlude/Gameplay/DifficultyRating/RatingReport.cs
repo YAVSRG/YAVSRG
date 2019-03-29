@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay.DifficultyRating
+namespace Interlude.Gameplay.DifficultyRating
 {
     public class RatingReport
     {
         public float Physical, Technical;
         public double[] OverallPhysical, OverallTechnical;
         public float[,] Delta;
-        public double[,] Jack, Trill, PhysicalComposite, Poly, Anchor;
+        public double[,] Jack, Trill, PhysicalComposite, Anchor;
 
         const double OHTNERF = 3;
 
@@ -32,7 +32,6 @@ namespace YAVSRG.Gameplay.DifficultyRating
             Jack = new double[chart.Notes.Points.Count, chart.Keys];
             Trill = new double[chart.Notes.Points.Count, chart.Keys];
             PhysicalComposite = new double[chart.Notes.Points.Count, chart.Keys];
-            Poly = new double[chart.Notes.Points.Count, chart.Keys];
             Anchor = new double[chart.Notes.Points.Count, chart.Keys];
             List<GameplaySnap> snaps = chart.Notes.Points;
             Snap current;
@@ -56,7 +55,7 @@ namespace YAVSRG.Gameplay.DifficultyRating
                     foreach (byte k in s.GetColumns()) //calculate value for each note and put it through overall algorithm
                     {
                         CalculateNoteDifficulty(k, i, current.Offset, layout.hands[h].Mask(), rate);
-                        CalcUtils.UpdateStrain(ref currentStrain[k], PhysicalComposite[i,k] * 0.55, (snaps[i].Offset - fingers[k]) / rate);
+                        CalcUtils.UpdateStrain(ref currentStrain[k], PhysicalComposite[i, k] * 0.55, (snaps[i].Offset - fingers[k]) / rate);
                     }
                     //these are separate for loops because this assignment affects the other two
                     foreach (byte k in s.GetColumns()) //record times for calculation of the next snap
@@ -66,8 +65,9 @@ namespace YAVSRG.Gameplay.DifficultyRating
                     lastHandUse[h] = snaps[i].Offset;
                 }
                 OverallPhysical[i] = GetSnapDifficulty(currentStrain, (ushort)(snaps[i].taps.value | snaps[i].holds.value | snaps[i].ends.value)); //calculate difficulty for hands overall
+                //TECHNICAL ----
                 OverallTechnical[i] = GetStreamCurve((snaps[i].Offset - lastHandUse[0]) / rate);
-                //    ----
+                // ----
             }
             Physical = CalcUtils.GetOverallDifficulty(OverallPhysical);
             Technical = CalcUtils.GetOverallDifficulty(OverallTechnical); //final values are meaned because your accuracy is a mean average of hits

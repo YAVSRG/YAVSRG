@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenTK;
-using YAVSRG.Graphics;
-using YAVSRG.Interface;
+using Interlude.Graphics;
+using Interlude.Interface;
 
-namespace YAVSRG.Gameplay.Mods.Visual
+namespace Interlude.Gameplay.Mods.Visual
 {
     public class SpiralScroll : IVisualMod
     {

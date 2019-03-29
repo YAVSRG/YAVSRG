@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     public class WidgetPositionData
     {

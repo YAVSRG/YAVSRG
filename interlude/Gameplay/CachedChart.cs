@@ -1,7 +1,7 @@
-﻿using YAVSRG.Gameplay.DifficultyRating;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+﻿using Interlude.Gameplay.DifficultyRating;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class CachedChart
     {

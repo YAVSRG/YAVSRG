@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace YAVSRG.Net.P2P.Protocol
+namespace Interlude.Net.P2P.Protocol
 {
     public class Protocol
     {

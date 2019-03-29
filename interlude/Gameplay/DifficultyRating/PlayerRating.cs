@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay.DifficultyRating
+namespace Interlude.Gameplay.DifficultyRating
 {
     public class PlayerRating
     {

@@ -2,7 +2,7 @@
 using System.IO;
 using System.Globalization;
 
-namespace YAVSRG.Gameplay.Charts.Osu
+namespace Interlude.Gameplay.Charts.Osu
 {
     public class BeatmapHeader //represents those big blocks of data like [GENERAL]
     {

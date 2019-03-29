@@ -1,10 +1,10 @@
 ﻿using System.Drawing;
 using Newtonsoft.Json;
-using YAVSRG.Interface;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.Interface;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     public class ThemeData
     {
@@ -16,7 +16,7 @@ namespace YAVSRG.Options
         public string Font2 = "Akrobat";
         public Color MenuFont = Color.White;
         public Color SelectChart = Color.FromArgb(0, 180, 110);
-        public Color DefaultThemeColor = Color.FromArgb(0, 255, 160);
+        public Color DefaultThemeColor = Color.FromArgb(0, 160, 255);
         //todo: move to widget data
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;

@@ -1,9 +1,9 @@
 ﻿using System.Drawing;
-using YAVSRG.Interface.Animations;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.Interface.Animations;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     class HitLighting : Widget
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class ChartSaveData
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay.Charts.Stepmania
+namespace Interlude.Gameplay.Charts.Stepmania
 {
     //contains the lines from a .sm file corresponding to a musical bar (only 4 beats per bar supported in .sm format)
     public class Measure

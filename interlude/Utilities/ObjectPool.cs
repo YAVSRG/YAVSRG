@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
-namespace YAVSRG.Utilities
+namespace Interlude.Utilities
 {
     class ObjectPool<T>
     {

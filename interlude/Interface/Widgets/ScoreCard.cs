@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Gameplay;
-using YAVSRG.IO;
+using Interlude.Gameplay;
+using Interlude.IO;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class ScoreCard : FrameContainer
     {

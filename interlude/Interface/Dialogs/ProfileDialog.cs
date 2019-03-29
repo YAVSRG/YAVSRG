@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Gameplay;
+using Interlude.Interface.Widgets;
+using Interlude.Gameplay;
 using System.Drawing;
 
-namespace YAVSRG.Interface.Dialogs
+namespace Interlude.Interface.Dialogs
 {
     class ProfileDialog : FadeDialog
     {

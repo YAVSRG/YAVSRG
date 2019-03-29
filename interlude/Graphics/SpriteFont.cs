@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using YAVSRG.Interface;
-using YAVSRG.IO;
+using Interlude.Interface;
+using Interlude.IO;
 
-namespace YAVSRG.Graphics
+namespace Interlude.Graphics
 {
     public class SpriteFont
     {

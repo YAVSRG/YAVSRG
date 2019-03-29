@@ -1,10 +1,10 @@
 ﻿using System;
-using YAVSRG.Gameplay;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.IO;
-using static YAVSRG.Interface.ScreenUtils;
+using Interlude.Gameplay;
+using Interlude.Interface.Widgets;
+using Interlude.IO;
+using static Interlude.Interface.ScreenUtils;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     public class ScreenLevelSelect : Screen
     {

@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Drawing;
-using static YAVSRG.Interface.ScreenUtils;
-using YAVSRG.Gameplay.Charts.YAVSRG;
-using YAVSRG.Gameplay;
-using YAVSRG.Gameplay.Mods.Visual;
-using YAVSRG.Gameplay.Mods;
-using YAVSRG.Interface.Widgets.Gameplay;
-using YAVSRG.Interface.Animations;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using static Interlude.Interface.ScreenUtils;
+using Interlude.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay;
+using Interlude.Gameplay.Mods.Visual;
+using Interlude.Gameplay.Mods;
+using Interlude.Interface.Widgets.Gameplay;
+using Interlude.Interface.Animations;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     class ScreenPlay : Screen //i cleaned up this file a little but it's a bit of a mess. sorry! update: a lot of a mess
     {
@@ -37,10 +37,10 @@ namespace YAVSRG.Interface.Screens
 
             //this stuff is ok to stay here
             AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
-            AddChild(new PerformanceMeter(scoreTracker));
+            //AddChild(new PerformanceMeter(scoreTracker));
             AddChild(new HitMeter(scoreTracker, widgetData.GetPosition("hitMeter")));
             AddChild(new ComboDisplay(scoreTracker, widgetData.GetPosition("combo")));
-            AddChild(new ProgressBar(scoreTracker, widgetData.GetPosition("progressBar")).PositionTopLeft(-500, 10, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new ProgressBar(scoreTracker, widgetData.GetPosition("progressBar")));
             AddChild(new AccMeter(scoreTracker, widgetData.GetPosition("accuracy")));
             AddChild(new HPMeter(scoreTracker, widgetData.GetPosition("healthBar")));
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("time"), () => { return DateTime.Now.ToLongTimeString(); }));

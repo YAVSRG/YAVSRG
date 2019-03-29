@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK;
 
-namespace YAVSRG.Graphics
+namespace Interlude.Graphics
 {
     public struct Plane
     {

@@ -2,16 +2,16 @@
 using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using YAVSRG.Graphics;
-using YAVSRG.Interface;
-using YAVSRG.Utilities;
-using YAVSRG.Net.P2P;
-using YAVSRG.IO;
-using YAVSRG.IO.Audio;
-using YAVSRG.Gameplay;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Graphics;
+using Interlude.Interface;
+using Interlude.Utilities;
+using Interlude.Net.P2P;
+using Interlude.IO;
+using Interlude.IO.Audio;
+using Interlude.Gameplay;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG
+namespace Interlude
 {
     class Game : GameWindow
     {
@@ -66,7 +66,7 @@ namespace YAVSRG
 
         public static string WorkingDirectory
         {
-            get { return YAVSRG.Options.Options.general.WorkingDirectory; }
+            get { return Interlude.Options.Options.general.WorkingDirectory; }
         }
 
         public Game() : base(500, 200, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
@@ -99,14 +99,14 @@ namespace YAVSRG
         public void ApplyWindowSettings(Options.General settings) //apply video settings
         {
             TargetRenderFrequency = settings.FrameLimiter; //set frame limit
-            if (settings.WindowMode == YAVSRG.Options.General.WindowType.Window)
+            if (settings.WindowMode == Interlude.Options.General.WindowType.Window)
             { //settings for windows
                 WindowState = WindowState.Normal;
                 WindowBorder = WindowBorder.Resizable;
-                Size = new Size(YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item1, YAVSRG.Options.General.RESOLUTIONS[settings.Resolution].Item2);
+                Size = new Size(Interlude.Options.General.RESOLUTIONS[settings.Resolution].Item1, Interlude.Options.General.RESOLUTIONS[settings.Resolution].Item2);
                 Location = new Point((DisplayDevice.Default.Width - Size.Width) / 2, (DisplayDevice.Default.Height - Size.Height) / 2);
             }
-            else if (settings.WindowMode == YAVSRG.Options.General.WindowType.Fullscreen)
+            else if (settings.WindowMode == Interlude.Options.General.WindowType.Fullscreen)
             {//settings for fullscreen
                 WindowState = WindowState.Fullscreen;
             }

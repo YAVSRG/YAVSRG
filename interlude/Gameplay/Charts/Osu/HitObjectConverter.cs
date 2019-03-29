@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay.Charts.Osu
+namespace Interlude.Gameplay.Charts.Osu
 {
     public class HitObjectConverter //encapsulates all hitobjects in a map. it is called HitObjectConverter because that's all it does, with no tools for manipulating the hitobjects
     {

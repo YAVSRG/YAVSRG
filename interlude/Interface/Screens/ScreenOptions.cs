@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Gameplay;
+using Interlude.Gameplay;
 using System.Drawing;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Options.Panels;
+using Interlude.Interface.Widgets;
+using Interlude.Options.Panels;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     class ScreenOptions : Screen
     {

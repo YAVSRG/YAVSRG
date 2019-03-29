@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
-using YAVSRG.Interface;
-using YAVSRG.IO;
+using Interlude.Interface;
+using Interlude.IO;
 
-namespace YAVSRG.Graphics
+namespace Interlude.Graphics
 {
     class SpriteBatch
     {
@@ -293,7 +293,8 @@ namespace YAVSRG.Graphics
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, ((Sprite)input).ID);
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.GenSamplers(1, out int sampler);
+            int sampler;
+            GL.GenSamplers(1, out sampler);
             GL.BindSampler(((Sprite)input).ID, sampler);
             DrawableFBO output = new DrawableFBO();
             GL.UseProgram(WaterShader.Program);

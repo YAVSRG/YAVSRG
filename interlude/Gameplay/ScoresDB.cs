@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class ScoresDB
     {

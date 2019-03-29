@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace YAVSRG.Gameplay.Charts.Collections
+namespace Interlude.Gameplay.Charts.Collections
 {
     public class CollectionsManager
     {

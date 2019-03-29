@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using OpenTK;
-using YAVSRG.Graphics;
-using YAVSRG.Interface;
+using Interlude.Graphics;
+using Interlude.Interface;
 
-namespace YAVSRG.Gameplay.Mods
+namespace Interlude.Gameplay.Mods
 {
     public class IVisualMod
     {

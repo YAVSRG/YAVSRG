@@ -4,13 +4,13 @@ using System.Linq;
 using System.IO;
 using System.IO.Compression;
 using System.Drawing;
-using YAVSRG.Gameplay.Charts.Stepmania;
-using YAVSRG.Gameplay.Charts.YAVSRG;
-using YAVSRG.Gameplay.Charts.Osu;
-using static YAVSRG.Utilities.Logging;
-using static YAVSRG.Utilities.TaskManager;
+using Interlude.Gameplay.Charts.Stepmania;
+using Interlude.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.Osu;
+using static Interlude.Utilities.Logging;
+using static Interlude.Utilities.TaskManager;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class ChartLoader
     {

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Toolbar
+namespace Interlude.Interface.Widgets.Toolbar
 {
     public class ChatBox : ToolbarWidget
     {
@@ -271,7 +271,8 @@ namespace YAVSRG.Interface.Widgets.Toolbar
                         }
                         else if (parse[0] == "e")
                         {
-                            int.TryParse(parse[1], out int id);
+                            int id;
+                            int.TryParse(parse[1], out id);
                             SpriteBatch.Draw("emoji", new Rect(x, y, x + 35, y + 35), c, id, 0, 0);
                             x += 35;
                             valid = true;

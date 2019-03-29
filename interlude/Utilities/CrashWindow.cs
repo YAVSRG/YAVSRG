@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace YAVSRG.Utilities
+namespace Interlude.Utilities
 {
     public partial class CrashWindow : Form
     {

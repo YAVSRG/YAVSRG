@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Interface;
-using YAVSRG.Interface.Dialogs;
+using Interlude.Interface.Widgets;
+using Interlude.Interface;
+using Interlude.Interface.Dialogs;
 
-namespace YAVSRG.Options.Panels
+namespace Interlude.Options.Panels
 {
     class GeneralPanel : OptionsPanel
     {

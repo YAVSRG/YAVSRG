@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Gameplay.Charts.YAVSRG;
-using YAVSRG.Gameplay.Watchers;
+using Interlude.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Watchers;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class Score
     {

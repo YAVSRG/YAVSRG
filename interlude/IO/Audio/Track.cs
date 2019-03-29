@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ManagedBass;
 using ManagedBass.Fx;
 
-namespace YAVSRG.IO.Audio
+namespace Interlude.IO.Audio
 {
     public class Track
     {

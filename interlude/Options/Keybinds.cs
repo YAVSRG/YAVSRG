@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Input;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     public class Keybinds
     {

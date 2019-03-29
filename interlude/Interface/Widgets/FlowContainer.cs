@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Interface.Animations;
-using YAVSRG.IO;
+using Interlude.Interface.Animations;
+using Interlude.IO;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class FlowContainer : FrameContainer
     {

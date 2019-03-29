@@ -1,8 +1,8 @@
 ﻿using OpenTK;
 using System.Drawing;
-using YAVSRG.Interface;
+using Interlude.Interface;
 
-namespace YAVSRG.Graphics
+namespace Interlude.Graphics
 {
     public struct RenderTarget
     {

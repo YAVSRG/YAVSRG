@@ -5,11 +5,11 @@ using System.Text;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using YAVSRG.Net.P2P.Protocol.Packets;
-using YAVSRG.Utilities;
-using YAVSRG.Gameplay;
+using Interlude.Net.P2P.Protocol.Packets;
+using Interlude.Utilities;
+using Interlude.Gameplay;
 
-namespace YAVSRG.Net.P2P
+namespace Interlude.Net.P2P
 {
     public class SocketServer
     {

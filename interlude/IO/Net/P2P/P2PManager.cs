@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Open.Nat;
-using YAVSRG.Utilities;
-using YAVSRG.Net.P2P.Protocol.Packets;
+using Interlude.Utilities;
+using Interlude.Net.P2P.Protocol.Packets;
 
-namespace YAVSRG.Net.P2P
+namespace Interlude.Net.P2P
 {
     public class P2PManager
     {

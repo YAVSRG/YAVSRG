@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 
-namespace YAVSRG.Interface.Animations
+namespace Interlude.Interface.Animations
 {
     public class AnimationColorMixer : Animation
     {

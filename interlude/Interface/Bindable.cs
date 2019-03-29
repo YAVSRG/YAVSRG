@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 
-namespace YAVSRG.Interface
+namespace Interlude.Interface
 {
     public class Bindable<T>
     {

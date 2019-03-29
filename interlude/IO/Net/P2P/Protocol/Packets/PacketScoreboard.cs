@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Gameplay;
+using Interlude.Gameplay;
 
-namespace YAVSRG.Net.P2P.Protocol.Packets
+namespace Interlude.Net.P2P.Protocol.Packets
 {
     public class PacketScoreboard : Packet<PacketScoreboard>
     {

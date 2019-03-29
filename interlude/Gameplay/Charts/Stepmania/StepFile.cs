@@ -4,9 +4,9 @@ using System.Linq;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Globalization;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay.Charts.Stepmania
+namespace Interlude.Gameplay.Charts.Stepmania
 {
     //sm file format sux and if stuff breaks it's not really my fault
     public class StepFile

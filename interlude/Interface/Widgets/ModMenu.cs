@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using YAVSRG.Interface.Animations;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.Interface.Animations;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     class ModMenu : Widget
     {

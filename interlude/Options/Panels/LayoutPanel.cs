@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Input;
-using YAVSRG.Interface;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Gameplay.DifficultyRating;
-using YAVSRG.IO;
+using Interlude.Interface;
+using Interlude.Interface.Widgets;
+using Interlude.Gameplay.DifficultyRating;
+using Interlude.IO;
 
-namespace YAVSRG.Options.Panels
+namespace Interlude.Options.Panels
 {
     class LayoutPanel : OptionsPanel
     {

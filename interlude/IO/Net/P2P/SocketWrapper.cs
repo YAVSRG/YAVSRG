@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 
-namespace YAVSRG.Net.P2P
+namespace Interlude.Net.P2P
 {
     public class SocketWrapper
     {

@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Gameplay;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     //todo: move me to gameplay namespace (and modularise)
     public class Colorizer

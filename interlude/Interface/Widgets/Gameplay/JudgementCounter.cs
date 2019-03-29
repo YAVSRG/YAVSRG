@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Graphics;
+using Interlude.Interface.Animations;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     class JudgementCounter : GameplayWidget
     {
         List<AnimationSlider> flashes;
 
-        public JudgementCounter(YAVSRG.Gameplay.ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
+        public JudgementCounter(Interlude.Gameplay.ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
             flashes = new List<AnimationSlider>();
             for (int i = 0; i < 6; i++)

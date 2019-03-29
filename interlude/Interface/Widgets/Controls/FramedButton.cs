@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.IO;
+using Interlude.IO;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     class FramedButton : FrameContainer
     {

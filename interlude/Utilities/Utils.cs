@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG
+namespace Interlude
 {
     class Utils
     {

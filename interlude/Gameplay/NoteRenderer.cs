@@ -1,12 +1,12 @@
 ﻿using System;
-using YAVSRG.Interface;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Gameplay.Mods;
-using YAVSRG.Gameplay.Charts.YAVSRG;
-using YAVSRG.Graphics;
-using YAVSRG.IO;
+using Interlude.Interface;
+using Interlude.Interface.Animations;
+using Interlude.Gameplay.Mods;
+using Interlude.Gameplay.Charts.YAVSRG;
+using Interlude.Graphics;
+using Interlude.IO;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class NoteRenderer : Widget
     {

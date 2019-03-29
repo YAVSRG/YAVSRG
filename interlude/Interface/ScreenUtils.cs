@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Gameplay.Watchers;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.Gameplay.Watchers;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface
+namespace Interlude.Interface
 {
     class ScreenUtils
     {

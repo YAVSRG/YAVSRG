@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
-using YAVSRG.Gameplay;
-using YAVSRG.Gameplay.Watchers;
-using YAVSRG.Gameplay.DifficultyRating;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Net.P2P.Protocol.Packets;
-using static YAVSRG.Interface.ScreenUtils;
+using Interlude.IO;
+using Interlude.Graphics;
+using Interlude.Gameplay;
+using Interlude.Gameplay.Watchers;
+using Interlude.Gameplay.DifficultyRating;
+using Interlude.Interface.Widgets;
+using Interlude.Net.P2P.Protocol.Packets;
+using static Interlude.Interface.ScreenUtils;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     class ScreenScore : Screen
     {

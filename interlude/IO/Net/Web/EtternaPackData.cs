@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Net.Web
+namespace Interlude.Net.Web
 {
     public class EtternaPackData
     {

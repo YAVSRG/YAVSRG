@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Net.Web;
+using Interlude.Net.Web;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     class DownloadManager : Widget
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Interface.Widgets.Toolbar
+namespace Interlude.Interface.Widgets.Toolbar
 {
     public class ToolbarWidget : Widget
     {

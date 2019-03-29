@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     class TextEntryBox : Widget
     {

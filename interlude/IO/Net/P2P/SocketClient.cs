@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Net;
-using YAVSRG.Net.P2P.Protocol.Packets;
-using YAVSRG.Gameplay;
+using Interlude.Net.P2P.Protocol.Packets;
+using Interlude.Gameplay;
 
-namespace YAVSRG.Net.P2P
+namespace Interlude.Net.P2P
 {
     public class SocketClient : SocketWrapper
     {

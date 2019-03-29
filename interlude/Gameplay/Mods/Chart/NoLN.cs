@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay.Mods
+namespace Interlude.Gameplay.Mods
 {
     public class NoLN : Mod
     {

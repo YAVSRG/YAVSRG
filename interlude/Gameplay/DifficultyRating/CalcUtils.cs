@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace YAVSRG.Gameplay.DifficultyRating
+namespace Interlude.Gameplay.DifficultyRating
 {
     class CalcUtils
     {

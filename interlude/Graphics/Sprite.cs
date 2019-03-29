@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Graphics
+namespace Interlude.Graphics
 {
     public struct Sprite
     {

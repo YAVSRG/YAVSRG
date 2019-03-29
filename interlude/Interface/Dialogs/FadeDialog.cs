@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Interface.Animations;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.Interface.Animations;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Dialogs
+namespace Interlude.Interface.Dialogs
 {
     public class FadeDialog : Dialog //not for specific purpose, just basis of certain dialogs that fade out the game to focus on something
     {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Interface.Widgets;
+using Interlude.Interface.Widgets;
 
-namespace YAVSRG.Interface
+namespace Interlude.Interface
 {
     public class Dialog : Widget
     {

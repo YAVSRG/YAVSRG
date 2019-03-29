@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using ManagedBass;
 
-namespace YAVSRG.IO.Audio
+namespace Interlude.IO.Audio
 {
     public class MusicPlayer
     {

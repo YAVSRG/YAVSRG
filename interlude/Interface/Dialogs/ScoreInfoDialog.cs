@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Gameplay;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Graphics;
+using Interlude.Gameplay;
+using Interlude.Interface.Widgets;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Dialogs
+namespace Interlude.Interface.Dialogs
 {
     public class ScoreInfoDialog : FadeDialog
     {

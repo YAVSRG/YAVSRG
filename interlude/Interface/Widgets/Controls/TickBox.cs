@@ -1,7 +1,7 @@
 ﻿using System;
-using YAVSRG.Graphics;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     class TickBox : Widget
     {

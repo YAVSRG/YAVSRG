@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     public class ScreenEditor : Screen
     {

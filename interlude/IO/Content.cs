@@ -5,10 +5,10 @@ using System.Drawing.Imaging;
 using System.IO;
 using OpenTK.Graphics.OpenGL;
 using ManagedBass;
-using YAVSRG.Graphics;
+using Interlude.Graphics;
 
 
-namespace YAVSRG.IO
+namespace Interlude.IO
 {
     class Content
     {

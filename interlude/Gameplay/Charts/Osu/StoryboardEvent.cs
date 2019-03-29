@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YAVSRG.Gameplay.Charts.Osu
+namespace Interlude.Gameplay.Charts.Osu
 {
     class StoryboardEvent
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace YAVSRG.Gameplay.Charts.Collections
+namespace Interlude.Gameplay.Charts.Collections
 {
     public class Collection
     {

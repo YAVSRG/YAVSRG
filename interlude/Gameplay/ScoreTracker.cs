@@ -1,10 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
-using YAVSRG.Gameplay.Charts.YAVSRG;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Gameplay.Watchers;
+using Interlude.Gameplay.Charts.YAVSRG;
+using Interlude.Interface.Animations;
+using Interlude.Gameplay.Watchers;
+using System.IO.Compression;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class ScoreTracker //handles scoring while you play through a chart, keeping track of hits and acc and stuff
     {
@@ -106,12 +108,26 @@ namespace YAVSRG.Gameplay
                 Array.Copy(data[i].hit, 0, result, k * (i * 5), k);
                 Buffer.BlockCopy(data[i].delta, 0, result, k * (i * 5 + 1), k * 4);
             }
-            return Convert.ToBase64String(result);
+            using (var inputStream = new MemoryStream())
+            using (var gZipStream = new GZipStream(inputStream, CompressionLevel.Optimal))
+            {
+                gZipStream.Write(result, 0, result.Length);
+                gZipStream.Close();
+                return Convert.ToBase64String(inputStream.ToArray());
+            }
         }
 
         public static HitData[] StringToHitData(string s, int k)
         {
-            byte[] raw = Convert.FromBase64String(s);
+            byte[] raw;
+            byte[] compressed = Convert.FromBase64String(s);
+            using (var outputStream = new MemoryStream())
+            using (var inputStream = new MemoryStream(compressed))
+            using (var gZipStream = new GZipStream(inputStream, CompressionMode.Decompress))
+            {
+                gZipStream.CopyTo(outputStream);
+                raw = outputStream.ToArray();
+            }
             HitData[] result = new HitData[raw.Length / (5 * k)];
             for (int i = 0; i < result.Length; i++)
             {
@@ -120,6 +136,26 @@ namespace YAVSRG.Gameplay
                 Buffer.BlockCopy(raw, k * (i * 5 + 1), result[i].delta, 0, k * 4);
             }
             return result;
+        }
+
+        public static void Migrate()
+        {
+            foreach (string hash in Game.Gameplay.ScoreDatabase.data.Keys)
+            {
+                ChartSaveData d = Game.Gameplay.ScoreDatabase.data[hash];
+                foreach (Score s in d.Scores)
+                {
+                    byte[] data = Convert.FromBase64String(s.hitdata);
+                    using (var inputStream = new MemoryStream())
+                    using (var gZipStream = new GZipStream(inputStream, CompressionLevel.Optimal))
+                    {
+                        gZipStream.Write(data, 0, data.Length);
+                        gZipStream.Close();
+                        s.hitdata = Convert.ToBase64String(inputStream.ToArray());
+                    }
+                }
+            }
+
         }
     }
 }

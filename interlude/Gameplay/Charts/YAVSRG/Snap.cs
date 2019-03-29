@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace YAVSRG.Gameplay.Charts.YAVSRG
+namespace Interlude.Gameplay.Charts.YAVSRG
 {
     public class Snap : OffsetItem
     {

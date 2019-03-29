@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Graphics;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class TextBox : Widget
     {

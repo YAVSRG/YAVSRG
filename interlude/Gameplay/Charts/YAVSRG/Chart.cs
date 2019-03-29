@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.IO;
 
-namespace YAVSRG.Gameplay.Charts.YAVSRG
+namespace Interlude.Gameplay.Charts.YAVSRG
 {
     public class Chart
     {

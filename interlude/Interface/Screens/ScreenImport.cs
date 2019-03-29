@@ -1,9 +1,9 @@
 ﻿using System;
 using OpenTK.Input;
-using YAVSRG.Gameplay;
-using YAVSRG.Graphics;
+using Interlude.Gameplay;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     class ScreenImport : Screen
     {

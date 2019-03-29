@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using OpenTK.Input;
-using YAVSRG.Interface;
+using Interlude.Interface;
 
-namespace YAVSRG.IO
+namespace Interlude.IO
 {
     public class Input
     {

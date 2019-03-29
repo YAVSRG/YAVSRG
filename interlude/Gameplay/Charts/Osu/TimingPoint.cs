@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace YAVSRG.Gameplay.Charts.Osu
+namespace Interlude.Gameplay.Charts.Osu
 {
     public class TimingPoint
     {

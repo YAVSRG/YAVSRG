@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Graphics;
+using Interlude.Interface.Animations;
+using Interlude.Interface.Widgets;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Dialogs
+namespace Interlude.Interface.Dialogs
 {
     class ConfirmDialog : Dialog
     {

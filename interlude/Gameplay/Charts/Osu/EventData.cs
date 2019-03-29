@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 
-namespace YAVSRG.Gameplay.Charts.Osu
+namespace Interlude.Gameplay.Charts.Osu
 {
     public class EventData //this is the block that stores storyboard events. one of such is what bg image to use
     {

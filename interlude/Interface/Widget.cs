@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Interface.Animations;
+using Interlude.Interface.Animations;
 
-namespace YAVSRG.Interface
+namespace Interlude.Interface
 {
     public class Widget
     {

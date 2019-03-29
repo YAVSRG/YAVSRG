@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using YAVSRG.Interface.Animations;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
-using static YAVSRG.Interface.ScreenUtils;
+using Interlude.Interface.Animations;
+using Interlude.IO;
+using Interlude.Graphics;
+using static Interlude.Interface.ScreenUtils;
 
-namespace YAVSRG.Interface
+namespace Interlude.Interface
 {
     class ScreenManager
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
 using OpenTK;
-using YAVSRG.Graphics;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     class Logo : Widget
     {

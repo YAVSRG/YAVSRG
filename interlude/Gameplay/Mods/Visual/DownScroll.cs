@@ -1,9 +1,9 @@
 ﻿using OpenTK;
 using System.Collections.Generic;
-using YAVSRG.Graphics;
-using YAVSRG.Interface;
+using Interlude.Graphics;
+using Interlude.Interface;
 
-namespace YAVSRG.Gameplay.Mods.Visual
+namespace Interlude.Gameplay.Mods.Visual
 {
     public class DownScroll : IVisualMod
     {

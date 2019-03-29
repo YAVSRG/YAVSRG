@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Drawing;
 using OpenTK;
-using YAVSRG.Gameplay;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Graphics;
-using static YAVSRG.Interface.ScreenUtils;
+using Interlude.Gameplay;
+using Interlude.Interface.Animations;
+using Interlude.Graphics;
+using static Interlude.Interface.ScreenUtils;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     class ScreenLoading : Screen
     {

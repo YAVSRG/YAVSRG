@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using static YAVSRG.Gameplay.ChartLoader;
-using YAVSRG.IO;
+using static Interlude.Gameplay.ChartLoader;
+using Interlude.IO;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class ChartSortingControls : Widget
     {

@@ -1,8 +1,8 @@
 ﻿using System.Drawing;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Editor
+namespace Interlude.Interface.Widgets.Editor
 {
     public class Timeline : Widget
     {
@@ -12,7 +12,7 @@ namespace YAVSRG.Interface.Widgets.Editor
             bounds = GetBounds(bounds);
             SpriteBatch.DrawRect(bounds, Color.FromArgb(127, 0, 0, 0));
             float nowPos;
-            foreach (YAVSRG.Gameplay.Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
+            foreach (Interlude.Gameplay.Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
             {
                 nowPos = (float)(bounds.Left + b.Offset / Game.Audio.Duration * bounds.Width);
                 //SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);

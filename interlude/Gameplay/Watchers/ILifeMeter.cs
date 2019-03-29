@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay.Watchers
+namespace Interlude.Gameplay.Watchers
 {
     public abstract class ILifeMeter : IGameplayWatcher
     {

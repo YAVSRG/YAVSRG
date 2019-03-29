@@ -1,9 +1,9 @@
 ﻿using System;
-using YAVSRG.Gameplay;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Graphics;
+using Interlude.Gameplay;
+using Interlude.Interface.Animations;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     public class ComboDisplay : GameplayWidget
     {

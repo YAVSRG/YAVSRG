@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using YAVSRG.Gameplay.Charts.YAVSRG;
-using YAVSRG.Gameplay.Mods;
-using YAVSRG.Gameplay.DifficultyRating;
-using YAVSRG.Gameplay.Charts.Collections;
-using YAVSRG.IO;
+using Interlude.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Mods;
+using Interlude.Gameplay.DifficultyRating;
+using Interlude.Gameplay.Charts.Collections;
+using Interlude.IO;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class GameplayManager
     {

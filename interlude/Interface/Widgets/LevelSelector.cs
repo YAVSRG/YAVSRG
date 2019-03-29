@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Drawing;
-using YAVSRG.Gameplay;
-using YAVSRG.Interface.Animations;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.Gameplay;
+using Interlude.Interface.Animations;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class LevelSelector : Widget
     {

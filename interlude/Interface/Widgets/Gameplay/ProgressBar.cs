@@ -1,27 +1,25 @@
-﻿using YAVSRG.Gameplay;
-using YAVSRG.Graphics;
+﻿using System.Drawing;
+using Interlude.Gameplay;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     public class ProgressBar : GameplayWidget
     {
+        bool background;
+
         public ProgressBar(ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
+            background = pos.GetValue("Background", true);
         }
 
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            SpriteBatch.DrawRect(bounds, Game.Screens.DarkColor);
-            float temp;
-            float x = bounds.Left;
-            for(int i = 5; i >= 0; i--)
-            {
-                temp = scoreTracker.Scoring.Judgements[i] * bounds.Width / scoreTracker.MaxCombo;
-                SpriteBatch.DrawRect(new Rect(x, bounds.Top, x + temp, bounds.Bottom), Game.Options.Theme.JudgeColors[i]);
-                x += temp;
-            }
+            float progress = ((float)Game.Audio.Now() - Game.CurrentChart.Notes.Points[0].Offset) / Game.CurrentChart.GetDuration();
+            if (background) SpriteBatch.DrawRect(bounds, Color.FromArgb(((Color)scoreTracker.WidgetColor).A, Game.Screens.DarkColor));
+            SpriteBatch.DrawRect(bounds.SliceLeft(bounds.Width * progress), Color.FromArgb(((Color)scoreTracker.WidgetColor).A, Game.Screens.HighlightColor));
         }
     }
 }

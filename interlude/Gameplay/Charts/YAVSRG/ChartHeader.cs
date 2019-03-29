@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace YAVSRG.Gameplay.Charts.YAVSRG
+namespace Interlude.Gameplay.Charts.YAVSRG
 {
     public class ChartHeader
     {

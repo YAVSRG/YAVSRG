@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Gameplay.Watchers.Scoring
+namespace Interlude.Gameplay.Watchers.Scoring
 {
     class OD : NoCCScoring
     {

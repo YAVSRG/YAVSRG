@@ -11,3 +11,7 @@ Times you didn't hit the note: 40
 Number of statistics that are accurate: 4
 Number of columns: {Game.CurrentChart.Keys}
 Number of statistics on the screen: 1
+Files blacklisted: 0
+Times you opened the game, stared at the menu and then closed it: 5
+Actually impressive scores: 2
+Unfixed bugs: 40+

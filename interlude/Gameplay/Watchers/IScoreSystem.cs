@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Gameplay.Watchers.Scoring;
+using Interlude.Gameplay.Watchers.Scoring;
 
-namespace YAVSRG.Gameplay.Watchers
+namespace Interlude.Gameplay.Watchers
 {
     public abstract class IScoreSystem : IGameplayWatcher
     {

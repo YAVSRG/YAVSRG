@@ -1,8 +1,8 @@
 ﻿using System;
 using DiscordRPC;
-using YAVSRG.Utilities;
+using Interlude.Utilities;
 
-namespace YAVSRG.IO
+namespace Interlude.IO
 {
     public class Discord
     {

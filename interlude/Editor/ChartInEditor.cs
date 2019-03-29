@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 using System.IO;
 
-namespace YAVSRG.Editor
+namespace Interlude.Editor
 {
     public class ChartInEditor : Chart
     {

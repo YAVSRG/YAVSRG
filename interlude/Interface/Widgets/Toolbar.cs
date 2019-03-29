@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Drawing;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Interface.Screens;
-using YAVSRG.Interface.Widgets.Toolbar;
-using static YAVSRG.Interface.ScreenUtils;
+using Interlude.IO;
+using Interlude.Graphics;
+using Interlude.Interface.Widgets;
+using Interlude.Interface.Animations;
+using Interlude.Interface.Screens;
+using Interlude.Interface.Widgets.Toolbar;
+using static Interlude.Interface.ScreenUtils;
 
-namespace YAVSRG.Interface
+namespace Interlude.Interface
 {
     public class Toolbar : Widget
     {

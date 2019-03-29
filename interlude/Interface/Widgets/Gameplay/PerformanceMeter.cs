@@ -1,8 +1,8 @@
 ﻿using System;
-using YAVSRG.Gameplay.DifficultyRating;
-using YAVSRG.Graphics;
+using Interlude.Gameplay.DifficultyRating;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     public class PerformanceMeter : GameplayWidget
     {
@@ -11,7 +11,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         int lasti;
         double nps;
 
-        public PerformanceMeter(YAVSRG.Gameplay.ScoreTracker scoreTracker) : base(scoreTracker, new Options.WidgetPosition() { Enable = true })
+        public PerformanceMeter(Interlude.Gameplay.ScoreTracker scoreTracker) : base(scoreTracker, new Options.WidgetPosition() { Enable = true })
         {
             scoreTracker.OnHit += HandleHit;
             lasti = scoreTracker.Chart.Notes.Count;

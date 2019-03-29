@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using OpenTK.Input;
 using Newtonsoft.Json;
-using YAVSRG.Gameplay;
-using YAVSRG.Gameplay.Watchers;
-using static YAVSRG.Gameplay.DifficultyRating.KeyLayout;
+using Interlude.Gameplay;
+using Interlude.Gameplay.Watchers;
+using static Interlude.Gameplay.DifficultyRating.KeyLayout;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     public class Profile
     {

@@ -1,12 +1,12 @@
-﻿using YAVSRG.Graphics;
+﻿using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     public class Screencover : GameplayWidget
     {
         bool flip;
 
-        public Screencover(YAVSRG.Gameplay.ScoreTracker st, bool d) : base(st, new Options.WidgetPosition() { Enable = true })
+        public Screencover(Interlude.Gameplay.ScoreTracker st, bool d) : base(st, new Options.WidgetPosition() { Enable = true })
         {
             flip = d;
         }

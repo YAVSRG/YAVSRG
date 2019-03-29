@@ -1,8 +1,8 @@
-﻿using YAVSRG.Interface;
-using YAVSRG.Interface.Widgets;
-using YAVSRG.Graphics;
+﻿using Interlude.Interface;
+using Interlude.Interface.Widgets;
+using Interlude.Graphics;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     public class OptionsPanel : Widget
     {

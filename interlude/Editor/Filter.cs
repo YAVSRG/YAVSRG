@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace YAVSRG.Editor
+namespace Interlude.Editor
 {
     public class Filter
     {

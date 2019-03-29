@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
-using YAVSRG.Utilities;
-using YAVSRG.IO;
+using Interlude.Utilities;
+using Interlude.IO;
 
-namespace YAVSRG
+namespace Interlude
 {
     class Program
     {

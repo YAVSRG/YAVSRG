@@ -1,7 +1,7 @@
-﻿using YAVSRG.Net.Web;
-using YAVSRG.Graphics;
+﻿using Interlude.Net.Web;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class NewsBox : Widget
     {

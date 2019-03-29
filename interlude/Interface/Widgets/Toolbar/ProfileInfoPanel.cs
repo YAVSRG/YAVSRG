@@ -1,8 +1,8 @@
 ﻿using System;
-using YAVSRG.Gameplay.DifficultyRating;
-using YAVSRG.Graphics;
+using Interlude.Gameplay.DifficultyRating;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Toolbar
+namespace Interlude.Interface.Widgets.Toolbar
 {
     public class ProfileInfoPanel : ToolbarWidget
     {

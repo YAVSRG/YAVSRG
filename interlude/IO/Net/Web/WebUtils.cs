@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Http;
 using System.IO;
 
-namespace YAVSRG.Net.Web
+namespace Interlude.Net.Web
 {
     public class WebUtils
     {

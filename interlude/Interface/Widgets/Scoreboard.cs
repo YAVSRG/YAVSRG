@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using YAVSRG.Gameplay;
-using YAVSRG.Graphics;
+using Interlude.Gameplay;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class Scoreboard : FlowContainer
     {

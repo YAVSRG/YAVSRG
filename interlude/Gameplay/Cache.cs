@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 using System.IO;
 
-namespace YAVSRG.Gameplay
+namespace Interlude.Gameplay
 {
     public class Cache
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Reflection;
 using System.IO;
 
-namespace YAVSRG.IO
+namespace Interlude.IO
 {
     public class ResourceGetter
     {

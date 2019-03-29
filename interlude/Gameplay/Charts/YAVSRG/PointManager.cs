@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace YAVSRG.Gameplay.Charts.YAVSRG
+namespace Interlude.Gameplay.Charts.YAVSRG
 {
     //Manages an ordered list of objects that contain a time into the chart when they occur
     public class PointManager<P> where P : OffsetItem

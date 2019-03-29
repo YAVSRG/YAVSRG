@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using YAVSRG.IO;
+using Interlude.IO;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     public class Options
     {

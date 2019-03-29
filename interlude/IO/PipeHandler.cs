@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO.Pipes;
 using System.IO;
 
-namespace YAVSRG.IO
+namespace Interlude.IO
 {
     class PipeHandler
     {

@@ -1,7 +1,7 @@
 ﻿using System;
-using YAVSRG.Gameplay.Charts.YAVSRG;
+using Interlude.Gameplay.Charts.YAVSRG;
 
-namespace YAVSRG.Gameplay.Mods
+namespace Interlude.Gameplay.Mods
 {
     public class Inverse : Mod
     {

@@ -1,8 +1,8 @@
-﻿using YAVSRG.Net.Web;
-using YAVSRG.Gameplay;
-using YAVSRG.Graphics;
+﻿using Interlude.Net.Web;
+using Interlude.Gameplay;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     class DownloadCard : Widget
     {

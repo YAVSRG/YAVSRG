@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using YAVSRG.Interface;
+using Interlude.Interface;
 
-namespace YAVSRG.Options
+namespace Interlude.Options
 {
     public class WidgetPosition
     {

@@ -1,9 +1,9 @@
-﻿using YAVSRG.Gameplay;
+﻿using Interlude.Gameplay;
 using System.Drawing;
-using YAVSRG.Gameplay.DifficultyRating;
-using YAVSRG.Graphics;
+using Interlude.Gameplay.DifficultyRating;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class TopScoreCard : Widget
     {

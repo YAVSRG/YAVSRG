@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace YAVSRG.Gameplay.Mods
+namespace Interlude.Gameplay.Mods
 {
     public class Mod
     {

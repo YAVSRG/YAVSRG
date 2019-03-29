@@ -1,7 +1,7 @@
 ﻿using System;
-using YAVSRG.IO;
+using Interlude.IO;
 
-namespace YAVSRG.Interface.Widgets.Toolbar
+namespace Interlude.Interface.Widgets.Toolbar
 {
     public class MusicControls : ToolbarWidget
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using OpenTK.Input;
-using YAVSRG.Graphics;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class KeyBinder : Widget
     {

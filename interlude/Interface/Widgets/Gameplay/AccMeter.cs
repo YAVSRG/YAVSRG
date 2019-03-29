@@ -1,7 +1,7 @@
-﻿using YAVSRG.Gameplay;
-using YAVSRG.Graphics;
+﻿using Interlude.Gameplay;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     public class AccMeter : GameplayWidget
     {

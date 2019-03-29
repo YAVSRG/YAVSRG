@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Widgets.Gameplay
+namespace Interlude.Interface.Widgets.Gameplay
 {
     public class HitMeter : GameplayWidget
     {
@@ -51,7 +51,7 @@ namespace YAVSRG.Interface.Widgets.Gameplay
         float hScale, vScale;
         int thickness;
 
-        public HitMeter(YAVSRG.Gameplay.ScoreTracker st, Options.WidgetPosition pos) : base(st, pos)
+        public HitMeter(Interlude.Gameplay.ScoreTracker st, Options.WidgetPosition pos) : base(st, pos)
         {
             st.OnHit += AddHit;
             if (Game.Options.Theme.JudgementPerColumn)

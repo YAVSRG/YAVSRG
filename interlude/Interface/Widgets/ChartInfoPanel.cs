@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using YAVSRG.Interface.Animations;
-using YAVSRG.Gameplay.DifficultyRating;
+using Interlude.Interface.Animations;
+using Interlude.Gameplay.DifficultyRating;
 
-namespace YAVSRG.Interface.Widgets
+namespace Interlude.Interface.Widgets
 {
     public class ChartInfoPanel : FrameContainer
     {

@@ -1,8 +1,8 @@
-﻿using YAVSRG.Interface.Widgets;
-using YAVSRG.IO;
-using YAVSRG.Graphics;
+﻿using Interlude.Interface.Widgets;
+using Interlude.IO;
+using Interlude.Graphics;
 
-namespace YAVSRG.Interface.Screens
+namespace Interlude.Interface.Screens
 {
     class ScreenLobby : Screen
     {
