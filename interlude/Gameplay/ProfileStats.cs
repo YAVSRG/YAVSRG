@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Interlude.Gameplay.Charts;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.DifficultyRating;
+using Prelude.Gameplay;
+using Prelude.Gameplay.Charts.YAVSRG;
+using Prelude.Utilities;
 
 namespace Interlude.Gameplay
 {
@@ -48,7 +47,7 @@ namespace Interlude.Gameplay
             List<TopScore> KeymodeScores = PhysicalBest[k];
             var HitData = ScoreTracker.StringToHitData(Score.hitdata, Score.keycount);
             ChartWithModifiers ModdedChart = Game.Gameplay.GetModifiedChart(Score.mods, Chart);
-            float ScoreRating = DifficultyRating.PlayerRating.GetRating(new DifficultyRating.RatingReport(ModdedChart, Score.rate, Score.layout), HitData);
+            float ScoreRating = PlayerRating.GetRating(new RatingReport(ModdedChart, Score.rate, Score.layout), HitData);
             TopScore NewTopScore = new TopScore(Chart.GetFileIdentifier(), Game.Gameplay.ScoreDatabase.GetChartSaveData(Chart).Scores.IndexOf(Score), ScoreRating); //score is added to list after this function is over, so .Count gives correct id
             bool inserted = false;
 
@@ -104,7 +103,7 @@ namespace Interlude.Gameplay
                 }
                 catch (Exception e)
                 {
-                    Utilities.Logging.Log("Could not retrieve score data from " + score.FileIdentifier, e.ToString(), Utilities.Logging.LogType.Error);
+                    Logging.Log("Could not retrieve score data from " + score.FileIdentifier, e.ToString(), Logging.LogType.Error);
                     continue;
                 }
                 yield return new ScoreInfoProvider(s, c);
@@ -130,14 +129,14 @@ namespace Interlude.Gameplay
                         ChartSaveData d = Game.Gameplay.ScoreDatabase.data[hash];
                         if (!ChartLoader.Cache.Charts.ContainsKey(d.Path))
                         {
-                            Utilities.Logging.Log("Found score data for " + d.Path + " - the file no longer exists; will be deleted", "");
+                            Logging.Log("Found score data for " + d.Path + " - the file no longer exists; will be deleted");
                             oldHashes.Add(hash);
                             continue;
                         }
                         Chart c = ChartLoader.Cache.LoadChart(ChartLoader.Cache.Charts[d.Path]);
                         if (c.GetHash() != hash)
                         {
-                            Utilities.Logging.Log("Found old score data for " + d.Path + " - the file is different; will be deleted", "");
+                            Logging.Log("Found old score data for " + d.Path + " - the file is different; will be deleted");
                             oldHashes.Add(hash);
                             continue;
                         }

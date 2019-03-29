@@ -1,6 +1,6 @@
 ﻿using System;
 using DiscordRPC;
-using Interlude.Utilities;
+using Prelude.Utilities;
 
 namespace Interlude.IO
 {

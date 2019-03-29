@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using Prelude.Gameplay.Charts.YAVSRG;
 using Interlude.IO;
 using Interlude.Graphics;
 
@@ -12,7 +13,7 @@ namespace Interlude.Interface.Widgets.Editor
             bounds = GetBounds(bounds);
             SpriteBatch.DrawRect(bounds, Color.FromArgb(127, 0, 0, 0));
             float nowPos;
-            foreach (Interlude.Gameplay.Charts.YAVSRG.BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
+            foreach (BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
             {
                 nowPos = (float)(bounds.Left + b.Offset / Game.Audio.Duration * bounds.Width);
                 //SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);

@@ -1,6 +1,7 @@
-﻿using Interlude.Gameplay;
-using System.Drawing;
-using Interlude.Gameplay.DifficultyRating;
+﻿using System.Drawing;
+using Prelude.Gameplay;
+using Prelude.Gameplay.DifficultyRating;
+using Interlude.Gameplay;
 using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets

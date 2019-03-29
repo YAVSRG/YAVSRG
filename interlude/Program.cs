@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
+using Prelude.Utilities;
 using Interlude.Utilities;
 using Interlude.IO;
 
@@ -15,9 +16,6 @@ namespace Interlude
             System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
             if (m.WaitOne(TimeSpan.Zero, true))
             {
-                var LogFile = new System.IO.FileStream("log.txt", System.IO.FileMode.Append);
-                var LogFileWriter = new System.IO.StreamWriter(LogFile);
-                Logging.OnLog += (s, d, t) => { LogFileWriter.WriteLine("[" + t.ToString() + "] " + s + (d != "" ? ": "+d : "")); };
                 PipeHandler.Open();
                 Logging.Log("Launching " + Game.Version + ", the date/time is " + DateTime.Now.ToString(), "");
                 Game g = null;
@@ -50,8 +48,7 @@ namespace Interlude
                         g.Dispose(); //clean up resources. i don't know if there's anything left to clean up but it's here i guess
                     }
                 }
-                LogFileWriter.Close();
-                LogFile.Close();
+                Logging.Close();
                 PipeHandler.Close();
                 m.ReleaseMutex();
             }

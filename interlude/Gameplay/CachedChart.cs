@@ -1,5 +1,6 @@
-﻿using Interlude.Gameplay.DifficultyRating;
-using Interlude.Gameplay.Charts.YAVSRG;
+﻿using Prelude.Gameplay.DifficultyRating;
+using Prelude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay;
 
 namespace Interlude.Gameplay
 {
@@ -21,7 +22,7 @@ namespace Interlude.Gameplay
 
         public static CachedChart FromChart(Chart c)
         {
-            RatingReport r = new RatingReport(new Gameplay.ChartWithModifiers(c),1,KeyLayout.Layout.Spread);
+            RatingReport r = new RatingReport(new ChartWithModifiers(c),1,KeyLayout.Layout.Spread);
             return new CachedChart
             {
                 file = c.Data.File,

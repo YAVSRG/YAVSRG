@@ -2,7 +2,6 @@
 using System.Net.Sockets;
 using System.Net;
 using Interlude.Net.P2P.Protocol.Packets;
-using Interlude.Gameplay;
 
 namespace Interlude.Net.P2P
 {
@@ -83,7 +82,7 @@ namespace Interlude.Net.P2P
                             return;
                         }
                     }
-                    Utilities.Logging.Log("You don't have the chart being played", packet.name + " [" + packet.diff + "] from " + packet.pack);
+                    Logging.Log("You don't have the chart being played", packet.name + " [" + packet.diff + "] from " + packet.pack);
                 }
                 else
                 {

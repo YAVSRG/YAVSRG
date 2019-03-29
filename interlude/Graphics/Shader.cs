@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
+using Prelude.Utilities;
 
 namespace Interlude.Graphics
 {
@@ -22,12 +18,12 @@ namespace Interlude.Graphics
             GL.CompileShader(FragmentShader);
             if (GL.GetError() != ErrorCode.NoError)
             {
-                Utilities.Logging.Log("Couldn't compile fragment shader", GL.GetError().ToString(), Utilities.Logging.LogType.Error);
+                Logging.Log("Couldn't compile fragment shader", GL.GetError().ToString(), Logging.LogType.Error);
             }
             GL.CompileShader(VertexShader);
             if (GL.GetError() != ErrorCode.NoError)
             {
-                Utilities.Logging.Log("Couldn't compile vertex shader", GL.GetError().ToString(), Utilities.Logging.LogType.Error);
+                Logging.Log("Couldn't compile vertex shader", GL.GetError().ToString(), Logging.LogType.Error);
             }
 
             Program = GL.CreateProgram();

@@ -1,5 +1,5 @@
 ﻿using System;
-using Interlude.Gameplay.DifficultyRating;
+using Prelude.Gameplay.DifficultyRating;
 using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets.Toolbar

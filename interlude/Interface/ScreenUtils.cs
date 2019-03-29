@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using Interlude.Gameplay.Watchers;
+using Prelude.Gameplay;
+using Prelude.Gameplay.Watchers;
 using Interlude.IO;
 using Interlude.Graphics;
 
@@ -42,7 +43,7 @@ namespace Interlude.Interface
             return MouseOver(bounds) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
-        public static void DrawGraph(Rect bounds, IScoreSystem scoring, Gameplay.ScoreTracker.HitData[] data)
+        public static void DrawGraph(Rect bounds, IScoreSystem scoring, HitData[] data)
         {
             int snapcount = data.Length;
             SpriteBatch.DrawRect(bounds, Color.FromArgb(150, 0, 0, 0));

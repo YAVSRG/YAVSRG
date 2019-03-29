@@ -9,7 +9,7 @@ using Interlude.Net.P2P;
 using Interlude.IO;
 using Interlude.IO.Audio;
 using Interlude.Gameplay;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude
 {

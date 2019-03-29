@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using static Interlude.Interface.ScreenUtils;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay;
 using Interlude.Gameplay;
 using Interlude.Gameplay.Mods.Visual;
 using Interlude.Gameplay.Mods;
@@ -9,6 +9,7 @@ using Interlude.Interface.Widgets.Gameplay;
 using Interlude.Interface.Animations;
 using Interlude.IO;
 using Interlude.Graphics;
+using static Interlude.Interface.ScreenUtils;
 
 namespace Interlude.Interface.Screens
 {

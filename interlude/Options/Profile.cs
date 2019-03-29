@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK.Input;
 using Newtonsoft.Json;
 using Interlude.Gameplay;
-using Interlude.Gameplay.Watchers;
-using static Interlude.Gameplay.DifficultyRating.KeyLayout;
+using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.Watchers.Scoring;
+using static Prelude.Gameplay.DifficultyRating.KeyLayout;
+using static Prelude.Gameplay.Watchers.IScoreSystem;
 
 namespace Interlude.Options
 {
@@ -58,7 +56,7 @@ namespace Interlude.Options
         public string ChartSortMode = "Title";
         public string ChartGroupMode = "Pack";
         public string ChartColorMode = "Nothing";
-        public IScoreSystem.ScoreType ScoreSystem = IScoreSystem.ScoreType.Default;
+        public ScoreType ScoreSystem = ScoreType.Default; //deprecate
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
         public float[] AccGradeThresholds = new float[] { 98.5f, 95, 93, 91, 89 };
         public ProfileStats Stats = new ProfileStats();
@@ -81,5 +79,23 @@ namespace Interlude.Options
             Layout.Spread,Layout.Spread,Layout.Spread, //placeholders
             Layout.OneHand, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread
         };
+
+        public IScoreSystem GetScoreSystem(ScoreType s)
+        {
+            switch (s)
+            {
+                case ScoreType.DP:
+                    return new DP(Judge);
+                case ScoreType.Osu:
+                    return new OD(OD);
+                case ScoreType.Wife:
+                    return new MSScoring(Judge);
+                case ScoreType.SCPlus:
+                    return new StandardScoringPlus(Judge);
+                case ScoreType.Default:
+                default:
+                    return new StandardScoring();
+            }
+        }
     }
 }

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.DifficultyRating;
+using Prelude.Gameplay;
 using Interlude.IO;
 using Interlude.Graphics;
 using Interlude.Gameplay;
-using Interlude.Gameplay.Watchers;
-using Interlude.Gameplay.DifficultyRating;
 using Interlude.Interface.Widgets;
-using Interlude.Net.P2P.Protocol.Packets;
 using static Interlude.Interface.ScreenUtils;
 
 namespace Interlude.Interface.Screens
@@ -62,8 +62,8 @@ namespace Interlude.Interface.Screens
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
 
             //alternative acc calculations
-            acc1 = IScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Osu) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Osu);
-            acc2 = IScoreSystem.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.DP) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Wife);
+            acc1 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Osu) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Osu);
+            acc2 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.DP) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Wife);
             acc1.ProcessScore(scoreData.Hitdata);
             acc2.ProcessScore(scoreData.Hitdata);
 

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Net;
 using System.Net.Sockets;
+using Prelude.Utilities;
 
 namespace Interlude.Net.P2P
 {
@@ -35,7 +33,7 @@ namespace Interlude.Net.P2P
 
         protected void Error(Exception e)
         {
-            Utilities.Logging.Log("An error has occured in a socket", e.ToString(), Utilities.Logging.LogType.Error);
+            Logging.Log("An error has occured in a socket", e.ToString(), Logging.LogType.Error);
             Disconnect();
         }
 

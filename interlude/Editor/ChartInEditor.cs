@@ -1,5 +1,5 @@
 ﻿using System.Linq;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.Charts.YAVSRG;
 using System.IO;
 
 namespace Interlude.Editor

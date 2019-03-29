@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using Interlude.Interface.Animations;
-using Interlude.Gameplay.DifficultyRating;
+using Prelude.Gameplay.DifficultyRating;
 
 namespace Interlude.Interface.Widgets
 {

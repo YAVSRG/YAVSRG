@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay;
 
 namespace Interlude.Gameplay
 {
@@ -8,7 +9,7 @@ namespace Interlude.Gameplay
         public string Path;
         public float Offset;
         public List<Score> Scores = new List<Score>();
-        //todo: grade achieved and stuff in here
+        //todo: best grade achieved and stuff in here
 
         public static ChartSaveData FromChart(Chart c)
         {

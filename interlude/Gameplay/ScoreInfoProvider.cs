@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Interlude.Gameplay.Charts.YAVSRG;
-using Interlude.Gameplay.Watchers;
+using Prelude.Gameplay;
+using Prelude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.DifficultyRating;
 
 namespace Interlude.Gameplay
 {
@@ -12,10 +14,10 @@ namespace Interlude.Gameplay
     {
         Score _score;
         Chart _chart;
-        DifficultyRating.RatingReport _rating;
+        RatingReport _rating;
         string _mods;
         IScoreSystem _scoring;
-        ScoreTracker.HitData[] _hitdata;
+        HitData[] _hitdata;
         float? _physical, _technical;
 
         public ScoreInfoProvider(Score Score, Chart Chart)
@@ -30,7 +32,7 @@ namespace Interlude.Gameplay
             get { return _chart.Data; }
         }
 
-        public ScoreTracker.HitData[] HitData
+        public HitData[] HitData
         {
             get { return _hitdata; }
         }
@@ -44,7 +46,7 @@ namespace Interlude.Gameplay
         {
             get
             {
-                if (_scoring == null) { _scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(HitData); }
+                if (_scoring == null) { _scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(HitData); }
                 return _scoring;
             }
         }
@@ -59,14 +61,14 @@ namespace Interlude.Gameplay
             get { return ScoreSystem.BestCombo; }
         }
 
-        public DifficultyRating.RatingReport RatingData
+        public RatingReport RatingData
         {
-            get { if (_rating == null) { _rating = new DifficultyRating.RatingReport(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _rating; }
+            get { if (_rating == null) { _rating = new RatingReport(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _rating; }
         }
 
         public float PhysicalPerformance
         {
-            get { if (_physical == null) { _physical = DifficultyRating.PlayerRating.GetRating(RatingData, HitData); } return (float)_physical; }
+            get { if (_physical == null) { _physical = PlayerRating.GetRating(RatingData, HitData); } return (float)_physical; }
         }
 
         public float TechnicalPerformance

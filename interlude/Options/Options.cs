@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Prelude.Utilities;
 using Interlude.IO;
 
 namespace Interlude.Options
@@ -35,7 +36,7 @@ namespace Interlude.Options
             catch (Exception e)
             {
                 //log that settings have been reset due to load failure
-                Utilities.Logging.Log("Couldn't switch to selected profile", e.ToString(), Utilities.Logging.LogType.Error);
+                Logging.Log("Couldn't switch to selected profile", e.ToString(), Logging.LogType.Error);
             }
         }
 
@@ -79,7 +80,7 @@ namespace Interlude.Options
                     }
                     catch (Exception e)
                     {
-                        Utilities.Logging.Log("Could not load profile from " + path, e.ToString(), Utilities.Logging.LogType.Error);
+                        Logging.Log("Could not load profile from " + path, e.ToString(), Logging.LogType.Error);
                     }
                 }
             }

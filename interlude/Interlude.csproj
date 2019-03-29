@@ -93,8 +93,8 @@
       <HintPath>..\packages\ManagedBass.Fx.2.0.1\lib\netstandard1.4\ManagedBass.Fx.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="OpenTK, Version=3.0.1.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
@@ -117,11 +117,6 @@
     <Compile Include="Gameplay\CachedChart.cs" />
     <Compile Include="Gameplay\Collections\Collection.cs" />
     <Compile Include="Gameplay\Collections\CollectionsManager.cs" />
-    <Compile Include="Gameplay\DifficultyRating\CalcUtils.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\BinarySwitcher.cs" />
-    <Compile Include="Gameplay\DifficultyRating\RatingReport.cs" />
-    <Compile Include="Gameplay\Charts\Osu\EventData.cs" />
-    <Compile Include="Gameplay\Charts\Osu\StoryboardEvent.cs" />
     <Compile Include="Gameplay\Mods\IVisualMod.cs" />
     <Compile Include="Gameplay\Mods\Visual\ManipScroll.cs" />
     <Compile Include="Gameplay\Mods\Visual\SpiralScroll.cs" />
@@ -135,27 +130,7 @@
     <Compile Include="Interface\WidgetState.cs" />
     <Compile Include="IO\Audio\MusicPlayer.cs" />
     <Compile Include="IO\Audio\Track.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\BPMPoint.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\Chart.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\ChartHeader.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\OffsetItem.cs" />
-    <Compile Include="Gameplay\Charts\Osu\OsuBeatmap.cs" />
-    <Compile Include="Gameplay\Charts\Osu\BeatmapHeader.cs" />
-    <Compile Include="Gameplay\DifficultyRating\KeyLayout.cs" />
-    <Compile Include="Gameplay\DifficultyRating\PlayerRating.cs" />
-    <Compile Include="Gameplay\Charts\Osu\HitObject.cs" />
-    <Compile Include="Gameplay\Charts\Osu\HitObjectConverter.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\PointManager.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\Snap.cs" />
-    <Compile Include="Gameplay\Charts\Osu\TimingPointConverter.cs" />
-    <Compile Include="Gameplay\Charts\Osu\TimingPoint.cs" />
-    <Compile Include="Gameplay\Charts\Stepmania\Measure.cs" />
-    <Compile Include="Gameplay\Charts\Stepmania\StepFile.cs" />
     <Compile Include="Gameplay\ChartLoader.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\SVManager.cs" />
-    <Compile Include="Gameplay\Charts\YAVSRG\SVPoint.cs" />
-    <Compile Include="Gameplay\Watchers\HP\HPSystem.cs" />
-    <Compile Include="Gameplay\Watchers\Scoring\StandardScoringPlus.cs" />
     <Compile Include="Interface\Animations\AnimationAnchorPoint.cs" />
     <Compile Include="Interface\Dialogs\TopScoreDialog.cs" />
     <Compile Include="Interface\Widgets\Controls\TickBox.cs" />
@@ -173,32 +148,10 @@
     <Compile Include="Editor\EditorManager.cs" />
     <Compile Include="Editor\Filter.cs" />
     <Compile Include="Gameplay\ChartSaveData.cs" />
-    <Compile Include="Gameplay\ChartWithModifiers.cs" />
     <Compile Include="Gameplay\GameplayManager.cs" />
-    <Compile Include="Gameplay\GameplaySnap.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Autoplay.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Random.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Inverse.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Keychange.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Manipulate.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Mirror.cs" />
-    <Compile Include="Gameplay\Mods\Mod.cs" />
-    <Compile Include="Gameplay\Mods\Chart\NoLN.cs" />
-    <Compile Include="Gameplay\Mods\Chart\NoSV.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Wave.cs" />
     <Compile Include="Gameplay\ScoresDB.cs" />
-    <Compile Include="Gameplay\Watchers\ILifeMeter.cs" />
-    <Compile Include="Gameplay\Watchers\Scoring\CCScoring.cs" />
-    <Compile Include="Gameplay\Watchers\Scoring\DP.cs" />
-    <Compile Include="Gameplay\Watchers\IGameplayWatcher.cs" />
-    <Compile Include="Gameplay\Watchers\Scoring\MSScoring.cs" />
-    <Compile Include="Gameplay\Watchers\Scoring\NoCCScoring.cs" />
-    <Compile Include="Gameplay\Watchers\Scoring\OD.cs" />
     <Compile Include="Gameplay\ScoreTracker.cs" />
     <Compile Include="Gameplay\ProfileStats.cs" />
-    <Compile Include="Gameplay\Score.cs" />
-    <Compile Include="Gameplay\Watchers\IScoreSystem.cs" />
-    <Compile Include="Gameplay\Watchers\Scoring\StandardScoring.cs" />
     <Compile Include="Interface\AnchorType.cs" />
     <Compile Include="Interface\Animation.cs" />
     <Compile Include="Interface\Animations\AnimationAction.cs" />
@@ -314,7 +267,6 @@
     <Compile Include="Options\Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utilities\Logging.cs" />
     <Compile Include="Utilities\ObjectPool.cs" />
     <Compile Include="IO\PipeHandler.cs" />
     <Compile Include="Graphics\Shader.cs" />
@@ -367,6 +319,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Editor\Filters\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Prelude\Prelude.csproj">
+      <Project>{0fac16df-28fb-4816-b7e5-f5867f38f0d1}</Project>
+      <Name>Prelude</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

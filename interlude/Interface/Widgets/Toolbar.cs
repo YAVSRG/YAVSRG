@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Prelude.Utilities;
 using Interlude.IO;
 using Interlude.Graphics;
 using Interlude.Interface.Widgets;
@@ -44,7 +45,7 @@ namespace Interlude.Interface
             AddChild(new MusicControls());
             Animation.Add(_Height = new AnimationSlider(-5));
             Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
-            Utilities.Logging.OnLog += (s, d, t) => { if (t != Utilities.Logging.LogType.Debug) AddNotification(s, Color.White); };
+            Logging.OnLog += (s, d, t) => { if (t != Logging.LogType.Debug) AddNotification(s, Color.White); };
         }
 
         public void AddNotification(string notif, Color color) //todo: use color

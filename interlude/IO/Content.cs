@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using OpenTK.Graphics.OpenGL;
 using ManagedBass;
+using Prelude.Utilities;
 using Interlude.Graphics;
 
 
@@ -107,7 +108,7 @@ namespace Interlude.IO
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log("Could not load widget position data from " + name, e.ToString(), Utilities.Logging.LogType.Error);
+                Logging.Log("Could not load widget position data from " + name, e.ToString(), Logging.LogType.Error);
             }
             return new Options.WidgetPositionData(); //return blank data
         }

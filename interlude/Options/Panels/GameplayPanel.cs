@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Interlude.Interface.Widgets;
+﻿using Interlude.Interface.Widgets;
 using Interlude.Interface;
-using Interlude.Gameplay.Watchers;
+using static Prelude.Gameplay.Watchers.IScoreSystem;
 
 namespace Interlude.Options.Panels
 {
@@ -69,7 +64,7 @@ namespace Interlude.Options.Panels
                 .PositionBottomRight(-50, 525, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife", "SC+" }, (int)Game.Options.Profile.ScoreSystem, v => { Game.Options.Profile.ScoreSystem = (IScoreSystem.ScoreType)v; }),
+                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife", "SC+" }, (int)Game.Options.Profile.ScoreSystem, v => { Game.Options.Profile.ScoreSystem = (ScoreType)v; }),
                 "This is the accuracy measurement system to use when playing.\nOsu = osu!mania's accuracy system\nWife = Etterna's accuracy system", ib)
                 .PositionTopLeft(50, 475, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 525, AnchorType.CENTER, AnchorType.MIN));

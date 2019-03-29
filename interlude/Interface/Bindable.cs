@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using Prelude.Utilities;
 
 namespace Interlude.Interface
 {
@@ -106,7 +106,7 @@ namespace Interlude.Interface
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log(e.ToString(), "");
+                Logging.Log("Error parsing json for bindable", e.ToString());
                 Value = _defaultValue;
             }
             if (objectType == typeof(BindableFloat))

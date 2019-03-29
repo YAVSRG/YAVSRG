@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Interlude.Gameplay.Charts.YAVSRG;
-using Interlude.Gameplay.Mods;
-using Interlude.Gameplay.DifficultyRating;
+using Prelude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.Mods;
+using Prelude.Gameplay.DifficultyRating;
+using Prelude.Gameplay;
 using Interlude.Gameplay.Charts.Collections;
 using Interlude.IO;
 
@@ -10,7 +11,8 @@ namespace Interlude.Gameplay
 {
     public class GameplayManager
     {
-        public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Random", new Mods.Random() }, { "Manipulate", new Manipulate() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
+        //todo: rename random to remove conflict
+        public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Random", new Prelude.Gameplay.Mods.Random() }, { "Manipulate", new Manipulate() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
 
         public Chart CurrentChart;
         public CachedChart CurrentCachedChart;
@@ -77,7 +79,7 @@ namespace Interlude.Gameplay
             }
         }
 
-        public void ApplyModsToHitData(ChartWithModifiers c, ref ScoreTracker.HitData[] hitdata)
+        public void ApplyModsToHitData(ChartWithModifiers c, ref HitData[] hitdata)
         {
             foreach (string m in SelectedMods.Keys)
             {

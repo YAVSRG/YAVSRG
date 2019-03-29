@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude
 {

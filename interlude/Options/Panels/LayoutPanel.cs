@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK.Input;
+using Prelude.Gameplay.DifficultyRating;
 using Interlude.Interface;
 using Interlude.Interface.Widgets;
-using Interlude.Gameplay.DifficultyRating;
 using Interlude.IO;
 
 namespace Interlude.Options.Panels

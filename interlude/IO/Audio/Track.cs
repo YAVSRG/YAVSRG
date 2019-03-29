@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Prelude.Utilities;
 using ManagedBass;
 using ManagedBass.Fx;
 
@@ -19,7 +15,7 @@ namespace Interlude.IO.Audio
             ID = Bass.CreateStream(file, 0, 0, BassFlags.Decode); //loads file
             if (ID == 0) //this means it didn't work
             {
-                Utilities.Logging.Log("Couldn't load audio track from "+file, Bass.LastError.ToString(), Utilities.Logging.LogType.Error);
+                Logging.Log("Couldn't load audio track from "+file, Bass.LastError.ToString(), Logging.LogType.Error);
             }
             else
             {

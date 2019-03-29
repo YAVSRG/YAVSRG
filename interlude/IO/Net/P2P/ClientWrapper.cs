@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net.Sockets;
+using Prelude.Utilities;
 
 namespace Interlude.Net.P2P
 {
@@ -29,7 +26,7 @@ namespace Interlude.Net.P2P
             }
             else if ((lastPingSent - lastPingReceived).TotalMilliseconds > 15000)
             {
-                Utilities.Logging.Log("Client with id " + id.ToString() + " didn't respond to ping request", "");
+                Logging.Log("Client with id " + id.ToString() + " didn't respond to ping request", "");
                 Disconnect();
             }
             base.Update(id);
@@ -44,7 +41,7 @@ namespace Interlude.Net.P2P
         {
             if (data.protocolversion != Protocol.Protocol.PROTOCOLVERSION)
             {
-                Utilities.Logging.Log("Client has a version mismatch", "");
+                Logging.Log("Client has a version mismatch", "");
                 Disconnect();
             }
             else

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Prelude.Utilities;
 
 namespace Interlude.Net.P2P.Protocol
 {
@@ -29,7 +25,7 @@ namespace Interlude.Net.P2P.Protocol
             }
             catch (Exception e)
             {
-                Utilities.Logging.Log("Error parsing packet for id " + id.ToString(), e.ToString() + "\n" + split[0] + "\n" + split[1], Utilities.Logging.LogType.Error);
+                Logging.Log("Error parsing packet for id " + id.ToString(), e.ToString() + "\n" + split[0] + "\n" + split[1], Logging.LogType.Error);
             }
         }
 

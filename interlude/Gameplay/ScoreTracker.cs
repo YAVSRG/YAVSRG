@@ -1,47 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay;
 using Interlude.Interface.Animations;
-using Interlude.Gameplay.Watchers;
+using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.Watchers.HP;
 using System.IO.Compression;
 
 namespace Interlude.Gameplay
 {
     public class ScoreTracker //handles scoring while you play through a chart, keeping track of hits and acc and stuff
     {
-        public class HitData : OffsetItem
-        {
-            public float[] delta;
-            public byte[] hit;
-
-            public HitData(GameplaySnap s, int keycount) : base(s.Offset)
-            {
-                hit = new byte[keycount];
-                foreach (int k in s.Combine().GetColumns())
-                {
-                    hit[k] = 1;
-                }
-                delta = new float[keycount];
-            }
-
-            public int Count
-            {
-                get
-                {
-                    int x = 0;
-                    for (int i = 0; i < hit.Length; i++)
-                    {
-                        if (hit[i] > 0)
-                        {
-                            x++;
-                        }
-                    }
-                    return x;
-                }
-            }
-        }
-
         public event Action<int, int, float> OnHit; //COLUMM, AWARDED JUDGE, MS DELTA
 
         public ChartWithModifiers Chart;
@@ -57,8 +26,8 @@ namespace Interlude.Gameplay
             WidgetColor = new AnimationColorFade(System.Drawing.Color.FromArgb(0, Game.Options.Theme.MenuFont), Game.Options.Theme.MenuFont);
             Watchers = new List<IGameplayWatcher>();
             Chart = c;
-            Scoring = IScoreSystem.GetScoreSystem(Game.Options.Profile.ScoreSystem);
-            HP = new Watchers.HP.HPSystem(Scoring);
+            Scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.ScoreSystem);
+            HP = new HPSystem(Scoring);
             Watchers.Add(Scoring);
             Watchers.Add(HP);
 

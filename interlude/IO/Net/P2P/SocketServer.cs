@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using Prelude.Utilities;
 using Interlude.Net.P2P.Protocol.Packets;
-using Interlude.Utilities;
-using Interlude.Gameplay;
 
 namespace Interlude.Net.P2P
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Http;
-using System.IO;
+using Prelude.Utilities;
 
 namespace Interlude.Net.Web
 {
@@ -20,7 +20,7 @@ namespace Interlude.Net.Web
                 }
                 catch (Exception e)
                 {
-                    Utilities.Logging.Log("Failed to get web data from " + url, e.ToString(), Utilities.Logging.LogType.Error);
+                    Logging.Log("Failed to get web data from " + url, e.ToString(), Logging.LogType.Error);
                 }
             }
         }
@@ -44,7 +44,7 @@ namespace Interlude.Net.Web
                     }
                     else
                     {
-                        Utilities.Logging.Log("Failed to download file from " + url, error.ToString(), Utilities.Logging.LogType.Error);
+                        Logging.Log("Failed to download file from " + url, error.ToString(), Logging.LogType.Error);
                         return false;
                     }
                 }
@@ -56,7 +56,7 @@ namespace Interlude.Net.Web
             DownloadString(url, (s) => {
                 try { callback(Newtonsoft.Json.JsonConvert.DeserializeObject<T>(s)); } //just does the string downloader and converts it
                 catch (Exception e)
-                { Utilities.Logging.Log("Failed to get json data from " + url, e.ToString(), Utilities.Logging.LogType.Error); } }); //error if json decoding failed, all web errors happen in DownloadString
+                { Logging.Log("Failed to get json data from " + url, e.ToString(), Logging.LogType.Error); } }); //error if json decoding failed, all web errors happen in DownloadString
         }
     }
 }

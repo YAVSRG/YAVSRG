@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using Prelude.Utilities;
 using Interlude.IO;
 using Interlude.Graphics;
 
@@ -121,7 +122,7 @@ namespace Interlude.Interface.Widgets.Toolbar
             emoji.SetState(WidgetState.DISABLED);
             Animation.Add(newMsgFade = new Animations.AnimationSlider(0));
             Animation.Add(fade = new Animations.AnimationSlider(0));
-            Utilities.Logging.OnLog += (s, d, t) => AddLine("Log", "[" + t.ToString() + "] " + s + (d != "" ? " (See log.txt for details)" : ""), false);
+            Logging.OnLog += (s, d, t) => AddLine("Log", "[" + t.ToString() + "] " + s + (d != "" ? " (See log.txt for details)" : ""), false);
         }
 
         public override void Draw(Rect bounds)

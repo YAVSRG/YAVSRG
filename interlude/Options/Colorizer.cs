@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
-using Interlude.Gameplay;
-using Interlude.Gameplay.Charts.YAVSRG;
+using Prelude.Gameplay;
+using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude.Options
 {
