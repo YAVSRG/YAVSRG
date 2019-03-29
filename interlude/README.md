@@ -1,15 +1,15 @@
 # **YAVSRG: Interlude**
 ### Yet Another Vertical Scrolling Rhythm Game
 
-Read about what this is [here](https://percyqaz.github.io/YAVSRG)
+Read about what this is [on the fancy Github page](https://percyqaz.github.io/YAVSRG)
 
 ### Build instructions
 
-Coming soon (especially for mac and linux users)
+Coming soon (mainly for Mac and Linux users)
 
-For now there are pre-built windows installers including the game assets for it to work in [releases](https://github.com/percyqaz/YAVSRG/releases).
+Go [here](https://github.com/percyqaz/YAVSRG/releases) for pre-built versions (with game assets)
 
-### Legal stuff
+### Licenses and stuff
 
-The source code is under the GNU General Public License.
-The audio library used is [BASS](http://www.un4seen.com/bass.html) and requires a license for commercial use.
+Interlude is licensed under the GPLv3 License.
+The audio library used is [BASS](http://www.un4seen.com/bass.html) and requires a license for commercial use (just so you know).
