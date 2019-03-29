@@ -65,6 +65,7 @@ namespace Interlude.Net.P2P
 
         private void HandlePlay(PacketPlay packet, int id)
         {
+            /*
             if (id == -1)
             {
                 if (!(Game.Screens.Current is Interface.Screens.ScreenPlay) && Game.Multiplayer.SyncCharts)
@@ -88,7 +89,7 @@ namespace Interlude.Net.P2P
                 {
                     SendPacket(new PacketScore());
                 }
-            }
+            }*/
         }
 
         private void HandleDisconnect(PacketDisconnect packet, int id)

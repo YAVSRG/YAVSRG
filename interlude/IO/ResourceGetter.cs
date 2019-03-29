@@ -10,9 +10,9 @@ namespace Interlude.IO
 {
     public class ResourceGetter
     {
-        static readonly string[] menu = LoadSplashes("YAVSRG.Resources.MenuSplashes.txt");
-        static readonly string[] loading = LoadSplashes("YAVSRG.Resources.LoadingSplashes.txt");
-        static readonly string[] crash = LoadSplashes("YAVSRG.Resources.CrashSplashes.txt");
+        static readonly string[] menu = LoadSplashes("Interlude.Resources.MenuSplashes.txt");
+        static readonly string[] loading = LoadSplashes("Interlude.Resources.LoadingSplashes.txt");
+        static readonly string[] crash = LoadSplashes("Interlude.Resources.CrashSplashes.txt");
 
         static Random random = new Random();
 
@@ -47,7 +47,7 @@ namespace Interlude.IO
 
         public static string GetShader(string name)
         {
-            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("YAVSRG.Resources.Shaders."+name))
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources.Shaders."+name))
             using (StreamReader reader = new StreamReader(stream))
             {
                 return reader.ReadToEnd();

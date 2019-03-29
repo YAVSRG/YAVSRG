@@ -12,16 +12,17 @@ namespace Interlude.Interface.Screens
         public ScreenLobby()
         {
             AddChild(new FramedButton("Disconnect", Game.Multiplayer.Disconnect).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
-            AddChild(hostButton = new FramedButton("Host a lobby", Game.Multiplayer.HostLobby).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
+            //AddChild(hostButton = new FramedButton("Host a lobby", Game.Multiplayer.HostLobby).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
             AddChild(new TextEntryBox((s) => { lobbyCode = s; }, () => { return lobbyCode; }, () => { }, () => { Game.Multiplayer.JoinLobby(lobbyCode); }, () => { return "Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to enter lobby code..."; })
      .PositionTopLeft(-250, 20, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(250, 80, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new BoolPicker("Play charts together", Game.Multiplayer.SyncCharts, (v) => { Game.Multiplayer.SyncCharts = v; }).PositionTopLeft(-50, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(50, 350, AnchorType.CENTER, AnchorType.MIN));
+            //AddChild(new BoolPicker("Play charts together", Game.Multiplayer.SyncCharts, (v) => { Game.Multiplayer.SyncCharts = v; }).PositionTopLeft(-50, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(50, 350, AnchorType.CENTER, AnchorType.MIN));
         }
 
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
+            /*
             if (Game.Multiplayer.Hosting)
             {
                 if (Game.Multiplayer.LobbyKey != "")
@@ -40,7 +41,7 @@ namespace Interlude.Interface.Screens
                     }
                 }
                 SpriteBatch.Font2.DrawParagraph("Chart picker is highlighted.\nLeft click to give someone chart picker role.\nRight click to kick someone.\nVery much WIP lol", 20f, new Rect(-300, 0, 300, 600), Game.Options.Theme.MenuFont);
-            }
+            }*/
             SpriteBatch.Font1.DrawJustifiedText("Multiplayer Lobby BETA", 30f, bounds.Right - 10, bounds.Bottom - 60, Game.Options.Theme.MenuFont);
         }
 
@@ -49,11 +50,12 @@ namespace Interlude.Interface.Screens
             base.Update(bounds);
             if (!Game.Multiplayer.Connected)
             {
-                hostButton.SetState(WidgetState.NORMAL);
+                //hostButton.SetState(WidgetState.NORMAL);
             }
             else
             {
-                hostButton.SetState(WidgetState.DISABLED);
+                //hostButton.SetState(WidgetState.DISABLED);
+                /*
                 if (Game.Multiplayer.Hosting)
                 {
                     if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.C))
@@ -79,7 +81,7 @@ namespace Interlude.Interface.Screens
                             y += 50;
                         }
                     }
-                }
+                }*/
             }
         }
     }

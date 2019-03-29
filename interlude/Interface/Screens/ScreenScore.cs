@@ -56,10 +56,6 @@ namespace Interlude.Interface.Screens
                 Game.Options.Profile.Stats.SetScore(score, Game.Gameplay.CurrentChart);
                 Game.Gameplay.SaveScores();
             }
-            if (Game.Multiplayer.SyncCharts)
-            {
-                Game.Multiplayer.SendPacket(new PacketScore() { score = score });
-            }
 
             //update stats
             Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
@@ -87,13 +83,11 @@ namespace Interlude.Interface.Screens
         {
             base.OnEnter(prev);
             Game.Audio.OnPlaybackFinish = Game.Audio.Stop;
-            PacketScoreboard.OnReceive += HandleMultiplayerScoreboard;
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            PacketScoreboard.OnReceive -= HandleMultiplayerScoreboard;
         }
 
         public bool ShouldSaveScore()
@@ -148,19 +142,6 @@ namespace Interlude.Interface.Screens
 
             SpriteBatch.Font1.DrawTextToFill("Your performance:", new Rect(bounds.Left + 550, bounds.Top + 160, bounds.CenterX, bounds.Top + 180), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawTextToFill(perf, new Rect(bounds.Left + 550, bounds.Top + 180, bounds.CenterX, bounds.Top + 250), Game.Options.Theme.MenuFont);
-        }
-
-        private void HandleMultiplayerScoreboard(PacketScoreboard packet, int id)
-        {
-            if (!Game.Multiplayer.SyncCharts) return;
-            try
-            {
-                scoreboard.UseScoreList(packet.scores);
-            }
-            catch (Exception e)
-            {
-                Utilities.Logging.Log("Something went wrong displaying multiplayer scores", e.ToString(), Utilities.Logging.LogType.Error);
-            }
         }
     }
 }

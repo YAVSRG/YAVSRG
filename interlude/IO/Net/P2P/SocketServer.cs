@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using Interlude.Net.P2P.Protocol.Packets;
 using Interlude.Utilities;
 using Interlude.Gameplay;
 
 namespace Interlude.Net.P2P
 {
+    //Hosts a socket server that clients can connect to and get additional game data/multiplayer functionality
     public class SocketServer
     {
         private Socket sock;
         private SocketAsyncEventArgs accept;
-        public ClientWrapper[] Clients = new ClientWrapper[16];
+        string name;
+
+        public ClientWrapper[] Clients = new ClientWrapper[1024]; //maximum of 1024 concurrent players
         public bool Running = false;
+        /*
         public int ChartPicker = 0;
         private bool Playing = false;
         private string PlayingHash;
         private DateTime? ScoreTimeout;
-        private List<Score> Scores;
+        private List<Score> Scores;*/
 
-        public SocketServer()
+        public SocketServer(string Name)
         {
-
+            name = Name;
         }
 
         public bool Start()
@@ -64,7 +65,7 @@ namespace Interlude.Net.P2P
         {
             for (int i = 0; i < Clients.Length; i++)
             {
-                Kick("Host closed the lobby", i);
+                Kick("Server is shutting down or restarting.", i);
             }
 
             PacketPing.OnReceive -= HandlePing;
@@ -92,7 +93,7 @@ namespace Interlude.Net.P2P
                     {
                         Logging.Log("Dropped client with id " + i.ToString(), "");
                         Clients[i].Destroy();
-                        if (Clients[i].LoggedIn) Broadcast("{c:FFFF00}" + Clients[i].Username + " left the lobby.");
+                        if (Clients[i].LoggedIn) Broadcast("{c:FFFF00}" + Clients[i].Username + " went offline.");
                         Clients[i] = null;
                         if (i == 0) //host left for whatever reason
                         {
@@ -100,7 +101,7 @@ namespace Interlude.Net.P2P
                         }
                     }
                 }
-            }
+            }/*
             if (Playing && ScoreTimeout != null && (DateTime.Now - ScoreTimeout).Value.TotalMilliseconds > 3000)
             {
                 SendToAll(new PacketScoreboard() { scores = Scores });
@@ -108,7 +109,7 @@ namespace Interlude.Net.P2P
                 Scores.Clear();
                 ScoreTimeout = null;
                 Logging.Log("Timed out while waiting for scores from players", "");
-            }
+            }*/
         }
 
         public void SendToAll(object packet)
@@ -131,7 +132,7 @@ namespace Interlude.Net.P2P
 
         public void Kick(string reason, int id)
         {
-            Message("You have been kicked: " + reason, id);
+            Message("You have been disconnected: " + reason, id);
             Clients[id]?.SendPacket(new PacketDisconnect());
             Clients[id]?.Disconnect();
         }
@@ -162,7 +163,7 @@ namespace Interlude.Net.P2P
                 else
                 {
                     Clients[id].Auth(packet);
-                    Broadcast("{c:FFFF00}" + Clients[id].Username + " joined the lobby!");
+                    Broadcast("{c:FFFF00}" + Clients[id].Username + " logged in.");
                 }
             }
             else
@@ -179,6 +180,8 @@ namespace Interlude.Net.P2P
 
         private void HandlePlay(PacketPlay packet, int id)
         {
+            return;
+            /*
             if (id >= 0 && Clients[id].LoggedIn)
             {
                 if (id == ChartPicker)
@@ -207,11 +210,13 @@ namespace Interlude.Net.P2P
                         Clients[id].ExpectingScore = false;
                     }
                 }
-            }
+            }*/
         }
 
         private void HandleScore(PacketScore packet, int id)
         {
+            return;
+            /*
             if (Playing)
             {
                 if (packet.score != null && Clients[id].ExpectingScore)
@@ -240,7 +245,7 @@ namespace Interlude.Net.P2P
                     ScoreTimeout = null;
                     Logging.Log("Got score from all participating players :)", "");
                 }
-            }
+            }*/
         }
 
         private void HandleDisconnect(PacketDisconnect packet, int id)
@@ -261,13 +266,13 @@ namespace Interlude.Net.P2P
                     freeslot = true;
                     Clients[i] = new ClientWrapper(e.AcceptSocket);
                     Logging.Log("Accepted new connection, client id is " + i.ToString(), "");
-                    Message("Welcome to " + Game.Options.Profile.Name + "'s lobby!", i);
+                    Message("Welcome to " + name, i);
                     break;
                 }
             }
             if (!freeslot)
             {
-                Logging.Log("There was a new connection, but the server slots are full!", "", Logging.LogType.Warning);
+                Logging.Log("There was a new connection, but the server is overloaded.", "", Logging.LogType.Warning);
                 e.AcceptSocket.Close();
             }
 

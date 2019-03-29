@@ -7,7 +7,7 @@
     <ProjectGuid>{5EBB46B4-2F12-4258-A257-73C409BB00D9}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>YAVSRG</RootNamespace>
+    <RootNamespace>Interlude</RootNamespace>
     <AssemblyName>Interlude</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>

@@ -11,20 +11,9 @@ namespace Interlude.Net.P2P
 {
     public class P2PManager
     {
-        public SocketServer Server;
         public SocketClient Client;
 
-        public bool SyncCharts = false;
-
         public string LobbyKey = "";
-
-        public bool Hosting
-        {
-            get
-            {
-                return Server?.Running == true;
-            }
-        }
 
         public bool Connected
         {
@@ -34,6 +23,7 @@ namespace Interlude.Net.P2P
             }
         }
 
+        /*
         private async void SetupNAT()
         {
             var discoverer = new NatDiscoverer();
@@ -49,41 +39,10 @@ namespace Interlude.Net.P2P
             {
                 Logging.Log("Port mapping failed", e.ToString(), Logging.LogType.Error);
             }
-        }
-
-        public void HostLobby()
-        {
-            if (!Hosting && !Connected)
-            {
-                SetupNAT();
-                Server = new SocketServer();
-                if (!Server.Start())
-                {
-                    Logging.Log("Couldn't host lobby!", "", Logging.LogType.Warning);
-                    Server = null;
-                    return;
-                }
-                JoinLobby(16777343);
-            }
-        }
-
-        public void CloseLobby()
-        {
-            if (Hosting)
-            {
-                Server?.Shutdown();
-                Client?.Disconnect();
-                LobbyKey = "";
-            }
-        }
+        }*/
 
         public void Disconnect()
         {
-            if (Hosting)
-            {
-                CloseLobby();
-                return;
-            }
             if (Connected)
             {
                 Client?.Disconnect();
@@ -102,25 +61,16 @@ namespace Interlude.Net.P2P
         {
             try
             {
-                JoinLobby(KeyToIP(key));
+                JoinLobby(16777343);
             }
             catch
             {
                 Logging.Log("Invalid lobby code: " + key, "", Logging.LogType.Warning);
             }
         }
-
-        public ClientWrapper[] Clients
-        {
-            get
-            {
-                return Server?.Clients;
-            }
-        }
-
+        
         public void Update()
         {
-            Server?.Update();
             Client?.Update();
         }
 
@@ -134,6 +84,7 @@ namespace Interlude.Net.P2P
             Client?.SendPacket(packet);
         }
 
+        /*
         private long KeyToIP(string key)
         {
             byte[] b = Convert.FromBase64String(key);
@@ -143,6 +94,6 @@ namespace Interlude.Net.P2P
         private string IPToKey(long ip)
         {
             return Convert.ToBase64String(BitConverter.GetBytes(ip));
-        }
+        }*/
     }
 }
