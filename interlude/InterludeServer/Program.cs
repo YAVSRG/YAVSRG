@@ -15,7 +15,7 @@ namespace InterludeServer
                 string r = "[" + t.ToString() + "] " + s + (d != "" ? ": " + d : "");
                 Console.WriteLine(s);
             };
-            var Server = new SocketServer("Timelapse");
+            var Server = new SocketServer("Detour");
             if (!Server.Start())
             {
                 Console.WriteLine("Could not start server");

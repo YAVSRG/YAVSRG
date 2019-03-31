@@ -9,3 +9,13 @@
 /publish
 /bin/Release
 /obj/Release
+/InterludeServer/bin/Debug
+/InterludeServer/obj/Debug
+/Prelude/bin/Debug
+/Prelude/obj/Debug
+/YAVSRG/bin
+/YAVSRG/obj
+/YAVSRG/publish/Application Files/YAVSRG_0_0_0_0
+/YAVSRG/publish
+/.vs/YAVSRG/v16/Server/sqlite3
+/packages
