@@ -8,9 +8,9 @@ namespace Prelude.Gameplay.Watchers.HP
 {
     public class HPSystem : ILifeMeter
     {
-        protected IScoreSystem Scoring;
+        protected ScoreSystem Scoring;
 
-        public HPSystem(IScoreSystem Scoring)
+        public HPSystem(ScoreSystem Scoring)
         {
             this.Scoring = Scoring;
             PointsPerJudgement = new float[] { 0.5f, 0.25f, 0f, -5f, -20f, -10f };
@@ -29,32 +29,32 @@ namespace Prelude.Gameplay.Watchers.HP
 
         public override void ProcessScore(HitData[] data)
         {
-            while (Cursor < data.Length)
+            while (Counter < data.Length)
             {
-                for (int i = 0; i < data[Cursor].hit.Length; i++)
+                for (int i = 0; i < data[Counter].hit.Length; i++)
                 {
-                    if (data[Cursor].hit[i] > 0)
+                    if (data[Counter].hit[i] > 0)
                     {
-                        HandleHit(i, Cursor, data);
+                        HandleHit(i, Counter, data);
                     }
                 }
-                Cursor++;
+                Counter++;
             }
         }
 
         //must happen after score system passes over it
         public override void Update(float now, HitData[] data)
         {
-            while (Cursor < data.Length && data[Cursor].Offset <= now)
+            while (Counter < data.Length && data[Counter].Offset <= now)
             {
-                for (int i = 0; i < data[Cursor].hit.Length; i++)
+                for (int i = 0; i < data[Counter].hit.Length; i++)
                 {
-                    if (data[Cursor].hit[i] == 1)
+                    if (data[Counter].hit[i] == 1)
                     {
-                        HandleHit(i, Cursor, data);
+                        HandleHit(i, Counter, data);
                     }
                 }
-                Cursor++;
+                Counter++;
             }
         }
     }

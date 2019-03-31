@@ -1,28 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Watchers.Scoring
 {
-    public class StandardScoring : CCScoring
+    public class StandardScoring : ScoreSystem
     {
-        public StandardScoring() : base(null, new int[] { 10, 9, 5, 1, -5, 0 }, 10)
+        public StandardScoring(DataGroup Settings) : base("SC", 6)
         {
-            float hw = 45f;
+            MaxPointsPerNote = 10;
+            PointsPerJudgement = new int[] { 10, 9, 5, 1, -8, 0 };
+            float perfwindow = 45f;
             JudgementWindows = new float[] {
-                hw/2,
-                hw,
-                hw*2,
-                hw*3,
-                hw*4
+                perfwindow * 0.5f,
+                perfwindow,
+                perfwindow * 2,
+                perfwindow * 3,
+                perfwindow * 4
             };
-        }
-
-        public override string FormatAcc()
-        {
-            return base.FormatAcc() + " (SC)";
         }
     }
 }

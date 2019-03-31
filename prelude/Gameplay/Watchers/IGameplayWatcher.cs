@@ -6,11 +6,14 @@ using System.Threading.Tasks;
 
 namespace Prelude.Gameplay.Watchers
 {
+    //interface for anything that looks at your hitdata either live or by processing a score
+    //e.g. accuracy or HP system
+    //todo: support for time series data to graph it overlayed on hit distribution graph
     public abstract class IGameplayWatcher
     {
         public delegate void HitHandler(int Column, int Judgement, float Offset);
 
-        protected int Cursor = 0;
+        protected int Counter = 0;
 
         public abstract void Update(float Now, HitData[] HitData);
 
@@ -22,7 +25,7 @@ namespace Prelude.Gameplay.Watchers
 
         public bool ReachedEnd(int snaps)
         {
-            return Cursor == snaps;
+            return Counter == snaps;
         }
     }
 }
