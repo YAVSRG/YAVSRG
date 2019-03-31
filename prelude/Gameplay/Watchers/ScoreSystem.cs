@@ -72,12 +72,9 @@ namespace Prelude.Gameplay.Watchers
             return PointsPerJudgement[JudgeHit(Delta)];
         }
 
+        //logic to handle a combo breaking judgement/miss
         protected virtual void ComboBreak()
         {
-            if (Combo > BestCombo)
-            {
-                BestCombo = Combo;
-            }
             Combo = 0;
             ComboBreaks += 1;
         }
@@ -96,10 +93,15 @@ namespace Prelude.Gameplay.Watchers
             else
             {
                 Combo++;
+                if (Combo > BestCombo)
+                {
+                    BestCombo = Combo;
+                }
             }
             OnHit(Column, Judgement, HitData[Index].delta[Column]);
         }
 
+        //processes the entire hit data of an existing score to get the final accuracy
         public override void ProcessScore(HitData[] HitData)
         {
             while (Counter < HitData.Length)
@@ -118,9 +120,9 @@ namespace Prelude.Gameplay.Watchers
                 }
                 Counter++;
             }
-            BestCombo = Math.Max(Combo, BestCombo);
         }
 
+        //processes updates to accuracy live by identifying recently missed notes
         public override void Update(float Now, HitData[] HitData)
         {
             Now -= MissWindow;
@@ -136,7 +138,6 @@ namespace Prelude.Gameplay.Watchers
                 }
                 Counter++;
             }
-            if (Counter == HitData.Length) BestCombo = Math.Max(Combo, BestCombo);
         }
 
         public virtual float Accuracy()
@@ -150,6 +151,7 @@ namespace Prelude.Gameplay.Watchers
             return PointsScored / PossiblePoints;
         }
 
+        //public because external code may want to know the judgement for a given ms deviation e.g. drawing the distribution graph on score screen
         public virtual int JudgeHit(float Delta)
         {
             for (int i = 0; i < JudgementWindows.Length; i++)

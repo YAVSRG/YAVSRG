@@ -5,6 +5,10 @@ namespace Prelude.Gameplay.Watchers.Scoring
 {
     public class Wife : DancePoints
     {
+        //Wife is a score system implemented by Etterna with the aim to improve upon DP
+        //It is pretty much exactly like DP except that all hits in milliseconds are fitted to a curve and a formula is used to determine points rather than judgement windows
+        //This gives more feedback to players who get almost entirely marvellous judgements as every millisecond matters
+        //The curve was initially modelled to be a close mimic of DP but has been adjusted over time - the curve used here is up to date with april 2019
         float CurveEnd = 180f;
         float scale = 95*95;
 
