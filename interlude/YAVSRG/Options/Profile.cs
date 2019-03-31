@@ -1,11 +1,12 @@
 ﻿using System;
 using OpenTK.Input;
 using Newtonsoft.Json;
-using Interlude.Gameplay;
+using Prelude.Utilities;
 using Prelude.Gameplay.Watchers;
 using Prelude.Gameplay.Watchers.Scoring;
 using static Prelude.Gameplay.DifficultyRating.KeyLayout;
-using static Prelude.Gameplay.Watchers.IScoreSystem;
+using static Prelude.Gameplay.Watchers.ScoreSystem;
+using Interlude.Gameplay;
 
 namespace Interlude.Options
 {
@@ -80,21 +81,21 @@ namespace Interlude.Options
             Layout.OneHand, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread
         };
 
-        public IScoreSystem GetScoreSystem(ScoreType s)
+        public ScoreSystem GetScoreSystem(ScoreType s)
         {
             switch (s)
             {
                 case ScoreType.DP:
-                    return new DP(Judge);
+                    return new DancePoints(new DataGroup() { { "Judge", Judge } });
                 case ScoreType.Osu:
-                    return new OD(OD);
+                    return new OsuMania(new DataGroup() { { "OD", OD } });
                 case ScoreType.Wife:
-                    return new MSScoring(Judge);
+                    return new Wife(new DataGroup() { { "Judge", Judge } });
                 case ScoreType.SCPlus:
-                    return new StandardScoringPlus(Judge);
+                    return new StandardScoringPlus(new DataGroup() { { "Judge", Judge } });
                 case ScoreType.Default:
                 default:
-                    return new StandardScoring();
+                    return new StandardScoring(new DataGroup());
             }
         }
     }

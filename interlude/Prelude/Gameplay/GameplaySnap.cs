@@ -2,6 +2,10 @@
 
 namespace Prelude.Gameplay
 {
+    //this extends the snap data structure but now it records color scheme information e.g. column coloring and DDR coloring
+    //note colors are precalculated rather than done live
+    //gameplay snaps are created as the final "to be played" chart when a loaded chart goes through modifier processing
+    //user selects chart -> user changes mods -> GameplayChart is updated in memory to reflect mods -> this is what user plays
     public class GameplaySnap : Snap
     {
         public int[] colors;

@@ -43,7 +43,7 @@ namespace Interlude.Interface
             return MouseOver(bounds) && Input.MouseClick(OpenTK.Input.MouseButton.Left);
         }
 
-        public static void DrawGraph(Rect bounds, IScoreSystem scoring, HitData[] data)
+        public static void DrawGraph(Rect bounds, ScoreSystem scoring, HitData[] data)
         {
             int snapcount = data.Length;
             SpriteBatch.DrawRect(bounds, Color.FromArgb(150, 0, 0, 0));
@@ -60,7 +60,7 @@ namespace Interlude.Interface
                     if (data[i].hit[k] > 0)
                     {
                         o = data[i].delta[k];
-                        j = scoring.JudgeHit(o);
+                        j = scoring.JudgeHit(Math.Abs(o));
                         if (j > 2)
                         {
                             SpriteBatch.DrawRect(new Rect(bounds.Left + i * w + 4, bounds.Top, bounds.Left + i * w + 6, bounds.Bottom), Color.FromArgb(80, Game.Options.Theme.JudgeColors[5]));

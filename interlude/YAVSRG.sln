@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interlude", "YAVSRG\Interlude.csproj", "{5EBB46B4-2F12-4258-A257-73C409BB00D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterludeServer", "InterludeServer\InterludeServer.csproj", "{3C223512-E153-413D-BB1D-30B02FFBD115}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Detour", "InterludeServer\Detour.csproj", "{3C223512-E153-413D-BB1D-30B02FFBD115}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Prelude", "Prelude\Prelude.csproj", "{0FAC16DF-28FB-4816-B7E5-F5867F38F0D1}"
 EndProject

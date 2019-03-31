@@ -146,7 +146,7 @@ namespace Interlude.Interface.Screens
                     OnKeyUp(k, now); //handle it
                 }
             }
-            scoreTracker.Update(now - missWindow); //check for notes you've missed and handle them
+            scoreTracker.Update(now); //check for notes you've missed and handle them
             if (scoreTracker.ReachedEnd()) //if the chart is over, go to score screen
             {
                 Game.Screens.PopScreen();

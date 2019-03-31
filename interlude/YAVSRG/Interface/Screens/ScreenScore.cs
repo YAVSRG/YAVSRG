@@ -19,7 +19,7 @@ namespace Interlude.Interface.Screens
         private ScoreTracker scoreData;
         int tier;
         int snapcount;
-        IScoreSystem acc1, acc2;
+        ScoreSystem acc1, acc2;
         Scoreboard scoreboard;
 
         public ScreenScore(ScoreTracker data)
@@ -62,8 +62,8 @@ namespace Interlude.Interface.Screens
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
 
             //alternative acc calculations
-            acc1 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Osu) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Osu);
-            acc2 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == IScoreSystem.ScoreType.DP) ? IScoreSystem.ScoreType.Default : IScoreSystem.ScoreType.Wife);
+            acc1 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Osu) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Osu);
+            acc2 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.DP) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Wife);
             acc1.ProcessScore(scoreData.Hitdata);
             acc2.ProcessScore(scoreData.Hitdata);
 

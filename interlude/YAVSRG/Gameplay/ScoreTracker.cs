@@ -14,7 +14,7 @@ namespace Interlude.Gameplay
         public event Action<int, int, float> OnHit; //COLUMM, AWARDED JUDGE, MS DELTA
 
         public ChartWithModifiers Chart;
-        public IScoreSystem Scoring;
+        public ScoreSystem Scoring;
         public ILifeMeter HP;
         public HitData[] Hitdata;
         public List<IGameplayWatcher> Watchers;

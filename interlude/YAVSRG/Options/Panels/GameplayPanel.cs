@@ -1,6 +1,6 @@
 ﻿using Interlude.Interface.Widgets;
 using Interlude.Interface;
-using static Prelude.Gameplay.Watchers.IScoreSystem;
+using static Prelude.Gameplay.Watchers.ScoreSystem;
 
 namespace Interlude.Options.Panels
 {

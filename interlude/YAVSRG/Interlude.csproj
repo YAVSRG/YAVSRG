@@ -124,6 +124,7 @@
     <Compile Include="Gameplay\Mods\Visual\DownScroll.cs" />
     <Compile Include="Gameplay\NoteRenderer.cs" />
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />
+    <Compile Include="Gameplay\TopScore.cs" />
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
     <Compile Include="Interface\Bindable.cs" />

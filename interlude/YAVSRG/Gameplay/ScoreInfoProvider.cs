@@ -16,7 +16,7 @@ namespace Interlude.Gameplay
         Chart _chart;
         RatingReport _rating;
         string _mods;
-        IScoreSystem _scoring;
+        ScoreSystem _scoring;
         HitData[] _hitdata;
         float? _physical, _technical;
 
@@ -42,7 +42,7 @@ namespace Interlude.Gameplay
             get { if (_mods == null) { _mods = Game.Gameplay.GetModString(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _mods; }
         }
 
-        public IScoreSystem ScoreSystem
+        public ScoreSystem ScoreSystem
         {
             get
             {
