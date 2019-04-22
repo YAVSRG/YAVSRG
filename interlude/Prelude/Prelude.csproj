@@ -92,6 +92,7 @@
     <Compile Include="Gameplay\Watchers\Scoring\StandardScoringPlus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\DataGroup.cs" />
+    <Compile Include="Utilities\DataTemplateAttribute.cs" />
     <Compile Include="Utilities\Logging.cs" />
   </ItemGroup>
   <ItemGroup>

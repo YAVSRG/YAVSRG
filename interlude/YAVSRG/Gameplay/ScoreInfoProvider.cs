@@ -46,7 +46,7 @@ namespace Interlude.Gameplay
         {
             get
             {
-                if (_scoring == null) { _scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.ScoreSystem); _scoring.ProcessScore(HitData); }
+                if (_scoring == null) { _scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.SelectedScoreSystem); _scoring.ProcessScore(HitData); }
                 return _scoring;
             }
         }

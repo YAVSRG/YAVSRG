@@ -6,7 +6,7 @@ using Interlude.Graphics;
 
 namespace Interlude.Interface.Dialogs
 {
-    class ConfirmDialog : Dialog
+    public class ConfirmDialog : Dialog
     {
         string prompt;
         AnimationSlider slide;

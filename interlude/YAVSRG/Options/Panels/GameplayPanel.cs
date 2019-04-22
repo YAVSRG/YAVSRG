@@ -1,6 +1,7 @@
 ﻿using Interlude.Interface.Widgets;
 using Interlude.Interface;
 using static Prelude.Gameplay.Watchers.ScoreSystem;
+using Interlude.Interface.Dialogs;
 
 namespace Interlude.Options.Panels
 {
@@ -64,22 +65,10 @@ namespace Interlude.Options.Panels
                 .PositionBottomRight(-50, 525, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife", "SC+" }, (int)Game.Options.Profile.ScoreSystem, v => { Game.Options.Profile.ScoreSystem = (ScoreType)v; }),
+                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife", "SC+" }, (int)Game.Options.Profile.ScoreSystems[0].Type, v => { Game.Options.Profile.ScoreSystems[0] = new AccuracySystemSelector.AccuracySystem((ScoreType)v, Game.Options.Profile.ScoreSystems[0].Data); Game.Screens.AddDialog(new ConfigDialog((s) => { }, "Configure score system", Game.Options.Profile.ScoreSystems[0].Data, Game.Options.Profile.ScoreSystems[0].Type == ScoreType.Osu ? typeof(Prelude.Gameplay.Watchers.Scoring.OsuMania) : typeof(Prelude.Gameplay.Watchers.Scoring.DancePoints))); }),
                 "This is the accuracy measurement system to use when playing.\nOsu = osu!mania's accuracy system\nWife = Etterna's accuracy system", ib)
                 .PositionTopLeft(50, 475, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 525, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(
-                new TooltipContainer(
-                new Slider("Osu OD", v => { Game.Options.Profile.OD = v; }, () => Game.Options.Profile.OD, 0, 10, 0.1f),
-                "This is the 'overall difficulty' value, a setting that controls the harshness of the Osu timing windows.\nOnly affects the behaviour of the Osu score system.", ib)
-                .PositionTopLeft(-300, 575, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(-50, 625, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(
-                new TooltipContainer(
-                new Slider("Stepmania Judge", v => { Game.Options.Profile.Judge = (int)v; }, () => Game.Options.Profile.Judge, 1, 10, 1f),
-                "This is the harshness of the Stepmania timing windows.\nJudge 4 is considered the universal standard for gameplay, however some people choose to use J5 because they are very proficient with J4.\nOnly affects the behaviour of the Wife and DP score systems.", ib)
-                .PositionTopLeft(50, 575, AnchorType.CENTER, AnchorType.MIN)
-                .PositionBottomRight(300, 625, AnchorType.CENTER, AnchorType.MIN));
         }
     }
 }

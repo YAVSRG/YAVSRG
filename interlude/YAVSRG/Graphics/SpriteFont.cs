@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Text;
 using Interlude.Interface;
 using Interlude.IO;
 
@@ -8,6 +9,7 @@ namespace Interlude.Graphics
 {
     public class SpriteFont
     {
+        static PrivateFontCollection collection = new PrivateFontCollection();
         //todo: comment everything and change to bounds system
         Dictionary<char, Sprite> FontLookup;
         int FONTSCALE;
@@ -17,7 +19,16 @@ namespace Interlude.Graphics
         public SpriteFont(int scale, string f)
         {
             FONTSCALE = scale;
-            Font = new Font(f, scale);
+            if (f.Contains("."))
+            {
+                collection.AddFontFile(f);
+                Font = new Font(collection.Families[0], scale);
+            }
+            else
+            {
+                Font = new Font(f, scale);
+            }
+
             FontLookup = new Dictionary<char, Sprite>();
 
             foreach (char c in @"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\|")
@@ -26,7 +37,7 @@ namespace Interlude.Graphics
             }
         }
 
-        public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default)
         {
             if (dropShadow)
             {

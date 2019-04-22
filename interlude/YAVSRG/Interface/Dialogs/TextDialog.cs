@@ -5,7 +5,7 @@ using Interlude.Graphics;
 
 namespace Interlude.Interface.Dialogs
 {
-    class TextDialog : FadeDialog
+    public class TextDialog : FadeDialog
     {
         string prompt;
         string text = "";

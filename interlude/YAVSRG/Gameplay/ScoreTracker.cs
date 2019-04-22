@@ -26,7 +26,7 @@ namespace Interlude.Gameplay
             WidgetColor = new AnimationColorFade(System.Drawing.Color.FromArgb(0, Game.Options.Theme.MenuFont), Game.Options.Theme.MenuFont);
             Watchers = new List<IGameplayWatcher>();
             Chart = c;
-            Scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.ScoreSystem);
+            Scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.SelectedScoreSystem);
             HP = new HPSystem(Scoring);
             Watchers.Add(Scoring);
             Watchers.Add(HP);

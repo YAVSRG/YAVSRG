@@ -6,7 +6,6 @@ namespace Interlude.Interface.Screens
 {
     class ScreenLobby : Screen
     {
-        Widget hostButton;
         string lobbyCode = "";
 
         public ScreenLobby()

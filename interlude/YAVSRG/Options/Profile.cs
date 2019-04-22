@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using OpenTK.Input;
 using Newtonsoft.Json;
 using Prelude.Utilities;
@@ -47,8 +48,6 @@ namespace Interlude.Options
         public float ScrollSpeed = 2.05f;
         public bool UseArrowsFor4k = false;
         public int HitPosition = 0;
-        public float OD = 8.5f;
-        public int Judge = 4;
         public bool Upscroll = false;
         public float ScreenCoverUp = 0f;
         public float ScreenCoverDown = 0f;
@@ -57,7 +56,9 @@ namespace Interlude.Options
         public string ChartSortMode = "Title";
         public string ChartGroupMode = "Pack";
         public string ChartColorMode = "Nothing";
-        public ScoreType ScoreSystem = ScoreType.Default; //deprecate
+        public List<Interface.Widgets.AccuracySystemSelector.AccuracySystem> ScoreSystems = new List<Interface.Widgets.AccuracySystemSelector.AccuracySystem>();
+        public int SelectedScoreSystem;
+        //todo: life systems
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
         public float[] AccGradeThresholds = new float[] { 98.5f, 95, 93, 91, 89 };
         public ProfileStats Stats = new ProfileStats();
@@ -81,21 +82,30 @@ namespace Interlude.Options
             Layout.OneHand, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread
         };
 
-        public ScoreSystem GetScoreSystem(ScoreType s)
+        public ScoreSystem GetScoreSystem(int Index)
         {
-            switch (s)
+            if (Index >= ScoreSystems.Count)
+            {
+                Index = 0;
+            }
+            if (ScoreSystems.Count == 0)
+            {
+                ScoreSystems.Add(new Interface.Widgets.AccuracySystemSelector.AccuracySystem(ScoreType.Default, new DataGroup()));
+            }
+            var ss = ScoreSystems[Index];
+            switch (ss.Type)
             {
                 case ScoreType.DP:
-                    return new DancePoints(new DataGroup() { { "Judge", Judge } });
+                    return new DancePoints(ss.Data);
                 case ScoreType.Osu:
-                    return new OsuMania(new DataGroup() { { "OD", OD } });
+                    return new OsuMania(ss.Data);
                 case ScoreType.Wife:
-                    return new Wife(new DataGroup() { { "Judge", Judge } });
+                    return new Wife(ss.Data);
                 case ScoreType.SCPlus:
-                    return new StandardScoringPlus(new DataGroup() { { "Judge", Judge } });
+                    return new StandardScoringPlus(ss.Data);
                 case ScoreType.Default:
                 default:
-                    return new StandardScoring(new DataGroup());
+                    return new StandardScoring(ss.Data);
             }
         }
     }

@@ -10,7 +10,7 @@ using System.Drawing;
 
 namespace Interlude.Interface.Dialogs
 {
-    class ProfileDialog : FadeDialog
+    public class ProfileDialog : FadeDialog
     {
         bool recalcScores;
 

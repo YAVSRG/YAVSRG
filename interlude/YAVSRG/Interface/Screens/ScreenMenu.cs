@@ -59,7 +59,7 @@ namespace Interlude.Interface.Screens
             options.PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER);
             quit.PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER);
             OnResize();
-            //this won't run in OnResize since we're transitioning to this screen
+            //this won't run in OnResize if we're transitioning to this screen
             Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400), false);
         }
 

@@ -18,15 +18,13 @@ namespace Interlude.Interface.Screens
         string perf, badge;
         private ScoreTracker scoreData;
         int tier;
-        int snapcount;
-        ScoreSystem acc1, acc2;
+        //ScoreSystem acc1, acc2;
         Scoreboard scoreboard;
 
         public ScreenScore(ScoreTracker data)
         {
 
             scoreData = data;
-            snapcount = scoreData.Chart.Notes.Count;
             scoreData.Scoring.BestCombo = Math.Max(scoreData.Scoring.Combo, scoreData.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
 
             //awards the rank for your acc
@@ -62,10 +60,10 @@ namespace Interlude.Interface.Screens
             Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
 
             //alternative acc calculations
-            acc1 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Osu) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Osu);
-            acc2 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.DP) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Wife);
-            acc1.ProcessScore(scoreData.Hitdata);
-            acc2.ProcessScore(scoreData.Hitdata);
+            //acc1 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Osu) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Osu);
+            //acc2 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.DP) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Wife);
+            //acc1.ProcessScore(scoreData.Hitdata);
+            //acc2.ProcessScore(scoreData.Hitdata);
 
             //more info pre calculated so it isn't calculated every frame
             perf = Utils.RoundNumber(PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
@@ -120,13 +118,12 @@ namespace Interlude.Interface.Screens
 
             //judgements display
             SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 350, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
-            SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), new Rect(bounds.Left + 550, bounds.Top + 500, bounds.CenterX - 50, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
-            SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), new Rect(bounds.CenterX + 50, bounds.Top + 500, bounds.Right - 550, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
-            float r = 0;
+            //SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), new Rect(bounds.Left + 550, bounds.Top + 500, bounds.CenterX - 50, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
+            //SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), new Rect(bounds.CenterX + 50, bounds.Top + 500, bounds.Right - 550, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
             float h = 450/scoreData.Scoring.Judgements.Length;
             for (int i = 0; i < scoreData.Scoring.Judgements.Length; i++)
             {
-                r = bounds.Right - 500 + i * h;
+                float r = bounds.Right - 500 + i * h;
                 SpriteBatch.DrawRect(new Rect(r, bounds.Top + 50, r + h, bounds.Top + 250), Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.DrawRect(new Rect(r, bounds.Top + 250 - 200f * scoreData.Scoring.Judgements[i] / scoreData.MaxCombo, r + h, bounds.Top + 250), Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
                 SpriteBatch.Font2.DrawCentredTextToFill(scoreData.Scoring.Judgements[i].ToString(), new Rect(r, bounds.Top + 50, r + h, bounds.Top + 150), Color.White, true);

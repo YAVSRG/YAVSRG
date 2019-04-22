@@ -3,6 +3,7 @@ using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Watchers.Scoring
 {
+    [DataTemplate("Judge", "Default", 4, "Min", 1, "Max", 10)]
     public class DancePoints : ScoreSystem
     {
         //DP is the old standard for scoring on Stepmania
