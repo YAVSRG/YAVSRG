@@ -38,7 +38,7 @@ namespace Prelude.Gameplay.Watchers
         protected int ComboBreakingJudgement;
 
         //display name of this accuracy system
-        protected string Name;
+        public string Name;
 
         //max points possible to have scored so far
         protected float PossiblePoints = 0;
