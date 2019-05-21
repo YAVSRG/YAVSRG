@@ -37,7 +37,7 @@ namespace Interlude.Interface.Screens
             var widgetData = Game.Options.Theme.Gameplay;
 
             //this stuff is ok to stay here
-            AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).PositionTopLeft(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).TL_DeprecateMe(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
             //AddChild(new PerformanceMeter(scoreTracker));
             AddChild(new HitMeter(scoreTracker, widgetData.GetPosition("hitMeter")));
             AddChild(new ComboDisplay(scoreTracker, widgetData.GetPosition("combo")));
@@ -56,17 +56,17 @@ namespace Interlude.Interface.Screens
             for (int i = 0; i < Chart.Keys; i++)
             {
                 lighting[i] = new HitLighting();
-                lighting[i].PositionTopLeft(columnwidth * i, hitposition, AnchorType.MIN, AnchorType.CENTER)
-                    .PositionBottomRight(columnwidth * (i + 1), hitposition + columnwidth, AnchorType.MIN, AnchorType.CENTER);
+                lighting[i].TL_DeprecateMe(columnwidth * i, hitposition, AnchorType.MIN, AnchorType.CENTER)
+                    .BR_DeprecateMe(columnwidth * (i + 1), hitposition + columnwidth, AnchorType.MIN, AnchorType.CENTER);
                 playfield.AddChild(lighting[i]);
             }
             //this places the screencovers
             if (Game.Options.Profile.ScreenCoverUp > 0)
                 playfield.AddChild(new Screencover(scoreTracker, false)
-                    .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
+                    .TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.CENTER).BR_DeprecateMe(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
             if (Game.Options.Profile.ScreenCoverDown > 0)
                 playfield.AddChild(new Screencover(scoreTracker, true)
-                .PositionTopLeft(0, ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverDown), AnchorType.MIN, AnchorType.CENTER).PositionBottomRight(0, ScreenHeight * 2, AnchorType.MAX, AnchorType.CENTER));
+                .TL_DeprecateMe(0, ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverDown), AnchorType.MIN, AnchorType.CENTER).BR_DeprecateMe(0, ScreenHeight * 2, AnchorType.MAX, AnchorType.CENTER));
         }
 
         public override void OnEnter(Screen prev)

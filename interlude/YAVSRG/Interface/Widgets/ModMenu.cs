@@ -92,7 +92,7 @@ namespace Interlude.Interface.Widgets
         {
             info = new InfoBox();
             modbuttons = new List<ModButton>();
-            AddChild(info.PositionTopLeft(50, 50, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(50, 200, AnchorType.MAX, AnchorType.MIN));
+            AddChild(info.TL_DeprecateMe(50, 50, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(50, 200, AnchorType.MAX, AnchorType.MIN));
 
             int x = 50;
             string[] mods = Game.Gameplay.Mods.Keys.ToArray();
@@ -101,7 +101,7 @@ namespace Interlude.Interface.Widgets
             {
                 var mb = new ModButton(info, m);
                 modbuttons.Add(mb);
-                AddChild(mb.PositionTopLeft(x, 250, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(x + 100, 350, AnchorType.MIN, AnchorType.MIN));
+                AddChild(mb.TL_DeprecateMe(x, 250, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(x + 100, 350, AnchorType.MIN, AnchorType.MIN));
                 x += 100;
             }
 
@@ -138,7 +138,7 @@ namespace Interlude.Interface.Widgets
                     int i = 1;
                     foreach (var mb in modbuttons)
                     {
-                        mb.Move(new Rect(100 + spacing * i, 250, 200 + spacing * i, 350), bounds, false);
+                        mb.MoveRelative(new Rect(100 + spacing * i, 250, 200 + spacing * i, 350), bounds);
                         i++;
                     }
                 }
@@ -146,7 +146,7 @@ namespace Interlude.Interface.Widgets
                 {
                     foreach (var mb in modbuttons)
                     {
-                        mb.Move(new Rect(-150, 250, -50, 350), bounds, false);
+                        mb.MoveRelative(new Rect(-150, 250, -50, 350), bounds);
                     }
                 }
             }

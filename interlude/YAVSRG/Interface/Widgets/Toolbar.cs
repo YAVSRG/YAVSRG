@@ -24,22 +24,22 @@ namespace Interlude.Interface
         {
             AddChild(
                 new SpriteButton("buttonback", "Back", Back)
-                .PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MIN, AnchorType.MIN));
+                .TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(240, 80, AnchorType.MIN, AnchorType.MIN));
             AddChild(
                 new SpriteButton("buttoninfo", "Notifications", () => { Chat.Expand(); })
-                .PositionTopLeft(80, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN));
+                .TL_DeprecateMe(80, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(0, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
                 new SpriteButton("buttonmusic", "Visualiser", () => { if (!(Game.Screens.Current is ScreenVisualiser) && !(Game.Screens.Current is ScreenScore) && Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); })
-                .PositionTopLeft(160, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(80, 80, AnchorType.MAX, AnchorType.MIN));
+                .TL_DeprecateMe(160, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(80, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
                 new SpriteButton("buttonoptions", "Options", () => { if (!(Game.Screens.Current is ScreenOptions) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenOptions()); })
-                .PositionTopLeft(240, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(160, 80, AnchorType.MAX, AnchorType.MIN));
+                .TL_DeprecateMe(240, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(160, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
                 new SpriteButton("buttonimport", "Import", () => { if (!(Game.Screens.Current is ScreenImport) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenImport()); })
-                .PositionTopLeft(320, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(240, 80, AnchorType.MAX, AnchorType.MIN));
+                .TL_DeprecateMe(320, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(240, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(
                 new SpriteButton("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenLobby()); })
-                .PositionTopLeft(400, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(320, 80, AnchorType.MAX, AnchorType.MIN));
+                .TL_DeprecateMe(400, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(320, 80, AnchorType.MAX, AnchorType.MIN));
             AddChild(new ProfileInfoPanel());
             AddChild(Chat = new ChatBox());
             AddChild(new MusicControls());

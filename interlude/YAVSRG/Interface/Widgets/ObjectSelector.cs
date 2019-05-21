@@ -36,12 +36,12 @@ namespace Interlude.Interface.Widgets
             AddChild(new SpriteButton("buttonimport", "Add", () => {
                 var o = OnCreate();
                 AddChild(new SelectableCard(GetName(o), o, GetSelected)); 
-                }).PositionBottomRight(50, 50, AnchorType.MIN, AnchorType.MIN));
+                }).BR_DeprecateMe(50, 50, AnchorType.MIN, AnchorType.MIN));
 
             AddChild(new SpriteButton("buttonclose", "Delete", () => {
                 OnDelete();
                 Children.RemoveAt(List.IndexOf(GetSelected()));
-            }).PositionTopLeft(50, 50, AnchorType.MAX, AnchorType.MAX));
+            }).TL_DeprecateMe(50, 50, AnchorType.MAX, AnchorType.MAX));
 
             for (int i = 0; i < List.Count; i++)
             {

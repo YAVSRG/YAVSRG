@@ -22,7 +22,7 @@ namespace Interlude.Gameplay
         protected int ColumnWidth { get { return Game.Options.Theme.ColumnWidth; } }
         readonly int Keys;
         readonly float ScrollSpeed;
-        readonly bool UseSV;
+        readonly bool UseSV; //todo: implement
 
         protected IVisualMod ScrollScheme;
 

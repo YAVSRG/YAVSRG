@@ -17,42 +17,18 @@ namespace Interlude.Interface.Animations
         private float GetRelativePosition(float pos, float min, float max)
         {
             return min + (max - min) * AnchorPos + pos;
-            /*switch (Anchor)
-            {
-                case AnchorType.MAX:
-                    return max - pos;
-                case AnchorType.MIN:
-                    return min + pos;
-                case AnchorType.LERP:
-                    return min + (max - min) * pos;
-                case AnchorType.CENTER:
-                default:
-                    return (max + min) * 0.5f + pos;
-            }*/
         }
 
         //gets position to use to place this point at desired location as if the anchor type were MIN
         private float GetStaticPosition(float target, float min, float max)
         {
             return target - (max - min) * AnchorPos;
-            /*
-            switch (Anchor)
-            {
-                case AnchorType.MAX:
-                    return (max - min) - target;
-                case AnchorType.MIN:
-                    return target;
-                case AnchorType.LERP:
-                    return target / (max - min);
-                case AnchorType.CENTER:
-                default:
-                    return target - (max - min) * 0.5f;
-            }*/
         }
 
-        public AnimationAnchorPoint(float pos, AnchorType type)
+        public AnimationAnchorPoint(float Position, float Anchor)
         {
-            Move(pos, type);
+            this.Position = new AnimationSlider(Position);
+            AnchorPos = Anchor;
         }
 
         public override bool Running
@@ -68,50 +44,66 @@ namespace Interlude.Interface.Animations
             Position.Update();
         }
 
-        public void Move(float pos, AnchorType type)
+        public void RepositionDeprecateMe(float pos, AnchorType type)
         {
             Anchor = type;
             switch (type)
             {
                 case AnchorType.MAX:
-                    Move(-pos, 1f); return;
+                    Reposition(-pos, 1f); return;
                 case AnchorType.MIN:
-                    Move(pos, 0f); return;
+                    Reposition(pos, 0f); return;
                 case AnchorType.LERP:
-                    Move(0, pos); return;
+                    Reposition(0, pos); return;
                 case AnchorType.CENTER:
                 default:
-                    Move(pos, 0.5f); return;
+                    Reposition(pos, 0.5f); return;
             }
         }
 
-        public void Move(float pos, float anchor)
+        //Returns the position of this anchor point relative to the minimum and maximum X or Y values as bounds
+        //Projected = true will retrieve where the widget will be in the immediate future as animation completes
+        //By default this returns the actual bounds of the widget which are different if it is moving/animated
+        public float GetPosition(float Min, float Max, bool Projected = false)
         {
-            Position = new AnimationSlider(pos);
-            AnchorPos = anchor;
+            return GetRelativePosition(Projected ? Position.Target : Position.Val, Min, Max);
         }
 
-        public void Move(float pos, bool instant)
+        //Instantly repositions the anchor point to a new arrangement
+        public void Reposition(float NewPosition, float Anchor)
         {
-            if (Anchor == AnchorType.MAX) pos *= -1;
-            if (instant) Position.Val = Position.Target = pos;
-            else Position.Target = pos;
+            Position.NewPosition = NewPosition;
+            AnchorPos = Anchor;
         }
 
-        public void Move(float pos, bool instant, float min, float max)
+        //Instantly repositions the anchor point to a new arrangement.
+        //Old anchor position is preserved.
+        public void Reposition(float NewPosition)
         {
-            if (instant) Position.Val = Position.Target = GetStaticPosition(pos, min, max);
-            else Position.Target = GetStaticPosition(pos, min, max);
+            if (Anchor == AnchorType.MAX) NewPosition *= -1;
+            Position.NewPosition = NewPosition;
         }
 
-        public float RelativePos(float min, float max, bool target)
+        //Instantly repositions the anchor point to a new arrangement.
+        //The new position is relative to the bounds and the old anchor position is preserved.
+        public void RepositionRelative(float NewPosition, float Min, float Max)
         {
-            return GetRelativePosition(target ? Position.Target : Position.Val, min, max);
+            Position.NewPosition = GetStaticPosition(NewPosition, Min, Max);
         }
 
-        public float StaticPos(bool target)
+        //Moves the anchor point smoothly to the new location
+        //The new position is relative to the anchor position
+        public void Move(float NewPosition)
         {
-            return target ? Position.Target : Position.Val;
+            if (Anchor == AnchorType.MAX) NewPosition *= -1;
+            Position.Target = NewPosition;
+        }
+
+        //Moves the anchor point smoothly to the new location.
+        //The new position is relative to the bounds rather than the anchor position
+        public void MoveRelative(float NewPosition, float Min, float Max)
+        {
+            Position.Target = GetStaticPosition(NewPosition, Min, Max);
         }
     }
 }

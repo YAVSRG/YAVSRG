@@ -117,8 +117,8 @@ namespace Interlude.Interface.Widgets.Toolbar
         {
             channels = new Dictionary<string, ChatChannel>();
             channelSelector = new FlowContainer() { BackColor = () => Color.FromArgb(127, 0, 0, 0), UseBackground = false, VerticalFade = 0 };
-            AddChild(channelSelector.PositionTopLeft(20, 20, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(220, 20, AnchorType.MIN, AnchorType.MAX));
-            AddChild(emoji = new EmojiPicker().PositionTopLeft(240, 30, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(30, 30, AnchorType.MAX, AnchorType.MAX));
+            AddChild(channelSelector.TL_DeprecateMe(20, 20, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(220, 20, AnchorType.MIN, AnchorType.MAX));
+            AddChild(emoji = new EmojiPicker().TL_DeprecateMe(240, 30, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(30, 30, AnchorType.MAX, AnchorType.MAX));
             emoji.SetState(WidgetState.DISABLED);
             Animation.Add(newMsgFade = new Animations.AnimationSlider(0));
             Animation.Add(fade = new Animations.AnimationSlider(0));
@@ -300,7 +300,7 @@ namespace Interlude.Interface.Widgets.Toolbar
         void CreateChannel(string channel)
         {
             channels.Add(channel, new ChatChannel(new SimpleButton(channel, () => { selectedChannel = channel; emoji.SetState(channel == "Log" ? WidgetState.DISABLED : WidgetState.NORMAL); }, () => { return selectedChannel == channel; }, 20f)));
-            channelSelector.AddChild(channels[channel].button.PositionBottomRight(180, 40, AnchorType.MIN, AnchorType.MIN));
+            channelSelector.AddChild(channels[channel].button.BR_DeprecateMe(180, 40, AnchorType.MIN, AnchorType.MIN));
             if (selectedChannel == "") { selectedChannel = channel; }
         }
 

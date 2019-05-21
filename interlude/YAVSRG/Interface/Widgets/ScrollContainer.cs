@@ -58,7 +58,7 @@ namespace Interlude.Interface.Widgets
                 }
             }
             widgetBounds = child.GetBounds(bounds);
-            child.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds, true);
+            child.RepositionRelative(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
             base.AddChild(child);
         }
 
@@ -77,7 +77,7 @@ namespace Interlude.Interface.Widgets
                     if (w.State > 0)
                     {
                         widgetBounds = w.GetBounds(bounds);
-                        w.Move(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds, false);
+                        w.MoveRelative(new Rect(x, y, x + widgetBounds.Width, y + widgetBounds.Height), bounds);
                         if (y + widgetBounds.Height <= 0)
                         {
                             selectedItem += 1;

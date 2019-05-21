@@ -18,7 +18,7 @@ namespace Interlude.Interface.Widgets
             Technical = tech;
             VerticalFade = 0;
             scores = new FlowContainer();
-            AddChild(scores.PositionTopLeft(10, 10, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(210, 10, AnchorType.MAX, AnchorType.MAX));
+            AddChild(scores.TL_DeprecateMe(10, 10, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(210, 10, AnchorType.MAX, AnchorType.MAX));
         }
 
         public void Refresh(int keymode)
@@ -30,7 +30,7 @@ namespace Interlude.Interface.Widgets
                 bool l = false;
                 foreach (ScoreInfoProvider si in Technical ? Game.Options.Profile.Stats.GetTechnicalTop(keymode) : Game.Options.Profile.Stats.GetPhysicalTop(keymode))
                 {
-                    scores.AddChild(new TopScoreCard(si, l, false).PositionBottomRight(0, 80, AnchorType.MAX, AnchorType.MIN));
+                    scores.AddChild(new TopScoreCard(si, l, false).BR_DeprecateMe(0, 80, AnchorType.MAX, AnchorType.MIN));
                     l = !l;
                 }
                 return true;

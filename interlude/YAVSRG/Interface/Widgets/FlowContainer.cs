@@ -78,7 +78,7 @@ namespace Interlude.Interface.Widgets
                             y += widgetBounds.Height + RowSpacing;
                         }
                         ContentSize = y + widgetBounds.Height;
-                        w.Move(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds, false);
+                        w.MoveRelative(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds);
                         if (ContentSize > bounds.Top && y < bounds.Bottom)
                         {
                             if (VisibleIndexTop < 0) VisibleIndexTop = i;
@@ -122,7 +122,7 @@ namespace Interlude.Interface.Widgets
                 y += widgetBounds.Height + RowSpacing;
             }
             base.AddChild(child);
-            child.Move(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds, true);
+            child.RepositionRelative(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds);
         }
 
         public void ScrollTo(int index)
@@ -130,7 +130,7 @@ namespace Interlude.Interface.Widgets
             if (index >= 0 && index < Children.Count)
             {
                 Rect bounds = GetBounds().Expand(-MarginX, -MarginY);
-                ScrollPosition += Children[index].TopAnchor.RelativePos(bounds.Top, bounds.Bottom, true) - bounds.Top;
+                ScrollPosition += Children[index].TopAnchor.GetPosition(bounds.Top, bounds.Bottom, true) - bounds.Top;
             }
         }
 

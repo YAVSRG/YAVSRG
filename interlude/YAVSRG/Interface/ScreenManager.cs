@@ -56,7 +56,7 @@ namespace Interlude.Interface
             animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
             animation2.Add(bgFade = new AnimationSlider(1));
             Logo = new Widgets.Logo();
-            Logo.PositionTopLeft(-200, 1000, AnchorType.CENTER, AnchorType.CENTER).PositionBottomRight(200, 1400, AnchorType.CENTER, AnchorType.CENTER);
+            Logo.TL_DeprecateMe(-200, 1000, AnchorType.CENTER, AnchorType.CENTER).BR_DeprecateMe(200, 1400, AnchorType.CENTER, AnchorType.CENTER);
         }
 
         public void AddDialog(Dialog d)

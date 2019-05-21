@@ -14,28 +14,29 @@ namespace Interlude.Interface.Widgets
             sb = new Scoreboard();
             ip = new ChartInfoPanel();
 
+            //todo: scrap scroll container (and maybe make flow container support horizontal flow)
             scroll = new ScrollContainer(10, 10, true, 1, false);
 
-            AddChild(scroll.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(ScreenUtils.ScreenWidth * 2 - 750, 150, AnchorType.MIN, AnchorType.MAX));
-            scroll.AddChild(sb.PositionBottomRight(-15, 20, AnchorType.CENTER, AnchorType.MAX));
-            scroll.AddChild(ip.PositionBottomRight(-15, 20, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(scroll.TL_DeprecateMe(50, 200, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(ScreenUtils.ScreenWidth * 2 - 750, 150, AnchorType.MIN, AnchorType.MAX));
+            scroll.AddChild(sb.BR_DeprecateMe(-15, 20, AnchorType.CENTER, AnchorType.MAX));
+            scroll.AddChild(ip.BR_DeprecateMe(-15, 20, AnchorType.CENTER, AnchorType.MAX));
             ChangeChart(true);
             
             ModMenu modMenu = new ModMenu();
-            AddChild(modMenu.PositionTopLeft(0, 150, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MAX));
+            AddChild(modMenu.TL_DeprecateMe(0, 150, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(0, 100, AnchorType.MAX, AnchorType.MAX));
 
             AddChild(new FramedButton("Play", () => { Game.Gameplay.PlaySelectedChart(); })
-                .PositionTopLeft(0.55f, 75, AnchorType.LERP, AnchorType.MAX)
-                .PositionBottomRight(0.9f, 25, AnchorType.LERP, AnchorType.MAX));
+                .TL_DeprecateMe(0.55f, 75, AnchorType.LERP, AnchorType.MAX)
+                .BR_DeprecateMe(0.9f, 25, AnchorType.LERP, AnchorType.MAX));
             AddChild(new FramedButton("Mods", () => { modMenu.Toggle(); })
-                .PositionTopLeft(0.1f, 75, AnchorType.LERP, AnchorType.MAX)
-                .PositionBottomRight(0.45f, 25, AnchorType.LERP, AnchorType.MAX));
+                .TL_DeprecateMe(0.1f, 75, AnchorType.LERP, AnchorType.MAX)
+                .BR_DeprecateMe(0.45f, 25, AnchorType.LERP, AnchorType.MAX));
         }
 
         public override void OnResize()
         {
             base.OnResize();
-            scroll.Move(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150), true);
+            scroll.Reposition(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150));
         }
 
         public void ChangeChart(bool force)
@@ -45,7 +46,7 @@ namespace Interlude.Interface.Widgets
                 sb.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
                 lastChart = Game.Gameplay.CurrentChart;
             }
-            scroll.Move(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150), true); //just to make sure
+            scroll.Reposition(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150)); //just to make sure
             ip.ChangeChart(); //ip needs to change length/bpm. difficulty is already recalculated
         }
 

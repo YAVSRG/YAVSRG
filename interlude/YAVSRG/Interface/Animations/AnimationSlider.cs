@@ -10,6 +10,10 @@ namespace Interlude.Interface.Animations
     {
         public float Val;
         public float Target;
+        public virtual float NewPosition
+        {
+            set { Val = Target = value; }
+        }
 
         public AnimationSlider(float p)
         {

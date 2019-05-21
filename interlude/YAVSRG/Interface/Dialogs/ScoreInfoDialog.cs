@@ -12,10 +12,10 @@ namespace Interlude.Interface.Dialogs
 
         public ScoreInfoDialog(ScoreInfoProvider data, Action<string> a) : base(a)
         {
-            PositionTopLeft(100, ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(100, -ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MAX, AnchorType.MAX);
-            Move(new Rect(100, 100, 100, 100), false);
+            TL_DeprecateMe(100, ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(100, -ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MAX, AnchorType.MAX);
+            Move(new Rect(100, 100, 100, 100));
             Data = data;
-            AddChild(new TextBox(Data.Accuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
+            AddChild(new TextBox(Data.Accuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).BR_DeprecateMe(300, 100, AnchorType.MIN, AnchorType.MIN));
         }
 
         public override void Draw(Rect bounds)
@@ -33,7 +33,7 @@ namespace Interlude.Interface.Dialogs
         protected override void OnClosing()
         {
             base.OnClosing();
-            Move(new Rect(100, ScreenUtils.ScreenHeight * 2 + 100, 100, -ScreenUtils.ScreenHeight * 2 + 100), false);
+            Move(new Rect(100, ScreenUtils.ScreenHeight * 2 + 100, 100, -ScreenUtils.ScreenHeight * 2 + 100));
         }
     }
 }

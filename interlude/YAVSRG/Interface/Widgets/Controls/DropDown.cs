@@ -20,7 +20,7 @@ namespace Interlude.Interface.Widgets
             getter = get;
             selector = new FlowContainer() { MarginY = 25, MarginX = 20, VerticalFade = 30, Frame = 85 };
             selector.ToggleState();
-            AddChild(selector.PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(0, -400, AnchorType.MAX, AnchorType.MAX));
+            AddChild(selector.TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(0, -400, AnchorType.MAX, AnchorType.MAX));
             AddChild(new SimpleButton(() => label + ": " + getter(), () => { selector.ToggleState(); }, () => selector.State == WidgetState.NORMAL, 20f));
         }
 
@@ -35,7 +35,7 @@ namespace Interlude.Interface.Widgets
 
         private Widget Item(string label)
         {
-            return new SimpleButton(label, () => { setter(label); }, () => { return getter() == label; }, 15f).PositionBottomRight(0, 35, AnchorType.MAX, AnchorType.MIN);
+            return new SimpleButton(label, () => { setter(label); }, () => { return getter() == label; }, 15f).BR_DeprecateMe(0, 35, AnchorType.MAX, AnchorType.MIN);
         }
     }
 }

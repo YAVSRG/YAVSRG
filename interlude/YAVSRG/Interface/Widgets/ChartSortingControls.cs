@@ -18,29 +18,29 @@ namespace Interlude.Interface.Widgets
             AddChild(collectionControls = new Widget());
             collectionControls.ToggleState();
             collectionControls.AddChild(d.SetItems(Game.Gameplay.Collections.Collections.Keys.ToList())
-                .PositionTopLeft(520, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(280, 10, AnchorType.MAX, AnchorType.MAX));
+                .TL_DeprecateMe(520, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(280, 10, AnchorType.MAX, AnchorType.MAX));
 
             collectionControls.AddChild(new SimpleButton("Create", () => { Game.Screens.AddDialog(new Dialogs.TextDialog("Enter name for collection: ", (s) => { if (s != "") { selectedCollection = s; } })); }, () => false, 20f)
-                .PositionTopLeft(260, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(150, 10, AnchorType.MAX, AnchorType.MAX));
+                .TL_DeprecateMe(260, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(150, 10, AnchorType.MAX, AnchorType.MAX));
             collectionControls.AddChild(new SimpleButton("Delete", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Really delete this collection?", (s) => { if (s == "Y") { Game.Gameplay.Collections.DeleteCollection(selectedCollection); } })); }, () => false, 20f)
-                .PositionTopLeft(130, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
+                .TL_DeprecateMe(130, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartGroupMode = x; Refresh(); }, () => (Game.Options.Profile.ChartGroupMode), "Group by")
                 .SetItems(GroupBy.Keys.ToList())
-                .PositionTopLeft(680, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(480, 10, AnchorType.MAX, AnchorType.MAX));
+                .TL_DeprecateMe(680, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(480, 10, AnchorType.MAX, AnchorType.MAX));
 
             sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartSortMode = x; Refresh(); }, () => (Game.Options.Profile.ChartSortMode), "Sort by")
                 .SetItems(SortBy.Keys.ToList())
-                .PositionTopLeft(450, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(250, 10, AnchorType.MAX, AnchorType.MAX));
+                .TL_DeprecateMe(450, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(250, 10, AnchorType.MAX, AnchorType.MAX));
 
             sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartColorMode = x; Refresh(); }, () => (Game.Options.Profile.ChartColorMode), "Color by")
                 .SetItems(ColorBy.Keys.ToList())
-                .PositionTopLeft(220, 50, AnchorType.MAX, AnchorType.MAX).PositionBottomRight(20, 10, AnchorType.MAX, AnchorType.MAX));
+                .TL_DeprecateMe(220, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
-                .PositionTopLeft(520, 10, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(20, 70, AnchorType.MAX, AnchorType.MIN));
+                .TL_DeprecateMe(520, 10, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(20, 70, AnchorType.MAX, AnchorType.MIN));
 
-            AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }).PositionTopLeft(600, 0, AnchorType.MAX,AnchorType.MIN).PositionBottomRight(520,80,AnchorType.MAX,AnchorType.MIN));
+            AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }).TL_DeprecateMe(600, 0, AnchorType.MAX,AnchorType.MIN).BR_DeprecateMe(520,80,AnchorType.MAX,AnchorType.MIN));
         }
 
         public override void Draw(Rect bounds)

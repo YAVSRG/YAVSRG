@@ -20,18 +20,18 @@ namespace Interlude.Interface.Screens
         {
             AddChild(
                 new SpriteButton("buttonplay", "", () => { Game.Audio.Play(); })
-                .PositionTopLeft(250, 10, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(170, 90, AnchorType.MAX, AnchorType.MIN)
+                .TL_DeprecateMe(250, 10, AnchorType.MAX, AnchorType.MIN)
+                .BR_DeprecateMe(170, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
                 new SpriteButton("buttonpause", "", () => { Game.Audio.Pause(); })
-                .PositionTopLeft(170, 10, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(90, 90, AnchorType.MAX, AnchorType.MIN)
+                .TL_DeprecateMe(170, 10, AnchorType.MAX, AnchorType.MIN)
+                .BR_DeprecateMe(90, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
                 new SpriteButton("buttonstop", "", () => { Game.Audio.Stop(); })
-                .PositionTopLeft(90, 10, AnchorType.MAX, AnchorType.MIN)
-                .PositionBottomRight(10, 90, AnchorType.MAX, AnchorType.MIN)
+                .TL_DeprecateMe(90, 10, AnchorType.MAX, AnchorType.MIN)
+                .BR_DeprecateMe(10, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             Animation.Add(rotation = new AnimationCounter(31415926, true));
             Animation.Add(hideUI = new AnimationSlider(1f));
@@ -40,7 +40,7 @@ namespace Interlude.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Screens.Logo.Move(new Rect(-400, -400, 400, 400), GetBounds(), false);
+            Game.Screens.Logo.MoveRelative(new Rect(-400, -400, 400, 400), GetBounds());
             Game.Screens.BackgroundDim.Target = 1;
             Game.Screens.Toolbar.SetState(WidgetState.NORMAL);
             Game.Screens.Parallax.Target *= 4;
@@ -50,7 +50,7 @@ namespace Interlude.Interface.Screens
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200), false);
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth -400, -200, -ScreenUtils.ScreenWidth, 200));
             Game.Screens.BackgroundDim.Target = 0.3f;
             Game.Screens.SetParallaxOverride(null);
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
@@ -114,7 +114,7 @@ namespace Interlude.Interface.Screens
             base.Update(bounds);
             float f = Utils.GetBeat(1);
             float r = 400 + Utils.GetBeat(1) * 20;
-            Game.Screens.Logo.Move(new Rect(-r, -r, r, r), false);
+            Game.Screens.Logo.Move(new Rect(-r, -r, r, r));
 
             if (hideUI.Val < 0.99f)
             {

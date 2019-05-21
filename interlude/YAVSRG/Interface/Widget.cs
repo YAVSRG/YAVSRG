@@ -24,10 +24,10 @@ namespace Interlude.Interface
         public Widget()
         {
             Animation = new AnimationGroup(true);
-            Animation.Add(LeftAnchor = new AnimationAnchorPoint(0, AnchorType.MIN));
-            Animation.Add(TopAnchor = new AnimationAnchorPoint(0, AnchorType.MIN));
-            Animation.Add(RightAnchor = new AnimationAnchorPoint(0, AnchorType.MAX));
-            Animation.Add(BottomAnchor = new AnimationAnchorPoint(0, AnchorType.MAX));
+            Animation.Add(LeftAnchor = new AnimationAnchorPoint(0, 0));
+            Animation.Add(TopAnchor = new AnimationAnchorPoint(0, 0));
+            Animation.Add(RightAnchor = new AnimationAnchorPoint(0, 1));
+            Animation.Add(BottomAnchor = new AnimationAnchorPoint(0, 1));
             Children = new List<Widget>();
         }
 
@@ -63,22 +63,22 @@ namespace Interlude.Interface
 
         public float Left(Rect bounds)
         {
-            return LeftAnchor.RelativePos(bounds.Left, bounds.Right, false);
+            return LeftAnchor.GetPosition(bounds.Left, bounds.Right);
         }
 
         public float Top(Rect bounds)
         {
-            return TopAnchor.RelativePos(bounds.Top, bounds.Bottom, false);
+            return TopAnchor.GetPosition(bounds.Top, bounds.Bottom);
         }
 
         public float Right(Rect bounds)
         {
-            return RightAnchor.RelativePos(bounds.Left, bounds.Right, false);
+            return RightAnchor.GetPosition(bounds.Left, bounds.Right);
         }
 
         public float Bottom(Rect bounds)
         {
-            return BottomAnchor.RelativePos(bounds.Top, bounds.Bottom, false);
+            return BottomAnchor.GetPosition(bounds.Top, bounds.Bottom);
         }
 
         public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its parent
@@ -100,40 +100,76 @@ namespace Interlude.Interface
             }
         }
 
-        public Widget Position(Options.WidgetPosition pos)
+        public Widget Reposition(Options.WidgetPosition pos)
         {
-            return PositionTopLeft(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor).PositionBottomRight(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
+            return TL_DeprecateMe(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor).BR_DeprecateMe(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
         }
 
-        public Widget PositionTopLeft(float x, float y, AnchorType ax, AnchorType ay) //todo: deprecate these
+        public Widget Reposition(float Left, float LeftA, float Top, float TopA, float Right, float RightA, float Bottom, float BottomA)
         {
-            LeftAnchor.Move(x, ax);
-            TopAnchor.Move(y, ay);
-            return this; //allows for method chaining
-        }
-
-        public Widget PositionBottomRight(float x, float y, AnchorType ax, AnchorType ay)
-        {
-            RightAnchor.Move(x, ax);
-            BottomAnchor.Move(y, ay);
+            LeftAnchor.Reposition(Left, LeftA);
+            TopAnchor.Reposition(Top, TopA);
+            RightAnchor.Reposition(Right, RightA);
+            BottomAnchor.Reposition(Bottom, BottomA);
             return this;
         }
 
-        public Widget Move(Rect bounds, Rect parentBounds, bool instant)
+        public Widget Reposition(Rect Offset, Rect Anchor)
         {
-            LeftAnchor.Move(bounds.Left, instant, parentBounds.Left, parentBounds.Right);
-            TopAnchor.Move(bounds.Top, instant, parentBounds.Top, parentBounds.Bottom);
-            RightAnchor.Move(bounds.Right, instant, parentBounds.Left, parentBounds.Right);
-            BottomAnchor.Move(bounds.Bottom, instant, parentBounds.Top, parentBounds.Bottom);
+            LeftAnchor.Reposition(Offset.Left, Anchor.Left);
+            TopAnchor.Reposition(Offset.Top, Anchor.Top);
+            RightAnchor.Reposition(Offset.Right, Anchor.Right);
+            BottomAnchor.Reposition(Offset.Bottom, Anchor.Bottom);
             return this;
         }
 
-        public Widget Move(Rect bounds, bool instant)
+        public Widget Reposition(Rect NewPosition)
         {
-            LeftAnchor.Move(bounds.Left, instant);
-            TopAnchor.Move(bounds.Top, instant);
-            RightAnchor.Move(bounds.Right, instant);
-            BottomAnchor.Move(bounds.Bottom, instant);
+            LeftAnchor.Reposition(NewPosition.Left);
+            TopAnchor.Reposition(NewPosition.Top);
+            RightAnchor.Reposition(NewPosition.Right);
+            BottomAnchor.Reposition(NewPosition.Bottom);
+            return this;
+        }
+
+        public Widget RepositionRelative(Rect NewPosition, Rect ParentBounds)
+        {
+            LeftAnchor.RepositionRelative(NewPosition.Left, ParentBounds.Left, ParentBounds.Right);
+            TopAnchor.RepositionRelative(NewPosition.Top, ParentBounds.Top, ParentBounds.Bottom);
+            RightAnchor.RepositionRelative(NewPosition.Right, ParentBounds.Left, ParentBounds.Right);
+            BottomAnchor.RepositionRelative(NewPosition.Bottom, ParentBounds.Top, ParentBounds.Bottom);
+            return this;
+        }
+
+        public Widget TL_DeprecateMe(float x, float y, AnchorType ax, AnchorType ay) //todo: deprecate these
+        {
+            LeftAnchor.RepositionDeprecateMe(x, ax);
+            TopAnchor.RepositionDeprecateMe(y, ay);
+            return this;
+        }
+
+        public Widget BR_DeprecateMe(float x, float y, AnchorType ax, AnchorType ay)
+        {
+            RightAnchor.RepositionDeprecateMe(x, ax);
+            BottomAnchor.RepositionDeprecateMe(y, ay);
+            return this;
+        }
+
+        public Widget Move(Rect Bounds)
+        {
+            LeftAnchor.Move(Bounds.Left);
+            TopAnchor.Move(Bounds.Top);
+            RightAnchor.Move(Bounds.Right);
+            BottomAnchor.Move(Bounds.Bottom);
+            return this;
+        }
+
+        public Widget MoveRelative(Rect Bounds, Rect ParentBounds)
+        {
+            LeftAnchor.MoveRelative(Bounds.Left, ParentBounds.Left, ParentBounds.Right);
+            TopAnchor.MoveRelative(Bounds.Top, ParentBounds.Top, ParentBounds.Bottom);
+            RightAnchor.MoveRelative(Bounds.Right, ParentBounds.Left, ParentBounds.Right);
+            BottomAnchor.MoveRelative(Bounds.Bottom, ParentBounds.Top, ParentBounds.Bottom);
             return this;
         }
 

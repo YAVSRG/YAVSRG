@@ -72,9 +72,9 @@ namespace Interlude.Interface.Screens
             //build up UI
             scoreboard = new Scoreboard();
             scoreboard.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
-            AddChild(scoreboard.PositionTopLeft(50, 200, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 50, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new ImageBox("rank-" + ranks[tier]).PositionTopLeft(-100, 150, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(100, 350, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new ChartInfoPanel().PositionTopLeft(500, 350, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(50, 50, AnchorType.MAX, AnchorType.MAX));
+            AddChild(scoreboard.TL_DeprecateMe(50, 200, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(500, 50, AnchorType.MIN, AnchorType.MAX));
+            AddChild(new ImageBox("rank-" + ranks[tier]).TL_DeprecateMe(-100, 150, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(100, 350, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new ChartInfoPanel().TL_DeprecateMe(500, 350, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(50, 50, AnchorType.MAX, AnchorType.MAX));
         }
 
         public override void OnEnter(Screen prev)

@@ -20,25 +20,22 @@ namespace Interlude.Interface.Screens
                 play = new BannerButton("Play", () =>
                 {
                     Game.Screens.AddScreen(new ScreenLevelSelect());
-                })
-                .PositionTopLeft(-100, -200, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER)
+                }, 0.7f, 1)
+                .Reposition(-100, 0, -200, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, -100, 0.5f)
                 );
             AddChild(
                 options = new BannerButton("Options", () =>
                 {
                     Game.Screens.AddScreen(new ScreenOptions());
-                })
-                .PositionTopLeft(-100, -50, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER)
+                }, 0.7f, 1)
+                .Reposition(-100, 0, -50, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, 50, 0.5f)
                 );
             AddChild(
                 quit = new BannerButton("Quit", () =>
                 {
                     Game.Screens.PopScreen();
-                })
-                .PositionTopLeft(-100, 100, AnchorType.MIN, AnchorType.CENTER)
-                .PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER)
+                }, 0.7f, 1)
+                .Reposition(-100, 0, 100, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, 200, 0.5f)
                 );
             AddChild(new NewsBox());
             Animation.Add(splashAnim = new AnimationSlider(0));
@@ -55,12 +52,12 @@ namespace Interlude.Interface.Screens
             splashSub = s.Length > 1 ? s[1] : "";
             Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
             Game.Screens.BackgroundDim.Target = 1;
-            play.PositionBottomRight(-ScreenUtils.ScreenWidth, -100, AnchorType.CENTER, AnchorType.CENTER);
-            options.PositionBottomRight(-ScreenUtils.ScreenWidth, 50, AnchorType.CENTER, AnchorType.CENTER);
-            quit.PositionBottomRight(-ScreenUtils.ScreenWidth, 200, AnchorType.CENTER, AnchorType.CENTER);
+            play.RightAnchor.Reposition(-ScreenUtils.ScreenWidth);
+            options.RightAnchor.Reposition(-ScreenUtils.ScreenWidth);
+            quit.RightAnchor.Reposition(-ScreenUtils.ScreenWidth);
             OnResize();
             //this won't run in OnResize if we're transitioning to this screen
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400), false);
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
         }
 
         public override void OnResize()
@@ -70,17 +67,17 @@ namespace Interlude.Interface.Screens
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() =>
             {
-                play.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1200, false);
+                play.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1200);
             }));
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() =>
             {
-                options.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1130, false);
+                options.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1130);
             }));
             a.Add(new AnimationCounter(10, false));
             a.Add(new AnimationAction(() =>
             {
-                quit.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1060, false);
+                quit.RightAnchor.Move(-ScreenUtils.ScreenWidth + 1060);
             }));
             a.Add(new AnimationCounter(20, false));
             a.Add(new AnimationAction(() =>
@@ -89,7 +86,7 @@ namespace Interlude.Interface.Screens
             }));
             Animation.Add(a);
             if (Game.Screens.Current is ScreenMenu) //prevents logo moving mid transition
-            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400), false);
+            Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
         }
 
         public override void OnExit(Screen next)
@@ -97,7 +94,7 @@ namespace Interlude.Interface.Screens
             base.OnExit(next);
             if (!(next is ScreenLoading))
             {
-                Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth - 400, -200, -ScreenUtils.ScreenWidth, 200), false);
+                Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth - 400, -200, -ScreenUtils.ScreenWidth, 200));
             }
             Game.Screens.BackgroundDim.Target = 0.3f;
             splashAnim.Target = 0;

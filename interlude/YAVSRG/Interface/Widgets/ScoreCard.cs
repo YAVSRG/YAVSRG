@@ -11,12 +11,12 @@ namespace Interlude.Interface.Widgets
 
         public ScoreCard(ScoreInfoProvider data)
         {
-            PositionBottomRight(0, 100, AnchorType.MAX, AnchorType.MIN);
+            BR_DeprecateMe(0, 100, AnchorType.MAX, AnchorType.MIN);
             Data = data;
-            AddChild(new TextBox(Data.Player, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black).PositionBottomRight(0.5f, 0.6f, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(Data.Mods, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black).PositionTopLeft(0f, 0.6f, AnchorType.LERP,AnchorType.LERP).PositionBottomRight(0.6f, 1f, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(Data.Accuracy, AnchorType.MAX, 0, true, Game.Options.Theme.MenuFont, Color.Black).PositionTopLeft(0.5f, 0f, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(1f, 0.6f, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(Utils.RoundNumber(Data.PhysicalPerformance)+" // "+Data.Time.ToShortDateString(), AnchorType.MAX, 0, false, Game.Options.Theme.MenuFont, Color.Black).PositionTopLeft(0.6f, 0.6f, AnchorType.LERP, AnchorType.LERP).PositionBottomRight(1f, 1f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Data.Player, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black).BR_DeprecateMe(0.5f, 0.6f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Data.Mods, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black).TL_DeprecateMe(0f, 0.6f, AnchorType.LERP,AnchorType.LERP).BR_DeprecateMe(0.6f, 1f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Data.Accuracy, AnchorType.MAX, 0, true, Game.Options.Theme.MenuFont, Color.Black).TL_DeprecateMe(0.5f, 0f, AnchorType.LERP, AnchorType.LERP).BR_DeprecateMe(1f, 0.6f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Utils.RoundNumber(Data.PhysicalPerformance)+" // "+Data.Time.ToShortDateString(), AnchorType.MAX, 0, false, Game.Options.Theme.MenuFont, Color.Black).TL_DeprecateMe(0.6f, 0.6f, AnchorType.LERP, AnchorType.LERP).BR_DeprecateMe(1f, 1f, AnchorType.LERP, AnchorType.LERP));
         }
 
         public override void Update(Rect bounds)

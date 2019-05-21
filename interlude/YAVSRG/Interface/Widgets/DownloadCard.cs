@@ -19,7 +19,7 @@ namespace Interlude.Interface.Widgets
             {
                 AddChild(new SimpleButton("Download",
                     () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack(data.attributes.download, data.attributes.name, ".zip"), (b) => { }, "Downloading pack: " + data.attributes.name, true), () => false, 20f)
-                    .PositionTopLeft(100, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 0, AnchorType.MAX, AnchorType.MAX));
+                    .TL_DeprecateMe(100, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(10, 0, AnchorType.MAX, AnchorType.MAX));
             }
         }
 
@@ -30,7 +30,7 @@ namespace Interlude.Interface.Widgets
             size = "";
             AddChild(new SimpleButton("Download",
                 () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack("https://osu.ppy.sh/beatmapsets/"+data.id.ToString()+"/download?noVideo=1", data.id.ToString(), ".osz"), (b) => { }, "Downloading beatmap: " + data.title, true), () => false, 20f)
-                .PositionTopLeft(100, 0, AnchorType.MAX, AnchorType.MIN).PositionBottomRight(10, 0, AnchorType.MAX, AnchorType.MAX));
+                .TL_DeprecateMe(100, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(10, 0, AnchorType.MAX, AnchorType.MAX));
         }
 
         public override void Draw(Rect bounds)

@@ -10,9 +10,9 @@ namespace Interlude.Interface.Screens
     {
         public ScreenEditor()
         {
-            AddChild(new Gameplay.NoteRenderer(Game.Gameplay.ModifiedChart, new Gameplay.Mods.Visual.DownScroll(ScreenUtils.Bounds,Game.Gameplay.ModifiedChart.Keys)).PositionTopLeft(0, 0, AnchorType.MIN, AnchorType.MIN).PositionBottomRight(500, 0, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new Widgets.Editor.Timeline().PositionTopLeft(0, 50, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(500, 0, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new Widgets.SpriteButton("buttonclose", "Exit", () => { Game.Screens.PopScreen(); }).PositionTopLeft(500, 0, AnchorType.MAX, AnchorType.MIN));
+            AddChild(new Gameplay.NoteRenderer(Game.Gameplay.ModifiedChart, new Gameplay.Mods.Visual.DownScroll(ScreenUtils.Bounds,Game.Gameplay.ModifiedChart.Keys)).TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(500, 0, AnchorType.MAX, AnchorType.MAX));
+            AddChild(new Widgets.Editor.Timeline().TL_DeprecateMe(0, 50, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(500, 0, AnchorType.MAX, AnchorType.MAX));
+            AddChild(new Widgets.SpriteButton("buttonclose", "Exit", () => { Game.Screens.PopScreen(); }).TL_DeprecateMe(500, 0, AnchorType.MAX, AnchorType.MIN));
         }
 
         public override void OnEnter(Screen prev)

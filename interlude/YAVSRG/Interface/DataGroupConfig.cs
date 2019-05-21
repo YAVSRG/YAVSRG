@@ -14,10 +14,10 @@ namespace Interlude.Interface
         {
             public DeletableSetting(Widget w, string name, DataGroup data)
             {
-                AddChild(w.PositionBottomRight(50, 0, AnchorType.MAX, AnchorType.MAX));
-                AddChild(new SpriteButton("buttonclose", "Delete "+name, () => { SetState(WidgetState.DISABLED); data.Remove(name); })
-                    .PositionTopLeft(50,0, AnchorType.MAX,AnchorType.MIN));
-                PositionBottomRight(0, 50, AnchorType.MAX, AnchorType.MIN);
+                AddChild(w.BR_DeprecateMe(50, 0, AnchorType.MAX, AnchorType.MAX));
+                AddChild(new SpriteButton("buttonclose", "Delete " + name, () => { SetState(WidgetState.DISABLED); data.Remove(name); })
+                    .Reposition(-50, 1, 0, 0, 0, 1, 0, 1));
+                Reposition(0, 0, 0, 0, 0, 1, 50, 0);
             }
         }
 
