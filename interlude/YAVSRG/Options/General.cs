@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,5 +38,8 @@ namespace Interlude.Options
         public string CurrentProfile = "Default.json";
         public string WorkingDirectory = "";
         public Keybinds Binds = new Keybinds();
+
+        [JsonIgnore]
+        public bool AudioFix = false;
     }
 }

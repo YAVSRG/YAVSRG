@@ -15,13 +15,13 @@ namespace Interlude.Interface.Animations
         {
             switch (Anchor)
             {
-                case (AnchorType.MAX):
+                case AnchorType.MAX:
                     return max - Position;
-                case (AnchorType.MIN):
+                case AnchorType.MIN:
                     return min + Position;
-                case (AnchorType.LERP):
+                case AnchorType.LERP:
                     return min + (max - min) * Position;
-                case (AnchorType.CENTER):
+                case AnchorType.CENTER:
                 default:
                     return (max + min) * 0.5f + Position;
             }
@@ -32,13 +32,13 @@ namespace Interlude.Interface.Animations
         {
             switch (Anchor)
             {
-                case (AnchorType.MAX):
+                case AnchorType.MAX:
                     return (max - min) - target;
-                case (AnchorType.MIN):
+                case AnchorType.MIN:
                     return target;
-                case (AnchorType.LERP):
+                case AnchorType.LERP:
                     return target / (max - min);
-                case (AnchorType.CENTER):
+                case AnchorType.CENTER:
                 default:
                     return target - (max - min) * 0.5f;
             }

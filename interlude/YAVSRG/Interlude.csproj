@@ -127,7 +127,7 @@
     <Compile Include="Gameplay\TopScore.cs" />
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
-    <Compile Include="Interface\Widgets\AccuracySystemSelector.cs" />
+    <Compile Include="Interface\Widgets\ObjectSelector.cs" />
     <Compile Include="Interface\Bindable.cs" />
     <Compile Include="Interface\DataGroupConfig.cs" />
     <Compile Include="Interface\Dialogs\ConfigDialog.cs" />

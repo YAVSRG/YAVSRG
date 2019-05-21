@@ -68,7 +68,7 @@ namespace Interlude.Interface
             }
             catch
             {
-                return default;
+                return default(T);
             }
         }
     }

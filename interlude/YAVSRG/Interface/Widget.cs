@@ -8,15 +8,18 @@ using Interlude.Interface.Animations;
 
 namespace Interlude.Interface
 {
+    //Represents an element of the interface. It is an object with rectangular bounds that are anchored relative to a parent (ultimately the screen itself)
+    //Can contain other widgets as children which are anchored relative to themselves.
     public class Widget
     {
+        //todo: replace this with a better anchor system i came up with
         public AnimationAnchorPoint LeftAnchor, TopAnchor, RightAnchor, BottomAnchor;
         public AnimationGroup Animation; //animation manager for this widget
 
         protected Widget Parent;
-        protected List<Widget> Children; //children of the widget
+        protected List<Widget> Children;
 
-        protected WidgetState _State = WidgetState.NORMAL; //0 is hidden, 2 is focussed
+        protected WidgetState _State = WidgetState.NORMAL;
 
         public Widget()
         {
@@ -38,6 +41,7 @@ namespace Interlude.Interface
             Parent = null;
         }
 
+        //Adds a new widget embedded inside this one
         public virtual void AddChild(Widget child)
         {
             lock (Children)
@@ -47,6 +51,7 @@ namespace Interlude.Interface
             child.AddToContainer(this);
         }
 
+        //Removes a widget embedded inside this one. Rarely used as it is easier to make widgets invisible until the parent is destroyed shortly after
         public virtual void RemoveChild(Widget child)
         {
             lock (Children)
@@ -76,7 +81,7 @@ namespace Interlude.Interface
             return BottomAnchor.RelativePos(bounds.Top, bounds.Bottom, false);
         }
 
-        public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its *container*
+        public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its parent
         {
             return new Rect(Left(containerBounds), Top(containerBounds), Right(containerBounds), Bottom(containerBounds));
         }
@@ -144,7 +149,7 @@ namespace Interlude.Interface
 
         public virtual void ToggleState()
         {
-            _State = _State > 0 ? WidgetState.DISABLED : WidgetState.NORMAL;
+            SetState(State != WidgetState.DISABLED ? WidgetState.DISABLED : WidgetState.NORMAL);
         }
 
         public WidgetState State
@@ -155,9 +160,10 @@ namespace Interlude.Interface
             }
         }
 
+        //BOUNDS HERE ARE THIS WIDGET'S BOUNDS, NOT THE PARENT BOUNDS
         protected void DrawWidgets(Rect bounds)
         {
-            lock (Children) //anti crash measure for cross-thread widget operations
+            lock (Children) //protection for cross-thread widget operations
             {
                 foreach (Widget w in Children)
                 {
@@ -174,7 +180,7 @@ namespace Interlude.Interface
             bounds = GetBounds(bounds);
             int c = Children.Count;
             Widget w;
-            for (int i = c - 1; i >= 0; i--)
+            for (int i = c - 1; i >= 0; i--) //updates are done from last element backwards, as these appear visually on top and should grab input first
             {
                 w = Children[i];
                 if (w._State > 0)

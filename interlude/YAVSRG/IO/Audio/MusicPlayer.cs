@@ -110,7 +110,7 @@ namespace Interlude.IO.Audio
             //some files like Go for it (golgo) and 1hr54 js challenge have notes continuing after audio ends so this is necessary
         {
             if (nowplaying == null) return 0;
-            if (LeadingIn) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - AudioOffset;
+            if (LeadingIn || Game.Options.General.AudioFix) return (long)(timer.ElapsedMilliseconds * Rate + startTime) - AudioOffset;
             return Bass.ChannelBytes2Seconds(nowplaying,Bass.ChannelGetPosition(nowplaying))*1000 - AudioOffset;
         }
 

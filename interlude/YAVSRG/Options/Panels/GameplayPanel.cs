@@ -65,7 +65,7 @@ namespace Interlude.Options.Panels
                 .PositionBottomRight(-50, 525, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife", "SC+" }, (int)Game.Options.Profile.ScoreSystems[0].Type, v => { Game.Options.Profile.ScoreSystems[0] = new AccuracySystemSelector.AccuracySystem((ScoreType)v, Game.Options.Profile.ScoreSystems[0].Data); Game.Screens.AddDialog(new ConfigDialog((s) => { }, "Configure score system", Game.Options.Profile.ScoreSystems[0].Data, Game.Options.Profile.ScoreSystems[0].Type == ScoreType.Osu ? typeof(Prelude.Gameplay.Watchers.Scoring.OsuMania) : typeof(Prelude.Gameplay.Watchers.Scoring.DancePoints))); }),
+                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife", "SC+" }, (int)Game.Options.Profile.ScoreSystems[0].Type, v => {  Game.Options.Profile.ScoreSystems[0].Type = (ScoreType)v; Game.Screens.AddDialog(new ConfigDialog((s) => { }, "Configure score system", Game.Options.Profile.ScoreSystems[0].Data, Game.Options.Profile.ScoreSystems[0].Type == ScoreType.Osu ? typeof(Prelude.Gameplay.Watchers.Scoring.OsuMania) : typeof(Prelude.Gameplay.Watchers.Scoring.DancePoints))); }),
                 "This is the accuracy measurement system to use when playing.\nOsu = osu!mania's accuracy system\nWife = Etterna's accuracy system", ib)
                 .PositionTopLeft(50, 475, AnchorType.CENTER, AnchorType.MIN)
                 .PositionBottomRight(200, 525, AnchorType.CENTER, AnchorType.MIN));

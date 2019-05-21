@@ -37,7 +37,7 @@ namespace Interlude.Graphics
             }
         }
 
-        public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default)
+        public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default(Color))
         {
             if (dropShadow)
             {

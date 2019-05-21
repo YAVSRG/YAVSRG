@@ -13,23 +13,25 @@ namespace Interlude.Interface
         AnimationFade fade1; //prev screen fade out 
         AnimationFade fade2; //next screen fade in
 
-        AnimationSeries animation = new AnimationSeries(true);
-        AnimationGroup animation2 = new AnimationGroup(true);
+        AnimationSlider bgFade; //fade between previous background and current
 
-        DrawableFBO FBO;
+        AnimationSeries animation = new AnimationSeries(true); //coordinates fading between screens
+        AnimationGroup animation2 = new AnimationGroup(true); //coordinates all other animations (they run constantly)
 
-        AnimationSlider bgFade;
+        DrawableFBO FBO; //fbo stores texture for fade between background images (it is reused many times per frame so this saves on aspect ratio calculations etc)
 
-        List<Screen> stack = new List<Screen>() { };
-        List<Dialog> dialogs = new List<Dialog>();
-        Screen Previous = null;
-        public Screen Current = null;
-        public bool Loading = true;
+        protected List<Screen> stack = new List<Screen>() { }; //stack of screens - clicking back pops one off and goes to the previous screen
+        protected List<Dialog> dialogs = new List<Dialog>(); //stack of dialogs - these prompt the user for something and block interaction with the screen
+        protected Screen Previous = null;
+        protected Screen Current = null;
+        //todo: fix this being public and controlled by ScreenLoading
+        public bool Loading = true; //disables some aspects of interface while showing enter/exit animation
 
         public Sprite Background;
-        public Sprite Oldbackground; //unlikely to ever be used / would be for fading because it needs to calculate two separate aspect ratio adjustments
+        public Sprite Oldbackground;
         public AnimationColorFade BackgroundDim = new AnimationColorFade(Color.Black, Color.White);
 
+        //todo: move to some kind of theme class
         public AnimationColorMixer BaseColor;
         public AnimationColorMixer DarkColor;
         public AnimationColorMixer HighlightColor;

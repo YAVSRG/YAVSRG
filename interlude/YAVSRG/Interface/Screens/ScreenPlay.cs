@@ -102,7 +102,7 @@ namespace Interlude.Interface.Screens
         {
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 0.3f;
-            IO.Discord.SetPresence("Selecting another chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
+            Discord.SetPresence("Selecting another chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
             Game.Screens.Toolbar.SetCursorState(true);
             base.OnExit(next);

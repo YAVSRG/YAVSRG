@@ -56,7 +56,7 @@ namespace Interlude.Options
         public string ChartSortMode = "Title";
         public string ChartGroupMode = "Pack";
         public string ChartColorMode = "Nothing";
-        public List<Interface.Widgets.AccuracySystemSelector.AccuracySystem> ScoreSystems = new List<Interface.Widgets.AccuracySystemSelector.AccuracySystem>();
+        public List<ScoreSystemData> ScoreSystems = new List<ScoreSystemData>();
         public int SelectedScoreSystem;
         //todo: life systems
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
@@ -90,23 +90,10 @@ namespace Interlude.Options
             }
             if (ScoreSystems.Count == 0)
             {
-                ScoreSystems.Add(new Interface.Widgets.AccuracySystemSelector.AccuracySystem(ScoreType.Default, new DataGroup()));
+                ScoreSystems.Add(new ScoreSystemData(ScoreType.Default, new DataGroup()));
             }
             var ss = ScoreSystems[Index];
-            switch (ss.Type)
-            {
-                case ScoreType.DP:
-                    return new DancePoints(ss.Data);
-                case ScoreType.Osu:
-                    return new OsuMania(ss.Data);
-                case ScoreType.Wife:
-                    return new Wife(ss.Data);
-                case ScoreType.SCPlus:
-                    return new StandardScoringPlus(ss.Data);
-                case ScoreType.Default:
-                default:
-                    return new StandardScoring(ss.Data);
-            }
+            return ss.Instantiate();
         }
     }
 }
