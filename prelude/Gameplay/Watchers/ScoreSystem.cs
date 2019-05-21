@@ -1,4 +1,5 @@
 ﻿using System;
+using Prelude.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,35 @@ namespace Prelude.Gameplay.Watchers
     //todo: option between points out of 100% rising, max accuracy possible and current accuracy for time series
     public class ScoreSystem : IGameplayWatcher
     {
+        public class ScoreSystemData
+        {
+            public ScoreType Type;
+            public DataGroup Data;
+
+            public ScoreSystemData(ScoreType type, DataGroup data)
+            {
+                Data = data;
+                Type = type;
+            }
+
+            public ScoreSystem Instantiate()
+            {
+                switch (Type)
+                {
+                    case ScoreType.DP:
+                        return new DancePoints(Data);
+                    case ScoreType.Osu:
+                        return new OsuMania(Data);
+                    case ScoreType.Wife:
+                        return new Wife(Data);
+                    case ScoreType.SCPlus:
+                        return new StandardScoringPlus(Data);
+                    case ScoreType.Default:
+                    default:
+                        return new StandardScoring(Data);
+                }
+            }
+        }
         //todo: remove and replace with dynamic score system list
         public enum ScoreType
         {
