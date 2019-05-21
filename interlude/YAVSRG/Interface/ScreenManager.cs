@@ -23,7 +23,8 @@ namespace Interlude.Interface
         protected List<Screen> stack = new List<Screen>() { }; //stack of screens - clicking back pops one off and goes to the previous screen
         protected List<Dialog> dialogs = new List<Dialog>(); //stack of dialogs - these prompt the user for something and block interaction with the screen
         protected Screen Previous = null;
-        protected Screen Current = null;
+        //todo: make this protected and remove references
+        public Screen Current = null;
         //todo: fix this being public and controlled by ScreenLoading
         public bool Loading = true; //disables some aspects of interface while showing enter/exit animation
 
