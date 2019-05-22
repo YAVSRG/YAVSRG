@@ -214,7 +214,6 @@
     <Compile Include="Interface\Widgets\ImageBox.cs" />
     <Compile Include="Interface\Widgets\NewsBox.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ProfileInfoPanel.cs" />
-    <Compile Include="Interface\Widgets\ScrollContainer.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ComboDisplay.cs" />
     <Compile Include="Interface\Widgets\Controls\FramedButton.cs" />
     <Compile Include="Interface\Widgets\Gameplay\GameplayWidget.cs" />

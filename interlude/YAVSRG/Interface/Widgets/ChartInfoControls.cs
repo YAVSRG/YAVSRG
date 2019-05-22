@@ -6,7 +6,7 @@ namespace Interlude.Interface.Widgets
     {
         Scoreboard sb;
         ChartInfoPanel ip;
-        ScrollContainer scroll;
+        FlowContainer scroll;
         object lastChart = null;
 
         public ChartInfoControls() : base()
@@ -14,12 +14,11 @@ namespace Interlude.Interface.Widgets
             sb = new Scoreboard();
             ip = new ChartInfoPanel();
 
-            //todo: scrap scroll container (and maybe make flow container support horizontal flow)
-            scroll = new ScrollContainer(10, 10, true, 1, false);
+            scroll = new FlowContainer() { Frame = 0, RowSpacing = 10f, BackColor = () => System.Drawing.Color.Transparent };
 
-            AddChild(scroll.TL_DeprecateMe(50, 200, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(ScreenUtils.ScreenWidth * 2 - 750, 150, AnchorType.MIN, AnchorType.MAX));
-            scroll.AddChild(sb.BR_DeprecateMe(-15, 20, AnchorType.CENTER, AnchorType.MAX));
-            scroll.AddChild(ip.BR_DeprecateMe(-15, 20, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(scroll.Reposition(10, 0, 160, 0, ScreenUtils.ScreenWidth * 2 - 750, 0, -160, 1));
+            scroll.AddChild(sb.Reposition(0, 0, 0, 0, -15, 0.5f, 0, 1));
+            scroll.AddChild(ip.Reposition(0, 0, 0, 0, -15, 0.5f, 0, 1));
             ChangeChart(true);
             
             ModMenu modMenu = new ModMenu();
@@ -36,7 +35,7 @@ namespace Interlude.Interface.Widgets
         public override void OnResize()
         {
             base.OnResize();
-            scroll.Reposition(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150));
+            scroll.Reposition(new Rect(10, 160, ScreenUtils.ScreenWidth * 2 - 750, -160));
         }
 
         public void ChangeChart(bool force)
@@ -46,7 +45,7 @@ namespace Interlude.Interface.Widgets
                 sb.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
                 lastChart = Game.Gameplay.CurrentChart;
             }
-            scroll.Reposition(new Rect(50, 200, ScreenUtils.ScreenWidth * 2 - 750, 150)); //just to make sure
+            scroll.Reposition(new Rect(10, 160, ScreenUtils.ScreenWidth * 2 - 750, -160)); //just to make sure
             ip.ChangeChart(); //ip needs to change length/bpm. difficulty is already recalculated
         }
 
@@ -55,7 +54,7 @@ namespace Interlude.Interface.Widgets
             bounds = GetBounds(bounds);
             //slice
             ScreenUtils.DrawParallelogramWithBG(bounds.SliceTop(150), 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            ScreenUtils.DrawParallelogramWithBG(bounds.SliceBottom(100), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
+            ScreenUtils.DrawParallelogramWithBG(bounds.SliceBottom(150), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, bounds.SliceTop(100), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 50, bounds.Top+150), Game.Options.Theme.MenuFont, true);
             

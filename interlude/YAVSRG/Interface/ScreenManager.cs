@@ -129,8 +129,8 @@ namespace Interlude.Interface
 
         void DrawScaledBG(Sprite bg, int alpha)
         {
-            //use math.min for "fit inside screen with letterbox"
-            //math.max is "scale up until the screen is filled which cuts off the sides/top if aspect ratio is different"
+            //use math.min for "fit inside screen with letterboxing"
+            //math.max is "scale up until the screen is filled" which cuts off the sides/top if aspect ratio is different
             float scale = Math.Max((float)ScreenWidth * 2 / bg.Width, (float)ScreenHeight * 2 / bg.Height);
             Color c = Color.FromArgb(alpha, Color.White);
             SpriteBatch.DrawTilingTexture(bg, Bounds, bg.Width * scale, bg.Height * scale, 0.5f, 0.5f, c, c, c, c);
@@ -180,6 +180,7 @@ namespace Interlude.Interface
 
         public void DrawChartBackground(Rect bounds, Color c, float parallaxMult = 1f)
         {
+            //todo: find the bug and fix it
             //this draws the background of the chart on the screen
             //a section of the texture is selected such all parts of the screen line up with the overall background image being fitted to the whole screen
 

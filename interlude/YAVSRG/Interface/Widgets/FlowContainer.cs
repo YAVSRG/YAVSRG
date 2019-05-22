@@ -7,7 +7,7 @@ namespace Interlude.Interface.Widgets
 {
     public class FlowContainer : FrameContainer
     {
-        public float MarginX = 10, MarginY = 10, RowSpacing = 5;
+        public float MarginX = 10, MarginY = 10, RowSpacing = 5, ColumnSpacing = 10;
         public float ScrollPosition;
         public int VisibleIndexTop, VisibleIndexBottom;
         protected float ContentSize;
@@ -79,6 +79,7 @@ namespace Interlude.Interface.Widgets
                         }
                         ContentSize = y + widgetBounds.Height;
                         w.MoveRelative(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds);
+                        x += ColumnSpacing;
                         if (ContentSize > bounds.Top && y < bounds.Bottom)
                         {
                             if (VisibleIndexTop < 0) VisibleIndexTop = i;
@@ -88,7 +89,7 @@ namespace Interlude.Interface.Widgets
                     }
                 }
             }
-            ContentSize += ScrollPosition + 4 * MarginY + RowSpacing;
+            ContentSize += ScrollPosition + 2 * MarginY;
         }
 
         public override void AddChild(Widget child)

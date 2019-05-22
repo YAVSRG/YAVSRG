@@ -14,13 +14,12 @@ namespace Interlude.Interface.Screens
         public ScreenLevelSelect()
         {
             selector = new LevelSelector(this);
-            AddChild(selector.TL_DeprecateMe(0, 120, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(0, 0, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new ChartSortingControls().TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(0, 120, AnchorType.MAX, AnchorType.MIN));
+            AddChild(selector.Reposition(0, 0.5f, 120, 0, 0, 1, 0, 1));
+            AddChild(new ChartSortingControls().Reposition(0, 0, 0, 0, 0, 1, 120, 0));
             diffDisplay = new ChartInfoControls();
-            AddChild(diffDisplay.TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(750, 0, AnchorType.MAX, AnchorType.MAX));
+            AddChild(diffDisplay.Reposition(0, 0, 0, 0, -750, 1, 0, 1));
 
-            TL_DeprecateMe(-ScreenWidth, 0, AnchorType.MIN, AnchorType.MIN);
-            BR_DeprecateMe(-ScreenWidth, 0, AnchorType.MAX, AnchorType.MAX);
+            Reposition(-ScreenWidth, 0, 0, 0, ScreenWidth, 1, 0, 1);
             Animation.Add(new Animation()); //dummy animation ensures "expansion" effect happens during screen transitions
         }
 
@@ -51,7 +50,7 @@ namespace Interlude.Interface.Screens
             Input.ChangeIM(null);
             Game.Gameplay.OnUpdateChart -= OnUpdateChart;
             ChartLoader.OnRefreshGroups -= OnUpdateGroups;
-            Move(new Rect(-ScreenWidth, 0, -ScreenWidth, 0));
+            Move(new Rect(-ScreenWidth, 0, ScreenWidth, 0));
         }
 
         public override void Update(Rect bounds)
