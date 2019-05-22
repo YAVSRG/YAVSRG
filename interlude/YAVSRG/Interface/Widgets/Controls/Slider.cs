@@ -30,7 +30,7 @@ namespace Interlude.Interface.Widgets
             SpriteBatch.DrawRect(bounds.ExpandY(-20), System.Drawing.Color.Gray);
             float p = bounds.Left + (get() - min) / (max - min) * bounds.Width;
             SpriteBatch.DrawRect(new Rect(p - 5, bounds.Top, p + 5, bounds.Bottom), System.Drawing.Color.White);
-            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, bounds.CenterX, bounds.Top, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, bounds.CenterX, bounds.Top-10, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(Rect bounds)

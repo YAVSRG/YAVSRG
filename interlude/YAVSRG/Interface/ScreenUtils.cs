@@ -72,7 +72,7 @@ namespace Interlude.Interface
             DrawFrame(bounds, 30f, Color.White);
         }
 
-        public static void DrawFrame(Rect bounds, float ignore, Color color, byte components = 255, float shadow = 10f, float thickness = 3f)
+        public static void DrawFrame(Rect bounds, float DEPRECATED, Color color, byte components = 255, float shadow = 10f, float thickness = 3f)
         {
             Color back = Color.FromArgb(color.A, Color.Black);
             Color transparent = Color.FromArgb(0, 0, 0, 0);

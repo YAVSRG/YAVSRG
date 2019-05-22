@@ -70,13 +70,10 @@ namespace Interlude.Interface.Screens
             {
                 Game.Tasks.AddTask(ChartLoader.Recache(), ChartLoader.RefreshCallback, "Recaching charts", true);
             }
+            //todo: add this to play button behaviour
             else if (Input.KeyTap(Game.Options.General.Binds.Select))
             {
                 Game.Gameplay.PlaySelectedChart();
-            }
-            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.E))
-            {
-                Game.Screens.AddScreen(new ScreenEditor());
             }
         }
 

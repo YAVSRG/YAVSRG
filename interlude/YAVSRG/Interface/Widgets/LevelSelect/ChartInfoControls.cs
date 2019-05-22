@@ -9,6 +9,24 @@ namespace Interlude.Interface.Widgets
         FlowContainer scroll;
         object lastChart = null;
 
+        class LevelSelectButtons : FrameContainer
+        {
+            public LevelSelectButtons(ModMenu modMenu)
+            {
+                HorizontalFade = 50; Frame = 170;
+                AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, 40)
+                    .Reposition(0, 0.02f, 10, 0, 0, 0.18f, -10, 1));
+                AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, 40)
+                    .Reposition(0, 0.22f, 10, 0, 0, 0.38f, -10, 1));
+                AddChild(new SimpleButton("Editor", () => { Game.Screens.AddScreen(new Screens.ScreenEditor()); }, () => false, 40)
+                    .Reposition(0, 0.42f, 10, 0, 0, 0.58f, -10, 1));
+                AddChild(new SimpleButton("Mods", () => { modMenu.Toggle(); }, () => false, 40)
+                    .Reposition(0, 0.62f, 10, 0, 0, 0.78f, -10, 1));
+                AddChild(new SimpleButton("Play", () => { Game.Gameplay.PlaySelectedChart(); }, () => false, 40)
+                    .Reposition(0, 0.82f, 10, 0, 0, 0.98f, -10, 1));
+            }
+        }
+
         public ChartInfoControls() : base()
         {
             sb = new Scoreboard();
@@ -16,26 +34,21 @@ namespace Interlude.Interface.Widgets
 
             scroll = new FlowContainer() { Frame = 0, RowSpacing = 10f, BackColor = () => System.Drawing.Color.Transparent };
 
-            AddChild(scroll.Reposition(10, 0, 160, 0, ScreenUtils.ScreenWidth * 2 - 750, 0, -160, 1));
+            AddChild(scroll.Reposition(10, 0, 260, 0, ScreenUtils.ScreenWidth * 2 - 750, 0, -10, 1));
             scroll.AddChild(sb.Reposition(0, 0, 0, 0, -15, 0.5f, 0, 1));
             scroll.AddChild(ip.Reposition(0, 0, 0, 0, -15, 0.5f, 0, 1));
             ChangeChart(true);
-            
-            ModMenu modMenu = new ModMenu();
-            AddChild(modMenu.TL_DeprecateMe(0, 150, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(0, 100, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(new FramedButton("Play", () => { Game.Gameplay.PlaySelectedChart(); })
-                .TL_DeprecateMe(0.55f, 75, AnchorType.LERP, AnchorType.MAX)
-                .BR_DeprecateMe(0.9f, 25, AnchorType.LERP, AnchorType.MAX));
-            AddChild(new FramedButton("Mods", () => { modMenu.Toggle(); })
-                .TL_DeprecateMe(0.1f, 75, AnchorType.LERP, AnchorType.MAX)
-                .BR_DeprecateMe(0.45f, 25, AnchorType.LERP, AnchorType.MAX));
+            ModMenu modMenu = new ModMenu();
+            AddChild(modMenu.Reposition(0, 0, 150, 0, 0, 1, -150, 1));
+
+            AddChild(new LevelSelectButtons(modMenu).Reposition(0, 0, 150, 0, 0, 1, 250, 0));
         }
 
         public override void OnResize()
         {
             base.OnResize();
-            scroll.Reposition(new Rect(10, 160, ScreenUtils.ScreenWidth * 2 - 750, -160));
+            scroll.Reposition(new Rect(10, 260, ScreenUtils.ScreenWidth * 2 - 750, -10));
         }
 
         public void ChangeChart(bool force)
@@ -45,16 +58,14 @@ namespace Interlude.Interface.Widgets
                 sb.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
                 lastChart = Game.Gameplay.CurrentChart;
             }
-            scroll.Reposition(new Rect(10, 160, ScreenUtils.ScreenWidth * 2 - 750, -160)); //just to make sure
+            scroll.Reposition(new Rect(10, 260, ScreenUtils.ScreenWidth * 2 - 750, -10)); //just to make sure
             ip.ChangeChart(); //ip needs to change length/bpm. difficulty is already recalculated
         }
 
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            //slice
             ScreenUtils.DrawParallelogramWithBG(bounds.SliceTop(150), 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
-            ScreenUtils.DrawParallelogramWithBG(bounds.SliceBottom(150), -0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, bounds.SliceTop(100), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 50, bounds.Top+150), Game.Options.Theme.MenuFont, true);
             
