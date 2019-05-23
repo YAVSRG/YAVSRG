@@ -13,9 +13,9 @@ namespace Interlude.Interface
 {
     public class Toolbar : Widget
     {
-        AnimationSlider _Height, _NotifFade;
+        AnimationSlider _Height, _NotifFade, _TooltipFade;
         AnimationSeries _NotifAnimation;
-        string Notification = "";
+        string Notification, Tooltip = "";
         //AnimationColorMixer NotificationColor;
         public ChatBox Chat;
         WidgetState CursorMode = WidgetState.NORMAL;
@@ -44,7 +44,7 @@ namespace Interlude.Interface
             AddChild(Chat = new ChatBox());
             AddChild(new MusicControls());
             Animation.Add(_Height = new AnimationSlider(-5));
-            Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
+            Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0)); Animation.Add(_TooltipFade = new AnimationSlider(0));
             Logging.OnLog += (s, d, t) => { if (t != Logging.LogType.Debug) AddNotification(s, Color.White); };
         }
 
@@ -55,6 +55,12 @@ namespace Interlude.Interface
             _NotifFade.Target = 1;
             _NotifAnimation.Add(new AnimationCounter(240, false));
             _NotifAnimation.Add(new AnimationAction(() => { _NotifFade.Target = 0; }));
+        }
+
+        public void SetTooltip(string text)
+        {
+            Tooltip = text;
+            _TooltipFade.Val = 1;
         }
 
         private void Back()
@@ -150,7 +156,12 @@ namespace Interlude.Interface
                 }
             }
 
-            if (CursorMode > WidgetState.DISABLED) SpriteBatch.Draw("cursor", new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor);
+            if (CursorMode > WidgetState.DISABLED)
+            {
+                SpriteBatch.Draw("cursor", new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor);
+                //var b = new Rect(Input.MouseX - 200, Input.MouseY + 50, Input.MouseX + 200, Input.MouseY + 500);
+                //SpriteBatch.DrawRect(b.SliceTop(SpriteBatch.Font2.DrawParagraph(Tooltip, 20f, b, Game.Options.Theme.MenuFont)), Color.FromArgb(80, 0, 0, 0));
+            }
         }
 
         public override void Update(Rect bounds)

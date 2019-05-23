@@ -136,7 +136,7 @@ namespace Interlude.Graphics
             }
         }
 
-        public void DrawParagraph(string text, float scale, Rect bounds, Color c)
+        public float DrawParagraph(string text, float scale, Rect bounds, Color c)
         {
             string[] lines = text.Split('\n');
             float x = bounds.Left;
@@ -159,6 +159,7 @@ namespace Interlude.Graphics
                 x = bounds.Left;
                 y += h;
             }
+            return y - bounds.Top;
         }
 
         private float MeasureText(string text)

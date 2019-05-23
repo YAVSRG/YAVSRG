@@ -164,7 +164,7 @@ namespace Interlude.Interface
             SpriteBatch.DrawRect(bounds.ExpandX(t), Color.Transparent);
             SpriteBatch.DisableTransform();
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
-            Game.Screens.DrawChartBackground(bounds.ExpandX(h), fill, 1.5f);
+            Game.Screens.DrawChartBackground(bounds.ExpandX(t * 2), fill, 1.5f);
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
             SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
             DrawFrame(bounds.ExpandX(t), frame);

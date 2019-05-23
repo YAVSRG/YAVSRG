@@ -17,8 +17,7 @@ namespace Interlude.Interface.Screens
         static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" }; //todo: remove these in favour of more "modular" rank system
         string perf, badge;
         private ScoreTracker scoreData;
-        int tier;
-        //ScoreSystem acc1, acc2;
+        int rankachieved;
         Scoreboard scoreboard;
 
         public ScreenScore(ScoreTracker data)
@@ -29,12 +28,12 @@ namespace Interlude.Interface.Screens
 
             //awards the rank for your acc
             float acc = scoreData.Scoring.Accuracy();
-            tier = 5;
+            rankachieved = 5;
             for (int i = 0; i < Game.Options.Profile.AccGradeThresholds.Length; i++) //custom grade boundaries
             {
                 if (acc >= Game.Options.Profile.AccGradeThresholds[i])
                 {
-                    tier = i; break;
+                    rankachieved = i; break;
                 }
             }
 
@@ -57,13 +56,7 @@ namespace Interlude.Interface.Screens
 
             //update stats
             Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
-            Game.Options.Profile.Stats.SRanks += (tier == 1 ? 1 : 0);
-
-            //alternative acc calculations
-            //acc1 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Osu) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Osu);
-            //acc2 = Game.Options.Profile.GetScoreSystem((Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.Wife || Game.Options.Profile.ScoreSystem == ScoreSystem.ScoreType.DP) ? ScoreSystem.ScoreType.Default : ScoreSystem.ScoreType.Wife);
-            //acc1.ProcessScore(scoreData.Hitdata);
-            //acc2.ProcessScore(scoreData.Hitdata);
+            Game.Options.Profile.Stats.SRanks += (rankachieved == 1 ? 1 : 0);
 
             //more info pre calculated so it isn't calculated every frame
             perf = Utils.RoundNumber(PlayerRating.GetRating(Game.Gameplay.ChartDifficulty, scoreData.Hitdata));
@@ -73,7 +66,7 @@ namespace Interlude.Interface.Screens
             scoreboard = new Scoreboard();
             scoreboard.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
             AddChild(scoreboard.TL_DeprecateMe(50, 200, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(500, 50, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new ImageBox("rank-" + ranks[tier]).TL_DeprecateMe(-100, 150, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(100, 350, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new ImageBox("rank-" + ranks[rankachieved]).TL_DeprecateMe(-100, 150, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(100, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(new ChartInfoPanel().TL_DeprecateMe(500, 350, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(50, 50, AnchorType.MAX, AnchorType.MAX));
         }
 
@@ -118,8 +111,6 @@ namespace Interlude.Interface.Screens
 
             //judgements display
             SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 350, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
-            //SpriteBatch.Font1.DrawCentredTextToFill(acc1.FormatAcc(), new Rect(bounds.Left + 550, bounds.Top + 500, bounds.CenterX - 50, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
-            //SpriteBatch.Font1.DrawCentredTextToFill(acc2.FormatAcc(), new Rect(bounds.CenterX + 50, bounds.Top + 500, bounds.Right - 550, bounds.Top + 600), Game.Options.Theme.MenuFont, true);
             float h = 450/scoreData.Scoring.Judgements.Length;
             for (int i = 0; i < scoreData.Scoring.Judgements.Length; i++)
             {

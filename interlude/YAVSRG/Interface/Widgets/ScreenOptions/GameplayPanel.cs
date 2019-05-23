@@ -1,9 +1,10 @@
-﻿using Interlude.Interface.Widgets;
-using Interlude.Interface;
-using static Prelude.Gameplay.Watchers.ScoreSystem;
+﻿using static Prelude.Gameplay.Watchers.ScoreSystem;
+using Prelude.Gameplay.Watchers.Scoring;
+using Prelude.Utilities;
 using Interlude.Interface.Dialogs;
+using Interlude.Options;
 
-namespace Interlude.Options.Panels
+namespace Interlude.Interface.Widgets
 {
     class GameplayPanel : OptionsPanel
     {
@@ -63,12 +64,22 @@ namespace Interlude.Options.Panels
                 "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm i.e make every other beat red and the remaining beats green\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord", ib)
                 .TL_DeprecateMe(-200, 475, AnchorType.CENTER, AnchorType.MIN)
                 .BR_DeprecateMe(-50, 525, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(
-                new TooltipContainer(
-                new TextPicker("Score System", new string[] { "Default", "Osu", "DP", "Wife", "SC+" }, (int)Game.Options.Profile.ScoreSystems[0].Type, v => {  Game.Options.Profile.ScoreSystems[0].Type = (ScoreType)v; Game.Screens.AddDialog(new ConfigDialog((s) => { }, "Configure score system", Game.Options.Profile.ScoreSystems[0].Data, Game.Options.Profile.ScoreSystems[0].Type == ScoreType.Osu ? typeof(Prelude.Gameplay.Watchers.Scoring.OsuMania) : typeof(Prelude.Gameplay.Watchers.Scoring.DancePoints))); }),
-                "This is the accuracy measurement system to use when playing.\nOsu = osu!mania's accuracy system\nWife = Etterna's accuracy system", ib)
-                .TL_DeprecateMe(50, 475, AnchorType.CENTER, AnchorType.MIN)
-                .BR_DeprecateMe(200, 525, AnchorType.CENTER, AnchorType.MIN));
+            ObjectSelector<ScoreSystemData> o = null; //suck my nuts compiler
+            o = new ObjectSelector<ScoreSystemData>(
+            Game.Options.Profile.ScoreSystems,
+            (t) => t.Instantiate().Name,
+            () => Game.Options.Profile.SelectedScoreSystem,
+            (i) => Game.Options.Profile.SelectedScoreSystem = i,
+            () => Game.Options.Profile.ScoreSystems.Add(new ScoreSystemData(ScoreType.Default, new DataGroup())),
+            () => { Game.Options.Profile.ScoreSystems.RemoveAt(Game.Options.Profile.SelectedScoreSystem); Game.Options.Profile.SelectedScoreSystem -= 1; },
+            () =>
+            {
+                Game.Screens.AddDialog(new ConfigDialog((s) => o.Refresh(), "Configure score system",
+                    Game.Options.Profile.ScoreSystems[Game.Options.Profile.SelectedScoreSystem].Data,
+                    Game.Options.Profile.ScoreSystems[Game.Options.Profile.SelectedScoreSystem].Type == ScoreType.Osu ? typeof(OsuMania) : typeof(DancePoints)));
+            }, () => { Game.Options.Profile.ScoreSystems[Game.Options.Profile.SelectedScoreSystem].Type = (ScoreType)((int)(Game.Options.Profile.ScoreSystems[Game.Options.Profile.SelectedScoreSystem].Type + 1) % 5); }
+            );
+            AddChild(o.Reposition(50, 0.5f, 475, 0, -50, 1, 875, 0));
         }
     }
 }

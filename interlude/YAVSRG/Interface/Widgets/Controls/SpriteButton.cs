@@ -30,11 +30,19 @@ namespace Interlude.Interface.Widgets
         {
             base.Update(bounds);
             bounds = GetBounds(bounds);
-            color.Target(ScreenUtils.MouseOver(bounds) ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
-            if (ScreenUtils.CheckButtonClick(bounds))
+            if (ScreenUtils.MouseOver(bounds))
             {
-                Game.Audio.PlaySFX("click");
-                action();
+                color.Target(Game.Screens.HighlightColor);
+                Game.Screens.Toolbar.SetTooltip(text);
+                if (IO.Input.MouseClick(OpenTK.Input.MouseButton.Left))
+                {
+                    Game.Audio.PlaySFX("click");
+                    action();
+                }
+            }
+            else
+            {
+                color.Target(Game.Screens.BaseColor);
             }
         }
     }

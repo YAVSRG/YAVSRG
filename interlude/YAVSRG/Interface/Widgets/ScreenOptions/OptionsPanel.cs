@@ -2,7 +2,7 @@
 using Interlude.Interface.Widgets;
 using Interlude.Graphics;
 
-namespace Interlude.Options
+namespace Interlude.Interface.Widgets
 {
     public class OptionsPanel : Widget
     {

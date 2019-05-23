@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Interlude.Gameplay;
-using System.Drawing;
-using Interlude.Interface.Widgets;
-using Interlude.Options.Panels;
+﻿using Interlude.Interface.Widgets;
 
 namespace Interlude.Interface.Screens
 {
@@ -35,8 +27,8 @@ namespace Interlude.Interface.Screens
             AddChild(ScrollButton("General", 0, tabs));
             AddChild(ScrollButton("Gameplay", 1, tabs));
             AddChild(ScrollButton("Layout", 2, tabs));
-            AddChild(ScrollButton("-", 3, tabs));
-            AddChild(ScrollButton("-", 4, tabs));
+            AddChild(ScrollButton("???", 3, tabs));
+            AddChild(ScrollButton("Credits", 4, tabs));
 
             AddChild(ib.TL_DeprecateMe(0, 200, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(0, 0, AnchorType.MAX, AnchorType.MAX));
 

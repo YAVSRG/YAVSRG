@@ -9,7 +9,7 @@ namespace Interlude.Interface.Widgets
     {
         protected FlowContainer ScoreContainer;
         bool noScores;
-        string scoreType = Game.Options.Profile.GetScoreSystem(0).Name;
+        string scoreType = "";
 
         public Scoreboard()
         {
@@ -20,6 +20,7 @@ namespace Interlude.Interface.Widgets
 
         public void UseScoreList(List<Score> scores)
         {
+            scoreType = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.SelectedScoreSystem).Name;
             ScoreContainer.Clear();
             ScoreContainer.ScrollPosition = 0;
             noScores = true;

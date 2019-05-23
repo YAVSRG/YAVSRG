@@ -110,8 +110,9 @@ namespace Interlude.Interface.Widgets
                         if (x > bounds.Width)
                         {
                             x = widgetBounds.Width;
-                            y += widgetBounds.Height + RowSpacing; 
+                            y += widgetBounds.Height + RowSpacing;
                         }
+                        x += ColumnSpacing;
                     }
                 }
             }

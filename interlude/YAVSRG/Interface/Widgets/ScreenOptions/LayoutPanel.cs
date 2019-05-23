@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenTK.Input;
 using Prelude.Gameplay.DifficultyRating;
-using Interlude.Interface;
-using Interlude.Interface.Widgets;
 using Interlude.IO;
+using static Interlude.Options.Options;
 
-namespace Interlude.Options.Panels
+
+namespace Interlude.Interface.Widgets
 {
     class LayoutPanel : OptionsPanel
     {
@@ -87,7 +87,7 @@ namespace Interlude.Options.Panels
             AddChild(selectKeyMode);
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .TL_DeprecateMe(-500, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Skin", Options.Skins, Math.Max(0, Array.IndexOf(Options.Skins, Game.Options.Profile.Skin)), (i) => { Game.Options.Profile.Skin = Options.Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode, width); })
+            AddChild(new TextPicker("Skin", Skins, Math.Max(0, Array.IndexOf(Skins, Game.Options.Profile.Skin)), (i) => { Game.Options.Profile.Skin = Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode, width); })
                 .TL_DeprecateMe(200, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(500, 575, AnchorType.CENTER, AnchorType.MIN));
         }
 
