@@ -34,7 +34,7 @@ namespace Interlude.Interface.Widgets
             base.Draw(bounds);
             bounds = GetBounds(bounds);
             Game.Screens.DrawChartBackground(bounds, Color.FromArgb(f, 100, 100, 100));
-            ScreenUtils.DrawFrame(bounds, 30f, Color.FromArgb(f,Color.White));
+            ScreenUtils.DrawFrame(bounds, Color.FromArgb(f,Color.White));
             SpriteBatch.Font1.DrawParagraph(text, 30f, bounds.Expand(-10,-10), Color.FromArgb(f,Game.Options.Theme.MenuFont));
         }
     }

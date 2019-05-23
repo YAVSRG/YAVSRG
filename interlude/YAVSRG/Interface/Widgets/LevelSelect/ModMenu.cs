@@ -8,6 +8,7 @@ using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets
 {
+    //todo: rewrite
     class ModMenu : Widget
     {
         class ModButton : Widget
@@ -33,7 +34,7 @@ namespace Interlude.Interface.Widgets
                 base.Draw(bounds);
                 bounds = GetBounds(bounds);
                 float b = color.Val * 5;
-                ScreenUtils.DrawFrame(bounds.Expand(b, b), 30f, color);
+                ScreenUtils.DrawFrame(bounds.Expand(b, b), color);
                 b = bounds.Height; //variable reuse lol.
                 SpriteBatch.Font1.DrawCentredTextToFill(mod, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + b / 2), Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor); //todo: replace with textbox
                 string s = "Off";
@@ -120,7 +121,7 @@ namespace Interlude.Interface.Widgets
             SpriteBatch.Font1.DrawCentredTextToFill(Game.Gameplay.GetModString(), new Rect(bounds.Left + 50, bounds.Bottom - h * slide + 50, bounds.Right - 50, bounds.Bottom - h * slide + 200), Color.FromArgb(a, Game.Options.Theme.MenuFont));
 
             DrawWidgets(new Rect(bounds.Left, bounds.Bottom - h * slide, bounds.Right, bounds.Bottom));
-            ScreenUtils.DrawFrame(bounds.SliceBottom(h * slide), 0, Color.FromArgb(a, Game.Screens.BaseColor), 68);
+            ScreenUtils.DrawFrame(bounds.SliceBottom(h * slide), Color.FromArgb(a, Game.Screens.BaseColor), 68);
             SpriteBatch.DrawRect(new Rect(bounds.Left, bounds.Bottom - h * slide - 5, bounds.Right, bounds.Bottom - h * slide), Color.FromArgb(a, Game.Screens.BaseColor));
             SpriteBatch.Font2.DrawCentredTextToFill("Mod Select", new Rect(bounds.Left, bounds.Bottom - h * slide - 50, bounds.Right, bounds.Bottom - h * slide), Color.FromArgb(a, Game.Options.Theme.MenuFont));
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);

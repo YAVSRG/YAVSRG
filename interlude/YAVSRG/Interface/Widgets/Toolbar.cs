@@ -139,8 +139,8 @@ namespace Interlude.Interface
                 SpriteBatch.Font1.DrawJustifiedText(((int)Game.Instance.FPS).ToString() + "fps", 18f, ScreenWidth, ScreenHeight - _Height + 28, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 18f, ScreenWidth, ScreenHeight - _Height + 51, Game.Options.Theme.MenuFont);
 
-                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 3), 30f, Game.Screens.BaseColor);
-                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 3, ScreenWidth + 30, ScreenHeight + 30), 30f, Game.Screens.BaseColor);
+                DrawFrame(new Rect(-ScreenWidth - 30, -ScreenHeight - 30, ScreenWidth + 30, -ScreenHeight + _Height + 3), Game.Screens.BaseColor);
+                DrawFrame(new Rect(-ScreenWidth - 30, ScreenHeight - _Height - 3, ScreenWidth + 30, ScreenHeight + 30), Game.Screens.BaseColor);
 
                 base.Draw(bounds.ExpandY(80 - _Height));
                 if (Chat.Collapsed && _NotifFade > 0.01f)

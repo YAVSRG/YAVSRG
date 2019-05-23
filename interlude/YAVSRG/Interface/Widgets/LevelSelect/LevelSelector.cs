@@ -50,7 +50,7 @@ namespace Interlude.Interface.Widgets
                         Rect bounds = new Rect(ScreenUtils.ScreenWidth - 600 - MouseOver + (float)Math.Pow(topEdge * 0.021, 2) * 1.5f, topEdge, ScreenUtils.ScreenWidth, topEdge + Height);
                         SpriteBatch.DrawTilingTexture("levelselectbase", bounds, 400, 0, 0, FillColor);
                         Game.Screens.DrawChartBackground(bounds, Color.FromArgb(80, FillColor), 1.5f);
-                        ScreenUtils.DrawFrame(bounds, 30f, FrameColor, components: 187);
+                        ScreenUtils.DrawFrame(bounds, FrameColor, components: 187);
                         if (Subtitle == "")
                         {
                             SpriteBatch.Font1.DrawTextToFill(Title, new Rect(bounds.Left + 20, bounds.Top + 22.5f, bounds.Left + 600, bounds.Bottom - 20), FrameColor, true, Utils.ColorInterp(FillColor, Color.Black, 0.7f));

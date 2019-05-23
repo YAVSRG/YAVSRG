@@ -69,14 +69,15 @@ namespace Interlude.Interface
                     }
                 }
             }
-            DrawFrame(bounds, 30f, Color.White);
+            DrawFrame(bounds, Color.White);
         }
 
-        public static void DrawFrame(Rect bounds, float DEPRECATED, Color color, byte components = 255, float shadow = 10f, float thickness = 3f)
+        public static void DrawFrame(Rect bounds, Color color, byte components = 255, float shadow = 10f, float thickness = 3f)
         {
             Color back = Color.FromArgb(color.A, Color.Black);
             Color transparent = Color.FromArgb(0, 0, 0, 0);
 
+            //todo: maybe make enum so this is easier to use
             if ((components & 16) > 0)
                 SpriteBatch.Draw(bounds: bounds.SliceLeft(shadow), colors: new[] { back, transparent, transparent, back });
             if ((components & 32) > 0)
@@ -166,7 +167,7 @@ namespace Interlude.Interface
             Game.Screens.DrawChartBackground(bounds.ExpandX(h), fill, 1.5f);
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
             SpriteBatch.ParallelogramTransform(amount, bounds.Top + h);
-            DrawFrame(bounds.ExpandX(t), 30f, frame);
+            DrawFrame(bounds.ExpandX(t), frame);
             SpriteBatch.DisableTransform();
         }
     }

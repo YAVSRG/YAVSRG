@@ -51,9 +51,14 @@ namespace Interlude.Gameplay
             }
         }
 
-        public string Accuracy
+        public string FormattedAccuracy
         {
             get { return ScoreSystem.FormatAcc(); }
+        }
+
+        public string ScoreShorthand
+        {
+            get { return ScoreSystem.ComboBreaks.ToString()+" / "+Utils.RoundNumber(ScoreSystem.Accuracy())+"%"; }
         }
 
         public int BestCombo

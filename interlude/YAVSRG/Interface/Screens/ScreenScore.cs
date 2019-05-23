@@ -132,7 +132,7 @@ namespace Interlude.Interface.Screens
             SpriteBatch.Font1.DrawTextToFill(scoreData.Scoring.BestCombo.ToString() + "x", new Rect(bounds.Right - 490, bounds.Top + 250, bounds.Right - 225, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Font1.DrawCentredTextToFill(badge, new Rect(bounds.Right - 390, bounds.Top + 250, bounds.Right - 160, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.Scoring.ComboBreaks.ToString() + "cbs", new Rect(bounds.Right - 225, bounds.Top + 250, bounds.Right - 60, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
-            DrawFrame(new Rect(bounds.Right - 500, bounds.Top + 50, bounds.Right - 50, bounds.Top + 300), 30f, Color.White);
+            DrawFrame(new Rect(bounds.Right - 500, bounds.Top + 50, bounds.Right - 50, bounds.Top + 300), Color.White);
 
             //graph
             DrawGraph(new Rect(bounds.Left + 550, bounds.Top + 600, bounds.Right - 550, bounds.Bottom - 50), scoreData.Scoring, scoreData.Hitdata);

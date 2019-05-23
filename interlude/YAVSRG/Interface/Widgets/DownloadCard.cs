@@ -43,7 +43,7 @@ namespace Interlude.Interface.Widgets
             SpriteBatch.Font1.DrawTextToFill(name, new Rect(bounds.Left, bounds.Top, bounds.Left + w * 0.7f, bounds.Bottom), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedTextToFill(size, new Rect(bounds.Left + w * 0.75f, bounds.Top, bounds.Left + w * 0.9f, bounds.Bottom), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawJustifiedTextToFill(difficulty, new Rect(bounds.Left + w * 0.9f, bounds.Top, bounds.Left + w, bounds.Bottom), Game.Options.Theme.MenuFont);
-            ScreenUtils.DrawFrame(bounds, 30f, System.Drawing.Color.White);
+            ScreenUtils.DrawFrame(bounds, System.Drawing.Color.White);
         }
     }
 }

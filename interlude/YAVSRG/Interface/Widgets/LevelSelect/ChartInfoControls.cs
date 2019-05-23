@@ -40,7 +40,7 @@ namespace Interlude.Interface.Widgets
             ChangeChart(true);
 
             ModMenu modMenu = new ModMenu();
-            AddChild(modMenu.Reposition(0, 0, 150, 0, 0, 1, -150, 1));
+            AddChild(modMenu.Reposition(0, 0, 250, 0, 0, 1, 0, 1));
 
             AddChild(new LevelSelectButtons(modMenu).Reposition(0, 0, 150, 0, 0, 1, 250, 0));
         }

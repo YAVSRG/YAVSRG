@@ -38,7 +38,7 @@ namespace Interlude.Interface.Dialogs
             base.Draw(bounds);
             bounds = GetBounds(bounds);
             Game.Screens.DrawChartBackground(bounds, Color.FromArgb(a, Game.Screens.DarkColor));
-            ScreenUtils.DrawFrame(bounds, 0, Color.FromArgb(a, Game.Screens.HighlightColor));
+            ScreenUtils.DrawFrame(bounds, Color.FromArgb(a, Game.Screens.HighlightColor));
             SpriteBatch.Font1.DrawCentredTextToFill(prompt, new Rect(bounds.Left, -100, bounds.Right, -60), Color.FromArgb(a, Game.Options.Theme.MenuFont));
             SpriteBatch.Font2.DrawCentredTextToFill(text, new Rect(bounds.Left, -60, bounds.Right, 70), Color.FromArgb(a, Game.Options.Theme.MenuFont));
         }

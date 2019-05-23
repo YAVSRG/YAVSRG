@@ -8,6 +8,7 @@ namespace Interlude.Interface.Widgets
 {
     public class ChartSortingControls : Widget
     {
+        //todo: move collection controls out of here
         string selectedCollection = "Favourites";
         Widget sortControls, collectionControls;
 
@@ -38,16 +39,17 @@ namespace Interlude.Interface.Widgets
                 .TL_DeprecateMe(220, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
-                .TL_DeprecateMe(520, 10, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(20, 70, AnchorType.MAX, AnchorType.MIN));
+                .Reposition(-600, 1, 10, 0, -20, 1, 70, 0));
 
-            AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }).TL_DeprecateMe(600, 0, AnchorType.MAX,AnchorType.MIN).BR_DeprecateMe(520,80,AnchorType.MAX,AnchorType.MIN));
+            AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); })
+                .Reposition(-680, 1, 0, 0, -600, 1, 80, 0));
         }
 
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
             Game.Screens.DrawChartBackground(bounds, Game.Screens.DarkColor, 1.5f);
-            ScreenUtils.DrawFrame(bounds.ExpandX(30), 30f, Game.Screens.HighlightColor);
+            ScreenUtils.DrawFrame(bounds.ExpandX(30), Game.Screens.HighlightColor);
             DrawWidgets(bounds);
         }
 

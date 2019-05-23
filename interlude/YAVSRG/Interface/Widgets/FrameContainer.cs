@@ -23,7 +23,7 @@ namespace Interlude.Interface.Widgets
         {
             bounds = GetBounds(bounds);
             PreDraw(bounds);
-            ScreenUtils.DrawFrame(bounds, 30f, FrameColor(), components: Frame);
+            ScreenUtils.DrawFrame(bounds, FrameColor(), components: Frame);
             PostDraw(bounds);
             DrawWidgets(bounds);
         }

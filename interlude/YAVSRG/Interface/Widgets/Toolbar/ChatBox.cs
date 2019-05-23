@@ -34,7 +34,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                 float spacing = 40f;
                 if (expand)
                 {
-                    ScreenUtils.DrawFrame(bounds, 30f, Color.White);
+                    ScreenUtils.DrawFrame(bounds, Color.White);
                     for (int x = 0; x < 5; x++)
                     {
                         for (int y = 0; y < 4; y++)
@@ -167,7 +167,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                         }
                     }
 
-                    ScreenUtils.DrawFrame(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), 30f, Game.Screens.HighlightColor);
+                    ScreenUtils.DrawFrame(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Game.Screens.HighlightColor);
                     fbo.Unbind();
                     SpriteBatch.Draw(fbo, ScreenUtils.Bounds, Color.FromArgb((int)(255 * fade), Color.White));
                 }

@@ -26,7 +26,7 @@ namespace Interlude.Interface.Widgets
                 .TL_DeprecateMe(0.4f, 0.6f, AnchorType.LERP, AnchorType.LERP).BR_DeprecateMe(0.8f, 1, AnchorType.LERP, AnchorType.LERP));
             AddChild(new TextBox(Utils.RoundNumber(data.PhysicalPerformance), AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont, CalcUtils.PhysicalColor(data.PhysicalPerformance))
                 .TL_DeprecateMe(0.8f, 0, AnchorType.LERP, AnchorType.LERP).BR_DeprecateMe(1, 0.6f, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(data.Accuracy, AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
+            AddChild(new TextBox(data.FormattedAccuracy, AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
                 .TL_DeprecateMe(0.8f, 0.6f, AnchorType.LERP, AnchorType.LERP).BR_DeprecateMe(1, 1, AnchorType.LERP, AnchorType.LERP));
         }
 

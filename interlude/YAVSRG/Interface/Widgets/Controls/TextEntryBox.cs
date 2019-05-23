@@ -32,7 +32,7 @@ namespace Interlude.Interface.Widgets
             bounds = GetBounds(bounds);
             SpriteBatch.DrawRect(bounds, Game.Screens.DarkColor);
             SpriteBatch.Font1.DrawText(get() != "" ? get() : text(), 20f, bounds.Left + 20, bounds.Top + 12.5f, color, true, Game.Screens.DarkColor);
-            ScreenUtils.DrawFrame(bounds, 30f, color);
+            ScreenUtils.DrawFrame(bounds, color);
         }
 
         public override void Update(Rect bounds)

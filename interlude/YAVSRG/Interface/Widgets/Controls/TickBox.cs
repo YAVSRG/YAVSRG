@@ -25,7 +25,7 @@ namespace Interlude.Interface.Widgets
             {
                 SpriteBatch.DrawRect(bounds.SliceLeft(bounds.Height).Expand(-15, -15), Game.Screens.BaseColor);
             }
-            ScreenUtils.DrawFrame(bounds.SliceLeft(bounds.Height).Expand(-10, -10), 20, System.Drawing.Color.White);
+            ScreenUtils.DrawFrame(bounds.SliceLeft(bounds.Height).Expand(-10, -10), System.Drawing.Color.White);
         }
 
         public override void Update(Rect bounds)

@@ -34,7 +34,7 @@ namespace Interlude.Interface.Widgets.Gameplay
                 SpriteBatch.Font2.DrawJustifiedTextToFill(scoreTracker.Scoring.Judgements[i].ToString(), new Rect(bounds.Right - w * 0.25f, r, bounds.Right, r + h), scoreTracker.WidgetColor);
                 r += h;
             }
-            ScreenUtils.DrawFrame(bounds, 30f, scoreTracker.WidgetColor);
+            ScreenUtils.DrawFrame(bounds, scoreTracker.WidgetColor);
         }
     }
 }
