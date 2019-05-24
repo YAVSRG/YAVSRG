@@ -14,7 +14,6 @@ namespace Interlude.Interface.Screens
 {
     class ScreenScore : Screen
     {
-        static string[] ranks = new[] { "ss", "s", "a", "b", "c", "f" }; //todo: remove these in favour of more "modular" rank system
         string perf, badge;
         private ScoreTracker scoreData;
         int rankachieved;
@@ -24,14 +23,12 @@ namespace Interlude.Interface.Screens
         {
 
             scoreData = data;
-            scoreData.Scoring.BestCombo = Math.Max(scoreData.Scoring.Combo, scoreData.Scoring.BestCombo); //if your biggest combo was until the end of the map, this catches it
-
             //awards the rank for your acc
             float acc = scoreData.Scoring.Accuracy();
-            rankachieved = 5;
-            for (int i = 0; i < Game.Options.Profile.AccGradeThresholds.Length; i++) //custom grade boundaries
+            rankachieved = Game.Options.Profile.GradeThresholds.Length;
+            for (int i = 0; i < Game.Options.Profile.GradeThresholds.Length; i++) //custom grade boundaries
             {
-                if (acc >= Game.Options.Profile.AccGradeThresholds[i])
+                if (acc >= Game.Options.Profile.GradeThresholds[i])
                 {
                     rankachieved = i; break;
                 }
@@ -66,7 +63,6 @@ namespace Interlude.Interface.Screens
             scoreboard = new Scoreboard();
             scoreboard.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
             AddChild(scoreboard.TL_DeprecateMe(50, 200, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(500, 50, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new ImageBox("rank-" + ranks[rankachieved]).TL_DeprecateMe(-100, 150, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(100, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(new ChartInfoPanel().TL_DeprecateMe(500, 350, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(50, 50, AnchorType.MAX, AnchorType.MAX));
         }
 
@@ -110,7 +106,8 @@ namespace Interlude.Interface.Screens
             SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 650, bounds.Top + 150), Game.Options.Theme.MenuFont, true);
 
             //judgements display
-            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 350, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
+            SpriteBatch.Font1.DrawCentredTextToFill(scoreData.Scoring.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 370, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
+            SpriteBatch.Draw("ranks", new Rect(-100, bounds.Top + 170, 100, bounds.Top + 370), Color.White, rankachieved, 0);
             float h = 450/scoreData.Scoring.Judgements.Length;
             for (int i = 0; i < scoreData.Scoring.Judgements.Length; i++)
             {

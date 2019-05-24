@@ -19,7 +19,7 @@ namespace Interlude.Interface.Screens
             AddChild(
                 play = new BannerButton("Play", () =>
                 {
-                    Game.Screens.AddScreen(new ScreenLevelSelect());
+                    Game.Screens.AddScreen((Game.CurrentChart == null ? (Screen)(new ScreenImport()) : new ScreenLevelSelect()));
                 }, 0.7f, 1)
                 .Reposition(-100, 0, -200, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, -100, 0.5f)
                 );
@@ -50,7 +50,7 @@ namespace Interlude.Interface.Screens
             var s = ResourceGetter.MenuSplash().Split('¬');
             splash = s[0];
             splashSub = s.Length > 1 ? s[1] : "";
-            Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
+            if (Game.CurrentChart != null) Discord.SetPresence("Main Menu", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, true);
             Game.Screens.BackgroundDim.Target = 1;
             play.RightAnchor.Reposition(-ScreenUtils.ScreenWidth);
             options.RightAnchor.Reposition(-ScreenUtils.ScreenWidth);

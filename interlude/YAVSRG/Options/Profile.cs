@@ -60,7 +60,8 @@ namespace Interlude.Options
         public int SelectedScoreSystem;
         //todo: life systems
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
-        public float[] AccGradeThresholds = new float[] { 98.5f, 95, 93, 91, 89 };
+        //todo: move to theme since number of ranks available is dependent on theme
+        public float[] GradeThresholds = new float[] { 99, 98, 97, 96, 95, 94, 93, 92, 91, 90 };
         public ProfileStats Stats = new ProfileStats();
 
         //these are default binds

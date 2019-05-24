@@ -36,6 +36,7 @@ namespace Interlude.Options
         public int Resolution = 4;
         public WindowType WindowMode = WindowType.Borderless;
         public string CurrentProfile = "Default.json";
+        public string LastSelectedFile = "";
         public string WorkingDirectory = "";
         public Keybinds Binds = new Keybinds();
 

@@ -95,7 +95,7 @@ namespace Interlude.Interface.Screens
             {
                 Game.Screens.Loading = false;
                 ChartLoader.Refresh();
-                ChartLoader.RandomChart();
+                ChartLoader.SelectDefaultChart();
                 Game.Screens.AddScreen(new ScreenMenu());
                 Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
                 Game.Instance.WindowBorder = wb;

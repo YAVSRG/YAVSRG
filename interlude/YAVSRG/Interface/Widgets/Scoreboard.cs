@@ -37,10 +37,7 @@ namespace Interlude.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            if (noScores)
-            {
-                SpriteBatch.Font1.DrawTextToFill("No local scores", bounds, Game.Options.Theme.MenuFont, true, System.Drawing.Color.Black);
-            }
+            if (noScores) SpriteBatch.Font1.DrawTextToFill("No local scores", bounds, Game.Options.Theme.MenuFont, true, System.Drawing.Color.Black);
             ScreenUtils.DrawParallelogramWithBG(bounds.SliceBottom(50), 0, Game.Screens.BaseColor, Game.Screens.HighlightColor);
             SpriteBatch.Font1.DrawCentredTextToFill(scoreType, bounds.SliceBottom(50), Game.Options.Theme.MenuFont, true, System.Drawing.Color.Black);
         }

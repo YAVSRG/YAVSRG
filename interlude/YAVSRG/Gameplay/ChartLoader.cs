@@ -200,17 +200,17 @@ namespace Interlude.Gameplay
 
         #endregion
 
-        //todo: remove the need for a placeholder
-        public static void RandomChart()
+        public static void SelectDefaultChart()
         {
             if (Cache.Charts.Count == 0)
             {
-                Chart def = new Chart(new List<Snap>(), new ChartHeader { SourcePack = "Nowhere", Artist = "Percyqaz", Creator = "Nobody", Title = "You have no songs installed!", SourcePath = Game.WorkingDirectory, DiffName = "Default", AudioFile = "", BGFile = "", PreviewTime = 0, File = "" }, 4);
-                def.Timing.SetTimingData(new List<BPMPoint>());
-                Game.Gameplay.ChangeChart(null, def, false);
+                Game.Screens.ChangeBackground(IO.Content.GetTexture("background"));
+                Game.Screens.ChangeThemeColor(Game.Options.Theme.DefaultThemeColor);
                 return;
             }
-            SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
+            if (Cache.Charts.ContainsKey(Game.Options.General.LastSelectedFile))
+                SwitchToChart(Cache.Charts[Game.Options.General.LastSelectedFile], true);
+            else SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
         }
 
         //Task to recache all charts (useful if you deleted them manually but they're still cached, or the cache is broken and charts are missing from it)
@@ -673,6 +673,7 @@ namespace Interlude.Gameplay
             Chart chart = Cache.LoadChart(c);
             if (chart != null)
             {
+                Game.Options.General.LastSelectedFile = c.GetFileIdentifier();
                 Game.Gameplay.ChangeChart(c, chart, playFromPreview);
             }
             else

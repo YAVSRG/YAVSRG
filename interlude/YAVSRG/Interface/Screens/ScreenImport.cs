@@ -15,7 +15,7 @@ namespace Interlude.Interface.Screens
                 {
                     if (s == "Y")
                     {
-                        Game.Tasks.AddTask(ChartLoader.ImportOsu(), (b) => { }, "Import from osu!", true);
+                        Game.Tasks.AddTask(ChartLoader.ImportOsu(), (b) => { }, "Import from osu!", false);
                     }
                 }));
             },
@@ -27,7 +27,7 @@ namespace Interlude.Interface.Screens
                 {
                     if (s == "Y")
                     {
-                        Game.Tasks.AddTask(ChartLoader.ImportStepmania(), (b) => { }, "Import from Stepmania/Etterna", true);
+                        Game.Tasks.AddTask(ChartLoader.ImportStepmania(), (b) => { }, "Import from Stepmania/Etterna", false);
                     }
                 }));
             },

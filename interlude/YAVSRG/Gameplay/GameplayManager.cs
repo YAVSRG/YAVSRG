@@ -45,6 +45,7 @@ namespace Interlude.Gameplay
 
         public void UpdateChart()
         {
+            if (CurrentChart == null) return;
             ModifiedChart = GetModifiedChart(SelectedMods);
             Options.Colorizer.Colorize(ModifiedChart, Game.Options.Profile.ColorStyle);
             UpdateDifficulty();

@@ -27,7 +27,7 @@ namespace Interlude.Utilities
                 _task = new Task(() => {
                     try
                     {
-                        Callback(Task((v) => { Progress = v; }));
+                        Callback(Task((v) => { Logging.Log(Name + ": " + v, "", Track ? Logging.LogType.Debug : Logging.LogType.Info); Progress = v; }));
                         if (Track) Logging.Log("Completed task: " + Name, "");
                     }
                     catch (Exception e)
