@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Prelude.Gameplay.Charts.YAVSRG;
-using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.ScoreMetrics;
 
 namespace Prelude.Gameplay
 {

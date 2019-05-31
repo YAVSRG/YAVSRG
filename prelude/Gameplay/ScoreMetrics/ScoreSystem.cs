@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Prelude.Gameplay.Watchers.Scoring;
+using Prelude.Gameplay.ScoreMetrics.Accuracy;
 
-namespace Prelude.Gameplay.Watchers
+namespace Prelude.Gameplay.ScoreMetrics
 {
     //todo: option between points out of 100% rising, max accuracy possible and current accuracy for time series
-    public class ScoreSystem : IGameplayWatcher
+    public class ScoreSystem : IScoreMetric
     {
         public class ScoreSystemData
         {

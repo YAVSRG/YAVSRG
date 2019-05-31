@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Prelude.Gameplay.Watchers
+namespace Prelude.Gameplay.ScoreMetrics
 {
     //interface for anything that looks at your hitdata either live or by processing a score
     //e.g. accuracy or HP system
     //todo: support for time series data to graph it overlayed on hit distribution graph
-    public abstract class IGameplayWatcher
+    public abstract class IScoreMetric
     {
         public delegate void HitHandler(int Column, int Judgement, float Offset);
 
