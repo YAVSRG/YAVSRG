@@ -109,7 +109,7 @@ namespace Interlude.Gameplay
                             else
                             {
                                 //todo: alert the user of this and/or remove chart from collection
-                                toRemove.Add(id);
+                                //toRemove.Add(id);
                                 Log(id + "isn't present in the cache! Maybe it was deleted?", "", LogType.Warning);
                             }
                         }

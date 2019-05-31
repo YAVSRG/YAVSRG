@@ -1,7 +1,7 @@
 ﻿using System;
 using Prelude.Utilities;
 
-namespace Prelude.Gameplay.Watchers.Scoring
+namespace Prelude.Gameplay.ScoreMetrics.Accuracy
 {
     [DataTemplate("Judge", "Default", 4, "Min", 1, "Max", 10)]
     public class DancePoints : ScoreSystem

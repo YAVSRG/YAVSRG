@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Prelude.Gameplay.Watchers.HP
+namespace Prelude.Gameplay.ScoreMetrics.HP
 {
     public class HPSystem : ILifeMeter
     {

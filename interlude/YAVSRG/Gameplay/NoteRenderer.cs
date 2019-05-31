@@ -31,7 +31,7 @@ namespace Interlude.Gameplay
         public NoteRenderer(ChartWithModifiers chart, IVisualMod mod)
         {
             Chart = chart;
-            Game.Options.Theme.LoadTextures(Chart.Keys);
+            Game.Options.Theme.LoadGameplayTextures(Chart.Keys);
             ScrollScheme = mod;
 
             Animation.Add(animation = new AnimationCounter(25, true));
@@ -52,7 +52,7 @@ namespace Interlude.Gameplay
 
         public void AddHitlights()
         {
-
+            //todo: fix/bring back hitlighting
         }
 
         public override void Draw(Rect bounds)

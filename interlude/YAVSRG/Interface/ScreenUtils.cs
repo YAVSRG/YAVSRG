@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using Prelude.Gameplay;
-using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.ScoreMetrics;
 using Interlude.IO;
 using Interlude.Graphics;
 

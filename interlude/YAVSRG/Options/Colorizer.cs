@@ -9,7 +9,7 @@ using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude.Options
 {
-    //todo: move me to gameplay namespace (and modularise)
+    //todo: refactor as interface/class for each colorizer and move to prelude
     public class Colorizer
     {
         public static readonly int[] DDRValues = { 1, 2, 3, 4, 6, 8, 12, 16 };
@@ -159,7 +159,7 @@ namespace Interlude.Options
 
         private static bool RoughlyDivisibleBy(float a, float b)
         {
-            return Math.Abs(a - b * Math.Round(a / b)) < 1;
+            return Math.Abs(a - b * Math.Round(a / b)) < 2;
         }
     }
 }

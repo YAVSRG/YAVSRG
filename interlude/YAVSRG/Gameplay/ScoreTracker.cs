@@ -3,8 +3,8 @@ using System.IO;
 using System.Collections.Generic;
 using Prelude.Gameplay;
 using Interlude.Interface.Animations;
-using Prelude.Gameplay.Watchers;
-using Prelude.Gameplay.Watchers.HP;
+using Prelude.Gameplay.ScoreMetrics;
+using Prelude.Gameplay.ScoreMetrics.HP;
 using System.IO.Compression;
 
 namespace Interlude.Gameplay
@@ -17,14 +17,14 @@ namespace Interlude.Gameplay
         public ScoreSystem Scoring;
         public ILifeMeter HP;
         public HitData[] Hitdata;
-        public List<IGameplayWatcher> Watchers;
+        public List<IScoreMetric> Watchers;
         public AnimationColorFade WidgetColor;
         public int MaxCombo; //max possible combo, not best combo achieved
 
         public ScoreTracker(ChartWithModifiers c)
         {
             WidgetColor = new AnimationColorFade(System.Drawing.Color.FromArgb(0, Game.Options.Theme.MenuFont), Game.Options.Theme.MenuFont);
-            Watchers = new List<IGameplayWatcher>();
+            Watchers = new List<IScoreMetric>();
             Chart = c;
             Scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.SelectedScoreSystem);
             HP = new HPSystem(Scoring);
@@ -45,7 +45,7 @@ namespace Interlude.Gameplay
 
         public void Update(float time)
         {
-            foreach (IGameplayWatcher w in Watchers)
+            foreach (IScoreMetric w in Watchers)
             {
                 w.Update(time, Hitdata);
             }
@@ -57,7 +57,7 @@ namespace Interlude.Gameplay
             if (Hitdata[index].hit[column] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
             Hitdata[index].hit[column] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)
             Hitdata[index].delta[column] = delta;
-            foreach (IGameplayWatcher w in Watchers)
+            foreach (IScoreMetric w in Watchers)
             {
                 w.HandleHit(column, index, Hitdata);
             }

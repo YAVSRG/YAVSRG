@@ -3,7 +3,7 @@ using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Prelude.Gameplay.Mods
 {
-    public class Random : Mod
+    public class Randomise : Mod
     {
         System.Random rand;
 

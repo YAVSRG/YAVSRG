@@ -173,7 +173,7 @@ namespace Interlude.Options
             return Content.GetTexture(NoteTexture(keycount)).UV_Y;
         }
 
-        public void LoadTextures(int keycount) //makes sure they're all in memory to avoid lag spikes while playing
+        public void LoadGameplayTextures(int keycount) //makes sure they're all in memory to avoid lag spikes while playing
         {
             Content.GetTexture(MineTexture(keycount));
             Content.GetTexture(NoteTexture(keycount));

@@ -54,7 +54,8 @@ namespace Interlude.Interface.Dialogs
         {
             Game.Screens.AddDialog(new TextDialog("Enter profile name:", (s) =>
             {
-                Options.Profile p = new Options.Profile() { Name = s, ProfilePath = new Regex("[^a-zA-Z0-9_-]").Replace(s, "") + ".json" };
+                Options.Profile p = new Options.Profile();
+                p.Rename(s);
                 Options.Options.Profiles.Add(p);
                 Game.Options.ChangeProfile(p);
                 Close(p.Name);
@@ -63,7 +64,7 @@ namespace Interlude.Interface.Dialogs
 
         void RenameProfile()
         {
-            Game.Screens.AddDialog(new TextDialog("Rename profile to:", (s) => { Game.Options.Profile.Name = s; }));
+            Game.Screens.AddDialog(new TextDialog("Rename profile to:", (s) => { Game.Options.Profile.Rename(s); }));
         }
     }
 }

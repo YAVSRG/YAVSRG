@@ -1,5 +1,5 @@
-﻿using static Prelude.Gameplay.Watchers.ScoreSystem;
-using Prelude.Gameplay.Watchers.Scoring;
+﻿using static Prelude.Gameplay.ScoreMetrics.ScoreSystem;
+using Prelude.Gameplay.ScoreMetrics.Accuracy;
 using Prelude.Utilities;
 using Interlude.Interface.Dialogs;
 using Interlude.Options;

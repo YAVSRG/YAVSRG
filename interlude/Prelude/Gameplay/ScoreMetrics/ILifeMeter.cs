@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Prelude.Gameplay.Watchers
+namespace Prelude.Gameplay.ScoreMetrics
 {
-    public abstract class ILifeMeter : IGameplayWatcher
+    public abstract class ILifeMeter : IScoreMetric
     {
         protected float MaximumHP = 100;
         protected float CurrentHP = 100;

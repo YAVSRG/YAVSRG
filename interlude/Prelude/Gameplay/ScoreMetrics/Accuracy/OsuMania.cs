@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Prelude.Utilities;
 
-namespace Prelude.Gameplay.Watchers.Scoring
+namespace Prelude.Gameplay.ScoreMetrics.Accuracy
 {
     [DataTemplate("OD", "Default", 9f, "Min", 0f, "Max", 10f, "Step", 0.1f)]
     public class OsuMania : ScoreSystem

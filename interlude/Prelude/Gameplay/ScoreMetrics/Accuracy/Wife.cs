@@ -1,7 +1,7 @@
 ﻿using System;
 using Prelude.Utilities;
 
-namespace Prelude.Gameplay.Watchers.Scoring
+namespace Prelude.Gameplay.ScoreMetrics.Accuracy
 {
     public class Wife : DancePoints
     {

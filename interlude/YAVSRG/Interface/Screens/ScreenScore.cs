@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.ScoreMetrics;
 using Prelude.Gameplay.DifficultyRating;
 using Prelude.Gameplay;
 using Interlude.IO;

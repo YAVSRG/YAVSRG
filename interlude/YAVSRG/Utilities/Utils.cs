@@ -34,7 +34,7 @@ namespace Interlude
             int seconds = (int)(ms / 1000) % 60;
             int minutes = (int)Math.Floor(ms % 3600000 / 60000);
             int hours = (int)Math.Floor(ms / 3600000);
-            return hours > 0 ? hours.ToString() + ":" +minutes.ToString().PadLeft(2,'0') + ":" + seconds.ToString().PadLeft(2, '0') : minutes.ToString() + ":" + seconds.ToString().PadLeft(2, '0');
+            return hours > 0 ? hours.ToString() + ":" + minutes.ToString().PadLeft(2, '0') + ":" + seconds.ToString().PadLeft(2, '0') : minutes.ToString() + ":" + seconds.ToString().PadLeft(2, '0');
         }
 
         public static T LoadObject<T>(string path) //reads an object of a given type from a file (this is how most data is stored and loaded)
@@ -100,7 +100,7 @@ namespace Interlude
             }
             if (goodness > 127) //goodness measures how vibrant the color is. if less than 127 it's likely a shade of grey/black/white so the default color is used instead
             {
-                Game.Screens.ChangeThemeColor(Color.FromArgb(255,best));
+                Game.Screens.ChangeThemeColor(Color.FromArgb(255, best));
             }
             else
             {

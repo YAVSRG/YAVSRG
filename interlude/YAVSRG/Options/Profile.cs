@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using OpenTK.Input;
 using Newtonsoft.Json;
 using Prelude.Utilities;
-using Prelude.Gameplay.Watchers;
-using Prelude.Gameplay.Watchers.Scoring;
+using Prelude.Gameplay.ScoreMetrics;
 using static Prelude.Gameplay.DifficultyRating.KeyLayout;
-using static Prelude.Gameplay.Watchers.ScoreSystem;
+using static Prelude.Gameplay.ScoreMetrics.ScoreSystem;
 using Interlude.Gameplay;
 
 namespace Interlude.Options
@@ -58,7 +58,7 @@ namespace Interlude.Options
         public string ChartColorMode = "Nothing";
         public List<ScoreSystemData> ScoreSystems = new List<ScoreSystemData>();
         public int SelectedScoreSystem;
-        //todo: life systems
+        //todo: choice of life systems
         public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
         //todo: move to theme since number of ranks available is dependent on theme
         public float[] GradeThresholds = new float[] { 99, 98, 97, 96, 95, 94, 93, 92, 91, 90 };
@@ -95,6 +95,12 @@ namespace Interlude.Options
             }
             var ss = ScoreSystems[Index];
             return ss.Instantiate();
+        }
+
+        public void Rename(string name)
+        {
+            Name = name;
+            if (ProfilePath == "Default.json") ProfilePath = new Regex("[^a-zA-Z0-9_-]").Replace(name, "") + ".json";
         }
     }
 }

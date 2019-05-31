@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Prelude.Gameplay;
 using Prelude.Gameplay.Charts.YAVSRG;
-using Prelude.Gameplay.Watchers;
+using Prelude.Gameplay.ScoreMetrics;
 using Prelude.Gameplay.DifficultyRating;
 
 namespace Interlude.Gameplay
