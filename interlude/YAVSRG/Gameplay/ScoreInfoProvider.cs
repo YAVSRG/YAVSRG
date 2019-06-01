@@ -39,7 +39,7 @@ namespace Interlude.Gameplay
 
         public string Mods
         {
-            get { if (_mods == null) { _mods = Game.Gameplay.GetModString(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _mods; }
+            get { if (_mods == null) { _mods = Game.Gameplay.GetModString(Game.Gameplay.GetModifiedChart(_score.selectedMods, _chart), _score.rate, _score.layout); } return _mods; }
         }
 
         public ScoreSystem ScoreSystem
@@ -68,7 +68,7 @@ namespace Interlude.Gameplay
 
         public RatingReport RatingData
         {
-            get { if (_rating == null) { _rating = new RatingReport(Game.Gameplay.GetModifiedChart(_score.mods, _chart), _score.rate, _score.layout); } return _rating; }
+            get { if (_rating == null) { _rating = new RatingReport(Game.Gameplay.GetModifiedChart(_score.selectedMods, _chart), _score.rate, _score.layout); } return _rating; }
         }
 
         public float PhysicalPerformance

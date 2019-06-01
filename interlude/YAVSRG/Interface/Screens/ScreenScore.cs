@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Prelude.Gameplay.ScoreMetrics;
+using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
 using Prelude.Gameplay;
 using Interlude.IO;
@@ -40,7 +40,7 @@ namespace Interlude.Interface.Screens
                 player = Game.Options.Profile.Name,
                 time = DateTime.Now, hitdata = ScoreTracker.HitDataToString(scoreData.Hitdata),
                 keycount = scoreData.Chart.Keys,
-                mods = new Dictionary<string, string>(Game.Gameplay.SelectedMods),
+                selectedMods = new Dictionary<string, DataGroup>(Game.Gameplay.SelectedMods),
                 rate = (float)Game.Options.Profile.Rate,
                 layout = Game.Options.Profile.KeymodeLayouts[scoreData.Chart.Keys]
             };
@@ -80,7 +80,7 @@ namespace Interlude.Interface.Screens
         public bool ShouldSaveScore()
         {
             //other options i.e dont save if i get an F, dont save if i dont hp clear, dont save if i dont pb
-            if (Game.Gameplay.GetModStatus(Game.Gameplay.SelectedMods) == 2) { return false; }
+            if (scoreData.Chart.ModStatus == 2) { return false; }
             return true;
         }
         

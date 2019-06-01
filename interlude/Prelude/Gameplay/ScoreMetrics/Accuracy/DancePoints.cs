@@ -1,5 +1,4 @@
-﻿using System;
-using Prelude.Utilities;
+﻿using Prelude.Utilities;
 
 namespace Prelude.Gameplay.ScoreMetrics.Accuracy
 {

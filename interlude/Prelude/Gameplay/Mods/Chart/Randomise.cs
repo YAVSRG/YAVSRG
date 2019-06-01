@@ -1,23 +1,26 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using Prelude.Utilities;
 using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Prelude.Gameplay.Mods
 {
+    //Rearranges notes to preserve direct jacks and direct streams
+    //Does not attempt to preserve note density per column but in general this is a good randomiser for non-speed patterns
     public class Randomise : Mod
     {
-        System.Random rand;
+        Random rand;
 
-        public override void Apply(ChartWithModifiers c, string data)
+        public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
-            base.Apply(c, data);
-            rand = new System.Random(0);
-            ushort mask = (ushort)((1 << c.Keys) - 1);
+            rand = new Random(Data.GetValue("Seed", 0));
+            ushort mask = (ushort)((1 << Chart.Keys) - 1);
             ushort lastRow = 0;
             ushort lastOriginalRow = 0;
             ushort newRow;
             ushort allowedBits;
 
-            foreach (GameplaySnap s in c.Notes.Points)
+            foreach (GameplaySnap s in Chart.Notes.Points)
             {
                 newRow = 0;
 
@@ -52,14 +55,16 @@ namespace Prelude.Gameplay.Mods
             return (ushort)(1 << l[rand.Next(0,l.Count)]);
         }
 
-        public override int GetStatus(string data)
+        public override int GetStatus(DataGroup Data)
         {
-            return 2;
+            return 2; //todo: set to 1 once stable
         }
 
-        public override string GetName(string data)
+        public override string GetName(DataGroup Data)
         {
-            return "Randomiser";
+            return "Randomise";
         }
+
+        public new DataGroup DefaultSettings = new DataGroup() { { "Seed", new Random().Next() } };
     }
 }

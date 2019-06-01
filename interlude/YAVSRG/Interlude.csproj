@@ -124,6 +124,7 @@
     <Compile Include="Gameplay\Mods\Visual\DownScroll.cs" />
     <Compile Include="Gameplay\NoteRenderer.cs" />
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />
+    <Compile Include="Gameplay\ScoreSavingPreference.cs" />
     <Compile Include="Gameplay\TopScore.cs" />
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
@@ -306,6 +307,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\Localisation\en-US.txt" />
     <None Include="DiscordRPC.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

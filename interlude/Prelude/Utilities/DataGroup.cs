@@ -26,7 +26,7 @@ namespace Prelude.Utilities
                     dynamic converted = Convert.ChangeType(v, v.GetType());
                     return (T)converted;
                 }
-                catch (Exception e)
+                catch
                 {
                     //silently fail
                 }

@@ -17,10 +17,12 @@ namespace Interlude.Options
         public Color MenuFont = Color.White;
         public Color SelectChart = Color.FromArgb(0, 180, 110);
         public Color DefaultThemeColor = Color.FromArgb(0, 160, 255);
+
         //todo: move to widget data
         public bool JudgementPerColumn = false;
         public bool JudgementShowMarv = false;
         public float JudgementFadeTime = 1500f; //milliseconds
+
         public int ColumnWidth = 150;
         public float NoteDepth = 20f;
         public bool FlipHoldTail = true;
@@ -48,43 +50,6 @@ namespace Interlude.Options
             bounds = bounds.FlipY(); //all these flips are to make downscroll the right way up
             SpriteBatch.Draw(NoteTexture(keycount), bounds, Color.White, animation, index, GetRotation(column, keycount));
             SpriteBatch.Draw(NoteTexture(keycount) + "-overlay", bounds, Color.White, animation, index, GetRotation(column, keycount), depth: -NoteDepth);
-        }
-
-        public void DrawMine(Rect bounds, int column, int keycount, int index, int animation)
-        {
-            bounds = bounds.FlipY();
-            SpriteBatch.Draw(MineTexture(keycount), bounds, Color.White, animation, index, 0);
-            SpriteBatch.Draw(MineTexture(keycount) + "-overlay", bounds, Color.White, animation, index, 0, depth: -NoteDepth);
-        }
-
-        public void DrawHead(Rect bounds, int column, int keycount, int index, int animation)
-        {
-            bounds = bounds.FlipY();
-            SpriteBatch.Draw(HeadTexture(keycount), bounds, Color.White, animation, index, GetRotation(column, keycount));
-            SpriteBatch.Draw(HeadTexture(keycount) + "-overlay", bounds, Color.White, animation, index, GetRotation(column, keycount), depth: -NoteDepth);
-        }
-
-        public void DrawTail(Rect bounds, int column, int keycount, int index, int animation)
-        {
-            int rotation = UseHoldTailTexture ? 0 : GetRotation(column, keycount);
-            if (!(FlipHoldTail && !UseHoldTailTexture))
-            {
-                bounds = bounds.FlipY();
-            }
-            SpriteBatch.Draw(TailTexture(keycount), bounds, Color.White, animation, index, rotation);
-            SpriteBatch.Draw(TailTexture(keycount) + "-overlay", bounds, Color.White, animation, index, rotation, depth: -NoteDepth);
-        }
-
-        public void DrawHold(Rect bounds, int column, int keycount, int index, int animation)
-        {
-            SpriteBatch.Draw(BodyTexture(keycount), bounds, Color.White, animation, index, 0);
-            SpriteBatch.Draw(BodyTexture(keycount) + "-overlay", bounds, Color.White, animation, index, 0, depth: -NoteDepth);
-        }
-
-        public void DrawReceptor(Rect bounds, int column, int keycount, bool pressed)
-        {
-            SpriteBatch.Draw(ReceptorTexture(keycount), bounds, Color.White, 0, pressed ? 1 : 0, GetRotation(column, keycount));
-            SpriteBatch.Draw(ReceptorTexture(keycount) + "-overlay", bounds, Color.White, 0, pressed ? 1 : 0, GetRotation(column, keycount), depth: -NoteDepth);
         }
 
         //NEW STUFF

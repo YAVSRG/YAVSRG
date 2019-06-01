@@ -46,7 +46,7 @@ namespace Interlude.Gameplay
 
             List<TopScore> KeymodeScores = PhysicalBest[k];
             var HitData = ScoreTracker.StringToHitData(Score.hitdata, Score.keycount);
-            ChartWithModifiers ModdedChart = Game.Gameplay.GetModifiedChart(Score.mods, Chart);
+            ChartWithModifiers ModdedChart = Game.Gameplay.GetModifiedChart(Score.selectedMods, Chart);
             float ScoreRating = PlayerRating.GetRating(new RatingReport(ModdedChart, Score.rate, Score.layout), HitData);
             TopScore NewTopScore = new TopScore(Chart.GetFileIdentifier(), Game.Gameplay.ScoreDatabase.GetChartSaveData(Chart).Scores.IndexOf(Score), ScoreRating); //score is added to list after this function is over, so .Count gives correct id
             bool inserted = false;

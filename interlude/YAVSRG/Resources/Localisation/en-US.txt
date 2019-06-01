@@ -1,0 +1,8 @@
+﻿this file is not ready to be used
+
+info. ___
+error. ___
+ui. ___
+desc.option. ___
+desc.mod. ___
+desc.screen. ___

@@ -1,64 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Mods
 {
+    [DataTemplate("all", "Default", 0, "Min", 0, "Max", 1)]
     public class NoLN : Mod
     {
-        public override void Apply(ChartWithModifiers c, string data)
+        public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
-            base.Apply(c, data);
-            if (data == "all")
+            if (Data.GetValue("all", 0) == 1)
             {
-                foreach (GameplaySnap s in c.Notes.Points)
+                foreach (GameplaySnap s in Chart.Notes.Points)
                 {
                     s.ends.value = 0;
                     s.middles.value = 0;
-                    s.taps.value += s.holds.value;
+                    s.taps.value |= s.holds.value;
                     s.holds.value = 0;
                 }
             }
         }
 
-        public override void ApplyToHitData(ChartWithModifiers c, ref HitData[] hitdata, string data)
+        public override void ApplyToHitData(ChartWithModifiers Chart, ref HitData[] HitData, DataGroup Data)
         {
-            if (data == "release")
+            if (Data.GetValue("all", 0) == 0)
             {
-                for (int i = 0; i < hitdata.Length; i++)
+                for (int i = 0; i < HitData.Length; i++)
                 {
-                    for (byte k = 0; k < hitdata[i].hit.Length; k++)
+                    for (byte k = 0; k < HitData[i].hit.Length; k++)
                     {
-                        if (c.Notes.Points[i].ends.GetColumn(k))
+                        if (Chart.Notes.Points[i].ends.GetColumn(k))
                         {
-                            hitdata[i].hit[k] = 0;
+                            HitData[i].hit[k] = 0;
                         }
                     }
                 }
             }
         }
 
-        public override bool IsApplicable(ChartWithModifiers c, string data)
+        public override bool IsApplicable(ChartWithModifiers Chart, DataGroup Data)
         {
-            foreach (GameplaySnap s in c.Notes.Points)
+            foreach (GameplaySnap s in Chart.Notes.Points)
             {
                 if (s.holds.value > 0)
                 {
                     return true;
                 }
             }
-            return true; //debug
+            return false;
         }
 
-        public override string[] Settings { get { return new string[] { "release", "all" }; } }
-
-        public override string GetName(string data)
+        public override string GetName(DataGroup Data)
         {
-            return data == "release" ? "NoReleases" : "NoHolds";
+            return Data.GetValue("all", 0) == 0 ? "No Releases" : "No Holds";
         }
 
-        public override string GetDescription(string data) { return  data == "release" ? "Disables the need to release the ends of hold notes with exact timing, as these are not given judgements.\nYou are still required to be holding them while hitting another other simultaneous notes." : "Removes all hold notes from a chart and replaces them with a tap note where they began."; }
+        public override int GetStatus(DataGroup Data) => 1;
+
+        public override string GetDescription(DataGroup Data) { return Data.GetValue("all", 0) == 0 ? "Disables the need to accurately time releasing the ends of hold notes" : "Replaces all hold notes with a tap note"; }
     }
 }

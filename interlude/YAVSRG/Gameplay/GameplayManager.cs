@@ -4,11 +4,13 @@ using Prelude.Gameplay.Charts.YAVSRG;
 using Prelude.Gameplay.Mods;
 using Prelude.Gameplay.DifficultyRating;
 using Prelude.Gameplay;
+using Prelude.Utilities;
 using Interlude.Gameplay.Charts.Collections;
 using Interlude.IO;
 
 namespace Interlude.Gameplay
 {
+    //Manages the selected chart, its associated data (scores and local offset) and applying selected modifiers to it
     public class GameplayManager
     {
         public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Random", new Randomise() }, { "Manipulate", new Manipulate() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
@@ -19,7 +21,7 @@ namespace Interlude.Gameplay
         public RatingReport ChartDifficulty;
         public ChartSaveData ChartSaveData;
         public CollectionsManager Collections = CollectionsManager.LoadCollections();
-        public Dictionary<string, string> SelectedMods = new Dictionary<string, string>();
+        public Dictionary<string, DataGroup> SelectedMods = new Dictionary<string, DataGroup>();
         public event Action OnUpdateChart = () => { };
 
         public ScoresDB ScoreDatabase = ScoresDB.Load();
@@ -45,7 +47,7 @@ namespace Interlude.Gameplay
         public void UpdateChart()
         {
             if (CurrentChart == null) return;
-            ModifiedChart = GetModifiedChart(SelectedMods);
+            ModifiedChart = GetModifiedChart(SelectedMods, CurrentChart);
             Options.Colorizer.Colorize(ModifiedChart, Game.Options.Profile.ColorStyle);
             UpdateDifficulty();
             OnUpdateChart();
@@ -71,12 +73,12 @@ namespace Interlude.Gameplay
         public void PlaySelectedChart()
         {
             Game.Screens.AddScreen(new Interface.Screens.ScreenPlay());
-            if (Game.Multiplayer.Connected)
+            /*if (Game.Multiplayer.Connected)
             {
                 Game.Multiplayer.SendPacket(new Net.P2P.Protocol.Packets.PacketPlay() {
                     diff = CurrentChart.Data.DiffName, mods = SelectedMods, rate = (float)Game.Options.Profile.Rate,
                     hash = CurrentChart.GetHash(), name = CurrentChart.Data.Title, pack = CurrentChart.Data.SourcePack });
-            }
+            }*/
         }
 
         public void ApplyModsToHitData(ChartWithModifiers c, ref HitData[] hitdata)
@@ -90,32 +92,19 @@ namespace Interlude.Gameplay
             }
         }
 
-        public ChartWithModifiers GetModifiedChart(Dictionary<string,string> SelectedMods)
-        {
-            return GetModifiedChart(SelectedMods, CurrentChart);
-        }
-
-        public ChartWithModifiers GetModifiedChart(Dictionary<string, string> SelectedMods, Chart Base)
+        public ChartWithModifiers GetModifiedChart(Dictionary<string, DataGroup> Mods, Chart Base)
         {
             ChartWithModifiers c = new ChartWithModifiers(Base);
             foreach (string m in Mods.Keys)
             {
-                if (SelectedMods.ContainsKey(m) && Mods[m].IsApplicable(c, SelectedMods[m]))
+                if (this.Mods[m].IsApplicable(c, Mods[m]))
                 {
-                    Mods[m].Apply(c, SelectedMods[m]);
+                    this.Mods[m].Apply(c, Mods[m]);
+                    c.Mods = this.Mods[m].GetName(Mods[m]);
+                    c.ModStatus = Math.Max(c.ModStatus, this.Mods[m].GetStatus(Mods[m]));
                 }
             }
             return c;
-        }
-
-        public int GetModStatus(Dictionary<string,string> SelectedMods)
-        {
-            int s = 0;
-            foreach (string m in SelectedMods.Keys)
-            {
-                s = Math.Max(s, Mods[m].GetStatus(SelectedMods[m]));
-            }
-            return s;
         }
 
         public string GetModString(ChartWithModifiers chart, float rate, KeyLayout.Layout layout)

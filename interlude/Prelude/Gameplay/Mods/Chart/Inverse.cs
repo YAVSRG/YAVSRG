@@ -1,20 +1,20 @@
-﻿using System;
+﻿using Prelude.Utilities;
 using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Prelude.Gameplay.Mods
 {
     public class Inverse : Mod
     {
-        public override void Apply(ChartWithModifiers c, string data)
+        //This modifier is imcomplete and undocumented
+        public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
-            base.Apply(c, data);
             PointManager<GameplaySnap> newSnaps = new PointManager<GameplaySnap>();
-            int count = c.Notes.Count;
+            int count = Chart.Notes.Count;
             GameplaySnap s,n;
 
             for (int i = 0; i < count; i++)
             {
-                s = c.Notes.Points[i];
+                s = Chart.Notes.Points[i];
                 if (i > 0)
                 {
                     n = newSnaps.GetPointAt(s.Offset, true);
@@ -28,7 +28,7 @@ namespace Prelude.Gameplay.Mods
                 if (i > 0)
                 {
                     GameplaySnap temp2 = newSnaps.Points[newSnaps.Count - 1]; //last snap
-                    GameplaySnap temp = (GameplaySnap)temp2.Interpolate(s.Offset - GetGapSize(c, s.Offset));//newSnaps.GetPointAt(s.Offset - GetGapSize(c, s.Offset), true); //find state to form gaps
+                    GameplaySnap temp = (GameplaySnap)temp2.Interpolate(s.Offset - GetGapSize(Chart, s.Offset));//newSnaps.GetPointAt(s.Offset - GetGapSize(c, s.Offset), true); //find state to form gaps
                     foreach (byte k in s.taps.GetColumns()) //all taps
                     {
                         n.holds.SetColumn(k); //turn to start of lns
@@ -77,7 +77,7 @@ namespace Prelude.Gameplay.Mods
             s = newSnaps.Points[newSnaps.Count - 1]; //finalise
             s.ends.value += s.middles.value;
             s.middles.value = 0;
-            c.Notes = newSnaps;
+            Chart.Notes = newSnaps;
         }
 
         float GetGapSize(ChartWithModifiers c, float time)
@@ -89,9 +89,14 @@ namespace Prelude.Gameplay.Mods
         //remove middles (implicitly)
         //replace ends with starts
 
-        public override string GetName(string data)
+        public override string GetName(DataGroup Data)
         {
             return "Inverse (not complete!)";
+        }
+
+        public override int GetStatus(DataGroup Data)
+        {
+            return 2;
         }
     }
 }

@@ -37,11 +37,7 @@ namespace Interlude.Interface.Widgets
                 ScreenUtils.DrawFrame(bounds.Expand(b, b), color);
                 b = bounds.Height; //variable reuse lol.
                 SpriteBatch.Font1.DrawCentredTextToFill(mod, new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + b / 2), Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor); //todo: replace with textbox
-                string s = "Off";
-                if (Game.Gameplay.SelectedMods.ContainsKey(mod))
-                {
-                    s = Game.Gameplay.SelectedMods[mod] == "" ? "On" : Game.Gameplay.SelectedMods[mod];
-                }
+                string s = Game.Gameplay.SelectedMods.ContainsKey(mod) ? "Enabled" : "Disabled";
                 SpriteBatch.Font2.DrawCentredTextToFill(s, new Rect(bounds.Left, bounds.Top + b / 2, bounds.Right, bounds.Bottom), color); //replace with textbox also
             }
 
@@ -52,26 +48,20 @@ namespace Interlude.Interface.Widgets
                 if (ScreenUtils.MouseOver(bounds))
                 {
                     hover = true;
-                    infobox.SetText(Game.Gameplay.Mods[mod].GetDescription(Game.Gameplay.SelectedMods.ContainsKey(mod) ? Game.Gameplay.SelectedMods[mod] : ""));
+                    infobox.SetText(Game.Gameplay.Mods[mod].GetDescription(Game.Gameplay.SelectedMods.ContainsKey(mod) ? Game.Gameplay.SelectedMods[mod] : Game.Gameplay.Mods[mod].DefaultSettings));
                     if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                     {
-                        string[] o = Game.Gameplay.Mods[mod].Settings;
                         if (Game.Gameplay.SelectedMods.ContainsKey(mod))
                         {
-                            int i = Array.IndexOf(o, Game.Gameplay.SelectedMods[mod]);
-                            if (i + 1 < o.Length)
-                            {
-                                Game.Gameplay.SelectedMods[mod] = o[i + 1];
-                            }
-                            else
-                            {
-                                Game.Gameplay.SelectedMods.Remove(mod);
-                                color.Target = 0;
-                            }
+                            Game.Gameplay.SelectedMods.Remove(mod);
+                            color.Target = 0;
                         }
                         else
                         {
-                            Game.Gameplay.SelectedMods.Add(mod, o.Length == 0 ? "" : Game.Gameplay.Mods[mod].Settings[0]);
+                            Game.Gameplay.SelectedMods.Add(mod, Game.Gameplay.Mods[mod].DefaultSettings);
+                            Game.Screens.AddDialog(new Dialogs.ConfigDialog(
+                                (s) => { }, "Configure Mod", Game.Gameplay.SelectedMods[mod], Game.Gameplay.Mods[mod].GetType()
+                                ));
                             color.Target = 1;
                         }
                         Game.Gameplay.UpdateChart();

@@ -1,34 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Mods
 {
+    //This mod sets all hits to dead on 0ms hits and marks every note as hit.
+    //Allows the player to see the file play through without disabling HP systems/having to see the feedback for missing
     public class AutoPlay : Mod
     {
-        public override void ApplyToHitData(ChartWithModifiers c, ref HitData[] hitdata, string data)
+        public override void ApplyToHitData(ChartWithModifiers Chart, ref HitData[] HitData, DataGroup Data)
         {
-            for (int i = 0; i < hitdata.Length; i++)
+            for (int i = 0; i < HitData.Length; i++)
             {
-                for (byte k = 0; k < hitdata[i].hit.Length; k++)
+                for (byte k = 0; k < HitData[i].hit.Length; k++)
                 {
-                    if (hitdata[i].hit[k] == 1)
+                    if (HitData[i].hit[k] == 1)
                     {
-                        hitdata[i].hit[k] = 2;
+                        HitData[i].hit[k] = 2; //Marks all "needs to be hit" objects as "hit"
                     }
                 }
             }
         }
 
-        public override int GetStatus(string data) { return 2; }
+        public override int GetStatus(DataGroup Data) { return 2; } //No auto score should be saved
 
-        public override string GetName(string data)
-        {
-            return "Auto";
-        }
+        public override string GetName(DataGroup Data) { return "Auto"; }
 
-        public override string GetDescription(string data) { return "Automatically plays the chart for you! (With perfect accuracy)"; }
+        public override string GetDescription(DataGroup Data) { return "Automatically plays the chart for you"; }
     }
 }
