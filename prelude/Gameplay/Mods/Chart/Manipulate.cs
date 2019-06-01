@@ -1,17 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Prelude.Utilities;
 using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Prelude.Gameplay.Mods
 {
+    //This modifier is incomplete and undocumented
     public class Manipulate : Mod
     {
-        public override void Apply(ChartWithModifiers c, string data)
+        public override bool IsApplicable(ChartWithModifiers Chart, DataGroup Data)
         {
-            if (c.Keys != 4) return;
-            base.Apply(c, data);
+            return (Chart.Keys == 4);
+        }
+
+        public override void Apply(ChartWithModifiers Chart, DataGroup Data)
+        {
             List<GameplaySnap> newPoints = new List<GameplaySnap>();
-            int count = c.Notes.Count;
+            int count = Chart.Notes.Count;
             ushort left, right;
             ushort lmask = 3;
             ushort rmask = 12;
@@ -24,18 +28,18 @@ namespace Prelude.Gameplay.Mods
             {
                 left = 0; right = 0;
                 ltimes.Clear();
-                var p = c.Timing.BPM.GetPointAt(c.Notes.Points[i].Offset, false);
-                lim = c.Notes.Points[i].Offset - (c.Notes.Points[i].Offset - p.Offset) % (p.MSPerBeat) + (p.MSPerBeat);
+                var p = Chart.Timing.BPM.GetPointAt(Chart.Notes.Points[i].Offset, false);
+                lim = Chart.Notes.Points[i].Offset - (Chart.Notes.Points[i].Offset - p.Offset) % (p.MSPerBeat) + (p.MSPerBeat);
 
-                while (i < count && c.Notes.Points[i].Offset <= lim)
+                while (i < count && Chart.Notes.Points[i].Offset <= lim)
                 {
-                    if ((left & c.Notes.Points[i].taps.value & lmask) > 0)
+                    if ((left & Chart.Notes.Points[i].taps.value & lmask) > 0)
                     {
                         newPoints.Add(new GameplaySnap(mean(ltimes), left, 0, 0, 0, 0));
                         left = 0;
                         ltimes.Clear();
                     }
-                    if ((right & c.Notes.Points[i].taps.value & rmask) > 0)
+                    if ((right & Chart.Notes.Points[i].taps.value & rmask) > 0)
                     {
                         //if (newPoints.Count > 0 && mean(rtimes) == newPoints[newPoints.Count - 1].Offset)
                         {
@@ -48,15 +52,15 @@ namespace Prelude.Gameplay.Mods
                         right = 0;
                         rtimes.Clear();
                     }
-                    if ((c.Notes.Points[i].taps.value & lmask) > 0)
+                    if ((Chart.Notes.Points[i].taps.value & lmask) > 0)
                     {
-                        left |= (ushort)(c.Notes.Points[i].taps.value & lmask);
-                        ltimes.Add(c.Notes.Points[i].Offset);
+                        left |= (ushort)(Chart.Notes.Points[i].taps.value & lmask);
+                        ltimes.Add(Chart.Notes.Points[i].Offset);
                     }
-                    if ((c.Notes.Points[i].taps.value & rmask) > 0)
+                    if ((Chart.Notes.Points[i].taps.value & rmask) > 0)
                     {
-                        right |= (ushort)(c.Notes.Points[i].taps.value & rmask);
-                        rtimes.Add(c.Notes.Points[i].Offset);
+                        right |= (ushort)(Chart.Notes.Points[i].taps.value & rmask);
+                        rtimes.Add(Chart.Notes.Points[i].Offset);
                     }
                     i++;
                 }
@@ -77,7 +81,7 @@ namespace Prelude.Gameplay.Mods
                 }
             }
             newPoints.Sort((a, b) => a.Offset.CompareTo(b.Offset));
-            c.Notes = new PointManager<GameplaySnap>(newPoints);
+            Chart.Notes = new PointManager<GameplaySnap>(newPoints);
         }
 
         private float mean(List<float> data)
@@ -90,12 +94,12 @@ namespace Prelude.Gameplay.Mods
             return r / data.Count;
         }
 
-        public override int GetStatus(string data)
+        public override int GetStatus(DataGroup Data)
         {
             return 2;
         }
 
-        public override string GetName(string data)
+        public override string GetName(DataGroup Data)
         {
             return "Manipulate";
         }

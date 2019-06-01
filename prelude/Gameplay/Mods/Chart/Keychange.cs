@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Mods
 {
+    //This modifier is incomplete and undocumented
     public class Keychange : Mod
     {
         ushort[] jack = new ushort[] { 1, 2, 8, 16 };
@@ -13,23 +11,17 @@ namespace Prelude.Gameplay.Mods
         ushort[] backupNotes = new ushort[] { 7, 14, 14, 28 };
         ushort[] criteria = new ushort[] { 1, 2, 4, 8 };
 
-        public override bool IsApplicable(ChartWithModifiers c, string data)
+        public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
-            return base.IsApplicable(c, data);
-        }
-
-        public override void Apply(ChartWithModifiers c, string data)
-        {
-            base.Apply(c, data);
             ushort prev = 0;
             List<GameplaySnap> newNotes = new List<GameplaySnap>();
-            c.Keys = 5;
-            foreach (GameplaySnap s in c.Notes.Points)
+            Chart.Keys = 5;
+            foreach (GameplaySnap s in Chart.Notes.Points)
             {
                 prev = GetValue((ushort)(s.taps.value | s.holds.value), prev);
                 newNotes.Add(new GameplaySnap(s.Offset, prev, 0, 0, 0, 0));
             }
-            c.Notes.Points = newNotes;
+            Chart.Notes.Points = newNotes;
         }
 
         ushort GetValue(ushort input, ushort previous)
@@ -60,14 +52,14 @@ namespace Prelude.Gameplay.Mods
             return output;
         }
 
-        public override string GetName(string data)
+        public override int GetStatus(DataGroup Data)
         {
-            return "KeyChange";
+            return 2;
         }
 
-        public override string GetDescription(string data)
+        public override string GetName(DataGroup Data)
         {
-            return base.GetDescription(data);
+            return "KeyChange";
         }
     }
 }

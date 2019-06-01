@@ -1,25 +1,25 @@
-﻿using System;
+﻿using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Mods
 {
     public class NoSV : Mod
     {
-        public override bool IsApplicable(ChartWithModifiers c, string data)
+        //Removes SV changes from a chart
+        public override bool IsApplicable(ChartWithModifiers Chart, DataGroup Data)
         {
-            return c.Timing.ContainsSV();
+            return Chart.Timing.ContainsSV();
         }
 
-        public override void Apply(ChartWithModifiers c, string data)
+        public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
-            base.Apply(c, data);
-            c.Timing.SetBlankSVData();
+            Chart.Timing.SetBlankSVData();
         }
 
-        public override string GetName(string data)
+        public override string GetName(DataGroup Data)
         {
             return "NoSV";
         }
 
-        public override string GetDescription(string data) { return "Removes all slider velocity (scroll speed) changes from a chart."; }
+        public override string GetDescription(DataGroup Data) { return "Removes all scroll speed changes from a chart."; }
     }
 }

@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Prelude.Gameplay.Charts.YAVSRG;
-using Prelude.Gameplay.ScoreMetrics;
+using Prelude.Utilities;
 
 namespace Prelude.Gameplay
 {
@@ -23,8 +19,8 @@ namespace Prelude.Gameplay
         //uuid of the profile that got that score (so if you change profile name the score can be connected to the same profile still)
         public string playerUUID;
 
-        //dictionary of the mod configuration (todo: rewrite mod system)
-        public Dictionary<string, string> mods;
+        //dictionary of the mod configuration
+        public Dictionary<string, DataGroup> selectedMods = new Dictionary<string, DataGroup>();
 
         //rate chart was played at
         public float rate;

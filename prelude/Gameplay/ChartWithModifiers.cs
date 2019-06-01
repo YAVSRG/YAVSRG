@@ -9,11 +9,12 @@ namespace Prelude.Gameplay
         public int Keys;
         public PointManager<GameplaySnap> Notes;
         public SVManager Timing;
-        private string mods;
+        private string AppliedMods;
+        public int ModStatus;
 
         public ChartWithModifiers(Chart baseChart)
         {
-            mods = "";
+            AppliedMods = "";
             Keys = baseChart.Keys;
             Timing = new SVManager(baseChart.Timing);
             //todo: duplicate timing points too since otherwise mods can edit original chart in memory
@@ -30,8 +31,8 @@ namespace Prelude.Gameplay
         //get is used to give a string representation of mods applied
         public string Mods
         {
-            get { return mods; }
-            set { mods += ", " + value; }
+            get { return AppliedMods; }
+            set { AppliedMods += ", " + value; }
         }
     }
 }

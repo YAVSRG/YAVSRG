@@ -1,42 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Mods
 {
     public class Wave : Mod
     {
-        public override void Apply(ChartWithModifiers c, string data)
+        //This is a temporary testing mod so it is undocumented
+        public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
-            base.Apply(c, data);
-            if (c.Timing.BPM.Count == 0) return;
-            float t = c.Timing.BPM.Points[0].Offset;
-            float step = c.Timing.BPM.Points[0].MSPerBeat;
-            double x = Math.PI * 2 / c.Timing.BPM.Points[0].Meter;
+            if (Chart.Timing.BPM.Count == 0) return;
+            float t = Chart.Timing.BPM.Points[0].Offset;
+            float step = Chart.Timing.BPM.Points[0].MSPerBeat;
+            double x = Math.PI * 2 / Chart.Timing.BPM.Points[0].Meter;
             double y = 0;
-            while (t < c.Notes.Points[c.Notes.Points.Count - 1].Offset)
+            while (t < Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset)
             {
-                for (byte k = 0; k < c.Keys; k++)
+                for (byte k = 0; k < Chart.Keys; k++)
                 {
-                    c.Timing.SV[k + 1].AppendPoint(new Charts.YAVSRG.SVPoint(t, 1 + 0.1f * (float)Math.Sin(y + x * k)));
+                    Chart.Timing.SV[k + 1].AppendPoint(new Charts.YAVSRG.SVPoint(t, 1 + 0.1f * (float)Math.Sin(y + x * k)));
                 }
                 t += step;
                 y += x;
             }
         }
 
-        public override string GetName(string data)
+        public override string GetName(DataGroup Data)
         {
-            return "W A V E";
+            return "Seasick";
         }
 
-        public override int GetStatus(string data)
+        public override int GetStatus(DataGroup Dataa)
         {
             return 2;
         }
 
-        public override string GetDescription(string data) { return "Makes notes W A V Y"; }
+        public override string GetDescription(DataGroup Data) { return "Makes notes W A V Y"; }
     }
 }
