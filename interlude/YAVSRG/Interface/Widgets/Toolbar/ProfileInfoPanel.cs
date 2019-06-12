@@ -4,19 +4,8 @@ using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets.Toolbar
 {
-    public class ProfileInfoPanel : ToolbarWidget
+    class ProfileInfoPanel : Widget
     {
-        public ProfileInfoPanel()
-        {
-            /*
-            AddChild(new TextBox(() => Game.Options.Profile.Name, AnchorType.MIN, 0, true, () => Game.Options.Theme.MenuFont, () => Game.Screens.DarkColor)
-                .PositionTopLeft(0, 80, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(400, 30, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new TextBox(() => Utils.RoundNumber(Game.Options.Profile.Stats.PhysicalMean[Game.CurrentChart.Keys - 3]), AnchorType.MIN, 0, true, () => Game.Options.Theme.MenuFont, () => Utils.PhysicalColor(Game.Options.Profile.Stats.PhysicalMean[Game.CurrentChart.Keys - 3]))
-                .PositionTopLeft(0, 40, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(60, 00, AnchorType.MIN, AnchorType.MAX));
-            AddChild(new TextBox(() => Utils.RoundNumber(Game.Options.Profile.Stats.TechnicalMean[Game.CurrentChart.Keys - 3]), AnchorType.MIN, 0, true, () => Game.Options.Theme.MenuFont, () => Utils.TechnicalColor(Game.Options.Profile.Stats.PhysicalMean[Game.CurrentChart.Keys - 3]))
-                .PositionTopLeft(60, 40, AnchorType.MIN, AnchorType.MAX).PositionBottomRight(120, 00, AnchorType.MIN, AnchorType.MAX));*/
-        }
-
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);

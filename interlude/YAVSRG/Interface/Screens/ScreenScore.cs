@@ -49,6 +49,10 @@ namespace Interlude.Interface.Screens
                 Game.Gameplay.ChartSaveData.Scores.Add(score);
                 Game.Options.Profile.Stats.SetScore(score, Game.Gameplay.CurrentChart);
                 Game.Gameplay.SaveScores();
+                if (Game.Multiplayer.Connected)
+                {
+                    Game.Multiplayer.SendPacket(new Net.P2P.Protocol.Packets.PacketScore() { score = score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
+                }
             }
 
             //update stats
@@ -70,6 +74,7 @@ namespace Interlude.Interface.Screens
         {
             base.OnEnter(prev);
             Game.Audio.OnPlaybackFinish = Game.Audio.Stop;
+            Game.Screens.Toolbar.Icons.Filter(0b00000001);
         }
 
         public override void OnExit(Screen next)

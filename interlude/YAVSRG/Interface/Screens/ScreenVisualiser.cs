@@ -40,11 +40,12 @@ namespace Interlude.Interface.Screens
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
-            Game.Screens.Logo.MoveRelative(new Rect(-400, -400, 400, 400), GetBounds());
+            Game.Screens.Logo.Move(new Rect(-400, -400, 400, 400));
             Game.Screens.BackgroundDim.Target = 1;
             Game.Screens.Toolbar.SetState(WidgetState.NORMAL);
             Game.Screens.Parallax.Target *= 4;
             Game.Audio.OnPlaybackFinish = () => { NextTrack(); };
+            Game.Screens.Toolbar.Icons.Filter(0b00011101);
         }
 
         public override void OnExit(Screen next)

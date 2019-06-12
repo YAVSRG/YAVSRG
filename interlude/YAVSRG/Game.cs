@@ -15,7 +15,7 @@ namespace Interlude
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.7.1";
+        public static readonly string Version = "Interlude v0.3.7.2";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
@@ -25,7 +25,7 @@ namespace Interlude
         protected ScreenManager screens;
         protected TrayIcon trayIcon;
         protected TaskManager taskManager;
-        protected P2PManager netManager;
+        protected NetManager netManager;
 
         public float FPS;
 
@@ -59,7 +59,7 @@ namespace Interlude
             get { return Instance.taskManager; }
         }
 
-        public static P2PManager Multiplayer
+        public static NetManager Multiplayer
         {
             get { return Instance.netManager; }
         }
@@ -84,15 +84,14 @@ namespace Interlude
             audio = new MusicPlayer(); //init my music player
 
             gameplay = new GameplayManager();
+            taskManager = new TaskManager();
+            trayIcon = new TrayIcon();
             screens = new ScreenManager();
             screens.Toolbar = new Toolbar();
             screens.AddScreen(new Interface.Screens.ScreenLoading(s));
-            taskManager = new TaskManager();
-            netManager = new P2PManager();
-            trayIcon = new TrayIcon();
+            netManager = new NetManager();
 
             ApplyWindowSettings(Options.General); //apply window settings from options
-            
             Discord.Init();
         }
 
@@ -145,8 +144,8 @@ namespace Interlude
 
         protected override void OnRenderFrame(FrameEventArgs e) //frame rendering code. runs every frame.
         {
-            base.OnRenderFrame(e);
             if (!Visible) return;
+            base.OnRenderFrame(e);
             SpriteBatch.Begin(ScreenUtils.ScreenWidth*2, ScreenUtils.ScreenHeight*2); //start my render code
             screens.Draw();
             SpriteBatch.End();
@@ -174,12 +173,15 @@ namespace Interlude
         protected override void OnUnload(EventArgs e)
         {
             base.OnUnload(e);
-            gameplay.Unload();
-            gameplay.SaveScores();
-            gameplay.Collections.Save();
-            trayIcon.Destroy();
-            taskManager.StopAll();
-            netManager.Disconnect();
+            if (gameplay != null)
+            {
+                gameplay.Unload();
+                gameplay.SaveScores();
+                gameplay.Collections.Save();
+            }
+            trayIcon?.Destroy();
+            taskManager?.StopAll();
+            netManager?.Disconnect();
             Discord.Shutdown();
             options.Save(); //remember to dump any updated profile settings to file
         }

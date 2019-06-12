@@ -15,7 +15,8 @@ namespace Interlude.Interface.Dialogs
             TL_DeprecateMe(100, ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(100, -ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MAX, AnchorType.MAX);
             Move(new Rect(100, 100, 100, 100));
             Data = data;
-            AddChild(new TextBox(Data.FormattedAccuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).BR_DeprecateMe(300, 100, AnchorType.MIN, AnchorType.MIN));
+            AddChild(new TextBox(Data.FormattedAccuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).BR_DeprecateMe(200, 100, AnchorType.MIN, AnchorType.MIN));
+            Game.Multiplayer.SendPacket(new Net.P2P.Protocol.Packets.PacketScore() { score = data.Score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
         }
 
         public override void Draw(Rect bounds)

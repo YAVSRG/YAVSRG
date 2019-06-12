@@ -10,6 +10,7 @@ namespace Interlude.Interface.Widgets
         public float MarginX = 10, MarginY = 10, RowSpacing = 5, ColumnSpacing = 10;
         public float ScrollPosition;
         public int VisibleIndexTop, VisibleIndexBottom;
+        public bool FlowFromRight;
         protected float ContentSize;
         AnimationSlider ScrollBarPosition;
         AnimationColorMixer ScrollBarColor;
@@ -78,7 +79,8 @@ namespace Interlude.Interface.Widgets
                             y += widgetBounds.Height + RowSpacing;
                         }
                         ContentSize = y + widgetBounds.Height;
-                        w.MoveRelative(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds);
+                        var offset = FlowFromRight ? widgetBounds.Width + bounds.Width - x : x;
+                        w.MoveRelative(new Rect(offset - widgetBounds.Width, y, offset, y + widgetBounds.Height), bounds);
                         x += ColumnSpacing;
                         if (ContentSize > bounds.Top && y < bounds.Bottom)
                         {
@@ -124,7 +126,8 @@ namespace Interlude.Interface.Widgets
                 y += widgetBounds.Height + RowSpacing;
             }
             base.AddChild(child);
-            child.RepositionRelative(new Rect(x - widgetBounds.Width, y, x, y + widgetBounds.Height), bounds);
+            var offset = FlowFromRight ? widgetBounds.Width + bounds.Width - x : x;
+            child.RepositionRelative(new Rect(offset - widgetBounds.Width, y, offset, y + widgetBounds.Height), bounds);
         }
 
         public void ScrollTo(int index)

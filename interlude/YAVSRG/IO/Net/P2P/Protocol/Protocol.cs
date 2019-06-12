@@ -6,7 +6,7 @@ namespace Interlude.Net.P2P.Protocol
 {
     public class Protocol
     {
-        public static readonly int PROTOCOLVERSION = 2;
+        public static readonly int PROTOCOLVERSION = 3;
 
         public static string WritePacket(object Packet)
         {

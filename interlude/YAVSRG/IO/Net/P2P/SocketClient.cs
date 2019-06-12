@@ -7,6 +7,8 @@ namespace Interlude.Net.P2P
 {
     public class SocketClient : SocketWrapper
     {
+        public bool Connected;
+
         public SocketClient(long ip) : base(null)
         {
             try
@@ -20,6 +22,7 @@ namespace Interlude.Net.P2P
                 PacketMessage.OnReceive += HandleMessage;
                 PacketPlay.OnReceive += HandlePlay;
                 PacketDisconnect.OnReceive += HandleDisconnect;
+                Connected = true;
             }
             catch (Exception e)
             {
@@ -42,7 +45,10 @@ namespace Interlude.Net.P2P
 
         public override void Disconnect()
         {
-            SendPacket(new PacketDisconnect());
+            if (Connected)
+            {
+                SendPacket(new PacketDisconnect());
+            }
             base.Disconnect();
         }
 

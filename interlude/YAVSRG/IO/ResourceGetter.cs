@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Reflection;
 using System.IO;
 
 namespace Interlude.IO
 {
+    //todo: GetFile to reduce code duplication
     public class ResourceGetter
     {
         static readonly string[] menu = LoadSplashes("Interlude.Resources.MenuSplashes.txt");
@@ -18,16 +15,21 @@ namespace Interlude.IO
 
         static string[] LoadSplashes(string resourceName)
         {
-            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd().Split('\n');
-            }
+            return GetResource(resourceName).Split('\n');
         }
 
         static string RandomSplash(string[] splash)
         {
             return splash[random.Next(0, splash.Length)];
+        }
+
+        static string GetResource(string path)
+        {
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
         }
 
         public static string MenuSplash()
@@ -47,12 +49,12 @@ namespace Interlude.IO
 
         public static string GetShader(string name)
         {
-            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources.Shaders."+name))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd();
-            }
+            return GetResource("Interlude.Resources.Shaders." + name);
         }
 
+        public static string GetCredits()
+        {
+            return GetResource("Interlude.Resources.Credits.txt");
+        }
     }
 }

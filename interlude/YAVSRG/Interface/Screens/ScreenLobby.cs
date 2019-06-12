@@ -6,15 +6,11 @@ namespace Interlude.Interface.Screens
 {
     class ScreenLobby : Screen
     {
-        string lobbyCode = "";
-
+        //will be repurposed for actual multi lobbies managed by the server
         public ScreenLobby()
         {
             AddChild(new FramedButton("Disconnect", Game.Multiplayer.Disconnect).BR_DeprecateMe(300, 100, AnchorType.MIN, AnchorType.MIN));
-            //AddChild(hostButton = new FramedButton("Host a lobby", Game.Multiplayer.HostLobby).PositionBottomRight(300, 100, AnchorType.MIN, AnchorType.MIN));
-            AddChild(new TextEntryBox((s) => { lobbyCode = s; }, () => { return lobbyCode; }, () => { }, () => { Game.Multiplayer.JoinLobby(lobbyCode); }, () => { return "Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to enter lobby code..."; })
-     .TL_DeprecateMe(-250, 20, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(250, 80, AnchorType.CENTER, AnchorType.MIN));
-            //AddChild(new BoolPicker("Play charts together", Game.Multiplayer.SyncCharts, (v) => { Game.Multiplayer.SyncCharts = v; }).PositionTopLeft(-50, 300, AnchorType.CENTER, AnchorType.MIN).PositionBottomRight(50, 350, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new FramedButton("Connect", Game.Multiplayer.Connect).Reposition(0, 0.5f, 0, 0.5f, 100, 0.5f, 50, 0.5f));
         }
 
         public override void Draw(Rect bounds)
@@ -42,6 +38,12 @@ namespace Interlude.Interface.Screens
                 SpriteBatch.Font2.DrawParagraph("Chart picker is highlighted.\nLeft click to give someone chart picker role.\nRight click to kick someone.\nVery much WIP lol", 20f, new Rect(-300, 0, 300, 600), Game.Options.Theme.MenuFont);
             }*/
             SpriteBatch.Font1.DrawJustifiedText("Multiplayer Lobby BETA", 30f, bounds.Right - 10, bounds.Bottom - 60, Game.Options.Theme.MenuFont);
+        }
+
+        public override void OnEnter(Screen prev)
+        {
+            base.OnEnter(prev);
+            Game.Screens.Toolbar.Icons.Filter(0b00001111);
         }
 
         public override void Update(Rect bounds)

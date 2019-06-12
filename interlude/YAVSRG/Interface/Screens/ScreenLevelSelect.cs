@@ -42,6 +42,7 @@ namespace Interlude.Interface.Screens
             Game.Audio.OnPlaybackFinish = () => { Game.Audio.Stop(); Game.Audio.Play((long)Game.CurrentChart.Data.PreviewTime); };
             diffDisplay.ChangeChart(true);
             ChartLoader.OnRefreshGroups += OnUpdateGroups;
+            Game.Screens.Toolbar.Icons.Filter(0b00011111);
         }
 
         public override void OnExit(Screen next)

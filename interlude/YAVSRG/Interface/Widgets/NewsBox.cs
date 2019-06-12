@@ -49,8 +49,8 @@ namespace Interlude.Interface.Widgets
             }
             else
             {
-                SpriteBatch.Font1.DrawCentredTextToFill("Loading...", new Rect(bounds.Left, bounds.Top + h, bounds.Right, bounds.Top + 2 * h), Game.Options.Theme.MenuFont);
-                ScreenUtils.DrawLoadingAnimation(100f * slide, bounds.CenterX, (bounds.Top + t) / 2, loading.value * 0.01f, 255);
+                SpriteBatch.Font1.DrawCentredTextToFill("Loading...", bounds.SliceTop(h*4).SliceBottom(h), Game.Options.Theme.MenuFont);
+                //ScreenUtils.DrawLoadingAnimation(100f * slide, bounds.CenterX, (bounds.Top + t) / 2, loading.value * 0.01f, 255);
             }
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
         }

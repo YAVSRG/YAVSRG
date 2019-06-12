@@ -32,8 +32,7 @@ namespace Interlude.IO
 
         public static void SetPresence(string State, string Details, bool AcceptJoin)
         {
-            Game.Multiplayer.LobbyKey = "e";
-            AcceptJoin &= Game.Multiplayer.LobbyKey != "";
+            //AcceptJoin &= Game.Multiplayer.LobbyKey != "";
             try
             {
                 client.SetPresence(new RichPresence()
@@ -53,7 +52,7 @@ namespace Interlude.IO
                     } : null,
                     Secrets = new Secrets
                     {
-                        JoinSecret = AcceptJoin ? Game.Multiplayer.LobbyKey : ""
+                        JoinSecret = ""//AcceptJoin ? Game.Multiplayer.LobbyKey : ""
                     }
                 });
             }

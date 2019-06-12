@@ -8,7 +8,7 @@ using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets.Toolbar
 {
-    public class ChatBox : ToolbarWidget
+    class ChatBox : Widget
     {
         class ChatChannel
         {
@@ -187,7 +187,7 @@ namespace Interlude.Interface.Widgets.Toolbar
             bounds = GetBounds(bounds);
             if (Collapsed)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Chat) && !ToolbarCollapsed)
+                if (Input.KeyTap(Game.Options.General.Binds.Chat) && ((Interface.Toolbar)Parent).State != WidgetState.DISABLED)
                 {
                     Expand();
                 }
@@ -208,12 +208,6 @@ namespace Interlude.Interface.Widgets.Toolbar
                     Input.ChangeIM(new InputMethod((s) => { entryText = s; }, () => { return entryText; }, () => { }));
                 }
             }
-        }
-
-        public override void OnToolbarCollapse()
-        {
-            base.OnToolbarCollapse();
-            Collapse();
         }
 
         public void AddLine(string channel, string text, bool important)

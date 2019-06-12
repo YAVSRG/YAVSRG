@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Prelude.Utilities;
 
 namespace Interlude.Net.P2P.Protocol.Packets
 {
@@ -13,7 +11,7 @@ namespace Interlude.Net.P2P.Protocol.Packets
         public string name;
         public string pack;
         public string diff;
-        public Dictionary<string, string> mods;
+        public Dictionary<string, DataGroup> mods;
         public float rate;
     }
 }

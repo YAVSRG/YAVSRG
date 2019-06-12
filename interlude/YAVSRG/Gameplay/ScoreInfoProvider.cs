@@ -27,6 +27,11 @@ namespace Interlude.Gameplay
             _hitdata = ScoreTracker.StringToHitData(_score.hitdata, _score.keycount);
         }
 
+        public Score Score
+        {
+            get { return _score; }
+        }
+
         public ChartHeader Data
         {
             get { return _chart.Data; }

@@ -39,7 +39,6 @@ namespace Interlude.Net.P2P
 
         public virtual void Disconnect()
         {
-            if (Closed) return;
             Closed = true;
         }
 

@@ -41,6 +41,7 @@ namespace Interlude.Interface.Screens
         {
             base.OnEnter(prev);
             Game.Instance.FileDrop += HandleFileDrop;
+            Game.Screens.Toolbar.Icons.Filter(0b00010111);
         }
 
         public override void OnExit(Screen next)

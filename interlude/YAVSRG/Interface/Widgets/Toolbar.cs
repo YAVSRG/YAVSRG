@@ -11,44 +11,33 @@ using static Interlude.Interface.ScreenUtils;
 
 namespace Interlude.Interface
 {
-    public class Toolbar : Widget
+    class Toolbar : Widget
     {
-        AnimationSlider _Height, _NotifFade, _TooltipFade;
+        AnimationSlider _Height, _NotifFade, _TooltipFade, _TooltipFade2;
         AnimationSeries _NotifAnimation;
-        string Notification, Tooltip = "";
-        //AnimationColorMixer NotificationColor;
+        public ToolbarIcons Icons = new ToolbarIcons();
+        string Notification;
+        string[] Tooltip, Tooltip2;
         public ChatBox Chat;
         WidgetState CursorMode = WidgetState.NORMAL;
 
         public Toolbar()
         {
+            AddChild(Icons.Reposition(0, 0, 0, 0, 0, 1, 80, 0));
             AddChild(
                 new SpriteButton("buttonback", "Back", Back)
-                .TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(240, 80, AnchorType.MIN, AnchorType.MIN));
-            AddChild(
-                new SpriteButton("buttoninfo", "Notifications", () => { Chat.Expand(); })
-                .TL_DeprecateMe(80, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(0, 80, AnchorType.MAX, AnchorType.MIN));
-            AddChild(
-                new SpriteButton("buttonmusic", "Visualiser", () => { if (!(Game.Screens.Current is ScreenVisualiser) && !(Game.Screens.Current is ScreenScore) && Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); })
-                .TL_DeprecateMe(160, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(80, 80, AnchorType.MAX, AnchorType.MIN));
-            AddChild(
-                new SpriteButton("buttonoptions", "Options", () => { if (!(Game.Screens.Current is ScreenOptions) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenOptions()); })
-                .TL_DeprecateMe(240, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(160, 80, AnchorType.MAX, AnchorType.MIN));
-            AddChild(
-                new SpriteButton("buttonimport", "Import", () => { if (!(Game.Screens.Current is ScreenImport) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenImport()); })
-                .TL_DeprecateMe(320, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(240, 80, AnchorType.MAX, AnchorType.MIN));
-            AddChild(
-                new SpriteButton("buttononline", "Multiplayer", () => { if (!(Game.Screens.Current is ScreenLobby) && !(Game.Screens.Current is ScreenScore)) Game.Screens.AddScreen(new ScreenLobby()); })
-                .TL_DeprecateMe(400, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(320, 80, AnchorType.MAX, AnchorType.MIN));
+                .Reposition(0, 0, 0, 0, 240, 0, 80, 0));
             AddChild(new ProfileInfoPanel());
             AddChild(Chat = new ChatBox());
             AddChild(new MusicControls());
             Animation.Add(_Height = new AnimationSlider(-5));
-            Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0)); Animation.Add(_TooltipFade = new AnimationSlider(0));
-            Logging.OnLog += (s, d, t) => { if (t != Logging.LogType.Debug) AddNotification(s, Color.White); };
+            Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
+            Animation.Add(_TooltipFade = new AnimationSlider(0)); Animation.Add(_TooltipFade2 = new AnimationSlider(0));
+            Logging.OnLog += (s, d, t) => { if (t != Logging.LogType.Debug) AddNotification(s); };
+            SetTooltip("hello\nworld", "");
         }
 
-        public void AddNotification(string notif, Color color) //todo: use color
+        public void AddNotification(string notif)
         {
             Notification = notif;
             _NotifAnimation.Clear();
@@ -57,17 +46,21 @@ namespace Interlude.Interface
             _NotifAnimation.Add(new AnimationAction(() => { _NotifFade.Target = 0; }));
         }
 
-        public void SetTooltip(string text)
+        public void SetTooltip(string text, string extra)
         {
-            Tooltip = text;
-            _TooltipFade.Val = 1;
+            if (text != "")
+            {
+                Tooltip = text.Split('\n');
+                Tooltip2 = extra.Split('\n');
+                _TooltipFade.Target = 1;
+            }
         }
 
         private void Back()
         {
             if (Game.Screens.Current is ScreenMenu && Game.Tasks.HasTasksRunning())
             {
-                Game.Screens.AddDialog(new Dialogs.ConfirmDialog("You have background tasks running. Are you sure you want to cancel them and quit?", (r) => { if (r == "Y") Game.Screens.PopScreen(); }));
+                Game.Screens.AddDialog(new Dialogs.ConfirmDialog("You have background tasks running. Cancel them and quit?", (r) => { if (r == "Y") Game.Screens.PopScreen(); }));
             }
             else
             {
@@ -78,16 +71,7 @@ namespace Interlude.Interface
         private void Collapse()
         {
             _Height.Target = -5;
-            lock (Children)
-            {
-                foreach (Widget w in Children)
-                {
-                    if (w is ToolbarWidget)
-                    {
-                        ((ToolbarWidget)w).OnToolbarCollapse();
-                    }
-                }
-            }
+            Chat.Collapse();
         }
 
         private void Expand()
@@ -137,7 +121,6 @@ namespace Interlude.Interface
                     SpriteBatch.DrawRect(new Rect(ScreenWidth - i * s - 2, ScreenHeight - level, ScreenWidth - (i + 1) * s + 2, ScreenHeight), Color.FromArgb((int)level, Game.Screens.HighlightColor));
                 }
 
-                //SpriteBatch.Font1.DrawText(Game.Options.Profile.Name, 30f, -ScreenWidth, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("Plays: " + Game.Options.Profile.Stats.TimesPlayed.ToString(), 18f, 0, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("Playtime: " + Utils.FormatTime(Game.Options.Profile.Stats.SecondsPlayed * 1000), 18f, 0, ScreenHeight - _Height + 28, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font2.DrawCentredText("S Ranks: " + Game.Options.Profile.Stats.SRanks, 18f, 0, ScreenHeight - _Height + 51, Game.Options.Theme.MenuFont);
@@ -159,8 +142,15 @@ namespace Interlude.Interface
             if (CursorMode > WidgetState.DISABLED)
             {
                 SpriteBatch.Draw("cursor", new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor);
-                //var b = new Rect(Input.MouseX - 200, Input.MouseY + 50, Input.MouseX + 200, Input.MouseY + 500);
-                //SpriteBatch.DrawRect(b.SliceTop(SpriteBatch.Font2.DrawParagraph(Tooltip, 20f, b, Game.Options.Theme.MenuFont)), Color.FromArgb(80, 0, 0, 0));
+                float f = _TooltipFade * _TooltipFade2;
+                if (f >= 0.001f)
+                {
+                    float x = Math.Min(bounds.Right - 450, Input.MouseX);
+                    float y = Math.Min(bounds.Bottom - 100 - 45 * Tooltip.Length, Input.MouseY);
+                    var b = new Rect(x + 50, y + 50, x + 400, y + 50 + 45 * Tooltip.Length);
+                    SpriteBatch.DrawRect(b, Color.FromArgb((int)(f * 127), 0, 0, 0));
+                    SpriteBatch.Font1.DrawParagraph(Tooltip[0], 30f, b, Color.FromArgb((int)(f * 255), Game.Options.Theme.MenuFont));
+                }
             }
         }
 
@@ -183,7 +173,9 @@ namespace Interlude.Interface
                         SetState(WidgetState.NORMAL);
                     }
                 }
+                _TooltipFade2.Target = Input.KeyPress(OpenTK.Input.Key.Slash) ? 1 : 0;
                 base.Update(bounds.ExpandY(80 - _Height));
+                _TooltipFade.Target = 0;
             }
             else
             {

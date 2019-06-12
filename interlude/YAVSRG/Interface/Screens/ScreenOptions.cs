@@ -20,6 +20,7 @@ namespace Interlude.Interface.Screens
             tabs.AddChild(new GeneralPanel(ib, lp).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
             tabs.AddChild(new GameplayPanel(ib, lp).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
             tabs.AddChild(lp.BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
+            tabs.AddChild(new CreditsPanel(ib).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
             lp.Refresh();
 
             AddChild(tabs.TL_DeprecateMe(200, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(200, 0, AnchorType.MAX, AnchorType.MAX));
@@ -32,6 +33,12 @@ namespace Interlude.Interface.Screens
 
             AddChild(ib.TL_DeprecateMe(0, 200, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(0, 0, AnchorType.MAX, AnchorType.MAX));
 
+        }
+
+        public override void OnEnter(Screen prev)
+        {
+            base.OnEnter(prev);
+            Game.Screens.Toolbar.Icons.Filter(0b00011011);
         }
 
         private Widget ScrollButton(string name, int id, FlowContainer container)

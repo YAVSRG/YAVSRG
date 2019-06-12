@@ -7,9 +7,11 @@ namespace Interlude.Interface
     //Can contain other widgets as children which are anchored relative to themselves.
     public class Widget
     {
-        //todo: replace this with a better anchor system i came up with
-        public AnimationAnchorPoint LeftAnchor, TopAnchor, RightAnchor, BottomAnchor;
-        public AnimationGroup Animation; //animation manager for this widget
+        public AnimationAnchorPoint LeftAnchor { private set; get; }
+        public AnimationAnchorPoint TopAnchor { private set; get; }
+        public AnimationAnchorPoint RightAnchor { private set; get; }
+        public AnimationAnchorPoint BottomAnchor { private set; get; }
+        public AnimationGroup Animation { private set; get; } //animation manager for this widget
 
         protected Widget Parent;
         protected List<Widget> Children;
@@ -56,34 +58,34 @@ namespace Interlude.Interface
             child.RemoveFromContainer(this);
         }
 
-        public float Left(Rect bounds)
+        public float Left(Rect bounds, bool projected = false)
         {
-            return LeftAnchor.GetPosition(bounds.Left, bounds.Right);
+            return LeftAnchor.GetPosition(bounds.Left, bounds.Right, projected);
         }
 
-        public float Top(Rect bounds)
+        public float Top(Rect bounds, bool projected = false)
         {
-            return TopAnchor.GetPosition(bounds.Top, bounds.Bottom);
+            return TopAnchor.GetPosition(bounds.Top, bounds.Bottom, projected);
         }
 
-        public float Right(Rect bounds)
+        public float Right(Rect bounds, bool projected = false)
         {
-            return RightAnchor.GetPosition(bounds.Left, bounds.Right);
+            return RightAnchor.GetPosition(bounds.Left, bounds.Right, projected);
         }
 
-        public float Bottom(Rect bounds)
+        public float Bottom(Rect bounds, bool projected = false)
         {
-            return BottomAnchor.GetPosition(bounds.Top, bounds.Bottom);
+            return BottomAnchor.GetPosition(bounds.Top, bounds.Bottom, projected);
         }
 
-        public Rect GetBounds(Rect containerBounds) //returns the bounds of *this widget* given the bounds of its parent
+        public Rect GetBounds(Rect containerBounds, bool projected = false) //returns the bounds of *this widget* given the bounds of its parent
         {
-            return new Rect(Left(containerBounds), Top(containerBounds), Right(containerBounds), Bottom(containerBounds));
+            return new Rect(Left(containerBounds, projected), Top(containerBounds, projected), Right(containerBounds, projected), Bottom(containerBounds, projected));
         }
 
         public virtual Rect GetBounds() //returns the bounds of *this widget* when no bounds are given (useful for some unusual cases but otherwise you shouldn't be using this)
-            //only use this when you need access to the widget bounds and you're not inside a draw or update call (where you're given them)
-            //it works backwards to find the bounds the widget should have and therefore takes more steps than the one above
+                                        //only use this when you need access to the widget bounds and you're not inside a draw or update call (where you're given them)
+                                        //it works backwards to find the bounds the widget should have and therefore takes more steps than the one above
         {
             if (Parent != null)
             {

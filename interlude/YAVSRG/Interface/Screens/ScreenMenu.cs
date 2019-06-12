@@ -58,6 +58,7 @@ namespace Interlude.Interface.Screens
             OnResize();
             //this won't run in OnResize if we're transitioning to this screen
             Game.Screens.Logo.Move(new Rect(-ScreenUtils.ScreenWidth, -400, -ScreenUtils.ScreenWidth + 800, 400));
+            Game.Screens.Toolbar.Icons.Filter(0b111111);
         }
 
         public override void OnResize()

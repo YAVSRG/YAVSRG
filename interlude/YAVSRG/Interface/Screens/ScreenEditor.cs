@@ -20,6 +20,7 @@ namespace Interlude.Interface.Screens
             base.OnEnter(prev);
             Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
             Game.Audio.SetRate(1.0);
+            Game.Screens.Toolbar.Icons.Filter(0b00000001);
         }
 
         public override void OnExit(Screen next)

@@ -30,6 +30,10 @@ namespace Interlude.Interface
             get { return (Bottom + Top) * 0.5f; }
         }
 
+        public Rect Translate(float x, float y)
+        {
+            return new Rect(Left + x, Top + y, Right + x, Bottom + y);
+        }
         public Rect ExpandX(float x)
         {
             return new Rect(Left - x, Top, Right + x, Bottom);

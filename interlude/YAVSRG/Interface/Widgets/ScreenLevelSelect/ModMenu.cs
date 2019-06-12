@@ -54,17 +54,19 @@ namespace Interlude.Interface.Widgets
                         if (Game.Gameplay.SelectedMods.ContainsKey(mod))
                         {
                             Game.Gameplay.SelectedMods.Remove(mod);
+                            Game.Gameplay.UpdateChart();
                             color.Target = 0;
                         }
                         else
                         {
                             Game.Gameplay.SelectedMods.Add(mod, Game.Gameplay.Mods[mod].DefaultSettings);
                             Game.Screens.AddDialog(new Dialogs.ConfigDialog(
-                                (s) => { }, "Configure Mod", Game.Gameplay.SelectedMods[mod], Game.Gameplay.Mods[mod].GetType()
+                                (s) => {
+                                    Game.Gameplay.UpdateChart();
+                                }, "Configure Mod", Game.Gameplay.SelectedMods[mod], Game.Gameplay.Mods[mod].GetType()
                                 ));
                             color.Target = 1;
                         }
-                        Game.Gameplay.UpdateChart();
                     }
                 }
                 else if (hover)

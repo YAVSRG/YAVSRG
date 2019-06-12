@@ -4,7 +4,7 @@ using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude
 {
-    class Utils
+    public class Utils
     {
         public static int Modulus(int a, int b)
         {

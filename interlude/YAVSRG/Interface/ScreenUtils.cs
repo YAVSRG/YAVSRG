@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using OpenTK;
 using Prelude.Gameplay;
 using Prelude.Gameplay.ScoreMetrics;
 using Interlude.IO;
@@ -45,6 +46,7 @@ namespace Interlude.Interface
 
         public static void DrawGraph(Rect bounds, ScoreSystem scoring, HitData[] data)
         {
+            //todo: make this a widget that uses FBOs
             int snapcount = data.Length;
             SpriteBatch.DrawRect(bounds, Color.FromArgb(150, 0, 0, 0));
             float w = (bounds.Width - 10) / snapcount;
@@ -113,47 +115,6 @@ namespace Interlude.Interface
                 SpriteBatch.Draw("arrow", left + l, top + t, left + l + s, top + t + s, Utils.ColorInterp(min, max, (float)Math.Abs(Math.Sin(value + i * 83))), 0, i % 8, 0);
             }
         }*/
-
-        public static void DrawArc(float x, float y, float r1, float r2, float start, float end, Color c)
-        {
-            float s = (end - start) / 60;
-            for (int i = 0; i < 60; i++)
-            {
-                SpriteBatch.Draw(coords: new OpenTK.Vector2[] {
-                    new OpenTK.Vector2(x + r1 * (float)Math.Cos(start + s*i), y + r1 * (float)Math.Sin(start + s*i)),
-                    new OpenTK.Vector2(x + r2 * (float)Math.Cos(start + s*i), y + r2 * (float)Math.Sin(start + s*i)),
-                    new OpenTK.Vector2(x + r2 * (float)Math.Cos(start + s + s*i), y + r2 * (float)Math.Sin(start + s + s*i)),
-                    new OpenTK.Vector2(x + r1 * (float)Math.Cos(start + s + s*i), y + r1 * (float)Math.Sin(start + s + s*i)),
-                }, color: c);
-            }
-        }
-
-        public static void DrawLoadingAnimation(float scale, float x, float y, float time, int alpha)
-        {
-            float tx, ty;
-            for (int i = 0; i < 6; i++)
-            {
-                tx = x + scale * 1.2f * (float)Math.Cos(time + i * Math.PI / 3);
-                ty = y + scale * 1.2f * (float)Math.Sin(time + i * Math.PI / 3);
-                SpriteBatch.DrawRect(new Rect(tx - 10, ty - 10, tx + 10, ty + 10), Color.FromArgb(alpha,Color.Aqua));
-            }
-
-            for (int i = 0; i < 6; i++)
-            {
-                SpriteBatch.Draw(coords: new OpenTK.Vector2[] {
-                    new OpenTK.Vector2(x - (0.8f*scale-10) * (float)Math.Cos(time + i * Math.PI / 3), y + (0.8f*scale-10) * (float)Math.Sin(time+i*Math.PI/3)),
-                    new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) + 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) + 10 * (float)Math.Cos(time+i*Math.PI/3)),
-                    new OpenTK.Vector2(x - (0.8f*scale+10) * (float)Math.Cos(time + i * Math.PI / 3), y + (0.8f*scale+10) * (float)Math.Sin(time+i*Math.PI/3)),
-                    new OpenTK.Vector2(x - (0.8f*scale) * (float)Math.Cos(time + i * Math.PI / 3) - 10 * (float)Math.Sin(time+i*Math.PI/3), y + (0.8f*scale) * (float)Math.Sin(time+i*Math.PI/3) - 10 * (float)Math.Cos(time+i*Math.PI/3)),
-                }, color: Color.FromArgb(alpha, Color.Aqua));
-            }
-
-            DrawArc(x, y, scale * 0.5f, scale * 0.55f, time, time + 2 * (float)Math.Sin(time), Color.Aquamarine);
-            DrawArc(x, y, scale * 0.5f, scale * 0.55f, time + 3.14f, 3.14f + time + 2 * (float)Math.Sin(time), Color.Aquamarine);
-
-            DrawArc(x, y, scale * 0.95f, scale, -time + 1.57f, 1.57f - time + 2 * (float)Math.Cos(time), Color.Aquamarine);
-            DrawArc(x, y, scale * 0.95f, scale, -time + 4.71f, 4.71f - time + 2 * (float)Math.Cos(time), Color.Aquamarine);
-        }
 
         public static void DrawParallelogramWithBG(Rect bounds, float amount, Color fill, Color frame)
         {
