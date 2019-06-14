@@ -22,7 +22,7 @@ namespace Interlude.Gameplay
         protected int ColumnWidth { get { return Game.Options.Theme.ColumnWidth; } }
         readonly int Keys;
         readonly float ScrollSpeed;
-        readonly bool UseSV; //todo: implement
+        public readonly bool UseSV = true;
 
         protected IVisualMod ScrollScheme;
 
@@ -77,7 +77,7 @@ namespace Interlude.Gameplay
             for (byte k = 0; k < Keys + 1; k++)
             {
                 svindex[k] = Chart.Timing.SV[k].GetLastIndex(now);
-                sv[k] = svindex[k] == -1 ? 1f : Chart.Timing.SV[k].Points[svindex[k]].ScrollSpeed;
+                sv[k] = !UseSV || svindex[k] == -1 ? 1f : Chart.Timing.SV[k].Points[svindex[k]].ScrollSpeed;
             }
 
             holdsInHitpos.value = 0; //tracker of hold notes that need to be shown in the hit position
@@ -92,28 +92,31 @@ namespace Interlude.Gameplay
             {
                 min = Height; //used to see if we've gone off the screen in all columns yet (and therefore stop rendering more notes, they'd be offscreen)
 
-                //calculates main SV, affecting all columns
-                while (svindex[0] < Chart.Timing.SV[0].Count - 1 && Chart.Timing.SV[0].Points[svindex[0] + 1].Offset < Chart.Notes.Points[i].Offset)
+                if (UseSV)
                 {
+                    //calculates main SV, affecting all columns
+                    while (svindex[0] < Chart.Timing.SV[0].Count - 1 && Chart.Timing.SV[0].Points[svindex[0] + 1].Offset < Chart.Notes.Points[i].Offset)
+                    {
+                        for (byte k = 0; k < Keys; k++)
+                        {
+                            pos[k] += ScrollSpeed * sv[0] * sv[k + 1] * (Chart.Timing.SV[0].Points[svindex[0] + 1].Offset - time[k]);
+                            time[k] = Chart.Timing.SV[0].Points[svindex[0] + 1].Offset;
+                        }
+                        svindex[0]++;
+                        sv[0] = Chart.Timing.SV[0].Points[svindex[0]].ScrollSpeed;
+                    }
+
+                    //calculates column specific SV
                     for (byte k = 0; k < Keys; k++)
                     {
-                        pos[k] += ScrollSpeed * sv[0] * sv[k + 1] * (Chart.Timing.SV[0].Points[svindex[0] + 1].Offset - time[k]);
-                        time[k] = Chart.Timing.SV[0].Points[svindex[0] + 1].Offset;
-                    }
-                    svindex[0]++;
-                    sv[0] = Chart.Timing.SV[0].Points[svindex[0]].ScrollSpeed;
-                }
-
-                //calculates column specific SV
-                for (byte k = 0; k < Keys; k++)
-                {
-                    byte j = (byte)(k + 1); //for sv and svindex
-                    while (svindex[j] < Chart.Timing.SV[j].Count - 1 && Chart.Timing.SV[j].Points[svindex[j] + 1].Offset < Chart.Notes.Points[i].Offset)
-                    {
-                        pos[k] += ScrollSpeed * sv[0] * sv[j] * (Chart.Timing.SV[j].Points[svindex[j] + 1].Offset - time[k]);
-                        time[k] = Chart.Timing.SV[j].Points[svindex[j] + 1].Offset;
-                        svindex[j]++;
-                        sv[j] = Chart.Timing.SV[j].Points[svindex[j]].ScrollSpeed;
+                        byte j = (byte)(k + 1); //for sv and svindex
+                        while (svindex[j] < Chart.Timing.SV[j].Count - 1 && Chart.Timing.SV[j].Points[svindex[j] + 1].Offset < Chart.Notes.Points[i].Offset)
+                        {
+                            pos[k] += ScrollSpeed * sv[0] * sv[j] * (Chart.Timing.SV[j].Points[svindex[j] + 1].Offset - time[k]);
+                            time[k] = Chart.Timing.SV[j].Points[svindex[j] + 1].Offset;
+                            svindex[j]++;
+                            sv[j] = Chart.Timing.SV[j].Points[svindex[j]].ScrollSpeed;
+                        }
                     }
                 }
 

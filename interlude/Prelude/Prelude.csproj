@@ -91,6 +91,17 @@
     <Compile Include="Gameplay\ScoreMetrics\Accuracy\StandardScoring.cs" />
     <Compile Include="Gameplay\ScoreMetrics\Accuracy\StandardScoringPlus.cs" />
     <Compile Include="Gameplay\ScoreSavingPreference.cs" />
+    <Compile Include="Net\Protocol\Packets\Packet.cs" />
+    <Compile Include="Net\Protocol\Packets\PacketAuth.cs" />
+    <Compile Include="Net\Protocol\Packets\PacketDisconnect.cs" />
+    <Compile Include="Net\Protocol\Packets\PacketMessage.cs" />
+    <Compile Include="Net\Protocol\Packets\PacketPing.cs" />
+    <Compile Include="Net\Protocol\Packets\PacketPlay.cs" />
+    <Compile Include="Net\Protocol\Packets\PacketScore.cs" />
+    <Compile Include="Net\Protocol\Packets\PacketScoreboard.cs" />
+    <Compile Include="Net\Protocol\Protocol.cs" />
+    <Compile Include="Net\SocketClient.cs" />
+    <Compile Include="Net\SocketWrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\DataGroup.cs" />
     <Compile Include="Utilities\DataTemplateAttribute.cs" />

@@ -4,8 +4,9 @@ using System.Text;
 using System.Net.Sockets;
 using Prelude.Utilities;
 
-namespace Interlude.Net.P2P
+namespace Prelude.Net
 {
+    //Manages a socket connection - Reads packets as they arrive and handles errors/disconnects
     public class SocketWrapper
     {
         protected Socket sock;

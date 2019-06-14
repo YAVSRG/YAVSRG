@@ -285,9 +285,9 @@ namespace Interlude.Interface.Widgets.Toolbar
 
         void SendMessage(string channel, string msg)
         {
-            if (channel == "Lobby" && Game.Multiplayer.Connected)
+            if (channel == "Lobby" && Game.Online.Connected)
             {
-                Game.Multiplayer.SendMessage(msg);
+                Game.Online.SendMessage(msg);
             }
         }
 

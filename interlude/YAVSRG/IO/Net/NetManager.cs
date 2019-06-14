@@ -1,7 +1,8 @@
 ﻿using Prelude.Utilities;
-using Interlude.Net.P2P.Protocol.Packets;
+using Prelude.Net;
+using Prelude.Net.Protocol.Packets;
 
-namespace Interlude.Net.P2P
+namespace Interlude.IO.Net
 {
     public class NetManager
     {
@@ -29,7 +30,7 @@ namespace Interlude.Net.P2P
             {
                 Game.Tasks.AddTask((Output) =>
                 {
-                    Client = new SocketClient(16777343); return Client.Connected;
+                    Client = new SocketClient(16777343); Client.SendPacket(new PacketAuth()); return Client.Connected;
                 }, (t) => Logging.Log(t ? "Connected to remote server" : "Connection failed"), "Connect", false);
             }
         }

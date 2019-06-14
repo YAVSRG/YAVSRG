@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Prelude.Gameplay;
 using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
-using Interlude.Net.P2P.Protocol.Packets;
+using Prelude.Net.Protocol.Packets;
 
 namespace InterludeServer
 {

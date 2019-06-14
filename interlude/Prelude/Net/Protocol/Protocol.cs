@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Prelude.Utilities;
 
-namespace Interlude.Net.P2P.Protocol
+namespace Prelude.Net.Protocol
 {
     public class Protocol
     {

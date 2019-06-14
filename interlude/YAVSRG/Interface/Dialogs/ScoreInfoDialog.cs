@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Prelude.Net.Protocol.Packets;
 using Interlude.Gameplay;
 using Interlude.Interface.Widgets;
 using Interlude.Graphics;
@@ -16,7 +17,7 @@ namespace Interlude.Interface.Dialogs
             Move(new Rect(100, 100, 100, 100));
             Data = data;
             AddChild(new TextBox(Data.FormattedAccuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).BR_DeprecateMe(200, 100, AnchorType.MIN, AnchorType.MIN));
-            Game.Multiplayer.SendPacket(new Net.P2P.Protocol.Packets.PacketScore() { score = data.Score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
+            Game.Online.SendPacket(new PacketScore() { score = data.Score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
         }
 
         public override void Draw(Rect bounds)

@@ -2,9 +2,9 @@
 using System.Net;
 using System.Net.Sockets;
 using Prelude.Utilities;
-using Interlude.Net.P2P.Protocol.Packets;
+using Prelude.Net.Protocol.Packets;
 
-namespace Interlude.Net.P2P
+namespace InterludeServer
 {
     //Hosts a socket server that clients can connect to and get additional game data/multiplayer functionality
     public class SocketServer
@@ -15,12 +15,6 @@ namespace Interlude.Net.P2P
 
         public ClientWrapper[] Clients = new ClientWrapper[1024]; //maximum of 1024 concurrent players
         public bool Running = false;
-        /*
-        public int ChartPicker = 0;
-        private bool Playing = false;
-        private string PlayingHash;
-        private DateTime? ScoreTimeout;
-        private List<Score> Scores;*/
 
         public SocketServer(string Name)
         {
@@ -43,8 +37,6 @@ namespace Interlude.Net.P2P
                 PacketPing.OnReceive += HandlePing;
                 PacketAuth.OnReceive += HandleAuth;
                 PacketMessage.OnReceive += HandleMessage;
-                PacketPlay.OnReceive += HandlePlay;
-                PacketScore.OnReceive += HandleScore;
                 PacketDisconnect.OnReceive += HandleDisconnect;
 
                 Running = true;
@@ -69,8 +61,6 @@ namespace Interlude.Net.P2P
             PacketPing.OnReceive -= HandlePing;
             PacketAuth.OnReceive -= HandleAuth;
             PacketMessage.OnReceive -= HandleMessage;
-            PacketPlay.OnReceive -= HandlePlay;
-            PacketScore.OnReceive -= HandleScore;
             PacketDisconnect.OnReceive -= HandleDisconnect;
             accept.Completed -= OnAccept;
 
@@ -93,21 +83,9 @@ namespace Interlude.Net.P2P
                         Clients[i].Destroy();
                         if (Clients[i].LoggedIn) Broadcast("{c:FFFF00}" + Clients[i].Username + " went offline.");
                         Clients[i] = null;
-                        if (i == 0) //host left for whatever reason
-                        {
-                            Shutdown();
-                        }
                     }
                 }
-            }/*
-            if (Playing && ScoreTimeout != null && (DateTime.Now - ScoreTimeout).Value.TotalMilliseconds > 3000)
-            {
-                SendToAll(new PacketScoreboard() { scores = Scores });
-                Playing = false;
-                Scores.Clear();
-                ScoreTimeout = null;
-                Logging.Log("Timed out while waiting for scores from players", "");
-            }*/
+            }
         }
 
         public void SendToAll(object packet)
@@ -174,76 +152,6 @@ namespace Interlude.Net.P2P
         {
             if (id >= 0)
                 Clients[id]?.Ping();
-        }
-
-        private void HandlePlay(PacketPlay packet, int id)
-        {
-            return;
-            /*
-            if (id >= 0 && Clients[id].LoggedIn)
-            {
-                if (id == ChartPicker)
-                {
-                    Broadcast("{c:DDDDEE}" + Clients[id].Username + " (Chart picker) is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
-                    Playing = true;
-                    PlayingHash = packet.hash;
-                    Scores = new List<Score>();
-                    for (int i = 0; i < Clients.Length; i++)
-                    {
-                        if (Clients[i] != null && Clients[i].LoggedIn)
-                        {
-                            Clients[i].ExpectingScore = true;
-                            if (i != ChartPicker)
-                            {
-                                Clients[i].SendPacket(packet);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    Broadcast("{c:BBBBCC}" + Clients[id].Username + " is playing " + packet.name + " [" + packet.diff + "] from " + packet.pack + " (" + Utils.RoundNumber(packet.rate) + "x)");
-                    if (Playing && packet.hash != PlayingHash)
-                    {
-                        Clients[id].ExpectingScore = false;
-                    }
-                }
-            }*/
-        }
-
-        private void HandleScore(PacketScore packet, int id)
-        {
-            return;
-            /*
-            if (Playing)
-            {
-                if (packet.score != null && Clients[id].ExpectingScore)
-                {
-                    Scores.Add(packet.score);
-                    if (ScoreTimeout == null)
-                    {
-                        ScoreTimeout = DateTime.Now;
-                    }
-                }
-                Clients[id].ExpectingScore = false;
-                bool ExpectingMoreScores = false;
-                for (int i = 0; i < Clients.Length; i++)
-                {
-                    if (Clients[i]?.ExpectingScore == true)
-                    {
-                        ExpectingMoreScores = true;
-                        break;
-                    }
-                }
-                if (!ExpectingMoreScores)
-                {
-                    SendToAll(new PacketScoreboard() { scores = Scores });
-                    Playing = false;
-                    Scores.Clear();
-                    ScoreTimeout = null;
-                    Logging.Log("Got score from all participating players :)", "");
-                }
-            }*/
         }
 
         private void HandleDisconnect(PacketDisconnect packet, int id)

@@ -4,6 +4,7 @@ using System.Drawing;
 using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
 using Prelude.Gameplay;
+using Prelude.Net.Protocol.Packets;
 using Interlude.IO;
 using Interlude.Graphics;
 using Interlude.Gameplay;
@@ -49,9 +50,9 @@ namespace Interlude.Interface.Screens
                 Game.Gameplay.ChartSaveData.Scores.Add(score);
                 Game.Options.Profile.Stats.SetScore(score, Game.Gameplay.CurrentChart);
                 Game.Gameplay.SaveScores();
-                if (Game.Multiplayer.Connected)
+                if (Game.Online.Connected)
                 {
-                    Game.Multiplayer.SendPacket(new Net.P2P.Protocol.Packets.PacketScore() { score = score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
+                    Game.Online.SendPacket(new PacketScore() { score = score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
                 }
             }
 

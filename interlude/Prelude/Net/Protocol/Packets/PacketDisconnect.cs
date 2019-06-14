@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Interlude.Net.P2P.Protocol.Packets
+namespace Prelude.Net.Protocol.Packets
 {
-    public class PacketPing : Packet<PacketPing>
+    public class PacketDisconnect : Packet<PacketDisconnect>
     {
-        public int id;
+        //there's nothing here lol
     }
 }

@@ -2,14 +2,14 @@
 using System.Drawing;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using Prelude.Gameplay.Charts.YAVSRG;
 using Interlude.Graphics;
 using Interlude.Interface;
 using Interlude.Utilities;
-using Interlude.Net.P2P;
 using Interlude.IO;
 using Interlude.IO.Audio;
+using Interlude.IO.Net;
 using Interlude.Gameplay;
-using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude
 {
@@ -59,7 +59,7 @@ namespace Interlude
             get { return Instance.taskManager; }
         }
 
-        public static NetManager Multiplayer
+        public static NetManager Online
         {
             get { return Instance.netManager; }
         }

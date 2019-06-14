@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Net.Sockets;
 using Prelude.Utilities;
+using Prelude.Net;
+using Prelude.Net.Protocol.Packets;
 
-namespace Interlude.Net.P2P
+namespace InterludeServer
 {
+    //Manages a socket connection from elsewhere by handling it logging in and dropping connection if ping response is too long
     public class ClientWrapper : SocketWrapper
     {
         private DateTime lastPingSent = DateTime.Now.AddMinutes(-1);
@@ -21,7 +24,7 @@ namespace Interlude.Net.P2P
         {
             if ((DateTime.Now - lastPingSent).TotalMilliseconds > 10000)
             {
-                SendPacket(new Protocol.Packets.PacketPing() { id = id });
+                SendPacket(new PacketPing() { id = id });
                 lastPingSent = DateTime.Now;
             }
             else if ((lastPingSent - lastPingReceived).TotalMilliseconds > 15000)
@@ -37,9 +40,10 @@ namespace Interlude.Net.P2P
             lastPingReceived = DateTime.Now;
         }
 
-        public void Auth(Protocol.Packets.PacketAuth data)
+        //todo: flesh out to proper authentication
+        public void Auth(PacketAuth data)
         {
-            if (data.protocolversion != Protocol.Protocol.PROTOCOLVERSION)
+            if (data.protocolversion != Prelude.Net.Protocol.Protocol.PROTOCOLVERSION)
             {
                 Logging.Log("Client has a version mismatch", "");
                 Disconnect();

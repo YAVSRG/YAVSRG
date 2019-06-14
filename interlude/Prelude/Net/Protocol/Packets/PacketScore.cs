@@ -1,6 +1,6 @@
 ﻿using Prelude.Gameplay;
 
-namespace Interlude.Net.P2P.Protocol.Packets
+namespace Prelude.Net.Protocol.Packets
 {
     public class PacketScore : Packet<PacketScore>
     {

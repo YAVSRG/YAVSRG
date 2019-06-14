@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Interlude.Net.P2P.Protocol.Packets
+namespace Prelude.Net.Protocol.Packets
 {
-    class PacketDisconnect : Packet<PacketDisconnect>
+    public class PacketMessage : Packet<PacketMessage>
     {
-        //there's nothing here lol
+        public string text;
     }
 }
