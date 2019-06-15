@@ -32,8 +32,11 @@ namespace Prelude.Utilities
         public static void Log(string Main, string Details = "", LogType Type = LogType.Info)
         {
             string s = "[" + Type.ToString() + "] " + Main + (Details == "" ? "" : ": " + Details);
-            LogFileWriter.WriteLine(s); //writes formatted string to log file
-            OnLog?.Invoke(Main, Details, Type); //then runs whatever callbacks have been attached
+            lock (LogFileWriter) //thread safety
+            {
+                LogFileWriter.WriteLine(s); //writes formatted string to log file
+                OnLog?.Invoke(Main, Details, Type); //then runs whatever callbacks have been attached
+            }
         }
 
         //call this method when the program is closing to release the log file

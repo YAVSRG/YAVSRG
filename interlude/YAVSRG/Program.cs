@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
+using System.Diagnostics;
 using Prelude.Utilities;
 using Interlude.Utilities;
 using Interlude.IO;
@@ -13,9 +14,9 @@ namespace Interlude
         static void Main(string[] args)
         {
             Mutex m = new Mutex(true, "Interlude");
-            System.Diagnostics.Process.GetCurrentProcess().PriorityClass = System.Diagnostics.ProcessPriorityClass.High;
             if (m.WaitOne(TimeSpan.Zero, true))
             {
+                Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.High;
                 PipeHandler.Open();
                 Logging.Log("Launching " + Game.Version + ", the date/time is " + DateTime.Now.ToString(), "");
                 Game g = null;
