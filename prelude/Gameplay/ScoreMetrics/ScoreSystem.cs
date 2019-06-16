@@ -65,7 +65,7 @@ namespace Prelude.Gameplay.ScoreMetrics
         protected int MaxPointsPerNote;
 
         //this judgement index OR WORSE will cause a combo break e.g. 3 awards Good, so 3,4 or 5 (good, bad, miss) all combo break if this is set to 3
-        protected int ComboBreakingJudgement;
+        public int ComboBreakingJudgement;
 
         //display name of this accuracy system
         public string Name;
