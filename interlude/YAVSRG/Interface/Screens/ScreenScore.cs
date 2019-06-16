@@ -96,6 +96,7 @@ namespace Interlude.Interface.Screens
         {
             base.OnExit(next);
             graph.RequestRedraw(); //releases FBO
+            graph.SetState(WidgetState.DISABLED); //so it doesnt draw while the screen fades out and reuse the FBO
         }
 
         public bool ShouldSaveScore()
