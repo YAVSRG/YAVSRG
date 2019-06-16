@@ -17,7 +17,7 @@ namespace Interlude.Interface
             OnComplete = action;
         }
 
-        protected void Close(string s)
+        protected virtual void Close(string s)
         {
             Closed = true;
             OnComplete(s);

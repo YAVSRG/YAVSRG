@@ -23,7 +23,7 @@ namespace Interlude.Interface.Widgets
                 .BR_DeprecateMe(200, 250, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Borderless 2", "Fullscreen" }, (int)general.WindowMode, (v) => { general.WindowMode = (General.WindowType)v; }),
+                    new TextPicker("Window Mode", new string[] { "Windowed", "Borderless", "Fullscreen" }, (int)general.WindowMode, (v) => { general.WindowMode = (General.WindowType)v; }),
                 "This selects what kind of window the game should be.\nWindowed = Regular, resizable window\nBorderless = Maximised window with no title bar or border around it\nFullscreen = Fullscreen mode", ib)
                 .TL_DeprecateMe(-75, 325, AnchorType.CENTER, AnchorType.MIN)
                 .BR_DeprecateMe(75, 350, AnchorType.CENTER, AnchorType.MIN));

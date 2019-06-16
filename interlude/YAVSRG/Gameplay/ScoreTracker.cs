@@ -19,7 +19,8 @@ namespace Interlude.Gameplay
         public HitData[] Hitdata;
         public List<IScoreMetric> Watchers;
         public AnimationColorFade WidgetColor;
-        public int MaxCombo; //max possible combo, not best combo achieved
+        //todo: maybe move this although its kinda helpful that its here
+        public int MaxPossibleCombo; //max possible combo, not best combo achieved. thats why it exists
 
         public ScoreTracker(ChartWithModifiers c)
         {
@@ -38,7 +39,7 @@ namespace Interlude.Gameplay
             for (int i = 0; i < count; i++)
             {
                 Hitdata[i] = new HitData(c.Notes.Points[i], c.Keys);
-                MaxCombo += c.Notes.Points[i].Count;
+                MaxPossibleCombo += c.Notes.Points[i].Count;
             }
             Game.Gameplay.ApplyModsToHitData(c, ref Hitdata);
         }

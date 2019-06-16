@@ -29,7 +29,7 @@ namespace Interlude.Interface
                 ScreenWidth = (int)(ScreenWidth * r);
                 ScreenHeight = (int)(ScreenHeight * r);
             }
-            DrawableFBO.ClearPool();
+            FBO.InitBuffers();
         }
 
         public static bool MouseOver(Rect bounds)

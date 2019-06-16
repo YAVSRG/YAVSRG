@@ -137,7 +137,7 @@ namespace Interlude.Interface.Widgets.Toolbar
             }
             if (fade > 0.01f)
             {
-                using (DrawableFBO fbo = new DrawableFBO())
+                using (FBO fbo = FBO.FromPool())
                 {
                     SpriteBatch.DrawRect(bounds, Color.FromArgb(180, 0, 0, 0));
                     SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb(127, Color.Black));

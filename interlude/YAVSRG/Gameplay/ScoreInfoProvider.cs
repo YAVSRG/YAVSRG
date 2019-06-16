@@ -27,6 +27,18 @@ namespace Interlude.Gameplay
             _hitdata = ScoreTracker.StringToHitData(_score.hitdata, _score.keycount);
         }
 
+        public void SetData(RatingReport rating, string mods, ScoreSystem scoring) //todo: technical when its ready
+        {
+            _rating = rating;
+            _mods = mods;
+            _scoring = scoring;
+        }
+
+        public void OnChangeScoreSystem()
+        {
+            _scoring = null;
+        }
+
         public Score Score
         {
             get { return _score; }

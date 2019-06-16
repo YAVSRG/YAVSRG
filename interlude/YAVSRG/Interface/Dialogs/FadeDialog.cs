@@ -11,7 +11,7 @@ namespace Interlude.Interface.Dialogs
         protected AnimationSlider Fade;
         bool Closing;
         protected string Output = "";
-        DrawableFBO FBO;
+        FBO FBO;
 
         public FadeDialog(Action<string> action) : base(action)
         {
@@ -41,7 +41,7 @@ namespace Interlude.Interface.Dialogs
 
         protected void PreDraw(Rect bounds)
         {
-            FBO = new DrawableFBO();
+            FBO = FBO.FromPool();
         }
 
         protected void PostDraw(Rect bounds)

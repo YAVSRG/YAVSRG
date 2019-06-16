@@ -287,7 +287,7 @@ namespace Interlude.Graphics
             }
         }
 
-        public static DrawableFBO WaterTest(DrawableFBO input)
+        public static FBO WaterTest(FBO input)
         {
             //input should already be unbound
             GL.ActiveTexture(TextureUnit.Texture1);
@@ -296,7 +296,7 @@ namespace Interlude.Graphics
             int sampler;
             GL.GenSamplers(1, out sampler);
             GL.BindSampler(((Sprite)input).ID, sampler);
-            DrawableFBO output = new DrawableFBO();
+            FBO output = FBO.FromPool();
             GL.UseProgram(WaterShader.Program);
             GL.Uniform1(GL.GetUniformLocation(WaterShader.Program, "tex"), sampler);
             GL.Uniform1(GL.GetUniformLocation(WaterShader.Program, "time"), shader);
@@ -332,6 +332,8 @@ namespace Interlude.Graphics
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
 
             WaterShader = new Shader(ResourceGetter.GetShader("Vertex.vsh"), ResourceGetter.GetShader("Water.fsh"));
+
+            FBO.InitBuffers();
         }
     }
 }

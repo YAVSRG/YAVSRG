@@ -18,7 +18,7 @@ namespace Interlude.Interface
         AnimationSeries animation = new AnimationSeries(true); //coordinates fading between screens
         AnimationGroup animation2 = new AnimationGroup(true); //coordinates all other animations (they run constantly)
 
-        DrawableFBO FBO; //fbo stores texture for fade between background images (it is reused many times per frame so this saves on aspect ratio calculations etc)
+        FBO FBO; //fbo stores texture for fade between background images (it is reused many times per frame so this saves on aspect ratio calculations etc)
 
         protected List<Screen> stack = new List<Screen>() { }; //stack of screens - clicking back pops one off and goes to the previous screen
         protected List<Dialog> dialogs = new List<Dialog>(); //stack of dialogs - these prompt the user for something and block interaction with the screen
@@ -139,7 +139,7 @@ namespace Interlude.Interface
         public void Draw()
         {
             Rect bounds = Bounds;
-            using (FBO = new DrawableFBO())
+            using (FBO = FBO.FromPool())
             {
                 DrawScaledBG(Oldbackground, 255);
                 DrawScaledBG(Background, (int)(bgFade * 255));

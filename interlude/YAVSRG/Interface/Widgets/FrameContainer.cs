@@ -12,7 +12,7 @@ namespace Interlude.Interface.Widgets
         public float VerticalFade = 0, HorizontalFade = 0;
         public byte Frame = 255;
         public AnimationSlider Alpha;
-        private DrawableFBO FBO;
+        private FBO FBO;
 
         public FrameContainer() : base()
         {
@@ -30,7 +30,7 @@ namespace Interlude.Interface.Widgets
 
         protected void PreDraw(Rect bounds)
         {
-            FBO = new DrawableFBO();
+            FBO = FBO.FromPool();
             if (UseBackground)
             {
                 Game.Screens.DrawChartBackground(bounds, BackColor(), 2f);

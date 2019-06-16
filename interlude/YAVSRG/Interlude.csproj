@@ -126,6 +126,7 @@
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />
     <Compile Include="Gameplay\ScoreSavingPreference.cs" />
     <Compile Include="Gameplay\TopScore.cs" />
+    <Compile Include="Graphics\FBO.cs" />
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
     <Compile Include="Interface\Widgets\Controls\ClickableComponent.cs" />
@@ -134,6 +135,7 @@
     <Compile Include="Interface\DataGroupConfig.cs" />
     <Compile Include="Interface\Dialogs\ConfigDialog.cs" />
     <Compile Include="Interface\WidgetState.cs" />
+    <Compile Include="Interface\Widgets\ScoreGraph.cs" />
     <Compile Include="Interface\Widgets\ScreenOptions\CreditsPanel.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarIcons.cs" />
     <Compile Include="IO\Audio\MusicPlayer.cs" />
@@ -148,7 +150,6 @@
     <Compile Include="Interface\Widgets\Toolbar\MusicControls.cs" />
     <Compile Include="Interface\Widgets\TopScoreDisplay.cs" />
     <Compile Include="IO\Net\Web\BloodcatChartData.cs" />
-    <Compile Include="Graphics\DrawableFBO.cs" />
     <Compile Include="IO\Content.cs" />
     <Compile Include="Editor\ChartInEditor.cs" />
     <Compile Include="Editor\EditorData.cs" />
