@@ -18,7 +18,7 @@ namespace Interlude.Interface.Widgets
             if (data.attributes.download != "")
             {
                 AddChild(new SimpleButton("Download",
-                    () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack(data.attributes.download, data.attributes.name, ".zip"), (b) => { }, "Downloading pack: " + data.attributes.name, true), () => false, 20f)
+                    () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack(data.attributes.download, data.attributes.name, ".zip"), (b) => { }, "Downloading pack: " + data.attributes.name, true), () => false, null)
                     .TL_DeprecateMe(100, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(10, 0, AnchorType.MAX, AnchorType.MAX));
             }
         }
@@ -29,7 +29,7 @@ namespace Interlude.Interface.Widgets
             difficulty = data.creator;
             size = "";
             AddChild(new SimpleButton("Download",
-                () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack("https://osu.ppy.sh/beatmapsets/"+data.id.ToString()+"/download?noVideo=1", data.id.ToString(), ".osz"), (b) => { }, "Downloading beatmap: " + data.title, true), () => false, 20f)
+                () => Game.Tasks.AddTask(ChartLoader.DownloadAndImportPack("https://osu.ppy.sh/beatmapsets/"+data.id.ToString()+"/download?noVideo=1", data.id.ToString(), ".osz"), (b) => { }, "Downloading beatmap: " + data.title, true), () => false, null)
                 .TL_DeprecateMe(100, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(10, 0, AnchorType.MAX, AnchorType.MAX));
         }
 

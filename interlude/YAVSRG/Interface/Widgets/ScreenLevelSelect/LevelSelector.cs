@@ -212,6 +212,7 @@ namespace Interlude.Interface.Widgets
             Refresh();
         }
 
+        //todo: reduce code duplication here
         public void Forward()
         {
             int i;
@@ -249,6 +250,31 @@ namespace Interlude.Interface.Widgets
                     {
                         ChartLoader.SwitchToChart(ChartLoader.GroupedCharts[g].charts[i - 1], true);
                     }
+                    ScrollToSelected();
+                    return;
+                }
+            }
+        }
+        public void ForwardGroup()
+        {
+            for (int g = 0; g < ChartLoader.GroupedCharts.Count; g++)
+            {
+                if (ChartLoader.GroupedCharts[g].charts.IndexOf(Game.Gameplay.CurrentCachedChart) >= 0)
+                {
+                    ChartLoader.SwitchToChart(ChartLoader.GroupedCharts[(g + 1) % ChartLoader.GroupedCharts.Count].charts[0], true);
+                    ScrollToSelected();
+                    return;
+                }
+            }
+        }
+
+        public void BackGroup()
+        {
+            for (int g = 0; g < ChartLoader.GroupedCharts.Count; g++)
+            {
+                if (ChartLoader.GroupedCharts[g].charts.IndexOf(Game.Gameplay.CurrentCachedChart) >= 0)
+                {
+                    ChartLoader.SwitchToChart(ChartLoader.GroupedCharts[(g - 1 + ChartLoader.GroupedCharts.Count) % ChartLoader.GroupedCharts.Count].charts[0], true);
                     ScrollToSelected();
                     return;
                 }
@@ -348,25 +374,37 @@ namespace Interlude.Interface.Widgets
             scroll.Target += items.Height;
             scroll.Target = Math.Max(bounds.Height - items.GetHeight(), scroll.Target);
             scroll.Target = Math.Min(scroll.Target, 0);
-            if (Input.KeyPress(OpenTK.Input.Key.Up))
+            if (Game.Options.General.Keybinds.Up.Held())
             {
                 scroll.Target += 15;
             }
-            else if (Input.KeyPress(OpenTK.Input.Key.Down))
+            else if (Game.Options.General.Keybinds.Down.Held())
             {
                 scroll.Target -= 15;
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.Right))
+            else if (Game.Options.General.Keybinds.End.Tapped())
+            {
+                ForwardGroup();
+            }
+            else if (Game.Options.General.Keybinds.Start.Tapped())
+            {
+                BackGroup();
+            }
+            else if (Game.Options.General.Keybinds.Next.Tapped())
             {
                 Forward();
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.Left))
+            else if (Game.Options.General.Keybinds.Previous.Tapped())
             {
                 Back();
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.F2))
+            else if (Game.Options.General.Keybinds.RandomChart.Tapped())
             {
                 Random();
+            }
+            else if (ScreenUtils.MouseOver(bounds) && Input.MousePress(OpenTK.Input.MouseButton.Right))
+            {
+                scroll.Target = ((Input.MouseY - bounds.Top) / bounds.Height) * (bounds.Height - items.GetHeight());
             }
             scroll.Target += Input.MouseScroll * 100;
             scroll.Update();

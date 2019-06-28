@@ -42,12 +42,12 @@ namespace Interlude.Interface.Widgets
             bounds = GetBounds(bounds);
             if (focus)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Search, true) || !Input.HasIM() || ScreenUtils.CheckButtonClick(bounds))
+                if (Game.Options.General.Keybinds.Search.Tapped(true) || !Input.HasIM() || ScreenUtils.CheckButtonClick(bounds))
                 {
                     Input.ChangeIM(null);
                     focus = false;
                 }
-                else if (onSend != null && Input.KeyTap(OpenTK.Input.Key.Enter, true) && get() != "")
+                else if (onSend != null && Game.Options.General.Keybinds.Select.Tapped(true) && get() != "")
                 {
                     onSend();
                     set("");
@@ -57,7 +57,7 @@ namespace Interlude.Interface.Widgets
             }
             else
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Search) || ScreenUtils.CheckButtonClick(bounds))
+                if (Game.Options.General.Keybinds.Search.Tapped() || ScreenUtils.CheckButtonClick(bounds))
                 {
                     Input.ChangeIM(new InputMethod(set, get, update));
                     focus = true;

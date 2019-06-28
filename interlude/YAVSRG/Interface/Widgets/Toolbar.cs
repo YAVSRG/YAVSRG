@@ -121,9 +121,6 @@ namespace Interlude.Interface
                     SpriteBatch.DrawRect(new Rect(ScreenWidth - i * s - 2, ScreenHeight - level, ScreenWidth - (i + 1) * s + 2, ScreenHeight), Color.FromArgb((int)level, Game.Screens.HighlightColor));
                 }
 
-                SpriteBatch.Font2.DrawCentredText("Plays: " + Game.Options.Profile.Stats.TimesPlayed.ToString(), 18f, 0, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
-                SpriteBatch.Font2.DrawCentredText("Playtime: " + Utils.FormatTime(Game.Options.Profile.Stats.SecondsPlayed * 1000), 18f, 0, ScreenHeight - _Height + 28, Game.Options.Theme.MenuFont);
-                SpriteBatch.Font2.DrawCentredText("S Ranks: " + Game.Options.Profile.Stats.SRanks, 18f, 0, ScreenHeight - _Height + 51, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(Game.Version, 18f, ScreenWidth, ScreenHeight - _Height + 5, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(((int)Game.Instance.FPS).ToString() + "fps", 18f, ScreenWidth, ScreenHeight - _Height + 28, Game.Options.Theme.MenuFont);
                 SpriteBatch.Font1.DrawJustifiedText(DateTime.Now.ToShortDateString() + " " + DateTime.Now.ToLongTimeString(), 18f, ScreenWidth, ScreenHeight - _Height + 51, Game.Options.Theme.MenuFont);
@@ -134,7 +131,7 @@ namespace Interlude.Interface
                 base.Draw(bounds.ExpandY(80 - _Height));
                 if (Chat.Collapsed && _NotifFade > 0.01f)
                 {
-                    Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Color.FromArgb((int)(255 * _NotifFade), Game.Screens.DarkColor), 2f);
+                    Game.Screens.DrawChartBackground(bounds.SliceBottom(_Height), Color.FromArgb((int)(180 * _NotifFade), Game.Screens.DarkColor), 2f);
                     SpriteBatch.Font1.DrawCentredTextToFill(Notification, new Rect(bounds.Left, bounds.Bottom - _Height, bounds.Right, bounds.Bottom + 80 - _Height), Color.FromArgb((int)(255 * _NotifFade), Game.Options.Theme.MenuFont), true);
                 }
             }
@@ -149,7 +146,10 @@ namespace Interlude.Interface
                     float y = Math.Min(bounds.Bottom - 100 - 45 * Tooltip.Length, Input.MouseY);
                     var b = new Rect(x + 50, y + 50, x + 400, y + 50 + 45 * Tooltip.Length);
                     SpriteBatch.DrawRect(b, Color.FromArgb((int)(f * 127), 0, 0, 0));
-                    SpriteBatch.Font1.DrawParagraph(Tooltip[0], 30f, b, Color.FromArgb((int)(f * 255), Game.Options.Theme.MenuFont));
+                    for (int i = 0; i < Tooltip.Length; i++)
+                    {
+                        SpriteBatch.Font1.DrawText(Tooltip[i], 30f, b.Left, b.Top + i * 45, Color.FromArgb((int)(f * 255), Game.Options.Theme.MenuFont));
+                    }
                 }
             }
         }
@@ -158,11 +158,12 @@ namespace Interlude.Interface
         {
             if (State != WidgetState.DISABLED)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Exit))
+                //todo: move to button functionality
+                if (Game.Options.General.Keybinds.Exit.Tapped())
                 {
                     Back();
                 }
-                if (Input.KeyTap(OpenTK.Input.Key.T) && Input.KeyPress(OpenTK.Input.Key.ControlLeft))
+                if (Game.Options.General.Keybinds.CollapseToolbar.Tapped())
                 {
                     if (State == WidgetState.NORMAL)
                     {
@@ -173,7 +174,7 @@ namespace Interlude.Interface
                         SetState(WidgetState.NORMAL);
                     }
                 }
-                _TooltipFade2.Target = Input.KeyPress(OpenTK.Input.Key.Slash) ? 1 : 0;
+                _TooltipFade2.Target = Game.Options.General.Keybinds.Help.Held() ? 1 : 0;
                 base.Update(bounds.ExpandY(80 - _Height));
                 _TooltipFade.Target = 0;
             }

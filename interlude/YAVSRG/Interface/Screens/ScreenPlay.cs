@@ -112,13 +112,13 @@ namespace Interlude.Interface.Screens
         public override void Update(Rect bounds) //update loop
         {
             float now = (float)Game.Audio.Now(); //get where we are now
-            if (Input.KeyTap(Game.Options.General.Binds.Exit)) //escape quits
+            if (Game.Options.General.Keybinds.Exit.Tapped()) //escape quits
             {
                 Game.Screens.PopScreen();
                 Children.Clear();
                 Game.Options.Profile.Stats.TimesQuit++;
             }
-            else if (Game.Audio.LeadingIn && Input.KeyTap(Game.Options.General.Binds.ChangeOffset)) //if map hasn't started you can sync it with + key
+            else if (Game.Audio.LeadingIn && Game.Options.General.Keybinds.ChangeOffset.Tapped()) //if map hasn't started you can sync it with + key
             {
                 Game.Audio.Stop();
                 Game.Screens.AddDialog(new Dialogs.TextDialog("Change sync by... (ms)", (x) =>
@@ -128,7 +128,7 @@ namespace Interlude.Interface.Screens
                     Game.Audio.PlayLeadIn();
                 }));
             }
-            else if (Input.KeyTap(Game.Options.General.Binds.Skip) && (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000))
+            else if (Game.Options.General.Keybinds.Skip.Tapped() && (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000))
             {
                 Game.Audio.Stop();
                 Game.Audio.Seek(Chart.Notes.Points[0].Offset - 5000);
@@ -243,7 +243,7 @@ namespace Interlude.Interface.Screens
             base.Draw(bounds);
             if (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000)
             {
-                SpriteBatch.Font1.DrawCentredText("Press " + Game.Options.General.Binds.Skip.ToString().ToUpper() + " to Skip", 50f, 0, 130, Game.Options.Theme.MenuFont);
+                SpriteBatch.Font1.DrawCentredText("Press " + Game.Options.General.Keybinds.Skip.ToString().ToUpper() + " to Skip", 50f, 0, 130, Game.Options.Theme.MenuFont);
             }
             if (Animation.Running)
             {

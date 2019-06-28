@@ -39,11 +39,11 @@ namespace Interlude.Interface.Widgets
             bounds = GetBounds(bounds);
             if (ScreenUtils.MouseOver(bounds.ExpandX(2)))
             {
-                if (Input.KeyTap(OpenTK.Input.Key.Left) && get() - resolution >= min)
+                if (Game.Options.General.Keybinds.Previous.Tapped() && get() - resolution >= min)
                 {
                     set((float)Math.Round(get() - resolution, 2));
                 }
-                if (Input.KeyTap(OpenTK.Input.Key.Right) && get() + resolution <= max)
+                if (Game.Options.General.Keybinds.Next.Tapped() && get() + resolution <= max)
                 {
                     set((float)Math.Round(get() + resolution, 2));
                 }

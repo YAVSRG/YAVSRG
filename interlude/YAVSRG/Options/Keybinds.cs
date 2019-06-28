@@ -1,25 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK.Input;
+﻿using OpenTK.Input;
+using Interlude.IO;
 
 namespace Interlude.Options
 {
     public class Keybinds
     {
-        //incomplete bind list
-        public Key Exit = Key.Escape;
-        public Key Select = Key.Enter;
-        public Key UpRate = Key.Plus;
-        public Key DownRate = Key.Minus;
-        public Key ChangeOffset = Key.Plus;
-        public Key Volume = Key.AltLeft;
-        public Key Skip = Key.Space;
-        public Key Search = Key.Tab;
-        public Key CollapseToToolbar = Key.Insert;
-        public Key Screenshot = Key.F12;
-        public Key Chat = Key.F8;
+        //general
+        public Bind Exit = new KeyBind(Key.Escape);
+        public Bind Select = new KeyBind(Key.Enter);
+        public Bind Search = new KeyBind(Key.Tab);
+        public Bind BossKey = new KeyBind(Key.Insert);
+        public Bind CollapseToolbar = new AltBind(new KeyBind(Key.T), false, true);
+        public Bind Help = new KeyBind(Key.Slash);
+        public Bind Screenshot = new KeyBind(Key.F12);
+        public Bind Chat = new KeyBind(Key.F8);
+        public Bind Volume = new KeyBind(Key.AltLeft);
+        public Bind Next = new KeyBind(Key.Right);
+        public Bind Previous = new KeyBind(Key.Left);
+        public Bind End = new AltBind(new KeyBind(Key.Right), false, true);
+        public Bind Start = new AltBind(new KeyBind(Key.Left), false, true);
+
+        //level select
+        public Bind UpRate = new KeyBind(Key.Plus);
+        public Bind DownRate = new KeyBind(Key.Minus);
+        public Bind UpHalfRate = new AltBind(new KeyBind(Key.Plus), false, true);
+        public Bind DownHalfRate = new AltBind(new KeyBind(Key.Minus), false, true);
+        public Bind UpSmallRate = new AltBind(new KeyBind(Key.Plus), true, false);
+        public Bind DownSmallRate = new AltBind(new KeyBind(Key.Minus), true, false);
+        public Bind Up = new KeyBind(Key.Up);
+        public Bind Down = new KeyBind(Key.Down);
+        public Bind Collections = new KeyBind(Key.F1);
+        public Bind Goals = new KeyBind(Key.F2);
+        public Bind Editor = new KeyBind(Key.F3);
+        public Bind Mods = new KeyBind(Key.F4);
+        public Bind RandomChart = new KeyBind(Key.F6);
+
+        //play
+        public Bind ChangeOffset = new KeyBind(Key.Plus);
+        public Bind Skip = new KeyBind(Key.Space);
     }
 }

@@ -38,7 +38,7 @@ namespace Interlude.Options
         public string CurrentProfile = "Default.json";
         public string LastSelectedFile = "";
         public string WorkingDirectory = "";
-        public Keybinds Binds = new Keybinds();
+        public Keybinds Keybinds = new Keybinds();
 
         [JsonIgnore]
         public bool AudioFix = false;

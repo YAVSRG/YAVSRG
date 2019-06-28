@@ -109,18 +109,18 @@ namespace Interlude.Interface.Screens
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
-            if (Input.KeyTap(Game.Options.General.Binds.Screenshot))
+            if (Game.Options.General.Keybinds.Screenshot.Tapped())
             {
                 Bitmap bm = Utils.CaptureWindow();
                 System.Windows.Forms.Clipboard.SetImage(bm);
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.Left))
+            else if (Game.Options.General.Keybinds.Previous.Tapped())
             {
                 Game.Options.Profile.SelectedScoreSystem = Utils.Modulus(Game.Options.Profile.SelectedScoreSystem - 1, Game.Options.Profile.ScoreSystems.Count);
                 scoreData.OnChangeScoreSystem();
                 OnScoreSystemChanged();
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.Right))
+            else if (Game.Options.General.Keybinds.Next.Tapped())
             {
                 Game.Options.Profile.SelectedScoreSystem = Utils.Modulus(Game.Options.Profile.SelectedScoreSystem + 1, Game.Options.Profile.ScoreSystems.Count);
                 scoreData.OnChangeScoreSystem();
@@ -155,9 +155,6 @@ namespace Interlude.Interface.Screens
             SpriteBatch.Font1.DrawCentredTextToFill(badge, new Rect(bounds.Right - 390, bounds.Top + 250, bounds.Right - 160, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Font1.DrawJustifiedTextToFill(scoreData.ScoreSystem.ComboBreaks.ToString() + "cbs", new Rect(bounds.Right - 225, bounds.Top + 250, bounds.Right - 60, bounds.Top + 300), Game.Options.Theme.MenuFont, true);
             DrawFrame(new Rect(bounds.Right - 500, bounds.Top + 50, bounds.Right - 50, bounds.Top + 300), Color.White);
-
-            //graph
-            //DrawGraph(new Rect(bounds.Left + 550, bounds.Top + 600, bounds.Right - 550, bounds.Bottom - 50), scoreData.Scoring, scoreData.Hitdata);
 
             SpriteBatch.Font1.DrawTextToFill("Your performance:", new Rect(bounds.Left + 550, bounds.Top + 160, bounds.CenterX, bounds.Top + 180), Game.Options.Theme.MenuFont);
             SpriteBatch.Font1.DrawTextToFill(Utils.RoundNumber(scoreData.PhysicalPerformance), new Rect(bounds.Left + 550, bounds.Top + 180, bounds.CenterX, bounds.Top + 250), Game.Options.Theme.MenuFont);

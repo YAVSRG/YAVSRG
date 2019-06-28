@@ -130,8 +130,8 @@
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
     <Compile Include="Interface\Widgets\Controls\ClickableComponent.cs" />
+    <Compile Include="Interface\Widgets\Controls\Selector.cs" />
     <Compile Include="Interface\Widgets\ObjectSelector.cs" />
-    <Compile Include="Interface\Bindable.cs" />
     <Compile Include="Interface\DataGroupConfig.cs" />
     <Compile Include="Interface\Dialogs\ConfigDialog.cs" />
     <Compile Include="Interface\WidgetState.cs" />

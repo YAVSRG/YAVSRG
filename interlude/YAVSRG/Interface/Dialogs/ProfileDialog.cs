@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Prelude.Utilities;
 using Interlude.Interface.Widgets;
 using Interlude.Gameplay;
-using System.Drawing;
 
 namespace Interlude.Interface.Dialogs
 {
@@ -18,19 +13,20 @@ namespace Interlude.Interface.Dialogs
         {
             var f = new FrameContainer() { VerticalFade = 0, HorizontalFade = 100f };
             AddChild(f);
-            f.AddChild(new SimpleButton("New Profile...", NewProfile, () => false, 30f)
+            f.AddChild(new SimpleButton("New Profile...", NewProfile, () => false, null) { FontSize = 30 }
                 .Reposition(220, 0, 10, 0, -10, 1, 60, 0));
-            f.AddChild(new SimpleButton("Rename Profile...", RenameProfile, () => false, 30f)
+            f.AddChild(new SimpleButton("Rename Profile...", RenameProfile, () => false, null) { FontSize = 30 }
                 .Reposition(220, 0, 70, 0, -10, 1, 120, 0));
             f.AddChild(new SimpleButton("Refresh Scores...", () =>
             {
                 if (!recalcScores)
                     Game.Tasks.AddTask(Game.Options.Profile.Stats.RecalculateTop(), (b) => { recalcScores = false; }, "RecalculateTop", false);
                 recalcScores = true;
-            }, () => recalcScores, 30f)
+            }, () => recalcScores, null)
+            { FontSize = 30 }
                 .Reposition(220, 0, 130, 0, -10, 1, 180, 0));
             //todo: refresh these when profile changed
-            f.AddChild(new TextPicker("", new[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, (int)Game.Options.Profile.DefaultKeymode, (i) => { Game.Options.Profile.PreferredKeymode = (Options.Profile.Keymode)i; })
+            f.AddChild(new Selector("", new[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, new SetterGetter<int>((i) => { Game.Options.Profile.PreferredKeymode = (Options.Profile.Keymode)i; }, () => (int)Game.Options.Profile.PreferredKeymode))
                 .Reposition(220, 0, -60, 1, -10, 1, -10, 1));
             f.AddChild(new TickBox("I only play", Game.Options.Profile.KeymodePreference, (b) => { Game.Options.Profile.KeymodePreference = b; ChartLoader.Refresh(); })
                 .Reposition(220, 0, -110, 1, -10, 1, -60, 1));
@@ -47,7 +43,7 @@ namespace Interlude.Interface.Dialogs
 
         Widget ProfileButton(Options.Profile p)
         {
-            return new SimpleButton(p.Name, () => { Game.Options.ChangeProfile(p); }, () => (Game.Options.Profile == p), 20f).BR_DeprecateMe(0, 50, AnchorType.MAX, AnchorType.MIN);
+            return new SimpleButton(p.Name, () => { Game.Options.ChangeProfile(p); }, () => (Game.Options.Profile == p), null).Reposition(0, 0, 0, 0, 0, 1, 50, 0);
         }
 
         void NewProfile()

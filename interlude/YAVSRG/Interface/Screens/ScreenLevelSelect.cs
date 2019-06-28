@@ -58,23 +58,34 @@ namespace Interlude.Interface.Screens
         {
             base.Update(bounds);
 
-            double ratestep = Input.KeyPress(OpenTK.Input.Key.ControlLeft) ? 0.05d : Input.KeyPress(OpenTK.Input.Key.ShiftLeft) ? 0.01d : 0.1d;
-            if (Input.KeyTap(Game.Options.General.Binds.UpRate))
+            if (Game.Options.General.Keybinds.UpSmallRate.Tapped())
             {
-                ChangeRate(ratestep);
+                ChangeRate(0.01);
             }
-            else if (Input.KeyTap(Game.Options.General.Binds.DownRate))
+            else if (Game.Options.General.Keybinds.DownSmallRate.Tapped())
             {
-                ChangeRate(-ratestep);
+                ChangeRate(-0.01);
             }
+            else if (Game.Options.General.Keybinds.UpHalfRate.Tapped())
+            {
+                ChangeRate(0.05);
+            }
+            else if (Game.Options.General.Keybinds.DownHalfRate.Tapped())
+            {
+                ChangeRate(-0.05);
+            }
+            else if (Game.Options.General.Keybinds.UpRate.Tapped())
+            {
+                ChangeRate(0.1);
+            }
+            else if (Game.Options.General.Keybinds.DownRate.Tapped())
+            {
+                ChangeRate(-0.1);
+            }
+
             else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R)) //debug feature, you shouldn't need to use this
             {
                 Game.Tasks.AddTask(ChartLoader.Recache(), ChartLoader.RefreshCallback, "Recaching charts", true);
-            }
-            //todo: add this to play button behaviour
-            else if (Input.KeyTap(Game.Options.General.Binds.Select))
-            {
-                Game.Gameplay.PlaySelectedChart();
             }
         }
 

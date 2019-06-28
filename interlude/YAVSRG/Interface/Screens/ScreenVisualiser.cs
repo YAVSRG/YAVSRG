@@ -146,11 +146,11 @@ namespace Interlude.Interface.Screens
                 }
             }
 
-            if (Input.KeyTap(OpenTK.Input.Key.Right))
+            if (Game.Options.General.Keybinds.Next.Tapped())
             {
                 NextTrack();
             }
-            else if (Input.KeyTap(OpenTK.Input.Key.Left))
+            else if (Game.Options.General.Keybinds.Previous.Tapped())
             {
                 PrevTrack();
             }

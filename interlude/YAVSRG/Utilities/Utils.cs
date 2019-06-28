@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using Newtonsoft.Json;
 using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude
@@ -39,13 +40,13 @@ namespace Interlude
 
         public static T LoadObject<T>(string path) //reads an object of a given type from a file (this is how most data is stored and loaded)
         {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(System.IO.File.ReadAllText(path));
+            return JsonConvert.DeserializeObject<T>(System.IO.File.ReadAllText(path));
         }
 
         public static void SaveObject<T>(T obj, string path) //saves an object to a file
         {
             if (obj == null) return;
-            System.IO.File.WriteAllText(path, Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented));
+            System.IO.File.WriteAllText(path, JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { Formatting = Formatting.Indented, TypeNameHandling = TypeNameHandling.Auto }));
         }
 
         public static Bitmap CaptureDesktop(Rectangle screenSize) //this is only used when the game starts to create the "fade in effect" (you can't have translucent windows)

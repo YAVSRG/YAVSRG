@@ -21,12 +21,12 @@ namespace Interlude.Interface.Dialogs
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
-            if (Input.KeyTap(Game.Options.General.Binds.Select, true))
+            if (Game.Options.General.Keybinds.Select.Tapped(true))
             {
                 OnClosing();
                 Output = text;
             }
-            if (Input.KeyTap(Game.Options.General.Binds.Exit, true))
+            if (Game.Options.General.Keybinds.Exit.Tapped(true))
             {
                 OnClosing();
             }

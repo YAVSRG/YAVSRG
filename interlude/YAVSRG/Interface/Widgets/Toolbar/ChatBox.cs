@@ -117,8 +117,8 @@ namespace Interlude.Interface.Widgets.Toolbar
         {
             channels = new Dictionary<string, ChatChannel>();
             channelSelector = new FlowContainer() { BackColor = () => Color.FromArgb(127, 0, 0, 0), UseBackground = false, VerticalFade = 0 };
-            AddChild(channelSelector.TL_DeprecateMe(20, 20, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(220, 20, AnchorType.MIN, AnchorType.MAX));
-            AddChild(emoji = new EmojiPicker().TL_DeprecateMe(240, 30, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(30, 30, AnchorType.MAX, AnchorType.MAX));
+            AddChild(channelSelector.Reposition(20, 0, 20, 0, -20, 1, 80, 0));
+            AddChild(emoji = new EmojiPicker().Reposition(-240, 1, 30, 0, -30, 1, -30, 1));
             emoji.SetState(WidgetState.DISABLED);
             Animation.Add(newMsgFade = new Animations.AnimationSlider(0));
             Animation.Add(fade = new Animations.AnimationSlider(0));
@@ -133,31 +133,37 @@ namespace Interlude.Interface.Widgets.Toolbar
                 int a = (int)(255 * newMsgFade.Val);
                 var c = Color.FromArgb(0, 0, 0, 0);
                 SpriteBatch.Draw(bounds: new Rect(bounds.Right - 1200, bounds.Bottom - 380, bounds.Right, bounds.Bottom - 80), colors: new[] { c, c, Color.FromArgb(a, Color.Black), c });
-                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Binds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Keybinds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+            }
+            if (Game.Tasks.Tasks.Count > 0)
+            {
+                var b = new Rect(bounds.Right - 500, bounds.Bottom - 60, bounds.Right - 250, bounds.Bottom - 20);
+                SpriteBatch.DrawRect(b, Color.FromArgb(120, 0, 0, 0));
+                SpriteBatch.Font1.DrawTextToFill(Game.Tasks.Tasks.Count.ToString() + " background task(s) running", b, Color.White);
             }
             if (fade > 0.01f)
             {
                 using (FBO fbo = FBO.FromPool())
                 {
                     SpriteBatch.DrawRect(bounds, Color.FromArgb(180, 0, 0, 0));
-                    SpriteBatch.DrawRect(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb(127, Color.Black));
+                    SpriteBatch.DrawRect(new Rect(bounds.Left + 20, bounds.Top + 100, bounds.Right - 20, bounds.Bottom - 20), Color.FromArgb(127, Color.Black));
                     DrawWidgets(bounds);
                     if (selectedChannel != "")
                     {
                         var l = channels[selectedChannel].lines;
-                        int c = Math.Min(l.Count, (int)(bounds.Height / 25 - 2));
+                        int c = Math.Min(l.Count, (int)(bounds.Height / 25 - 6));
                         for (int i = 0; i < c; i++)
                         {
-                            RenderText(l[i], bounds.Left + 260, bounds.Bottom - 90 - 25 * i);
+                            RenderText(l[i], bounds.Left + 40, bounds.Bottom - 90 - 25 * i);
                         }
                     }
-                    RenderText("> " + entryText, bounds.Left + 260, bounds.Bottom - 60);
+                    RenderText("> " + entryText, bounds.Left + 40, bounds.Bottom - 60);
 
                     if (emoji.State == WidgetState.DISABLED)
                     {
                         lock (Game.Tasks.Tasks)
                         {
-                            float y = bounds.Top + 30;
+                            float y = bounds.Top + 110;
                             foreach (Utilities.TaskManager.NamedTask t in Game.Tasks.Tasks)
                             {
                                 SpriteBatch.Font1.DrawJustifiedText(t.Name, 30f, bounds.Right - 30, y, Game.Options.Theme.MenuFont, true);
@@ -167,7 +173,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                         }
                     }
 
-                    ScreenUtils.DrawFrame(new Rect(bounds.Left + 240, bounds.Top + 20, bounds.Right - 20, bounds.Bottom - 20), Game.Screens.HighlightColor);
+                    ScreenUtils.DrawFrame(new Rect(bounds.Left + 20, bounds.Top + 100, bounds.Right - 20, bounds.Bottom - 20), Game.Screens.HighlightColor);
                     fbo.Unbind();
                     SpriteBatch.Draw(fbo, ScreenUtils.Bounds, Color.FromArgb((int)(255 * fade), Color.White));
                 }
@@ -187,14 +193,14 @@ namespace Interlude.Interface.Widgets.Toolbar
             bounds = GetBounds(bounds);
             if (Collapsed)
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Chat) && ((Interface.Toolbar)Parent).State != WidgetState.DISABLED)
+                if (Game.Options.General.Keybinds.Chat.Tapped() && ((Interface.Toolbar)Parent).State != WidgetState.DISABLED)
                 {
                     Expand();
                 }
             }
             else
             {
-                if (Input.KeyTap(Game.Options.General.Binds.Chat, true) || Input.KeyTap(Game.Options.General.Binds.Exit, true))
+                if (Game.Options.General.Keybinds.Chat.Tapped(true) || Game.Options.General.Keybinds.Exit.Tapped(true))
                 {
                     Collapse();
                 }
@@ -293,8 +299,8 @@ namespace Interlude.Interface.Widgets.Toolbar
 
         void CreateChannel(string channel)
         {
-            channels.Add(channel, new ChatChannel(new SimpleButton(channel, () => { selectedChannel = channel; emoji.SetState(channel == "Log" ? WidgetState.DISABLED : WidgetState.NORMAL); }, () => { return selectedChannel == channel; }, 20f)));
-            channelSelector.AddChild(channels[channel].button.BR_DeprecateMe(180, 40, AnchorType.MIN, AnchorType.MIN));
+            channels.Add(channel, new ChatChannel(new SimpleButton(channel, () => { selectedChannel = channel; emoji.SetState(channel == "Log" ? WidgetState.DISABLED : WidgetState.NORMAL); }, () => { return selectedChannel == channel; }, null)));
+            channelSelector.AddChild(channels[channel].button.Reposition(0, 0, 0, 0, 180, 0, 40, 0));
             if (selectedChannel == "") { selectedChannel = channel; }
         }
 
@@ -303,7 +309,6 @@ namespace Interlude.Interface.Widgets.Toolbar
             channelSelector.RemoveChild(channels[channel].button);
             channels.Remove(channel);
             if (channel == selectedChannel) { selectedChannel = ""; }
-            //the data just gets garbage collected
         }
     }
 }

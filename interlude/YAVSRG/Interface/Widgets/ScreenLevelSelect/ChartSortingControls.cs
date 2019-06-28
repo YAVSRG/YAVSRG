@@ -19,11 +19,11 @@ namespace Interlude.Interface.Widgets
             AddChild(collectionControls = new Widget());
             collectionControls.ToggleState();
             collectionControls.AddChild(d.SetItems(Game.Gameplay.Collections.Collections.Keys.ToList())
-                .TL_DeprecateMe(520, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(280, 10, AnchorType.MAX, AnchorType.MAX));
+                .Reposition(-520, 1, -50, 1, -280, 1, -10, 1));
 
-            collectionControls.AddChild(new SimpleButton("Create", () => { Game.Screens.AddDialog(new Dialogs.TextDialog("Enter name for collection: ", (s) => { if (s != "") { selectedCollection = s; } })); }, () => false, 20f)
+            collectionControls.AddChild(new SimpleButton("Create", () => { Game.Screens.AddDialog(new Dialogs.TextDialog("Enter name for collection: ", (s) => { if (s != "") { selectedCollection = s; } })); }, () => false, null)
                 .TL_DeprecateMe(260, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(150, 10, AnchorType.MAX, AnchorType.MAX));
-            collectionControls.AddChild(new SimpleButton("Delete", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Really delete this collection?", (s) => { if (s == "Y") { Game.Gameplay.Collections.DeleteCollection(selectedCollection); } })); }, () => false, 20f)
+            collectionControls.AddChild(new SimpleButton("Delete", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Really delete this collection?", (s) => { if (s == "Y") { Game.Gameplay.Collections.DeleteCollection(selectedCollection); } })); }, () => false, null)
                 .TL_DeprecateMe(130, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(20, 10, AnchorType.MAX, AnchorType.MAX));
 
             sortControls.AddChild(new DropDown((x) => { Game.Options.Profile.ChartGroupMode = x; Refresh(); }, () => (Game.Options.Profile.ChartGroupMode), "Group by")
@@ -38,7 +38,7 @@ namespace Interlude.Interface.Widgets
                 .SetItems(ColorBy.Keys.ToList())
                 .TL_DeprecateMe(220, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(20, 10, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Binds.Search.ToString().ToUpper() + " to search..."))
+            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Keybinds.Search.ToString().ToUpper() + " to search..."))
                 .Reposition(-600, 1, 10, 0, -20, 1, 70, 0));
 
             AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); })

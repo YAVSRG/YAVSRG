@@ -2,6 +2,7 @@
 
 namespace Interlude.Interface.Widgets
 {
+    //todo: maybe deprecate since unused
     public class ImageBox : Widget
     {
         public System.Drawing.Color c = System.Drawing.Color.White;

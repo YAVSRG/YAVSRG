@@ -24,7 +24,7 @@ namespace Interlude
                 {
                     Options.Options.Init(); //init options i.e load profiles
                     g = new Game();
-                    Logging.Log("Looks good", "");
+                    Logging.Log("Game launched, all seems well", "");
                 }
                 catch (Exception e)
                 {

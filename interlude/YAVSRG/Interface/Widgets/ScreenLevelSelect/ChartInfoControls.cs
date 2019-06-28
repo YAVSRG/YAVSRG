@@ -14,15 +14,15 @@ namespace Interlude.Interface.Widgets
             public LevelSelectButtons(ModMenu modMenu)
             {
                 HorizontalFade = 50; Frame = 170;
-                AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, 40)
+                AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Keybinds.Collections) { FontSize = 40, Tooltip = "nyi lol" }
                     .Reposition(0, 0.02f, 10, 0, 0, 0.18f, -10, 1));
-                AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, 40)
+                AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Keybinds.Goals) { FontSize = 40, Tooltip = "nyi lol" }
                     .Reposition(0, 0.22f, 10, 0, 0, 0.38f, -10, 1));
-                AddChild(new SimpleButton("Editor", () => { Game.Screens.AddScreen(new Screens.ScreenEditor()); }, () => false, 40)
+                AddChild(new SimpleButton("Editor", () => { Game.Screens.AddScreen(new Screens.ScreenEditor()); }, () => false, () => Game.Options.General.Keybinds.Editor) { FontSize = 40, Tooltip = "Edit the selected chart" }
                     .Reposition(0, 0.42f, 10, 0, 0, 0.58f, -10, 1));
-                AddChild(new SimpleButton("Mods", () => { modMenu.Toggle(); }, () => false, 40)
+                AddChild(new SimpleButton("Mods", () => { modMenu.Toggle(); }, () => false, () => Game.Options.General.Keybinds.Mods) { FontSize = 40, Tooltip = "Choose gameplay modifiers" }
                     .Reposition(0, 0.62f, 10, 0, 0, 0.78f, -10, 1));
-                AddChild(new SimpleButton("Play", () => { Game.Gameplay.PlaySelectedChart(); }, () => false, 40)
+                AddChild(new SimpleButton("Play", () => { Game.Gameplay.PlaySelectedChart(); }, () => false, () => Game.Options.General.Keybinds.Select) { FontSize = 40, Tooltip = "Play the selected chart" }
                     .Reposition(0, 0.82f, 10, 0, 0, 0.98f, -10, 1));
             }
         }
@@ -68,24 +68,8 @@ namespace Interlude.Interface.Widgets
             ScreenUtils.DrawParallelogramWithBG(bounds.SliceTop(150), 0.5f, Game.Screens.DarkColor, Game.Screens.BaseColor);
             SpriteBatch.Font1.DrawCentredTextToFill(Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title, bounds.SliceTop(100), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Font2.DrawCentredTextToFill("Charted by " + Game.CurrentChart.Data.Creator + "         From " + Game.CurrentChart.Data.SourcePack, new Rect(bounds.Left + 50, bounds.Top + 80, bounds.Right - 50, bounds.Top+150), Game.Options.Theme.MenuFont, true);
-            
-            //DrawGraph(bounds.Left + 550, bounds.Top + 350, bounds.Right - 50, bounds.Bottom - 250);
 
             DrawWidgets(bounds);
         }
-
-        /*
-        public void DrawGraph(float left, float top, float right, float bottom)
-        {
-            int c = diff.PhysicalData.Length;
-            float x = (right - left) / c;
-            float y = (bottom - top) / physical * 0.25f;
-            for (int i = 0; i < c; i++)
-            {
-                //SpriteBatch.DrawRect(left + x * i - 1, bottom - y * diff.PhysicalData[i] - 5, left + x * i + 1, bottom - y * diff.PhysicalData[i] + 5, Color.Aqua);
-            }
-            SpriteBatch.Font2.DrawCentredTextToFill("Replace with NPS graph?",left, top, right, bottom, Game.Options.Theme.MenuFont);
-            SpriteBatch.DrawFrame(left, top, right, bottom, 30f, Color.White);
-        }*/
     }
 }

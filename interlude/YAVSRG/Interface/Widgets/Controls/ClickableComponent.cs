@@ -8,7 +8,7 @@ namespace Interlude.Interface.Widgets
         public Action OnClick;
         public Action OnRightClick;
         public Action<bool> OnMouseOver;
-        public Func<OpenTK.Input.Key> Bind;
+        public Func<Bind> Bind;
 
         bool hover;
 
@@ -24,7 +24,7 @@ namespace Interlude.Interface.Widgets
                     hover = true;
                     OnMouseOver?.Invoke(true);
                 }
-                if (Input.MouseClick(OpenTK.Input.MouseButton.Left) || (Bind != null && Input.KeyTap(Bind())))
+                if (Input.MouseClick(OpenTK.Input.MouseButton.Left))
                 {
                     OnClick?.Invoke();
                 }
@@ -40,6 +40,10 @@ namespace Interlude.Interface.Widgets
                     hover = false;
                     OnMouseOver?.Invoke(false);
                 }
+            }
+            if (Bind != null && Bind().Tapped())
+            {
+                OnClick?.Invoke();
             }
         }
     }

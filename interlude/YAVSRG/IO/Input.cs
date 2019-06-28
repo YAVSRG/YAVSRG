@@ -139,4 +139,95 @@ namespace Interlude.IO
             ClickHandled = false;
         }
     }
+
+    public abstract class Bind
+    {
+        public abstract bool Tapped(bool overrideTextBox = false);
+
+        public abstract bool Held(bool overrideTextBox = false);
+    }
+
+    public class KeyBind : Bind
+    {
+        public readonly Key key;
+
+        public KeyBind(Key key)
+        {
+            this.key = key;
+        }
+
+        public override bool Held(bool overrideTextBox = false)
+        {
+            return Input.KeyPress(key, overrideTextBox);
+        }
+
+        public override bool Tapped(bool overrideTextBox = false)
+        {
+            return Input.KeyTap(key, overrideTextBox);
+        }
+
+        public override string ToString()
+        {
+            return key.ToString();
+        }
+    }
+
+    public class MouseBind : Bind
+    {
+        public readonly MouseButton button;
+
+        public MouseBind(MouseButton button)
+        {
+            this.button = button;
+        }
+
+        public override bool Held(bool overrideTextBox = false)
+        {
+            return Input.MousePress(button);
+        }
+
+        public override bool Tapped(bool overrideTextBox = false)
+        {
+            return Input.MouseClick(button);
+        }
+
+        public override string ToString()
+        {
+            return "Mouse"+button.ToString();
+        }
+    }
+
+    public class AltBind : Bind
+    {
+        public readonly Bind bind;
+        public readonly bool shift;
+        public readonly bool ctrl;
+
+        public AltBind(Bind bind, bool shift, bool ctrl)
+        {
+            this.bind = bind;
+            this.shift = shift;
+            this.ctrl = ctrl;
+        }
+
+        public override bool Held(bool overrideTextBox = false)
+        {
+            return CheckAltButtons() && bind.Held(overrideTextBox);
+        }
+
+        public override bool Tapped(bool overrideTextBox = false)
+        {
+            return CheckAltButtons() && bind.Tapped(overrideTextBox);
+        }
+
+        bool CheckAltButtons()
+        {
+            return (!ctrl || Input.KeyPress(Key.ControlLeft) || Input.KeyPress(Key.ControlRight)) && (!shift || Input.KeyPress(Key.ShiftLeft) || Input.KeyPress(Key.ShiftRight));
+        }
+
+        public override string ToString()
+        {
+            return (ctrl ? "Ctrl + " : "") + (shift ? "Shift + " : "") + bind.ToString();
+        }
+    }
 }

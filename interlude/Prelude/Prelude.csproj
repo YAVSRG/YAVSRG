@@ -106,6 +106,7 @@
     <Compile Include="Utilities\DataGroup.cs" />
     <Compile Include="Utilities\DataTemplateAttribute.cs" />
     <Compile Include="Utilities\Logging.cs" />
+    <Compile Include="Utilities\SetterGetter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
