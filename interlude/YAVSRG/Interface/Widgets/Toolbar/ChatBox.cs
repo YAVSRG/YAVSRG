@@ -196,6 +196,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                 if (Game.Options.General.Keybinds.Chat.Tapped() && ((Interface.Toolbar)Parent).State != WidgetState.DISABLED)
                 {
                     Expand();
+                    ((Interface.Toolbar)Parent).SetState(WidgetState.ACTIVE);
                 }
             }
             else

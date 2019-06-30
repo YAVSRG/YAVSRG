@@ -25,7 +25,7 @@ namespace Interlude.Interface
         {
             AddChild(Icons.Reposition(0, 0, 0, 0, 0, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonback", Back, () => Game.Options.General.Keybinds.Exit) { Tooltip = "Back to previous screen" }
+                new SpriteButton("buttonback", Back, null) { Tooltip = "Back to previous screen" }
                 .Reposition(0, 0, 0, 0, 240, 0, 80, 0));
             AddChild(new ProfileInfoPanel());
             AddChild(Chat = new ChatBox());
@@ -34,7 +34,6 @@ namespace Interlude.Interface
             Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
             Animation.Add(_TooltipFade = new AnimationSlider(0)); Animation.Add(_TooltipFade2 = new AnimationSlider(0));
             Logging.OnLog += (s, d, t) => { if (t != Logging.LogType.Debug) AddNotification(s); };
-            SetTooltip("hello\nworld", "");
         }
 
         public void AddNotification(string notif)
@@ -158,6 +157,11 @@ namespace Interlude.Interface
         {
             if (State != WidgetState.DISABLED)
             {
+                //here and not attached to the button to not double fire when closing chat box
+                if (Game.Options.General.Keybinds.Exit.Tapped())
+                {
+                    Back();
+                }
                 if (Game.Options.General.Keybinds.CollapseToolbar.Tapped())
                 {
                     if (State == WidgetState.NORMAL)

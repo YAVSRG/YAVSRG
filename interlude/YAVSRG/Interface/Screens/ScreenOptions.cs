@@ -15,7 +15,7 @@ namespace Interlude.Interface.Screens
         {
             Children.Clear();
             var ib = new InfoBox();
-            FlowContainer tabs = new FlowContainer();
+            FlowContainer tabs = new FlowContainer() { BackColor = () => System.Drawing.Color.FromArgb(50,50,50) };
             lp = new LayoutPanel(ib);
             tabs.AddChild(new GeneralPanel(ib, lp).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
             tabs.AddChild(new GameplayPanel(ib, lp).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));

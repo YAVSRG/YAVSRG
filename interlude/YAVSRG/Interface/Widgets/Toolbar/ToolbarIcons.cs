@@ -9,7 +9,7 @@ namespace Interlude.Interface.Widgets.Toolbar
         {
             ColumnSpacing = 0; MarginX = 0; MarginY = 0; FlowFromRight = true; Frame = 0; BackColor = () => Color.Transparent;
             AddChild(
-                new SpriteButton("buttoninfo", () => { ((Interface.Toolbar)Parent).Chat.Expand(); }, () => Game.Options.General.Keybinds.Chat) { Tooltip = "Chat and notifications" }
+                new SpriteButton("buttoninfo", () => { ((Interface.Toolbar)Parent).Chat.Expand(); }, null) { Tooltip = "Chat and notifications" }
                 .Reposition(-80, 1, 0, 0, 0, 1, 80, 0));
             AddChild(
                 new SpriteButton("buttonmusic", () => { if (Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); }, () => Game.Options.General.Keybinds.Music) { Tooltip = "Music visualiser" }
