@@ -19,7 +19,7 @@ namespace Interlude.Interface.Screens
         ScoreTracker scoreTracker;
         Widget playfield;
         float missWindow;
-        OpenTK.Input.Key[] binds;
+        Bind[] binds;
         HitLighting[] lighting;
         AnimationFade bannerIn, bannerOut;
 
@@ -32,22 +32,22 @@ namespace Interlude.Interface.Screens
             int hitposition = Game.Options.Profile.HitPosition;
 
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
-            binds = Game.Options.Profile.KeymodeBindings[Chart.Keys - 3];
+            binds = Game.Options.Profile.KeyBinds[Chart.Keys - 3];
 
             var widgetData = Game.Options.Theme.Gameplay;
 
             //this stuff is ok to stay here
             AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).TL_DeprecateMe(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
             //AddChild(new PerformanceMeter(scoreTracker));
-            AddChild(new HitMeter(scoreTracker, widgetData.GetPosition("hitMeter")));
-            AddChild(new ComboDisplay(scoreTracker, widgetData.GetPosition("combo")));
-            AddChild(new ProgressBar(scoreTracker, widgetData.GetPosition("progressBar")));
-            AddChild(new AccMeter(scoreTracker, widgetData.GetPosition("accuracy")));
-            AddChild(new HPMeter(scoreTracker, widgetData.GetPosition("healthBar")));
-            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("time"), () => { return DateTime.Now.ToLongTimeString(); }));
-            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("timeLeft"), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
-            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("fps"), () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }));
-            AddChild(new JudgementCounter(scoreTracker, widgetData.GetPosition("judgements")));
+            AddChild(new HitMeter(scoreTracker, widgetData.GetWidgetConfig("hitMeter", -250, 0.5f, 150, 0.5f, 250, 0.5f, 20, 0.5f, true)));
+            AddChild(new ComboDisplay(scoreTracker, widgetData.GetWidgetConfig("combo", -100, 0.5f, 100, 0.5f, 100, 0.5f, 101, 0.5f, true)));
+            AddChild(new ProgressBar(scoreTracker, widgetData.GetWidgetConfig("progressBar", 0, 0, -10, 1, 0, 1, 0, 1, true)));
+            AddChild(new AccMeter(scoreTracker, widgetData.GetWidgetConfig("accuracy", -200, 0.5f, 50, 0, 200, 0.5f, 150, 0, true)));
+            AddChild(new HPMeter(scoreTracker, widgetData.GetWidgetConfig("healthBar", 20, 0, 20, 0, 520, 0, 50, 0, true)));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("fps", -220, 1, -180, 1, -20, 1, -100, 1, false), () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("time", -220, 1, -100, 1, -20, 1, -20, 1, true), () => { return DateTime.Now.ToLongTimeString(); }));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("timeLeft", -220, 1, 20, 0, -20, 1, 100, 0, false), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
+            AddChild(new JudgementCounter(scoreTracker, widgetData.GetWidgetConfig("judgements", 70, 0, -180, 0.5f, 320, 0, 180, 0.5f, false)));
             //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
             //playfield.InitGameplay();
             lighting = new HitLighting[Chart.Keys];
@@ -86,7 +86,7 @@ namespace Interlude.Interface.Screens
             AnimationSeries s = new AnimationSeries(false);
             s.Add(bannerIn = new AnimationFade(0, 2.001f, 2f));
             s.Add(new AnimationCounter(60, false));
-            s.Add(new AnimationAction(() => { scoreTracker.WidgetColor.Target = 1; }));
+            s.Add(new AnimationAction(() => { scoreTracker.WidgetColor.Target = Game.Options.General.HideGameplayUI || Game.Gameplay.SelectedMods.ContainsKey("Auto") ? 0 : 1; }));
             s.Add(bannerOut = new AnimationFade(0, 255, 254));
             Animation.Add(s);
 
@@ -96,6 +96,7 @@ namespace Interlude.Interface.Screens
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
+            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
         }
 
         public override void OnExit(Screen next)
@@ -106,7 +107,6 @@ namespace Interlude.Interface.Screens
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
             Game.Screens.Toolbar.SetCursorState(true);
             base.OnExit(next);
-            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
         }
 
         public override void Update(Rect bounds) //update loop
@@ -134,14 +134,20 @@ namespace Interlude.Interface.Screens
                 Game.Audio.Seek(Chart.Notes.Points[0].Offset - 5000);
                 Game.Audio.Play(); //in case of leading in
             }
+            else if (Game.Options.General.Keybinds.HideUI.Tapped() && !Animation.Running)
+            {
+                Game.Options.General.HideGameplayUI = !Game.Options.General.HideGameplayUI;
+                scoreTracker.WidgetColor.Target = Game.Options.General.HideGameplayUI ? 0 : 1;
+            }
+
             //actual input stuff
             for (byte k = 0; k < Chart.Keys; k++)
             {
-                if (Input.KeyTap(binds[k])) //if you press a key
+                if (binds[k].Tapped()) //if you press a key
                 {
                     OnKeyDown(k, now); //handle it in the context of the map and where we are (now)
                 }
-                else if (Input.KeyRelease(binds[k])) //if you release a key
+                else if (binds[k].Released()) //if you release a key
                 {
                     OnKeyUp(k, now); //handle it
                 }
@@ -224,7 +230,7 @@ namespace Interlude.Interface.Screens
             {
                 foreach (byte c in new BinarySwitcher(needsToHold & Chart.Notes.Points[hitAt].middles.value).GetColumns())
                 {
-                    if (!Input.KeyPress(binds[c]))
+                    if (!binds[c].Held())
                     {
                         return;
                     }

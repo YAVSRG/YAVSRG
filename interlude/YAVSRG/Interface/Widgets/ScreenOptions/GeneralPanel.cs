@@ -57,6 +57,12 @@ namespace Interlude.Interface.Widgets
                 "Opens the folder which Interlude works in. This is where you put skins, charts and other settings.", ib)
             .TL_DeprecateMe(-150, 650, AnchorType.CENTER, AnchorType.MIN)
             .BR_DeprecateMe(150, 725, AnchorType.CENTER, AnchorType.MIN));
+            Widget f;
+            AddChild(f = new FlowContainer() { MarginY = 50, RowSpacing = 50 }.Reposition(50, 0, 50, 0, 350, 0, -50, 1));
+            foreach (var a in typeof(Keybinds).GetFields())
+            {
+                f.AddChild(new KeyBinder(a.Name, new Prelude.Utilities.SetterGetter<IO.Bind>(Game.Options.General.Keybinds, a.Name)).Reposition(0, 0, 0, 0, 280, 0, 50, 0));
+            }
         }
     }
 }

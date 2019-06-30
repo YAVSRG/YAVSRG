@@ -6,6 +6,7 @@ using Interlude.IO;
 
 namespace Interlude.Interface.Widgets
 {
+    //Allows a user to cycle through/select from a list of strings and store the index of the selected item in a variables
     public class Selector : Widget
     {
         string[] Options;

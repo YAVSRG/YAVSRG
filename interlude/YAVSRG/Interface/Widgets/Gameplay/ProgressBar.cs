@@ -10,7 +10,7 @@ namespace Interlude.Interface.Widgets.Gameplay
 
         public ProgressBar(ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
-            background = pos.GetValue("Background", true);
+            background = pos.Extra.GetValue("Background", true);
         }
 
         public override void Draw(Rect bounds)

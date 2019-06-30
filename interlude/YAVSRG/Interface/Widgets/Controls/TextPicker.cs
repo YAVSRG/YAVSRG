@@ -3,6 +3,7 @@ using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets
 {
+    //todo: deprecate
     public class TextPicker : Widget
     {
         string[] options;

@@ -55,7 +55,7 @@ namespace Interlude.IO
                     }
                 }
             }
-            return default(Sprite);
+            return default;
         }
 
         public static Sprite GetTexture(string path)
@@ -111,6 +111,12 @@ namespace Interlude.IO
                 Logging.Log("Could not load widget position data from " + name, e.ToString(), Logging.LogType.Error);
             }
             return new Options.WidgetPositionData(); //return blank data
+        }
+
+        public static void SaveWidgetData(string theme, string name, Options.WidgetPositionData data)
+        {
+            string path = Path.Combine(AssetsDir, theme, name + ".json");
+            Utils.SaveObject(data, path);
         }
 
         public static int LoadSoundFromAssets(string path)

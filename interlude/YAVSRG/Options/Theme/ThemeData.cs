@@ -18,11 +18,6 @@ namespace Interlude.Options
         public Color SelectChart = Color.FromArgb(0, 180, 110);
         public Color DefaultThemeColor = Color.FromArgb(0, 160, 255);
 
-        //todo: move to widget data
-        public bool JudgementPerColumn = false;
-        public bool JudgementShowMarv = false;
-        public float JudgementFadeTime = 1500f; //milliseconds
-
         public int ColumnWidth = 150;
         public float NoteDepth = 20f;
         public bool FlipHoldTail = true;

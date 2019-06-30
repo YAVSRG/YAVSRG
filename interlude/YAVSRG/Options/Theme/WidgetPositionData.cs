@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Interlude.Options
 {
@@ -10,22 +6,14 @@ namespace Interlude.Options
     {
         public Dictionary<string, WidgetPosition> Data = new Dictionary<string, WidgetPosition>();
 
-        public bool IsEnabled(string name)
+        //todo: do this using two Rects instead of 8 parameters
+        public WidgetPosition GetWidgetConfig(string name, float l, float la, float t, float ta, float r, float ra, float b, float ba, bool enable)
         {
-            if (Data.ContainsKey(name))
+            if (!Data.ContainsKey(name))
             {
-                return Data[name].Enable;
+                Data[name] = new WidgetPosition() { Left = l, LeftRel = la, Top = t, TopRel = ta, Right = r, RightRel = ra, Bottom = b, BottomRel = ba, Enable = enable };
             }
-            return false;
-        }
-
-        public WidgetPosition GetPosition(string name)
-        {
-            if (Data.ContainsKey(name))
-            {
-                return Data[name];
-            }
-            return new WidgetPosition();
+            return Data[name];
         }
     }
 }

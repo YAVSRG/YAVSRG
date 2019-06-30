@@ -149,6 +149,7 @@ namespace Prelude.Gameplay.ScoreMetrics
                     }
                 }
                 Counter++;
+                UpdateTimeSeriesData(HitData.Length);
             }
         }
 
@@ -167,7 +168,9 @@ namespace Prelude.Gameplay.ScoreMetrics
                     }
                 }
                 Counter++;
+                //updatetimeseries should actually be here but it's both negligible in data accuracy and a small optimisation to put it down there
             }
+            UpdateTimeSeriesData(HitData.Length);
         }
 
         public virtual float Accuracy()

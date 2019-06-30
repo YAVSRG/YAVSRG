@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Prelude.Utilities;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,29 +10,11 @@ namespace Interlude.Options
 {
     public class WidgetPosition
     {
-        public int Top = 0; public AnchorType TopAnchor = AnchorType.MIN;
-        public int Left = 0; public AnchorType LeftAnchor = AnchorType.MIN;
-        public int Right = 0; public AnchorType RightAnchor = AnchorType.MAX;
-        public int Bottom = 0; public AnchorType BottomAnchor = AnchorType.MAX;
+        public float Top = 0; public float TopRel = 0;
+        public float Left = 0; public float LeftRel = 0;
+        public float Right = 0; public float RightRel = 1;
+        public float Bottom = 0; public float BottomRel = 1;
         public bool Enable = false;
-
-        public Dictionary<string, object> Extra = new Dictionary<string, object>();
-
-        public T GetValue<T>(string tag, T def)
-        {
-            if (Extra.ContainsKey(tag))
-            {
-                var v = Extra[tag];
-                if (v is T)
-                {
-                    return (T)Extra[tag];
-                }
-            }
-            else
-            {
-                Extra[tag] = def;
-            }
-            return def;
-        }
+        public DataGroup Extra = new DataGroup();
     }
 }

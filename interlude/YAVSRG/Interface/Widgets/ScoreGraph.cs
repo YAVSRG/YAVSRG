@@ -51,7 +51,7 @@ namespace Interlude.Interface.Widgets
             int j;
             float o;
             float scale = (height - 20) * 0.5f / data.ScoreSystem.MissWindow;
-            float x = -ScreenUtils.ScreenWidth + 5;
+            float x = bounds.Left + 5;
             for (int i = 0; i < snapcount; i++)
             {
                 for (int k = 0; k < data.HitData[i].hit.Length; k++)
@@ -62,13 +62,34 @@ namespace Interlude.Interface.Widgets
                         j = data.ScoreSystem.JudgeHit(Math.Abs(o));
                         if (j >= data.ScoreSystem.ComboBreakingJudgement)
                         {
-                            SpriteBatch.DrawRect(new Rect(x - 1, -ScreenUtils.ScreenHeight, x + 2, -ScreenUtils.ScreenHeight + height), Color.FromArgb(60, Game.Options.Theme.JudgeColors[5]));
+                            SpriteBatch.DrawRect(new Rect(x - 1, bounds.Top, x + 2, bounds.Bottom), Color.FromArgb(60, Game.Options.Theme.JudgeColors[5]));
                         }
                         SpriteBatch.DrawRect(new Rect(x - 2, middle - o * scale - 2, x + 3, middle - o * scale + 2), Game.Options.Theme.JudgeColors[j]);
                     }
                 }
                 x += w;
             }
+            /*
+            var timeSeriesData = data.ScoreSystem.Data;
+
+            w = (width - 10) / timeSeriesData.Length;
+            x = bounds.Left + 5;
+            o = bounds.Bottom - 5 - timeSeriesData[1] * (height - 10);
+            float p;
+            for (int i = 1; i < timeSeriesData.Length; i++)
+            {
+                Func<float, float> f = (v) => (v - 0.9f) * 10;
+
+                p = bounds.Bottom - 5 - f(timeSeriesData[i]) * (height - 10);
+                double theta = Math.Atan((o - p) / w);
+                float ax =  -4 * (float)Math.Sin(theta); float ay = -4 * (float)Math.Cos(theta);
+                SpriteBatch.Draw(new RenderTarget(new Vector2(x - ax, o), new Vector2(x, o + ay), new Vector2(x + w + ax, p), new Vector2(x + w, p + ay), Color.Fuchsia));
+                //SpriteBatch.DrawRect(new Rect(-ScreenUtils.ScreenWidth + 3 + w * i, bounds.Bottom - 7 - data.ScoreSystem.Data[i] * (height - 10), -ScreenUtils.ScreenWidth + 7 + w * i, bounds.Bottom - 3 - data.ScoreSystem.Data[i] * (height - 10)), Color.Fuchsia);
+                o = p;
+                x += w;
+            }
+            SpriteBatch.DrawRect(new Rect(x, o - 2, x + w, o + 2), Color.Fuchsia);
+            */
             ScreenUtils.DrawFrame(bounds, Color.White);
             fbo.Unbind();
         }

@@ -97,11 +97,6 @@ namespace Interlude.Interface
             }
         }
 
-        public Widget Reposition(Options.WidgetPosition pos)
-        {
-            return TL_DeprecateMe(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor).BR_DeprecateMe(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
-        }
-
         public Widget Reposition(float Left, float LeftA, float Top, float TopA, float Right, float RightA, float Bottom, float BottomA)
         {
             LeftAnchor.Reposition(Left, LeftA);

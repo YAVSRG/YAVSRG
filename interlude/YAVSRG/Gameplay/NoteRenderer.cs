@@ -67,7 +67,7 @@ namespace Interlude.Gameplay
             {
                 //DrawColumn(bounds.Left, c);
                 SpriteBatch.Draw("playfield", ScrollScheme.PlaceObject(c, 0, IVisualMod.ObjectType.Backdrop), 0, 0);
-                Game.Options.Theme.DrawReceptor(ScrollScheme.PlaceObject(c, 0, IVisualMod.ObjectType.Receptor), c, Keys, Input.KeyPress(Game.Options.Profile.KeymodeBindings[Keys - 3][c]));
+                Game.Options.Theme.DrawReceptor(ScrollScheme.PlaceObject(c, 0, IVisualMod.ObjectType.Receptor), c, Keys, Game.Options.Profile.KeyBinds[Keys - 3][c].Held());
                 //DrawReceptor(bounds.Left, c);
                 pos[c] = HitPos;
                 time[c] = now;

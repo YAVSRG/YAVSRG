@@ -25,7 +25,7 @@ namespace Interlude.Interface
         {
             AddChild(Icons.Reposition(0, 0, 0, 0, 0, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonback", "Back", Back)
+                new SpriteButton("buttonback", Back, () => Game.Options.General.Keybinds.Exit) { Tooltip = "Back to previous screen" }
                 .Reposition(0, 0, 0, 0, 240, 0, 80, 0));
             AddChild(new ProfileInfoPanel());
             AddChild(Chat = new ChatBox());
@@ -158,11 +158,6 @@ namespace Interlude.Interface
         {
             if (State != WidgetState.DISABLED)
             {
-                //todo: move to button functionality
-                if (Game.Options.General.Keybinds.Exit.Tapped())
-                {
-                    Back();
-                }
                 if (Game.Options.General.Keybinds.CollapseToolbar.Tapped())
                 {
                     if (State == WidgetState.NORMAL)

@@ -9,19 +9,19 @@ namespace Interlude.Interface.Widgets.Toolbar
         {
             ColumnSpacing = 0; MarginX = 0; MarginY = 0; FlowFromRight = true; Frame = 0; BackColor = () => Color.Transparent;
             AddChild(
-                new SpriteButton("buttoninfo", "Notifications", () => { ((Interface.Toolbar)Parent).Chat.Expand(); })
+                new SpriteButton("buttoninfo", () => { ((Interface.Toolbar)Parent).Chat.Expand(); }, () => Game.Options.General.Keybinds.Chat) { Tooltip = "Chat and notifications" }
                 .Reposition(-80, 1, 0, 0, 0, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonmusic", "Visualiser", () => { if (Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); })
+                new SpriteButton("buttonmusic", () => { if (Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); }, () => Game.Options.General.Keybinds.Music) { Tooltip = "Music visualiser" }
                 .Reposition(-160, 1, 0, 0, -80, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonoptions", "Options", () => { Game.Screens.AddScreen(new ScreenOptions()); })
+                new SpriteButton("buttonoptions", () => { Game.Screens.AddScreen(new ScreenOptions()); }, () => Game.Options.General.Keybinds.Options) { Tooltip = "Options" }
                 .Reposition(-240, 1, 0, 0, -160, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonimport", "Import", () => { Game.Screens.AddScreen(new ScreenImport()); })
+                new SpriteButton("buttonimport", () => { Game.Screens.AddScreen(new ScreenImport()); }, () => Game.Options.General.Keybinds.Import) { Tooltip = "Import charts" }
                 .Reposition(-320, 1, 0, 0, -240, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttononline", "Multiplayer", () => { Game.Screens.AddScreen(new ScreenLobby()); })
+                new SpriteButton("buttononline", () => { Game.Screens.AddScreen(new ScreenLobby()); }, null) { Tooltip = "Multiplayer lobby screen (NYI)" }
                 .Reposition(-400, 1, 0, 0, -320, 1, 80, 0));
         }
 

@@ -1,19 +1,20 @@
 ﻿using System;
+using Prelude.Utilities;
 using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets
 {
+    //GUI element that lets the user toggle the value of a boolean
+    //The box is filled in if true and not if false
     class TickBox : Widget
     {
-        bool Ticked;
-        Action<bool> Set;
         string Label;
+        SetterGetter<bool> Value;
 
-        public TickBox(string label, bool start, Action<bool> set) : base()
+        public TickBox(string label, SetterGetter<bool> value) : base()
         {
             Label = label;
-            Set = set;
-            Ticked = start;
+            Value = value;
         }
 
         public override void Draw(Rect bounds)
@@ -21,7 +22,7 @@ namespace Interlude.Interface.Widgets
             base.Draw(bounds);
             bounds = GetBounds(bounds);
             SpriteBatch.Font1.DrawTextToFill(Label, bounds.SliceRight(bounds.Width - bounds.Height), Game.Options.Theme.MenuFont, true, System.Drawing.Color.Black);
-            if (Ticked)
+            if (Value)
             {
                 SpriteBatch.DrawRect(bounds.SliceLeft(bounds.Height).Expand(-15, -15), Game.Screens.BaseColor);
             }
@@ -34,8 +35,7 @@ namespace Interlude.Interface.Widgets
             bounds = GetBounds(bounds);
             if (ScreenUtils.CheckButtonClick(bounds))
             {
-                Ticked = !Ticked;
-                Set(Ticked);
+                Value.Set(!Value);
             }
         }
     }

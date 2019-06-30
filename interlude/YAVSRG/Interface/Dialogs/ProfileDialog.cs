@@ -9,7 +9,7 @@ namespace Interlude.Interface.Dialogs
     {
         bool recalcScores;
 
-        public ProfileDialog(Action<string> action) : base(action)
+        public ProfileDialog(Action<string> action) : base((s) => { ChartLoader.Refresh(); action(s); })
         {
             var f = new FrameContainer() { VerticalFade = 0, HorizontalFade = 100f };
             AddChild(f);
@@ -28,7 +28,7 @@ namespace Interlude.Interface.Dialogs
             //todo: refresh these when profile changed
             f.AddChild(new Selector("", new[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, new SetterGetter<int>((i) => { Game.Options.Profile.PreferredKeymode = (Options.Profile.Keymode)i; }, () => (int)Game.Options.Profile.PreferredKeymode))
                 .Reposition(220, 0, -60, 1, -10, 1, -10, 1));
-            f.AddChild(new TickBox("I only play", Game.Options.Profile.KeymodePreference, (b) => { Game.Options.Profile.KeymodePreference = b; ChartLoader.Refresh(); })
+            f.AddChild(new TickBox("I only play", new SetterGetter<bool>((b) => { Game.Options.Profile.KeymodePreference = b; }, () => Game.Options.Profile.KeymodePreference))
                 .Reposition(220, 0, -110, 1, -10, 1, -60, 1));
 
             var profileSelector = new FlowContainer();

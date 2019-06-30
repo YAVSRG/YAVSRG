@@ -53,7 +53,7 @@ namespace Interlude.Options
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Songs"));
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Imports"));
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Profiles"));
-            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Assets", "_Fallback"));
+            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Assets", "_fallback"));
         }
 
         public static void Init()
@@ -96,10 +96,16 @@ namespace Interlude.Options
         {
             //remember to save the old one
             SaveProfile(Profile);
+            ChangeSkin(Profile.Skin, p.Skin);
             Profile = p;
             general.CurrentProfile = p.ProfilePath;
+        }
+
+        public void ChangeSkin(string from, string to)
+        {
+            Content.SaveWidgetData(from, "gameplay", Theme.Gameplay);
             Content.ClearStore();
-            Theme = Content.LoadThemeData(p.Skin);
+            Theme = Content.LoadThemeData(to);
         }
 
         public void SaveProfile(Profile p)
@@ -111,6 +117,7 @@ namespace Interlude.Options
         {
             SaveProfile(Profile);
             Utils.SaveObject(general, "Options.json");
+            Content.SaveWidgetData(Profile.Skin, "gameplay", Theme.Gameplay);
         }
     }
 }

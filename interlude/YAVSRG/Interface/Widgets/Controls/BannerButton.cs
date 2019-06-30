@@ -1,23 +1,26 @@
 ﻿using System;
+using Interlude.IO;
 using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets
 {
     class BannerButton : SpriteButton
     {
-        float T1, T2, s;
+        string label;
+        public float TextLeftPercent = 0f;
+        public float TextRightPercent = 1f;
+        public float Slant = 0.5f;
 
-        public BannerButton(string label, Action onClick, float t1 = 0, float t2 = 1, float slant = 0.5f) : base("banner", label, onClick)
+        public BannerButton(string label, Action onClick, Func<Bind> bind) : base("", onClick, bind)
         {
-            T1 = t1; T2 = t2;
-            s = slant;
+            this.label = label;
         }
 
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            ScreenUtils.DrawParallelogramWithBG(bounds, s, color, color);
-            SpriteBatch.Font1.DrawCentredTextToFill(text, bounds.SliceLeft(bounds.Width * T2).SliceRight(bounds.Width * (1 - T1)).ExpandY(-10), Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor);
+            ScreenUtils.DrawParallelogramWithBG(bounds, Slant, color, color);
+            SpriteBatch.Font1.DrawCentredTextToFill(label, bounds.SliceLeft(bounds.Width * TextRightPercent).SliceRight(bounds.Width * (1 - TextLeftPercent)).ExpandY(-10), Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor);
         }
     }
 }

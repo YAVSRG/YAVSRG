@@ -39,6 +39,7 @@ namespace Interlude.Options
         public string LastSelectedFile = "";
         public string WorkingDirectory = "";
         public Keybinds Keybinds = new Keybinds();
+        public bool HideGameplayUI = false;
 
         [JsonIgnore]
         public bool AudioFix = false;

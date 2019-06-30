@@ -145,6 +145,8 @@ namespace Interlude.IO
         public abstract bool Tapped(bool overrideTextBox = false);
 
         public abstract bool Held(bool overrideTextBox = false);
+
+        public abstract bool Released();
     }
 
     public class KeyBind : Bind
@@ -164,6 +166,11 @@ namespace Interlude.IO
         public override bool Tapped(bool overrideTextBox = false)
         {
             return Input.KeyTap(key, overrideTextBox);
+        }
+
+        public override bool Released()
+        {
+            return Input.KeyRelease(key);
         }
 
         public override string ToString()
@@ -189,6 +196,11 @@ namespace Interlude.IO
         public override bool Tapped(bool overrideTextBox = false)
         {
             return Input.MouseClick(button);
+        }
+
+        public override bool Released()
+        {
+            return Input.MouseRelease(button);
         }
 
         public override string ToString()
@@ -218,6 +230,10 @@ namespace Interlude.IO
         public override bool Tapped(bool overrideTextBox = false)
         {
             return CheckAltButtons() && bind.Tapped(overrideTextBox);
+        }
+        public override bool Released()
+        {
+            return bind.Released();
         }
 
         bool CheckAltButtons()

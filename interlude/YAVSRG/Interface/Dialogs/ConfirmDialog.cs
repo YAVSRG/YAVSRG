@@ -15,8 +15,8 @@ namespace Interlude.Interface.Dialogs
         public ConfirmDialog(string prompt, Action<string> action) : base(action)
         {
             this.prompt = prompt;
-            AddChild(new BannerButton("Yes", () => { Close("Y"); }).Reposition(0, 0, 100, 0.5f, -ScreenUtils.ScreenWidth / 2, 0.5f, 200, 0.5f).Move(new Rect(0,100,-100,200)));
-            AddChild(new BannerButton("No", () => { Close("N"); }, 0, 1, -0.5f).Reposition(ScreenUtils.ScreenWidth / 2, 0.5f, 100, 0.5f, 0, 1, 200, 0.5f).Move(new Rect(100, 100, 0, 200)));
+            AddChild(new BannerButton("Yes", () => { Close("Y"); }, null).Reposition(0, 0, 100, 0.5f, -ScreenUtils.ScreenWidth / 2, 0.5f, 200, 0.5f).Move(new Rect(0,100,-100,200)));
+            AddChild(new BannerButton("No", () => { Close("N"); }, null) { Slant = -0.5f }.Reposition(ScreenUtils.ScreenWidth / 2, 0.5f, 100, 0.5f, 0, 1, 200, 0.5f).Move(new Rect(100, 100, 0, 200)));
             Animation.Add(slide = new AnimationSlider(0) { Target = 1f });
         }
 

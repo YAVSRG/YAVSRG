@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenTK.Input;
+using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
 using Interlude.IO;
 using static Interlude.Options.Options;
@@ -79,7 +80,10 @@ namespace Interlude.Interface.Widgets
                 .TL_DeprecateMe(-50, 100, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(50, 150, AnchorType.CENTER, AnchorType.MIN);
             for (int i = 0; i < 10; i++)
             {
-                binds[i] = new KeyBinder("Column " + (i + 1).ToString(), Key.F35, (b) => { });
+                var j = i;
+                Action<Bind> set = (bind) => { Game.Options.Profile.KeyBinds[keyMode - 3][j] = (KeyBind)bind; };
+                Func<Bind> get = () => Game.Options.Profile.KeyBinds[keyMode - 3][j];
+                binds[i] = new KeyBinder("Column " + (i + 1).ToString(), new SetterGetter<Bind>(set, get)) { AllowAltBinds = false };
                 AddChild(binds[i]);
                 colors[i] = new ColorPicker("", null, null, 1);
                 AddChild(colors[i]);
@@ -87,7 +91,7 @@ namespace Interlude.Interface.Widgets
             AddChild(selectKeyMode);
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .TL_DeprecateMe(-500, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Skin", Skins, Math.Max(0, Array.IndexOf(Skins, Game.Options.Profile.Skin)), (i) => { Game.Options.Profile.Skin = Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode, width); })
+            AddChild(new TextPicker("Skin", Skins, Math.Max(0, Array.IndexOf(Skins, Game.Options.Profile.Skin)), (i) => { Game.Options.ChangeSkin(Game.Options.Profile.Skin, Skins[i]); Game.Options.Profile.Skin = Skins[i]; ChangeKeyMode(keyMode, width); })
                 .TL_DeprecateMe(200, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(500, 575, AnchorType.CENTER, AnchorType.MIN));
         }
 
@@ -105,10 +109,6 @@ namespace Interlude.Interface.Widgets
             ChangeKeyMode(keyMode, width);
         }
 
-        private Action<Key> BindSetter(int i, int k)
-        {
-            return (key) => { Game.Options.Profile.KeymodeBindings[k - 3][i] = key; };
-        }
         private Action<int> ColorSetter(int i, int k)
         {
             return (s) => { Game.Options.Profile.ColorStyle.SetColorIndex(i, k, s); };
@@ -130,7 +130,6 @@ namespace Interlude.Interface.Widgets
             int start = -k * c / 2;
             for (int i = 0; i < k; i++)
             {
-                binds[i].Change(Game.Options.Profile.KeymodeBindings[k - 3][i], BindSetter(i, k));
                 binds[i].SetState(WidgetState.NORMAL);
                 binds[i].TL_DeprecateMe(start + i * c, 200, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(start + c + i * c, 250, AnchorType.CENTER, AnchorType.MIN);
             }

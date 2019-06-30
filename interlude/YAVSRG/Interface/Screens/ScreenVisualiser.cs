@@ -19,17 +19,17 @@ namespace Interlude.Interface.Screens
         public ScreenVisualiser()
         {
             AddChild(
-                new SpriteButton("buttonplay", "", () => { Game.Audio.Play(); })
+                new SpriteButton("buttonplay", () => { Game.Audio.Play(); }, null) { Tooltip = "Play" }
                 .TL_DeprecateMe(250, 10, AnchorType.MAX, AnchorType.MIN)
                 .BR_DeprecateMe(170, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
-                new SpriteButton("buttonpause", "", () => { Game.Audio.Pause(); })
+                new SpriteButton("buttonpause", () => { Game.Audio.Pause(); }, null) { Tooltip = "Pause" }
                 .TL_DeprecateMe(170, 10, AnchorType.MAX, AnchorType.MIN)
                 .BR_DeprecateMe(90, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
-                new SpriteButton("buttonstop", "", () => { Game.Audio.Stop(); })
+                new SpriteButton("buttonstop", () => { Game.Audio.Stop(); }, null) { Tooltip = "Stop" }
                 .TL_DeprecateMe(90, 10, AnchorType.MAX, AnchorType.MIN)
                 .BR_DeprecateMe(10, 90, AnchorType.MAX, AnchorType.MIN)
                 );
