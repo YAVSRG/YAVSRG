@@ -35,7 +35,7 @@ namespace Interlude.Interface.Widgets.Gameplay
 
             public void Draw(Rect bounds, float now)
             {
-                SpriteBatch.Draw("judgements", bounds, Color.FromArgb(parent.Alpha((now - h.time) * 2), Color.White), h.delta < 0 ? 0 : 1, h.tier);
+                SpriteBatch.Draw(new RenderTarget(Content.GetTexture("judgements"), bounds, Color.FromArgb(parent.Alpha((now - h.time) * 2), Color.White), h.delta < 0 ? 0 : 1, h.tier));
             }
 
             public void NewHit(Hit newhit)

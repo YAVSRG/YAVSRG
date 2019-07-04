@@ -39,7 +39,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                     {
                         for (int y = 0; y < 4; y++)
                         {
-                            SpriteBatch.Draw("emoji", new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.White, x + y * 5, 0);
+                            SpriteBatch.Draw(new RenderTarget(Content.GetTexture("emoji"), new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.White, x + y * 5, 0));
                         }
                         for (int y = 4; y < 6; y++)
                         {
@@ -49,7 +49,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                 }
                 else
                 {
-                    SpriteBatch.Draw("emoji", new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.White, 0, 0);
+                    SpriteBatch.Draw(new RenderTarget(Content.GetTexture("emoji"), new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.White, 0, 0));
                 }
             }
 
@@ -132,7 +132,7 @@ namespace Interlude.Interface.Widgets.Toolbar
             {
                 int a = (int)(255 * newMsgFade.Val);
                 var c = Color.FromArgb(0, 0, 0, 0);
-                SpriteBatch.Draw(bounds: new Rect(bounds.Right - 1200, bounds.Bottom - 380, bounds.Right, bounds.Bottom - 80), colors: new[] { c, c, Color.FromArgb(a, Color.Black), c });
+                SpriteBatch.Draw(new RenderTarget(new Rect(bounds.Right - 1200, bounds.Bottom - 380, bounds.Right, bounds.Bottom - 80), c, c, Color.FromArgb(a, Color.Black), c));
                 SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Keybinds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a, Game.Options.Theme.MenuFont));
             }
             if (Game.Tasks.Tasks.Count > 0)
@@ -175,7 +175,7 @@ namespace Interlude.Interface.Widgets.Toolbar
 
                     ScreenUtils.DrawFrame(new Rect(bounds.Left + 20, bounds.Top + 100, bounds.Right - 20, bounds.Bottom - 20), Game.Screens.HighlightColor);
                     fbo.Unbind();
-                    SpriteBatch.Draw(fbo, ScreenUtils.Bounds, Color.FromArgb((int)(255 * fade), Color.White));
+                    SpriteBatch.Draw(new RenderTarget(fbo, ScreenUtils.Bounds, Color.FromArgb((int)(255 * fade), Color.White)));
                 }
             }
         }
@@ -275,7 +275,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                         {
                             int id;
                             int.TryParse(parse[1], out id);
-                            SpriteBatch.Draw("emoji", new Rect(x, y, x + 35, y + 35), c, id, 0, 0);
+                            SpriteBatch.Draw(new RenderTarget(Content.GetTexture("emoji"), new Rect(x, y, x + 35, y + 35), c, id, 0));
                             x += 35;
                             valid = true;
                         }

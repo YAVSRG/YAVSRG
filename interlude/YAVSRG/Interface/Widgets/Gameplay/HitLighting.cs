@@ -30,7 +30,7 @@ namespace Interlude.Interface.Widgets.Gameplay
             }
             if (NoteLight.Val > 0f)
             {
-                SpriteBatch.Draw("notelighting", bounds.SliceBottom(w), Color.FromArgb((int)(NoteLight.Val * 255), Color.White));
+                SpriteBatch.Draw(new RenderTarget(Content.GetTexture("notelighting"), bounds.SliceBottom(w), Color.FromArgb((int)(NoteLight.Val * 255), Color.White)));
             }
         }
     }

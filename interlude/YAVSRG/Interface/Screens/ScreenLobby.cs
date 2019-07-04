@@ -44,6 +44,7 @@ namespace Interlude.Interface.Screens
         {
             base.OnEnter(prev);
             Game.Screens.Toolbar.Icons.Filter(0b00001111);
+            Prelude.Utilities.Logging.Log(SpriteBatch.Font1.Count.ToString(), "", Prelude.Utilities.Logging.LogType.Critical);
         }
 
         public override void Update(Rect bounds)

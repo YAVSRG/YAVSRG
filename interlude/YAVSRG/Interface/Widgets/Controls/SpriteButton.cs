@@ -35,7 +35,7 @@ namespace Interlude.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            SpriteBatch.Draw(icon, bounds, color);
+            SpriteBatch.Draw(new RenderTarget(Content.GetTexture(icon), bounds, color));
         }
 
         public override void Update(Rect bounds)

@@ -123,6 +123,7 @@
     <Compile Include="Gameplay\Mods\Visual\UpScroll.cs" />
     <Compile Include="Gameplay\Mods\Visual\DownScroll.cs" />
     <Compile Include="Gameplay\NoteRenderer.cs" />
+    <Compile Include="Gameplay\NoteRendering\PlayfieldFragment.cs" />
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />
     <Compile Include="Gameplay\ScoreSavingPreference.cs" />
     <Compile Include="Gameplay\TopScore.cs" />

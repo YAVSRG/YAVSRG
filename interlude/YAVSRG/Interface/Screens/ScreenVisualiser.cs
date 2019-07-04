@@ -85,10 +85,20 @@ namespace Interlude.Interface.Screens
                     a2 = a1 + Math.PI / 192;
                     a1 = rotate + rotate - a1;
                     a2 = rotate + rotate - a2;
-                    SpriteBatch.Draw("", color: Color.FromArgb(100, Game.Screens.HighlightColor), coords: new Vector2[] { new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)), new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)) });
+                    SpriteBatch.Draw(new RenderTarget(
+                        new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)),
+                        new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)),
+                        Color.FromArgb(100, Game.Screens.HighlightColor)));
                     a1 = rotate + rotate - a1;
                     a2 = rotate + rotate - a2;
-                    SpriteBatch.Draw("", color: Color.FromArgb(100, Game.Screens.HighlightColor), coords: new Vector2[] { new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)), new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)) });
+                    SpriteBatch.Draw(new RenderTarget(
+                        new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)),
+                        new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)),
+                        Color.FromArgb(100, Game.Screens.HighlightColor)));
                     a1 += Math.PI / 3;
                 }
             }

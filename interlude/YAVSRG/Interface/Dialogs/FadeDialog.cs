@@ -48,7 +48,7 @@ namespace Interlude.Interface.Dialogs
         {
             FBO.Unbind();
             Color c = Color.FromArgb((int)(255 * Fade), Color.White);
-            SpriteBatch.Draw(FBO, ScreenUtils.Bounds, c);
+            SpriteBatch.Draw(new RenderTarget(FBO, ScreenUtils.Bounds, c));
             FBO.Dispose();
         }
 

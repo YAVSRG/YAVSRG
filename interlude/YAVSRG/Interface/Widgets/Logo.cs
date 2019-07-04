@@ -44,7 +44,7 @@ namespace Interlude.Interface.Widgets
                 new Vector2(bounds.CenterX, bounds.CenterY + 0.2875f * w), new Vector2(bounds.CenterX, bounds.CenterY + 0.45f * w), Color.Transparent));
 
             SpriteBatch.AlphaTest(true);
-            SpriteBatch.Draw("logo", bounds, Color.FromArgb(a, Color.White));
+            SpriteBatch.Draw(new RenderTarget(IO.Content.GetTexture("logo"), bounds, Color.FromArgb(a, Color.White)));
             SpriteBatch.AlphaTest(false);
 
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Draw);
@@ -73,12 +73,12 @@ namespace Interlude.Interface.Widgets
 
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
 
-            SpriteBatch.Draw("logo", bounds, colors: new[] {
-                Color.FromArgb(Math.Min(255,a*3),Color.White),
-                Color.FromArgb(Math.Min(255,a*2),Color.White),
-                Color.FromArgb(Math.Min(255,a*2),Color.White),
-                Color.FromArgb(Math.Min(255,a*3),Color.White)
-            });
+            SpriteBatch.Draw(new RenderTarget(IO.Content.GetTexture("logo"), bounds, Color.FromArgb(Math.Min(255, a * 2), Color.White)));// colors: new[] {
+                //Color.FromArgb(Math.Min(255,a*3),Color.White),
+                //Color.FromArgb(Math.Min(255,a*2),Color.White),
+               // Color.FromArgb(Math.Min(255,a*2),Color.White),
+               // Color.FromArgb(Math.Min(255,a*3),Color.White)
+            //});
         }
     }
 }

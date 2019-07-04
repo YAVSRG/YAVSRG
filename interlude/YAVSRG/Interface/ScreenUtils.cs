@@ -51,22 +51,22 @@ namespace Interlude.Interface
 
             //todo: maybe make enum so this is easier to use
             if ((components & 16) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceLeft(shadow), colors: new[] { back, transparent, transparent, back });
+                SpriteBatch.Draw(new RenderTarget(bounds.SliceLeft(shadow), back, transparent, transparent, back));
             if ((components & 32) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceTop(shadow), colors: new[] { back, back, transparent, transparent });
+                SpriteBatch.Draw(new RenderTarget(bounds.SliceTop(shadow), back, back, transparent, transparent));
             if ((components & 64) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceRight(shadow), colors: new[] { transparent, back, back, transparent });
+                SpriteBatch.Draw(new RenderTarget(bounds.SliceRight(shadow), transparent, back, back, transparent));
             if ((components & 128) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceBottom(shadow), colors: new[] { transparent, transparent, back, back });
+                SpriteBatch.Draw(new RenderTarget(bounds.SliceBottom(shadow), transparent, transparent, back, back));
 
             if ((components & 1) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceLeft(thickness), color: color);
+                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceLeft(thickness), color));
             if ((components & 2) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceTop(thickness), color: color);
+                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceTop(thickness), color));
             if ((components & 4) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceRight(thickness), color: color);
+                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceRight(thickness), color));
             if ((components & 8) > 0)
-                SpriteBatch.Draw(bounds: bounds.SliceBottom(thickness), color: color);
+                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceBottom(thickness), color));
         }
 
         public static void DrawParallelogramWithBG(Rect bounds, float amount, Color fill, Color frame)

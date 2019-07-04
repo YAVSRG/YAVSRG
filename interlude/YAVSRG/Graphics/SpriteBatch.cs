@@ -35,11 +35,7 @@ namespace Interlude.Graphics
 
         public static Shader WaterShader;
 
-        public static void Draw(Sprite sprite, Rect bounds, Color color, int rotation = 0)
-        {
-            Draw(sprite: sprite, bounds: bounds, ux: 0, uy: 0, color: color, rotation: rotation);
-        }
-
+        /*
         public static void Draw(string texture = "", Rect bounds = default(Rect), Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null, float depth = 0)
         {
             Vector2 Coord1, Coord2, Coord3, Coord4;
@@ -100,7 +96,7 @@ namespace Interlude.Graphics
                 Tex4 = texcoords[3];
             }
             Draw(new RenderTarget((Sprite)sprite, Coord1, Coord2, Coord3, Coord4, Col1, Col2, Col3, Col4, Tex1, Tex2, Tex3, Tex4).Rotate(rotation), depth);
-        }
+        }*/
 
         public static void Draw(RenderTarget target, float depth = 0)
         {
@@ -176,7 +172,7 @@ namespace Interlude.Graphics
         public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
         {
             Sprite s = Content.GetTexture(texture);
-            Draw(texture: texture, bounds: new Rect(x + s.Width * alignX * scaleX, y + s.Height * alignY * scaleY, x + s.Width * (alignX + 1) * scaleX, y + s.Height * (alignY + 1) * scaleY), color: color);
+            Draw(new RenderTarget(s, new Rect(x + s.Width * alignX * scaleX, y + s.Height * alignY * scaleY, x + s.Width * (alignX + 1) * scaleX, y + s.Height * (alignY + 1) * scaleY), color));
         }
 
         public static void DrawTilingTexture(string texture, Rect bounds, float scale, float x, float y, Color color)
@@ -319,6 +315,8 @@ namespace Interlude.Graphics
         public static void End()
         {
             //Console.WriteLine(calls);
+            GL.Finish();
+            GL.Flush();
         }
 
         public static void Init()

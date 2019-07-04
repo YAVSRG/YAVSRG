@@ -1,4 +1,5 @@
 ﻿using Interlude.Graphics;
+using Interlude.IO;
 
 namespace Interlude.Interface.Widgets
 {
@@ -17,7 +18,7 @@ namespace Interlude.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            SpriteBatch.Draw(sprite, bounds, c);
+            SpriteBatch.Draw(new RenderTarget(Content.GetTexture(sprite), bounds, c));
         }
     }
 }

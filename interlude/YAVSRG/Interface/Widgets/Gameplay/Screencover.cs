@@ -2,6 +2,7 @@
 
 namespace Interlude.Interface.Widgets.Gameplay
 {
+    //deprecated
     public class Screencover : GameplayWidget
     {
         bool flip;
@@ -17,13 +18,13 @@ namespace Interlude.Interface.Widgets.Gameplay
             bounds = GetBounds(bounds);
             if (flip)
             {
-                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top + Game.Options.Theme.ColumnWidth, bounds.Right, bounds.Bottom), System.Drawing.Color.White, 0, 1, depth: -Game.Options.Theme.NoteDepth);
-                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + Game.Options.Theme.ColumnWidth), System.Drawing.Color.White, 0, 0, depth: -Game.Options.Theme.NoteDepth);
+                //SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top + Game.Options.Theme.ColumnWidth, bounds.Right, bounds.Bottom), System.Drawing.Color.White, 0, 1, depth: -Game.Options.Theme.NoteDepth);
+                //SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Top + Game.Options.Theme.ColumnWidth), System.Drawing.Color.White, 0, 0, depth: -Game.Options.Theme.NoteDepth);
             }
             else
             {
-                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom - Game.Options.Theme.ColumnWidth), System.Drawing.Color.White, 0, 1, depth: -Game.Options.Theme.NoteDepth);
-                SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Bottom - Game.Options.Theme.ColumnWidth, bounds.Right, bounds.Bottom), System.Drawing.Color.White, 0, 0, 2, depth: -Game.Options.Theme.NoteDepth);
+                //SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom - Game.Options.Theme.ColumnWidth), System.Drawing.Color.White, 0, 1, depth: -Game.Options.Theme.NoteDepth);
+                //SpriteBatch.Draw("screencover", new Rect(bounds.Left, bounds.Bottom - Game.Options.Theme.ColumnWidth, bounds.Right, bounds.Bottom), System.Drawing.Color.White, 0, 0, 2, depth: -Game.Options.Theme.NoteDepth);
             }
         }
     }

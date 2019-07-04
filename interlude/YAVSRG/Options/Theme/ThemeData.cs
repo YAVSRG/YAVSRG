@@ -43,8 +43,8 @@ namespace Interlude.Options
         public void DrawNote(Rect bounds, int column, int keycount, int index, int animation)
         {
             bounds = bounds.FlipY(); //all these flips are to make downscroll the right way up
-            SpriteBatch.Draw(NoteTexture(keycount), bounds, Color.White, animation, index, GetRotation(column, keycount));
-            SpriteBatch.Draw(NoteTexture(keycount) + "-overlay", bounds, Color.White, animation, index, GetRotation(column, keycount), depth: -NoteDepth);
+            SpriteBatch.Draw(new RenderTarget(Content.GetTexture(NoteTexture(keycount)), bounds, Color.White, animation, index).Rotate(GetRotation(column, keycount)));
+            SpriteBatch.Draw(new RenderTarget(Content.GetTexture(NoteTexture(keycount) + "-overlay"), bounds, Color.White, animation, index).Rotate(GetRotation(column, keycount)), -NoteDepth);
         }
 
         //NEW STUFF
