@@ -1,13 +1,19 @@
 ﻿using System;
 using System.IO;
+using System.Data.SQLite;
 using Prelude.Net.Protocol.Packets;
 
 namespace InterludeServer
 {
     class Program
     {
+        public static SQLiteConnection Database;
+
         static void Main(string[] args)
         {
+            //Database = new SQLiteConnection(@"Data Source=data.db; Version=3");
+            //Database.Open();
+            var session = Database.CreateSession("Data");
             Directory.CreateDirectory("Scores");
             PacketScore.OnReceive += ScoreTable.HandlePacketScore;
             PacketScoreboard.OnReceive += ScoreTable.HandlePacketScoreboard;
@@ -29,6 +35,7 @@ namespace InterludeServer
             }
             Console.WriteLine("Server shutting down.");
             Server.Shutdown();
+            Database.Close();
         }
     }
 }
