@@ -24,7 +24,6 @@ namespace Interlude.Options
         public Bind Options = new AltBind(new KeyBind(Key.O), false, true);
         public Bind Music = new AltBind(new KeyBind(Key.P), false, true);
 
-
         //level select
         public Bind UpRate = new KeyBind(Key.Plus);
         public Bind DownRate = new KeyBind(Key.Minus);

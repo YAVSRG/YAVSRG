@@ -35,7 +35,7 @@ namespace Interlude.Interface.Widgets.Gameplay
 
             public void Draw(Rect bounds, float now)
             {
-                SpriteBatch.Draw(new RenderTarget(Content.GetTexture("judgements"), bounds, Color.FromArgb(parent.Alpha((now - h.time) * 2), Color.White), h.delta < 0 ? 0 : 1, h.tier));
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("judgements"), bounds, Color.FromArgb(parent.Alpha((now - h.time) * 2), Color.White), h.delta < 0 ? 0 : 1, h.tier));
             }
 
             public void NewHit(Hit newhit)
@@ -74,7 +74,7 @@ namespace Interlude.Interface.Widgets.Gameplay
                 disp[0] = new JudgementDisplay(this);
             }
             hits = new List<Hit>();
-            Sprite sprite = Content.GetTexture("judgements");
+            Sprite sprite = Game.Options.Themes.GetTexture("judgements");
             aspectRatio = (float)sprite.Height / sprite.UV_Y / ((float)sprite.Width / sprite.UV_X);
             hScale = pos.Extra.GetValue("HitHorizontalScale", 3f) * Game.Options.Theme.ColumnWidth / st.Scoring.MissWindow;
             vScale = pos.Extra.GetValue("HitVerticalScale", 0.25f) * Game.Options.Theme.ColumnWidth;

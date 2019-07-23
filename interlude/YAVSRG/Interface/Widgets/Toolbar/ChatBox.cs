@@ -39,7 +39,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                     {
                         for (int y = 0; y < 4; y++)
                         {
-                            SpriteBatch.Draw(new RenderTarget(Content.GetTexture("emoji"), new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.White, x + y * 5, 0));
+                            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("emoji"), new Rect(bounds.Left + 10 + spacing * x, bounds.Top + 10 + spacing * y, bounds.Left + spacing + spacing * x, bounds.Top + spacing + spacing * y), Color.White, x + y * 5, 0));
                         }
                         for (int y = 4; y < 6; y++)
                         {
@@ -49,7 +49,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                 }
                 else
                 {
-                    SpriteBatch.Draw(new RenderTarget(Content.GetTexture("emoji"), new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.White, 0, 0));
+                    SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("emoji"), new Rect(bounds.Right - spacing, bounds.Top + 10, bounds.Right - 10, bounds.Top + spacing), Color.White, 0, 0));
                 }
             }
 
@@ -275,7 +275,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                         {
                             int id;
                             int.TryParse(parse[1], out id);
-                            SpriteBatch.Draw(new RenderTarget(Content.GetTexture("emoji"), new Rect(x, y, x + 35, y + 35), c, id, 0));
+                            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("emoji"), new Rect(x, y, x + 35, y + 35), c, id, 0));
                             x += 35;
                             valid = true;
                         }

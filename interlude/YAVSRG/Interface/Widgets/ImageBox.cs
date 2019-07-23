@@ -18,7 +18,7 @@ namespace Interlude.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            SpriteBatch.Draw(new RenderTarget(Content.GetTexture(sprite), bounds, c));
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture(sprite), bounds, c));
         }
     }
 }

@@ -66,7 +66,7 @@ namespace Interlude.Interface
 
         public void ChangeBackground(Sprite bg)
         {
-            if (!(Oldbackground.ID == Background.ID || Oldbackground.ID == Content.GetTexture("background").ID))
+            if (!(Oldbackground.ID == Background.ID || Oldbackground.ID == Game.Options.Themes.GetTexture("background").ID))
             {
                 Content.UnloadTexture(Oldbackground);
             }

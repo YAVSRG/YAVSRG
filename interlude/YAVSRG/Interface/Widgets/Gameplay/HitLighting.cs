@@ -13,7 +13,7 @@ namespace Interlude.Interface.Widgets.Gameplay
 
         public HitLighting() : base()
         {
-            scale = Game.Options.Theme.ColumnWidth / Content.GetTexture("receptorlighting").Width;
+            scale = Game.Options.Theme.ColumnWidth / Game.Options.Themes.GetTexture("receptorlighting").Width;
             Animation.Add(NoteLight);
             Animation.Add(ReceptorLight);
         }
@@ -30,7 +30,7 @@ namespace Interlude.Interface.Widgets.Gameplay
             }
             if (NoteLight.Val > 0f)
             {
-                SpriteBatch.Draw(new RenderTarget(Content.GetTexture("notelighting"), bounds.SliceBottom(w), Color.FromArgb((int)(NoteLight.Val * 255), Color.White)));
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("notelighting"), bounds.SliceBottom(w), Color.FromArgb((int)(NoteLight.Val * 255), Color.White)));
             }
         }
     }

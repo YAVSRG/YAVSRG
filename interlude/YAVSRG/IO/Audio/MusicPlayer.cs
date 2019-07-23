@@ -194,7 +194,7 @@ namespace Interlude.IO.Audio
 
         public void PlaySFX(string name, float pitch = 1f, float volume = 1f)
         {
-            int i = Content.LoadSoundFromAssets(name);
+            int i = Game.Options.Themes.GetSound(name);
             int s = Bass.SampleGetChannel(i);
             Bass.ChannelSetAttribute(s, ChannelAttribute.Volume, Game.Options.General.AudioVolume * volume);
             Bass.ChannelSetAttribute(s, ChannelAttribute.Frequency, Bass.ChannelGetAttribute(s, ChannelAttribute.Frequency) * pitch);

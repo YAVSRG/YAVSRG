@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
@@ -61,7 +57,7 @@ namespace Interlude.Graphics
         public static void Draw(string texture, Plane pos, int ux, int uy)
         {
             GL.Enable(EnableCap.Texture2D);
-            Sprite s = Content.GetTexture(texture);
+            Sprite s = Game.Options.Themes.GetTexture(texture);
             GL.BindTexture(TextureTarget.Texture2D, s.ID);
             GL.Begin(PrimitiveType.Quads);
 
@@ -97,7 +93,7 @@ namespace Interlude.Graphics
             GL.End();
         }
 
-        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col1 = default(Color), Color col2 = default(Color), Color col3 = default(Color), Color col4 = default(Color))
+        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col1 = default, Color col2 = default, Color col3 = default, Color col4 = default)
         {
             float l = offsetX + bounds.Left / scaleX;
             float t = offsetY + bounds.Top / scaleY;
@@ -107,20 +103,20 @@ namespace Interlude.Graphics
             return new RenderTarget(texture, bounds, col1, col2, col3, col4, new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b));
         }
 
-        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col = default(Color))
+        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col = default)
         {
             return Tiling(texture, bounds, offsetX, offsetY, scaleX, scaleY, col, col, col, col);
         }
 
         public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
         {
-            Sprite s = Content.GetTexture(texture);
+            Sprite s = Game.Options.Themes.GetTexture(texture);
             Draw(new RenderTarget(s, new Rect(x + s.Width * alignX * scaleX, y + s.Height * alignY * scaleY, x + s.Width * (alignX + 1) * scaleX, y + s.Height * (alignY + 1) * scaleY), color));
         }
 
         public static void DrawTilingTexture(string texture, Rect bounds, float scale, float x, float y, Color color)
         {
-            DrawTilingTexture(Content.GetTexture(texture), bounds, scale, scale, x, y, color, color, color, color);
+            DrawTilingTexture(Game.Options.Themes.GetTexture(texture), bounds, scale, scale, x, y, color, color, color, color);
         }
 
         public static void DrawTilingTexture(Sprite texture, Rect bounds, float scaleX, float scaleY, float x, float y, Color col1, Color col2, Color col3, Color col4)

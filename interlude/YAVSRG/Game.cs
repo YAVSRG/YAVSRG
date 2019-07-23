@@ -9,19 +9,20 @@ using Interlude.Utilities;
 using Interlude.IO;
 using Interlude.IO.Audio;
 using Interlude.IO.Net;
+using Interlude.Options;
 using Interlude.Gameplay;
 
 namespace Interlude
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.7.2";
+        public static readonly string Version = "Interlude v0.3.8";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 
         protected GameplayManager gameplay; //the current selected chart ingame 
         protected MusicPlayer audio; //audio engine instance
-        protected Options.Options options; //options handler instance
+        protected SettingsManager options; //options handler instance
         protected ScreenManager screens;
         protected TrayIcon trayIcon;
         protected TaskManager taskManager;
@@ -29,7 +30,7 @@ namespace Interlude
 
         public float FPS;
 
-        public static Options.Options Options
+        public static SettingsManager Options
         {
             get { return Instance.options; }
         }
@@ -66,15 +67,16 @@ namespace Interlude
 
         public static string WorkingDirectory
         {
-            get { return Interlude.Options.Options.general.WorkingDirectory; }
+            get { return SettingsManager.general.WorkingDirectory; }
         }
 
         public Game() : base(500, 200, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
         {
-            options = new Options.Options(); //create options data from profile
+            Instance = this;
+            options = new Options.SettingsManager(); //create options data from profile
+            options.Themes = new Interlude.Options.Themes.ThemeManager();
             Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";
-            Instance = this;
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
             VSync = VSyncMode.Off; //probably keeping this permanently as opentk has issues with vsync on. best performance is no frame cap and no vsync otherwise you get stutters
 
@@ -98,14 +100,14 @@ namespace Interlude
         public void ApplyWindowSettings(Options.General settings) //apply video settings
         {
             TargetRenderFrequency = settings.FrameLimiter; //set frame limit
-            if (settings.WindowMode == Interlude.Options.General.WindowType.Window)
+            if (settings.WindowMode == General.WindowType.Window)
             { //settings for windows
                 WindowState = WindowState.Normal;
                 WindowBorder = WindowBorder.Resizable;
-                Size = new Size(Interlude.Options.General.RESOLUTIONS[settings.Resolution].Item1, Interlude.Options.General.RESOLUTIONS[settings.Resolution].Item2);
+                Size = new Size(General.RESOLUTIONS[settings.Resolution].Item1, General.RESOLUTIONS[settings.Resolution].Item2);
                 Location = new Point((DisplayDevice.Default.Width - Size.Width) / 2, (DisplayDevice.Default.Height - Size.Height) / 2);
             }
-            else if (settings.WindowMode == Interlude.Options.General.WindowType.Fullscreen)
+            else if (settings.WindowMode == General.WindowType.Fullscreen)
             {//settings for fullscreen
                 WindowState = WindowState.Fullscreen;
             }

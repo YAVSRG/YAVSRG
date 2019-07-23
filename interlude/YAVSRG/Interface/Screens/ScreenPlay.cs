@@ -34,7 +34,7 @@ namespace Interlude.Interface.Screens
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
             binds = Game.Options.Profile.KeyBinds[Chart.Keys - 3];
 
-            var widgetData = Game.Options.Theme.Gameplay;
+            var widgetData = Game.Options.Themes.LoadedThemes[0].UIConfig["gameplay"];
 
             //this stuff is ok to stay here
             AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).TL_DeprecateMe(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));

@@ -170,6 +170,10 @@
     <Compile Include="Interface\Animations\AnimationSeries.cs" />
     <Compile Include="Interface\Animations\AnimationCounter.cs" />
     <Compile Include="Interface\Animations\AnimationColorFade.cs" />
+    <Compile Include="Options\Themes\NoteSkin.cs" />
+    <Compile Include="Options\Themes\TextureData.cs" />
+    <Compile Include="Options\Themes\Theme.cs" />
+    <Compile Include="Options\Themes\ThemeManager.cs" />
     <Compile Include="Utilities\CrashWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -246,12 +250,12 @@
     <Compile Include="Interface\Widgets\ScreenOptions\GameplayPanel.cs" />
     <Compile Include="Interface\Widgets\ScreenOptions\GeneralPanel.cs" />
     <Compile Include="Interface\Widgets\ScreenOptions\LayoutPanel.cs" />
-    <Compile Include="Options\Theme\WidgetPosition.cs" />
-    <Compile Include="Options\Theme\WidgetPositionData.cs" />
+    <Compile Include="Options\Themes\WidgetPosition.cs" />
+    <Compile Include="Options\Themes\WidgetPositionData.cs" />
     <Compile Include="IO\Discord.cs" />
     <Compile Include="Options\General.cs" />
     <Compile Include="Options\Profile.cs" />
-    <Compile Include="Options\Theme\ThemeData.cs" />
+    <Compile Include="Options\Themes\ThemeOptions.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="IO\Input.cs" />
     <Compile Include="Interface\Screen.cs" />
@@ -259,7 +263,7 @@
     <Compile Include="Interface\Screens\ScreenPlay.cs" />
     <Compile Include="Interface\ScreenUtils.cs" />
     <Compile Include="Interface\Widgets\Toolbar.cs" />
-    <Compile Include="Options\Options.cs" />
+    <Compile Include="Options\SettingsManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\ObjectPool.cs" />
@@ -279,6 +283,7 @@
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />
     <EmbeddedResource Include="Resources\Shaders\Water.fsh" />
+    <EmbeddedResource Include="Resources\Assets\fallback.zip" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">

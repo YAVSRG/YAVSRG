@@ -45,7 +45,8 @@ namespace Interlude.Options
         public string UUID = Guid.NewGuid().ToString();
         public Keymode PreferredKeymode = Keymode.Key4;
         public bool KeymodePreference = false;
-        public string Skin = "_fallback";
+        public List<string> SelectedThemes = new List<string>();
+        public string NoteSkin = "default";
         public float ScrollSpeed = 2.05f;
         public bool UseArrowsFor4k = false;
         public int HitPosition = 0;

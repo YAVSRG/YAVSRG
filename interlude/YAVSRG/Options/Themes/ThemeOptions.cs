@@ -6,10 +6,8 @@ using Interlude.Graphics;
 
 namespace Interlude.Options
 {
-    public class ThemeData
+    public class ThemeOptions
     {
-        [JsonIgnore]
-        public WidgetPositionData Gameplay;
         public Color[] JudgeColors = new[] { Color.FromArgb(0, 255, 255), Color.FromArgb(255, 255, 0), Color.FromArgb(0, 255, 100), Color.FromArgb(0, 0, 255), Color.Fuchsia, Color.FromArgb(255, 0, 0) };
         public string[] Judges = new[] { "Marvellous", "Perfect", "Good", "Bad", "Yikes", "Miss" };
         public string Font1 = "Akrobat-Black.otf";
@@ -18,6 +16,7 @@ namespace Interlude.Options
         public Color SelectChart = Color.FromArgb(0, 180, 110);
         public Color DefaultThemeColor = Color.FromArgb(0, 160, 255);
 
+        public Color PlayfieldColor = Color.FromArgb(180, 50, 50, 50);
         public int ColumnWidth = 150;
         public float NoteDepth = 20f;
         public bool FlipHoldTail = true;
@@ -42,9 +41,7 @@ namespace Interlude.Options
 
         public void DrawNote(Rect bounds, int column, int keycount, int index, int animation)
         {
-            bounds = bounds.FlipY(); //all these flips are to make downscroll the right way up
-            SpriteBatch.Draw(new RenderTarget(Content.GetTexture(NoteTexture(keycount)), bounds, Color.White, animation, index).Rotate(GetRotation(column, keycount)));
-            SpriteBatch.Draw(new RenderTarget(Content.GetTexture(NoteTexture(keycount) + "-overlay"), bounds, Color.White, animation, index).Rotate(GetRotation(column, keycount)), -NoteDepth);
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture(NoteTexture(keycount)), bounds, Color.White, animation, index).Rotate(GetRotation(column, keycount)));
         }
 
         //NEW STUFF
@@ -52,20 +49,20 @@ namespace Interlude.Options
         {
             bounds = bounds.Rotate(GetRotation(column, keycount));
             SpriteBatch.Draw(NoteTexture(keycount), bounds, animation, index);
-            SpriteBatch.Draw(NoteTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+            //SpriteBatch.Draw(NoteTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
         }
 
         public void DrawMine(Plane bounds, int column, int keycount, int index, int animation)
         {
             SpriteBatch.Draw(MineTexture(keycount), bounds, animation, index);
-            SpriteBatch.Draw(MineTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+            //SpriteBatch.Draw(MineTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
         }
 
         public void DrawHead(Plane bounds, int column, int keycount, int index, int animation)
         {
             bounds = bounds.Rotate(GetRotation(column, keycount));
             SpriteBatch.Draw(HeadTexture(keycount), bounds, animation, index);
-            SpriteBatch.Draw(HeadTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+            //SpriteBatch.Draw(HeadTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
         }
 
         public void DrawTail(Plane bounds, int column, int keycount, int index, int animation)
@@ -77,40 +74,35 @@ namespace Interlude.Options
             }
             bounds = bounds.Rotate(rotation);
             SpriteBatch.Draw(TailTexture(keycount), bounds, animation, index);
-            SpriteBatch.Draw(TailTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+            //SpriteBatch.Draw(TailTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
         }
 
         public void DrawHold(Plane bounds, int column, int keycount, int index, int animation)
         {
             SpriteBatch.Draw(BodyTexture(keycount), bounds, animation, index);
-            SpriteBatch.Draw(BodyTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
+            //SpriteBatch.Draw(BodyTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), animation, index);
         }
 
         public void DrawReceptor(Plane bounds, int column, int keycount, bool pressed)
         {
             bounds = bounds.Rotate(GetRotation(column, keycount));
             SpriteBatch.Draw(ReceptorTexture(keycount), bounds, 0, pressed ? 1 : 0);
-            SpriteBatch.Draw(ReceptorTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), 0, pressed ? 1 : 0);
-        }
-
-        protected string Arrow(int keycount)
-        {
-            return (Game.Options.Profile.UseArrowsFor4k && keycount == 4) ? "arrow" : "";
+            //SpriteBatch.Draw(ReceptorTexture(keycount) + "-overlay", bounds.Translate(new OpenTK.Vector3(0, 0, -NoteDepth)), 0, pressed ? 1 : 0);
         }
 
         protected string NoteTexture(int keycount)
         {
-            return (Game.Options.Profile.UseArrowsFor4k && keycount == 4) ? "arrow" : "note";
+            return "note";
         }
 
         protected string HeadTexture(int keycount)
         {
-            return Arrow(keycount) + "holdhead";
+            return "holdhead";
         }
 
         protected string TailTexture(int keycount)
         {
-            return Arrow(keycount) + "hold" + (UseHoldTailTexture ? "tail" : "head");
+            return "hold" + (UseHoldTailTexture ? "tail" : "head");
         }
 
         protected string BodyTexture(int keycount)
@@ -120,7 +112,7 @@ namespace Interlude.Options
 
         protected string ReceptorTexture(int keycount)
         {
-            return Arrow(keycount) + "receptor";
+            return "receptor";
         }
 
         protected string MineTexture(int keycount)
@@ -130,17 +122,17 @@ namespace Interlude.Options
 
         public int CountNoteColors(int keycount)
         {
-            return Content.GetTexture(NoteTexture(keycount)).UV_Y;
+            return Game.Options.Themes.GetNoteSkinTexture(NoteTexture(keycount)).UV_Y;
         }
 
         public void LoadGameplayTextures(int keycount) //makes sure they're all in memory to avoid lag spikes while playing
         {
-            Content.GetTexture(MineTexture(keycount));
-            Content.GetTexture(NoteTexture(keycount));
-            Content.GetTexture(HeadTexture(keycount));
-            Content.GetTexture(TailTexture(keycount));
-            Content.GetTexture(BodyTexture(keycount));
-            Content.GetTexture(ReceptorTexture(keycount));
+            Game.Options.Themes.GetNoteSkinTexture(MineTexture(keycount));
+            Game.Options.Themes.GetNoteSkinTexture(NoteTexture(keycount));
+            Game.Options.Themes.GetNoteSkinTexture(HeadTexture(keycount));
+            Game.Options.Themes.GetNoteSkinTexture(TailTexture(keycount));
+            Game.Options.Themes.GetNoteSkinTexture(BodyTexture(keycount));
+            Game.Options.Themes.GetNoteSkinTexture(ReceptorTexture(keycount));
         }
     }
 }

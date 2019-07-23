@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using static Interlude.Options.Options;
+using static Interlude.Options.SettingsManager;
 using Interlude.Options;
 
 

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using Newtonsoft.Json;
 using Prelude.Gameplay.Charts.YAVSRG;
 
 namespace Interlude
 {
+    //collection of random garbage functions that all need a home elsewhere
     public class Utils
     {
         public static int Modulus(int a, int b)
@@ -40,13 +42,21 @@ namespace Interlude
 
         public static T LoadObject<T>(string path) //reads an object of a given type from a file (this is how most data is stored and loaded)
         {
-            return JsonConvert.DeserializeObject<T>(System.IO.File.ReadAllText(path));
+            return LoadObject<T>(File.OpenRead(path));
+        }
+
+        public static T LoadObject<T>(Stream stream) //reads an object of a given type from a file stream (this is how most data is stored and loaded)
+        {
+            using (var r = new StreamReader(stream))
+            {
+                return JsonConvert.DeserializeObject<T>(r.ReadToEnd());
+            }
         }
 
         public static void SaveObject<T>(T obj, string path) //saves an object to a file
         {
             if (obj == null) return;
-            System.IO.File.WriteAllText(path, JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { Formatting = Formatting.Indented, TypeNameHandling = TypeNameHandling.Auto }));
+            File.WriteAllText(path, JsonConvert.SerializeObject(obj, new JsonSerializerSettings() { Formatting = Formatting.Indented, TypeNameHandling = TypeNameHandling.Auto }));
         }
 
         public static Bitmap CaptureDesktop(Rectangle screenSize) //this is only used when the game starts to create the "fade in effect" (you can't have translucent windows)

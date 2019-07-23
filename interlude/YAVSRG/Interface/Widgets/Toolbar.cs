@@ -137,7 +137,7 @@ namespace Interlude.Interface
 
             if (CursorMode > WidgetState.DISABLED)
             {
-                SpriteBatch.Draw(new RenderTarget(Content.GetTexture("cursor"), new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor));
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("cursor"), new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor));
                 float f = _TooltipFade * _TooltipFade2;
                 if (f >= 0.001f)
                 {

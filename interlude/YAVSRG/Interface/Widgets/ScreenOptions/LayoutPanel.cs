@@ -5,7 +5,6 @@ using OpenTK.Input;
 using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
 using Interlude.IO;
-using static Interlude.Options.Options;
 
 
 namespace Interlude.Interface.Widgets
@@ -91,8 +90,19 @@ namespace Interlude.Interface.Widgets
             AddChild(selectKeyMode);
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .TL_DeprecateMe(-500, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Skin", Skins, Math.Max(0, Array.IndexOf(Skins, Game.Options.Profile.Skin)), (i) => { Game.Options.ChangeSkin(Game.Options.Profile.Skin, Skins[i]); Game.Options.Profile.Skin = Skins[i]; ChangeKeyMode(keyMode, width); })
-                .TL_DeprecateMe(200, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(500, 575, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new TextPicker("Theme", Game.Options.Themes.AvailableThemes.ToArray(), 0, (i) =>
+            {
+                Game.Options.Profile.SelectedThemes = new List<string>() { Game.Options.Themes.AvailableThemes[i] };
+                //Game.Options.Themes.Unload(); Game.Options.Themes.Load();
+                ChangeKeyMode(keyMode, width);
+            }).Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
+            var arr = Game.Options.Themes.NoteSkins.Keys.ToArray();
+            AddChild(new TextPicker("Noteskin", arr, 0, (i) =>
+            {
+                Game.Options.Profile.NoteSkin = arr[i];
+                Game.Options.Themes.Unload(); Game.Options.Themes.Load();
+                ChangeKeyMode(keyMode, width);
+            }).Reposition(200, 0.5f, 600, 0, 500, 0.5f, 650, 0));
         }
 
         public void Refresh()

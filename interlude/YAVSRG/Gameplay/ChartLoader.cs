@@ -204,7 +204,7 @@ namespace Interlude.Gameplay
         {
             if (Cache.Charts.Count == 0)
             {
-                Game.Screens.ChangeBackground(IO.Content.GetTexture("background"));
+                Game.Screens.ChangeBackground(Game.Options.Themes.GetTexture("background"));
                 Game.Screens.ChangeThemeColor(Game.Options.Theme.DefaultThemeColor);
                 return;
             }

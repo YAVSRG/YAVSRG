@@ -32,9 +32,9 @@ namespace Interlude.Interface.Dialogs
                 .Reposition(220, 0, -110, 1, -10, 1, -60, 1));
 
             var profileSelector = new FlowContainer();
-            for (int i = 0; i < Options.Options.Profiles.Count; i++)
+            for (int i = 0; i < Options.SettingsManager.Profiles.Count; i++)
             {
-                profileSelector.AddChild(ProfileButton(Options.Options.Profiles[i]));
+                profileSelector.AddChild(ProfileButton(Options.SettingsManager.Profiles[i]));
             }
             AddChild(profileSelector.Reposition(10, 0, 10, 0, 210, 0, -10, 1));
 
@@ -52,7 +52,7 @@ namespace Interlude.Interface.Dialogs
             {
                 Options.Profile p = new Options.Profile();
                 p.Rename(s);
-                Options.Options.Profiles.Add(p);
+                Options.SettingsManager.Profiles.Add(p);
                 Game.Options.ChangeProfile(p);
                 Close(p.Name);
             }));
