@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Prelude.Gameplay.Charts.YAVSRG;
 using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Mods
@@ -13,6 +14,19 @@ namespace Prelude.Gameplay.Mods
 
         public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
+            foreach (GameplaySnap s in Chart.Notes.Points)
+            {
+                for (int i = 0; i < 6; i++)
+                {
+                    var x = s[i];
+                    if (x.GetColumn(0)) x.SetColumn(6);
+                    if (x.GetColumn(1)) x.SetColumn(5);
+                    if (x.GetColumn(2)) x.SetColumn(4);
+                }
+                Chart.Keys = 7;
+                Chart.Timing.SV = new SVManager(7).SV;
+            }
+            /*
             ushort prev = 0;
             List<GameplaySnap> newNotes = new List<GameplaySnap>();
             Chart.Keys = 5;
@@ -21,9 +35,10 @@ namespace Prelude.Gameplay.Mods
                 prev = GetValue((ushort)(s.taps.value | s.holds.value), prev);
                 newNotes.Add(new GameplaySnap(s.Offset, prev, 0, 0, 0, 0));
             }
-            Chart.Notes.Points = newNotes;
+            Chart.Notes.Points = newNotes;*/
         }
 
+        /*
         ushort GetValue(ushort input, ushort previous)
         {
             ushort output = 0;
@@ -50,7 +65,7 @@ namespace Prelude.Gameplay.Mods
                 }
             }
             return output;
-        }
+        }*/
 
         public override int GetStatus(DataGroup Data)
         {
