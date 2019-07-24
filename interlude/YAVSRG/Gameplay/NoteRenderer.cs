@@ -63,7 +63,7 @@ namespace Interlude.Gameplay
             for (int i = 0; i < Chart.Keys; i++)
             {
                 AddChild(new HitLighting(Game.Options.Profile.KeyBinds[Chart.Keys - 3][i])
-                    .Reposition(o + i * ColumnWidth, 0.5f, -HitPos, 1, o + (i + 1) * ColumnWidth, 0.5f, -HitPos + ColumnWidth, 1));
+                    .Reposition(o + i * ColumnWidth, 0.5f, HitPos, 0, o + (i + 1) * ColumnWidth, 0.5f, -HitPos, 1));
             }
         }
 

@@ -33,7 +33,14 @@ namespace Interlude.Interface.Widgets.Gameplay
             if (ReceptorLight.Val > threshold)
             {
                 int a = (int)(255f * (ReceptorLight.Val - threshold) / Game.Options.Theme.ColumnLightTime);
-                SpriteBatch.DrawAlignedTexture("receptorlighting", bounds.CenterX, bounds.Top, scale * ReceptorLight.Val, scale / ReceptorLight.Val, -0.5f, -1, Color.FromArgb(a, Color.White));
+                if (Game.Options.Profile.Upscroll)
+                {
+                    SpriteBatch.DrawAlignedTexture("receptorlighting", bounds.CenterX, bounds.Top, scale * ReceptorLight.Val, -scale / ReceptorLight.Val, -0.5f, -1, Color.FromArgb(a, Color.White));
+                }
+                else
+                {
+                    SpriteBatch.DrawAlignedTexture("receptorlighting", bounds.CenterX, bounds.Bottom, scale * ReceptorLight.Val, scale / ReceptorLight.Val, -0.5f, -1, Color.FromArgb(a, Color.White));
+                }
             }
         }
     }
