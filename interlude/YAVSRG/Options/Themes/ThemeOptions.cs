@@ -18,7 +18,7 @@ namespace Interlude.Options
 
         public Color PlayfieldColor = Color.FromArgb(120, 0, 0, 0);
         public int ColumnWidth = 150;
-        public float ColumnLightTime = 0.8f;
+        public float ColumnLightTime = 0.2f;
         public int CursorSize = 50;
 
         public int NoteColorCount()
