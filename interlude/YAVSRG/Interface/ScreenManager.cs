@@ -41,8 +41,8 @@ namespace Interlude.Interface
         public Widgets.Logo Logo;
         public Toolbar Toolbar;
 
-        private AnimationSlider ParallaxPosX = new AnimationSlider(0);
-        private AnimationSlider ParallaxPosY = new AnimationSlider(0);
+        private readonly AnimationSlider ParallaxPosX = new AnimationSlider(0);
+        private readonly AnimationSlider ParallaxPosY = new AnimationSlider(0);
         private Func<Point> ParallaxFunc = () => new Point(Input.MouseX, Input.MouseY);
 
         public ScreenManager()

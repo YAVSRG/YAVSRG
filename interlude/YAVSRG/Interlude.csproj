@@ -117,11 +117,6 @@
     <Compile Include="Gameplay\CachedChart.cs" />
     <Compile Include="Gameplay\Collections\Collection.cs" />
     <Compile Include="Gameplay\Collections\CollectionsManager.cs" />
-    <Compile Include="Gameplay\Mods\IVisualMod.cs" />
-    <Compile Include="Gameplay\Mods\Visual\ManipScroll.cs" />
-    <Compile Include="Gameplay\Mods\Visual\SpiralScroll.cs" />
-    <Compile Include="Gameplay\Mods\Visual\UpScroll.cs" />
-    <Compile Include="Gameplay\Mods\Visual\DownScroll.cs" />
     <Compile Include="Gameplay\NoteRenderer.cs" />
     <Compile Include="Gameplay\NoteRendering\PlayfieldFragment.cs" />
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />

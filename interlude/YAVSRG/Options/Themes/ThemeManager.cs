@@ -36,8 +36,10 @@ namespace Interlude.Options.Themes
             Textures = new Dictionary<string, Sprite>();
             Sounds = new Dictionary<string, int>();
             NoteSkins = new Dictionary<string, NoteSkin>();
-            LoadedThemes = new List<Theme>();
-            LoadedThemes.Add(new Theme(Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources.Assets.fallback.zip")));
+            LoadedThemes = new List<Theme>
+            {
+                new Theme(Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources.Assets.fallback.zip"))
+            };
             foreach (string t in Game.Options.Profile.SelectedThemes)
             {
                 if (AvailableThemes.Contains(t))

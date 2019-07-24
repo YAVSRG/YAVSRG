@@ -54,12 +54,6 @@ namespace Interlude.Interface.Widgets
                 .BR_DeprecateMe(-50, 425, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                new BoolPicker("Arrows for 4k", Game.Options.Profile.UseArrowsFor4k, v => { Game.Options.Profile.UseArrowsFor4k = v; lp.Refresh(); }),
-                "Turn this on if you want to use arrow textures when playing with four keys. This uses the arrow texture provided by the skin, which will be rotated depending on the column.", ib)
-                .TL_DeprecateMe(50, 375, AnchorType.CENTER, AnchorType.MIN)
-                .BR_DeprecateMe(200, 425, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(
-                new TooltipContainer(
                 new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord", "Jackhammer" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; lp.Refresh(); }),
                 "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm i.e make every other beat red and the remaining beats green\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord", ib)
                 .TL_DeprecateMe(-200, 475, AnchorType.CENTER, AnchorType.MIN)

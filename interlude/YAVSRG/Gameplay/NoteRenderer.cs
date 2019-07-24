@@ -1,38 +1,43 @@
 ﻿using System;
+using System.Drawing;
+using OpenTK.Graphics.OpenGL;
 using Prelude.Gameplay.Charts.YAVSRG;
 using Prelude.Gameplay;
 using Interlude.Interface;
+using Interlude.Interface.Widgets.Gameplay;
 using Interlude.Interface.Animations;
-using Interlude.Gameplay.Mods;
 using Interlude.Graphics;
-using Interlude.IO;
 
 namespace Interlude.Gameplay
 {
     public class NoteRenderer : Widget
     {
-        float[] holds;
-        BinarySwitcher holdMiddles, bugFix;
-        BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
-        int[] holdColors, holdColorsHitpos, svindex;
-        float[] pos, time, sv;
+        readonly float[] holds;
+        readonly BinarySwitcher holdMiddles, bugFix;
+        readonly BinarySwitcher holdsInHitpos = new BinarySwitcher(0);
+        readonly int[] holdColors, holdColorsHitpos, svindex;
+        readonly float[] pos, time, sv;
 
-        ChartWithModifiers Chart;
+        readonly ChartWithModifiers Chart;
         protected int HitPos { get { return Game.Options.Profile.HitPosition; } }
         protected int ColumnWidth { get { return Game.Options.Theme.ColumnWidth; } }
         readonly int Keys;
         readonly float ScrollSpeed;
         public readonly bool UseSV = true;
 
-        protected IVisualMod ScrollScheme;
+        protected FBO NoteRender, Composite;
 
         protected AnimationCounter animation;
 
-        public NoteRenderer(ChartWithModifiers chart, IVisualMod mod)
+        public NoteRenderer(ChartWithModifiers chart)
         {
             Chart = chart;
-            Game.Options.Theme.LoadGameplayTextures(Chart.Keys);
-            ScrollScheme = mod;
+            Game.Options.Theme.LoadGameplayTextures();
+
+            Composite = FBO.FromPool();
+            NoteRender = FBO.FromPool();
+            NoteRender.Unbind();
+            Composite.Unbind();
 
             Animation.Add(animation = new AnimationCounter(25, true));
 
@@ -48,31 +53,34 @@ namespace Interlude.Gameplay
             time = new float[Chart.Keys];
             sv = new float[Chart.Keys + 1];
             svindex = new int[Chart.Keys + 1];
+
+            AddHitlights();
         }
 
         public void AddHitlights()
         {
-            //todo: fix/bring back hitlighting
+            float o = ColumnWidth * Chart.Keys * -0.5f;
+            for (int i = 0; i < Chart.Keys; i++)
+            {
+                AddChild(new HitLighting(Game.Options.Profile.KeyBinds[Chart.Keys - 3][i])
+                    .Reposition(o + i * ColumnWidth, 0.5f, -HitPos, 1, o + (i + 1) * ColumnWidth, 0.5f, -HitPos + ColumnWidth, 1));
+            }
         }
 
         public override void Draw(Rect bounds)
         {
             bounds = GetBounds(bounds);
-            SpriteBatch.Enable3D();
-            SpriteBatch.EnableTransform(false);
-            float Height = ScrollScheme.Height;
+            float Height = PlayfieldHeight();
             float now = (float)Game.Audio.Now(); //where are we in the song
 
-            for (byte c = 0; c < Keys; c++) //draw columns and empty receptors
+            for (byte c = 0; c < Keys; c++)
             {
-                //DrawColumn(bounds.Left, c);
-                //SpriteBatch.Draw("playfield", ScrollScheme.PlaceObject(c, 0, IVisualMod.ObjectType.Backdrop), 0, 0);
-                Game.Options.Theme.DrawReceptor(ScrollScheme.PlaceObject(c, 0, IVisualMod.ObjectType.Receptor), c, Keys, Game.Options.Profile.KeyBinds[Keys - 3][c].Held());
-                //DrawReceptor(bounds.Left, c);
-                pos[c] = HitPos;
+                pos[c] = 0;
                 time[c] = now;
             }
 
+            NoteRender.Bind();
+            GL.Clear(ClearBufferMask.ColorBufferBit);
             int i = Chart.Notes.GetNextIndex(now); //find next row above hitpos to render
             for (byte k = 0; k < Keys + 1; k++)
             {
@@ -129,7 +137,7 @@ namespace Interlude.Gameplay
                 }
 
                 //renders next row of notes (positions per column are globally accessible)
-                DrawSnap(Chart.Notes.Points[i], bounds.Left);
+                DrawSnap(Chart.Notes.Points[i]);
                 i++; //move on to next row of notes
             }
 
@@ -137,40 +145,67 @@ namespace Interlude.Gameplay
             {
                 foreach (byte k in holdsInHitpos.GetColumns())
                 {
-                    Game.Options.Theme.DrawHead(ScrollScheme.PlaceObject(k, 0, IVisualMod.ObjectType.Head), k, Keys, holdColorsHitpos[k], animation.cycles % 8);
+                    SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdhead"), ObjectPosition(k, 0), Color.White,
+                        AnimationFrame(), holdColorsHitpos[k]));
                 }
                 bugFix.value &= (ushort)~holdsInHitpos.value;
             }
+            NoteRender.Unbind();
+            Composite.Bind();
+            GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            //DrawWidgets(bounds);
+            for (byte c = 0; c < Keys; c++) //draw columns and empty receptors
+            {
+                SpriteBatch.DrawRect(ColumnPosition(c), Game.Options.Theme.PlayfieldColor);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("receptor"), ObjectPosition(c, 0), Color.White,
+                    AnimationFrame(), Game.Options.Profile.KeyBinds[Keys - 3][c].Held() ? 1 : 0));
+            }
+
+            float sct = -ScreenUtils.ScreenHeight + ScreenUtils.ScreenHeight * 2 * Game.Options.Profile.ScreenCoverDown;
+            float scb = -ScreenUtils.ScreenHeight + ScreenUtils.ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverUp);
+            SpriteBatch.DrawTilingTexture(NoteRender, new Rect(-ScreenUtils.ScreenWidth, sct - Game.Options.Profile.ScreenCoverFadeLength, ScreenUtils.ScreenWidth, sct),
+                ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, Color.Transparent, Color.Transparent, Color.White, Color.White);
+
+            SpriteBatch.DrawTilingTexture(NoteRender, new Rect(-ScreenUtils.ScreenWidth, sct, ScreenUtils.ScreenWidth, scb),
+                ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, Color.White, Color.White, Color.White, Color.White);
+
+            SpriteBatch.DrawTilingTexture(NoteRender, new Rect(-ScreenUtils.ScreenWidth, scb, ScreenUtils.ScreenWidth, scb + Game.Options.Profile.ScreenCoverFadeLength),
+                ScreenUtils.ScreenWidth * 2, ScreenUtils.ScreenHeight * 2, 0.5f, 0.5f, Color.White, Color.White, Color.Transparent, Color.Transparent);
+            DrawWidgets(bounds);
+
+            Composite.Unbind();
+
+            SpriteBatch.Enable3D();
+            SpriteBatch.EnableTransform(false);
+            SpriteBatch.Draw(new RenderTarget(Composite, bounds, Color.White));
             SpriteBatch.DisableTransform();
             SpriteBatch.Disable3D();
-
         }
 
-        private void DrawLongTap(float offset, byte i, float start, float end, int color)
+        private void DrawLongTap(byte i, float start, float end, int color)
         {
-            foreach (Plane p in ScrollScheme.DrawHold(i, start, end)) { Game.Options.Theme.DrawHold(p, i, Keys, color, animation.cycles % 8); }
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdbody"), HoldPosition(i, start, end), Color.White, AnimationFrame(), color));
             if (holdMiddles.GetColumn(i)) //draw hold head if this isn't a middle section of a long note
             { holdMiddles.RemoveColumn(i); }
             else
             {
-                Game.Options.Theme.DrawHead(ScrollScheme.PlaceObject(i, start, IVisualMod.ObjectType.Head), i, Keys, color, animation.cycles % 8);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdhead"), ObjectPosition(i, start), Color.White,
+                    AnimationFrame(), color));
             }
         }
-        private void DrawSnap(GameplaySnap s, float offset)
+        private void DrawSnap(GameplaySnap s)
         {
             foreach (byte k in s.middles.GetColumns())
             {
                 if (holds[k] == 0)
                 {
                     holdMiddles.SetColumn(k);
-                    DrawLongTap(offset, k, holds[k], pos[k], holdColorsHitpos[k]);
+                    DrawLongTap(k, holds[k], pos[k], holdColorsHitpos[k]);
                     holdsInHitpos.SetColumn(k);
                 }
                 else
                 {
-                    DrawLongTap(offset, k, holds[k], pos[k], holdColors[k]);
+                    DrawLongTap(k, holds[k], pos[k], holdColors[k]);
                 }
                 holds[k] = pos[k];
                 holdColors[k] = s.colors[k];
@@ -181,14 +216,14 @@ namespace Interlude.Gameplay
                 if (holds[k] == 0)
                 {
                     holdMiddles.SetColumn(k);
-                    DrawLongTap(offset, k, holds[k], pos[k], holdColorsHitpos[k]);
+                    DrawLongTap(k, holds[k], pos[k], holdColorsHitpos[k]);
                     holdsInHitpos.SetColumn(k);
                 }
                 else
                 {
-                    DrawLongTap(offset, k, holds[k], pos[k], holdColors[k]);
+                    DrawLongTap(k, holds[k], pos[k], holdColors[k]);
                 }
-                holds[k] = ScrollScheme.Height;
+                holds[k] = PlayfieldHeight();
                 holdMiddles.RemoveColumn(k);
             }
             foreach (byte k in s.holds.GetColumns())
@@ -203,16 +238,88 @@ namespace Interlude.Gameplay
             }
             foreach (byte k in s.taps.GetColumns())
             {
-                Game.Options.Theme.DrawNote(ScrollScheme.PlaceObject(k, pos[k], IVisualMod.ObjectType.Note), k, Keys, s.colors[k], animation.cycles % 8);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("note"), ObjectPosition(k, pos[k]), Color.White,
+                    AnimationFrame(), s.colors[k]).Rotate(NoteRotation(k)));
             }
             foreach (byte k in s.mines.GetColumns())
             {
-                Game.Options.Theme.DrawMine(ScrollScheme.PlaceObject(k, pos[k], IVisualMod.ObjectType.Mine), k, Keys, s.colors[k], animation.cycles % 8);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("mine"), ObjectPosition(k, pos[k]), Color.White,
+                    AnimationFrame(), s.colors[k]));
             }
             foreach (byte k in s.ends.GetColumns())
             {
-                Game.Options.Theme.DrawTail(ScrollScheme.PlaceObject(k, pos[k], IVisualMod.ObjectType.Tail), k, Keys, s.colors[k], animation.cycles % 8);
+                bool FlipTail = (Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].FlipHoldTail && !Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].UseHoldTailTexture) ^ Game.Options.Profile.Upscroll;
+                Sprite sprite = Game.Options.Themes.GetNoteSkinTexture(Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].UseHoldTailTexture ? "holdtail" : "holdhead");
+                Rect rect = ObjectPosition(k, pos[k]);
+                if (FlipTail) rect = rect.FlipY();
+                RenderTarget target = new RenderTarget(sprite, ObjectPosition(k, pos[k]), Color.White, AnimationFrame(), s.colors[k]);
+                if (!Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].UseHoldTailTexture) target = target.Rotate(NoteRotation(k));
+                SpriteBatch.Draw(target);
             }
+        }
+
+        int NoteRotation(int column)
+        {
+            if (Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].UseRotation)
+            {
+                if (Chart.Keys == 4)
+                {
+                    switch (column)
+                    {
+                        case 0: { return 3; }
+                        case 1: { return 0; }
+                        case 2: { return 2; }
+                        case 3: { return 1; }
+                    }
+                }
+                //?? rotation for other keymodes?
+            }
+            return 0;
+        }
+
+        int PlayfieldHeight()
+        {
+            return ScreenUtils.ScreenHeight * 2;
+        }
+
+        int AnimationFrame()
+        {
+            return animation.cycles % 8;
+        }
+
+        Rect ObjectPosition(int column, float position)
+        {
+            float offset = ColumnWidth * Chart.Keys * -0.5f;
+            float bottom = PositionFunc(position);
+            return new Rect(offset + column * ColumnWidth, bottom - ColumnWidth, offset + (column + 1) * ColumnWidth, bottom);
+        }
+
+        Rect HoldPosition(int column, float start, float end)
+        {
+            float offset = ColumnWidth * Chart.Keys * -0.5f;
+            float bottom = PositionFunc(start) - Game.Options.Theme.ColumnWidth  * 0.5f;
+            float top = PositionFunc(end) - Game.Options.Theme.ColumnWidth * 0.5f;
+            return new Rect(offset + column * ColumnWidth, top, offset + (column + 1) * ColumnWidth, bottom);
+        }
+
+        float PositionFunc(float pos)
+        {
+            float p = PlayfieldHeight() / 2 - pos - Game.Options.Profile.HitPosition;
+            if (Game.Options.Profile.Upscroll) p = -p + Game.Options.Theme.ColumnWidth;
+            return p;
+        }
+
+        Rect ColumnPosition(int column)
+        {
+            float offset = ColumnWidth * Chart.Keys * -0.5f;
+            return new Rect(offset + column * ColumnWidth, -PlayfieldHeight() / 2, offset + (column + 1) * ColumnWidth, PlayfieldHeight() / 2);
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            NoteRender.Dispose();
+            Composite.Dispose();
         }
     }
 }

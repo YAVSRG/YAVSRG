@@ -17,7 +17,7 @@ namespace Interlude.Interface
 
         //Called when this screen is being exited for another
         //this.OnExit(next) is called BEFORE next.OnEnter(this)
-        public virtual void OnExit(Screen next) { }
+        public virtual void OnExit(Screen next) { Dispose(); }
 
         //Overrides widget bounds behaviour; The bounds of a screen fill the whole game window
         public override Rect GetBounds()

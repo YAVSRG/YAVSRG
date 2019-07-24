@@ -48,11 +48,11 @@ namespace Interlude.Options
         public List<string> SelectedThemes = new List<string>();
         public string NoteSkin = "default";
         public float ScrollSpeed = 2.05f;
-        public bool UseArrowsFor4k = false;
         public int HitPosition = 0;
         public bool Upscroll = false;
         public float ScreenCoverUp = 0f;
         public float ScreenCoverDown = 0f;
+        public float ScreenCoverFadeLength = 200;
         public float PerspectiveTilt = 0f;
         public float BackgroundDim = 0.5f;
         public string ChartSortMode = "Title";

@@ -3,8 +3,6 @@ using System.Drawing;
 using Prelude.Gameplay.Charts.YAVSRG;
 using Prelude.Gameplay;
 using Interlude.Gameplay;
-using Interlude.Gameplay.Mods.Visual;
-using Interlude.Gameplay.Mods;
 using Interlude.Interface.Widgets.Gameplay;
 using Interlude.Interface.Animations;
 using Interlude.IO;
@@ -20,7 +18,6 @@ namespace Interlude.Interface.Screens
         Widget playfield;
         float missWindow;
         Bind[] binds;
-        HitLighting[] lighting;
         AnimationFade bannerIn, bannerOut;
 
         public ScreenPlay()
@@ -37,7 +34,7 @@ namespace Interlude.Interface.Screens
             var widgetData = Game.Options.Themes.LoadedThemes[0].UIConfig["gameplay"];
 
             //this stuff is ok to stay here
-            AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).TL_DeprecateMe(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
+            AddChild(playfield = new NoteRenderer(Chart));
             //AddChild(new PerformanceMeter(scoreTracker));
             AddChild(new HitMeter(scoreTracker, widgetData.GetWidgetConfig("hitMeter", -250, 0.5f, 150, 0.5f, 250, 0.5f, 20, 0.5f, true)));
             AddChild(new ComboDisplay(scoreTracker, widgetData.GetWidgetConfig("combo", -100, 0.5f, 100, 0.5f, 100, 0.5f, 101, 0.5f, true)));
@@ -50,16 +47,7 @@ namespace Interlude.Interface.Screens
             AddChild(new JudgementCounter(scoreTracker, widgetData.GetWidgetConfig("judgements", 70, 0, -180, 0.5f, 320, 0, 180, 0.5f, false)));
             //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
             //playfield.InitGameplay();
-            lighting = new HitLighting[Chart.Keys];
             float x = Chart.Keys * 0.5f;
-            //this places a hitlight on every column
-            for (int i = 0; i < Chart.Keys; i++)
-            {
-                lighting[i] = new HitLighting();
-                lighting[i].TL_DeprecateMe(columnwidth * i, hitposition, AnchorType.MIN, AnchorType.CENTER)
-                    .BR_DeprecateMe(columnwidth * (i + 1), hitposition + columnwidth, AnchorType.MIN, AnchorType.CENTER);
-                playfield.AddChild(lighting[i]);
-            }
             //this places the screencovers
             if (Game.Options.Profile.ScreenCoverUp > 0)
                 playfield.AddChild(new Screencover(scoreTracker, false)
@@ -123,7 +111,7 @@ namespace Interlude.Interface.Screens
                 Game.Audio.Stop();
                 Game.Screens.AddDialog(new Dialogs.TextDialog("Change sync by... (ms)", (x) =>
                 {
-                    float f = 0; float.TryParse(x, out f); Game.Gameplay.ChartSaveData.Offset += f;
+                    float.TryParse(x, out float f); Game.Gameplay.ChartSaveData.Offset += f;
                     Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
                     Game.Audio.PlayLeadIn();
                 }));
@@ -165,14 +153,11 @@ namespace Interlude.Interface.Screens
         public void OnKeyDown(byte k, float now) //handle but also do the hit lighting stuff
         {
             HandleHit(k, now, false);
-            lighting[k].ReceptorLight.Target = 1;
-            lighting[k].ReceptorLight.Val = 1;
         }
 
         public void OnKeyUp(byte k, float now) //handle but also do the hit lighting stuff
         {
             HandleHit(k, now, true);
-            lighting[k].ReceptorLight.Target = 0;
         }
 
         public void HandleHit(byte k, float now, bool release)
@@ -240,7 +225,6 @@ namespace Interlude.Interface.Screens
                 if (release) { delta *= 0.5f; }
                 //else { Game.Audio.PlaySFX("hit", pitch: 1f - delta * 0.5f / missWindow, volume: 1f - Math.Abs(delta) / missWindow); } //auditory feedback tests (causes performance issues)
                 scoreTracker.RegisterHit(hitAt, k, delta); //handle the hit
-                lighting[k].NoteLight.Val = 1;
             } //put else statement here for cb on unecessary keypress if i ever want to do that
         }
 

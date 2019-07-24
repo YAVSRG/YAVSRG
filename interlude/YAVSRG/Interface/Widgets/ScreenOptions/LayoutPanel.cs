@@ -4,6 +4,7 @@ using System.Linq;
 using OpenTK.Input;
 using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
+using Interlude.Graphics;
 using Interlude.IO;
 
 
@@ -43,7 +44,7 @@ namespace Interlude.Interface.Widgets
             {
                 base.Draw(bounds);
                 bounds = GetBounds(bounds);
-                Game.Options.Theme.DrawNote(bounds, 1, ((LayoutPanel)Parent).keyMode, get(), 0);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("note"), bounds, System.Drawing.Color.White, 1, get()));
             }
 
             public override void Update(Rect bounds)
@@ -80,8 +81,8 @@ namespace Interlude.Interface.Widgets
             for (int i = 0; i < 10; i++)
             {
                 var j = i;
-                Action<Bind> set = (bind) => { Game.Options.Profile.KeyBinds[keyMode - 3][j] = (KeyBind)bind; };
-                Func<Bind> get = () => Game.Options.Profile.KeyBinds[keyMode - 3][j];
+                void set(Bind bind) { Game.Options.Profile.KeyBinds[keyMode - 3][j] = (KeyBind)bind; }
+                Bind get() => Game.Options.Profile.KeyBinds[keyMode - 3][j];
                 binds[i] = new KeyBinder("Column " + (i + 1).ToString(), new SetterGetter<Bind>(set, get)) { AllowAltBinds = false };
                 AddChild(binds[i]);
                 colors[i] = new ColorPicker("", null, null, 1);
@@ -123,6 +124,7 @@ namespace Interlude.Interface.Widgets
         {
             return (s) => { Game.Options.Profile.ColorStyle.SetColorIndex(i, k, s); };
         }
+
         private Func<int> ColorGetter(int i, int k)
         {
             return () => { return Game.Options.Profile.ColorStyle.GetColorIndex(i, k); };
@@ -145,7 +147,7 @@ namespace Interlude.Interface.Widgets
             }
 
             int colorCount = Game.Options.Profile.ColorStyle.GetColorCount(k);
-            int availableColors = Game.Options.Theme.CountNoteColors(k);
+            int availableColors = Game.Options.Theme.NoteColorCount();
             c = colorCount * Game.Options.Theme.ColumnWidth > Width ? (int)(Width / colorCount) : Game.Options.Theme.ColumnWidth;
             start = -colorCount * c / 2;
             int keymodeIndex = Game.Options.Profile.ColorStyle.UseForAllKeyModes ? 0 : k;

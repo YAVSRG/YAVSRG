@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Interlude.Interface.Animations;
 
 namespace Interlude.Interface
 {
     //Represents an element of the interface. It is an object with rectangular bounds that are anchored relative to a parent (ultimately the screen itself)
     //Can contain other widgets as children which are anchored relative to themselves.
-    public class Widget
+    public class Widget : IDisposable
     {
         public AnimationAnchorPoint LeftAnchor { private set; get; }
         public AnimationAnchorPoint TopAnchor { private set; get; }
@@ -224,6 +225,14 @@ namespace Interlude.Interface
             foreach (Widget w in Children)
             {
                 w.OnResize();
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            foreach (Widget w in Children)
+            {
+                w.Dispose();
             }
         }
     }

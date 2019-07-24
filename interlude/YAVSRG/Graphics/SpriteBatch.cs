@@ -111,6 +111,7 @@ namespace Interlude.Graphics
         public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
         {
             Sprite s = Game.Options.Themes.GetTexture(texture);
+            if (s.Width == 0) return;
             Draw(new RenderTarget(s, new Rect(x + s.Width * alignX * scaleX, y + s.Height * alignY * scaleY, x + s.Width * (alignX + 1) * scaleX, y + s.Height * (alignY + 1) * scaleY), color));
         }
 
@@ -126,7 +127,7 @@ namespace Interlude.Graphics
 
         public static void DrawRect(Rect bounds, Color color)
         {
-            Draw(new RenderTarget(default(Sprite), bounds, color, 0, 0));
+            Draw(new RenderTarget(default, bounds, color, 0, 0));
         }
 
         public static void EnableTransform(bool upscroll)

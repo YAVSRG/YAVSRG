@@ -8,7 +8,7 @@ namespace Interlude.Interface.Screens
     {
         public ScreenEditor()
         {
-            AddChild(new NoteRenderer(Game.Gameplay.ModifiedChart, new Gameplay.Mods.Visual.DownScroll(ScreenUtils.Bounds, Game.Gameplay.ModifiedChart.Keys)).Reposition(0, 0, 0, 0, -100, 1, 0, 1));
+            AddChild(new NoteRenderer(Game.Gameplay.ModifiedChart).Reposition(0, 0, 0, 0, -100, 1, 0, 1));
             AddChild(new Timeline().Reposition(0, 0, -20, 1, 0, 1, 0, 1));
             AddChild(new SpriteButton("buttonclose", () => { Game.Screens.PopScreen(); }, () => Game.Options.General.Keybinds.Exit) { Tooltip = "Exit editor" }.Reposition(-80, 1, 0, 0, 0, 1, 80, 0));
         }
