@@ -31,6 +31,28 @@ namespace Interlude.Options.Themes
             Load();
         }
 
+        public NoteSkin GetCurrentNoteSkin()
+        {
+            if (NoteSkins.ContainsKey(Game.Options.Profile.NoteSkin))
+            {
+                return NoteSkins[Game.Options.Profile.NoteSkin];
+            }
+            return NoteSkins["default"];
+        }
+
+        public WidgetPositionData GetUIConfig(string id)
+        {
+            for (int i = LoadedThemes.Count - 1; i >= 0; i--)
+            {
+                if (LoadedThemes[i].UIConfig.ContainsKey(id))
+                {
+                    return LoadedThemes[i].UIConfig[id];
+                }
+            }
+            LoadedThemes[LoadedThemes.Count - 1].UIConfig[id] = new WidgetPositionData();
+            return LoadedThemes[LoadedThemes.Count - 1].UIConfig[id];
+        }
+
         public void Load()
         {
             Textures = new Dictionary<string, Sprite>();
@@ -143,9 +165,14 @@ namespace Interlude.Options.Themes
 
         public void Unload()
         {
+            //todo: reload sounds, fonts
             foreach (string id in Textures.Keys)
             {
                 GL.DeleteTexture(Textures[id].ID);
+            }
+            foreach (Theme theme in LoadedThemes)
+            {
+                theme.Save();
             }
         }
     }

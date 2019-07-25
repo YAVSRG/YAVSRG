@@ -146,7 +146,7 @@ namespace Interlude.Gameplay
                 foreach (byte k in holdsInHitpos.GetColumns())
                 {
                     SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdhead"), ObjectPosition(k, 0), Color.White,
-                        AnimationFrame(), holdColorsHitpos[k]));
+                        AnimationFrame(), holdColorsHitpos[k]).Rotate(NoteRotation(k)));
                 }
                 bugFix.value &= (ushort)~holdsInHitpos.value;
             }
@@ -158,7 +158,7 @@ namespace Interlude.Gameplay
             {
                 SpriteBatch.DrawRect(ColumnPosition(c), Game.Options.Theme.PlayfieldColor);
                 SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("receptor"), ObjectPosition(c, 0), Color.White,
-                    AnimationFrame(), Game.Options.Profile.KeyBinds[Keys - 3][c].Held() ? 1 : 0));
+                    AnimationFrame(), Game.Options.Profile.KeyBinds[Keys - 3][c].Held() ? 1 : 0).Rotate(NoteRotation(c)));
             }
 
             float sct = -ScreenUtils.ScreenHeight + ScreenUtils.ScreenHeight * 2 * Game.Options.Profile.ScreenCoverDown;
@@ -190,7 +190,7 @@ namespace Interlude.Gameplay
             else
             {
                 SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdhead"), ObjectPosition(i, start), Color.White,
-                    AnimationFrame(), color));
+                    AnimationFrame(), color).Rotate(NoteRotation(i)));
             }
         }
         private void DrawSnap(GameplaySnap s)
@@ -248,12 +248,13 @@ namespace Interlude.Gameplay
             }
             foreach (byte k in s.ends.GetColumns())
             {
-                bool FlipTail = (Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].FlipHoldTail && !Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].UseHoldTailTexture) ^ Game.Options.Profile.Upscroll;
-                Sprite sprite = Game.Options.Themes.GetNoteSkinTexture(Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].UseHoldTailTexture ? "holdtail" : "holdhead");
+                var ns = Game.Options.Themes.GetCurrentNoteSkin();
+                bool FlipTail = (ns.FlipHoldTail && !ns.UseHoldTailTexture) ^ Game.Options.Profile.Upscroll;
+                Sprite sprite = Game.Options.Themes.GetNoteSkinTexture(ns.UseHoldTailTexture ? "holdtail" : "holdhead");
                 Rect rect = ObjectPosition(k, pos[k]);
                 if (FlipTail) rect = rect.FlipY();
                 RenderTarget target = new RenderTarget(sprite, ObjectPosition(k, pos[k]), Color.White, AnimationFrame(), s.colors[k]);
-                if (!Game.Options.Themes.NoteSkins[Game.Options.Profile.NoteSkin].UseHoldTailTexture) target = target.Rotate(NoteRotation(k));
+                if (!ns.UseHoldTailTexture) target = target.Rotate(NoteRotation(k));
                 SpriteBatch.Draw(target);
             }
         }

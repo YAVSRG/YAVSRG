@@ -210,7 +210,7 @@ namespace Interlude.Gameplay
             }
             if (Cache.Charts.ContainsKey(Game.Options.General.LastSelectedFile))
                 SwitchToChart(Cache.Charts[Game.Options.General.LastSelectedFile], true);
-            else SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
+            if (Game.CurrentChart == null) SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
         }
 
         //Task to recache all charts (useful if you deleted them manually but they're still cached, or the cache is broken and charts are missing from it)

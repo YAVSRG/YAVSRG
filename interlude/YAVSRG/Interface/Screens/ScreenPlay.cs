@@ -31,7 +31,7 @@ namespace Interlude.Interface.Screens
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
             binds = Game.Options.Profile.KeyBinds[Chart.Keys - 3];
 
-            var widgetData = Game.Options.Themes.LoadedThemes[0].UIConfig["gameplay"];
+            var widgetData = Game.Options.Themes.GetUIConfig("gameplay");
 
             //this stuff is ok to stay here
             AddChild(playfield = new NoteRenderer(Chart));

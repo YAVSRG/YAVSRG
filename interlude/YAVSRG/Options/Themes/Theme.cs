@@ -26,6 +26,7 @@ namespace Interlude.Options.Themes
             ThemePath = path;
             Config = Utils.LoadObject<ThemeOptions>(GetFile("theme.json"));
             NoteSkins = new Dictionary<string, NoteSkin>();
+            UIConfig = new Dictionary<string, WidgetPositionData>();
             foreach (string noteskin in Directory.EnumerateDirectories(Path.Combine(ThemePath, "NoteSkins")))
             {
                 string name = Path.GetFileName(noteskin);
@@ -36,6 +37,14 @@ namespace Interlude.Options.Themes
                 catch (Exception e)
                 {
                     Logging.Log("Could not load noteskin: " + name, e.ToString(), Logging.LogType.Error);
+                }
+            }
+            Directory.CreateDirectory(Path.Combine(ThemePath, "Interface"));
+            foreach (string file in Directory.EnumerateFiles(Path.Combine(ThemePath, "Interface")))
+            {
+                if (Path.GetExtension(file).ToLower() == ".json")
+                {
+                    UIConfig[Path.GetFileNameWithoutExtension(file)] = Utils.LoadObject<WidgetPositionData>(file);
                 }
             }
         }
@@ -93,6 +102,21 @@ namespace Interlude.Options.Themes
             }
             p = Path.Combine(ThemePath, p);
             return File.OpenRead(p);
+        }
+
+        public void WriteFile<T>(T obj, params string[] path)
+        {
+            if (zipFile != null) return;
+            Utils.SaveObject(obj, Path.Combine(ThemePath, Path.Combine(path)));
+        }
+
+        public void Save()
+        {
+            WriteFile(Config, "theme.json");
+            foreach (string k in UIConfig.Keys)
+            {
+                WriteFile(UIConfig[k], "Interface", k + ".json");
+            }
         }
     }
 }
