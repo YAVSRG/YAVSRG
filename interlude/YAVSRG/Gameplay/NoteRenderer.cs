@@ -54,7 +54,10 @@ namespace Interlude.Gameplay
             sv = new float[Chart.Keys + 1];
             svindex = new int[Chart.Keys + 1];
 
-            AddHitlights();
+            if (Game.Options.Profile.HitLighting)
+            {
+                AddHitlights();
+            }
         }
 
         public void AddHitlights()

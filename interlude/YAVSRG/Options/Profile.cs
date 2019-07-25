@@ -49,6 +49,7 @@ namespace Interlude.Options
         public string NoteSkin = "default";
         public float ScrollSpeed = 2.05f;
         public int HitPosition = 0;
+        public bool HitLighting = false;
         public bool Upscroll = false;
         public float ScreenCoverUp = 0f;
         public float ScreenCoverDown = 0f;

@@ -54,6 +54,12 @@ namespace Interlude.Interface.Widgets
                 .BR_DeprecateMe(-50, 425, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
+                new BoolPicker("Enable Hitlights", Game.Options.Profile.HitLighting, v => { Game.Options.Profile.HitLighting = v; }),
+                "Turn this on to enable columns lighting up when you press a key.", ib)
+                .TL_DeprecateMe(50, 375, AnchorType.CENTER, AnchorType.MIN)
+                .BR_DeprecateMe(300, 425, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(
+                new TooltipContainer(
                 new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord", "Jackhammer" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; lp.Refresh(); }),
                 "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm i.e make every other beat red and the remaining beats green\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord", ib)
                 .TL_DeprecateMe(-200, 475, AnchorType.CENTER, AnchorType.MIN)
