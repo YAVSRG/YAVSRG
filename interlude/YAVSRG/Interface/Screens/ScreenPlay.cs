@@ -11,11 +11,13 @@ using static Interlude.Interface.ScreenUtils;
 
 namespace Interlude.Interface.Screens
 {
-    class ScreenPlay : Screen //i cleaned up this file a little but it's a bit of a mess. sorry! update: a lot of a mess
+    /// <summary>
+    /// The screen for playing and scoring on a selected chart. Uses the NoteRenderer class to render the playfield and then handles input and note hitting logic.
+    /// </summary>
+    class ScreenPlay : Screen
     {
         ChartWithModifiers Chart;
         ScoreTracker scoreTracker;
-        Widget playfield;
         float missWindow;
         Bind[] binds;
         AnimationFade bannerIn, bannerOut;
@@ -25,17 +27,13 @@ namespace Interlude.Interface.Screens
             Chart = Game.Gameplay.ModifiedChart;
             scoreTracker = new ScoreTracker(Game.Gameplay.ModifiedChart);
 
-            int columnwidth = Game.Options.Theme.ColumnWidth;
-            int hitposition = Game.Options.Profile.HitPosition;
-
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
             binds = Game.Options.Profile.KeyBinds[Chart.Keys - 3];
 
             var widgetData = Game.Options.Themes.GetUIConfig("gameplay");
 
-            //this stuff is ok to stay here
-            AddChild(playfield = new NoteRenderer(Chart));
-            //AddChild(new PerformanceMeter(scoreTracker));
+            AddChild(new NoteRenderer(Chart));
+
             AddChild(new HitMeter(scoreTracker, widgetData.GetWidgetConfig("hitMeter", -250, 0.5f, 150, 0.5f, 250, 0.5f, 20, 0.5f, true)));
             AddChild(new ComboDisplay(scoreTracker, widgetData.GetWidgetConfig("combo", -100, 0.5f, 100, 0.5f, 100, 0.5f, 101, 0.5f, true)));
             AddChild(new ProgressBar(scoreTracker, widgetData.GetWidgetConfig("progressBar", 0, 0, -10, 1, 0, 1, 0, 1, true)));
@@ -45,16 +43,6 @@ namespace Interlude.Interface.Screens
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("time", -220, 1, -100, 1, -20, 1, -20, 1, true), () => { return DateTime.Now.ToLongTimeString(); }));
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("timeLeft", -220, 1, 20, 0, -20, 1, 100, 0, false), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
             AddChild(new JudgementCounter(scoreTracker, widgetData.GetWidgetConfig("judgements", 70, 0, -180, 0.5f, 320, 0, 180, 0.5f, false)));
-            //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
-            //playfield.InitGameplay();
-            float x = Chart.Keys * 0.5f;
-            //this places the screencovers
-            if (Game.Options.Profile.ScreenCoverUp > 0)
-                playfield.AddChild(new Screencover(scoreTracker, false)
-                    .TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.CENTER).BR_DeprecateMe(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
-            if (Game.Options.Profile.ScreenCoverDown > 0)
-                playfield.AddChild(new Screencover(scoreTracker, true)
-                .TL_DeprecateMe(0, ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverDown), AnchorType.MIN, AnchorType.CENTER).BR_DeprecateMe(0, ScreenHeight * 2, AnchorType.MAX, AnchorType.CENTER));
         }
 
         public override void OnEnter(Screen prev)
@@ -67,7 +55,7 @@ namespace Interlude.Interface.Screens
             }
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 1 - Game.Options.Profile.BackgroundDim;
-            IO.Discord.SetPresence("Playing a chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, false); ;
+            Discord.SetPresence("Playing a chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, false); ;
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
             Game.Screens.Toolbar.SetCursorState(false);
@@ -162,10 +150,17 @@ namespace Interlude.Interface.Screens
 
         public void HandleHit(byte k, float now, bool release)
         {
-            //basically, this whole algorithm finds the closest snap to the receptors (above or below) that is relevant (has a note in the column you're pressing)
-            //- missWindow and + missWindow are used because all snaps found in that time slice are considered. the closest note to now in that column is the one you hit
-            //this mechanic is different to other rhythm games where it finds the earliest unhit note in this window
-            //you will miss more, but get fucked by column lockouts in jacks and dense streams less
+            //basically, this whole algorithm finds the snap that is
+            // - closest to the receptors (can be above or below)
+            // - contains a note in the column being hit
+            // - this note has not been hit with a great or better judgement
+            //this is different to most rhythm games, where it is normally "earliest note within the miss window that has not been hit"
+            //the intention behind this is to largely reduce "cbrushing" where hitting a combo breaking judgement can cause a chain of more combo breakers
+            //basically, if you continue to play the rest of the notes as normal most rhythm game engines will grab notes you don't mean to be hitting because you expected to have already hit them and are aiming for the next note
+            //this system should typically cause one or two combo breaks where the player actually trips up but not then form a loop
+            //i think this is generally a lot fairer and better (despite a lot of "just get good" arguments) and will lead to a greater ability to rate difficulty,
+                //since some charts are more vulnerable to the soul crushing defeat of locking out of a whole column than others but should not be rated differently due to farming by getting lucky
+            //imo this is a fairly key thing holding high level keyboard rhythm games back, as this was clearly never intended but rather a side effect of game engines designed around notes that would not be within 180ms of each other in the same column
             int i = Chart.Notes.GetNextIndex(now - missWindow);
             if (i >= Chart.Notes.Count) { return; } //if there are no more notes, stop
             float delta = missWindow; //default value for the final "found" delta"

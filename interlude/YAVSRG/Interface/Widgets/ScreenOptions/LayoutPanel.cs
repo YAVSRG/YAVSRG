@@ -91,12 +91,10 @@ namespace Interlude.Interface.Widgets
             AddChild(selectKeyMode);
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .TL_DeprecateMe(-500, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Theme", Game.Options.Themes.AvailableThemes.ToArray(), 0, (i) =>
+            AddChild(new SimpleButton("Change Theme", () =>
             {
-                Game.Options.Profile.SelectedThemes = new List<string>() { Game.Options.Themes.AvailableThemes[i] };
-                //Game.Options.Themes.Unload(); Game.Options.Themes.Load();
-                ChangeKeyMode(keyMode, width);
-            }).Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
+                Game.Screens.AddDialog(new Dialogs.ThemeSelectDialog((s) => { }));
+            }, () => false, null).Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
             var arr = Game.Options.Themes.NoteSkins.Keys.ToArray();
             AddChild(new TextPicker("Noteskin", arr, 0, (i) =>
             {

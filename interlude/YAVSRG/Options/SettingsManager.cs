@@ -57,6 +57,7 @@ namespace Interlude.Options
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Songs"));
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Imports"));
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Profiles"));
+            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Assets"));
         }
 
         public static void Init()

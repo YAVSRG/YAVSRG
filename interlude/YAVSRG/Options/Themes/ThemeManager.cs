@@ -23,6 +23,11 @@ namespace Interlude.Options.Themes
 
         public ThemeManager()
         {
+            DetectAvailableThemes();
+        }
+
+        public void DetectAvailableThemes()
+        {
             AvailableThemes = new List<string>();
             foreach (string t in Directory.EnumerateDirectories(AssetsDir))
             {

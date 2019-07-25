@@ -125,6 +125,7 @@
     <Compile Include="Graphics\FBO.cs" />
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
+    <Compile Include="Interface\Dialogs\ThemeSelectDialog.cs" />
     <Compile Include="Interface\Widgets\Controls\ClickableComponent.cs" />
     <Compile Include="Interface\Widgets\Controls\Selector.cs" />
     <Compile Include="Interface\Widgets\ObjectSelector.cs" />
@@ -222,7 +223,6 @@
     <Compile Include="Interface\Widgets\Controls\FramedButton.cs" />
     <Compile Include="Interface\Widgets\Gameplay\GameplayWidget.cs" />
     <Compile Include="Interface\Widgets\Gameplay\HitMeter.cs" />
-    <Compile Include="Interface\Widgets\Gameplay\Screencover.cs" />
     <Compile Include="Interface\Widgets\Controls\KeyBinder.cs" />
     <Compile Include="Interface\Widgets\ScreenLevelSelect\LevelSelector.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ProgressBar.cs" />
