@@ -12,6 +12,7 @@ namespace Interlude.Interface.Widgets
         float min;
         float resolution;
         string label;
+        bool dragging;
 
         public Slider(string label, Action<float> set, Func<float> get, float min, float max, float res) : base()
         {
@@ -27,32 +28,48 @@ namespace Interlude.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            SpriteBatch.DrawRect(bounds.ExpandY(-20), System.Drawing.Color.Gray);
+            SpriteBatch.DrawRect(bounds.ExpandY(-20), Game.Screens.DarkColor);
             float p = bounds.Left + (get() - min) / (max - min) * bounds.Width;
-            SpriteBatch.DrawRect(new Rect(p - 5, bounds.Top, p + 5, bounds.Bottom), System.Drawing.Color.White);
-            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, bounds.CenterX, bounds.Top-10, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawRect(new Rect(p - bounds.Height / 2, bounds.Top, p + bounds.Height / 2, bounds.Bottom), Game.Screens.HighlightColor);
+            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, bounds.CenterX, bounds.Top - 25, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
             bounds = GetBounds(bounds);
-            if (ScreenUtils.MouseOver(bounds.ExpandX(2)))
+            if (ScreenUtils.CheckButtonClick(bounds))
             {
-                if (Game.Options.General.Keybinds.Previous.Tapped() && get() - resolution >= min)
+                dragging = true;
+            }
+            else if (!Input.MousePress(OpenTK.Input.MouseButton.Left))
+            {
+                dragging = false;
+            }
+
+            if (dragging)
+            {
+                SetWithRounding(min + (Input.MouseX - bounds.Left) / bounds.Width * (max - min));
+            }
+            else if (ScreenUtils.MouseOver(bounds))
+            {
+                if (Game.Options.General.Keybinds.Previous.Tapped())
                 {
-                    set((float)Math.Round(get() - resolution, 2));
+                    SetWithRounding(get() - resolution);
                 }
-                if (Game.Options.General.Keybinds.Next.Tapped() && get() + resolution <= max)
+                else if (Game.Options.General.Keybinds.Next.Tapped())
                 {
-                    set((float)Math.Round(get() + resolution, 2));
-                }
-                if (Input.MousePress(OpenTK.Input.MouseButton.Left))
-                {
-                    set(min + (Input.MouseX - bounds.Left) / bounds.Width * (max - min));
-                    set((float)Math.Round(get() - get() % resolution, 2));
+                    SetWithRounding(get() + resolution);
                 }
             }
+        }
+
+        void SetWithRounding(float value)
+        {
+            value = (float)Math.Round(value / resolution, 0) * resolution;
+            value = Math.Min(max, value);
+            value = Math.Max(min, value);
+            set(value);
         }
     }
 }

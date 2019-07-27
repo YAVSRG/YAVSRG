@@ -10,14 +10,13 @@ using Interlude.IO;
 
 namespace Interlude.Interface.Widgets
 {
-    class LayoutPanel : OptionsPanel
+    class LayoutPanel : Widget
     {
         private Widget selectKeyMode, selectLayout;
         private KeyBinder[] binds = new KeyBinder[10];
         private ColorPicker[] colors = new ColorPicker[10];
         private int keyMode = (int)Game.Options.Profile.DefaultKeymode + 3;
         private float width;
-        private InfoBox infobox;
 
         protected class ColorPicker : Widget
         {
@@ -25,7 +24,6 @@ namespace Interlude.Interface.Widgets
             Action<int> select;
             Func<int> get;
             int max;
-            bool hover;
 
             public ColorPicker(string label, Action<int> select, Func<int> get, int max)
             {
@@ -61,20 +59,13 @@ namespace Interlude.Interface.Widgets
                     {
                         select(Utils.Modulus(get() - 1, max));
                     }
-                    ((LayoutPanel)Parent).infobox.SetText(label);
-                    hover = true;
-                }
-                else if (hover)
-                {
-                    hover = false;
-                    ((LayoutPanel)Parent).infobox.SetText("");
+                    Game.Screens.Toolbar.SetTooltip(label, "");
                 }
             }
         }
 
-        public LayoutPanel(InfoBox ib) : base(ib, "Key Layout")
+        public LayoutPanel()
         {
-            infobox = ib;
             width = ScreenUtils.ScreenWidth * 2 - 600;
             selectKeyMode = new TextPicker("Keys", new string[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, (int)Game.Options.Profile.DefaultKeymode, (i) => { ChangeKeyMode(i + 3, width); })
                 .TL_DeprecateMe(-50, 100, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(50, 150, AnchorType.CENTER, AnchorType.MIN);
@@ -99,6 +90,7 @@ namespace Interlude.Interface.Widgets
                 Game.Options.Themes.Unload(); Game.Options.Themes.Load();
                 ChangeKeyMode(keyMode, width);
             }).Reposition(200, 0.5f, 600, 0, 500, 0.5f, 650, 0));
+            Refresh();
         }
 
         public void Refresh()

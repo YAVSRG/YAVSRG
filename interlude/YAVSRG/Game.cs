@@ -73,8 +73,8 @@ namespace Interlude
         public Game() : base(500, 200, new OpenTK.Graphics.GraphicsMode(32,24,8,0,0))
         {
             Instance = this;
-            options = new Options.SettingsManager(); //create options data from profile
-            options.Themes = new Interlude.Options.Themes.ThemeManager();
+            options = new SettingsManager(); //create options data from profile
+            options.Themes = new Options.Themes.ThemeManager();
             Sprite s = Content.UploadTexture(Utils.CaptureDesktop(new Rectangle(0, 0, DisplayDevice.Default.Width, DisplayDevice.Default.Height)), 1, 1);
             Title = "Interlude";
             Cursor = null; //hack to hide cursor but not confine it. at time of writing this code, opentk doesn't seperate cursor confine from cursor hiding
@@ -97,7 +97,7 @@ namespace Interlude
             Discord.Init();
         }
 
-        public void ApplyWindowSettings(Options.General settings) //apply video settings
+        public void ApplyWindowSettings(General settings) //apply video settings
         {
             TargetRenderFrequency = settings.FrameLimiter; //set frame limit
             if (settings.WindowMode == General.WindowType.Window)

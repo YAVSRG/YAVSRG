@@ -36,6 +36,10 @@ namespace Interlude.Interface
 
         public virtual void RemoveFromContainer(Widget parent)
         {
+            if (parent != Parent)
+            {
+                Prelude.Utilities.Logging.Log("Removed widget from container that is isn't in?", "Child side", Prelude.Utilities.Logging.LogType.Debug);
+            }
             Parent = null;
         }
 
@@ -54,7 +58,14 @@ namespace Interlude.Interface
         {
             lock (Children)
             {
-                Children.Remove(child);
+                if (Children.Contains(child))
+                {
+                    Children.Remove(child);
+                }
+                else
+                {
+                    Prelude.Utilities.Logging.Log("Removed widget from container that is isn't in?", "Parent side", Prelude.Utilities.Logging.LogType.Debug);
+                }
             }
             child.RemoveFromContainer(this);
         }
