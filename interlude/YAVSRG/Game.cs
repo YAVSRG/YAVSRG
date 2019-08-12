@@ -180,6 +180,7 @@ namespace Interlude
                 gameplay.Unload();
                 gameplay.SaveScores();
                 gameplay.Collections.Save();
+                ChartLoader.Cache?.Save();
             }
             trayIcon?.Destroy();
             taskManager?.StopAll();

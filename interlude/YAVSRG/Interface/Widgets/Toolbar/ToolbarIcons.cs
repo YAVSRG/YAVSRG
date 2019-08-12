@@ -15,7 +15,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                 new SpriteButton("buttonmusic", () => { if (Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); }, () => Game.Options.General.Keybinds.Music) { Tooltip = "Music visualiser" }
                 .Reposition(-160, 1, 0, 0, -80, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonoptions", () => { Game.Screens.AddScreen(new ScreenOldOptions()); }, () => Game.Options.General.Keybinds.Options) { Tooltip = "Options" }
+                new SpriteButton("buttonoptions", () => { Game.Screens.AddScreen(new ScreenOptions()); }, () => Game.Options.General.Keybinds.Options) { Tooltip = "Options" }
                 .Reposition(-240, 1, 0, 0, -160, 1, 80, 0));
             AddChild(
                 new SpriteButton("buttonimport", () => { Game.Screens.AddScreen(new ScreenImport()); }, () => Game.Options.General.Keybinds.Import) { Tooltip = "Import charts" }

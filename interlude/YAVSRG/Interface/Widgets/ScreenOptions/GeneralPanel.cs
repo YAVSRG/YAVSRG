@@ -46,12 +46,6 @@ namespace Interlude.Interface.Widgets
                 .BR_DeprecateMe(-150, 350, AnchorType.CENTER, AnchorType.MIN));
             AddChild(
                 new TooltipContainer(
-                    new FramedButton("Apply", () => { Game.Instance.ApplyWindowSettings(general); }, null),
-                "Applies the selected settings (above). Without this they won't be applied until you restart the game so you don't accidentally mess them up.")
-                .TL_DeprecateMe(-150, 450, AnchorType.CENTER, AnchorType.MIN)
-                .BR_DeprecateMe(150, 525, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(
-                new TooltipContainer(
                     new FramedButton("Open Data Folder",
                 () => { System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory)); }, null),
                 "Opens the folder which Interlude works in. This is where you put skins, charts and other settings.")
@@ -63,6 +57,12 @@ namespace Interlude.Interface.Widgets
             {
                 f.AddChild(new KeyBinder(a.Name, new Prelude.Utilities.SetterGetter<IO.Bind>(Game.Options.General.Keybinds, a.Name)).Reposition(0, 0, 0, 0, 280, 0, 50, 0));
             }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            Game.Instance.ApplyWindowSettings(general);
         }
     }
 }

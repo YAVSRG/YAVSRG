@@ -20,6 +20,7 @@ namespace Interlude.Gameplay
         //Constant lists indicating what is supported for conversion. Extend them here if support for a new archive or file format is implemented
         public static readonly string[] CHARTFORMATS = { ".sm", ".osu", ".yav" };
         public static readonly string[] ARCHIVEFORMATS = { ".osz", ".zip" };
+        public static readonly string OSU_PACK_TITLE = "osu!";
 
         //All of the grouping methods for charts
         public static Dictionary<string, Func<CachedChart, string>> GroupBy = new Dictionary<string, Func<CachedChart, string>>()
@@ -463,7 +464,7 @@ namespace Interlude.Gameplay
                     if (Directory.Exists(Folder))
                     {
                         Output("Detected osu! Folder");
-                        Game.Tasks.AddTask(ConvertPack(Folder, "osu! Imports"), RefreshCallback, "Importing osu! songs", true);
+                        Game.Tasks.AddTask(ConvertPack(Folder, OSU_PACK_TITLE), RefreshCallback, "Importing osu! songs", true);
                         Output("Converted osu! songs folder successfully.");
                         return true;
                     }
@@ -514,7 +515,7 @@ namespace Interlude.Gameplay
                     {
                         z.ExtractToDirectory(dir);
                     }
-                    Game.Tasks.AddTask(ConvertSongFolder(dir, "osu! Imports"), (b) =>
+                    Game.Tasks.AddTask(ConvertSongFolder(dir, OSU_PACK_TITLE), (b) =>
                     {
                         RefreshCallback(b);
                         try

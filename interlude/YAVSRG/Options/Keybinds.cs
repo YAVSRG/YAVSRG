@@ -42,6 +42,6 @@ namespace Interlude.Options
         //play
         public Bind ChangeOffset = new KeyBind(Key.Plus);
         public Bind Skip = new KeyBind(Key.Space);
-        public Bind HideUI = new KeyBind(Key.Tab);
+        public Bind HideUI = new KeyBind(Key.F9);
     }
 }

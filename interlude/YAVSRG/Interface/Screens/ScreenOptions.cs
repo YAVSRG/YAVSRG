@@ -26,12 +26,15 @@ namespace Interlude.Interface.Screens
         public override void Draw(Rect bounds)
         {
             SpriteBatch.DrawTilingTexture("levelselectbase", GetBounds(bounds), 400, 0, 0, Color.FromArgb(30,Game.Screens.HighlightColor));
+            SpriteBatch.Font1.DrawCentredText("Hold " + Game.Options.General.Keybinds.Help.ToString().ToUpper() + " to see more info when hovering over settings", 30f, 0, bounds.Bottom - 50, Color.White, true, Color.Black);
             base.Draw(bounds);
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
+            Game.Gameplay.UpdateChart();
+            //Gameplay.ChartLoader.Refresh();
             //refresh sorting, chart, etc
         }
 

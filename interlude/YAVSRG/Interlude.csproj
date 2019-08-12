@@ -126,6 +126,7 @@
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
     <Compile Include="Interface\Dialogs\ThemeSelectDialog.cs" />
+    <Compile Include="Interface\Screens\ScreenDebug.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
     <Compile Include="Interface\Widgets\Controls\ClickableComponent.cs" />
     <Compile Include="Interface\Widgets\Controls\Selector.cs" />
@@ -192,7 +193,6 @@
     <Compile Include="Interface\Screens\ScreenLevelSelect.cs" />
     <Compile Include="Interface\Screens\ScreenLoading.cs" />
     <Compile Include="Interface\Screens\ScreenLobby.cs" />
-    <Compile Include="Interface\Screens\ScreenOldOptions.cs" />
     <Compile Include="Interface\Screens\ScreenScore.cs" />
     <Compile Include="Interface\Animations\AnimationSlider.cs" />
     <Compile Include="Interface\Screens\ScreenVisualiser.cs" />
