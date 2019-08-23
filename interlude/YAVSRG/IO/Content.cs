@@ -1,22 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using OpenTK.Graphics.OpenGL;
 using ManagedBass;
-using Prelude.Utilities;
 using Interlude.Graphics;
+using Interlude.Options.Themes;
 
 
 namespace Interlude.IO
 {
     class Content
     {
-        public static readonly string AssetsDir = Path.Combine(Game.WorkingDirectory, "Data", "Assets");
-        static Dictionary<string, Sprite> Store = new Dictionary<string, Sprite>();
-        static Dictionary<string, int> SoundStore = new Dictionary<string, int>();
-
         public static Sprite LoadTexture(string path, bool getColors = false) //load texture from absolute path
         {
             if (!File.Exists(path))
@@ -31,123 +26,13 @@ namespace Interlude.IO
             return UploadTexture(bmp, 1, 1, getColors); //temp (?)
         }
 
-        public static Sprite FindTexture(string name, string skin)
-        {
-            string filename;
-            foreach (string s in Directory.GetFiles(Path.Combine(AssetsDir, skin))) //lots of files in your skin folder slows this down
-            {
-                filename = Path.GetFileNameWithoutExtension(s).ToLower();
-                int ux = 1; int uy = 1;
-                if (filename.StartsWith(name))
-                {
-                    string[] split = filename.Split(' ');
-                    split = split[split.Length - 1].Split('x');
-                    if (split.Length == 2)
-                    {
-                        int.TryParse(split[0], out ux);
-                        int.TryParse(split[1], out uy);
-                    }
-                    //needs some way to check format isn't being abused
-                    if (filename == name || filename == name + " " + ux.ToString() + "x" + uy.ToString())
-                    {
-                        Bitmap bmp = new Bitmap(s);
-                        return UploadTexture(bmp, ux, uy);
-                    }
-                }
-            }
-            return default(Sprite);
-        }
-
-        public static Sprite GetTexture(string path)
-        {
-            if (!Store.ContainsKey(path))
-            {
-                Sprite s = FindTexture(path, Game.Options.Profile.Skin);
-                if (s.Height == 0)
-                {
-                    s = FindTexture(path, "_fallback");
-                }
-                Store.Add(path, s);
-            }
-            return Store[path];
-        }
-
-        public static Options.ThemeData LoadThemeData(string name)
-        {
-            string newpath = Path.Combine(AssetsDir, name, "skin.json");
-            Options.ThemeData t;
-            if (!File.Exists(newpath))
-            {
-                t = new Options.ThemeData();
-            }
-            else
-            {
-                t = Utils.LoadObject<Options.ThemeData>(newpath);
-            }
-            Utils.SaveObject(t, newpath);
-            t.Gameplay = LoadWidgetData(name, "gameplay");
-            return t;
-        }
-
-        public static Options.WidgetPositionData LoadWidgetData(string theme, string name)
-        {
-            try
-            {
-                string path = Path.Combine(AssetsDir, theme, name + ".json");
-                if (File.Exists(path)) //attempt to find and load in current assets folder
-                {
-                    var d = Utils.LoadObject<Options.WidgetPositionData>(path);
-                    if (d != null) { return d; }
-                }
-                path = Path.Combine(AssetsDir, "_fallback", name + ".json");
-                if (File.Exists(path)) //attempt to find and load in fallback assets folder
-                {
-                    var d = Utils.LoadObject<Options.WidgetPositionData>(path);
-                    if (d != null) { return d; }
-                }
-            }
-            catch (Exception e)
-            {
-                Logging.Log("Could not load widget position data from " + name, e.ToString(), Logging.LogType.Error);
-            }
-            return new Options.WidgetPositionData(); //return blank data
-        }
-
-        public static int LoadSoundFromAssets(string path)
-        {
-            if (!SoundStore.ContainsKey(path))
-            {
-                string newpath = Path.Combine(AssetsDir, Game.Options.Profile.Skin, path + ".wav");
-                if (!File.Exists(newpath))
-                {
-                    newpath = Path.Combine(AssetsDir, "_fallback", path + ".wav");
-                }
-                SoundStore.Add(path, Bass.SampleLoad(newpath, 0, 0, 65535, BassFlags.AutoFree));
-            }
-            return SoundStore[path];
-        }
-
-        public static void ClearStore()
-        {
-            foreach (string k in Store.Keys)
-            {
-                UnloadTexture(Store[k]);
-            }
-            foreach (string k in SoundStore.Keys)
-            {
-                Bass.SampleFree(SoundStore[k]);
-            }
-            Store = new Dictionary<string, Sprite>();
-            SoundStore = new Dictionary<string, int>();
-        }
-
         public static Sprite LoadBackground(string path, string filename)
         {
             string e = Path.GetExtension(filename).ToLower();
             bool valid = (e == ".png" || e == ".jpg");
             if (valid && File.Exists(Path.Combine(path, filename))) return LoadTexture(Path.Combine(path, filename), true);
             Game.Screens.ChangeThemeColor(Game.Options.Theme.DefaultThemeColor);
-            return GetTexture("background");
+            return Game.Options.Themes.GetTexture("background");
         }
 
         public static Sprite UploadTexture(Bitmap bmp, int ux, int uy, bool font = false)

@@ -13,11 +13,11 @@ namespace Interlude.Interface.Widgets.Gameplay
 
         public ComboDisplay(ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
-            baseSize = pos.GetValue("baseSize", 40);
-            bumpAmount = pos.GetValue("hitBumpAmount", 5);
-            cbAmount = pos.GetValue("missBumpAmount", 40);
-            comboCap = pos.GetValue("comboCap", 1000);
-            scaleWithCombo = pos.GetValue("scaleWithCombo", 0.02f);
+            baseSize = pos.Extra.GetValue("baseSize", 40);
+            bumpAmount = pos.Extra.GetValue("hitBumpAmount", 5);
+            cbAmount = pos.Extra.GetValue("missBumpAmount", 40);
+            comboCap = pos.Extra.GetValue("comboCap", 1000);
+            scaleWithCombo = pos.Extra.GetValue("scaleWithCombo", 0.02f);
 
             size = new AnimationSlider(baseSize);
             scoreTracker.OnHit += (x,y,z) =>

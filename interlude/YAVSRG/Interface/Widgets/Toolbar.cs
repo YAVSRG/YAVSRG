@@ -25,7 +25,7 @@ namespace Interlude.Interface
         {
             AddChild(Icons.Reposition(0, 0, 0, 0, 0, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonback", "Back", Back)
+                new SpriteButton("buttonback", Back, null) { Tooltip = "Back to previous screen" }
                 .Reposition(0, 0, 0, 0, 240, 0, 80, 0));
             AddChild(new ProfileInfoPanel());
             AddChild(Chat = new ChatBox());
@@ -34,7 +34,6 @@ namespace Interlude.Interface
             Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
             Animation.Add(_TooltipFade = new AnimationSlider(0)); Animation.Add(_TooltipFade2 = new AnimationSlider(0));
             Logging.OnLog += (s, d, t) => { if (t != Logging.LogType.Debug) AddNotification(s); };
-            SetTooltip("hello\nworld", "");
         }
 
         public void AddNotification(string notif)
@@ -138,7 +137,7 @@ namespace Interlude.Interface
 
             if (CursorMode > WidgetState.DISABLED)
             {
-                SpriteBatch.Draw("cursor", new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("cursor"), new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor));
                 float f = _TooltipFade * _TooltipFade2;
                 if (f >= 0.001f)
                 {
@@ -158,7 +157,7 @@ namespace Interlude.Interface
         {
             if (State != WidgetState.DISABLED)
             {
-                //todo: move to button functionality
+                //here and not attached to the button to not double fire when closing chat box
                 if (Game.Options.General.Keybinds.Exit.Tapped())
                 {
                     Back();

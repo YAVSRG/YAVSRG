@@ -1,37 +1,35 @@
-﻿using System;
+﻿using System.Drawing;
 using OpenTK.Input;
+using Prelude.Utilities;
+using Interlude.IO;
 using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets
 {
     public class KeyBinder : Widget
     {
-        Key bind;
-        Action<Key> set;
-        string label;
-        bool listening;
+        public bool AllowAltBinds = true;
+        SetterGetter<Bind> Value;
+        string Label;
+        bool listening, ctrl, shift;
 
-        public KeyBinder(string label, Key start, Action<Key> set) : base()
+        public KeyBinder(string label, SetterGetter<Bind> value) : base()
         {
-            this.label = label;
-            Change(start, set);
-        }
-
-        public void Change(Key start, Action<Key> set)
-        {
-            bind = start;
-            this.set = set;
+            Label = label;
+            Value = value;
         }
 
         public override void Draw(Rect bounds)
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            //todo: reduce duplication between this and the switchers
-            SpriteBatch.DrawRect(bounds.SliceLeft(20), Game.Screens.BaseColor);
-            SpriteBatch.DrawRect(bounds.SliceRight(20), Game.Screens.BaseColor);
-            SpriteBatch.Font1.DrawCentredText(bind.ToString(), 30, bounds.CenterX, bounds.Top, listening ? System.Drawing.Color.Fuchsia : Game.Options.Theme.MenuFont, true, Game.Screens.DarkColor);
-            SpriteBatch.Font2.DrawCentredText(label, 20, bounds.CenterX, bounds.Top - 30, Game.Options.Theme.MenuFont);
+            SpriteBatch.DrawRect(bounds, Color.FromArgb(120, Game.Screens.DarkColor));
+            ;
+            SpriteBatch.Font1.DrawCentredText(((Bind)Value).ToString(), 30, bounds.CenterX, bounds.Top,
+                listening ? Color.Fuchsia : 
+                (((Bind)Value).Held() ? Game.Screens.HighlightColor : Game.Options.Theme.MenuFont), true, Game.Screens.DarkColor);
+
+            SpriteBatch.Font2.DrawCentredText(Label, 20, bounds.CenterX, bounds.Top - 30, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(Rect bounds)
@@ -41,16 +39,29 @@ namespace Interlude.Interface.Widgets
             if (!listening && ScreenUtils.CheckButtonClick(bounds))
             {
                 listening = true;
+                ctrl = false;
+                shift = false;
                 Game.Instance.KeyDown += OnKeyPress;
             }
         }
 
         private void OnKeyPress(object o, KeyboardKeyEventArgs k)
         {
-            bind = k.Key;
-            set(bind);
-            listening = false;
-            Game.Instance.KeyDown -= OnKeyPress;
+            if (k.Key == Key.ControlLeft || k.Key == Key.ControlRight)
+            {
+                ctrl = true && AllowAltBinds;
+            }
+            else if (k.Key == Key.ShiftRight || k.Key == Key.ShiftLeft)
+            {
+                shift = true && AllowAltBinds;
+            }
+            else
+            {
+                Value.Set(new KeyBind(k.Key));
+                if (shift || ctrl) { Value.Set(new AltBind(Value, shift, ctrl)); }
+                listening = false;
+                Game.Instance.KeyDown -= OnKeyPress;
+            }
         }
     }
 }

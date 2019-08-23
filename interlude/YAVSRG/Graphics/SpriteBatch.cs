@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
@@ -21,8 +17,7 @@ namespace Interlude.Graphics
         }
 
         static int StencilDepth = 0;
-        static float shader = 0f;
-        static int calls = 0;
+
         static double[] mat = new[] {
                 1.0, 0.0, 0.0, 0.0,
                 0.0, 0.0, 0.0, 0.0,
@@ -33,81 +28,11 @@ namespace Interlude.Graphics
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
-        public static Shader WaterShader;
-
-        public static void Draw(Sprite sprite, Rect bounds, Color color, int rotation = 0)
-        {
-            Draw(sprite: sprite, bounds: bounds, ux: 0, uy: 0, color: color, rotation: rotation);
-        }
-
-        public static void Draw(string texture = "", Rect bounds = default(Rect), Color color = default(Color), int ux = 0, int uy = 0, int rotation = 0, Sprite? sprite = null, Vector2[] coords = null, Vector2[] texcoords = null, Color[] colors = null, float depth = 0)
-        {
-            Vector2 Coord1, Coord2, Coord3, Coord4;
-            Vector2 Tex1, Tex2, Tex3, Tex4;
-            Color Col1, Col2, Col3, Col4;
-            if (coords == null)
-            {
-                Coord1 = new Vector2(bounds.Left, bounds.Top);
-                Coord2 = new Vector2(bounds.Right, bounds.Top);
-                Coord3 = new Vector2(bounds.Right, bounds.Bottom);
-                Coord4 = new Vector2(bounds.Left, bounds.Bottom);
-            }
-            else
-            {
-                Coord1 = coords[0];
-                Coord2 = coords[1];
-                Coord3 = coords[2];
-                Coord4 = coords[3];
-            }
-            if (colors == null)
-            {
-                Col1 = Col2 = Col3 = Col4 = color;
-            }
-            else
-            {
-                Col1 = colors[0];
-                Col2 = colors[1];
-                Col3 = colors[2];
-                Col4 = colors[3];
-            }
-            if (sprite == null)
-            {
-                if (texture == "")
-                {
-                    sprite = default(Sprite);
-                }
-                else
-                {
-                    //todo: have this stuff cached in theme data instead
-                    sprite = Content.GetTexture(texture);
-                }
-            }
-            if (texcoords == null)
-            {
-                float x = 1f / ((Sprite)sprite).UV_X;
-                float y = 1f / ((Sprite)sprite).UV_Y;
-
-                Tex1 = new Vector2(x * ux, y * uy);
-                Tex2 = new Vector2(x + x * ux, y * uy);
-                Tex3 = new Vector2(x + x * ux, y + y * uy);
-                Tex4 = new Vector2(x * ux, y + y * uy);
-            }
-            else
-            {
-                Tex1 = texcoords[0];
-                Tex2 = texcoords[1];
-                Tex3 = texcoords[2];
-                Tex4 = texcoords[3];
-            }
-            Draw(new RenderTarget((Sprite)sprite, Coord1, Coord2, Coord3, Coord4, Col1, Col2, Col3, Col4, Tex1, Tex2, Tex3, Tex4).Rotate(rotation), depth);
-        }
-
         public static void Draw(RenderTarget target, float depth = 0)
         {
             GL.Enable(EnableCap.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, target.Texture.ID);
             GL.Begin(PrimitiveType.Quads);
-            calls += 1;
 
             GL.Color4(target.Color1);
             GL.TexCoord2(target.Texcoord1);
@@ -132,10 +57,9 @@ namespace Interlude.Graphics
         public static void Draw(string texture, Plane pos, int ux, int uy)
         {
             GL.Enable(EnableCap.Texture2D);
-            Sprite s = Content.GetTexture(texture);
+            Sprite s = Game.Options.Themes.GetTexture(texture);
             GL.BindTexture(TextureTarget.Texture2D, s.ID);
             GL.Begin(PrimitiveType.Quads);
-            calls += 1;
 
             float x = 1f / s.UV_X;
             float y = 1f / s.UV_Y;
@@ -158,7 +82,18 @@ namespace Interlude.Graphics
             GL.Disable(EnableCap.Texture2D);
         }
 
-        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col1 = default(Color), Color col2 = default(Color), Color col3 = default(Color), Color col4 = default(Color))
+        public static void DrawLine(Vector2 a, Vector2 b, Color col1, Color col2, float thickness)
+        {
+            GL.LineWidth(thickness);
+            GL.Begin(PrimitiveType.Lines);
+            GL.Color4(col1);
+            GL.Vertex2(a);
+            GL.Color4(col2);
+            GL.Vertex2(b);
+            GL.End();
+        }
+
+        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col1 = default, Color col2 = default, Color col3 = default, Color col4 = default)
         {
             float l = offsetX + bounds.Left / scaleX;
             float t = offsetY + bounds.Top / scaleY;
@@ -168,20 +103,21 @@ namespace Interlude.Graphics
             return new RenderTarget(texture, bounds, col1, col2, col3, col4, new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b));
         }
 
-        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col = default(Color))
+        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col = default)
         {
             return Tiling(texture, bounds, offsetX, offsetY, scaleX, scaleY, col, col, col, col);
         }
 
         public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
         {
-            Sprite s = Content.GetTexture(texture);
-            Draw(texture: texture, bounds: new Rect(x + s.Width * alignX * scaleX, y + s.Height * alignY * scaleY, x + s.Width * (alignX + 1) * scaleX, y + s.Height * (alignY + 1) * scaleY), color: color);
+            Sprite s = Game.Options.Themes.GetTexture(texture);
+            if (s.Width == 0) return;
+            Draw(new RenderTarget(s, new Rect(x + s.Width * alignX * scaleX, y + s.Height * alignY * scaleY, x + s.Width * (alignX + 1) * scaleX, y + s.Height * (alignY + 1) * scaleY), color));
         }
 
         public static void DrawTilingTexture(string texture, Rect bounds, float scale, float x, float y, Color color)
         {
-            DrawTilingTexture(Content.GetTexture(texture), bounds, scale, scale, x, y, color, color, color, color);
+            DrawTilingTexture(Game.Options.Themes.GetTexture(texture), bounds, scale, scale, x, y, color, color, color, color);
         }
 
         public static void DrawTilingTexture(Sprite texture, Rect bounds, float scaleX, float scaleY, float x, float y, Color col1, Color col2, Color col3, Color col4)
@@ -191,7 +127,7 @@ namespace Interlude.Graphics
 
         public static void DrawRect(Rect bounds, Color color)
         {
-            Draw(new RenderTarget(default(Sprite), bounds, color, 0, 0));
+            Draw(new RenderTarget(default, bounds, color, 0, 0));
         }
 
         public static void EnableTransform(bool upscroll)
@@ -205,8 +141,6 @@ namespace Interlude.Graphics
             GL.MatrixMode(MatrixMode.Modelview);
             GL.PushMatrix();
             GL.MultMatrix(ref m);
-            //GL.Translate(0, i * ScreenUtils.ScreenHeight, 0);
-            //GL.MultMatrix(mat);
         }
 
         public static void Enable3D()
@@ -287,6 +221,7 @@ namespace Interlude.Graphics
             }
         }
 
+        /*
         public static FBO WaterTest(FBO input)
         {
             //input should already be unbound
@@ -306,19 +241,19 @@ namespace Interlude.Graphics
             input.Dispose();
             GL.DeleteSampler(sampler);
             return output;
-        }
+        }*/
 
         public static void Begin(int width, int height)
         {
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
             GL.Ortho(-width * 0.5f, width * 0.5f, height * 0.5f, -height * 0.5f, -height, height);
-            calls = 0;
         }
 
         public static void End()
         {
-            //Console.WriteLine(calls);
+            GL.Finish();
+            GL.Flush();
         }
 
         public static void Init()
@@ -330,8 +265,6 @@ namespace Interlude.Graphics
 
             Font1 = new SpriteFont(60, Game.Options.Theme.Font1);
             Font2 = new SpriteFont(60, Game.Options.Theme.Font2);
-
-            WaterShader = new Shader(ResourceGetter.GetShader("Vertex.vsh"), ResourceGetter.GetShader("Water.fsh"));
 
             FBO.InitBuffers();
         }

@@ -25,20 +25,22 @@ namespace Interlude.Interface.Widgets.Gameplay
         class JudgementDisplay
         {
             Hit h;
+            HitMeter parent;
 
-            public JudgementDisplay()
+            public JudgementDisplay(HitMeter parent)
             {
                 h = new Hit(-10000, 0, 0);
+                this.parent = parent;
             }
 
             public void Draw(Rect bounds, float now)
             {
-                SpriteBatch.Draw("judgements", bounds, Color.FromArgb(Alpha((now - h.time) * 2), Color.White), h.delta < 0 ? 0 : 1, h.tier);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("judgements"), bounds, Color.FromArgb(parent.Alpha((now - h.time) * 2), Color.White), h.delta < 0 ? 0 : 1, h.tier));
             }
 
             public void NewHit(Hit newhit)
             {
-                if ((newhit.time - h.time >= 200 || newhit.tier > h.tier) && (newhit.tier > 0 || Game.Options.Theme.JudgementShowMarv))
+                if ((newhit.time - h.time >= 200 || newhit.tier > h.tier) && (newhit.tier > 0 || parent.showMarv))
                 {
                     h = newhit;
                 }
@@ -50,36 +52,42 @@ namespace Interlude.Interface.Widgets.Gameplay
         float aspectRatio; //used to scale judgement text correctly
         float hScale, vScale;
         int thickness;
+        bool perColumn;
+        float fadeTime; //yikes but i had to bro
+        protected bool showMarv;
 
         public HitMeter(Interlude.Gameplay.ScoreTracker st, Options.WidgetPosition pos) : base(st, pos)
         {
             st.OnHit += AddHit;
-            if (Game.Options.Theme.JudgementPerColumn)
+            perColumn = pos.Extra.GetValue("JudgementPercolumn", false);
+            if (perColumn)
             {
                 disp = new JudgementDisplay[st.Chart.Keys];
                 for (int k = 0; k < st.Chart.Keys; k++)
                 {
-                    disp[k] = new JudgementDisplay();
+                    disp[k] = new JudgementDisplay(this);
                 }
             }
             else
             {
                 disp = new JudgementDisplay[1];
-                disp[0] = new JudgementDisplay();
+                disp[0] = new JudgementDisplay(this);
             }
             hits = new List<Hit>();
-            Sprite sprite = Content.GetTexture("judgements");
+            Sprite sprite = Game.Options.Themes.GetTexture("judgements");
             aspectRatio = (float)sprite.Height / sprite.UV_Y / ((float)sprite.Width / sprite.UV_X);
-            hScale = pos.GetValue("HitHorizontalScale", 3f) * Game.Options.Theme.ColumnWidth / st.Scoring.MissWindow;
-            vScale = pos.GetValue("HitVerticalScale", 0.25f) * Game.Options.Theme.ColumnWidth;
-            thickness = pos.GetValue("HitThickness", 4);
+            hScale = pos.Extra.GetValue("HitHorizontalScale", 3f) * Game.Options.Theme.ColumnWidth / st.Scoring.MissWindow;
+            vScale = pos.Extra.GetValue("HitVerticalScale", 0.25f) * Game.Options.Theme.ColumnWidth;
+            thickness = pos.Extra.GetValue("HitThickness", 4);
+            showMarv = pos.Extra.GetValue("ShowMarvellous", false);
+            fadeTime = pos.Extra.GetValue("FadeTime", 1500f);
         }
 
         private void AddHit(int k, int tier, float delta)
         {
             float now = (float)Game.Audio.Now();
             Hit h = new Hit(now, delta, tier);
-            if (Game.Options.Theme.JudgementPerColumn)
+            if (perColumn)
             {
                 disp[k].NewHit(h);
             }
@@ -98,7 +106,7 @@ namespace Interlude.Interface.Widgets.Gameplay
 
             float now = (float)Game.Audio.Now();
 
-            if (Game.Options.Theme.JudgementPerColumn)
+            if (perColumn)
             {
                 for (int i = 0; i < disp.Length; i++)
                 {
@@ -125,7 +133,7 @@ namespace Interlude.Interface.Widgets.Gameplay
             List<Hit> temp = new List<Hit>();
             foreach (Hit h in hits) //todo: optimise this
             {
-                if (now - h.time > Game.Options.Theme.JudgementFadeTime)
+                if (now - h.time >fadeTime)
                 {
                     temp.Add(h);
                 }
@@ -137,9 +145,9 @@ namespace Interlude.Interface.Widgets.Gameplay
             }
         }
 
-        static int Alpha(float delta)
+        int Alpha(float delta)
         {
-            return (int)Math.Max(0,Math.Min(255,(255f*(1 - delta / Game.Options.Theme.JudgementFadeTime))));
+            return (int)Math.Max(0,Math.Min(255,255f*(1 - delta / fadeTime)));
         }
     }
 }

@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Interlude.Interface.Animations;
 
 namespace Interlude.Interface
 {
     //Represents an element of the interface. It is an object with rectangular bounds that are anchored relative to a parent (ultimately the screen itself)
     //Can contain other widgets as children which are anchored relative to themselves.
-    public class Widget
+    public class Widget : IDisposable
     {
         public AnimationAnchorPoint LeftAnchor { private set; get; }
         public AnimationAnchorPoint TopAnchor { private set; get; }
@@ -35,6 +36,10 @@ namespace Interlude.Interface
 
         public virtual void RemoveFromContainer(Widget parent)
         {
+            if (parent != Parent)
+            {
+                Prelude.Utilities.Logging.Log("Removed widget from container that is isn't in?", "Child side", Prelude.Utilities.Logging.LogType.Debug);
+            }
             Parent = null;
         }
 
@@ -53,7 +58,14 @@ namespace Interlude.Interface
         {
             lock (Children)
             {
-                Children.Remove(child);
+                if (Children.Contains(child))
+                {
+                    Children.Remove(child);
+                }
+                else
+                {
+                    Prelude.Utilities.Logging.Log("Removed widget from container that is isn't in?", "Parent side", Prelude.Utilities.Logging.LogType.Debug);
+                }
             }
             child.RemoveFromContainer(this);
         }
@@ -95,11 +107,6 @@ namespace Interlude.Interface
             {
                 return GetBounds(ScreenUtils.Bounds);
             }
-        }
-
-        public Widget Reposition(Options.WidgetPosition pos)
-        {
-            return TL_DeprecateMe(pos.Left, pos.Top, pos.LeftAnchor, pos.TopAnchor).BR_DeprecateMe(pos.Right, pos.Bottom, pos.RightAnchor, pos.BottomAnchor);
         }
 
         public Widget Reposition(float Left, float LeftA, float Top, float TopA, float Right, float RightA, float Bottom, float BottomA)
@@ -229,6 +236,14 @@ namespace Interlude.Interface
             foreach (Widget w in Children)
             {
                 w.OnResize();
+            }
+        }
+
+        public virtual void Dispose()
+        {
+            foreach (Widget w in Children)
+            {
+                w.Dispose();
             }
         }
     }

@@ -19,17 +19,17 @@ namespace Interlude.Interface.Screens
         public ScreenVisualiser()
         {
             AddChild(
-                new SpriteButton("buttonplay", "", () => { Game.Audio.Play(); })
+                new SpriteButton("buttonplay", () => { Game.Audio.Play(); }, null) { Tooltip = "Play" }
                 .TL_DeprecateMe(250, 10, AnchorType.MAX, AnchorType.MIN)
                 .BR_DeprecateMe(170, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
-                new SpriteButton("buttonpause", "", () => { Game.Audio.Pause(); })
+                new SpriteButton("buttonpause", () => { Game.Audio.Pause(); }, null) { Tooltip = "Pause" }
                 .TL_DeprecateMe(170, 10, AnchorType.MAX, AnchorType.MIN)
                 .BR_DeprecateMe(90, 90, AnchorType.MAX, AnchorType.MIN)
                 );
             AddChild(
-                new SpriteButton("buttonstop", "", () => { Game.Audio.Stop(); })
+                new SpriteButton("buttonstop", () => { Game.Audio.Stop(); }, null) { Tooltip = "Stop" }
                 .TL_DeprecateMe(90, 10, AnchorType.MAX, AnchorType.MIN)
                 .BR_DeprecateMe(10, 90, AnchorType.MAX, AnchorType.MIN)
                 );
@@ -85,10 +85,20 @@ namespace Interlude.Interface.Screens
                     a2 = a1 + Math.PI / 192;
                     a1 = rotate + rotate - a1;
                     a2 = rotate + rotate - a2;
-                    SpriteBatch.Draw("", color: Color.FromArgb(100, Game.Screens.HighlightColor), coords: new Vector2[] { new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)), new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)) });
+                    SpriteBatch.Draw(new RenderTarget(
+                        new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)),
+                        new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)),
+                        Color.FromArgb(100, Game.Screens.HighlightColor)));
                     a1 = rotate + rotate - a1;
                     a2 = rotate + rotate - a2;
-                    SpriteBatch.Draw("", color: Color.FromArgb(100, Game.Screens.HighlightColor), coords: new Vector2[] { new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)), new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)), new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)) });
+                    SpriteBatch.Draw(new RenderTarget(
+                        new Vector2(r1 * (float)Math.Sin(a1), r1 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a1), r2 * (float)Math.Cos(a1)),
+                        new Vector2(r2 * (float)Math.Sin(a2), r2 * (float)Math.Cos(a2)),
+                        new Vector2(r1 * (float)Math.Sin(a2), r1 * (float)Math.Cos(a2)),
+                        Color.FromArgb(100, Game.Screens.HighlightColor)));
                     a1 += Math.PI / 3;
                 }
             }

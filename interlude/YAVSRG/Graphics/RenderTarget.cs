@@ -51,6 +51,23 @@ namespace Interlude.Graphics
             Texture = texture;
         }
 
+        public RenderTarget(Rect bounds, Color col1, Color col2, Color col3, Color col4)
+        {
+            Coord1 = new Vector2(bounds.Left, bounds.Top);
+            Coord2 = new Vector2(bounds.Right, bounds.Top);
+            Coord3 = new Vector2(bounds.Right, bounds.Bottom);
+            Coord4 = new Vector2(bounds.Left, bounds.Bottom);
+
+            Color1 = col1;
+            Color2 = col2;
+            Color3 = col3;
+            Color4 = col4;
+
+            Texcoord1 = Texcoord2 = Texcoord3 = Texcoord4 = default;
+
+            Texture = default;
+        }
+
         public RenderTarget(Sprite texture, Rect bounds, Color col1, Color col2, Color col3, Color col4, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4)
         {
             Coord1 = new Vector2(bounds.Left, bounds.Top);
@@ -105,7 +122,7 @@ namespace Interlude.Graphics
             Color3 = col;
             Color4 = col;
 
-            Texture = default(Sprite);
+            Texture = default;
         }
 
         public Vector2 GetTexCoord(int i)
@@ -118,19 +135,6 @@ namespace Interlude.Graphics
                 case 0: default: return Texcoord1;
             }
         }
-
-        /*
-        public void SetTexCoord(int i, Vector2 val)
-        {
-            switch (i)
-            {
-                case 3: Texcoord4 = val; return;
-                case 2: Texcoord3 = val; return;
-                case 1: Texcoord2 = val; return;
-                case 0: Texcoord1 = val; return;
-                default: return;
-            }
-        }*/
 
         public RenderTarget Rotate(int r)
         {

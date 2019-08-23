@@ -20,6 +20,10 @@ namespace Interlude.Options
         public Bind End = new AltBind(new KeyBind(Key.Right), false, true);
         public Bind Start = new AltBind(new KeyBind(Key.Left), false, true);
 
+        public Bind Import = new AltBind(new KeyBind(Key.I), false, true);
+        public Bind Options = new AltBind(new KeyBind(Key.O), false, true);
+        public Bind Music = new AltBind(new KeyBind(Key.P), false, true);
+
         //level select
         public Bind UpRate = new KeyBind(Key.Plus);
         public Bind DownRate = new KeyBind(Key.Minus);
@@ -38,5 +42,6 @@ namespace Interlude.Options
         //play
         public Bind ChangeOffset = new KeyBind(Key.Plus);
         public Bind Skip = new KeyBind(Key.Space);
+        public Bind HideUI = new KeyBind(Key.F9);
     }
 }

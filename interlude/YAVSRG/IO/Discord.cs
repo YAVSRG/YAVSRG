@@ -33,6 +33,7 @@ namespace Interlude.IO
         public static void SetPresence(string State, string Details, bool AcceptJoin)
         {
             //AcceptJoin &= Game.Multiplayer.LobbyKey != "";
+            if (Details.Length > 128) Details = Details.Substring(0, 125) + "...";
             try
             {
                 client.SetPresence(new RichPresence()

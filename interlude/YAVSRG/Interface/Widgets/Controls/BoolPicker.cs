@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Interlude.Interface.Widgets
 {
+    //todo: deprecate
     public class BoolPicker : TextPicker
     {
         public BoolPicker(string label, bool start, Action<bool> set) : base(label,new string[] { "OFF", "ON" }, start ? 1 : 0, v => set(v == 1))

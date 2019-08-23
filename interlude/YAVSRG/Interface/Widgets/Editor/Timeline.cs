@@ -2,6 +2,7 @@
 using Prelude.Gameplay.Charts.YAVSRG;
 using Interlude.IO;
 using Interlude.Graphics;
+using System;
 
 namespace Interlude.Interface.Widgets.Editor
 {
@@ -16,10 +17,11 @@ namespace Interlude.Interface.Widgets.Editor
             foreach (BPMPoint b in Game.CurrentChart.Timing.BPM.Points)
             {
                 nowPos = (float)(bounds.Left + b.Offset / Game.Audio.Duration * bounds.Width);
-                //SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), (b.InheritsFrom != b.Offset) ? Color.Green : Color.Red);
+                SpriteBatch.DrawRect(new Rect(nowPos - 1, bounds.Top, nowPos + 1, bounds.Top + 25), Color.Red);
             }
             nowPos = bounds.Left + bounds.Width * Game.Audio.NowPercentage();
             SpriteBatch.DrawRect(new Rect(nowPos - 2, bounds.Top, nowPos + 2, bounds.Bottom), Color.White);
+            SpriteBatch.Font1.DrawCentredText(Utils.FormatTime((float)Game.Audio.Now()), 20f, Math.Max(bounds.Left + 25, nowPos), bounds.Top - 30, Color.White);
         }
 
         public override void Update(Rect bounds)

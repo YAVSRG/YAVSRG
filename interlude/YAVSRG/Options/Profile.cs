@@ -7,6 +7,7 @@ using Prelude.Utilities;
 using Prelude.Gameplay.ScoreMetrics;
 using static Prelude.Gameplay.DifficultyRating.KeyLayout;
 using static Prelude.Gameplay.ScoreMetrics.ScoreSystem;
+using Interlude.IO;
 using Interlude.Gameplay;
 
 namespace Interlude.Options
@@ -44,13 +45,15 @@ namespace Interlude.Options
         public string UUID = Guid.NewGuid().ToString();
         public Keymode PreferredKeymode = Keymode.Key4;
         public bool KeymodePreference = false;
-        public string Skin = "_fallback";
+        public List<string> SelectedThemes = new List<string>();
+        public string NoteSkin = "default";
         public float ScrollSpeed = 2.05f;
-        public bool UseArrowsFor4k = false;
         public int HitPosition = 0;
+        public bool HitLighting = false;
         public bool Upscroll = false;
         public float ScreenCoverUp = 0f;
         public float ScreenCoverDown = 0f;
+        public float ScreenCoverFadeLength = 200;
         public float PerspectiveTilt = 0f;
         public float BackgroundDim = 0.5f;
         public string ChartSortMode = "Title";
@@ -65,16 +68,16 @@ namespace Interlude.Options
         public ProfileStats Stats = new ProfileStats();
 
         //these are default binds
-        public Key[][] KeymodeBindings = new Key[][] //this needs redoing cause it turns out shit in the profile.json
+        public KeyBind[][] KeyBinds = new KeyBind[][]
         {
-            new Key[] { Key.Left, Key.Down, Key.Right }, //3K
-            new Key[] { Key.Z, Key.X, Key.Period, Key.Slash }, //4k
-            new Key[] { Key.Z, Key.X, Key.Space, Key.Period, Key.Slash }, //5k
-            new Key[] { Key.Z, Key.X, Key.C, Key.Comma, Key.Period, Key.Slash }, //6k
-            new Key[] { Key.Z, Key.X, Key.C, Key.Space, Key.Comma, Key.Period, Key.Slash }, //7k
-            new Key[] { Key.Z, Key.X, Key.C, Key.V, Key.Comma, Key.Period, Key.Slash, Key.RShift }, //8k
-            new Key[] { Key.Z, Key.X, Key.C, Key.V, Key.Space, Key.Comma, Key.Period, Key.Slash, Key.RShift }, //9k
-            new Key[] { Key.CapsLock, Key.Q, Key.W, Key.E, Key.V, Key.Space, Key.K, Key.L, Key.Semicolon, Key.Quote }, //10k
+            new KeyBind[] { new KeyBind(Key.Left), new KeyBind(Key.Down), new KeyBind(Key.Right) },
+            new KeyBind[] { new KeyBind(Key.Z), new KeyBind(Key.X), new KeyBind(Key.Period), new KeyBind(Key.Slash) },
+            new KeyBind[] { new KeyBind(Key.Z), new KeyBind(Key.X), new KeyBind(Key.Space), new KeyBind(Key.Period), new KeyBind(Key.Slash) },
+            new KeyBind[] { new KeyBind(Key.Z), new KeyBind(Key.X), new KeyBind(Key.C), new KeyBind(Key.Comma), new KeyBind(Key.Period), new KeyBind(Key.Slash) },
+            new KeyBind[] { new KeyBind(Key.Z), new KeyBind(Key.X), new KeyBind(Key.C), new KeyBind(Key.Space), new KeyBind(Key.Comma), new KeyBind(Key.Period), new KeyBind(Key.Slash) },
+            new KeyBind[] { new KeyBind(Key.Z), new KeyBind(Key.X), new KeyBind(Key.C), new KeyBind(Key.V), new KeyBind(Key.Comma), new KeyBind(Key.Period), new KeyBind(Key.Slash), new KeyBind(Key.RShift) },
+            new KeyBind[] { new KeyBind(Key.Z), new KeyBind(Key.X), new KeyBind(Key.C), new KeyBind(Key.V), new KeyBind(Key.Space), new KeyBind(Key.Comma), new KeyBind(Key.Period), new KeyBind(Key.Slash), new KeyBind(Key.RShift) },
+            new KeyBind[] { new KeyBind(Key.CapsLock), new KeyBind(Key.Q), new KeyBind(Key.W), new KeyBind(Key.E), new KeyBind(Key.V), new KeyBind(Key.Space), new KeyBind(Key.K), new KeyBind(Key.L), new KeyBind(Key.Semicolon), new KeyBind(Key.Quote) }
         };
 
         public Layout[] KeymodeLayouts = new Layout[] //default playstyles

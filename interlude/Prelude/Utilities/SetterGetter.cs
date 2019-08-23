@@ -10,7 +10,8 @@ namespace Prelude.Utilities
 
         public SetterGetter(object obj, string propertyName)
         {
-            var prop = obj.GetType().GetProperty(propertyName);
+            var prop = obj.GetType().GetField(propertyName);
+
             _set = (v) => { prop.SetValue(obj, v); };
             _get = () => (T)prop.GetValue(obj);
         }

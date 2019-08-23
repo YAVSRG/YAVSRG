@@ -10,11 +10,16 @@ namespace Interlude.Graphics
     public class SpriteFont
     {
         static PrivateFontCollection collection = new PrivateFontCollection();
-        //todo: comment everything and change to bounds system
+
         Dictionary<char, Sprite> FontLookup;
         int FONTSCALE;
         Font Font;
         readonly float ShadowAmount = 0.09f;
+
+        public int Count
+        {
+            get { return FontLookup.Count; }
+        }
 
         public SpriteFont(int scale, string f)
         {
@@ -37,7 +42,7 @@ namespace Interlude.Graphics
             }
         }
 
-        public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default)
         {
             if (dropShadow)
             {
@@ -51,13 +56,13 @@ namespace Interlude.Graphics
                 if (c == ' ') { x += FONTSCALE * 0.75f * scale; continue; }
                 if (!FontLookup.ContainsKey(c)) { GenChar(c); }
                 s = FontLookup[c];
-                SpriteBatch.Draw(sprite: s, bounds: new Rect(x, y, x + s.Width * scale, y + s.Height * scale), color: color);
+                SpriteBatch.Draw(new RenderTarget(s, new Rect(x, y, x + s.Width * scale, y + s.Height * scale), color));
                 x += (s.Width - FONTSCALE * 0.5f) * scale; //kerning
             }
             return x - start;
         }
 
-        public float DrawCentredText(string text, float scale, float x, float y, Color c, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawCentredText(string text, float scale, float x, float y, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             if (dropShadow)
             {
@@ -67,7 +72,7 @@ namespace Interlude.Graphics
             return DrawText(text, scale, x, y, c);
         }
 
-        public float DrawJustifiedText(string text, float scale, float x, float y, Color c, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawJustifiedText(string text, float scale, float x, float y, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             if (dropShadow)
             {
@@ -77,7 +82,7 @@ namespace Interlude.Graphics
             return DrawText(text, scale, x, y, c);
         }
 
-        public float DrawCentredTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawCentredTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
@@ -88,7 +93,7 @@ namespace Interlude.Graphics
             return DrawCentredText(text, scale * FONTSCALE, bounds.CenterX, bounds.CenterY - h * scale * 0.5f, c, dropShadow, shadowColor);
         }
 
-        public float DrawTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
@@ -99,7 +104,7 @@ namespace Interlude.Graphics
             return DrawText(text, scale * FONTSCALE, bounds.Left, bounds.CenterY - h * scale * 0.5f, c, dropShadow, shadowColor);
         }
 
-        public float DrawJustifiedTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawJustifiedTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             float w = MeasureText(text);
             int h = FontLookup['T'].Height;
@@ -110,7 +115,7 @@ namespace Interlude.Graphics
             return DrawJustifiedText(text, scale * FONTSCALE, bounds.Right, bounds.CenterY - h * scale * 0.5f, c, dropShadow, shadowColor);
         }
 
-        public float DrawDynamicText(string text, Rect bounds, Color c, AnchorType position, float size, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawDynamicText(string text, Rect bounds, Color c, AnchorType position, float size, bool dropShadow = false, Color shadowColor = default)
         {
             switch (position)
             {
@@ -123,7 +128,7 @@ namespace Interlude.Graphics
             }
         }
 
-        public float DrawDynamicTextToFill(string text, Rect bounds, Color c, AnchorType position, bool dropShadow = false, Color shadowColor = default(Color))
+        public float DrawDynamicTextToFill(string text, Rect bounds, Color c, AnchorType position, bool dropShadow = false, Color shadowColor = default)
         {
             switch (position)
             {
@@ -194,7 +199,7 @@ namespace Interlude.Graphics
             var bmp = new Bitmap((int)size.Width, (int)size.Height);
             using (var g = System.Drawing.Graphics.FromImage(bmp))
             {
-                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 g.DrawString(c.ToString(), Font, Brushes.White, 0, 0);
             }
             FontLookup.Add(c, Content.UploadTexture(bmp, 1, 1, true));

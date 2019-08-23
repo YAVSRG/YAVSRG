@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenTK.Input;
+using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
+using Interlude.Graphics;
 using Interlude.IO;
-using static Interlude.Options.Options;
 
 
 namespace Interlude.Interface.Widgets
 {
-    class LayoutPanel : OptionsPanel
+    class LayoutPanel : Widget
     {
         private Widget selectKeyMode, selectLayout;
         private KeyBinder[] binds = new KeyBinder[10];
         private ColorPicker[] colors = new ColorPicker[10];
         private int keyMode = (int)Game.Options.Profile.DefaultKeymode + 3;
         private float width;
-        private InfoBox infobox;
 
         protected class ColorPicker : Widget
         {
@@ -24,7 +24,6 @@ namespace Interlude.Interface.Widgets
             Action<int> select;
             Func<int> get;
             int max;
-            bool hover;
 
             public ColorPicker(string label, Action<int> select, Func<int> get, int max)
             {
@@ -43,7 +42,7 @@ namespace Interlude.Interface.Widgets
             {
                 base.Draw(bounds);
                 bounds = GetBounds(bounds);
-                Game.Options.Theme.DrawNote(bounds, 1, ((LayoutPanel)Parent).keyMode, get(), 0);
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("note"), bounds, System.Drawing.Color.White, 1, get()));
             }
 
             public override void Update(Rect bounds)
@@ -60,26 +59,22 @@ namespace Interlude.Interface.Widgets
                     {
                         select(Utils.Modulus(get() - 1, max));
                     }
-                    ((LayoutPanel)Parent).infobox.SetText(label);
-                    hover = true;
-                }
-                else if (hover)
-                {
-                    hover = false;
-                    ((LayoutPanel)Parent).infobox.SetText("");
+                    Game.Screens.Toolbar.SetTooltip(label, "");
                 }
             }
         }
 
-        public LayoutPanel(InfoBox ib) : base(ib, "Key Layout")
+        public LayoutPanel()
         {
-            infobox = ib;
             width = ScreenUtils.ScreenWidth * 2 - 600;
             selectKeyMode = new TextPicker("Keys", new string[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, (int)Game.Options.Profile.DefaultKeymode, (i) => { ChangeKeyMode(i + 3, width); })
                 .TL_DeprecateMe(-50, 100, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(50, 150, AnchorType.CENTER, AnchorType.MIN);
             for (int i = 0; i < 10; i++)
             {
-                binds[i] = new KeyBinder("Column " + (i + 1).ToString(), Key.F35, (b) => { });
+                var j = i;
+                void set(Bind bind) { Game.Options.Profile.KeyBinds[keyMode - 3][j] = (KeyBind)bind; }
+                Bind get() => Game.Options.Profile.KeyBinds[keyMode - 3][j];
+                binds[i] = new KeyBinder("Column " + (i + 1).ToString(), new SetterGetter<Bind>(set, get)) { AllowAltBinds = false };
                 AddChild(binds[i]);
                 colors[i] = new ColorPicker("", null, null, 1);
                 AddChild(colors[i]);
@@ -87,8 +82,15 @@ namespace Interlude.Interface.Widgets
             AddChild(selectKeyMode);
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
                 .TL_DeprecateMe(-500, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new TextPicker("Skin", Skins, Math.Max(0, Array.IndexOf(Skins, Game.Options.Profile.Skin)), (i) => { Game.Options.Profile.Skin = Skins[i]; Content.ClearStore(); ChangeKeyMode(keyMode, width); })
-                .TL_DeprecateMe(200, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(500, 575, AnchorType.CENTER, AnchorType.MIN));
+            AddChild(new SimpleButton("Change Theme", () => { Game.Screens.AddDialog(new Dialogs.ThemeSelectDialog((s) => { })); }, () => false, null).Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
+            var arr = Game.Options.Themes.NoteSkins.Keys.ToArray();
+            AddChild(new TextPicker("Noteskin", arr, Math.Max(0, Array.IndexOf(arr, Game.Options.Profile.NoteSkin)), (i) =>
+            {
+                Game.Options.Profile.NoteSkin = arr[i];
+                Game.Options.Themes.Unload(); Game.Options.Themes.Load();
+                ChangeKeyMode(keyMode, width);
+            }).Reposition(200, 0.5f, 600, 0, 500, 0.5f, 650, 0));
+            Refresh();
         }
 
         public void Refresh()
@@ -105,14 +107,11 @@ namespace Interlude.Interface.Widgets
             ChangeKeyMode(keyMode, width);
         }
 
-        private Action<Key> BindSetter(int i, int k)
-        {
-            return (key) => { Game.Options.Profile.KeymodeBindings[k - 3][i] = key; };
-        }
         private Action<int> ColorSetter(int i, int k)
         {
             return (s) => { Game.Options.Profile.ColorStyle.SetColorIndex(i, k, s); };
         }
+
         private Func<int> ColorGetter(int i, int k)
         {
             return () => { return Game.Options.Profile.ColorStyle.GetColorIndex(i, k); };
@@ -130,13 +129,12 @@ namespace Interlude.Interface.Widgets
             int start = -k * c / 2;
             for (int i = 0; i < k; i++)
             {
-                binds[i].Change(Game.Options.Profile.KeymodeBindings[k - 3][i], BindSetter(i, k));
                 binds[i].SetState(WidgetState.NORMAL);
                 binds[i].TL_DeprecateMe(start + i * c, 200, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(start + c + i * c, 250, AnchorType.CENTER, AnchorType.MIN);
             }
 
             int colorCount = Game.Options.Profile.ColorStyle.GetColorCount(k);
-            int availableColors = Game.Options.Theme.CountNoteColors(k);
+            int availableColors = Game.Options.Theme.NoteColorCount();
             c = colorCount * Game.Options.Theme.ColumnWidth > Width ? (int)(Width / colorCount) : Game.Options.Theme.ColumnWidth;
             start = -colorCount * c / 2;
             int keymodeIndex = Game.Options.Profile.ColorStyle.UseForAllKeyModes ? 0 : k;

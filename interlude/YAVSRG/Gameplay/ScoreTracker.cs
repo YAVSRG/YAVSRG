@@ -30,6 +30,7 @@ namespace Interlude.Gameplay
             Scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.SelectedScoreSystem);
             HP = new HPSystem(Scoring);
             Watchers.Add(Scoring);
+            //HP must always be later in the list as it asks if scoring has marked things as miss/whatever judgement etc
             Watchers.Add(HP);
 
             Scoring.OnHit = (k, j, d) => { OnHit(k, j, d); }; //feed current score system into gameplay ui handlers for hits

@@ -1,55 +1,54 @@
-﻿using Interlude.Interface.Widgets;
+﻿using System;
+using System.Drawing;
+using Interlude.Graphics;
+using Interlude.Interface.Widgets;
 
 namespace Interlude.Interface.Screens
 {
-    class ScreenOptions : Screen
+    public class ScreenOptions : Screen
     {
-        private LayoutPanel lp;
-        
+        Widget container, selected;
+        string current = "";
         public ScreenOptions()
         {
-            OnResize();
+            FlowContainer list;
+            AddChild(container = new Widget().Reposition(300, 0, 0, 0, 0, 1, 0, 1));
+            AddChild((list = new FlowContainer() { RowSpacing = 20 }).Reposition(0, 0, 0, 0, 300, 0, 0, 1));
+            list.AddChild(Button("General", "Settings such as audio, screen resolution, frame limiter", () => new GeneralPanel()));
+            list.AddChild(Button("Hotkeys", "Bind hotkeys for all aspects of the UI", () => new TextBox("hello world", AnchorType.CENTER, 0, true, Color.White)));
+            list.AddChild(Button("Gameplay", "Settings such as noteskins, scroll speed, accuracy", () => new GameplayPanel()));
+            list.AddChild(Button("Noteskin & Layout", "Rebind gameplay keys", () => new LayoutPanel()));
+            list.AddChild(Button("Themes", "Select, create and edit themes to customise Interlude", () => new TextBox("hello world", AnchorType.CENTER, 0, true, Color.White)));
+            list.AddChild(Button("Debug", "Debug tools", () => new TextBox("hello world", AnchorType.CENTER, 0, true, Color.White)));
+            list.AddChild(Button("Credits", "Credits & special thanks to everyone who has made Interlude possible so far", () => new CreditsPanel()));
         }
 
-        public override void OnResize()
+        public override void Draw(Rect bounds)
         {
-            Children.Clear();
-            var ib = new InfoBox();
-            FlowContainer tabs = new FlowContainer();
-            lp = new LayoutPanel(ib);
-            tabs.AddChild(new GeneralPanel(ib, lp).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
-            tabs.AddChild(new GameplayPanel(ib, lp).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
-            tabs.AddChild(lp.BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
-            tabs.AddChild(new CreditsPanel(ib).BR_DeprecateMe(0, 900, AnchorType.MAX, AnchorType.MIN));
-            lp.Refresh();
-
-            AddChild(tabs.TL_DeprecateMe(200, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(200, 0, AnchorType.MAX, AnchorType.MAX));
-
-            AddChild(ScrollButton("General", 0, tabs));
-            AddChild(ScrollButton("Gameplay", 1, tabs));
-            AddChild(ScrollButton("Layout", 2, tabs));
-            AddChild(ScrollButton("???", 3, tabs));
-            AddChild(ScrollButton("Credits", 4, tabs));
-
-            AddChild(ib.TL_DeprecateMe(0, 200, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(0, 0, AnchorType.MAX, AnchorType.MAX));
-
-        }
-
-        public override void OnEnter(Screen prev)
-        {
-            base.OnEnter(prev);
-            Game.Screens.Toolbar.Icons.Filter(0b00011011);
-        }
-
-        private Widget ScrollButton(string name, int id, FlowContainer container)
-        {
-            return new FramedButton(name, () => { container.ScrollTo(id); }) { Highlight = () => container.VisibleIndexBottom == id, Frame = 170, HorizontalFade = 50 }.TL_DeprecateMe(id * 0.2f, 80, AnchorType.LERP, AnchorType.MAX).BR_DeprecateMe(0.2f + id * 0.2f, 0, AnchorType.LERP, AnchorType.MAX);
+            SpriteBatch.DrawTilingTexture("levelselectbase", GetBounds(bounds), 400, 0, 0, Color.FromArgb(30,Game.Screens.HighlightColor));
+            SpriteBatch.Font1.DrawCentredText("Hold " + Game.Options.General.Keybinds.Help.ToString().ToUpper() + " to see more info when hovering over settings", 30f, 0, bounds.Bottom - 50, Color.White, true, Color.Black);
+            base.Draw(bounds);
         }
 
         public override void OnExit(Screen next)
         {
             base.OnExit(next);
-            Game.Gameplay.UpdateChart(); //recolor notes based on settings if they've changed
+            Game.Gameplay.UpdateChart();
+            //Gameplay.ChartLoader.Refresh();
+            //refresh sorting, chart, etc
+        }
+
+        Widget Button(string name, string tooltip, Func<Widget> obj)
+        {
+            return new FramedButton(name, () => {
+                current = name;
+                selected?.Dispose();
+                if (selected != null)
+                {
+                    container.RemoveChild(selected);
+                }
+                container.AddChild(selected = obj());
+            }, null) { Highlight = () => current == name, Frame = 170, HorizontalFade = 50, Tooltip = tooltip }.Reposition(0, 0, 0, 0, 0, 1, 50, 0);
         }
     }
 }

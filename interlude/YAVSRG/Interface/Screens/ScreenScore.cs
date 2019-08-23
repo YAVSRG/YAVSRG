@@ -141,7 +141,7 @@ namespace Interlude.Interface.Screens
 
             //judgements display
             SpriteBatch.Font1.DrawCentredTextToFill(scoreData.ScoreSystem.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 370, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
-            SpriteBatch.Draw("ranks", new Rect(-100, bounds.Top + 170, 100, bounds.Top + 370), Color.White, rankachieved, 0);
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("ranks"), new Rect(-100, bounds.Top + 170, 100, bounds.Top + 370), Color.White, rankachieved, 0));
             float h = 450/scoreData.ScoreSystem.Judgements.Length;
             for (int i = 0; i < scoreData.ScoreSystem.Judgements.Length; i++)
             {

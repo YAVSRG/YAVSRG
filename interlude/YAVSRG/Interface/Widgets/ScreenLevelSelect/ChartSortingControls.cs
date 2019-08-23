@@ -41,7 +41,7 @@ namespace Interlude.Interface.Widgets
             AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Keybinds.Search.ToString().ToUpper() + " to search..."))
                 .Reposition(-600, 1, 10, 0, -20, 1, 70, 0));
 
-            AddChild(new SpriteButton("buttoninfo", "Collections", () => { collectionControls.ToggleState(); sortControls.ToggleState(); })
+            AddChild(new SpriteButton("buttoninfo", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }, null) { Tooltip = "Collections (deprecate this button soon)" }
                 .Reposition(-680, 1, 0, 0, -600, 1, 80, 0));
         }
 

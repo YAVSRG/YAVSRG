@@ -2,30 +2,34 @@
 using System.Collections.Generic;
 using System.IO;
 using Prelude.Utilities;
-using Interlude.IO;
+using Interlude.Options.Themes;
 
 namespace Interlude.Options
 {
-    public class Options
+    public class SettingsManager
     {
         public static List<Profile> Profiles;
-        public static string[] Skins;
         public static General general;
 
         public Profile Profile;
-        public ThemeData Theme;
+        public ThemeManager Themes;
+
         public General General
         {
             get { return general; }
         }
 
-        public Options()
+        public ThemeOptions Theme
+        {
+            get { return Themes.LoadedThemes[Themes.LoadedThemes.Count - 1].Config; }
+        }
+
+        public SettingsManager()
         {
             Profile = new Profile();
-            Theme = new ThemeData();
             try
             {
-                foreach (Profile p in Profiles) //linear search cause i'm lazy, this runs once and you're not gonna have more than like 20 profiles ever
+                foreach (Profile p in Profiles)
                 {
                     if (p.ProfilePath == general.CurrentProfile)
                     {
@@ -53,7 +57,7 @@ namespace Interlude.Options
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Songs"));
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Imports"));
             Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Profiles"));
-            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Assets", "_Fallback"));
+            Directory.CreateDirectory(Path.Combine(general.WorkingDirectory, "Data", "Assets"));
         }
 
         public static void Init()
@@ -84,22 +88,16 @@ namespace Interlude.Options
                     }
                 }
             }
-            string[] s = Directory.GetDirectories(Path.Combine(general.WorkingDirectory, "Data", "Assets"));
-            Skins = new string[s.Length];
-            for (int i = 0; i < s.Length; i++)
-            {
-                Skins[i] = Path.GetFileName(s[i]);
-            }
         }
 
         public void ChangeProfile(Profile p)
         {
             //remember to save the old one
             SaveProfile(Profile);
+            Themes?.Unload();
+            Themes?.Load();
             Profile = p;
             general.CurrentProfile = p.ProfilePath;
-            Content.ClearStore();
-            Theme = Content.LoadThemeData(p.Skin);
         }
 
         public void SaveProfile(Profile p)
@@ -111,6 +109,7 @@ namespace Interlude.Options
         {
             SaveProfile(Profile);
             Utils.SaveObject(general, "Options.json");
+            Themes.Unload();
         }
     }
 }

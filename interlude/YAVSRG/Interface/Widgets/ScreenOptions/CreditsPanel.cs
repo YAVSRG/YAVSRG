@@ -3,10 +3,10 @@ using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets
 {
-    class CreditsPanel : OptionsPanel
+    class CreditsPanel : Widget
     {
         string[] lines;
-        public CreditsPanel(InfoBox ib) : base(ib, "Credits")
+        public CreditsPanel()
         {
             lines = ResourceGetter.GetCredits().Split('\n');
         }

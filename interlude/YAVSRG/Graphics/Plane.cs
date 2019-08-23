@@ -19,11 +19,13 @@ namespace Interlude.Graphics
             P4 = p4;
         }
 
-        /*
-        public Plane Transform(Matrix4 mat)
+        public Plane Interpolate(float a, Plane other)
         {
-            return new Plane(mat * P1, mat * P2, mat * P3, mat * P4);
-        }*/
+            return new Plane(other.P1 * a + (1 - a) * P1,
+                other.P2 * a + (1 - a) * P2,
+                other.P3 * a + (1 - a) * P3,
+                other.P4 * a + (1 - a) * P4);
+        }
 
         public Plane Translate(Vector3 vec)
         {

@@ -22,7 +22,7 @@ namespace Interlude
                 Game g = null;
                 try
                 {
-                    Options.Options.Init(); //init options i.e load profiles
+                    Options.SettingsManager.Init(); //init options i.e load profiles
                     g = new Game();
                     Logging.Log("Game launched, all seems well", "");
                 }

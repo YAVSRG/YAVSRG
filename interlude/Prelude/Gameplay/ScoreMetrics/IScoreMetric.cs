@@ -11,6 +11,8 @@ namespace Prelude.Gameplay.ScoreMetrics
     //todo: support for time series data to graph it overlayed on hit distribution graph
     public abstract class IScoreMetric
     {
+        public float[] Data = new float[100];
+
         public delegate void HitHandler(int Column, int Judgement, float Offset);
 
         protected int Counter = 0;
@@ -22,6 +24,16 @@ namespace Prelude.Gameplay.ScoreMetrics
         public abstract void ProcessScore(HitData[] HitData);
 
         public abstract float GetValue();
+
+        public void UpdateTimeSeriesData(int snaps)
+        {
+            int i = Data.Length * Counter / snaps;
+            if (i == Data.Length) return;
+            if (Data[i] == 0)
+            {
+                Data[i] = GetValue();
+            }
+        }
 
         public bool ReachedEnd(int snaps)
         {

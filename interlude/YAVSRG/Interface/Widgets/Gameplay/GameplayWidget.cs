@@ -16,7 +16,7 @@ namespace Interlude.Interface.Widgets.Gameplay
         {
             scoreTracker = s;
             if (!pos.Enable) SetState(WidgetState.DISABLED);
-            Reposition(pos);
+            Reposition(pos.Left, pos.LeftRel, pos.Top, pos.TopRel, pos.Right, pos.RightRel, pos.Bottom, pos.BottomRel);
         }
     }
 }

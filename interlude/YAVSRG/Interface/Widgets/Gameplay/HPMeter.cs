@@ -9,7 +9,7 @@ namespace Interlude.Interface.Widgets.Gameplay
 
         public HPMeter(ScoreTracker scoreTracker, Options.WidgetPosition pos) : base(scoreTracker, pos)
         {
-            Horizontal = pos.GetValue("Horizontal", true);
+            Horizontal = pos.Extra.GetValue("Horizontal", true);
         }
 
         public override void Draw(Rect bounds)

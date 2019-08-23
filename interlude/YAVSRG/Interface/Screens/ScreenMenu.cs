@@ -20,21 +20,24 @@ namespace Interlude.Interface.Screens
                 play = new BannerButton("Play", () =>
                 {
                     Game.Screens.AddScreen((Game.CurrentChart == null ? (Screen)(new ScreenImport()) : new ScreenLevelSelect()));
-                }, 0.7f, 1)
+                }, () => Game.Options.General.Keybinds.Select)
+                { Tooltip = "Play the game!", TextLeftPercent = 0.7f }
                 .Reposition(-100, 0, -200, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, -100, 0.5f)
                 );
             AddChild(
                 options = new BannerButton("Options", () =>
                 {
                     Game.Screens.AddScreen(new ScreenOptions());
-                }, 0.7f, 1)
+                }, null) //binds already implemented by toolbar
+                { Tooltip = "Options and settings", TextLeftPercent = 0.7f }
                 .Reposition(-100, 0, -50, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, 50, 0.5f)
                 );
             AddChild(
                 quit = new BannerButton("Quit", () =>
                 {
                     Game.Screens.PopScreen();
-                }, 0.7f, 1)
+                }, null) //binds already implemented by toolbar
+                { Tooltip = "sEe YoU nExT tIMe", TextLeftPercent = 0.7f }
                 .Reposition(-100, 0, 100, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, 200, 0.5f)
                 );
             AddChild(new NewsBox());

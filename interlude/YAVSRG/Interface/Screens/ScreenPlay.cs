@@ -3,8 +3,6 @@ using System.Drawing;
 using Prelude.Gameplay.Charts.YAVSRG;
 using Prelude.Gameplay;
 using Interlude.Gameplay;
-using Interlude.Gameplay.Mods.Visual;
-using Interlude.Gameplay.Mods;
 using Interlude.Interface.Widgets.Gameplay;
 using Interlude.Interface.Animations;
 using Interlude.IO;
@@ -13,14 +11,15 @@ using static Interlude.Interface.ScreenUtils;
 
 namespace Interlude.Interface.Screens
 {
-    class ScreenPlay : Screen //i cleaned up this file a little but it's a bit of a mess. sorry! update: a lot of a mess
+    /// <summary>
+    /// The screen for playing and scoring on a selected chart. Uses the NoteRenderer class to render the playfield and then handles input and note hitting logic.
+    /// </summary>
+    class ScreenPlay : Screen
     {
         ChartWithModifiers Chart;
         ScoreTracker scoreTracker;
-        Widget playfield;
         float missWindow;
-        OpenTK.Input.Key[] binds;
-        HitLighting[] lighting;
+        Bind[] binds;
         AnimationFade bannerIn, bannerOut;
 
         public ScreenPlay()
@@ -28,45 +27,22 @@ namespace Interlude.Interface.Screens
             Chart = Game.Gameplay.ModifiedChart;
             scoreTracker = new ScoreTracker(Game.Gameplay.ModifiedChart);
 
-            int columnwidth = Game.Options.Theme.ColumnWidth;
-            int hitposition = Game.Options.Profile.HitPosition;
-
             missWindow = scoreTracker.Scoring.MissWindow * (float)Game.Options.Profile.Rate;
-            binds = Game.Options.Profile.KeymodeBindings[Chart.Keys - 3];
+            binds = Game.Options.Profile.KeyBinds[Chart.Keys - 3];
 
-            var widgetData = Game.Options.Theme.Gameplay;
+            var widgetData = Game.Options.Themes.GetUIConfig("gameplay");
 
-            //this stuff is ok to stay here
-            AddChild(playfield = new NoteRenderer(Chart, Game.Options.Profile.Upscroll ? (IVisualMod)new UpScroll(Bounds, Chart.Keys) : new DownScroll(Bounds, Chart.Keys)).TL_DeprecateMe(-columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(columnwidth * Chart.Keys * 0.5f, 0, AnchorType.CENTER, AnchorType.MAX));
-            //AddChild(new PerformanceMeter(scoreTracker));
-            AddChild(new HitMeter(scoreTracker, widgetData.GetPosition("hitMeter")));
-            AddChild(new ComboDisplay(scoreTracker, widgetData.GetPosition("combo")));
-            AddChild(new ProgressBar(scoreTracker, widgetData.GetPosition("progressBar")));
-            AddChild(new AccMeter(scoreTracker, widgetData.GetPosition("accuracy")));
-            AddChild(new HPMeter(scoreTracker, widgetData.GetPosition("healthBar")));
-            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("time"), () => { return DateTime.Now.ToLongTimeString(); }));
-            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("timeLeft"), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
-            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetPosition("fps"), () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }));
-            AddChild(new JudgementCounter(scoreTracker, widgetData.GetPosition("judgements")));
-            //all this stuff needs to be moved to Playfield under a method that adds gameplay elements (not used when in editor)
-            //playfield.InitGameplay();
-            lighting = new HitLighting[Chart.Keys];
-            float x = Chart.Keys * 0.5f;
-            //this places a hitlight on every column
-            for (int i = 0; i < Chart.Keys; i++)
-            {
-                lighting[i] = new HitLighting();
-                lighting[i].TL_DeprecateMe(columnwidth * i, hitposition, AnchorType.MIN, AnchorType.CENTER)
-                    .BR_DeprecateMe(columnwidth * (i + 1), hitposition + columnwidth, AnchorType.MIN, AnchorType.CENTER);
-                playfield.AddChild(lighting[i]);
-            }
-            //this places the screencovers
-            if (Game.Options.Profile.ScreenCoverUp > 0)
-                playfield.AddChild(new Screencover(scoreTracker, false)
-                    .TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.CENTER).BR_DeprecateMe(0, ScreenHeight * 2 * Game.Options.Profile.ScreenCoverUp, AnchorType.MAX, AnchorType.CENTER));
-            if (Game.Options.Profile.ScreenCoverDown > 0)
-                playfield.AddChild(new Screencover(scoreTracker, true)
-                .TL_DeprecateMe(0, ScreenHeight * 2 * (1 - Game.Options.Profile.ScreenCoverDown), AnchorType.MIN, AnchorType.CENTER).BR_DeprecateMe(0, ScreenHeight * 2, AnchorType.MAX, AnchorType.CENTER));
+            AddChild(new NoteRenderer(Chart));
+
+            AddChild(new HitMeter(scoreTracker, widgetData.GetWidgetConfig("hitMeter", -250, 0.5f, 150, 0.5f, 250, 0.5f, 20, 0.5f, true)));
+            AddChild(new ComboDisplay(scoreTracker, widgetData.GetWidgetConfig("combo", -100, 0.5f, 100, 0.5f, 100, 0.5f, 101, 0.5f, true)));
+            AddChild(new ProgressBar(scoreTracker, widgetData.GetWidgetConfig("progressBar", 0, 0, -10, 1, 0, 1, 0, 1, true)));
+            AddChild(new AccMeter(scoreTracker, widgetData.GetWidgetConfig("accuracy", -200, 0.5f, 50, 0, 200, 0.5f, 150, 0, true)));
+            AddChild(new HPMeter(scoreTracker, widgetData.GetWidgetConfig("healthBar", 20, 0, 20, 0, 520, 0, 50, 0, true)));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("fps", -220, 1, -180, 1, -20, 1, -100, 1, false), () => { return ((int)Game.Instance.FPS).ToString() + "fps"; }));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("time", -220, 1, -100, 1, -20, 1, -20, 1, true), () => { return DateTime.Now.ToLongTimeString(); }));
+            AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("timeLeft", -220, 1, 20, 0, -20, 1, 100, 0, false), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
+            AddChild(new JudgementCounter(scoreTracker, widgetData.GetWidgetConfig("judgements", 70, 0, -180, 0.5f, 320, 0, 180, 0.5f, false)));
         }
 
         public override void OnEnter(Screen prev)
@@ -79,14 +55,14 @@ namespace Interlude.Interface.Screens
             }
             //some misc stuff
             Game.Screens.BackgroundDim.Target = 1 - Game.Options.Profile.BackgroundDim;
-            IO.Discord.SetPresence("Playing a chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, false); ;
+            Discord.SetPresence("Playing a chart", Game.CurrentChart.Data.Artist + " - " + Game.CurrentChart.Data.Title + " [" + Game.CurrentChart.Data.DiffName + "]\nFrom " + Game.CurrentChart.Data.SourcePack, false); ;
             Game.Options.Profile.Stats.TimesPlayed++;
             Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
             Game.Screens.Toolbar.SetCursorState(false);
             AnimationSeries s = new AnimationSeries(false);
             s.Add(bannerIn = new AnimationFade(0, 2.001f, 2f));
             s.Add(new AnimationCounter(60, false));
-            s.Add(new AnimationAction(() => { scoreTracker.WidgetColor.Target = 1; }));
+            s.Add(new AnimationAction(() => { scoreTracker.WidgetColor.Target = Game.Options.General.HideGameplayUI || Game.Gameplay.SelectedMods.ContainsKey("Auto") ? 0 : 1; }));
             s.Add(bannerOut = new AnimationFade(0, 255, 254));
             Animation.Add(s);
 
@@ -96,6 +72,7 @@ namespace Interlude.Interface.Screens
             Game.Audio.Stop();
             Game.Audio.SetRate(Game.Options.Profile.Rate);
             Game.Audio.PlayLeadIn();
+            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
         }
 
         public override void OnExit(Screen next)
@@ -106,7 +83,6 @@ namespace Interlude.Interface.Screens
             Game.Screens.Toolbar.SetState(WidgetState.ACTIVE);
             Game.Screens.Toolbar.SetCursorState(true);
             base.OnExit(next);
-            System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.SustainedLowLatency;
         }
 
         public override void Update(Rect bounds) //update loop
@@ -123,7 +99,7 @@ namespace Interlude.Interface.Screens
                 Game.Audio.Stop();
                 Game.Screens.AddDialog(new Dialogs.TextDialog("Change sync by... (ms)", (x) =>
                 {
-                    float f = 0; float.TryParse(x, out f); Game.Gameplay.ChartSaveData.Offset += f;
+                    float.TryParse(x, out float f); Game.Gameplay.ChartSaveData.Offset += f;
                     Game.Audio.LocalOffset = Game.Gameplay.GetChartOffset();
                     Game.Audio.PlayLeadIn();
                 }));
@@ -134,14 +110,20 @@ namespace Interlude.Interface.Screens
                 Game.Audio.Seek(Chart.Notes.Points[0].Offset - 5000);
                 Game.Audio.Play(); //in case of leading in
             }
+            else if (Game.Options.General.Keybinds.HideUI.Tapped() && !Animation.Running)
+            {
+                Game.Options.General.HideGameplayUI = !Game.Options.General.HideGameplayUI;
+                scoreTracker.WidgetColor.Target = Game.Options.General.HideGameplayUI ? 0 : 1;
+            }
+
             //actual input stuff
             for (byte k = 0; k < Chart.Keys; k++)
             {
-                if (Input.KeyTap(binds[k])) //if you press a key
+                if (binds[k].Tapped()) //if you press a key
                 {
                     OnKeyDown(k, now); //handle it in the context of the map and where we are (now)
                 }
-                else if (Input.KeyRelease(binds[k])) //if you release a key
+                else if (binds[k].Released()) //if you release a key
                 {
                     OnKeyUp(k, now); //handle it
                 }
@@ -159,22 +141,26 @@ namespace Interlude.Interface.Screens
         public void OnKeyDown(byte k, float now) //handle but also do the hit lighting stuff
         {
             HandleHit(k, now, false);
-            lighting[k].ReceptorLight.Target = 1;
-            lighting[k].ReceptorLight.Val = 1;
         }
 
         public void OnKeyUp(byte k, float now) //handle but also do the hit lighting stuff
         {
             HandleHit(k, now, true);
-            lighting[k].ReceptorLight.Target = 0;
         }
 
         public void HandleHit(byte k, float now, bool release)
         {
-            //basically, this whole algorithm finds the closest snap to the receptors (above or below) that is relevant (has a note in the column you're pressing)
-            //- missWindow and + missWindow are used because all snaps found in that time slice are considered. the closest note to now in that column is the one you hit
-            //this mechanic is different to other rhythm games where it finds the earliest unhit note in this window
-            //you will miss more, but get fucked by column lockouts in jacks and dense streams less
+            //basically, this whole algorithm finds the snap that is
+            // - closest to the receptors (can be above or below)
+            // - contains a note in the column being hit
+            // - this note has not been hit with a great or better judgement
+            //this is different to most rhythm games, where it is normally "earliest note within the miss window that has not been hit"
+            //the intention behind this is to largely reduce "cbrushing" where hitting a combo breaking judgement can cause a chain of more combo breakers
+            //basically, if you continue to play the rest of the notes as normal most rhythm game engines will grab notes you don't mean to be hitting because you expected to have already hit them and are aiming for the next note
+            //this system should typically cause one or two combo breaks where the player actually trips up but not then form a loop
+            //i think this is generally a lot fairer and better (despite a lot of "just get good" arguments) and will lead to a greater ability to rate difficulty,
+                //since some charts are more vulnerable to the soul crushing defeat of locking out of a whole column than others but should not be rated differently due to farming by getting lucky
+            //imo this is a fairly key thing holding high level keyboard rhythm games back, as this was clearly never intended but rather a side effect of game engines designed around notes that would not be within 180ms of each other in the same column
             int i = Chart.Notes.GetNextIndex(now - missWindow);
             if (i >= Chart.Notes.Count) { return; } //if there are no more notes, stop
             float delta = missWindow; //default value for the final "found" delta"
@@ -224,7 +210,7 @@ namespace Interlude.Interface.Screens
             {
                 foreach (byte c in new BinarySwitcher(needsToHold & Chart.Notes.Points[hitAt].middles.value).GetColumns())
                 {
-                    if (!Input.KeyPress(binds[c]))
+                    if (!binds[c].Held())
                     {
                         return;
                     }
@@ -234,7 +220,6 @@ namespace Interlude.Interface.Screens
                 if (release) { delta *= 0.5f; }
                 //else { Game.Audio.PlaySFX("hit", pitch: 1f - delta * 0.5f / missWindow, volume: 1f - Math.Abs(delta) / missWindow); } //auditory feedback tests (causes performance issues)
                 scoreTracker.RegisterHit(hitAt, k, delta); //handle the hit
-                lighting[k].NoteLight.Val = 1;
             } //put else statement here for cb on unecessary keypress if i ever want to do that
         }
 

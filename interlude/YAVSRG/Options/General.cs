@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Interlude.Options
 {
@@ -39,6 +36,7 @@ namespace Interlude.Options
         public string LastSelectedFile = "";
         public string WorkingDirectory = "";
         public Keybinds Keybinds = new Keybinds();
+        public bool HideGameplayUI = false;
 
         [JsonIgnore]
         public bool AudioFix = false;

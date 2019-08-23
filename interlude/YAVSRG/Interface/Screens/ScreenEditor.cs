@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Interlude.Gameplay;
+using Interlude.Interface.Widgets;
+using Interlude.Interface.Widgets.Editor;
 
 namespace Interlude.Interface.Screens
 {
@@ -10,16 +8,16 @@ namespace Interlude.Interface.Screens
     {
         public ScreenEditor()
         {
-            AddChild(new Gameplay.NoteRenderer(Game.Gameplay.ModifiedChart, new Gameplay.Mods.Visual.DownScroll(ScreenUtils.Bounds,Game.Gameplay.ModifiedChart.Keys)).TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(500, 0, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new Widgets.Editor.Timeline().TL_DeprecateMe(0, 50, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(500, 0, AnchorType.MAX, AnchorType.MAX));
-            AddChild(new Widgets.SpriteButton("buttonclose", "Exit", () => { Game.Screens.PopScreen(); }).TL_DeprecateMe(500, 0, AnchorType.MAX, AnchorType.MIN));
+            AddChild(new NoteRenderer(Game.Gameplay.ModifiedChart).Reposition(0, 0, 0, 0, -100, 1, 0, 1));
+            AddChild(new Timeline().Reposition(0, 0, -20, 1, 0, 1, 0, 1));
+            AddChild(new SpriteButton("buttonclose", () => { Game.Screens.PopScreen(); }, () => Game.Options.General.Keybinds.Exit) { Tooltip = "Exit editor" }.Reposition(-80, 1, 0, 0, 0, 1, 80, 0));
         }
 
         public override void OnEnter(Screen prev)
         {
             base.OnEnter(prev);
             Game.Screens.Toolbar.SetState(WidgetState.DISABLED);
-            Game.Audio.SetRate(1.0);
+            Game.Audio.OnPlaybackFinish = Game.Audio.Stop;
             Game.Screens.Toolbar.Icons.Filter(0b00000001);
         }
 

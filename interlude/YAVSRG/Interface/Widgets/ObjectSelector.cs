@@ -74,23 +74,26 @@ namespace Interlude.Interface.Widgets
         {
             Children.Clear();
 
-            AddChild(new SpriteButton("buttonimport", "Add", () =>
+            AddChild(new SpriteButton("buttonimport", () =>
             {
                 Create();
                 Refresh();
-            }).Reposition(0, 0, 0, 0, 50, 0, 50, 0));
+            }, null)
+            { Tooltip = "Create new" }.Reposition(0, 0, 0, 0, 50, 0, 50, 0));
 
-            AddChild(new SpriteButton("buttonclose", "Delete", () =>
+            AddChild(new SpriteButton("buttonclose", () =>
             {
                 Delete();
                 Refresh();
-            }).Reposition(0, 0, 0, 0, 50, 0, 50, 0));
+            }, null)
+            { Tooltip = "Delete selected" }.Reposition(0, 0, 0, 0, 50, 0, 50, 0));
 
-            AddChild(new SpriteButton("buttonoptions", "Config", () =>
+            AddChild(new SpriteButton("buttonoptions", () =>
             {
                 Modify();
                 Refresh();
-            }).Reposition(0, 0, 0, 0, 50, 0, 50, 0));
+            }, null)
+            { Tooltip = "Configure selected" }.Reposition(0, 0, 0, 0, 50, 0, 50, 0));
 
             for (int i = 0; i < Target.Count; i++)
             {

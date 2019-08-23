@@ -20,6 +20,7 @@ namespace Interlude.Gameplay
         //Constant lists indicating what is supported for conversion. Extend them here if support for a new archive or file format is implemented
         public static readonly string[] CHARTFORMATS = { ".sm", ".osu", ".yav" };
         public static readonly string[] ARCHIVEFORMATS = { ".osz", ".zip" };
+        public static readonly string OSU_PACK_TITLE = "osu!";
 
         //All of the grouping methods for charts
         public static Dictionary<string, Func<CachedChart, string>> GroupBy = new Dictionary<string, Func<CachedChart, string>>()
@@ -204,13 +205,13 @@ namespace Interlude.Gameplay
         {
             if (Cache.Charts.Count == 0)
             {
-                Game.Screens.ChangeBackground(IO.Content.GetTexture("background"));
+                Game.Screens.ChangeBackground(Game.Options.Themes.GetTexture("background"));
                 Game.Screens.ChangeThemeColor(Game.Options.Theme.DefaultThemeColor);
                 return;
             }
             if (Cache.Charts.ContainsKey(Game.Options.General.LastSelectedFile))
                 SwitchToChart(Cache.Charts[Game.Options.General.LastSelectedFile], true);
-            else SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
+            if (Game.CurrentChart == null) SwitchToChart(Cache.Charts.Values.ToList()[new Random().Next(0, Cache.Charts.Values.Count)], true);
         }
 
         //Task to recache all charts (useful if you deleted them manually but they're still cached, or the cache is broken and charts are missing from it)
@@ -463,7 +464,7 @@ namespace Interlude.Gameplay
                     if (Directory.Exists(Folder))
                     {
                         Output("Detected osu! Folder");
-                        Game.Tasks.AddTask(ConvertPack(Folder, "osu! Imports"), RefreshCallback, "Importing osu! songs", true);
+                        Game.Tasks.AddTask(ConvertPack(Folder, OSU_PACK_TITLE), RefreshCallback, "Importing osu! songs", true);
                         Output("Converted osu! songs folder successfully.");
                         return true;
                     }
@@ -514,7 +515,7 @@ namespace Interlude.Gameplay
                     {
                         z.ExtractToDirectory(dir);
                     }
-                    Game.Tasks.AddTask(ConvertSongFolder(dir, "osu! Imports"), (b) =>
+                    Game.Tasks.AddTask(ConvertSongFolder(dir, OSU_PACK_TITLE), (b) =>
                     {
                         RefreshCallback(b);
                         try

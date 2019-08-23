@@ -9,8 +9,8 @@ namespace Interlude.Interface.Screens
         //will be repurposed for actual multi lobbies managed by the server
         public ScreenLobby()
         {
-            AddChild(new FramedButton("Disconnect", Game.Online.Disconnect).BR_DeprecateMe(300, 100, AnchorType.MIN, AnchorType.MIN));
-            AddChild(new FramedButton("Connect", Game.Online.Connect).Reposition(0, 0.5f, 0, 0.5f, 100, 0.5f, 50, 0.5f));
+            AddChild(new FramedButton("Disconnect", Game.Online.Disconnect, null).BR_DeprecateMe(300, 100, AnchorType.MIN, AnchorType.MIN));
+            AddChild(new FramedButton("Connect", Game.Online.Connect, null).Reposition(0, 0.5f, 0, 0.5f, 100, 0.5f, 50, 0.5f));
         }
 
         public override void Draw(Rect bounds)
@@ -44,6 +44,7 @@ namespace Interlude.Interface.Screens
         {
             base.OnEnter(prev);
             Game.Screens.Toolbar.Icons.Filter(0b00001111);
+            Prelude.Utilities.Logging.Log(SpriteBatch.Font1.Count.ToString(), "", Prelude.Utilities.Logging.LogType.Critical);
         }
 
         public override void Update(Rect bounds)

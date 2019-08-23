@@ -1,24 +1,28 @@
 ﻿using System;
 using Interlude.Graphics;
 using Interlude.Interface.Animations;
+using Interlude.IO;
 
 namespace Interlude.Interface.Widgets
 {
     public class SpriteButton : Widget
     {
         protected string icon;
-        protected string text;
         protected AnimationColorMixer color;
+        protected Func<Bind> bind;
+        public string Tooltip = "";
+        public string Tooltip2 = "";
 
         bool hover;
 
-        public SpriteButton(string sprite, string label, Action onClick) : base()
+        public SpriteButton(string sprite, Action onClick, Func<Bind> bind) : base()
         {
+            this.bind = bind;
             icon = sprite;
-            text = label;
             Animation.Add(color = new AnimationColorMixer(Game.Screens.BaseColor));
             AddChild(new ClickableComponent()
             {
+                Bind = bind,
                 OnClick = () =>
                 {
                     Game.Audio.PlaySFX("click"); onClick();
@@ -31,14 +35,14 @@ namespace Interlude.Interface.Widgets
         {
             base.Draw(bounds);
             bounds = GetBounds(bounds);
-            SpriteBatch.Draw(icon, bounds, color);
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture(icon), bounds, color));
         }
 
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
             color.Target(hover ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
-            if (hover) Game.Screens.Toolbar.SetTooltip(text, "");
+            if (hover) { Game.Screens.Toolbar.SetTooltip(Tooltip + (bind != null ? "\n<" + bind().ToString() + ">" : ""), Tooltip2); }
         }
     }
 }
