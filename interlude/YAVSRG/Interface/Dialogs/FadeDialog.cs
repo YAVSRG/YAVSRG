@@ -33,7 +33,7 @@ namespace Interlude.Interface.Dialogs
             {
                 Close(Output);
             }
-            if (Game.Options.General.Keybinds.Exit.Tapped() || (!ScreenUtils.MouseOver(GetBounds(bounds)) && Input.MouseClick(OpenTK.Input.MouseButton.Left)))
+            if (Game.Options.General.Hotkeys.Exit.Tapped() || (!ScreenUtils.MouseOver(GetBounds(bounds)) && Input.MouseClick(OpenTK.Input.MouseButton.Left)))
             {
                 OnClosing();
             }

@@ -8,12 +8,12 @@ namespace Interlude.Interface.Dialogs
     {
         FlowContainer Selected, Available;
 
-        class Doot : Widget
+        class ThemeItem : Widget
         {
             public string theme;
             ThemeSelectDialog dialog;
 
-            internal Doot(string theme, ThemeSelectDialog d)
+            internal ThemeItem(string theme, ThemeSelectDialog d)
             {
                 this.theme = theme;
                 dialog = d;
@@ -53,7 +53,7 @@ namespace Interlude.Interface.Dialogs
         public ThemeSelectDialog(Action<string> action) : base((s) => { Game.Options.Themes.Unload(); Game.Options.Themes.Load(); action(s); })
         {
             Game.Options.Themes.DetectAvailableThemes();
-            AddChild(new SimpleButton("Done", () => Close(""), () => false, () => Game.Options.General.Keybinds.Select).Reposition(0, 0.4f, -150, 1, 0, 0.6f, -100, 1));
+            AddChild(new SimpleButton("Done", () => { Game.Options.Themes.Unload(); Game.Options.Themes.Load(); Close(""); }, () => false, () => Game.Options.General.Hotkeys.Select).Reposition(0, 0.4f, -150, 1, 0, 0.6f, -100, 1));
             AddChild((Selected = new FlowContainer()).Reposition(50, 0.5f, 200, 0, -200, 1, -200, 1));
             AddChild((Available = new FlowContainer()).Reposition(200, 0, 200, 0, -50, 0.5f, -200, 1));
             Selected.AddChild(new TextBox("(fallback)", AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont, System.Drawing.Color.Black).Reposition(0, 0, 0, 0, 0, 1, 50, 0));
@@ -62,11 +62,11 @@ namespace Interlude.Interface.Dialogs
             {
                 if (Game.Options.Profile.SelectedThemes.Contains(t))
                 {
-                    Selected.AddChild(new Doot(t, this));
+                    Selected.AddChild(new ThemeItem(t, this));
                 }
                 else
                 {
-                    Available.AddChild(new Doot(t, this));
+                    Available.AddChild(new ThemeItem(t, this));
                 }
             }
         }

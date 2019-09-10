@@ -14,15 +14,15 @@ namespace Interlude.Interface.Widgets
             public LevelSelectButtons(ModMenu modMenu)
             {
                 HorizontalFade = 50; Frame = 170;
-                AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Keybinds.Collections) { FontSize = 40, Tooltip = "nyi lol" }
+                AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Collections) { FontSize = 40, Tooltip = "nyi lol" }
                     .Reposition(0, 0.02f, 10, 0, 0, 0.18f, -10, 1));
-                AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Keybinds.Goals) { FontSize = 40, Tooltip = "nyi lol" }
+                AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Goals) { FontSize = 40, Tooltip = "nyi lol" }
                     .Reposition(0, 0.22f, 10, 0, 0, 0.38f, -10, 1));
-                AddChild(new SimpleButton("Editor", () => { Game.Screens.AddScreen(new Screens.ScreenEditor()); }, () => false, () => Game.Options.General.Keybinds.Editor) { FontSize = 40, Tooltip = "Edit the selected chart" }
+                AddChild(new SimpleButton("Editor", () => { Game.Screens.AddScreen(new Screens.ScreenEditor()); }, () => false, () => Game.Options.General.Hotkeys.Editor) { FontSize = 40, Tooltip = "Edit the selected chart" }
                     .Reposition(0, 0.42f, 10, 0, 0, 0.58f, -10, 1));
-                AddChild(new SimpleButton("Mods", () => { modMenu.Toggle(); }, () => false, () => Game.Options.General.Keybinds.Mods) { FontSize = 40, Tooltip = "Choose gameplay modifiers" }
+                AddChild(new SimpleButton("Mods", () => { modMenu.Toggle(); }, () => false, () => Game.Options.General.Hotkeys.Mods) { FontSize = 40, Tooltip = "Choose gameplay modifiers" }
                     .Reposition(0, 0.62f, 10, 0, 0, 0.78f, -10, 1));
-                AddChild(new SimpleButton("Play", () => { Game.Gameplay.PlaySelectedChart(); }, () => false, () => Game.Options.General.Keybinds.Select) { FontSize = 40, Tooltip = "Play the selected chart" }
+                AddChild(new SimpleButton("Play", () => { Game.Gameplay.PlaySelectedChart(); }, () => false, () => Game.Options.General.Hotkeys.Select) { FontSize = 40, Tooltip = "Play the selected chart" }
                     .Reposition(0, 0.82f, 10, 0, 0, 0.98f, -10, 1));
             }
         }

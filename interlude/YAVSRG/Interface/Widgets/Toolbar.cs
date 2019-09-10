@@ -158,11 +158,11 @@ namespace Interlude.Interface
             if (State != WidgetState.DISABLED)
             {
                 //here and not attached to the button to not double fire when closing chat box
-                if (Game.Options.General.Keybinds.Exit.Tapped())
+                if (Game.Options.General.Hotkeys.Exit.Tapped())
                 {
                     Back();
                 }
-                if (Game.Options.General.Keybinds.CollapseToolbar.Tapped())
+                if (Game.Options.General.Hotkeys.CollapseToolbar.Tapped())
                 {
                     if (State == WidgetState.NORMAL)
                     {
@@ -173,7 +173,7 @@ namespace Interlude.Interface
                         SetState(WidgetState.NORMAL);
                     }
                 }
-                _TooltipFade2.Target = Game.Options.General.Keybinds.Help.Held() ? 1 : 0;
+                _TooltipFade2.Target = Game.Options.General.Hotkeys.Help.Held() ? 1 : 0;
                 base.Update(bounds.ExpandY(80 - _Height));
                 _TooltipFade.Target = 0;
             }

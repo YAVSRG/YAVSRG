@@ -374,31 +374,31 @@ namespace Interlude.Interface.Widgets
             scroll.Target += items.Height;
             scroll.Target = Math.Max(bounds.Height - items.GetHeight(), scroll.Target);
             scroll.Target = Math.Min(scroll.Target, 0);
-            if (Game.Options.General.Keybinds.Up.Held())
+            if (Game.Options.General.Hotkeys.Up.Held())
             {
                 scroll.Target += 15;
             }
-            else if (Game.Options.General.Keybinds.Down.Held())
+            else if (Game.Options.General.Hotkeys.Down.Held())
             {
                 scroll.Target -= 15;
             }
-            else if (Game.Options.General.Keybinds.End.Tapped())
+            else if (Game.Options.General.Hotkeys.End.Tapped())
             {
                 ForwardGroup();
             }
-            else if (Game.Options.General.Keybinds.Start.Tapped())
+            else if (Game.Options.General.Hotkeys.Start.Tapped())
             {
                 BackGroup();
             }
-            else if (Game.Options.General.Keybinds.Next.Tapped())
+            else if (Game.Options.General.Hotkeys.Next.Tapped())
             {
                 Forward();
             }
-            else if (Game.Options.General.Keybinds.Previous.Tapped())
+            else if (Game.Options.General.Hotkeys.Previous.Tapped())
             {
                 Back();
             }
-            else if (Game.Options.General.Keybinds.RandomChart.Tapped())
+            else if (Game.Options.General.Hotkeys.RandomChart.Tapped())
             {
                 Random();
             }

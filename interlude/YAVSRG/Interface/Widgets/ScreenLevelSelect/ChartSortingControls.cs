@@ -38,7 +38,7 @@ namespace Interlude.Interface.Widgets
                 .SetItems(ColorBy.Keys.ToList())
                 .TL_DeprecateMe(220, 50, AnchorType.MAX, AnchorType.MAX).BR_DeprecateMe(20, 10, AnchorType.MAX, AnchorType.MAX));
 
-            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Keybinds.Search.ToString().ToUpper() + " to search..."))
+            AddChild(new TextEntryBox((s) => { SearchString = s; }, () => SearchString, () => { Refresh(); }, null, () => ("Press " + Game.Options.General.Hotkeys.Search.ToString().ToUpper() + " to search..."))
                 .Reposition(-600, 1, 10, 0, -20, 1, 70, 0));
 
             AddChild(new SpriteButton("buttoninfo", () => { collectionControls.ToggleState(); sortControls.ToggleState(); }, null) { Tooltip = "Collections (deprecate this button soon)" }

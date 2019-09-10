@@ -136,6 +136,9 @@
     <Compile Include="Interface\WidgetState.cs" />
     <Compile Include="Interface\Widgets\ScoreGraph.cs" />
     <Compile Include="Interface\Widgets\ScreenOptions\CreditsPanel.cs" />
+    <Compile Include="Interface\Widgets\ScreenOptions\DebugPanel.cs" />
+    <Compile Include="Interface\Widgets\ScreenOptions\HotkeysPanel.cs" />
+    <Compile Include="Interface\Widgets\ScreenOptions\ThemePanel.cs" />
     <Compile Include="Interface\Widgets\Toolbar\ToolbarIcons.cs" />
     <Compile Include="IO\Audio\MusicPlayer.cs" />
     <Compile Include="IO\Audio\Track.cs" />

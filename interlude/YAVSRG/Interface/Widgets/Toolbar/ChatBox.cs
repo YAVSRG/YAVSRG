@@ -133,7 +133,7 @@ namespace Interlude.Interface.Widgets.Toolbar
                 int a = (int)(255 * newMsgFade.Val);
                 var c = Color.FromArgb(0, 0, 0, 0);
                 SpriteBatch.Draw(new RenderTarget(new Rect(bounds.Right - 1200, bounds.Bottom - 380, bounds.Right, bounds.Bottom - 80), c, c, Color.FromArgb(a, Color.Black), c));
-                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Keybinds.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a, Game.Options.Theme.MenuFont));
+                SpriteBatch.Font1.DrawJustifiedText("Press " + Game.Options.General.Hotkeys.Chat.ToString() + " to view " + newMessages.ToString() + " new message" + (newMessages == 1 ? "" : "s"), 30f, bounds.Right, bounds.Bottom - 130, Color.FromArgb(a, Game.Options.Theme.MenuFont));
             }
             if (Game.Tasks.Tasks.Count > 0)
             {
@@ -193,7 +193,7 @@ namespace Interlude.Interface.Widgets.Toolbar
             bounds = GetBounds(bounds);
             if (Collapsed)
             {
-                if (Game.Options.General.Keybinds.Chat.Tapped() && ((Interface.Toolbar)Parent).State != WidgetState.DISABLED)
+                if (Game.Options.General.Hotkeys.Chat.Tapped() && ((Interface.Toolbar)Parent).State != WidgetState.DISABLED)
                 {
                     Expand();
                     ((Interface.Toolbar)Parent).SetState(WidgetState.ACTIVE);
@@ -201,7 +201,7 @@ namespace Interlude.Interface.Widgets.Toolbar
             }
             else
             {
-                if (Game.Options.General.Keybinds.Chat.Tapped(true) || Game.Options.General.Keybinds.Exit.Tapped(true))
+                if (Game.Options.General.Hotkeys.Chat.Tapped(true) || Game.Options.General.Hotkeys.Exit.Tapped(true))
                 {
                     Collapse();
                 }

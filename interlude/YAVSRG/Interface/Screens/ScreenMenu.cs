@@ -20,7 +20,7 @@ namespace Interlude.Interface.Screens
                 play = new BannerButton("Play", () =>
                 {
                     Game.Screens.AddScreen((Game.CurrentChart == null ? (Screen)(new ScreenImport()) : new ScreenLevelSelect()));
-                }, () => Game.Options.General.Keybinds.Select)
+                }, () => Game.Options.General.Hotkeys.Select)
                 { Tooltip = "Play the game!", TextLeftPercent = 0.7f }
                 .Reposition(-100, 0, -200, 0.5f, -ScreenUtils.ScreenWidth, 0.5f, -100, 0.5f)
                 );

@@ -140,18 +140,19 @@ namespace Interlude.IO
         }
     }
 
-    public abstract class Bind
+    public class Bind
     {
-        public abstract bool Tapped(bool overrideTextBox = false);
+        public virtual bool Tapped(bool overrideTextBox = false) => false;
 
-        public abstract bool Held(bool overrideTextBox = false);
+        public virtual bool Held(bool overrideTextBox = false) => false;
 
-        public abstract bool Released();
+        public virtual bool Released() => false;
     }
 
     public class KeyBind : Bind
     {
-        public readonly Key key;
+        //not to be edited, instead create a new instance. this should be readonly or otherwise protected but that would prevent it from deserialising correctly
+        public Key key;
 
         public KeyBind(Key key)
         {
@@ -181,7 +182,8 @@ namespace Interlude.IO
 
     public class MouseBind : Bind
     {
-        public readonly MouseButton button;
+        //not to be edited, instead create a new instance. this should be readonly or otherwise protected but that would prevent it from deserialising correctly
+        public MouseButton button;
 
         public MouseBind(MouseButton button)
         {
@@ -211,9 +213,10 @@ namespace Interlude.IO
 
     public class AltBind : Bind
     {
-        public readonly Bind bind;
-        public readonly bool shift;
-        public readonly bool ctrl;
+        //not to be edited, instead create a new instance. these should be readonly or otherwise protected but that would prevent them from deserialising correctly
+        public Bind bind;
+        public bool shift;
+        public bool ctrl;
 
         public AltBind(Bind bind, bool shift, bool ctrl)
         {

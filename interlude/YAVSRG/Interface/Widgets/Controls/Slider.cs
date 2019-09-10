@@ -53,11 +53,11 @@ namespace Interlude.Interface.Widgets
             }
             else if (ScreenUtils.MouseOver(bounds))
             {
-                if (Game.Options.General.Keybinds.Previous.Tapped())
+                if (Game.Options.General.Hotkeys.Previous.Tapped())
                 {
                     SetWithRounding(get() - resolution);
                 }
-                else if (Game.Options.General.Keybinds.Next.Tapped())
+                else if (Game.Options.General.Hotkeys.Next.Tapped())
                 {
                     SetWithRounding(get() + resolution);
                 }

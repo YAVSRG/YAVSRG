@@ -231,7 +231,7 @@ namespace Interlude.Interface
             var p = ParallaxFunc();
             ParallaxPosX.Target = p.X;
             ParallaxPosY.Target = p.Y;
-            if (Game.Options.General.Keybinds.BossKey.Tapped())
+            if (Game.Options.General.Hotkeys.BossKey.Tapped())
             {
                 Game.Instance.CollapseToIcon();
             }

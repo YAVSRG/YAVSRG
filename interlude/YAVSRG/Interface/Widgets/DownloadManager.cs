@@ -22,7 +22,7 @@ namespace Interlude.Interface.Widgets
                 sc.AddChild(new DownloadCard(p).BR_DeprecateMe(600, 50, AnchorType.MIN, AnchorType.MIN));
             }
             AddChild(new TextEntryBox((s) => { searchtext = s; }, () => { return searchtext; },
-                Filter, null, () => { return "Press " + Game.Options.General.Keybinds.Search.ToString().ToUpper() + " to search..."; })
+                Filter, null, () => { return "Press " + Game.Options.General.Hotkeys.Search.ToString().ToUpper() + " to search..."; })
                 .TL_DeprecateMe(0,0,AnchorType.MIN,AnchorType.MIN).BR_DeprecateMe(0,60,AnchorType.MAX,AnchorType.MIN));
             AddChild(sc.TL_DeprecateMe(0, 60, AnchorType.MIN, AnchorType.MIN));
         }
@@ -37,7 +37,7 @@ namespace Interlude.Interface.Widgets
                 sc.AddChild(new DownloadCard(p).BR_DeprecateMe(600, 50, AnchorType.MIN, AnchorType.MIN));
             }
             AddChild(new TextEntryBox((s) => { searchtext = s; }, () => { return searchtext; },
-                ()=> { }, null, () => { return "Press " + Game.Options.General.Keybinds.Search.ToString().ToUpper() + " to search..."; })
+                ()=> { }, null, () => { return "Press " + Game.Options.General.Hotkeys.Search.ToString().ToUpper() + " to search..."; })
                 .TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(0, 60, AnchorType.MAX, AnchorType.MIN));
             AddChild(sc.TL_DeprecateMe(0, 60, AnchorType.MIN, AnchorType.MIN));
         }

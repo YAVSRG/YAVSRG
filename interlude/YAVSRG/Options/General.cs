@@ -35,7 +35,7 @@ namespace Interlude.Options
         public string CurrentProfile = "Default.json";
         public string LastSelectedFile = "";
         public string WorkingDirectory = "";
-        public Keybinds Keybinds = new Keybinds();
+        public Keybinds Hotkeys { get; private set; } = new Keybinds();
         public bool HideGameplayUI = false;
 
         [JsonIgnore]

@@ -156,11 +156,11 @@ namespace Interlude.Interface.Screens
                 }
             }
 
-            if (Game.Options.General.Keybinds.Next.Tapped())
+            if (Game.Options.General.Hotkeys.Next.Tapped())
             {
                 NextTrack();
             }
-            else if (Game.Options.General.Keybinds.Previous.Tapped())
+            else if (Game.Options.General.Hotkeys.Previous.Tapped())
             {
                 PrevTrack();
             }

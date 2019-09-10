@@ -95,9 +95,9 @@ namespace Interlude.Options
             //remember to save the old one
             SaveProfile(Profile);
             Themes?.Unload();
-            Themes?.Load();
             Profile = p;
             general.CurrentProfile = p.ProfilePath;
+            Themes?.Load();
         }
 
         public void SaveProfile(Profile p)

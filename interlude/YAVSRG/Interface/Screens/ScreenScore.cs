@@ -109,18 +109,18 @@ namespace Interlude.Interface.Screens
         public override void Update(Rect bounds)
         {
             base.Update(bounds);
-            if (Game.Options.General.Keybinds.Screenshot.Tapped())
+            if (Game.Options.General.Hotkeys.Screenshot.Tapped())
             {
                 Bitmap bm = Utils.CaptureWindow();
                 System.Windows.Forms.Clipboard.SetImage(bm);
             }
-            else if (Game.Options.General.Keybinds.Previous.Tapped())
+            else if (Game.Options.General.Hotkeys.Previous.Tapped())
             {
                 Game.Options.Profile.SelectedScoreSystem = Utils.Modulus(Game.Options.Profile.SelectedScoreSystem - 1, Game.Options.Profile.ScoreSystems.Count);
                 scoreData.OnChangeScoreSystem();
                 OnScoreSystemChanged();
             }
-            else if (Game.Options.General.Keybinds.Next.Tapped())
+            else if (Game.Options.General.Hotkeys.Next.Tapped())
             {
                 Game.Options.Profile.SelectedScoreSystem = Utils.Modulus(Game.Options.Profile.SelectedScoreSystem + 1, Game.Options.Profile.ScoreSystems.Count);
                 scoreData.OnChangeScoreSystem();

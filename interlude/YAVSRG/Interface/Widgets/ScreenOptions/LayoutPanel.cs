@@ -6,6 +6,7 @@ using Prelude.Utilities;
 using Prelude.Gameplay.DifficultyRating;
 using Interlude.Graphics;
 using Interlude.IO;
+using Interlude.Options;
 
 
 namespace Interlude.Interface.Widgets
@@ -68,7 +69,7 @@ namespace Interlude.Interface.Widgets
         {
             width = ScreenUtils.ScreenWidth * 2 - 600;
             selectKeyMode = new TextPicker("Keys", new string[] { "3K", "4K", "5K", "6K", "7K", "8K", "9K", "10K" }, (int)Game.Options.Profile.DefaultKeymode, (i) => { ChangeKeyMode(i + 3, width); })
-                .TL_DeprecateMe(-50, 100, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(50, 150, AnchorType.CENTER, AnchorType.MIN);
+                .Reposition(-50, 0.5f, 100, 0, 50, 0.5f, 150, 0);
             for (int i = 0; i < 10; i++)
             {
                 var j = i;
@@ -80,16 +81,20 @@ namespace Interlude.Interface.Widgets
                 AddChild(colors[i]);
             }
             AddChild(selectKeyMode);
+            AddChild(
+                new TooltipContainer(
+                new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord", "Jackhammer" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; Refresh(); }),
+                "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm i.e make every other beat red and the remaining beats green\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord")
+                .Reposition(-150, 0.5f, 475, 0, 150, 0.5f, 525, 0));
             AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
-                .TL_DeprecateMe(-500, 525, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(-200, 575, AnchorType.CENTER, AnchorType.MIN));
-            AddChild(new SimpleButton("Change Theme", () => { Game.Screens.AddDialog(new Dialogs.ThemeSelectDialog((s) => { })); }, () => false, null).Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
+                .Reposition(-500, 0.5f, 525, 0, -200, 0.5f, 575, 0));
             var arr = Game.Options.Themes.NoteSkins.Keys.ToArray();
             AddChild(new TextPicker("Noteskin", arr, Math.Max(0, Array.IndexOf(arr, Game.Options.Profile.NoteSkin)), (i) =>
             {
                 Game.Options.Profile.NoteSkin = arr[i];
                 Game.Options.Themes.Unload(); Game.Options.Themes.Load();
                 ChangeKeyMode(keyMode, width);
-            }).Reposition(200, 0.5f, 600, 0, 500, 0.5f, 650, 0));
+            }).Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
             Refresh();
         }
 
@@ -130,7 +135,7 @@ namespace Interlude.Interface.Widgets
             for (int i = 0; i < k; i++)
             {
                 binds[i].SetState(WidgetState.NORMAL);
-                binds[i].TL_DeprecateMe(start + i * c, 200, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(start + c + i * c, 250, AnchorType.CENTER, AnchorType.MIN);
+                binds[i].Reposition(start + i * c, 0.5f, 200, 0, start + c + i * c, 0.5f, 250, 0);
             }
 
             int colorCount = Game.Options.Profile.ColorStyle.GetColorCount(k);
@@ -142,7 +147,7 @@ namespace Interlude.Interface.Widgets
             {
                 colors[i].Change(Game.Options.Profile.ColorStyle.GetDescription(i), ColorSetter(i, keymodeIndex), ColorGetter(i, keymodeIndex), availableColors);
                 colors[i].SetState(WidgetState.NORMAL);
-                colors[i].TL_DeprecateMe(start + i * c, 300, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(start + c + i * c, 300 + Game.Options.Theme.ColumnWidth, AnchorType.CENTER, AnchorType.MIN);
+                colors[i].Reposition(start + i * c, 0.5f, 300, 0, start + c + i * c, 0.5f, 300 + Game.Options.Theme.ColumnWidth, 0);
             }
             if (selectLayout != null)
             {
@@ -151,7 +156,7 @@ namespace Interlude.Interface.Widgets
             List<KeyLayout.Layout> layouts = KeyLayout.GetPossibleLayouts(k);
             string[] layoutNames = layouts.Select((x) => KeyLayout.GetLayoutName(x, k)).ToArray();
             Children.Add(selectLayout = new TextPicker("Keyboard layout", layoutNames, Math.Max(0, layouts.IndexOf(Game.Options.Profile.KeymodeLayouts[k])), (i) => { Game.Options.Profile.KeymodeLayouts[k] = layouts[i]; })
-                .TL_DeprecateMe(-150, 600, AnchorType.CENTER, AnchorType.MIN).BR_DeprecateMe(150, 650, AnchorType.CENTER, AnchorType.MIN));
+                .Reposition(-150, 0.5f, 600, 0, 150, 0.5f, 650, 0));
         }
     }
 }

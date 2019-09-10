@@ -12,13 +12,13 @@ namespace Interlude.Interface.Widgets.Toolbar
                 new SpriteButton("buttoninfo", () => { ((Interface.Toolbar)Parent).Chat.Expand(); }, null) { Tooltip = "Chat and notifications" }
                 .Reposition(-80, 1, 0, 0, 0, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonmusic", () => { if (Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); }, () => Game.Options.General.Keybinds.Music) { Tooltip = "Music visualiser" }
+                new SpriteButton("buttonmusic", () => { if (Game.Gameplay.CurrentCachedChart != null) Game.Screens.AddScreen(new ScreenVisualiser()); }, () => Game.Options.General.Hotkeys.Music) { Tooltip = "Music visualiser" }
                 .Reposition(-160, 1, 0, 0, -80, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonoptions", () => { Game.Screens.AddScreen(new ScreenOptions()); }, () => Game.Options.General.Keybinds.Options) { Tooltip = "Options" }
+                new SpriteButton("buttonoptions", () => { Game.Screens.AddScreen(new ScreenOptions()); }, () => Game.Options.General.Hotkeys.Options) { Tooltip = "Options" }
                 .Reposition(-240, 1, 0, 0, -160, 1, 80, 0));
             AddChild(
-                new SpriteButton("buttonimport", () => { Game.Screens.AddScreen(new ScreenImport()); }, () => Game.Options.General.Keybinds.Import) { Tooltip = "Import charts" }
+                new SpriteButton("buttonimport", () => { Game.Screens.AddScreen(new ScreenImport()); }, () => Game.Options.General.Hotkeys.Import) { Tooltip = "Import charts" }
                 .Reposition(-320, 1, 0, 0, -240, 1, 80, 0));
             AddChild(
                 new SpriteButton("buttononline", () => { Game.Screens.AddScreen(new ScreenLobby()); }, null) { Tooltip = "Multiplayer lobby screen (NYI)" }

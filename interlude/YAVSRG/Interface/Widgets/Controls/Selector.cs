@@ -34,11 +34,11 @@ namespace Interlude.Interface.Widgets
             bounds = GetBounds(bounds);
             if (ScreenUtils.MouseOver(bounds))
             {
-                if (Input.MouseClick(MouseButton.Left) || Game.Options.General.Keybinds.Next.Tapped())
+                if (Input.MouseClick(MouseButton.Left) || Game.Options.General.Hotkeys.Next.Tapped())
                 {
                     Value.Set(Utils.Modulus(Value + 1, Options.Length));
                 }
-                else if (Input.MouseClick(MouseButton.Right) || Game.Options.General.Keybinds.Previous.Tapped())
+                else if (Input.MouseClick(MouseButton.Right) || Game.Options.General.Hotkeys.Previous.Tapped())
                 {
                     Value.Set(Utils.Modulus(Value - 1, Options.Length));
                 }

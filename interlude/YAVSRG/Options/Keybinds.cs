@@ -1,5 +1,6 @@
 ﻿using OpenTK.Input;
 using Interlude.IO;
+using Newtonsoft.Json;
 
 namespace Interlude.Options
 {

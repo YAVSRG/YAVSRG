@@ -58,34 +58,29 @@ namespace Interlude.Interface.Screens
         {
             base.Update(bounds);
 
-            if (Game.Options.General.Keybinds.UpSmallRate.Tapped())
+            if (Game.Options.General.Hotkeys.UpSmallRate.Tapped())
             {
                 ChangeRate(0.01);
             }
-            else if (Game.Options.General.Keybinds.DownSmallRate.Tapped())
+            else if (Game.Options.General.Hotkeys.DownSmallRate.Tapped())
             {
                 ChangeRate(-0.01);
             }
-            else if (Game.Options.General.Keybinds.UpHalfRate.Tapped())
+            else if (Game.Options.General.Hotkeys.UpHalfRate.Tapped())
             {
                 ChangeRate(0.05);
             }
-            else if (Game.Options.General.Keybinds.DownHalfRate.Tapped())
+            else if (Game.Options.General.Hotkeys.DownHalfRate.Tapped())
             {
                 ChangeRate(-0.05);
             }
-            else if (Game.Options.General.Keybinds.UpRate.Tapped())
+            else if (Game.Options.General.Hotkeys.UpRate.Tapped())
             {
                 ChangeRate(0.1);
             }
-            else if (Game.Options.General.Keybinds.DownRate.Tapped())
+            else if (Game.Options.General.Hotkeys.DownRate.Tapped())
             {
                 ChangeRate(-0.1);
-            }
-
-            else if (Input.KeyPress(OpenTK.Input.Key.ControlLeft) && Input.KeyTap(OpenTK.Input.Key.R)) //debug feature, you shouldn't need to use this
-            {
-                Game.Tasks.AddTask(ChartLoader.Recache(), ChartLoader.RefreshCallback, "Recaching charts", true);
             }
         }
 
