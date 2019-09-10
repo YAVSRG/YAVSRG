@@ -20,19 +20,13 @@ namespace Interlude.Interface.Screens
         {
             AddChild(
                 new SpriteButton("buttonplay", () => { Game.Audio.Play(); }, null) { Tooltip = "Play" }
-                .TL_DeprecateMe(250, 10, AnchorType.MAX, AnchorType.MIN)
-                .BR_DeprecateMe(170, 90, AnchorType.MAX, AnchorType.MIN)
-                );
+                .Reposition(-250, 1, 10, 0, -170, 1, 90, 0));
             AddChild(
                 new SpriteButton("buttonpause", () => { Game.Audio.Pause(); }, null) { Tooltip = "Pause" }
-                .TL_DeprecateMe(170, 10, AnchorType.MAX, AnchorType.MIN)
-                .BR_DeprecateMe(90, 90, AnchorType.MAX, AnchorType.MIN)
-                );
+                .Reposition(-170, 1, 10, 0, -90, 1, 90, 0));
             AddChild(
                 new SpriteButton("buttonstop", () => { Game.Audio.Stop(); }, null) { Tooltip = "Stop" }
-                .TL_DeprecateMe(90, 10, AnchorType.MAX, AnchorType.MIN)
-                .BR_DeprecateMe(10, 90, AnchorType.MAX, AnchorType.MIN)
-                );
+                .Reposition(-90, 1, 10, 0, -10, 1, 90, 0));
             Animation.Add(rotation = new AnimationCounter(31415926, true));
             Animation.Add(hideUI = new AnimationSlider(1f));
         }

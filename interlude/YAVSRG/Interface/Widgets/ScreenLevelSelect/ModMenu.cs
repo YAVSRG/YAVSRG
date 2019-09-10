@@ -85,7 +85,7 @@ namespace Interlude.Interface.Widgets
         {
             info = new InfoBox();
             modbuttons = new List<ModButton>();
-            AddChild(info.TL_DeprecateMe(50, 50, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(50, 200, AnchorType.MAX, AnchorType.MIN));
+            AddChild(info.Reposition(50, 0, 50, 0, -50, 1, 200, 0));
 
             int x = 50;
             string[] mods = Game.Gameplay.Mods.Keys.ToArray();
@@ -94,7 +94,7 @@ namespace Interlude.Interface.Widgets
             {
                 var mb = new ModButton(info, m);
                 modbuttons.Add(mb);
-                AddChild(mb.TL_DeprecateMe(x, 250, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(x + 100, 350, AnchorType.MIN, AnchorType.MIN));
+                AddChild(mb.Reposition(x, 0, 250, 0, x + 100, 0, 350, 0));
                 x += 100;
             }
 

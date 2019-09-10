@@ -14,7 +14,7 @@ namespace Interlude.Interface
         {
             public DeletableSetting(Widget w, string name, DataGroup data)
             {
-                AddChild(w.BR_DeprecateMe(50, 0, AnchorType.MAX, AnchorType.MAX));
+                AddChild(w.Reposition(0, 0, 0, 0, -50, 1, 0, 1));
                 AddChild(new SpriteButton("buttonclose", () => { SetState(WidgetState.DISABLED); data.Remove(name); }, null) { Tooltip = "Delete " + name }
                     .Reposition(-50, 1, 0, 0, 0, 1, 0, 1));
                 Reposition(0, 0, 0, 0, 0, 1, 50, 0);

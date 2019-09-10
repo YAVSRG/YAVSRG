@@ -14,10 +14,10 @@ namespace Interlude.Interface.Dialogs
 
         public ScoreInfoDialog(ScoreInfoProvider data, Action<string> a) : base(a)
         {
-            TL_DeprecateMe(100, ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(100, -ScreenUtils.ScreenHeight * 2 + 100, AnchorType.MAX, AnchorType.MAX);
-            Move(new Rect(100, 100, 100, 100));
+            Reposition(100, 0, ScreenUtils.ScreenHeight * 2 + 100, 0, -100, 1, ScreenUtils.ScreenHeight * 2 - 100, 1);
+            Move(new Rect(100, 100, -100, -100));
             Data = data;
-            AddChild(new TextBox(Data.FormattedAccuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).BR_DeprecateMe(200, 100, AnchorType.MIN, AnchorType.MIN));
+            AddChild(new TextBox(Data.FormattedAccuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).Reposition(0, 0, 0, 0, 200, 0, 100, 0));
             AddChild((Graph = new ScoreGraph(data)).Reposition(20, 0, -200, 1, -20, 1, -20, 1));
             Game.Online.SendPacket(new PacketScore() { score = data.Score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
         }
@@ -36,12 +36,11 @@ namespace Interlude.Interface.Dialogs
         protected override void OnClosing()
         {
             base.OnClosing();
-            Move(new Rect(100, ScreenUtils.ScreenHeight * 2 + 100, 100, -ScreenUtils.ScreenHeight * 2 + 100));
+            Move(new Rect(100, ScreenUtils.ScreenHeight * 2 + 100, -100, ScreenUtils.ScreenHeight * 2 - 100));
         }
 
-        protected override void Close(string s)
+        public override void Dispose()
         {
-            base.Close(s);
             Graph.RequestRedraw(); //frees fbo
         }
     }

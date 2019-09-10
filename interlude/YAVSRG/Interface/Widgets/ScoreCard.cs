@@ -13,10 +13,10 @@ namespace Interlude.Interface.Widgets
         {
             Reposition(0, 0, 0, 0, 0, 1, 100, 0);
             Data = data;
-            AddChild(new TextBox(Data.Player, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black).BR_DeprecateMe(0.5f, 0.6f, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(Data.Mods, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black).TL_DeprecateMe(0f, 0.6f, AnchorType.LERP,AnchorType.LERP).BR_DeprecateMe(0.6f, 1f, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(Data.ScoreShorthand, AnchorType.MAX, 0, true, Game.Options.Theme.MenuFont, Color.Black).TL_DeprecateMe(0.5f, 0f, AnchorType.LERP, AnchorType.LERP).BR_DeprecateMe(1f, 0.6f, AnchorType.LERP, AnchorType.LERP));
-            AddChild(new TextBox(Utils.RoundNumber(Data.PhysicalPerformance)+" // "+Data.Time.ToShortDateString(), AnchorType.MAX, 0, false, Game.Options.Theme.MenuFont, Color.Black).TL_DeprecateMe(0.6f, 0.6f, AnchorType.LERP, AnchorType.LERP).BR_DeprecateMe(1f, 1f, AnchorType.LERP, AnchorType.LERP));
+            AddChild(new TextBox(Data.Player, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0, 0, 0, 0, 0.5f, 0, 0.6f));
+            AddChild(new TextBox(Data.Mods, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0, 0, 0.6f, 0, 0.6f, 0, 1));
+            AddChild(new TextBox(Data.ScoreShorthand, AnchorType.MAX, 0, true, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0.5f, 0, 0, 0, 1, 0, 0.6f));
+            AddChild(new TextBox(Utils.RoundNumber(Data.PhysicalPerformance) + " // " + Data.Time.ToShortDateString(), AnchorType.MAX, 0, false, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0.6f, 0, 0.6f, 0, 1, 0, 1));
         }
 
         public override void Update(Rect bounds)

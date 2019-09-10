@@ -13,7 +13,7 @@ namespace Interlude.Interface.Dialogs
 
         public TextDialog(string prompt, Action<string> action) : base(action)
         {
-            TL_DeprecateMe(100, -70, AnchorType.MIN, AnchorType.CENTER).BR_DeprecateMe(100, 70, AnchorType.MAX, AnchorType.CENTER);
+            Reposition(100, 0, -70, 0.5f, -100, 1, 70, 0.5f);
             this.prompt = prompt;
             Input.ChangeIM(im = new InputMethod((s) => { text = s; }, () => { return text; }, () => { }));
         }

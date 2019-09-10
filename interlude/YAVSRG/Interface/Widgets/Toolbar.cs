@@ -18,6 +18,7 @@ namespace Interlude.Interface
         public ToolbarIcons Icons = new ToolbarIcons();
         string Notification;
         string[] Tooltip, Tooltip2;
+        float TooltipWidth;
         public ChatBox Chat;
         WidgetState CursorMode = WidgetState.NORMAL;
 
@@ -49,7 +50,12 @@ namespace Interlude.Interface
         {
             if (text != "")
             {
+                TooltipWidth = 0;
                 Tooltip = text.Split('\n');
+                foreach (string l in Tooltip)
+                {
+                    TooltipWidth = Math.Max(TooltipWidth, SpriteBatch.Font1.MeasureText(l, 30f));
+                }
                 Tooltip2 = extra.Split('\n');
                 _TooltipFade.Target = 1;
             }
@@ -141,10 +147,10 @@ namespace Interlude.Interface
                 float f = _TooltipFade * _TooltipFade2;
                 if (f >= 0.001f)
                 {
-                    float x = Math.Min(bounds.Right - 450, Input.MouseX);
+                    float x = Math.Min(bounds.Right - 50 - TooltipWidth, Input.MouseX);
                     float y = Math.Min(bounds.Bottom - 100 - 45 * Tooltip.Length, Input.MouseY);
-                    var b = new Rect(x + 50, y + 50, x + 400, y + 50 + 45 * Tooltip.Length);
-                    SpriteBatch.DrawRect(b, Color.FromArgb((int)(f * 127), 0, 0, 0));
+                    var b = new Rect(x + 50, y + 50, x + 50 + TooltipWidth, y + 53 + 45 * Tooltip.Length);
+                    SpriteBatch.DrawRect(b, Color.FromArgb((int)(f * 180), 0, 0, 0));
                     for (int i = 0; i < Tooltip.Length; i++)
                     {
                         SpriteBatch.Font1.DrawText(Tooltip[i], 30f, b.Left, b.Top + i * 45, Color.FromArgb((int)(f * 255), Game.Options.Theme.MenuFont));

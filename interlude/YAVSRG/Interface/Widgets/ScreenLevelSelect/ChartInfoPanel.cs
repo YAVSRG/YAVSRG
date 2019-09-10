@@ -13,27 +13,23 @@ namespace Interlude.Interface.Widgets
         public ChartInfoPanel()
         {
             BackColor = () => Utils.ColorInterp(Color.FromArgb(80, 80, 80), Game.Screens.DarkColor, 0.2f);
-            AddChild(new TextBox(() => Game.CurrentChart.Data.DiffName, AnchorType.CENTER, 0, true, () => Game.Options.Theme.MenuFont, () => text).BR_DeprecateMe(0, 0.2f, AnchorType.MAX, AnchorType.LERP));
+            AddChild(new TextBox(() => Game.CurrentChart.Data.DiffName, AnchorType.CENTER, 0, true, () => Game.Options.Theme.MenuFont, () => text).Reposition(0, 0, 0, 0, 0, 1, 0, 0.2f));
             AddChild(new TextBox(Game.Gameplay.GetModString, AnchorType.CENTER, 0, false, () => Game.Options.Theme.MenuFont, () => text)
-                .TL_DeprecateMe(0, 0.15f, AnchorType.MIN, AnchorType.LERP).BR_DeprecateMe(0, 0.3f, AnchorType.MAX, AnchorType.LERP));
+                .Reposition(0, 0, 0, 0.15f, 0, 1, 0, 0.3f));
 
             AddChild(new TextBox(() => Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Physical) + "*", AnchorType.MIN, 50f, true, () => Game.Options.Theme.MenuFont, () => physical)
-                .TL_DeprecateMe(15, 0.35f, AnchorType.MIN, AnchorType.LERP).BR_DeprecateMe(0, 0.5f, AnchorType.CENTER, AnchorType.LERP));
+                .Reposition(15, 0, 0, 0.35f, 0, 0.5f, 0, 0.5f));
             AddChild(new TextBox(() => "*" + Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Technical), AnchorType.MAX, 50f, true, () => Game.Options.Theme.MenuFont, () => technical)
-                .TL_DeprecateMe(0, 0.35f, AnchorType.CENTER, AnchorType.LERP).BR_DeprecateMe(15, 0.5f, AnchorType.MAX, AnchorType.LERP));
-
+                .Reposition(0, 0.5f, 0, 0.35f, -15, 1, 0, 0.5f));
             AddChild(new TextBox(() => "Physical", AnchorType.MIN, 20f, false, () => Game.Options.Theme.MenuFont, () => text)
-                .TL_DeprecateMe(15, 0.3f, AnchorType.MIN, AnchorType.LERP).BR_DeprecateMe(0, 0.4f, AnchorType.CENTER, AnchorType.LERP));
+                .Reposition(15, 0, 0, 0.3f, 0, 0.5f, 0, 0.4f));
             AddChild(new TextBox(() => "Technical", AnchorType.MAX, 20f, false, () => Game.Options.Theme.MenuFont, () => text)
-                .TL_DeprecateMe(0, 0.3f, AnchorType.CENTER, AnchorType.LERP).BR_DeprecateMe(15, 0.4f, AnchorType.MAX, AnchorType.LERP));
-
-            //AddChild(new TextBox("Skillset breakdown coming soon", AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont)
-            //    .TL_DeprecateMe(0, 0.5f, AnchorType.MIN, AnchorType.LERP).BR_DeprecateMe(0, 90, AnchorType.MAX, AnchorType.MAX));
+                .Reposition(0, 0.5f, 0, 0.3f, -15, 1, 0, 0.4f));
 
             AddChild(new TextBox(() => bpm, AnchorType.MIN, 30f, false, () => Game.Options.Theme.MenuFont, () => text)
-                .TL_DeprecateMe(15, 70, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(0, 0, AnchorType.CENTER, AnchorType.MAX));
+                .Reposition(15, 0, -70, 1, 0, 0.5f, 0, 1));
             AddChild(new TextBox(() => time, AnchorType.MAX, 30f, false, () => Game.Options.Theme.MenuFont, () => text)
-                .TL_DeprecateMe(0, 70, AnchorType.CENTER, AnchorType.MAX).BR_DeprecateMe(15, 0, AnchorType.MAX, AnchorType.MAX));
+                .Reposition(0, 0.5f, -70, 1, -15, 1, 0, 1));
             Animation.Add(physical = new AnimationColorMixer(Color.White));
             Animation.Add(technical = new AnimationColorMixer(Color.White));
             Animation.Add(text = new AnimationColorMixer(Color.Black));

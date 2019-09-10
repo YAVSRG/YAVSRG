@@ -39,6 +39,8 @@ namespace Interlude.Options
         public Bind Editor = new KeyBind(Key.F3);
         public Bind Mods = new KeyBind(Key.F4);
         public Bind RandomChart = new KeyBind(Key.F6);
+        public Bind AddToCollection = new KeyBind(Key.KeypadPlus);
+        public Bind RemoveFromCollection = new KeyBind(Key.KeypadMinus);
 
         //play
         public Bind ChangeOffset = new KeyBind(Key.Plus);

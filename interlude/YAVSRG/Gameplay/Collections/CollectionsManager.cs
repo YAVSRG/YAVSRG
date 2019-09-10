@@ -6,6 +6,7 @@ namespace Interlude.Gameplay.Charts.Collections
     public class CollectionsManager
     {
         public Dictionary<string, Collection> Collections = new Dictionary<string, Collection>();
+        public string SelectedCollection = "Favourites";
 
         public static CollectionsManager LoadCollections()
         {

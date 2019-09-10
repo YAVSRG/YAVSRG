@@ -34,6 +34,7 @@ namespace Interlude.Options
         public WindowType WindowMode = WindowType.Borderless;
         public string CurrentProfile = "Default.json";
         public string LastSelectedFile = "";
+        public string LastSelectedOptionsTab = "General";
         public string WorkingDirectory = "";
         public Keybinds Hotkeys { get; private set; } = new Keybinds();
         public bool HideGameplayUI = false;

@@ -146,6 +146,7 @@ namespace Interlude.Interface.Widgets
                 foreach (Widget w in Children)
                 {
                     w.RemoveFromContainer(this);
+                    w.Dispose();
                 }
                 Children.Clear();
             }

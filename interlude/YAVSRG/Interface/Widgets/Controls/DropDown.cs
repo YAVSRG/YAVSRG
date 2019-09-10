@@ -10,22 +10,21 @@ namespace Interlude.Interface.Widgets
     {
         private Action<string> setter;
         private Func<string> getter;
-        private string label;
         private FlowContainer selector;
 
         public DropDown(Action<string> set, Func<string> get, string label)
         {
-            this.label = label;
             setter = set;
             getter = get;
             selector = new FlowContainer() { MarginY = 25, MarginX = 20, VerticalFade = 30, Frame = 85 };
             selector.ToggleState();
-            AddChild(selector.TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MAX).BR_DeprecateMe(0, -400, AnchorType.MAX, AnchorType.MAX));
+            AddChild(selector.Reposition(0, 0, 0, 1, 0, 1, 400, 1));
             AddChild(new SimpleButton(() => label + ": " + getter(), () => { selector.ToggleState(); }, () => selector.State == WidgetState.NORMAL, null));
         }
 
         public DropDown SetItems(List<string> items)
         {
+            selector.Clear();
             foreach (string item in items)
             {
                 selector.AddChild(Item(item));

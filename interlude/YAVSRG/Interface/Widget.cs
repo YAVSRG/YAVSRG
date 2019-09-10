@@ -145,20 +145,6 @@ namespace Interlude.Interface
             return this;
         }
 
-        public Widget TL_DeprecateMe(float x, float y, AnchorType ax, AnchorType ay) //todo: deprecate these
-        {
-            LeftAnchor.RepositionDeprecateMe(x, ax);
-            TopAnchor.RepositionDeprecateMe(y, ay);
-            return this;
-        }
-
-        public Widget BR_DeprecateMe(float x, float y, AnchorType ax, AnchorType ay)
-        {
-            RightAnchor.RepositionDeprecateMe(x, ax);
-            BottomAnchor.RepositionDeprecateMe(y, ay);
-            return this;
-        }
-
         public Widget Move(Rect Bounds)
         {
             LeftAnchor.Move(Bounds.Left);

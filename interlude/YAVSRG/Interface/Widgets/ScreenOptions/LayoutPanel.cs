@@ -84,17 +84,22 @@ namespace Interlude.Interface.Widgets
             AddChild(
                 new TooltipContainer(
                 new TextPicker("Note Color Style", new string[] { "DDR", "Column", "Chord", "Jackhammer" }, (int)Game.Options.Profile.ColorStyle.Style, v => { Game.Options.Profile.ColorStyle.Style = (Colorizer.ColorStyle)v; Refresh(); }),
-                "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm i.e make every other beat red and the remaining beats green\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord")
+                "This is the color scheme for notes when playing.\nDDR = Color notes by musical rhythm, like in Dance Dance Revolution\nColumn = Each column has a specific color for its notes\nChord = Color chords of notes by the number of notes in the chord")
                 .Reposition(-150, 0.5f, 475, 0, 150, 0.5f, 525, 0));
-            AddChild(new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); })
+            AddChild(
+                new TooltipContainer(
+                new BoolPicker("Different colors per keymode", !Game.Options.Profile.ColorStyle.UseForAllKeyModes, (i) => { Game.Options.Profile.ColorStyle.UseForAllKeyModes = !i; Refresh(); }),
+                "Turn this on if you want to choose different colors on each keymode.\nWith this setting off, you are editing a (different) set of colors that applies to all keymodes.")
                 .Reposition(-500, 0.5f, 525, 0, -200, 0.5f, 575, 0));
             var arr = Game.Options.Themes.NoteSkins.Keys.ToArray();
-            AddChild(new TextPicker("Noteskin", arr, Math.Max(0, Array.IndexOf(arr, Game.Options.Profile.NoteSkin)), (i) =>
+            AddChild(
+                new TooltipContainer(
+                new TextPicker("Noteskin", arr, Math.Max(0, Array.IndexOf(arr, Game.Options.Profile.NoteSkin)), (i) =>
             {
                 Game.Options.Profile.NoteSkin = arr[i];
                 Game.Options.Themes.Unload(); Game.Options.Themes.Load();
                 ChangeKeyMode(keyMode, width);
-            }).Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
+            }), "Select the appearance of the notes when playing.\nYou can add to the available list using themes.").Reposition(200, 0.5f, 525, 0, 500, 0.5f, 575, 0));
             Refresh();
         }
 
@@ -151,12 +156,16 @@ namespace Interlude.Interface.Widgets
             }
             if (selectLayout != null)
             {
-                Children.Remove(selectLayout);
+                RemoveChild(selectLayout);
+                selectLayout.Dispose();
             }
             List<KeyLayout.Layout> layouts = KeyLayout.GetPossibleLayouts(k);
             string[] layoutNames = layouts.Select((x) => KeyLayout.GetLayoutName(x, k)).ToArray();
-            Children.Add(selectLayout = new TextPicker("Keyboard layout", layoutNames, Math.Max(0, layouts.IndexOf(Game.Options.Profile.KeymodeLayouts[k])), (i) => { Game.Options.Profile.KeymodeLayouts[k] = layouts[i]; })
-                .Reposition(-150, 0.5f, 600, 0, 150, 0.5f, 650, 0));
+            Children.Add(
+                selectLayout = new TooltipContainer(
+                    new TextPicker("Playstyle", layoutNames, Math.Max(0, layouts.IndexOf(Game.Options.Profile.KeymodeLayouts[k])), (i) => { Game.Options.Profile.KeymodeLayouts[k] = layouts[i]; }),
+                    "Used to select what playstyle (position of your hands) is being used to play.\nThis information is used for the difficulty calculator.\nBe sure to set this to match how you are playing for meaningful difficulty ratings.")
+                    .Reposition(-150, 0.5f, 600, 0, 150, 0.5f, 650, 0));
         }
     }
 }

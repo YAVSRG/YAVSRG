@@ -8,7 +8,6 @@ namespace Interlude.Interface.Screens
     public class ScreenOptions : Screen
     {
         Widget container, selected;
-        string current = "";
         public ScreenOptions()
         {
             FlowContainer list;
@@ -46,15 +45,27 @@ namespace Interlude.Interface.Screens
 
         Widget Button(string name, string tooltip, Func<Widget> obj)
         {
-            return new FramedButton(name, () => {
-                current = name;
-                selected?.Dispose();
+            if (name == Game.Options.General.LastSelectedOptionsTab)
+            {
+                container.AddChild(selected = obj());
+            }
+            return new FramedButton(name, () =>
+            {
+                Game.Options.General.LastSelectedOptionsTab = name;
                 if (selected != null)
                 {
+                    selected.Dispose();
                     container.RemoveChild(selected);
                 }
                 container.AddChild(selected = obj());
-            }, null) { Highlight = () => current == name, Frame = 170, HorizontalFade = 50, Tooltip = tooltip }.Reposition(0, 0, 0, 0, 0, 1, 50, 0);
+            }, null)
+            {
+                Highlight = () =>
+         Game.Options.General.LastSelectedOptionsTab == name,
+                Frame = 170,
+                HorizontalFade = 50,
+                Tooltip = tooltip
+            }.Reposition(0, 0, 0, 0, 0, 1, 50, 0);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace Interlude.Interface.Widgets
             AddChild(
                 new TooltipContainer(
                     new Slider("Audio Offset", (v) => { general.UniversalAudioOffset = v; }, () => { return general.UniversalAudioOffset; }, -100, 100, 1f),
-                "This will offset audio (in milliseconds) relative to charts and may be useful if you have consistent input latency or always hit early.\nThis number should be lower if you are hitting early and higher if you are hitting late.")
+                "This will offset audio (in milliseconds) relative to your keyboard input.\nUseful if you have consistent input latency or audio plays early (due to sound drivers).\nThis number should be lower if you are hitting early and higher if you are hitting late.")
                 .Reposition(-200, 0.5f, 225, 0, 200, 0.5f, 250, 0));
             AddChild(
                 new TooltipContainer(

@@ -56,7 +56,7 @@ namespace Interlude.Interface
             animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
             animation2.Add(bgFade = new AnimationSlider(1));
             Logo = new Widgets.Logo();
-            Logo.TL_DeprecateMe(-200, 1000, AnchorType.CENTER, AnchorType.CENTER).BR_DeprecateMe(200, 1400, AnchorType.CENTER, AnchorType.CENTER);
+            Logo.Reposition(-200, 0.5f, 1000, 0.5f, 200, 0.5f, 1400, 0.5f);
         }
 
         public void AddDialog(Dialog d)
@@ -204,6 +204,7 @@ namespace Interlude.Interface
                 dialogs[0].Update(bounds.ExpandY(-Toolbar.Height));
                 if (dialogs[0].Closed)
                 {
+                    dialogs[0].Dispose();
                     dialogs.RemoveAt(0);
                 }
                 Current?.Animation.Update();

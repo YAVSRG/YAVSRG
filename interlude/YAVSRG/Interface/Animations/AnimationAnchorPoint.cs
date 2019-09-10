@@ -44,23 +44,6 @@ namespace Interlude.Interface.Animations
             Position.Update();
         }
 
-        public void RepositionDeprecateMe(float pos, AnchorType type)
-        {
-            Anchor = type;
-            switch (type)
-            {
-                case AnchorType.MAX:
-                    Reposition(-pos, 1f); return;
-                case AnchorType.MIN:
-                    Reposition(pos, 0f); return;
-                case AnchorType.LERP:
-                    Reposition(0, pos); return;
-                case AnchorType.CENTER:
-                default:
-                    Reposition(pos, 0.5f); return;
-            }
-        }
-
         //Returns the position of this anchor point relative to the minimum and maximum X or Y values as bounds
         //Projected = true will retrieve where the widget will be in the immediate future as animation completes
         //By default this returns the actual bounds of the widget which are different if it is moving/animated

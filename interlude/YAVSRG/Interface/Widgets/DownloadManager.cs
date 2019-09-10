@@ -14,32 +14,16 @@ namespace Interlude.Interface.Widgets
 
         public DownloadManager(EtternaPackData data)
         {
-            //sc = new ScrollContainer(10f, 10f, false);
             sc = new FlowContainer();
-            TL_DeprecateMe(0, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(-620, 0, AnchorType.MAX, AnchorType.MAX);
+            Reposition(0, 1, 0, 0, 620, 1, 0, 1);
             foreach (EtternaPackData.EtternaPack p in data.data)
             {
-                sc.AddChild(new DownloadCard(p).BR_DeprecateMe(600, 50, AnchorType.MIN, AnchorType.MIN));
+                sc.AddChild(new DownloadCard(p).Reposition(0, 0, 0, 0, 0, 1, 50, 0));
             }
             AddChild(new TextEntryBox((s) => { searchtext = s; }, () => { return searchtext; },
                 Filter, null, () => { return "Press " + Game.Options.General.Hotkeys.Search.ToString().ToUpper() + " to search..."; })
-                .TL_DeprecateMe(0,0,AnchorType.MIN,AnchorType.MIN).BR_DeprecateMe(0,60,AnchorType.MAX,AnchorType.MIN));
-            AddChild(sc.TL_DeprecateMe(0, 60, AnchorType.MIN, AnchorType.MIN));
-        }
-
-        public DownloadManager(List<BloodcatChartData> data)
-        {
-            //sc = new ScrollContainer(10f, 10f, false);
-            sc = new FlowContainer();
-            TL_DeprecateMe(0, 0, AnchorType.MAX, AnchorType.MIN).BR_DeprecateMe(-620, 0, AnchorType.MAX, AnchorType.MAX);
-            foreach (BloodcatChartData p in data)
-            {
-                sc.AddChild(new DownloadCard(p).BR_DeprecateMe(600, 50, AnchorType.MIN, AnchorType.MIN));
-            }
-            AddChild(new TextEntryBox((s) => { searchtext = s; }, () => { return searchtext; },
-                ()=> { }, null, () => { return "Press " + Game.Options.General.Hotkeys.Search.ToString().ToUpper() + " to search..."; })
-                .TL_DeprecateMe(0, 0, AnchorType.MIN, AnchorType.MIN).BR_DeprecateMe(0, 60, AnchorType.MAX, AnchorType.MIN));
-            AddChild(sc.TL_DeprecateMe(0, 60, AnchorType.MIN, AnchorType.MIN));
+                .Reposition(0, 0, 0, 0, 0, 1, 60, 0));
+            AddChild(sc.Reposition(0, 0, 60, 0, 0, 1, 0, 1));
         }
 
         void Filter()

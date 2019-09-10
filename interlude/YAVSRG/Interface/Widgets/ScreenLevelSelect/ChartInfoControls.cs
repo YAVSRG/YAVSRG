@@ -14,7 +14,7 @@ namespace Interlude.Interface.Widgets
             public LevelSelectButtons(ModMenu modMenu)
             {
                 HorizontalFade = 50; Frame = 170;
-                AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Collections) { FontSize = 40, Tooltip = "nyi lol" }
+                AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.CollectionsDialog((s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Collections) { FontSize = 40, Tooltip = "Organise charts into groups" }
                     .Reposition(0, 0.02f, 10, 0, 0, 0.18f, -10, 1));
                 AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Goals) { FontSize = 40, Tooltip = "nyi lol" }
                     .Reposition(0, 0.22f, 10, 0, 0, 0.38f, -10, 1));
