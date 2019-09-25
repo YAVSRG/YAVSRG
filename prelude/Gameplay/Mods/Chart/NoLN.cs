@@ -2,12 +2,12 @@
 
 namespace Prelude.Gameplay.Mods
 {
-    [DataTemplate("all", "Default", 0, "Min", 0, "Max", 1)]
+    [DataTemplate("All", "Default", false)]
     public class NoLN : Mod
     {
         public override void Apply(ChartWithModifiers Chart, DataGroup Data)
         {
-            if (Data.GetValue("all", 0) == 1)
+            if (Data.GetValue("All", false))
             {
                 foreach (GameplaySnap s in Chart.Notes.Points)
                 {
@@ -21,7 +21,7 @@ namespace Prelude.Gameplay.Mods
 
         public override void ApplyToHitData(ChartWithModifiers Chart, ref HitData[] HitData, DataGroup Data)
         {
-            if (Data.GetValue("all", 0) == 0)
+            if (!Data.GetValue("All", false))
             {
                 for (int i = 0; i < HitData.Length; i++)
                 {
@@ -48,13 +48,12 @@ namespace Prelude.Gameplay.Mods
             return false;
         }
 
-        public override string GetName(DataGroup Data)
-        {
-            return Data.GetValue("all", 0) == 0 ? "No Releases" : "No Holds";
-        }
+        public override string Name => "No Holds";
 
-        public override int GetStatus(DataGroup Data) => 1;
+        public override int Status => 1;
 
-        public override string GetDescription(DataGroup Data) { return Data.GetValue("all", 0) == 0 ? "Disables the need to accurately time releasing the ends of hold notes" : "Replaces all hold notes with a tap note"; }
+        public override string Description => "Replaces all hold notes with a tap note";
+
+        public override bool Visible => true;
     }
 }

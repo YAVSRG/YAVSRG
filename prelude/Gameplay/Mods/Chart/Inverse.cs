@@ -89,14 +89,8 @@ namespace Prelude.Gameplay.Mods
         //remove middles (implicitly)
         //replace ends with starts
 
-        public override string GetName(DataGroup Data)
-        {
-            return "Inverse (not complete!)";
-        }
+        public override string Name => "Inverse (not complete!)";
 
-        public override int GetStatus(DataGroup Data)
-        {
-            return 2;
-        }
+        public override int Status => 2;
     }
 }

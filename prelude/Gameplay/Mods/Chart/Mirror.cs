@@ -30,11 +30,10 @@ namespace Prelude.Gameplay.Mods
             return o;
         }
 
-        public override string GetName(DataGroup Data)
-        {
-            return "Mirror";
-        }
+        public override string Name => "Mirror";
 
-        public override string GetDescription(DataGroup Data) { return "Horizontally flips the whole chart"; }
+        public override string Description => "Horizontally flips the whole chart";
+
+        public override bool Visible => true;
     }
 }

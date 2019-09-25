@@ -24,16 +24,12 @@ namespace Prelude.Gameplay.Mods
             }
         }
 
-        public override string GetName(DataGroup Data)
-        {
-            return "Seasick";
-        }
+        public override string Name => "Seasick";
 
-        public override int GetStatus(DataGroup Dataa)
-        {
-            return 2;
-        }
+        public override int Status => 1;
 
-        public override string GetDescription(DataGroup Data) { return "Makes notes W A V Y"; }
+        public override bool Visible => true;
+
+        public override string Description => "Makes notes ~w~a~v~y~";
     }
 }

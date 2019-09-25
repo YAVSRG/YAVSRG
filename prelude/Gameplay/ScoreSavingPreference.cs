@@ -12,6 +12,6 @@ namespace Interlude.Gameplay
         ALWAYS,
         PASS,
         PERSONALBEST,
-        TARGETACC, //todo: use same target percentage as pacemaker
+        TARGETACC, //todo: target for this is same as target for pacemaker when pacemaker implemented
     }
 }
