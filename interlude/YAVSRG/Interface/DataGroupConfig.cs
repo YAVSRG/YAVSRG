@@ -23,6 +23,9 @@ namespace Interlude.Interface
 
         public DataGroupConfig(DataGroup Data, DataTemplateAttribute[] Template)
         {
+            MarginY = 50;
+            Frame = 85;
+            VerticalFade = 20;
             foreach (var t in Template)
             {
                 Widget w;
@@ -43,7 +46,8 @@ namespace Interlude.Interface
                 else if (type == typeof(int))
                 {
                     w = new Slider(t.Name,
-                        (i) => {
+                        (i) =>
+                        {
                             Data.Remove(t.Name);
                             Data.Add(t.Name, (int)i);
                         },
@@ -52,9 +56,23 @@ namespace Interlude.Interface
                         t.Properties.GetValue("Max", 100),
                         1);
                 }
+                else if (type == typeof(string))
+                {
+                    w = new TextEntryBox(
+                        (s) => Data[t.Name] = s,
+                        () => Data.GetValue(t.Name, GetDefault<string>(t.Properties)),
+                        () => { },
+                        () => { },
+                        () => t.Name)
+                    { EnableSelectionKey = false };
+                }
+                else if (type == typeof(bool))
+                {
+                    w = new BoolPicker(t.Name, Data.GetValue(t.Name, GetDefault<bool>(t.Properties)), (b) => Data[t.Name] = b);
+                }
                 else
                 {
-                    w = new TextBox(t.Name, AnchorType.CENTER, 30, true, System.Drawing.Color.White);
+                    w = new TextBox(t.Name, TextAnchor.CENTER, 30, true, System.Drawing.Color.White);
                 }
                 AddChild(new DeletableSetting(w, t.Name, Data));
             }
@@ -68,7 +86,7 @@ namespace Interlude.Interface
             }
             catch
             {
-                return default(T);
+                return default;
             }
         }
     }

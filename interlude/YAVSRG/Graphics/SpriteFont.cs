@@ -115,26 +115,26 @@ namespace Interlude.Graphics
             return DrawJustifiedText(text, scale * FONTSCALE, bounds.Right, bounds.CenterY - h * scale * 0.5f, c, dropShadow, shadowColor);
         }
 
-        public float DrawDynamicText(string text, Rect bounds, Color c, AnchorType position, float size, bool dropShadow = false, Color shadowColor = default)
+        public float DrawDynamicText(string text, Rect bounds, Color c, TextAnchor position, float size, bool dropShadow = false, Color shadowColor = default)
         {
             switch (position)
             {
-                case (AnchorType.CENTER):
+                case (TextAnchor.CENTER):
                     return DrawCentredText(text, size, bounds.CenterX, bounds.Top, c, dropShadow, shadowColor);
-                case (AnchorType.MAX):
+                case (TextAnchor.RIGHT):
                     return DrawJustifiedText(text, size, bounds.Right, bounds.Top, c, dropShadow, shadowColor);
                 default:
                     return DrawText(text, size, bounds.Left, bounds.Top, c, dropShadow, shadowColor);
             }
         }
 
-        public float DrawDynamicTextToFill(string text, Rect bounds, Color c, AnchorType position, bool dropShadow = false, Color shadowColor = default)
+        public float DrawDynamicTextToFill(string text, Rect bounds, Color c, TextAnchor position, bool dropShadow = false, Color shadowColor = default)
         {
             switch (position)
             {
-                case (AnchorType.CENTER):
+                case (TextAnchor.CENTER):
                     return DrawCentredTextToFill(text, bounds, c, dropShadow, shadowColor);
-                case (AnchorType.MAX):
+                case (TextAnchor.RIGHT):
                     return DrawJustifiedTextToFill(text, bounds, c, dropShadow, shadowColor);
                 default:
                     return DrawTextToFill(text, bounds, c, dropShadow, shadowColor);

@@ -13,22 +13,22 @@ namespace Interlude.Interface.Widgets
         public ChartInfoPanel()
         {
             BackColor = () => Utils.ColorInterp(Color.FromArgb(80, 80, 80), Game.Screens.DarkColor, 0.2f);
-            AddChild(new TextBox(() => Game.CurrentChart.Data.DiffName, AnchorType.CENTER, 0, true, () => Game.Options.Theme.MenuFont, () => text).Reposition(0, 0, 0, 0, 0, 1, 0, 0.2f));
-            AddChild(new TextBox(Game.Gameplay.GetModString, AnchorType.CENTER, 0, false, () => Game.Options.Theme.MenuFont, () => text)
+            AddChild(new TextBox(() => Game.CurrentChart.Data.DiffName, TextAnchor.CENTER, 0, true, () => Game.Options.Theme.MenuFont, () => text).Reposition(0, 0, 0, 0, 0, 1, 0, 0.2f));
+            AddChild(new TextBox(Game.Gameplay.GetModString, TextAnchor.CENTER, 0, false, () => Game.Options.Theme.MenuFont, () => text)
                 .Reposition(0, 0, 0, 0.15f, 0, 1, 0, 0.3f));
 
-            AddChild(new TextBox(() => Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Physical) + "*", AnchorType.MIN, 50f, true, () => Game.Options.Theme.MenuFont, () => physical)
+            AddChild(new TextBox(() => Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Physical) + "*", TextAnchor.LEFT, 50f, true, () => Game.Options.Theme.MenuFont, () => physical)
                 .Reposition(15, 0, 0, 0.35f, 0, 0.5f, 0, 0.5f));
-            AddChild(new TextBox(() => "*" + Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Technical), AnchorType.MAX, 50f, true, () => Game.Options.Theme.MenuFont, () => technical)
+            AddChild(new TextBox(() => "*" + Utils.RoundNumber(Game.Gameplay.ChartDifficulty.Technical), TextAnchor.RIGHT, 50f, true, () => Game.Options.Theme.MenuFont, () => technical)
                 .Reposition(0, 0.5f, 0, 0.35f, -15, 1, 0, 0.5f));
-            AddChild(new TextBox(() => "Physical", AnchorType.MIN, 20f, false, () => Game.Options.Theme.MenuFont, () => text)
+            AddChild(new TextBox(() => "Physical", TextAnchor.LEFT, 20f, false, () => Game.Options.Theme.MenuFont, () => text)
                 .Reposition(15, 0, 0, 0.3f, 0, 0.5f, 0, 0.4f));
-            AddChild(new TextBox(() => "Technical", AnchorType.MAX, 20f, false, () => Game.Options.Theme.MenuFont, () => text)
+            AddChild(new TextBox(() => "Technical", TextAnchor.RIGHT, 20f, false, () => Game.Options.Theme.MenuFont, () => text)
                 .Reposition(0, 0.5f, 0, 0.3f, -15, 1, 0, 0.4f));
 
-            AddChild(new TextBox(() => bpm, AnchorType.MIN, 30f, false, () => Game.Options.Theme.MenuFont, () => text)
+            AddChild(new TextBox(() => bpm, TextAnchor.LEFT, 30f, false, () => Game.Options.Theme.MenuFont, () => text)
                 .Reposition(15, 0, -70, 1, 0, 0.5f, 0, 1));
-            AddChild(new TextBox(() => time, AnchorType.MAX, 30f, false, () => Game.Options.Theme.MenuFont, () => text)
+            AddChild(new TextBox(() => time, TextAnchor.RIGHT, 30f, false, () => Game.Options.Theme.MenuFont, () => text)
                 .Reposition(0, 0.5f, -70, 1, -15, 1, 0, 1));
             Animation.Add(physical = new AnimationColorMixer(Color.White));
             Animation.Add(technical = new AnimationColorMixer(Color.White));

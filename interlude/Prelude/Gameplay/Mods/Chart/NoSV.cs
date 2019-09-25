@@ -15,11 +15,10 @@ namespace Prelude.Gameplay.Mods
             Chart.Timing.SetBlankSVData();
         }
 
-        public override string GetName(DataGroup Data)
-        {
-            return "NoSV";
-        }
+        public override string Name => "No SV";
 
-        public override string GetDescription(DataGroup Data) { return "Removes all scroll speed changes from a chart."; }
+        public override string Description => "Removes all scroll speed changes from a chart.";
+
+        public override bool Visible => true;
     }
 }

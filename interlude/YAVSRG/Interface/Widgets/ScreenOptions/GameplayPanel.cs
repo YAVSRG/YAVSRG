@@ -11,7 +11,7 @@ namespace Interlude.Interface.Widgets
         {
             AddChild(
                 new TooltipContainer(
-                new Slider("Scroll speed", v => { Game.Options.Profile.ScrollSpeed = v; }, () => Game.Options.Profile.ScrollSpeed, 1, 4, 0.01f),
+                new Slider("Scroll speed", v => { Game.Options.Profile.ScrollSpeed = v; }, () => Game.Options.Profile.ScrollSpeed, 1, 4, 0.01f) { ShowAsPercentage = true },
                 "Increasing this will increase the speed at which notes scroll across the screen.\nA scroll speed of 1 means that 1 pixel corresponds to 1ms, or 1000 pixels corresponds to 1 second.")
                 .Reposition(-300, 0.5f, 75, 0, -50, 0.5f, 100, 0));
             AddChild(
@@ -21,22 +21,22 @@ namespace Interlude.Interface.Widgets
                 .Reposition(50, 0.5f, 75, 0, 300, 0.5f, 100, 0));
             AddChild(
                 new TooltipContainer(
-                new Slider("3D Perspective", v => { Game.Options.Profile.PerspectiveTilt = v; }, () => Game.Options.Profile.PerspectiveTilt, -0.75f, 0.75f, 0.01f),
+                new Slider("3D Perspective", v => { Game.Options.Profile.PerspectiveTilt = v; }, () => Game.Options.Profile.PerspectiveTilt, -0.75f, 0.75f, 0.01f) { ShowAsPercentage = true },
                 "This tilts the playfield to give a 3D perspective.\nNegative numbers tilt away from receptors and positive numbers tilt towards receptors.")
                 .Reposition(-300, 0.5f, 175, 0, -50, 0.5f, 200, 0));
             AddChild(
                 new TooltipContainer(
-                new Slider("Background Dim", v => { Game.Options.Profile.BackgroundDim = v; }, () => Game.Options.Profile.BackgroundDim, 0, 1, 0.01f),
+                new Slider("Background Dim", v => { Game.Options.Profile.BackgroundDim = v; }, () => Game.Options.Profile.BackgroundDim, 0, 1, 0.01f) { ShowAsPercentage = true },
                 "This controls the dimming effect of the background image when you are playing.\n0 = No dimming\n1 = Completely black")
                 .Reposition(50, 0.5f, 175, 0, 300, 0.5f, 200, 0));
             AddChild(
                 new TooltipContainer(
-                new Slider("Upwards Screencover", v => { Game.Options.Profile.ScreenCoverUp = v; }, () => Game.Options.Profile.ScreenCoverUp, 0, 1, 0.01f),
+                new Slider("Upwards Screencover", v => { Game.Options.Profile.ScreenCoverUp = v; }, () => Game.Options.Profile.ScreenCoverUp, 0, 1, 0.01f) { ShowAsPercentage = true },
                 "This is the proportion of the screen covered by a screen cover. Some players may find it easier to read notes when using a screencover.\nThis screencover is for the receptor end of the screen.")
                 .Reposition(-300, 0.5f, 275, 0, -50, 0.5f, 300, 0));
             AddChild(
                 new TooltipContainer(
-                new Slider("Downwards Screencover", v => { Game.Options.Profile.ScreenCoverDown = v; }, () => Game.Options.Profile.ScreenCoverDown, 0, 1, 0.01f),
+                new Slider("Downwards Screencover", v => { Game.Options.Profile.ScreenCoverDown = v; }, () => Game.Options.Profile.ScreenCoverDown, 0, 1, 0.01f) { ShowAsPercentage = true },
                 "This is the proportion of the screen covered by a screen cover. Some players may find it easier to read notes when using a screencover.\nThis screencover is for the non-receptor end of the screen.")
                 .Reposition(50, 0.5f, 275, 0, 300, 0.5f, 300, 0));
             AddChild(

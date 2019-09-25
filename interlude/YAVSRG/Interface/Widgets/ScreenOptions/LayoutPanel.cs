@@ -60,7 +60,7 @@ namespace Interlude.Interface.Widgets
                     {
                         select(Utils.Modulus(get() - 1, max));
                     }
-                    Game.Screens.Toolbar.SetTooltip(label, "");
+                    Game.Screens.SetTooltip(label, "");
                 }
             }
         }

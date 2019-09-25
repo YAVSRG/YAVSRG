@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace Interlude.Interface
 {
-    public enum AnchorType
+    public enum TextAnchor
     {
-        MIN, //top left
+        LEFT, 
         CENTER,
-        MAX, //bottom right
-        LERP
+        RIGHT
     }
 }

@@ -14,6 +14,8 @@ namespace Interlude.Interface.Widgets
         string label;
         bool dragging;
 
+        public bool ShowAsPercentage = false;
+
         public Slider(string label, Action<float> set, Func<float> get, float min, float max, float res) : base()
         {
             this.label = label;
@@ -31,7 +33,7 @@ namespace Interlude.Interface.Widgets
             SpriteBatch.DrawRect(bounds.ExpandY(-20), Game.Screens.DarkColor);
             float p = bounds.Left + (get() - min) / (max - min) * bounds.Width;
             SpriteBatch.DrawRect(new Rect(p - bounds.Height / 2, bounds.Top, p + bounds.Height / 2, bounds.Bottom), Game.Screens.HighlightColor);
-            SpriteBatch.Font2.DrawCentredText(label + ": " + get().ToString(), 20f, bounds.CenterX, bounds.Top - 25, Game.Options.Theme.MenuFont);
+            SpriteBatch.Font2.DrawCentredText(label + ": " + (ShowAsPercentage ? string.Format("{0:0}%", Math.Round(get(), 2) * 100) : get().ToString()), 20f, bounds.CenterX, bounds.Top - 25, Game.Options.Theme.MenuFont);
         }
 
         public override void Update(Rect bounds)

@@ -11,7 +11,6 @@ namespace Interlude.Interface.Animations
     public class AnimationAnchorPoint : Animation
     {
         private AnimationSlider Position;
-        private AnchorType Anchor = AnchorType.MIN;
         private float AnchorPos;
 
         private float GetRelativePosition(float pos, float min, float max)
@@ -63,7 +62,6 @@ namespace Interlude.Interface.Animations
         //Old anchor position is preserved.
         public void Reposition(float NewPosition)
         {
-            if (Anchor == AnchorType.MAX) NewPosition *= -1;
             Position.NewPosition = NewPosition;
         }
 
@@ -78,7 +76,6 @@ namespace Interlude.Interface.Animations
         //The new position is relative to the anchor position
         public void Move(float NewPosition)
         {
-            if (Anchor == AnchorType.MAX) NewPosition *= -1;
             Position.Target = NewPosition;
         }
 

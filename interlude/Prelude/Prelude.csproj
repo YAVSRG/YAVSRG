@@ -70,7 +70,7 @@
     <Compile Include="Gameplay\DifficultyRating\RatingReport.cs" />
     <Compile Include="Gameplay\GameplaySnap.cs" />
     <Compile Include="Gameplay\HitData.cs" />
-    <Compile Include="Gameplay\Mods\Chart\Autoplay.cs" />
+    <Compile Include="Gameplay\Mods\Chart\Auto.cs" />
     <Compile Include="Gameplay\Mods\Chart\Inverse.cs" />
     <Compile Include="Gameplay\Mods\Chart\Keychange.cs" />
     <Compile Include="Gameplay\Mods\Chart\Manipulate.cs" />

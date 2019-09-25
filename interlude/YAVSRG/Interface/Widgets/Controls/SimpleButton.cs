@@ -55,7 +55,7 @@ namespace Interlude.Interface.Widgets
             base.Update(bounds);
             bounds = GetBounds(bounds);
             color.Target(highlight() ? System.Drawing.Color.White : hoverAnimation.Target == 1 ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
-            if (hoverAnimation.Target == 1) { Game.Screens.Toolbar.SetTooltip(Tooltip + (bind != null ? "\n<" + bind().ToString() + ">" : ""), Tooltip2); }
+            if (hoverAnimation.Target == 1) { Game.Screens.SetTooltip(Tooltip + (bind != null ? "\n<" + bind().ToString() + ">" : ""), Tooltip2); }
         }
     }
 }

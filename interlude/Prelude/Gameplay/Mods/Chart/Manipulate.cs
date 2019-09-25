@@ -94,14 +94,8 @@ namespace Prelude.Gameplay.Mods
             return r / data.Count;
         }
 
-        public override int GetStatus(DataGroup Data)
-        {
-            return 2;
-        }
+        public override int Status => 2;
 
-        public override string GetName(DataGroup Data)
-        {
-            return "Manipulate";
-        }
+        public override string Name => "Manipulate";
     }
 }

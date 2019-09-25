@@ -56,7 +56,7 @@ namespace Interlude.Interface.Dialogs
             AddChild(new SimpleButton("Done", () => { Game.Options.Themes.Unload(); Game.Options.Themes.Load(); Close(""); }, () => false, () => Game.Options.General.Hotkeys.Select).Reposition(0, 0.4f, -150, 1, 0, 0.6f, -100, 1));
             AddChild((Selected = new FlowContainer()).Reposition(50, 0.5f, 200, 0, -200, 1, -200, 1));
             AddChild((Available = new FlowContainer()).Reposition(200, 0, 200, 0, -50, 0.5f, -200, 1));
-            Selected.AddChild(new TextBox("(fallback)", AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont, System.Drawing.Color.Black).Reposition(0, 0, 0, 0, 0, 1, 50, 0));
+            Selected.AddChild(new TextBox("(fallback)", TextAnchor.CENTER, 0, true, Game.Options.Theme.MenuFont, System.Drawing.Color.Black).Reposition(0, 0, 0, 0, 0, 1, 50, 0));
 
             foreach (string t in Game.Options.Themes.AvailableThemes)
             {

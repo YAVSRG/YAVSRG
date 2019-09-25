@@ -55,7 +55,10 @@ namespace Interlude.Options.Themes
             Config = Utils.LoadObject<ThemeOptions>(GetFile("theme.json"));
             //todo: hard code more stuff as time goes on like a jackass
             UIConfig = new Dictionary<string, WidgetPositionData>() { { "gameplay", Utils.LoadObject<WidgetPositionData>(GetFile("Interface", "gameplay.json")) } };
-            NoteSkins = new Dictionary<string, NoteSkin>() { { "default", Utils.LoadObject<NoteSkin>(GetFile("NoteSkins", "default", "noteskin.json")) } };
+            NoteSkins = new Dictionary<string, NoteSkin>() {
+                { "default", Utils.LoadObject<NoteSkin>(GetFile("NoteSkins", "default", "noteskin.json")) },
+                { "DivideByZero", Utils.LoadObject<NoteSkin>(GetFile("NoteSkins", "DivideByZero", "noteskin.json")) }
+            };
         }
 
         public Sprite GetTexture(string name)

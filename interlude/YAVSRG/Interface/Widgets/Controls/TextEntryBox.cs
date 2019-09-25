@@ -16,6 +16,8 @@ namespace Interlude.Interface.Widgets
         Func<string> text;
         Action onSend;
 
+        public bool EnableSelectionKey = true;
+
         public TextEntryBox(Action<string> setter, Func<string> getter, Action updater, Action send, Func<string> label)
         {
             set = setter;
@@ -57,7 +59,7 @@ namespace Interlude.Interface.Widgets
             }
             else
             {
-                if (Game.Options.General.Hotkeys.Search.Tapped() || ScreenUtils.CheckButtonClick(bounds))
+                if ((Game.Options.General.Hotkeys.Search.Tapped() && EnableSelectionKey) || ScreenUtils.CheckButtonClick(bounds))
                 {
                     Input.ChangeIM(new InputMethod(set, get, update));
                     focus = true;

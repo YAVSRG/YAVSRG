@@ -13,10 +13,10 @@ namespace Interlude.Interface.Widgets
         {
             Reposition(0, 0, 0, 0, 0, 1, 100, 0);
             Data = data;
-            AddChild(new TextBox(Data.Player, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0, 0, 0, 0, 0.5f, 0, 0.6f));
-            AddChild(new TextBox(Data.Mods, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0, 0, 0.6f, 0, 0.6f, 0, 1));
-            AddChild(new TextBox(Data.ScoreShorthand, AnchorType.MAX, 0, true, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0.5f, 0, 0, 0, 1, 0, 0.6f));
-            AddChild(new TextBox(Utils.RoundNumber(Data.PhysicalPerformance) + " // " + Data.Time.ToShortDateString(), AnchorType.MAX, 0, false, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0.6f, 0, 0.6f, 0, 1, 0, 1));
+            AddChild(new TextBox(Data.Player, TextAnchor.LEFT, 0, true, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0, 0, 0, 0, 0.5f, 0, 0.6f));
+            AddChild(new TextBox(Data.Mods, TextAnchor.LEFT, 0, false, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0, 0, 0.6f, 0, 0.6f, 0, 1));
+            AddChild(new TextBox(Data.ScoreShorthand, TextAnchor.RIGHT, 0, true, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0.5f, 0, 0, 0, 1, 0, 0.6f));
+            AddChild(new TextBox(Utils.RoundNumber(Data.PhysicalPerformance) + " // " + Data.Time.ToShortDateString(), TextAnchor.RIGHT, 0, false, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0.6f, 0, 0.6f, 0, 1, 0, 1));
         }
 
         public override void Update(Rect bounds)

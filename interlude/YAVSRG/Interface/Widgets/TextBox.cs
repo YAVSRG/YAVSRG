@@ -7,15 +7,15 @@ namespace Interlude.Interface.Widgets
     public class TextBox : Widget
     {
         Func<string> text;
-        AnchorType style;
+        TextAnchor style;
         bool font;
         float size;
         Func<Color> color;
         Func<Color> dropColor;
 
-        public TextBox(string text, AnchorType position, float textSize, bool altFont, Color c, Color d = default(Color)) : this(() => (text), position, textSize, altFont, () => (c), () => (d)) { }
+        public TextBox(string text, TextAnchor position, float textSize, bool altFont, Color c, Color d = default(Color)) : this(() => (text), position, textSize, altFont, () => (c), () => (d)) { }
 
-        public TextBox(Func<string> text, AnchorType position, float textSize, bool altFont, Func<Color> c, Func<Color> d)
+        public TextBox(Func<string> text, TextAnchor position, float textSize, bool altFont, Func<Color> c, Func<Color> d)
         {
             this.text = text;
             style = position;

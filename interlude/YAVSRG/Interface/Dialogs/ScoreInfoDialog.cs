@@ -17,7 +17,7 @@ namespace Interlude.Interface.Dialogs
             Reposition(100, 0, ScreenUtils.ScreenHeight * 2 + 100, 0, -100, 1, ScreenUtils.ScreenHeight * 2 - 100, 1);
             Move(new Rect(100, 100, -100, -100));
             Data = data;
-            AddChild(new TextBox(Data.FormattedAccuracy, AnchorType.MIN, 0, true, Color.White, Color.Black).Reposition(0, 0, 0, 0, 200, 0, 100, 0));
+            AddChild(new TextBox(Data.FormattedAccuracy, TextAnchor.LEFT, 0, true, Color.White, Color.Black).Reposition(0, 0, 0, 0, 200, 0, 100, 0));
             AddChild((Graph = new ScoreGraph(data)).Reposition(20, 0, -200, 1, -20, 1, -20, 1));
             Game.Online.SendPacket(new PacketScore() { score = data.Score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
         }

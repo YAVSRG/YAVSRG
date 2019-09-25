@@ -11,7 +11,7 @@ namespace Interlude.Interface.Widgets
         {
             AddChild(
                 new TooltipContainer(
-                new Slider("Volume", (v) => { general.AudioVolume = v; }, () => { return general.AudioVolume; }, 0, 1, 0.01f),
+                new Slider("Volume", (v) => { general.AudioVolume = v; }, () => { return general.AudioVolume; }, 0, 1, 0.01f) { ShowAsPercentage = true },
                 "Global audio volume setting.\n1 is the loudest and 0 is muted.")
                 .Reposition(-200, 0.5f, 125, 0, 200, 0.5f, 150, 0));
             AddChild(

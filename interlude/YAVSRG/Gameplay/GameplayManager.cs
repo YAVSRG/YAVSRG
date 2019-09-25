@@ -13,8 +13,6 @@ namespace Interlude.Gameplay
     //Manages the selected chart, its associated data (scores and local offset) and applying selected modifiers to it
     public class GameplayManager
     {
-        public Dictionary<string, Mod> Mods = new Dictionary<string, Mod>() { { "Auto", new AutoPlay() }, { "NoLN", new NoLN() }, { "Random", new Randomise() }, { "Manipulate", new Manipulate() }, { "Mirror", new Mirror() }, { "NoSV", new NoSV() }, { "Wave", new Wave() } };
-
         public Chart CurrentChart;
         public CachedChart CurrentCachedChart;
         public ChartWithModifiers ModifiedChart;
@@ -85,23 +83,23 @@ namespace Interlude.Gameplay
         {
             foreach (string m in SelectedMods.Keys)
             {
-                if (Mods[m].IsApplicable(c, SelectedMods[m]))
+                if (Mod.AvailableMods[m].IsApplicable(c, SelectedMods[m]))
                 {
-                    Mods[m].ApplyToHitData(c, ref hitdata, SelectedMods[m]);
+                    Mod.AvailableMods[m].ApplyToHitData(c, ref hitdata, SelectedMods[m]);
                 }
             }
         }
 
-        public ChartWithModifiers GetModifiedChart(Dictionary<string, DataGroup> Mods, Chart Base)
+        public ChartWithModifiers GetModifiedChart(Dictionary<string, DataGroup> SelectedMods, Chart Base)
         {
             ChartWithModifiers c = new ChartWithModifiers(Base);
-            foreach (string m in Mods.Keys)
+            foreach (string m in Mod.AvailableMods.Keys)
             {
-                if (this.Mods[m].IsApplicable(c, Mods[m]))
+                if (SelectedMods.ContainsKey(m) && Mod.AvailableMods[m].IsApplicable(c, SelectedMods[m]))
                 {
-                    this.Mods[m].Apply(c, Mods[m]);
-                    c.Mods = this.Mods[m].GetName(Mods[m]);
-                    c.ModStatus = Math.Max(c.ModStatus, this.Mods[m].GetStatus(Mods[m]));
+                    Mod.AvailableMods[m].Apply(c, SelectedMods[m]);
+                    c.Mods = Mod.AvailableMods[m].Name;
+                    c.ModStatus = Math.Max(c.ModStatus, Mod.AvailableMods[m].Status);
                 }
             }
             return c;

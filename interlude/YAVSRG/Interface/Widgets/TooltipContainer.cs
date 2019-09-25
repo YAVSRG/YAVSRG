@@ -20,7 +20,7 @@ namespace Interlude.Interface.Widgets
         {
             base.Update(bounds);
             bounds = GetBounds(bounds);
-            if (ScreenUtils.MouseOver(bounds)) Game.Screens.Toolbar.SetTooltip(text, "");
+            if (ScreenUtils.MouseOver(bounds)) Game.Screens.SetTooltip(text, "");
         }
     }
 }

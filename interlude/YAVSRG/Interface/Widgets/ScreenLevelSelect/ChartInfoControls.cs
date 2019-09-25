@@ -11,16 +11,16 @@ namespace Interlude.Interface.Widgets
 
         class LevelSelectButtons : FrameContainer
         {
-            public LevelSelectButtons(ModMenu modMenu)
+            public LevelSelectButtons()
             {
                 HorizontalFade = 50; Frame = 170;
                 AddChild(new SimpleButton("Collections", () => { Game.Screens.AddDialog(new Dialogs.CollectionsDialog((s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Collections) { FontSize = 40, Tooltip = "Organise charts into groups" }
                     .Reposition(0, 0.02f, 10, 0, 0, 0.18f, -10, 1));
-                AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Goals) { FontSize = 40, Tooltip = "nyi lol" }
+                AddChild(new SimpleButton("Goals", () => { Game.Screens.AddDialog(new Dialogs.ConfirmDialog("NYI lol", (s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Goals) { FontSize = 40, Tooltip = "Track statistics and set goals/challenges for yourself as a player" }
                     .Reposition(0, 0.22f, 10, 0, 0, 0.38f, -10, 1));
                 AddChild(new SimpleButton("Editor", () => { Game.Screens.AddScreen(new Screens.ScreenEditor()); }, () => false, () => Game.Options.General.Hotkeys.Editor) { FontSize = 40, Tooltip = "Edit the selected chart" }
                     .Reposition(0, 0.42f, 10, 0, 0, 0.58f, -10, 1));
-                AddChild(new SimpleButton("Mods", () => { modMenu.Toggle(); }, () => false, () => Game.Options.General.Hotkeys.Mods) { FontSize = 40, Tooltip = "Choose gameplay modifiers" }
+                AddChild(new SimpleButton("Mods", () => { Game.Screens.AddDialog(new Dialogs.ModSelectDialog((s) => { })); }, () => false, () => Game.Options.General.Hotkeys.Mods) { FontSize = 40, Tooltip = "Choose gameplay modifiers" }
                     .Reposition(0, 0.62f, 10, 0, 0, 0.78f, -10, 1));
                 AddChild(new SimpleButton("Play", () => { Game.Gameplay.PlaySelectedChart(); }, () => false, () => Game.Options.General.Hotkeys.Select) { FontSize = 40, Tooltip = "Play the selected chart" }
                     .Reposition(0, 0.82f, 10, 0, 0, 0.98f, -10, 1));
@@ -39,10 +39,10 @@ namespace Interlude.Interface.Widgets
             scroll.AddChild(ip.Reposition(0, 0, 0, 0, -15, 0.5f, 0, 1));
             ChangeChart(true);
 
-            ModMenu modMenu = new ModMenu();
-            AddChild(modMenu.Reposition(0, 0, 250, 0, 0, 1, 0, 1));
+            //ModMenu modMenu = new ModMenu();
+            //AddChild(modMenu.Reposition(0, 0, 250, 0, 0, 1, 0, 1));
 
-            AddChild(new LevelSelectButtons(modMenu).Reposition(0, 0, 150, 0, 0, 1, 250, 0));
+            AddChild(new LevelSelectButtons().Reposition(0, 0, 150, 0, 0, 1, 250, 0));
         }
 
         public override void OnResize()
@@ -58,7 +58,6 @@ namespace Interlude.Interface.Widgets
                 sb.UseScoreList(Game.Gameplay.ChartSaveData.Scores);
                 lastChart = Game.Gameplay.CurrentChart;
             }
-            scroll.Reposition(new Rect(10, 260, ScreenUtils.ScreenWidth * 2 - 750, -10)); //just to make sure
             ip.ChangeChart(); //ip needs to change length/bpm. difficulty is already recalculated
         }
 

@@ -13,12 +13,10 @@ namespace Interlude.Interface
 {
     class Toolbar : Widget
     {
-        AnimationSlider _Height, _NotifFade, _TooltipFade, _TooltipFade2;
+        AnimationSlider _Height, _NotifFade;
         AnimationSeries _NotifAnimation;
         public ToolbarIcons Icons = new ToolbarIcons();
         string Notification;
-        string[] Tooltip, Tooltip2;
-        float TooltipWidth;
         public ChatBox Chat;
         WidgetState CursorMode = WidgetState.NORMAL;
 
@@ -33,7 +31,6 @@ namespace Interlude.Interface
             AddChild(new MusicControls());
             Animation.Add(_Height = new AnimationSlider(-5));
             Animation.Add(_NotifAnimation = new AnimationSeries(true)); Animation.Add(_NotifFade = new AnimationSlider(0));
-            Animation.Add(_TooltipFade = new AnimationSlider(0)); Animation.Add(_TooltipFade2 = new AnimationSlider(0));
             Logging.OnLog += (s, d, t) => { if (t != Logging.LogType.Debug) AddNotification(s); };
         }
 
@@ -44,21 +41,6 @@ namespace Interlude.Interface
             _NotifFade.Target = 1;
             _NotifAnimation.Add(new AnimationCounter(240, false));
             _NotifAnimation.Add(new AnimationAction(() => { _NotifFade.Target = 0; }));
-        }
-
-        public void SetTooltip(string text, string extra)
-        {
-            if (text != "")
-            {
-                TooltipWidth = 0;
-                Tooltip = text.Split('\n');
-                foreach (string l in Tooltip)
-                {
-                    TooltipWidth = Math.Max(TooltipWidth, SpriteBatch.Font1.MeasureText(l, 30f));
-                }
-                Tooltip2 = extra.Split('\n');
-                _TooltipFade.Target = 1;
-            }
         }
 
         private void Back()
@@ -144,18 +126,6 @@ namespace Interlude.Interface
             if (CursorMode > WidgetState.DISABLED)
             {
                 SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("cursor"), new Rect(Input.MouseX, Input.MouseY, Input.MouseX + Game.Options.Theme.CursorSize, Input.MouseY + Game.Options.Theme.CursorSize), Game.Screens.HighlightColor));
-                float f = _TooltipFade * _TooltipFade2;
-                if (f >= 0.001f)
-                {
-                    float x = Math.Min(bounds.Right - 50 - TooltipWidth, Input.MouseX);
-                    float y = Math.Min(bounds.Bottom - 100 - 45 * Tooltip.Length, Input.MouseY);
-                    var b = new Rect(x + 50, y + 50, x + 50 + TooltipWidth, y + 53 + 45 * Tooltip.Length);
-                    SpriteBatch.DrawRect(b, Color.FromArgb((int)(f * 180), 0, 0, 0));
-                    for (int i = 0; i < Tooltip.Length; i++)
-                    {
-                        SpriteBatch.Font1.DrawText(Tooltip[i], 30f, b.Left, b.Top + i * 45, Color.FromArgb((int)(f * 255), Game.Options.Theme.MenuFont));
-                    }
-                }
             }
         }
 
@@ -179,9 +149,7 @@ namespace Interlude.Interface
                         SetState(WidgetState.NORMAL);
                     }
                 }
-                _TooltipFade2.Target = Game.Options.General.Hotkeys.Help.Held() ? 1 : 0;
                 base.Update(bounds.ExpandY(80 - _Height));
-                _TooltipFade.Target = 0;
             }
             else
             {

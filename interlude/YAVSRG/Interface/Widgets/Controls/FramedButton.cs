@@ -24,7 +24,7 @@ namespace Interlude.Interface.Widgets
             FrameColor = () => Border;
             BackColor = () => Fill;
 
-            AddChild(new TextBox(() => label, AnchorType.CENTER, 0, true, () => Game.Options.Theme.MenuFont, () => Color.Black));
+            AddChild(new TextBox(() => label, TextAnchor.CENTER, 0, true, () => Game.Options.Theme.MenuFont, () => Color.Black));
 
             AddChild(new ClickableComponent()
             {
@@ -42,7 +42,7 @@ namespace Interlude.Interface.Widgets
             base.Update(bounds);
             Fill.Target(Highlight() ? Game.Screens.BaseColor : Game.Screens.DarkColor);
             Border.Target(hover ? Game.Options.Theme.MenuFont : Game.Screens.HighlightColor);
-            if (hover) { Game.Screens.Toolbar.SetTooltip(Tooltip + (bind != null ? "\n<" + bind().ToString() + ">" : ""), Tooltip2); }
+            if (hover) { Game.Screens.SetTooltip(Tooltip + (bind != null ? "\n<" + bind().ToString() + ">" : ""), Tooltip2); }
         }
     }
 }

@@ -16,17 +16,17 @@ namespace Interlude.Interface.Widgets
             Data = data;
             Light = light;
 
-            AddChild(new TextBox(data.Data.Title, AnchorType.MIN, 0, true, Game.Options.Theme.MenuFont, Color.Black)
+            AddChild(new TextBox(data.Data.Title, TextAnchor.LEFT, 0, true, Game.Options.Theme.MenuFont, Color.Black)
                 .Reposition(0, 0, 0, 0, 0, 0.4f, 0, 0.6f));
-            AddChild(new TextBox(data.Data.DiffName + " // " + data.Data.Creator, AnchorType.MIN, 0, false, Game.Options.Theme.MenuFont, Color.Black)
+            AddChild(new TextBox(data.Data.DiffName + " // " + data.Data.Creator, TextAnchor.LEFT, 0, false, Game.Options.Theme.MenuFont, Color.Black)
                 .Reposition(0, 0, 0, 0.6f, 0, 0.4f, 0, 1));
-            AddChild(new TextBox(data.Mods, AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont, Color.Black)
+            AddChild(new TextBox(data.Mods, TextAnchor.CENTER, 0, true, Game.Options.Theme.MenuFont, Color.Black)
                 .Reposition(0, 0.4f, 0, 0, 0, 0.8f, 0, 0.6f));
-            AddChild(new TextBox(data.Time.ToString(), AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
+            AddChild(new TextBox(data.Time.ToString(), TextAnchor.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
                 .Reposition(0, 0.4f, 0, 0.6f, 0, 0.8f, 0, 1));
-            AddChild(new TextBox(Utils.RoundNumber(data.PhysicalPerformance), AnchorType.CENTER, 0, true, Game.Options.Theme.MenuFont, CalcUtils.PhysicalColor(data.PhysicalPerformance))
+            AddChild(new TextBox(Utils.RoundNumber(data.PhysicalPerformance), TextAnchor.CENTER, 0, true, Game.Options.Theme.MenuFont, CalcUtils.PhysicalColor(data.PhysicalPerformance))
                 .Reposition(0, 0.8f, 0, 0, 0, 1, 0, 0.6f));
-            AddChild(new TextBox(data.FormattedAccuracy, AnchorType.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
+            AddChild(new TextBox(data.FormattedAccuracy, TextAnchor.CENTER, 0, false, Game.Options.Theme.MenuFont, Color.Black)
                 .Reposition(0, 0.8f, 0, 0.6f, 0, 1, 0, 1));
         }
 

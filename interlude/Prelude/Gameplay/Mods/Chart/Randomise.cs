@@ -55,16 +55,12 @@ namespace Prelude.Gameplay.Mods
             return (ushort)(1 << l[rand.Next(0,l.Count)]);
         }
 
-        public override int GetStatus(DataGroup Data)
-        {
-            return 2; //todo: set to 1 once stable
-        }
+        public override int Status => 2;
 
-        public override string GetName(DataGroup Data)
-        {
-            return "Randomise";
-        }
+        public override bool Visible => true;
 
-        public new DataGroup DefaultSettings = new DataGroup() { { "Seed", new Random().Next() } };
+        public override string Name => "Randomise";
+
+        public override DataGroup DefaultSettings => new DataGroup() { { "Seed", new Random().Next() } };
     }
 }

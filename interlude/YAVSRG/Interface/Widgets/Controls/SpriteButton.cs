@@ -42,7 +42,7 @@ namespace Interlude.Interface.Widgets
         {
             base.Update(bounds);
             color.Target(hover ? Game.Screens.HighlightColor : Game.Screens.BaseColor);
-            if (hover) { Game.Screens.Toolbar.SetTooltip(Tooltip + (bind != null ? "\n<" + bind().ToString() + ">" : ""), Tooltip2); }
+            if (hover) { Game.Screens.SetTooltip(Tooltip + (bind != null ? "\n<" + bind().ToString() + ">" : ""), Tooltip2); }
         }
     }
 }

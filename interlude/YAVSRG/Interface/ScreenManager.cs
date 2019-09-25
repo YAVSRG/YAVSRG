@@ -15,8 +15,8 @@ namespace Interlude.Interface
 
         AnimationSlider bgFade; //fade between previous background and current
 
-        AnimationSeries animation = new AnimationSeries(true); //coordinates fading between screens
-        AnimationGroup animation2 = new AnimationGroup(true); //coordinates all other animations (they run constantly)
+        AnimationSeries screenAnimation = new AnimationSeries(true); //coordinates fading between screens
+        AnimationGroup animation = new AnimationGroup(true); //coordinates all other animations (they run constantly)
 
         FBO FBO; //fbo stores texture for fade between background images (it is reused many times per frame so this saves on aspect ratio calculations etc)
 
@@ -45,18 +45,23 @@ namespace Interlude.Interface
         private readonly AnimationSlider ParallaxPosY = new AnimationSlider(0);
         private Func<Point> ParallaxFunc = () => new Point(Input.MouseX, Input.MouseY);
 
+        AnimationSlider _TooltipFade, _TooltipFade2;
+        string[] Tooltip, Tooltip2;
+        float TooltipWidth;
+
         public ScreenManager()
         {
-            animation2.Add(Parallax);
-            animation2.Add(ParallaxPosX);
-            animation2.Add(ParallaxPosY);
-            animation2.Add(BackgroundDim);
-            animation2.Add(BaseColor = new AnimationColorMixer(Color.White));
-            animation2.Add(DarkColor = new AnimationColorMixer(Color.White));
-            animation2.Add(HighlightColor = new AnimationColorMixer(Color.White));
-            animation2.Add(bgFade = new AnimationSlider(1));
+            animation.Add(Parallax);
+            animation.Add(ParallaxPosX);
+            animation.Add(ParallaxPosY);
+            animation.Add(BackgroundDim);
+            animation.Add(BaseColor = new AnimationColorMixer(Color.White));
+            animation.Add(DarkColor = new AnimationColorMixer(Color.White));
+            animation.Add(HighlightColor = new AnimationColorMixer(Color.White));
+            animation.Add(bgFade = new AnimationSlider(1));
             Logo = new Widgets.Logo();
             Logo.Reposition(-200, 0.5f, 1000, 0.5f, 200, 0.5f, 1400, 0.5f);
+            animation.Add(_TooltipFade = new AnimationSlider(0)); animation.Add(_TooltipFade2 = new AnimationSlider(0));
         }
 
         public void AddDialog(Dialog d)
@@ -86,22 +91,22 @@ namespace Interlude.Interface
         {
             stack.Insert(0, s);
             SetNextScreen(stack[0]);
-            animation.Clear();
+            screenAnimation.Clear();
             fade1 = new AnimationFade(0, 2, 0.996f);
             fade2 = new AnimationFade(0, 1, 0.996f);
-            animation.Add(fade1);
-            animation.Add(fade2);
+            screenAnimation.Add(fade1);
+            screenAnimation.Add(fade2);
         }
 
         public void PopScreen()
         {
             stack.RemoveAt(0);
             SetNextScreen(stack[0]);
-            animation.Clear();
+            screenAnimation.Clear();
             fade1 = new AnimationFade(0, 2, 0.996f);
             fade2 = new AnimationFade(0, 1, 0.996f);
-            animation.Add(fade1);
-            animation.Add(fade2);
+            screenAnimation.Add(fade1);
+            screenAnimation.Add(fade2);
         }
 
         private void SetNextScreen(Screen s)
@@ -116,6 +121,21 @@ namespace Interlude.Interface
         {
             Current?.OnResize();
             Previous?.OnResize();
+        }
+
+        public void SetTooltip(string text, string extra)
+        {
+            if (text != "")
+            {
+                TooltipWidth = 0;
+                Tooltip = text.Split('\n');
+                foreach (string l in Tooltip)
+                {
+                    TooltipWidth = Math.Max(TooltipWidth, SpriteBatch.Font1.MeasureText(l, 30f));
+                }
+                Tooltip2 = extra.Split('\n');
+                _TooltipFade.Target = 1;
+            }
         }
 
         public void SetParallaxOverride(Func<Point> f) //used to move the parallax effect to some place other than the mouse position i.e in visualiser
@@ -152,7 +172,7 @@ namespace Interlude.Interface
                     return;
                 }
                 DrawChartBackground(bounds, BackgroundDim);
-                if (animation.Running)
+                if (screenAnimation.Running)
                 {
                     if (fade1.Running)
                     {
@@ -175,6 +195,20 @@ namespace Interlude.Interface
                     dialogs[i].Draw(bounds.ExpandY(-Toolbar.Height));
                 }
                 Toolbar.Draw(bounds);
+
+                //todo: bundle tooltips and notifications into a widget
+                float f = _TooltipFade * _TooltipFade2;
+                if (f >= 0.001f)
+                {
+                    float x = Math.Min(bounds.Right - 50 - TooltipWidth, Input.MouseX);
+                    float y = Math.Min(bounds.Bottom - 100 - 45 * Tooltip.Length, Input.MouseY);
+                    var b = new Rect(x + 50, y + 50, x + 50 + TooltipWidth, y + 53 + 45 * Tooltip.Length);
+                    SpriteBatch.DrawRect(b, Color.FromArgb((int)(f * 180), 0, 0, 0));
+                    for (int i = 0; i < Tooltip.Length; i++)
+                    {
+                        SpriteBatch.Font1.DrawText(Tooltip[i], 30f, b.Left, b.Top + i * 45, Color.FromArgb((int)(f * 255), Game.Options.Theme.MenuFont));
+                    }
+                }
             }
         }
 
@@ -215,7 +249,7 @@ namespace Interlude.Interface
             }
             if (Previous != null)
             {
-                if (animation.Running)
+                if (screenAnimation.Running)
                 {
                     if (Previous.Animation.Running)
                     {
@@ -227,8 +261,10 @@ namespace Interlude.Interface
                     Previous = null;
                 }
             }
+            screenAnimation.Update();
+            _TooltipFade2.Target = Game.Options.General.Hotkeys.Help.Held() ? 1 : 0;
             animation.Update();
-            animation2.Update();
+            _TooltipFade.Target = 0;
             var p = ParallaxFunc();
             ParallaxPosX.Target = p.X;
             ParallaxPosY.Target = p.Y;

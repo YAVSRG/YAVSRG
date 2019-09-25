@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Prelude.Gameplay.Charts.YAVSRG;
+﻿using Prelude.Gameplay.Charts.YAVSRG;
 using Prelude.Utilities;
 
 namespace Prelude.Gameplay.Mods
@@ -67,14 +66,8 @@ namespace Prelude.Gameplay.Mods
             return output;
         }*/
 
-        public override int GetStatus(DataGroup Data)
-        {
-            return 2;
-        }
+        public override int Status => 2;
 
-        public override string GetName(DataGroup Data)
-        {
-            return "KeyChange";
-        }
+        public override string Name => "KeyChange";
     }
 }

@@ -126,6 +126,7 @@
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
     <Compile Include="Interface\Dialogs\CollectionsDialog.cs" />
+    <Compile Include="Interface\Dialogs\ModSelectDialog.cs" />
     <Compile Include="Interface\Dialogs\ThemeSelectDialog.cs" />
     <Compile Include="Interface\Screens\ScreenDebug.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
@@ -219,7 +220,6 @@
     <Compile Include="Interface\Widgets\Gameplay\PerformanceMeter.cs" />
     <Compile Include="Interface\Widgets\Logo.cs" />
     <Compile Include="Interface\Widgets\TopScoreCard.cs" />
-    <Compile Include="Interface\Widgets\ScreenLevelSelect\ModMenu.cs" />
     <Compile Include="Interface\Widgets\InfoBox.cs" />
     <Compile Include="Interface\Widgets\ImageBox.cs" />
     <Compile Include="Interface\Widgets\NewsBox.cs" />
