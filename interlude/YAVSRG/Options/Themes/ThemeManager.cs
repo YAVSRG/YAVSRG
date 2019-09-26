@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.IO;
+using System.Text.RegularExpressions;
 using ManagedBass;
 using OpenTK.Graphics.OpenGL;
 using Prelude.Utilities;
@@ -179,6 +180,11 @@ namespace Interlude.Options.Themes
             {
                 theme.Save();
             }
+        }
+
+        public void CreateNewTheme(string name)
+        {
+            LoadedThemes[0].CopyTo(Path.Combine(AssetsDir, new Regex("[^a-zA-Z0-9_-]").Replace(name, "")));
         }
     }
 }

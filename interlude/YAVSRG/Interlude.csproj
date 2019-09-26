@@ -128,10 +128,10 @@
     <Compile Include="Interface\Dialogs\CollectionsDialog.cs" />
     <Compile Include="Interface\Dialogs\ModSelectDialog.cs" />
     <Compile Include="Interface\Dialogs\ThemeSelectDialog.cs" />
-    <Compile Include="Interface\Screens\ScreenDebug.cs" />
     <Compile Include="Interface\Screens\ScreenOptions.cs" />
     <Compile Include="Interface\Widgets\Controls\ClickableComponent.cs" />
     <Compile Include="Interface\Widgets\Controls\Selector.cs" />
+    <Compile Include="Interface\Widgets\Gameplay\Mascot.cs" />
     <Compile Include="Interface\Widgets\ObjectSelector.cs" />
     <Compile Include="Interface\DataGroupConfig.cs" />
     <Compile Include="Interface\Dialogs\ConfigDialog.cs" />
@@ -232,7 +232,7 @@
     <Compile Include="Interface\Widgets\ScreenLevelSelect\LevelSelector.cs" />
     <Compile Include="Interface\Widgets\Gameplay\ProgressBar.cs" />
     <Compile Include="Interface\Widgets\ScreenLevelSelect\Scoreboard.cs" />
-    <Compile Include="Interface\Widgets\ScoreCard.cs" />
+    <Compile Include="Interface\Widgets\ScreenLevelSelect\ScoreCard.cs" />
     <Compile Include="Interface\Widgets\Controls\SimpleButton.cs" />
     <Compile Include="Interface\Widgets\Controls\Slider.cs" />
     <Compile Include="Interface\Widgets\Controls\TextEntryBox.cs" />

@@ -31,9 +31,14 @@ namespace Interlude.Interface.Widgets
                 }
                 else if (Input.MouseClick(OpenTK.Input.MouseButton.Right) && Input.KeyPress(OpenTK.Input.Key.Delete))
                 {
-                    SetState(0);
-                    //todo: find way to support this given that this changes score index for use in top scores system
-                    //Game.Gameplay.ChartSaveData.Scores.Remove(c);
+                    Game.Screens.AddDialog(new Dialogs.ConfirmDialog("Delete this score?", (s) =>
+                    {
+                        if (s == "Y")
+                        {
+                            SetState(0);
+                            Game.Gameplay.ChartSaveData.Scores.Remove(Data.Score);
+                        }
+                    }));
                 }
             }
         }

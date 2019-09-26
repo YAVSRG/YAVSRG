@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using OpenTK.Graphics.OpenGL;
-using ManagedBass;
 using Interlude.Graphics;
-using Interlude.Options.Themes;
 
 
 namespace Interlude.IO
@@ -38,8 +35,8 @@ namespace Interlude.IO
         public static Sprite UploadTexture(Bitmap bmp, int ux, int uy, bool font = false)
         {
             int id = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, id);
             BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            GL.BindTexture(TextureTarget.Texture2D, id);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
 
             bmp.UnlockBits(data);

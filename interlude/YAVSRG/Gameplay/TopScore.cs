@@ -9,13 +9,13 @@ namespace Interlude.Gameplay
     public class TopScore
     {
         public string FileIdentifier;
-        public int ScoreID;
+        public DateTime Timestamp;
         public float Rating;
 
-        public TopScore(string FileID, int ScoreID, float Rating)
+        public TopScore(string FileID, DateTime Timestamp, float Rating)
         {
             FileIdentifier = FileID;
-            this.ScoreID = ScoreID;
+            this.Timestamp = Timestamp;
             this.Rating = Rating; //only used to compare - is recalculated when displaying
         }
     }

@@ -121,5 +121,13 @@ namespace Interlude.Options.Themes
                 WriteFile(UIConfig[k], "Interface", k + ".json");
             }
         }
+
+        // Copies/extracts contents of this theme to a folder/zip archive
+        public void CopyTo(string targetPath)
+        {
+            //targetPath is .zip NYI
+            //current theme is not a zip NYI
+            zipFile.ExtractToDirectory(targetPath);
+        }
     }
 }

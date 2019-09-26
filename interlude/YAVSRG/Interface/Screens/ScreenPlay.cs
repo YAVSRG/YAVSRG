@@ -43,6 +43,7 @@ namespace Interlude.Interface.Screens
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("time", -220, 1, -100, 1, -20, 1, -20, 1, true), () => { return DateTime.Now.ToLongTimeString(); }));
             AddChild(new MiscInfoDisplay(scoreTracker, widgetData.GetWidgetConfig("timeLeft", -220, 1, 20, 0, -20, 1, 100, 0, false), () => { return Utils.FormatTime((Chart.Notes.Points[Chart.Notes.Points.Count - 1].Offset - (float)Game.Audio.Now()) / (float)Game.Options.Profile.Rate) + " left"; }));
             AddChild(new JudgementCounter(scoreTracker, widgetData.GetWidgetConfig("judgements", 70, 0, -180, 0.5f, 320, 0, 180, 0.5f, false)));
+            //AddChild(new Mascot(scoreTracker, widgetData.GetWidgetConfig("mascot", 0, 0, 0, 0, 1, 1, 1, 1, false)));
         }
 
         public override void OnEnter(Screen prev)

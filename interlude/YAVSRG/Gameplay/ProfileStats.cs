@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Prelude.Gameplay.DifficultyRating;
 using Prelude.Gameplay;
 using Prelude.Gameplay.Charts.YAVSRG;
@@ -48,7 +49,7 @@ namespace Interlude.Gameplay
             var HitData = ScoreTracker.StringToHitData(Score.hitdata, Score.keycount);
             ChartWithModifiers ModdedChart = Game.Gameplay.GetModifiedChart(Score.selectedMods, Chart);
             float ScoreRating = PlayerRating.GetRating(new RatingReport(ModdedChart, Score.rate, Score.layout), HitData);
-            TopScore NewTopScore = new TopScore(Chart.GetFileIdentifier(), Game.Gameplay.ScoreDatabase.GetChartSaveData(Chart).Scores.IndexOf(Score), ScoreRating); //score is added to list after this function is over, so .Count gives correct id
+            TopScore NewTopScore = new TopScore(Chart.GetFileIdentifier(), Score.time, ScoreRating); //score is added to list after this function is over, so .Count gives correct id
             bool inserted = false;
 
             //look through existing top scores (earlier = higher rating)
@@ -99,7 +100,7 @@ namespace Interlude.Gameplay
                 try
                 {
                     c = ChartLoader.Cache.LoadChart(ChartLoader.Cache.Charts[score.FileIdentifier]);
-                    s = Game.Gameplay.ScoreDatabase.GetChartSaveData(c).Scores[score.ScoreID];
+                    s = Game.Gameplay.ScoreDatabase.GetChartSaveData(c).Scores.Where((entry) => entry.time == score.Timestamp).First();
                 }
                 catch (Exception e)
                 {
@@ -142,7 +143,7 @@ namespace Interlude.Gameplay
                         }
                         foreach (Score s in d.Scores)
                         {
-                            if (s.playerUUID == Game.Options.Profile.UUID)
+                            if (s.playerUUID == Game.Options.Profile.UUID || s.player == Game.Options.Profile.Name)
                                 SetScore(s, c);
                         }
                     }

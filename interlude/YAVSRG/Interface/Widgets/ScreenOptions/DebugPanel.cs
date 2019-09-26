@@ -13,5 +13,10 @@ namespace Interlude.Interface.Widgets
         {
             AddChild(new SimpleButton("Recache Charts", () => Game.Tasks.AddTask(ChartLoader.Recache(), ChartLoader.RefreshCallback, "Recaching charts", true), () => false, null).Reposition(50, 0, 50, 0, 350, 0, 100, 0));
         }
+
+        public override void Draw(Rect bounds)
+        {
+            base.Draw(bounds);
+        }
     }
 }
