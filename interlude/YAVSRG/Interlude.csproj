@@ -117,6 +117,8 @@
     <Compile Include="Gameplay\CachedChart.cs" />
     <Compile Include="Gameplay\Collections\Collection.cs" />
     <Compile Include="Gameplay\Collections\CollectionsManager.cs" />
+    <Compile Include="Gameplay\Collections\GoalData.cs" />
+    <Compile Include="Gameplay\Collections\PlaylistData.cs" />
     <Compile Include="Gameplay\NoteRenderer.cs" />
     <Compile Include="Gameplay\NoteRendering\PlayfieldFragment.cs" />
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />

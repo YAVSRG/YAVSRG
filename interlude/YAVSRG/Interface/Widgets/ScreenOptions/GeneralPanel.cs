@@ -42,7 +42,7 @@ namespace Interlude.Interface.Widgets
             AddChild(
                 new TooltipContainer(
                     new FramedButton("Open Data Folder",
-                () => { System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory)); }, null),
+                () => { System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory == "" ? System.IO.Directory.GetCurrentDirectory() : Game.WorkingDirectory)); }, null),
                 "Opens the folder which Interlude works in. This is where you put skins, charts and other settings.")
                 .Reposition(-200, 0.5f, 525, 0, 200, 0.5f, 600, 0));
         }

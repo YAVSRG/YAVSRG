@@ -23,6 +23,8 @@ namespace Interlude.Interface.Dialogs
             AddChild(new SimpleButton("Delete", () => { Game.Screens.AddDialog(new ConfirmDialog("Really delete this collection?",
                 (s) => { if (s == "Y") { Game.Gameplay.Collections.DeleteCollection(Game.Gameplay.Collections.SelectedCollection); Refresh(); } })); }, () => false, null)
                 .Reposition(50, 0.5f, 0, 0.5f, 250, 0.5f, 40, 0.5f));
+            AddChild(new SimpleButton("Make this collection into a playlist", () => { Game.Gameplay.Collections.GetCollection(Game.Gameplay.Collections.SelectedCollection).MakePlaylist(); }, () => false, null)
+                .Reposition(50, 0.5f, 40, 0.5f, 250, 0.5f, 80, 0.5f));
         }
     }
 }

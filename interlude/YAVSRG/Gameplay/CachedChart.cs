@@ -1,4 +1,5 @@
-﻿using Prelude.Gameplay.DifficultyRating;
+﻿using Newtonsoft.Json;
+using Prelude.Gameplay.DifficultyRating;
 using Prelude.Gameplay.Charts.YAVSRG;
 using Prelude.Gameplay;
 
@@ -20,9 +21,14 @@ namespace Interlude.Gameplay
         public float physical;
         public float technical;
 
+        [JsonIgnore]
+        public string collection;
+        [JsonIgnore]
+        public int collectionIndex;
+
         public static CachedChart FromChart(Chart c)
         {
-            RatingReport r = new RatingReport(new ChartWithModifiers(c),1,KeyLayout.Layout.Spread);
+            RatingReport r = new RatingReport(new ChartWithModifiers(c), 1, KeyLayout.Layout.Spread);
             return new CachedChart
             {
                 file = c.Data.File,
@@ -41,19 +47,17 @@ namespace Interlude.Gameplay
             };
         }
 
-        public override bool Equals(object other) //reminder to fix this in future, in an optimised way
-        {
-            return ReferenceEquals(this, other);
-        }
-        
-        public override int GetHashCode()
-        {
-            return 0;
-        }
-
         public string GetFileIdentifier()
         {
             return System.IO.Path.Combine(abspath, file);
+        }
+
+        public CachedChart Rename_This_Hack(string collection, int index)
+        {
+            CachedChart result = (CachedChart)MemberwiseClone();
+            result.collection = collection;
+            result.collectionIndex = index;
+            return result;
         }
     }
 }

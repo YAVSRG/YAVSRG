@@ -5,7 +5,7 @@ using Prelude.Gameplay.Mods;
 using Prelude.Gameplay.DifficultyRating;
 using Prelude.Gameplay;
 using Prelude.Utilities;
-using Interlude.Gameplay.Charts.Collections;
+using Interlude.Gameplay.Collections;
 using Interlude.IO;
 
 namespace Interlude.Gameplay
@@ -27,6 +27,10 @@ namespace Interlude.Gameplay
         public void ChangeChart(CachedChart cache, Chart c, bool playFromPreview)
         {
             CurrentCachedChart = cache;
+            if (cache.collection != null)
+            {
+                Collections.GetCollection(cache.collection).GetPlaylistData(cache.collectionIndex)?.Apply();
+            }
             CurrentChart = c;
             Game.Screens.ChangeBackground(Content.LoadBackground(c.Data.SourcePath, c.Data.BGFile));
             Game.Audio.ChangeTrack(c.AudioPath());
@@ -71,12 +75,6 @@ namespace Interlude.Gameplay
         public void PlaySelectedChart()
         {
             Game.Screens.AddScreen(new Interface.Screens.ScreenPlay());
-            /*if (Game.Multiplayer.Connected)
-            {
-                Game.Multiplayer.SendPacket(new Net.P2P.Protocol.Packets.PacketPlay() {
-                    diff = CurrentChart.Data.DiffName, mods = SelectedMods, rate = (float)Game.Options.Profile.Rate,
-                    hash = CurrentChart.GetHash(), name = CurrentChart.Data.Title, pack = CurrentChart.Data.SourcePack });
-            }*/
         }
 
         public void ApplyModsToHitData(ChartWithModifiers c, ref HitData[] hitdata)

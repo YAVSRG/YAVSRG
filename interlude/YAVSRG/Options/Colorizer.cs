@@ -159,7 +159,7 @@ namespace Interlude.Options
 
         private static bool RoughlyDivisibleBy(float a, float b)
         {
-            return Math.Abs(a - b * Math.Round(a / b)) < 2;
+            return Math.Abs(a - b * Math.Round(a / b)) < 3;
         }
     }
 }

@@ -97,6 +97,7 @@ namespace Interlude.Gameplay
             {
                 foreach (string c in Game.Gameplay.Collections.Collections.Keys)
                 {
+                    int i = 0;
                     temp.Add(c, new List<CachedChart>());
                     toRemove = new List<string>();
                     lock (Cache)
@@ -105,14 +106,15 @@ namespace Interlude.Gameplay
                         {
                             if (Cache.Charts.ContainsKey(id))
                             {
-                                temp[c].Add(Cache.Charts[id]);
+                                temp[c].Add(Cache.Charts[id].Rename_This_Hack(c, i));
                             }
                             else
                             {
-                                //todo: alert the user of this and/or remove chart from collection
+                                //todo: alert the user of this and prompt remove chart from collection
                                 //toRemove.Add(id);
                                 Log(id + "isn't present in the cache! Maybe it was deleted?", "", LogType.Warning);
                             }
+                            i++;
                         }
                     }
                     foreach (string id in toRemove)

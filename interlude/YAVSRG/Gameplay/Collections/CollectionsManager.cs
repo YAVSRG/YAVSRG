@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Prelude.Utilities;
 
-namespace Interlude.Gameplay.Charts.Collections
+namespace Interlude.Gameplay.Collections
 {
     public class CollectionsManager
     {
@@ -16,6 +17,19 @@ namespace Interlude.Gameplay.Charts.Collections
                 return Utils.LoadObject<CollectionsManager>(path);
             }
             return new CollectionsManager();
+        }
+
+        public void CreateNewCollection(string name, bool playlist)
+        {
+            if (!Collections.ContainsKey(name))
+            {
+                Collections.Add(name, new Collection());
+                if (playlist) GetCollection(name).MakePlaylist();
+            }
+            else
+            {
+                Logging.Log("This collection already exists!", "", Logging.LogType.Warning);
+            }
         }
 
         public Collection GetCollection(string name)
