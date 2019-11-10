@@ -124,6 +124,7 @@
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />
     <Compile Include="Gameplay\ScoreSavingPreference.cs" />
     <Compile Include="Gameplay\TopScore.cs" />
+    <Compile Include="Graphics\TextureAtlas.cs" />
     <Compile Include="Graphics\FBO.cs" />
     <Compile Include="Graphics\Plane.cs" />
     <Compile Include="Graphics\RenderTarget.cs" />
@@ -304,6 +305,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resources\Assets\Assets.txt" />
     <Content Include="Resources\Localisation\en-US.txt" />
     <Content Include="Resources\TipSplashes.txt" />
     <None Include="DiscordRPC.dll">

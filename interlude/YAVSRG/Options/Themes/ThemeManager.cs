@@ -14,17 +14,26 @@ namespace Interlude.Options.Themes
     {
         public static readonly string AssetsDir = Path.Combine(Game.WorkingDirectory, "Data", "Assets");
 
-        public List<string> AvailableThemes;
+        public List<string> AvailableThemes { get; private set; }
 
-        public List<Theme> LoadedThemes;
+        public List<Theme> LoadedThemes { get; private set; }
 
-        public Dictionary<string, NoteSkin> NoteSkins;
-        protected Dictionary<string, Sprite> Textures;
+        public Dictionary<string, string> AssetsList { get; private set; }
+        public Dictionary<string, NoteSkinMetadata> NoteSkins { get; private set; }
+
         protected Dictionary<string, int> Sounds;
+        public TextureAtlas TextureAtlas;
 
         public ThemeManager()
         {
             DetectAvailableThemes();
+            AssetsList = new Dictionary<string, string>();
+            foreach (string line in IO.ResourceGetter.LoadText("Interlude.Resources.Assets.Assets.txt"))
+            {
+                var split = line.Split('|');
+                AssetsList.Add(split[0], split[1]);
+            }
+            Load();
         }
 
         public void DetectAvailableThemes()
@@ -34,10 +43,9 @@ namespace Interlude.Options.Themes
             {
                 AvailableThemes.Add(Path.GetFileName(t));
             }
-            Load();
         }
 
-        public NoteSkin GetCurrentNoteSkin()
+        public NoteSkinMetadata GetCurrentNoteSkin()
         {
             if (NoteSkins.ContainsKey(Game.Options.Profile.NoteSkin))
             {
@@ -61,9 +69,8 @@ namespace Interlude.Options.Themes
 
         public void Load()
         {
-            Textures = new Dictionary<string, Sprite>();
             Sounds = new Dictionary<string, int>();
-            NoteSkins = new Dictionary<string, NoteSkin>();
+            NoteSkins = new Dictionary<string, NoteSkinMetadata>();
             LoadedThemes = new List<Theme>
             {
                 new Theme(Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources.Assets.fallback.zip"))
@@ -89,61 +96,66 @@ namespace Interlude.Options.Themes
                     NoteSkins[noteskin] = theme.NoteSkins[noteskin];
                 }
             }
+
+            BuildAtlas();
+        }
+
+        void BuildAtlas()
+        {
+            TextureAtlas = new TextureAtlas();
+            foreach (string asset in AssetsList.Keys)
+            {
+                if (asset.StartsWith("skin/"))
+                {
+                    for (int i = LoadedThemes.Count - 1; i >= 0; i--)
+                    {
+                        if (LoadedThemes[i].NoteSkins.ContainsKey(Game.Options.Profile.NoteSkin))
+                        {
+                            try
+                            {
+                                TextureAtlas.AddTexture(LoadedThemes[i].GetNoteSkinTexture(Game.Options.Profile.NoteSkin, asset.Substring(5)));
+                                //Logging.Log("Loaded noteskin texture: " + asset, "", Logging.LogType.Debug);
+                            }
+                            catch
+                            {
+                                try
+                                {
+                                    //Logging.Log("Using fallback noteskin texture: "+asset, "", Logging.LogType.Debug);
+                                    TextureAtlas.AddTexture(LoadedThemes[0].GetNoteSkinTexture("default", asset.Substring(5)));
+                                }
+                                catch
+                                {
+                                    Logging.Log("Error in fallback gameplay assets!", "", Logging.LogType.Warning);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    for (int i = LoadedThemes.Count - 1; i >= 0; i--)
+                    {
+
+                        try
+                        {
+                            TextureAtlas.AddTexture(LoadedThemes[i].GetTexture(asset));
+                            //Logging.Log("Loaded texture: " + asset, "", Logging.LogType.Debug);
+                            break;
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+                    }
+                }
+            }
+            TextureAtlas.Build(false);
         }
 
         public Sprite GetTexture(string name)
         {
-            if (!Textures.ContainsKey(name))
-            {
-                Sprite t = default;
-                for (int i = LoadedThemes.Count - 1; i >= 0; i--)
-                {
-
-                    try
-                    {
-                        t = LoadedThemes[i].GetTexture(name);
-                        break;
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-                }
-                Textures[name] = t;
-            }
-            return Textures[name];
-        }
-
-        public Sprite GetNoteSkinTexture(string name)
-        {
-            if (!Textures.ContainsKey(name))
-            {
-                Sprite t = default;
-                for (int i = LoadedThemes.Count - 1; i >= 0; i--)
-                {
-                    if (LoadedThemes[i].NoteSkins.ContainsKey(Game.Options.Profile.NoteSkin))
-                    {
-                        try
-                        {
-                            t = LoadedThemes[i].GetNoteSkinTexture(Game.Options.Profile.NoteSkin, name);
-                        }
-                        catch
-                        {
-                            try
-                            {
-                                t = LoadedThemes[0].GetNoteSkinTexture("default", name);
-                            }
-                            catch
-                            {
-                                Logging.Log("Error in fallback gameplay assets!", "", Logging.LogType.Warning);
-                            }
-                        }
-                        break;
-                    }
-                }
-                Textures[name] = t;
-            }
-            return Textures[name];
+            return TextureAtlas[name];
         }
 
         public int GetSound(string name)
@@ -172,10 +184,7 @@ namespace Interlude.Options.Themes
         public void Unload()
         {
             //todo: reload sounds, fonts
-            foreach (string id in Textures.Keys)
-            {
-                GL.DeleteTexture(Textures[id].ID);
-            }
+            TextureAtlas.Dispose();
             foreach (Theme theme in LoadedThemes)
             {
                 theme.Save();

@@ -23,16 +23,7 @@ namespace Interlude.Options
 
         public int NoteColorCount()
         {
-            return Game.Options.Themes.GetNoteSkinTexture("note").UV_Y;
-        }
-
-        public void LoadGameplayTextures() //makes sure they're all in memory to avoid lag spikes while playing
-        {
-            string[] names = { "note", "holdhead", "holdtail", "holdbody", "receptor", "mine" };
-            foreach (string n in names)
-            {
-                Game.Options.Themes.GetNoteSkinTexture(n);
-            }
+            return Game.Options.Themes.GetTexture("note").Rows;
         }
     }
 }

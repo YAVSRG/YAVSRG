@@ -28,10 +28,15 @@ namespace Interlude.Graphics
         public static SpriteFont Font1;
         public static SpriteFont Font2;
 
+        static int LastSprite;
+
         public static void Draw(RenderTarget target, float depth = 0)
         {
-            GL.Enable(EnableCap.Texture2D);
-            GL.BindTexture(TextureTarget.Texture2D, target.Texture.ID);
+            if (target.Texture.GL_Texture_ID != LastSprite)
+            {
+                GL.BindTexture(TextureTarget.Texture2D, target.Texture.GL_Texture_ID);
+                LastSprite = target.Texture.GL_Texture_ID;
+            }
             GL.Begin(PrimitiveType.Quads);
 
             GL.Color4(target.Color1);
@@ -51,35 +56,6 @@ namespace Interlude.Graphics
             GL.Vertex3(target.Coord4.X, target.Coord4.Y, depth);
 
             GL.End();
-            GL.Disable(EnableCap.Texture2D);
-        }
-
-        public static void Draw(string texture, Plane pos, int ux, int uy)
-        {
-            GL.Enable(EnableCap.Texture2D);
-            Sprite s = Game.Options.Themes.GetTexture(texture);
-            GL.BindTexture(TextureTarget.Texture2D, s.ID);
-            GL.Begin(PrimitiveType.Quads);
-
-            float x = 1f / s.UV_X;
-            float y = 1f / s.UV_Y;
-
-            GL.Color4(Color.White);
-
-            GL.TexCoord2(x * ux, y * uy);
-            GL.Vertex3(pos.P1);
-            
-            GL.TexCoord2(x + x * ux, y * uy);
-            GL.Vertex3(pos.P2);
-
-            GL.TexCoord2(x + x * ux, y + y * uy);
-            GL.Vertex3(pos.P3);
-
-            GL.TexCoord2(x * ux, y + y * uy);
-            GL.Vertex3(pos.P4);
-
-            GL.End();
-            GL.Disable(EnableCap.Texture2D);
         }
 
         public static void DrawLine(Vector2 a, Vector2 b, Color col1, Color col2, float thickness)
@@ -103,11 +79,6 @@ namespace Interlude.Graphics
             return new RenderTarget(texture, bounds, col1, col2, col3, col4, new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b));
         }
 
-        public static RenderTarget Tiling(Sprite texture, Rect bounds, float offsetX = 0, float offsetY = 0, float scaleX = 1, float scaleY = 1, Color col = default)
-        {
-            return Tiling(texture, bounds, offsetX, offsetY, scaleX, scaleY, col, col, col, col);
-        }
-
         public static void DrawAlignedTexture(string texture, float x, float y, float scaleX, float scaleY, float alignX, float alignY, Color color)
         {
             Sprite s = Game.Options.Themes.GetTexture(texture);
@@ -127,7 +98,7 @@ namespace Interlude.Graphics
 
         public static void DrawRect(Rect bounds, Color color)
         {
-            Draw(new RenderTarget(default, bounds, color, 0, 0));
+            Draw(new RenderTarget(Sprite.Default, bounds, color, 0, 0));
         }
 
         public static void EnableTransform(bool upscroll)
@@ -259,6 +230,7 @@ namespace Interlude.Graphics
         public static void Init()
         {
             GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Texture2D);
             GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha);
             GL.ClearColor(0, 0, 0, 0);
             GL.ClearStencil(0x00);

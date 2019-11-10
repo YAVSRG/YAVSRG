@@ -21,13 +21,18 @@ namespace Interlude.Graphics
             Coord3 = new Vector2(bounds.Right, bounds.Bottom);
             Coord4 = new Vector2(bounds.Left, bounds.Bottom);
 
-            float x = 1f / texture.UV_X;
-            float y = 1f / texture.UV_Y;
+            float x = (float)texture.Width / texture.SourceWidth / texture.Columns;
+            float y = (float)texture.Height / texture.SourceHeight / texture.Rows;
+            float ox = (float)texture.Offset_X / texture.SourceWidth;
+            float oy = (float)texture.Offset_Y / texture.SourceHeight;
 
-            Texcoord1 = new Vector2(x * ux, y * uy);
-            Texcoord2 = new Vector2(x + x * ux, y * uy);
-            Texcoord3 = new Vector2(x + x * ux, y + y * uy);
-            Texcoord4 = new Vector2(x * ux, y + y * uy);
+            ux = ux % texture.Columns;
+            uy = uy % texture.Rows;
+
+            Texcoord1 = new Vector2(ox + x * ux, oy + y * uy);
+            Texcoord2 = new Vector2(ox + x + x * ux,  oy + y * uy);
+            Texcoord3 = new Vector2(ox + x + x * ux, oy + y + y * uy);
+            Texcoord4 = new Vector2(ox + x * ux, oy + y + y * uy);
 
             Color1 = Color2 = Color3 = Color4 = color;
 
@@ -65,7 +70,7 @@ namespace Interlude.Graphics
 
             Texcoord1 = Texcoord2 = Texcoord3 = Texcoord4 = default;
 
-            Texture = default;
+            Texture = Sprite.Default;
         }
 
         public RenderTarget(Sprite texture, Rect bounds, Color col1, Color col2, Color col3, Color col4, Vector2 uv1, Vector2 uv2, Vector2 uv3, Vector2 uv4)
@@ -115,14 +120,14 @@ namespace Interlude.Graphics
             Coord3 = pos3;
             Coord4 = pos4;
 
-            Texcoord1 = Texcoord2= Texcoord3 = Texcoord4 = default(Vector2);
+            Texcoord1 = Texcoord2= Texcoord3 = Texcoord4 = default;
 
             Color1 = col;
             Color2 = col;
             Color3 = col;
             Color4 = col;
 
-            Texture = default;
+            Texture = Sprite.Default;
         }
 
         public Vector2 GetTexCoord(int i)

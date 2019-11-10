@@ -7,13 +7,13 @@ namespace Interlude.IO
     //todo: GetFile to reduce code duplication
     public class ResourceGetter
     {
-        static readonly string[] menu = LoadSplashes("Interlude.Resources.MenuSplashes.txt");
-        static readonly string[] loading = LoadSplashes("Interlude.Resources.LoadingSplashes.txt");
-        static readonly string[] crash = LoadSplashes("Interlude.Resources.CrashSplashes.txt");
+        static readonly string[] menu = LoadText("Interlude.Resources.MenuSplashes.txt");
+        static readonly string[] loading = LoadText("Interlude.Resources.LoadingSplashes.txt");
+        static readonly string[] crash = LoadText("Interlude.Resources.CrashSplashes.txt");
 
         static Random random = new Random();
 
-        static string[] LoadSplashes(string resourceName)
+        public static string[] LoadText(string resourceName)
         {
             return GetResource(resourceName).Split('\n');
         }

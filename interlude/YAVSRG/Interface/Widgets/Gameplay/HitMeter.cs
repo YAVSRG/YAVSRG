@@ -75,7 +75,7 @@ namespace Interlude.Interface.Widgets.Gameplay
             }
             hits = new List<Hit>();
             Sprite sprite = Game.Options.Themes.GetTexture("judgements");
-            aspectRatio = (float)sprite.Height / sprite.UV_Y / ((float)sprite.Width / sprite.UV_X);
+            aspectRatio = (float)sprite.Height / sprite.Rows / ((float)sprite.Width / sprite.Columns);
             hScale = pos.Extra.GetValue("HitHorizontalScale", 3f) * Game.Options.Theme.ColumnWidth / st.Scoring.MissWindow;
             vScale = pos.Extra.GetValue("HitVerticalScale", 0.25f) * Game.Options.Theme.ColumnWidth;
             thickness = pos.Extra.GetValue("HitThickness", 4);

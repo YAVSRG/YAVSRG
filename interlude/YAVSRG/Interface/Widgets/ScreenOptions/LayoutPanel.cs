@@ -43,7 +43,7 @@ namespace Interlude.Interface.Widgets
             {
                 base.Draw(bounds);
                 bounds = GetBounds(bounds);
-                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("note"), bounds, System.Drawing.Color.White, 1, get()));
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("note"), bounds, System.Drawing.Color.White, 1, get()));
             }
 
             public override void Update(Rect bounds)

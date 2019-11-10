@@ -63,7 +63,7 @@ namespace Interlude.Interface.Dialogs
 
         public ModSelectDialog(Action<string> action) : base(action)
         {
-            AddChild(new SimpleButton("Done", () => { Game.Options.Themes.Unload(); Game.Options.Themes.Load(); Close(""); }, () => false, () => Game.Options.General.Hotkeys.Select).Reposition(0, 0.4f, -150, 1, 0, 0.6f, -100, 1));
+            AddChild(new SimpleButton("Done", () => { Close(""); }, () => false, () => Game.Options.General.Hotkeys.Select).Reposition(0, 0.4f, -150, 1, 0, 0.6f, -100, 1));
             AddChild((Selected = new FlowContainer()).Reposition(50, 0.5f, 200, 0, -200, 1, -200, 1));
             AddChild((Available = new FlowContainer()).Reposition(200, 0, 200, 0, -50, 0.5f, -200, 1));
             AddChild(new TextBox("Selected", TextAnchor.RIGHT, 0f, true, Game.Options.Theme.MenuFont, Color.Black).Reposition(0, 0.5f, 50, 0, -200, 1, 200, 0));

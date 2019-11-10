@@ -11,15 +11,10 @@ namespace Interlude.Graphics
     {
         static PrivateFontCollection collection = new PrivateFontCollection();
 
-        Dictionary<char, Sprite> FontLookup;
+        TextureAtlas FontLookup;
         int FONTSCALE;
         Font Font;
         readonly float ShadowAmount = 0.09f;
-
-        public int Count
-        {
-            get { return FontLookup.Count; }
-        }
 
         public SpriteFont(int scale, string f)
         {
@@ -34,13 +29,17 @@ namespace Interlude.Graphics
                 Font = new Font(f, scale);
             }
 
-            FontLookup = new Dictionary<char, Sprite>();
+            FontLookup = new TextureAtlas();
 
-            foreach (char c in @"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\|")
+            foreach (char c in @"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\|"+"\"\r\n")
             {
                 GenChar(c);
             }
+
+            FontLookup.Build(true);
         }
+
+        int TypicalCharHeight => FontLookup["T"].Height;
 
         public float DrawText(string text, float scale, float x, float y, Color color, bool dropShadow = false, Color shadowColor = default)
         {
@@ -54,8 +53,7 @@ namespace Interlude.Graphics
             foreach (char c in text)
             {
                 if (c == ' ') { x += FONTSCALE * 0.75f * scale; continue; }
-                if (!FontLookup.ContainsKey(c)) { GenChar(c); }
-                s = FontLookup[c];
+                s = FontLookup.GetTexture(c.ToString());
                 SpriteBatch.Draw(new RenderTarget(s, new Rect(x, y, x + s.Width * scale, y + s.Height * scale), color));
                 x += (s.Width - FONTSCALE * 0.5f) * scale; //kerning
             }
@@ -85,7 +83,7 @@ namespace Interlude.Graphics
         public float DrawCentredTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             float w = MeasureText(text);
-            int h = FontLookup['T'].Height;
+            int h = TypicalCharHeight;
             float scale = Math.Min(
                 bounds.Width / w,
                 bounds.Height / h
@@ -96,7 +94,7 @@ namespace Interlude.Graphics
         public float DrawTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             float w = MeasureText(text);
-            int h = FontLookup['T'].Height;
+            int h = TypicalCharHeight;
             float scale = Math.Min(
                 bounds.Width / w,
                 bounds.Height / h
@@ -107,7 +105,7 @@ namespace Interlude.Graphics
         public float DrawJustifiedTextToFill(string text, Rect bounds, Color c, bool dropShadow = false, Color shadowColor = default)
         {
             float w = MeasureText(text);
-            int h = FontLookup['T'].Height;
+            int h = TypicalCharHeight;
             float scale = Math.Min(
                 bounds.Width / w,
                 bounds.Height / h
@@ -146,7 +144,7 @@ namespace Interlude.Graphics
             string[] lines = text.Split('\n');
             float x = bounds.Left;
             float y = bounds.Top;
-            float h = FontLookup['T'].Height * scale / FONTSCALE;
+            float h = TypicalCharHeight * scale / FONTSCALE;
             foreach (string s in lines)
             {
                 string[] split = s.Split(' ');
@@ -174,8 +172,7 @@ namespace Interlude.Graphics
             foreach (char c in text)
             {
                 if (c == ' ') { w += FONTSCALE * 0.75f; continue; }
-                if (!FontLookup.ContainsKey(c)) { w += FontLookup['?'].Width; }
-                else { w += FontLookup[c].Width; }
+                else { w += FontLookup[c.ToString()].Width; }
                 w -= FONTSCALE / 2;
             }
             return w;
@@ -202,7 +199,7 @@ namespace Interlude.Graphics
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 g.DrawString(c.ToString(), Font, Brushes.White, 0, 0);
             }
-            FontLookup.Add(c, Content.UploadTexture(bmp, 1, 1, true));
+            FontLookup.AddTexture(bmp, c.ToString());
         }
     }
 }

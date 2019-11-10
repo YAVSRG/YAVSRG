@@ -24,7 +24,7 @@ namespace Interlude.Interface.Screens
 
         public override void Draw(Rect bounds)
         {
-            SpriteBatch.DrawTilingTexture("levelselectbase", GetBounds(bounds), 400, 0, 0, Color.FromArgb(30,Game.Screens.HighlightColor));
+            //SpriteBatch.DrawTilingTexture("levelselectbase", GetBounds(bounds), 400, 0, 0, Color.FromArgb(30,Game.Screens.HighlightColor));
             base.Draw(bounds);
             SpriteBatch.Font1.DrawCentredText("Hold " + Game.Options.General.Hotkeys.Help.ToString().ToUpper() + " to see more info when hovering over settings", 30f, 0, bounds.Bottom - 50, Color.White, true, Color.Black);
         }

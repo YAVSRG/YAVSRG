@@ -59,7 +59,7 @@ namespace Interlude.IO
 
         public static void UnloadTexture(Sprite s)
         {
-            GL.DeleteTexture(s.ID);
+            GL.DeleteTexture(s.GL_Texture_ID);
         }
     }
 }

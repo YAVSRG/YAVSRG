@@ -21,8 +21,8 @@ namespace Interlude.Interface.Widgets.Gameplay
         {
             base.Draw(bounds);
             Sprite s = Game.Options.Themes.GetTexture("mascot");
-            float w = bounds.Height * (s.Width / s.UV_X) / s.Height;
-            SpriteBatch.Draw(new RenderTarget(s, bounds.SliceRight(w), System.Drawing.Color.White, frame % s.UV_X, 0));
+            float w = bounds.Height * (s.Width / s.Columns) / s.Height;
+            SpriteBatch.Draw(new RenderTarget(s, bounds.SliceRight(w), System.Drawing.Color.White, frame % s.Columns, 0));
         }
     }
 }

@@ -32,7 +32,6 @@ namespace Interlude.Gameplay
         public NoteRenderer(ChartWithModifiers chart)
         {
             Chart = chart;
-            Game.Options.Theme.LoadGameplayTextures();
 
             Composite = FBO.FromPool();
             NoteRender = FBO.FromPool();
@@ -148,7 +147,7 @@ namespace Interlude.Gameplay
             {
                 foreach (byte k in holdsInHitpos.GetColumns())
                 {
-                    SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdhead"), ObjectPosition(k, 0), Color.White,
+                    SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("holdhead"), ObjectPosition(k, 0), Color.White,
                         AnimationFrame(), holdColorsHitpos[k]).Rotate(NoteRotation(k)));
                 }
                 bugFix.value &= (ushort)~holdsInHitpos.value;
@@ -160,7 +159,7 @@ namespace Interlude.Gameplay
             for (byte c = 0; c < Keys; c++) //draw columns and empty receptors
             {
                 SpriteBatch.DrawRect(ColumnPosition(c), Game.Options.Theme.PlayfieldColor);
-                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("receptor"), ObjectPosition(c, 0), Color.White,
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("receptor"), ObjectPosition(c, 0), Color.White,
                     AnimationFrame(), Game.Options.Profile.KeyBinds[Keys - 3][c].Held() ? 1 : 0).Rotate(NoteRotation(c)));
             }
 
@@ -187,12 +186,12 @@ namespace Interlude.Gameplay
 
         private void DrawLongTap(byte i, float start, float end, int color)
         {
-            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdbody"), HoldPosition(i, start, end), Color.White, AnimationFrame(), color));
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("holdbody"), HoldPosition(i, start, end), Color.White, AnimationFrame(), color));
             if (holdMiddles.GetColumn(i)) //draw hold head if this isn't a middle section of a long note
             { holdMiddles.RemoveColumn(i); }
             else
             {
-                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("holdhead"), ObjectPosition(i, start), Color.White,
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("holdhead"), ObjectPosition(i, start), Color.White,
                     AnimationFrame(), color).Rotate(NoteRotation(i)));
             }
         }
@@ -241,19 +240,19 @@ namespace Interlude.Gameplay
             }
             foreach (byte k in s.taps.GetColumns())
             {
-                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("note"), ObjectPosition(k, pos[k]), Color.White,
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("note"), ObjectPosition(k, pos[k]), Color.White,
                     AnimationFrame(), s.colors[k]).Rotate(NoteRotation(k)));
             }
             foreach (byte k in s.mines.GetColumns())
             {
-                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetNoteSkinTexture("mine"), ObjectPosition(k, pos[k]), Color.White,
+                SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("mine"), ObjectPosition(k, pos[k]), Color.White,
                     AnimationFrame(), s.colors[k]));
             }
             foreach (byte k in s.ends.GetColumns())
             {
                 var ns = Game.Options.Themes.GetCurrentNoteSkin();
                 bool FlipTail = (ns.FlipHoldTail && !ns.UseHoldTailTexture) ^ Game.Options.Profile.Upscroll;
-                Sprite sprite = Game.Options.Themes.GetNoteSkinTexture(ns.UseHoldTailTexture ? "holdtail" : "holdhead");
+                Sprite sprite = Game.Options.Themes.GetTexture(ns.UseHoldTailTexture ? "holdtail" : "holdhead");
                 Rect rect = ObjectPosition(k, pos[k]);
                 if (FlipTail) rect = rect.FlipY();
                 RenderTarget target = new RenderTarget(sprite, ObjectPosition(k, pos[k]), Color.White, AnimationFrame(), s.colors[k]);

@@ -60,13 +60,13 @@ namespace Interlude.Interface
                 SpriteBatch.Draw(new RenderTarget(bounds.SliceBottom(shadow), transparent, transparent, back, back));
 
             if ((components & 1) > 0)
-                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceLeft(thickness), color));
+                SpriteBatch.Draw(new RenderTarget(Sprite.Default, bounds.SliceLeft(thickness), color));
             if ((components & 2) > 0)
-                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceTop(thickness), color));
+                SpriteBatch.Draw(new RenderTarget(Sprite.Default, bounds.SliceTop(thickness), color));
             if ((components & 4) > 0)
-                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceRight(thickness), color));
+                SpriteBatch.Draw(new RenderTarget(Sprite.Default, bounds.SliceRight(thickness), color));
             if ((components & 8) > 0)
-                SpriteBatch.Draw(new RenderTarget(default, bounds.SliceBottom(thickness), color));
+                SpriteBatch.Draw(new RenderTarget(Sprite.Default, bounds.SliceBottom(thickness), color));
         }
 
         public static void DrawParallelogramWithBG(Rect bounds, float amount, Color fill, Color frame)

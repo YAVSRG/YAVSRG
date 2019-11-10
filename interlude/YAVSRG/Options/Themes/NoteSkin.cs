@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Options.Themes
 {
-    public class NoteSkin
+    public class NoteSkinMetadata
     {
         public bool UseRotation = false;
         public string Name = "?";

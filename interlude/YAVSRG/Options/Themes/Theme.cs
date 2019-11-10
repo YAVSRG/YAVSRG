@@ -6,6 +6,7 @@ using System.Drawing;
 using Prelude.Utilities;
 using Interlude.IO;
 using Interlude.Graphics;
+using static Interlude.Graphics.TextureAtlas;
 
 namespace Interlude.Options.Themes
 {
@@ -13,7 +14,7 @@ namespace Interlude.Options.Themes
     {
         public ThemeOptions Config;
 
-        public Dictionary<string, NoteSkin> NoteSkins;
+        public Dictionary<string, NoteSkinMetadata> NoteSkins;
 
         public Dictionary<string, WidgetPositionData> UIConfig;
 
@@ -25,14 +26,14 @@ namespace Interlude.Options.Themes
         {
             ThemePath = path;
             Config = Utils.LoadObject<ThemeOptions>(GetFile("theme.json"));
-            NoteSkins = new Dictionary<string, NoteSkin>();
+            NoteSkins = new Dictionary<string, NoteSkinMetadata>();
             UIConfig = new Dictionary<string, WidgetPositionData>();
             foreach (string noteskin in Directory.EnumerateDirectories(Path.Combine(ThemePath, "NoteSkins")))
             {
                 string name = Path.GetFileName(noteskin);
                 try
                 {
-                    NoteSkins[name] = Utils.LoadObject<NoteSkin>(GetFile("NoteSkins", name, "noteskin.json"));
+                    NoteSkins[name] = Utils.LoadObject<NoteSkinMetadata>(GetFile("NoteSkins", name, "noteskin.json"));
                 }
                 catch (Exception e)
                 {
@@ -55,13 +56,13 @@ namespace Interlude.Options.Themes
             Config = Utils.LoadObject<ThemeOptions>(GetFile("theme.json"));
             //todo: hard code more stuff as time goes on like a jackass
             UIConfig = new Dictionary<string, WidgetPositionData>() { { "gameplay", Utils.LoadObject<WidgetPositionData>(GetFile("Interface", "gameplay.json")) } };
-            NoteSkins = new Dictionary<string, NoteSkin>() {
-                { "default", Utils.LoadObject<NoteSkin>(GetFile("NoteSkins", "default", "noteskin.json")) },
-                { "DivideByZero", Utils.LoadObject<NoteSkin>(GetFile("NoteSkins", "DivideByZero", "noteskin.json")) }
+            NoteSkins = new Dictionary<string, NoteSkinMetadata>() {
+                { "default", Utils.LoadObject<NoteSkinMetadata>(GetFile("NoteSkins", "default", "noteskin.json")) },
+                { "DivideByZero", Utils.LoadObject<NoteSkinMetadata>(GetFile("NoteSkins", "DivideByZero", "noteskin.json")) }
             };
         }
 
-        public Sprite GetTexture(string name)
+        public SpriteData GetTexture(string name)
         {
             Bitmap bmp; //fuck you c# look at this shit
             //how is this difficult
@@ -71,10 +72,10 @@ namespace Interlude.Options.Themes
             }
             TextureData info;
             try { info = Utils.LoadObject<TextureData>(GetFile("Textures", name + ".json")); } catch { info = new TextureData(); }
-            return Content.UploadTexture(bmp, info.Columns, info.Rows, false);
+            return new SpriteData() { Bitmap = bmp, Columns = info.Columns, Rows = info.Rows, Name = name };
         }
 
-        public Sprite GetNoteSkinTexture(string noteskinname, string name)
+        public SpriteData GetNoteSkinTexture(string noteskinname, string name)
         {
             Bitmap bmp;
             using (var stream = GetFile("NoteSkins", noteskinname, name + ".png"))
@@ -83,7 +84,7 @@ namespace Interlude.Options.Themes
             }
             TextureData info;
             try { info = Utils.LoadObject<TextureData>(GetFile("NoteSkins", noteskinname, name + ".json")); } catch { info = new TextureData(); }
-            return Content.UploadTexture(bmp, info.Columns, info.Rows, false);
+            return new SpriteData() { Bitmap = bmp, Columns = info.Columns, Rows = info.Rows, Name = name };
         }
 
         public byte[] GetSound(string name)
