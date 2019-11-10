@@ -4,8 +4,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Drawing;
 using Prelude.Utilities;
-using Interlude.IO;
-using Interlude.Graphics;
 using static Interlude.Graphics.TextureAtlas;
 
 namespace Interlude.Options.Themes
@@ -72,7 +70,7 @@ namespace Interlude.Options.Themes
             }
             TextureData info;
             try { info = Utils.LoadObject<TextureData>(GetFile("Textures", name + ".json")); } catch { info = new TextureData(); }
-            return new SpriteData() { Bitmap = bmp, Columns = info.Columns, Rows = info.Rows, Name = name };
+            return new SpriteData() { Bitmap = bmp, Columns = info.Columns, Rows = info.Rows, Name = name, Tiling = info.Tiling };
         }
 
         public SpriteData GetNoteSkinTexture(string noteskinname, string name)
@@ -84,7 +82,7 @@ namespace Interlude.Options.Themes
             }
             TextureData info;
             try { info = Utils.LoadObject<TextureData>(GetFile("NoteSkins", noteskinname, name + ".json")); } catch { info = new TextureData(); }
-            return new SpriteData() { Bitmap = bmp, Columns = info.Columns, Rows = info.Rows, Name = name };
+            return new SpriteData() { Bitmap = bmp, Columns = info.Columns, Rows = info.Rows, Name = name, Tiling = info.Tiling };
         }
 
         public byte[] GetSound(string name)

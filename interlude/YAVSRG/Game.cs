@@ -16,7 +16,7 @@ namespace Interlude
 {
     class Game : GameWindow
     {
-        public static readonly string Version = "Interlude v0.3.8.2-dev";
+        public static readonly string Version = "Interlude v0.3.8.3DEV";
         
         public static Game Instance; //keep track of instance of the game (should only be one).
 

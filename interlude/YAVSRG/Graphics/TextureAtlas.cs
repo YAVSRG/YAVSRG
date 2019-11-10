@@ -21,6 +21,7 @@ namespace Interlude.Graphics
             public Bitmap Bitmap;
             public int Rows;
             public int Columns;
+            public bool Tiling;
         }
 
         List<SpriteData> Textures = new List<SpriteData>();
@@ -55,9 +56,13 @@ namespace Interlude.Graphics
             AddTexture(bmp, name, 1, 1);
         }
 
-        public void AddTexture(Bitmap bmp, string name, int rows, int columns)
+        public void AddTexture(Bitmap bmp, string name, int rows, int columns, bool tiling = false)
         {
-            Textures.Add(new SpriteData() { Bitmap = bmp, Name = name, Rows = rows, Columns = columns });
+            if (tiling)
+            {
+
+            }
+            Textures.Add(new SpriteData() { Bitmap = bmp, Name = name, Rows = rows, Columns = columns, Tiling = tiling});
         }
 
         public void AddTexture(SpriteData data)
@@ -77,6 +82,7 @@ namespace Interlude.Graphics
             int y_position;
             foreach (SpriteData tex in Textures)
             {
+                if (tex.Tiling) continue;
                 height = Math.Max(height, tex.Bitmap.Height);
                 if (x_position + tex.Bitmap.Width > 16384)
                 {
@@ -97,6 +103,13 @@ namespace Interlude.Graphics
             foreach (SpriteData tex in Textures)
             {
                 var bmp = tex.Bitmap;
+                if (tex.Tiling)
+                {
+                    Sprites.Add(tex.Name, IO.Content.UploadTexture(bmp, tex.Columns, tex.Rows, LinearClamp));
+                    bmp.Dispose();
+                    GL.BindTexture(TextureTarget.Texture2D, Texture_ID);
+                    continue;
+                }
                 h = Math.Max(h, bmp.Height);
                 if (x_position + bmp.Width > 16384)
                 {
@@ -123,7 +136,6 @@ namespace Interlude.Graphics
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             }
-            Prelude.Utilities.Logging.Log(GL.GetError().ToString()+" "+width.ToString(),"", Prelude.Utilities.Logging.LogType.Debug);
             Textures.Clear();
         }
 

@@ -51,9 +51,9 @@ namespace Interlude.Interface.Widgets
 
             Game.Screens.DrawChartBackground(bounds, Color.FromArgb(a, Color.Aqua));
             SpriteBatch.DrawRect(bounds, Color.FromArgb((int)(alpha * 180), Color.Aqua));
-            //SpriteBatch.DrawTilingTexture("rain", bounds, 320, animation.value * -0.0006f, animation.value * -0.0007f, color: Color.FromArgb((int)(alpha * 80), Color.Blue));
-            //SpriteBatch.DrawTilingTexture("rain", bounds, 512, animation.value * -0.001f, animation.value * -0.0011f, color: Color.FromArgb((int)(alpha * 150), Color.Blue));
-            //SpriteBatch.DrawTilingTexture("rain", bounds, 800, animation.value * -0.0015f, animation.value * -0.0016f, color: Color.FromArgb((int)(alpha * 220), Color.Blue));
+            SpriteBatch.DrawTilingTexture("rain", bounds, 320, animation.value * -0.0006f, animation.value * -0.0007f, color: Color.FromArgb((int)(alpha * 80), Color.Blue));
+            SpriteBatch.DrawTilingTexture("rain", bounds, 512, animation.value * -0.001f, animation.value * -0.0011f, color: Color.FromArgb((int)(alpha * 150), Color.Blue));
+            SpriteBatch.DrawTilingTexture("rain", bounds, 800, animation.value * -0.0015f, animation.value * -0.0016f, color: Color.FromArgb((int)(alpha * 220), Color.Blue));
 
             float prev = 0;
             float m = bounds.Bottom - w * alpha * 0.5f;
@@ -73,12 +73,7 @@ namespace Interlude.Interface.Widgets
 
             SpriteBatch.Stencil(SpriteBatch.StencilMode.Disable);
 
-            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("logo"), bounds, Color.FromArgb(Math.Min(255, a * 2), Color.White)));// colors: new[] {
-                //Color.FromArgb(Math.Min(255,a*3),Color.White),
-                //Color.FromArgb(Math.Min(255,a*2),Color.White),
-               // Color.FromArgb(Math.Min(255,a*2),Color.White),
-               // Color.FromArgb(Math.Min(255,a*3),Color.White)
-            //});
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("logo"), bounds, Color.FromArgb(Math.Min(255, a * 2), Color.White)));
         }
     }
 }

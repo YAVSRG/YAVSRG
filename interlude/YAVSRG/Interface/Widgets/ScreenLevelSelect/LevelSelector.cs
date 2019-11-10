@@ -48,7 +48,7 @@ namespace Interlude.Interface.Widgets
                             QuickColor(); //prevents black flashing
                         }
                         Rect bounds = new Rect(ScreenUtils.ScreenWidth - 600 - MouseOver + (float)Math.Pow(topEdge * 0.021, 2) * 1.5f, topEdge, ScreenUtils.ScreenWidth, topEdge + Height);
-                        //SpriteBatch.DrawTilingTexture("levelselectbase", bounds, 400, 0, 0, FillColor);
+                        SpriteBatch.DrawTilingTexture("levelselectbase", bounds, 400, 0, 0, FillColor);
                         Game.Screens.DrawChartBackground(bounds, Color.FromArgb(80, FillColor), 1.5f);
                         ScreenUtils.DrawFrame(bounds, FrameColor, components: 187);
                         if (Subtitle == "")
