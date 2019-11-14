@@ -13,13 +13,11 @@ namespace Prelude.Gameplay.ScoreMetrics
     {
         public float[] Data = new float[100];
 
-        public delegate void HitHandler(int Column, int Judgement, float Offset);
-
         protected int Counter = 0;
 
         public abstract void Update(float Now, HitData[] HitData);
 
-        public abstract void HandleHit(int Column, int Index, HitData[] HitData);
+        public abstract void HandleHit(byte Column, int Index, HitData[] HitData);
 
         public abstract void ProcessScore(HitData[] HitData);
 

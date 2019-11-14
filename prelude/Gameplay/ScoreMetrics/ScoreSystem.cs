@@ -1,9 +1,5 @@
 ﻿using System;
 using Prelude.Utilities;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Prelude.Gameplay.ScoreMetrics.Accuracy;
 
 namespace Prelude.Gameplay.ScoreMetrics
@@ -51,6 +47,19 @@ namespace Prelude.Gameplay.ScoreMetrics
             Custom
         }
 
+        public enum HitType
+        {
+            RIDICULOUS,
+            MARVELLOUS,
+            PERFECT,
+            GREAT,
+            GOOD,
+            BAD,
+            MISS,
+            OK, //correctly not hitting a mine, holding a note
+            FUMBLE //incorrectly hitting a mine, releasing a note
+        }
+
         //this should be a constant but its chilling here just in case it needs changing
         public readonly float MissWindow = 180f;
 
@@ -64,8 +73,8 @@ namespace Prelude.Gameplay.ScoreMetrics
         //maximum points awarded for each judgement (should be same as PointsPerJudgement[0] but allows for funny use cases)
         protected int MaxPointsPerNote;
 
-        //this judgement index OR WORSE will cause a combo break e.g. 3 awards Good, so 3,4 or 5 (good, bad, miss) all combo break if this is set to 3
-        public int ComboBreakingJudgement;
+        //this judgement index OR WORSE will cause a combo break e.g. 3 awards Good, so 3, 4 or 5 (good, bad, miss) all combo break if this is set to 3
+        public HitType ComboBreakingJudgement;
 
         //display name of this accuracy system
         public string Name;
@@ -88,18 +97,25 @@ namespace Prelude.Gameplay.ScoreMetrics
         //array storing number of each judgement the user has achieved so far
         public int[] Judgements;
 
-        //hook used by things like UI on the gameplay screen to display judgements when you get them
-        public Action<int, int, float> OnHit = (Column, Judgement, Delta) => { };
+        public HitType[] HitTypes = new HitType[] {
+            HitType.MARVELLOUS, HitType.PERFECT, HitType.GREAT,
+            HitType.GOOD, HitType.BAD, HitType.MISS
+        };
 
-        public ScoreSystem(string Name, int JudgementCount)
+        public int JudgementCount => HitTypes.Length;
+
+        //hook used by things like UI on the gameplay screen to display judgements when you get them
+        public Action<byte, HitType, float> OnHit = (Column, Judgement, Delta) => { };
+
+        public ScoreSystem(string Name)
         {
             this.Name = Name;
-            Judgements = new int[JudgementCount];
+            Judgements = new int[(int)HitType.FUMBLE];
         }
 
         public virtual float GetPointsForNote(float Delta)
         {
-            return PointsPerJudgement[JudgeHit(Delta)];
+            return PointsPerJudgement[(int)JudgeHit(Delta)];
         }
 
         //logic to handle a combo breaking judgement/miss
@@ -109,11 +125,11 @@ namespace Prelude.Gameplay.ScoreMetrics
             ComboBreaks += 1;
         }
 
-        public override void HandleHit(int Column, int Index, HitData[] HitData)
+        public override void HandleHit(byte Column, int Index, HitData[] HitData)
         {
             float delta = Math.Abs(HitData[Index].delta[Column]);
-            int Judgement = JudgeHit(delta);
-            Judgements[Judgement] += 1;
+            var Judgement = JudgeHit(delta);
+            Judgements[(int)Judgement] += 1;
             PointsScored += GetPointsForNote(delta);
             PossiblePoints += MaxPointsPerNote;
             if (Judgement >= ComboBreakingJudgement)
@@ -136,16 +152,16 @@ namespace Prelude.Gameplay.ScoreMetrics
         {
             while (Counter < HitData.Length)
             {
-                for (int i = 0; i < HitData[Counter].hit.Length; i++)
+                for (byte k = 0; k < HitData[Counter].hit.Length; k++)
                 {
-                    if (HitData[Counter].hit[i] == 1)
+                    if (HitData[Counter].hit[k] == 1)
                     {
-                        HitData[Counter].delta[i] = MissWindow;
-                        HandleHit(i, Counter, HitData);
+                        HitData[Counter].delta[k] = MissWindow;
+                        HandleHit(k, Counter, HitData);
                     }
-                    else if (HitData[Counter].hit[i] == 2)
+                    else if (HitData[Counter].hit[k] == 2)
                     {
-                        HandleHit(i, Counter, HitData);
+                        HandleHit(k, Counter, HitData);
                     }
                 }
                 Counter++;
@@ -159,16 +175,15 @@ namespace Prelude.Gameplay.ScoreMetrics
             Now -= MissWindow;
             while (Counter < HitData.Length && HitData[Counter].Offset <= Now)
             {
-                for (int i = 0; i < HitData[Counter].hit.Length; i++)
+                for (byte k = 0; k < HitData[Counter].hit.Length; k++)
                 {
-                    if (HitData[Counter].hit[i] == 1)
+                    if (HitData[Counter].hit[k] == 1)
                     {
-                        HitData[Counter].delta[i] = MissWindow;
-                        HandleHit(i, Counter, HitData);
+                        HitData[Counter].delta[k] = MissWindow;
+                        HandleHit(k, Counter, HitData);
                     }
                 }
                 Counter++;
-                //updatetimeseries should actually be here but it's both negligible in data accuracy and a small optimisation to put it down there
             }
             UpdateTimeSeriesData(HitData.Length);
         }
@@ -185,13 +200,13 @@ namespace Prelude.Gameplay.ScoreMetrics
         }
 
         //public because external code may want to know the judgement for a given ms deviation e.g. drawing the distribution graph on score screen
-        public virtual int JudgeHit(float Delta)
+        public virtual HitType JudgeHit(float Delta)
         {
             for (int i = 0; i < JudgementWindows.Length; i++)
             {
-                if (Delta < JudgementWindows[i]) { return i; }
+                if (Delta < JudgementWindows[i]) { return HitTypes[i]; }
             }
-            return JudgementWindows.Length;
+            return HitType.MISS;
         }
 
         public virtual string FormatAcc()
