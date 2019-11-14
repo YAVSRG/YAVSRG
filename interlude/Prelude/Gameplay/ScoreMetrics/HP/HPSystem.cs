@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Prelude.Gameplay.ScoreMetrics.HP
 {
@@ -13,13 +9,13 @@ namespace Prelude.Gameplay.ScoreMetrics.HP
         public HPSystem(ScoreSystem Scoring)
         {
             this.Scoring = Scoring;
-            PointsPerJudgement = new float[] { 0.5f, 0.25f, 0f, -5f, -20f, -10f };
+            PointsPerJudgement = new float[] { 0.5f, 0.5f, 0.25f, 0f, -5f, -20f, -10f, 0f, -5f };
             CurrentHP = 50;
         }
 
-        public override void HandleHit(int k, int index, HitData[] data)
+        public override void HandleHit(byte Column, int Index, HitData[] Data)
         {
-            int judgement = Scoring.JudgeHit(data[index].delta[k]);
+            int judgement = (int)Scoring.JudgeHit(Data[Index].delta[Column]);
             CurrentHP += PointsPerJudgement[judgement];
             CurrentHP = Math.Max(0, Math.Min(MaximumHP, CurrentHP));
             if (CurrentHP == 0)
@@ -32,11 +28,11 @@ namespace Prelude.Gameplay.ScoreMetrics.HP
         {
             while (Counter < HitData.Length)
             {
-                for (int i = 0; i < HitData[Counter].hit.Length; i++)
+                for (byte k = 0; k < HitData[Counter].hit.Length; k++)
                 {
-                    if (HitData[Counter].hit[i] > 0)
+                    if (HitData[Counter].hit[k] > 0)
                     {
-                        HandleHit(i, Counter, HitData);
+                        HandleHit(k, Counter, HitData);
                     }
                 }
                 Counter++;
@@ -50,12 +46,12 @@ namespace Prelude.Gameplay.ScoreMetrics.HP
             Now -= Scoring.MissWindow;
             while (Counter < HitData.Length && HitData[Counter].Offset <= Now)
             {
-                for (int i = 0; i < HitData[Counter].hit.Length; i++)
+                for (byte k = 0; k < HitData[Counter].hit.Length; k++)
                 {
-                    if (HitData[Counter].hit[i] == 1)
+                    if (HitData[Counter].hit[k] == 1)
                     {
                         //data[Counter].delta[i] = Scoring.MissWindow; <-- this line is for if score system does not pass first (was here to test a bug that has now been fixed)
-                        HandleHit(i, Counter, HitData);
+                        HandleHit(k, Counter, HitData);
                     }
                 }
                 Counter++;

@@ -142,12 +142,13 @@ namespace Interlude.Interface.Screens
             //judgements display
             SpriteBatch.Font1.DrawCentredTextToFill(scoreData.ScoreSystem.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 370, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
             SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("ranks"), new Rect(-100, bounds.Top + 170, 100, bounds.Top + 370), Color.White, rankachieved, 0));
-            float h = 450/scoreData.ScoreSystem.Judgements.Length;
-            for (int i = 0; i < scoreData.ScoreSystem.Judgements.Length; i++)
+            float h = 450/scoreData.ScoreSystem.HitTypes.Length;
+            for (int j = 0; j < scoreData.ScoreSystem.HitTypes.Length; j++)
             {
-                float r = bounds.Right - 500 + i * h;
-                SpriteBatch.DrawRect(new Rect(r, bounds.Top + 50, r + h, bounds.Top + 250), Color.FromArgb(80, Game.Options.Theme.JudgeColors[i]));
-                SpriteBatch.DrawRect(new Rect(r, bounds.Top + 250 - 200f * scoreData.ScoreSystem.Judgements[i] / noteCount, r + h, bounds.Top + 250), Color.FromArgb(140, Game.Options.Theme.JudgeColors[i]));
+                int i = (int)scoreData.ScoreSystem.HitTypes[j];
+                float r = bounds.Right - 500 + j * h;
+                SpriteBatch.DrawRect(new Rect(r, bounds.Top + 50, r + h, bounds.Top + 250), Color.FromArgb(80, Game.Options.Theme.JudgementColors[i]));
+                SpriteBatch.DrawRect(new Rect(r, bounds.Top + 250 - 200f * scoreData.ScoreSystem.Judgements[i] / noteCount, r + h, bounds.Top + 250), Color.FromArgb(140, Game.Options.Theme.JudgementColors[i]));
                 SpriteBatch.Font2.DrawCentredTextToFill(scoreData.ScoreSystem.Judgements[i].ToString(), new Rect(r, bounds.Top + 50, r + h, bounds.Top + 150), Color.White, true);
                 SpriteBatch.Font2.DrawCentredTextToFill(Utils.RoundNumber(scoreData.ScoreSystem.Judgements[i] * 100f / noteCount) + "%", new Rect(r, bounds.Top + 150, r + h, bounds.Top + 250), Color.White, true);
             }

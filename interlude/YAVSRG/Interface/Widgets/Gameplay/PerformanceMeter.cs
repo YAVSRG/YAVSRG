@@ -1,5 +1,7 @@
 ﻿using System;
 using Prelude.Gameplay.DifficultyRating;
+using Prelude.Gameplay.ScoreMetrics;
+using Interlude.Gameplay;
 using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets.Gameplay
@@ -11,13 +13,13 @@ namespace Interlude.Interface.Widgets.Gameplay
         int lasti;
         double nps;
 
-        public PerformanceMeter(Interlude.Gameplay.ScoreTracker scoreTracker) : base(scoreTracker, new Options.WidgetPosition() { Enable = true })
+        public PerformanceMeter(ScoreTracker scoreTracker) : base(scoreTracker, new Options.WidgetPosition() { Enable = true })
         {
             scoreTracker.OnHit += HandleHit;
             lasti = scoreTracker.Chart.Notes.Count;
         }
 
-        void HandleHit(int column, int judge, float delta)
+        void HandleHit(byte column, ScoreSystem.HitType judge, float delta)
         {
             //nothing
         }

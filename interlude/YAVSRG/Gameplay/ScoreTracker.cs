@@ -11,7 +11,7 @@ namespace Interlude.Gameplay
 {
     public class ScoreTracker //handles scoring while you play through a chart, keeping track of hits and acc and stuff
     {
-        public event Action<int, int, float> OnHit; //COLUMM, AWARDED JUDGE, MS DELTA
+        public event Action<byte, ScoreSystem.HitType, float> OnHit; //COLUMM, AWARDED JUDGE, MS DELTA
 
         public ChartWithModifiers Chart;
         public ScoreSystem Scoring;
@@ -54,7 +54,7 @@ namespace Interlude.Gameplay
             WidgetColor.Update();
         }
 
-        public void RegisterHit(int index, int column, float delta)
+        public void RegisterHit(int index, byte column, float delta)
         {
             if (Hitdata[index].hit[column] != 1) { return; } //ignore if the note is already hit or doesn't need to be hit. prevents mashing exploits and such.
             Hitdata[index].hit[column] = 2; //mark that note was not only supposed to be hit, but was also hit (marks it as not a miss)

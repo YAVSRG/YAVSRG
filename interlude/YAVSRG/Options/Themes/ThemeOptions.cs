@@ -1,15 +1,11 @@
 ﻿using System.Drawing;
-using Newtonsoft.Json;
-using Interlude.Interface;
-using Interlude.IO;
-using Interlude.Graphics;
 
 namespace Interlude.Options
 {
     public class ThemeOptions
     {
-        public Color[] JudgeColors = new[] { Color.FromArgb(0, 255, 255), Color.FromArgb(255, 255, 0), Color.FromArgb(0, 255, 100), Color.FromArgb(0, 0, 255), Color.Fuchsia, Color.FromArgb(255, 0, 0) };
-        public string[] Judges = new[] { "Marvellous", "Perfect", "Good", "Bad", "Yikes", "Miss" };
+        public Color[] JudgementColors = new[] { Color.FromArgb(127, 127, 255), Color.FromArgb(0, 255, 255), Color.FromArgb(255, 255, 0), Color.FromArgb(0, 255, 100), Color.FromArgb(0, 0, 255), Color.Fuchsia, Color.FromArgb(255, 0, 0), Color.FromArgb(255, 255, 0), Color.Fuchsia };
+        public string[] JudgementNames = new[] { "Ridiculous", "Marvellous", "Perfect", "Good", "Bad", "Boo", "Miss", "OK", "Fumble" };
         public string Font1 = "Akrobat-Black.otf";
         public string Font2 = "Akrobat-Regular.otf";
         public Color MenuFont = Color.White;

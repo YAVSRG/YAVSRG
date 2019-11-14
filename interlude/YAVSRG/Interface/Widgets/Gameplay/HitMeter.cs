@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using Interlude.IO;
+using Prelude.Gameplay.ScoreMetrics;
 using Interlude.Graphics;
 
 namespace Interlude.Interface.Widgets.Gameplay
@@ -83,10 +83,10 @@ namespace Interlude.Interface.Widgets.Gameplay
             fadeTime = pos.Extra.GetValue("FadeTime", 1500f);
         }
 
-        private void AddHit(int k, int tier, float delta)
+        private void AddHit(byte k, ScoreSystem.HitType tier, float delta)
         {
             float now = (float)Game.Audio.Now();
-            Hit h = new Hit(now, delta, tier);
+            Hit h = new Hit(now, delta, (int)tier);
             if (perColumn)
             {
                 disp[k].NewHit(h);
@@ -122,7 +122,7 @@ namespace Interlude.Interface.Widgets.Gameplay
             float c = bounds.CenterX;
             foreach (Hit h in hits)
             {
-                SpriteBatch.DrawRect(new Rect(c + h.delta * hScale - thickness, bounds.Bottom - vScale, c + h.delta * hScale + thickness, bounds.Bottom), Color.FromArgb(Alpha(now - h.time), Game.Options.Theme.JudgeColors[h.tier]));
+                SpriteBatch.DrawRect(new Rect(c + h.delta * hScale - thickness, bounds.Bottom - vScale, c + h.delta * hScale + thickness, bounds.Bottom), Color.FromArgb(Alpha(now - h.time), Game.Options.Theme.JudgementColors[h.tier]));
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using OpenTK;
+using Prelude.Gameplay.ScoreMetrics;
 using Interlude.Gameplay;
 using Interlude.Graphics;
 
@@ -44,7 +45,6 @@ namespace Interlude.Interface.Widgets
             float w = (width - 10) / snapcount;
             float middle = -ScreenUtils.ScreenHeight + height * 0.5f;
             SpriteBatch.DrawRect(new Rect(-ScreenUtils.ScreenWidth, middle - 2, -ScreenUtils.ScreenWidth + width, middle + 2), Color.Green);
-            int j;
             float o;
             float scale = (height - 20) * 0.5f / data.ScoreSystem.MissWindow;
             float x = bounds.Left + 5;
@@ -55,12 +55,12 @@ namespace Interlude.Interface.Widgets
                     if (data.HitData[i].hit[k] > 0)
                     {
                         o = data.HitData[i].delta[k];
-                        j = data.ScoreSystem.JudgeHit(Math.Abs(o));
+                        var j = data.ScoreSystem.JudgeHit(Math.Abs(o));
                         if (j >= data.ScoreSystem.ComboBreakingJudgement)
                         {
-                            SpriteBatch.DrawRect(new Rect(x - 1, bounds.Top, x + 2, bounds.Bottom), Color.FromArgb(60, Game.Options.Theme.JudgeColors[5]));
+                            SpriteBatch.DrawRect(new Rect(x - 1, bounds.Top, x + 2, bounds.Bottom), Color.FromArgb(60, Game.Options.Theme.JudgementColors[(int)ScoreSystem.HitType.MISS]));
                         }
-                        SpriteBatch.DrawRect(new Rect(x - 2, middle - o * scale - 2, x + 3, middle - o * scale + 2), Game.Options.Theme.JudgeColors[j]);
+                        SpriteBatch.DrawRect(new Rect(x - 2, middle - o * scale - 2, x + 3, middle - o * scale + 2), Game.Options.Theme.JudgementColors[(int)j]);
                     }
                 }
                 x += w;
