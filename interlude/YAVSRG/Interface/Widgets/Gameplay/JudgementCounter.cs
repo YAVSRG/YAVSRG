@@ -31,7 +31,7 @@ namespace Interlude.Interface.Widgets.Gameplay
             for (int i = 0; i < scoreTracker.Scoring.JudgementCount; i++)
             {
                 int j = (int)scoreTracker.Scoring.HitTypes[i];
-                SpriteBatch.DrawRect(new Rect(bounds.Left, r, bounds.Right, r + h), Color.FromArgb((int)(((Color)scoreTracker.WidgetColor).A/255f * (80+(flashes[j]*140))), Game.Options.Theme.JudgementColors[j]));
+                SpriteBatch.DrawRect(new Rect(bounds.Left, r, bounds.Right, r + h), Color.FromArgb((int)(((Color)scoreTracker.WidgetColor).A / 255f * (80 + (flashes[j] * 140))), Game.Options.Theme.JudgementColors[j]));
                 SpriteBatch.Font2.DrawTextToFill(Game.Options.Theme.JudgementNames[j], new Rect(bounds.Left, r, bounds.Left + w * 0.75f, r + h), scoreTracker.WidgetColor);
                 SpriteBatch.Font2.DrawJustifiedTextToFill(scoreTracker.Scoring.Judgements[j].ToString(), new Rect(bounds.Right - w * 0.25f, r, bounds.Right, r + h), scoreTracker.WidgetColor);
                 r += h;
