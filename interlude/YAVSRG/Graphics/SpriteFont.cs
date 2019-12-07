@@ -33,7 +33,7 @@ namespace Interlude.Graphics
 
             foreach (char c in @"qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\|"+"\"\r\n")
             {
-                GenChar(c);
+                GenChar(c, false);
             }
 
             FontLookup.Build(true);
@@ -53,6 +53,7 @@ namespace Interlude.Graphics
             foreach (char c in text)
             {
                 if (c == ' ') { x += FONTSCALE * 0.75f * scale; continue; }
+                if (!FontLookup.HasTexture(c.ToString())) { GenChar(c, true); }
                 s = FontLookup.GetTexture(c.ToString());
                 SpriteBatch.Draw(new RenderTarget(s, new Rect(x, y, x + s.Width * scale, y + s.Height * scale), color));
                 x += (s.Width - FONTSCALE * 0.5f) * scale; //kerning
@@ -117,9 +118,9 @@ namespace Interlude.Graphics
         {
             switch (position)
             {
-                case (TextAnchor.CENTER):
+                case TextAnchor.CENTER:
                     return DrawCentredText(text, size, bounds.CenterX, bounds.Top, c, dropShadow, shadowColor);
-                case (TextAnchor.RIGHT):
+                case TextAnchor.RIGHT:
                     return DrawJustifiedText(text, size, bounds.Right, bounds.Top, c, dropShadow, shadowColor);
                 default:
                     return DrawText(text, size, bounds.Left, bounds.Top, c, dropShadow, shadowColor);
@@ -130,9 +131,9 @@ namespace Interlude.Graphics
         {
             switch (position)
             {
-                case (TextAnchor.CENTER):
+                case TextAnchor.CENTER:
                     return DrawCentredTextToFill(text, bounds, c, dropShadow, shadowColor);
-                case (TextAnchor.RIGHT):
+                case TextAnchor.RIGHT:
                     return DrawJustifiedTextToFill(text, bounds, c, dropShadow, shadowColor);
                 default:
                     return DrawTextToFill(text, bounds, c, dropShadow, shadowColor);
@@ -183,7 +184,7 @@ namespace Interlude.Graphics
             return MeasureText(text) * scale / FONTSCALE;
         }
 
-        private void GenChar(char c)
+        private void GenChar(char c, bool built)
         {
             SizeF size;
             using (var b = new Bitmap(1, 1))
@@ -199,7 +200,14 @@ namespace Interlude.Graphics
                 g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
                 g.DrawString(c.ToString(), Font, Brushes.White, 0, 0);
             }
-            FontLookup.AddTexture(bmp, c.ToString());
+            if (built)
+            {
+                FontLookup.AddSprite(Content.UploadTexture(bmp, 1, 1, true), c.ToString());
+            }
+            else
+            {
+                FontLookup.AddTexture(bmp, c.ToString());
+            }
         }
     }
 }

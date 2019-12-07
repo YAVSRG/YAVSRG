@@ -35,7 +35,7 @@ namespace Interlude.Interface.Screens
                 keycount = data.Chart.Keys,
                 selectedMods = new Dictionary<string, DataGroup>(Game.Gameplay.SelectedMods),
                 rate = (float)Game.Options.Profile.Rate,
-                layout = Game.Options.Profile.KeymodeLayouts[data.Chart.Keys]
+                layout = Game.Options.Profile.Playstyles[data.Chart.Keys - 3]
             };
 
             if (ShouldSaveScore())
@@ -50,7 +50,7 @@ namespace Interlude.Interface.Screens
             }
 
             scoreData = new ScoreInfoProvider(score, Game.CurrentChart);
-            scoreData.SetData(Game.Gameplay.ChartDifficulty, Game.Gameplay.GetModString(), data.Scoring);
+            scoreData.SetData(Game.Gameplay.ChartDifficulty, Game.Gameplay.GetModString(), data.Scoring, data.HP);
 
             //update stats
             Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
@@ -103,6 +103,8 @@ namespace Interlude.Interface.Screens
         {
             //other options i.e dont save if i get an F, dont save if i dont hp clear, dont save if i dont pb
             if (Game.Gameplay.ModifiedChart.ModStatus == 2) { return false; }
+            else if (Game.Options.Profile.ScoreSavingPreference == ScoreSavingPreference.PASS) { return !scoreData.HP.HasFailed(); }
+            else if (Game.Options.Profile.ScoreSavingPreference == ScoreSavingPreference.PACEMAKER) { return scoreData.ScoreSystem.Accuracy() >= Game.Options.Profile.Pacemaker; }
             return true;
         }
         
@@ -141,7 +143,8 @@ namespace Interlude.Interface.Screens
 
             //judgements display
             SpriteBatch.Font1.DrawCentredTextToFill(scoreData.ScoreSystem.FormatAcc(), new Rect(bounds.Left + 500, bounds.Top + 370, bounds.Right - 500, bounds.Top + 500), Game.Options.Theme.MenuFont, true);
-            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("ranks"), new Rect(-100, bounds.Top + 170, 100, bounds.Top + 370), Color.White, rankachieved, 0));
+            SpriteBatch.Draw(new RenderTarget(Game.Options.Themes.GetTexture("ranks"), new Rect(-100, bounds.Top + 170, 100, bounds.Top + 370), scoreData.HP.HasFailed() ? Color.Gray : Color.White, rankachieved, 0));
+            if (scoreData.HP.HasFailed()) SpriteBatch.Font1.DrawCentredTextToFill("Failed", new Rect(-100, bounds.Top + 170, 100, bounds.Top + 370), Color.Red, true, Color.Yellow);
             float h = 450/scoreData.ScoreSystem.HitTypes.Length;
             for (int j = 0; j < scoreData.ScoreSystem.HitTypes.Length; j++)
             {

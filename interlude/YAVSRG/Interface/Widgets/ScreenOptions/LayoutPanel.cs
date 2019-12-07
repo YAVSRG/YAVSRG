@@ -163,7 +163,7 @@ namespace Interlude.Interface.Widgets
             string[] layoutNames = layouts.Select((x) => KeyLayout.GetLayoutName(x, k)).ToArray();
             Children.Add(
                 selectLayout = new TooltipContainer(
-                    new TextPicker("Playstyle", layoutNames, Math.Max(0, layouts.IndexOf(Game.Options.Profile.KeymodeLayouts[k])), (i) => { Game.Options.Profile.KeymodeLayouts[k] = layouts[i]; }),
+                    new TextPicker("Playstyle", layoutNames, Math.Max(0, layouts.IndexOf(Game.Options.Profile.Playstyles[k - 3])), (i) => { Game.Options.Profile.Playstyles[k - 3] = layouts[i]; }),
                     "Used to select what playstyle (position of your hands) is being used to play.\nThis information is used for the difficulty calculator.\nBe sure to set this to match how you are playing for meaningful difficulty ratings.")
                     .Reposition(-150, 0.5f, 600, 0, 150, 0.5f, 650, 0));
         }

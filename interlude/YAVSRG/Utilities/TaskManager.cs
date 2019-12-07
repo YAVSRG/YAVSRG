@@ -15,24 +15,24 @@ namespace Interlude.Utilities
         {
             CancellationTokenSource _token = new CancellationTokenSource();
             Task _task;
-            public readonly string Name;
-            public readonly bool Track;
+            public string Name { get; private set; }
+            public bool Visible { get; private set; }
             public string Progress { get; private set; }
 
-            public NamedTask(UserTask Task, string Name, Action<bool> Callback, bool Track)
+            public NamedTask(UserTask task, string name, Action<bool> callback, bool visible)
             {
-                this.Name = Name;
-                this.Track = Track;
+                Name = name;
+                Visible = visible;
                 Progress = "";
                 _task = new Task(() => {
                     try
                     {
-                        Callback(Task((v) => { if (!Track) Logging.Log(Name + ": " + v, "", Logging.LogType.Info); Progress = v; }));
-                        if (Track) Logging.Log("Completed task: " + Name, "");
+                        callback(task((v) => { if (!visible) Logging.Log(name + ": " + v, "", Logging.LogType.Info); Progress = v; }));
+                        if (visible) Logging.Log("Completed task: " + name, "");
                     }
                     catch (Exception e)
                     {
-                        Logging.Log("Exception occured in task " + Name, e.ToString(), Logging.LogType.Error);
+                        Logging.Log("Exception occured in task " + name, e.ToString(), Logging.LogType.Error);
                     }
                     finally
                     {
@@ -70,7 +70,7 @@ namespace Interlude.Utilities
             }
         }
 
-        public List<NamedTask> Tasks;
+        public List<NamedTask> Tasks { get; private set; }
 
         public TaskManager()
         {
@@ -83,7 +83,7 @@ namespace Interlude.Utilities
             {
                 Tasks.Add(Task);
             }
-            if (Task.Track) Logging.Log("Added task: " + Task.Name, "");
+            if (Task.Visible) Logging.Log("Added task: " + Task.Name, "");
             Task.Start();
         }
 

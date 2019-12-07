@@ -15,7 +15,7 @@ namespace Interlude.Gameplay
 
         public ChartWithModifiers Chart;
         public ScoreSystem Scoring;
-        public ILifeMeter HP;
+        public LifeMeter HP;
         public HitData[] Hitdata;
         public List<IScoreMetric> Watchers;
         public AnimationColorFade WidgetColor;

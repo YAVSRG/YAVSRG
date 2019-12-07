@@ -83,14 +83,13 @@
     <Compile Include="Gameplay\Score.cs" />
     <Compile Include="Gameplay\ScoreMetrics\HP\HPSystem.cs" />
     <Compile Include="Gameplay\ScoreMetrics\IScoreMetric.cs" />
-    <Compile Include="Gameplay\ScoreMetrics\ILifeMeter.cs" />
+    <Compile Include="Gameplay\ScoreMetrics\LifeMeter.cs" />
     <Compile Include="Gameplay\ScoreMetrics\ScoreSystem.cs" />
     <Compile Include="Gameplay\ScoreMetrics\Accuracy\DancePoints.cs" />
     <Compile Include="Gameplay\ScoreMetrics\Accuracy\Wife.cs" />
     <Compile Include="Gameplay\ScoreMetrics\Accuracy\OsuMania.cs" />
     <Compile Include="Gameplay\ScoreMetrics\Accuracy\StandardScoring.cs" />
     <Compile Include="Gameplay\ScoreMetrics\Accuracy\StandardScoringPlus.cs" />
-    <Compile Include="Gameplay\ScoreSavingPreference.cs" />
     <Compile Include="Net\Protocol\Packets\Packet.cs" />
     <Compile Include="Net\Protocol\Packets\PacketAuth.cs" />
     <Compile Include="Net\Protocol\Packets\PacketDisconnect.cs" />

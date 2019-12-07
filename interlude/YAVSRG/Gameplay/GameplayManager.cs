@@ -13,16 +13,16 @@ namespace Interlude.Gameplay
     //Manages the selected chart, its associated data (scores and local offset) and applying selected modifiers to it
     public class GameplayManager
     {
-        public Chart CurrentChart;
-        public CachedChart CurrentCachedChart;
-        public ChartWithModifiers ModifiedChart;
-        public RatingReport ChartDifficulty;
-        public ChartSaveData ChartSaveData;
-        public CollectionsManager Collections = CollectionsManager.LoadCollections();
+        public Chart CurrentChart { get; private set; }
+        public CachedChart CurrentCachedChart { get; private set; }
+        public ChartWithModifiers ModifiedChart { get; private set; }
+        public RatingReport ChartDifficulty { get; private set; }
+        public ChartSaveData ChartSaveData { get; private set; }
+        public CollectionsManager Collections { get; private set; } = CollectionsManager.LoadCollections();
         public Dictionary<string, DataGroup> SelectedMods = new Dictionary<string, DataGroup>();
         public event Action OnUpdateChart = () => { };
 
-        public ScoresDB ScoreDatabase = ScoresDB.Load();
+        public ScoresDB ScoreDatabase { get; private set; } = ScoresDB.Load();
 
         public void ChangeChart(CachedChart cache, Chart c, bool playFromPreview)
         {
@@ -57,7 +57,7 @@ namespace Interlude.Gameplay
 
         public void UpdateDifficulty()
         {
-            ChartDifficulty = new RatingReport(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.KeymodeLayouts[ModifiedChart.Keys]);
+            ChartDifficulty = new RatingReport(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[ModifiedChart.Keys - 3]);
         }
 
         public void Unload()
@@ -110,7 +110,7 @@ namespace Interlude.Gameplay
 
         public string GetModString()
         {
-            return GetModString(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.KeymodeLayouts[ModifiedChart.Keys]);
+            return GetModString(ModifiedChart, (float)Game.Options.Profile.Rate, Game.Options.Profile.Playstyles[ModifiedChart.Keys - 3]);
         }
 
         public void SaveScores()

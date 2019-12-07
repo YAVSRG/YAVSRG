@@ -95,7 +95,7 @@ namespace Interlude.Interface.Screens
                 Children.Clear();
                 Game.Options.Profile.Stats.TimesQuit++;
             }
-            else if (Game.Audio.LeadingIn && Game.Options.General.Hotkeys.ChangeOffset.Tapped()) //if map hasn't started you can sync it with + key
+            else if (Game.Audio.Using_Timer && Game.Options.General.Hotkeys.ChangeOffset.Tapped()) //todo: proper pre-gameplay menu with offset changer, score system changer, scroll speed changer
             {
                 Game.Audio.Stop();
                 Game.Screens.AddDialog(new Dialogs.TextDialog("Change sync by... (ms)", (x) =>
@@ -105,11 +105,10 @@ namespace Interlude.Interface.Screens
                     Game.Audio.PlayLeadIn();
                 }));
             }
-            else if (Game.Options.General.Hotkeys.Skip.Tapped() && (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 5000))
-            {
+            else if (Game.Options.General.Hotkeys.Skip.Tapped() && (Chart.Notes.Points[0].Offset - Game.Audio.Now() > 3000))
+             {
                 Game.Audio.Stop();
-                Game.Audio.Seek(Chart.Notes.Points[0].Offset - 5000);
-                Game.Audio.Play(); //in case of leading in
+                Game.Audio.Play((long)(Chart.Notes.Points[0].Offset - 3000)); //in case of leading in
             }
             else if (Game.Options.General.Hotkeys.HideUI.Tapped() && !Animation.Running)
             {

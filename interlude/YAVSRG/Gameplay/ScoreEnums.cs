@@ -11,5 +11,13 @@ namespace Interlude.Gameplay
         ALWAYS,
         PASS,
         PERSONALBEST,
+        PACEMAKER
+    }
+
+    public enum HPFailType
+    {
+        NOFAIL,
+        INSTANT,
+        END_OF_SONG
     }
 }

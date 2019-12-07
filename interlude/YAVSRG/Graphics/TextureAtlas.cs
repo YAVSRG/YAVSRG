@@ -45,6 +45,11 @@ namespace Interlude.Graphics
             return Sprites[""];
         }
 
+        public bool HasTexture(string name)
+        {
+            return Sprites.ContainsKey(name);
+        }
+
         public Sprite this[string name]
         {
             get { return GetTexture(name); }
@@ -58,10 +63,6 @@ namespace Interlude.Graphics
 
         public void AddTexture(Bitmap bmp, string name, int rows, int columns, bool tiling = false)
         {
-            if (tiling)
-            {
-
-            }
             Textures.Add(new SpriteData() { Bitmap = bmp, Name = name, Rows = rows, Columns = columns, Tiling = tiling});
         }
 
@@ -137,6 +138,11 @@ namespace Interlude.Graphics
                 GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             }
             Textures.Clear();
+        }
+
+        public void AddSprite(Sprite s, string name)
+        {
+            Sprites.Add(name, s);
         }
 
         public void Dispose()

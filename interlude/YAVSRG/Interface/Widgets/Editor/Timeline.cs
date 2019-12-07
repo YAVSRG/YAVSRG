@@ -38,7 +38,7 @@ namespace Interlude.Interface.Widgets.Editor
             }
             if (Input.KeyTap(OpenTK.Input.Key.Space))
             {
-                if (Game.Audio.Paused)
+                if (Game.Audio.IsPaused)
                 {
                     Game.Audio.Play();
                 }

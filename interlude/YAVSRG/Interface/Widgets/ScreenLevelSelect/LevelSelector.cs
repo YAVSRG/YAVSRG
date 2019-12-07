@@ -347,7 +347,8 @@ namespace Interlude.Interface.Widgets
                     {
                         if (c.GetFileIdentifier() == id)
                         {
-                            Game.Gameplay.CurrentCachedChart = c;
+                            //todo: find out if this breaks anything
+                            //Game.Gameplay.CurrentCachedChart = c;
                             return true;
                         }
                     }

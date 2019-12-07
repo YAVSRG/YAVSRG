@@ -17,6 +17,7 @@ namespace Interlude.Gameplay
         RatingReport _rating;
         string _mods;
         ScoreSystem _scoring;
+        LifeMeter _hp;
         HitData[] _hitdata;
         float? _physical, _technical;
 
@@ -27,11 +28,12 @@ namespace Interlude.Gameplay
             _hitdata = ScoreTracker.StringToHitData(_score.hitdata, _score.keycount);
         }
 
-        public void SetData(RatingReport rating, string mods, ScoreSystem scoring) //todo: technical when its ready
+        public void SetData(RatingReport rating, string mods, ScoreSystem scoring, LifeMeter hp) //todo: technical when its ready
         {
             _rating = rating;
             _mods = mods;
             _scoring = scoring;
+            _hp = hp;
         }
 
         public void OnChangeScoreSystem()
@@ -65,6 +67,19 @@ namespace Interlude.Gameplay
             {
                 if (_scoring == null) { _scoring = Game.Options.Profile.GetScoreSystem(Game.Options.Profile.SelectedScoreSystem); _scoring.ProcessScore(HitData); }
                 return _scoring;
+            }
+        }
+
+        public LifeMeter HP
+        {
+            get
+            {
+                if (_hp == null)
+                {
+                    //todo: create from proper system
+                    _hp = new Prelude.Gameplay.ScoreMetrics.HP.HPSystem(ScoreSystem); HP.ProcessScore(HitData);
+                }
+                return _hp;
             }
         }
 

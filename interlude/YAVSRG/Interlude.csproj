@@ -122,7 +122,7 @@
     <Compile Include="Gameplay\NoteRenderer.cs" />
     <Compile Include="Gameplay\NoteRendering\PlayfieldFragment.cs" />
     <Compile Include="Gameplay\ScoreInfoProvider.cs" />
-    <Compile Include="Gameplay\ScoreSavingPreference.cs" />
+    <Compile Include="Gameplay\ScoreEnums.cs" />
     <Compile Include="Gameplay\TopScore.cs" />
     <Compile Include="Graphics\TextureAtlas.cs" />
     <Compile Include="Graphics\FBO.cs" />

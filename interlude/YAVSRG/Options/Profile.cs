@@ -24,6 +24,7 @@ namespace Interlude.Options
             get { return KeymodePreference ? PreferredKeymode : ToKeymode(Game.CurrentChart != null ? Game.CurrentChart.Keys : 4); }
         }
 
+        //todo: creating this was a distaster. refactor by destroying this enum and using flat numbers again
         public enum Keymode
         {
             Key3 = 0,
@@ -43,10 +44,8 @@ namespace Interlude.Options
 
         public string Name = "Default Profile";
         public string UUID = Guid.NewGuid().ToString();
-        public Keymode PreferredKeymode = Keymode.Key4;
-        public bool KeymodePreference = false;
-        public List<string> SelectedThemes = new List<string>();
-        public string NoteSkin = "default";
+        public ProfileStats Stats = new ProfileStats();
+
         public float ScrollSpeed = 2.05f;
         public int HitPosition = 0;
         public bool HitLighting = false;
@@ -56,16 +55,24 @@ namespace Interlude.Options
         public float ScreenCoverFadeLength = 200;
         public float PerspectiveTilt = 0f;
         public float BackgroundDim = 0.5f;
+        public string NoteSkin = "default";
+        public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
+
+        public Keymode PreferredKeymode = Keymode.Key4;
+        public bool KeymodePreference = false;
+        public List<string> SelectedThemes = new List<string>();
         public string ChartSortMode = "Title";
         public string ChartGroupMode = "Pack";
         public string ChartColorMode = "Nothing";
+
         public List<ScoreSystemData> ScoreSystems = new List<ScoreSystemData>();
         public int SelectedScoreSystem;
-        //todo: choice of life systems
-        public ColorScheme ColorStyle = new ColorScheme(Colorizer.ColorStyle.Column);
+        //todo: choice of life systems goes here
         //todo: move to theme since number of ranks available is dependent on theme
         public float[] GradeThresholds = new float[] { 99, 98, 97, 96, 95, 94, 93, 92, 91, 90 };
-        public ProfileStats Stats = new ProfileStats();
+        public float Pacemaker = 95f;
+        public ScoreSavingPreference ScoreSavingPreference = ScoreSavingPreference.PASS;
+        public HPFailType HPFailType = HPFailType.INSTANT; //todo: put back to NOFAIL
 
         //these are default binds
         public KeyBind[][] KeyBinds = new KeyBind[][]
@@ -80,9 +87,8 @@ namespace Interlude.Options
             new KeyBind[] { new KeyBind(Key.CapsLock), new KeyBind(Key.Q), new KeyBind(Key.W), new KeyBind(Key.E), new KeyBind(Key.V), new KeyBind(Key.Space), new KeyBind(Key.K), new KeyBind(Key.L), new KeyBind(Key.Semicolon), new KeyBind(Key.Quote) }
         };
 
-        public Layout[] KeymodeLayouts = new Layout[] //default playstyles
+        public Layout[] Playstyles = new Layout[] //default playstyles
         {
-            Layout.Spread,Layout.Spread,Layout.Spread, //placeholders
             Layout.OneHand, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread, Layout.LeftOne, Layout.Spread
         };
 
