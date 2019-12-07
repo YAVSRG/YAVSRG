@@ -38,6 +38,9 @@ namespace Interlude.Interface.Screens
                 layout = Game.Options.Profile.Playstyles[data.Chart.Keys - 3]
             };
 
+            scoreData = new ScoreInfoProvider(score, Game.CurrentChart);
+            scoreData.SetData(Game.Gameplay.ChartDifficulty, Game.Gameplay.GetModString(), data.Scoring, data.HP);
+
             if (ShouldSaveScore())
             {
                 Game.Gameplay.ChartSaveData.Scores.Add(score);
@@ -48,9 +51,6 @@ namespace Interlude.Interface.Screens
                     Game.Online.SendPacket(new PacketScore() { score = score, chartHash = Game.Gameplay.CurrentChart.GetHash() });
                 }
             }
-
-            scoreData = new ScoreInfoProvider(score, Game.CurrentChart);
-            scoreData.SetData(Game.Gameplay.ChartDifficulty, Game.Gameplay.GetModString(), data.Scoring, data.HP);
 
             //update stats
             Game.Options.Profile.Stats.SecondsPlayed += (int)(Game.CurrentChart.GetDuration() / 1000 / Game.Options.Profile.Rate);
