@@ -2,7 +2,7 @@
 
 namespace Prelude.Gameplay.ScoreMetrics.HP
 {
-    public class HPSystem : ILifeMeter
+    public class HPSystem : LifeMeter
     {
         protected ScoreSystem Scoring;
 

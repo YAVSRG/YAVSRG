@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Prelude.Gameplay.ScoreMetrics
 {
-    public abstract class ILifeMeter : IScoreMetric
+    public abstract class LifeMeter : IScoreMetric
     {
         protected float MaximumHP = 100;
         protected float CurrentHP = 100;
