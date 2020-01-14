@@ -118,7 +118,7 @@ namespace Prelude.Gameplay.DifficultyRating
         protected float GetStreamCurve(float delta) //how hard is it to hit these two adjacent notes? when they are VERY close together you can hit them at the same time so no difficulty added
         {
             float widthScale = 0.02f;
-            float heightScale = 10f * 1.4f;
+            float heightScale = 10f * 1.35f;
             float curveExponent = 1f;
             float cutoffExponent = 10f;
             return (float)Math.Max((heightScale / Math.Pow(widthScale * delta, curveExponent) - 0.1f * heightScale / Math.Pow(widthScale * delta, curveExponent * cutoffExponent)), 0);
@@ -127,7 +127,7 @@ namespace Prelude.Gameplay.DifficultyRating
         protected float GetJackCurve(float delta) //how hard is it to hit these two notes in the same column? closer = exponentially harder
         {
             float widthScale = 0.02f;
-            float heightScale = 10f * 2.5f;
+            float heightScale = 10f * 2.65f;
             float curveExponent = 1f;
             return (float)Math.Min(heightScale / Math.Pow(widthScale * delta, curveExponent), 20);
         }

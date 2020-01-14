@@ -16,12 +16,12 @@ namespace Prelude.Gameplay.DifficultyRating
 
         public static double StaminaBaseFunc(double ratio)
         {
-            return (1 + 0.1f * ratio);
+            return (1 + 0.105f * ratio);
         }
 
         public static double StaminaDecayFunc(float timedelta)
         {
-            return Math.Exp(-0.0004 * timedelta);
+            return Math.Exp(-0.00045 * timedelta);
         }
 
         public static void UpdateStrain(ref double result, double value, float timeDelta)

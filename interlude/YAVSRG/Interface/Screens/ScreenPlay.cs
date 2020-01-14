@@ -129,7 +129,7 @@ namespace Interlude.Interface.Screens
                 }
             }
             scoreTracker.Update(now); //check for notes you've missed and handle them
-            if (scoreTracker.ReachedEnd()) //if the chart is over, go to score screen
+            if (scoreTracker.GameOver()) //if the chart is over, go to score screen
             {
                 Game.Screens.PopScreen();
                 Game.Screens.AddScreen(new ScreenScore(scoreTracker));

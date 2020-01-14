@@ -25,6 +25,7 @@ namespace Interlude.Interface.Screens
         public ScreenScore(ScoreTracker data)
         {
             noteCount = data.MaxPossibleCombo;
+            data.Scoring.Update(float.MaxValue, data.Hitdata);
 
             //score saving logic including multiplayer handling
             Score score = new Score()
@@ -40,6 +41,7 @@ namespace Interlude.Interface.Screens
 
             scoreData = new ScoreInfoProvider(score, Game.CurrentChart);
             scoreData.SetData(Game.Gameplay.ChartDifficulty, Game.Gameplay.GetModString(), data.Scoring, data.HP);
+
 
             if (ShouldSaveScore())
             {

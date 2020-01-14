@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using OpenTK.Input;
 using Prelude.Utilities;
 using Interlude.Graphics;
@@ -43,6 +44,12 @@ namespace Interlude.Interface.Widgets
                     Value.Set(Utils.Modulus(Value - 1, Options.Length));
                 }
             }
+        }
+
+        public static Selector FromEnum<T>(string name, object target, string propertyName) where T : Enum
+        {
+            var s = new SetterGetter<int>(target, propertyName);
+            return new Selector(name, typeof(T).GetEnumNames(), s);
         }
     }
 }

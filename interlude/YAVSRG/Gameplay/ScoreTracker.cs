@@ -65,9 +65,9 @@ namespace Interlude.Gameplay
             }
         }
 
-        public bool ReachedEnd() //is end of chart?
+        public bool GameOver() //is end of chart?
         {
-            return Scoring.ReachedEnd(Hitdata.Length);
+            return (Game.Options.Profile.HPFailType == HPFailType.INSTANT && HP.HasFailed()) || Scoring.ReachedEnd(Hitdata.Length);
         }
 
         public static string HitDataToString(HitData[] data)

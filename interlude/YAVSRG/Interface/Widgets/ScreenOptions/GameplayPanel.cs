@@ -2,6 +2,7 @@
 using Prelude.Gameplay.ScoreMetrics.Accuracy;
 using Prelude.Utilities;
 using Interlude.Interface.Dialogs;
+using Interlude.Gameplay;
 
 namespace Interlude.Interface.Widgets
 {
@@ -49,6 +50,11 @@ namespace Interlude.Interface.Widgets
                 new BoolPicker("Enable Hitlights", Game.Options.Profile.HitLighting, v => { Game.Options.Profile.HitLighting = v; }),
                 "Turn this on to enable columns lighting up when you press a key.")
                 .Reposition(-300, 0.5f, 475, 0, -50, 0.5f, 525, 0));
+            AddChild(
+                new TooltipContainer(
+                Selector.FromEnum<HPFailType>("HP Fail Type", Game.Options.Profile, "HPFailType"),
+                "TODO: SET DESCRIPTION")
+                .Reposition(-300, 0.5f, 575, 0, -50, 0.5f, 625, 0));
 
             ObjectSelector<ScoreSystemData> o = null; //suck my nuts compiler
             o = new ObjectSelector<ScoreSystemData>(
