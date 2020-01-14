@@ -23,6 +23,7 @@ namespace Prelude.Gameplay.DifficultyRating
                     if (hitdata[i].hit[k] > 0)
                     {
                         CalcUtils.UpdateStrain(ref v[k], r.PhysicalComposite[i, k] * CalcUtils.ConfidenceValue(hitdata[i].delta[k]), r.Delta[i, k]);
+                        if (Math.Abs(hitdata[i].delta[k]) >= 100) { v[k] *= 0.5f; }
                         findMean.Add(v[k]);
                     }
                 }
@@ -30,9 +31,6 @@ namespace Prelude.Gameplay.DifficultyRating
                 {
                     physical[i] = CalcUtils.RootMeanPower(findMean, 1);
                 }
-                /*
-                        v *= Math.Exp(0.02 * w * Math.Max(0,Math.Log(w * r.OverallPhysical[i] / v)));
-                }*/
             }
             return CalcUtils.GetOverallDifficulty(physical);
         }
