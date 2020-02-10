@@ -104,6 +104,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utilities\DataGroup.cs" />
     <Compile Include="Utilities\DataTemplateAttribute.cs" />
+    <Compile Include="Utilities\Localisation.cs" />
     <Compile Include="Utilities\Logging.cs" />
     <Compile Include="Utilities\SetterGetter.cs" />
   </ItemGroup>

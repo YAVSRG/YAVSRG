@@ -39,6 +39,26 @@ namespace Prelude.Utilities
             }
         }
 
+        public static void Info(string text, string details = "", bool locale = true)
+        {
+            Log(locale ? Localisation.GetTranslation(text) : text, details, LogType.Info);
+        }
+
+        public static void Warn(string text, string details = "", bool locale = true)
+        {
+            Log(locale ? Localisation.GetTranslation(text) : text, details, LogType.Warning);
+        }
+
+        public static void Error(string text, string details = "", bool locale = true)
+        {
+            Log(locale ? Localisation.GetTranslation(text) : text, details, LogType.Error);
+        }
+
+        public static void Debug(string text, string details = "", bool locale = true)
+        {
+            Log(locale ? Localisation.GetTranslation(text) : text, details, LogType.Debug);
+        }
+
         //call this method when the program is closing to release the log file
         public static void Close()
         {
