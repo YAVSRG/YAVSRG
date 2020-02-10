@@ -23,5 +23,11 @@ namespace Interlude.Utilities
         {
             System.Diagnostics.Process.Start("file://" + System.IO.Path.GetFullPath(Game.WorkingDirectory)); //multiplatform hack (i think)
         }
+
+        [STAThread()]
+        public static void DisplayCrashWindow(string error)
+        {
+            Application.Run(new CrashWindow(error));
+        }
     }
 }

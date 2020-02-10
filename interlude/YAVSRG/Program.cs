@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using System.Windows.Forms;
 using System.Diagnostics;
 using Prelude.Utilities;
 using Interlude.Utilities;
@@ -10,7 +9,6 @@ namespace Interlude
 {
     class Program
     {
-        [STAThread()]
         static void Main(string[] args)
         {
             Mutex m = new Mutex(true, "Interlude");
@@ -24,12 +22,12 @@ namespace Interlude
                 {
                     Options.SettingsManager.Init(); //init options i.e load profiles
                     g = new Game();
-                    Logging.Log("Game launched, all seems well", "");
+                    Logging.Debug("Game initiated successfully", locale: false);
                 }
                 catch (Exception e)
                 {
-                    Application.Run(new CrashWindow(e.ToString()));
-                    Logging.Log("Game failed to launch ", e.ToString(), Logging.LogType.Critical);
+                    CrashWindow.DisplayCrashWindow(e.ToString());
+                    Logging.Log("Game failed to launch", e.ToString(), Logging.LogType.Critical);
                 }
                 if (g != null)
                 {
@@ -40,7 +38,7 @@ namespace Interlude
                     catch (Exception e)
                     {
                         g.Exit(); //if it crashes close it and give a neat crash log
-                        Application.Run(new CrashWindow(e.ToString()));
+                        CrashWindow.DisplayCrashWindow(e.ToString());
                         Logging.Log("Game crashed (that's bad)", e.ToString(), Logging.LogType.Critical);
                     }
                     finally

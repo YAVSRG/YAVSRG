@@ -40,7 +40,7 @@ namespace Interlude.Gameplay
                 hash = c.GetHash(),
                 keymode = c.Keys,
                 length = c.GetDuration(),
-                bpm = c.GetBPM(),
+                bpm = c.AverageBPM(),
                 diffname = c.Data.DiffName,
                 physical = r.Physical,
                 technical = r.Technical

@@ -39,7 +39,7 @@ namespace Interlude.Interface.Widgets
         public void ChangeChart()
         {
             time = Utils.FormatTime(Game.CurrentChart.GetDuration() / (float)Game.Options.Profile.Rate);
-            bpm = ((int)(Game.CurrentChart.GetBPM() * Game.Options.Profile.Rate)).ToString() + "BPM";
+            bpm = Game.CurrentChart.FormatBPM(Game.Options.Profile.Rate);
             physical.Target(CalcUtils.PhysicalColor(Game.Gameplay.ChartDifficulty.Physical));
             technical.Target(CalcUtils.TechnicalColor(Game.Gameplay.ChartDifficulty.Physical));
             text.Target(Color.Black);

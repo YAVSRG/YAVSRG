@@ -31,10 +31,24 @@ namespace Prelude.Gameplay.Charts.YAVSRG
             return Notes.Points[Notes.Count - 1].Offset - Notes.Points[0].Offset;
         }
 
-        public int GetBPM()
+        public string FormatBPM(double rate)
+        {
+            if (Notes.Points.Count == 0 || Timing.BPM.Points.Count == 0) { return "120BPM"; }
+            int min = int.MaxValue, max = int.MinValue;
+            foreach (var p in Timing.BPM.Points)
+            {
+                int bpm = (int)(60000f * rate / p.MSPerBeat);
+                min = Math.Min(min, bpm);
+                max = Math.Max(max, bpm);
+            }
+            if (min == max) return min.ToString() + "BPM";
+            return min.ToString() + "-" + max.ToString() + "BPM";
+        }
+
+        public int AverageBPM() //todo: take average instead of initial. used in caching/sorting by bpm
         {
             if (Notes.Points.Count == 0 || Timing.BPM.Points.Count == 0) { return 120; }
-            return (int)(60000f / Timing.BPM.Points[0].MSPerBeat); //todo: min and max
+            return (int)(60000f / Timing.BPM.Points[0].MSPerBeat);
         }
 
         public string GetHash() //unique identifier for the content of the chart - identical charts stored in different locations can use the same score data because if two charts are the same, they have the same hash

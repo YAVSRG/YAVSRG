@@ -1,8 +1,10 @@
-﻿this file is not ready to be used
-
-info. ___
-error. ___
-ui. ___
-desc.option. ___
-desc.mod. ___
-desc.screen. ___
+﻿error.locale=Error loading locale file
+error.criticalLaunchError=Interlude failed to start
+error.criticalRuntimeError=Interlude has crashed
+error.chart.notInCache
+error.chart.invalidSort
+error.chart.
+ui._
+desc.option._
+desc.mod._
+desc.screen._
