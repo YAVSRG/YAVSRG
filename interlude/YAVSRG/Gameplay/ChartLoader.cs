@@ -365,6 +365,7 @@ namespace Interlude.Gameplay
                     {
                         if (i > 0)
                         {
+                            //Todo: fix potential bug with capital letters in file extension
                             Difficulty.Data.File = Difficulty.Data.File.Replace(".sm", "_" + i.ToString() + ".sm"); //file extension is edited later
                         }
                         ConvertToInterlude(Difficulty, SongFolder, TargetSongFolder);

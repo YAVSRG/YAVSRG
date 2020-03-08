@@ -18,6 +18,7 @@ namespace Prelude.Gameplay
         //0 = no note here OR no note required to be hit (e.g. the no long note releases mod sets ln ends to 0s and they are not considered)
         //1 = note here and has not been hit (yet, but also 1 can represent not hit after the fact)
         //2 = hit (updating delta should not be allowed)
+        //Todo: make this an enum allowing for special hits like mines and holding long notes
         public byte[] hit;
 
         //creates the data structure

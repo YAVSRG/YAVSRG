@@ -1,28 +1,23 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
 using Prelude.Gameplay.Charts.YAVSRG;
 using System.IO;
 
 namespace Interlude.Editor
 {
-    public class ChartInEditor : Chart
+    public class ChartInEditor
     {
         public EditorData EditorData;
+        public List<PointManager<Snap>> Layers;
+        public SVManager Timing;
+        public int Keys;
 
-        public ChartInEditor(Chart from) : base(from.Notes.Points, from.Data, from.Keys)
+        public ChartInEditor(Chart from)
         {
-            try
-            {
-                EditorData = Utils.LoadObject<EditorData>(GetDataPath());
-            }
-            catch
-            {
-                EditorData = new EditorData();
-            }
-        }
-
-        public string GetDataPath()
-        {
-            return Path.Combine("Data", "Editor", new string(GetFileIdentifier().Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c) || c == '-').ToArray()) + ".json");
+            EditorData = EditorData.FromChart(from.Data);
+            Timing = from.Timing; //unsafe
+            Keys = from.Keys;
+            Layers.Add(from.Notes);
         }
     }
 }
