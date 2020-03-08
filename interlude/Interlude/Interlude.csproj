@@ -325,6 +325,12 @@
   <ItemGroup>
     <Folder Include="Editor\Filters\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Prelude\Prelude\Prelude.csproj">
+      <Project>{0fac16df-28fb-4816-b7e5-f5867f38f0d1}</Project>
+      <Name>Prelude</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
