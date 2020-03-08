@@ -78,7 +78,7 @@
       <Project>{0fac16df-28fb-4816-b7e5-f5867f38f0d1}</Project>
       <Name>Prelude</Name>
     </ProjectReference>
-    <ProjectReference Include="..\YAVSRG\Interlude.csproj">
+    <ProjectReference Include="..\Interlude\Interlude.csproj">
       <Project>{5ebb46b4-2f12-4258-a257-73c409bb00d9}</Project>
       <Name>Interlude</Name>
     </ProjectReference>
