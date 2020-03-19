@@ -3,3 +3,12 @@
 ################################################################################
 
 /Prelude/obj/Debug
+/.vs/Prelude/v16/Server/sqlite3
+/.vs
+/Prelude/.ionide
+/Prelude/.vscode
+/Prelude/bin/Debug/netcoreapp2.1
+/Prelude/obj
+/Prelude-Legacy/obj
+/Prelude-Test/bin/Debug/netcoreapp2.1
+/Prelude-Test/obj
