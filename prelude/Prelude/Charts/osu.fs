@@ -6,8 +6,10 @@ open FParsec
 //https://osu.ppy.sh/community/forums/topics/1869?start=12468#p12468
 (*
   Not currently supported:
+    Sliders (parsing or writing)
     Combo colors/starters
-    Parsing of storyboard events
+    Loops in storyboard (parsing or writing)
+    Parsing of storyboard shorthand notation
 *)
 
 (*
@@ -140,7 +142,7 @@ let parseHitObject: Parser<HitObject, unit> =
 let parseHitObjects = pstring "[HitObjects]" >>. newline >>. many parseHitObject
 
 (*
-    Storyboard parsing code (WIP)
+    Storyboard parsing code
 *)
 
 type Easing =
@@ -188,31 +190,58 @@ type StoryboardEvent =
     | Move_X of Offset * Offset * Easing * float * float
     | Move_Y of Offset * Offset * Easing * float * float
     | Scale of Offset * Offset * Easing * float
-    | Vector_Scale of Offset * Offset * Easing * Point
+    | VectorScale of Offset * Offset * Easing * Point
     | Rotate of Offset * Offset * Easing * float * float
     | Color of Offset * Offset * Easing * (int * int * int) * (int * int * int)
     | Loop of Offset * int * StoryboardEvent list
     | Trigger_Loop of Offset * Offset * TriggerType * StoryboardEvent list
     | Parameter of Offset * Offset * SpriteParameter
+    member this.Format(padding) =
+        padding + (String.concat ","
+            (match this with
+            | Fade (time1, time2, easing, a, b) -> ["F"; easing |> int |> string; string time1; string time2; string a; string b]
+            | Move (time1, time2, easing, (x1,y1), (x2,y2)) -> ["M"; easing |> int |> string; string time1; string time2;
+                string x1; string y1; string x2; string y2]
+            | Move_X (time1, time2, easing, a, b) -> ["MX"; easing |> int |> string; string time1; string time2; string a; string b]
+            | Move_Y (time1, time2, easing, a, b) -> ["MY"; easing |> int |> string; string time1; string time2; string a; string b]
+            | Scale (time1, time2, easing, v) -> ["S"; easing |> int |> string; string time1; string time2; string v]
+            | VectorScale (time1, time2, easing, (a,b)) -> ["V"; easing |> int |> string; string time1; string time2; string a; string b]
+            | Rotate (time1, time2, easing, a, b) -> ["R"; easing |> int |> string; string time1; string time2; string a; string b]
+            | Color (time1, time2, easing, (r1,g1,b1), (r2,g2,b2)) -> ["C"; easing |> int |> string; string time1; string time2;
+                    string r1; string g1; string b1; string r2; string g2; string b2]
+            | _ -> ["nyi"]
+            ))
 
 type StoryboardObject =
     | Sprite of Layer * SpriteOrigin * string * Point * StoryboardEvent list
     | Animation of Layer * SpriteOrigin * string * Point * int * Offset * LoopType * StoryboardEvent list
     | Sample of Offset * Layer * string * int
-    | Break of Offset * Offset
     | Background of string * Point
     | Video of Offset * string * Point
+    | Break of Offset * Offset
     override this.ToString() = 
         match this with
-        | Background (filename, (x,y)) -> String.concat "," ["0"; "0"; "\""+filename+"\""; string x; string y]
-        | Break (start, finish) -> String.concat "," ["2"; string start; string finish]
+        | Background (filename, (x,y)) -> String.concat "," ["Background"; "0"; "\""+filename+"\""; string x; string y]
+        | Video (time, filename, (x,y)) -> String.concat "," ["Video"; string time; "\""+filename+"\""; string x; string y];
+        | Break (start, finish) -> String.concat "," ["Break"; string start; string finish]
+        | Sprite (layer, origin, filename, (x,y), events) ->
+            String.concat "\n" (
+                (String.concat "," ["Sprite"; layer.ToString("G"); origin.ToString("G"); "\""+filename+"\""; string x; string y])
+                :: (List.map (fun (x : StoryboardEvent) -> x.Format " ") events)
+             )
         | _ -> "nyi"
 
-let private parseSpriteEvent depthSkipper =
+//Parsing loops is unsupported!
+let rec private parseSpriteEvent depthSkipper =
     depthSkipper
-    >>. (tuple4 (((satisfy (isAnyOf "FMSVRCP") |>> string) <|> pstring "MX" <|> pstring "MY") .>> comma .>> spaces)
-             (parseInt .>> comma .>> spaces |>> enum) (parseNum .>> comma .>> spaces) (parseNum .>> comma .>> spaces))
-    >>= fun (eventType, easing, startTime, endTime) ->
+    >>. 
+    (
+    //((pchar 'L' >>. comma >>. tuple3 (parseNum .>> comma) (parseInt .>> comma .>> spaces) (many (parseSpriteEvent ((pchar ' ' <|> pchar '_') >>. depthSkipper .>> skipNewline))))
+    //|>> (fun (time, repeats, events) -> Loop(time, repeats, events)))
+    //<|>
+    (tuple4 (((satisfy (isAnyOf "FMSVRCP") |>> string) <|> pstring "MX" <|> pstring "MY") .>> comma .>> spaces)
+             (parseInt .>> comma .>> spaces |>> enum) (parseNum .>> comma .>> spaces) (parseNum .>> comma .>> spaces)
+    >>= (fun (eventType, easing, startTime, endTime) ->
         let parse2Nums = ((parseNum .>> comma) .>>. parseNum)
         match eventType with
         | "F" -> parse2Nums |>> fun (f1, f2) -> Fade(startTime, endTime, easing, f1, f2)
@@ -220,7 +249,7 @@ let private parseSpriteEvent depthSkipper =
         | "MX" -> parse2Nums |>> fun (f1, f2) -> Move_X(startTime, endTime, easing, f1, f2)
         | "MY" -> parse2Nums |>> fun (f1, f2) -> Move_Y(startTime, endTime, easing, f1, f2)
         | "S" -> parseNum |>> fun s -> Scale(startTime, endTime, easing, s)
-        | "V" -> parse2Nums |>> fun p -> Vector_Scale(startTime, endTime, easing, p)
+        | "V" -> parse2Nums |>> fun p -> VectorScale(startTime, endTime, easing, p)
         | "R" -> parse2Nums |>> fun (f1, f2) -> Rotate(startTime, endTime, easing, f1, f2)
         | "P" ->
             (charReturn 'H' HorizontalFlip <|> charReturn 'V' VerticalFlip <|> charReturn 'A' AdditiveBlendColor)
@@ -229,11 +258,10 @@ let private parseSpriteEvent depthSkipper =
             (tuple3 (parseInt .>> comma) (parseInt .>> comma) (parseInt .>> comma))
             .>>. (tuple3 (parseInt .>> comma) (parseInt .>> comma) parseInt)
             |>> fun (c1, c2) -> Color(startTime, endTime, easing, c1, c2)
-        //Loops cannot be parsed for now due to not using any of the same variables
-        | _ -> failwith "Unknown storyboard event"
+        | _ -> failwith "Unknown storyboard event")))
 
-let private parseSpriteEvents depthSkipper = many (parseSpriteEvent depthSkipper .>> pchar '\n')
-//todo: complete this part of the parser
+let private parseSpriteEvents depthSkipper = many (parseSpriteEvent depthSkipper .>> skipNewline)
+
 let parseStoryboardEvent =
     (pstring "Animation" >>. comma
      >>. (tuple3
@@ -253,6 +281,10 @@ let parseStoryboardEvent =
     <|> ((pstring "Background" <|> pstring "0") >>. comma
          >>. (tuple4 (parseNum .>> comma) (parseQuote .>> comma) (parseNum .>> comma) parseNum)
          |>> fun (time, file, x, y) -> Background(file, (x, y)))
+         
+    <|> ((pstring "Video" <|> pstring "1") >>. comma
+         >>. (tuple4 (parseNum .>> comma) (parseQuote .>> comma) (parseNum .>> comma) parseNum)
+         |>> fun (time, file, x, y) -> Video(time, file, (x, y)))
          
     <|> ((pstring "Break" <|> pstring "2") >>. comma
         >>.  (parseNum .>> comma) .>>. parseNum
@@ -473,6 +505,11 @@ let private writeDifficulty (data : Difficulty) : Header =
 
 type Beatmap = General * Editor * Metadata * Difficulty * StoryboardObject list * HitObject list * TimingPoint list
 
+//todo: in future can include variables list too
+type Storyboard = StoryboardObject list
+
+let eventsToString events = "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events);
+
 let beatmapToString (general, editor, meta, diff, events, objects, timing) = 
     String.concat "\n\n" [
         "osu file format v14";
@@ -480,7 +517,7 @@ let beatmapToString (general, editor, meta, diff, events, objects, timing) =
         editor |> writeEditor |> formatHeader;
         meta |> writeMetadata |> formatHeader;
         diff |> writeDifficulty |> formatHeader;
-        "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events);
+        events |> eventsToString;
         "[TimingPoints]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) timing);
         "[HitObjects]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) objects);
     ]
@@ -502,5 +539,13 @@ let loadBeatmapFile path : Beatmap =
 
 let saveBeatmapFile path beatmap = 
     System.IO.File.WriteAllText(path, beatmapToString beatmap)
+    
+let loadStoryboardFile path : Storyboard =
+    match runParserOnFile parseEvents () path System.Text.Encoding.UTF8 with
+    | Success(result, _, _) -> result
+    | Failure(errorMsg, _, _) -> failwith errorMsg
+    
+let saveStoryboardFile path events = 
+    System.IO.File.WriteAllText(path, eventsToString events)
 
 let getGameMode ((g, _, _, _, _, _, _): Beatmap) = g.Mode

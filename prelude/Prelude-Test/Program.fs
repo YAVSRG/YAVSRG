@@ -5,6 +5,7 @@ open Prelude.Charts.osu
 open Prelude.Charts.ChartConversions
 open Prelude.Charts.Filter
 open Prelude.Gameplay.Difficulty
+open FParsec
 
 (*
     Prelude features to tackle next:
@@ -19,7 +20,7 @@ open Prelude.Gameplay.Difficulty
 
 [<EntryPoint>]
 let main argv =
-    let chart =
+    (*let chart =
         @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Uncut Ver.].osu"
         |> loadAndConvertFile |> List.head
     let all = textMapping       "--1234--"
@@ -57,5 +58,8 @@ let main argv =
     |> ignore
     Chart(8, chart.Header, chart.Notes, chart.BPM, chart.SV)
     |> convert_interlude_osu
-    |> saveBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Dumb Files Ver.].osu"
+    |> saveBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Dumb Files Ver.].osu"*)
+    loadStoryboardFile @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637117532073937730-Fractal - Collide (ft. Danyka Nadeau)\Fractal - Collide (feat. Danyka Nadeau) (Percyqaz).osb"
+    |> eventsToString
+    |> printfn "%A"
     0 
