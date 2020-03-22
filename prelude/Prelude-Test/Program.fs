@@ -4,11 +4,9 @@ open FParsec
 
 (*
     Prelude features to tackle next:
-        Finish sm <> interlude conversion
         HP system/life calculation
         Chart modifiers
         Chart coloring systems
-        Difficulty rating calculation
         Chart caching tools
 *)
 

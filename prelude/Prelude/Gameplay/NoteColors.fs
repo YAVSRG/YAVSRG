@@ -21,9 +21,15 @@ type ColorScheme =
         | DDR -> Array.length DDRValues
         | Jackhammer -> Array.length DDRValues
 
-type ColorData = int array //always of size 10
+type ColorData = byte array //always of size 10
 type ColorDataSets = ColorData array //color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
 
+
+
 let applyColorizer (scheme : ColorScheme) (colorData : ColorData) (chart : Chart) =
+    let ci i = colorData.[i]
     match scheme with
+    | Column ->
+        for (_, nr) in chart.Notes.Enumerate do
+            ()
     | _ -> ()

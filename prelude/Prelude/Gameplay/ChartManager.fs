@@ -1,4 +1,4 @@
-﻿module Prelude.Charts.ChartManagement
+﻿module Prelude.Charts.ChartManager
 
 open Newtonsoft.Json
 open System
@@ -7,7 +7,7 @@ open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
-//open Prelude.Charts.DifficultyRating
+open Prelude.Gameplay.Difficulty
 
 (*
     Caching of charts
@@ -37,7 +37,7 @@ let cacheChart (chart : Chart) : CachedChart =
     let endTime =
         if chart.Notes.Count = 0 then 0.0 else
             chart.Notes.GetPointAt infinity |> offsetOf
-    let rating = ()
+    let rating = RatingReport(chart.Notes, 1.0, Layout.Spread, chart.Keys)
     {
     File = chart.Header.File
     SourcePath = chart.Header.SourcePath
@@ -50,8 +50,8 @@ let cacheChart (chart : Chart) : CachedChart =
     Length = if endTime = 0.0 then 0.0 else endTime - (offsetOf chart.Notes.First)
     BPM = minMaxBPM (chart.BPM.Enumerate |> List.ofSeq) endTime
     DiffName = chart.Header.DiffName
-    Physical = 0.0 //nyi
-    Technical = 0.0
+    Physical = rating.Physical
+    Technical = rating.Technical
     Collection = ""
     CollectionIndex = 0 }
 
@@ -89,6 +89,6 @@ type Cache() =
         try
             let c = id |> loadChartFile
             this.CacheChart c
-            Some c;
+            Some c
         with
         | err -> Logging.Error ("Could not load chart from " + id) (err.ToString()); None

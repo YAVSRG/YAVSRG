@@ -361,4 +361,4 @@ let relocateChart (chart : Chart) (sourcePath : string) (targetPath : string) =
     
     copyFile (Path.Combine(sourcePath, c.Header.AudioFile)) (Path.Combine(targetPath, c.Header.AudioFile))
     copyFile (Path.Combine(sourcePath, c.Header.BGFile)) (Path.Combine(targetPath, c.Header.BGFile))
-    c.WriteToFile(Path.Combine(targetPath, c.Header.File))
+    saveChartFile c (Path.Combine(targetPath, c.Header.File))

@@ -242,14 +242,18 @@ type Chart(keys, header, notes, bpms, sv) =
 
     member this.FileIdentifier = Path.Combine(this.Header.SourcePath, this.Header.File)
 
-    member this.WriteToFile(path: string): unit = () //NYI
-
 let private readSection<'t> (br: BinaryReader) f =
     let objectList = new List<TimeDataItem<'t>>()
     let count = br.ReadInt32()
     for i = 1 to count do
         objectList.Add((br.ReadSingle() |> float, f br))
     TimeData<'t>(objectList)
+
+let private writeSection<'t> (data: TimeData<'t>) (bw : BinaryWriter) f =
+    bw.Write(data.Count)
+    for (time, guts) in data.Enumerate do
+        bw.Write(time |> float32)
+        f guts
 
 let loadChartFile filepath =
     use fs = new FileStream(filepath, FileMode.Open)
@@ -269,6 +273,16 @@ let loadChartFile filepath =
          for i in 0 .. (keys |> int) do
              sv.SetChannelData(i - 1, readSection br (fun r -> (r.ReadSingle() |> float)))
          sv)
+
+let saveChartFile (chart : Chart) filepath =
+    use fs = new FileStream(filepath, FileMode.Create)
+    use bw = new BinaryWriter(fs)
+    bw.Write(chart.Keys)
+    bw.Write(saveJsonCompact chart.Header)
+    writeSection chart.Notes bw (fun nr -> writeRowToFile bw nr)
+    writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter); bw.Write(float32 msPerBeat))
+    for i = 0 to chart.Keys do
+        writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(float32 f))
 
 let calculateHash (chart: Chart): string =
     let h = SHA256.Create()
