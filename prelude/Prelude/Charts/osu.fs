@@ -29,7 +29,7 @@ type TimingEffect =
     | OmitFirstBarline = 8
 
 type SampleSet =
-    | None = 0 //todo: review 
+    | None = 0
     | Default = 0
     | Normal = 1
     | Soft = 2
@@ -189,8 +189,8 @@ type StoryboardEvent =
     | Move of Offset * Offset * Easing * Point * Point
     | Move_X of Offset * Offset * Easing * float * float
     | Move_Y of Offset * Offset * Easing * float * float
-    | Scale of Offset * Offset * Easing * float
-    | VectorScale of Offset * Offset * Easing * Point
+    | Scale of Offset * Offset * Easing * float * float
+    | VectorScale of Offset * Offset * Easing * Point * Point
     | Rotate of Offset * Offset * Easing * float * float
     | Color of Offset * Offset * Easing * (int * int * int) * (int * int * int)
     | Loop of Offset * int * StoryboardEvent list
@@ -204,8 +204,9 @@ type StoryboardEvent =
                 string x1; string y1; string x2; string y2]
             | Move_X (time1, time2, easing, a, b) -> ["MX"; easing |> int |> string; string time1; string time2; string a; string b]
             | Move_Y (time1, time2, easing, a, b) -> ["MY"; easing |> int |> string; string time1; string time2; string a; string b]
-            | Scale (time1, time2, easing, v) -> ["S"; easing |> int |> string; string time1; string time2; string v]
-            | VectorScale (time1, time2, easing, (a,b)) -> ["V"; easing |> int |> string; string time1; string time2; string a; string b]
+            | Scale (time1, time2, easing, a, b) -> ["S"; easing |> int |> string; string time1; string time2; string a; string b]
+            | VectorScale (time1, time2, easing, (x1,y1), (x2,y2)) -> ["V"; easing |> int |> string; string time1; string time2;
+                string x1; string y1; string x2; string y2]
             | Rotate (time1, time2, easing, a, b) -> ["R"; easing |> int |> string; string time1; string time2; string a; string b]
             | Color (time1, time2, easing, (r1,g1,b1), (r2,g2,b2)) -> ["C"; easing |> int |> string; string time1; string time2;
                     string r1; string g1; string b1; string r2; string g2; string b2]
@@ -248,8 +249,8 @@ let rec private parseSpriteEvent depthSkipper =
         | "M" -> parse2Nums .>> comma .>>. parse2Nums |>> fun (p1, p2) -> Move(startTime, endTime, easing, p1, p2)
         | "MX" -> parse2Nums |>> fun (f1, f2) -> Move_X(startTime, endTime, easing, f1, f2)
         | "MY" -> parse2Nums |>> fun (f1, f2) -> Move_Y(startTime, endTime, easing, f1, f2)
-        | "S" -> parseNum |>> fun s -> Scale(startTime, endTime, easing, s)
-        | "V" -> parse2Nums |>> fun p -> VectorScale(startTime, endTime, easing, p)
+        | "S" -> parse2Nums |>> fun (s1, s2) -> Scale(startTime, endTime, easing, s1, s2)
+        | "V" -> parse2Nums .>>. parse2Nums |>> fun (p1, p2) -> VectorScale(startTime, endTime, easing, p1, p2)
         | "R" -> parse2Nums |>> fun (f1, f2) -> Rotate(startTime, endTime, easing, f1, f2)
         | "P" ->
             (charReturn 'H' HorizontalFlip <|> charReturn 'V' VerticalFlip <|> charReturn 'A' AdditiveBlendColor)
@@ -523,10 +524,12 @@ let beatmapToString (general, editor, meta, diff, events, objects, timing) =
     ]
 
 let parseBeatmap =
-    tuple4 (pstring "osu file format v" >>. restOfLine true .>> spaces) (parseHeader .>> spaces)  //General
-        (parseHeader .>> spaces) (parseHeader .>> spaces)  //Editor
-    .>>. //Metadata
-    tuple4 (parseHeader .>> spaces) (parseEvents .>> spaces) (parseTimingPoints .>> spaces)  //Difficulty
+    tuple4 (pstring "osu file format v" >>. restOfLine true .>> spaces)
+        (parseHeader .>> spaces)  //General
+        (parseHeader .>> spaces)  //Metadata
+        (parseHeader .>> spaces)  //Editor
+    .>>.
+    tuple4 (parseHeader .>> spaces) (*Difficulty*) (parseEvents .>> spaces) (parseTimingPoints .>> spaces)
         (parseHitObjects .>> spaces)
     |>> fun ((format, general, editor, metadata), (difficulty, events, timingpoints, hitobjects)) ->
         (readGeneral general, readEditor editor, readMetadata metadata, readDifficulty difficulty, events, hitobjects,
@@ -546,6 +549,6 @@ let loadStoryboardFile path : Storyboard =
     | Failure(errorMsg, _, _) -> failwith errorMsg
     
 let saveStoryboardFile path events = 
-    System.IO.File.WriteAllText(path, eventsToString events)
+    System.IO.File.WriteAllText(path, eventsToString events + "\n\n")
 
 let getGameMode ((g, _, _, _, _, _, _): Beatmap) = g.Mode

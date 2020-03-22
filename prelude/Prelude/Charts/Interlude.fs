@@ -99,10 +99,6 @@ type TimeData<'t>(list) =
 
     member this.SetData(data: TimeData<'t>) = this.SetData(data.GetData)
 
-    member this.Add item =
-        data.Add(item)
-        count <- count + 1
-
     member this.IndexAt time: int * bool =
         match count with
         | 0 -> (0, false)
@@ -138,19 +134,26 @@ type TimeData<'t>(list) =
                 | _ -> failwith "impossible"
 
     member this.GetPointAt time: TimeDataItem<'t> =
-        let (index, _) = this.IndexAt time in data.[index]
+        let (index, _) = this.IndexAt time
+        Logging.Debug (string index) ""
+        data.[index]
+
+    member this.GetNextPointAt time: TimeDataItem<'t> =
+            let (index, _) = this.IndexAt time
+            Logging.Debug (string index) ""
+            if (index + 1 < count) then data.[index + 1] else data.[index]
 
     member this.InterpolatePointAt time interp_func : TimeDataItem<'t> =
         match this.IndexAt time with
         | (index, true) -> data.[index]
         | (index, false) ->
-            let (_, data) = data.[index] in (time, interp_func data)
+            let (time0, data) = data.[index] in (time, interp_func time0 time data)
 
     member this.InsertAt time guts =
         match this.IndexAt time with
         | (_, true) -> failwith "Cannot insert two points in same place, use ReplaceAt instead."
         | (index, false) ->
-            data.Insert(index + 1, (time, guts))
+            data.Insert(index, (time, guts))
             count <- count + 1
 
     member this.Insert(time, guts) = this.InsertAt time guts
@@ -168,7 +171,7 @@ type TimeData<'t>(list) =
             data.RemoveAt(index)
             data.Insert(index, (time, guts))
         | (index, false) ->
-            data.Insert(index + 1, (time, guts))
+            data.Insert(index, (time, guts))
             count <- count + 1
 
     member this.InsertOrReplace(time, guts) = this.InsertOrReplaceAt time guts
@@ -184,7 +187,7 @@ type TimeData<'t>(list) =
 
     member this.Clear = data.Clear(); count <- 0
 
-    member this.First = data.[0] //Use Count to check this exists first before use
+    member this.First = data.[0] //Use IsEmpty to check this exists first before use
     member this.Enumerate = data.AsReadOnly()
 
     member this.EnumerateBetween time1 time2 = 

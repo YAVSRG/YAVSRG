@@ -288,7 +288,7 @@ let convert_interlude_stepmania (chart : Chart) : StepmaniaData = failwith "nyi"
 
 let loadAndConvertFile (path : string) : Chart list =
     match Path.GetExtension(path).ToLower() with
-        ".yav" -> [loadChartFile path]
+      | ".yav" -> [loadChartFile path]
       | ".sm" -> convert_stepmania_interlude (loadStepmaniaFile path) (Path.GetDirectoryName path)
       | ".osu" -> let map = loadBeatmapFile path in if getGameMode map = GameMode.Mania then [convert_osu_interlude (loadBeatmapFile path)] else []
       | _ -> []
