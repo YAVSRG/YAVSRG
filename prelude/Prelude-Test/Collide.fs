@@ -7,25 +7,34 @@ open Prelude.Charts.osu
 open Prelude.Charts.ChartConversions
 open Prelude.Charts.Filter
 
-let plus ((x1, y1) : Point) ((x2, y2) : Point) = (x1 + x2, y1 + y2)
+let plus ((x1, y1) : Point) ((x2, y2) : Point) =
+    (x1 + x2, y1 + y2)
 
 let collide =
     let receptorOrigin = MultiTimeData<Point>(2)
     let receptorPosition = MultiTimeData<Point>(2)
+    let redAngle = TimeData<float>()
+    let blueAngle = TimeData<float>()
     let lerp v (x1, y1) (x2, y2) = (x1 * (1.0-v) + x2 * v, y1 * (1.0-v) + y2 * v)
     let ip time (data : TimeData<Point>) =
         let (time1, p1) = data.GetPointAt(time)
         let (time2, p2) = data.GetNextPointAt(time)
-        lerp ((time - time1) / (time2 - time1)) p1 p2
-    receptorOrigin.GetChannelData(-1).InsertAt -infinity (320.0, 240.0)
-    receptorOrigin.GetChannelData(0).InsertAt -infinity (0.0, 0.0)
-    receptorOrigin.GetChannelData(1).InsertAt -infinity (0.0, 0.0)
-    for i = -1 to 1 do
-        receptorPosition.GetChannelData(i).InsertAt -infinity (0.0, 0.0)
-
-    receptorPosition.GetChannelData(-1).InsertAt 20000.0 (20.0, 1000.0)
-    
-    Logging.Debug "data init" ""
+        if (time1 = time2) then p1 else lerp ((time - time1) / (time2 - time1)) p1 p2
+    let fp time (data : TimeData<float>) =
+        let (time1, p1) = data.GetPointAt(time)
+        let (time2, p2) = data.GetNextPointAt(time)
+        if (time1 = time2) then p1 else
+            let v = ((time - time1) / (time2 - time1))
+            p1 * (1.0-v) + p2 * v
+        
+    receptorOrigin.GetChannelData(-1).InsertAt 0.0 (320.0, 240.0)
+    receptorOrigin.GetChannelData(0).InsertAt 0.0 (0.0, 0.0)
+    receptorOrigin.GetChannelData(1).InsertAt 0.0 (0.0, 0.0)
+    receptorPosition.GetChannelData(-1).InsertAt 0.0 (0.0, 0.0)
+    receptorPosition.GetChannelData(0).InsertAt 0.0 (0.0, 0.0)
+    receptorPosition.GetChannelData(1).InsertAt 0.0 (0.0, 0.0)
+    redAngle.InsertAt 0.0 -0.5
+    blueAngle.InsertAt 0.0 -0.5
 
     let receptorPosAt isRed time = 
         let (x,y) = plus (ip time (receptorOrigin.GetChannelData(-1))) (ip time (receptorOrigin.GetChannelData(if isRed then 0 else 1)))
@@ -38,7 +47,7 @@ let collide =
                 (fun (t, angle, dist) ->
                     let (x, y) = receptorPosAt isRed t
                     (t, (x + Math.Cos(Math.PI * angle) * dist, y + Math.Sin(Math.PI * angle) * dist)))
-                [ for i in (time - 1000.0).. 50.0 .. time -> (i, i/2000.0 + (if isRed then 1.0 else 0.0), time - i) ]
+                [ for i in (time - 1000.0).. 50.0 .. time -> (i, (if isRed then (fp time redAngle) else (fp time blueAngle)), (time - i) * 0.5) ]
 
         (Seq.map (fun ((t1, p1),(t2, p2)) -> Move (t1, t2, Easing.None, p1, p2)) (Seq.zip motion (List.tail motion)) |> List.ofSeq) @
             [Fade (time, (time + 100.0), Easing.None, 1.0, 0.0); Scale (time, (time + 100.0), Easing.None, 0.4, 0.7)]
@@ -53,7 +62,6 @@ let collide =
         match obj with
         | HitCircle ((x,_), time, _, _) ->
             let isRed = x < 320.0
-            Logging.Debug (string time) ""
             [Sprite (Layer.Overlay, SpriteOrigin.Centre, (if isRed then "red.png" else "blue.png"), (320.0, 240.0),
                 (Scale ((time - 1000.0), time, Easing.None, 0.4, 0.4)) :: (pathing isRed time))]
         | HoldNote ((x, _), time, endTime, _, _) -> 
@@ -64,7 +72,7 @@ let collide =
         | _ -> failwith "impossible"
     List.map f obj |> List.concat |> saveStoryboardFile @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637117532073937730-Fractal - Collide (ft. Danyka Nadeau)\Fractal - Collide (feat. Danyka Nadeau) (Percyqaz).osb"
 
-let miracle =
+let miracle _ =
     let chart =
         @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Uncut Ver.].osu"
         |> loadAndConvertFile |> List.head

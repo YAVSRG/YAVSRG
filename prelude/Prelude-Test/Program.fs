@@ -14,8 +14,6 @@ open FParsec
 
 [<EntryPoint>]
 let main argv =
-    Logging.Debug "begin" ""
-    Logging.Subscribe (fun _ -> Console.ReadLine() |> ignore)
     try
         Collide.collide
     with

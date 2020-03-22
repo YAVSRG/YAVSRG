@@ -101,46 +101,33 @@ type TimeData<'t>(list) =
 
     member this.IndexAt time: int * bool =
         match count with
-        | 0 -> (0, false)
+        | 0 -> (-1, false)
         | 1 ->
             let (offset, _) = data.[0]
             if time < offset then (-1, false)
             else if time = offset then (0, true)
-            else (1, false)
+            else (0, false)
         | n ->
-            let (offset, _) = data.[0]
-            if time < offset then
-                (-1, false)
-            else
-                //Binary search with the added touch that you get
-                //(I, TRUE/FALSE) with I = the highest index with offset <= the time requested
-                //and the TRUE/FALSE flag is true if the offset = the time requested
-                let mutable low = 0
-                let mutable high = count
-                let mutable mid = -1
-                while (low + 1 < high) do
-                    mid <- (high + low) / 2
-                    let o = offsetOf data.[mid]
-                    if (o = time) then
-                        low <- mid
-                        high <- mid
-                    else if (o < time) then
-                        low <- mid
-                    else
-                        high <- mid
-                match (high - low) with
-                | 0 -> (low, true)
-                | 1 -> (low, false)
-                | _ -> failwith "impossible"
+            //Binary search with the added touch that you get
+            //(I, TRUE/FALSE) with I = the highest index with offset <= the time requested
+            //and the TRUE/FALSE flag is true if the offset = the time requested
+            let mutable low = 0
+            let mutable high = count
+            let mutable mid = -1
+            while (low < high) do
+                mid <- (high + low) / 2
+                let o = offsetOf data.[mid]
+                if (o < time) then
+                    low <- mid + 1
+                else
+                    high <- mid
+            if (offsetOf data.[low - 1] = time) then (low - 1, true) else (low - 1, false)
 
     member this.GetPointAt time: TimeDataItem<'t> =
-        let (index, _) = this.IndexAt time
-        Logging.Debug (string index) ""
-        data.[index]
+        let (index, _) = this.IndexAt time in data.[index]
 
     member this.GetNextPointAt time: TimeDataItem<'t> =
             let (index, _) = this.IndexAt time
-            Logging.Debug (string index) ""
             if (index + 1 < count) then data.[index + 1] else data.[index]
 
     member this.InterpolatePointAt time interp_func : TimeDataItem<'t> =
@@ -153,7 +140,7 @@ type TimeData<'t>(list) =
         match this.IndexAt time with
         | (_, true) -> failwith "Cannot insert two points in same place, use ReplaceAt instead."
         | (index, false) ->
-            data.Insert(index, (time, guts))
+            data.Insert(index + 1, (time, guts))
             count <- count + 1
 
     member this.Insert(time, guts) = this.InsertAt time guts
@@ -171,7 +158,7 @@ type TimeData<'t>(list) =
             data.RemoveAt(index)
             data.Insert(index, (time, guts))
         | (index, false) ->
-            data.Insert(index, (time, guts))
+            data.Insert(index + 1, (time, guts))
             count <- count + 1
 
     member this.InsertOrReplace(time, guts) = this.InsertOrReplaceAt time guts
