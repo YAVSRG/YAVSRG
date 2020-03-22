@@ -1,5 +1,6 @@
 ﻿module Prelude.Charts.ChartConversions
 
+open System
 open System.IO
 open System.Collections.Generic
 open System.Linq
@@ -128,11 +129,61 @@ let convert_osu_interlude ((general, _, meta, diff, events, notes, timing) : Bea
     (Incomplete)
 *)
 
-let convert_measures measures bpm = 
-    //add snaps to accumulator from single measure
-    //bpm/measure matching function to write this whole thing as a fold
-    let (snaps, _, _) = ([], measures, bpm) in
-    TimeData(listToDotNet snaps)
+let private convert_measures measures bpms start = 
+    let mutable bpms = bpms
+    let meter = 4
+    let states = new List<(Offset * NoteRow)>()
+    let points = new List<(Offset * BPM)>()
+    let mutable ln : Bitmap = 0us
+    let mutable now = start
+    let (t, b) = List.head bpms in points.Add(t, (meter, 60000.0/b))
+    let mutable msPerBeat = 60000.0/b
+    bpms <- List.tail bpms
+    let mutable totalBeats = 0.0;
+    let mutable lo = 0.0
+    let mutable hi = 0.0
+
+    let convert_measure (m : string list) hi lo =
+        let met = float meter
+        let l = List.length m |> float
+        let sep = msPerBeat * met / l
+        let start = Math.Ceiling(lo * l / met) |> int
+        let finish = Math.Ceiling(hi * l / met) |> int
+        let offset = now + (float start * sep) - (lo * msPerBeat)
+
+        for i in start..(finish-1) do
+            let nr = makeNoteRow 0us 0us ln 0us 0us 0us 0us
+            Array.iteri (fun k c ->
+                match c with
+                | '0' -> ()
+                | '1' -> applyToNoteData NoteType.NORMAL (setBit i) nr
+                | '2' | '4' ->
+                    applyToNoteData NoteType.HOLDHEAD (setBit i) nr
+                    ln <- setBit i ln
+                | '3' ->
+                    applyToNoteData NoteType.HOLDTAIL (setBit i) nr
+                    applyToNoteData NoteType.HOLDBODY (unsetBit i) nr
+                    ln <- unsetBit i ln
+                | 'M' -> applyToNoteData NoteType.MINE (setBit i) nr
+                | _ -> failwith ("unknown note type " + c.ToString())
+                ) (m.[i].ToCharArray())
+            if isEmptyNoteRow nr then states.Add((offset + float (i - start) * sep),nr)
+
+    List.iteri (fun i m -> 
+        totalBeats <- totalBeats + float meter
+        lo <- 0.0
+        while (List.isEmpty bpms && fst (List.head bpms) < totalBeats) do
+            hi <- fst (List.head bpms) - totalBeats + float meter
+            convert_measure m lo hi
+            now <- now + msPerBeat * (hi - lo)
+            let (t, b) = List.head bpms in points.Add(t, (meter, 60000.0/b))
+            msPerBeat <- 60000.0/b
+            bpms <- List.tail bpms
+        convert_measure m lo hi
+        now <- now + msPerBeat * (float meter - lo)
+        ) measures
+    (new TimeData<NoteRow>(states), new TimeData<BPM>(points))
+
 
 let convert_stepmania_interlude (sm : StepmaniaData) path = 
     let rec metadataFallback x =
@@ -143,7 +194,7 @@ let convert_stepmania_interlude (sm : StepmaniaData) path =
     let findBackground guess : string =
         if (not (File.Exists(Path.Combine(path, guess)))) then
             let mutable result = ""
-            //todo: fix this
+            //todo: fix this going through all files
             for s in Directory.GetFiles(path) do
                 let filename = Path.GetFileNameWithoutExtension(s).ToLower()
                 if (filename.Contains("bg") || filename.Contains("background")) then result <- Path.GetFileName(s)
@@ -164,7 +215,8 @@ let convert_stepmania_interlude (sm : StepmaniaData) path =
                 AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"]
                 BGFile = metadataFallback [sm.BACKGROUND; findBackground (sm.TITLE + "-bg.jpg")]
         }
-        None //nyi behaviour
+        let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0)
+        Some (Chart(keys, header, notes, bpm, MultiTimeData<float>(keys)))
     sm.Charts |> List.choose convert_difficulty
 
 (*

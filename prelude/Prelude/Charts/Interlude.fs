@@ -55,6 +55,7 @@ let makeNoteRow taps holds middles ends mines special hitsound: NoteRow =
 let noteData (nt: NoteType) (data: NoteRow) = data.[nt |> int]
 let testForNote k (nt: NoteType) = noteData nt >> hasBit k
 let applyToNoteData (nt: NoteType) f (data: NoteRow) = data.[nt |> int] <- data |> noteData nt |> f
+let isEmptyNoteRow = Array.forall (fun x -> x = 0us)
 
 let readRowFromFile (br: BinaryReader) =
     let (storage: uint16) = br.ReadByte() |> uint16
