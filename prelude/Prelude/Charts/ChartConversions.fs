@@ -324,7 +324,7 @@ let convert_interlude_osu (chart : Chart) : Beatmap =
             OverallDifficulty = 8.0
             HPDrainRate = 8.0
     }
-    (general, editor, meta, diff, [(Background (chart.Header.BGFile, (0.0,0.0)))],
+    (general, editor, meta, diff, [(Background (chart.Header.BGFile, (0.0, 0.0)))],
         convertSnapsToHitobjects (List.ofSeq (chart.Notes.Enumerate)) chart.Keys,
         convertToTimingPoints chart.BPM chart.SV (offsetOf (chart.Notes.GetPointAt(infinity))))
 
@@ -345,6 +345,7 @@ let loadAndConvertFile (path : string) : Chart list =
       | ".osu" -> let map = loadBeatmapFile path in if getGameMode map = GameMode.Mania then [convert_osu_interlude (loadBeatmapFile path)] else []
       | _ -> []
 
+//Writes chart to new location, including copying its background and audio files
 let relocateChart (chart : Chart) (sourcePath : string) (targetPath : string) =
     let c = chart.WithHeader({ chart.Header with SourcePath = targetPath; SourcePack = Path.GetFileName(Path.GetDirectoryName(targetPath)); File = Path.ChangeExtension(chart.Header.File, ".yav") })
 

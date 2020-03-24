@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Tests\score-test.fs" />
     <Compile Include="Collide.fs" />
     <Compile Include="Collatz.fs" />
     <Compile Include="Program.fs" />

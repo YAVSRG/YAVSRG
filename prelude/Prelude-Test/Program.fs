@@ -3,11 +3,16 @@ open Prelude.Common
 open FParsec
 
 (*
-    Prelude features to tackle next:
+    Prelude features required to build Interlude:
         HP system/life calculation
+        Gameplay/score prep logic
         Chart modifiers
         Chart coloring systems
         Chart caching tools
+    Prelude features that would otherwise be useful:
+        Pattern generator
+        File format for chart editing containing extra data/layers of notes
+        SV Filters
 *)
 
 [<EntryPoint>]

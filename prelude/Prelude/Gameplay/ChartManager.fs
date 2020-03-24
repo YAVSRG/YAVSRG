@@ -3,10 +3,12 @@
 open Newtonsoft.Json
 open System
 open System.IO
+open System.Linq
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
+open Prelude.Gameplay.Score
 open Prelude.Gameplay.Difficulty
 
 (*
@@ -55,34 +57,32 @@ let cacheChart (chart : Chart) : CachedChart =
     Collection = ""
     CollectionIndex = 0 }
 
-(*this stuff should stay in Interlude as ColorBy uses aspects that belong in Interlude
-
-let private formatFirstChar (s : string) =
-    if s.Length > 0 && System.Char.IsLetterOrDigit s.[0] then s.[0].ToString().ToUpper() else "?"
-let private formatNum (n : float) =
-    let i = int (n / 2.0) * 2
-    i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
-
-let GroupBy : IDictionary<string, CachedChart -> string> =
-    dict (seq [
-        ("Physical", fun c -> c.Physical |> formatNum);
-        ("Technical", fun c -> c.Technical |> formatNum);
-        ("Creator", fun c -> c.Creator |> formatFirstChar);
-        ("Artist", fun c -> c.Artist |> formatFirstChar);
-        ("Pack", fun c -> c.Pack);
-        ("Title", fun c -> c.Title |> formatFirstChar);
-        ("Keymode", fun c -> c.Keys.ToString() + "K");
-        ("Collection", fun c -> "")
-    ])
-*)
-
 let osuSongFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs")
 let smPackFolder = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Stepmania 5", "Songs")
 let etternaPackFolder = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Etterna", "Songs")
+
+type ChartGroup = (string * CachedChart list)
+
+type Goal =
+    | NoGoal
+    | Clear of unit
+    | Grade of unit * int
+    | Accuracy of unit * float
+
+    //todo: replace unit type with mod list type
+type PlaylistData = string * float * unit
+type Collection =
+    | Collection of List<string>
+    | Playlist of List<PlaylistData>
+    | Goals of List<PlaylistData * Goal>
+
 type Cache() =
     let charts = new Dictionary<string, CachedChart>()
+    let collections = new Dictionary<string, Collection>()
     
     member this.CacheChart (c: Chart) = lock(this) (fun () -> charts.[c.FileIdentifier] <- cacheChart c)
+
+    member this.Count = charts.Count
 
     member this.LoadChart (cc : CachedChart) : Chart option =  
         let id = Path.Combine(cc.SourcePath, cc.File)
@@ -92,3 +92,45 @@ type Cache() =
             Some c
         with
         | err -> Logging.Error ("Could not load chart from " + id) (err.ToString()); None
+
+    member this.GetGroups grouping (sorting : Comparison<CachedChart>) =
+        let groups = new Dictionary<string, List<CachedChart>>()
+        for c in charts.Values do
+            let s = grouping(c)
+            if (groups.ContainsKey(s) |> not) then groups.Add(s, new List<CachedChart>())
+            groups.[s].Add(c)
+        for g in groups.Values do
+            g.Sort(sorting)
+        groups
+
+    member this.GetCollections (sorting : Comparison<CachedChart>) = 
+        let groups = new Dictionary<string, List<CachedChart>>()
+        for name in collections.Keys do
+            let c = collections.[name]
+            match c with
+            | Collection ids -> ()
+            | Playlist ps -> ()
+            | Goals gs -> ()
+        failwith "nyi"
+
+    member this.RebuildCache = failwith "nyi"
+
+    member this.DeleteChart (c : CachedChart) = failwith "nyi"
+
+    member this.DeleteCharts (cs : List<CachedChart>) = failwith "nyi"
+
+    member this.ConvertSongFolder path target = failwith "nyi"
+
+    member this.ConvertPackFolder path target = failwith "nyi"
+
+    member this.ConvertFolder path target = 
+        //auto detect:
+            // osz
+            // zip containing sm, yav, ssc, osu
+            // song folder
+            // pack of song folders
+            // folder of packs
+        //accordingly extract if needed
+        //accordingly convert
+        failwith "nyi"
+
