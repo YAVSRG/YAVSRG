@@ -14,3 +14,5 @@
 /Prelude-Test/obj
 /packages/Newtonsoft.Json.12.0.1/lib
 /packages/Newtonsoft.Json.12.0.1
+/Prelude/bin/Debug
+/Prelude-Test/bin/Debug

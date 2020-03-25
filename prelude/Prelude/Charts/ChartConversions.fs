@@ -126,7 +126,7 @@ let convert_osu_interlude ((general, _, meta, diff, events, notes, timing) : Bea
 
 (*
     Conversion code for StepMania -> Interlude
-    (Incomplete)
+    Todo: Support freezes, warps, stops
 *)
 
 let private convert_measures measures bpms start = 

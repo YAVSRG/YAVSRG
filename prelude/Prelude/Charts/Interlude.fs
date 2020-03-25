@@ -261,7 +261,7 @@ let loadChartFile filepath =
     let keys = br.ReadByte()
 
     let header =
-        { loadJson (br.ReadString()) with
+        { Json.Load (br.ReadString()) with
               File = Path.GetFileName(filepath)
               SourcePath = Path.GetDirectoryName(filepath) }
 
@@ -278,7 +278,7 @@ let saveChartFile (chart : Chart) filepath =
     use fs = new FileStream(filepath, FileMode.Create)
     use bw = new BinaryWriter(fs)
     bw.Write(chart.Keys)
-    bw.Write(saveJsonCompact chart.Header)
+    bw.Write(Json.Save chart.Header)
     writeSection chart.Notes bw (fun nr -> writeRowToFile bw nr)
     writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter); bw.Write(float32 msPerBeat))
     for i = 0 to chart.Keys do

@@ -40,6 +40,8 @@ type Mod
 
 type ModState(mods : Dictionary<string, int>) =
     static let modList = new Dictionary<string, Mod>();
+    
+    new() = ModState(new Dictionary<string, int> ())
 
     member this.EnableMod id state = 
         if modList.[id].MaxState >= state then
@@ -60,6 +62,6 @@ type ModState(mods : Dictionary<string, int>) =
 let private auto _ _ hitData =
     for (t, delta, hit) in hitData do
         for i = 0 to (Array.length hit - 1) do
-            if hit.[i] = HitStatus.Not_Hit then hit.[i] <- HitStatus.Hit
+            if hit.[i] = HitStatus.NotHit then hit.[i] <- HitStatus.Hit
 ModState.RegisterMod "auto"
     (Mod(ModStatus.Unstored, 0, (fun _ _ -> true), (fun _ _ -> ()), auto))

@@ -12,10 +12,10 @@ open System.IO.Compression
 
 type HitStatus =
     | Nothing = 0uy
-    | Not_Hit = 1uy
+    | NotHit = 1uy
     | Hit = 2uy
     | Special = 3uy
-    | Special_Missed = 4uy
+    | SpecialMissed = 4uy
 
 type ScoreDataRow = float * float array * HitStatus array
 
@@ -120,10 +120,10 @@ let accuracy_hit_func judge_func points_func max_point_func combo_func =
     fun ((_, deltas, hit): ScoreDataRow) k ((judgementCounts, points, maxPoints, combo, maxCombo, cbs): AccuracySystemState) ->
         let j =
             match hit.[k] with
-            | HitStatus.Not_Hit -> JudgementType.MISS
+            | HitStatus.NotHit -> JudgementType.MISS
             | HitStatus.Hit -> judge_func (Math.Abs deltas.[k])
             | HitStatus.Special -> JudgementType.OK
-            | HitStatus.Special_Missed -> JudgementType.FUMBLE
+            | HitStatus.SpecialMissed -> JudgementType.FUMBLE
             | _ -> failwith "impossible hit status"
         judgementCounts.[j |> int] <- (judgementCounts.[j |> int] + 1)
         let (newcombo, cb) = combo_func j combo

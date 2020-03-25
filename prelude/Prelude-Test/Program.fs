@@ -1,4 +1,5 @@
 ﻿open System
+open System.Collections.Generic
 open Prelude.Common
 open FParsec
 
@@ -17,9 +18,14 @@ open FParsec
 
 [<EntryPoint>]
 let main argv =
-    try
+    Console.BufferHeight <- 32766
+    @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Uncut Ver.].osu"
+    |> Prelude.Charts.osu.loadBeatmapFile
+    |> Json.Save
+    |> printfn "%A"
+    (*try
         Collide.collide
     with
     | e ->
-        Logging.Error (e.ToString()) ""
+        Logging.Error (e.ToString()) ""*)
     0

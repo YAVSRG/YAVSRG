@@ -1,12 +1,35 @@
 ﻿module Prelude.Common
 
-open Newtonsoft.Json
 open System.Threading
 open System.Threading.Tasks
+open System.IO
+open Newtonsoft.Json
 
-let loadJson<'T> string = JsonConvert.DeserializeObject<'T>(string)
-let saveJson<'T> (obj : 'T) = JsonConvert.SerializeObject(obj, Formatting.Indented)
-let saveJsonCompact obj = JsonConvert.SerializeObject(obj)
+(*
+    Json I/O
+*)
+
+type Json() =
+    static let s = JsonSerializerSettings() |> (*Newtonsoft.Json.FSharp.Serialisation.extend |>*) JsonSerializer.Create
+    
+    static member Load<'T> string : 'T = 
+        use jr = new JsonTextReader(new StringReader(string))
+        s.Deserialize<'T> jr
+
+    static member Save<'T> (obj : 'T) : string = 
+        use sw = new StringWriter()
+        use jw = new JsonTextWriter(sw)
+        s.Serialize(jw, obj)
+        sw.ToString()
+
+    static member LoadFile<'T> (path : string) : 'T =
+        use jr = new JsonTextReader(new StreamReader(path))
+        s.Deserialize<'T> jr
+        
+    static member SaveFile<'T> (obj : 'T) (path : string) : unit = 
+        use sw = new StreamWriter(path)
+        use jw = new JsonTextWriter(sw)
+        s.Serialize(jw, obj)
 
 (*
     Logging
@@ -51,7 +74,7 @@ type ManagedTask(name : string, t : LoggableTask, callback : bool -> unit, visib
     let mutable task : Task = new Task(fun () -> ())
 
     //this exists so that...
-    member this.Task =
+    member this.CreateTask =
         let action() =
             try
                 status <- "Running"
@@ -71,7 +94,7 @@ type ManagedTask(name : string, t : LoggableTask, callback : bool -> unit, visib
 
     member this.Start =
         if state = ManagedTaskState.INACTIVE then
-            task <- this.Task;
+            task <- this.CreateTask;
             state <- ManagedTaskState.ACTIVE
             task.Start();
         else Logging.Warn ("Tried to start " + name + " but it has already been started") ""

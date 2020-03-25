@@ -1,10 +1,9 @@
 ﻿module Prelude.Charts.ChartManager
 
-open Newtonsoft.Json
 open System
 open System.IO
-open System.Linq
 open System.Collections.Generic
+open Newtonsoft.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
@@ -84,6 +83,8 @@ type Cache() =
 
     member this.Count = charts.Count
 
+    member this.LookupChart (id : string) : CachedChart option = if charts.ContainsKey(id) then Some charts.[id] else None
+
     member this.LoadChart (cc : CachedChart) : Chart option =  
         let id = Path.Combine(cc.SourcePath, cc.File)
         try
@@ -108,10 +109,17 @@ type Cache() =
         for name in collections.Keys do
             let c = collections.[name]
             match c with
-            | Collection ids -> ()
-            | Playlist ps -> ()
-            | Goals gs -> ()
-        failwith "nyi"
+            | Collection ids ->
+                Seq.choose this.LookupChart ids
+            | Playlist ps ->
+                Seq.choose (fun (i, _, _) -> this.LookupChart i) ps
+            | Goals gs ->
+                Seq.choose (fun ((i, _, _), _) -> this.LookupChart i) gs
+            |> ResizeArray<CachedChart>
+            |> fun x -> groups.Add(name, x)
+        for g in groups.Values do
+            g.Sort(sorting)
+        groups
 
     member this.RebuildCache = failwith "nyi"
 
