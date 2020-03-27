@@ -216,18 +216,17 @@ type ChartHeader =
       File: string
       [<JsonIgnore>]
       SourcePath: string }
-
-let DefaultChartHeader =
-    { Title = "Untitled Chart"
-      Artist = ""
-      Creator = ""
-      DiffName = ""
-      PreviewTime = 0.0
-      SourcePath = ""
-      SourcePack = "Unknown"
-      BGFile = ""
-      AudioFile = "audio.mp3"
-      File = "unknown.yav" }
+    static member Default = 
+        { Title = "Untitled Chart"
+          Artist = ""
+          Creator = ""
+          DiffName = ""
+          PreviewTime = 0.0
+          SourcePath = ""
+          SourcePack = "Unknown"
+          BGFile = ""
+          AudioFile = "audio.mp3"
+          File = "unknown.yav" }
 
 type Chart(keys, header, notes, bpms, sv) =
     member this.Keys = keys
@@ -236,7 +235,7 @@ type Chart(keys, header, notes, bpms, sv) =
     member this.Header: ChartHeader = header
     member this.SV: MultiTimeData<float> = sv
 
-    new() = Chart(4, DefaultChartHeader, TimeData(), TimeData(), MultiTimeData(4))
+    new() = Chart(4, ChartHeader.Default, TimeData(), TimeData(), MultiTimeData(4))
 
     member this.WithHeader(h) = Chart(this.Keys, h, this.Notes, this.BPM, this.SV)
 

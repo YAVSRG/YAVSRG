@@ -47,7 +47,9 @@ type ModState(mods : Dictionary<string, int>) =
         if modList.[id].MaxState >= state then
             mods.[id] <- state
         else failwith "tried to assign a state"
+
     member this.DisableMod id = mods.Remove(id)
+
     member this.IterApplicable chart =
         seq {
             for id in mods.Keys do
@@ -55,8 +57,11 @@ type ModState(mods : Dictionary<string, int>) =
             }
 
     static member ModList = modList
+
     static member RegisterMod id obj = modList.Add(id, obj)
+
     static member GetModName id = localise ("mod."+id+".name")
+
     static member GetModDesc id = localise ("mod."+id+".desc")
 
 let private auto _ _ hitData =

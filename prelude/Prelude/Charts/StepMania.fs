@@ -82,59 +82,58 @@ let parseHeader: Parser<Header, unit> = many (parseKeyValue .>> comment)
 *)
 
 type StepmaniaData =
-    { TITLE: string
-      SUBTITLE: string
-      ARTIST: string
-      TITLETRANSLIT: string
-      SUBTITLETRANSLIT: string
-      ARTISTTRANSLIT: string
-      GENRE: string
-      CREDIT: string
-      BANNER: string
-      BACKGROUND: string
-      CDTITLE: string
-      MUSIC: string
-      OFFSET: float
-      BPMS: (float * float) list
-      STOPS: (float * float) list
-      SAMPLESTART: float
-      SAMPLELENGTH: float
-      DISPLAYBPM: float * float
-      SELECTABLE: bool
-      //The following tags are SSC features
-      VERSION: string
-      ORIGIN: string
-      WARPS: (float * float) list
-      DELAYS: (float * float) list
-      TIMESIGNATURES: (float * float) list
-      Charts: ChartData list }
-
-let StepmaniaDataDefault: StepmaniaData =
-    { TITLE = "Unknown Chart"
-      SUBTITLE = ""
-      ARTIST = ""
-      TITLETRANSLIT = ""
-      SUBTITLETRANSLIT = ""
-      ARTISTTRANSLIT = ""
-      GENRE = ""
-      CREDIT = ""
-      BANNER = ""
-      BACKGROUND = ""
-      CDTITLE = ""
-      MUSIC = ""
-      OFFSET = 0.0
-      BPMS = [ (0.0, 120.0) ]
-      STOPS = []
-      SAMPLESTART = 0.0
-      SAMPLELENGTH = 1.0
-      DISPLAYBPM = (120.0, 120.0)
-      SELECTABLE = true
-      VERSION = ""
-      ORIGIN = ""
-      WARPS = []
-      DELAYS = []
-      TIMESIGNATURES = []
-      Charts = [] }
+    {   TITLE: string
+        SUBTITLE: string
+        ARTIST: string
+        TITLETRANSLIT: string
+        SUBTITLETRANSLIT: string
+        ARTISTTRANSLIT: string
+        GENRE: string
+        CREDIT: string
+        BANNER: string
+        BACKGROUND: string
+        CDTITLE: string
+        MUSIC: string
+        OFFSET: float
+        BPMS: (float * float) list
+        STOPS: (float * float) list
+        SAMPLESTART: float
+        SAMPLELENGTH: float
+        DISPLAYBPM: float * float
+        SELECTABLE: bool
+        //The following tags are SSC features
+        VERSION: string
+        ORIGIN: string
+        WARPS: (float * float) list
+        DELAYS: (float * float) list
+        TIMESIGNATURES: (float * float) list
+        Charts: ChartData list }
+        static member Default =
+            {   TITLE = "Unknown Chart"
+                SUBTITLE = ""
+                ARTIST = ""
+                TITLETRANSLIT = ""
+                SUBTITLETRANSLIT = ""
+                ARTISTTRANSLIT = ""
+                GENRE = ""
+                CREDIT = ""
+                BANNER = ""
+                BACKGROUND = ""
+                CDTITLE = ""
+                MUSIC = ""
+                OFFSET = 0.0
+                BPMS = [ (0.0, 120.0) ]
+                STOPS = []
+                SAMPLESTART = 0.0
+                SAMPLELENGTH = 1.0
+                DISPLAYBPM = (120.0, 120.0)
+                SELECTABLE = true
+                VERSION = ""
+                ORIGIN = ""
+                WARPS = []
+                DELAYS = []
+                TIMESIGNATURES = []
+                Charts = [] }
 
 let private parsePairs = sepBy (pfloat .>> pchar '=' .>>. pfloat) (pchar ',')
 let private parseMeasure = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
@@ -204,7 +203,7 @@ let readSMData header =
                           :: s.Charts }
             | Failure(errorMsg, _, _) -> failwith errorMsg
         | _ -> s
-    List.fold f StepmaniaDataDefault header
+    List.fold f StepmaniaData.Default header
 
 let parseStepFile = parseHeader |>> readSMData
 

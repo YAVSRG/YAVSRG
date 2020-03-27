@@ -117,7 +117,7 @@ let convert_osu_interlude ((general, _, meta, diff, events, notes, timing) : Bea
             | _ :: es -> findBGFile es
             | [] -> ""
     let header = { 
-        DefaultChartHeader with
+        ChartHeader.Default with
             Title = meta.Title; Artist = meta.Artist; Creator = meta.Creator; SourcePack = "osu!"
             DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename }
     let snaps = convertHitObjects notes keys
@@ -204,7 +204,7 @@ let convert_stepmania_interlude (sm : StepmaniaData) path =
     let convert_difficulty (diff : ChartData) : Chart option = 
         let keys = keyCount diff.STEPSTYPE
         let header = {
-            DefaultChartHeader with
+            ChartHeader.Default with
                 Title = metadataFallback [sm.TITLETRANSLIT; sm.TITLE]
                 Artist = metadataFallback [sm.ARTISTTRANSLIT; sm.ARTIST]
                 Creator = metadataFallback [sm.CREDIT; diff.CREDIT]
@@ -302,15 +302,15 @@ let private convertToTimingPoints (bpm : TimeData<BPM>) (sv : MultiTimeData<floa
 
 let convert_interlude_osu (chart : Chart) : Beatmap =
     let general = {
-        GeneralDefault with
+        General.Default with
             AudioFilename = chart.Header.AudioFile
             PreviewTime = chart.Header.PreviewTime
             SampleSet = SampleSet.Soft
             Mode = GameMode.Mania
     }
-    let editor = EditorDefault
+    let editor = Editor.Default
     let meta = {
-        MetadataDefault with
+        Metadata.Default with
             Title = chart.Header.Title
             TitleUnicode = chart.Header.Title
             Artist = chart.Header.Artist
@@ -319,7 +319,7 @@ let convert_interlude_osu (chart : Chart) : Beatmap =
             Version = chart.Header.DiffName
     }
     let diff = {
-        DifficultyDefault with
+        Difficulty.Default with
             CircleSize = float chart.Keys
             OverallDifficulty = 8.0
             HPDrainRate = 8.0

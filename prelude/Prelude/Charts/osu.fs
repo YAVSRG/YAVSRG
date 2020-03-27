@@ -327,24 +327,23 @@ type General =
       SpecialStyle: bool
       WidescreenStoryboard: bool
       SamplesMatchPlaybackRate: bool }
-
-let GeneralDefault: General =
-    { AudioFilename = ""
-      AudioLeadIn = 0
-      PreviewTime = -1.0
-      Countdown = 0
-      SampleSet = SampleSet.Normal
-      StackLeniency = 0.7
-      Mode = GameMode.osu
-      LetterboxInBreaks = false
-      UseSkinSprites = false
-      OverlayPosition = OverlayPosition.NoChange
-      SkinPreference = ""
-      EpilepsyWarning = false
-      CountdownOffset = 0
-      SpecialStyle = false
-      WidescreenStoryboard = false
-      SamplesMatchPlaybackRate = false }
+    static member Default =
+        { AudioFilename = ""
+          AudioLeadIn = 0
+          PreviewTime = -1.0
+          Countdown = 0
+          SampleSet = SampleSet.Normal
+          StackLeniency = 0.7
+          Mode = GameMode.osu
+          LetterboxInBreaks = false
+          UseSkinSprites = false
+          OverlayPosition = OverlayPosition.NoChange
+          SkinPreference = ""
+          EpilepsyWarning = false
+          CountdownOffset = 0
+          SpecialStyle = false
+          WidescreenStoryboard = false
+          SamplesMatchPlaybackRate = false }
 
 let private readGeneral (title, settings) =
     assert (title = "General")
@@ -369,7 +368,7 @@ let private readGeneral (title, settings) =
         | "WidescreenStoryboard" -> { s with WidescreenStoryboard = value |> readBool }
         | "SamplesMatchPlaybackRate" -> { s with SamplesMatchPlaybackRate = value |> readBool }
         | _ -> s
-    List.fold f GeneralDefault settings
+    List.fold f General.Default settings
 
 let private writeGeneral (data : General) : Header =
     ("General", [("AudioFilename", data.AudioFilename); ("AudioLeadIn", string data.AudioLeadIn); ("PreviewTime", string data.PreviewTime);
@@ -387,13 +386,12 @@ type Editor =
       BeatDivisor: float
       GridSize: int
       TimelineZoom: float }
-
-let EditorDefault: Editor =
-    { Bookmarks = []
-      DistanceSpacing = 1.0
-      BeatDivisor = 8.0
-      GridSize = 4
-      TimelineZoom = 1.0 }
+    static member Default =
+        { Bookmarks = []
+          DistanceSpacing = 1.0
+          BeatDivisor = 8.0
+          GridSize = 4
+          TimelineZoom = 1.0 }
 
 let private readEditor (title, settings) =
     assert (title = "Editor")
@@ -408,7 +406,7 @@ let private readEditor (title, settings) =
         | "GridSize" -> { s with GridSize = value |> int }
         | "TimelineZoom" -> { s with TimelineZoom = value |> float }
         | _ -> s
-    List.fold f EditorDefault settings
+    List.fold f Editor.Default settings
 
 let private writeEditor (data : Editor) : Header =
     ("Editor", [("Bookmarks", String.concat "," (List.map string data.Bookmarks)); ("DistanceSpacing", string data.DistanceSpacing);
@@ -426,18 +424,17 @@ type Metadata =
       Tags: string list
       BeatmapID: int
       BeatmapSetID: int }
-
-let MetadataDefault: Metadata =
-    { Title = ""
-      TitleUnicode = ""
-      Artist = ""
-      ArtistUnicode = ""
-      Creator = ""
-      Version = ""
-      Source = ""
-      Tags = []
-      BeatmapID = 0
-      BeatmapSetID = -1 }
+    static member Default =
+        { Title = ""
+          TitleUnicode = ""
+          Artist = ""
+          ArtistUnicode = ""
+          Creator = ""
+          Version = ""
+          Source = ""
+          Tags = []
+          BeatmapID = 0
+          BeatmapSetID = -1 }
 
 let private readMetadata (title, settings) =
     assert (title = "Metadata")
@@ -457,7 +454,7 @@ let private readMetadata (title, settings) =
         | "BeatmapID" -> { s with BeatmapID = value |> int }
         | "BeatmapSetID" -> { s with BeatmapSetID = value |> int }
         | _ -> s
-    List.fold f MetadataDefault settings
+    List.fold f Metadata.Default settings
 
 let private writeMetadata (data : Metadata) : Header =
     ("Metadata", [("Title", data.Title); ("TitleUnicode", data.TitleUnicode); ("Artist", data.Artist);
@@ -473,14 +470,13 @@ type Difficulty =
       ApproachRate: float
       SliderMultiplier: float
       SliderTickRate: float }
-
-let DifficultyDefault: Difficulty =
-    { HPDrainRate = 5.0
-      CircleSize = 5.0
-      OverallDifficulty = 5.0
-      ApproachRate = 5.0
-      SliderMultiplier = 1.4
-      SliderTickRate = 1.0 }
+    static member Default =
+        { HPDrainRate = 5.0
+          CircleSize = 5.0
+          OverallDifficulty = 5.0
+          ApproachRate = 5.0
+          SliderMultiplier = 1.4
+          SliderTickRate = 1.0 }
 
 let private readDifficulty (title, settings) =
     assert (title = "Difficulty")
@@ -493,7 +489,7 @@ let private readDifficulty (title, settings) =
         | "SliderMultiplier" -> { s with SliderMultiplier = value |> float }
         | "SliderTickRate" -> { s with SliderTickRate = value |> float }
         | _ -> s
-    List.fold f DifficultyDefault settings
+    List.fold f Difficulty.Default settings
 
 let private writeDifficulty (data : Difficulty) : Header =
     ("Difficulty", [("HPDrainRate", string data.HPDrainRate); ("CircleSize", string data.CircleSize);

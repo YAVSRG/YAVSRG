@@ -10,7 +10,7 @@ open Newtonsoft.Json
 *)
 
 type Json() =
-    static let s = JsonSerializerSettings() |> (*Newtonsoft.Json.FSharp.Serialisation.extend |>*) JsonSerializer.Create
+    static let s = JsonSerializerSettings() |> JsonSerializer.Create
     
     static member Load<'T> string : 'T = 
         use jr = new JsonTextReader(new StringReader(string))
