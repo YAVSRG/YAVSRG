@@ -119,7 +119,7 @@ let convert_osu_interlude ((general, _, meta, diff, events, notes, timing) : Bea
     let header = { 
         ChartHeader.Default with
             Title = meta.Title; Artist = meta.Artist; Creator = meta.Creator; SourcePack = "osu!"
-            DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename; File = meta.Title + "[" + meta.Version + "].yav"}
+            DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename; File = meta.Title + " [" + meta.Version + "].yav"}
     let snaps = convertHitObjects notes keys
     let (bpm, sv) = (convertTimingPoints timing keys (offsetOf (snaps.GetPointAt(infinity))))
     Chart(keys, header, snaps, bpm, sv)

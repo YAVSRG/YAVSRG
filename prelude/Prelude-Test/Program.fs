@@ -25,5 +25,5 @@ let main argv =
     @"C:\Users\percy\AppData\Local\osu!\Songs\588322 Snails - Funk With Me (ft Big Gigantic)"
     |> fun p -> TaskManager.AddTask("Test", (c.ConvertSongFolder p "osu!"), (fun b -> TaskManager.AddTask("Test2", (c.RebuildCache), ignore, true)), true)
     while TaskManager.HasTaskRunning do
-        Console.ReadLine() |> ignore
+        Threading.Thread.Sleep(500)
     0
