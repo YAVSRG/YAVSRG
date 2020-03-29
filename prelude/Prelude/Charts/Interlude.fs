@@ -65,10 +65,10 @@ let readRowFromFile (br: BinaryReader) =
     data
 
 let writeRowToFile (bw: BinaryWriter) (data: NoteRow) =
-    let mutable storage = 0uy
+    let mutable storage = 0us
     for i = 0 to 6 do
-        if data.[i] > 0us then storage <- storage &&& (1uy <<< i)
-    bw.Write(storage)
+        if data.[i] > 0us then storage <- setBit i storage
+    bw.Write(storage |> byte)
     for i = 0 to 6 do
         if data.[i] > 0us then bw.Write(data.[i])
 
@@ -255,61 +255,68 @@ let private writeSection<'t> (data: TimeData<'t>) (bw : BinaryWriter) f =
         f guts
 
 let loadChartFile filepath =
-    use fs = new FileStream(filepath, FileMode.Open)
-    use br = new BinaryReader(fs)
-    let keys = br.ReadByte()
+    try
+        use fs = new FileStream(filepath, FileMode.Open)
+        use br = new BinaryReader(fs)
+        let keys = br.ReadByte()
+        Logging.Debug (fs.Position |> string) ""
 
-    let header =
-        { Json.Load (br.ReadString()) with
-              File = Path.GetFileName(filepath)
-              SourcePath = Path.GetDirectoryName(filepath) }
+        let header =
+            { Json.Load<ChartHeader>(br.ReadString()) with
+                  File = Path.GetFileName(filepath)
+                  SourcePath = Path.GetDirectoryName(filepath) }
+        Logging.Debug (fs.Position |> string) ""
 
-    let notes = readSection br (readRowFromFile)
-    let bpms = readSection br (fun r -> BPM(r.ReadInt32(), r.ReadSingle() |> float))
-    Chart
-        (keys |> int, header, notes, bpms,
-         let sv = MultiTimeData(keys |> int)
-         for i in 0 .. (keys |> int) do
-             sv.SetChannelData(i - 1, readSection br (fun r -> (r.ReadSingle() |> float)))
-         sv)
+        let notes = readSection br (readRowFromFile)
+        Logging.Debug (fs.Position |> string) ""
+        let bpms = readSection br (fun r -> BPM(r.ReadInt32(), r.ReadSingle() |> float))
+        Logging.Debug (fs.Position |> string) ""
+        Some (Chart
+            (keys |> int, header, notes, bpms,
+             let sv = MultiTimeData(keys |> int)
+             for i in 0 .. (keys |> int) do
+                 sv.SetChannelData(i - 1, readSection br (fun r -> (r.ReadSingle() |> float)))
+                 Logging.Debug (fs.Position |> string) ""
+             sv))
+    with
+    | err -> Logging.Error ("Could not load chart from " + filepath) (err.ToString()); None
 
 let saveChartFileTo (chart : Chart) filepath =
     use fs = new FileStream(filepath, FileMode.Create)
     use bw = new BinaryWriter(fs)
-    bw.Write(chart.Keys)
+    bw.Write(chart.Keys |> byte)
+    Logging.Debug (fs.Position |> string) ""
     bw.Write(Json.Save chart.Header)
+    Logging.Debug (fs.Position |> string) ""
     writeSection chart.Notes bw (fun nr -> writeRowToFile bw nr)
+    Logging.Debug (fs.Position |> string) ""
     writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter); bw.Write(float32 msPerBeat))
+    Logging.Debug (fs.Position |> string) ""
     for i = 0 to chart.Keys do
         writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(float32 f))
+        Logging.Debug (fs.Position |> string) ""
 
 let saveChartFile (chart : Chart) =
+    Logging.Debug (chart.Header.SourcePath) ""
     saveChartFileTo chart (Path.Combine(chart.Header.SourcePath, chart.Header.File))
 
 let calculateHash (chart: Chart): string =
     let h = SHA256.Create()
-    let data = Array.zeroCreate<byte> (16 * chart.Notes.Count)
+    use ms = new MemoryStream()
+    use bw = new BinaryWriter(ms)
     if (chart.Notes.Count = 0) then
         "_"
     else
         let offset = offsetOf chart.Notes.First
-        let mutable p = 0
         for (o, nr) in chart.Notes.Enumerate do
-            BitConverter.GetBytes((o - offset) |> int).CopyTo(data, p)
-            p <- p + 4
+            bw.Write((o - offset) |> int)
             for i = 0 to 5 do
-                BitConverter.GetBytes(nr.[i]).CopyTo(data, p + 2 * i)
-            p <- p + 12
+                bw.Write(nr.[i])
         for i = 0 to chart.Keys |> int do
             let mutable speed = 1.0
             for (o, f) in (chart.SV.GetChannelData(i - 1)).Enumerate do
                 if (speed <> f) then
-                    Array.Resize(ref data, data.Length + 8)
-                    BitConverter.GetBytes((o - offset) |> int).CopyTo(data, p)
-                    p <- p + 4
-                    BitConverter.GetBytes(f |> float32).CopyTo(data, p)
-                    p <- p + 4
+                    bw.Write((o - offset) |> int)
+                    bw.Write((f |> float32))
                     speed <- f
-                else
-                    ()
-        BitConverter.ToString(h.ComputeHash(data)).Replace("-", "")
+        BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")

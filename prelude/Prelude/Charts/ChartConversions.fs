@@ -215,7 +215,7 @@ let convert_stepmania_interlude (sm : StepmaniaData) path =
                 AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"]
                 BGFile = metadataFallback [sm.BACKGROUND; findBackground (sm.TITLE + "-bg.jpg")]
                 SourcePath = path
-                File = diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + "[" + (string i) + "].yav"
+                File = diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav"
                 
         }
         let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0)
@@ -369,15 +369,19 @@ let (|FolderOfPacks|_|) (path : string) =
 
 let loadAndConvertFile (path : string) : Chart list =
     match Path.GetExtension(path).ToLower() with
-      | ".yav" -> [loadChartFile path]
+      | ".yav" ->
+        match loadChartFile path with
+        | Some chart -> [chart]
+        | None -> []
       | ".sm" -> convert_stepmania_interlude (loadStepmaniaFile path) (Path.GetDirectoryName path)
-      | ".osu" -> let map = loadBeatmapFile path in if getGameMode map = GameMode.Mania then [convert_osu_interlude (loadBeatmapFile path)] else []
+      | ".osu" -> 
+        let map = loadBeatmapFile path in if getGameMode map = GameMode.Mania then [convert_osu_interlude (loadBeatmapFile path)] else []; 
       | _ -> []
 
 //Writes chart to new location, including copying its background and audio files
 let relocateChart (chart : Chart) (sourceFolder : string) (targetFolder : string) =
     let c = chart.WithHeader({ chart.Header with SourcePath = targetFolder; SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder)); File = Path.ChangeExtension(chart.Header.File, ".yav") })
-
+    
     Directory.CreateDirectory(targetFolder) |> ignore
     let copyFile source target =
         if (File.Exists(source)) then

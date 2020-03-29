@@ -2,6 +2,7 @@
 open System.Collections.Generic
 open Prelude.Common
 open FParsec
+open Prelude.Gameplay.ChartManager
 
 (*
     Prelude features required to build Interlude:
@@ -19,13 +20,10 @@ open FParsec
 [<EntryPoint>]
 let main argv =
     Console.BufferHeight <- 32766
-    @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Uncut Ver.].osu"
-    |> System.IO.Path.GetDirectoryName
-    |> System.IO.Path.GetDirectoryName
-    |> printfn "%A"
-    (*try
-        Collide.collide
-    with
-    | e ->
-        Logging.Error (e.ToString()) ""*)
+    Logging.Subscribe(fun (_, _, s) -> if s.Length > 0 then printfn "    %s\n" s)
+    let c = Cache()
+    @"C:\Users\percy\AppData\Local\osu!\Songs\588322 Snails - Funk With Me (ft Big Gigantic)"
+    |> fun p -> TaskManager.AddTask("Test", (c.ConvertSongFolder p "osu!"), (fun b -> TaskManager.AddTask("Test2", (c.RebuildCache), ignore, true)), true)
+    while TaskManager.HasTaskRunning do
+        Console.ReadLine() |> ignore
     0

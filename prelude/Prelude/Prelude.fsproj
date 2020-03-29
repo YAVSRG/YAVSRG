@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Json.fs" />
     <Compile Include="Common.fs" />
     <Compile Include="Charts\Interlude.fs" />
     <Compile Include="Charts\StepMania.fs" />

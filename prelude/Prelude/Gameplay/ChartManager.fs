@@ -1,4 +1,4 @@
-﻿module Prelude.Charts.ChartManager
+﻿module Prelude.Gameplay.ChartManager
 
 open System
 open System.IO
@@ -79,7 +79,7 @@ type Cache() =
     let charts = new Dictionary<string, CachedChart>()
     let collections = new Dictionary<string, Collection>()
 
-    member this.Save = failwith "nyi"
+    member this.Save = Json.Save((charts, collections)) |> printfn "%A"
 
     member this.Load = failwith "nyi"
     
@@ -91,12 +91,11 @@ type Cache() =
 
     member this.LoadChart (cc : CachedChart) : Chart option =  
         let id = Path.Combine(cc.SourcePath, cc.File)
-        try
-            let c = id |> loadChartFile
+        match id |> loadChartFile with
+        | Some c ->
             this.CacheChart c
             Some c
-        with
-        | err -> Logging.Error ("Could not load chart from " + id) (err.ToString()); None
+        | None -> None
 
     member this.GetGroups grouping (sorting : Comparison<CachedChart>) =
         let groups = new Dictionary<string, List<CachedChart>>()
@@ -136,14 +135,14 @@ type Cache() =
                         | ".yav" ->
                             lock this (fun _ ->
                             (
-                                try
+                                match loadChartFile(file) with
+                                | Some c ->
                                     output("Caching " + file)
-                                    this.CacheChart(loadChartFile(file))
-                                with
-                                | e -> Logging.Error ("Could not cache " + file) (e.ToString())
+                                    this.CacheChart(c)
+                                | None -> ()
                             ))
                         | _ -> ()
-            this.Save()
+            this.Save
             output("Saved cache.")
             true
         )
@@ -160,7 +159,7 @@ type Cache() =
                 | ChartFile ->
                     output("Converting " + file)
                     loadAndConvertFile file
-                    |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetDirectoryName(path))))
+                    |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetFileName(path))))
                     |> fun charts ->
                         lock this (fun _ ->
                         (
