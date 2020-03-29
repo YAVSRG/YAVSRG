@@ -31,6 +31,16 @@ type Json() =
         use jw = new JsonTextWriter(sw)
         s.Serialize(jw, obj)
 
+//folder structure:
+    //Data
+        //Assets
+        //Profiles
+        //Cache.json
+        //Scores.json
+    //Songs
+    //Imports
+let getDataPath name = Path.Combine(Directory.GetCurrentDirectory(), name)
+
 (*
     Logging
 *)
@@ -62,7 +72,7 @@ let localise str : string = str
     Background task management
 *)
 
-type LoggableTask = (string -> unit) -> (unit -> bool)
+type LoggableTask = (string -> unit) -> bool
 type ManagedTaskState = INACTIVE = 0 | ACTIVE = 1 | DONE = 2
 
 type ManagedTask(name : string, t : LoggableTask, callback : bool -> unit, visible : bool) =
@@ -70,20 +80,20 @@ type ManagedTask(name : string, t : LoggableTask, callback : bool -> unit, visib
     let visible = visible
     let cts = new CancellationTokenSource()
     let mutable state = ManagedTaskState.INACTIVE
-    let mutable status = "Pending"
+    let mutable info = "Pending"
     let mutable task : Task = new Task(fun () -> ())
 
     //this exists so that...
     member this.CreateTask =
         let action() =
             try
-                status <- "Running"
-                callback(t (fun s -> status <- s; Logging.Info (name + ": " + s) "") ())
-                status <- "Complete"
+                info <- "Running"
+                callback(t (fun s -> info <- s; Logging.Info (name + ": " + s) ""))
+                info <- "Complete"
             with
             | err ->
                 Logging.Error ("Exception in " + name) (err.ToString())
-                status <- "Failed"
+                info <- "Failed"
             state <- ManagedTaskState.DONE
             cts.Dispose()
             //... I can have this line of code here. This member is used once to initialise task
@@ -91,6 +101,9 @@ type ManagedTask(name : string, t : LoggableTask, callback : bool -> unit, visib
         new Task(action, cts.Token)
 
     member this.Name = name
+    member this.Status = task.Status
+    member this.Info = info
+    member this.Visible = visible
 
     member this.Start =
         if state = ManagedTaskState.INACTIVE then
@@ -99,13 +112,9 @@ type ManagedTask(name : string, t : LoggableTask, callback : bool -> unit, visib
             task.Start();
         else Logging.Warn ("Tried to start " + name + " but it has already been started") ""
 
-    member this.Status = task.Status
-
     member this.Cancel =
         if state <> ManagedTaskState.ACTIVE then Logging.Warn ("Tried to cancel " + name + " but it is not running") ""
         else cts.Cancel(); state <- ManagedTaskState.DONE
-
-    member this.Visible = visible
 
 and TaskManager() =
     static let evt = new Event<ManagedTask>()
@@ -142,3 +151,8 @@ let extractOption o =
     match o with
     | Some v -> v
     | None -> failwith "impossible"
+
+let rec List_forSome pred l =
+    match l with
+    | [] -> false
+    | x :: xs -> if pred x then true else List_forSome pred xs

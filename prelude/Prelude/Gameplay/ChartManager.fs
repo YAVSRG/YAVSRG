@@ -78,6 +78,10 @@ type Collection =
 type Cache() =
     let charts = new Dictionary<string, CachedChart>()
     let collections = new Dictionary<string, Collection>()
+
+    member this.Save = failwith "nyi"
+
+    member this.Load = failwith "nyi"
     
     member this.CacheChart (c: Chart) = lock(this) (fun () -> charts.[c.FileIdentifier] <- cacheChart c)
 
@@ -121,24 +125,84 @@ type Cache() =
             g.Sort(sorting)
         groups
 
-    member this.RebuildCache = failwith "nyi"
+    member this.RebuildCache : LoggableTask =
+        fun output ->
+        (
+            lock this (fun _ -> ( charts.Clear(); ))
+            for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
+                for song in Directory.EnumerateDirectories(pack) do
+                    for file in Directory.EnumerateFiles(song) do
+                        match Path.GetExtension(file).ToLower() with
+                        | ".yav" ->
+                            lock this (fun _ ->
+                            (
+                                try
+                                    output("Caching " + file)
+                                    this.CacheChart(loadChartFile(file))
+                                with
+                                | e -> Logging.Error ("Could not cache " + file) (e.ToString())
+                            ))
+                        | _ -> ()
+            this.Save()
+            output("Saved cache.")
+            true
+        )
 
     member this.DeleteChart (c : CachedChart) = failwith "nyi"
 
-    member this.DeleteCharts (cs : List<CachedChart>) = failwith "nyi"
+    member this.DeleteCharts (cs : List<CachedChart>) = Seq.iter (this.DeleteChart) cs
 
-    member this.ConvertSongFolder path target = failwith "nyi"
+    member this.ConvertSongFolder path packname : LoggableTask =
+        fun output ->
+        (
+            for file in Directory.EnumerateFiles(path) do
+                match file with
+                | ChartFile ->
+                    output("Converting " + file)
+                    loadAndConvertFile file
+                    |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetDirectoryName(path))))
+                    |> fun charts ->
+                        lock this (fun _ ->
+                        (
+                            List.iter this.CacheChart charts
+                        ))
+                | _ -> ()
+            true
+        )
 
-    member this.ConvertPackFolder path target = failwith "nyi"
+    member this.ConvertPackFolder path packname =
+        fun output ->
+        (
+            Directory.EnumerateDirectories(path)
+            //conversion of song folders one by one.
+            //todo: test performance of converting in parallel (would create hundreds of tasks)
+            |> Seq.iter (fun song -> (this.ConvertSongFolder song packname output |> ignore))
+            true
+        )
 
-    member this.ConvertFolder path target = 
-        //auto detect:
-            // osz
-            // zip containing sm, yav, ssc, osu
-            // song folder
-            // pack of song folders
-            // folder of packs
-        //accordingly extract if needed
-        //accordingly convert
-        failwith "nyi"
-
+    member this.AutoConvert path : LoggableTask =
+        fun output ->
+        (
+            match File.GetAttributes(path) &&& FileAttributes.Directory |> int with
+            | 0 ->
+                match path with
+                | ChartFile -> failwith "single chart file not yet supported"
+                | ChartArchive -> failwith "chart archives not yet supported"
+                | _ -> failwith "unrecognised file"
+            | _ ->
+                match path with
+                | SongFolder ->
+                    //todo: replace ignore callback with action to refresh level select with new charts
+                    //todo: maybe make "Singles" not a hardcoded string
+                    TaskManager.AddTask ("Import " + Path.GetFileName(path), this.ConvertSongFolder path "Singles", ignore, true)
+                | PackFolder ->
+                    let packname =
+                        match Path.GetFileName(path) with
+                        | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
+                        | s -> s
+                    //todo: replace ignore callback with action to refresh level select with new charts
+                    TaskManager.AddTask ("Import pack " + Path.GetFileName(path), this.ConvertPackFolder path packname, ignore, true)
+                | FolderOfPacks -> ()
+                | _ -> failwith "no importable folder structure detected"
+            true
+        )

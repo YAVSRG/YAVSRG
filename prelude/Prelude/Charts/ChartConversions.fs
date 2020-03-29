@@ -119,7 +119,7 @@ let convert_osu_interlude ((general, _, meta, diff, events, notes, timing) : Bea
     let header = { 
         ChartHeader.Default with
             Title = meta.Title; Artist = meta.Artist; Creator = meta.Creator; SourcePack = "osu!"
-            DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename }
+            DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename; File = meta.Title + "[" + meta.Version + "].yav"}
     let snaps = convertHitObjects notes keys
     let (bpm, sv) = (convertTimingPoints timing keys (offsetOf (snaps.GetPointAt(infinity))))
     Chart(keys, header, snaps, bpm, sv)
@@ -201,7 +201,7 @@ let convert_stepmania_interlude (sm : StepmaniaData) path =
             result
         else guess
         
-    let convert_difficulty (diff : ChartData) : Chart option = 
+    let convert_difficulty (i : int) (diff : ChartData) : Chart option = 
         let keys = keyCount diff.STEPSTYPE
         let header = {
             ChartHeader.Default with
@@ -214,10 +214,13 @@ let convert_stepmania_interlude (sm : StepmaniaData) path =
                 PreviewTime = sm.SAMPLESTART * 1000.0
                 AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"]
                 BGFile = metadataFallback [sm.BACKGROUND; findBackground (sm.TITLE + "-bg.jpg")]
+                SourcePath = path
+                File = diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + "[" + (string i) + "].yav"
+                
         }
         let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0)
         Some (Chart(keys, header, notes, bpm, MultiTimeData<float>(keys)))
-    sm.Charts |> List.choose convert_difficulty
+    sm.Charts |> List.mapi convert_difficulty |> List.choose id
 
 (*
     Conversion code for Interlude -> osu
@@ -338,6 +341,32 @@ let convert_interlude_stepmania (chart : Chart) : StepmaniaData = failwith "nyi"
     Overall utilities to dynamically load different chart files and convert to interlude format
 *)
 
+let (|ChartFile|_|) (path : string) = 
+    match Path.GetExtension(path).ToLower() with
+    | ".yav" | ".sm" | ".osu" -> Some ()
+    | _ -> None
+
+let (|ChartArchive|_|) (path : string) = 
+    match Path.GetExtension(path).ToLower() with
+    | ".osz" -> Some ()
+    | ".zip" -> failwith "nyi"
+    | _ -> None
+
+let (|SongFolder|_|) (path : string) =
+    Directory.EnumerateFiles(path)
+    |> Seq.forall (fun x -> match x with ChartFile -> false | _ -> true)
+    |> fun b -> if b then None else Some ()
+    
+let (|PackFolder|_|) (path : string) =
+    Directory.EnumerateDirectories(path)
+    |> Seq.forall (fun x -> match x with SongFolder -> false | _ -> true)
+    |> fun b -> if b then None else Some ()
+
+let (|FolderOfPacks|_|) (path : string) =
+    Directory.EnumerateDirectories(path)
+    |> Seq.forall (fun x -> match x with PackFolder -> false | _ -> true)
+    |> fun b -> if b then None else Some ()
+
 let loadAndConvertFile (path : string) : Chart list =
     match Path.GetExtension(path).ToLower() with
       | ".yav" -> [loadChartFile path]
@@ -346,10 +375,10 @@ let loadAndConvertFile (path : string) : Chart list =
       | _ -> []
 
 //Writes chart to new location, including copying its background and audio files
-let relocateChart (chart : Chart) (sourcePath : string) (targetPath : string) =
-    let c = chart.WithHeader({ chart.Header with SourcePath = targetPath; SourcePack = Path.GetFileName(Path.GetDirectoryName(targetPath)); File = Path.ChangeExtension(chart.Header.File, ".yav") })
+let relocateChart (chart : Chart) (sourceFolder : string) (targetFolder : string) =
+    let c = chart.WithHeader({ chart.Header with SourcePath = targetFolder; SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder)); File = Path.ChangeExtension(chart.Header.File, ".yav") })
 
-    Directory.CreateDirectory(targetPath) |> ignore
+    Directory.CreateDirectory(targetFolder) |> ignore
     let copyFile source target =
         if (File.Exists(source)) then
             if (not (File.Exists(target))) then
@@ -360,6 +389,7 @@ let relocateChart (chart : Chart) (sourcePath : string) (targetPath : string) =
             else () //fail silently when repeatedly copying
         else Logging.Warn ("Missing media file at " + source) ""
     
-    copyFile (Path.Combine(sourcePath, c.Header.AudioFile)) (Path.Combine(targetPath, c.Header.AudioFile))
-    copyFile (Path.Combine(sourcePath, c.Header.BGFile)) (Path.Combine(targetPath, c.Header.BGFile))
-    saveChartFile c (Path.Combine(targetPath, c.Header.File))
+    copyFile (Path.Combine(sourceFolder, c.Header.AudioFile)) (Path.Combine(targetFolder, c.Header.AudioFile))
+    copyFile (Path.Combine(sourceFolder, c.Header.BGFile)) (Path.Combine(targetFolder, c.Header.BGFile))
+    saveChartFile c
+    c

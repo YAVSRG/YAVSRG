@@ -273,7 +273,7 @@ let loadChartFile filepath =
              sv.SetChannelData(i - 1, readSection br (fun r -> (r.ReadSingle() |> float)))
          sv)
 
-let saveChartFile (chart : Chart) filepath =
+let saveChartFileTo (chart : Chart) filepath =
     use fs = new FileStream(filepath, FileMode.Create)
     use bw = new BinaryWriter(fs)
     bw.Write(chart.Keys)
@@ -282,6 +282,9 @@ let saveChartFile (chart : Chart) filepath =
     writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter); bw.Write(float32 msPerBeat))
     for i = 0 to chart.Keys do
         writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(float32 f))
+
+let saveChartFile (chart : Chart) =
+    saveChartFileTo chart (Path.Combine(chart.Header.SourcePath, chart.Header.File))
 
 let calculateHash (chart: Chart): string =
     let h = SHA256.Create()

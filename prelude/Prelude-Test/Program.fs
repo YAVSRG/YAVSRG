@@ -20,8 +20,8 @@ open FParsec
 let main argv =
     Console.BufferHeight <- 32766
     @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Uncut Ver.].osu"
-    |> Prelude.Charts.osu.loadBeatmapFile
-    |> Json.Save
+    |> System.IO.Path.GetDirectoryName
+    |> System.IO.Path.GetDirectoryName
     |> printfn "%A"
     (*try
         Collide.collide
