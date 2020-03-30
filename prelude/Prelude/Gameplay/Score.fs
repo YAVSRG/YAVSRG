@@ -55,7 +55,7 @@ let decompressScoreData (sd: string) (k: int): ScoreData =
         result.[i] <- (offset, Array.map float delta, hit)
     result
 
-let compressScoreData (sd: ScoreData): string = ""
+let compressScoreData (sd: ScoreData): string = failwith "nyi"
 
 (*
     Score metrics - These are processors that run on score data and keep a running state as they go
@@ -65,13 +65,9 @@ let compressScoreData (sd: ScoreData): string = ""
     Used for: Accuracy, Health Bar, Performance Rating
 *)
 
-type ScoreMetric<'state>(name: string, i: 'state, f: ScoreDataRow -> int -> 'state -> 'state, g: ScoreDataRow -> int -> 'state -> 'state, h: 'state -> float) =
+type ScoreMetric<'state>(name: string, i: 'state, row_functor: ScoreDataRow -> int -> 'state -> 'state, hit_functor: ScoreDataRow -> int -> 'state -> 'state, value_functor: 'state -> float) =
     let mutable counter = 0
     let mutable state: 'state = i
-
-    let row_functor = f
-    let hit_functor = g
-    let value_functor = h
 
     let timeSeriesData = Array.zeroCreate<float> 100
 
@@ -138,8 +134,6 @@ type AccuracySystem(name: string, judge_func: float -> JudgementType, points_fun
          (let handle_hit =
              (accuracy_hit_func judge_func points_func max_point_func combo_func)
           (fun (offset, deltas, hit) _ (judgementCounts, points, maxPoints, combo, maxCombo, cbs) ->
-              let mutable p = points
-              let mutable mp = maxPoints
               List.fold
                   (fun s (k: int) ->
                       if hit.[k] <> HitStatus.Nothing then
@@ -149,12 +143,14 @@ type AccuracySystem(name: string, judge_func: float -> JudgementType, points_fun
                   (judgementCounts, points, maxPoints, combo, maxCombo, cbs)
                   [ 0 .. (deltas.Length - 1) ])),
          (accuracy_hit_func judge_func points_func max_point_func combo_func),
-         (fun (_, points, maxPoints, combo, maxCombo, cbs) -> points / maxPoints))
+         (fun (judgements, points, maxPoints, combo, maxCombo, cbs) -> points / maxPoints))
+
+    member this.JudgeFunc = judge_func
 
 //todo: ability to enable ridiculous timing windows
 type AccuracyDisplayType =
     | Percentage
-    | BestProjectedScore
+    | ProjectedScore
     | PointsScored
 
 type AccuracySystemConfig =
@@ -260,3 +256,68 @@ let createAccuracyMetric config =
              (fun j -> if is_regular_hit j then 300.0 else 0.0),
              (fun j c -> if is_combo_break JudgementType.FUMBLE j then (0, true) else (c + 1, false)))
     | _ -> failwith "nyi"
+
+(*
+    HP systems as score metrics
+    HP systems control a meter that fills when you hit notes well and empties when you hit notes badly
+    Falling below a certain value will "fail" you - Consequences of this are optional to the player
+    HP should act as a guide to push you away from things that are too hard
+*)
+
+type HPSystemState = bool * float
+
+let hp_hit_func judge_func points_func failThreshold failAtEnd =
+    fun ((_, deltas, hit): ScoreDataRow) k ((failed, hp): HPSystemState) ->
+        let j =
+            match hit.[k] with
+            | HitStatus.NotHit -> JudgementType.MISS
+            | HitStatus.Hit -> judge_func (Math.Abs deltas.[k])
+            | HitStatus.Special -> JudgementType.OK
+            | HitStatus.SpecialMissed -> JudgementType.FUMBLE
+            | _ -> failwith "impossible hit status"
+        let newhp = Math.Clamp(hp + points_func j (Math.Abs deltas.[k]), 0.0, 1.0)
+        ((failed && failAtEnd) || newhp <= failThreshold, newhp)
+
+type HPSystem(name: string, init: float, points_func: JudgementType -> float -> float, scoring: AccuracySystem, failThreshold: float, failAtEnd: bool) =
+    inherit ScoreMetric<HPSystemState>(
+        name,
+        (false, init),
+        hp_hit_func scoring.JudgeFunc points_func failThreshold failAtEnd,
+        (let handle_hit =
+            (hp_hit_func scoring.JudgeFunc points_func failThreshold failAtEnd)
+         (fun (offset, deltas, hit) _ (failed, hp) ->
+             List.fold
+                 (fun s (k: int) ->
+                     if hit.[k] <> HitStatus.Nothing then
+                         handle_hit (offset, deltas, hit) k s
+                     else
+                         s)
+                 (failed, hp)
+                 [ 0 .. (deltas.Length - 1) ])),
+        fun (failed, hp) -> hp
+    )
+
+    member this.Failed = fst this.State
+
+(*
+    More scoring tools
+*)
+
+//todo: add RFC and SDM?
+type Lamp =
+    | MFC
+    | SDP
+    | PFC
+    | SDG
+    | FC
+    | SDCB
+    | CLEAR
+    | FAIL
+
+let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState) ((failed, _) : HPSystemState) : Lamp =
+    if failed then FAIL else
+        let c count zero singleDigit (more : Lazy<Lamp>) = 
+            if count = 0 then zero
+            elif count < 10 then singleDigit
+            else more.Force()
+        c judgements.[int JudgementType.PERFECT] MFC SDP (lazy (c judgements.[int JudgementType.GREAT] PFC SDG (lazy (c cbs FC SDCB (lazy CLEAR) )) ))

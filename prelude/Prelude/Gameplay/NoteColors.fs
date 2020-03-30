@@ -22,14 +22,20 @@ type ColorScheme =
         | DDR -> Array.length DDRValues
         | Jackhammer -> Array.length DDRValues
 
-type ColorData = byte array //always of size 10
+type ColorData = byte array
 type ColorDataSets = ColorData array //color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
 type Colorizer<'state> = 'state -> TimeDataItem<NoteRow> -> ('state * ColorData)
 
 let colorize (chart : Chart) (initialState, col : Colorizer<'t>) =
-    (Seq.fold (fun (s, data : (TimeDataItem<NoteRow * ColorData>) list) (time, nr) -> ( let (ns, d) = col s (time, nr) in (ns, (time, (nr, d)) :: data) ))
-        (initialState, []) chart.Notes.Enumerate
-        |> snd)
+    let (_, _, data) = 
+        Seq.fold (fun (lastcolors : ColorData, s, data : (TimeDataItem<NoteRow * ColorData>) list) (time, nr) ->
+        (
+            let (ns, d) = col s (time, nr)
+            for k in getBits ((noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.HOLDTAIL nr)) do
+                d.[k] <- lastcolors.[k]
+            (d, ns, (time, (nr, d)) :: data)
+        )) (Array.zeroCreate(chart.Keys), initialState, []) chart.Notes.Enumerate
+    in data
     |> Seq.rev
     |> ResizeArray<TimeDataItem<NoteRow * ColorData>>
     |> TimeData<NoteRow * ColorData>
