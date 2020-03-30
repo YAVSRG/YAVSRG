@@ -147,6 +147,8 @@ type AccuracySystem(name: string, judge_func: float -> JudgementType, points_fun
 
     member this.JudgeFunc = judge_func
 
+type HitWindows = (float * JudgementType) list
+
 //todo: ability to enable ridiculous timing windows
 type AccuracyDisplayType =
     | Percentage
@@ -160,8 +162,6 @@ type AccuracySystemConfig =
     | DP of int
     | OM of float
     | Custom of unit
-
-type HitWindows = (float * JudgementType) list
 
 let sc_curve (judge: int) (delta: float) =
     assert (delta >= 0.0)
@@ -298,6 +298,15 @@ type HPSystem(name: string, init: float, points_func: JudgementType -> float -> 
     )
 
     member this.Failed = fst this.State
+
+type HPSystemConfig =
+    | VG
+    | OM of float
+    | Custom of unit
+
+let createHPMetric (config : HPSystemConfig) : HPSystem =
+    match config with
+    | _ -> failwith "nyi"
 
 (*
     More scoring tools
