@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
+open Prelude.Charts.Filter
 open Prelude.Gameplay.Score
 
 //ideas
@@ -44,9 +45,11 @@ type ModState(mods : Dictionary<string, int>) =
     new() = ModState(new Dictionary<string, int> ())
 
     member this.EnableMod id state = 
-        if modList.[id].MaxState >= state then
-            mods.[id] <- state
-        else failwith "tried to assign a state"
+        if (modList.ContainsKey(id)) then
+            if modList.[id].MaxState >= state then
+                mods.[id] <- state
+            else failwith ("tried to assign an invalid state to " + string id + ": " + string state)
+        else failwith ("tried to enable a mod that does not exist: " + string id)
 
     member this.DisableMod id = mods.Remove(id)
 
@@ -68,5 +71,12 @@ let private auto _ _ hitData =
     for (t, delta, hit) in hitData do
         for i = 0 to (Array.length hit - 1) do
             if hit.[i] = HitStatus.NotHit then hit.[i] <- HitStatus.Hit
+
 ModState.RegisterMod "auto"
     (Mod(ModStatus.Unstored, 0, (fun _ _ -> true), (fun _ _ -> ()), auto))
+
+ModState.RegisterMod "mirror"
+    (Mod(ModStatus.Ranked, 0, (fun _ _ -> true), (fun _ c -> mirror -infinity infinity c |> ignore), (fun _ _ _ -> ())))
+
+ModState.RegisterMod "nosv"
+    (Mod(ModStatus.Ranked, 0, (fun _ c -> not c.SV.IsEmpty), (fun _ c -> c.SV.Clear), (fun _ _ _ -> ())))

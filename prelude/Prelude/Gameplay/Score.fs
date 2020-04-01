@@ -57,6 +57,8 @@ let decompressScoreData (sd: string) (k: int): ScoreData =
 
 let compressScoreData (sd: ScoreData): string = failwith "nyi"
 
+let notesToScoreData () = failwith "nyi"
+
 (*
     Score metrics - These are processors that run on score data and keep a running state as they go
     They can then output a value which means something depending on the metric
@@ -304,8 +306,24 @@ type HPSystemConfig =
     | OM of float
     | Custom of unit
 
-let createHPMetric (config : HPSystemConfig) : HPSystem =
+let createHPMetric (config : HPSystemConfig) scoring : HPSystem =
     match config with
+    | VG ->
+        new HPSystem(
+            "VG", 0.5,
+            (fun j _ -> 
+                match j with
+                | JudgementType.RIDICULOUS | JudgementType.MARVELLOUS -> 0.005
+                | JudgementType.PERFECT -> 0.0025
+                | JudgementType.GREAT -> 0.0
+                | JudgementType.GOOD -> -0.05
+                | JudgementType.BAD -> -0.2
+                | JudgementType.MISS -> -0.1
+                | JudgementType.OK -> 0.0
+                | JudgementType.FUMBLE -> -0.1
+                | _ -> failwith "impossible judgement type"
+            ), scoring, 0.0, false
+        )
     | _ -> failwith "nyi"
 
 (*
@@ -314,19 +332,19 @@ let createHPMetric (config : HPSystemConfig) : HPSystem =
 
 //todo: add RFC and SDM?
 type Lamp =
-    | MFC
-    | SDP
-    | PFC
-    | SDG
-    | FC
-    | SDCB
-    | CLEAR
-    | FAIL
+    | MFC = 7
+    | SDP = 6
+    | PFC = 5
+    | SDG = 4
+    | FC = 3
+    | SDCB = 2
+    | CLEAR = 1
+    | FAIL = 0
 
 let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState) ((failed, _) : HPSystemState) : Lamp =
-    if failed then FAIL else
+    if failed then Lamp.FAIL else
         let c count zero singleDigit (more : Lazy<Lamp>) = 
             if count = 0 then zero
             elif count < 10 then singleDigit
             else more.Force()
-        c judgements.[int JudgementType.PERFECT] MFC SDP (lazy (c judgements.[int JudgementType.GREAT] PFC SDG (lazy (c cbs FC SDCB (lazy CLEAR) )) ))
+        c judgements.[int JudgementType.PERFECT] Lamp.MFC Lamp.SDP (lazy (c judgements.[int JudgementType.GREAT] Lamp.PFC Lamp.SDG (lazy (c cbs Lamp.FC Lamp.SDCB (lazy Lamp.CLEAR) )) ))

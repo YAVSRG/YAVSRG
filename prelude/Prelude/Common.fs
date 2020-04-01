@@ -39,7 +39,10 @@ type Json() =
         //Scores.json
     //Songs
     //Imports
-let getDataPath name = Path.Combine(Directory.GetCurrentDirectory(), name)
+let getDataPath name =
+    let p = Path.Combine(Directory.GetCurrentDirectory(), name)
+    Directory.CreateDirectory(p) |> ignore
+    p
 
 (*
     Logging
@@ -139,6 +142,8 @@ and TaskManager() =
 
     //todo: consider changing .Add to .Subscribe if the need arises
     static member Subscribe = evt.Publish.Add
+
+    static member Wait = while TaskManager.HasTaskRunning do Thread.Sleep(1000)
 
 TaskManager.Subscribe (fun t -> Logging.Debug ("Task created: " + t.Name) "")
 

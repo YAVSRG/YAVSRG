@@ -197,7 +197,7 @@ type MultiTimeData<'t>(keys) =
     member this.SetChannelData(k, (newData: TimeData<'t>)) = data.[k + 1].SetData(newData)
     member this.GetChannelData k = data.[k + 1]
     member this.IsEmpty = Array.fold (fun b (t: TimeData<'t>) -> b && t.IsEmpty) true data
-    member this.Clear = Array.forall (fun (t: TimeData<'t>) -> t.Clear; true) data
+    member this.Clear = Array.iter (fun (t: TimeData<'t>) -> t.Clear) data
 
 (*
     Overall Interlude chart storage format

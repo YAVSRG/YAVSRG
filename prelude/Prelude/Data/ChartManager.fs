@@ -1,4 +1,4 @@
-﻿module Prelude.Gameplay.ChartManager
+﻿module Prelude.Data.ChartManager
 
 open System
 open System.IO
@@ -76,12 +76,16 @@ type Collection =
     | Goals of List<PlaylistData * Goal>
 
 type Cache() =
-    let charts = new Dictionary<string, CachedChart>()
-    let collections = new Dictionary<string, Collection>()
+    let charts, collections = Cache.Load
 
-    member this.Save = Json.Save((charts, collections)) |> printfn "%A"
+    member this.Save = Json.SaveFile (charts, collections) (Path.Combine(getDataPath("Data"),"Cache.json"))
 
-    member this.Load = failwith "nyi"
+    static member Load =
+        try
+            Json.LoadFile<Dictionary<string, CachedChart> * Dictionary<string, Collection>>(Path.Combine(getDataPath("Data"), "Cache.json"))
+        with
+        | :? FileNotFoundException -> (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
+        | err -> Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString()); (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
     
     member this.CacheChart (c: Chart) = lock(this) (fun () -> charts.[c.FileIdentifier] <- cacheChart c)
 
