@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.IO.Compression
+open Prelude.Charts.Interlude
 
 (*
     Representation of replay data for a score.
@@ -38,26 +39,25 @@ type Score =
       layout: unit
       keycount: int }
 
-//todo: resolve bug where decompressed score data does not have the offsets
-//this will require reformatting of scores in general, might as well make a cleaner format
-let decompressScoreData (sd: string) (k: int): ScoreData =
+let decompressScoreData (sd: string) (keys: int) (notes: TimeData<NoteRow>): ScoreData =
     let compressed = Convert.FromBase64String(sd)
-    use outputStream = new MemoryStream()
     use inputStream = new MemoryStream(compressed)
     use gZipStream = new GZipStream(inputStream, CompressionMode.Decompress)
-    gZipStream.CopyTo(outputStream)
-    let raw = outputStream.ToArray()
-    let result: ScoreData = Array.zeroCreate (raw.Length / (5 * k))
-    for i in 0 .. (result.Length - 1) do
-        let (offset, delta, hit) = (0.0, Array.zeroCreate<float32> (k), Array.zeroCreate (k))
-        Array.Copy(raw, k * (i * 5), hit, 0, k)
-        Buffer.BlockCopy(raw, k * (i * 5 + 1), delta, 0, k * 4)
-        result.[i] <- (offset, Array.map float delta, hit)
-    result
+    use br = new BinaryReader(gZipStream)
+    notes.Enumerate
+    |> Seq.map (fun (time, nr) ->
+        let hit = [|for i in 1..keys -> br.ReadByte() |> LanguagePrimitives.EnumOfValue|]
+        (time, [|for i in 1..keys -> br.ReadSingle() |> float|], hit))
+    |> Array.ofSeq       
 
-let compressScoreData (sd: ScoreData): string = failwith "nyi"
+let compressScoreData (sd: ScoreData): string = 
+    use inputStream = new MemoryStream()
+    use gZipStream = new GZipStream(inputStream, CompressionLevel.Optimal)
+    use bw = new BinaryWriter(gZipStream)
+    Array.iter (fun (_, delta, hit) -> Array.iter (byte >> bw.Write) hit; Array.iter (float32 >> bw.Write) delta) sd
+    Convert.ToBase64String(inputStream.ToArray())
 
-let notesToScoreData () = failwith "nyi"
+let notesToScoreData (keys: int) (notes: TimeData<NoteRow>) = failwith "nyi"
 
 (*
     Score metrics - These are processors that run on score data and keep a running state as they go
@@ -332,19 +332,17 @@ let createHPMetric (config : HPSystemConfig) scoring : HPSystem =
 
 //todo: add RFC and SDM?
 type Lamp =
-    | MFC = 7
-    | SDP = 6
-    | PFC = 5
-    | SDG = 4
-    | FC = 3
-    | SDCB = 2
-    | CLEAR = 1
-    | FAIL = 0
+    | MFC = 6
+    | SDP = 5
+    | PFC = 4
+    | SDG = 3
+    | FC = 2
+    | SDCB = 1
+    | NONE = 0
 
-let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState) ((failed, _) : HPSystemState) : Lamp =
-    if failed then Lamp.FAIL else
-        let c count zero singleDigit (more : Lazy<Lamp>) = 
-            if count = 0 then zero
-            elif count < 10 then singleDigit
-            else more.Force()
-        c judgements.[int JudgementType.PERFECT] Lamp.MFC Lamp.SDP (lazy (c judgements.[int JudgementType.GREAT] Lamp.PFC Lamp.SDG (lazy (c cbs Lamp.FC Lamp.SDCB (lazy Lamp.CLEAR) )) ))
+let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState): Lamp =
+    let c count zero singleDigit (more : Lazy<Lamp>) = 
+        if count = 0 then zero
+        elif count < 10 then singleDigit
+        else more.Force()
+    c judgements.[int JudgementType.PERFECT] Lamp.MFC Lamp.SDP (lazy (c judgements.[int JudgementType.GREAT] Lamp.PFC Lamp.SDG (lazy (c cbs Lamp.FC Lamp.SDCB (lazy Lamp.NONE) )) ))

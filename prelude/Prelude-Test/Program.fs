@@ -8,6 +8,7 @@ open Prelude.Data.ChartManager
     Prelude features required to build Interlude:
         Gameplay/score prep logic
         Theme management
+        Proper json writing and reading
     Prelude features that would otherwise be useful:
         Pattern generator
         File format for chart editing containing extra data/layers of notes
