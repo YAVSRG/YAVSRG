@@ -6,7 +6,6 @@ open Prelude.Charts.Interlude
 open Prelude.Charts.Filter
 open Prelude.Gameplay.Score
 
-//ideas
 type ModConfig = int
 (*
     Marker for status of mods.
@@ -60,12 +59,9 @@ type ModState(mods : Dictionary<string, int>) =
             }
 
     static member ModList = modList
-
     static member RegisterMod id obj = modList.Add(id, obj)
-
-    static member GetModName id = localise ("mod."+id+".name")
-
-    static member GetModDesc id = localise ("mod."+id+".desc")
+    static member GetModName id = localise ("mod." + id + ".name")
+    static member GetModDesc id = localise ("mod." + id + ".desc")
 
 let private auto _ _ hitData =
     for (t, delta, hit) in hitData do

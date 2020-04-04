@@ -22,6 +22,8 @@ type ScoreDataRow = float * float array * HitStatus array
 
 type ScoreData = ScoreDataRow array
 
+let MISSWINDOW = 180.0
+
 let countHits ((_, _, h): ScoreDataRow) =
     Array.fold (fun x hit ->
         if hit <> HitStatus.Nothing then x + 1 else x) 0 h
@@ -57,7 +59,16 @@ let compressScoreData (sd: ScoreData): string =
     Array.iter (fun (_, delta, hit) -> Array.iter (byte >> bw.Write) hit; Array.iter (float32 >> bw.Write) delta) sd
     Convert.ToBase64String(inputStream.ToArray())
 
-let notesToScoreData (keys: int) (notes: TimeData<NoteRow>) = failwith "nyi"
+let notesToScoreData (keys: int) (notes: TimeData<NoteRow>): ScoreData =
+    notes.Enumerate
+    |> Seq.map (fun (time, nr) ->
+        let bits = (noteData NoteType.HOLDHEAD nr) ||| (noteData NoteType.NORMAL nr) ||| (noteData NoteType.HOLDTAIL nr)
+        let bits2 = (noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.MINE nr)
+        (time,
+            Array.init keys (fun i -> if hasBit i bits then MISSWINDOW else 0.0),
+            Array.init keys (fun i -> if hasBit i bits then HitStatus.NotHit elif hasBit i bits2 then HitStatus.Special else HitStatus.Nothing)): ScoreDataRow
+        )
+    |> Array.ofSeq
 
 (*
     Score metrics - These are processors that run on score data and keep a running state as they go
@@ -111,8 +122,6 @@ type JudgementType =
     | MISS = 8
 
 type AccuracySystemState = int array * float * float * int * int * int
-
-let MISSWINDOW = 180.0
 
 let accuracy_hit_func judge_func points_func max_point_func combo_func =
     fun ((_, deltas, hit): ScoreDataRow) k ((judgementCounts, points, maxPoints, combo, maxCombo, cbs): AccuracySystemState) ->

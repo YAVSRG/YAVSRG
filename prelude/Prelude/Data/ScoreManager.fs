@@ -3,6 +3,7 @@
 open System.Collections.Generic
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
+open Prelude.Gameplay.Mods
 
 type ChartSaveData = {
     Path: string
@@ -12,6 +13,8 @@ type ChartSaveData = {
     Accuracy: Dictionary<string, float>
     Clear: Dictionary<string, bool>
 }
+
+let createModifiedChart (chart: Chart) (mods: ModState) = ()
 
 type ScoreInfoProvider(score: Score, chart: Chart) =
     let hitdata = lazy (decompressScoreData score.hitdata score.keycount)

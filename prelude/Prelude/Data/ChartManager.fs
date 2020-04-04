@@ -7,7 +7,7 @@ open Newtonsoft.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
-open Prelude.Gameplay.Score
+open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 
 (*
@@ -69,7 +69,7 @@ type Goal =
     | Accuracy of unit * float
 
     //todo: replace unit type with mod list type
-type PlaylistData = string * float * unit
+type PlaylistData = string * ModState * unit
 type Collection =
     | Collection of List<string>
     | Playlist of List<PlaylistData>
@@ -78,7 +78,7 @@ type Collection =
 type Cache() =
     let charts, collections = Cache.Load
 
-    member this.Save = Json.SaveFile (charts, collections) (Path.Combine(getDataPath("Data"),"Cache.json"))
+    member this.Save = Json.SaveFile (charts, collections) (Path.Combine(getDataPath("Data"), "Cache.json"))
 
     static member Load =
         try
