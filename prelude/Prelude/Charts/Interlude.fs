@@ -190,7 +190,6 @@ type TimeData<'t>(list) =
         }
 
 type MultiTimeData<'t>(keys) =
-
     let data = [| for i in 0 .. keys -> TimeData() |]
 
     member this.SetChannelData(k, (newData: List<TimeDataItem<'t>>)) = data.[k + 1].SetData(newData)
@@ -198,6 +197,11 @@ type MultiTimeData<'t>(keys) =
     member this.GetChannelData k = data.[k + 1]
     member this.IsEmpty = Array.fold (fun b (t: TimeData<'t>) -> b && t.IsEmpty) true data
     member this.Clear = Array.iter (fun (t: TimeData<'t>) -> t.Clear) data
+    member this.Clone =
+        let mt = MultiTimeData(keys)
+        for i in 0 .. keys do
+            mt.SetChannelData(i - 1, TimeData(this.GetChannelData(i- 1)))
+        mt
 
 (*
     Overall Interlude chart storage format

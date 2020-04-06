@@ -73,7 +73,7 @@ let getAvailableLayouts k =
 
 (*
     Difficulty calculation
-    this is all old and bad and i will be rewriting it
+    this is all old and bad and i will be rewriting it properly - this is just a port of the C# version
 *)
 
 let private jackCurve delta =
@@ -112,7 +112,7 @@ let private overallDifficulty arr =
 let private OHTNERF = 3.0
 let private SCALING_VALUE = 0.55
 
-type RatingReport(notes : TimeData<NoteRow>, rate : float, layout, keys) =
+type RatingReport(notes: TimeData<NoteRow>, rate: float, layout, keys) =
     let layoutData =
         match getLayoutInfo keys layout with
         | Some l -> l

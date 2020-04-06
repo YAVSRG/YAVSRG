@@ -2,6 +2,7 @@
 
 open System
 open Prelude.Charts.Interlude
+open Prelude.Editor
 
 //This is the final stage of preprocessing chart data before it is played by the user.
 //Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures
@@ -26,7 +27,9 @@ type ColorData = byte array
 type ColorDataSets = ColorData array //color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
 type Colorizer<'state> = 'state -> TimeDataItem<NoteRow> -> ('state * ColorData)
 
-let colorize (chart : Chart) (initialState, col : Colorizer<'t>) =
+type ColorizedChart = int * TimeData<NoteRow * ColorData> * TimeData<BPM> * TimeData<float> * string list
+
+let colorize ((keys, notes, bpm, sv, m) : ModChart) (initialState, col : Colorizer<'t>) =
     let (_, _, data) = 
         Seq.fold (fun (lastcolors : ColorData, s, data : (TimeDataItem<NoteRow * ColorData>) list) (time, nr) ->
         (
@@ -34,7 +37,7 @@ let colorize (chart : Chart) (initialState, col : Colorizer<'t>) =
             for k in getBits ((noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.HOLDTAIL nr)) do
                 d.[k] <- lastcolors.[k]
             (d, ns, (time, (nr, d)) :: data)
-        )) (Array.zeroCreate(chart.Keys), initialState, []) chart.Notes.Enumerate
+        )) (Array.zeroCreate(keys), initialState, []) notes.Enumerate
     in data
     |> Seq.rev
     |> ResizeArray<TimeDataItem<NoteRow * ColorData>>
@@ -46,22 +49,24 @@ let private ddr_func delta (msPerBeat : float) : int =
     List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / (float n))) [0..7]
     |> Option.defaultValue DDRValues.Length
 
-let applyColorizer (scheme : ColorScheme) (colorData : ColorData) (chart : Chart) =
+let applyColorizer (scheme : ColorScheme) (colorData : ColorData) (chart : ModChart) =
+    let (keys, _, bpm, sv, m) = chart
     let ci i = colorData.[i]
     match scheme with
     | Column ->
         ((), fun _ (_, nr) ->
-            ((), [|for i in 0..(chart.Keys-1) -> ci i|]))
+            ((), [|for i in 0..(keys-1) -> ci i|]))
             |> colorize chart
     | Chord ->
         ((), fun _ (_, nr) ->
-            ((), Array.create chart.Keys ((nr |> noteData NoteType.NORMAL |> countBits) + (nr |> noteData NoteType.HOLDHEAD |> countBits) |> ci)))
+            ((), Array.create keys ((nr |> noteData NoteType.NORMAL |> countBits) + (nr |> noteData NoteType.HOLDHEAD |> countBits) |> ci)))
             |> colorize chart
     | DDR ->
         (chart, fun c (time, nr) ->
-            let (ptime,(_, msPerBeat)) = chart.BPM.GetPointAt(time) in (chart, Array.create chart.Keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
+            let (ptime,(_, msPerBeat)) = bpm.GetPointAt(time) in (chart, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
             |> colorize chart
     | _ ->
         ((), fun _ _ ->
-            ((), Array.zeroCreate(chart.Keys)))
+            ((), Array.zeroCreate(keys)))
             |> colorize chart
+    |> fun x -> (keys, x, bpm, sv, m)

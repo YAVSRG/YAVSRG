@@ -5,7 +5,7 @@ open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.osu
 open Prelude.Charts.ChartConversions
-open Prelude.Charts.Filter
+open Prelude.Editor.Filter
 
 let plus ((x1, y1) : Point) ((x2, y2) : Point) =
     (x1 + x2, y1 + y2)
@@ -107,7 +107,7 @@ let miracle _ =
         (220085.0, all)
         ]
     Seq.zip transitions (List.tail transitions) |> List.ofSeq
-    |> List.map (fun ((t1, m), (t2, _)) -> applyMappingBetween m t1 t2 chart)
+    |> List.map (fun ((t1, m), (t2, _)) -> applyMappingBetween m t1 t2 chart.Notes)
     |> ignore
     Chart(8, chart.Header, chart.Notes, chart.BPM, chart.SV)
     |> convert_interlude_osu

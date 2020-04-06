@@ -13,11 +13,11 @@
     <Compile Include="Charts\StepMania.fs" />
     <Compile Include="Charts\osu.fs" />
     <Compile Include="Charts\ChartConversions.fs" />
-    <Compile Include="Charts\Filter\Filter.fs" />
+    <Compile Include="Editor\Editor.fs" />
     <Compile Include="Gameplay\Score.fs" />
-    <Compile Include="Gameplay\Difficulty.fs" />
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\NoteColors.fs" />
+    <Compile Include="Gameplay\Difficulty.fs" />
     <Compile Include="Data\ScoreManager.fs" />
     <Compile Include="Data\ChartManager.fs" />
   </ItemGroup>
