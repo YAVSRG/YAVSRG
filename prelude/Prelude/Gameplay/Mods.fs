@@ -59,7 +59,7 @@ module Mods =
         member this.IterApplicable chart =
             seq {
                 for id in mods.Keys do
-                    if modList.[id].CheckApplicable (mods.[id]) chart then yield (modList.[id], mods.[id])
+                    if modList.[id].CheckApplicable (mods.[id]) chart then yield (id, modList.[id], mods.[id])
                 }
 
         static member ModList = modList
@@ -86,7 +86,9 @@ module Mods =
     *)
 
     let private applyMods (mods: ModState) (chart: Chart): ModChart =
-        let modChart = (chart.Keys, TimeData(chart.Notes), TimeData(chart.BPM), chart.SV.Clone, []): ModChart
-        for (m, c) in mods.IterApplicable modChart do
+        let mutable modChart = (chart.Keys, TimeData(chart.Notes), TimeData(chart.BPM), chart.SV.Clone, []): ModChart
+        for (name, m, c) in mods.IterApplicable modChart do
             m.ApplyChart c modChart
+            let (keys, notes, bpm, sv, m) = modChart in
+                modChart <- (keys, notes, bpm, sv, m @ [name])
         modChart
