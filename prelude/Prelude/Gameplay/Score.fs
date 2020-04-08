@@ -329,19 +329,22 @@ module Score =
         More scoring tools
     *)
 
-    //No RFC or SDM because it interferes with future lamping plans and also nobody should ever attain them anyway
     type Lamp =
-        | MFC = 6
-        | SDP = 5
-        | PFC = 4
-        | SDG = 3
-        | FC = 2
+        | MFC = 9
+        | WF = 8
+        | SDP = 7
+        | PFC = 6
+        | BF = 5
+        | SDG = 4
+        | FC = 3
+        | MF = 2
         | SDCB = 1
         | NONE = 0
 
     let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState): Lamp =
-        let c count zero singleDigit (more : Lazy<Lamp>) = 
+        let c count zero one singleDigit (more : Lazy<Lamp>) = 
             if count = 0 then zero
+            elif count = 1 then one
             elif count < 10 then singleDigit
             else more.Force()
-        c judgements.[int JudgementType.PERFECT] Lamp.MFC Lamp.SDP (lazy (c judgements.[int JudgementType.GREAT] Lamp.PFC Lamp.SDG (lazy (c cbs Lamp.FC Lamp.SDCB (lazy Lamp.NONE) )) ))
+        c judgements.[int JudgementType.PERFECT] Lamp.MFC Lamp.WF Lamp.SDP (lazy (c judgements.[int JudgementType.GREAT] Lamp.PFC Lamp.BF Lamp.SDG (lazy (c cbs Lamp.FC Lamp.MF Lamp.SDCB (lazy Lamp.NONE) )) ))
