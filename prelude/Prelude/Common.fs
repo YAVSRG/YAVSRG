@@ -140,7 +140,6 @@ and TaskManager() =
 
     static member RemoveTask(t : ManagedTask) = lock (tasks) (fun () -> tasks.Remove(t) |> ignore)
 
-    //todo: consider changing .Add to .Subscribe if the need arises
     static member Subscribe = evt.Publish.Add
 
     static member Wait = while TaskManager.HasTaskRunning do Thread.Sleep(1000)

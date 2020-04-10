@@ -92,3 +92,24 @@ module Mods =
             let (keys, notes, bpm, sv, m) = modChart in
                 modChart <- (keys, notes, bpm, sv, m @ [name])
         modChart
+
+    let private applyModsToScoreData (mods: ModState) (modChart: ModChart) (scoreData: ScoreData) =
+        for (name, m, c) in mods.IterApplicable modChart do
+            m.ApplyHitData c modChart scoreData
+        scoreData
+
+    let getModChart (mods: ModState) (chart: Chart): Lazy<ModChart> * Lazy<ScoreData> =
+        let mc = lazy (applyMods mods chart)
+        let scoreData = lazy (
+            let (keys, notes, _, _, _) = mc.Force()
+            applyModsToScoreData mods (mc.Force()) (notesToScoreData keys notes)
+        )
+        (mc, scoreData)
+
+    let getModChartWithScore (mods: ModState) (chart: Chart) (replay: string): Lazy<ModChart> * Lazy<ScoreData> =
+        let mc = lazy (applyMods mods chart)
+        let scoreData = lazy (
+            let (keys, notes, _, _, _) = mc.Force()
+            (decompressScoreData replay keys notes)
+        )
+        (mc, scoreData)
