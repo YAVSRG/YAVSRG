@@ -8,6 +8,7 @@ open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Layout
 open Prelude.Gameplay.Difficulty
 
 (*
@@ -68,8 +69,7 @@ type Goal =
     | Grade of unit * int
     | Accuracy of unit * float
 
-    //todo: replace unit type with mod list type
-type PlaylistData = string * ModState * unit
+type PlaylistData = string * ModState * float
 type Collection =
     | Collection of List<string>
     | Playlist of List<PlaylistData>

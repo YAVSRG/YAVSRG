@@ -1,16 +1,15 @@
 ﻿namespace Prelude.Data
 
+open System
+open System.Collections.Generic
+open Prelude.Charts.Interlude
+open Prelude.Gameplay.Score
+open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Difficulty
+open Prelude.Gameplay.Layout
+
 module ScoreManager =
 
-    open System
-    open System.Collections.Generic
-    open Prelude.Charts.Interlude
-    open Prelude.Gameplay.Score
-    open Prelude.Gameplay.Mods
-    open Prelude.Gameplay.Difficulty
-    open Prelude.Gameplay.Layout
-
-    //todo: maybe migrate this format to something better
     type Score = {
         time: DateTime
         hitdata: string
@@ -58,3 +57,24 @@ module ScoreManager =
         member this.Physical = performance.Force().Value
         member this.Technical = 0.0 //nyi
         member this.Mods = let (keys, _, _, _, mods) = modchart.Force() in String.Join(", ", mods)
+
+    type ScoresDB() =
+        let data = ScoresDB.Load
+
+        member this.Save = ()
+
+        static member Load =
+            new Dictionary<string, ChartSaveData>()
+
+    type TopScore = string * string * DateTime * float //Cache id, Hash, Timestamp, Rating
+
+    type TopScores(scores: List<TopScore>) =
+        new() = TopScores(new List<TopScore>())
+        
+        member this.AddScore((id, hash, timestamp, rating) : TopScore) =
+            //running state through this fold:
+                // 0 = Haven't found spot to insert this score at
+                // 1 = Inserted this score
+                // 2 = After insertion, removed old version of score from the list
+            ()
+            
