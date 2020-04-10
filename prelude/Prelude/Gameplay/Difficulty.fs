@@ -9,11 +9,10 @@ open Prelude.Gameplay.Score
     Representation of hand/keyboard layouts.
     Used in the difficulty calculation to model how some things strain your hand(s) differently depending on which fingers are used
 *)
+module Layout =
 
-type Layout = Spread | OneHand | LeftOne | RightOne | LeftTwo | RightTwo | BMSLeft | BMSRight
-type Hand = int list
-
-module Layout = 
+    type Layout = Spread | OneHand | LeftOne | RightOne | LeftTwo | RightTwo | BMSLeft | BMSRight
+    type Hand = int list
 
     let getFingerPosition k h =
         let rec f k h i =
@@ -116,14 +115,12 @@ module Layout =
         |> List.filter (getLayoutInfo >> Option.isSome)
         |> List.map (fun (a, b) -> a)
 
-
-module Difficulty =
-
-    open Layout
 (*
     Difficulty calculation
     this is all old and bad and i will be rewriting it properly - this is just a port of the C# version
 *)
+module Difficulty =
+    open Layout
 
     let private jackCurve delta =
         let widthScale = 0.02

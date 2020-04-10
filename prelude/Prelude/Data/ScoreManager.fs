@@ -8,6 +8,7 @@ module ScoreManager =
     open Prelude.Gameplay.Score
     open Prelude.Gameplay.Mods
     open Prelude.Gameplay.Difficulty
+    open Prelude.Gameplay.Layout
 
     //todo: maybe migrate this format to something better
     type Score = {
