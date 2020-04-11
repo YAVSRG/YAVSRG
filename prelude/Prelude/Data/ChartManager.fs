@@ -3,7 +3,7 @@
 open System
 open System.IO
 open System.Collections.Generic
-open Newtonsoft.Json
+open Prelude.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
@@ -16,8 +16,7 @@ open Prelude.Gameplay.Difficulty
 *)
 
 type CachedChart = {
-    File: string
-    SourcePath: string
+    FilePath: string
     Title: string
     Artist: string
     Creator: string
@@ -30,9 +29,7 @@ type CachedChart = {
     Physical: float
     Technical: float
 
-    [<JsonIgnore>]
     Collection: string
-    [<JsonIgnore>]
     CollectionIndex: int }
 
 let cacheChart (chart : Chart) : CachedChart =
@@ -41,8 +38,7 @@ let cacheChart (chart : Chart) : CachedChart =
             chart.Notes.GetPointAt infinity |> offsetOf
     let rating = RatingReport(chart.Notes, 1.0, Layout.Spread, chart.Keys)
     {
-    File = chart.Header.File
-    SourcePath = chart.Header.SourcePath
+    FilePath = chart.FileIdentifier
     Title = chart.Header.Title
     Artist = chart.Header.Artist
     Creator = chart.Header.Creator
@@ -74,15 +70,27 @@ type Collection =
     | Collection of List<string>
     | Playlist of List<PlaylistData>
     | Goals of List<PlaylistData * Goal>
+    (*static member ToJson (this: Collection) = json {
+        match this with
+        | Collection l -> do! JsonHelper.write "Collection" l
+        | Playlist l -> do! Json.write "Playlist" l
+        | Goals l -> do! Json.write "Goals" l
+    }
+    static member FromJson(_) =
+        function
+        | Property "Collection" l as json -> Json.init (Collection l) json
+        | Property "Playlist" l as json -> Json.init (Playlist l) json
+        | Property "Goals" l as json -> Json.init (Goals l) json
+        | json -> Json.error "couldn't deserialize collection" json*)
 
 type Cache() =
     let charts, collections = Cache.Load
 
-    member this.Save = Json.SaveFile (charts, collections) (Path.Combine(getDataPath("Data"), "Cache.json"))
+    member this.Save = JsonHelper.saveFile (charts, collections) (Path.Combine(getDataPath("Data"), "Cache.json"))
 
     static member Load =
         try
-            Json.LoadFile<Dictionary<string, CachedChart> * Dictionary<string, Collection>>(Path.Combine(getDataPath("Data"), "Cache.json"))
+            JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "Cache.json"))
         with
         | :? FileNotFoundException -> (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
         | err -> Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString()); (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
@@ -93,9 +101,8 @@ type Cache() =
 
     member this.LookupChart (id : string) : CachedChart option = if charts.ContainsKey(id) then Some charts.[id] else None
 
-    member this.LoadChart (cc : CachedChart) : Chart option =  
-        let id = Path.Combine(cc.SourcePath, cc.File)
-        match id |> loadChartFile with
+    member this.LoadChart (cc : CachedChart) : Chart option = 
+        match cc.FilePath |> loadChartFile with
         | Some c ->
             this.CacheChart c
             Some c

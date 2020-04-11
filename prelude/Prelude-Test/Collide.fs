@@ -109,6 +109,6 @@ let miracle _ =
     Seq.zip transitions (List.tail transitions) |> List.ofSeq
     |> List.map (fun ((t1, m), (t2, _)) -> applyMappingBetween m t1 t2 chart.Notes)
     |> ignore
-    Chart(8, chart.Header, chart.Notes, chart.BPM, chart.SV)
+    Chart(8, chart.Header, chart.Notes, chart.BPM, chart.SV, chart.FileIdentifier)
     |> convert_interlude_osu
     |> saveBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Dumb Files Ver.].osu"

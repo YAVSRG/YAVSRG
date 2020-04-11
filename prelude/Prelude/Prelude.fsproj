@@ -20,10 +20,14 @@
     <Compile Include="Gameplay\Difficulty.fs" />
     <Compile Include="Data\ScoreManager.fs" />
     <Compile Include="Data\ChartManager.fs" />
+    <Compile Include="Data\Themes.fs" />
+    <Compile Include="Data\Profiles.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aether" Version="8.3.1" />
     <PackageReference Include="FParsec" Version="1.1.1" />
+    <PackageReference Include="FSharp.Json" Version="0.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 

@@ -1,24 +1,37 @@
-﻿module Prelude.Json
+﻿namespace Prelude
 
-open Newtonsoft.Json
-open Microsoft.FSharp.Reflection
-open System.Linq
-open Newtonsoft.Json.Linq
+open System.IO
+open System.Collections.Generic
+open FSharp.Json
 
-type TupleConverter() =
-    inherit JsonConverter()
+module Json =
+    
+    type DictionaryTransform<'T>() =
+        interface ITypeTransform with
+            member x.targetType() = typeof<Map<string, 'T>>
+            member x.toTargetType value = value :?> Dictionary<string, 'T> |> Seq.map (|KeyValue|) |> Map.ofSeq :> obj
+            member x.fromTargetType value = value :?> Map<string, 'T> |> Dictionary :> obj
 
-    override this.CanConvert t = FSharpType.IsTuple t
+    type ListTransform<'T>() =
+        interface ITypeTransform with
+            member x.targetType() = typeof<'T list>
+            member x.toTargetType value = value :?> List<'T> |> List.ofSeq :> obj
+            member x.fromTargetType value = value :?> 'T list |> ResizeArray :> obj
 
-    override this.WriteJson(writer, value, serializer) =
-        serializer.Serialize(writer, FSharpValue.GetTupleFields value)
+    module JsonHelper = 
 
-    override this.ReadJson(reader, t, existingValue, serializer) =
-        let argTypes = FSharpType.GetTupleElements t
-        let array = serializer.Deserialize<JArray>(reader)
-        let items = array.Select(fun a i -> a.ToObject(argTypes.[i], serializer)).ToArray()
-        FSharpValue.MakeTuple(items, t)
-
-let addConverters (settings : JsonSerializerSettings) : JsonSerializerSettings = 
-    settings.Converters.Add(TupleConverter())
-    settings
+        let load string : 'T =
+            string
+            |> Json.deserialize
+    
+        let save (obj : 'T) : string =
+            obj
+            |> Json.serializeU
+    
+        let loadFile (path : string) : 'T =
+            use sr = new StreamReader(path)
+            load (sr.ReadToEnd())
+            
+        let saveFile (obj : 'T) (path : string) : unit = 
+            use sw = new StreamWriter(path)
+            sw.Write(save obj)

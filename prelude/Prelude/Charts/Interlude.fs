@@ -4,8 +4,9 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Security.Cryptography
+open FSharp.Json
 open Prelude.Common
-open Newtonsoft.Json
+open Prelude.Json
 
 (*
     Bit mappings for use in storing rows of notes. Stores up to 16 flags so this format can theoretically support 16 columns.
@@ -215,35 +216,27 @@ type ChartHeader =
       PreviewTime: float
       SourcePack: string
       BGFile: string
-      AudioFile: string
-      [<JsonIgnore>]
-      File: string
-      [<JsonIgnore>]
-      SourcePath: string }
+      AudioFile: string }
     static member Default = 
         { Title = "Untitled Chart"
           Artist = ""
           Creator = ""
           DiffName = ""
           PreviewTime = 0.0
-          SourcePath = ""
           SourcePack = "Unknown"
           BGFile = ""
-          AudioFile = "audio.mp3"
-          File = "unknown.yav" }
+          AudioFile = "audio.mp3" }
 
-type Chart(keys, header, notes, bpms, sv) =
+type Chart(keys, header, notes, bpms, sv, path) =
+    
     member this.Keys = keys
     member this.Notes: TimeData<NoteRow> = notes
     member this.BPM: TimeData<int * float> = bpms
     member this.Header: ChartHeader = header
     member this.SV: MultiTimeData<float> = sv
+    member this.FileIdentifier = path
 
-    new() = Chart(4, ChartHeader.Default, TimeData(), TimeData(), MultiTimeData(4))
-
-    member this.WithHeader(h) = Chart(this.Keys, h, this.Notes, this.BPM, this.SV)
-
-    member this.FileIdentifier = Path.Combine(this.Header.SourcePath, this.Header.File)
+    new() = Chart(4, ChartHeader.Default, TimeData(), TimeData(), MultiTimeData(4), "unknown.yav")
 
 let private readSection<'t> (br: BinaryReader) f =
     let objectList = new List<TimeDataItem<'t>>()
@@ -262,21 +255,18 @@ let loadChartFile filepath =
     try
         use fs = new FileStream(filepath, FileMode.Open)
         use br = new BinaryReader(fs)
-        let keys = br.ReadByte()
+        let keys = br.ReadByte() |> int
 
-        let header =
-            { Json.Load<ChartHeader>(br.ReadString()) with
-                  File = Path.GetFileName(filepath)
-                  SourcePath = Path.GetDirectoryName(filepath) }
+        let header = JsonHelper.load(br.ReadString())
 
         let notes = readSection br (readRowFromFile)
         let bpms = readSection br (fun r -> BPM(r.ReadInt32(), r.ReadSingle() |> float))
-        Some (Chart
-            (keys |> int, header, notes, bpms,
-             let sv = MultiTimeData(keys |> int)
-             for i in 0 .. (keys |> int) do
-                 sv.SetChannelData(i - 1, readSection br (fun r -> (r.ReadSingle() |> float)))
-             sv))
+        let sv = MultiTimeData(keys)
+        for i in 0..keys do
+            sv.SetChannelData(i - 1, readSection br (fun r -> (r.ReadSingle() |> float)))
+
+        Chart (keys, header, notes, bpms, sv, filepath)
+        |> Some
     with
     | err -> Logging.Error ("Could not load chart from " + filepath) (err.ToString()); None
 
@@ -284,14 +274,14 @@ let saveChartFileTo (chart : Chart) filepath =
     use fs = new FileStream(filepath, FileMode.Create)
     use bw = new BinaryWriter(fs)
     bw.Write(chart.Keys |> byte)
-    bw.Write(Json.Save chart.Header)
+    bw.Write(JsonHelper.save chart.Header)
     writeSection chart.Notes bw (fun nr -> writeRowToFile bw nr)
     writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter); bw.Write(float32 msPerBeat))
     for i = 0 to chart.Keys do
         writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(float32 f))
 
 let saveChartFile (chart : Chart) =
-    saveChartFileTo chart (Path.Combine(chart.Header.SourcePath, chart.Header.File))
+    saveChartFileTo chart chart.FileIdentifier
 
 let calculateHash (chart: Chart): string =
     let h = SHA256.Create()

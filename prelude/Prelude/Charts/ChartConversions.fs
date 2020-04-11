@@ -119,10 +119,10 @@ let convert_osu_interlude ((general, _, meta, diff, events, notes, timing) : Bea
     let header = { 
         ChartHeader.Default with
             Title = meta.Title; Artist = meta.Artist; Creator = meta.Creator; SourcePack = "osu!"
-            DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename; File = meta.Title + " [" + meta.Version + "].yav"}
+            DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename }
     let snaps = convertHitObjects notes keys
     let (bpm, sv) = (convertTimingPoints timing keys (offsetOf (snaps.GetPointAt(infinity))))
-    Chart(keys, header, snaps, bpm, sv)
+    Chart(keys, header, snaps, bpm, sv, meta.Title + " [" + meta.Version + "].yav")
 
 (*
     Conversion code for StepMania -> Interlude
@@ -214,12 +214,10 @@ let convert_stepmania_interlude (sm : StepmaniaData) path =
                 PreviewTime = sm.SAMPLESTART * 1000.0
                 AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"]
                 BGFile = metadataFallback [sm.BACKGROUND; findBackground (sm.TITLE + "-bg.jpg")]
-                SourcePath = path
-                File = diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav"
-                
         }
+        let filepath = Path.Combine(path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
         let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0)
-        Some (Chart(keys, header, notes, bpm, MultiTimeData<float>(keys)))
+        Some (Chart(keys, header, notes, bpm, MultiTimeData<float>(keys), filepath))
     sm.Charts |> List.mapi convert_difficulty |> List.choose id
 
 (*
@@ -380,7 +378,9 @@ let loadAndConvertFile (path : string) : Chart list =
 
 //Writes chart to new location, including copying its background and audio files
 let relocateChart (chart : Chart) (sourceFolder : string) (targetFolder : string) =
-    let c = chart.WithHeader({ chart.Header with SourcePath = targetFolder; SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder)); File = Path.ChangeExtension(chart.Header.File, ".yav") })
+    let c =
+        Chart(chart.Keys, { chart.Header with SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder)) },
+            chart.Notes, chart.BPM, chart.SV, Path.Combine(targetFolder, Path.ChangeExtension(Path.GetFileName(chart.FileIdentifier), ".yav")))
     
     Directory.CreateDirectory(targetFolder) |> ignore
     let copyFile source target =
