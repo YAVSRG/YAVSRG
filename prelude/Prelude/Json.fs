@@ -49,7 +49,6 @@ module Json =
                 match FSharpType.GetUnionCases(t) |> Array.filter (fun case -> case.Name = name) with
                 | [|case|] -> case, case.GetFields()
                 | _ -> failwith "could not deserialise unknown union case"
-            printfn "matched case: %s with %i fields" case.Name fields.Length
             reader.Read() |> ignore
             let result =
                 match fields.Length with
@@ -57,9 +56,7 @@ module Json =
                     //there should be a null token under the cursor
                     FSharpValue.MakeUnion(case, [||])
                 | 1 ->
-                    printfn "reading type: %A" fields.[0].PropertyType
                     let res = [| serializer.Deserialize(reader, fields.[0].PropertyType) |]
-                    printfn "read field: %A" res
                     FSharpValue.MakeUnion(case, res)
                 | _ ->
                     let tupleType =
