@@ -27,10 +27,7 @@ type CachedChart = {
     BPM: (float * float)
     DiffName: string
     Physical: float
-    Technical: float
-
-    Collection: string
-    CollectionIndex: int }
+    Technical: float }
 
 let cacheChart (chart : Chart) : CachedChart =
     let endTime =
@@ -49,9 +46,7 @@ let cacheChart (chart : Chart) : CachedChart =
     BPM = minMaxBPM (chart.BPM.Enumerate |> List.ofSeq) endTime
     DiffName = chart.Header.DiffName
     Physical = rating.Physical
-    Technical = rating.Technical
-    Collection = ""
-    CollectionIndex = 0 }
+    Technical = rating.Technical }
 
 let osuSongFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs")
 let smPackFolder = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Stepmania 5", "Songs")
@@ -70,20 +65,9 @@ type Collection =
     | Collection of List<string>
     | Playlist of List<PlaylistData>
     | Goals of List<PlaylistData * Goal>
-    (*static member ToJson (this: Collection) = json {
-        match this with
-        | Collection l -> do! JsonHelper.write "Collection" l
-        | Playlist l -> do! Json.write "Playlist" l
-        | Goals l -> do! Json.write "Goals" l
-    }
-    static member FromJson(_) =
-        function
-        | Property "Collection" l as json -> Json.init (Collection l) json
-        | Property "Playlist" l as json -> Json.init (Playlist l) json
-        | Property "Goals" l as json -> Json.init (Goals l) json
-        | json -> Json.error "couldn't deserialize collection" json*)
 
 type Cache() =
+
     let charts, collections = Cache.Load
 
     member this.Save = JsonHelper.saveFile (charts, collections) (Path.Combine(getDataPath("Data"), "Cache.json"))

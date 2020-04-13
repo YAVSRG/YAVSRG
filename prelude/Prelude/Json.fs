@@ -1,37 +1,49 @@
 ﻿namespace Prelude
 
 open System.IO
-open System.Collections.Generic
-open FSharp.Json
+open System.Linq
+open Microsoft.FSharp.Reflection
+open Newtonsoft.Json
+open Newtonsoft.Json.Linq
 
 module Json =
     
-    type DictionaryTransform<'T>() =
-        interface ITypeTransform with
-            member x.targetType() = typeof<Map<string, 'T>>
-            member x.toTargetType value = value :?> Dictionary<string, 'T> |> Seq.map (|KeyValue|) |> Map.ofSeq :> obj
-            member x.fromTargetType value = value :?> Map<string, 'T> |> Dictionary :> obj
+    type TupleConverter() =
+        inherit JsonConverter()
 
-    type ListTransform<'T>() =
-        interface ITypeTransform with
-            member x.targetType() = typeof<'T list>
-            member x.toTargetType value = value :?> List<'T> |> List.ofSeq :> obj
-            member x.fromTargetType value = value :?> 'T list |> ResizeArray :> obj
+        override this.CanConvert t = FSharpType.IsTuple t
+
+        override this.WriteJson(writer, value, serializer) =
+            serializer.Serialize(writer, FSharpValue.GetTupleFields value)
+
+        override this.ReadJson(reader, t, existingValue, serializer) =
+            let argTypes = FSharpType.GetTupleElements t
+            let array = serializer.Deserialize<JArray>(reader)
+            let items = array.Select(fun a i -> a.ToObject(argTypes.[i], serializer)).ToArray()
+            FSharpValue.MakeTuple(items, t)
+
+    let addConverters (settings : JsonSerializerSettings) : JsonSerializerSettings = 
+        settings.Converters.Add(TupleConverter())
+        settings
 
     module JsonHelper = 
+        let s = new JsonSerializerSettings(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate) |> addConverters |> JsonSerializer.Create
 
-        let load string : 'T =
-            string
-            |> Json.deserialize
+        let load<'T> string : 'T = 
+            use jr = new JsonTextReader(new StringReader(string))
+            s.Deserialize<'T> jr
+
+        let save<'T> (obj : 'T) : string = 
+            use sw = new StringWriter()
+            use jw = new JsonTextWriter(sw)
+            s.Serialize(jw, obj)
+            sw.ToString()
+
+        let loadFile<'T> (path : string) : 'T =
+            use jr = new JsonTextReader(new StreamReader(path))
+            s.Deserialize<'T> jr
     
-        let save (obj : 'T) : string =
-            obj
-            |> Json.serializeU
-    
-        let loadFile (path : string) : 'T =
-            use sr = new StreamReader(path)
-            load (sr.ReadToEnd())
-            
-        let saveFile (obj : 'T) (path : string) : unit = 
+        let saveFile<'T> (obj : 'T) (path : string) : unit = 
             use sw = new StreamWriter(path)
-            sw.Write(save obj)
+            use jw = new JsonTextWriter(sw)
+            s.Serialize(jw, obj)

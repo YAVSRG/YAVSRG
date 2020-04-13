@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Security.Cryptography
-open FSharp.Json
+open System.ComponentModel
 open Prelude.Common
 open Prelude.Json
 
@@ -209,14 +209,14 @@ type MultiTimeData<'t>(keys) =
 *)
 
 type ChartHeader =
-    { Title: string
-      Artist: string
-      Creator: string
-      DiffName: string
-      PreviewTime: float
-      SourcePack: string
-      BGFile: string
-      AudioFile: string }
+    { [<DefaultValue("Untitled Chart")>] Title: string
+      [<DefaultValue("")>] Artist: string
+      [<DefaultValue("")>] Creator: string
+      [<DefaultValue("")>] DiffName: string
+      [<DefaultValue(0.0)>] PreviewTime: float
+      [<DefaultValue("Unknown")>] SourcePack: string
+      [<DefaultValue("")>] BGFile: string
+      [<DefaultValue("audio.mp3")>] AudioFile: string }
     static member Default = 
         { Title = "Untitled Chart"
           Artist = ""
@@ -228,7 +228,6 @@ type ChartHeader =
           AudioFile = "audio.mp3" }
 
 type Chart(keys, header, notes, bpms, sv, path) =
-    
     member this.Keys = keys
     member this.Notes: TimeData<NoteRow> = notes
     member this.BPM: TimeData<int * float> = bpms
