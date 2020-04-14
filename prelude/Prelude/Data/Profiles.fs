@@ -119,5 +119,4 @@ module Profiles =
                 UUID = pd.UUID; Stats = (Option.defaultValue this.Stats pd.Stats)
                 Playstyles = (if pd.Playstyles <> null then pd.Playstyles else this.Playstyles)
                 EnabledThemes = (if pd.EnabledThemes <> null then pd.EnabledThemes else this.EnabledThemes )}
-
-
+            
