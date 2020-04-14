@@ -1,24 +1,34 @@
 ﻿namespace Prelude
 
+open System
+open System.IO
 open System.Threading
 open System.Threading.Tasks
-open System.IO
 open System.Collections.Generic
+open System.Text.RegularExpressions
 
 module Common =
 
-    //folder structure:
-        //Data
-            //Assets
-            //Profiles
-            //Cache.json
-            //Scores.json
-        //Songs
-        //Imports
-    let getDataPath name =
-        let p = Path.Combine(Directory.GetCurrentDirectory(), name)
-        Directory.CreateDirectory(p) |> ignore
-        p
+(*
+    Settings - Store an (ideally immutable type) value that can be get and set
+    Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
+    (Auto generation will be done with reflection)
+*)
+
+    type Setting<'T>(value : 'T) =
+        let mutable value = value
+        member this.Set(newValue) = value <- newValue
+        member this.Get() = value
+
+    type NumSetting<'T when 'T : comparison>(value : 'T, min : 'T, max : 'T) =
+        inherit Setting<'T>(value)
+        member this.Set(newValue) = base.Set(if newValue > max then max elif newValue < min then min else newValue)
+        member this.Min = min
+        member this.Max = max
+
+    type StringSetting(value: string, allowSpecialChar: bool) =
+        inherit Setting<string>(value)
+        member this.Set(newValue) = base.Set(if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, ""))
 
 (*
     Logging
@@ -127,12 +137,7 @@ module Common =
     Lots of these are likely to be temporary while I learn the language and discover the already existing shorthand
 *)
 
-    let extractOption o =
-        match o with
-        | Some v -> v
-        | None -> failwith "impossible"
-
-    let rec List_forSome pred l =
-        match l with
-        | [] -> false
-        | x :: xs -> if pred x then true else List_forSome pred xs
+    let getDataPath name =
+        let p = Path.Combine(Directory.GetCurrentDirectory(), name)
+        Directory.CreateDirectory(p) |> ignore
+        p

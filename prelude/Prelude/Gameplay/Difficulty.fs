@@ -162,7 +162,7 @@ module Difficulty =
         let layoutData =
             match getLayoutInfo(layout, keys) with
             | Some l -> l
-            | None -> getAvailableLayouts keys |> List.head |> fun l -> getLayoutInfo(l, keys) |> extractOption
+            | None -> getAvailableLayouts keys |> List.head |> fun l -> getLayoutInfo(l, keys) |> fun x -> x.Value
         let fingers = Array.zeroCreate keys
 
         let physicalData = Array.zeroCreate notes.Count
