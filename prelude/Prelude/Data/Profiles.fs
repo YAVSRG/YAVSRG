@@ -1,9 +1,7 @@
 ﻿namespace Prelude.Data
 
 open System
-open System.ComponentModel
 open System.Collections.Generic
-open System.Text.RegularExpressions
 open Newtonsoft.Json
 open Prelude.Common
 open Prelude.Gameplay.Layout

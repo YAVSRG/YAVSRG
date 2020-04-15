@@ -6,6 +6,7 @@ open Prelude.Charts.Interlude
 type ModChart = int * TimeData<NoteRow> * TimeData<BPM> * MultiTimeData<float> * string list
 
 module Filter =
+
     type Bitmapping =
         | Column of int
         | Not of Bitmapping
