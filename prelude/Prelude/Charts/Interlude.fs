@@ -1,4 +1,4 @@
-﻿module Prelude.Charts
+﻿namespace Prelude.Charts
 
 open System
 open System.IO

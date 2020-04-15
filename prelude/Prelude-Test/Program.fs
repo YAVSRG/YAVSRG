@@ -1,6 +1,7 @@
 ﻿open System
 open System.Collections.Generic
 open Prelude.Common
+open Prelude.Json
 open FParsec
 open Prelude.Data.ChartManager
 

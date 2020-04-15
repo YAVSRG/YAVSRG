@@ -6,6 +6,7 @@ open System.Linq
 open Microsoft.FSharp.Reflection
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
+open Prelude.Common
 
 module Json =
     
@@ -101,7 +102,21 @@ module Json =
             else
               FSharpValue.MakeUnion(cases.[1], [|value|])
 
+    type SettingConverter() = 
+        inherit JsonConverter()
+
+        override this.CanConvert t = t.IsGenericType && t.GetGenericTypeDefinition().Equals(typedefof<Setting<_>>)
+
+        override this.WriteJson(writer, value, serializer) =
+            serializer.Serialize(writer, value.GetType().GetMethod("Get").Invoke(value, [||]))
+
+        override this.ReadJson(reader, t, existingValue, serializer) =
+            let innerType = t.GetGenericArguments().[0]
+            let innerValue = serializer.Deserialize(reader, innerType)
+            t.GetConstructor([|innerType|]).Invoke([|innerValue|])
+
     let addConverters (settings : JsonSerializerSettings) : JsonSerializerSettings = 
+        settings.Converters.Add(SettingConverter())
         settings.Converters.Add(TupleConverter())
         settings.Converters.Add(OptionConverter())
         settings.Converters.Add(UnionConverter())

@@ -1,15 +1,20 @@
 ﻿namespace Prelude.Data
 
 open System
+open System.IO
 open System.Collections.Generic
+open Prelude.Json
+open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout
+open Prelude.Data.ChartManager
 
 module ScoreManager =
 
+    //todo: add json required attributes to these records OR a way to insert default values
     type Score = {
         time: DateTime
         hitdata: string
@@ -23,12 +28,20 @@ module ScoreManager =
 
     type ChartSaveData = {
         Path: string
-        Offset: float
+        Offset: Setting<float>
         Scores: List<Score>
         Lamp: Dictionary<string, Lamp>
         Accuracy: Dictionary<string, float>
         Clear: Dictionary<string, bool>
     }
+    with
+        static member FromChart(c: Chart) =
+            {   Path = c.FileIdentifier
+                Offset = Setting(if c.Notes.IsEmpty then 0.0 else offsetOf c.Notes.First);
+                Scores = new List<Score>()
+                Lamp = new Dictionary<string, Lamp>()
+                Accuracy = Dictionary<string, float>()
+                Clear = Dictionary<string, bool>() }
 
     (*
         Gameplay pipelines that need to happen to play a chart
@@ -61,10 +74,20 @@ module ScoreManager =
     type ScoresDB() =
         let data = ScoresDB.Load
 
-        member this.Save = ()
+        member this.Save =  JsonHelper.saveFile data (Path.Combine(getDataPath("Data"), "Scores.json"))
 
         static member Load =
-            new Dictionary<string, ChartSaveData>()
+            try
+                JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "Scores.json"))
+            with
+            | :? FileNotFoundException -> new Dictionary<string, ChartSaveData>()
+            | err -> Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
+
+        member this.GetScoreData (chart: Chart) =
+            let hash = calculateHash(chart)
+            if not <| data.ContainsKey(hash) then data.Add(hash, ChartSaveData.FromChart(chart))
+            data.[hash]
+            
 
     type TopScore = string * string * DateTime * float //Cache id, Hash, Timestamp, Rating
 
