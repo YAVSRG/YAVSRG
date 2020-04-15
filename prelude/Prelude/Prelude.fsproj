@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <AssemblyName>Prelude</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Common.fs" />
+    <Compile Include="Json.fs" />
+    <Compile Include="Charts\Interlude.fs" />
+    <Compile Include="Charts\StepMania.fs" />
+    <Compile Include="Charts\osu.fs" />
+    <Compile Include="Charts\ChartConversions.fs" />
+    <Compile Include="Editor\Editor.fs" />
+    <Compile Include="Gameplay\Score.fs" />
+    <Compile Include="Gameplay\Mods.fs" />
+    <Compile Include="Gameplay\NoteColors.fs" />
+    <Compile Include="Gameplay\Difficulty.fs" />
+    <Compile Include="Data\ChartManager.fs" />
+    <Compile Include="Data\ScoreManager.fs" />
+    <Compile Include="Data\Themes.fs" />
+    <Compile Include="Data\Profiles.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FParsec" Version="1.1.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="4.7.1" />
+  </ItemGroup>
+
+</Project>
