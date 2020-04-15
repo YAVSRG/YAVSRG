@@ -5,7 +5,7 @@ It implements the core elements of the game as a class library but no game engin
 
 The purpose of this framework is to provide a very easy set of tools for working with Interlude and the format it stores data in, however I have designed some aspects of it with general purpose rhythm game tools/reusability in mind.
 
-I am currently in the middle of rewriting more of all of the YAVSRG project in F# so that it is
+I am currently in the middle of rewriting most/all of the YAVSRG project in F# so that it is
 - More organised, neat and concise
 - Easier to verify correctness/debug
 - Built for .NET Core as Interlude was previously built for .NET Framework making it hard to port to macOS and linux.
