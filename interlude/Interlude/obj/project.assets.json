@@ -1,0 +1,170 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETCoreApp,Version=v3.1": {
+      "FSharp.Core/4.7.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/FSharp.Core.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/FSharp.Core.dll": {}
+        },
+        "resource": {
+          "lib/netstandard2.0/cs/FSharp.Core.resources.dll": {
+            "locale": "cs"
+          },
+          "lib/netstandard2.0/de/FSharp.Core.resources.dll": {
+            "locale": "de"
+          },
+          "lib/netstandard2.0/es/FSharp.Core.resources.dll": {
+            "locale": "es"
+          },
+          "lib/netstandard2.0/fr/FSharp.Core.resources.dll": {
+            "locale": "fr"
+          },
+          "lib/netstandard2.0/it/FSharp.Core.resources.dll": {
+            "locale": "it"
+          },
+          "lib/netstandard2.0/ja/FSharp.Core.resources.dll": {
+            "locale": "ja"
+          },
+          "lib/netstandard2.0/ko/FSharp.Core.resources.dll": {
+            "locale": "ko"
+          },
+          "lib/netstandard2.0/pl/FSharp.Core.resources.dll": {
+            "locale": "pl"
+          },
+          "lib/netstandard2.0/pt-BR/FSharp.Core.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "lib/netstandard2.0/ru/FSharp.Core.resources.dll": {
+            "locale": "ru"
+          },
+          "lib/netstandard2.0/tr/FSharp.Core.resources.dll": {
+            "locale": "tr"
+          },
+          "lib/netstandard2.0/zh-Hans/FSharp.Core.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "FSharp.Core/4.7.0": {
+      "sha512": "6Bf2qzSCaJoP6tTfO+a5muUS7QbyJANqSut73zQvwQ9It5P0ITz9VKseeia2ofco30c55EQ0jA2wf2+A2gpGnw==",
+      "type": "package",
+      "path": "fsharp.core/4.7.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "fsharp.core.4.7.0.nupkg.sha512",
+        "fsharp.core.nuspec",
+        "lib/net45/FSharp.Core.dll",
+        "lib/net45/FSharp.Core.optdata",
+        "lib/net45/FSharp.Core.sigdata",
+        "lib/net45/FSharp.Core.xml",
+        "lib/net45/cs/FSharp.Core.resources.dll",
+        "lib/net45/de/FSharp.Core.resources.dll",
+        "lib/net45/es/FSharp.Core.resources.dll",
+        "lib/net45/fr/FSharp.Core.resources.dll",
+        "lib/net45/it/FSharp.Core.resources.dll",
+        "lib/net45/ja/FSharp.Core.resources.dll",
+        "lib/net45/ko/FSharp.Core.resources.dll",
+        "lib/net45/pl/FSharp.Core.resources.dll",
+        "lib/net45/pt-BR/FSharp.Core.resources.dll",
+        "lib/net45/ru/FSharp.Core.resources.dll",
+        "lib/net45/tr/FSharp.Core.resources.dll",
+        "lib/net45/zh-Hans/FSharp.Core.resources.dll",
+        "lib/net45/zh-Hant/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/FSharp.Core.dll",
+        "lib/netstandard2.0/FSharp.Core.optdata",
+        "lib/netstandard2.0/FSharp.Core.sigdata",
+        "lib/netstandard2.0/FSharp.Core.xml",
+        "lib/netstandard2.0/cs/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/de/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/es/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/fr/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/it/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ja/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ko/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/pl/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/pt-BR/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/ru/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/tr/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/zh-Hans/FSharp.Core.resources.dll",
+        "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETCoreApp,Version=v3.1": [
+      "FSharp.Core >= 4.7.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\percy\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\percy\\Source\\Repos\\YAVSRG\\Interlude\\Interlude.fsproj",
+      "projectName": "Interlude",
+      "projectPath": "C:\\Users\\percy\\Source\\Repos\\YAVSRG\\Interlude\\Interlude.fsproj",
+      "packagesPath": "C:\\Users\\percy\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\percy\\Source\\Repos\\YAVSRG\\Interlude\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\percy\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "netcoreapp3.1"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "netcoreapp3.1": {
+          "projectReferences": {}
+        }
+      }
+    },
+    "frameworks": {
+      "netcoreapp3.1": {
+        "dependencies": {
+          "FSharp.Core": {
+            "target": "Package",
+            "version": "[4.7.0, )",
+            "generatePathProperty": true
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.201\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}
