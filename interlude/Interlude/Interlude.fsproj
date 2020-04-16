@@ -6,6 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Utils.fs" />
+    <Compile Include="Audio.fs" />
+    <Compile Include="Render.fs" />
+    <Compile Include="Input.fs" />
+    <Compile Include="UI\Animation.fs" />
+    <Compile Include="UI\Components.fs" />
+    <Compile Include="UI\Screens.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
