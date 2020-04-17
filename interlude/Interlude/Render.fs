@@ -2,6 +2,41 @@
 
 open OpenTK
 open OpenTK.Graphics.OpenGL
+open System.Collections.Generic
+open System.Drawing.Text
+
+(*
+    Sprites and content uploading
+*)
+
+[<Struct>]
+type Sprite = { ID:int; Width:int; Height:int; Rows:int; Columns:int }
+with static member Default = { ID=0; Width=1; Height=1; Rows=1; Columns=1 }
+
+module Sprite =
+
+    open System.Drawing
+    open System.Drawing.Imaging
+    
+    let upload(bitmap : Bitmap, rows, columns, smooth) =
+        let id = GL.GenTexture()
+        let data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb)
+        GL.BindTexture(TextureTarget.Texture2D, id)
+        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0)
+        bitmap.UnlockBits(data)
+
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat)
+        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat)
+        if smooth then
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear)
+        else
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest)
+
+        { ID=id; Width=bitmap.Width; Height=bitmap.Height; Rows=rows; Columns=columns }
+
+    let destroy (sprite: Sprite) = GL.DeleteTexture(sprite.ID)
 
 (*
     Storage of rectangles as left, top, right, bottom
@@ -49,6 +84,23 @@ module Quad =
         (new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b))
 
     let create c1 c2 c3 c4 : Quad = c1, c2, c3, c4
+
+(*
+    Font
+*)
+
+type SpriteFont(font: Font) =
+    let fontLookup = new Dictionary<string, Sprite>()
+    let genChar(c: char) =
+        let size =
+            use b = new Bitmap(1, 1)
+            use g = System.Drawing.Graphics.FromImage(b)
+            g.MeasureString(c.ToString(), font)
+        let bmp = new Bitmap(int size.Width, int size.Height)
+        use g = System.Drawing.Graphics.FromImage(bmp)
+        g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit
+        g.DrawString(c.ToString(), font, Brushes.White, 0, 0)
+        fontLookup.Add(c.ToString, Sprite.upload(bmp, 1, 1, true))
 
 (*
     Render handling to be used from Game
