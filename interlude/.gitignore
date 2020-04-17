@@ -2,17 +2,13 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/publish/Application Files/YAVSRG_0_0_0_0
 /publish
-/Prelude/bin/Debug
-/Prelude/obj/Debug
 /.vs/YAVSRG/v16/Server/sqlite3
 /packages
 /.vs/YAVSRG/v15/Server/sqlite3
-/Detour/bin/Debug
-/Detour/obj/Debug
 /Retrolude/bin/Debug
 /Retrolude/obj/Debug
+/Interlude/bin/Debug
+/Interlude/obj/Debug
 /Prelude/Prelude/bin/Debug
 /Prelude/Prelude/obj/Debug
-/Interlude/bin/Debug/netcoreapp3.1
