@@ -6,9 +6,9 @@
 /.vs/YAVSRG/v16/Server/sqlite3
 /packages
 /.vs/YAVSRG/v15/Server/sqlite3
-/Retrolude/bin/Debug
-/Retrolude/obj/Debug
-/Interlude/bin/Debug
-/Interlude/obj/Debug
-/Prelude/Prelude/bin/Debug
-/Prelude/Prelude/obj/Debug
+/Retrolude/bin
+/Retrolude/obj
+/Interlude/bin
+/Interlude/obj
+/Prelude/Prelude/bin
+/Prelude/Prelude/obj
