@@ -25,7 +25,9 @@ type Game() =
         base.OnRenderFrame (e)
         Render.start()
         Render.resize(float base.Width, float base.Height)
-        Draw.rect(Rect.create 0.f 0.f (float32 base.Width) (float32 base.Height) |> Rect.expand(-20.0f, -20.0f)) Color.Aquamarine
+        Draw.rect(Rect.create 0.f 0.f (float32 base.Width) (float32 base.Height) |> Rect.expand(-20.f, -20.f)) Color.Gray Sprite.Default
+        Draw.rect(Rect.create 0.f 0.f (float32 base.Width) (float32 base.Height) |> Rect.expand(-40.f, -40.f)) Color.Black Sprite.Default
+        Font.drawJust(Font.defaultFont, "Centred", 20.f, 150.f, 150.f, Color.Aquamarine, 0.5f)
         Render.finish()
         base.SwapBuffers()
 
