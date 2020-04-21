@@ -38,6 +38,8 @@ module Rect =
     let sliceBottom v ((left, _, right, bottom): Rect) =
         struct (left, bottom - v, right, bottom)
 
+    let zero = create 0.f 0.f 0.f 0.f
+
 (*
     Simple storage of vertices to render as a quad
 *)

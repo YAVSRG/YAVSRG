@@ -14,7 +14,6 @@ let main argv =
     //Check if interlude is already running (true if not already running)
     if m.WaitOne(TimeSpan.Zero, true) then
 
-        //Set high system priority
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
         //Init logging
