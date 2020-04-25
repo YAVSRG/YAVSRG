@@ -2,6 +2,7 @@
 
 open OpenTK
 open OpenTK.Input
+open Prelude.Common
 open System.Collections.Generic
 
 module Input = 
@@ -14,6 +15,9 @@ module Input =
     let mutable internal mousey = 0.f
     let mutable internal mousescroll = 0
     let mutable internal clickhandled = false
+    let mutable private inputmethod: Setting<string> list = []
+
+    let internal freeIM = List.isEmpty inputmethod
 
     let init(game : GameWindow) =
         game.MouseWheel.Add(fun e -> mousescroll <- e.Delta)
@@ -22,9 +26,33 @@ module Input =
         game.MouseUp.Add(fun e -> while mouse.Remove(e.Button) do ())
 
         game.KeyDown.Add(fun e -> keys.Add(e.Key))
+        game.KeyPress.Add(
+            fun e ->
+                match List.tryHead inputmethod with
+                | Some s -> s.Set(s.Get() + e.KeyChar.ToString())
+                | None -> ())
         game.KeyUp.Add(fun e -> while keys.Remove(e.Key) do ())
 
+    //todo: consider threading input and redesigning this system to use events instead
+    //these methods are internal until further notice as the Bind system should be used instead
+    module Keyboard =
+        let internal pressedOverride(k) = keys.Contains(k)
+        let internal pressed(k, overrideIM) = (overrideIM || freeIM) && pressedOverride(k)
+        //was key pressed this frame?
+        let internal tappedOverride(k) = keys.Contains(k) && not(oldKeys.Contains(k))
+        let internal tapped(k, overrideIM) = (overrideIM || freeIM) && tappedOverride(k)
+        //was key released this frame?
+        let internal released(k) = oldKeys.Contains(k) && not(keys.Contains(k))
+
     let update() =
+        match List.tryHead inputmethod with
+        |  Some s ->
+            if Keyboard.tappedOverride(Key.BackSpace) && s.Get().Length > 0 then
+                if Keyboard.pressedOverride(Key.LControl) then s.Set("") else
+                    let v = s.Get()
+                    s.Set(v.Substring(0, v.Length - 1))
+            //todo: clipboard support
+        | None -> ()
         oldKeys.Clear()
         oldKeys.AddRange(keys)
         oldMouse.Clear()
@@ -32,14 +60,13 @@ module Input =
         clickhandled <- false
         mousescroll <- 0
 
-//todo: consider threading input and redesigning this system to use events instead
-//these methods are internal until further notice as the Bind system should be used instead
-module Keyboard =
-    let internal pressed(k) = Input.keys.Contains(k)
-    //was key pressed this frame?
-    let internal tapped(k) = Input.keys.Contains(k) && not(Input.oldKeys.Contains(k))
-    //was key released this frame?
-    let internal released(k) = Input.oldKeys.Contains(k) && not(Input.keys.Contains(k))
+    let createInputMethod(s: Setting<string>) =
+        inputmethod <- s :: inputmethod
+
+    let removeInputMethod() =
+        inputmethod <- List.tail inputmethod
+
+module Keyboard = Input.Keyboard
 
 module Mouse = 
     let X() = Input.mousex
@@ -72,22 +99,24 @@ type Bind =
             | Alt b -> "Alt + " + b.ToString()
             | Ctrl b -> "Ctrl + " + b.ToString()
             | Joystick _ -> "nyi"
-        member this.Pressed() =
+        member this.Pressed(overrideIM) =
             match this with
-            | Key k -> Keyboard.pressed(k)
+            | Key k -> Keyboard.pressed(k, overrideIM)
             | Mouse m -> Mouse.pressed(m)
-            | Shift b -> (Keyboard.pressed(Key.LShift) || Keyboard.pressed(Key.RShift)) && b.Pressed()
-            | Alt b -> (Keyboard.pressed(Key.LControl) || Keyboard.pressed(Key.RControl)) && b.Pressed()
-            | Ctrl b -> (Keyboard.pressed(Key.LAlt) || Keyboard.pressed(Key.RAlt)) && b.Pressed()
+            | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Pressed(overrideIM)
+            | Alt b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Pressed(overrideIM)
+            | Ctrl b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Pressed(overrideIM)
             | _ -> false
-        member this.Tapped() =
+        member this.Tapped(overrideIM) =
             match this with
-            | Key k -> Keyboard.tapped(k)
+            | Key k -> Keyboard.tapped(k, overrideIM)
             | Mouse m -> Mouse.Click(m)
-            | Shift b -> (Keyboard.pressed(Key.LShift) || Keyboard.pressed(Key.RShift)) && b.Tapped()
-            | Alt b -> (Keyboard.pressed(Key.LControl) || Keyboard.pressed(Key.RControl)) && b.Tapped()
-            | Ctrl b -> (Keyboard.pressed(Key.LAlt) || Keyboard.pressed(Key.RAlt)) && b.Tapped()
+            | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Tapped(overrideIM)
+            | Alt b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Tapped(overrideIM)
+            | Ctrl b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Tapped(overrideIM)
             | _ -> false
+        //note that for the sake of completeness released should take an im override too, but there is no context where it matters
+        //todo: maybe put it in later
         member this.Released() =
             match this with
             | Key k -> Keyboard.released(k)
