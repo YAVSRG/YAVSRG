@@ -122,7 +122,7 @@ module Profiles =
 
     module Profile =
         
-        let saveProfile (p: Profile) = Path.Combine(getDataPath("Data"), "Profiles", p.UUID + ".json") |> JsonHelper.saveFile p
+        let save (p: Profile) = Path.Combine(getDataPath("Data"), "Profiles", p.UUID + ".json") |> JsonHelper.saveFile p
 
-        let loadProfile (path: string) = Profile.Default.FromData(JsonHelper.loadFile path)
+        let load (path: string) = Profile.Default.FromData(JsonHelper.loadFile path)
             
