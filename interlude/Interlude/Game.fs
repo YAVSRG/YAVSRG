@@ -4,6 +4,7 @@ open OpenTK
 open OpenTK.Graphics
 open OpenTK.Graphics.OpenGL
 open Interlude.Render
+open Interlude.Input
 
 module Game = 
     let version = "v0.4.0"
@@ -33,10 +34,12 @@ type Game() =
 
     override this.OnUpdateFrame (e) =
         base.OnUpdateFrame (e)
+        Input.update()
     
     override this.OnLoad (e) =
         base.OnLoad(e)
         Render.init(float base.Width, float base.Height)
+        Input.init(this)
 
     override this.OnUnload (e) =
         base.OnUnload(e)
