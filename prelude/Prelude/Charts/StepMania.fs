@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Charts
 
 open FParsec
+open System
 
 //https://github.com/stepmania/stepmania/wiki/sm
 //https://github.com/stepmania/stepmania/wiki/ssc
@@ -179,7 +180,7 @@ module StepMania =
                 | Failure(errorMsg, _, _) -> failwith errorMsg
             | "STOPS", [ ss ] ->
                 match run parsePairs ss with
-                | Success(result, _, _) -> { s with BPMS = result }
+                | Success(result, _, _) -> { s with STOPS = result }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
             | "SAMPLESTART", [ v ] -> { s with SAMPLESTART = v |> float }
             | "SAMPLELENGTH", [ v ] -> { s with SAMPLELENGTH = v |> float }
@@ -213,3 +214,42 @@ module StepMania =
         match runParserOnFile parseStepFile () path System.Text.Encoding.UTF8 with
         | Success(result, _, _) -> result
         | Failure(errorMsg, _, _) -> failwith errorMsg
+
+    let calculateEtternaHash measures bpms =
+        use ms = new System.IO.MemoryStream()
+        use sw = new System.IO.StreamWriter(ms)
+        let mutable bpms = bpms
+        let mutable b = snd <| List.head bpms
+        bpms <- List.tail bpms
+        let mutable totalBeats = 0.0;
+        let mutable lo = 0.0
+        let mutable hi = 0.0
+        let meter = 4.0
+
+        let convert_measure (m : string list) lo hi =
+            let l = List.length m |> float
+            let start = Math.Ceiling(lo * l / meter) |> int
+            let finish = Math.Ceiling(hi * l / meter) |> int
+
+            for i in start..(finish-1) do
+                Seq.iteri (fun k c ->
+                    match c with
+                    | '1' | '2' | '4' -> sw.Write(c.ToString()); sw.Write(int <| b + 0.374643)
+                    | _ -> ()
+                    ) m.[i]
+
+        List.iteri (fun i m -> 
+            totalBeats <- totalBeats + meter
+            lo <- 0.0
+            while (not (List.isEmpty bpms) && fst (List.head bpms) < totalBeats) do
+                hi <- fst (List.head bpms) - totalBeats + meter
+                convert_measure m lo hi
+                lo <- hi
+                b <- snd <| List.head bpms
+                bpms <- List.tail bpms
+            convert_measure m lo meter
+            ) measures
+        sw.Flush()
+        printfn "%A" <| System.Text.Encoding.UTF8.GetString(ms.ToArray())
+        use hash = System.Security.Cryptography.SHA1.Create()
+        "X" + System.BitConverter.ToString(hash.ComputeHash(ms.ToArray())).Replace("-", "")

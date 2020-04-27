@@ -16,4 +16,8 @@ open Prelude.Data.ChartManager
 [<EntryPoint>]
 let main argv =
     Console.BufferHeight <- 32766
+    "Game Time.sm"
+    |> Prelude.Charts.StepMania.loadStepmaniaFile
+    |> fun sm -> sm; Prelude.Charts.StepMania.calculateEtternaHash (List.head sm.Charts).NOTES sm.BPMS
+    |> printfn "%A"
     0

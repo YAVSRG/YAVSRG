@@ -145,7 +145,7 @@ module ChartConversions =
         let mutable lo = 0.0
         let mutable hi = 0.0
 
-        let convert_measure (m : string list) hi lo =
+        let convert_measure (m : string list) lo hi =
             let met = float meter
             let l = List.length m |> float
             let sep = msPerBeat * met / l
@@ -155,7 +155,7 @@ module ChartConversions =
 
             for i in start..(finish-1) do
                 let nr = makeNoteRow 0us 0us ln 0us 0us 0us 0us
-                Array.iteri (fun k c ->
+                Seq.iteri (fun k c ->
                     match c with
                     | '0' -> ()
                     | '1' -> applyToNoteData NoteType.NORMAL (setBit i) nr
@@ -168,20 +168,21 @@ module ChartConversions =
                         ln <- unsetBit i ln
                     | 'M' -> applyToNoteData NoteType.MINE (setBit i) nr
                     | _ -> failwith ("unknown note type " + c.ToString())
-                    ) (m.[i].ToCharArray())
+                    ) m.[i]
                 if isEmptyNoteRow nr then states.Add((offset + float (i - start) * sep),nr)
 
         List.iteri (fun i m -> 
             totalBeats <- totalBeats + float meter
             lo <- 0.0
-            while (List.isEmpty bpms && fst (List.head bpms) < totalBeats) do
+            while (not (List.isEmpty bpms) && fst (List.head bpms) < totalBeats) do
                 hi <- fst (List.head bpms) - totalBeats + float meter
                 convert_measure m lo hi
                 now <- now + msPerBeat * (hi - lo)
+                lo <- hi
                 let (t, b) = List.head bpms in points.Add(t, (meter, 60000.0/b))
                 msPerBeat <- 60000.0/b
                 bpms <- List.tail bpms
-            convert_measure m lo hi
+            convert_measure m lo (float meter)
             now <- now + msPerBeat * (float meter - lo)
             ) measures
         (new TimeData<NoteRow>(states), new TimeData<BPM>(points))
