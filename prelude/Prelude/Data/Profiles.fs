@@ -13,31 +13,6 @@ module Profiles =
 
     type ProfileStats() =
         member val Plays = 0 with get, set
-    
-    type ProfileData = {
-        [<JsonRequired>] UUID: string
-        Stats: ProfileStats option
-        EnabledThemes: List<string>
-        Playstyles: Layout array
-
-        Name: string option
-        ScrollSpeed: float option
-        HitPosition: int option
-        HitLighting: bool option
-        Upscroll: bool option
-        BackgroundDim: float option
-        PerspectiveTilt: float option
-        ScreenCoverUp: float option
-        ScreenCoverDown: float option
-        ScreenCoverFadeLength: int option
-        ColorStyle: ColorConfig option
-        KeymodePreference: int option
-        UseKeymodePreference: bool option
-        NoteSkin: string option
-        ChartSortMode: string option
-        ChartGroupMode: string option
-        ChartColorMode: string option
-    }
 
     type Profile = {
         UUID: string
@@ -94,35 +69,15 @@ module Profiles =
             ChartGroupMode = Setting("Pack")
             ChartColorMode = Setting("Nothing")
         }
-        member this.FromData (pd: ProfileData) =
-            let f (obj: 'T option) (setting: Setting<'T>) =
-                if obj.IsSome then setting.Set(obj.Value)
-            f pd.Name this.Name
-            f pd.NoteSkin this.NoteSkin
-            f pd.ChartSortMode this.ChartSortMode
-            f pd.ChartGroupMode this.ChartGroupMode
-            f pd.ChartColorMode this.ChartColorMode
-            f pd.ColorStyle this.ColorStyle
-            f pd.ScrollSpeed this.ScrollSpeed
-            f pd.HitPosition this.HitPosition
-            f pd.HitLighting this.HitLighting
-            f pd.Upscroll this.Upscroll
-            f pd.ScreenCoverUp this.ScreenCoverUp
-            f pd.ScreenCoverDown this.ScreenCoverDown
-            f pd.ScreenCoverFadeLength this.ScreenCoverFadeLength
-            f pd.PerspectiveTilt this.PerspectiveTilt
-            f pd.BackgroundDim this.BackgroundDim
-            f pd.KeymodePreference this.KeymodePreference
-            f pd.UseKeymodePreference this.UseKeymodePreference
-
-            { this with
-                UUID = pd.UUID; Stats = (Option.defaultValue this.Stats pd.Stats)
-                Playstyles = (if pd.Playstyles <> null then pd.Playstyles else this.Playstyles)
-                EnabledThemes = (if pd.EnabledThemes <> null then pd.EnabledThemes else this.EnabledThemes )}
 
     module Profile =
-        
-        let save (p: Profile) = Path.Combine(getDataPath("Data"), "Profiles", p.UUID + ".json") |> JsonHelper.saveFile p
 
-        let load (path: string) = Profile.Default.FromData(JsonHelper.loadFile path)
+        let profilePath = 
+            let pp = Path.Combine(getDataPath("Data"), "Profiles")
+            Directory.CreateDirectory(pp) |> ignore
+            pp
+        
+        let save (p: Profile) = Path.Combine(profilePath, p.UUID + ".json") |> JsonHelper.saveFile p
+
+        let load (path: string): Profile = JsonHelper.loadFile path
             

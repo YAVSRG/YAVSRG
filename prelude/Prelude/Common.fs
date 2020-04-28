@@ -19,12 +19,14 @@ module Common =
         let mutable value = value
         member this.Set(newValue) = value <- newValue
         member this.Get() = value
+        override this.ToString() = value.ToString()
 
     type NumSetting<'T when 'T : comparison>(value : 'T, min : 'T, max : 'T) =
         inherit Setting<'T>(value)
         member this.Set(newValue) = base.Set(if newValue > max then max elif newValue < min then min else newValue)
         member this.Min = min
         member this.Max = max
+        override this.ToString() = sprintf "%s (%A - %A)" (base.ToString()) min max
 
     type StringSetting(value: string, allowSpecialChar: bool) =
         inherit Setting<string>(value)

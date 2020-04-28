@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Linq
 open Microsoft.FSharp.Reflection
+open System.Reflection
 open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 open Prelude.Common
@@ -105,7 +106,8 @@ module Json =
     type SettingConverter() = 
         inherit JsonConverter()
 
-        override this.CanConvert t = t.IsGenericType && t.GetGenericTypeDefinition().Equals(typedefof<Setting<_>>)
+        override this.CanConvert t =
+            t.IsGenericType && t.GetGenericTypeDefinition().Equals(typedefof<Setting<_>>) || (t.BaseType <> null && this.CanConvert t.BaseType)
 
         override this.WriteJson(writer, value, serializer) =
             serializer.Serialize(writer, value.GetType().GetMethod("Get").Invoke(value, [||]))
@@ -113,13 +115,61 @@ module Json =
         override this.ReadJson(reader, t, existingValue, serializer) =
             let innerType = t.GetGenericArguments().[0]
             let innerValue = serializer.Deserialize(reader, innerType)
-            t.GetConstructor([|innerType|]).Invoke([|innerValue|])
+            if existingValue <> null then
+                t.GetMethod("Set").Invoke(existingValue, [|innerValue|]) |> ignore
+                existingValue
+            else
+                t.GetConstructor([|innerType|]).Invoke([|innerValue|])
+
+    type RecordConverter() = 
+        inherit JsonConverter()
+
+        let sc = SettingConverter()
+        
+        //only suitable for records with a static "Default" member
+        //deserialises record mostly as usual but all missing values are replaced with the values from <RECORDTYPE>.Default
+        override this.CanConvert t = FSharpType.IsRecord t && t.GetProperty("Default") <> null
+
+        override this.WriteJson(writer, value, serializer) =
+            writer.WriteStartObject()
+            let fields = FSharpType.GetRecordFields <| value.GetType()
+            for f in fields do
+                writer.WritePropertyName(f.Name)
+                serializer.Serialize(writer, FSharpValue.GetRecordField(value, f))
+            writer.WriteEndObject()
+
+        override this.ReadJson(reader, t, existingValue, serializer) =
+            let copyAndUpdate r (prop : PropertyInfo) value =
+                (Array.choose
+                    (fun (p: PropertyInfo) -> if p.Name = "Default" then None else Some (if p.Name = prop.Name then value else FSharpValue.GetRecordField(r, p)))
+                    (t.GetProperties()) : obj array)
+                |> fun objs -> FSharpValue.MakeRecord(t, objs)
+            let mutable record = t.GetProperty("Default").GetValue(null)
+            reader.Read() |> ignore
+            while reader.TokenType = JsonToken.PropertyName do
+                let name = reader.Value :?> string
+                reader.Read() |> ignore
+                let prop = t.GetProperty(name)
+                if prop <> null then
+                    let value =
+                        //hack to deserialise settings while keeping their ranges/default values intact when relevant
+                        if sc.CanConvert prop.PropertyType then
+                            sc.ReadJson(reader, prop.PropertyType, FSharpValue.GetRecordField(record, prop), serializer)
+                        else
+                            serializer.Deserialize(reader, prop.PropertyType)
+                    if value <> null then
+                        record <- copyAndUpdate record prop value
+                else
+                    reader.Skip()
+                reader.Read() |> ignore
+            record
 
     let addConverters (settings : JsonSerializerSettings) : JsonSerializerSettings = 
         settings.Converters.Add(SettingConverter())
         settings.Converters.Add(TupleConverter())
         settings.Converters.Add(OptionConverter())
         settings.Converters.Add(UnionConverter())
+        settings.Converters.Add(RecordConverter())
         settings
 
     module JsonHelper = 

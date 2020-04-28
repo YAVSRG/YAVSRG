@@ -1,8 +1,6 @@
 ﻿open System
-open System.Collections.Generic
+open System.IO
 open Prelude.Common
-open Prelude.Json
-open Prelude.Data.ChartManager
 
 (*
     Prelude features required to build Interlude:
@@ -16,8 +14,7 @@ open Prelude.Data.ChartManager
 [<EntryPoint>]
 let main argv =
     Console.BufferHeight <- 32766
-    "Game Time.sm"
-    |> Prelude.Charts.StepMania.loadStepmaniaFile
-    |> fun sm -> sm; Prelude.Charts.StepMania.calculateEtternaHash (List.head sm.Charts).NOTES sm.BPMS
+    Path.Combine(Prelude.Data.Profiles.Profile.profilePath, "profile.json")
+    |> Prelude.Data.Profiles.Profile.load
     |> printfn "%A"
     0
