@@ -212,6 +212,7 @@ module Interlude =
         Overall Interlude chart storage format
     *)
 
+    //todo: remove these default value tags
     type ChartHeader =
         { [<DefaultValue("Untitled Chart")>] Title: string
           [<DefaultValue("")>] Artist: string
@@ -221,15 +222,15 @@ module Interlude =
           [<DefaultValue("Unknown")>] SourcePack: string
           [<DefaultValue("")>] BGFile: string
           [<DefaultValue("audio.mp3")>] AudioFile: string }
-        static member Default = 
-            { Title = "Untitled Chart"
-              Artist = ""
-              Creator = ""
-              DiffName = ""
-              PreviewTime = 0.0
-              SourcePack = "Unknown"
-              BGFile = ""
-              AudioFile = "audio.mp3" }
+        static member Default = {
+            Title = "Untitled Chart"
+            Artist = ""
+            Creator = ""
+            DiffName = ""
+            PreviewTime = 0.0
+            SourcePack = "Unknown"
+            BGFile = ""
+            AudioFile = "audio.mp3" }
 
     type Chart(keys, header, notes, bpms, sv, path) =
         member this.Keys = keys

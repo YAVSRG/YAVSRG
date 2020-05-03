@@ -80,4 +80,3 @@ module Profiles =
         let save (p: Profile) = Path.Combine(profilePath, p.UUID + ".json") |> JsonHelper.saveFile p
 
         let load (path: string): Profile = JsonHelper.loadFile path
-            

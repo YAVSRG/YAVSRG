@@ -14,7 +14,5 @@ open Prelude.Common
 [<EntryPoint>]
 let main argv =
     Console.BufferHeight <- 32766
-    Path.Combine(Prelude.Data.Profiles.Profile.profilePath, "profile.json")
-    |> Prelude.Data.Profiles.Profile.load
-    |> printfn "%A"
+    Collide.collide()
     0

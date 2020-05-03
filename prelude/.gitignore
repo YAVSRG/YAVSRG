@@ -16,3 +16,5 @@
 /packages/Newtonsoft.Json.12.0.1
 /Prelude/bin/Debug
 /Prelude-Test/bin/Debug
+/Prelude/bin/Release/netcoreapp3.1
+/Prelude-Test/bin/Release/netcoreapp3.1
