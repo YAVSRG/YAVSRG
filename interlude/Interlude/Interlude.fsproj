@@ -10,6 +10,7 @@
     <Compile Include="Audio.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Input.fs" />
+    <Compile Include="Options\Options.fs" />
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Components.fs" />
     <Compile Include="UI\Screens.fs" />

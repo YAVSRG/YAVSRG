@@ -6,6 +6,7 @@ open System.Diagnostics
 open System.IO
 open Prelude.Common
 open Interlude
+open Interlude.Options
 
 [<EntryPoint>]
 let main argv =
@@ -28,6 +29,7 @@ let main argv =
         Logging.Info("Launching Interlude " + Game.version + ", " + DateTime.Now.ToString()) ""
         let game =
             try
+                Options.load()
                 Some (new Game())
             with
             | err -> Logging.Critical "Game failed to launch" (err.ToString()); None
@@ -39,6 +41,7 @@ let main argv =
             | err ->
                 Logging.Critical "Game crashed" (err.ToString())
             game.Exit()
+            Options.save()
             game.Dispose()
         m.ReleaseMutex()
     else
