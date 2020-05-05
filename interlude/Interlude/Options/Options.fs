@@ -23,13 +23,13 @@ type GameConfig = {
     WorkingDirectory: string
     WindowMode: WindowType
     Resolution: WindowResolution
-    FrameLimiter: int
+    FrameLimiter: float
 } with
     static member Default = {
         WorkingDirectory = ""
         WindowMode = WindowType.BORDERLESS
         Resolution = Custom (1024, 768)
-        FrameLimiter = 0
+        FrameLimiter = 0.0
     }
 
 type Hotkeys = {
@@ -84,6 +84,13 @@ module Options =
     let resolutions: (struct (int * int)) array =
         [|(800, 600); (1024, 768); (1280, 800); (1280, 1024); (1366, 768); (1600, 900);
             (1600, 1024); (1680, 1050); (1920, 1080); (2715, 1527)|]
+
+    let getResolution res =
+        match res with
+        | Custom (w, h) -> (true, struct (w, h))
+        | Preset i ->
+            let i = System.Math.Clamp(i, 0, Array.length resolutions - 1)
+            (false, resolutions.[i])
 
     let mutable internal config = GameConfig.Default
     let mutable internal options = GameOptions.Default

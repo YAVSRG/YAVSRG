@@ -2,9 +2,11 @@
 
 open System.Collections.Generic
 
+[<AbstractClass>]
 type Animation() =
-    member this.Complete = false
-    member this.Update(_) = ()
+    abstract member Complete: bool
+    default this.Complete = false
+    abstract member Update: float -> unit
 
 module Animation =
 
@@ -16,28 +18,30 @@ module Animation =
         member this.Target = target
         member this.SetTarget(t) = target <- t
         member this.SetValue(v) = value <- v
-        member this.Update(_) = value <- value * 0.95f + target * 0.05f
+        override this.Update(_) = value <- value * 0.95f + target * 0.05f
     
     //Runs an action and then is complete. Good for use in sequence with AnimationTimer
     type AnimationAction(action) =
         inherit Animation()
         let mutable complete = false
-        member this.Complete = complete
-        member this.Update(_) = action(); complete <- true
+        override this.Complete = complete
+        override this.Update(_) =
+            do action()
+            complete <- true
 
     //Animation ends after given milliseconds
     type AnimationTimer(milliseconds) =
         inherit Animation()
         let mutable elapsed = 0.0
-        member this.Complete = elapsed >= milliseconds
-        member this.Update(elapsedMillis) = elapsed <- elapsed + elapsedMillis
+        override this.Complete = elapsed >= milliseconds
+        override this.Update(elapsedMillis) = elapsed <- elapsed + elapsedMillis
 
     //Animation lasts forever and counts how many of the given time interval have passed
     type AnimationCounter(milliseconds) =
         inherit Animation()
         let mutable elapsed = 0.0
         let mutable loops = 0
-        member this.Update(elapsedMillis) =
+        override this.Update(elapsedMillis) =
             elapsed <- elapsed + elapsedMillis
             while (elapsed >= milliseconds) do
                 elapsed <- elapsed - milliseconds
@@ -50,15 +54,16 @@ module Animation =
         inherit Animation()
         let mutable animations = []
         member this.Add(a: Animation) = animations <- a :: animations
-        member this.Complete = List.forall (fun (a: Animation) -> a.Complete) animations
-        member this.Update(elapsed) = animations <- List.filter (fun (a: Animation) -> a.Update(elapsed); not a.Complete) animations
+        override this.Complete = List.forall (fun (a: Animation) -> a.Complete) animations
+        override this.Update(elapsed) = animations <- List.filter (fun (a: Animation) -> a.Update(elapsed); not a.Complete) animations
         
     //Sequence of animations run one by one
     type AnimationSequence() =
         inherit Animation()
         let animations: Queue<Animation> = new Queue<Animation>()
-        member this.Complete = animations.Count = 0
-        member this.Update(elapsed) =
+        member this.Add(a: Animation) = animations.Enqueue(a)
+        override this.Complete = animations.Count = 0
+        override this.Update(elapsed) =
             if animations.Count > 0 then
                 let a = animations.Peek()
                 a.Update(elapsed)

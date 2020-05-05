@@ -30,7 +30,7 @@ let main argv =
         let game =
             try
                 Options.load()
-                Some (new Game())
+                Some (new Game(Options.config))
             with
             | err -> Logging.Critical "Game failed to launch" (err.ToString()); None
         if (game.IsSome) then

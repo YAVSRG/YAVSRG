@@ -32,16 +32,19 @@ type Widget() =
     let mutable state = (WidgetState.Uninitialised ||| WidgetState.Normal)
     let children = new List<Widget>()
 
-    member this.Add(c) =
+    abstract member Add: Widget -> unit
+    default this.Add(c) =
         children.Add(c)
         c.AddTo(this)
 
-    member private this.AddTo(c) =
+    abstract member AddTo: Widget -> unit
+    default this.AddTo(c) =
         match parent with
         | None -> parent <- Some c
         | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one") ""
-
-    member this.Remove(c) =
+        
+    abstract member Remove: Widget -> unit
+    default this.Remove(c) =
         if children.Remove(c) then
             c.RemoveFrom(this)
         else Logging.Error("Tried to remove widget that was not in this container") ""
@@ -56,15 +59,22 @@ type Widget() =
     member this.Position = (left, top, right, bottom)
     member this.State with get() = state and set(value) = state <- value
 
-    member this.Draw() =
-        children |> Seq.iter (fun w -> w.Draw())
+    abstract member Draw: unit -> unit
+    default this.Draw() =
+        children
+        |> Seq.filter (fun w -> w.State < WidgetState.Disabled)
+        |> Seq.iter (fun w -> w.Draw())
 
-    member this.Update(elapsedTime, (l, t, r, b): Rect) =
+    abstract member Update: float * Rect -> unit
+    default this.Update(elapsedTime, (l, t, r, b): Rect) =
         animation.Update(elapsedTime)
         this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
         bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-        //todo: update in reverse order so that widgets drawn further in front grab input first
-        children |> Seq.iter (fun w -> w.Update(elapsedTime, bounds))
+        seq {
+            for i in children.Count - 1 .. -1 .. 0 do
+                if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then yield children.[i]
+        }
+        |> Seq.iter (fun w -> w.Update(elapsedTime, bounds))
 
     member this.Reposition(l, la, t, ta, r, ra, b, ba) =
         left.Reposition(l, la)
@@ -91,10 +101,10 @@ module Components =
     
     type FilledRect(c) =
         inherit Widget()
-        member this.Draw() = Draw.rect base.Bounds c Sprite.Default
+        override this.Draw() = Draw.rect base.Bounds c Sprite.Default
 
     type TextBox(textFunc, size, color) =
         inherit Widget()
-        member this.Draw() = 
+        override this.Draw() = 
             let struct (l, t, _, _) = base.Bounds
             Font.draw(Font.defaultFont, textFunc(), size, l, t, color)

@@ -185,17 +185,17 @@ module Font =
 
     let draw(font: SpriteFont, text, scale, x, y, color) =
         let mutable x = x
-        let scale = scale / fontscale
+        let scale2 = scale / fontscale
         text
         |> Seq.iter
             (function
              | ' ' -> x <- x + spacing * scale
              | c -> 
                 let s = font.Char(c)
-                let w = float32 s.Width * scale
-                let h = float32 s.Height * scale
+                let w = float32 s.Width * scale2
+                let h = float32 s.Height * scale2
                 Draw.rect(Rect.create x y (x + w) (y + h)) color s
-                x <- x + w - 0.5f * scale * fontscale)
+                x <- x + w - 0.5f * scale)
 
     let defaultFont = SpriteFont(new Font("Akrobat Black", fontscale))
 
