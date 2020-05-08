@@ -17,7 +17,6 @@ module Profiles =
     type Profile = {
         UUID: string
         Stats: ProfileStats
-        EnabledThemes: List<string>
         Name: Setting<string>
         ScrollSpeed: Setting<float>
         HitPosition: Setting<int>
@@ -33,8 +32,9 @@ module Profiles =
         UseKeymodePreference: Setting<bool>
         NoteSkin: Setting<string>
 
+        SelectedHPSystem: Setting<int>
+        SelectedAccSystem: Setting<int>
         //pacemaker, score saving, fail behaviour
-        //choice of score system, hp system
 
         ChartSortMode: Setting<string>
         ChartGroupMode: Setting<string>
@@ -46,7 +46,6 @@ module Profiles =
         static member Default = {
             UUID = Guid.NewGuid().ToString()
             Stats = ProfileStats()
-            EnabledThemes = new List<string>()
 
             Name = StringSetting("Default Profile", false)
 
@@ -60,6 +59,8 @@ module Profiles =
             PerspectiveTilt = NumSetting(0.0, -1.0, 1.0)
             BackgroundDim = NumSetting(0.5, 0.0, 1.0)
             NoteSkin = Setting("default")
+            SelectedHPSystem = Setting(0)
+            SelectedAccSystem = Setting(0)
             ColorStyle = Setting(ColorConfig.Default)
             KeymodePreference = NumSetting(4, 3, 10)
             UseKeymodePreference = Setting(false)
