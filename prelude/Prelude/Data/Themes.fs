@@ -37,8 +37,6 @@ module Themes =
     }
 
     type Theme(storage) =
-        new(path: string) = Theme(Folder path)
-        new(zip: ZipArchive) = Theme(Zip zip)
 
         member this.GetFile([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
