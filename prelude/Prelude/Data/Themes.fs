@@ -69,11 +69,34 @@ module Themes =
             match storage with
             | Zip z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open()
             | Folder f -> File.OpenRead(Path.Combine(f, p)) :> Stream
+
+        member this.GetFiles([<ParamArray>] path: string array) =
+            let p = Path.Combine(path)
+            match storage with
+            | Zip z ->
+                let p = p.Replace(Path.DirectorySeparatorChar, '/')
+                seq {
+                    for e in z.Entries do
+                        if e.FullName = p + "/" + e.Name && Path.HasExtension(e.Name) then yield e.FullName
+                }
+            | Folder f -> Directory.EnumerateFiles(p)
+
+        member this.GetFolders([<ParamArray>] path: string array) =
+            let p = Path.Combine(path)
+            match storage with
+            | Zip z ->
+                let p = p.Replace(Path.DirectorySeparatorChar, '/')
+                seq {
+                    for e in z.Entries do
+                        if e.FullName = p + "/" + e.Name && not <| Path.HasExtension(e.Name) then yield e.FullName
+                }
+            | Folder f -> Directory.EnumerateDirectories(p)
         
         member this.GetJson([<ParamArray>] path: string array) =
             use stream = this.GetFile(path)
             use tr = new StreamReader(stream)
             tr.ReadToEnd() |> JsonHelper.load
+
 
         member this.CopyTo(targetPath) =
             if Directory.Exists(targetPath) then
