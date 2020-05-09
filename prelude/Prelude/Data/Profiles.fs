@@ -41,8 +41,7 @@ module Profiles =
         ChartColorMode: Setting<string>
 
         Playstyles: Layout array
-    }
-    with
+    } with
         static member Default = {
             UUID = Guid.NewGuid().ToString()
             Stats = ProfileStats()
