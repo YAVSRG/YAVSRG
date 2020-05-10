@@ -51,11 +51,11 @@ module Themes =
 
     let private noteskinTextures = [|"note"; "receptor"; "mine"; "holdhead"; "holdbody"; "holdtail"|]
 
-    let defaultTheme = Theme.FromZipStream <| Interlude.Utils.getResourceStream("default.zip")
+    let private defaultTheme = Theme.FromZipStream <| Interlude.Utils.getResourceStream("default.zip")
+    let private loadedNoteskins = new Dictionary<string, NoteSkinConfig * int>()
+    let private loadedThemes = new List<Theme>()
     let mutable themeConfig = ThemeConfig.Default
-    let mutable loadedThemes = []
     let mutable currentNoteSkin = "default"
-    let loadedNoteskins = new Dictionary<string, NoteSkinConfig * int>()
 
     let availableThemes =
         let l = new List<string>()
@@ -65,10 +65,22 @@ module Themes =
 
     let private sprites = new Dictionary<string, Sprite>()
     let private sounds = "nyi"
+    
+    //reminder that id is the folder name of the noteskin, NOT the name given in the noteskin metadata
+    let changeNoteSkin(id: string) =
+        let id = if loadedNoteskins.ContainsKey(id) then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default") ""; "default"
+        currentNoteSkin <- id
+        Array.iter
+            (fun t -> 
+                if sprites.ContainsKey(t) then
+                    Sprite.destroy sprites.[t]
+                    sprites.Remove(t) |> ignore
+            ) noteskinTextures
 
     let loadThemes(themes: List<string>) =
-        loadedThemes <- [defaultTheme]
         loadedNoteskins.Clear()
+        loadedThemes.Clear()
+        loadedThemes.Add(defaultTheme)
         Seq.choose (fun t ->
             let theme = Theme.FromThemeFolder(t)
             try
@@ -77,37 +89,40 @@ module Themes =
             with
             | err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
             themes
-        |> Seq.iteri(fun i (t, conf) ->
+        |> Seq.iter (fun (t, conf) -> loadedThemes.Add(t); themeConfig <- conf)
+
+        loadedThemes
+        |> Seq.iteri(fun i t ->
             //this is where we load other stuff like scripting in future
             t.GetNoteSkins()
             |> Seq.iter (fun (ns, c) ->
                 loadedNoteskins.Remove(ns) |> ignore //overwrites existing skin with same name
-                loadedNoteskins.Add(ns, (c, i)))
-            themeConfig <- conf
-            loadedThemes <- t :: loadedThemes)
+                loadedNoteskins.Add(ns, (c, i))
+                Logging.Debug(sprintf "Loaded noteskin %s" ns) ""))
         Seq.iter Sprite.destroy sprites.Values
         sprites.Clear()
+        changeNoteSkin(currentNoteSkin)
+        Logging.Debug(sprintf "Loaded %i themes (%i available)" <| loadedThemes.Count - 1 <| availableThemes.Count) ""
 
-    let rec private getInherited f themes =
-        match themes with
-        | x :: xs ->
-            match f x with
+    let private getInherited f =
+        let rec g i =
+            if i < 0 then failwith "f should give some value for default theme"
+            match f loadedThemes.[i] with
             | Some v -> v
-            | None -> getInherited f <| List.tail themes
-        | [] -> failwith "f should give some value for default theme"
+            | None -> g (i - 1)
+        g (loadedThemes.Count - 1)
 
     let getTexture(name: string) =
         if not <| sprites.ContainsKey(name) then
             let (bmp, config) =
                 if Array.contains name noteskinTextures then
                     let (ns, i) = loadedNoteskins.[currentNoteSkin]
-                    loadedThemes.[List.length loadedThemes - 1 - i].GetTexture(Some currentNoteSkin, name)
+                    loadedThemes.[i].GetTexture(Some currentNoteSkin, name)
                 else
                     getInherited (fun (t: Theme) ->
                         try
                             Some <| t.GetTexture(None, name)
                         with
                         | err -> Logging.Error("Failed to load texture '" + name + "'") (err.ToString()); None)
-                        loadedThemes
             sprites.Add(name, Sprite.upload(bmp, config.Rows, config.Columns, false))
         sprites.[name]

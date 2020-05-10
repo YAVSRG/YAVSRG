@@ -57,22 +57,22 @@ type Hotkeys = {
     }
 
 type GameOptions = {
-    AudioOffset: float
-    AudioVolume: float
-    CurrentProfile: string
-    CurrentChart: string
-    CurrentOptionsTab: string
+    AudioOffset: NumSetting<float>
+    AudioVolume: NumSetting<float>
+    CurrentProfile: Setting<string>
+    CurrentChart: Setting<string>
+    CurrentOptionsTab: Setting<string>
     EnabledThemes: List<string>
     AccuracySystems: List<AccuracySystemConfig>
     HPSystems: List<HPSystemConfig>
     Hotkeys: Hotkeys
 } with
     static member Default = {
-        AudioOffset = 0.0
-        AudioVolume = 0.1
-        CurrentProfile = ""
-        CurrentChart = ""
-        CurrentOptionsTab = "General"
+        AudioOffset = NumSetting(0.0, -500.0, 500.0)
+        AudioVolume = NumSetting(0.1, 0.0, 1.0)
+        CurrentProfile = Setting("")
+        CurrentChart = Setting("")
+        CurrentOptionsTab = Setting("General")
         EnabledThemes = new List<string>()
         AccuracySystems = new List<AccuracySystemConfig>()
         HPSystems = new List<HPSystemConfig>()
@@ -93,6 +93,7 @@ module Options =
 
     let mutable internal config = GameConfig.Default
     let mutable internal options = GameOptions.Default
+    let mutable internal profile = Profile.Default
     let internal configPath = Path.GetFullPath("config.json")
     let profiles = new List<Profile>()
 
@@ -123,14 +124,29 @@ module Options =
 
         for pf in Directory.EnumerateFiles(Profile.profilePath) do
             try
-                profiles.Add(Profile.load pf)
+                let data = Profile.load pf
+                Profile.save data
+                profiles.Add(data)
+                if data.UUID = options.CurrentProfile.Get() then profile <- data
             with
             | err -> Logging.Error("Failed to load profile: " + Path.GetFileName(pf)) (err.ToString())
-        //select current profile here
+        options.CurrentProfile.Set(profile.UUID)
+        Themes.loadThemes(options.EnabledThemes)
+        Themes.changeNoteSkin(profile.NoteSkin.Get())
+        Logging.Debug(sprintf "Current profile: %s (%s)" (profile.Name.Get()) profile.UUID) ""
+
+    let changeProfile(uuid: string) =
+        Profile.save profile
+        match Seq.tryFind (fun p -> p.UUID = uuid) profiles with
+        | Some p ->
+            options.CurrentProfile.Set(p.UUID)
+            profile <- p
+        | None -> Logging.Error("No profile with UUID '" + uuid + "' exists") ""
 
     let save() =
         try
             JsonHelper.saveFile config configPath
             JsonHelper.saveFile options <| Path.Combine(getDataPath("Data"), "options.json")
+            Profile.save profile
         with
         | err -> Logging.Critical("Failed to write options/config to file.") (err.ToString())
