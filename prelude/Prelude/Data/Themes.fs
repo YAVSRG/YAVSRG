@@ -89,6 +89,7 @@ module Themes =
                     for e in z.Entries do
                         if
                             (e.Name = ""
+                            && e.FullName.Length > p.Length
                             && e.FullName =
                                 let s = (e.FullName.Substring(p.Length + 1)) in
                                 p + "/" + s.Split('/').[0] + "/")
