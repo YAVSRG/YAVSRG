@@ -26,7 +26,7 @@ let main argv =
                 if details = "" then sprintf "[%A] %s" level main else sprintf "[%A] %s\n%s" level main details
                 |> sw.WriteLine))
 
-        Logging.Info("Launching Interlude " + Game.version + ", " + DateTime.Now.ToString()) ""
+        Logging.Info("Launching " + Utils.version + ", " + DateTime.Now.ToString()) ""
         let game =
             try
                 Options.load()

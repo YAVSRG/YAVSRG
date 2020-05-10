@@ -6,10 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
     <Compile Include="Audio.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Input.fs" />
+    <Compile Include="Options\Themes.fs" />
     <Compile Include="Options\Options.fs" />
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Components.fs" />
@@ -30,5 +32,7 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.7.1" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>

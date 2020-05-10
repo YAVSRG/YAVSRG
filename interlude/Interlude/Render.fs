@@ -183,7 +183,7 @@ module Font =
     let measure(font: SpriteFont, text: string): float32 =
         text |> Seq.fold (fun v c -> v + (c |> function | ' ' -> spacing | c -> -0.5f + float32 (font.Char(c).Width) / fontscale)) 0.5f
 
-    let draw(font: SpriteFont, text, scale, x, y, color) =
+    let draw(font: SpriteFont, text: string, scale, x, y, color) =
         let mutable x = x
         let scale2 = scale / fontscale
         text

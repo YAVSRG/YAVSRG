@@ -3,6 +3,7 @@
 open OpenTK
 open Interlude.Render
 open Interlude.UI.Animation
+open Interlude.Utils
 
 type Screen() =
     inherit Widget()
@@ -45,11 +46,29 @@ type ScreenLoading() =
 type Toolbar() as this =
     inherit Widget()
 
+    static let height = 60.f
+
     let barSlider = new AnimationFade(0.0f)
     let notifSlider = new AnimationFade(0.0f)
     
     do
-        this.Animation.Add(AnimationFade(0.0f))
+        this.Animation.Add(barSlider)
+        this.Animation.Add(notifSlider)
+        let tb = new Components.TextBox(K version, 25.f, Color.White)
+        tb.Reposition(-200.f, 1.f, 0.f, 1.f, 0.f, 1.f, height, 1.f)
+        this.Add(tb)
+
+    override this.Draw() = 
+        let struct (l, t, r, b) = this.Bounds
+        Draw.rect(Rect.create l (t - height) r t) Color.Gray Sprite.Default
+        Draw.rect(Rect.create l b r (b + height)) Color.Gray Sprite.Default
+        base.Draw()
+
+    override this.Update(elapsed, bounds) =
+        if Interlude.Options.Options.options.Hotkeys.Screenshot.Get().Tapped(false) then
+            barSlider.SetTarget(1.0f - barSlider.Target)
+        base.Update(elapsed, Rect.expand (0.f, -height * barSlider.Value) bounds)
+        //
         
 
 type ScreenContainer() as this =
@@ -65,6 +84,7 @@ type ScreenContainer() as this =
         Screens.addScreen <- this.AddScreen
         Screens.popScreen <- this.RemoveScreen
         current.OnEnter(current)
+        this.Add(new Toolbar())
 
     member this.Exit = exit
 
@@ -86,7 +106,9 @@ type ScreenContainer() as this =
             current <- s
 
     override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
         current.Update(elapsedTime, bounds)
 
     override this.Draw() =
         current.Draw()
+        base.Draw()

@@ -9,16 +9,13 @@ open Interlude.Input
 open Interlude.Options
 open Interlude.UI
 
-module Game = 
-    let version = "v0.4.0"
-
 type Game(config: GameConfig) =
     inherit GameWindow(300, 300, new GraphicsMode(ColorFormat(32), 24, 8, 0))
 
     let screens = new ScreenContainer()
 
     do
-        base.Title <- "Interlude " + Game.version
+        base.Title <- Utils.version
         base.VSync <- VSyncMode.Off
         //base.Cursor <- new MouseCursor.Empty
 
@@ -52,8 +49,8 @@ type Game(config: GameConfig) =
 
     override this.OnUpdateFrame (e) =
         base.OnUpdateFrame (e)
-        Input.update()
         screens.Update(e.Time * 1000.0, Rect.create 0.0f 0.0f (float32 base.Width) (float32 base.Height))
+        Input.update()
         if screens.Exit then base.Exit()
     
     override this.OnLoad (e) =

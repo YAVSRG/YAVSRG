@@ -6,7 +6,6 @@ open OpenTK.Input
 open Prelude.Common
 open Prelude.Json
 open Prelude.Data.Profiles
-open Prelude.Data.Themes
 open Prelude.Gameplay.Score
 open Interlude.Input
 
