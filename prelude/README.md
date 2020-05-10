@@ -17,11 +17,11 @@ I am currently in the middle of rewriting most/all of the YAVSRG project in F# s
 - Chart modifiers, note color schemes and difficulty calculation
 - Score processing with HP, accuracy and difficulty performance metrics
 - Chart caching and management of a songs folder
+- Management of data like settings, scores and themes
 - Background task management, mostly for batch converting packs to Interlude
 
 ## Future Features
 - A wiki full of examples on how to use Prelude to perform tasks such as editing an osu file or calculating Wife% for a score
 - Support for more chart file formats
 - Interlude -> Stepmania conversion and writing
-- Management of data like settings, scores and themes
 - Web tools/communication with score servers
