@@ -7,7 +7,6 @@ open System.Drawing
 open Prelude.Json
 open Prelude.Common
 
-
 module Themes =
     
     type StorageType = Zip of ZipArchive | Folder of string
@@ -88,7 +87,12 @@ module Themes =
                 let p = p.Replace(Path.DirectorySeparatorChar, '/')
                 seq {
                     for e in z.Entries do
-                        if e.FullName = p + "/" + e.Name + "/" then yield e.Name
+                        if
+                            (e.Name = ""
+                            && e.FullName =
+                                let s = (e.FullName.Substring(p.Length + 1)) in
+                                p + "/" + s.Split('/').[0] + "/")
+                            then yield e.Name
                 }
             | Folder f -> Directory.EnumerateDirectories(p)
         
