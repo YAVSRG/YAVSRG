@@ -87,13 +87,9 @@ module Themes =
                 let p = p.Replace(Path.DirectorySeparatorChar, '/')
                 seq {
                     for e in z.Entries do
-                        if
-                            (e.Name = ""
-                            && e.FullName.Length > p.Length
-                            && e.FullName =
-                                let s = (e.FullName.Substring(p.Length + 1)) in
-                                p + "/" + s.Split('/').[0] + "/")
-                            then yield e.Name
+                        if (e.Name = "" && e.FullName.Length > p.Length) then
+                            let s = (e.FullName.Substring(p.Length + 1)).Split('/')
+                            if e.FullName = p + "/" + s.[0] + "/" then yield s.[0]
                 }
             | Folder f -> Directory.EnumerateDirectories(p)
         
