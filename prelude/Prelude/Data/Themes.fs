@@ -95,8 +95,11 @@ module Themes =
         member this.GetJson([<ParamArray>] path: string array) =
             use stream = this.GetFile(path)
             use tr = new StreamReader(stream)
-            tr.ReadToEnd() |> JsonHelper.load
-
+            let json = tr.ReadToEnd() |> JsonHelper.load
+            match storage with
+            | Zip _ -> () //do not write data to zip archives
+            | Folder f -> JsonHelper.saveFile json (Path.Combine(f, Path.Combine(path)))
+            json
 
         member this.CopyTo(targetPath) =
             if Directory.Exists(targetPath) then
