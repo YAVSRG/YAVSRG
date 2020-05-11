@@ -74,13 +74,13 @@ module ScoreManager =
     type ScoresDB() =
         let data = ScoresDB.Load
 
-        member this.Save =  JsonHelper.saveFile data (Path.Combine(getDataPath("Data"), "Scores.json"))
+        member this.Save() = JsonHelper.saveFile data (Path.Combine(getDataPath("Data"), "scores.json"))
 
         static member Load =
             try
-                JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "Scores.json"))
+                JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "scores.json"))
             with
-            | :? FileNotFoundException -> new Dictionary<string, ChartSaveData>()
+            | :? FileNotFoundException -> Logging.Info("No scores database found, creating one.") ""; new Dictionary<string, ChartSaveData>()
             | err -> Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
 
         member this.GetScoreData (chart: Chart) =

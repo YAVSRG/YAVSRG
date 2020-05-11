@@ -72,14 +72,18 @@ module ChartManager =
 
         let charts, collections = Cache.Load
 
-        member this.Save = JsonHelper.saveFile (charts, collections) (Path.Combine(getDataPath("Data"), "Cache.json"))
+        member this.Save() = JsonHelper.saveFile (charts, collections) (Path.Combine(getDataPath("Data"), "cache.json"))
 
         static member Load =
             try
-                JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "Cache.json"))
+                JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "cache.json"))
             with
-            | :? FileNotFoundException -> (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
-            | err -> Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString()); (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
+            | :? FileNotFoundException ->
+                Logging.Info("No chart cache found, creating one.") ""
+                (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
+            | err ->
+                Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString())
+                (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
     
         member this.CacheChart (c: Chart) = lock(this) (fun () -> charts.[c.FileIdentifier] <- cacheChart c)
 
@@ -139,7 +143,7 @@ module ChartManager =
                                     | None -> ()
                                 ))
                             | _ -> ()
-                this.Save
+                this.Save()
                 output("Saved cache.")
                 true
             )
