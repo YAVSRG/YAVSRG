@@ -238,7 +238,9 @@ module Interlude =
         member this.BPM: TimeData<int * float> = bpms
         member this.Header: ChartHeader = header
         member this.SV: MultiTimeData<float> = sv
-        member this.FileIdentifier = path
+        member this.FileIdentifier: string = path
+        member this.BGPath = Path.Combine(Path.GetDirectoryName(path), header.BGFile)
+        member this.AudioPath = Path.Combine(Path.GetDirectoryName(path), header.AudioFile)
 
         new() = Chart(4, ChartHeader.Default, TimeData(), TimeData(), MultiTimeData(4), "unknown.yav")
 
