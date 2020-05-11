@@ -19,6 +19,8 @@ module Screens =
     let mutable internal popScreen: unit -> unit = ignore
     //add dialog
 
+// Menu screen
+
 type ScreenMenu() =
     inherit Screen()
 
@@ -26,6 +28,8 @@ type ScreenMenu() =
         let (x, y) = Rect.center this.Bounds
         Font.drawJust(Font.defaultFont, Audio.timeWithOffset().ToString(), 50.f, x, y, Color.White, 0.5f)
         //Draw.rect (Rect.expand (-400.0f, -400.0f) this.Bounds) Color.White <| Themes.getTexture("note")
+
+// Loading screen
 
 type ScreenLoading() =
     inherit Screen()
@@ -49,6 +53,8 @@ type ScreenLoading() =
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
         Font.drawJust(Font.defaultFont, (if closing then "Bye o/" else "Loading :)"), 80.f, x, y, Color.White, 0.5f)
+
+// Toolbar
 
 type Toolbar() as this =
     inherit Widget()
@@ -78,7 +84,8 @@ type Toolbar() as this =
             Screens.popScreen()
         base.Update(elapsed, Rect.expand (0.f, -height * barSlider.Value) bounds)
         //
-        
+
+//Screen manager
 
 type ScreenContainer() as this =
     inherit Widget()
