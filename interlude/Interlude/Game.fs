@@ -14,6 +14,9 @@ type Game(config: GameConfig) =
 
     let screens = new ScreenContainer()
 
+    [<DefaultValue>]
+    val mutable virtualRes: float * float
+
     do
         base.Title <- Utils.version
         base.VSync <- VSyncMode.Off
@@ -38,7 +41,7 @@ type Game(config: GameConfig) =
     override this.OnResize (e) =
         base.OnResize (e)
         GL.Viewport(base.ClientRectangle)
-        Render.resize(float base.Width, float base.Height)
+        Render.resize(float32 base.Width, float32 base.Height)
 
     override this.OnRenderFrame (e) =
         base.OnRenderFrame (e)
@@ -49,15 +52,18 @@ type Game(config: GameConfig) =
 
     override this.OnUpdateFrame (e) =
         base.OnUpdateFrame (e)
-        screens.Update(e.Time * 1000.0, Rect.create 0.0f 0.0f (float32 base.Width) (float32 base.Height))
+        screens.Update(e.Time * 1000.0, Render.bounds)
+        Audio.update()
         Input.update()
         if screens.Exit then base.Exit()
     
     override this.OnLoad (e) =
         base.OnLoad(e)
         this.ApplyConfig(config)
-        Render.init(float base.Width, float base.Height)
+        Render.init(float32 base.Width, float32 base.Height)
         Input.init(this)
+        Gameplay.init()
 
     override this.OnUnload (e) =
+        Gameplay.save()
         base.OnUnload(e)

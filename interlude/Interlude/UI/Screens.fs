@@ -1,9 +1,11 @@
 ﻿namespace Interlude.UI
 
 open OpenTK
+open Interlude
 open Interlude.Render
 open Interlude.UI.Animation
 open Interlude.Utils
+open Interlude.Options
 
 type Screen() =
     inherit Widget()
@@ -22,26 +24,31 @@ type ScreenMenu() =
 
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
-        Font.drawJust(Font.defaultFont, "menu screen", 50.f, x, y, Color.White, 0.5f)
+        Font.drawJust(Font.defaultFont, Audio.timeWithOffset().ToString(), 50.f, x, y, Color.White, 0.5f)
+        //Draw.rect (Rect.expand (-400.0f, -400.0f) this.Bounds) Color.White <| Themes.getTexture("note")
 
 type ScreenLoading() =
     inherit Screen()
+
+    let mutable closing = false
+
     override this.OnEnter(prev: Screen) =
         match prev with
         | :? ScreenMenu ->
+            closing <- true
             let s = AnimationSequence()
-            s.Add(AnimationTimer(2000.0))
+            s.Add(AnimationTimer(1500.0))
             s.Add(AnimationAction(fun () -> Screens.popScreen()))
             this.Animation.Add(s)
         | _ -> 
             let s = AnimationSequence()
-            s.Add(AnimationTimer(2000.0))
+            s.Add(AnimationTimer(1500.0))
             s.Add(AnimationAction(fun () -> Screens.addScreen (new ScreenMenu())))
             this.Animation.Add(s)
         
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
-        Font.drawJust(Font.defaultFont, "Loading :)", 80.f, x, y, Color.White, 0.5f)
+        Font.drawJust(Font.defaultFont, (if closing then "Bye o/" else "Loading :)"), 80.f, x, y, Color.White, 0.5f)
 
 type Toolbar() as this =
     inherit Widget()
@@ -67,6 +74,8 @@ type Toolbar() as this =
     override this.Update(elapsed, bounds) =
         if Interlude.Options.Options.options.Hotkeys.Screenshot.Get().Tapped(false) then
             barSlider.SetTarget(1.0f - barSlider.Target)
+        if Interlude.Options.Options.options.Hotkeys.Exit.Get().Tapped(true) then
+            Screens.popScreen()
         base.Update(elapsed, Rect.expand (0.f, -height * barSlider.Value) bounds)
         //
         

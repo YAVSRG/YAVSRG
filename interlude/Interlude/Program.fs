@@ -29,6 +29,7 @@ let main argv =
         Logging.Info("Launching " + Utils.version + ", " + DateTime.Now.ToString()) ""
         let game =
             try
+                Audio.init()
                 Options.load()
                 Some (new Game(Options.config))
             with

@@ -5,12 +5,18 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>true</Optimize>
+    <Tailcalls>false</Tailcalls>
+  </PropertyGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
     <Compile Include="Audio.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Input.fs" />
+    <Compile Include="Gameplay.fs" />
     <Compile Include="Options\Themes.fs" />
     <Compile Include="Options\Options.fs" />
     <Compile Include="UI\Animation.fs" />
@@ -22,6 +28,7 @@
 
   <ItemGroup>
     <PackageReference Include="ManagedBass" Version="3.0.0" />
+    <PackageReference Include="ManagedBass.Fx" Version="3.0.0" />
     <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.12" />
   </ItemGroup>
 
@@ -32,7 +39,5 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="4.7.1" />
   </ItemGroup>
-
-  <ItemGroup />
 
 </Project>

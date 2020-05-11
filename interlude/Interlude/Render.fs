@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Render
 
+open System
 open OpenTK
 open OpenTK.Graphics.OpenGL
 open System.Collections.Generic
@@ -107,13 +108,25 @@ module Sprite =
 
 module Render =
 
+    let mutable (vwidth, vheight) = (1.0f, 1.0f)
+    let mutable bounds = Rect.zero
+
     let resize(width, height) =
         GL.MatrixMode(MatrixMode.Projection)
         GL.LoadIdentity()
-        GL.Ortho(0.0, width, height, 0.0, 0.0, 1.0)
+        
+        let (width, height) =
+            if (width < 1920.0f || height < 1000.0f) then
+                let r = Math.Max(1920.0f / width, 1000.0f / height);
+                (width * r, height * r)
+            else (width, height)
+        vwidth <- width
+        vheight <- height
+        GL.Ortho(0.0, float vwidth, float vheight, 0.0, 0.0, 1.0)
+        bounds <- Rect.create 0.f 0.f vwidth vheight
 
     let start() = 
-        GL.ClearColor(Color.Black)
+        GL.Clear(ClearBufferMask.ColorBufferBit)
 
     let finish() =
         GL.Finish()
@@ -122,6 +135,7 @@ module Render =
     let init(width, height) =
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
+        GL.ClearColor(Color.Black)
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
         resize(width, height)
