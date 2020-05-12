@@ -7,6 +7,7 @@ open Prelude.Common
 open Prelude.Json
 open Prelude.Data.Profiles
 open Prelude.Gameplay.Score
+open Interlude
 open Interlude.Input
 
 type WindowType =

@@ -3,6 +3,7 @@
 open System
 open System.Collections.Generic
 open Prelude.Common
+open Interlude
 open Interlude.Render
 open Interlude.UI.Animation
 
@@ -107,4 +108,4 @@ module Components =
         inherit Widget()
         override this.Draw() = 
             let struct (l, t, _, _) = base.Bounds
-            Font.draw(Font.defaultFont, textFunc(), size, l, t, color)
+            Text.draw(Themes.font(), textFunc(), size, l, t, color)

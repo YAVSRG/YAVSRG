@@ -32,14 +32,14 @@ module Gameplay =
             let (m, r) = getModChart selectedMods c
             modifiedChart <- m
             replayData <- r
-        //force modchart, make lazy coloring
-        //run diff calc on uncolored modchart
+        //todo: force modchart, make lazy coloring
+        //todo: run diff calc on uncolored modchart
 
     let changeChart(cachedChart, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetScoreData(chart)
-        //load bg
+        Themes.loadBackground(chart.BGPath)
         let localOffset = if chart.Notes.IsEmpty then 0.0 else chartSaveData.Value.Offset.Get() - (offsetOf chart.Notes.First)
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
 

@@ -61,6 +61,7 @@ type Game(config: GameConfig) =
         base.OnLoad(e)
         this.ApplyConfig(config)
         Render.init(float32 base.Width, float32 base.Height)
+        Themes.font() |> ignore
         Input.init(this)
         Gameplay.init()
 

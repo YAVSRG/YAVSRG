@@ -140,9 +140,9 @@ module Render =
         GL.ClearStencil(0x00)
         resize(width, height)
         
-        //font management here maybe
+        //possible todo: font management here
 
-        //fbo storage here too
+        //todo: fbo storage here too
 
 (*
     Drawing methods to be used by UI components
@@ -165,15 +165,16 @@ module Draw =
     Font rendering
 *)
 
-module Font =
+module Text =
     
     open System.Drawing
     open System.Drawing.Text
 
-    let fontscale = 100.f
-    let spacing = 0.25f
-    let shadow = 0.1f
+    let private fontscale = 100.f
+    let private spacing = 0.25f
+    let private shadow = 0.1f
 
+    [<AllowNullLiteral>]
     type SpriteFont(font: Font) =
         let fontLookup = new Dictionary<char, Sprite>()
         let genChar(c: char) =
@@ -193,6 +194,10 @@ module Font =
         member this.Char(c) =
             if not <| fontLookup.ContainsKey(c) then genChar(c)
             fontLookup.[c]
+        //idk why i cant call dispose manually when this implements IDisposable
+        member this.Dispose() =
+            fontLookup.Values
+            |> Seq.iter Sprite.destroy
 
     let measure(font: SpriteFont, text: string): float32 =
         text |> Seq.fold (fun v c -> v + (c |> function | ' ' -> spacing | c -> -0.5f + float32 (font.Char(c).Width) / fontscale)) 0.5f
@@ -211,6 +216,20 @@ module Font =
                 Draw.rect(Rect.create x y (x + w) (y + h)) color s
                 x <- x + w - 0.5f * scale)
 
-    let defaultFont = SpriteFont(new Font("Akrobat Black", fontscale))
-
     let drawJust(font: SpriteFont, text, scale, x, y, color, just: float32) = draw(font, text, scale, x - measure(font, text) * scale * just, y, color)
+
+    let createFont (str: string) =
+        let f =
+            if str.Contains('.') then
+                //targeting a specific file
+                try
+                    use pfc = new PrivateFontCollection()
+                    pfc.AddFontFile(str)
+                    new Font(pfc.Families.[0], fontscale)
+                with
+                | err ->
+                    Prelude.Common.Logging.Error("Failed to load font file: " + str) (err.ToString())
+                    new Font(str, fontscale)
+            else
+                new Font(str, fontscale)
+        new SpriteFont(f)

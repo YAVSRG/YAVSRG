@@ -85,12 +85,12 @@ module Audio =
         timer.Stop()
 
     let resume() =
-        //should seek to where timer thinks we are to reduce drift
+        //possible todo: should seek to where timer thinks we are to reduce drift
         Bass.ChannelPlay(nowplaying.ID) |> bassError
         timer.Start()
 
     let update() =
-        //waveform stuff
+        //todo: waveform stuff
         let t = time()
         if (t > 0.0 && t < nowplaying.Duration && not channelPlaying) then
             channelPlaying <- true
@@ -98,7 +98,7 @@ module Audio =
             Bass.ChannelPlay(nowplaying.ID) |> bassError
         elif (t > nowplaying.Duration) then
             channelPlaying <- false
-            //handle action for when track is complete here
+            //todo: handle action for when track is complete here
 
     let changeRate(newRate) =
         rate <- newRate;
@@ -114,4 +114,4 @@ module Audio =
 
     let init() =
         Bass.Init() |> bassError
-        Bass.Volume <- 0.05
+        Bass.GlobalStreamVolume <- int (0.05 * 10000.0)

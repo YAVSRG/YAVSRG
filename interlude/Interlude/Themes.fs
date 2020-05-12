@@ -1,11 +1,10 @@
-﻿namespace Interlude.Options
+﻿namespace Interlude
 
 open System
 open System.IO
 open System.IO.Compression
 open System.Collections.Generic
 open System.Drawing
-open Prelude.Json
 open Prelude.Common
 open Prelude.Data.Themes
 
@@ -54,8 +53,14 @@ module Themes =
     let private defaultTheme = Theme.FromZipStream <| Interlude.Utils.getResourceStream("default.zip")
     let private loadedNoteskins = new Dictionary<string, NoteSkinConfig * int>()
     let private loadedThemes = new List<Theme>()
+
     let mutable themeConfig = ThemeConfig.Default
     let mutable currentNoteSkin = "default"
+    let mutable background = Sprite.Default
+    let mutable accentColor = Color.White
+
+    let mutable private fontBuilder: Lazy<Text.SpriteFont> option = None
+    let font(): Text.SpriteFont = fontBuilder.Value.Force()
 
     let availableThemes =
         let l = new List<string>()
@@ -102,6 +107,9 @@ module Themes =
         Seq.iter Sprite.destroy sprites.Values
         sprites.Clear()
         changeNoteSkin(currentNoteSkin)
+        accentColor <- themeConfig.DefaultAccentColor
+        if fontBuilder.IsSome then font().Dispose(); 
+        fontBuilder <- Some (lazy (Text.createFont themeConfig.Font))
         Logging.Debug(sprintf "Loaded %i themes (%i available)" <| loadedThemes.Count - 1 <| availableThemes.Count) ""
 
     let private getInherited f =
@@ -126,3 +134,31 @@ module Themes =
                         | err -> Logging.Error("Failed to load texture '" + name + "'") (err.ToString()); None)
             sprites.Add(name, Sprite.upload(bmp, config.Rows, config.Columns, false))
         sprites.[name]
+
+    let loadBackground(file: string) =
+        if background.ID <> 0 && background.ID <> getTexture("background").ID then Sprite.destroy background
+        background <- 
+        match Path.GetExtension(file).ToLower() with
+        | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
+            try
+                use bmp = new Bitmap(file)
+                accentColor <-
+                    if themeConfig.OverrideAccentColor then themeConfig.DefaultAccentColor else
+                        let vibrance (c:Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
+                        seq {
+                            for x in 0 .. bmp.Width / 10 - 1 do
+                                for y in 0 .. bmp.Height / 10 - 1 do
+                                    yield bmp.GetPixel(x * 10, y * 10) }
+                        |> Seq.maxBy vibrance
+                        |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else themeConfig.DefaultAccentColor
+                Sprite.upload(bmp, 1, 1, true)
+            with
+            | err ->
+                Logging.Error("Failed to load background image: " + file) (err.ToString())
+                accentColor <- themeConfig.DefaultAccentColor
+                getTexture("background")
+
+        | ext ->
+            Logging.Error("Unsupported file type for background: " + ext) ""
+            accentColor <- themeConfig.DefaultAccentColor
+            getTexture("background")
