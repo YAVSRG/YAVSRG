@@ -14,9 +14,6 @@ type Game(config: GameConfig) =
 
     let screens = new ScreenContainer()
 
-    [<DefaultValue>]
-    val mutable virtualRes: float * float
-
     do
         base.Title <- Utils.version
         base.VSync <- VSyncMode.Off

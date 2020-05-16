@@ -4,6 +4,7 @@ open OpenTK
 open Interlude
 open Interlude.Render
 open Interlude.UI.Animation
+open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Options
 
@@ -47,7 +48,7 @@ type ScreenLoading() =
 type Toolbar() as this =
     inherit Widget()
 
-    static let height = 60.f
+    static let height = 70.f
 
     let barSlider = new AnimationFade(0.0f)
     let notifSlider = new AnimationFade(0.0f)
@@ -55,14 +56,17 @@ type Toolbar() as this =
     do
         this.Animation.Add(barSlider)
         this.Animation.Add(notifSlider)
-        let tb = new Components.TextBox(K version, 25.f, Color.White)
-        tb.Reposition(-200.f, 1.f, 0.f, 1.f, 0.f, 1.f, height, 1.f)
-        this.Add(tb)
+        this.Add(new TextBox(K version, K Color.White, 1.0f) |> positionWidget(-200.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
+        this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K Color.White, 1.0f) |> positionWidget(-200.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
+        this.Add(new Button(ignore, "Back", Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
+        this.Add(new Button(ignore, "Options", Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button(ignore, "Import", Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button(ignore, "Help", Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
-        Draw.rect(Rect.create l (t - height) r t) (otkColor Themes.accentColor) Sprite.Default
-        Draw.rect(Rect.create l b r (b + height)) (otkColor Themes.accentColor) Sprite.Default
+        Draw.rect(Rect.create l (t - height) r t) (Screens.accentColor.GetColor()) Sprite.Default
+        Draw.rect(Rect.create l b r (b + height)) (Screens.accentColor.GetColor()) Sprite.Default
         base.Draw()
 
     override this.Update(elapsed, bounds) =
@@ -89,6 +93,7 @@ type ScreenContainer() as this =
         Screens.popScreen <- this.RemoveScreen
         current.OnEnter(current)
         this.Add(new Toolbar())
+        this.Animation.Add(Screens.accentColor)
 
     member this.Exit = exit
 
@@ -110,6 +115,7 @@ type ScreenContainer() as this =
             current <- s
 
     override this.Update(elapsedTime, bounds) =
+        Screens.accentColor.SetColor(Themes.accentColor)
         base.Update(elapsedTime, bounds)
         current.Update(elapsedTime, bounds)
 

@@ -57,7 +57,7 @@ module Themes =
     let mutable themeConfig = ThemeConfig.Default
     let mutable currentNoteSkin = "default"
     let mutable background = Sprite.Default
-    let mutable accentColor = Color.White
+    let mutable internal accentColor = Color.White
 
     let mutable private fontBuilder: Lazy<Text.SpriteFont> option = None
     let font(): Text.SpriteFont = fontBuilder.Value.Force()

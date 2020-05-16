@@ -1,111 +1,55 @@
 ﻿namespace Interlude.UI
 
 open System
-open System.Collections.Generic
-open Prelude.Common
 open Interlude
 open Interlude.Render
 open Interlude.UI.Animation
-
-type AnchorPoint(value, anchor) =
-    inherit AnimationFade(value)
-    let mutable anchor = anchor
-    member this.Position(min, max) =  min + base.Value + (max - min) * anchor
-    member this.Reposition(value, a) = this.SetValue(value); this.SetTarget(value); anchor <- a
-
-type WidgetState = Normal = 1uy | Active = 2uy | Disabled = 3uy | Uninitialised = 4uy
-
-type Widget() =
-
-    let left = AnchorPoint(0.f, 0.f)
-    let top = AnchorPoint(0.f, 0.f)
-    let right = AnchorPoint(0.f, 1.f)
-    let bottom = AnchorPoint(0.f, 1.f)
-
-    let animation = AnimationGroup()
-    do
-        animation.Add(left)
-        animation.Add(right)
-        animation.Add(top)
-        animation.Add(bottom)
-    let mutable parent = None
-    let mutable bounds = Rect.zero
-    let mutable state = (WidgetState.Uninitialised ||| WidgetState.Normal)
-    let children = new List<Widget>()
-
-    abstract member Add: Widget -> unit
-    default this.Add(c) =
-        children.Add(c)
-        c.AddTo(this)
-
-    abstract member AddTo: Widget -> unit
-    default this.AddTo(c) =
-        match parent with
-        | None -> parent <- Some c
-        | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one") ""
-        
-    abstract member Remove: Widget -> unit
-    default this.Remove(c) =
-        if children.Remove(c) then
-            c.RemoveFrom(this)
-        else Logging.Error("Tried to remove widget that was not in this container") ""
-
-    member private this.RemoveFrom(c) =
-        match parent with
-        | None -> Logging.Error("Tried to remove this widget from a container it isn't in one") ""
-        | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another") ""
-
-    member this.Animation = animation
-    member this.Bounds = bounds
-    member this.Position = (left, top, right, bottom)
-    member this.State with get() = state and set(value) = state <- value
-
-    abstract member Draw: unit -> unit
-    default this.Draw() =
-        children
-        |> Seq.filter (fun w -> w.State < WidgetState.Disabled)
-        |> Seq.iter (fun w -> w.Draw())
-
-    abstract member Update: float * Rect -> unit
-    default this.Update(elapsedTime, (l, t, r, b): Rect) =
-        animation.Update(elapsedTime)
-        this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
-        bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-        seq {
-            for i in children.Count - 1 .. -1 .. 0 do
-                if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then yield children.[i]
-        }
-        |> Seq.iter (fun w -> w.Update(elapsedTime, bounds))
-
-    member this.Reposition(l, la, t, ta, r, ra, b, ba) =
-        left.Reposition(l, la)
-        top.Reposition(t, ta)
-        right.Reposition(r, ra)
-        bottom.Reposition(b, ba)
-    
-    member this.Reposition(l, t, r, b) = this.Reposition(l, 0.f, t, 0.f, r, 1.f, b, 1.f)
-
-    member this.Move(l, t, r, b) =
-        left.SetTarget(l)
-        top.SetTarget(t)
-        right.SetTarget(r)
-        bottom.SetTarget(b)
-
-    interface IDisposable with
-        member this.Dispose() = ()
+open OpenTK
 
 module Components =
+    open Interlude.Input
     
-    let positionWidget (w: Widget) l t r b : Widget =
+    let positionWidgetA(l, t, r, b) (w: Widget) : Widget =
         w.Reposition(l, t, r, b)
+        w
+
+    let positionWidget(l, la, t, ta, r, ra, b, ba) (w: Widget) : Widget =
+        w.Reposition(l, la, t, ta, r, ra, b, ba)
         w
     
     type FilledRect(c) =
         inherit Widget()
         override this.Draw() = Draw.rect base.Bounds c Sprite.Default
 
-    type TextBox(textFunc, size, color) =
+    type TextBox(textFunc, color, just) =
         inherit Widget()
         override this.Draw() = 
             let struct (l, t, _, _) = base.Bounds
-            Text.draw(Themes.font(), textFunc(), size, l, t, color)
+            Text.drawFill(Themes.font(), textFunc(), this.Bounds, color(), just)
+
+    type Clickable(onClick, onHover) =
+        inherit Widget()
+
+        let mutable hover = false
+
+        override this.Update(time, (l, t, r, b)) =
+            base.Update(time, (l, t, r, b))
+            let x, y = Mouse.X(), Mouse.Y()
+            let oh = hover
+            hover <- x > l && x < r && y > t && y < b
+            if oh <> hover then onHover(hover)
+            if hover && Mouse.Click(Input.MouseButton.Left) then onClick()
+
+    type Button(onClick, label, sprite) as this =
+        inherit Widget()
+
+        let color = AnimationFade(0.0f)
+
+        do
+            this.Animation.Add(color)
+            this.Add(new Clickable(onClick, fun b -> color.SetTarget(if b then 0.7f else 0.0f)))
+
+        override this.Draw() =
+            Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
+            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Text.drawFill(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value)), 0.5f)

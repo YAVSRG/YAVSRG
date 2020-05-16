@@ -39,6 +39,18 @@ module Rect =
     let sliceBottom v ((left, _, right, bottom): Rect) =
         struct (left, bottom - v, right, bottom)
 
+    let trimLeft v ((left, top, right, bottom): Rect) =
+        struct (left + v, top, right, bottom)
+        
+    let trimTop v ((left, top, right, bottom): Rect) =
+        struct (left, top + v, right, bottom)
+                
+    let trimRight v ((left, top, right, bottom): Rect) =
+        struct (left, top, right - v, bottom)
+                        
+    let trimBottom v ((left, top, right, bottom): Rect) =
+        struct (left, top, right, bottom - v)
+
     let zero = create 0.f 0.f 0.f 0.f
 
 (*
@@ -217,6 +229,13 @@ module Text =
                 x <- x + w - 0.5f * scale)
 
     let drawJust(font: SpriteFont, text, scale, x, y, color, just: float32) = draw(font, text, scale, x - measure(font, text) * scale * just, y, color)
+
+    let drawFill(font: SpriteFont, text, bounds, color, just: float32) =
+        let w = measure(font, text)
+        let scale = Math.Min(Rect.height bounds * 0.6f, (Rect.width bounds / w))
+        let struct (l, _, r, _) = bounds
+        let x = (1.0f - just) * (l + scale * w * 0.5f) + just * (r - scale * w * 0.5f) - w * scale * 0.5f
+        draw(font, text, scale, x, Rect.centerY bounds - scale * 0.75f, color)
 
     let createFont (str: string) =
         let f =

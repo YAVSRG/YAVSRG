@@ -19,6 +19,22 @@ module Animation =
         member this.SetTarget(t) = target <- t
         member this.SetValue(v) = value <- v
         override this.Update(_) = value <- value * 0.95f + target * 0.05f
+
+    type AnimationColorMixer(color : OpenTK.Color) =
+        inherit Animation()
+
+        let r = AnimationFade(float32 color.R)
+        let g = AnimationFade(float32 color.G)
+        let b = AnimationFade(float32 color.B)
+
+        member this.SetColor(color: OpenTK.Color) =
+            r.SetTarget(float32 color.R); r.SetTarget(float32 color.G); r.SetTarget(float32 color.B)
+        member this.SetColor(color: System.Drawing.Color) =
+            r.SetTarget(float32 color.R); r.SetTarget(float32 color.G); r.SetTarget(float32 color.B)
+        member this.GetColor() = OpenTK.Color.FromArgb(255, int color.R, int color.G, int color.B)    
+
+        override this.Update(t) =
+            r.Update(t); g.Update(t); b.Update(t);
     
     //Runs an action and then is complete. Good for use in sequence with AnimationTimer
     type AnimationAction(action) =

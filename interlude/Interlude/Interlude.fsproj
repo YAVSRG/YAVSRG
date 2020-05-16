@@ -22,8 +22,8 @@
     <Compile Include="Gameplay.fs" />
     <Compile Include="Options\Options.fs" />
     <Compile Include="UI\Animation.fs" />
+    <Compile Include="UI\Widgets.fs" />
     <Compile Include="UI\Components.fs" />
-    <Compile Include="UI\Screens.fs" />
     <Compile Include="UI\ScreensMain.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
