@@ -48,20 +48,20 @@ module Profiles =
 
             Name = StringSetting("Default Profile", false)
 
-            ScrollSpeed = NumSetting(2.05, 1.0, 3.0)
-            HitPosition = NumSetting(0, -100, 400)
+            ScrollSpeed = FloatSetting(2.05, 1.0, 3.0)
+            HitPosition = IntSetting(0, -100, 400)
             HitLighting = Setting(false)
             Upscroll = Setting(false)
-            ScreenCoverUp = NumSetting(0.0, 0.0, 1.0)
-            ScreenCoverDown = NumSetting(0.0, 0.0, 1.0)
-            ScreenCoverFadeLength = NumSetting(200, 0, 500)
-            PerspectiveTilt = NumSetting(0.0, -1.0, 1.0)
-            BackgroundDim = NumSetting(0.5, 0.0, 1.0)
+            ScreenCoverUp = FloatSetting(0.0, 0.0, 1.0)
+            ScreenCoverDown = FloatSetting(0.0, 0.0, 1.0)
+            ScreenCoverFadeLength = IntSetting(200, 0, 500)
+            PerspectiveTilt = FloatSetting(0.0, -1.0, 1.0)
+            BackgroundDim = FloatSetting(0.5, 0.0, 1.0)
             NoteSkin = Setting("default")
             SelectedHPSystem = Setting(0)
             SelectedAccSystem = Setting(0)
             ColorStyle = Setting(ColorConfig.Default)
-            KeymodePreference = NumSetting(4, 3, 10)
+            KeymodePreference = IntSetting(4, 3, 10)
             UseKeymodePreference = Setting(false)
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
 

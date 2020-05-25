@@ -21,12 +21,26 @@ module Common =
         member this.Get() = value
         override this.ToString() = value.ToString()
 
+    [<AbstractClass>]
     type NumSetting<'T when 'T : comparison>(value : 'T, min : 'T, max : 'T) =
         inherit Setting<'T>(value)
+        abstract member SetPercent: float32 -> unit
+        abstract member GetPercent: unit -> float32
         member this.Set(newValue) = base.Set(if newValue > max then max elif newValue < min then min else newValue)
         member this.Min = min
         member this.Max = max
         override this.ToString() = sprintf "%s (%A - %A)" (base.ToString()) min max
+
+    type IntSetting(value: int, min: int, max: int) = 
+        inherit NumSetting<int>(value, min, max)
+        override this.SetPercent(pc: float32) = this.Set(min + ((float32 (max - min) * pc) |> float |> Math.Round |> int))
+        override this.GetPercent() = float32 (this.Get() - min) / float32 (max - min)
+
+    type FloatSetting(value: float, min: float, max: float) = 
+        inherit NumSetting<float>(value, min, max)
+        override this.SetPercent(pc: float32) = this.Set(min + (max - min) * float pc)
+        override this.GetPercent() = (this.Get() - min) / (max - min) |> float32
+        member this.Set(newValue: float) = base.Set(Math.Round(newValue, 2))
 
     type StringSetting(value: string, allowSpecialChar: bool) =
         inherit Setting<string>(value)
