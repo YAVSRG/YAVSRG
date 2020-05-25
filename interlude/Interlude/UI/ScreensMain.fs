@@ -16,7 +16,6 @@ type ScreenMenu() =
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
         Text.drawJust(Themes.font(), Audio.timeWithOffset().ToString(), 50.f, x, y, Color.White, 0.5f)
-        //Draw.rect (Rect.expand (-400.0f, -400.0f) this.Bounds) Color.White <| Themes.getTexture("note")
 
 // Loading screen
 
@@ -59,7 +58,7 @@ type Toolbar() as this =
         this.Add(new TextBox(K version, K Color.White, 1.0f) |> positionWidget(-200.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
         this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K Color.White, 1.0f) |> positionWidget(-200.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
         this.Add(new Button(ignore, "Back", Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
-        this.Add(new Button(ignore, "Options", Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button((fun () -> new ScreenOptions() |> Screens.addScreen), "Options", Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button(ignore, "Import", Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button(ignore, "Help", Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
 
@@ -88,11 +87,13 @@ type ScreenContainer() as this =
     let mutable screens = [current]
     let mutable exit = false
 
+    let toolbar = new Toolbar()
+
     do
         Screens.addScreen <- this.AddScreen
         Screens.popScreen <- this.RemoveScreen
         current.OnEnter(current)
-        this.Add(new Toolbar())
+        this.Add(toolbar)
         this.Animation.Add(Screens.accentColor)
 
     member this.Exit = exit
@@ -117,7 +118,7 @@ type ScreenContainer() as this =
     override this.Update(elapsedTime, bounds) =
         Screens.accentColor.SetColor(Themes.accentColor)
         base.Update(elapsedTime, bounds)
-        current.Update(elapsedTime, bounds)
+        current.Update(elapsedTime, toolbar.Bounds)
 
     override this.Draw() =
         Draw.rect this.Bounds Color.White Themes.background

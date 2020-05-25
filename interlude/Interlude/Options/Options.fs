@@ -69,8 +69,8 @@ type GameOptions = {
     Hotkeys: Hotkeys
 } with
     static member Default = {
-        AudioOffset = NumSetting(0.0, -500.0, 500.0)
-        AudioVolume = NumSetting(0.1, 0.0, 1.0)
+        AudioOffset = FloatSetting(0.0, -500.0, 500.0)
+        AudioVolume = FloatSetting(0.1, 0.0, 1.0)
         CurrentProfile = Setting("")
         CurrentChart = Setting("")
         CurrentOptionsTab = Setting("General")

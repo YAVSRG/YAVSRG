@@ -81,7 +81,8 @@ module Mouse =
             Input.clickhandled <- true
             Input.mouse.Contains(b) && not(Input.oldMouse.Contains(b))
     let internal pressed(b) = Input.mouse.Contains(b)
-    let internal released(b) = Input.oldMouse.Contains(b) && not(Input.mouse.Contains(b))
+    let internal release(b) = Input.oldMouse.Contains(b) && not(Input.mouse.Contains(b))
+    let Hover((l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
 
 type Bind =
     | Key of Key
@@ -120,6 +121,6 @@ type Bind =
         member this.Released() =
             match this with
             | Key k -> Keyboard.released(k)
-            | Mouse m -> Mouse.released(m)
+            | Mouse m -> Mouse.release(m)
             | Shift b | Alt b | Ctrl b -> b.Released()
             | _ -> false
