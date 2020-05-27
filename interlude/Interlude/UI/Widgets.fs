@@ -117,8 +117,10 @@ module Screens =
     let mutable internal addScreen: Screen -> unit = ignore
     let mutable internal popScreen: unit -> unit = ignore
     //add dialog
+
+    let mutable internal setToolbarCollapsed: bool -> unit = ignore
+
     //background fbo
-    //accent color as animation
 
     let accentColor = AnimationColorMixer(otkColor Themes.accentColor)
     

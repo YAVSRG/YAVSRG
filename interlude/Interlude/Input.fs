@@ -105,16 +105,16 @@ type Bind =
             | Key k -> Keyboard.pressed(k, overrideIM)
             | Mouse m -> Mouse.pressed(m)
             | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Pressed(overrideIM)
-            | Alt b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Pressed(overrideIM)
-            | Ctrl b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Pressed(overrideIM)
+            | Alt b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Pressed(overrideIM)
+            | Ctrl b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Pressed(overrideIM)
             | _ -> false
         member this.Tapped(overrideIM) =
             match this with
             | Key k -> Keyboard.tapped(k, overrideIM)
             | Mouse m -> Mouse.Click(m)
             | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Tapped(overrideIM)
-            | Alt b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Tapped(overrideIM)
-            | Ctrl b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Tapped(overrideIM)
+            | Alt b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Tapped(overrideIM)
+            | Ctrl b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Tapped(overrideIM)
             | _ -> false
         //note that for the sake of completeness released should take an im override too, but there is no context where it matters
         //todo: maybe put it in later

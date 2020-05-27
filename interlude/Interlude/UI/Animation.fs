@@ -28,10 +28,10 @@ module Animation =
         let b = AnimationFade(float32 color.B)
 
         member this.SetColor(color: OpenTK.Color) =
-            r.SetTarget(float32 color.R); r.SetTarget(float32 color.G); r.SetTarget(float32 color.B)
+            r.SetTarget(float32 color.R); g.SetTarget(float32 color.G); b.SetTarget(float32 color.B)
         member this.SetColor(color: System.Drawing.Color) =
-            r.SetTarget(float32 color.R); r.SetTarget(float32 color.G); r.SetTarget(float32 color.B)
-        member this.GetColor() = OpenTK.Color.FromArgb(255, int color.R, int color.G, int color.B)    
+            r.SetTarget(float32 color.R); g.SetTarget(float32 color.G); b.SetTarget(float32 color.B)
+        member this.GetColor() = OpenTK.Color.FromArgb(255, int r.Value, int g.Value, int b.Value)    
 
         override this.Update(t) =
             r.Update(t); g.Update(t); b.Update(t);

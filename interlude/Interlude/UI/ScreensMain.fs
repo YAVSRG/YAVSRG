@@ -13,6 +13,9 @@ open Interlude.Options
 type ScreenMenu() =
     inherit Screen()
 
+    override this.OnEnter(prev: Screen) =
+        Screens.setToolbarCollapsed(false)
+
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
         Text.drawJust(Themes.font(), Audio.timeWithOffset().ToString(), 50.f, x, y, Color.White, 0.5f)
@@ -28,6 +31,7 @@ type ScreenLoading() =
         match prev with
         | :? ScreenMenu ->
             closing <- true
+            Screens.setToolbarCollapsed(true)
             let s = AnimationSequence()
             s.Add(AnimationTimer(1500.0))
             s.Add(AnimationAction(fun () -> Screens.popScreen()))
@@ -51,16 +55,21 @@ type Toolbar() as this =
 
     let barSlider = new AnimationFade(0.0f)
     let notifSlider = new AnimationFade(0.0f)
+
+    let mutable userCollapse = false
+    let mutable forceCollapse = true
     
     do
         this.Animation.Add(barSlider)
         this.Animation.Add(notifSlider)
         this.Add(new TextBox(K version, K Color.White, 1.0f) |> positionWidget(-200.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
         this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K Color.White, 1.0f) |> positionWidget(-200.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
-        this.Add(new Button(ignore, "Back", Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
-        this.Add(new Button((fun () -> new ScreenOptions() |> Screens.addScreen), "Options", Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button(ignore, "Import", Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button(ignore, "Help", Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button((fun () -> Screens.popScreen()), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
+        this.Add(new Button((fun () -> new ScreenOptions() |> Screens.addScreen), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button(ignore, "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
+
+        Screens.setToolbarCollapsed <- (fun b -> forceCollapse <- b; barSlider.SetTarget(if userCollapse || forceCollapse then 0.0f else 1.0f))
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
@@ -69,12 +78,10 @@ type Toolbar() as this =
         base.Draw()
 
     override this.Update(elapsed, bounds) =
-        if Interlude.Options.Options.options.Hotkeys.Screenshot.Get().Tapped(false) then
-            barSlider.SetTarget(1.0f - barSlider.Target)
-        if Interlude.Options.Options.options.Hotkeys.Exit.Get().Tapped(true) then
-            Screens.popScreen()
+        if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped(false) then
+            userCollapse <- not userCollapse
+            barSlider.SetTarget(if userCollapse || forceCollapse then 0.0f else 1.0f)
         base.Update(elapsed, Rect.expand (0.f, -height * barSlider.Value) bounds)
-        //
 
 //Screen manager
 

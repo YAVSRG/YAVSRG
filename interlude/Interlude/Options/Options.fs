@@ -36,25 +36,35 @@ type Hotkeys = {
     Exit: Setting<Bind>
     Select: Setting<Bind>
     Search: Setting<Bind>
-    Help: Setting<Bind>
+    Toolbar: Setting<Bind>
+    Tooltip: Setting<Bind>
     Screenshot: Setting<Bind>
     Volume: Setting<Bind>
     Next: Setting<Bind>
     Previous: Setting<Bind>
     End: Setting<Bind>
     Start: Setting<Bind>
+
+    Import: Setting<Bind>
+    Options: Setting<Bind>
+    Help: Setting<Bind>
 } with
     static member Default = {
         Exit = new Setting<Bind>(Key Key.Escape)
         Select = new Setting<Bind>(Key Key.Enter)
         Search = new Setting<Bind>(Key Key.Tab)
-        Help = new Setting<Bind>(Key Key.Slash)
+        Tooltip = new Setting<Bind>(Key Key.Slash)
+        Toolbar = new Setting<Bind>(Key Key.T |> Ctrl)
         Screenshot = new Setting<Bind>(Key Key.F12)
         Volume = new Setting<Bind>(Key Key.AltLeft)
         Previous = new Setting<Bind>(Key Key.Left)
         Next = new Setting<Bind>(Key Key.Right)
         Start = new Setting<Bind>(Key Key.Home)
         End = new Setting<Bind>(Key Key.End)
+
+        Import = new Setting<Bind>(Key Key.I |> Ctrl)
+        Options = new Setting<Bind>(Key Key.O |> Ctrl)
+        Help = new Setting<Bind>(Key Key.H |> Ctrl)
     }
 
 type GameOptions = {

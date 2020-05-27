@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System
+open System.Collections.Generic
 open Prelude.Common
 open Interlude
 open Interlude.Render
@@ -40,29 +41,33 @@ module Components =
             if oh <> hover then onHover(hover)
             if hover && Mouse.Click(Input.MouseButton.Left) then onClick()
 
-    type Button(onClick, label, sprite) as this =
+    type Button(onClick, label, bind : Setting<Bind>, sprite) as this =
         inherit Widget()
 
-        let color = AnimationFade(0.0f)
+        let color = AnimationFade(0.3f)
 
         do
             this.Animation.Add(color)
-            this.Add(new Clickable(onClick, fun b -> color.SetTarget(if b then 0.7f else 0.0f)))
+            this.Add(new Clickable(onClick, fun b -> color.SetTarget(if b then 0.7f else 0.3f)))
 
         override this.Draw() =
             Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
             Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
             Text.drawFill(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value)), 0.5f)
 
+        override this.Update(bounds, elapsedTime) =
+            if bind.Get().Tapped(false) then onClick()
+            base.Update(bounds, elapsedTime)
+
     type Slider<'T when 'T : comparison>(setting : NumSetting<'T>, label) as this =
         inherit Widget()
 
-        let color = AnimationFade(1.0f)
+        let color = AnimationFade(0.5f)
         let mutable dragging = false
 
         do
             this.Animation.Add(color)
-            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.SetTarget(if b then 0.8f else 1.0f)))
+            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
 
         override this.Update(time, (l, t, r, b)) =
             base.Update(time, (l, t, r, b))
@@ -82,6 +87,30 @@ module Components =
             Draw.rect (cursor |> Rect.expand(15.0f, 15.0f)) Color.Black Sprite.Default
             Draw.rect (cursor |> Rect.expand(10.0f, 10.0f)) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
 
+    type Selector(options: string array, index, func, label) as this =
+        inherit Widget()
+        
+        let color = AnimationFade(0.5f)
+        let mutable index = index
+
+        do
+            this.Animation.Add(color)
+            let cycle() =
+                index <- ((index + 1) % options.Length)
+                func(index, options.[index])
+            this.Add(new Clickable(cycle, fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
+
+        override this.Draw() =
+            Draw.rect (Rect.expand (5.0f, 5.0f) this.Bounds) (Color.Black) Sprite.Default
+            Draw.rect this.Bounds (Screens.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+            Text.drawFill(Themes.font(), label, Rect.sliceTop 30.0f this.Bounds, Color.White, 0.5f)
+            Text.drawFill(Themes.font(), options.[index], Rect.trimTop 30.0f this.Bounds, Color.White, 0.5f)
+
+        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: Setting<'T>, label) =
+            let names = Enum.GetNames(typeof<'T>)
+            let values = Enum.GetValues(typeof<'T>) :?> 'T array
+            new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])), label)
+
     type FlowContainer(?spacingX: float32, ?spacingY: float32) =
         inherit Widget()
         let spacingX, spacingY = (defaultArg spacingX 10.0f, defaultArg spacingY 5.0f)
@@ -96,6 +125,7 @@ module Components =
             let y = -scrollPos
             contentSize <-
                 this.Children
+                |> Seq.filter (fun c -> c.State &&& WidgetState.Disabled < WidgetState.Disabled)
                 |> Seq.fold (fun (x, y) w ->
                     let (l, t, r, b) = w.Position
                     let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
@@ -116,3 +146,7 @@ module Components =
                 base.Update(time,bounds)
                 this.FlowContent(true)
                 if Mouse.Hover(bounds) then scrollPos <- Math.Clamp(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, 0.0f, contentSize)
+
+        override this.Add(child) =
+            base.Add(child)
+            this.FlowContent(true)
