@@ -101,12 +101,110 @@ type Widget() =
     interface IDisposable with
         member this.Dispose() = ()
 
+type Logo() as this =
+    inherit Widget()
+
+    let counter = AnimationCounter(10000000.0)
+
+    do this.Animation.Add(counter)
+
+    override this.Draw() =
+        base.Draw()
+        let w = Rect.width this.Bounds
+        let struct (l, t, r, b) = this.Bounds
+
+        Draw.quad
+        <| Quad.create
+            (new Vector2(l + 0.08f * w, t + 0.09f * w))
+            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
+            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
+            (new Vector2(r - 0.08f * w, t + 0.09f * w))
+        <| Quad.colorOf(Color.DarkBlue)
+        <| (Sprite.DefaultQuad)
+        Draw.quad
+        <| Quad.create
+            (new Vector2(l + 0.08f * w, t + 0.29f * w))
+            (new Vector2(l + 0.22f * w, t + 0.29f * w))
+            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
+            (new Vector2(l + 0.5f * w, t + 0.96875f * w))
+        <| Quad.colorOf(Color.DarkBlue)
+        <| (Sprite.DefaultQuad)
+        Draw.quad
+        <| Quad.create
+            (new Vector2(r - 0.08f * w, t + 0.29f * w))
+            (new Vector2(r - 0.22f * w, t + 0.29f * w))
+            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
+            (new Vector2(l + 0.5f * w, t + 0.96875f * w))
+        <| Quad.colorOf(Color.DarkBlue)
+        <| (Sprite.DefaultQuad)
+
+        Stencil.create()
+        Draw.quad
+        <| Quad.create
+            (new Vector2(l + 0.1f * w, t + 0.1f * w))
+            (new Vector2(l + 0.5f * w, t + 0.75f * w))
+            (new Vector2(l + 0.5f * w, t + 0.75f * w))
+            (new Vector2(r - 0.1f * w, t + 0.1f * w))
+        <| Quad.colorOf(Color.Aqua)
+        <| (Sprite.DefaultQuad)
+        Draw.quad
+        <| Quad.create
+            (new Vector2(l + 0.1f * w, t + 0.3f * w))
+            (new Vector2(l + 0.2f * w, t + 0.3f * w))
+            (new Vector2(l + 0.5f * w, t + 0.7875f * w))
+            (new Vector2(l + 0.5f * w, t + 0.95f * w))
+        <| Quad.colorOf(Color.Aqua)
+        <| (Sprite.DefaultQuad)
+        Draw.quad
+        <| Quad.create
+            (new Vector2(r - 0.1f * w, t + 0.3f * w))
+            (new Vector2(r - 0.2f * w, t + 0.3f * w))
+            (new Vector2(l + 0.5f * w, t + 0.7875f * w))
+            (new Vector2(l + 0.5f * w, t + 0.95f * w))
+        <| Quad.colorOf(Color.Aqua)
+        <| (Sprite.DefaultQuad)
+        Draw.rect this.Bounds Color.White <| Themes.getTexture("logo")
+
+        Stencil.draw()
+        //chart background
+        Draw.rect this.Bounds <| Color.Aqua <| Sprite.Default
+        let v = float32 counter.Time
+        Draw.quad <| Quad.ofRect this.Bounds <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255)) <| Themes.getTexture("rain").TilingUV(0.625f, v * -0.06f, v * -0.07f)
+        Draw.quad <| Quad.ofRect this.Bounds <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| Themes.getTexture("rain").TilingUV(1.0f, v * -0.1f, v * -0.11f)
+        Draw.quad <| Quad.ofRect this.Bounds <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| Themes.getTexture("rain").TilingUV(1.5625f, v * -0.15f, v * -0.16f)
+
+        let mutable prev = 0.0f
+        let m = b - w * 0.5f
+        for i in 0 .. 31 do
+            let level =
+                (seq { (i * 8)..(i * 8 + 7) }
+                |> Seq.map (fun x -> Audio.waveForm.[x])
+                |> Seq.sum) * 0.1f
+            let i = float32 i
+            Draw.quad
+            <| Quad.create
+                (new Vector2(l + i * w / 32.0f, m - prev))
+                (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level))
+                (new Vector2(l + (i + 1.0f) * w / 32.0f, b))
+                (new Vector2(l + i * w / 32.0f, b))
+            <| Quad.colorOf(Color.FromArgb(127, 0, 0, 255))
+            <| (Sprite.DefaultQuad)
+            prev <- level
+
+        Stencil.finish()
+        Draw.rect this.Bounds Color.White <| Themes.getTexture("logo")
+
 type Screen() =
     inherit Widget()
     abstract member OnEnter: Screen -> unit
     default this.OnEnter(prev: Screen) = ()
     abstract member OnExit: Screen -> unit
     default this.OnExit(next: Screen) = ()
+
+type Dialog() =
+    inherit Widget()
+
+    //...
 
 //Collection of mutable values to "tie the knot" in mutual dependence
 // - Stuff is defined but not inialised here
@@ -116,13 +214,18 @@ type Screen() =
 module Screens =
     let mutable internal addScreen: Screen -> unit = ignore
     let mutable internal popScreen: unit -> unit = ignore
-    //add dialog
+    let mutable internal addDialog: Dialog -> unit = ignore //nyi
 
     let mutable internal setToolbarCollapsed: bool -> unit = ignore
 
     //background fbo
-
+    let parallaxX  = AnimationFade(0.0f)
+    let parallaxY  = AnimationFade(0.0f)
+    let parallaxZ  = AnimationFade(15.0f)
+    let backgroundDim = AnimationFade(1.0f)
     let accentColor = AnimationColorMixer(otkColor Themes.accentColor)
+
+    let logo = new Logo()
     
     let accentShade(alpha, brightness, white) =
         let accentColor = accentColor.GetColor()
@@ -133,3 +236,21 @@ module Screens =
             int ((float32 accentColor.R + rd) * brightness),
             int ((float32 accentColor.G + gd) * brightness),
             int ((float32 accentColor.B + bd) * brightness))
+
+    let drawBackground(bounds, color, depth) =
+        //not complete. will wait until level select and changing backgrounds to give more testing ability
+        let bg = Themes.background
+        let screenaspect = Render.vwidth / Render.vheight
+        let bgaspect = float32 bg.Width / float32 bg.Height
+        let hs = Render.vwidth / float32 bg.Width
+        let vs = Render.vheight / float32 bg.Height
+        let uv = 
+            if screenaspect > bgaspect then //need to trim top and bottom
+                Rect.create 0.0f 0.0f 1.0f (1.0f - screenaspect + bgaspect)
+            else //need to trim sides
+                Rect.create 0.0f 0.0f (1.0f - bgaspect + screenaspect) 1.0f
+            
+        //let scale = Math.Max(Render.vwidth / float32 bg.Width, Render.vheight / float32 bg.Height)
+        //let px = depth * parallaxZ.Value * parallaxX.Value / Render.vwidth * 0.25f
+        //let py = depth * parallaxZ.Value * parallaxY.Value / Render.vheight * 0.25f
+        Draw.quad (Quad.ofRect bounds) (Quad.colorOf color) (bg, Quad.ofRect uv)

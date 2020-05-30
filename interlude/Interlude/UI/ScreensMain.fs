@@ -6,6 +6,7 @@ open Interlude.Render
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.Utils
+open Interlude.Input
 open Interlude.Options
 
 // Menu screen
@@ -14,11 +15,23 @@ type ScreenMenu() =
     inherit Screen()
 
     override this.OnEnter(prev: Screen) =
+        Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
+        Screens.backgroundDim.SetTarget(0.0f)
         Screens.setToolbarCollapsed(false)
+
+    override this.OnExit(next: Screen) =
+        Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
+        Screens.backgroundDim.SetTarget(0.7f)
 
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
-        Text.drawJust(Themes.font(), Audio.timeWithOffset().ToString(), 50.f, x, y, Color.White, 0.5f)
+        base.Draw()
+        //Text.drawJust(Themes.font(), Audio.timeWithOffset().ToString(), 50.f, x, y, Color.White, 0.5f)
+
+    override this.Update(time, bounds) =
+        base.Update(time, bounds)
+        if (Options.options.Hotkeys.Select.Get().Tapped(false)) then
+            Screens.addScreen (new ScreenLevelSelect())
 
 // Loading screen
 
@@ -28,10 +41,11 @@ type ScreenLoading() =
     let mutable closing = false
 
     override this.OnEnter(prev: Screen) =
+        Screens.logo.Move(-400.0f, -400.0f, 400.0f, 400.0f)
+        Screens.setToolbarCollapsed(true)
         match prev with
         | :? ScreenMenu ->
             closing <- true
-            Screens.setToolbarCollapsed(true)
             let s = AnimationSequence()
             s.Add(AnimationTimer(1500.0))
             s.Add(AnimationAction(fun () -> Screens.popScreen()))
@@ -44,7 +58,7 @@ type ScreenLoading() =
         
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
-        Text.drawJust(Themes.font(), (if closing then "Bye o/" else "Loading :)"), 80.f, x, y, Color.White, 0.5f)
+        Text.drawJust(Themes.font(), (if closing then "Bye o/" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)
 
 // Toolbar
 
@@ -73,8 +87,8 @@ type Toolbar() as this =
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
-        Draw.rect(Rect.create l (t - height) r t) (Screens.accentColor.GetColor()) Sprite.Default
-        Draw.rect(Rect.create l b r (b + height)) (Screens.accentColor.GetColor()) Sprite.Default
+        Draw.rect(Rect.create l (t - height) r t) (Screens.accentShade(127, 1.0f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l b r (b + height)) (Screens.accentShade(127, 1.0f, 0.0f)) Sprite.Default
         base.Draw()
 
     override this.Update(elapsed, bounds) =
@@ -96,12 +110,20 @@ type ScreenContainer() as this =
 
     let toolbar = new Toolbar()
 
+    let parallaxX = new AnimationFade(0.0f)
+    let parallaxY = new AnimationFade(0.0f)
+
     do
         Screens.addScreen <- this.AddScreen
         Screens.popScreen <- this.RemoveScreen
-        current.OnEnter(current)
         this.Add(toolbar)
+        this.Add(Screens.logo |> Components.positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f))
         this.Animation.Add(Screens.accentColor)
+        this.Animation.Add(Screens.parallaxZ)
+        this.Animation.Add(Screens.parallaxX)
+        this.Animation.Add(Screens.parallaxY)
+        this.Animation.Add(Screens.backgroundDim)
+        current.OnEnter(current)
 
     member this.Exit = exit
 
@@ -123,11 +145,14 @@ type ScreenContainer() as this =
             current <- s
 
     override this.Update(elapsedTime, bounds) =
+        Screens.parallaxX.SetTarget(Mouse.X())
+        Screens.parallaxY.SetTarget(Mouse.Y())
         Screens.accentColor.SetColor(Themes.accentColor)
         base.Update(elapsedTime, bounds)
         current.Update(elapsedTime, toolbar.Bounds)
 
     override this.Draw() =
-        Draw.rect this.Bounds Color.White Themes.background
+        Screens.drawBackground(this.Bounds, Color.White, 1.0f)
+        Draw.rect this.Bounds (Color.FromArgb(Screens.backgroundDim.Value * 255.0f |> int, 0, 0, 0)) Sprite.Default
         current.Draw()
         base.Draw()

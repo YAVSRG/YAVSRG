@@ -89,8 +89,27 @@ module Audio =
         Bass.ChannelPlay(nowplaying.ID) |> bassError
         timer.Start()
 
+    let private updateWaveform() =
+        if playing() then
+            Bass.ChannelGetData(nowplaying.ID, fft, int DataFlags.FFT2048) |> ignore
+            //algorithm adapted from here
+            //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
+            let mutable b0 = 0
+            for i in 0..255 do
+                let mutable peak = 0.0f
+                let mutable b1 = Math.Min(Math.Pow(2.0, float i * 10.0 / 255.0) |> int, 1023)
+                if (b1 <= b0) then b1 <- b0 + 1
+                while (b0 < b1) do
+                    if (peak < fft.[1 + b0]) then peak <- fft.[1 + b0]
+                    b0 <- b0 + 1
+                let y = Math.Clamp(Math.Sqrt(float peak) * 3.0 * 255.0 - 4.0, 0.0, 255.0) |> float32
+                waveForm.[i] <- waveForm.[i] * 0.9f + y * 0.1f
+        else
+            for i in 0..255 do waveForm.[i] <- waveForm.[i] * 0.9f
+
     let update() =
-        //todo: waveform stuff
+        updateWaveform()
+
         let t = time()
         if (t > 0.0 && t < nowplaying.Duration && not channelPlaying) then
             channelPlaying <- true
@@ -106,6 +125,7 @@ module Audio =
         Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Frequency, float nowplaying.Frequency * rate) |> bassError
 
     let changeTrack(path, offset, rate) =
+        if playing() then pause()
         if nowplaying.ID <> 0 then
             nowplaying.Dispose()
         nowplaying <- Track.FromFile(path)

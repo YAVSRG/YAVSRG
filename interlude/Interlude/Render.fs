@@ -52,6 +52,7 @@ module Rect =
         struct (left, top, right, bottom - v)
 
     let zero = create 0.f 0.f 0.f 0.f
+    let one = create 0.f 0.f 1.f 1.f
 
 (*
     Simple storage of vertices to render as a quad
@@ -77,7 +78,11 @@ module Quad =
 type Sprite = { ID:int; Width:int; Height:int; Rows:int; Columns:int }
 with
     member this.WithUV(q: Quad): SpriteQuad = (this, q)
+    member this.TilingUV(s, x, y): SpriteQuad =
+        let w = float32 this.Width
+        this, Quad.ofRect(Rect.create (x / w / s) (y / w / s) (x / w / s + s) (y / w / s + s))
     static member Default = { ID=0; Width=1; Height=1; Rows=1; Columns=1 }
+    static member DefaultQuad: SpriteQuad = (Sprite.Default, Quad.ofRect Rect.one)
 and SpriteQuad = (struct(Sprite * Quad))
 
 module Sprite =
@@ -148,6 +153,7 @@ module Render =
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
         GL.ClearColor(Color.Black)
+        GL.ClearStencil(0x00)
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
         resize(width, height)
@@ -155,6 +161,32 @@ module Render =
         //possible todo: font management here
 
         //todo: fbo storage here too
+
+module Stencil =
+    let mutable depth = 0
+
+    let create() =
+        if depth = 0 then
+            GL.Enable(EnableCap.StencilTest)
+            GL.Enable(EnableCap.AlphaTest);
+            GL.Clear(ClearBufferMask.StencilBufferBit)
+            GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
+        GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
+        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
+        depth <- depth + 1
+
+    let draw() = 
+        GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
+        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
+
+    let finish() =
+        depth <- depth - 1
+        if depth = 0 then
+            GL.Clear(ClearBufferMask.StencilBufferBit)
+            GL.Disable(EnableCap.StencilTest)
+            GL.Disable(EnableCap.AlphaTest)
+        else
+            GL.StencilFunc(StencilFunction.Lequal, depth, 0xFF)
 
 (*
     Drawing methods to be used by UI components

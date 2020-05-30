@@ -10,6 +10,7 @@ open Prelude.Data.ChartManager
 open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.Utils
+open Interlude.Options
 
 module Gameplay =
     
@@ -42,16 +43,30 @@ module Gameplay =
         Themes.loadBackground(chart.BGPath)
         let localOffset = if chart.Notes.IsEmpty then 0.0 else chartSaveData.Value.Offset.Get() - (offsetOf chart.Notes.First)
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
+        Audio.playFrom(chart.Header.PreviewTime)
+        Options.options.CurrentChart.Set(cachedChart.FilePath)
 
     let save() =
         scores.Save()
         cache.Save()
         
     let init() =
-        cache.ConvertSongFolder @"C:\Users\percy\Downloads\Singles\STEPPERZ (Tim)" "Singles" (fun x -> Logging.Debug(x) "") |> ignore
-        cache.GetGroups(K "All") (new Comparison<CachedChart>(fun _ _ -> 0))
-        |> fun d -> d.["All"].[0]
-        |> fun c ->
-            let ch = cache.LoadChart(c).Value
-            changeChart(c, ch)
-            Audio.playFrom(ch.Header.PreviewTime)
+        //cache.ConvertPackFolder(osuSongFolder) "osu!" (fun x -> Logging.Info(x) "") |> ignore
+        let c, ch = 
+            match cache.LookupChart(Options.options.CurrentChart.Get()) with
+            | Some cc ->
+                match cache.LoadChart(cc) with
+                | Some c -> cc, c
+                | None ->
+                    Logging.Error("Could not load chart file: " + cc.FilePath) ""
+                    cache.GetGroups(K "All") (Comparison(fun _ _ -> 0))
+                    |> fun d -> d.["All"].[0]
+                    |> fun c -> c, cache.LoadChart(c).Value
+            | None ->
+                Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Get()) ""
+                cache.GetGroups(K "All") (Comparison(fun _ _ -> 0))
+                |> fun d -> d.["All"].[0]
+                |> fun c -> c, cache.LoadChart(c).Value
+        changeChart(c, ch)
+        //temp while audio code isnt finished (this will automatically happen in future)
+        Audio.playFrom(ch.Header.PreviewTime)

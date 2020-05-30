@@ -22,21 +22,16 @@ type Theme(storage) =
         use stream = base.GetFile(folder, name + ".png")
         let bmp = new Bitmap(stream)
         let info: TextureConfig =
-            try
-                this.GetJson(folder, name + ".json")
-            with
-            | :? FileNotFoundException -> TextureConfig.Default
-            //what error does zip archive give?
-            | err -> Logging.Error("Could not load texture data for '" + name + "'") (err.ToString()); TextureConfig.Default
+            Option.defaultValue TextureConfig.Default <| this.GetJson(folder, name + ".json")
         (bmp, info)
 
-    member this.GetConfig() = this.GetJson("theme.json")
+    member this.GetConfig() = this.GetJson("theme.json").Value
 
     member this.GetNoteSkins() =
         Seq.choose
             (fun ns ->
                 try
-                    let config: NoteSkinConfig = this.GetJson("Noteskins", ns, "noteskin.json")
+                    let config: NoteSkinConfig = this.GetJson("Noteskins", ns, "noteskin.json").Value
                     Some (ns, config)
                 with
                 | err -> Logging.Error("Failed to load noteskin '" + ns + "'") (err.ToString()); None)
@@ -89,7 +84,7 @@ module Themes =
         Seq.choose (fun t ->
             let theme = Theme.FromThemeFolder(t)
             try
-                let config: ThemeConfig = theme.GetJson("theme.json")
+                let config: ThemeConfig = theme.GetJson("theme.json").Value
                 Some (theme, config)
             with
             | err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
