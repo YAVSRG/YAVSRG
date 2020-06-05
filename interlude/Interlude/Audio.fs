@@ -126,6 +126,7 @@ module Audio =
 
     let changeTrack(path, offset, rate) =
         if playing() then pause()
+        timerStart <- -infinity
         if nowplaying.ID <> 0 then
             nowplaying.Dispose()
         nowplaying <- Track.FromFile(path)

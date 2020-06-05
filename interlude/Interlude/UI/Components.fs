@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open Prelude.Common
 open Interlude
+open Interlude.Utils
 open Interlude.Render
 open Interlude.UI.Animation
 open Interlude.Input
@@ -19,15 +20,18 @@ module Components =
         w.Reposition(l, la, t, ta, r, ra, b, ba)
         w
     
-    type FilledRect(c) =
+    type Frame() =
         inherit Widget()
-        override this.Draw() = Draw.rect base.Bounds c Sprite.Default
+        override this.Draw() =
+            Draw.rect <| Rect.expand(5.0f, 5.0f) base.Bounds <| Screens.accentShade(127, 0.5f, 0.0f) <| Sprite.Default
+            Draw.rect <| base.Bounds <| Screens.accentShade(255, 0.8f, 0.0f) <| Sprite.Default
+            base.Draw()
 
     type TextBox(textFunc, color, just) =
         inherit Widget()
         override this.Draw() = 
-            let struct (l, t, _, _) = base.Bounds
             Text.drawFill(Themes.font(), textFunc(), this.Bounds, color(), just)
+            base.Draw()
 
     type Clickable(onClick, onHover) =
         inherit Widget()
@@ -37,11 +41,11 @@ module Components =
         override this.Update(time, bounds) =
             base.Update(time, bounds)
             let oh = hover
-            hover <- Mouse.Hover(bounds)
+            hover <- Mouse.Hover(this.Bounds)
             if oh <> hover then onHover(hover)
             if hover && Mouse.Click(Input.MouseButton.Left) then onClick()
 
-    type Button(onClick, label, bind : Setting<Bind>, sprite) as this =
+    type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
         inherit Widget()
 
         let color = AnimationFade(0.3f)
@@ -59,7 +63,7 @@ module Components =
             if bind.Get().Tapped(false) then onClick()
             base.Update(bounds, elapsedTime)
 
-    type Slider<'T when 'T : comparison>(setting : NumSetting<'T>, label) as this =
+    type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, label) as this =
         inherit Widget()
 
         let color = AnimationFade(0.5f)
@@ -87,31 +91,8 @@ module Components =
             Draw.rect (cursor |> Rect.expand(15.0f, 15.0f)) Color.Black Sprite.Default
             Draw.rect (cursor |> Rect.expand(10.0f, 10.0f)) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
 
-    type Selector(options: string array, index, func, label) as this =
-        inherit Widget()
-        
-        let color = AnimationFade(0.5f)
-        let mutable index = index
-
-        do
-            this.Animation.Add(color)
-            let cycle() =
-                index <- ((index + 1) % options.Length)
-                func(index, options.[index])
-            this.Add(new Clickable(cycle, fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
-
-        override this.Draw() =
-            Draw.rect (Rect.expand (5.0f, 5.0f) this.Bounds) (Color.Black) Sprite.Default
-            Draw.rect this.Bounds (Screens.accentShade(255, 0.6f, 0.0f)) Sprite.Default
-            Text.drawFill(Themes.font(), label, Rect.sliceTop 30.0f this.Bounds, Color.White, 0.5f)
-            Text.drawFill(Themes.font(), options.[index], Rect.trimTop 30.0f this.Bounds, Color.White, 0.5f)
-
-        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: Setting<'T>, label) =
-            let names = Enum.GetNames(typeof<'T>)
-            let values = Enum.GetValues(typeof<'T>) :?> 'T array
-            new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])), label)
-
     type FlowContainer(?spacingX: float32, ?spacingY: float32) =
+        //todo: fix bunch of rendering bugs/add stencilling
         inherit Widget()
         let spacingX, spacingY = (defaultArg spacingX 10.0f, defaultArg spacingY 5.0f)
         let mutable contentSize = 0.0f
@@ -143,10 +124,101 @@ module Components =
                 this.FlowContent(false)
                 base.Update(time, bounds)
             else
-                base.Update(time,bounds)
+                base.Update(time, bounds)
                 this.FlowContent(true)
-                if Mouse.Hover(bounds) then scrollPos <- Math.Clamp(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, 0.0f, contentSize)
+                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Clamp(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, 0.0f, contentSize)
 
         override this.Add(child) =
             base.Add(child)
             this.FlowContent(true)
+            
+    type Selector(options: string array, index, func, label) as this =
+        inherit Frame()
+                    
+        let color = AnimationFade(0.5f)
+        let mutable index = index
+            
+        do
+            this.Animation.Add(color)
+            let cycle() =
+                index <- ((index + 1) % options.Length)
+                func(index, options.[index])
+            this.Add(new Clickable(cycle, fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
+            
+        override this.Draw() =
+            base.Draw()
+            Text.drawFill(Themes.font(), label, Rect.sliceTop 30.0f this.Bounds, Color.White, 0.5f)
+            Text.drawFill(Themes.font(), options.[index], Rect.trimTop 30.0f this.Bounds, Color.White, 0.5f)
+            
+        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: Setting<'T>, label) =
+            let names = Enum.GetNames(typeof<'T>)
+            let values = Enum.GetValues(typeof<'T>) :?> 'T array
+            new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])), label)
+
+    type Dropdown(options: string array, index, func, label, buttonSize) as this =
+        inherit Widget()
+
+        let color = AnimationFade(0.5f)
+        let mutable index = index
+
+        do
+            this.Animation.Add(color)
+            let fr = new Frame()
+            this.Add(
+                let fc = new FlowContainer(0.0f, 0.0f)
+                fr.Add(fc)
+                Array.iteri
+                    (fun i o -> fc.Add(new Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
+                    options
+                fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
+            this.Add((new Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.SetTarget(if b then 0.8f else 0.5f))) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
+            fr.State <- WidgetState.Disabled
+            
+        override this.Draw() =
+            let bbounds = Rect.sliceTop buttonSize this.Bounds
+            Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Color.Black) Sprite.Default
+            Draw.rect bbounds (Screens.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+            Text.drawFill(Themes.font(), label, Rect.sliceTop 20.0f bbounds, Color.White, 0.5f)
+            Text.drawFill(Themes.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
+            base.Draw()
+
+    type TextEntry(s: ISettable<string>, bind: ISettable<Bind> option, prompt: string) as this =
+        inherit Frame()
+
+        let color = new AnimationFade(0.5f)
+
+        let mutable active = false
+        let toggle() =
+            active <- not active
+            if active then
+                color.SetTarget(1.0f)
+                Input.createInputMethod(s)
+            else
+                color.SetTarget(0.5f)
+                Input.removeInputMethod()
+
+        do
+            this.Animation.Add(color)
+            if Option.isNone bind then toggle()
+            this.Add(
+                new TextBox(
+                    (fun () ->
+                        match bind with
+                        | Some b ->
+                            match s.Get() with
+                            | "" -> sprintf "Press %s to %s" (b.Get().ToString()) prompt
+                            | text -> text
+                        | None -> prompt),
+                    (fun () -> Screens.accentShade(255, 1.0f, color.Value)), 0.0f));
+            this.Add(
+                new Clickable((if (Option.isSome bind) then toggle else K ()), ignore))
+
+        override this.Update(time, bounds) =
+            base.Update(time, bounds)
+            match bind with
+            | Some b -> if b.Get().Tapped(true) then toggle()
+            | None -> ()
+
+        interface IDisposable with
+            member this.Dispose() =
+                if active then Input.removeInputMethod()

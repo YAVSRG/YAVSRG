@@ -59,12 +59,12 @@ module Gameplay =
                 | Some c -> cc, c
                 | None ->
                     Logging.Error("Could not load chart file: " + cc.FilePath) ""
-                    cache.GetGroups(K "All") (Comparison(fun _ _ -> 0))
+                    cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) ""
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, cache.LoadChart(c).Value
             | None ->
                 Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Get()) ""
-                cache.GetGroups(K "All") (Comparison(fun _ _ -> 0))
+                cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) ""
                 |> fun d -> d.["All"].[0]
                 |> fun c -> c, cache.LoadChart(c).Value
         changeChart(c, ch)

@@ -15,7 +15,7 @@ module Input =
     let mutable internal mousey = 0.f
     let mutable internal mousescroll = 0
     let mutable internal clickhandled = false
-    let mutable private inputmethod: Setting<string> list = []
+    let mutable private inputmethod: ISettable<string> list = []
 
     let internal freeIM = List.isEmpty inputmethod
 
@@ -60,7 +60,7 @@ module Input =
         clickhandled <- false
         mousescroll <- 0
 
-    let createInputMethod(s: Setting<string>) =
+    let createInputMethod(s: ISettable<string>) =
         inputmethod <- s :: inputmethod
 
     let removeInputMethod() =
@@ -85,6 +85,7 @@ module Mouse =
     let Hover((l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
 
 type Bind =
+    | Dummy
     | Key of Key
     | Mouse of MouseButton
     | Shift of Bind
@@ -94,6 +95,7 @@ type Bind =
     with
         override this.ToString() =
             match this with
+            | Dummy -> "DUMMY"
             | Key k -> k.ToString()
             | Mouse m -> "M"+m.ToString()
             | Shift b -> "Shift + " + b.ToString()
@@ -102,6 +104,7 @@ type Bind =
             | Joystick _ -> "nyi"
         member this.Pressed(overrideIM) =
             match this with
+            | Dummy -> false
             | Key k -> Keyboard.pressed(k, overrideIM)
             | Mouse m -> Mouse.pressed(m)
             | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Pressed(overrideIM)
@@ -110,6 +113,7 @@ type Bind =
             | _ -> false
         member this.Tapped(overrideIM) =
             match this with
+            | Dummy -> false
             | Key k -> Keyboard.tapped(k, overrideIM)
             | Mouse m -> Mouse.Click(m)
             | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Tapped(overrideIM)
@@ -120,7 +124,9 @@ type Bind =
         //todo: maybe put it in later
         member this.Released() =
             match this with
+            | Dummy -> false
             | Key k -> Keyboard.released(k)
             | Mouse m -> Mouse.release(m)
             | Shift b | Alt b | Ctrl b -> b.Released()
             | _ -> false
+        static member DummyBind = new Setting<Bind>(Dummy)

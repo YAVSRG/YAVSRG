@@ -17,7 +17,7 @@ type AnchorPoint(value, anchor) =
     member this.MoveRelative(min, max, value) = this.SetTarget(value - min - (max - min) * anchor)
     member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.SetValue(value - min - (max - min) * anchor)
 
-type WidgetState = Normal = 1uy | Active = 2uy | Disabled = 3uy | Uninitialised = 4uy
+type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
 
 type Widget() =
 
@@ -64,7 +64,7 @@ type Widget() =
     member this.Position = (left, top, right, bottom)
     member this.State with get() = state and set(value) = state <- value
     member this.Children = children :> seq<Widget>
-    member this.Initialised = byte (this.State &&& WidgetState.Uninitialised) = 0uy
+    member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
 
     //todo: locks on children for thread protection
     abstract member Draw: unit -> unit
