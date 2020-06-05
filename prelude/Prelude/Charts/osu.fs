@@ -175,18 +175,19 @@ module osu =
         Parsing of .osu and .osb formats
     *)
 
+    let private isLetterOrDigit c = isLetter c || isDigit c
     let private comma = pchar ','
     let private colon = pchar ':'
     let private pipe = pchar '|'
     let private parseNum = pfloat
     let private parseInt = pint64 |>> int
-    let private parseName = (many1Satisfy isLetter)
+    let private parseName = (many1Satisfy isLetterOrDigit)
     let private parseQuote =
         between (pchar '"') (pchar '"') (many1Satisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
 
     let private parseKeyValue = parseName .>> spaces .>> colon .>> spaces .>>. (restOfLine true)
-    let private parseHeaderTitle = between (pchar '[') (pchar ']') parseName
-    let parseHeader: Parser<Header, unit> = parseHeaderTitle .>> newline .>>. many parseKeyValue |>> Header
+    let private parseHeaderTitle(name) = pstring ("[" + name + "]") >>% name
+    let parseHeader(name): Parser<Header, unit> = parseHeaderTitle(name) .>> newline .>>. many parseKeyValue |>> Header
 
     let parseTimingPoint: Parser<TimingPoint, unit> =
         (tuple4 (parseNum .>> comma) (parseNum .>> comma) (parseInt .>> comma) (parseInt .>> comma))
@@ -276,26 +277,26 @@ module osu =
     let parseStoryboardEvent =
         (pstring "Animation" >>. comma
             >>. (tuple3
-                    (tuple4 (parseName .>> comma |>> Layer.Parse) (parseName .>> comma |>> SpriteOrigin.Parse)
-                        (parseQuote .>> comma) (parseNum .>> comma))
-                    ((tuple4 (parseNum .>> comma) (parseInt .>> comma) (parseNum .>> comma) (parseName |>> LoopType.Parse))
-                    .>> pchar '\n') (parseSpriteEvents (pchar '_' <|> pchar ' ')))
+                (tuple4 (parseName .>> comma |>> Layer.Parse) (parseName .>> comma |>> SpriteOrigin.Parse)
+                    (parseQuote .>> comma) (parseNum .>> comma))
+                ((tuple4 (parseNum .>> comma) (parseInt .>> comma) (parseNum .>> comma) (parseName |>> LoopType.Parse))
+                .>> pchar '\n') (parseSpriteEvents (pchar '_' <|> pchar ' ')))
             |>> fun ((layer, origin, file, x), (y, frames, frameTime, loopType), events) ->
                 Animation(layer, origin, file, (x, y), frames, frameTime, loopType, events))
 
         <|> (pstring "Sprite" >>. comma
-                >>. ((tuple5 (parseName .>> comma |>> Layer.Parse) (parseName .>> comma |>> SpriteOrigin.Parse)
-                        (parseQuote .>> comma) (parseNum .>> comma) parseNum) .>> pchar '\n')
-                .>>. (parseSpriteEvents (pchar '_' <|> pchar ' '))
-                |>> fun ((layer, origin, file, x, y), events) -> Sprite(layer, origin, file, (x, y), events))
+            >>. ((tuple5 (parseName .>> comma |>> Layer.Parse) (parseName .>> comma |>> SpriteOrigin.Parse)
+                    (parseQuote .>> comma) (parseNum .>> comma) parseNum) .>> pchar '\n')
+            .>>. (parseSpriteEvents (pchar '_' <|> pchar ' '))
+            |>> fun ((layer, origin, file, x, y), events) -> Sprite(layer, origin, file, (x, y), events))
 
         <|> ((pstring "Background" <|> pstring "0") >>. comma
-                >>. (tuple4 (parseNum .>> comma) (parseQuote .>> comma) (parseNum .>> comma) parseNum)
-                |>> fun (time, file, x, y) -> Background(file, (x, y)))
+            >>. (tuple3 (parseNum .>> comma) parseQuote ((opt (tuple2 (comma >>. parseNum) (comma >>. parseNum))) |>> Option.defaultValue (0.0, 0.0)))
+            |>> fun (time, file, (x, y)) -> Background(file, (x, y)))
          
         <|> ((pstring "Video" <|> pstring "1") >>. comma
-                >>. (tuple4 (parseNum .>> comma) (parseQuote .>> comma) (parseNum .>> comma) parseNum)
-                |>> fun (time, file, x, y) -> Video(time, file, (x, y)))
+            >>. (tuple3 (parseNum .>> comma) parseQuote ((opt (tuple2 (comma >>. parseNum) (comma >>. parseNum))) |>> Option.defaultValue (0.0, 0.0)))
+            |>> fun (time, file, (x, y)) -> Video(time, file, (x, y)))
          
         <|> ((pstring "Break" <|> pstring "2") >>. comma
             >>.  (parseNum .>> comma) .>>. parseNum
@@ -532,13 +533,14 @@ module osu =
 
     let parseBeatmap =
         tuple4 (pstring "osu file format v" >>. restOfLine true .>> spaces)
-            (parseHeader .>> spaces)  //General
-            (parseHeader .>> spaces)  //Metadata
-            (parseHeader .>> spaces)  //Editor
+            (parseHeader("General") .>> spaces)  //General
+            (parseHeader("Editor") .>> spaces)  //Editor
+            (parseHeader("Metadata") .>> spaces)  //Metadata
         .>>.
-        tuple4 (parseHeader .>> spaces) (*Difficulty*) (parseEvents .>> spaces) (parseTimingPoints .>> spaces)
+        tuple5 (parseHeader("Difficulty") .>> spaces) (*Difficulty*) (parseEvents .>> spaces) (parseTimingPoints .>> spaces)
+            (optional (parseHeader("Colours") .>> spaces))
             (parseHitObjects .>> spaces)
-        |>> fun ((format, general, editor, metadata), (difficulty, events, timingpoints, hitobjects)) ->
+        |>> fun ((format, general, editor, metadata), (difficulty, events, timingpoints, _, hitobjects)) ->
             (readGeneral general, readEditor editor, readMetadata metadata, readDifficulty difficulty, events, hitobjects,
              timingpoints)
 

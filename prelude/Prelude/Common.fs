@@ -14,19 +14,29 @@ module Common =
     Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
     (Auto generation will be done with reflection)
 *)
+    [<AbstractClass>]
+    type ISettable<'T>() =
+        abstract member Set: 'T -> unit
+        abstract member Get: unit -> 'T
 
     type Setting<'T>(value : 'T) =
+        inherit ISettable<'T>()
         let mutable value = value
-        member this.Set(newValue) = value <- newValue
-        member this.Get() = value
+        override this.Set(newValue) = value <- newValue
+        override this.Get() = value
         override this.ToString() = value.ToString()
+
+    type WrappedSetting<'T, 'U>(setting: Setting<'U>, set: 'T -> 'U, get: 'U -> 'T) =
+        inherit ISettable<'T>()
+        override this.Set(newValue) = setting.Set(set(newValue))
+        override this.Get() = get(setting.Get())
 
     [<AbstractClass>]
     type NumSetting<'T when 'T : comparison>(value : 'T, min : 'T, max : 'T) =
         inherit Setting<'T>(value)
         abstract member SetPercent: float32 -> unit
         abstract member GetPercent: unit -> float32
-        member this.Set(newValue) = base.Set(if newValue > max then max elif newValue < min then min else newValue)
+        override this.Set(newValue) = base.Set(if newValue > max then max elif newValue < min then min else newValue)
         member this.Min = min
         member this.Max = max
         override this.ToString() = sprintf "%s (%A - %A)" (base.ToString()) min max
@@ -40,11 +50,11 @@ module Common =
         inherit NumSetting<float>(value, min, max)
         override this.SetPercent(pc: float32) = this.Set(min + (max - min) * float pc)
         override this.GetPercent() = (this.Get() - min) / (max - min) |> float32
-        member this.Set(newValue: float) = base.Set(Math.Round(newValue, 2))
+        override this.Set(newValue: float) = base.Set(Math.Round(newValue, 2))
 
     type StringSetting(value: string, allowSpecialChar: bool) =
         inherit Setting<string>(value)
-        member this.Set(newValue) = base.Set(if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, ""))
+        override this.Set(newValue) = base.Set(if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, ""))
 
 (*
     Logging
