@@ -74,7 +74,7 @@ type Widget() =
         |> Seq.iter (fun w -> w.Draw())
 
     abstract member Update: float * Rect -> unit
-    default this.Update(elapsedTime, (l, t, r, b): Rect) =
+    default this.Update(elapsedTime, struct (l, t, r, b): Rect) =
         animation.Update(elapsedTime)
         this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
         bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
@@ -253,4 +253,4 @@ module Screens =
         //let scale = Math.Max(Render.vwidth / float32 bg.Width, Render.vheight / float32 bg.Height)
         //let px = depth * parallaxZ.Value * parallaxX.Value / Render.vwidth * 0.25f
         //let py = depth * parallaxZ.Value * parallaxY.Value / Render.vheight * 0.25f
-        Draw.quad (Quad.ofRect bounds) (Quad.colorOf color) (bg, Quad.ofRect uv)
+        Draw.quad (Quad.ofRect bounds) (Quad.colorOf color) struct (bg, Quad.ofRect uv)

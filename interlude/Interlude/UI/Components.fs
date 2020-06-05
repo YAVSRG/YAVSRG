@@ -73,8 +73,8 @@ module Components =
             this.Animation.Add(color)
             this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
 
-        override this.Update(time, (l, t, r, b)) =
-            base.Update(time, (l, t, r, b))
+        override this.Update(time, struct (l, t, r, b)) =
+            base.Update(time, struct (l, t, r, b))
             if (Mouse.pressed(Input.MouseButton.Left) && dragging) then
                 let amt = (Mouse.X() - l) / (r - l)
                 setting.SetPercent(amt)

@@ -82,7 +82,7 @@ module Mouse =
             Input.mouse.Contains(b) && not(Input.oldMouse.Contains(b))
     let internal pressed(b) = Input.mouse.Contains(b)
     let internal release(b) = Input.oldMouse.Contains(b) && not(Input.mouse.Contains(b))
-    let Hover((l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
+    let Hover(struct (l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
 
 type Bind =
     | Dummy

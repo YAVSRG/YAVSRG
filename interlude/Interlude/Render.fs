@@ -14,41 +14,41 @@ type Rect = (struct(float32 * float32 * float32 * float32))
 
 module Rect = 
 
-    let create l t r b : Rect = l, t, r, b
-    
-    let width ((left, _, right, _): Rect) = right - left
-    let height ((_, top, _, bottom): Rect) = bottom - top
+    let create l t r b : Rect = struct(l, t, r, b)
 
-    let centerX ((left, _, right, _): Rect) = (right + left) * 0.5f
-    let centerY ((_, top, _, bottom): Rect) = (bottom + top) * 0.5f
+    let width (struct (left, _, right, _): Rect) = right - left
+    let height (struct (_, top, _, bottom): Rect) = bottom - top
+
+    let centerX (struct (left, _, right, _): Rect) = (right + left) * 0.5f
+    let centerY (struct (_, top, _, bottom): Rect) = (bottom + top) * 0.5f
     let center (r: Rect) = (centerX r, centerY r)
     let centerV (r: Rect) = new Vector2(centerX r, centerY r)
 
-    let expand (x,y) ((left, top, right, bottom): Rect) =
+    let expand (x,y) (struct (left, top, right, bottom): Rect) =
         struct (left - x, top - y, right + x, bottom + y)
 
-    let sliceLeft v ((left, top, _, bottom): Rect) =
+    let sliceLeft v (struct (left, top, _, bottom): Rect) =
         struct (left, top, left + v, bottom)
 
-    let sliceTop v ((left, top, right, _): Rect) =
+    let sliceTop v (struct (left, top, right, _): Rect) =
         struct (left, top, right, top + v)
 
-    let sliceRight v ((_, top, right, bottom): Rect) =
+    let sliceRight v (struct (_, top, right, bottom): Rect) =
         struct (right - v, top, right, bottom)
 
-    let sliceBottom v ((left, _, right, bottom): Rect) =
+    let sliceBottom v (struct (left, _, right, bottom): Rect) =
         struct (left, bottom - v, right, bottom)
 
-    let trimLeft v ((left, top, right, bottom): Rect) =
+    let trimLeft v (struct (left, top, right, bottom): Rect) =
         struct (left + v, top, right, bottom)
-        
-    let trimTop v ((left, top, right, bottom): Rect) =
+
+    let trimTop v (struct (left, top, right, bottom): Rect) =
         struct (left, top + v, right, bottom)
-                
-    let trimRight v ((left, top, right, bottom): Rect) =
+
+    let trimRight v (struct (left, top, right, bottom): Rect) =
         struct (left, top, right - v, bottom)
-                        
-    let trimBottom v ((left, top, right, bottom): Rect) =
+
+    let trimBottom v (struct (left, top, right, bottom): Rect) =
         struct (left, top, right, bottom - v)
 
     let zero = create 0.f 0.f 0.f 0.f
@@ -62,13 +62,13 @@ type Quad = (struct(Vector2 * Vector2 * Vector2 * Vector2))
 type QuadColors = (struct(Color * Color * Color * Color))
 
 module Quad =
-    
-    let ofRect ((l, t, r, b) : Rect) : Quad =
-        (new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b))
 
-    let create c1 c2 c3 c4 : Quad = c1, c2, c3, c4
+    let ofRect (struct (l, t, r, b) : Rect) : Quad =
+        struct (new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b))
 
-    let colorOf c : QuadColors = c, c, c, c
+    let create c1 c2 c3 c4 : Quad = struct (c1, c2, c3, c4)
+
+    let colorOf c : QuadColors = struct (c, c, c, c)
 
 (*
     Sprites and content uploading
@@ -77,12 +77,12 @@ module Quad =
 [<Struct>]
 type Sprite = { ID:int; Width:int; Height:int; Rows:int; Columns:int }
 with
-    member this.WithUV(q: Quad): SpriteQuad = (this, q)
+    member this.WithUV(q: Quad): SpriteQuad = struct (this, q)
     member this.TilingUV(s, x, y): SpriteQuad =
         let w = float32 this.Width
-        this, Quad.ofRect(Rect.create (x / w / s) (y / w / s) (x / w / s + s) (y / w / s + s))
+        struct (this, Quad.ofRect(Rect.create (x / w / s) (y / w / s) (x / w / s + s) (y / w / s + s)))
     static member Default = { ID=0; Width=1; Height=1; Rows=1; Columns=1 }
-    static member DefaultQuad: SpriteQuad = (Sprite.Default, Quad.ofRect Rect.one)
+    static member DefaultQuad: SpriteQuad = struct (Sprite.Default, Quad.ofRect Rect.one)
 and SpriteQuad = (struct(Sprite * Quad))
 
 module Sprite =
@@ -194,7 +194,7 @@ module Stencil =
 
 module Draw =
 
-    let quad ((p1, p2, p3, p4): Quad) ((c1, c2, c3, c4): QuadColors) ((s,(u1,u2,u3,u4)): SpriteQuad) =
+    let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1,u2,u3,u4)): SpriteQuad) =
         GL.BindTexture(TextureTarget.Texture2D, s.ID)
         GL.Begin(PrimitiveType.Quads)
         GL.Color4(c1); GL.TexCoord2(u1); GL.Vertex2(p1)

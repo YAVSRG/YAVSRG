@@ -92,8 +92,8 @@ type GameOptions = {
 
 module Options =
     let resolutions: (struct (int * int)) array =
-        [|(800, 600); (1024, 768); (1280, 800); (1280, 1024); (1366, 768); (1600, 900);
-            (1600, 1024); (1680, 1050); (1920, 1080); (2715, 1527)|]
+        [|struct (800, 600); struct (1024, 768); struct (1280, 800); struct (1280, 1024); struct (1366, 768); struct (1600, 900);
+            struct (1600, 1024); struct (1680, 1050); struct (1920, 1080); struct (2715, 1527)|]
 
     let getResolution res =
         match res with

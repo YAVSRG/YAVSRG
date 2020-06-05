@@ -14,3 +14,6 @@
 /Prelude/Prelude/obj
 /.vs/YAVSRG
 .ionide/symbolCache.db
+
+.fake
+.ionide
