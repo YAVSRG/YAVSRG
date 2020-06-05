@@ -308,7 +308,7 @@ module Score =
     let createHPMetric (config : HPSystemConfig) scoring : HPSystem =
         match config with
         | VG ->
-            new HPSystem(
+            HPSystem(
                 "VG", 0.5,
                 (fun j _ -> 
                     match j with

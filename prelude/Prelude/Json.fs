@@ -79,7 +79,7 @@ module Json =
 
         override this.WriteJson(writer, value, serializer) =
             let value =
-                match value = null with
+                match isNull value with
                 | true -> null
                 | false ->
                     let _, fields = FSharpValue.GetUnionFields(value, value.GetType())
@@ -98,7 +98,7 @@ module Json =
             let value = serializer.Deserialize(reader, innerType)
             let cases = FSharpType.GetUnionCases t
 
-            if value = null then
+            if isNull value then
               FSharpValue.MakeUnion(cases.[0], [||])
             else
               FSharpValue.MakeUnion(cases.[1], [|value|])
@@ -107,7 +107,7 @@ module Json =
         inherit JsonConverter()
 
         override this.CanConvert t =
-            t.IsGenericType && t.GetGenericTypeDefinition().Equals(typedefof<Setting<_>>) || (t.BaseType <> null && this.CanConvert t.BaseType)
+            t.IsGenericType && t.GetGenericTypeDefinition().Equals(typedefof<Setting<_>>) || (not (isNull t.BaseType) && this.CanConvert t.BaseType)
 
         override this.WriteJson(writer, value, serializer) =
             serializer.Serialize(writer, value.GetType().GetMethod("Get").Invoke(value, [||]))
@@ -115,11 +115,11 @@ module Json =
         override this.ReadJson(reader, t, existingValue, serializer) =
             let innerType = t.GetGenericArguments().[0]
             let innerValue = serializer.Deserialize(reader, innerType)
-            if existingValue <> null then
+            if isNull existingValue then
+                t.GetConstructor([|innerType|]).Invoke([|innerValue|])
+            else
                 t.GetMethod("Set").Invoke(existingValue, [|innerValue|]) |> ignore
                 existingValue
-            else
-                t.GetConstructor([|innerType|]).Invoke([|innerValue|])
 
     type RecordConverter() = 
         inherit JsonConverter()
@@ -128,7 +128,7 @@ module Json =
         
         //only suitable for records with a static "Default" member
         //deserialises record mostly as usual but all missing values are replaced with the values from <RECORDTYPE>.Default
-        override this.CanConvert t = FSharpType.IsRecord t && t.GetProperty("Default") <> null
+        override this.CanConvert t = FSharpType.IsRecord t && not (isNull <| t.GetProperty("Default"))
 
         override this.WriteJson(writer, value, serializer) =
             writer.WriteStartObject()
@@ -150,17 +150,17 @@ module Json =
                 let name = reader.Value :?> string
                 reader.Read() |> ignore
                 let prop = t.GetProperty(name)
-                if prop <> null then
+                if isNull prop then
+                    reader.Skip()
+                else
                     let value =
                         //hack to deserialise settings while keeping their ranges/default values intact when relevant
                         if sc.CanConvert prop.PropertyType then
                             sc.ReadJson(reader, prop.PropertyType, FSharpValue.GetRecordField(record, prop), serializer)
                         else
                             serializer.Deserialize(reader, prop.PropertyType)
-                    if value <> null then
+                    if not (isNull value) then
                         record <- copyAndUpdate record prop value
-                else
-                    reader.Skip()
                 reader.Read() |> ignore
             record
 
@@ -173,7 +173,7 @@ module Json =
         settings
 
     module JsonHelper = 
-        let s = new JsonSerializerSettings(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate) |> addConverters |> JsonSerializer.Create
+        let s = JsonSerializerSettings(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate) |> addConverters |> JsonSerializer.Create
 
         let load<'T> string : 'T = 
             use jr = new JsonTextReader(new StringReader(string))
