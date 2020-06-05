@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data
+namespace Prelude.Data
 
 open System
 open System.IO
@@ -114,4 +114,3 @@ module Themes =
                 | Zip z -> z.ExtractToDirectory(targetPath)
                 | Folder f -> failwith "nyi, do this manually for now"
             else //copying to zip
-                failwith "nyi, do this manually for now"

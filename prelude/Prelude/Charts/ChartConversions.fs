@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts
+namespace Prelude.Charts
 
 open System
 open System.IO
@@ -404,4 +404,3 @@ module ChartConversions =
         copyFile (Path.Combine(sourceFolder, c.Header.AudioFile)) (Path.Combine(targetFolder, c.Header.AudioFile))
         copyFile (Path.Combine(sourceFolder, c.Header.BGFile)) (Path.Combine(targetFolder, c.Header.BGFile))
         saveChartFile c
-        c
