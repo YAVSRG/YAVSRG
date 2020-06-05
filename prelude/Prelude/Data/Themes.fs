@@ -65,9 +65,12 @@ module Themes =
 
         member this.GetFile([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
-            match storage with
-            | Zip z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open()
-            | Folder f -> File.OpenRead(Path.Combine(f, p)) :> Stream
+            try
+                match storage with
+                | Zip z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open()
+                | Folder f -> File.OpenRead(Path.Combine(f, p)) :> Stream
+            with
+            |  err -> reraise()
 
         member this.GetFiles([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
@@ -94,13 +97,16 @@ module Themes =
             | Folder f -> Directory.EnumerateDirectories(p)
         
         member this.GetJson([<ParamArray>] path: string array) =
-            use stream = this.GetFile(path)
-            use tr = new StreamReader(stream)
-            let json = tr.ReadToEnd() |> JsonHelper.load
-            match storage with
-            | Zip _ -> () //do not write data to zip archives
-            | Folder f -> JsonHelper.saveFile json (Path.Combine(f, Path.Combine(path)))
-            json
+            try
+                use stream = this.GetFile(path)
+                use tr = new StreamReader(stream)
+                let json = tr.ReadToEnd() |> JsonHelper.load
+                match storage with
+                | Zip _ -> () //do not write data to zip archives
+                | Folder f -> JsonHelper.saveFile json (Path.Combine(f, Path.Combine(path)))
+                Some json
+            with
+            | err -> Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString()); None
 
         member this.CopyTo(targetPath) =
             if Directory.Exists(targetPath) then

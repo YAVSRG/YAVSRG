@@ -98,9 +98,17 @@ module ChartManager =
                 Some c
             | None -> None
 
-        member this.GetGroups grouping (sorting : Comparison<CachedChart>) =
+        member private this.FilterCharts(filter: string) =
+            let filter = filter.ToLower()
+            seq {
+                for c in charts.Values do
+                    if (c.Title + c.Artist + c.Creator + c.DiffName).ToLower().Contains(filter) then
+                        yield c
+            }
+
+        member this.GetGroups grouping (sorting : Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()
-            for c in charts.Values do
+            for c in this.FilterCharts filter do
                 let s = grouping(c)
                 if (groups.ContainsKey(s) |> not) then groups.Add(s, new List<CachedChart>())
                 groups.[s].Add(c)
@@ -108,7 +116,8 @@ module ChartManager =
                 g.Sort(sorting)
             groups
 
-        member this.GetCollections (sorting : Comparison<CachedChart>) = 
+        member this.GetCollections (sorting : Comparison<CachedChart>) filter = 
+            //todo: filter
             let groups = new Dictionary<string, List<CachedChart>>()
             for name in collections.Keys do
                 let c = collections.[name]

@@ -124,7 +124,7 @@ module ChartConversions =
                 DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename }
         let snaps = convertHitObjects notes keys
         let (bpm, sv) = (convertTimingPoints timing keys (offsetOf (snaps.GetPointAt(infinity))))
-        Chart(keys, header, snaps, bpm, sv, meta.Title + " [" + meta.Version + "].yav")
+        Chart(keys, header, snaps, bpm, sv, String.Join("_", (meta.Title + " [" + meta.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
 
     (*
         Conversion code for StepMania -> Interlude
@@ -370,14 +370,19 @@ module ChartConversions =
 
     let loadAndConvertFile (path : string) : Chart list =
         match Path.GetExtension(path).ToLower() with
-          | ".yav" ->
+        | ".yav" ->
             match loadChartFile path with
             | Some chart -> [chart]
             | None -> []
-          | ".sm" -> convert_stepmania_interlude (loadStepmaniaFile path) (Path.GetDirectoryName path)
-          | ".osu" -> 
-            let map = loadBeatmapFile path in if getGameMode map = GameMode.Mania then [convert_osu_interlude (loadBeatmapFile path)] else []; 
-          | _ -> []
+        | ".sm" -> convert_stepmania_interlude (loadStepmaniaFile path) (Path.GetDirectoryName path)
+        | ".osu" -> 
+            try
+                let map = loadBeatmapFile path
+                if getGameMode map = GameMode.Mania && (let (_,_,_,d,_,_,_) = map in (let keys = d.CircleSize |> int in 3 <= keys && keys <= 10)) then
+                    [convert_osu_interlude (loadBeatmapFile path)] else []
+            with
+            | err -> Logging.Error("Could not load .osu file: " + path) (err.ToString()); []
+        | _ -> []
 
     //Writes chart to new location, including copying its background and audio files
     let relocateChart (chart : Chart) (sourceFolder : string) (targetFolder : string) =
