@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -26,6 +26,8 @@
     <Compile Include="UI\Components.fs" />
     <Compile Include="UI\Screens\ScreenOptions.fs" />
     <Compile Include="UI\Screens\ScreenLevelSelect.fs" />
+    <Compile Include="UI\Screens\ScreenScore.fs" />
+    <Compile Include="UI\Screens\ScreenPlay.fs" />
     <Compile Include="UI\ScreensMain.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />

@@ -152,7 +152,6 @@ module Themes =
                 Logging.Error("Failed to load background image: " + file) (err.ToString())
                 accentColor <- themeConfig.DefaultAccentColor
                 getTexture("background")
-
         | ext ->
             Logging.Error("Unsupported file type for background: " + ext) ""
             accentColor <- themeConfig.DefaultAccentColor

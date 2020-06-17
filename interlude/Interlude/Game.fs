@@ -38,7 +38,8 @@ type Game(config: GameConfig) =
     override this.OnResize (e) =
         base.OnResize (e)
         GL.Viewport(base.ClientRectangle)
-        Render.resize(float32 base.Width, float32 base.Height)
+        Render.resize(base.Width, base.Height)
+        FBO.init()
 
     override this.OnRenderFrame (e) =
         base.OnRenderFrame (e)
@@ -57,7 +58,8 @@ type Game(config: GameConfig) =
     override this.OnLoad (e) =
         base.OnLoad(e)
         this.ApplyConfig(config)
-        Render.init(float32 base.Width, float32 base.Height)
+        Render.init(base.Width, base.Height)
+        FBO.init()
         Themes.font() |> ignore
         Input.init(this)
         Gameplay.init()

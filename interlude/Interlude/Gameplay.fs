@@ -51,7 +51,9 @@ module Gameplay =
         cache.Save()
         
     let init() =
+        //cache.RebuildCache (fun x -> Logging.Info(x) "") |> ignore
         //cache.ConvertPackFolder(osuSongFolder) "osu!" (fun x -> Logging.Info(x) "") |> ignore
+       
         let c, ch = 
             match cache.LookupChart(Options.options.CurrentChart.Get()) with
             | Some cc ->

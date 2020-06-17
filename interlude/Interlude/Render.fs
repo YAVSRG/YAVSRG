@@ -125,10 +125,14 @@ module Sprite =
 
 module Render =
 
+    let mutable (rwidth, rheight) = (1, 1)
     let mutable (vwidth, vheight) = (1.0f, 1.0f)
     let mutable bounds = Rect.zero
 
     let resize(width, height) =
+        rwidth <- width
+        rheight <- height
+        let width, height = float32 width, float32 height
         GL.MatrixMode(MatrixMode.Projection)
         GL.LoadIdentity()
         
@@ -137,8 +141,8 @@ module Render =
                 let r = Math.Max(1920.0f / width, 1000.0f / height);
                 (width * r, height * r)
             else (width, height)
-        vwidth <- width
-        vheight <- height
+        vwidth <- float32 <| Math.Round(float width)
+        vheight <- float32 <| Math.Round(float height)
         GL.Ortho(0.0, float vwidth, float vheight, 0.0, 0.0, 1.0)
         bounds <- Rect.create 0.f 0.f vwidth vheight
 
@@ -157,10 +161,72 @@ module Render =
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
         resize(width, height)
-        
-        //possible todo: font management here
 
-        //todo: fbo storage here too
+module FBO =
+
+    let private pool_size = 6
+    let private fbo_ids = Array.zeroCreate<int> pool_size
+    let private texture_ids = Array.zeroCreate<int> pool_size
+    let private in_use = Array.zeroCreate<bool> pool_size
+
+    let mutable private stack: int list = []
+    
+    type FBO =
+        { sprite: Sprite; fbo_id: int; fbo_index: int }
+        with
+            member this.Bind() =
+                if List.isEmpty stack then
+                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
+                    GL.Viewport(0, 0, int Render.vwidth, int Render.vheight)
+                GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, this.fbo_id);
+                stack <- this.fbo_id :: stack
+            member this.Unbind() =
+                stack <- List.tail stack
+                if List.isEmpty stack then
+                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
+                    GL.Viewport(0, 0, Render.rwidth, Render.rheight);
+                else
+                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, List.head stack);
+            interface IDisposable with member this.Dispose() = in_use.[this.fbo_index] <- false
+
+    let init() =
+        for i in 0 .. (pool_size - 1) do
+            if (texture_ids.[i] <> 0) then
+                GL.DeleteTexture(texture_ids.[i])
+                texture_ids.[i] <- 0
+
+            if (fbo_ids.[i] <> 0) then
+                GL.Ext.DeleteFramebuffer(fbo_ids.[i])
+                fbo_ids.[i] <- 0
+
+            texture_ids.[i] <- GL.GenTexture()
+            GL.BindTexture(TextureTarget.Texture2D, texture_ids.[i])
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, int Render.vwidth, int Render.vheight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat)
+
+            GL.Ext.GenFramebuffers(1, &fbo_ids.[i]);
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fbo_ids.[i]);
+            GL.RenderbufferStorage(RenderbufferTarget.RenderbufferExt, RenderbufferStorage.Depth24Stencil8, int Render.vwidth, int Render.vheight);
+            GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, texture_ids.[i], 0);
+        
+        GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+
+    let create() =
+        { 0 .. (pool_size - 1) }
+        |> Seq.tryFind (fun i -> not in_use.[i])
+        |> function
+            | None -> failwith "All FBOs in pool are in use. Change pool size or (far more likely) make sure you dispose of your FBOs"
+            | Some i ->
+                let sprite: Sprite = { ID = texture_ids.[i]; Width = int Render.vwidth; Height = int Render.vheight; Rows = 1; Columns = 1 }
+                in_use.[i] <- true;
+                let fbo = { sprite = sprite; fbo_id = fbo_ids.[i]; fbo_index = i }
+                fbo.Bind()
+                GL.Clear(ClearBufferMask.ColorBufferBit)
+                fbo
 
 module Stencil =
     let mutable depth = 0
