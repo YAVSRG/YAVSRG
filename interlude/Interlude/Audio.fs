@@ -37,7 +37,7 @@ module Audio =
     | Wait
     | Action of (unit -> unit)
 
-    let private LEADIN_TIME = 3000.0
+    let private LEADIN_TIME = 2000.0
     
     let mutable private nowplaying: Track = Track.Default
     let private fft: float32 array = Array.zeroCreate 1024
@@ -51,7 +51,7 @@ module Audio =
 
     let audioDuration() = nowplaying.Duration
 
-    let time() = float timer.ElapsedMilliseconds + timerStart
+    let time() = rate * (float timer.ElapsedMilliseconds) + timerStart
 
     let timeWithOffset() = time() + localOffset + globalOffset * rate
 
@@ -68,7 +68,7 @@ module Audio =
             channelPlaying <- false
         timer.Restart()
 
-    let playLeadIn() = playFrom(-LEADIN_TIME)
+    let playLeadIn() = playFrom(-LEADIN_TIME * rate)
 
     let seek(time) =
         timerStart <- time

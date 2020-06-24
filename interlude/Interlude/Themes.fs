@@ -50,6 +50,7 @@ module Themes =
     let private loadedThemes = new List<Theme>()
 
     let mutable themeConfig = ThemeConfig.Default
+    let mutable noteskinConfig = NoteSkinConfig.Default
     let mutable currentNoteSkin = "default"
     let mutable background = Sprite.Default
     let mutable internal accentColor = Color.White
@@ -70,6 +71,7 @@ module Themes =
     let changeNoteSkin(id: string) =
         let id = if loadedNoteskins.ContainsKey(id) then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default") ""; "default"
         currentNoteSkin <- id
+        noteskinConfig <- fst loadedNoteskins.[id]
         Array.iter
             (fun t -> 
                 if sprites.ContainsKey(t) then

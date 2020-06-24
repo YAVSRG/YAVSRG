@@ -169,7 +169,9 @@ type ScreenLevelSelect() as this =
         //right click scroll logic
         let height = bottom - scrollPos.Value - 300.0f
         scrollPos.SetTarget(Math.Clamp(scrollPos.Target + float32 (Mouse.Scroll()) * 100.0f, -height, 300.0f))
-        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh();
+        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
+        if Options.options.Hotkeys.Select.Get().Tapped(false) then
+            Screens.addScreen(new ScreenPlay())
 
     override this.Draw() =
         selection
