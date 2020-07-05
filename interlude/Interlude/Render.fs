@@ -143,6 +143,7 @@ module Render =
             else (width, height)
         vwidth <- float32 <| Math.Round(float width)
         vheight <- float32 <| Math.Round(float height)
+        //GL.Ortho(-3.0, 3.0, -3.0, 3.0, 0.0, 1.0)
         GL.Ortho(0.0, float vwidth, float vheight, 0.0, 0.0, 1.0)
         bounds <- Rect.create 0.f 0.f vwidth vheight
 

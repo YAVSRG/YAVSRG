@@ -6,6 +6,7 @@ open Prelude.Charts.Interlude
 open Prelude.Editor
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Score
+open Prelude.Gameplay.NoteColors
 open Prelude.Data.ChartManager
 open Prelude.Data.ScoreManager
 open Interlude
@@ -18,8 +19,9 @@ module Gameplay =
     let mutable internal currentCachedChart: CachedChart option = None
     let mutable internal chartSaveData = None
     let mutable modifiedChart: Lazy<ModChart> = lazy ( failwith "tried to access modified chart when none is selected" )
+    let mutable coloredChart: Lazy<ColorizedChart> = lazy ( failwith "tried to access colored chart when none is selected" )
     let mutable replayData: Lazy<ScoreData> = lazy ( null )
-    let mutable rate = 1.0
+    let mutable rate = 1.0f
 
     let selectedMods = ModState()
     let difficultyRating = null
@@ -41,11 +43,12 @@ module Gameplay =
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetScoreData(chart)
         Themes.loadBackground(chart.BGPath)
-        let localOffset = if chart.Notes.IsEmpty then 0.0 else chartSaveData.Value.Offset.Get() - (offsetOf chart.Notes.First)
+        let localOffset = if chart.Notes.IsEmpty() then 0.0f<ms> else chartSaveData.Value.Offset.Get() - (offsetOf <| chart.Notes.First())
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
         Audio.playFrom(chart.Header.PreviewTime)
         Options.options.CurrentChart.Set(cachedChart.FilePath)
         modifiedChart <- getModChart(selectedMods)(chart) |> fst
+        coloredChart <- getColoredChart(Options.profile.ColorStyle.Get())(modifiedChart)
 
     let save() =
         scores.Save()
@@ -73,3 +76,5 @@ module Gameplay =
         changeChart(c, ch)
         //temp while audio code isnt finished (this will automatically happen in future)
         Audio.playFrom(ch.Header.PreviewTime)
+
+        //Options.profile.ColorStyle.Set({ Options.profile.ColorStyle.Get() with Style = ColorScheme.DDR })
