@@ -23,27 +23,27 @@ module ChartConversions =
     let private convertHitObjects (objects : HitObject list) (keys: int) : TimeData<NoteRow> =
         let xToColumn (x : float) = (x / (512.0 / (keys |> float))) |> int
 
-        let getMiddles (holds : (float array)) = 
+        let getMiddles (holds : (Time array)) = 
             makeBitmap (seq {
             for i = 0 to (holds.Length - 1) do
-                if holds.[i] >= 0.0 then yield i
+                if holds.[i] >= 0.0f<ms> then yield i
             })
 
         let updateHolds time (snaps, holds) =
             let mutable s = snaps
-            let mutable minT = Array.fold (fun y x -> if x = -1.0 then y else min y x) infinity holds
+            let mutable minT = Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) (infinityf * 1.0f<ms>) holds
             while minT < time do
                 for k in 0..(keys - 1) do
-                    if (holds.[k] >= 0.0 && holds.[k] = minT) then 
+                    if (holds.[k] >= 0.0f<ms> && holds.[k] = minT) then 
                         match s with
                           | (time, nr) :: ss ->
-                            holds.[k] <- -1.0;
+                            holds.[k] <- -1.0f<ms>;
                             if time = minT then
                                 applyToNoteData NoteType.HOLDTAIL (setBit k) nr
                                 applyToNoteData NoteType.HOLDBODY (unsetBit k) nr
                             else s <- (minT, (makeNoteRow 0us 0us (getMiddles holds) (makeBitmap (seq [k])) 0us 0us 0us)) :: s
                           | [] -> failwith "impossible"
-                minT <- Array.fold (fun y x -> if x = -1.0 then y else min y x) infinity holds
+                minT <- Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) (infinityf * 1.0f<ms>) holds
             (s, holds)
 
         let note k time (snaps, holds) =
@@ -53,8 +53,8 @@ module ChartConversions =
                     else ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
                | [] -> ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
 
-        let hold (k : int) time (release : float) (snaps, (holds : float array)) =
-            assert (holds.[k] = -1.0)
+        let hold (k : int) time (release : Time) (snaps, (holds : Time array)) =
+            assert (holds.[k] = -1.0f<ms>)
             let middles = getMiddles holds
             holds.[k] <- release;
             match snaps with
@@ -69,24 +69,24 @@ module ChartConversions =
               | HoldNote ((x,y), time, endTime, _, _) -> hold (xToColumn x) time endTime (updateHolds time (snaps, holds))
               | _ -> (snaps, holds)
 
-        let (states, _) = updateHolds infinity (List.fold f ([], Array.create<float> 4 -1.0) objects)
+        let (states, _) = updateHolds (infinityf * 1.0f<ms>) (List.fold f ([], Array.create 4 -1.0f<ms>) objects)
         TimeData<NoteRow>(listToDotNet states)
 
-    let private convertTimingPoints (points: TimingPoint list) (keys : int) (endTime : float) : (TimeData<BPM> * MultiTimeData<float>) =
+    let private convertTimingPoints (points: TimingPoint list) (keys : int) (endTime : Time) : (TimeData<BPM> * MultiTimeData<float32>) =
         let rec bpmDurations points = 
             if List.isEmpty points then failwith "no bpm point"
             match (List.head points) with
                 | (TimingPoint.BPM (offset, msPerBeat, _, _, _)) ->
-                    let mutable current : float = msPerBeat
-                    let mutable t : float = offset
-                    let data = new Dictionary<float, float>()
+                    let mutable current : float32<ms/beat> = msPerBeat
+                    let mutable t : Time = offset
+                    let data = new Dictionary<float32<ms/beat>, Time>()
 
                     for p in points do
-                        if (not (data.ContainsKey current)) then data.Add(current, 0.0)
+                        if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
                         match p with
-                            (TimingPoint.SV _) -> ()
-                            | (TimingPoint.BPM (offset, msPerBeat, _, _, _)) -> data.[current] <- data.[current] + offset - t; t <- offset; current <- msPerBeat
-                    if (not (data.ContainsKey current)) then data.Add(current, 0.0)
+                        | (TimingPoint.SV _) -> ()
+                        | (TimingPoint.BPM (offset, msPerBeat, _, _, _)) -> data.[current] <- data.[current] + offset - t; t <- offset; current <- msPerBeat
+                    if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
                     data.[current] <- data.[current] + endTime - t
                     data
                 | _ -> bpmDurations (List.tail points)
@@ -99,15 +99,15 @@ module ChartConversions =
                 | (time, oldValue) :: s -> if oldValue = value then sv else (offset, value) :: sv
 
         let (bpm, sv, _) = 
-            let func ((bpm, sv, scroll) : (TimeDataItem<BPM> list * TimeDataItem<float> list * float)) (point : TimingPoint) : (TimeDataItem<BPM> list * TimeDataItem<float> list * float) =
+            let func ((bpm, sv, scroll) : (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32)) (point : TimingPoint) : (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32) =
                 match point with
                     | (TimingPoint.BPM (offset, msPerBeat, meter, _, _)) -> 
                         (((offset, (meter, msPerBeat)) :: bpm), addOrSkipSV (offset, (mostCommonBpm / msPerBeat)) sv, mostCommonBpm / msPerBeat)
                     | (TimingPoint.SV (offset, value, _, _)) ->
                         (bpm, addOrSkipSV (offset, (value * scroll)) sv, scroll)
-            List.fold func ([], [], 1.0) points
+            List.fold func ([], [], 1.0f) points
 
-        let svData = MultiTimeData<float>(keys)
+        let svData = MultiTimeData<float32>(keys)
         svData.SetChannelData(-1, listToDotNet sv)
         (TimeData(listToDotNet bpm), svData)
 
@@ -123,7 +123,7 @@ module ChartConversions =
                 Title = meta.Title; Artist = meta.Artist; Creator = meta.Creator; SourcePack = "osu!"
                 DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename }
         let snaps = convertHitObjects notes keys
-        let (bpm, sv) = (convertTimingPoints timing keys (offsetOf (snaps.GetPointAt(infinity))))
+        let (bpm, sv) = (convertTimingPoints timing keys (offsetOf (snaps.GetPointAt(infinityf * 1.0f<ms>))))
         Chart(keys, header, snaps, bpm, sv, String.Join("_", (meta.Title + " [" + meta.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
 
     (*
@@ -131,27 +131,27 @@ module ChartConversions =
         Todo: Support freezes, warps, stops
     *)
 
-    let private convert_measures measures bpms start = 
+    let private convert_measures measures (bpms: (float32<beat> * float32<beat/minute>) list) start = 
         let mutable bpms = bpms
-        let meter = 4
-        let states = new List<(Offset * NoteRow)>()
-        let points = new List<(Offset * BPM)>()
+        let meter = 4<beat>
+        let fmeter = float32 meter * 1.0f<beat>
+        let states = new List<(Time * NoteRow)>()
+        let points = new List<(Time * BPM)>()
         let mutable ln : Bitmap = 0us
         let mutable now = start
-        let (t, b) = List.head bpms in points.Add(t, (meter, 60000.0/b))
-        let mutable msPerBeat = 60000.0/b
+        let (_, b) = List.head bpms in points.Add(start, (meter, 60000.0f<ms/minute> / b))
+        let mutable msPerBeat = 60000.0f<ms/minute> / b
         bpms <- List.tail bpms
-        let mutable totalBeats = 0.0;
-        let mutable lo = 0.0
-        let mutable hi = 0.0
+        let mutable totalBeats = 0.0f<beat>;
+        let mutable lo = 0.0f<beat>
+        let mutable hi = 0.0f<beat>
 
-        let convert_measure (m : string list) lo hi =
-            let met = float meter
-            let l = List.length m |> float
-            let sep = msPerBeat * met / l
-            let start = Math.Ceiling(lo * l / met) |> int
-            let finish = Math.Ceiling(hi * l / met) |> int
-            let offset = now + (float start * sep) - (lo * msPerBeat)
+        let convert_measure (m : string list) (lo: float32<beat>) (hi: float32<beat>) =
+            let l = List.length m |> float32
+            let sep = msPerBeat * fmeter / l
+            let start = Math.Ceiling(lo * l / fmeter |> float) |> int
+            let finish = Math.Ceiling(hi * l / fmeter |> float) |> int
+            let offset = now + (float32 start * sep) - (lo * msPerBeat)
 
             for i in start..(finish-1) do
                 let nr = makeNoteRow 0us 0us ln 0us 0us 0us 0us
@@ -169,21 +169,21 @@ module ChartConversions =
                     | 'M' -> applyToNoteData NoteType.MINE (setBit i) nr
                     | _ -> failwith ("unknown note type " + c.ToString())
                     ) m.[i]
-                if isEmptyNoteRow nr then states.Add((offset + float (i - start) * sep),nr)
+                if isEmptyNoteRow nr then states.Add((offset + float32 (i - start) * sep),nr)
 
         List.iteri (fun i m -> 
-            totalBeats <- totalBeats + float meter
-            lo <- 0.0
+            totalBeats <- totalBeats + float32 meter * 1.0f<beat>
+            lo <- 0.0f<beat>
             while (not (List.isEmpty bpms) && fst (List.head bpms) < totalBeats) do
-                hi <- fst (List.head bpms) - totalBeats + float meter
+                hi <- fst (List.head bpms) - totalBeats + fmeter
                 convert_measure m lo hi
                 now <- now + msPerBeat * (hi - lo)
                 lo <- hi
-                let (t, b) = List.head bpms in points.Add(t, (meter, 60000.0/b))
-                msPerBeat <- 60000.0/b
+                let (_, b) = List.head bpms in points.Add(now, (meter, 60000.0f<ms/minute> / b))
+                msPerBeat <- 60000.0f<ms/minute> / b
                 bpms <- List.tail bpms
-            convert_measure m lo (float meter)
-            now <- now + msPerBeat * (float meter - lo)
+            convert_measure m lo fmeter
+            now <- now + msPerBeat * (fmeter - lo)
             ) measures
         (new TimeData<NoteRow>(states), new TimeData<BPM>(points))
 
@@ -214,13 +214,13 @@ module ChartConversions =
                     SourcePack = "Singles"
                     DiffName = metadataFallback [sm.SUBTITLETRANSLIT; sm.SUBTITLE;
                         diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE; diff.STEPSTYPE.ToString() + " " + diff.METER.ToString()]
-                    PreviewTime = sm.SAMPLESTART * 1000.0
+                    PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
                     AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"]
                     BGFile = metadataFallback [sm.BACKGROUND; findBackground (sm.TITLE + "-bg.jpg")]
             }
             let filepath = Path.Combine(path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
-            let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0)
-            Some (Chart(keys, header, notes, bpm, MultiTimeData<float>(keys), filepath))
+            let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
+            Some (Chart(keys, header, notes, bpm, MultiTimeData<float32>(keys), filepath))
         sm.Charts |> List.mapi convert_difficulty |> List.choose id
 
     (*
@@ -246,17 +246,17 @@ module ChartConversions =
         }
         convert snaps |> Seq.toList
 
-    let rec private bpmDurations points (endTime : float) = 
+    let rec private bpmDurations points (endTime : Time) = 
         if List.isEmpty points then failwith "no bpm point"
         let (offset, (_, msPerBeat)) = (List.head points)
-        let mutable current : float = msPerBeat
-        let mutable t : float = offset
-        let data = new Dictionary<float, float>()
+        let mutable current : float32<ms/beat> = msPerBeat
+        let mutable t : Time = offset
+        let data = new Dictionary<float32<ms/beat>, Time>()
 
         for (offset, (_, msPerBeat)) in points do
-            if (not (data.ContainsKey current)) then data.Add(current, 0.0)
+            if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
             data.[current] <- data.[current] + offset - t; t <- offset; current <- msPerBeat
-        if (not (data.ContainsKey current)) then data.Add(current, 0.0)
+        if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
         data.[current] <- data.[current] + endTime - t
         data
 
@@ -264,7 +264,7 @@ module ChartConversions =
         let d = (bpmDurations bs endTime).OrderBy(fun p -> p.Key)
         (d.First().Key, d.Last().Key)
 
-    let private convertToTimingPoints (bpm : TimeData<BPM>) (sv : MultiTimeData<float>) (endTime : float) =
+    let private convertToTimingPoints (bpm : TimeData<BPM>) (sv : MultiTimeData<float32>) (endTime : Time) =
         let corrective_sv offset mult = 
             if (sv.GetChannelData -1).Count = 0 then None else
                 match (sv.GetChannelData -1).IndexAt offset with
@@ -285,11 +285,11 @@ module ChartConversions =
         let tps =
             seq {
                 //todo: can be refactored as recursion
-                let mutable bs = bpm.Enumerate |> List.ofSeq
+                let mutable bs = bpm.Data |> List.ofSeq
                 if List.isEmpty bs then ()
                 else
                     let mostCommonBpm = (bpmDurations bs endTime).OrderByDescending(fun p -> p.Value).First().Key
-                    yield! svs -infinity (bs |> List.head |> offsetOf) 1.0
+                    yield! svs (-infinityf * 1.0f<ms>) (bs |> List.head |> offsetOf) 1.0f
                     while bs |> List.isEmpty |> not do
                         match bs with
                         | (offset, (meter, beatLength)) :: (offset2, _) :: rs ->
@@ -298,7 +298,7 @@ module ChartConversions =
                             bs <- List.tail bs
                         | (offset, (meter, beatLength)) :: [] ->
                             yield TimingPoint.BPM (offset, beatLength, meter, (SampleSet.Soft, 0, 10), enum 0)
-                            yield! svs offset infinity (mostCommonBpm / beatLength)
+                            yield! svs offset (infinityf * 1.0f<ms>) (mostCommonBpm / beatLength)
                             bs <- List.tail bs
                         | _ -> failwith "impossible"
             }
@@ -329,8 +329,8 @@ module ChartConversions =
                 HPDrainRate = 8.0
         }
         (general, editor, meta, diff, [(Background (chart.Header.BGFile, (0.0, 0.0)))],
-            convertSnapsToHitobjects (List.ofSeq (chart.Notes.Enumerate)) chart.Keys,
-            convertToTimingPoints chart.BPM chart.SV (offsetOf (chart.Notes.GetPointAt(infinity))))
+            convertSnapsToHitobjects (List.ofSeq (chart.Notes.Data)) chart.Keys,
+            convertToTimingPoints chart.BPM chart.SV (offsetOf (chart.Notes.GetPointAt(infinityf * 1.0f<ms>))))
 
     (*
         Conversion code for Interlude -> StepMania

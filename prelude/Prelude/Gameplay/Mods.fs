@@ -76,17 +76,17 @@ module Mods =
         (Mod(ModStatus.Unstored, 0, (fun _ _ -> true), (fun _ _ -> ()), auto))
 
     ModState.RegisterMod "mirror"
-        (Mod(ModStatus.Ranked, 0, (fun _ _ -> true), (fun _ (keys, notes, _, _, _) -> mirror -infinity infinity keys notes |> ignore), (fun _ _ _ -> ())))
+        (Mod(ModStatus.Ranked, 0, (fun _ _ -> true), (fun _ (keys, notes, _, _, _) -> mirror (-infinityf * 1.0f<ms>) (infinityf * 1.0f<ms>) keys notes |> ignore), (fun _ _ _ -> ())))
 
     ModState.RegisterMod "nosv"
-        (Mod(ModStatus.Ranked, 0, (fun _ (_, _, _, sv, _) -> not sv.IsEmpty), (fun _ (_, _, _, sv, _) -> sv.Clear), (fun _ _ _ -> ())))
+        (Mod(ModStatus.Ranked, 0, (fun _ (_, _, _, sv, _) -> not <| sv.IsEmpty()), (fun _ (_, _, _, sv, _) -> sv.Clear()), (fun _ _ _ -> ())))
 
     (*
         Mod application pipeline
     *)
 
     let private applyMods (mods: ModState) (chart: Chart): ModChart =
-        let mutable modChart = (chart.Keys, TimeData(chart.Notes), TimeData(chart.BPM), chart.SV.Clone, []): ModChart
+        let mutable modChart = (chart.Keys, TimeData(chart.Notes), TimeData(chart.BPM), chart.SV.Clone(), []): ModChart
         for (name, m, c) in mods.IterApplicable modChart do
             m.ApplyChart c modChart
             let (keys, notes, bpm, sv, m) = modChart in

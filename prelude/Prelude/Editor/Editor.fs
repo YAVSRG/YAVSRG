@@ -3,7 +3,7 @@
 open System
 open Prelude.Charts.Interlude
 
-type ModChart = int * TimeData<NoteRow> * TimeData<BPM> * MultiTimeData<float> * string list
+type ModChart = int * TimeData<NoteRow> * TimeData<BPM> * MultiTimeData<float32> * string list
 
 module Filter =
 

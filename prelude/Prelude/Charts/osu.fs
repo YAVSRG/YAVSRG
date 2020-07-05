@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Charts
 
 open FParsec
+open Prelude.Common
 
 //https://osu.ppy.sh/help/wiki/osu!_File_Formats/Osu_(file_format)
 //https://osu.ppy.sh/community/forums/topics/1869?start=12468#p12468
@@ -18,8 +19,6 @@ module osu =
         Basic .osu file representation
         Headers are just decoded data and then parsed into record structures with the data tags
     *)
-
-    type Offset = float
 
     type Header = string * (string * string) list
 
@@ -39,14 +38,14 @@ module osu =
         | Drum = 3
 
     type TimingPoint =
-        | BPM of Offset * float * int * (SampleSet * int * int) * TimingEffect
-        | SV of Offset * float * (SampleSet * int * int) * TimingEffect
+        | BPM of Time * float32<ms/beat> * int<beat> * (SampleSet * int * int) * TimingEffect
+        | SV of Time * float32 * (SampleSet * int * int) * TimingEffect
         override this.ToString() =
             match this with
             | BPM (time, msPerBeat, meter, (set,index,volume), effect) ->
                 String.concat "," [string time; string msPerBeat; string meter; set |> int |> string; string index; string volume; "1"; effect |> int |> string]
-            | SV (time, value, (set,index,volume), effect) ->
-                String.concat "," [string time; string (-100.0/value); "4"; set |> int |> string; string index; string volume; "0"; effect |> int |> string]
+            | SV (time, value, (set, index, volume), effect) ->
+                String.concat "," [string time; string (-100.0f / value); "4"; set |> int |> string; string index; string volume; "0"; effect |> int |> string]
 
     type Point = float * float
 
@@ -69,16 +68,16 @@ module osu =
         | Clap = 8
 
     type HitObject =
-        | HitCircle of Point * Offset * HitSound * HitAddition
-        | HoldNote of Point * Offset * Offset * HitSound * HitAddition
-        | Slider of Point * Offset * int * (SliderShape * Point list) * float * HitSound * HitSound list * (SampleSet * SampleSet) list * HitAddition
-        | Spinner of Offset * Offset * HitSound * HitAddition
+        | HitCircle of Point * Time * HitSound * HitAddition
+        | HoldNote of Point * Time * Time * HitSound * HitAddition
+        | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * HitSound list * (SampleSet * SampleSet) list * HitAddition
+        | Spinner of Time * Time * HitSound * HitAddition
         override this.ToString() = 
             match this with
-            | HitCircle ((x,y),offset,hs,addition) -> String.concat "," [x |> string; y |> string; offset |> string; "1"; hs |> int |> string; formatHitAddition addition]
-            | HoldNote ((x,y),start,finish,hs,addition) -> String.concat "," [string x; string y; string start; "128"; hs |> int |> string; (string finish) + ":" + formatHitAddition addition]
-            | Slider ((x,y),offset,repeats,points,length,hs,phss,padditions,addition) -> "nyi"
-            | Spinner (start,finish,hs,addition) -> String.concat "," ["320"; "240"; string start; "8"; hs |> int |> string; string finish; formatHitAddition addition]
+            | HitCircle ((x, y), offset, hs, addition) -> String.concat "," [x |> string; y |> string; offset |> string; "1"; hs |> int |> string; formatHitAddition addition]
+            | HoldNote ((x, y), start, finish, hs, addition) -> String.concat "," [string x; string y; string start; "128"; hs |> int |> string; (string finish) + ":" + formatHitAddition addition]
+            | Slider ((x, y), offset, repeats, points, length, hs, phss, padditions, addition) -> "nyi"
+            | Spinner (start, finish, hs, addition) -> String.concat "," ["320"; "240"; string start; "8"; hs |> int |> string; string finish; formatHitAddition addition]
 
     (*
         Storyboard data types
@@ -124,17 +123,17 @@ module osu =
         | AdditiveBlendColor
 
     type StoryboardEvent =
-        | Fade of Offset * Offset * Easing * float * float
-        | Move of Offset * Offset * Easing * Point * Point
-        | Move_X of Offset * Offset * Easing * float * float
-        | Move_Y of Offset * Offset * Easing * float * float
-        | Scale of Offset * Offset * Easing * float * float
-        | VectorScale of Offset * Offset * Easing * Point * Point
-        | Rotate of Offset * Offset * Easing * float * float
-        | Color of Offset * Offset * Easing * (int * int * int) * (int * int * int)
-        | Loop of Offset * int * StoryboardEvent list
-        | Trigger_Loop of Offset * Offset * TriggerType * StoryboardEvent list
-        | Parameter of Offset * Offset * SpriteParameter
+        | Fade of Time * Time * Easing * float * float
+        | Move of Time * Time * Easing * Point * Point
+        | Move_X of Time * Time * Easing * float * float
+        | Move_Y of Time * Time * Easing * float * float
+        | Scale of Time * Time * Easing * float * float
+        | VectorScale of Time * Time * Easing * Point * Point
+        | Rotate of Time * Time * Easing * float * float
+        | Color of Time * Time * Easing * (int * int * int) * (int * int * int)
+        | Loop of Time * int * StoryboardEvent list
+        | Trigger_Loop of Time * Time * TriggerType * StoryboardEvent list
+        | Parameter of Time * Time * SpriteParameter
         member this.Format(padding) =
             padding + (String.concat ","
                 (match this with
@@ -154,11 +153,11 @@ module osu =
 
     type StoryboardObject =
         | Sprite of Layer * SpriteOrigin * string * Point * StoryboardEvent list
-        | Animation of Layer * SpriteOrigin * string * Point * int * Offset * LoopType * StoryboardEvent list
-        | Sample of Offset * Layer * string * int
+        | Animation of Layer * SpriteOrigin * string * Point * int * Time * LoopType * StoryboardEvent list
+        | Sample of Time * Layer * string * int
         | Background of string * Point
-        | Video of Offset * string * Point
-        | Break of Offset * Offset
+        | Video of Time * string * Point
+        | Break of Time * Time
         override this.ToString() = 
             match this with
             | Background (filename, (x,y)) -> String.concat "," ["Background"; "0"; "\""+filename+"\""; string x; string y]
@@ -194,8 +193,8 @@ module osu =
         .>>. (tuple4 (parseInt .>> comma) (parseInt .>> comma) (parseInt .>> comma) parseInt) |>>
         fun ((offset, value, meter, sampleSet), (sampleIndex, volume, isBpm, effects)) ->
             if isBpm > 0
-            then BPM(offset, value, meter, (enum sampleSet, sampleIndex, volume), enum effects)
-            else SV(offset, -100.0 / value, (enum sampleSet, sampleIndex, volume), enum effects)
+            then BPM(toTime offset, toTime value / 1.0f<beat>, meter * 1<beat>, (enum sampleSet, sampleIndex, volume), enum effects)
+            else SV(toTime offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
 
     let parseTimingPoints = pstring "[TimingPoints]" >>. newline >>. many (parseTimingPoint .>> newline)
 
@@ -222,6 +221,7 @@ module osu =
     let parseHitObject: Parser<HitObject, unit> =
         tuple4 (parsePoint .>> comma) (parseNum .>> comma) (parseInt .>> comma) ((parseInt .>> comma) |>> enum)
         >>= (fun (pos, offset, objType, hitsound) ->
+            let offset = toTime offset
             match objType &&& 139 with
             | 1 -> parseAddition |>> fun addition -> HitCircle(pos, offset, hitsound, addition)
             | 2 ->
@@ -231,10 +231,10 @@ module osu =
                     Slider(pos, offset, slides, points, length, hitsound, sounds, sampleSets, addition)
             | 8 ->
                 pipe2 (parseNum .>> comma) parseAddition
-                    (fun endTime addition -> Spinner(offset, endTime, hitsound, addition))
+                    (fun endTime addition -> Spinner(offset, toTime endTime, hitsound, addition))
             | 128 ->
                 pipe2 (parseNum .>> colon) parseAddition
-                    (fun endTime addition -> HoldNote(pos, offset, endTime, hitsound, addition))
+                    (fun endTime addition -> HoldNote(pos, offset, toTime endTime, hitsound, addition))
             | _ -> failwith "Unknown hitobject type")
 
     let parseHitObjects = pstring "[HitObjects]" >>. newline >>. many parseHitObject
@@ -255,6 +255,7 @@ module osu =
                     (parseInt .>> comma .>> spaces |>> enum) (parseNum .>> comma .>> spaces) (parseNum .>> comma .>> spaces)
         >>= (fun (eventType, easing, startTime, endTime) ->
             let parse2Nums = ((parseNum .>> comma) .>>. parseNum)
+            let startTime, endTime = toTime startTime, toTime endTime
             match eventType with
             | "F" -> parse2Nums |>> fun (f1, f2) -> Fade(startTime, endTime, easing, f1, f2)
             | "M" -> parse2Nums .>> comma .>>. parse2Nums |>> fun (p1, p2) -> Move(startTime, endTime, easing, p1, p2)
@@ -282,7 +283,7 @@ module osu =
                 ((tuple4 (parseNum .>> comma) (parseInt .>> comma) (parseNum .>> comma) (parseName |>> LoopType.Parse))
                 .>> pchar '\n') (parseSpriteEvents (pchar '_' <|> pchar ' ')))
             |>> fun ((layer, origin, file, x), (y, frames, frameTime, loopType), events) ->
-                Animation(layer, origin, file, (x, y), frames, frameTime, loopType, events))
+                Animation(layer, origin, file, (x, y), frames, toTime frameTime, loopType, events))
 
         <|> (pstring "Sprite" >>. comma
             >>. ((tuple5 (parseName .>> comma |>> Layer.Parse) (parseName .>> comma |>> SpriteOrigin.Parse)
@@ -296,11 +297,11 @@ module osu =
          
         <|> ((pstring "Video" <|> pstring "1") >>. comma
             >>. (tuple3 (parseNum .>> comma) parseQuote ((opt (tuple2 (comma >>. parseNum) (comma >>. parseNum))) |>> Option.defaultValue (0.0, 0.0)))
-            |>> fun (time, file, (x, y)) -> Video(time, file, (x, y)))
+            |>> fun (time, file, (x, y)) -> Video(toTime time, file, (x, y)))
          
         <|> ((pstring "Break" <|> pstring "2") >>. comma
             >>.  (parseNum .>> comma) .>>. parseNum
-            |>> Break)
+            |>> fun (time1, time2) -> Break (toTime time1, toTime time2))
 
     let parseEvents =
         pstring "[Events]" >>. newline >>. many (pstring "//" >>. restOfLine true)
@@ -325,7 +326,7 @@ module osu =
     type General =
         { AudioFilename: string
           AudioLeadIn: int
-          PreviewTime: Offset
+          PreviewTime: Time
           Countdown: int
           SampleSet: SampleSet
           StackLeniency: float
@@ -342,7 +343,7 @@ module osu =
         static member Default =
             { AudioFilename = ""
               AudioLeadIn = 0
-              PreviewTime = -1.0
+              PreviewTime = -1.0f<ms>
               Countdown = 0
               SampleSet = SampleSet.Normal
               StackLeniency = 0.7
@@ -365,7 +366,7 @@ module osu =
             match key with
             | "AudioFilename" -> { s with AudioFilename = value }
             | "AudioLeadIn" -> { s with AudioLeadIn = value |> int }
-            | "PreviewTime" -> { s with PreviewTime = value |> float }
+            | "PreviewTime" -> { s with PreviewTime = value |> float |> toTime }
             | "Countdown" -> { s with Countdown = value |> int }
             | "SampleSet" -> { s with SampleSet = value |> SampleSet.Parse }
             | "StackLeniency" -> { s with StackLeniency = value |> float }
@@ -393,7 +394,7 @@ module osu =
 
 
     type Editor =
-        { Bookmarks: Offset list
+        { Bookmarks: Time list
           DistanceSpacing: float
           BeatDivisor: float
           GridSize: int
@@ -411,7 +412,7 @@ module osu =
             match key with
             | "Bookmarks" ->
                 match run (sepBy parseNum comma) value with
-                | Success(result, _, _) -> { s with Bookmarks = result }
+                | Success(result, _, _) -> { s with Bookmarks = result |> List.map toTime }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
             | "DistanceSpacing" -> { s with DistanceSpacing = value |> float }
             | "BeatDivisor" -> { s with BeatDivisor = value |> float }

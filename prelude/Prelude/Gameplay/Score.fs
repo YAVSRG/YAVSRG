@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.IO.Compression
+open Prelude.Common
 open Prelude.Charts.Interlude
 
 module Score =
@@ -19,7 +20,7 @@ module Score =
         | Special = 3uy
         | SpecialMissed = 4uy
 
-    type ScoreDataRow = float * float array * HitStatus array
+    type ScoreDataRow = Time * float array * HitStatus array
 
     type ScoreData = ScoreDataRow array
 
@@ -36,7 +37,7 @@ module Score =
         use inputStream = new MemoryStream(compressed)
         use gZipStream = new GZipStream(inputStream, CompressionMode.Decompress)
         use br = new BinaryReader(gZipStream)
-        notes.Enumerate
+        notes.Data
         |> Seq.map (fun (time, nr) ->
             let hit = [|for i in 1..keys -> br.ReadByte() |> LanguagePrimitives.EnumOfValue|]
             (time, [|for i in 1..keys -> br.ReadSingle() |> float|], hit))
@@ -50,7 +51,7 @@ module Score =
         Convert.ToBase64String(inputStream.ToArray())
 
     let notesToScoreData (keys: int) (notes: TimeData<NoteRow>): ScoreData =
-        notes.Enumerate
+        notes.Data
         |> Seq.map (fun (time, nr) ->
             let bits = (noteData NoteType.HOLDHEAD nr) ||| (noteData NoteType.NORMAL nr) ||| (noteData NoteType.HOLDTAIL nr)
             let bits2 = (noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.MINE nr)
@@ -86,13 +87,13 @@ module Score =
             let i = timeSeriesData.Length * counter / count
             if (i < timeSeriesData.Length) && (timeSeriesData.[i] = 0.0) then timeSeriesData.[i] <- this.Value
 
-        member this.Update (now: float) (hitData: ScoreData) =
+        member this.Update (now: Time) (hitData: ScoreData) =
             while (counter < hitData.Length) && (offsetOfRow hitData.[counter] < now) do
                 state <- row_functor hitData.[counter] counter state
                 this.UpdateTimeSeries hitData.Length
                 counter <- counter + 1
 
-        member this.ProcessAll(hitData: ScoreData) = this.Update infinity hitData
+        member this.ProcessAll(hitData: ScoreData) = this.Update (infinityf * 1.0f<ms>) hitData
 
     (*
         % Accuracy systems using score metrics

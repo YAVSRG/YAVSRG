@@ -20,7 +20,7 @@ module ScoreManager =
         hitdata: string
         player: string
         playerUUID: string
-        rate: float
+        rate: float32
         selectedMods: ModState
         layout: Layout
         keycount: int
@@ -28,7 +28,7 @@ module ScoreManager =
 
     type ChartSaveData = {
         Path: string
-        Offset: Setting<float>
+        Offset: Setting<Time>
         Scores: List<Score>
         Lamp: Dictionary<string, Lamp>
         Accuracy: Dictionary<string, float>
@@ -37,7 +37,7 @@ module ScoreManager =
     with
         static member FromChart(c: Chart) =
             {   Path = c.FileIdentifier
-                Offset = Setting(if c.Notes.IsEmpty then 0.0 else offsetOf c.Notes.First);
+                Offset = Setting(if c.Notes.IsEmpty() then 0.0f<ms> else offsetOf <| c.Notes.First());
                 Scores = new List<Score>()
                 Lamp = new Dictionary<string, Lamp>()
                 Accuracy = Dictionary<string, float>()

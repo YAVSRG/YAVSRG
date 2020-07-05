@@ -9,6 +9,12 @@ open System.Text.RegularExpressions
 
 module Common =
 
+    [<Measure>] type ms
+    [<Measure>] type beat
+    [<Measure>] type minute
+    type Time = float32<ms>
+    let toTime (f: float) = float32 f * 1.0f<ms>
+
 (*
     Settings - Store an (ideally immutable type) value that can be get and set
     Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings

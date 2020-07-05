@@ -82,9 +82,9 @@ module Interlude =
         Anything that is a sequence of events over the course of a chart
     *)
 
-    type BPM = int * float
+    type BPM = int<beat> * float32<ms/beat>
 
-    type TimeDataItem<'t> = float * 't
+    type TimeDataItem<'t> = Time * 't
 
     let offsetOf ((offset, _): TimeDataItem<'t>) = offset
 
@@ -92,9 +92,12 @@ module Interlude =
         let data: List<TimeDataItem<'t>> = list
         let mutable count: int = list.Count
 
-        member private this.GetData = data
+        //do not use this to edit the data!!! needs to be accessed like this for efficiency and if I could, I would prevent other uses from compiling
+        //perpetual todo: search for references to this.Data and if they use anything other than indexing, fix it
+        member this.Data = data
+
         new() = TimeData<'t>(new List<TimeDataItem<'t>>())
-        new(td: TimeData<'t>) = TimeData<'t>(td.GetData)
+        new(td: TimeData<'t>) = TimeData<'t>(td.Data)
 
         member this.Count = count
 
@@ -103,7 +106,7 @@ module Interlude =
             data.AddRange(list)
             count <- list.Count
 
-        member this.SetData(data: TimeData<'t>) = this.SetData(data.GetData)
+        member this.SetData(data: TimeData<'t>) = this.SetData(data.Data)
 
         member this.IndexAt time: int * bool =
             match count with
@@ -127,8 +130,8 @@ module Interlude =
                         low <- mid + 1
                     else
                         high <- mid
-				if low = 0 then (-1, false) else
-					if (offsetOf data.[low - 1] = time) then (low - 1, true) else (low - 1, false)
+                if low = 0 then (-1, false) else
+                    if (offsetOf data.[low - 1] = time) then (low - 1, true) else (low - 1, false)
 
         member this.GetPointAt time: TimeDataItem<'t> =
             let (index, _) = this.IndexAt time in data.[index]
@@ -177,13 +180,12 @@ module Interlude =
                 count <- count - 1
             | (_, false) -> failwith "No point to remove here."
 
-        member this.IsEmpty = (count = 0)
+        member this.IsEmpty() = (count = 0)
 
-        member this.Clear = data.Clear(); count <- 0
+        member this.Clear() = data.Clear(); count <- 0
 
-        member this.First = data.[0] //Use IsEmpty to check this exists first before use
-        member this.Enumerate = data.AsReadOnly()
-
+        member this.First() = data.[0] //Use IsEmpty to check this exists first before use
+        
         member this.EnumerateBetween time1 time2 = 
             seq {
                 let mutable i =
@@ -201,9 +203,9 @@ module Interlude =
         member this.SetChannelData(k, (newData: List<TimeDataItem<'t>>)) = data.[k + 1].SetData(newData)
         member this.SetChannelData(k, (newData: TimeData<'t>)) = data.[k + 1].SetData(newData)
         member this.GetChannelData k = data.[k + 1]
-        member this.IsEmpty = Array.fold (fun b (t: TimeData<'t>) -> b && t.IsEmpty) true data
-        member this.Clear = Array.iter (fun (t: TimeData<'t>) -> t.Clear) data
-        member this.Clone =
+        member this.IsEmpty() = Array.fold (fun b (t: TimeData<'t>) -> b && t.IsEmpty()) true data
+        member this.Clear() = Array.iter (fun (t: TimeData<'t>) -> t.Clear()) data
+        member this.Clone() =
             let mt = MultiTimeData(keys)
             for i in 0 .. keys do
                 mt.SetChannelData(i - 1, TimeData(this.GetChannelData(i- 1)))
@@ -219,7 +221,7 @@ module Interlude =
           [<DefaultValue("")>] Artist: string
           [<DefaultValue("")>] Creator: string
           [<DefaultValue("")>] DiffName: string
-          [<DefaultValue(0.0)>] PreviewTime: float
+          [<DefaultValue(0.0)>] PreviewTime: Time
           [<DefaultValue("Unknown")>] SourcePack: string
           [<DefaultValue("")>] BGFile: string
           [<DefaultValue("audio.mp3")>] AudioFile: string }
@@ -228,7 +230,7 @@ module Interlude =
             Artist = ""
             Creator = ""
             DiffName = ""
-            PreviewTime = 0.0
+            PreviewTime = 0.0f<ms>
             SourcePack = "Unknown"
             BGFile = ""
             AudioFile = "audio.mp3" }
@@ -236,9 +238,9 @@ module Interlude =
     type Chart(keys, header, notes, bpms, sv, path) =
         member this.Keys = keys
         member this.Notes: TimeData<NoteRow> = notes
-        member this.BPM: TimeData<int * float> = bpms
+        member this.BPM: TimeData<BPM> = bpms
         member this.Header: ChartHeader = header
-        member this.SV: MultiTimeData<float> = sv
+        member this.SV: MultiTimeData<float32> = sv
         member this.FileIdentifier: string = path
         member this.BGPath = Path.Combine(Path.GetDirectoryName(path), header.BGFile)
         member this.AudioPath = Path.Combine(Path.GetDirectoryName(path), header.AudioFile)
@@ -249,12 +251,12 @@ module Interlude =
         let objectList = new List<TimeDataItem<'t>>()
         let count = br.ReadInt32()
         for i = 1 to count do
-            objectList.Add((br.ReadSingle() |> float, f br))
+            objectList.Add((br.ReadSingle() * 1.0f<ms>, f br))
         TimeData<'t>(objectList)
 
     let private writeSection<'t> (data: TimeData<'t>) (bw : BinaryWriter) f =
         bw.Write(data.Count)
-        for (time, guts) in data.Enumerate do
+        for (time, guts) in data.Data do
             bw.Write(time |> float32)
             f guts
 
@@ -267,10 +269,10 @@ module Interlude =
             let header = JsonHelper.load(br.ReadString())
 
             let notes = readSection br (readRowFromFile)
-            let bpms = readSection br (fun r -> BPM(r.ReadInt32(), r.ReadSingle() |> float))
+            let bpms = readSection br (fun r -> BPM(r.ReadInt32() * 1<beat>, r.ReadSingle() * 1.0f<ms/beat>))
             let sv = MultiTimeData(keys)
             for i in 0..keys do
-                sv.SetChannelData(i - 1, readSection br (fun r -> (r.ReadSingle() |> float)))
+                sv.SetChannelData(i - 1, readSection br (fun r -> r.ReadSingle()))
 
             Chart (keys, header, notes, bpms, sv, filepath)
             |> Some
@@ -283,9 +285,9 @@ module Interlude =
         bw.Write(chart.Keys |> byte)
         bw.Write(JsonHelper.save chart.Header)
         writeSection chart.Notes bw (fun nr -> writeRowToFile bw nr)
-        writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter); bw.Write(float32 msPerBeat))
+        writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter / 1<beat>); bw.Write(float32 msPerBeat))
         for i = 0 to chart.Keys do
-            writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(float32 f))
+            writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(f))
 
     let saveChartFile (chart : Chart) =
         saveChartFileTo chart chart.FileIdentifier
@@ -297,16 +299,17 @@ module Interlude =
         if (chart.Notes.Count = 0) then
             "_"
         else
-            let offset = offsetOf chart.Notes.First
-            for (o, nr) in chart.Notes.Enumerate do
+            let offset = offsetOf <| chart.Notes.First()
+            for (o, nr) in chart.Notes.Data do
                 bw.Write((o - offset) |> int)
                 for i = 0 to 5 do
                     bw.Write(nr.[i])
             for i = 0 to chart.Keys |> int do
                 let mutable speed = 1.0
-                for (o, f) in (chart.SV.GetChannelData(i - 1)).Enumerate do
+                for (o, f) in (chart.SV.GetChannelData(i - 1)).Data do
+                    let f = float f
                     if (speed <> f) then
                         bw.Write((o - offset) |> int)
-                        bw.Write((f |> float32))
+                        bw.Write(f)
                         speed <- f
             BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")

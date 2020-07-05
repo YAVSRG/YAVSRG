@@ -3,6 +3,7 @@
 open System
 open Prelude.Charts.Interlude
 open Prelude.Editor
+open Prelude.Common
 
 //This is the final stage of preprocessing chart data before it is played by the user.
 //Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures
@@ -11,7 +12,7 @@ open Prelude.Editor
 
 module NoteColors = 
 
-    let DDRValues = [|1; 2; 3; 4; 6; 8; 12; 16|]
+    let DDRValues = [|1.0f; 2.0f; 3.0f; 4.0f; 6.0f; 8.0f; 12.0f; 16.0f|] |> Array.map (fun i -> i * 1.0f</beat>)
 
     type ColorScheme = 
         | Column
@@ -29,29 +30,30 @@ module NoteColors =
     type ColorDataSets = ColorData array //color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
     type Colorizer<'state> = 'state -> TimeDataItem<NoteRow> -> ('state * ColorData)
 
-    type ColorizedChart = int * TimeData<NoteRow * ColorData> * TimeData<BPM> * TimeData<float> * string list
+    type private ColorNoteRow = (struct (NoteRow * ColorData))
+    type ColorizedChart = int * TimeData<ColorNoteRow> * TimeData<BPM> * MultiTimeData<float32> * string list
 
     let colorize ((keys, notes, bpm, sv, m) : ModChart) (initialState, col : Colorizer<'t>) =
         let (_, _, data) = 
-            Seq.fold (fun (lastcolors : ColorData, s, data : (TimeDataItem<NoteRow * ColorData>) list) (time, nr) ->
+            Seq.fold (fun (lastcolors : ColorData, s, data : (TimeDataItem<ColorNoteRow>) list) (time, nr) ->
             (
                 let (ns, d) = col s (time, nr)
                 for k in getBits ((noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.HOLDTAIL nr)) do
                     d.[k] <- lastcolors.[k]
                 (d, ns, (time, (nr, d)) :: data)
-            )) (Array.zeroCreate(keys), initialState, []) notes.Enumerate
+            )) (Array.zeroCreate(keys), initialState, []) notes.Data
         in data
         |> Seq.rev
-        |> ResizeArray<TimeDataItem<NoteRow * ColorData>>
-        |> TimeData<NoteRow * ColorData>
+        |> ResizeArray<TimeDataItem<ColorNoteRow>>
+        |> TimeData<ColorNoteRow>
 
-    let private roughlyDivisible (a : float) (b : float) = Math.Abs(a - b * Math.Round(a / b)) < 3.0
+    let private roughlyDivisible (a : Time) (b : Time) = Math.Abs(float32 <| a - b * float32 (Math.Round(float <| a / b))) < 3.0f
 
-    let private ddr_func delta (msPerBeat : float) : int =
-        List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / (float n))) [0..7]
+    let private ddr_func (delta: Time) (msPerBeat : float32<ms/beat>) : int =
+        List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / n)) [0..7]
         |> Option.defaultValue DDRValues.Length
 
-    let applyColorizer (scheme : ColorScheme) (colorData : ColorData) (chart : ModChart) =
+    let applyScheme (scheme : ColorScheme) (colorData : ColorData) (chart : ModChart) =
         let (keys, _, bpm, sv, m) = chart
         let ci i = colorData.[i]
         match scheme with
@@ -65,7 +67,13 @@ module NoteColors =
                 |> colorize chart
         | DDR ->
             (chart, fun c (time, nr) ->
-                let (ptime,(_, msPerBeat)) = bpm.GetPointAt(time) in (chart, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
+                let (ptime, (_, msPerBeat)) =
+                    if bpm.IsEmpty() then
+                        (0.0f<ms>, (4<beat>, 500.0f<ms/beat>))
+                    elif offsetOf <| bpm.First() >= time then bpm.First()
+                    else
+                        bpm.GetPointAt(time)
+                in (chart, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
                 |> colorize chart
         | _ ->
             ((), fun _ _ ->
@@ -76,8 +84,16 @@ module NoteColors =
     type ColorConfig = {
         Style: ColorScheme
         Colors: ColorDataSets
+        UseGlobalColors: bool
     }
     with
-        static member Default = { Style = ColorScheme.Column; Colors = Array.init 11 (fun i -> Array.init 10 byte) }
-        
-    //todo: function that applies colorconfig automatically here
+        static member Default = { Style = ColorScheme.Column; Colors = Array.init 11 (fun i -> Array.init 10 byte); UseGlobalColors = true }
+
+    let getColoredChart (config: ColorConfig) (chart: Lazy<ModChart>) =
+        lazy (
+            let chart = chart.Force()
+            let index =
+                if config.UseGlobalColors then 0
+                else
+                    let (keys, _, _, _, _) = chart in keys - 2
+            applyScheme config.Style config.Colors.[index] chart )

@@ -25,17 +25,17 @@ module ChartManager =
         Pack: string
         Hash: string
         Keys: int
-        Length: float
-        BPM: (float * float)
+        Length: Time
+        BPM: (float32<ms/beat> * float32<ms/beat>)
         DiffName: string
         Physical: float
         Technical: float }
 
     let cacheChart (chart : Chart) : CachedChart =
         let endTime =
-            if chart.Notes.Count = 0 then 0.0 else
-                chart.Notes.GetPointAt infinity |> offsetOf
-        let rating = RatingReport(chart.Notes, 1.0, Layout.Spread, chart.Keys)
+            if chart.Notes.Count = 0 then 0.0f<ms> else
+                chart.Notes.GetPointAt (infinityf * 1.0f<ms>) |> offsetOf
+        let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
         {
         FilePath = chart.FileIdentifier
         Title = chart.Header.Title
@@ -44,8 +44,8 @@ module ChartManager =
         Pack = chart.Header.SourcePack
         Hash = calculateHash chart
         Keys = chart.Keys
-        Length = if endTime = 0.0 then 0.0 else endTime - (offsetOf chart.Notes.First)
-        BPM = minMaxBPM (chart.BPM.Enumerate |> List.ofSeq) endTime
+        Length = if endTime = 0.0f<ms> then 0.0f<ms> else endTime - (offsetOf <| chart.Notes.First())
+        BPM = minMaxBPM (chart.BPM.Data |> List.ofSeq) endTime
         DiffName = chart.Header.DiffName
         Physical = rating.Physical
         Technical = rating.Technical }

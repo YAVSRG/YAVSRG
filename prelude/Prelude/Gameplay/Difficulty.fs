@@ -126,17 +126,17 @@ module Difficulty =
         let widthScale = 0.02
         let heightScale = 26.5
         let curveExp = 1.0
-        Math.Min(heightScale / Math.Pow(widthScale * delta, curveExp), 20.0)
+        Math.Min(heightScale / Math.Pow(widthScale * float delta, curveExp), 20.0)
 
     let private streamCurve delta =
         let widthScale = 0.02
         let heightScale = 13.5
         let curveExp = 1.0
         let cutoff = 10.0
-        Math.Max((heightScale / Math.Pow(widthScale * delta, curveExp) - 0.1 * heightScale / Math.Pow(widthScale * delta, curveExp * cutoff)), 0.0)
+        Math.Max((heightScale / Math.Pow(widthScale * float delta, curveExp) - 0.1 * heightScale / Math.Pow(widthScale * float delta, curveExp * cutoff)), 0.0)
 
     let private jackCompensation jackDelta streamDelta =
-        Math.Min(Math.Pow(Math.Max(Math.Log(jackDelta/streamDelta, 2.0), 0.0), 2.0), 1.0)
+        Math.Min(Math.Pow(Math.Max(Math.Log(float(jackDelta / streamDelta), 2.0), 0.0), 2.0), 1.0)
 
     let private rootMeanPower values power = 
         match values with
@@ -149,7 +149,7 @@ module Difficulty =
     let private staminaFunc value input delta =
         let staminaBaseFunc(ratio) = 1.0 + 0.105 * ratio
         let staminaDecayFunc(delta) = Math.Exp(-0.00045 * delta)
-        let v = Math.Max(value * staminaDecayFunc(delta), 0.001)
+        let v = Math.Max(value * staminaDecayFunc(float delta), 0.001)
         v * staminaBaseFunc(input/v)
    
     let private overallDifficulty arr =
@@ -158,12 +158,12 @@ module Difficulty =
     let private OHTNERF = 3.0
     let private SCALING_VALUE = 0.55
 
-    type RatingReport(notes: TimeData<NoteRow>, rate: float, layout, keys) =
+    type RatingReport(notes: TimeData<NoteRow>, rate: float32, layout, keys) =
         let layoutData =
             match getLayoutInfo(layout, keys) with
             | Some l -> l
             | None -> getAvailableLayouts keys |> List.head |> fun l -> getLayoutInfo(l, keys) |> fun x -> x.Value
-        let fingers = Array.zeroCreate keys
+        let fingers = Array.zeroCreate<Time> keys
 
         let physicalData = Array.zeroCreate notes.Count
         let technicalData = Array.zeroCreate notes.Count
@@ -174,18 +174,18 @@ module Difficulty =
         let anchor = Array2D.zeroCreate notes.Count keys
         let physicalComposite = Array2D.zeroCreate notes.Count keys
 
-        let updateNoteDifficulty(column, index, offset : float, otherColumns : Bitmap) =
+        let updateNoteDifficulty(column, index, offset: Time, otherColumns : Bitmap) =
             let s = otherColumns |> unsetBit column
             let delta1 =
-                if fingers.[column] > 0.0 then
+                if fingers.[column] > 0.0f<ms> then
                     delta.[index, column] <- (offset - fingers.[column]) / rate
                     jack.[index,column] <- Math.Pow(jackCurve(delta.[index,column]), OHTNERF)
                     delta.[index, column]
-                else 10000.0
+                else 10000.0f<ms>
             for k in getBits s do
-                if fingers.[k] > 0.0 then
+                if fingers.[k] > 0.0f<ms> then
                     let delta2 = (offset - fingers.[k]) / rate
-                    trill.[index, column] <- trill.[index, column] + Math.Pow(streamCurve delta2 * (jackCompensation delta1 delta2), OHTNERF)
+                    trill.[index, column] <- trill.[index, column] + Math.Pow((streamCurve delta2) * (jackCompensation delta1 delta2), OHTNERF)
             physicalComposite.[index, column] <- Math.Pow(trill.[index,column] + jack.[index, column], 1.0 / OHTNERF)
 
         let snapDifficulty (strain : float array) mask =
@@ -198,12 +198,11 @@ module Difficulty =
             let lastHandUse = Array.zeroCreate (List.length layoutData)
             let currentStrain = Array.zeroCreate<float> keys
             let mutable i = 0
-            for (offset, nr) in notes.Enumerate do
+            for (offset, nr) in notes.Data do
                 let hits = (noteData NoteType.NORMAL nr) ||| (noteData NoteType.HOLDHEAD nr)
                 if hits > 0us then
                     List.fold (fun h hand ->
                         let handHits = hits &&& getHandBitMask hand
-                        let delta = (offset - lastHandUse.[h]) / rate
                         for k in getBits handHits do
                             updateNoteDifficulty(k, i, offset, getHandBitMask hand)
                             currentStrain.[k] <- staminaFunc (currentStrain.[k]) (physicalComposite.[i,k] * SCALING_VALUE) ((offset - fingers.[k]) / rate)
@@ -233,17 +232,17 @@ module Difficulty =
     let performanceFunc b value deviation delta =
         staminaFunc b (value * confidenceValue deviation) delta
 
-    type PerformanceMetricState = float * float * float array * float * float array
+    type PerformanceMetricState = Time * float * float array * float * float array
     let performanceMetric (rr : RatingReport) (keys: int) =
         ScoreMetric<PerformanceMetricState>(
             "Interlude",
-            (0.0, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
+            (0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
             (fun (time, dev, hit) i (lastTime, p, ps, t, ts) ->
                 let mutable v = 0.0
                 let mutable c = 0.0
                 for k = 0 to (keys - 1) do
                     if hit.[k] = HitStatus.Hit then
-                        ps.[k] <- performanceFunc (ps.[k]) (rr.PhysicalComposite.[i, k]) (dev.[k]) (time-lastTime)
+                        ps.[k] <- performanceFunc (ps.[k]) (rr.PhysicalComposite.[i, k]) (dev.[k]) (time - lastTime)
                         c <- c + 1.0
                         v <- v + ps.[k]
                 (time, p * Math.Exp(0.01 * Math.Max(0.0, Math.Log(v/c/p))), ps, t, ts)

@@ -2,6 +2,7 @@
 
 open FParsec
 open System
+open Prelude.Common
 
 //https://github.com/stepmania/stepmania/wiki/sm
 //https://github.com/stepmania/stepmania/wiki/ssc
@@ -97,19 +98,19 @@ module StepMania =
             BACKGROUND: string
             CDTITLE: string
             MUSIC: string
-            OFFSET: float
-            BPMS: (float * float) list
-            STOPS: (float * float) list
-            SAMPLESTART: float
-            SAMPLELENGTH: float
-            DISPLAYBPM: float * float
+            OFFSET: float32
+            BPMS: (float32<beat> * float32<beat/minute>) list
+            STOPS: (float32<beat> * float32) list
+            SAMPLESTART: float32
+            SAMPLELENGTH: float32
+            DISPLAYBPM: float32<beat/minute> * float32<beat/minute>
             SELECTABLE: bool
             //The following tags are SSC features
             VERSION: string
             ORIGIN: string
-            WARPS: (float * float) list
-            DELAYS: (float * float) list
-            TIMESIGNATURES: (float * float) list
+            WARPS: (float32<beat> * float32) list
+            DELAYS: (float32<beat> * float32) list
+            TIMESIGNATURES: (float32<beat> * float32<beat>) list
             Charts: ChartData list }
             static member Default =
                 {   TITLE = "Unknown Chart"
@@ -124,12 +125,12 @@ module StepMania =
                     BACKGROUND = ""
                     CDTITLE = ""
                     MUSIC = ""
-                    OFFSET = 0.0
-                    BPMS = [ (0.0, 120.0) ]
+                    OFFSET = 0.0f
+                    BPMS = [ (0.0f<beat>, 120.0f<beat/minute>) ]
                     STOPS = []
-                    SAMPLESTART = 0.0
-                    SAMPLELENGTH = 1.0
-                    DISPLAYBPM = (120.0, 120.0)
+                    SAMPLESTART = 0.0f
+                    SAMPLELENGTH = 1.0f
+                    DISPLAYBPM = (120.0f<beat/minute>, 120.0f<beat/minute>)
                     SELECTABLE = true
                     VERSION = ""
                     ORIGIN = ""
@@ -173,20 +174,20 @@ module StepMania =
             | "BACKGROUND", [ t ] -> { s with BACKGROUND = t }
             | "CDTITLE", [ t ] -> { s with CDTITLE = t }
             | "MUSIC", [ t ] -> { s with MUSIC = t }
-            | "OFFSET", [ v ] -> { s with OFFSET = v |> float }
+            | "OFFSET", [ v ] -> { s with OFFSET = v |> float32 }
             | "BPMS", [ bs ] ->
                 match run parsePairs bs with
-                | Success(result, _, _) -> { s with BPMS = result }
+                | Success(result, _, _) -> { s with BPMS = result |> List.map (fun (a,b) -> (float32 a * 1.0f<beat>, float32 b * 1.0f<beat/minute>)) }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
             | "STOPS", [ ss ] ->
                 match run parsePairs ss with
-                | Success(result, _, _) -> { s with STOPS = result }
+                | Success(result, _, _) -> { s with STOPS = result |> List.map (fun (a,b) -> (float32 a * 1.0f<beat>, float32 b)) }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
-            | "SAMPLESTART", [ v ] -> { s with SAMPLESTART = v |> float }
-            | "SAMPLELENGTH", [ v ] -> { s with SAMPLELENGTH = v |> float }
-            | "DISPLAYBPM", [ "*" ] -> { s with DISPLAYBPM = (0.0, 999.0) }
-            | "DISPLAYBPM", [ v ] -> { s with DISPLAYBPM = v |> float |> fun x -> (x, x) }
-            | "DISPLAYBPM", [ v1; v2 ] -> { s with DISPLAYBPM = (v1 |> float, v2 |> float) }
+            | "SAMPLESTART", [ v ] -> { s with SAMPLESTART = v |> float32 }
+            | "SAMPLELENGTH", [ v ] -> { s with SAMPLELENGTH = v |> float32 }
+            | "DISPLAYBPM", [ "*" ] -> { s with DISPLAYBPM = (0.0f<beat/minute>, 999.0f<beat/minute>) }
+            | "DISPLAYBPM", [ v ] -> { s with DISPLAYBPM = v |> float32 |> fun x -> (x * 1.0f<beat/minute>, x * 1.0f<beat/minute>) }
+            | "DISPLAYBPM", [ v1; v2 ] -> { s with DISPLAYBPM = (float32 v1 * 1.0f<beat/minute>, float32 v2 * 1.0f<beat/minute>) }
             | "SELECTABLE", [ "YES" ] -> { s with SELECTABLE = true }
             | "SELECTABLE", [ "NO" ] -> { s with SELECTABLE = false }
             //Version, Origin, Warps, Delays, TimeSignatures TBI
