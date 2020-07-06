@@ -63,19 +63,21 @@ type QuadColors = (struct(Color * Color * Color * Color))
 
 module Quad =
 
-    let ofRect (struct (l, t, r, b) : Rect) : Quad =
+    let ofRect (struct (l, t, r, b) : Rect): Quad =
         struct (new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b))
 
-    let create c1 c2 c3 c4 : Quad = struct (c1, c2, c3, c4)
+    let create c1 c2 c3 c4: Quad = struct (c1, c2, c3, c4)
 
-    let colorOf c : QuadColors = struct (c, c, c, c)
+    let colorOf c: QuadColors = struct (c, c, c, c)
+
+    let flip (struct (c1, c2, c3, c4): Quad): Quad = struct (c4, c3, c2, c1)
 
 (*
     Sprites and content uploading
 *)
 
 [<Struct>]
-type Sprite = { ID:int; Width:int; Height:int; Rows:int; Columns:int }
+type Sprite = { ID: int; Width: int; Height: int; Rows: int; Columns: int }
 with
     member this.WithUV(q: Quad): SpriteQuad = struct (this, q)
     member this.TilingUV(s, x, y): SpriteQuad =
@@ -179,16 +181,16 @@ module FBO =
                 if List.isEmpty stack then
                     GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
                     GL.Viewport(0, 0, int Render.vwidth, int Render.vheight)
-                GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, this.fbo_id);
+                GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, this.fbo_id)
                 stack <- this.fbo_id :: stack
             member this.Unbind() =
                 stack <- List.tail stack
                 if List.isEmpty stack then
-                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
-                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
-                    GL.Viewport(0, 0, Render.rwidth, Render.rheight);
+                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
+                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0)
+                    GL.Viewport(0, 0, Render.rwidth, Render.rheight)
                 else
-                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, List.head stack);
+                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, List.head stack)
             interface IDisposable with member this.Dispose() = in_use.[this.fbo_index] <- false
 
     let init() =
@@ -209,12 +211,12 @@ module FBO =
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat)
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat)
 
-            GL.Ext.GenFramebuffers(1, &fbo_ids.[i]);
-            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fbo_ids.[i]);
-            GL.RenderbufferStorage(RenderbufferTarget.RenderbufferExt, RenderbufferStorage.Depth24Stencil8, int Render.vwidth, int Render.vheight);
-            GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, texture_ids.[i], 0);
+            GL.Ext.GenFramebuffers(1, &fbo_ids.[i])
+            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fbo_ids.[i])
+            GL.RenderbufferStorage(RenderbufferTarget.RenderbufferExt, RenderbufferStorage.Depth24Stencil8, int Render.vwidth, int Render.vheight)
+            GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, texture_ids.[i], 0)
         
-        GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0);
+        GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
 
     let create() =
         { 0 .. (pool_size - 1) }
@@ -261,7 +263,7 @@ module Stencil =
 
 module Draw =
 
-    let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1,u2,u3,u4)): SpriteQuad) =
+    let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
         GL.BindTexture(TextureTarget.Texture2D, s.ID)
         GL.Begin(PrimitiveType.Quads)
         GL.Color4(c1); GL.TexCoord2(u1); GL.Vertex2(p1)

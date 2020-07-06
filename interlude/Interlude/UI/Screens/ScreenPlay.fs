@@ -9,13 +9,10 @@ open Interlude.Render
 open Interlude.Options
 
 //TODO LIST
-//  UPSCROLL SUPPORT
-//  ANIMATION SUPPORT
+//  ARROW NOTE ROTATION
 //  SEEKING/REWINDING SUPPORT
-//  RECEPTORS
 //  COLUMN INDEPENDENT SV
 //  MAYBE FIX HOLD TAIL CLIPPING
-
 
 type NoteRenderer() as this =
     inherit Widget()
@@ -32,6 +29,7 @@ type NoteRenderer() as this =
     let hitposition = float32 <| Options.profile.HitPosition.Get()
     let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
 
+    let tailsprite = Themes.getTexture(if Themes.noteskinConfig.UseHoldTailTexture then "holdtail" else "holdhead")
     let animation = new Animation.AnimationCounter(200.0)
 
     //arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
@@ -46,6 +44,9 @@ type NoteRenderer() as this =
     let hold_presence = Array.create keys false
     let hold_pos = Array.create keys 0.0f
     let hold_colors = Array.create keys 0
+
+    let scrollDirectionPos bottom = if Options.profile.Upscroll.Get() then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
+    let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.profile.Upscroll.Get() then id else Quad.flip
 
     do
         //todo: position differently for editor
@@ -82,7 +83,7 @@ type NoteRenderer() as this =
                     hold_colors.[k] <- int c.[k]
                     (testForNote k NoteType.HOLDHEAD nd || testForNote k NoteType.HOLDBODY nd)
                 else false
-            Draw.rect(Rect.create (left + columnPositions.[k]) (bottom - hitposition - noteHeight) (left + columnPositions.[k] + columnWidths.[k]) (bottom - hitposition)) Color.White (Themes.getTexture("receptor")) //animation for being pressed
+            Draw.rect(Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight) |> scrollDirectionPos bottom) Color.White (Themes.getTexture("receptor")) //animation for being pressed
 
         //main render loop - until the last note rendered in every column appears off screen
         let mutable min = hitposition
@@ -106,38 +107,49 @@ type NoteRenderer() as this =
                 sv_time.[k] <- t
                 min <- Math.Min(column_pos.[k], min)
                 if testForNote k NoteType.NORMAL nd then
-                    let pos = bottom - column_pos.[k] //SCROLL
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (pos - noteHeight) (left + columnPositions.[k] + columnWidths.[k]) pos)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, int color.[k])(Themes.getTexture("note")))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, int color.[k])(Themes.getTexture("note")))
                 elif testForNote k NoteType.HOLDHEAD nd then
                     hold_pos.[k] <- column_pos.[k]
                     hold_colors.[k] <- int color.[k]
                     hold_presence.[k] <- true
                 elif testForNote k NoteType.HOLDTAIL nd then
-                    let headpos = bottom - hold_pos.[k]
-                    let pos = bottom - column_pos.[k] + holdnoteTrim //SCROLL
-                    if headpos > pos then //SCROLL
-                        Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (pos - noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (headpos - noteHeight * 0.5f))) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
-                    if pos - headpos < noteHeight * 0.5f then
+                    let headpos = hold_pos.[k]
+                    let pos = column_pos.[k] - holdnoteTrim
+                    if headpos < pos then
+                        Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight * 0.5f) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
+                    if headpos - pos < noteHeight * 0.5f then
                         Draw.quad
-                            (Quad.ofRect (Rect.create(left + columnPositions.[k]) (pos - noteHeight) (left + columnPositions.[k] + columnWidths.[k]) (Math.Min(pos, headpos - noteHeight * 0.5f))))
+                            (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos + noteHeight * 0.5f)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom))
                             (Quad.colorOf Color.White)
-                            (Sprite.uv(animation.Loops, int color.[k])(Themes.getTexture("holdtail")))
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos - noteHeight) (left + columnPositions.[k] + columnWidths.[k]) headpos)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
+                            (Sprite.uv(animation.Loops, int color.[k])(tailsprite) |> fun struct (x, y) -> struct (x, scrollDirectionFlip y))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
                     hold_presence.[k] <- false
                 elif testForNote k NoteType.MINE nd then
-                    let pos = bottom - column_pos.[k] //SCROLL
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (pos - noteHeight) (left + columnPositions.[k] + columnWidths.[k]) pos)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, int color.[k])(Themes.getTexture("mine")))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, int color.[k])(Themes.getTexture("mine")))
                     
             note_peek <- note_peek + 1
         
         for k in 0 .. (keys - 1) do
             if hold_presence.[k] then
-                let headpos = bottom - hold_pos.[k]
-                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) top (left + columnPositions.[k] + columnWidths.[k]) (headpos - noteHeight * 0.5f))) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
-                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos - noteHeight) (left + columnPositions.[k] + columnWidths.[k]) headpos)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
+                let headpos = hold_pos.[k]
+                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) bottom |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
+                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
                 
             
-
+//TODO LIST
+//  INPUT
+//  BANNER
+//  WIDGETS
+//    ACCURACY
+//    HIT LIGHTING
+//    HIT METER
+//    JUDGEMENT METER
+//    COMBO
+//    SONG TITLE/INFO/TIME
+//    PROGRESS
+//    JUDGEMENT COUNTS
+//    SCREEN COVERS
+//    PACEMAKER
 
 type ScreenPlay() as this =
     inherit Screen()
