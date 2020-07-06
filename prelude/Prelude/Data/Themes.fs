@@ -41,6 +41,7 @@ module Themes =
         FlipHoldTail: bool
         UseHoldTailTexture: bool
         ColumnWidth: float32
+        HoldNoteTrim: float32
         PlayfieldAlignment: float32 * float32
     } with
         static member Default = {
@@ -49,6 +50,7 @@ module Themes =
             FlipHoldTail = false
             UseHoldTailTexture = false
             ColumnWidth = 150.0f
+            HoldNoteTrim = 0.0f
             PlayfieldAlignment =  0.5f, 0.5f
         }
 
