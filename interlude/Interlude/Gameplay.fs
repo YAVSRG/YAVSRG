@@ -47,7 +47,8 @@ module Gameplay =
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
         Audio.playFrom(chart.Header.PreviewTime)
         Options.options.CurrentChart.Set(cachedChart.FilePath)
-        modifiedChart <- getModChart(selectedMods)(chart) |> fst
+        let (m, r) = getModChart(selectedMods)(chart)
+        modifiedChart <- m; replayData <- r
         coloredChart <- getColoredChart(Options.profile.ColorStyle.Get())(modifiedChart)
 
     let save() =

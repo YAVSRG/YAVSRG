@@ -18,7 +18,7 @@
     <Compile Include="Audio.fs" />
     <Compile Include="Render.fs" />
     <Compile Include="Input.fs" />
-    <Compile Include="Themes.fs" />
+    <Compile Include="ThemeManager.fs" />
     <Compile Include="Options\Options.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Animation.fs" />
