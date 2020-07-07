@@ -110,7 +110,7 @@ module Score =
     | GREAT = 4
     | GOOD = 5
     | BAD = 6
-    | FUMBLE = 7
+    | NG = 7
     | MISS = 8
 
     //judgements, points, maxpoints, combo, maxcombo, cbs
@@ -124,7 +124,7 @@ module Score =
                 | HitStatus.Hit -> judge_func ((deltas.[k] |> Time.Abs))
                 | HitStatus.Special
                 | HitStatus.SpecialOK -> JudgementType.OK
-                | HitStatus.SpecialNG -> JudgementType.FUMBLE
+                | HitStatus.SpecialNG -> JudgementType.NG
                 | _ -> failwith "impossible hit status"
             judgementCounts.[j |> int] <- (judgementCounts.[j |> int] + 1)
             let (newcombo, cb) = combo_func j combo
@@ -151,6 +151,7 @@ module Score =
              (fun (judgements, points, maxPoints, combo, maxCombo, cbs) -> points / maxPoints))
 
         member this.JudgeFunc = judge_func
+        member this.Format() = sprintf "%.2f%%" (if System.Double.IsNaN this.Value then 100.0 else 100.0 * this.Value) 
 
     type HitWindows = (Time * JudgementType) list
 
@@ -178,7 +179,7 @@ module Score =
         | JudgementType.BAD
         | JudgementType.MISS -> true
         | JudgementType.OK
-        | JudgementType.FUMBLE
+        | JudgementType.NG
         | _ -> false
 
     let sc_curve (judge: int) (judgement: JudgementType) (delta: Time) =
@@ -265,7 +266,7 @@ module Score =
                      | JudgementType.MISS
                      | _ -> 0.0),
                  (fun j -> if is_regular_hit j then 300.0 else 0.0),
-                 (fun j c -> if is_combo_break JudgementType.FUMBLE j then (0, true) else (c + 1, false)))
+                 (fun j c -> if is_combo_break JudgementType.NG j then (0, true) else (c + 1, false)))
         | _ -> failwith "nyi"
 
     (*
@@ -285,7 +286,7 @@ module Score =
                 | HitStatus.Hit -> judge_func (deltas.[k] |> Time.Abs)
                 | HitStatus.Special
                 | HitStatus.SpecialOK -> JudgementType.OK
-                | HitStatus.SpecialNG -> JudgementType.FUMBLE
+                | HitStatus.SpecialNG -> JudgementType.NG
                 | _ -> failwith "impossible hit status"
             let newhp = Math.Clamp(hp + points_func j (deltas.[k] |> Time.Abs), 0.0, 1.0)
             ((failed && failAtEnd) || newhp <= failThreshold, newhp)
@@ -330,7 +331,7 @@ module Score =
                     | JudgementType.BAD -> -0.2
                     | JudgementType.MISS -> -0.1
                     | JudgementType.OK -> 0.0
-                    | JudgementType.FUMBLE -> -0.1
+                    | JudgementType.NG -> -0.1
                     | _ -> failwith "impossible judgement type"
                 ), scoring, 0.0, false
             )

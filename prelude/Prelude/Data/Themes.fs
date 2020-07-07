@@ -8,12 +8,14 @@ open Prelude.Json
 open Prelude.Common
 
 module Themes =
-    
-    type StorageType = Zip of ZipArchive | Folder of string
+
+    //Default config values for themes, textures, noteskins, widget layouts
 
     type ThemeConfig = {
         JudgementColors: Color array
         JudgementNames: string array
+        LampColors: Color array
+        LampNames: string array
         Font: string
         TextColor: Color
         SelectChart: Color
@@ -23,15 +25,18 @@ module Themes =
         CursorSize: float32
     } with
         static member Default: ThemeConfig = {
-            JudgementColors = [|Color.FromArgb(127, 127, 255); Color.FromArgb(0, 255, 255); Color.FromArgb(255, 255, 0);
-                Color.FromArgb(0, 255, 100); Color.FromArgb(0, 0, 255); Color.Fuchsia; Color.FromArgb(255, 0, 0); Color.FromArgb(255, 255, 0); Color.Fuchsia|];
-            JudgementNames = [|"Ridiculous"; "Marvellous"; "Perfect"; "Good"; "Bad"; "Boo"; "Miss"; "OK"; "Not Good"|];
-            Font = "Akrobat Black";
-            TextColor = Color.White;
-            SelectChart = Color.FromArgb(0, 180, 110);
-            DefaultAccentColor = Color.FromArgb(0, 255, 160);
-            OverrideAccentColor = false;
-            PlayfieldColor = Color.FromArgb(120, 0, 0, 0);
+            JudgementColors = [|Color.FromArgb(127, 127, 255); Color.FromArgb(0, 255, 255); Color.FromArgb(255, 255, 0); Color.FromArgb(255, 255, 0);
+                Color.FromArgb(0, 255, 100); Color.FromArgb(0, 0, 255); Color.Fuchsia; Color.Fuchsia; Color.FromArgb(255, 0, 0); |]
+            JudgementNames = [|"Ridiculous"; "Marvellous"; "Perfect"; "Great"; "Good"; "Bad"; "Miss"; "OK"; "Not Good"|]
+            LampColors = [|Color.White; Color.FromArgb(255, 220, 220); Color.FromArgb(160, 205, 160); Color.FromArgb(200, 255, 200); Color.FromArgb(220, 255, 220);
+                Color.FromArgb(205, 205, 160); Color.FromArgb(255, 255, 190); Color.FromArgb(255, 255, 210); Color.FromArgb(160, 205, 205); Color.FromArgb(220, 255, 255)|]
+            LampNames = [|"NONE"; "SINGLE DIGIT COMBO BREAKS"; "MISS FLAG"; "FULL COMBO"; "SINGLE DIGIT GREATS"; "BLACK FLAG"; "PERFECT FULL COMBO"; "SINGLE DIGIT PERFECTS"; "WHITE FLAG"; "MARVELLOUS FULL COMBO"|]
+            Font = "Akrobat Black"
+            TextColor = Color.White
+            SelectChart = Color.FromArgb(0, 180, 110)
+            DefaultAccentColor = Color.FromArgb(0, 255, 160)
+            OverrideAccentColor = false
+            PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
             CursorSize = 50.0f
         }
 
@@ -64,6 +69,34 @@ module Themes =
             Rows = 1
             Tiling = true
         }
+
+    type WidgetConfig = { Enabled: bool; Float: bool; Left: float32; LeftA: float32; Top: float32; TopA: float32; Right: float32; RightA: float32; Bottom: float32; BottomA: float32 }
+    with
+        static member Default = { Enabled = false; Float = true; Left = 0.0f; LeftA = 0.0f; Top = 0.0f; TopA = 0.0f; Right = 0.0f; RightA = 1.0f; Bottom = 0.0f; BottomA = 1.0f }
+    module WidgetConfig =
+        type AccuracyMeter = { Position: WidgetConfig; GradeColors: bool }
+        with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = 40.0f; TopA = 0.0f; Right = 100.0f; RightA = 0.5f; Bottom = 100.0f; BottomA = 0.0f }; GradeColors = true }
+        type HitMeter = { Position: WidgetConfig; AnimationTime: float32; Thickness: float32 }
+        with static member Default = { Position = { Enabled = true; Float = false; Left = -300.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.5f; Right = 300.0f; RightA = 0.5f; Bottom = 25.0f; BottomA = 0.5f }; AnimationTime = 1000.0f; Thickness = 5.0f }
+        type Combo = { Position: WidgetConfig; Growth: float32; Pop: float32; LampColors: bool }
+        with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.55f; Right = 100.0f; RightA = 0.5f; Bottom = 50.0f; BottomA = 0.55f }; Growth = 0.01f; Pop = 5.0f; LampColors = true }
+        type JudgementMeter = { Position: WidgetConfig; AnimationTime: float }
+        type Banner = { Position: WidgetConfig; AnimationTime: float }
+        type SkipButton = { Position: WidgetConfig }
+        type ProgressBar = { Position: WidgetConfig }
+        //quick settings
+        //song info
+        //mod info
+        //current time
+        //judgement counts
+        //screencovers
+        //pacemaker
+        type HitLighting = { AnimationTime: float; Expand: float32 }
+        type ColumnLighting = { AnimationTime: float }
+
+    //Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
+
+    type StorageType = Zip of ZipArchive | Folder of string
 
     type Theme(storage) =
 
@@ -100,6 +133,7 @@ module Themes =
                 }
             | Folder f -> Directory.EnumerateDirectories(p)
         
+        //todo: pair with boolean marking if this is defaulting - if so can inherit from other themes
         member this.GetJson([<ParamArray>] path: string array) =
             try
                 use stream = this.GetFile(path)
@@ -108,9 +142,11 @@ module Themes =
                 match storage with
                 | Zip _ -> () //do not write data to zip archives
                 | Folder f -> JsonHelper.saveFile json (Path.Combine(f, Path.Combine(path)))
-                Some json
+                json
             with
-            | err -> Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString()); None
+            | err -> 
+                Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString())
+                "{}" |> JsonHelper.load
 
         member this.CopyTo(targetPath) =
             if Directory.Exists(targetPath) then
