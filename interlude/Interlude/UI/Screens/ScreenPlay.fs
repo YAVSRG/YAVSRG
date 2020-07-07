@@ -3,6 +3,7 @@
 open OpenTK
 open System
 open Prelude.Common
+open Prelude.Data.Themes
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
 open Interlude
@@ -135,24 +136,53 @@ type NoteRenderer() as this =
                 let headpos = hold_pos.[k]
                 Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) bottom |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
                 Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
-                
-            
-//TODO LIST
-//  INPUT
-//  WIDGETS
-//    ACCURACY
-//    HIT LIGHTING
-//    HIT METER
-//    JUDGEMENT METER
-//    COMBO
-//    QUICK SETTINGS
-//    SKIP BUTTON
-//    BANNER
-//    SONG TITLE/INFO/TIME
-//    PROGRESS
-//    JUDGEMENT COUNTS
-//    SCREEN COVERS
-//    PACEMAKER
+        base.Draw()
+
+module GameplayWidgets = 
+    type HitEvent = (struct(int * Time * Time))
+    type Helper = {
+        Scoring: AccuracySystem
+        OnHit: IEvent<HitEvent>
+    }
+
+    type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
+        inherit Widget()
+        do
+            this.Add(new Components.TextBox(helper.Scoring.Format, (fun () -> Color.White), 0.5f))
+            //todo: optionally show name of scoring system
+            //todo: optionally color accuracy by current grade
+
+    type HitMeter(conf: WidgetConfig.HitMeter, helper) =
+        inherit Widget()
+        let hits = ResizeArray<struct (Time * float32 * int)>()
+        let mutable w = 0.0f
+        let listener =
+            helper.OnHit.Subscribe(
+                fun struct (_, delta, now) -> hits.Add(struct (now, delta/MISSWINDOW * w * 0.5f, helper.Scoring.JudgeFunc(Time.Abs delta) |> int)))
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if w = 0.0f then w <- Rect.width this.Bounds
+            let now = Audio.timeWithOffset()
+            while hits.Count > 0 && let struct (time, _, _) = (hits.[0]) in time + conf.AnimationTime * 1.0f<ms> < now do
+                hits.RemoveAt(0)
+
+        override this.Draw() =
+            base.Draw()
+            let struct (left, top, right, bottom) = this.Bounds
+            let centre = (right + left) * 0.5f
+            //todo: optional guide bar in centre
+            let now = Audio.timeWithOffset()
+            for struct (time, pos, j) in hits do
+                Draw.rect(Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
+                    (let c = Themes.themeConfig.JudgementColors.[j] in
+                        Color.FromArgb(255 - int (254.0f * (now - time) / conf.AnimationTime), int c.R, int c.G, int c.B))
+                    (Sprite.Default)
+        interface IDisposable with
+            member this.Dispose() =
+                listener.Dispose()
+
+open GameplayWidgets
 
 type ScreenPlay() as this =
     inherit Screen()
@@ -160,13 +190,25 @@ type ScreenPlay() as this =
     let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
     let scoreData = Gameplay.replayData.Force()
     let scoring = createAccuracyMetric(SCPlus 4)
+    let onHit = new Event<HitEvent>()
+    let widgetHelper: Helper = { Scoring = scoring; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[keys - 3]
     let missWindow = MISSWINDOW * Gameplay.rate
 
     do
-        this.Add(new NoteRenderer())
-        this.Add(new Components.TextBox((fun () -> sprintf "%f!" scoring.Value), (fun () -> Color.White), 0.5f) |> Components.positionWidget(-100.0f, 0.5f, 40.0f, 0.0f, 100.0f, 0.5f, 100.0f, 0.0f))
-        //widgets based on config
+        let noteRenderer = new NoteRenderer()
+        this.Add(noteRenderer)
+        let inline f name (constructor : 'T -> Widget) = 
+            let config: ^T = Themes.getGameplayConfig(name)
+            let pos : WidgetConfig = (^T: (member Position: WidgetConfig) (config)) //wtaf
+            if pos.Enabled then
+                config
+                |> constructor
+                |> Components.positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
+                |> if pos.Float then this.Add else noteRenderer.Add
+        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
+        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
+        //todo: rest of widgets
 
     override this.OnEnter(prev) =
         if (prev :? ScreenScore) then
@@ -183,7 +225,7 @@ type ScreenPlay() as this =
         Screens.setToolbarCollapsed(false)
         Screens.backgroundDim.SetTarget(0.7f)
 
-    member private this.Hit(i, k, delta, bad) =
+    member private this.Hit(i, k, delta, bad, now) =
         let _, deltas, status = scoreData.[i]
         match status.[k] with
         | HitStatus.Hit
@@ -193,6 +235,7 @@ type ScreenPlay() as this =
             deltas.[k] <- delta
             status.[k] <- HitStatus.Hit
             scoring.HandleHit(k)(i)(scoreData)
+            onHit.Trigger(struct(k, delta, now))
         | HitStatus.Special ->
             deltas.[k] <- delta
             status.[k] <- if bad then HitStatus.SpecialNG else HitStatus.SpecialOK
@@ -236,7 +279,7 @@ type ScreenPlay() as this =
             i <- i + 1
         if hitAt >= 0 then
             delta <- delta / Gameplay.rate * (if release then 0.5f else 1.0f)
-            this.Hit(hitAt, k, delta, noteType = NoteType.MINE || noteType = NoteType.HOLDBODY)
+            this.Hit(hitAt, k, delta, noteType = NoteType.MINE || noteType = NoteType.HOLDBODY, now)
 
 
     override this.Update(elapsedTime, bounds) =
@@ -249,6 +292,7 @@ type ScreenPlay() as this =
                 this.HandleHit(k, now, true)
         let i, _ = notes.IndexAt(now - missWindow * 0.5f)
         let mutable i = i + 1
+        //todo: fix potential issues with this behaviour
         while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow * 0.5f do
             let (_, struct (nd, _)) = notes.Data.[i]
             let (_, _, s) = scoreData.[i]
@@ -257,14 +301,13 @@ type ScreenPlay() as this =
             for k in noteData NoteType.MINE nd |> getBits do
                 if s.[k] = HitStatus.Special && binds.[k].Pressed(true) then s.[k] <- HitStatus.SpecialNG
             i <- i + 1
+        //todo: handle in all watchers
         scoring.Update(now - missWindow)(scoreData)
 
     override this.Draw() =
         base.Draw()
         let (judgements, pts, maxpts, combo, maxcombo, cbs) = scoring.State
-        Text.draw(Themes.font(), pts.ToString(), 30.0f, 10.0f, 10.0f, Color.White)
-        Text.draw(Themes.font(), maxpts.ToString(), 30.0f, 10.0f, 40.0f, Color.White)
         Text.draw(Themes.font(), combo.ToString(), 30.0f, 10.0f, 70.0f, Color.White)
         Text.draw(Themes.font(), maxcombo.ToString(), 30.0f, 10.0f, 100.0f, Color.White)
-        for i in 0..(judgements.Length - 1) do
+        for i in 1..(judgements.Length - 1) do
             Text.draw(Themes.font(), ((enum i):JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 130.0f + 30.0f * float32 i, Color.White)

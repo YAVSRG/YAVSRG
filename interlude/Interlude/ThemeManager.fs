@@ -25,13 +25,13 @@ type Theme(storage) =
             Option.defaultValue TextureConfig.Default <| this.GetJson(folder, name + ".json")
         (bmp, info)
 
-    member this.GetConfig() = this.GetJson("theme.json").Value
+    member this.GetConfig() = this.GetJson("theme.json")
 
     member this.GetNoteSkins() =
         Seq.choose
             (fun ns ->
                 try
-                    let config: NoteSkinConfig = this.GetJson("Noteskins", ns, "noteskin.json").Value
+                    let config: NoteSkinConfig = this.GetJson("Noteskins", ns, "noteskin.json")
                     Some (ns, config)
                 with
                 | err -> Logging.Error("Failed to load noteskin '" + ns + "'") (err.ToString()); None)
@@ -48,6 +48,7 @@ module Themes =
     let private defaultTheme = Theme.FromZipStream <| Interlude.Utils.getResourceStream("default.zip")
     let private loadedNoteskins = new Dictionary<string, NoteSkinConfig * int>()
     let private loadedThemes = new List<Theme>()
+    let private gameplayConfig = new Dictionary<string, obj>()
 
     let mutable themeConfig = ThemeConfig.Default
     let mutable noteskinConfig = NoteSkinConfig.Default
@@ -86,7 +87,7 @@ module Themes =
         Seq.choose (fun t ->
             let theme = Theme.FromThemeFolder(t)
             try
-                let config: ThemeConfig = theme.GetJson("theme.json").Value
+                let config: ThemeConfig = theme.GetJson("theme.json")
                 Some (theme, config)
             with
             | err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
@@ -103,6 +104,7 @@ module Themes =
                 Logging.Debug(sprintf "Loaded noteskin %s" ns) ""))
         Seq.iter Sprite.destroy sprites.Values
         sprites.Clear()
+        gameplayConfig.Clear()
         changeNoteSkin(currentNoteSkin)
         accentColor <- themeConfig.DefaultAccentColor
         if fontBuilder.IsSome then font().Dispose(); 
@@ -131,6 +133,14 @@ module Themes =
                         | err -> Logging.Error("Failed to load texture '" + name + "'") (err.ToString()); None)
             sprites.Add(name, Sprite.upload(bmp, config.Rows, config.Columns, false))
         sprites.[name]
+
+    let getGameplayConfig<'T>(name: string) = 
+        if gameplayConfig.ContainsKey(name) then
+            gameplayConfig.[name] :?> 'T
+        else
+            let o = getInherited(fun t -> Some <| t.GetJson("Interface", "Gameplay", name + ".json"))
+            gameplayConfig.Add(name, o :> obj)
+            o
 
     let loadBackground(file: string) =
         if background.ID <> 0 && background.ID <> getTexture("background").ID then Sprite.destroy background
