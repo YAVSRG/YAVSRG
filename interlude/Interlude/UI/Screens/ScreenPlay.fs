@@ -4,6 +4,7 @@ open OpenTK
 open System
 open Prelude.Common
 open Prelude.Charts.Interlude
+open Prelude.Gameplay.Score
 open Interlude
 open Interlude.Render
 open Interlude.Options
@@ -138,13 +139,15 @@ type NoteRenderer() as this =
             
 //TODO LIST
 //  INPUT
-//  BANNER
 //  WIDGETS
 //    ACCURACY
 //    HIT LIGHTING
 //    HIT METER
 //    JUDGEMENT METER
 //    COMBO
+//    QUICK SETTINGS
+//    SKIP BUTTON
+//    BANNER
 //    SONG TITLE/INFO/TIME
 //    PROGRESS
 //    JUDGEMENT COUNTS
@@ -154,8 +157,16 @@ type NoteRenderer() as this =
 type ScreenPlay() as this =
     inherit Screen()
     
+    let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
+    let scoreData = Gameplay.replayData.Force()
+    let scoring = createAccuracyMetric(SCPlus 4)
+    let binds = Options.options.GameplayBinds.[keys - 3]
+    let missWindow = MISSWINDOW * Gameplay.rate
+
     do
         this.Add(new NoteRenderer())
+        this.Add(new Components.TextBox((fun () -> sprintf "%f!" scoring.Value), (fun () -> Color.White), 0.5f) |> Components.positionWidget(-100.0f, 0.5f, 40.0f, 0.0f, 100.0f, 0.5f, 100.0f, 0.0f))
+        //widgets based on config
 
     override this.OnEnter(prev) =
         if (prev :? ScreenScore) then
@@ -165,10 +176,95 @@ type ScreenPlay() as this =
             //discord presence
             Screens.setToolbarCollapsed(true)
             //disable cursor
-            //banner animation
             Audio.changeRate(Gameplay.rate)
             Audio.playLeadIn()
 
     override this.OnExit(next) =
         Screens.setToolbarCollapsed(false)
         Screens.backgroundDim.SetTarget(0.7f)
+
+    member private this.Hit(i, k, delta, bad) =
+        let _, deltas, status = scoreData.[i]
+        match status.[k] with
+        | HitStatus.Hit
+        | HitStatus.SpecialNG
+        | HitStatus.SpecialOK -> ()
+        | HitStatus.NotHit ->
+            deltas.[k] <- delta
+            status.[k] <- HitStatus.Hit
+            scoring.HandleHit(k)(i)(scoreData)
+        | HitStatus.Special ->
+            deltas.[k] <- delta
+            status.[k] <- if bad then HitStatus.SpecialNG else HitStatus.SpecialOK
+            scoring.HandleHit(k)(i)(scoreData)
+        | HitStatus.Nothing
+        | _ -> failwith "impossible"
+
+    member private this.HandleHit(k, now, release) =
+        let i, _ = notes.IndexAt(now - missWindow) //maybe optimise this with another seeker?
+        let mutable i = i + 1 //next index
+        let mutable delta = missWindow
+        let mutable hitAt = -1
+        let mutable noteType = enum -1
+        while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow do
+            let (time, struct (nd, _)) = notes.Data.[i]
+            let (_, deltas, status) = scoreData.[i]
+            if (status.[k] = HitStatus.NotHit || status.[k] = HitStatus.Special || deltas.[k] < -missWindow * 0.5f) then
+                let d = now - time
+                if release then
+                    if (testForNote k NoteType.HOLDTAIL nd) then
+                        if (Time.Abs(delta) > Time.Abs(d)) || noteType = NoteType.HOLDBODY  then
+                            delta <- d
+                            hitAt <- i
+                            noteType <- NoteType.HOLDTAIL
+                    else if noteType <> NoteType.HOLDTAIL && (testForNote k NoteType.HOLDBODY nd) then
+                        if (Time.Abs(delta) > Time.Abs(d)) then
+                            delta <- d
+                            hitAt <- i
+                            noteType <- NoteType.HOLDBODY
+                else 
+                    if (testForNote k NoteType.HOLDHEAD nd) || (testForNote k NoteType.NORMAL nd) then
+                        if (Time.Abs(delta) > Time.Abs(d)) || noteType = NoteType.MINE  then
+                            delta <- d
+                            hitAt <- i
+                            noteType <- NoteType.NORMAL
+                    else if noteType <> NoteType.NORMAL && (testForNote k NoteType.MINE nd) then
+                        if (Time.Abs(delta) > Time.Abs(d)) then
+                            delta <- d
+                            hitAt <- i
+                            noteType <- NoteType.MINE
+            i <- i + 1
+        if hitAt >= 0 then
+            delta <- delta / Gameplay.rate * (if release then 0.5f else 1.0f)
+            this.Hit(hitAt, k, delta, noteType = NoteType.MINE || noteType = NoteType.HOLDBODY)
+
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        let now = Audio.timeWithOffset()
+        for k in 0 .. (keys - 1) do
+            if binds.[k].Tapped(true) then
+                this.HandleHit(k, now, false)
+            elif (binds.[k].Released()) then
+                this.HandleHit(k, now, true)
+        let i, _ = notes.IndexAt(now - missWindow * 0.5f)
+        let mutable i = i + 1
+        while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow * 0.5f do
+            let (_, struct (nd, _)) = notes.Data.[i]
+            let (_, _, s) = scoreData.[i]
+            for k in noteData NoteType.HOLDBODY nd |> getBits do
+                if s.[k] = HitStatus.Special && not (binds.[k].Pressed(true)) then s.[k] <- HitStatus.SpecialNG
+            for k in noteData NoteType.MINE nd |> getBits do
+                if s.[k] = HitStatus.Special && binds.[k].Pressed(true) then s.[k] <- HitStatus.SpecialNG
+            i <- i + 1
+        scoring.Update(now - missWindow)(scoreData)
+
+    override this.Draw() =
+        base.Draw()
+        let (judgements, pts, maxpts, combo, maxcombo, cbs) = scoring.State
+        Text.draw(Themes.font(), pts.ToString(), 30.0f, 10.0f, 10.0f, Color.White)
+        Text.draw(Themes.font(), maxpts.ToString(), 30.0f, 10.0f, 40.0f, Color.White)
+        Text.draw(Themes.font(), combo.ToString(), 30.0f, 10.0f, 70.0f, Color.White)
+        Text.draw(Themes.font(), maxcombo.ToString(), 30.0f, 10.0f, 100.0f, Color.White)
+        for i in 0..(judgements.Length - 1) do
+            Text.draw(Themes.font(), ((enum i):JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 130.0f + 30.0f * float32 i, Color.White)

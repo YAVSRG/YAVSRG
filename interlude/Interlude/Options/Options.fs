@@ -77,6 +77,7 @@ type GameOptions = {
     AccuracySystems: List<AccuracySystemConfig>
     HPSystems: List<HPSystemConfig>
     Hotkeys: Hotkeys
+    GameplayBinds: (Bind array) array
 } with
     static member Default = {
         AudioOffset = FloatSetting(0.0, -500.0, 500.0)
@@ -88,6 +89,15 @@ type GameOptions = {
         AccuracySystems = new List<AccuracySystemConfig>()
         HPSystems = new List<HPSystemConfig>()
         Hotkeys = Hotkeys.Default
+        GameplayBinds = [|
+            [|Key Key.Left; Key Key.Down; Key Key.Right|];
+            [|Key Key.Z; Key Key.X; Key Key.Period; Key Key.Slash|];
+            [|Key Key.Z; Key Key.X; Key Key.Space; Key Key.Period; Key Key.Slash|];
+            [|Key Key.Z; Key Key.X; Key Key.C; Key Key.Comma; Key Key.Period; Key Key.Slash|];
+            [|Key Key.Z; Key Key.X; Key Key.C; Key Key.Space; Key Key.Comma; Key Key.Period; Key Key.Slash|];
+            [|Key Key.Z; Key Key.X; Key Key.C; Key Key.V; Key Key.Comma; Key Key.Period; Key Key.Slash; Key Key.RShift|];
+            [|Key Key.Z; Key Key.X; Key Key.C; Key Key.V; Key Key.Space; Key Key.Comma; Key Key.Period; Key Key.Slash; Key Key.RShift|];
+            [|Key Key.CapsLock; Key Key.Q; Key Key.W; Key Key.E; Key Key.V; Key Key.Space; Key Key.K; Key Key.L; Key Key.Semicolon; Key Key.Quote|]|]
     }
 
 module Options =
