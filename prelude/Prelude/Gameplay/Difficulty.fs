@@ -223,11 +223,12 @@ module Difficulty =
 
         member this.PhysicalComposite = physicalComposite
 
-    let private confidenceValue (delta : float) =
+    let private confidenceValue (delta : Time) =
+        let delta = float delta
         let phi x =
             let y = x / 1.414213562
             Math.Max(0.0, Math.Min((0.5 + Math.Pow(Math.PI, -0.5) * (y - Math.Pow(y, 3.0) / 3.0 + Math.Pow(y, 5.0)/ 10.0 - Math.Pow(y, 7.0) / 42.0 + Math.Pow(y, 9.0)/ 216.0)), 1.0))
-        phi((17.95 - Math.Max(2.0, Math.Abs(delta))) / 15.0)
+        phi((17.95 - Math.Max(2.0, System.Math.Abs(delta))) / 15.0)
 
     let performanceFunc b value deviation delta =
         staminaFunc b (value * confidenceValue deviation) delta

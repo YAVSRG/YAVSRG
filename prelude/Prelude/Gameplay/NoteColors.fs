@@ -47,7 +47,7 @@ module NoteColors =
         |> ResizeArray<TimeDataItem<ColorNoteRow>>
         |> TimeData<ColorNoteRow>
 
-    let private roughlyDivisible (a : Time) (b : Time) = Math.Abs(float32 <| a - b * float32 (Math.Round(float <| a / b))) < 3.0f
+    let private roughlyDivisible (a : Time) (b : Time) = Time.Abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
 
     let private ddr_func (delta: Time) (msPerBeat : float32<ms/beat>) : int =
         List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / n)) [0..7]

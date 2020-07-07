@@ -14,17 +14,18 @@ module Score =
     *)
 
     type HitStatus =
-        | Nothing = 0uy
-        | NotHit = 1uy
-        | Hit = 2uy
-        | Special = 3uy
-        | SpecialMissed = 4uy
+    | Nothing = 0uy
+    | NotHit = 1uy
+    | Hit = 2uy
+    | Special = 3uy
+    | SpecialNG = 4uy
+    | SpecialOK = 5uy
 
-    type ScoreDataRow = Time * float array * HitStatus array
+    type ScoreDataRow = Time * Time array * HitStatus array
 
     type ScoreData = ScoreDataRow array
 
-    let MISSWINDOW = 180.0
+    let MISSWINDOW = 180.0f<ms>
 
     let countHits ((_, _, h): ScoreDataRow) =
         Array.fold (fun x hit ->
@@ -40,7 +41,7 @@ module Score =
         notes.Data
         |> Seq.map (fun (time, nr) ->
             let hit = [|for i in 1..keys -> br.ReadByte() |> LanguagePrimitives.EnumOfValue|]
-            (time, [|for i in 1..keys -> br.ReadSingle() |> float|], hit))
+            (time, [|for i in 1..keys -> br.ReadSingle() * 1.0f<ms>|], hit))
         |> Array.ofSeq       
 
     let compressScoreData (sd: ScoreData): string = 
@@ -56,7 +57,7 @@ module Score =
             let bits = (noteData NoteType.HOLDHEAD nr) ||| (noteData NoteType.NORMAL nr) ||| (noteData NoteType.HOLDTAIL nr)
             let bits2 = (noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.MINE nr)
             (time,
-                Array.init keys (fun i -> if hasBit i bits then MISSWINDOW else 0.0),
+                Array.init keys (fun i -> if hasBit i bits then MISSWINDOW else 0.0f<ms>),
                 Array.init keys (fun i -> if hasBit i bits then HitStatus.NotHit elif hasBit i bits2 then HitStatus.Special else HitStatus.Nothing)): ScoreDataRow
             )
         |> Array.ofSeq
@@ -102,16 +103,17 @@ module Score =
     *)
 
     type JudgementType =
-        | RIDICULOUS = 0
-        | MARVELLOUS = 1
-        | PERFECT = 2
-        | OK = 3
-        | GREAT = 4
-        | GOOD = 5
-        | BAD = 6
-        | FUMBLE = 7
-        | MISS = 8
+    | RIDICULOUS = 0
+    | MARVELLOUS = 1
+    | PERFECT = 2
+    | OK = 3
+    | GREAT = 4
+    | GOOD = 5
+    | BAD = 6
+    | FUMBLE = 7
+    | MISS = 8
 
+    //judgements, points, maxpoints, combo, maxcombo, cbs
     type AccuracySystemState = int array * float * float * int * int * int
 
     let accuracy_hit_func judge_func points_func max_point_func combo_func =
@@ -119,17 +121,18 @@ module Score =
             let j =
                 match hit.[k] with
                 | HitStatus.NotHit -> JudgementType.MISS
-                | HitStatus.Hit -> judge_func (Math.Abs deltas.[k])
-                | HitStatus.Special -> JudgementType.OK
-                | HitStatus.SpecialMissed -> JudgementType.FUMBLE
+                | HitStatus.Hit -> judge_func ((deltas.[k] |> Time.Abs))
+                | HitStatus.Special
+                | HitStatus.SpecialOK -> JudgementType.OK
+                | HitStatus.SpecialNG -> JudgementType.FUMBLE
                 | _ -> failwith "impossible hit status"
             judgementCounts.[j |> int] <- (judgementCounts.[j |> int] + 1)
             let (newcombo, cb) = combo_func j combo
-            (judgementCounts, points + points_func j (Math.Abs deltas.[k]), maxPoints + max_point_func j, newcombo,
+            (judgementCounts, points + points_func j (deltas.[k] |> Time.Abs), maxPoints + max_point_func j, newcombo,
              max newcombo maxCombo,
              cbs + if cb then 1 else 0)
 
-    type AccuracySystem(name: string, judge_func: float -> JudgementType, points_func: JudgementType -> float -> float, max_point_func: JudgementType -> float, combo_func: JudgementType -> int -> (int * bool)) =
+    type AccuracySystem(name: string, judge_func: Time -> JudgementType, points_func: JudgementType -> Time -> float, max_point_func: JudgementType -> float, combo_func: JudgementType -> int -> (int * bool)) =
         inherit ScoreMetric<AccuracySystemState>(
             name,
             ([| 0; 0; 0; 0; 0; 0; 0; 0; 0 |], 0.0, 0.0, 0, 0, 0),
@@ -149,59 +152,22 @@ module Score =
 
         member this.JudgeFunc = judge_func
 
-    type HitWindows = (float * JudgementType) list
+    type HitWindows = (Time * JudgementType) list
 
     //todo: ability to enable ridiculous timing windows
     type AccuracyDisplayType =
-        | Percentage
-        | ProjectedScore
-        | PointsScored
+    | Percentage
+    | ProjectedScore
+    | PointsScored
 
     type AccuracySystemConfig =
-        | SC of int
-        | SCPlus of int
-        | Wife of int
-        | DP of int
-        | OM of float
-        | Custom of unit
-
-    let sc_curve (judge: int) (delta: float) =
-        assert (delta >= 0.0)
-        let scale = 6.0 / (10.0 - (judge |> float))
-        if delta >= MISSWINDOW
-        then 0.0
-        else Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056) * 2.0)
-
-    let wife_curve (judge: int) (delta: float) =
-        assert (delta >= 0.0)
-        let scale = 6.0 / (10.0 - (judge |> float))
-        if delta >= (MISSWINDOW / scale)
-        then -8.0
-        else (2.0 - 10.0 * Math.Pow(1.0 - Math.Pow(2.0, -(delta * delta) * scale / 9025.0), 2.0))
-
-    let rec window_func (windows: HitWindows) delta =
-        assert (delta >= 0.0)
-        match windows with
-        | [] -> JudgementType.MISS
-        | (w, j) :: xs ->
-            if (delta < w) then j else window_func xs delta
-
-    let points_func (arr: float array) (j: JudgementType) (_: float) = arr.[j |> int]
-
-    let dp_windows judge ridiculous =
-        let perf_window = 45.0 / 6.0 * (10.0 - (judge |> float))
-
-        let windows: HitWindows =
-            [ (perf_window * 0.5, JudgementType.MARVELLOUS)
-              (perf_window, JudgementType.PERFECT)
-              (perf_window * 2.0, JudgementType.GREAT)
-              (min (perf_window * 3.0) 135.0, JudgementType.GOOD)
-              (min (perf_window * 4.0) 180.0, JudgementType.BAD) ]
-        window_func
-            (if ridiculous
-             then (perf_window * 0.25, JudgementType.RIDICULOUS) :: windows
-             else windows)
-
+    | SC of int
+    | SCPlus of int
+    | Wife of int
+    | DP of int
+    | OM of float32
+    | Custom of unit
+    
     let private is_regular_hit judgement =
         match judgement with
         | JudgementType.RIDICULOUS
@@ -214,6 +180,49 @@ module Score =
         | JudgementType.OK
         | JudgementType.FUMBLE
         | _ -> false
+
+    let sc_curve (judge: int) (judgement: JudgementType) (delta: Time) =
+        if is_regular_hit judgement then
+            assert (delta >= 0.0f<ms>)
+            if delta >= MISSWINDOW then -0.5
+            else
+                let delta = float delta
+                let scale = 6.0 / (10.0 - (judge |> float))
+                Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056) * 2.0)
+        else 0.0
+
+    let wife_curve (judge: int) (judgement: JudgementType) (delta: Time) = //TODO: update to wifev3
+        if is_regular_hit judgement then
+            assert (delta >= 0.0f<ms>)
+            let scale = 6.0f / (10.0f - (judge |> float32))
+            if delta >= (MISSWINDOW / scale) then -8.0
+            else
+                let delta = float delta
+                (2.0 - 10.0 * Math.Pow(1.0 - Math.Pow(2.0, -(delta * delta) * (float scale) / 9025.0), 2.0))
+        else 0.0
+
+    let rec window_func (windows: HitWindows) delta =
+        assert (delta >= 0.0f<ms>)
+        match windows with
+        | [] -> JudgementType.MISS
+        | (w, j) :: xs ->
+            if (delta < w) then j else window_func xs delta
+
+    let points_func (arr: float array) (j: JudgementType) (_: Time) = arr.[j |> int]
+
+    let dp_windows judge ridiculous =
+        let perf_window = 45.0f<ms> / 6.0f * (10.0f - (judge |> float32))
+
+        let windows: HitWindows =
+            [ (perf_window * 0.5f, JudgementType.MARVELLOUS)
+              (perf_window, JudgementType.PERFECT)
+              (perf_window * 2.0f, JudgementType.GREAT)
+              (min (perf_window * 3.0f) 135.0f<ms>, JudgementType.GOOD)
+              (min (perf_window * 4.0f) 180.0f<ms>, JudgementType.BAD) ]
+        window_func
+            (if ridiculous
+             then (perf_window * 0.25f, JudgementType.RIDICULOUS) :: windows
+             else windows)
 
     let private is_combo_break threshold judgement =
         match judgement with
@@ -231,20 +240,20 @@ module Score =
         | SC judge ->
             dp_based_accuracy ("SC (J" + (judge |> string) + ")") judge false
                 (points_func [| 2.0; 2.0; 1.8; 0.0; 1.0; 0.2; -1.6; 0.0; 0.0 |])
-        | SCPlus judge -> dp_based_accuracy ("SC+ (J" + (judge |> string) + ")") judge false (fun _ -> sc_curve judge)
+        | SCPlus judge -> dp_based_accuracy ("SC+ (J" + (judge |> string) + ")") judge false (sc_curve judge)
         | DP judge ->
             dp_based_accuracy ("DP (J" + (judge |> string) + ")") judge false
                 (points_func [| 2.0; 2.0; 2.0; 0.0; 1.0; -4.0; -8.0; 0.0; -8.0 |])
-        | Wife judge -> dp_based_accuracy ("Wife (J" + (judge |> string) + ")") judge false (fun _ -> wife_curve judge)
+        | Wife judge -> dp_based_accuracy ("Wife (J" + (judge |> string) + ")") judge false (wife_curve judge)
         | OM od ->
             AccuracySystem
                 (("osu!mania (OD" + (od |> string) + ")"),
                  window_func
-                     [ (16.5, JudgementType.MARVELLOUS)
-                       (64.5 - od * 3.0, JudgementType.PERFECT)
-                       (97.5 - od * 3.0, JudgementType.GREAT)
-                       (127.5 - od * 3.0, JudgementType.GOOD)
-                       (151.5 - od * 3.0, JudgementType.BAD) ],
+                     [ (16.5f<ms>, JudgementType.MARVELLOUS)
+                       (64.5f<ms> - od * 3.0f<ms>, JudgementType.PERFECT)
+                       (97.5f<ms> - od * 3.0f<ms>, JudgementType.GREAT)
+                       (127.5f<ms> - od * 3.0f<ms>, JudgementType.GOOD)
+                       (151.5f<ms> - od * 3.0f<ms>, JudgementType.BAD) ],
                  (fun j _ ->
                      match j with
                      | JudgementType.RIDICULOUS
@@ -273,14 +282,15 @@ module Score =
             let j =
                 match hit.[k] with
                 | HitStatus.NotHit -> JudgementType.MISS
-                | HitStatus.Hit -> judge_func (Math.Abs deltas.[k])
-                | HitStatus.Special -> JudgementType.OK
-                | HitStatus.SpecialMissed -> JudgementType.FUMBLE
+                | HitStatus.Hit -> judge_func (deltas.[k] |> Time.Abs)
+                | HitStatus.Special
+                | HitStatus.SpecialOK -> JudgementType.OK
+                | HitStatus.SpecialNG -> JudgementType.FUMBLE
                 | _ -> failwith "impossible hit status"
-            let newhp = Math.Clamp(hp + points_func j (Math.Abs deltas.[k]), 0.0, 1.0)
+            let newhp = Math.Clamp(hp + points_func j (deltas.[k] |> Time.Abs), 0.0, 1.0)
             ((failed && failAtEnd) || newhp <= failThreshold, newhp)
 
-    type HPSystem(name: string, init: float, points_func: JudgementType -> float -> float, scoring: AccuracySystem, failThreshold: float, failAtEnd: bool) =
+    type HPSystem(name: string, init: float, points_func: JudgementType -> Time -> float, scoring: AccuracySystem, failThreshold: float, failAtEnd: bool) =
         inherit ScoreMetric<HPSystemState>(
             name,
             (false, init),
@@ -302,9 +312,9 @@ module Score =
         member this.Failed = fst this.State
 
     type HPSystemConfig =
-        | VG
-        | OMHP of float
-        | Custom of unit
+    | VG
+    | OMHP of float
+    | Custom of unit
 
     let createHPMetric (config : HPSystemConfig) scoring : HPSystem =
         match config with
@@ -331,16 +341,16 @@ module Score =
     *)
 
     type Lamp =
-        | MFC = 9
-        | WF = 8
-        | SDP = 7
-        | PFC = 6
-        | BF = 5
-        | SDG = 4
-        | FC = 3
-        | MF = 2
-        | SDCB = 1
-        | NONE = 0
+    | MFC = 9
+    | WF = 8
+    | SDP = 7
+    | PFC = 6
+    | BF = 5
+    | SDG = 4
+    | FC = 3
+    | MF = 2
+    | SDCB = 1
+    | NONE = 0
 
     let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState): Lamp =
         let c count zero one singleDigit (more : Lazy<Lamp>) = 

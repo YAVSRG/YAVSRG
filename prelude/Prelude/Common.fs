@@ -15,6 +15,9 @@ module Common =
     type Time = float32<ms>
     let toTime (f: float) = float32 f * 1.0f<ms>
 
+    module Time =
+        let Abs(t: Time) = if t < 0.0f<ms> then -t else t
+
 (*
     Settings - Store an (ideally immutable type) value that can be get and set
     Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
