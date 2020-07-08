@@ -76,8 +76,8 @@ module Themes =
     module WidgetConfig =
         type AccuracyMeter = { Position: WidgetConfig; GradeColors: bool }
         with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = 40.0f; TopA = 0.0f; Right = 100.0f; RightA = 0.5f; Bottom = 100.0f; BottomA = 0.0f }; GradeColors = true }
-        type HitMeter = { Position: WidgetConfig; AnimationTime: float32; Thickness: float32 }
-        with static member Default = { Position = { Enabled = true; Float = false; Left = -300.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.5f; Right = 300.0f; RightA = 0.5f; Bottom = 25.0f; BottomA = 0.5f }; AnimationTime = 1000.0f; Thickness = 5.0f }
+        type HitMeter = { Position: WidgetConfig; AnimationTime: float32; Thickness: float32; ShowGuide: bool }
+        with static member Default = { Position = { Enabled = true; Float = false; Left = -300.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.5f; Right = 300.0f; RightA = 0.5f; Bottom = 25.0f; BottomA = 0.5f }; AnimationTime = 1000.0f; Thickness = 5.0f; ShowGuide = true }
         type Combo = { Position: WidgetConfig; Growth: float32; Pop: float32; LampColors: bool }
         with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.55f; Right = 100.0f; RightA = 0.5f; Bottom = 50.0f; BottomA = 0.55f }; Growth = 0.01f; Pop = 5.0f; LampColors = true }
         type JudgementMeter = { Position: WidgetConfig; AnimationTime: float }

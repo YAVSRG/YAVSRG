@@ -70,7 +70,7 @@ module Score =
         Used for: Accuracy, Health Bar, Performance Rating
     *)
 
-    type ScoreMetric<'state>(name: string, i: 'state, row_functor: ScoreDataRow -> int -> 'state -> 'state, hit_functor: ScoreDataRow -> int -> 'state -> 'state, value_functor: 'state -> float) =
+    type ScoreMetric<'state>(name: string, i: 'state, row_functor: ScoreDataRow -> int -> 'state -> bool -> 'state, hit_functor: ScoreDataRow -> int -> 'state -> 'state, value_functor: 'state -> float) =
         let mutable counter = 0
         let mutable state: 'state = i
 
@@ -88,13 +88,13 @@ module Score =
             let i = timeSeriesData.Length * counter / count
             if (i < timeSeriesData.Length) && (timeSeriesData.[i] = 0.0) then timeSeriesData.[i] <- this.Value
 
-        member this.Update (now: Time) (hitData: ScoreData) =
+        member this.Update (now: Time) (hitData: ScoreData) (playing: bool) =
             while (counter < hitData.Length) && (offsetOfRow hitData.[counter] < now) do
-                state <- row_functor hitData.[counter] counter state
+                state <- row_functor hitData.[counter] counter state playing
                 this.UpdateTimeSeries hitData.Length
                 counter <- counter + 1
 
-        member this.ProcessAll(hitData: ScoreData) = this.Update (infinityf * 1.0f<ms>) hitData
+        member this.ProcessAll(hitData: ScoreData) = this.Update (infinityf * 1.0f<ms>) hitData false
 
     (*
         % Accuracy systems using score metrics
@@ -129,29 +129,29 @@ module Score =
             judgementCounts.[j |> int] <- (judgementCounts.[j |> int] + 1)
             let (newcombo, cb) = combo_func j combo
             (judgementCounts, points + points_func j (deltas.[k] |> Time.Abs), maxPoints + max_point_func j, newcombo,
-             max newcombo maxCombo,
-             cbs + if cb then 1 else 0)
+                max newcombo maxCombo,
+                cbs + if cb then 1 else 0)
 
     type AccuracySystem(name: string, judge_func: Time -> JudgementType, points_func: JudgementType -> Time -> float, max_point_func: JudgementType -> float, combo_func: JudgementType -> int -> (int * bool)) =
         inherit ScoreMetric<AccuracySystemState>(
             name,
             ([| 0; 0; 0; 0; 0; 0; 0; 0; 0 |], 0.0, 0.0, 0, 0, 0),
-             (let handle_hit =
-                 (accuracy_hit_func judge_func points_func max_point_func combo_func)
-              (fun (offset, deltas, hit) _ (judgementCounts, points, maxPoints, combo, maxCombo, cbs) ->
-                  List.fold
-                      (fun s (k: int) ->
-                          if hit.[k] <> HitStatus.Nothing then
-                              handle_hit (offset, deltas, hit) k s
-                          else
-                              s)
-                      (judgementCounts, points, maxPoints, combo, maxCombo, cbs)
-                      [ 0 .. (deltas.Length - 1) ])),
-             (accuracy_hit_func judge_func points_func max_point_func combo_func),
-             (fun (judgements, points, maxPoints, combo, maxCombo, cbs) -> points / maxPoints))
+            (let handle_hit =
+                (accuracy_hit_func judge_func points_func max_point_func combo_func)
+            (fun (offset, deltas, hit) _ (judgementCounts, points, maxPoints, combo, maxCombo, cbs) playing ->
+                List.fold
+                    (fun s (k: int) ->
+                        if hit.[k] <> HitStatus.Nothing && (not playing || hit.[k] <> HitStatus.Hit) then
+                            handle_hit (offset, deltas, hit) k s
+                        else
+                            s)
+                    (judgementCounts, points, maxPoints, combo, maxCombo, cbs)
+                    [ 0 .. (deltas.Length - 1) ])),
+            (accuracy_hit_func judge_func points_func max_point_func combo_func),
+            (fun (judgements, points, maxPoints, combo, maxCombo, cbs) -> points / maxPoints))
 
         member this.JudgeFunc = judge_func
-        member this.Format() = sprintf "%.2f%%" (if System.Double.IsNaN this.Value then 100.0 else 100.0 * this.Value) 
+        member this.Format() = sprintf "%.2f%%" (if System.Double.IsNaN this.Value then 100.0 else 100.0 * this.Value)
 
     type HitWindows = (Time * JudgementType) list
 
@@ -295,18 +295,18 @@ module Score =
         inherit ScoreMetric<HPSystemState>(
             name,
             (false, init),
-            hp_hit_func scoring.JudgeFunc points_func failThreshold failAtEnd,
             (let handle_hit =
                 (hp_hit_func scoring.JudgeFunc points_func failThreshold failAtEnd)
-             (fun (offset, deltas, hit) _ (failed, hp) ->
-                 List.fold
-                     (fun s (k: int) ->
-                         if hit.[k] <> HitStatus.Nothing then
-                             handle_hit (offset, deltas, hit) k s
-                         else
-                             s)
-                     (failed, hp)
-                     [ 0 .. (deltas.Length - 1) ])),
+            (fun (offset, deltas, hit) _ (failed, hp) playing ->
+                List.fold
+                    (fun s (k: int) ->
+                        if hit.[k] <> HitStatus.Nothing && (not playing || hit.[k] <> HitStatus.Hit) then
+                            handle_hit (offset, deltas, hit) k s
+                        else
+                            s)
+                    (failed, hp)
+                    [ 0 .. (deltas.Length - 1) ])),
+            (hp_hit_func scoring.JudgeFunc points_func failThreshold failAtEnd),
             fun (failed, hp) -> hp
         )
 

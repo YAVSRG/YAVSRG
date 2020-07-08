@@ -238,7 +238,7 @@ module Difficulty =
         ScoreMetric<PerformanceMetricState>(
             "Interlude",
             (0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
-            (fun (time, dev, hit) i (lastTime, p, ps, t, ts) ->
+            (fun (time, dev, hit) i (lastTime, p, ps, t, ts) _ ->
                 let mutable v = 0.0
                 let mutable c = 0.0
                 for k = 0 to (keys - 1) do
