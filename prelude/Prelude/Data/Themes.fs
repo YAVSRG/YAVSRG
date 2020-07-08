@@ -28,8 +28,8 @@ module Themes =
             JudgementColors = [|Color.FromArgb(127, 127, 255); Color.FromArgb(0, 255, 255); Color.FromArgb(255, 255, 0); Color.FromArgb(255, 255, 0);
                 Color.FromArgb(0, 255, 100); Color.FromArgb(0, 0, 255); Color.Fuchsia; Color.Fuchsia; Color.FromArgb(255, 0, 0); |]
             JudgementNames = [|"Ridiculous"; "Marvellous"; "Perfect"; "Great"; "Good"; "Bad"; "Miss"; "OK"; "Not Good"|]
-            LampColors = [|Color.White; Color.FromArgb(255, 220, 220); Color.FromArgb(160, 205, 160); Color.FromArgb(200, 255, 200); Color.FromArgb(220, 255, 220);
-                Color.FromArgb(205, 205, 160); Color.FromArgb(255, 255, 190); Color.FromArgb(255, 255, 210); Color.FromArgb(160, 205, 205); Color.FromArgb(220, 255, 255)|]
+            LampColors = [|Color.White; Color.FromArgb(255, 160, 160); Color.FromArgb(160, 160, 160); Color.FromArgb(80, 255, 80); Color.FromArgb(160, 255, 160);
+                Color.FromArgb(200, 160, 255); Color.FromArgb(255, 255, 80); Color.FromArgb(255, 255, 160); Color.FromArgb(255, 160, 255); Color.FromArgb(160, 255, 255)|]
             LampNames = [|"NONE"; "SINGLE DIGIT COMBO BREAKS"; "MISS FLAG"; "FULL COMBO"; "SINGLE DIGIT GREATS"; "BLACK FLAG"; "PERFECT FULL COMBO"; "SINGLE DIGIT PERFECTS"; "WHITE FLAG"; "MARVELLOUS FULL COMBO"|]
             Font = "Akrobat Black"
             TextColor = Color.White
@@ -79,7 +79,7 @@ module Themes =
         type HitMeter = { Position: WidgetConfig; AnimationTime: float32; Thickness: float32; ShowGuide: bool }
         with static member Default = { Position = { Enabled = true; Float = false; Left = -300.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.5f; Right = 300.0f; RightA = 0.5f; Bottom = 25.0f; BottomA = 0.5f }; AnimationTime = 1000.0f; Thickness = 5.0f; ShowGuide = true }
         type Combo = { Position: WidgetConfig; Growth: float32; Pop: float32; LampColors: bool }
-        with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.55f; Right = 100.0f; RightA = 0.5f; Bottom = 50.0f; BottomA = 0.55f }; Growth = 0.01f; Pop = 5.0f; LampColors = true }
+        with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = -10.0f; TopA = 0.45f; Right = 100.0f; RightA = 0.5f; Bottom = 50.0f; BottomA = 0.45f }; Growth = 0.01f; Pop = 5.0f; LampColors = true }
         type JudgementMeter = { Position: WidgetConfig; AnimationTime: float }
         type Banner = { Position: WidgetConfig; AnimationTime: float }
         type SkipButton = { Position: WidgetConfig }
