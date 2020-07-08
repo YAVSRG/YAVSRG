@@ -63,7 +63,7 @@ module Audio =
             channelPlaying <- true
             Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
             Bass.ChannelPlay(nowplaying.ID) |> bassError
-        else
+        else if channelPlaying then
             Bass.ChannelPause(nowplaying.ID) |> bassError
             channelPlaying <- false
         timer.Restart()

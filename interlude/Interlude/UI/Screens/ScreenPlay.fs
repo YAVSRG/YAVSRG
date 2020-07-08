@@ -171,16 +171,49 @@ module GameplayWidgets =
             base.Draw()
             let struct (left, top, right, bottom) = this.Bounds
             let centre = (right + left) * 0.5f
-            //todo: optional guide bar in centre
+            if (conf.ShowGuide) then
+                Draw.rect
+                    (Rect.create (centre - conf.Thickness) top (centre + conf.Thickness) bottom)
+                    (Color.White)
+                    (Sprite.Default)
             let now = Audio.timeWithOffset()
             for struct (time, pos, j) in hits do
-                Draw.rect(Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
+                Draw.rect
+                    (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
                     (let c = Themes.themeConfig.JudgementColors.[j] in
                         Color.FromArgb(255 - int (254.0f * (now - time) / conf.AnimationTime), int c.R, int c.G, int c.B))
                     (Sprite.Default)
         interface IDisposable with
             member this.Dispose() =
                 listener.Dispose()
+
+    type ComboMeter(conf: WidgetConfig.Combo, helper) as this =
+        inherit Widget()
+        let popAnimation = new Animation.AnimationFade(0.0f)
+        let color = new Animation.AnimationColorMixer(Color.White)
+        let mutable hits = 0
+        let listener =
+            helper.OnHit.Subscribe(
+                fun _ ->
+                    hits <- hits + 1
+                    if (conf.LampColors && hits > 50) then
+                        color.SetColor(Themes.themeConfig.LampColors.[helper.Scoring.State |> lamp |> int])
+                    popAnimation.SetValue(conf.Pop))
+
+        do
+            this.Animation.Add(color)
+            this.Animation.Add(popAnimation)
+
+        override this.Draw() =
+            base.Draw()
+            let (_, _, _, combo, _, _) = helper.Scoring.State
+            let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
+            Text.drawFill(Themes.font(), combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
+
+        interface IDisposable with
+            member this.Dispose() =
+                listener.Dispose()
+
 
 open GameplayWidgets
 
@@ -195,6 +228,8 @@ type ScreenPlay() as this =
     let binds = Options.options.GameplayBinds.[keys - 3]
     let missWindow = MISSWINDOW * Gameplay.rate
 
+    let mutable noteSeek = 0
+
     do
         let noteRenderer = new NoteRenderer()
         this.Add(noteRenderer)
@@ -208,6 +243,7 @@ type ScreenPlay() as this =
                 |> if pos.Float then this.Add else noteRenderer.Add
         f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
         f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
+        f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
     override this.OnEnter(prev) =
@@ -290,19 +326,23 @@ type ScreenPlay() as this =
                 this.HandleHit(k, now, false)
             elif (binds.[k].Released()) then
                 this.HandleHit(k, now, true)
-        let i, _ = notes.IndexAt(now - missWindow * 0.5f)
-        let mutable i = i + 1
-        //todo: fix potential issues with this behaviour
-        while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow * 0.5f do
-            let (_, struct (nd, _)) = notes.Data.[i]
-            let (_, _, s) = scoreData.[i]
-            for k in noteData NoteType.HOLDBODY nd |> getBits do
-                if s.[k] = HitStatus.Special && not (binds.[k].Pressed(true)) then s.[k] <- HitStatus.SpecialNG
-            for k in noteData NoteType.MINE nd |> getBits do
-                if s.[k] = HitStatus.Special && binds.[k].Pressed(true) then s.[k] <- HitStatus.SpecialNG
+        while noteSeek < notes.Count && offsetOf notes.Data.[noteSeek] < now - missWindow do
+            let (_, _, s) = scoreData.[noteSeek]
+            Array.iteri (fun i state -> if state = HitStatus.NotHit then onHit.Trigger(struct (i, MISSWINDOW, now))) s
+            noteSeek <- noteSeek + 1
+        let mutable i = noteSeek
+        while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow * 0.125f do
+            let (t, struct (nd, _)) = notes.Data.[i]
+            //todo: dont give release penalty if note ends/begins within +-180ms
+            if (t > now - missWindow * 0.125f) then
+                let (_, _, s) = scoreData.[i]
+                for k in noteData NoteType.HOLDBODY nd |> getBits do
+                    if s.[k] = HitStatus.Special && not (binds.[k].Pressed(true)) then s.[k] <- HitStatus.SpecialNG
+                for k in noteData NoteType.MINE nd |> getBits do
+                    if s.[k] = HitStatus.Special && binds.[k].Pressed(true) then s.[k] <- HitStatus.SpecialNG
             i <- i + 1
         //todo: handle in all watchers
-        scoring.Update(now - missWindow)(scoreData)
+        scoring.Update(now - missWindow)(scoreData)(true)
 
     override this.Draw() =
         base.Draw()
