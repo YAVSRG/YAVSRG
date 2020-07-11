@@ -354,9 +354,9 @@ module Score =
     | NONE = 0
 
     let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState): Lamp =
-        let c count zero one singleDigit (more : Lazy<Lamp>) = 
-            if count = 0 then zero
+        let c count (zero : Lazy<Lamp>) one singleDigit more = 
+            if count = 0 then zero.Force()
             elif count = 1 then one
             elif count < 10 then singleDigit
-            else more.Force()
-        c judgements.[int JudgementType.PERFECT] Lamp.MFC Lamp.WF Lamp.SDP (lazy (c judgements.[int JudgementType.GREAT] Lamp.PFC Lamp.BF Lamp.SDG (lazy (c cbs Lamp.FC Lamp.MF Lamp.SDCB (lazy Lamp.NONE) )) ))
+            else more
+        c cbs (lazy (c judgements.[int JudgementType.GREAT] (lazy (c judgements.[int JudgementType.PERFECT] (lazy Lamp.MFC) Lamp.WF Lamp.SDP Lamp.PFC)) Lamp.BF Lamp.SDG Lamp.FC)) Lamp.MF Lamp.SDCB Lamp.NONE 
