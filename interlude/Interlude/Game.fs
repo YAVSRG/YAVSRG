@@ -35,27 +35,30 @@ type Game(config: GameConfig) =
         //todo: validation on config record data so this cannot happen
         | _ -> Logging.Error("Invalid window state. How did we get here?") ""
 
-    override this.OnResize (e) =
+    override this.OnResize(e) =
         base.OnResize (e)
         GL.Viewport(base.ClientRectangle)
         Render.resize(base.Width, base.Height)
         FBO.init()
 
-    override this.OnRenderFrame (e) =
+    override this.OnFileDrop(e) =
+        FileDropHandling.import(e.FileName)
+
+    override this.OnRenderFrame(e) =
         base.OnRenderFrame (e)
         Render.start()
         screens.Draw()
         Render.finish()
         base.SwapBuffers()
 
-    override this.OnUpdateFrame (e) =
-        base.OnUpdateFrame (e)
+    override this.OnUpdateFrame(e) =
+        base.OnUpdateFrame(e)
         screens.Update(e.Time * 1000.0, Render.bounds)
         Audio.update()
         Input.update()
         if screens.Exit then base.Exit()
     
-    override this.OnLoad (e) =
+    override this.OnLoad(e) =
         base.OnLoad(e)
         this.ApplyConfig(config)
         Render.init(base.Width, base.Height)
@@ -64,6 +67,6 @@ type Game(config: GameConfig) =
         Input.init(this)
         Gameplay.init()
 
-    override this.OnUnload (e) =
+    override this.OnUnload(e) =
         Gameplay.save()
         base.OnUnload(e)

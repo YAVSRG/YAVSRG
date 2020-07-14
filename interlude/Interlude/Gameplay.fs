@@ -72,6 +72,7 @@ module Gameplay =
     let init() =
         //cache.RebuildCache (fun x -> Logging.Info(x) "") |> ignore
         //cache.ConvertPackFolder(osuSongFolder) "osu!" (fun x -> Logging.Info(x) "") |> ignore
+        //Options.profile.ColorStyle.Set({ Options.profile.ColorStyle.Get() with Style = ColorScheme.DDR })
        
         let c, ch = 
             match cache.LookupChart(Options.options.CurrentChart.Get()) with
@@ -91,5 +92,3 @@ module Gameplay =
         changeChart(c, ch)
         //temp while audio code isnt finished (this will automatically happen in future)
         Audio.playFrom(ch.Header.PreviewTime)
-
-        //Options.profile.ColorStyle.Set({ Options.profile.ColorStyle.Get() with Style = ColorScheme.DDR })

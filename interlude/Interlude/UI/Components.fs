@@ -101,20 +101,22 @@ module Components =
             let width = Rect.width this.Bounds
             let height = Rect.height this.Bounds
             let pos (anchor : AnchorPoint) = if instant then anchor.RepositionRelative else anchor.MoveRelative
-            contentSize <-
-                this.Children
-                |> Seq.filter (fun c -> c.State &&& WidgetState.Disabled < WidgetState.Disabled)
-                |> Seq.fold (fun (x, y) w ->
-                    let (l, t, r, b) = w.Position
-                    let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
-                    let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
-                    let x = x + cwidth + spacingX
-                    let x, y = if x > width then cwidth, y + cheight + spacingY else x, y
-                    pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
-                    pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
-                    (x + spacingY, y)
-                    ) (0.0f, -scrollPos)
-                |> snd
+            lock(this)
+                (fun () ->
+                    contentSize <-
+                        this.Children
+                        |> Seq.filter (fun c -> c.State &&& WidgetState.Disabled < WidgetState.Disabled)
+                        |> Seq.fold (fun (x, y) w ->
+                            let (l, t, r, b) = w.Position
+                            let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
+                            let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
+                            let x = x + cwidth + spacingX
+                            let x, y = if x > width then cwidth, y + cheight + spacingY else x, y
+                            pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
+                            pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
+                            (x + spacingY, y)
+                            ) (0.0f, -scrollPos)
+                        |> snd)
 
         override this.Update(time, bounds) =
             if (this.Initialised) then
@@ -130,7 +132,13 @@ module Components =
             Stencil.create(false)
             Draw.rect(this.Bounds)(Color.Transparent)(Sprite.Default)
             Stencil.draw()
-            base.Draw()
+            let struct (_, top, _, bottom) = this.Bounds
+            lock(this)
+                (fun () ->
+                    for c in this.Children do
+                        if c.State < WidgetState.Disabled then
+                            let struct (_, t, _, b) = c.Bounds
+                            if t < bottom && b > top then c.Draw())
             Stencil.finish()
 
         override this.Add(child) =

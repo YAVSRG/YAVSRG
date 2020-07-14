@@ -39,8 +39,10 @@ type Widget() =
 
     abstract member Add: Widget -> unit
     default this.Add(c) =
-        children.Add(c)
-        c.AddTo(this)
+        lock(this)
+            (fun () ->
+                children.Add(c)
+                c.AddTo(this))
 
     abstract member AddTo: Widget -> unit
     default this.AddTo(c) =
@@ -69,17 +71,21 @@ type Widget() =
     //todo: locks on children for thread protection
     abstract member Draw: unit -> unit
     default this.Draw() =
-        children
-        |> Seq.filter (fun w -> w.State < WidgetState.Disabled)
-        |> Seq.iter (fun w -> w.Draw())
+        lock(this)
+            (fun () ->
+                children
+                |> Seq.filter (fun w -> w.State < WidgetState.Disabled)
+                |> Seq.iter (fun w -> w.Draw()))
 
     abstract member Update: float * Rect -> unit
     default this.Update(elapsedTime, struct (l, t, r, b): Rect) =
         animation.Update(elapsedTime)
         this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
         bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-        for i in children.Count - 1 .. -1 .. 0 do
-            if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then children.[i].Update(elapsedTime, bounds)
+        lock(this)
+            (fun () ->
+                for i in children.Count - 1 .. -1 .. 0 do
+                    if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then children.[i].Update(elapsedTime, bounds))
 
     member this.Reposition(l, la, t, ta, r, ra, b, ba) =
         left.Reposition(l, la)

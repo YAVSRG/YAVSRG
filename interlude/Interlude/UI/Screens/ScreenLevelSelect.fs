@@ -24,6 +24,7 @@ module ScreenLevelSelect =
     //  SCROLL UP WHEN COLLAPSING GROUPS
     //  NAVIGATION WITH ARROW KEYS
 
+    let mutable refresh = false
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //hash
     let mutable scrollTo = false
@@ -40,6 +41,9 @@ module ScreenLevelSelect =
             this.Add(
                 new TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Scoring.State in combo) |> K, K Color.White, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f))
+            this.Add(
+                new TextBox(K data.Mods, K Color.White, 1.0f)
+                |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
         override this.Draw() =
@@ -239,6 +243,9 @@ type ScreenLevelSelect() as this =
         this.Add(
             new TextBox((fun () -> match difficultyRating with None -> "0.00" | Some d -> sprintf "%.2f" d.Technical), K Color.White, 0.5f)
             |> positionWidget(0.0f, 0.2f, -240.0f, 1.0f, -50.0f, 0.4f, -140.0f, 1.0f))
+        this.Add(
+            new TextBox(getModString, K Color.White, 0.5f)
+            |> positionWidget(0.0f, 0.0f, -140.0f, 1.0f, -50.0f, 0.4f, -70.0f, 1.0f))
         refresh()
 
     override this.Update(elapsedTime, bounds) =
@@ -267,7 +274,6 @@ type ScreenLevelSelect() as this =
             
 
     override this.Draw() =
-
         let struct (left, top, right, bottom) = this.Bounds
         //level select stuff
         Stencil.create(false)
@@ -283,3 +289,7 @@ type ScreenLevelSelect() as this =
         Draw.rect(Rect.create left top right (top + 170.0f))(Screens.accentShade(100, 0.6f, 0.0f))(Sprite.Default)
         Draw.rect(Rect.create left (top + 170.0f) right (top + 175.0f))(Screens.accentShade(255, 0.8f, 0.0f))(Sprite.Default)
         base.Draw()
+
+    override this.OnEnter(prev) =
+        base.OnEnter(prev)
+        scoreboard.Refresh()
