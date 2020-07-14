@@ -31,6 +31,7 @@ module Animation =
             r.SetTarget(float32 color.R); g.SetTarget(float32 color.G); b.SetTarget(float32 color.B)
         member this.SetColor(color: System.Drawing.Color) =
             r.SetTarget(float32 color.R); g.SetTarget(float32 color.G); b.SetTarget(float32 color.B)
+        member this.GetColor(alpha) = OpenTK.Color.FromArgb(alpha, int r.Value, int g.Value, int b.Value)   
         member this.GetColor() = OpenTK.Color.FromArgb(255, int r.Value, int g.Value, int b.Value)    
 
         override this.Update(t) =

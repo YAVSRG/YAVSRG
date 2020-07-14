@@ -6,6 +6,7 @@ open Prelude.Charts.Interlude
 open Prelude.Editor
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Score
+open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.ChartManager
 open Prelude.Data.ScoreManager
@@ -21,12 +22,15 @@ module Gameplay =
     let mutable modifiedChart: Lazy<ModChart> = lazy ( failwith "tried to access modified chart when none is selected" )
     let mutable coloredChart: Lazy<ColorizedChart> = lazy ( failwith "tried to access colored chart when none is selected" )
     let mutable replayData: Lazy<ScoreData> = lazy ( null )
-    let mutable rate = 1.0f
+    let mutable difficultyRating = None
 
+    let mutable rate = 1.0f
     let selectedMods = ModState()
-    let difficultyRating = null
     let scores = ScoresDB()
     let cache = Cache()
+
+    let mutable onChartUpdate = fun () -> ()
+    let mutable onChartChange = fun () -> ()
 
     let updateChart() =
         match currentChart with
@@ -34,9 +38,17 @@ module Gameplay =
         | Some c ->
             let (m, r) = getModChart selectedMods c
             modifiedChart <- m
+            coloredChart <- getColoredChart(Options.profile.ColorStyle.Get())(modifiedChart)
             replayData <- r
-        //todo: force modchart, make lazy coloring
-        //todo: run diff calc on uncolored modchart
+            difficultyRating <-
+                let (keys, notes, _, _, _) = m.Force() in
+                Some <| RatingReport(notes, rate, Options.profile.Playstyles.[keys - 3], keys)
+            onChartUpdate()
+
+    let changeRate(amount) =
+        rate <- Math.Round(float (rate + amount), 2) |> float32
+        Audio.changeRate(rate)
+        updateChart()
 
     let changeChart(cachedChart, chart) =
         currentCachedChart <- Some cachedChart
@@ -47,9 +59,11 @@ module Gameplay =
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
         Audio.playFrom(chart.Header.PreviewTime)
         Options.options.CurrentChart.Set(cachedChart.FilePath)
-        let (m, r) = getModChart(selectedMods)(chart)
-        modifiedChart <- m; replayData <- r
-        coloredChart <- getColoredChart(Options.profile.ColorStyle.Get())(modifiedChart)
+        updateChart()
+        onChartChange()
+
+    let getModString() = 
+        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods.Enumerate() |> List.map (ModState.GetModName)))
 
     let save() =
         scores.Save()

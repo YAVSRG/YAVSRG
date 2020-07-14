@@ -87,8 +87,14 @@ type Toolbar() as this =
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
-        Draw.rect(Rect.create l (t - height) r t) (Screens.accentShade(127, 1.0f, 0.0f)) Sprite.Default
-        Draw.rect(Rect.create l b r (b + height)) (Screens.accentShade(127, 1.0f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l (t - height) r t) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l b r (b + height)) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        if barSlider.Value > 0.01f then
+            let s = (r - l) / 48.0f
+            for i in 0 .. 47 do
+                let level = System.Math.Min((Audio.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, height)
+                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - height) (l + (float32 i + 1.0f) * s - 2.0f) (t - height + level))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
+                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + height - level) (r - float32 i * s - 2.0f) (b + height))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
         base.Draw()
 
     override this.Update(elapsed, bounds) =
@@ -102,7 +108,7 @@ type Toolbar() as this =
 type ScreenContainer() as this =
     inherit Widget()
 
-    let mutable dialogs = []
+    let dialogs = new ResizeArray<Dialog>()
     let mutable previous = None
     let mutable current = new ScreenLoading() :> Screen
     let mutable screens = [current]
@@ -116,6 +122,7 @@ type ScreenContainer() as this =
     do
         Screens.addScreen <- this.AddScreen
         Screens.popScreen <- this.RemoveScreen
+        Screens.addDialog <- this.AddDialog
         this.Add(toolbar)
         this.Add(Screens.logo |> Components.positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f))
         this.Animation.Add(Screens.accentColor)
@@ -127,6 +134,9 @@ type ScreenContainer() as this =
 
     member this.Exit = exit
 
+    member this.AddDialog(d: Dialog) =
+        dialogs.Add(d)
+
     member this.AddScreen(s: Screen) =
         screens <- s :: screens
         current.OnExit(s)
@@ -135,6 +145,7 @@ type ScreenContainer() as this =
         current <- s
 
     member this.RemoveScreen() =
+        current.Dispose()
         previous <- Some current
         screens <- List.tail screens
         match List.tryHead screens with
@@ -149,10 +160,19 @@ type ScreenContainer() as this =
         Screens.parallaxY.SetTarget(Mouse.Y())
         Screens.accentColor.SetColor(Themes.accentColor)
         base.Update(elapsedTime, bounds)
-        current.Update(elapsedTime, toolbar.Bounds)
+        if dialogs.Count > 0 then
+            dialogs.[dialogs.Count - 1].Update(elapsedTime, toolbar.Bounds)
+            if dialogs.[dialogs.Count - 1].State = WidgetState.Disabled then
+                dialogs.[dialogs.Count - 1].Dispose()
+                dialogs.RemoveAt(dialogs.Count - 1)
+            current.Animation.Update(elapsedTime)
+        else
+            current.Update(elapsedTime, toolbar.Bounds)
 
     override this.Draw() =
         Screens.drawBackground(this.Bounds, Color.White, 1.0f)
         Draw.rect this.Bounds (Color.FromArgb(Screens.backgroundDim.Value * 255.0f |> int, 0, 0, 0)) Sprite.Default
         current.Draw()
+        for d in dialogs do
+            d.Draw()
         base.Draw()

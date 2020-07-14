@@ -21,12 +21,14 @@ type WindowResolution =
 
 type GameConfig = {
     WorkingDirectory: string
+    Locale: string
     WindowMode: WindowType
     Resolution: WindowResolution
     FrameLimiter: float
 } with
     static member Default = {
         WorkingDirectory = ""
+        Locale = "en_GB.txt"
         WindowMode = WindowType.BORDERLESS
         Resolution = Custom (1024, 768)
         FrameLimiter = 0.0
@@ -40,31 +42,45 @@ type Hotkeys = {
     Tooltip: Setting<Bind>
     Screenshot: Setting<Bind>
     Volume: Setting<Bind>
-    Next: Setting<Bind>
     Previous: Setting<Bind>
-    End: Setting<Bind>
+    Next: Setting<Bind>
     Start: Setting<Bind>
+    End: Setting<Bind>
 
     Import: Setting<Bind>
     Options: Setting<Bind>
     Help: Setting<Bind>
+
+    UpRate: Setting<Bind>
+    DownRate: Setting<Bind>
+    UpRateHalf: Setting<Bind>
+    DownRateHalf: Setting<Bind>
+    UpRateSmall: Setting<Bind>
+    DownRateSmall: Setting<Bind>
 } with
     static member Default = {
-        Exit = new Setting<Bind>(Key Key.Escape)
-        Select = new Setting<Bind>(Key Key.Enter)
-        Search = new Setting<Bind>(Key Key.Tab)
-        Tooltip = new Setting<Bind>(Key Key.Slash)
-        Toolbar = new Setting<Bind>(Key Key.T |> Ctrl)
-        Screenshot = new Setting<Bind>(Key Key.F12)
-        Volume = new Setting<Bind>(Key Key.AltLeft)
-        Previous = new Setting<Bind>(Key Key.Left)
-        Next = new Setting<Bind>(Key Key.Right)
-        Start = new Setting<Bind>(Key Key.Home)
-        End = new Setting<Bind>(Key Key.End)
+        Exit = Setting(Key Key.Escape)
+        Select = Setting(Key Key.Enter)
+        Search = Setting(Key Key.Tab)
+        Tooltip = Setting(Key Key.Slash)
+        Toolbar = Setting(Key Key.T |> Ctrl)
+        Screenshot = Setting(Key Key.F12)
+        Volume = Setting(Key Key.AltLeft)
+        Previous = Setting(Key Key.Left)
+        Next = Setting(Key Key.Right)
+        Start = Setting(Key Key.Home)
+        End = Setting(Key Key.End)
 
-        Import = new Setting<Bind>(Key Key.I |> Ctrl)
-        Options = new Setting<Bind>(Key Key.O |> Ctrl)
-        Help = new Setting<Bind>(Key Key.H |> Ctrl)
+        Import = Setting(Key Key.I |> Ctrl)
+        Options = Setting(Key Key.O |> Ctrl)
+        Help = Setting(Key Key.H |> Ctrl)
+
+        UpRate = Setting(Key Key.Plus)
+        DownRate = Setting(Key Key.Minus)
+        UpRateHalf = Setting(Key Key.Plus |> Ctrl)
+        DownRateHalf = Setting(Key Key.Minus |> Ctrl)
+        UpRateSmall = Setting(Key Key.Plus |> Shift)
+        DownRateSmall = Setting(Key Key.Minus |> Shift)
     }
 
 type GameOptions = {
@@ -131,6 +147,7 @@ module Options =
             Logging.Critical("User has chosen to launch game with default config.") ""
         
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
+        Localisation.loadFile(config.Locale)
         
         try
             options <- JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "options.json"))

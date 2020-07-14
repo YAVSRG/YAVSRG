@@ -129,6 +129,7 @@ module Audio =
         timerStart <- -infinityf * 1.0f<ms>
         if nowplaying.ID <> 0 then
             nowplaying.Dispose()
+        channelPlaying <- false
         nowplaying <- Track.FromFile(path)
         localOffset <- offset
         changeRate(rate)

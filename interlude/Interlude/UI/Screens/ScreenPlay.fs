@@ -142,15 +142,29 @@ module GameplayWidgets =
     type HitEvent = (struct(int * Time * Time))
     type Helper = {
         Scoring: AccuracySystem
+        HP: HPSystem
         OnHit: IEvent<HitEvent>
     }
 
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
+
+        let color = new Animation.AnimationColorMixer(if conf.GradeColors then Utils.otkColor Themes.themeConfig.GradeColors.[0] else Color.White)
+        let listener =
+            if conf.GradeColors then
+                helper.OnHit.Subscribe(fun _ -> color.SetColor(Themes.themeConfig.GradeColors.[grade helper.Scoring.Value Themes.themeConfig.GradeThresholds]))
+            else null
+
         do
-            this.Add(new Components.TextBox(helper.Scoring.Format, (fun () -> Color.White), 0.5f))
-            //todo: optionally show name of scoring system
-            //todo: optionally color accuracy by current grade
+            this.Animation.Add(color)
+            this.Add(new Components.TextBox(helper.Scoring.Format, color.GetColor, 0.5f) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.7f))
+            if conf.ShowName then
+                this.Add(new Components.TextBox(Utils.K helper.Scoring.Name, (fun () -> Color.White), 0.5f) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+        
+        //todo: test this doesnt crash when this code becomes used
+        interface IDisposable with
+            member this.Dispose() =
+                if isNull listener then () else listener.Dispose()
 
     type HitMeter(conf: WidgetConfig.HitMeter, helper) =
         inherit Widget()
@@ -181,7 +195,7 @@ module GameplayWidgets =
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
                     (let c = Themes.themeConfig.JudgementColors.[j] in
-                        Color.FromArgb(255 - int (254.0f * (now - time) / conf.AnimationTime), int c.R, int c.G, int c.B))
+                        Color.FromArgb(Math.Max(0, 255 - int (255.0f * (now - time) / conf.AnimationTime)), int c.R, int c.G, int c.B))
                     (Sprite.Default)
         interface IDisposable with
             member this.Dispose() =
@@ -223,8 +237,9 @@ type ScreenPlay() as this =
     let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
     let scoreData = Gameplay.replayData.Force()
     let scoring = createAccuracyMetric(SCPlus 4)
+    let hp = createHPMetric(VG)(scoring)
     let onHit = new Event<HitEvent>()
-    let widgetHelper: Helper = { Scoring = scoring; OnHit = onHit.Publish }
+    let widgetHelper: Helper = { Scoring = scoring; HP = hp; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[keys - 3]
     let missWindow = MISSWINDOW * Gameplay.rate
 
@@ -235,7 +250,7 @@ type ScreenPlay() as this =
         this.Add(noteRenderer)
         let inline f name (constructor : 'T -> Widget) = 
             let config: ^T = Themes.getGameplayConfig(name)
-            let pos : WidgetConfig = (^T: (member Position: WidgetConfig) (config)) //wtaf
+            let pos : WidgetConfig = (^T: (member Position: WidgetConfig) (config))
             if pos.Enabled then
                 config
                 |> constructor
@@ -271,11 +286,13 @@ type ScreenPlay() as this =
             deltas.[k] <- delta
             status.[k] <- HitStatus.Hit
             scoring.HandleHit(k)(i)(scoreData)
+            hp.HandleHit(k)(i)(scoreData)
             onHit.Trigger(struct(k, delta, now))
         | HitStatus.Special ->
             deltas.[k] <- delta
             status.[k] <- if bad then HitStatus.SpecialNG else HitStatus.SpecialOK
             scoring.HandleHit(k)(i)(scoreData)
+            hp.HandleHit(k)(i)(scoreData)
         | HitStatus.Nothing
         | _ -> failwith "impossible"
 
@@ -314,7 +331,7 @@ type ScreenPlay() as this =
                             noteType <- NoteType.MINE
             i <- i + 1
         if hitAt >= 0 then
-            delta <- delta / Gameplay.rate * (if release then 0.5f else 1.0f)
+            delta <- delta / Gameplay.rate * (if release then 0.666f else 1.0f)
             this.Hit(hitAt, k, delta, noteType = NoteType.MINE || noteType = NoteType.HOLDBODY, now)
 
 
@@ -326,23 +343,34 @@ type ScreenPlay() as this =
                 this.HandleHit(k, now, false)
             elif (binds.[k].Released()) then
                 this.HandleHit(k, now, true)
+        //seek up to miss threshold and display missed notes in widgets
         while noteSeek < notes.Count && offsetOf notes.Data.[noteSeek] < now - missWindow do
             let (_, _, s) = scoreData.[noteSeek]
             Array.iteri (fun i state -> if state = HitStatus.NotHit then onHit.Trigger(struct (i, MISSWINDOW, now))) s
             noteSeek <- noteSeek + 1
+        //update release mask - if there is a LN head or tail within +- 180ms then not holding the key during a HOLDBODY should be ignored
+        let mutable i = noteSeek
+        let mutable releaseMask = 0us
+        while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow do
+            let (_, struct (nd, _)) = notes.Data.[i]
+            releaseMask <- releaseMask ||| noteData NoteType.HOLDTAIL nd ||| noteData NoteType.HOLDHEAD nd
+            i <- i + 1
+        releaseMask <- ~~~releaseMask
+        //detect holding through a mine or releasing through a holdbody
+        //todo: have a mask for mines as well
         let mutable i = noteSeek
         while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow * 0.125f do
             let (t, struct (nd, _)) = notes.Data.[i]
-            //todo: dont give release penalty if note ends/begins within +-180ms
             if (t > now - missWindow * 0.125f) then
                 let (_, _, s) = scoreData.[i]
-                for k in noteData NoteType.HOLDBODY nd |> getBits do
+                for k in noteData NoteType.HOLDBODY nd &&& releaseMask |> getBits do
                     if s.[k] = HitStatus.Special && not (binds.[k].Pressed(true)) then s.[k] <- HitStatus.SpecialNG
                 for k in noteData NoteType.MINE nd |> getBits do
                     if s.[k] = HitStatus.Special && binds.[k].Pressed(true) then s.[k] <- HitStatus.SpecialNG
             i <- i + 1
         //todo: handle in all watchers
         scoring.Update(now - missWindow)(scoreData)(true)
+        hp.Update(now - missWindow)(scoreData)(true)
 
     override this.Draw() =
         base.Draw()
@@ -350,4 +378,4 @@ type ScreenPlay() as this =
         Text.draw(Themes.font(), combo.ToString(), 30.0f, 10.0f, 70.0f, Color.White)
         Text.draw(Themes.font(), maxcombo.ToString(), 30.0f, 10.0f, 100.0f, Color.White)
         for i in 1..(judgements.Length - 1) do
-            Text.draw(Themes.font(), ((enum i):JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 130.0f + 30.0f * float32 i, Color.White)
+            Text.draw(Themes.font(), ((enum i): JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 130.0f + 30.0f * float32 i, Color.White)

@@ -63,7 +63,7 @@ type Widget() =
     member this.Bounds = bounds
     member this.Position = (left, top, right, bottom)
     member this.State with get() = state and set(value) = state <- value
-    member this.Children = children :> seq<Widget>
+    member this.Children = children
     member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
 
     //todo: locks on children for thread protection
@@ -78,11 +78,8 @@ type Widget() =
         animation.Update(elapsedTime)
         this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
         bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-        seq {
-            for i in children.Count - 1 .. -1 .. 0 do
-                if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then yield children.[i]
-        }
-        |> Seq.iter (fun w -> w.Update(elapsedTime, bounds))
+        for i in children.Count - 1 .. -1 .. 0 do
+            if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then children.[i].Update(elapsedTime, bounds)
 
     member this.Reposition(l, la, t, ta, r, ra, b, ba) =
         left.Reposition(l, la)
@@ -98,8 +95,8 @@ type Widget() =
         right.SetTarget(r)
         bottom.SetTarget(b)
 
-    interface IDisposable with
-        member this.Dispose() = ()
+    abstract member Dispose: unit -> unit
+    default this.Dispose() = for c in children do c.Dispose()
 
 type Logo() as this =
     inherit Widget()
@@ -138,7 +135,7 @@ type Logo() as this =
         <| Quad.colorOf(Color.DarkBlue)
         <| (Sprite.DefaultQuad)
 
-        Stencil.create()
+        Stencil.create(true)
         Draw.quad
         <| Quad.create
             (new Vector2(l + 0.1f * w, t + 0.1f * w))
@@ -201,10 +198,31 @@ type Screen() =
     abstract member OnExit: Screen -> unit
     default this.OnExit(next: Screen) = ()
 
-type Dialog() =
+[<AbstractClass>]
+type Dialog() as this =
     inherit Widget()
 
-    //...
+    let fade = new Animation.AnimationFade(0.0f)
+
+    do
+        this.Animation.Add(fade)
+        fade.SetTarget(1.0f)
+
+    member this.Close() =
+        fade.SetTarget(0.0f)
+
+    abstract member OnClose: unit -> unit
+
+    override this.Draw() =
+        Draw.rect(this.Bounds)(Color.FromArgb(int (127.0f * fade.Value), 0, 0, 0))(Sprite.Default)
+        base.Draw()
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if (fade.Value < 0.02f && fade.Target = 0.0f) then
+            this.State <- WidgetState.Disabled
+            this.OnClose()
+    
 
 //Collection of mutable values to "tie the knot" in mutual dependence
 // - Stuff is defined but not inialised here
@@ -214,7 +232,7 @@ type Dialog() =
 module Screens =
     let mutable internal addScreen: Screen -> unit = ignore
     let mutable internal popScreen: unit -> unit = ignore
-    let mutable internal addDialog: Dialog -> unit = ignore //nyi
+    let mutable internal addDialog: Dialog -> unit = ignore
 
     let mutable internal setToolbarCollapsed: bool -> unit = ignore
 

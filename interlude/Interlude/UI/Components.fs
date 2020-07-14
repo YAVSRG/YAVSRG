@@ -92,7 +92,6 @@ module Components =
             Draw.rect (cursor |> Rect.expand(10.0f, 10.0f)) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
 
     type FlowContainer(?spacingX: float32, ?spacingY: float32) =
-        //todo: fix bunch of rendering bugs/add stencilling
         inherit Widget()
         let spacingX, spacingY = (defaultArg spacingX 10.0f, defaultArg spacingY 5.0f)
         let mutable contentSize = 0.0f
@@ -101,9 +100,7 @@ module Components =
         member private this.FlowContent(instant) =
             let width = Rect.width this.Bounds
             let height = Rect.height this.Bounds
-            let f (anchor : AnchorPoint) = if instant then anchor.RepositionRelative else anchor.MoveRelative
-            let x = 0.0f
-            let y = -scrollPos
+            let pos (anchor : AnchorPoint) = if instant then anchor.RepositionRelative else anchor.MoveRelative
             contentSize <-
                 this.Children
                 |> Seq.filter (fun c -> c.State &&& WidgetState.Disabled < WidgetState.Disabled)
@@ -113,8 +110,8 @@ module Components =
                     let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
                     let x = x + cwidth + spacingX
                     let x, y = if x > width then cwidth, y + cheight + spacingY else x, y
-                    f l (0.0f, width, x - cwidth - spacingX); f t (0.0f, height, y - cheight)
-                    f r (0.0f, width, x - spacingX); f b (0.0f, height, y)
+                    pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
+                    pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
                     (x + spacingY, y)
                     ) (0.0f, -scrollPos)
                 |> snd
@@ -123,14 +120,24 @@ module Components =
             if (this.Initialised) then
                 this.FlowContent(false)
                 base.Update(time, bounds)
+                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Clamp(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, 0.0f, contentSize)
             else
+                //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
                 base.Update(time, bounds)
                 this.FlowContent(true)
-                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Clamp(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, 0.0f, contentSize)
+
+        override this.Draw() =
+            Stencil.create(false)
+            Draw.rect(this.Bounds)(Color.Transparent)(Sprite.Default)
+            Stencil.draw()
+            base.Draw()
+            Stencil.finish()
 
         override this.Add(child) =
             base.Add(child)
-            this.FlowContent(true)
+            if (this.Initialised) then this.FlowContent(true)
+
+        member this.Clear() = this.Children.Clear()
             
     type Selector(options: string array, index, func, label) as this =
         inherit Frame()
@@ -155,6 +162,9 @@ module Components =
             let values = Enum.GetValues(typeof<'T>) :?> 'T array
             new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])), label)
 
+        static member FromBool(setting: Setting<bool>, label) =
+            new Selector([|"NO" ; "YES"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)), label)
+
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
 
@@ -164,6 +174,7 @@ module Components =
         do
             this.Animation.Add(color)
             let fr = new Frame()
+            this.Add((new Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.SetTarget(if b then 0.8f else 0.5f))) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
                 let fc = new FlowContainer(0.0f, 0.0f)
                 fr.Add(fc)
@@ -171,12 +182,11 @@ module Components =
                     (fun i o -> fc.Add(new Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                     options
                 fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
-            this.Add((new Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.SetTarget(if b then 0.8f else 0.5f))) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             fr.State <- WidgetState.Disabled
             
         override this.Draw() =
             let bbounds = Rect.sliceTop buttonSize this.Bounds
-            Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Color.Black) Sprite.Default
+            Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Screens.accentShade(127, 0.5f, 0.0f)) Sprite.Default
             Draw.rect bbounds (Screens.accentShade(255, 0.6f, 0.0f)) Sprite.Default
             Text.drawFill(Themes.font(), label, Rect.sliceTop 20.0f bbounds, Color.White, 0.5f)
             Text.drawFill(Themes.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
@@ -219,6 +229,5 @@ module Components =
             | Some b -> if b.Get().Tapped(true) then toggle()
             | None -> ()
 
-        interface IDisposable with
-            member this.Dispose() =
-                if active then Input.removeInputMethod()
+        override this.Dispose() =
+            if active then Input.removeInputMethod()

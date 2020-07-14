@@ -10,13 +10,16 @@ type ConfigEditor<'T>(data: 'T) as this =
     inherit FlowContainer()
 
     do
+        let typeName = data.GetType().Name
         let fields = FSharpType.GetRecordFields(data.GetType())
         Array.choose (
             fun p ->
                 let value = FSharpValue.GetRecordField(data, p)
                 match value with
-                | :? FloatSetting as s -> new Slider<float>(s, localise("setting.name."+p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
-                | :? IntSetting as s -> new Slider<int>(s, localise("setting.name."+p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
+                | :? FloatSetting as s -> new Slider<float>(s, Localisation.localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
+                | :? IntSetting as s -> new Slider<int>(s, Localisation.localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
+                | :? Setting<bool> as s -> Selector.FromBool(s, Localisation.localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
+                //| :? Setting<'S> as s -> Selector.FromEnum(s, localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
                 | _ -> None
             ) fields
         |> Array.iter this.Add

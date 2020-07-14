@@ -78,8 +78,8 @@ module Mouse =
     //for this reason, when checking if something has been clicked on it is important to check if the mouse is in the right area BEFORE checking if it has been clicked
     let Click(b) =
         if Input.clickhandled then false else
-            Input.clickhandled <- true
-            Input.mouse.Contains(b) && not(Input.oldMouse.Contains(b))
+            Input.clickhandled <- Input.mouse.Contains(b) && not(Input.oldMouse.Contains(b))
+            Input.clickhandled
     let internal pressed(b) = Input.mouse.Contains(b)
     let internal release(b) = Input.oldMouse.Contains(b) && not(Input.mouse.Contains(b))
     let Hover(struct (l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b

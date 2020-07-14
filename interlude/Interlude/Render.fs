@@ -234,12 +234,12 @@ module FBO =
 module Stencil =
     let mutable depth = 0
 
-    let create() =
+    let create(alphaMasking) =
         if depth = 0 then
             GL.Enable(EnableCap.StencilTest)
             GL.Enable(EnableCap.AlphaTest);
             GL.Clear(ClearBufferMask.StencilBufferBit)
-            GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
+            GL.AlphaFunc((if alphaMasking then AlphaFunction.Greater else AlphaFunction.Always), 0.0f)
         GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
         depth <- depth + 1
