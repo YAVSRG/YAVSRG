@@ -56,6 +56,8 @@ module Mods =
 
         member this.DisableMod id = mods.Remove(id)
 
+        member this.Enumerate() = mods.Keys |> List.ofSeq
+
         member this.IterApplicable chart =
             seq {
                 for id in mods.Keys do
@@ -64,8 +66,8 @@ module Mods =
 
         static member ModList = modList
         static member RegisterMod id obj = modList.Add(id, obj)
-        static member GetModName id = localise ("mod." + id + ".name")
-        static member GetModDesc id = localise ("mod." + id + ".desc")
+        static member GetModName id = Localisation.localise ("mod." + id + ".name")
+        static member GetModDesc id = Localisation.localise ("mod." + id + ".desc")
 
     let private auto _ _ hitData =
         for (t, delta, hit) in hitData do

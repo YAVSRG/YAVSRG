@@ -16,6 +16,8 @@ module Themes =
         JudgementNames: string array
         LampColors: Color array
         LampNames: string array
+        GradeColors: Color array
+        GradeThresholds: float array
         Font: string
         TextColor: Color
         SelectChart: Color
@@ -31,6 +33,9 @@ module Themes =
             LampColors = [|Color.White; Color.FromArgb(255, 160, 160); Color.FromArgb(160, 160, 160); Color.FromArgb(80, 255, 80); Color.FromArgb(160, 255, 160);
                 Color.FromArgb(200, 160, 255); Color.FromArgb(255, 255, 80); Color.FromArgb(255, 255, 160); Color.FromArgb(255, 160, 255); Color.FromArgb(160, 255, 255)|]
             LampNames = [|"NONE"; "SINGLE DIGIT COMBO BREAKS"; "MISS FLAG"; "FULL COMBO"; "SINGLE DIGIT GREATS"; "BLACK FLAG"; "PERFECT FULL COMBO"; "SINGLE DIGIT PERFECTS"; "WHITE FLAG"; "MARVELLOUS FULL COMBO"|]
+            GradeColors = [|Color.FromArgb(205, 205, 205); Color.FromArgb(246, 234, 128); Color.FromArgb(237, 205, 140); Color.FromArgb(127, 231, 139); Color.FromArgb(134, 227, 183);
+                Color.FromArgb(148, 210, 180); Color.FromArgb(149, 193, 220); Color.FromArgb(163, 190, 207); Color.FromArgb(202, 153, 183); Color.FromArgb(194, 162, 182); Color.FromArgb(200, 163, 155)|]
+            GradeThresholds = [|0.99; 0.98; 0.97; 0.96; 0.95; 0.94; 0.93; 0.92; 0.91; 0.90|]
             Font = "Akrobat Black"
             TextColor = Color.White
             SelectChart = Color.FromArgb(0, 180, 110)
@@ -74,8 +79,8 @@ module Themes =
     with
         static member Default = { Enabled = false; Float = true; Left = 0.0f; LeftA = 0.0f; Top = 0.0f; TopA = 0.0f; Right = 0.0f; RightA = 1.0f; Bottom = 0.0f; BottomA = 1.0f }
     module WidgetConfig =
-        type AccuracyMeter = { Position: WidgetConfig; GradeColors: bool }
-        with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = 40.0f; TopA = 0.0f; Right = 100.0f; RightA = 0.5f; Bottom = 100.0f; BottomA = 0.0f }; GradeColors = true }
+        type AccuracyMeter = { Position: WidgetConfig; GradeColors: bool; ShowName: bool }
+        with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = 40.0f; TopA = 0.0f; Right = 100.0f; RightA = 0.5f; Bottom = 120.0f; BottomA = 0.0f }; GradeColors = true; ShowName = true }
         type HitMeter = { Position: WidgetConfig; AnimationTime: float32; Thickness: float32; ShowGuide: bool }
         with static member Default = { Position = { Enabled = true; Float = false; Left = -300.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.5f; Right = 300.0f; RightA = 0.5f; Bottom = 25.0f; BottomA = 0.5f }; AnimationTime = 1000.0f; Thickness = 5.0f; ShowGuide = true }
         type Combo = { Position: WidgetConfig; Growth: float32; Pop: float32; LampColors: bool }

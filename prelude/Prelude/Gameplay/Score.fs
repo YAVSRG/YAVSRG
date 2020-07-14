@@ -359,4 +359,10 @@ module Score =
             elif count = 1 then one
             elif count < 10 then singleDigit
             else more
-        c cbs (lazy (c judgements.[int JudgementType.GREAT] (lazy (c judgements.[int JudgementType.PERFECT] (lazy Lamp.MFC) Lamp.WF Lamp.SDP Lamp.PFC)) Lamp.BF Lamp.SDG Lamp.FC)) Lamp.MF Lamp.SDCB Lamp.NONE 
+        c cbs (lazy (c judgements.[int JudgementType.GREAT] (lazy (c judgements.[int JudgementType.PERFECT] (lazy Lamp.MFC) Lamp.WF Lamp.SDP Lamp.PFC)) Lamp.BF Lamp.SDG Lamp.FC)) Lamp.MF Lamp.SDCB Lamp.NONE
+
+    let grade percent (thresholds: float array) = 
+        let mutable i = 0
+        while i < thresholds.Length && thresholds.[i] > percent do
+            i <- i + 1
+        i

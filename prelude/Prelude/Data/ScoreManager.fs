@@ -21,7 +21,7 @@ module ScoreManager =
         player: string
         playerUUID: string
         rate: float32
-        selectedMods: ModState
+        selectedMods: Dictionary<string, int>
         layout: Layout
         keycount: int
     }
@@ -35,13 +35,14 @@ module ScoreManager =
         Clear: Dictionary<string, bool>
     }
     with
-        static member FromChart(c: Chart) =
-            {   Path = c.FileIdentifier
-                Offset = Setting(if c.Notes.IsEmpty() then 0.0f<ms> else offsetOf <| c.Notes.First());
-                Scores = new List<Score>()
-                Lamp = new Dictionary<string, Lamp>()
-                Accuracy = Dictionary<string, float>()
-                Clear = Dictionary<string, bool>() }
+        static member FromChart(c: Chart) = {
+            Path = c.FileIdentifier
+            Offset = Setting(if c.Notes.IsEmpty() then 0.0f<ms> else offsetOf <| c.Notes.First());
+            Scores = new List<Score>()
+            Lamp = new Dictionary<string, Lamp>()
+            Accuracy = Dictionary<string, float>()
+            Clear = Dictionary<string, bool>()
+        }
 
     (*
         Gameplay pipelines that need to happen to play a chart
@@ -51,7 +52,7 @@ module ScoreManager =
     *)
 
     type ScoreInfoProvider(score: Score, chart: Chart) =
-        let (modchart, hitdata) = getModChartWithScore score.selectedMods chart score.hitdata
+        let (modchart, hitdata) = getModChartWithScore (ModState(score.selectedMods)) chart score.hitdata
         let difficulty =
             lazy (let (keys, notes, _, _, _) = modchart.Force()
                 RatingReport(notes, score.rate, score.layout, keys))
@@ -64,24 +65,24 @@ module ScoreManager =
                 let m = performanceMetric (difficulty.Force()) keys in m.ProcessAll(hitdata.Force()); m)
         let lamp = lazy (lamp (scoring.Force().State))
 
-        member this.Accuracy = scoring.Force().Value
+        member this.Scoring = scoring.Force()
         member this.Clear = hp.Force().Failed
         member this.Lamp = lamp.Force()
         member this.Physical = performance.Force().Value
         member this.Technical = 0.0 //nyi
-        member this.Mods = let (keys, _, _, _, mods) = modchart.Force() in String.Join(", ", mods)
+        member this.Mods = let (keys, _, _, _, mods) = modchart.Force() in String.Join(", ", string score.rate :: mods)
 
     type ScoresDB() =
-        let data = ScoresDB.Load
+        let data = ScoresDB.Load()
 
         member this.Save() = JsonHelper.saveFile data (Path.Combine(getDataPath("Data"), "scores.json"))
 
-        static member Load =
+        static member Load() =
             try
                 JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "scores.json"))
             with
             | :? FileNotFoundException -> Logging.Info("No scores database found, creating one.") ""; new Dictionary<string, ChartSaveData>()
-            | err -> Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
+            | err -> Logging.Critical("Could not load score database! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
 
         member this.GetScoreData (chart: Chart) =
             let hash = calculateHash(chart)

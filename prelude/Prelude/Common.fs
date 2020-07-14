@@ -87,10 +87,29 @@ module Common =
 
 (*
     Localisation
-    (stub)
 *)
+    module Localisation =
+        let private mapping = new Dictionary<string, string>()
+        let mutable private loadedPath = ""
 
-    let localise str : string = str
+        let loadFile path =
+            let path = Path.Combine("Locale", path)
+            try
+                let lines = File.ReadAllLines(path)
+                Array.iter(
+                    fun (l: string) ->
+                        let s: string[] = l.Split([|'='|], 2)
+                        mapping.Add(s.[0], s.[1])) lines
+                loadedPath <- path
+            with
+            | err -> Logging.Error("Failed to load localisation file: " + path)(err.ToString())
+
+        let localise str : string =
+            if mapping.ContainsKey(str) then mapping.[str]
+            else 
+                mapping.Add(str, str)
+                if loadedPath <> "" then File.AppendAllText(loadedPath, "\n"+str+"="+str)
+                str
 
 (*
     Background task management

@@ -11,7 +11,7 @@ open Prelude.Gameplay.Score
 *)
 module Layout =
 
-    type Layout = Spread | OneHand | LeftOne | RightOne | LeftTwo | RightTwo | BMSLeft | BMSRight
+    type Layout = Spread = 0 | OneHand = 1 | LeftOne = 2 | RightOne = 3 | LeftTwo = 4 | RightTwo = 5 | BMSLeft = 6 | BMSRight = 7
     type Hand = int list
 
     let getFingerPosition k h =
@@ -29,89 +29,89 @@ module Layout =
 
     let getLayoutInfo(l, keycount): LayoutInfo option =
         match (l, keycount) with
-        | (OneHand, 3) -> Some [[0;1;2]]
-        | (LeftOne, 3) -> Some [[0;1];[2]]
-        | (RightOne, 3) -> Some [[0];[1;2]]
+        | (Layout.OneHand, 3) -> Some [[0;1;2]]
+        | (Layout.LeftOne, 3) -> Some [[0;1];[2]]
+        | (Layout.RightOne, 3) -> Some [[0];[1;2]]
 
-        | (OneHand, 4) -> Some [[0;1;2;3]]
-        | (Spread, 4) -> Some [[0;1];[2;3]]
-        | (LeftOne, 4) -> Some [[0;1;2];[3]]
-        | (RightOne, 4) -> Some [[0];[1;2;3]]
+        | (Layout.OneHand, 4) -> Some [[0;1;2;3]]
+        | (Layout.Spread, 4) -> Some [[0;1];[2;3]]
+        | (Layout.LeftOne, 4) -> Some [[0;1;2];[3]]
+        | (Layout.RightOne, 4) -> Some [[0];[1;2;3]]
 
-        | (OneHand, 5) -> Some [[0;1;2;3;4]]
-        | (LeftOne, 5) -> Some [[0;1;2];[3;4]]
-        | (RightOne, 5) -> Some [[0;1];[2;3;4]]
-        | (LeftTwo, 5) -> Some [[0;1;2;3];[4]]
-        | (RightTwo, 5) -> Some [[0];[1;2;3;4]]
+        | (Layout.OneHand, 5) -> Some [[0;1;2;3;4]]
+        | (Layout.LeftOne, 5) -> Some [[0;1;2];[3;4]]
+        | (Layout.RightOne, 5) -> Some [[0;1];[2;3;4]]
+        | (Layout.LeftTwo, 5) -> Some [[0;1;2;3];[4]]
+        | (Layout.RightTwo, 5) -> Some [[0];[1;2;3;4]]
 
-        | (Spread, 6) -> Some [[0;1;2];[3;4;5]]
-        | (LeftOne, 6) -> Some [[0;1;2;3];[4;5]]
-        | (RightOne, 6) -> Some [[0;1];[2;3;4;5]]
-        | (LeftTwo, 6) -> Some [[0;1;2;3;4];[5]]
-        | (RightTwo, 6) -> Some [[0];[1;2;3;4;5]]
+        | (Layout.Spread, 6) -> Some [[0;1;2];[3;4;5]]
+        | (Layout.LeftOne, 6) -> Some [[0;1;2;3];[4;5]]
+        | (Layout.RightOne, 6) -> Some [[0;1];[2;3;4;5]]
+        | (Layout.LeftTwo, 6) -> Some [[0;1;2;3;4];[5]]
+        | (Layout.RightTwo, 6) -> Some [[0];[1;2;3;4;5]]
 
-        | (LeftOne, 7) -> Some [[0;1;2;3];[4;5;6]]
-        | (RightOne, 7) -> Some [[0;1;2];[3;4;5;6]]
-        | (LeftTwo, 7) -> Some [[0;1;2;3;4];[5;6]]
-        | (RightTwo, 7) -> Some [[0;1];[2;3;4;5;6]]
-        | (BMSLeft, 7) -> Some [[0;1;3;2];[4;5;6]]
-        | (BMSRight, 7) -> Some [[0;1;2];[4;3;5;6]]
+        | (Layout.LeftOne, 7) -> Some [[0;1;2;3];[4;5;6]]
+        | (Layout.RightOne, 7) -> Some [[0;1;2];[3;4;5;6]]
+        | (Layout.LeftTwo, 7) -> Some [[0;1;2;3;4];[5;6]]
+        | (Layout.RightTwo, 7) -> Some [[0;1];[2;3;4;5;6]]
+        | (Layout.BMSLeft, 7) -> Some [[0;1;3;2];[4;5;6]]
+        | (Layout.BMSRight, 7) -> Some [[0;1;2];[4;3;5;6]]
 
-        | (Spread, 8) -> Some [[0;1;2;3];[4;5;6;7]]
-        | (LeftOne, 8) -> Some [[0;1;2];[3;4;5;6;7]]
-        | (RightOne, 8) -> Some [[0;1;2;3;4];[5;6;7]]
+        | (Layout.Spread, 8) -> Some [[0;1;2;3];[4;5;6;7]]
+        | (Layout.LeftOne, 8) -> Some [[0;1;2];[3;4;5;6;7]]
+        | (Layout.RightOne, 8) -> Some [[0;1;2;3;4];[5;6;7]]
 
-        | (LeftOne, 9) -> Some [[0;1;2;3;4];[5;6;7;8]]
-        | (RightOne, 9) -> Some [[0;1;2;3];[4;5;6;7;8]]
+        | (Layout.LeftOne, 9) -> Some [[0;1;2;3;4];[5;6;7;8]]
+        | (Layout.RightOne, 9) -> Some [[0;1;2;3];[4;5;6;7;8]]
 
-        | (Spread, 10) -> Some [[0;1;2;3;4];[5;6;7;8;9]]
+        | (Layout.Spread, 10) -> Some [[0;1;2;3;4];[5;6;7;8;9]]
 
         | _ -> None
 
     let getLayoutName(l, keycount) =
         match (l, keycount) with
-        | (OneHand, 3) -> "One-Handed"
-        | (LeftOne, 3) -> "2k+1"
-        | (RightOne, 3) -> "1k+2"
+        | (Layout.OneHand, 3) -> "One-Handed"
+        | (Layout.LeftOne, 3) -> "2k+1"
+        | (Layout.RightOne, 3) -> "1k+2"
     
-        | (OneHand, 4) -> "One-Handed"
-        | (Spread, 4) -> "Spread"
-        | (LeftOne, 4) -> "3k+1"
-        | (RightOne, 4) -> "1k+3"
+        | (Layout.OneHand, 4) -> "One-Handed"
+        | (Layout.Spread, 4) -> "Spread"
+        | (Layout.LeftOne, 4) -> "3k+1"
+        | (Layout.RightOne, 4) -> "1k+3"
     
-        | (OneHand, 5) -> "One-Handed"
-        | (LeftOne, 5) -> "3k+2"
-        | (RightOne, 5) -> "2k+3"
-        | (LeftTwo, 5) -> "4k+1"
-        | (RightTwo, 5) -> "1k+4"
+        | (Layout.OneHand, 5) -> "One-Handed"
+        | (Layout.LeftOne, 5) -> "3k+2"
+        | (Layout.RightOne, 5) -> "2k+3"
+        | (Layout.LeftTwo, 5) -> "4k+1"
+        | (Layout.RightTwo, 5) -> "1k+4"
     
-        | (Spread, 6) -> "Spread"
-        | (LeftOne, 6) -> "4k+2"
-        | (RightOne, 6) -> "2k+4"
-        | (LeftTwo, 6) -> "5k+1"
-        | (RightTwo, 6) -> "1k+5"
+        | (Layout.Spread, 6) -> "Spread"
+        | (Layout.LeftOne, 6) -> "4k+2"
+        | (Layout.RightOne, 6) -> "2k+4"
+        | (Layout.LeftTwo, 6) -> "5k+1"
+        | (Layout.RightTwo, 6) -> "1k+5"
     
-        | (LeftOne, 7) -> "Left Thumb"
-        | (RightOne, 7) -> "Right Thumb"
-        | (LeftTwo, 7) -> "5k+2"
-        | (RightTwo, 7) -> "2k+5"
-        | (BMSLeft, 7) -> "IIDX Left Thumb"
-        | (BMSRight, 7) -> "IIDX Right Thumb"
+        | (Layout.LeftOne, 7) -> "Left Thumb"
+        | (Layout.RightOne, 7) -> "Right Thumb"
+        | (Layout.LeftTwo, 7) -> "5k+2"
+        | (Layout.RightTwo, 7) -> "2k+5"
+        | (Layout.BMSLeft, 7) -> "IIDX Left Thumb"
+        | (Layout.BMSRight, 7) -> "IIDX Right Thumb"
     
-        | (Spread, 8) -> "Spread"
-        | (LeftOne, 8) -> "5k+3"
-        | (RightOne, 8) -> "3k+5"
+        | (Layout.Spread, 8) -> "Spread"
+        | (Layout.LeftOne, 8) -> "5k+3"
+        | (Layout.RightOne, 8) -> "3k+5"
 
-        | (LeftOne, 9) -> "Left Thumb"
-        | (RightOne, 9) -> "Right Thumb"
+        | (Layout.LeftOne, 9) -> "Left Thumb"
+        | (Layout.RightOne, 9) -> "Right Thumb"
 
-        | (Spread, 10) -> "Spread"
+        | (Layout.Spread, 10) -> "Spread"
 
         | _ -> "Unknown Layout"
 
     let getAvailableLayouts (k: int) = 
-        [(Spread, k); (OneHand, k); (LeftOne, k); (RightOne, k);
-            (LeftTwo, k); (RightTwo, k); (BMSLeft, k); (BMSRight, k)]
+        [(Layout.Spread, k); (Layout.OneHand, k); (Layout.LeftOne, k); (Layout.RightOne, k);
+            (Layout.LeftTwo, k); (Layout.RightTwo, k); (Layout.BMSLeft, k); (Layout.BMSRight, k)]
         |> List.filter (getLayoutInfo >> Option.isSome)
         |> List.map (fun (a, b) -> a)
 

@@ -70,11 +70,11 @@ module ChartManager =
 
     type Cache() =
 
-        let charts, collections = Cache.Load
+        let charts, collections = Cache.Load()
 
         member this.Save() = JsonHelper.saveFile (charts, collections) (Path.Combine(getDataPath("Data"), "cache.json"))
 
-        static member Load =
+        static member Load() =
             try
                 JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "cache.json"))
             with
