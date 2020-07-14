@@ -158,18 +158,18 @@ module ChartConversions =
                 Seq.iteri (fun k c ->
                     match c with
                     | '0' -> ()
-                    | '1' -> applyToNoteData NoteType.NORMAL (setBit i) nr
+                    | '1' -> applyToNoteData NoteType.NORMAL (setBit k) nr
                     | '2' | '4' ->
-                        applyToNoteData NoteType.HOLDHEAD (setBit i) nr
-                        ln <- setBit i ln
+                        applyToNoteData NoteType.HOLDHEAD (setBit k) nr
+                        ln <- setBit k ln
                     | '3' ->
-                        applyToNoteData NoteType.HOLDTAIL (setBit i) nr
-                        applyToNoteData NoteType.HOLDBODY (unsetBit i) nr
-                        ln <- unsetBit i ln
-                    | 'M' -> applyToNoteData NoteType.MINE (setBit i) nr
+                        applyToNoteData NoteType.HOLDTAIL (setBit k) nr
+                        applyToNoteData NoteType.HOLDBODY (unsetBit k) nr
+                        ln <- unsetBit k ln
+                    | 'M' -> applyToNoteData NoteType.MINE (setBit k) nr
                     | _ -> failwith ("unknown note type " + c.ToString())
                     ) m.[i]
-                if isEmptyNoteRow nr then states.Add((offset + float32 (i - start) * sep),nr)
+                if isEmptyNoteRow nr |> not then states.Add((offset + float32 (i - start) * sep),nr)
 
         List.iteri (fun i m -> 
             totalBeats <- totalBeats + float32 meter * 1.0f<beat>
@@ -349,8 +349,7 @@ module ChartConversions =
 
     let (|ChartArchive|_|) (path : string) = 
         match Path.GetExtension(path).ToLower() with
-        | ".osz" -> Some ()
-        | ".zip" -> failwith "nyi"
+        | ".osz" | ".zip" -> Some ()
         | _ -> None
 
     let (|SongFolder|_|) (path : string) =

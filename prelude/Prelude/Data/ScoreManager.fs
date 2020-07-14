@@ -70,7 +70,7 @@ module ScoreManager =
         member this.Lamp = lamp.Force()
         member this.Physical = performance.Force().Value
         member this.Technical = 0.0 //nyi
-        member this.Mods = let (keys, _, _, _, mods) = modchart.Force() in String.Join(", ", string score.rate :: mods)
+        member this.Mods = String.Join(", ", sprintf "%.2fx" score.rate :: (score.selectedMods.Keys |> List.ofSeq |> List.map ModState.GetModName))
 
     type ScoresDB() =
         let data = ScoresDB.Load()

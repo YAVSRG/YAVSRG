@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.IO.Compression
 open System.Collections.Generic
 open Prelude.Json
 open Prelude.Common
@@ -136,7 +137,6 @@ module ChartManager =
 
         member this.RebuildCache : LoggableTask =
             fun output ->
-            (
                 lock this (fun _ -> ( charts.Clear(); ))
                 for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
                     for song in Directory.EnumerateDirectories(pack) do
@@ -155,7 +155,6 @@ module ChartManager =
                 this.Save()
                 output("Saved cache.")
                 true
-            )
 
         member this.DeleteChart (c : CachedChart) = failwith "nyi"
 
@@ -163,7 +162,6 @@ module ChartManager =
 
         member this.ConvertSongFolder path packname : LoggableTask =
             fun output ->
-            (
                 for file in Directory.EnumerateFiles(path) do
                     match file with
                     | ChartFile ->
@@ -177,31 +175,33 @@ module ChartManager =
                             ))
                     | _ -> ()
                 true
-            )
 
         member this.ConvertPackFolder path packname =
             fun output ->
-            (
                 Directory.EnumerateDirectories(path)
                 //conversion of song folders one by one.
                 //todo: test performance of converting in parallel (would create hundreds of tasks)
                 |> Seq.iter (fun song -> (this.ConvertSongFolder song packname output |> ignore))
                 true
-            )
 
         member this.AutoConvert path : LoggableTask =
             fun output ->
-            (
                 match File.GetAttributes(path) &&& FileAttributes.Directory |> int with
                 | 0 ->
                     match path with
                     | ChartFile -> failwith "single chart file not yet supported"
-                    | ChartArchive -> failwith "chart archives not yet supported"
+                    | ChartArchive ->
+                        output("Extracting...")
+                        let dir = Path.ChangeExtension(path, null)
+                        Logging.Debug("There is no check against possibly malicious directory traversal  (for now). Be careful")("")
+                        ZipFile.ExtractToDirectory(path, dir)
+                        output("Extracted! " + dir)
+                        this.AutoConvert(dir)(output) |> ignore
+                        Directory.Delete(dir, true)
                     | _ -> failwith "unrecognised file"
                 | _ ->
                     match path with
                     | SongFolder ->
-                        //todo: replace ignore callback with action to refresh level select with new charts
                         //todo: maybe make "Singles" not a hardcoded string
                         TaskManager.AddTask ("Import " + Path.GetFileName(path), this.ConvertSongFolder path "Singles", ignore, true)
                     | PackFolder ->
@@ -209,9 +209,9 @@ module ChartManager =
                             match Path.GetFileName(path) with
                             | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
                             | s -> s
-                        //todo: replace ignore callback with action to refresh level select with new charts
                         TaskManager.AddTask ("Import pack " + Path.GetFileName(path), this.ConvertPackFolder path packname, ignore, true)
-                    | FolderOfPacks -> ()
+                    | FolderOfPacks ->
+                        for packFolder in Directory.EnumerateDirectories(path) do
+                            this.ConvertPackFolder(packFolder)(Path.GetFileName(packFolder))(output) |> ignore
                     | _ -> failwith "no importable folder structure detected"
                 true
-            )

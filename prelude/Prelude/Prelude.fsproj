@@ -22,6 +22,7 @@
     <Compile Include="Data\ScoreManager.fs" />
     <Compile Include="Data\Themes.fs" />
     <Compile Include="Data\Profiles.fs" />
+    <Compile Include="Data\Web.fs" />
   </ItemGroup>
 
   <ItemGroup>

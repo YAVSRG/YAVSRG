@@ -131,7 +131,7 @@ module Common =
             let action() =
                 try
                     info <- "Running"
-                    callback(t (fun s -> info <- s; Logging.Info (name + ": " + s) ""))
+                    callback(t (fun s -> info <- s; if not visible then Logging.Debug (name + ": " + s) ""))
                     info <- "Complete"
                 with
                 | err ->
