@@ -169,10 +169,10 @@ module ChartConversions =
                     | 'M' -> applyToNoteData NoteType.MINE (setBit k) nr
                     | _ -> failwith ("unknown note type " + c.ToString())
                     ) m.[i]
-                if isEmptyNoteRow nr |> not then states.Add((offset + float32 (i - start) * sep),nr)
+                if isEmptyNoteRow nr |> not then states.Add((offset + float32 (i - start) * sep), nr)
 
         List.iteri (fun i m -> 
-            totalBeats <- totalBeats + float32 meter * 1.0f<beat>
+            totalBeats <- totalBeats + fmeter
             lo <- 0.0f<beat>
             while (not (List.isEmpty bpms) && fst (List.head bpms) < totalBeats) do
                 hi <- fst (List.head bpms) - totalBeats + fmeter

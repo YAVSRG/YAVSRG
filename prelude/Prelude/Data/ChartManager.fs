@@ -69,6 +69,7 @@ module ChartManager =
         | Playlist of List<PlaylistData>
         | Goals of List<PlaylistData * Goal>
 
+    //todo: add reverse lookup from hash -> id and remove id storage in score data
     type Cache() =
 
         let charts, collections = Cache.Load()
@@ -193,7 +194,7 @@ module ChartManager =
                     | ChartArchive ->
                         output("Extracting...")
                         let dir = Path.ChangeExtension(path, null)
-                        Logging.Debug("There is no check against possibly malicious directory traversal  (for now). Be careful")("")
+                        //Logging.Debug("There is no check against possibly malicious directory traversal  (for now). Be careful")("")
                         ZipFile.ExtractToDirectory(path, dir)
                         output("Extracted! " + dir)
                         this.AutoConvert(dir)(output) |> ignore

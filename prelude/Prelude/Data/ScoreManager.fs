@@ -90,15 +90,35 @@ module ScoreManager =
             data.[hash]
             
 
-    type TopScore = string * string * DateTime * float //Cache id, Hash, Timestamp, Rating
+    type TopScore = string * DateTime * float //Hash, Timestamp, Rating
 
-    type TopScores(scores: List<TopScore>) =
-        new() = TopScores(new List<TopScore>())
-        
-        member this.AddScore((id, hash, timestamp, rating) : TopScore) =
-            //running state through this fold:
-                // 0 = Haven't found spot to insert this score at
-                // 1 = Inserted this score
-                // 2 = After insertion, removed old version of score from the list
-            ()
-            
+    module TopScore =
+        let private count = 50
+
+        let add ((hash, timestamp, rating): TopScore) (data: TopScore list) =
+            let rec f count data =
+                match count with
+                | 0 -> []
+                | 1 ->
+                    match data with
+                    | (h, t, r) :: _ ->
+                        if r >= rating then
+                            (h, t, r) :: []
+                        else
+                            (hash, timestamp, rating) :: []
+                    | [] -> []
+                | _ ->
+                    match data with
+                    | (h, t, r) :: xs ->
+                        if h = hash then
+                            if r >= rating then
+                                (h, t, r) :: xs
+                            else
+                                (hash, timestamp, rating) :: xs
+                        else
+                            if r >= rating then
+                                (h, t, r) :: (f (count - 1) xs)
+                            else
+                                (hash, timestamp, rating) :: (h, t, r) :: (f (count - 2) xs)
+                    | [] -> []
+            f count data

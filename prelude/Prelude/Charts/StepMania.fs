@@ -78,7 +78,7 @@ module StepMania =
     let private parseText = spaces >>. (manyChars (noneOf ":;" <|> (previousCharSatisfies (isAnyOf "\\") >>. anyChar)))
     let parseKeyValue = (pchar '#') >>. parseText .>> pchar ':' .>>. (sepBy parseText (pchar ':')) .>> pchar ';' .>> spaces
     let private comment = optional (pstring "//" >>. restOfLine true)
-    let parseHeader: Parser<Header, unit> = many (parseKeyValue .>> comment)
+    let parseHeader: Parser<Header, unit> = (many (parseKeyValue .>> comment)) .>> eof
 
     (*
         Parsing for retrieving specific useful data from the file
@@ -141,7 +141,7 @@ module StepMania =
 
     let private parsePairs = sepBy (pfloat .>> pchar '=' .>>. pfloat) (pchar ',')
     let private parseMeasure = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
-    let parseMeasures = sepBy parseMeasure (pchar ',' .>> spaces)
+    let parseMeasures = (optional (spaces >>. comment .>> spaces)) >>. (sepBy parseMeasure (pchar ',' .>> spaces .>> (optional (comment .>> spaces))))
     //https://github.com/etternagame/etterna/blob/master/src/Etterna/Singletons/GameManager.cpp
     let readChartType t =
         match t with

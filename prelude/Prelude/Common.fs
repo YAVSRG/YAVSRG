@@ -131,7 +131,9 @@ module Common =
             let action() =
                 try
                     info <- "Running"
-                    callback(t (fun s -> info <- s; if not visible then Logging.Debug (name + ": " + s) ""))
+                    let outcome = t (fun s -> info <- s; if not visible then Logging.Debug (name + ": " + s) "")
+                    callback(outcome)
+                    Logging.Debug(sprintf "Task complete (%A): %s" outcome name)""
                     info <- "Complete"
                 with
                 | err ->

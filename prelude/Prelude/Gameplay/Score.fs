@@ -22,7 +22,6 @@ module Score =
     | SpecialOK = 5uy
 
     type ScoreDataRow = Time * Time array * HitStatus array
-
     type ScoreData = ScoreDataRow array
 
     let MISSWINDOW = 180.0f<ms>
@@ -249,24 +248,24 @@ module Score =
         | OM od ->
             AccuracySystem
                 (("osu!mania (OD" + (od |> string) + ")"),
-                 window_func
-                     [ (16.5f<ms>, JudgementType.MARVELLOUS)
-                       (64.5f<ms> - od * 3.0f<ms>, JudgementType.PERFECT)
-                       (97.5f<ms> - od * 3.0f<ms>, JudgementType.GREAT)
-                       (127.5f<ms> - od * 3.0f<ms>, JudgementType.GOOD)
-                       (151.5f<ms> - od * 3.0f<ms>, JudgementType.BAD) ],
-                 (fun j _ ->
-                     match j with
-                     | JudgementType.RIDICULOUS
-                     | JudgementType.MARVELLOUS
-                     | JudgementType.PERFECT -> 300.0
-                     | JudgementType.GREAT -> 200.0
-                     | JudgementType.GOOD -> 100.0
-                     | JudgementType.BAD -> 50.0
-                     | JudgementType.MISS
-                     | _ -> 0.0),
-                 (fun j -> if is_regular_hit j then 300.0 else 0.0),
-                 (fun j c -> if is_combo_break JudgementType.NG j then (0, true) else (c + 1, false)))
+                    window_func [
+                        (16.5f<ms>, JudgementType.MARVELLOUS)
+                        (64.5f<ms> - od * 3.0f<ms>, JudgementType.PERFECT)
+                        (97.5f<ms> - od * 3.0f<ms>, JudgementType.GREAT)
+                        (127.5f<ms> - od * 3.0f<ms>, JudgementType.GOOD)
+                        (151.5f<ms> - od * 3.0f<ms>, JudgementType.BAD) ],
+                    (fun j _ ->
+                        match j with
+                        | JudgementType.RIDICULOUS
+                        | JudgementType.MARVELLOUS
+                        | JudgementType.PERFECT -> 300.0
+                        | JudgementType.GREAT -> 200.0
+                        | JudgementType.GOOD -> 100.0
+                        | JudgementType.BAD -> 50.0
+                        | JudgementType.MISS
+                        | _ -> 0.0),
+                    (fun j -> if is_regular_hit j then 300.0 else 0.0),
+                    (fun j c -> if is_combo_break JudgementType.NG j then (0, true) else (c + 1, false)))
         | _ -> failwith "nyi"
 
     (*
@@ -366,3 +365,22 @@ module Score =
         while i < thresholds.Length && thresholds.[i] > percent do
             i <- i + 1
         i
+
+    type PersonalBests<'T> = ('T * float) * ('T * float)
+    type PersonalBestType =
+    | Faster = 2
+    | Better = 1
+    | None = 0
+
+    let updatePB (((bestA, rateA), (bestR, rateR)): PersonalBests<'T>) (value: 'T, rate: float) =
+        let r, rv =
+            if rate > rateR then (value, rate), PersonalBestType.Faster
+            elif rate = rateR then
+                if value > bestR then (value, rate), PersonalBestType.Faster else (bestR, rate), PersonalBestType.None
+            else (bestR, rateR), PersonalBestType.None
+        let a, av =
+            if value > bestA then (value, rate), PersonalBestType.Better
+            elif value = bestA then
+                if rate > rateA then (value, rate), PersonalBestType.Better else (bestA, rateA), PersonalBestType.None
+            else (bestA, rateA), PersonalBestType.None
+        (a, r), (av ||| rv) : PersonalBests<'T> * PersonalBestType

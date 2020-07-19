@@ -7,6 +7,7 @@ open Prelude.Charts.osu
 open Prelude.Charts.ChartConversions
 open Prelude.Editor.Filter
 
+(*
 let plus ((x1, y1) : Point) ((x2, y2) : Point) =
     (x1 + x2, y1 + y2)
 
@@ -373,4 +374,4 @@ let miracle _ =
     |> ignore
     Chart(8, chart.Header, chart.Notes, chart.BPM, chart.SV, chart.FileIdentifier)
     |> convert_interlude_osu
-    |> saveBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\WJSN (Cosmic Girls) - Miracle (Percyqaz) [Dumb Files Ver.].osu"
+    |> saveBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\1122880 WJSN (Cosmic Girls) - Miracle\ *WJSN (Cosmic Girls) - Miracle (Percyqaz) [Dumb Files Ver.].osu"  *)
