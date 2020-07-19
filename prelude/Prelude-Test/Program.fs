@@ -18,8 +18,11 @@ let main argv =
     let c1 = loadChartFile("original.yav").Value
     let c2 = loadChartFile("new.yav").Value
 
+    printfn "%s" (calculateHash c1)
+    printfn "%s" (calculateHash c2)
+
     Seq.zip
-        (c1.Notes.Data |> Seq.map (fun (t, nd) -> t))
-        (c2.Notes.Data |> Seq.map (fun (t, nd) -> t))
-    |> Seq.iter(fun (a, b) -> printfn "%f, %f" a (b - a))
+        (c1.Notes.Data |> Seq.map (fun (t, nd) -> t |> Convert.ToInt32))
+        (c2.Notes.Data |> Seq.map (fun (t, nd) -> t |> Convert.ToInt32))
+    |> Seq.iter(fun (a, b) -> if a <> b then printfn "%i, %i" a b)
     0

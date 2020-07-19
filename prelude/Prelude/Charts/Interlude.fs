@@ -301,15 +301,15 @@ module Interlude =
         else
             let offset = offsetOf <| chart.Notes.First()
             for (o, nr) in chart.Notes.Data do
-                bw.Write((o - offset) |> Convert.ToInt32)
+                bw.Write((o - offset)  * 0.2f |> Convert.ToInt32)
                 for i = 0 to 5 do
                     bw.Write(nr.[i])
-            for i = 0 to chart.Keys |> Convert.ToInt32 do
+            for i = 0 to chart.Keys do
                 let mutable speed = 1.0
                 for (o, f) in (chart.SV.GetChannelData(i - 1)).Data do
                     let f = float f
                     if (speed <> f) then
-                        bw.Write((o - offset) |> Convert.ToInt32)
+                        bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
                         bw.Write(f)
                         speed <- f
             BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")
