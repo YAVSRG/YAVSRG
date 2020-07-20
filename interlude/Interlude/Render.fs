@@ -72,6 +72,8 @@ module Quad =
 
     let flip (struct (c1, c2, c3, c4): Quad): Quad = struct (c4, c3, c2, c1)
 
+    let map f (struct (c1, c2, c3, c4): Quad): Quad = struct (f c1, f c2, f c3, f c4)
+
 (*
     Sprites and content uploading
 *)
@@ -80,10 +82,11 @@ module Quad =
 type Sprite = { ID: int; Width: int; Height: int; Rows: int; Columns: int }
 with
     member this.WithUV(q: Quad): SpriteQuad = struct (this, q)
+    //todo: deprecate
     member this.TilingUV(s, x, y): SpriteQuad =
         let w = float32 this.Width
         struct (this, Quad.ofRect(Rect.create (x / w / s) (y / w / s) (x / w / s + s) (y / w / s + s)))
-    static member Default = { ID=0; Width=1; Height=1; Rows=1; Columns=1 }
+    static member Default = { ID = 0; Width = 1; Height = 1; Rows = 1; Columns = 1 }
     static member DefaultQuad: SpriteQuad = struct (Sprite.Default, Quad.ofRect Rect.one)
 and SpriteQuad = (struct(Sprite * Quad))
 
@@ -108,11 +111,11 @@ module Sprite =
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest)
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest)
 
-        { ID=id; Width=bitmap.Width; Height=bitmap.Height; Rows=rows; Columns=columns }
+        { ID = id; Width = bitmap.Width; Height = bitmap.Height; Rows = rows; Columns = columns }
 
     let destroy (sprite: Sprite) = GL.DeleteTexture(sprite.ID)
 
-    let uv(x, y) (sprite: Sprite) =
+    let gridUV(x, y) (sprite: Sprite) =
         let x = float32 x
         let y = float32 y
         let sx = 1.f / float32 sprite.Columns
@@ -120,6 +123,12 @@ module Sprite =
         Rect.create <| x * sx <| y * sy <| (x + 1.f) * sx <| (y + 1.f) * sy
         |> Quad.ofRect
         |> sprite.WithUV
+
+    let tilingUV(scale, left, top)(sprite)(quad) =
+        let width = float32 sprite.Width * scale
+        let height = float32 sprite.Height * scale
+        quad |>
+        Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height))
 
 (*
     Render handling to be used from Game
@@ -272,7 +281,7 @@ module Draw =
         GL.Color4(c4); GL.TexCoord2(u4); GL.Vertex2(p4)
         GL.End()
         
-    let rect (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.uv(0, 0) s
+    let rect (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.gridUV(0, 0) s
 
 (*
     Font rendering

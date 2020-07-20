@@ -94,7 +94,7 @@ module ScreenLevelSelect =
                         Draw.quad
                             (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength - 40.0f, bottom) <| new Vector2(left, bottom))
                             (Quad.colorOf <| Screens.accentShade(127, 1.0f, 0.2f))
-                            (Sprite.uv(0,0)Sprite.Default)
+                            (Sprite.gridUV(0,0)Sprite.Default)
                         Text.draw(font(), cc.Artist + " - " + cc.Title, 25.0f, left, top, Color.White)
                         Text.draw(font(), cc.DiffName + " // " + cc.Creator, 20.0f, left, top + 40.0f, Color.White)
                         let border = Rect.expand(5.0f, 5.0f)bounds

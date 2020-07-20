@@ -139,7 +139,7 @@ type NoteRenderer() as this =
                 sv_time.[k] <- t
                 min <- Math.Min(column_pos.[k], min)
                 if testForNote k NoteType.NORMAL nd then
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, int color.[k])(Themes.getTexture("note")))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, int color.[k])(Themes.getTexture("note")))
                 elif testForNote k NoteType.HOLDHEAD nd then
                     hold_pos.[k] <- column_pos.[k]
                     hold_colors.[k] <- int color.[k]
@@ -148,24 +148,24 @@ type NoteRenderer() as this =
                     let headpos = hold_pos.[k]
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
-                        Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight * 0.5f) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
+                        Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight * 0.5f) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
                     if headpos - pos < noteHeight * 0.5f then
                         Draw.quad
                             (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos + noteHeight * 0.5f)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom))
                             (Quad.colorOf Color.White)
-                            (Sprite.uv(animation.Loops, int color.[k])(tailsprite) |> fun struct (x, y) -> struct (x, scrollDirectionFlip y))
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
+                            (Sprite.gridUV(animation.Loops, int color.[k])(tailsprite) |> fun struct (x, y) -> struct (x, scrollDirectionFlip y))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
                     hold_presence.[k] <- false
                 elif testForNote k NoteType.MINE nd then
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, int color.[k])(Themes.getTexture("mine")))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, int color.[k])(Themes.getTexture("mine")))
                     
             note_peek <- note_peek + 1
         
         for k in 0 .. (keys - 1) do
             if hold_presence.[k] then
                 let headpos = hold_pos.[k]
-                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) bottom |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
-                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.uv(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
+                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) bottom |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
+                Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
         base.Draw()
 
 module GameplayWidgets = 

@@ -266,15 +266,17 @@ module Screens =
         let bg = Themes.background
         let screenaspect = Render.vwidth / Render.vheight
         let bgaspect = float32 bg.Width / float32 bg.Height
-        let hs = Render.vwidth / float32 bg.Width
-        let vs = Render.vheight / float32 bg.Height
-        let uv = 
-            if screenaspect > bgaspect then //need to trim top and bottom
-                Rect.create 0.0f 0.0f 1.0f (1.0f - screenaspect + bgaspect)
-            else //need to trim sides
-                Rect.create 0.0f 0.0f (1.0f - bgaspect + screenaspect) 1.0f
-            
-        //let scale = Math.Max(Render.vwidth / float32 bg.Width, Render.vheight / float32 bg.Height)
-        //let px = depth * parallaxZ.Value * parallaxX.Value / Render.vwidth * 0.25f
-        //let py = depth * parallaxZ.Value * parallaxY.Value / Render.vheight * 0.25f
-        Draw.quad (Quad.ofRect bounds) (Quad.colorOf color) struct (bg, Quad.ofRect uv)
+        let q = Quad.ofRect bounds
+        Draw.quad
+            q
+            (Quad.colorOf color)
+            (bg.WithUV(
+                Sprite.tilingUV(
+                    if bgaspect > screenaspect then
+                        let scale = Render.vheight / float32 bg.Height
+                        let left = (float32 bg.Width * scale - Render.vwidth) * -0.5f
+                        (scale, left, 0.0f)
+                    else
+                        let scale = Render.vwidth / float32 bg.Width
+                        let top = (float32 bg.Height * scale - Render.vheight) * -0.5f
+                        (scale, 0.0f, top)) bg q))
