@@ -7,8 +7,38 @@ open Prelude.Data.Themes
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
 open Interlude
+open Interlude.UI.Animation
 open Interlude.Render
 open Interlude.Options
+
+type GameStartDialog() as this =
+    inherit Dialog()
+
+    let anim1 = new AnimationFade(0.0f)
+
+    do
+        this.Animation.Add(anim1)
+        anim1.SetTarget(1.0f)
+        let g = new AnimationSequence()
+        g.Add(new AnimationTimer(600.0))
+        g.Add(new AnimationAction(fun () -> anim1.SetTarget(0.0f)))
+        g.Add(new AnimationAction(this.Close))
+        this.Animation.Add(g)
+
+    override this.Draw() =
+        let struct (left, top, right, bottom) = this.Bounds
+        let w = right - left
+        let bounds =
+            let m = (top + bottom) * 0.5f
+            Rect.create left (m - 100.0f) right (m + 100.0f)
+        if anim1.Target = 1.0f then
+            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceRight(w * anim1.Value))(Screens.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.sliceLeft(w * anim1.Value))(Screens.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
+        else
+            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceLeft(w * anim1.Value))(Screens.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.sliceRight(w * anim1.Value))(Screens.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
+
+    override this.OnClose() = ()
 
 //TODO LIST
 //  ARROW NOTE ROTATION
@@ -32,7 +62,7 @@ type NoteRenderer() as this =
     let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
 
     let tailsprite = Themes.getTexture(if Themes.noteskinConfig.UseHoldTailTexture then "holdtail" else "holdhead")
-    let animation = new Animation.AnimationCounter(200.0)
+    let animation = new AnimationCounter(200.0)
 
     //arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
     let mutable note_seek = 0 //see comments for sv_seek and sv_peek. same role but for index of next row
@@ -149,7 +179,7 @@ module GameplayWidgets =
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
-        let color = new Animation.AnimationColorMixer(if conf.GradeColors then Utils.otkColor Themes.themeConfig.GradeColors.[0] else Color.White)
+        let color = new AnimationColorMixer(if conf.GradeColors then Utils.otkColor Themes.themeConfig.GradeColors.[0] else Color.White)
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe(fun _ -> color.SetColor(Themes.themeConfig.GradeColors.[grade helper.Scoring.Value Themes.themeConfig.GradeThresholds]))
@@ -161,10 +191,8 @@ module GameplayWidgets =
             if conf.ShowName then
                 this.Add(new Components.TextBox(Utils.K helper.Scoring.Name, (fun () -> Color.White), 0.5f) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
         
-        //todo: test this doesnt crash when this code becomes used
-        interface IDisposable with
-            member this.Dispose() =
-                if isNull listener then () else listener.Dispose()
+        override this.Dispose() =
+            if isNull listener then () else listener.Dispose()
 
     type HitMeter(conf: WidgetConfig.HitMeter, helper) =
         inherit Widget()
@@ -197,14 +225,14 @@ module GameplayWidgets =
                     (let c = Themes.themeConfig.JudgementColors.[j] in
                         Color.FromArgb(Math.Max(0, 255 - int (255.0f * (now - time) / conf.AnimationTime)), int c.R, int c.G, int c.B))
                     (Sprite.Default)
-        interface IDisposable with
-            member this.Dispose() =
-                listener.Dispose()
+
+        override this.Dispose() =
+            listener.Dispose()
 
     type ComboMeter(conf: WidgetConfig.Combo, helper) as this =
         inherit Widget()
-        let popAnimation = new Animation.AnimationFade(0.0f)
-        let color = new Animation.AnimationColorMixer(Color.White)
+        let popAnimation = new AnimationFade(0.0f)
+        let color = new AnimationColorMixer(Color.White)
         let mutable hits = 0
         let listener =
             helper.OnHit.Subscribe(
@@ -224,9 +252,8 @@ module GameplayWidgets =
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
             Text.drawFill(Themes.font(), combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
 
-        interface IDisposable with
-            member this.Dispose() =
-                listener.Dispose()
+        override this.Dispose() =
+            listener.Dispose()
 
 
 open GameplayWidgets
@@ -271,6 +298,7 @@ type ScreenPlay() as this =
             //disable cursor
             Audio.changeRate(Gameplay.rate)
             Audio.playLeadIn()
+            //Screens.addDialog(new GameStartDialog())
 
     override this.OnExit(next) =
         Screens.setToolbarCollapsed(false)
@@ -309,15 +337,17 @@ type ScreenPlay() as this =
                 let d = now - time
                 if release then
                     if (testForNote k NoteType.HOLDTAIL nd) then
-                        if (Time.Abs(delta) > Time.Abs(d)) || noteType = NoteType.HOLDBODY  then
+                        if noteType = NoteType.HOLDBODY || Time.Abs(delta) > Time.Abs(d)  then
                             delta <- d
                             hitAt <- i
                             noteType <- NoteType.HOLDTAIL
-                    else if noteType <> NoteType.HOLDTAIL && (testForNote k NoteType.HOLDBODY nd) then
+                    else if noteType <> NoteType.HOLDTAIL&& (testForNote k NoteType.HOLDBODY nd) then
                         if (Time.Abs(delta) > Time.Abs(d)) then
                             delta <- d
                             hitAt <- i
                             noteType <- NoteType.HOLDBODY
+                    else if testForNote k NoteType.HOLDHEAD nd then
+                        i <- notes.Count //ln fix
                 else 
                     if (testForNote k NoteType.HOLDHEAD nd) || (testForNote k NoteType.NORMAL nd) then
                         if (Time.Abs(delta) > Time.Abs(d)) || noteType = NoteType.MINE  then
@@ -330,7 +360,7 @@ type ScreenPlay() as this =
                             hitAt <- i
                             noteType <- NoteType.MINE
             i <- i + 1
-        if hitAt >= 0 then
+        if hitAt >= 0 && (not release || noteType <> NoteType.HOLDHEAD) then
             delta <- delta / Gameplay.rate * (if release then 0.666f else 1.0f)
             this.Hit(hitAt, k, delta, noteType = NoteType.MINE || noteType = NoteType.HOLDBODY, now)
 

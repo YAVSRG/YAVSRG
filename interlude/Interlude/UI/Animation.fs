@@ -50,6 +50,7 @@ module Animation =
     type AnimationTimer(milliseconds) =
         inherit Animation()
         let mutable elapsed = 0.0
+        member this.Elapsed = elapsed
         override this.Complete = elapsed >= milliseconds
         override this.Update(elapsedMillis) = elapsed <- elapsed + elapsedMillis
 

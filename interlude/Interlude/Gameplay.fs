@@ -1,6 +1,7 @@
 ﻿namespace Interlude
 
 open System
+open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Editor
@@ -64,6 +65,33 @@ module Gameplay =
 
     let getModString() = 
         String.Join(", ", sprintf "%.2fx" rate :: (selectedMods.Enumerate() |> List.map (ModState.GetModName)))
+
+    let setScore(data: ScoreInfoProvider) =
+        let d = chartSaveData.Value
+        if
+            match Options.profile.ScoreSaveCondition.Get() with
+            | _ -> true
+            //todo: fill in this stub (pb condition will be complicated)
+        then
+            //add to score db
+            d.Scores.Add(data.Score)
+            //update top scores
+            Options.profile.Stats.TopPhysical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical)(Options.profile.Stats.TopPhysical.Get()))
+            Options.profile.Stats.TopTechnical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Technical)(Options.profile.Stats.TopTechnical.Get()))
+            //update pbs
+            let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) = 
+                if target.ContainsKey(name) then
+                    let n, pb = updatePB(target.[name])(value, data.Score.rate)
+                    target.[name] <- n
+                    pb
+                else
+                    target.Add(name, ((value, data.Score.rate), (value, data.Score.rate)))
+                    PersonalBestType.Faster
+            f data.Accuracy.Name d.Lamp data.Lamp,
+            f data.Accuracy.Name d.Accuracy data.Accuracy.Value,
+            f (data.Accuracy.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
+        else
+            (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)
 
     let save() =
         scores.Save()

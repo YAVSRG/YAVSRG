@@ -122,7 +122,7 @@ module Components =
             if (this.Initialised) then
                 this.FlowContent(false)
                 base.Update(time, bounds)
-                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Clamp(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, 0.0f, contentSize)
+                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, contentSize))
             else
                 //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
                 base.Update(time, bounds)
@@ -227,7 +227,7 @@ module Components =
                             | "" -> sprintf "Press %s to %s" (b.Get().ToString()) prompt
                             | text -> text
                         | None -> prompt),
-                    (fun () -> Screens.accentShade(255, 1.0f, color.Value)), 0.0f));
+                    (fun () -> Screens.accentShade(255, 1.0f, color.Value)), 0.0f))
             this.Add(
                 new Clickable((if (Option.isSome bind) then toggle else K ()), ignore))
 

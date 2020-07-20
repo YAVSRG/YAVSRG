@@ -17,7 +17,7 @@ module Input =
     let mutable internal clickhandled = false
     let mutable private inputmethod: ISettable<string> list = []
 
-    let internal freeIM = List.isEmpty inputmethod
+    let internal freeIM() = List.isEmpty inputmethod
 
     let init(game : GameWindow) =
         game.MouseWheel.Add(fun e -> mousescroll <- e.Delta)
@@ -37,10 +37,10 @@ module Input =
     //these methods are internal until further notice as the Bind system should be used instead
     module Keyboard =
         let internal pressedOverride(k) = keys.Contains(k)
-        let internal pressed(k, overrideIM) = (overrideIM || freeIM) && pressedOverride(k)
+        let internal pressed(k, overrideIM) = (overrideIM || freeIM()) && pressedOverride(k)
         //was key pressed this frame?
         let internal tappedOverride(k) = keys.Contains(k) && not(oldKeys.Contains(k))
-        let internal tapped(k, overrideIM) = (overrideIM || freeIM) && tappedOverride(k)
+        let internal tapped(k, overrideIM) = (overrideIM || freeIM()) && tappedOverride(k)
         //was key released this frame?
         let internal released(k) = oldKeys.Contains(k) && not(keys.Contains(k))
 

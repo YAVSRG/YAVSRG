@@ -9,7 +9,7 @@ type ScreenScore(scoreData: ScoreInfoProvider) as this =
     inherit Screen()
 
     do
-        this.Add(new TextBox(K <| scoreData.Scoring.Format(), K Color.White, 0.5f))
+        this.Add(new TextBox(K <| scoreData.Accuracy.Format(), K Color.White, 0.5f))
 
     override this.OnEnter(prev) =
         () //add score to database, update pbs, all that

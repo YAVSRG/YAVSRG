@@ -36,10 +36,10 @@ module ScreenLevelSelect =
 
         do
             this.Add(
-                new TextBox(sprintf "%s / %i" (data.Scoring.Format()) (let (_, _, _, _, _, cbs) = data.Scoring.State in cbs) |> K, K Color.White, 0.0f)
+                new TextBox(sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs) |> K, K Color.White, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f))
             this.Add(
-                new TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Scoring.State in combo) |> K, K Color.White, 0.0f)
+                new TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) |> K, K Color.White, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f))
             this.Add(
                 new TextBox(K data.Mods, K Color.White, 1.0f)
@@ -232,7 +232,7 @@ type ScreenLevelSelect() as this =
         this.Add(scoreboard |> positionWidget(50.0f, 0.0f, 220.0f, 0.0f, -50.0f, 0.4f, -50.0f, 1.0f))
         onChartChange <- scoreboard.Refresh
         this.Add(
-            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Artist + " - " + c.Title), K Color.White, 0.5f)
+            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Title), K Color.White, 0.5f)
             |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 100.0f, 0.0f))
         this.Add(
             new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K Color.White, 0.5f)
@@ -277,7 +277,7 @@ type ScreenLevelSelect() as this =
         let struct (left, top, right, bottom) = this.Bounds
         //level select stuff
         Stencil.create(false)
-        Draw.rect(Rect.create 0.0f 240.0f Render.vwidth (Render.vheight - 70.0f))(Color.Transparent)(Sprite.Default)
+        Draw.rect(Rect.create 0.0f (top + 170.0f) Render.vwidth bottom)(Color.Transparent)(Sprite.Default)
         Stencil.draw()
         let bottom =
             selection
