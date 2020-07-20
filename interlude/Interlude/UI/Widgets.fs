@@ -171,10 +171,12 @@ type Logo() as this =
         Stencil.draw()
         //chart background
         Draw.rect this.Bounds <| Color.Aqua <| Sprite.Default
+        let rain = Themes.getTexture("rain")
         let v = float32 counter.Time
-        Draw.quad <| Quad.ofRect this.Bounds <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255)) <| Themes.getTexture("rain").TilingUV(0.625f, v * -0.06f, v * -0.07f)
-        Draw.quad <| Quad.ofRect this.Bounds <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| Themes.getTexture("rain").TilingUV(1.0f, v * -0.1f, v * -0.11f)
-        Draw.quad <| Quad.ofRect this.Bounds <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| Themes.getTexture("rain").TilingUV(1.5625f, v * -0.15f, v * -0.16f)
+        let q = Quad.ofRect this.Bounds
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f)rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f)rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f)rain q)
 
         let mutable prev = 0.0f
         let m = b - w * 0.5f

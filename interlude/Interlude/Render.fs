@@ -82,10 +82,6 @@ module Quad =
 type Sprite = { ID: int; Width: int; Height: int; Rows: int; Columns: int }
 with
     member this.WithUV(q: Quad): SpriteQuad = struct (this, q)
-    //todo: deprecate
-    member this.TilingUV(s, x, y): SpriteQuad =
-        let w = float32 this.Width
-        struct (this, Quad.ofRect(Rect.create (x / w / s) (y / w / s) (x / w / s + s) (y / w / s + s)))
     static member Default = { ID = 0; Width = 1; Height = 1; Rows = 1; Columns = 1 }
     static member DefaultQuad: SpriteQuad = struct (Sprite.Default, Quad.ofRect Rect.one)
 and SpriteQuad = (struct(Sprite * Quad))
