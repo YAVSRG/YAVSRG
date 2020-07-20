@@ -27,21 +27,19 @@ module ScoreManager =
     }
 
     type ChartSaveData = {
-        Path: string
         Offset: Setting<Time>
         Scores: List<Score>
-        Lamp: Dictionary<string, Lamp>
-        Accuracy: Dictionary<string, float>
-        Clear: Dictionary<string, bool>
+        Lamp: Dictionary<string, PersonalBests<Lamp>>
+        Accuracy: Dictionary<string, PersonalBests<float>>
+        Clear: Dictionary<string, PersonalBests<bool>>
     }
     with
         static member FromChart(c: Chart) = {
-            Path = c.FileIdentifier
             Offset = Setting(if c.Notes.IsEmpty() then 0.0f<ms> else offsetOf <| c.Notes.First());
             Scores = new List<Score>()
-            Lamp = new Dictionary<string, Lamp>()
-            Accuracy = Dictionary<string, float>()
-            Clear = Dictionary<string, bool>()
+            Lamp = new Dictionary<string, PersonalBests<Lamp>>()
+            Accuracy = Dictionary<string, PersonalBests<float>>()
+            Clear = Dictionary<string, PersonalBests<bool>>()
         }
 
     (*
@@ -56,17 +54,18 @@ module ScoreManager =
         let difficulty =
             lazy (let (keys, notes, _, _, _) = modchart.Force()
                 RatingReport(notes, score.rate, score.layout, keys))
-        let scoring =
+        let accuracy =
             lazy (let m = createAccuracyMetric(SCPlus 4) in m.ProcessAll(hitdata.Force()); m) //todo: connect to profile settings
-        let hp = lazy (let m = createHPMetric VG (scoring.Force()) in m.ProcessAll(hitdata.Force()); m)
+        let hp = lazy (let m = createHPMetric VG (accuracy.Force()) in m.ProcessAll(hitdata.Force()); m)
         let performance =
             lazy (
                 let (keys, _, _, _, _) = modchart.Force()
                 let m = performanceMetric (difficulty.Force()) keys in m.ProcessAll(hitdata.Force()); m)
-        let lamp = lazy (lamp (scoring.Force().State))
+        let lamp = lazy (lamp (accuracy.Force().State))
 
-        member this.Scoring = scoring.Force()
-        member this.Clear = hp.Force().Failed
+        member this.Score = score
+        member this.Accuracy = accuracy.Force()
+        member this.HP = hp.Force()
         member this.Lamp = lamp.Force()
         member this.Physical = performance.Force().Value
         member this.Technical = 0.0 //nyi

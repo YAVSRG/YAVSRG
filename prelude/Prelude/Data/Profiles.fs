@@ -6,13 +6,35 @@ open System.Collections.Generic
 open Newtonsoft.Json
 open Prelude.Common
 open Prelude.Json
+open Prelude.Gameplay.Score
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.NoteColors
+open Prelude.Data.ScoreManager
 
 module Profiles = 
 
-    type ProfileStats() =
-        member val Plays = 0 with get, set
+    type ScoreSaving =
+    | Always = 0
+    | Pacemaker = 1
+    | PB = 2
+
+    type Pacemaker =
+    | Accuracy of float
+    | Lamp of Lamp
+
+    type FailType =
+    | Instant
+    | AtEnd
+
+    type ProfileStats = {
+        //todo: rrd graph of improvement over time/session performances
+        TopPhysical: Setting<TopScore list>
+        TopTechnical: Setting<TopScore list>
+    } with
+        static member Default = {
+            TopPhysical = Setting([])
+            TopTechnical = Setting([])
+        }
 
     type Profile = {
         UUID: string
@@ -32,19 +54,21 @@ module Profiles =
         UseKeymodePreference: Setting<bool>
         NoteSkin: Setting<string>
 
-        SelectedHPSystem: Setting<int>
+        Playstyles: Layout array
+
+        SelectedHPSystem: Setting<int> //todo: not this
         SelectedAccSystem: Setting<int>
-        //pacemaker, score saving, fail behaviour
+        ScoreSaveCondition: Setting<ScoreSaving>
+        FailCondition: Setting<FailType>
+        Pacemaker: Setting<Pacemaker>
 
         ChartSortMode: Setting<string>
         ChartGroupMode: Setting<string>
         ChartColorMode: Setting<string>
-
-        Playstyles: Layout array
     } with
         static member Default = {
             UUID = Guid.NewGuid().ToString()
-            Stats = ProfileStats()
+            Stats = ProfileStats.Default
 
             Name = StringSetting("Default Profile", false)
 
@@ -52,18 +76,22 @@ module Profiles =
             HitPosition = IntSetting(0, -100, 400)
             HitLighting = Setting(false)
             Upscroll = Setting(false)
+            BackgroundDim = FloatSetting(0.5, 0.0, 1.0)
+            PerspectiveTilt = FloatSetting(0.0, -1.0, 1.0)
             ScreenCoverUp = FloatSetting(0.0, 0.0, 1.0)
             ScreenCoverDown = FloatSetting(0.0, 0.0, 1.0)
             ScreenCoverFadeLength = IntSetting(200, 0, 500)
-            PerspectiveTilt = FloatSetting(0.0, -1.0, 1.0)
-            BackgroundDim = FloatSetting(0.5, 0.0, 1.0)
             NoteSkin = Setting("default")
-            SelectedHPSystem = Setting(0)
-            SelectedAccSystem = Setting(0)
             ColorStyle = Setting(ColorConfig.Default)
             KeymodePreference = IntSetting(4, 3, 10)
             UseKeymodePreference = Setting(false)
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
+
+            SelectedHPSystem = Setting(0)
+            SelectedAccSystem = Setting(0)
+            ScoreSaveCondition = Setting(ScoreSaving.Always)
+            FailCondition = Setting(AtEnd)
+            Pacemaker = Setting(Accuracy 0.95)
 
             ChartSortMode = Setting("Title")
             ChartGroupMode = Setting("Pack")

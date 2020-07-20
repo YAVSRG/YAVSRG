@@ -224,16 +224,16 @@ module Score =
              then (perf_window * 0.25f, JudgementType.RIDICULOUS) :: windows
              else windows)
 
-    let private is_combo_break threshold judgement =
+    let private get_combo_break threshold judgement combo =
         match judgement with
-        | JudgementType.OK -> false
-        | j -> j >= threshold
+        | JudgementType.OK -> (combo, false)
+        | j -> if j >= threshold then (0, true) else (combo + 1, false)
 
     let private dp_based_accuracy name judge ridiculous pfunc =
         AccuracySystem
             (name, dp_windows judge ridiculous, pfunc,
              (fun j -> if is_regular_hit j then 2.0 else 0.0),
-             (fun j c -> if is_combo_break JudgementType.GOOD j then (0, true) else (c + 1, false)))
+             (fun j c -> get_combo_break JudgementType.GOOD j c))
 
     let createAccuracyMetric config =
         match config with
@@ -265,7 +265,7 @@ module Score =
                         | JudgementType.MISS
                         | _ -> 0.0),
                     (fun j -> if is_regular_hit j then 300.0 else 0.0),
-                    (fun j c -> if is_combo_break JudgementType.NG j then (0, true) else (c + 1, false)))
+                    (fun j c ->  get_combo_break JudgementType.GOOD j c))
         | _ -> failwith "nyi"
 
     (*
@@ -366,13 +366,13 @@ module Score =
             i <- i + 1
         i
 
-    type PersonalBests<'T> = ('T * float) * ('T * float)
+    type PersonalBests<'T> = ('T * float32) * ('T * float32)
     type PersonalBestType =
     | Faster = 2
     | Better = 1
     | None = 0
 
-    let updatePB (((bestA, rateA), (bestR, rateR)): PersonalBests<'T>) (value: 'T, rate: float) =
+    let updatePB (((bestA, rateA), (bestR, rateR)): PersonalBests<'T>) (value: 'T, rate: float32) =
         let r, rv =
             if rate > rateR then (value, rate), PersonalBestType.Faster
             elif rate = rateR then
