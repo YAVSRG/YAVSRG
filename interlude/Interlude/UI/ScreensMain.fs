@@ -35,12 +35,16 @@ type ScreenMenu() =
 
 // Loading screen
 
-type ScreenLoading() =
+type ScreenLoading() as this =
     inherit Screen()
 
     let mutable closing = false
+    let fade = new AnimationFade(1.0f)
+    do
+        this.Animation.Add(fade)
 
     override this.OnEnter(prev: Screen) =
+        fade.SetValue(0.0f)
         Screens.logo.Move(-400.0f, -400.0f, 400.0f, 400.0f)
         Screens.setToolbarCollapsed(true)
         match prev with
@@ -55,10 +59,41 @@ type ScreenLoading() =
             s.Add(AnimationTimer(1500.0))
             s.Add(AnimationAction(fun () -> Screens.addScreen (new ScreenMenu())))
             this.Animation.Add(s)
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        Audio.changeVolume(Options.options.AudioVolume.Get() * float (if closing then 1.0f - fade.Value else fade.Value))
         
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
         Text.drawJust(Themes.font(), (if closing then "Bye o/" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)
+
+// Toolbar widgets
+
+type Jukebox() as this =
+    inherit Widget()
+    //todo: right click to seek/tools to pause and play music
+    let fade = new AnimationFade(0.0f)
+    let slider = new AnimationFade(0.0f)
+    do
+        this.Animation.Add(fade)
+        this.Animation.Add(slider)
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if Options.options.Hotkeys.Volume.Get().Pressed(true) then
+            fade.SetTarget(1.0f)
+            Options.options.AudioVolume.Set(Options.options.AudioVolume.Get() + float Interlude.Input.Input.mousescroll * 0.02)
+            Audio.changeVolume(Options.options.AudioVolume.Get())
+            slider.SetTarget(float32 <| Options.options.AudioVolume.Get())
+        else
+            fade.SetTarget(0.0f)
+
+    override this.Draw() =
+        let r = Rect.sliceBottom(5.0f) this.Bounds
+        Draw.rect(r)(Screens.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f))(Sprite.Default)
+        Draw.rect(r |> Rect.sliceLeft(slider.Value * (Rect.width r)))(Screens.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f))(Sprite.Default)
+
 
 // Toolbar
 
@@ -82,6 +117,7 @@ type Toolbar() as this =
         this.Add(new Button((fun () -> new ScreenOptions() |> Screens.addScreen), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button((fun () -> new ScreenImport() |> Screens.addScreen), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Jukebox())
 
         Screens.setToolbarCollapsed <- (fun b -> forceCollapse <- b; barSlider.SetTarget(if userCollapse || forceCollapse then 0.0f else 1.0f))
 

@@ -119,6 +119,9 @@ module Audio =
             channelPlaying <- false
             //todo: handle action for when track is complete here
 
+    let changeVolume(newVolume) =
+        Bass.GlobalStreamVolume <- int (newVolume * 10000.0)
+
     let changeRate(newRate) =
         rate <- newRate;
         //if (PREVENT_PITCH_CHANGE) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(rate, 2.0) * 12.0) |> ignore
@@ -136,4 +139,4 @@ module Audio =
 
     let init() =
         Bass.Init() |> bassError
-        Bass.GlobalStreamVolume <- int (0.05 * 10000.0)
+        Bass.GlobalStreamVolume <- 0
