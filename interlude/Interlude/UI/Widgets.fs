@@ -247,7 +247,7 @@ module Screens =
     //background fbo
     let parallaxX  = AnimationFade(0.0f)
     let parallaxY  = AnimationFade(0.0f)
-    let parallaxZ  = AnimationFade(15.0f)
+    let parallaxZ  = AnimationFade(40.0f)
     let backgroundDim = AnimationFade(1.0f)
     let accentColor = AnimationColorMixer(otkColor Themes.accentColor)
 
@@ -264,9 +264,12 @@ module Screens =
             int ((float32 accentColor.B + bd) * brightness))
 
     let drawBackground(bounds, color, depth) =
-        //not complete. will wait until level select and changing backgrounds to give more testing ability
         let bg = Themes.background
-        let screenaspect = Render.vwidth / Render.vheight
+        let pwidth = Render.vwidth + parallaxZ.Value
+        let pheight = Render.vheight + parallaxZ.Value
+        let x = -parallaxX.Value * parallaxZ.Value
+        let y = -parallaxY.Value * parallaxZ.Value
+        let screenaspect = pwidth / pheight
         let bgaspect = float32 bg.Width / float32 bg.Height
         let q = Quad.ofRect bounds
         Draw.quad
@@ -275,10 +278,10 @@ module Screens =
             (bg.WithUV(
                 Sprite.tilingUV(
                     if bgaspect > screenaspect then
-                        let scale = Render.vheight / float32 bg.Height
-                        let left = (float32 bg.Width * scale - Render.vwidth) * -0.5f
-                        (scale, left, 0.0f)
+                        let scale = pheight / float32 bg.Height
+                        let left = (float32 bg.Width * scale - pwidth) * -0.5f
+                        (scale, left + x, 0.0f + y)
                     else
-                        let scale = Render.vwidth / float32 bg.Width
-                        let top = (float32 bg.Height * scale - Render.vheight) * -0.5f
-                        (scale, 0.0f, top)) bg q))
+                        let scale = pwidth / float32 bg.Width
+                        let top = (float32 bg.Height * scale - pheight) * -0.5f
+                        (scale, 0.0f + x, top + y)) bg q))

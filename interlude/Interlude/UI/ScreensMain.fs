@@ -192,8 +192,8 @@ type ScreenContainer() as this =
             current <- s
 
     override this.Update(elapsedTime, bounds) =
-        Screens.parallaxX.SetTarget(Mouse.X())
-        Screens.parallaxY.SetTarget(Mouse.Y())
+        Screens.parallaxX.SetTarget(Mouse.X() / Render.vwidth)
+        Screens.parallaxY.SetTarget(Mouse.Y() / Render.vheight)
         Screens.accentColor.SetColor(Themes.accentColor)
         base.Update(elapsedTime, bounds)
         if dialogs.Count > 0 then
