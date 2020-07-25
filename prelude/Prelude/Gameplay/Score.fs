@@ -44,11 +44,12 @@ module Score =
         |> Array.ofSeq       
 
     let compressScoreData (sd: ScoreData): string = 
-        use inputStream = new MemoryStream()
-        use gZipStream = new GZipStream(inputStream, CompressionLevel.Optimal)
+        use outputStream = new MemoryStream()
+        use gZipStream = new GZipStream(outputStream, CompressionLevel.Optimal)
         use bw = new BinaryWriter(gZipStream)
         Array.iter (fun (_, delta, hit) -> Array.iter (byte >> bw.Write) hit; Array.iter (float32 >> bw.Write) delta) sd
-        Convert.ToBase64String(inputStream.ToArray())
+        bw.Flush()
+        Convert.ToBase64String(outputStream.ToArray())
 
     let notesToScoreData (keys: int) (notes: TimeData<NoteRow>): ScoreData =
         notes.Data
@@ -368,6 +369,7 @@ module Score =
 
     type PersonalBests<'T> = ('T * float32) * ('T * float32)
     type PersonalBestType =
+    | FasterBetter = 3
     | Faster = 2
     | Better = 1
     | None = 0

@@ -50,6 +50,7 @@ module ScoreManager =
     *)
 
     type ScoreInfoProvider(score: Score, chart: Chart) =
+        //todo: method to set already existing values when possible
         let (modchart, hitdata) = getModChartWithScore (ModState(score.selectedMods)) chart score.hitdata
         let difficulty =
             lazy (let (keys, notes, _, _, _) = modchart.Force()

@@ -42,6 +42,7 @@ module Mods =
         //This typically is unused - examples uses are marking all notes as hit perfectly in Autoplay or marking LN releases as not needing to be hit
         member this.ApplyHitData = apply_score
 
+    //todo: just make non oop operations on Dictionary<string, int>
     type ModState(mods : Dictionary<string, int>) =
         static let modList = new Dictionary<string, Mod>();
     
@@ -63,6 +64,8 @@ module Mods =
                 for id in mods.Keys do
                     if modList.[id].CheckApplicable (mods.[id]) chart then yield (id, modList.[id], mods.[id])
                 }
+
+        member this.Data = mods
 
         static member ModList = modList
         static member RegisterMod id obj = modList.Add(id, obj)
@@ -107,6 +110,10 @@ module Mods =
             applyModsToScoreData mods (mc.Force()) (notesToScoreData keys notes)
         )
         (mc, scoreData)
+
+    let getScoreData (mods: ModState) (mc: ModChart): Lazy<ScoreData> =
+        let (keys, notes, _, _, _) = mc
+        lazy (applyModsToScoreData mods mc (notesToScoreData keys notes))
 
     let getModChartWithScore (mods: ModState) (chart: Chart) (replay: string): Lazy<ModChart> * Lazy<ScoreData> =
         let mc = lazy (applyMods mods chart)
