@@ -5,7 +5,7 @@ open Prelude.Data.ScoreManager
 open Interlude.Utils
 open Interlude.UI.Components 
 
-type ScreenScore(scoreData: ScoreInfoProvider) as this =
+type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
     inherit Screen()
 
     do

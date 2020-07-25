@@ -22,7 +22,7 @@ module Gameplay =
     let mutable internal chartSaveData = None
     let mutable modifiedChart: Lazy<ModChart> = lazy ( failwith "tried to access modified chart when none is selected" )
     let mutable coloredChart: Lazy<ColorizedChart> = lazy ( failwith "tried to access colored chart when none is selected" )
-    let mutable replayData: Lazy<ScoreData> = lazy ( null )
+    let mutable private replayData: Lazy<ScoreData> = lazy ( null )
     let mutable difficultyRating = None
 
     let mutable rate = 1.0f
@@ -66,6 +66,23 @@ module Gameplay =
     let getModString() = 
         String.Join(", ", sprintf "%.2fx" rate :: (selectedMods.Enumerate() |> List.map (ModState.GetModName)))
 
+    let createScoreData() = 
+        let r = replayData.Force()
+        replayData <- getScoreData(selectedMods)(modifiedChart.Force())
+        r
+
+    let makeScore(scoreData, keys) : Score =
+        {   
+            time = DateTime.Now
+            hitdata = compressScoreData scoreData
+            player = Options.profile.Name.Get()
+            playerUUID = Options.profile.UUID
+            rate = rate
+            selectedMods = selectedMods.Data
+            layout = Options.profile.Playstyles.[keys - 2]
+            keycount = keys } : Score
+        
+
     let setScore(data: ScoreInfoProvider) =
         let d = chartSaveData.Value
         if
@@ -75,6 +92,7 @@ module Gameplay =
         then
             //add to score db
             d.Scores.Add(data.Score)
+            scores.Save()
             //update top scores
             Options.profile.Stats.TopPhysical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical)(Options.profile.Stats.TopPhysical.Get()))
             Options.profile.Stats.TopTechnical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Technical)(Options.profile.Stats.TopTechnical.Get()))

@@ -188,8 +188,8 @@ type ScreenContainer() as this =
         | None -> exit <- true
         | Some s ->
             current.OnExit(s)
-            s.OnEnter(current)
             current <- s
+            s.OnEnter(previous.Value)
 
     override this.Update(elapsedTime, bounds) =
         Screens.parallaxX.SetTarget(Mouse.X() / Render.vwidth)

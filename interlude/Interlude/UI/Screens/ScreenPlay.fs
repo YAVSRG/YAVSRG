@@ -3,9 +3,10 @@
 open OpenTK
 open System
 open Prelude.Common
-open Prelude.Data.Themes
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
+open Prelude.Data.Themes
+open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.UI.Animation
 open Interlude.Render
@@ -262,7 +263,7 @@ type ScreenPlay() as this =
     inherit Screen()
     
     let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
-    let scoreData = Gameplay.replayData.Force()
+    let scoreData = Gameplay.createScoreData()
     let scoring = createAccuracyMetric(SCPlus 4)
     let hp = createHPMetric(VG)(scoring)
     let onHit = new Event<HitEvent>()
@@ -401,6 +402,15 @@ type ScreenPlay() as this =
         //todo: handle in all watchers
         scoring.Update(now - missWindow)(scoreData)(true)
         hp.Update(now - missWindow)(scoreData)(true)
+        if noteSeek = notes.Count then
+            noteSeek <- noteSeek + 1 //hack to prevent running this code twice
+            let sd =
+                (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value)
+                |> ScoreInfoProvider
+            (sd, Gameplay.setScore(sd))
+            |> ScreenScore
+            |> Screens.addScreen
+        else ()
 
     override this.Draw() =
         base.Draw()
