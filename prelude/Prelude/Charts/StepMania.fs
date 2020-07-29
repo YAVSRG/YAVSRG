@@ -139,9 +139,9 @@ module StepMania =
                     TIMESIGNATURES = []
                     Charts = [] }
 
-    let private parsePairs = sepBy (pfloat .>> pchar '=' .>>. pfloat) (pchar ',')
+    let private parsePairs = (sepBy (pfloat .>> pchar '=' .>>. pfloat .>> spaces) (pchar ',') .>> eof)
     let private parseMeasure = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
-    let parseMeasures = (optional (spaces >>. comment .>> spaces)) >>. (sepBy parseMeasure (pchar ',' .>> spaces .>> (optional (comment .>> spaces))))
+    let parseMeasures = (optional (spaces >>. comment .>> spaces)) >>. (sepBy parseMeasure (pchar ',' .>> spaces .>> (optional (comment .>> spaces)))) .>> eof
     //https://github.com/etternagame/etterna/blob/master/src/Etterna/Singletons/GameManager.cpp
     let readChartType t =
         match t with

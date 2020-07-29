@@ -174,7 +174,7 @@ module ChartConversions =
         List.iteri (fun i m -> 
             totalBeats <- totalBeats + fmeter
             lo <- 0.0f<beat>
-            while (not (List.isEmpty bpms) && fst (List.head bpms) < totalBeats) do
+            while ((not (List.isEmpty bpms)) && fst (List.head bpms) < totalBeats) do
                 hi <- fst (List.head bpms) - totalBeats + fmeter
                 convert_measure m lo hi
                 now <- now + msPerBeat * (hi - lo)

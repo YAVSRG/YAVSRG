@@ -4,6 +4,7 @@ open System;
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
+open System.Drawing
 
 (*
     Representation of hand/keyboard layouts.
@@ -228,22 +229,38 @@ module Difficulty =
         let phi x =
             let y = x / 1.414213562
             Math.Max(0.0, Math.Min((0.5 + Math.Pow(Math.PI, -0.5) * (y - Math.Pow(y, 3.0) / 3.0 + Math.Pow(y, 5.0)/ 10.0 - Math.Pow(y, 7.0) / 42.0 + Math.Pow(y, 9.0)/ 216.0)), 1.0))
-        phi((17.95 - Math.Max(2.0, System.Math.Abs(delta))) / 15.0)
+        phi((17.95 - Math.Max(2.0, Math.Abs(delta))) / 15.0)
 
-    let performanceFunc b value deviation delta =
+    let private performanceFunc b value deviation delta =
         staminaFunc b (value * confidenceValue deviation) delta
+
+    let technicalColor(v) =
+        try
+            let a = Math.Min(1.0, v * 0.1)
+            let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
+            Color.FromArgb(255.0 * (1.0 - a) |> int, 255.0 * b |> int, 255.0 * a |> int)
+        with
+        | _ -> Color.Blue
+
+    let physicalColor(v) =
+        try
+            let a = Math.Min(1.0, v * 0.1)
+            let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
+            Color.FromArgb(255.0 * a |> int, 255.0 * (1.0 - a) |> int, 255.0 * b |> int)
+        with
+        | _ -> Color.Red
 
     type PerformanceMetricState = Time * float * float array * float * float array
     let performanceMetric (rr : RatingReport) (keys: int) =
         ScoreMetric<PerformanceMetricState>(
             "Interlude",
             (0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
-            (fun (time, dev, hit) i (lastTime, p, ps, t, ts) _ ->
+            (fun (time, deltas, hit) i (lastTime, p, ps, t, ts) _ ->
                 let mutable v = 0.0
                 let mutable c = 0.0
                 for k = 0 to (keys - 1) do
                     if hit.[k] = HitStatus.Hit then
-                        ps.[k] <- performanceFunc (ps.[k]) (rr.PhysicalComposite.[i, k]) (dev.[k]) (time - lastTime)
+                        ps.[k] <- performanceFunc (ps.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTime)
                         c <- c + 1.0
                         v <- v + ps.[k]
                 (time, p * Math.Exp(0.01 * Math.Max(0.0, Math.Log(v/c/p))), ps, t, ts)
