@@ -164,7 +164,7 @@ module Render =
     let init(width, height) =
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
-        GL.ClearColor(Color.Black)
+        GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.ClearStencil(0x00)
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
@@ -184,7 +184,8 @@ module FBO =
         with
             member this.Bind() =
                 if List.isEmpty stack then
-                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
+                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0)
+                    GL.Translate(0.0f, -Render.vheight, 0.0f)
                     GL.Viewport(0, 0, int Render.vwidth, int Render.vheight)
                 GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, this.fbo_id)
                 stack <- this.fbo_id :: stack
@@ -192,11 +193,12 @@ module FBO =
                 stack <- List.tail stack
                 if List.isEmpty stack then
                     GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
-                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0)
+                    GL.Translate(0.0f, Render.vheight, 0.0f)
+                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
                     GL.Viewport(0, 0, Render.rwidth, Render.rheight)
                 else
                     GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, List.head stack)
-            interface IDisposable with member this.Dispose() = in_use.[this.fbo_index] <- false
+            member this.Dispose() = in_use.[this.fbo_index] <- false
 
     let init() =
         for i in 0 .. (pool_size - 1) do
@@ -227,7 +229,7 @@ module FBO =
         { 0 .. (pool_size - 1) }
         |> Seq.tryFind (fun i -> not in_use.[i])
         |> function
-            | None -> failwith "All FBOs in pool are in use. Change pool size or (far more likely) make sure you dispose of your FBOs"
+            | None -> failwith "All FBOs in pool are in use. Change pool size or (more likely) make sure you dispose of your FBOs"
             | Some i ->
                 let sprite: Sprite = { ID = texture_ids.[i]; Width = int Render.vwidth; Height = int Render.vheight; Rows = 1; Columns = 1 }
                 in_use.[i] <- true;

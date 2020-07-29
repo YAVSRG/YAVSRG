@@ -302,8 +302,9 @@ type ScreenPlay() as this =
             //Screens.addDialog(new GameStartDialog())
 
     override this.OnExit(next) =
-        Screens.setToolbarCollapsed(false)
         Screens.backgroundDim.SetTarget(0.7f)
+        if (next :? ScreenScore) then () else
+            Screens.setToolbarCollapsed(false)
 
     member private this.Hit(i, k, delta, bad, now) =
         let _, deltas, status = scoreData.[i]
@@ -411,11 +412,3 @@ type ScreenPlay() as this =
             |> ScreenScore
             |> Screens.addScreen
         else ()
-
-    override this.Draw() =
-        base.Draw()
-        let (judgements, pts, maxpts, combo, maxcombo, cbs) = scoring.State
-        Text.draw(Themes.font(), combo.ToString(), 30.0f, 10.0f, 70.0f, Color.White)
-        Text.draw(Themes.font(), maxcombo.ToString(), 30.0f, 10.0f, 100.0f, Color.White)
-        for i in 1..(judgements.Length - 1) do
-            Text.draw(Themes.font(), ((enum i): JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 130.0f + 30.0f * float32 i, Color.White)

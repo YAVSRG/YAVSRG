@@ -4,6 +4,7 @@ open System
 open Prelude.Common
 open Prelude.Data.ScoreManager
 open Prelude.Data.ChartManager
+open Prelude.Gameplay.Score
 open Interlude.Themes
 open Interlude.Utils
 open Interlude.Render
@@ -44,6 +45,7 @@ module ScreenLevelSelect =
             this.Add(
                 new TextBox(K data.Mods, K Color.White, 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+            this.Add(new Clickable((fun () -> Screens.addScreen(new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)))), ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
         override this.Draw() =

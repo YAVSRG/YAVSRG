@@ -104,25 +104,25 @@ module Components =
             lock(this)
                 (fun () ->
                     contentSize <-
-                        this.Children
+                        (this.Children
                         |> Seq.filter (fun c -> c.State &&& WidgetState.Disabled < WidgetState.Disabled)
                         |> Seq.fold (fun (x, y) w ->
                             let (l, t, r, b) = w.Position
                             let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
                             let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
                             let x = x + cwidth + spacingX
-                            let x, y = if x > width then cwidth, y + cheight + spacingY else x, y
+                            let x, y = if x > width then cwidth + spacingX, y + cheight + spacingY else x, y
                             pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
                             pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
                             (x + spacingY, y)
                             ) (0.0f, -scrollPos)
-                        |> snd)
+                        |> snd) + scrollPos)
 
         override this.Update(time, bounds) =
             if (this.Initialised) then
-                this.FlowContent(false)
+                this.FlowContent(false) 
                 base.Update(time, bounds)
-                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, contentSize))
+                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, contentSize - Rect.height this.Bounds))
             else
                 //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
                 base.Update(time, bounds)
