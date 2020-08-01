@@ -150,7 +150,7 @@ module Difficulty =
     let private staminaFunc value input delta =
         let staminaBaseFunc(ratio) = 1.0 + 0.105 * ratio
         let staminaDecayFunc(delta) = Math.Exp(-0.00045 * delta)
-        let v = Math.Max(value * staminaDecayFunc(float delta), 0.001)
+        let v = Math.Max(value * staminaDecayFunc(float delta), 0.01)
         v * staminaBaseFunc(input/v)
    
     let private overallDifficulty arr =
@@ -190,6 +190,7 @@ module Difficulty =
             physicalComposite.[index, column] <- Math.Pow(trill.[index,column] + jack.[index, column], 1.0 / OHTNERF)
 
         let snapDifficulty (strain : float array) mask =
+            //todo: optimise
             let mutable vals = []
             for k in getBits mask do
                 vals <- strain.[k] :: vals
@@ -250,20 +251,22 @@ module Difficulty =
         with
         | _ -> Color.Red
 
-    type PerformanceMetricState = Time * float * float array * float * float array
+    type PerformanceMetricState = Time array * float * float array * float * float array
     let performanceMetric (rr : RatingReport) (keys: int) =
         ScoreMetric<PerformanceMetricState>(
             "Interlude",
-            (0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
-            (fun (time, deltas, hit) i (lastTime, p, ps, t, ts) _ ->
+            (Array.create keys 0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
+            (fun (time, deltas, hit) i (lastTimes, p, ps, t, ts) _ ->
                 let mutable v = 0.0
                 let mutable c = 0.0
                 for k = 0 to (keys - 1) do
                     if hit.[k] = HitStatus.Hit then
-                        ps.[k] <- performanceFunc (ps.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTime)
+                        ps.[k] <- performanceFunc (ps.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
+                        lastTimes.[k] <- time
                         c <- c + 1.0
                         v <- v + ps.[k]
-                (time, p * Math.Exp(0.01 * Math.Max(0.0, Math.Log(v/c/p))), ps, t, ts)
+                let snapRating = if c = 0.0 then 0.0 else v / c
+                (lastTimes, p * Math.Exp(0.01 * Math.Max(0.0, Math.Log(snapRating / p))), ps, t, ts)
             ),
             (fun x y -> id),
             fun (_, p, ps, t, ts) -> Math.Pow(p, 0.6) * 2.5)
