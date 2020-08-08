@@ -42,48 +42,44 @@ module Mods =
         //This typically is unused - examples uses are marking all notes as hit perfectly in Autoplay or marking LN releases as not needing to be hit
         member this.ApplyHitData = apply_score
 
-    //todo: just make non oop operations on Dictionary<string, int>
-    type ModState(mods : Dictionary<string, int>) =
-        static let modList = new Dictionary<string, Mod>();
-    
-        new() = ModState(new Dictionary<string, int> ())
+    type ModState = Dictionary<string, int>
 
-        member this.EnableMod id state = 
+    module ModState =
+        let modList = new Dictionary<string, Mod>()
+
+        let getModName id = Localisation.localise ("mod." + id + ".name")
+        let getModDesc id = Localisation.localise ("mod." + id + ".desc")
+
+        let registerMod id obj = modList.Add(id, obj)
+
+        let enable id state (mods: ModState) =
             if (modList.ContainsKey(id)) then
                 if modList.[id].MaxState >= state then
                     mods.[id] <- state
                 else failwith ("tried to assign an invalid state to " + string id + ": " + string state)
             else failwith ("tried to enable a mod that does not exist: " + string id)
 
-        member this.DisableMod id = mods.Remove(id)
+        let disable id (mods: ModState) =
+            mods.Remove(id)
 
-        member this.Enumerate() = mods.Keys |> List.ofSeq
+        let enumerate (mods: ModState) = mods.Keys :> string seq
 
-        member this.IterApplicable chart =
-            seq {
-                for id in mods.Keys do
-                    if modList.[id].CheckApplicable (mods.[id]) chart then yield (id, modList.[id], mods.[id])
-                }
-
-        member this.Data = mods
-
-        static member ModList = modList
-        static member RegisterMod id obj = modList.Add(id, obj)
-        static member GetModName id = Localisation.localise ("mod." + id + ".name")
-        static member GetModDesc id = Localisation.localise ("mod." + id + ".desc")
+        let enumerateApplicable chart (mods: ModState) =
+            enumerate mods
+            |>  Seq.choose (fun id -> if modList.[id].CheckApplicable(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
 
     let private auto _ _ hitData =
         for (t, delta, hit) in hitData do
             for i = 0 to (Array.length hit - 1) do
                 if hit.[i] = HitStatus.NotHit then hit.[i] <- HitStatus.Hit
 
-    ModState.RegisterMod "auto"
+    ModState.registerMod "auto"
         (Mod(ModStatus.Unstored, 0, (fun _ _ -> true), (fun _ _ -> ()), auto))
 
-    ModState.RegisterMod "mirror"
+    ModState.registerMod "mirror"
         (Mod(ModStatus.Ranked, 0, (fun _ _ -> true), (fun _ (keys, notes, _, _, _) -> mirror (-infinityf * 1.0f<ms>) (infinityf * 1.0f<ms>) keys notes |> ignore), (fun _ _ _ -> ())))
 
-    ModState.RegisterMod "nosv"
+    ModState.registerMod "nosv"
         (Mod(ModStatus.Ranked, 0, (fun _ (_, _, _, sv, _) -> not <| sv.IsEmpty()), (fun _ (_, _, _, sv, _) -> sv.Clear()), (fun _ _ _ -> ())))
 
     (*
@@ -92,14 +88,14 @@ module Mods =
 
     let private applyMods (mods: ModState) (chart: Chart): ModChart =
         let mutable modChart = (chart.Keys, TimeData(chart.Notes), TimeData(chart.BPM), chart.SV.Clone(), []): ModChart
-        for (name, m, c) in mods.IterApplicable modChart do
+        for (name, m, c) in mods |> ModState.enumerateApplicable modChart do
             m.ApplyChart c modChart
             let (keys, notes, bpm, sv, m) = modChart in
                 modChart <- (keys, notes, bpm, sv, m @ [name])
         modChart
 
     let private applyModsToScoreData (mods: ModState) (modChart: ModChart) (scoreData: ScoreData) =
-        for (name, m, c) in mods.IterApplicable modChart do
+        for (name, m, c) in mods |> ModState.enumerateApplicable modChart do
             m.ApplyHitData c modChart scoreData
         scoreData
 
