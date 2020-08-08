@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI
 
+open System
 open OpenTK
 open Interlude
 open Interlude.Render
@@ -102,7 +103,7 @@ type Toolbar() as this =
 
     static let height = 70.f
 
-    let barSlider = new AnimationFade(0.0f)
+    let barSlider = new AnimationFade(1.0f)
     let notifSlider = new AnimationFade(0.0f)
 
     let mutable userCollapse = false
@@ -119,7 +120,7 @@ type Toolbar() as this =
         this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Jukebox())
 
-        Screens.setToolbarCollapsed <- (fun b -> forceCollapse <- b; barSlider.SetTarget(if userCollapse || forceCollapse then 0.0f else 1.0f))
+        Screens.setToolbarCollapsed <- (fun b -> forceCollapse <- b)
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
@@ -136,24 +137,24 @@ type Toolbar() as this =
     override this.Update(elapsed, bounds) =
         if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped(false) then
             userCollapse <- not userCollapse
-            barSlider.SetTarget(if userCollapse || forceCollapse then 0.0f else 1.0f)
-        base.Update(elapsed, Rect.expand (0.f, -height * barSlider.Value) bounds)
+            barSlider.SetTarget(if userCollapse then 0.0f else 1.0f)
+        base.Update(elapsed, Rect.expand (0.f, -height * if forceCollapse then 0.0f else barSlider.Value) bounds)
 
 //Screen manager
 
 type ScreenContainer() as this =
     inherit Widget()
 
+    let transitionTime = 500.0
     let dialogs = new ResizeArray<Dialog>()
-    let mutable previous = None
+    let screenTransition = new AnimationSequence()
+    let t1 = new AnimationTimer(transitionTime)
+    let t2 = new AnimationTimer(transitionTime)
     let mutable current = new ScreenLoading() :> Screen
     let mutable screens = [current]
     let mutable exit = false
 
     let toolbar = new Toolbar()
-
-    let parallaxX = new AnimationFade(0.0f)
-    let parallaxY = new AnimationFade(0.0f)
 
     do
         Screens.addScreen <- this.AddScreen
@@ -161,6 +162,7 @@ type ScreenContainer() as this =
         Screens.addDialog <- this.AddDialog
         this.Add(toolbar)
         this.Add(Screens.logo |> Components.positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f))
+        this.Animation.Add(screenTransition)
         this.Animation.Add(Screens.accentColor)
         this.Animation.Add(Screens.parallaxZ)
         this.Animation.Add(Screens.parallaxX)
@@ -174,22 +176,49 @@ type ScreenContainer() as this =
         dialogs.Add(d)
 
     member this.AddScreen(s: Screen) =
-        screens <- s :: screens
-        current.OnExit(s)
-        s.OnEnter(current)
-        previous <- Some current
-        current <- s
+        if screenTransition.Complete() then
+            this.Animation.Add(screenTransition)
+        screenTransition.Add(t1)
+        screenTransition.Add(
+            new AnimationAction(
+                fun () ->
+                    screens <- s :: screens
+                    current.OnExit(s)
+                    s.OnEnter(current)
+                    current <- s
+        ))
+        screenTransition.Add(t2)
+        screenTransition.Add(
+            new AnimationAction(
+                fun () ->
+                    t1.Reset()
+                    t2.Reset()
+            ))
 
     member this.RemoveScreen() =
-        current.Dispose()
-        previous <- Some current
-        screens <- List.tail screens
-        match List.tryHead screens with
-        | None -> exit <- true
-        | Some s ->
-            current.OnExit(s)
-            current <- s
-            s.OnEnter(previous.Value)
+        if screenTransition.Complete() then
+            this.Animation.Add(screenTransition)
+        screenTransition.Add(t1)
+        screenTransition.Add(
+            new AnimationAction(
+                fun () ->
+                    current.Dispose()
+                    let previous = current
+                    screens <- List.tail screens
+                    match List.tryHead screens with
+                    | None -> exit <- true
+                    | Some s ->
+                        current.OnExit(s)
+                        current <- s
+                        s.OnEnter(previous)
+        ))
+        screenTransition.Add(t2)
+        screenTransition.Add(
+            new AnimationAction(
+                fun () ->
+                    t1.Reset()
+                    t2.Reset()
+            ))
 
     override this.Update(elapsedTime, bounds) =
         Screens.parallaxX.SetTarget(Mouse.X() / Render.vwidth)
@@ -212,3 +241,23 @@ type ScreenContainer() as this =
         for d in dialogs do
             d.Draw()
         base.Draw()
+        if not <| screenTransition.Complete() then
+            let amount = Math.Clamp((if t1.Elapsed < transitionTime then t1.Elapsed / transitionTime else (transitionTime - t2.Elapsed) / transitionTime), 0.0, 1.0) |> float32
+
+            let s = 150.0f
+
+            let size x =
+                let f = Math.Clamp(((if t1.Elapsed < transitionTime then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / ((4.0f * s) / Render.vwidth), 0.0f, 1.0f)
+                if t1.Elapsed < transitionTime then f * s * 0.5f else (1.0f - f) * s * 0.5f
+            let diamond x y =
+                let r = size x
+                Draw.quad(Quad.create <| new Vector2(x - r, y) <| new Vector2(x, y - r) <| new Vector2(x + r, y) <| new Vector2(x, y + r))(Quad.colorOf Color.Transparent)(Sprite.DefaultQuad)
+                
+            Stencil.create(false)
+            for x in 0 .. (Render.vwidth / s |> float |> Math.Ceiling |> int) do
+                for y in 0 .. (Render.vheight / s |> float |> Math.Ceiling |> int) do
+                    diamond (s * float32 x) (s * float32 y)
+                    diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
+            Stencil.draw()
+            Screens.drawBackground(this.Bounds, Screens.accentShade(255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+            Stencil.finish()
