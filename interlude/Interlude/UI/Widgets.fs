@@ -237,9 +237,14 @@ type Dialog() as this =
 // - Stuff is then referenced by screen logic
 // - Overall screen manager references screen logic AND initialises values, connecting the loop
 
+type ScreenTransitionFlag =
+| Default = 0
+| UnderLogo = 1
+| NoBacktrack = 2
+
 module Screens =
-    let mutable internal addScreen: Screen -> unit = ignore
-    let mutable internal popScreen: unit -> unit = ignore
+    let mutable internal addScreen: (unit -> Screen) * ScreenTransitionFlag -> unit = ignore
+    let mutable internal popScreen: ScreenTransitionFlag -> unit = ignore
     let mutable internal addDialog: Dialog -> unit = ignore
 
     let mutable internal setToolbarCollapsed: bool -> unit = ignore

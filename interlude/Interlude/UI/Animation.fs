@@ -56,9 +56,13 @@ module Animation =
     type AnimationTimer(milliseconds) =
         inherit Animation()
         let mutable elapsed = 0.0
+        let mutable milliseconds = milliseconds
+        let mutable frameskip = false
         member this.Elapsed = elapsed
+        member this.FrameSkip() = frameskip <- true
+        member this.ChangeLength(ms) = milliseconds <- ms
         override this.Complete() = elapsed >= milliseconds
-        override this.Update(elapsedMillis) = elapsed <- elapsed + elapsedMillis
+        override this.Update(elapsedMillis) = if frameskip then frameskip <- false else elapsed <- elapsed + elapsedMillis
         override this.Reset() = elapsed <- 0.0
 
     //Animation lasts forever and counts how many of the given time interval have passed

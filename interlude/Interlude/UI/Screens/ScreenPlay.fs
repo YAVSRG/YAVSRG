@@ -290,16 +290,13 @@ type ScreenPlay() as this =
         //todo: rest of widgets
 
     override this.OnEnter(prev) =
-        if (prev :? ScreenScore) then
-            Screens.popScreen()
-        else
-            Screens.backgroundDim.SetTarget(Options.profile.BackgroundDim.Get() |> float32)
-            //discord presence
-            Screens.setToolbarCollapsed(true)
-            //disable cursor
-            Audio.changeRate(Gameplay.rate)
-            Audio.playLeadIn()
-            //Screens.addDialog(new GameStartDialog())
+        Screens.backgroundDim.SetTarget(Options.profile.BackgroundDim.Get() |> float32)
+        //discord presence
+        Screens.setToolbarCollapsed(true)
+        //disable cursor
+        Audio.changeRate(Gameplay.rate)
+        Audio.playLeadIn()
+        //Screens.addDialog(new GameStartDialog())
 
     override this.OnExit(next) =
         Screens.backgroundDim.SetTarget(0.7f)
@@ -405,10 +402,12 @@ type ScreenPlay() as this =
         hp.Update(now - missWindow)(scoreData)(true)
         if noteSeek = notes.Count then
             noteSeek <- noteSeek + 1 //hack to prevent running this code twice
-            let sd =
-                (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value)
-                |> ScoreInfoProvider
-            (sd, Gameplay.setScore(sd))
-            |> ScreenScore
+            ((fun () ->
+                let sd =
+                    (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value)
+                    |> ScoreInfoProvider
+                (sd, Gameplay.setScore(sd))
+                |> ScreenScore
+                :> Screen), ScreenTransitionFlag.NoBacktrack)
             |> Screens.addScreen
         else ()

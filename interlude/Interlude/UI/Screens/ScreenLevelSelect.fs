@@ -32,6 +32,9 @@ module ScreenLevelSelect =
     let mutable expandedGroup = ""
     let mutable scrollBy = fun amt -> ()
 
+    let playCurrentChart() =
+        Screens.addScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenTransitionFlag.Default)
+
     type ScoreCard(data: ScoreInfoProvider) as this =
         inherit Widget()
 
@@ -45,7 +48,14 @@ module ScreenLevelSelect =
             this.Add(
                 new TextBox(K data.Mods, K Color.White, 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
-            this.Add(new Clickable((fun () -> Screens.addScreen(new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)))), ignore))
+            this.Add(
+                new Clickable(
+                    (fun () ->
+                        Screens.addScreen(
+                            (fun () ->
+                                new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen),
+                            ScreenTransitionFlag.Default)),
+                    ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
         override this.Draw() =
@@ -131,7 +141,7 @@ module ScreenLevelSelect =
                             match cache.LoadChart(cc) with
                             | Some c ->
                                 if selectedChart = cc.Hash then
-                                    Screens.addScreen(new ScreenPlay())
+                                    playCurrentChart()
                                 else
                                     changeChart(cc, c)
                                     selectedChart <- cc.Hash
@@ -260,7 +270,7 @@ type ScreenLevelSelect() as this =
         scrollPos.SetTarget(Math.Min(Math.Max(scrollPos.Target + float32 (Mouse.Scroll()) * 100.0f, -height + 600.0f), 300.0f))
         if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
         if Options.options.Hotkeys.Select.Get().Tapped(false) then
-            Screens.addScreen(new ScreenPlay())
+            playCurrentChart()
         elif Options.options.Hotkeys.UpRateSmall.Get().Tapped(false) then
             changeRate(0.01f)
         elif Options.options.Hotkeys.UpRateHalf.Get().Tapped(false) then

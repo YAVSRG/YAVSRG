@@ -64,7 +64,7 @@ module Gameplay =
         onChartChange()
 
     let getModString() = 
-        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods.Enumerate() |> List.map (ModState.GetModName)))
+        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))
 
     let createScoreData() = 
         let r = replayData.Force()
@@ -78,7 +78,7 @@ module Gameplay =
             player = Options.profile.Name.Get()
             playerUUID = Options.profile.UUID
             rate = rate
-            selectedMods = selectedMods.Data
+            selectedMods = selectedMods
             layout = Options.profile.Playstyles.[keys - 2]
             keycount = keys } : Score
         
