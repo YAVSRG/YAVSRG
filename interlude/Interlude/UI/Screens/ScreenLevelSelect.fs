@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System
+open System.Linq
 open Prelude.Common
 open Prelude.Data.ScoreManager
 open Prelude.Data.ChartManager
@@ -18,12 +19,8 @@ open OpenTK
 module ScreenLevelSelect =
 
     //TODO LIST
-    //  AUTO SELECT CHART IF THERE IS ONLY ONE RESULT
-    //  HOLD RIGHT CLICK TO FAST SCROLL
     //  MAKE IT LOOK NICE
     //    SHOW PBS (LAMP, ACCURACY, GRADE)
-    //  SCROLL UP WHEN COLLAPSING GROUPS
-    //  NAVIGATION WITH ARROW KEYS
 
     let mutable refresh = false
     let mutable selectedGroup = ""
@@ -31,6 +28,23 @@ module ScreenLevelSelect =
     let mutable scrollTo = false
     let mutable expandedGroup = ""
     let mutable scrollBy = fun amt -> ()
+
+    type Navigation = 
+    | Nothing
+    | Backward of string * CachedChart
+    | Forward of bool
+
+    let mutable navigation = Nothing
+
+    let switchCurrentChart(cc, groupName) =
+        match cache.LoadChart(cc) with
+        | Some c ->
+            changeChart(cc, c)
+            selectedChart <- cc.Hash
+            expandedGroup <- groupName
+            selectedGroup <- groupName
+            scrollTo <- true
+        | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
 
     let playCurrentChart() =
         Screens.addScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenTransitionFlag.Default)
@@ -97,7 +111,7 @@ module ScreenLevelSelect =
             else
                 match content with
                 | Choice1Of2 (groupName, cc) ->
-                    if (top > 150.0f) then
+                    if (top > 70.0f) then
                         let bounds = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 75.0f)
                         let struct (left, _, right, bottom) = bounds
                         Draw.rect(bounds)(Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
@@ -117,7 +131,7 @@ module ScreenLevelSelect =
                         Draw.rect(Rect.sliceBottom(5.0f)(border))(borderColor)Sprite.Default
                     top + 90.0f
                 | Choice2Of2 (name, items) ->
-                    if (top > 170.0f) then
+                    if (top > 90.0f) then
                         let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + 65.0f)
                         let struct (left, _, right, bottom) = bounds
                         Draw.rect(bounds)(if selectedGroup = name then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
@@ -128,6 +142,7 @@ module ScreenLevelSelect =
                         top + 70.0f
 
         member this.Update(top: float32, elapsedTime): float32 =
+            this.Navigate()
             match content with
             | Choice1Of2 (groupName, cc) ->
                 if scrollTo && groupName = selectedGroup && cc.Hash = selectedChart then
@@ -138,23 +153,21 @@ module ScreenLevelSelect =
                     if Mouse.Hover(bounds) then 
                         hover.SetTarget(1.0f)
                         if Mouse.Click(Input.MouseButton.Left) then
-                            match cache.LoadChart(cc) with
-                            | Some c ->
-                                if selectedChart = cc.Hash then
-                                    playCurrentChart()
-                                else
-                                    changeChart(cc, c)
-                                    selectedChart <- cc.Hash
-                                    selectedGroup <- groupName
-                                    scrollTo <- true
-                            | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
+                            if selectedChart = cc.Hash then
+                                playCurrentChart()
+                            else
+                                switchCurrentChart(cc, groupName)
                         elif Mouse.Click(Input.MouseButton.Right) then
                             expandedGroup <- ""
+                            scrollTo <- true
                     else
                         hover.SetTarget(0.0f)
                     animation.Update(elapsedTime)
                 top + 90.0f
             | Choice2Of2 (name, items) ->
+                if scrollTo && name = selectedGroup && name <> expandedGroup then
+                    scrollBy(-top + 500.0f)
+                    scrollTo <- false
                 if (top > 170.0f) then
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.9f) (top + 65.0f)
                     if Mouse.Hover(bounds) then 
@@ -167,7 +180,24 @@ module ScreenLevelSelect =
                 if expandedGroup = name then
                     List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) (top + 90.0f) items
                 else
+                    List.iter (fun (i: SelectableItem) -> i.Navigate()) items
                     top + 70.0f
+
+            member this.Navigate() =
+                match content with
+                | Choice1Of2 (groupName, cc) ->
+                    match navigation with
+                    | Nothing -> ()
+                    | Forward b ->
+                        if b then
+                            switchCurrentChart(cc, groupName); navigation <- Nothing
+                        elif groupName = selectedGroup && cc.Hash = selectedChart then
+                            navigation <- Forward true
+                    | Backward (groupName2, cc2) ->
+                        if groupName = selectedGroup && cc.Hash = selectedChart then
+                            switchCurrentChart(cc2, groupName2); navigation <- Nothing
+                        else navigation <- Backward(groupName, cc)
+                | _ -> () //nyi
 
     let private firstCharacter(s : string) =
         if (s.Length = 0) then "?"
@@ -199,6 +229,7 @@ type ScreenLevelSelect() as this =
     inherit Screen()
 
     let mutable selection: SelectableItem list = []
+    let mutable lastItem: (string * CachedChart) option = None
     let scrollPos = new AnimationFade(300.0f)
     let searchText = new Setting<string>("")
     let searchTimer = System.Diagnostics.Stopwatch()
@@ -206,6 +237,15 @@ type ScreenLevelSelect() as this =
 
     let refresh() =
         let groups = cache.GetGroups groupBy.[Options.profile.ChartGroupMode.Get()] sortBy.[Options.profile.ChartSortMode.Get()] <| searchText.Get()
+        if groups.Count = 1 then
+            let g = groups.Keys.First()
+            if groups.[g].Count = 1 then
+                let cc = groups.[g].[0]
+                match cache.LoadChart(cc) with
+                | Some c ->
+                    changeChart(cc, c)
+                | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
+        lastItem <- None
         selection <- 
             groups.Keys
             |> Seq.sort
@@ -216,6 +256,7 @@ type ScreenLevelSelect() as this =
                         match currentCachedChart with
                         | None -> ()
                         | Some c -> if c.Hash = cc.Hash then selectedChart <- c.Hash; selectedGroup <- k
+                        lastItem <- Some (k, cc)
                         SelectableItem(Choice1Of2 (k, cc)))
                     |> List.ofSeq
                     |> fun l -> SelectableItem(Choice2Of2 (k, l)))
@@ -262,27 +303,30 @@ type ScreenLevelSelect() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        let bottom =
-            selection
-            |> List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) scrollPos.Value
-        //right click scroll logic
-        let height = bottom - scrollPos.Value - 320.0f
-        scrollPos.SetTarget(Math.Min(Math.Max(scrollPos.Target + float32 (Mouse.Scroll()) * 100.0f, -height + 600.0f), 300.0f))
-        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
         if Options.options.Hotkeys.Select.Get().Tapped(false) then
             playCurrentChart()
-        elif Options.options.Hotkeys.UpRateSmall.Get().Tapped(false) then
-            changeRate(0.01f)
-        elif Options.options.Hotkeys.UpRateHalf.Get().Tapped(false) then
-            changeRate(0.05f)
-        elif Options.options.Hotkeys.UpRate.Get().Tapped(false) then
-            changeRate(0.1f)
-        elif Options.options.Hotkeys.DownRateSmall.Get().Tapped(false) then
-            changeRate(-0.01f)
-        elif Options.options.Hotkeys.DownRateHalf.Get().Tapped(false) then
-            changeRate(-0.05f)
-        elif Options.options.Hotkeys.DownRate.Get().Tapped(false) then
-            changeRate(-0.1f)
+        elif Options.options.Hotkeys.UpRateSmall.Get().Tapped(false) then changeRate(0.01f)
+        elif Options.options.Hotkeys.UpRateHalf.Get().Tapped(false) then changeRate(0.05f)
+        elif Options.options.Hotkeys.UpRate.Get().Tapped(false) then changeRate(0.1f)
+        elif Options.options.Hotkeys.DownRateSmall.Get().Tapped(false) then changeRate(-0.01f)
+        elif Options.options.Hotkeys.DownRateHalf.Get().Tapped(false) then changeRate(-0.05f)
+        elif Options.options.Hotkeys.DownRate.Get().Tapped(false) then changeRate(-0.1f)
+        elif Options.options.Hotkeys.Next.Get().Tapped(false) then
+            if lastItem.IsSome then
+                let h = (lastItem.Value |> snd).Hash
+                navigation <- Navigation.Forward(selectedGroup = fst lastItem.Value && selectedChart = h)
+        elif Options.options.Hotkeys.Previous.Get().Tapped(false) then
+            if lastItem.IsSome then
+                navigation <- Navigation.Backward(lastItem.Value)
+        let struct (left, top, right, bottom)  = this.Bounds
+        let bottomEdge =
+            selection
+            |> List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) scrollPos.Value
+        let height = bottomEdge - scrollPos.Value - 320.0f
+        if Mouse.pressed(Input.MouseButton.Right) then
+            scrollPos.SetTarget(-(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height)
+        scrollPos.SetTarget(Math.Min(Math.Max(scrollPos.Target + float32 (Mouse.Scroll()) * 100.0f, -height + 600.0f), 300.0f))
+        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
             
 
     override this.Draw() =
@@ -291,12 +335,13 @@ type ScreenLevelSelect() as this =
         Stencil.create(false)
         Draw.rect(Rect.create 0.0f (top + 170.0f) Render.vwidth bottom)(Color.Transparent)(Sprite.Default)
         Stencil.draw()
-        let bottom =
+        let bottomEdge =
             selection
             |> List.fold (fun t (i: SelectableItem) -> i.Draw(t)) scrollPos.Value
         Stencil.finish()
-        let scrollPos = (scrollPos.Value / (scrollPos.Value - bottom)) * (Render.vheight - 320.0f)
-        Draw.rect(Rect.create (Render.vwidth - 10.0f) (240.0f + scrollPos) (Render.vwidth - 5.0f) (260.0f + scrollPos))(Color.White)(Sprite.Default)
+        //todo: make this render right, is currently bugged
+        let scrollPos = (scrollPos.Value / (scrollPos.Value - bottomEdge)) * (bottom - top - 100.0f)
+        Draw.rect(Rect.create (Render.vwidth - 10.0f) (top + 225.0f + scrollPos) (Render.vwidth - 5.0f) (top + 245.0f + scrollPos))(Color.White)(Sprite.Default)
 
         Draw.rect(Rect.create left top right (top + 170.0f))(Screens.accentShade(100, 0.6f, 0.0f))(Sprite.Default)
         Draw.rect(Rect.create left (top + 170.0f) right (top + 175.0f))(Screens.accentShade(255, 0.8f, 0.0f))(Sprite.Default)
