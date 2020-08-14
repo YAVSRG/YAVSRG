@@ -75,10 +75,10 @@ module StepMania =
           METER: int
           CREDIT: string }
 
+    let private comment = optional (pstring "//" >>. restOfLine true >>. spaces)
     let private parseText = spaces >>. (manyChars (noneOf ":;" <|> (previousCharSatisfies (isAnyOf "\\") >>. anyChar)))
-    let parseKeyValue = (pchar '#') >>. parseText .>> pchar ':' .>>. (sepBy parseText (pchar ':')) .>> pchar ';' .>> spaces
-    let private comment = optional (pstring "//" >>. restOfLine true)
-    let parseHeader: Parser<Header, unit> = (many (parseKeyValue .>> comment)) .>> eof
+    let parseKeyValue = comment >>. (pchar '#') >>. parseText .>> pchar ':' .>>. (sepBy parseText (pchar ':')) .>> pchar ';' .>> spaces
+    let parseHeader: Parser<Header, unit> = many parseKeyValue .>> eof
 
     (*
         Parsing for retrieving specific useful data from the file

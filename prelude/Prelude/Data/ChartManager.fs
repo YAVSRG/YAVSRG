@@ -167,13 +167,15 @@ module ChartManager =
                     match file with
                     | ChartFile ->
                         output("Converting " + file)
-                        loadAndConvertFile file
-                        |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetFileName(path))))
-                        |> fun charts ->
-                            lock this (fun _ ->
-                            (
-                                List.iter this.CacheChart charts
-                            ))
+                        try
+                            loadAndConvertFile file
+                            |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetFileName(path))))
+                            |> fun charts ->
+                                lock this (fun _ ->
+                                (
+                                    List.iter this.CacheChart charts
+                                ))
+                        with err -> Logging.Error("Failed to load/convert file: " + file)(err.ToString())
                     | _ -> ()
                 true
 
@@ -181,7 +183,7 @@ module ChartManager =
             fun output ->
                 Directory.EnumerateDirectories(path)
                 //conversion of song folders one by one.
-                //todo: test performance of converting in parallel (would create hundreds of tasks)
+                //todo: consider testing performance of converting in parallel (would create hundreds of tasks)
                 |> Seq.iter (fun song -> (this.ConvertSongFolder song packname output |> ignore))
                 true
 
