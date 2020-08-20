@@ -28,6 +28,8 @@ module ScreenLevelSelect =
     let mutable scrollTo = false
     let mutable expandedGroup = ""
     let mutable scrollBy = fun amt -> ()
+    let mutable colorVersionGlobal = 0
+    let mutable colorFunc = fun cc -> Color.Transparent
 
     type Navigation = 
     | Nothing
@@ -99,6 +101,7 @@ module ScreenLevelSelect =
         
         let hover = new AnimationFade(0.0f)
         //todo: colors
+        let mutable colorVersion = -1
         let mutable color = Color.Transparent
         let animation = new AnimationGroup()
 
@@ -106,40 +109,39 @@ module ScreenLevelSelect =
             animation.Add(hover)
 
         member this.Draw(top: float32): float32 =
-            if top > Render.vheight then
-                top + 80.0f
-            else
-                match content with
-                | Choice1Of2 (groupName, cc) ->
-                    if (top > 70.0f) then
-                        let bounds = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 75.0f)
-                        let struct (left, _, right, bottom) = bounds
-                        Draw.rect(bounds)(Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
-                        let twidth = Math.Max(Text.measure(font(), cc.Artist + " - " + cc.Title) * 25.0f, Text.measure(font(), cc.DiffName + " // " + cc.Creator) * 20.0f + 40.0f) + 20.0f
-                        let stripeLength = twidth + (right - left) * 0.3f * hover.Value
-                        Draw.quad
-                            (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength - 40.0f, bottom) <| new Vector2(left, bottom))
-                            (Quad.colorOf <| Screens.accentShade(127, 1.0f, 0.2f))
-                            (Sprite.gridUV(0,0)Sprite.Default)
-                        Text.draw(font(), cc.Artist + " - " + cc.Title, 25.0f, left, top, Color.White)
-                        Text.draw(font(), cc.DiffName + " // " + cc.Creator, 20.0f, left, top + 40.0f, Color.White)
-                        let border = Rect.expand(5.0f, 5.0f)bounds
-                        let borderColor = if selectedChart = cc.Hash then Color.White else color
+            match content with
+            | Choice1Of2 (groupName, cc) ->
+                if (top > 70.0f && top < Render.vheight) then
+                    let bounds = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 85.0f)
+                    let struct (left, _, right, bottom) = bounds
+                    Draw.rect(bounds)(Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
+                    let twidth = Math.Max(Text.measure(font(), cc.Artist + " - " + cc.Title) * 23.0f, Text.measure(font(), cc.DiffName + " // " + cc.Creator) * 20.0f + 40.0f) + 20.0f
+                    let stripeLength = twidth + (right - left) * 0.3f * hover.Value
+                    Draw.quad
+                        (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength - 40.0f, bottom) <| new Vector2(left, bottom))
+                        (Quad.colorOf <| Screens.accentShade(127, 1.0f, 0.2f))
+                        (Sprite.gridUV(0,0)Sprite.Default)
+                    Draw.rect(Rect.sliceBottom(25.0f)bounds)(Color.FromArgb(70, 0, 0, 0))Sprite.Default
+                    Text.draw(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, Color.White)
+                    Text.draw(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, Color.White)
+                    let border = Rect.expand(5.0f, 5.0f)bounds
+                    let borderColor = if selectedChart = cc.Hash then Color.White else color
+                    if borderColor.A > 0uy then
                         Draw.rect(Rect.sliceLeft(5.0f)(border))(borderColor)Sprite.Default
                         Draw.rect(Rect.sliceTop(5.0f)(border))(borderColor)Sprite.Default
                         Draw.rect(Rect.sliceRight(5.0f)(border))(borderColor)Sprite.Default
                         Draw.rect(Rect.sliceBottom(5.0f)(border))(borderColor)Sprite.Default
-                    top + 90.0f
-                | Choice2Of2 (name, items) ->
-                    if (top > 90.0f) then
-                        let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + 65.0f)
-                        let struct (left, _, right, bottom) = bounds
-                        Draw.rect(bounds)(if selectedGroup = name then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
-                        Text.drawFill(font(), name, bounds, Color.White, 0.5f)
-                    if expandedGroup = name then
-                        List.fold (fun t (i: SelectableItem) -> i.Draw(t)) (top + 90.0f) items
-                    else
-                        top + 70.0f
+                top + 95.0f
+            | Choice2Of2 (name, items) ->
+                if (top > 90.0f && top < Render.vheight) then
+                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + 65.0f)
+                    let struct (left, _, right, bottom) = bounds
+                    Draw.rect(bounds)(if selectedGroup = name then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
+                    Text.drawFill(font(), name, bounds, Color.White, 0.5f)
+                if expandedGroup = name then
+                    List.fold (fun t (i: SelectableItem) -> i.Draw(t)) (top + 80.0f) items
+                else
+                    top + 80.0f
 
         member this.Update(top: float32, elapsedTime): float32 =
             this.Navigate()
@@ -149,7 +151,10 @@ module ScreenLevelSelect =
                     scrollBy(-top + 500.0f)
                     scrollTo <- false
                 if (top > 150.0f) then
-                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + 75.0f)
+                    if colorVersion < colorVersionGlobal then
+                        colorVersion <- colorVersionGlobal
+                        color <- colorFunc(cc) 
+                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + 85.0f)
                     if Mouse.Hover(bounds) then 
                         hover.SetTarget(1.0f)
                         if Mouse.Click(Input.MouseButton.Left) then
@@ -163,12 +168,12 @@ module ScreenLevelSelect =
                     else
                         hover.SetTarget(0.0f)
                     animation.Update(elapsedTime)
-                top + 90.0f
+                top + 95.0f
             | Choice2Of2 (name, items) ->
                 if scrollTo && name = selectedGroup && name <> expandedGroup then
                     scrollBy(-top + 500.0f)
                     scrollTo <- false
-                if (top > 170.0f) then
+                if (top > 170.0f) then                       
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.9f) (top + 65.0f)
                     if Mouse.Hover(bounds) then 
                         hover.SetTarget(1.0f)
@@ -178,10 +183,10 @@ module ScreenLevelSelect =
                         hover.SetTarget(0.0f)
                     animation.Update(elapsedTime)
                 if expandedGroup = name then
-                    List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) (top + 90.0f) items
+                    List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) (top + 80.0f) items
                 else
                     List.iter (fun (i: SelectableItem) -> i.Navigate()) items
-                    top + 70.0f
+                    top + 80.0f
 
             member this.Navigate() =
                 match content with
@@ -223,6 +228,26 @@ module ScreenLevelSelect =
             "Creator", Comparison(fun a b -> a.Creator.CompareTo(b.Creator))
         ]
 
+    let colorBy = dict[
+            "Grade",
+            fun c ->
+                match Interlude.Gameplay.scores.GetScoreData(c.Hash) with
+                | None -> Color.Transparent
+                | Some d ->
+                    let k = "SC+ (J4)"
+                    if d.Accuracy.ContainsKey(k) then
+                        let ((p1, r1), (p2, r2)) = d.Accuracy.[k]
+                        if r1 < Interlude.Gameplay.rate then
+                            if r2 < Interlude.Gameplay.rate then
+                                Color.Transparent
+                            else
+                                Interlude.Themes.themeConfig.GradeColors.[grade p2 Interlude.Themes.themeConfig.GradeThresholds] |> otkColor
+                        else
+                            Interlude.Themes.themeConfig.GradeColors.[grade p1 Interlude.Themes.themeConfig.GradeThresholds] |> otkColor
+                    else
+                        Color.Transparent
+        ]
+
 open ScreenLevelSelect
 
 type ScreenLevelSelect() as this =
@@ -246,6 +271,8 @@ type ScreenLevelSelect() as this =
                     changeChart(cc, c)
                 | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
         lastItem <- None
+        colorVersionGlobal <- 0
+        colorFunc <- colorBy.["Grade"]
         selection <- 
             groups.Keys
             |> Seq.sort
@@ -305,12 +332,12 @@ type ScreenLevelSelect() as this =
         base.Update(elapsedTime, bounds)
         if Options.options.Hotkeys.Select.Get().Tapped(false) then
             playCurrentChart()
-        elif Options.options.Hotkeys.UpRateSmall.Get().Tapped(false) then changeRate(0.01f)
-        elif Options.options.Hotkeys.UpRateHalf.Get().Tapped(false) then changeRate(0.05f)
-        elif Options.options.Hotkeys.UpRate.Get().Tapped(false) then changeRate(0.1f)
-        elif Options.options.Hotkeys.DownRateSmall.Get().Tapped(false) then changeRate(-0.01f)
-        elif Options.options.Hotkeys.DownRateHalf.Get().Tapped(false) then changeRate(-0.05f)
-        elif Options.options.Hotkeys.DownRate.Get().Tapped(false) then changeRate(-0.1f)
+        elif Options.options.Hotkeys.UpRateSmall.Get().Tapped(false) then changeRate(0.01f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif Options.options.Hotkeys.UpRateHalf.Get().Tapped(false) then changeRate(0.05f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif Options.options.Hotkeys.UpRate.Get().Tapped(false) then changeRate(0.1f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif Options.options.Hotkeys.DownRateSmall.Get().Tapped(false) then changeRate(-0.01f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif Options.options.Hotkeys.DownRateHalf.Get().Tapped(false) then changeRate(-0.05f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif Options.options.Hotkeys.DownRate.Get().Tapped(false) then changeRate(-0.1f); colorVersionGlobal <- colorVersionGlobal + 1
         elif Options.options.Hotkeys.Next.Get().Tapped(false) then
             if lastItem.IsSome then
                 let h = (lastItem.Value |> snd).Hash

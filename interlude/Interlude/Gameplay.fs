@@ -54,7 +54,7 @@ module Gameplay =
     let changeChart(cachedChart, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
-        chartSaveData <- Some <| scores.GetScoreData(chart)
+        chartSaveData <- Some <| scores.GetOrCreateScoreData(chart)
         Themes.loadBackground(chart.BGPath)
         let localOffset = if chart.Notes.IsEmpty() then 0.0f<ms> else chartSaveData.Value.Offset.Get() - (offsetOf <| chart.Notes.First())
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
@@ -104,7 +104,7 @@ module Gameplay =
                     pb
                 else
                     target.Add(name, ((value, data.Score.rate), (value, data.Score.rate)))
-                    PersonalBestType.Faster
+                    PersonalBestType.Faster 
             f data.Accuracy.Name d.Lamp data.Lamp,
             f data.Accuracy.Name d.Accuracy data.Accuracy.Value,
             f (data.Accuracy.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
