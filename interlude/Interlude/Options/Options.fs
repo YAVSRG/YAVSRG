@@ -5,8 +5,10 @@ open System.IO
 open OpenTK.Input
 open Prelude.Common
 open Prelude.Json
-open Prelude.Data.Profiles
 open Prelude.Gameplay.Score
+open Prelude.Gameplay.Layout
+open Prelude.Gameplay.NoteColors
+open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.Input
 
@@ -83,6 +85,30 @@ type Hotkeys = {
         DownRateSmall = Setting(Key Key.Minus |> Shift)
     }
 
+type ScoreSaving =
+| Always = 0
+| Pacemaker = 1
+| PB = 2
+
+type Pacemaker =
+| Accuracy of float
+| Lamp of Lamp
+
+type FailType =
+| Instant
+| AtEnd
+type ListSelection<'T> = int * 'T list
+
+type ProfileStats = {
+    //todo: rrd graph of improvement over time/session performances
+    TopPhysical: Setting<TopScore list>
+    TopTechnical: Setting<TopScore list>
+} with
+    static member Default = {
+        TopPhysical = Setting([])
+        TopTechnical = Setting([])
+    }
+
 type GameOptions = {
     AudioOffset: NumSetting<float>
     AudioVolume: NumSetting<float>
@@ -90,8 +116,34 @@ type GameOptions = {
     CurrentChart: Setting<string>
     CurrentOptionsTab: Setting<string>
     EnabledThemes: List<string>
-    AccuracySystems: List<AccuracySystemConfig>
-    HPSystems: List<HPSystemConfig>
+
+    ScrollSpeed: Setting<float>
+    HitPosition: Setting<int>
+    HitLighting: Setting<bool>
+    Upscroll: Setting<bool>
+    BackgroundDim: Setting<float>
+    PerspectiveTilt: Setting<float>
+    ScreenCoverUp: Setting<float>
+    ScreenCoverDown: Setting<float>
+    ScreenCoverFadeLength: Setting<int>
+    ColorStyle: Setting<ColorConfig>
+    KeymodePreference: Setting<int>
+    UseKeymodePreference: Setting<bool>
+    NoteSkin: Setting<string>
+
+    Playstyles: Layout array
+    HPSystems: Setting<ListSelection<HPSystemConfig>>
+    AccSystems: Setting<ListSelection<AccuracySystemConfig>>
+    ScoreSaveCondition: Setting<ScoreSaving>
+    FailCondition: Setting<FailType>
+    Pacemaker: Setting<Pacemaker>
+
+    Stats: ProfileStats
+
+    ChartSortMode: Setting<string>
+    ChartGroupMode: Setting<string>
+    ChartColorMode: Setting<string>
+
     Hotkeys: Hotkeys
     GameplayBinds: (Bind array) array
 } with
@@ -102,8 +154,34 @@ type GameOptions = {
         CurrentChart = Setting("")
         CurrentOptionsTab = Setting("General")
         EnabledThemes = new List<string>()
-        AccuracySystems = new List<AccuracySystemConfig>()
-        HPSystems = new List<HPSystemConfig>()
+
+        ScrollSpeed = FloatSetting(2.05, 1.0, 3.0)
+        HitPosition = IntSetting(0, -100, 400)
+        HitLighting = Setting(false)
+        Upscroll = Setting(false)
+        BackgroundDim = FloatSetting(0.5, 0.0, 1.0)
+        PerspectiveTilt = FloatSetting(0.0, -1.0, 1.0)
+        ScreenCoverUp = FloatSetting(0.0, 0.0, 1.0)
+        ScreenCoverDown = FloatSetting(0.0, 0.0, 1.0)
+        ScreenCoverFadeLength = IntSetting(200, 0, 500)
+        NoteSkin = Setting("default")
+        ColorStyle = Setting(ColorConfig.Default)
+        KeymodePreference = IntSetting(4, 3, 10)
+        UseKeymodePreference = Setting(false)
+
+        Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
+        HPSystems = Setting((0, [VG]))
+        AccSystems = Setting((0, [SCPlus 4]))
+        ScoreSaveCondition = Setting(ScoreSaving.Always)
+        FailCondition = Setting(AtEnd)
+        Pacemaker = Setting(Accuracy 0.95)
+
+        //todo: move to scores database
+        Stats = ProfileStats.Default
+
+        ChartSortMode = Setting("Title")
+        ChartGroupMode = Setting("Pack")
+        ChartColorMode = Setting("Nothing")
         Hotkeys = Hotkeys.Default
         GameplayBinds = [|
             [|Key Key.Left; Key Key.Down; Key Key.Right|];
@@ -113,7 +191,8 @@ type GameOptions = {
             [|Key Key.Z; Key Key.X; Key Key.C; Key Key.Space; Key Key.Comma; Key Key.Period; Key Key.Slash|];
             [|Key Key.Z; Key Key.X; Key Key.C; Key Key.V; Key Key.Comma; Key Key.Period; Key Key.Slash; Key Key.RShift|];
             [|Key Key.Z; Key Key.X; Key Key.C; Key Key.V; Key Key.Space; Key Key.Comma; Key Key.Period; Key Key.Slash; Key Key.RShift|];
-            [|Key Key.CapsLock; Key Key.Q; Key Key.W; Key Key.E; Key Key.V; Key Key.Space; Key Key.K; Key Key.L; Key Key.Semicolon; Key Key.Quote|]|]
+            [|Key Key.CapsLock; Key Key.Q; Key Key.W; Key Key.E; Key Key.V; Key Key.Space; Key Key.K; Key Key.L; Key Key.Semicolon; Key Key.Quote|]
+        |]
     }
 
 module Options =
@@ -130,9 +209,7 @@ module Options =
 
     let mutable internal config = GameConfig.Default
     let mutable internal options = GameOptions.Default
-    let mutable internal profile = Profile.Default
     let internal configPath = Path.GetFullPath("config.json")
-    let profiles = new List<Profile>()
 
     let load() =
         try
@@ -160,31 +237,12 @@ module Options =
             System.Console.ReadLine() |> ignore
             Logging.Critical("User has chosen to proceed with game setup with default game settings.") ""
 
-        for pf in Directory.EnumerateFiles(Profile.profilePath) do
-            try
-                let data = Profile.load pf
-                Profile.save data
-                profiles.Add(data)
-                if data.UUID = options.CurrentProfile.Get() then profile <- data
-            with
-            | err -> Logging.Error("Failed to load profile: " + Path.GetFileName(pf)) (err.ToString())
-        options.CurrentProfile.Set(profile.UUID)
         Themes.loadThemes(options.EnabledThemes)
-        Themes.changeNoteSkin(profile.NoteSkin.Get())
-        Logging.Debug(sprintf "Current profile: %s (%s)" (profile.Name.Get()) profile.UUID) ""
-
-    let changeProfile(uuid: string) =
-        Profile.save profile
-        match Seq.tryFind (fun p -> p.UUID = uuid) profiles with
-        | Some p ->
-            options.CurrentProfile.Set(p.UUID)
-            profile <- p
-        | None -> Logging.Error("No profile with UUID '" + uuid + "' exists") ""
+        Themes.changeNoteSkin(options.NoteSkin.Get())
 
     let save() =
         try
             JsonHelper.saveFile config configPath
             JsonHelper.saveFile options <| Path.Combine(getDataPath("Data"), "options.json")
-            Profile.save profile
         with
         | err -> Logging.Critical("Failed to write options/config to file.") (err.ToString())

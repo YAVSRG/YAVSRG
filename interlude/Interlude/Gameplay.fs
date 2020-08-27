@@ -39,11 +39,11 @@ module Gameplay =
         | Some c ->
             let (m, r) = getModChart selectedMods c
             modifiedChart <- m
-            coloredChart <- getColoredChart(Options.profile.ColorStyle.Get())(modifiedChart)
+            coloredChart <- getColoredChart(Options.options.ColorStyle.Get())(modifiedChart)
             replayData <- r
             difficultyRating <-
                 let (keys, notes, _, _, _) = m.Force() in
-                Some <| RatingReport(notes, rate, Options.profile.Playstyles.[keys - 3], keys)
+                Some <| RatingReport(notes, rate, Options.options.Playstyles.[keys - 3], keys)
             onChartUpdate()
 
     let changeRate(amount) =
@@ -75,18 +75,16 @@ module Gameplay =
         {   
             time = DateTime.Now
             hitdata = compressScoreData scoreData
-            player = Options.profile.Name.Get()
-            playerUUID = Options.profile.UUID
             rate = rate
             selectedMods = selectedMods
-            layout = Options.profile.Playstyles.[keys - 2]
+            layout = Options.options.Playstyles.[keys - 2]
             keycount = keys } : Score
         
 
     let setScore(data: ScoreInfoProvider) =
         let d = chartSaveData.Value
         if
-            match Options.profile.ScoreSaveCondition.Get() with
+            match Options.options.ScoreSaveCondition.Get() with
             | _ -> true
             //todo: fill in this stub (pb condition will be complicated)
         then
@@ -94,8 +92,8 @@ module Gameplay =
             d.Scores.Add(data.Score)
             scores.Save()
             //update top scores
-            Options.profile.Stats.TopPhysical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical)(Options.profile.Stats.TopPhysical.Get()))
-            Options.profile.Stats.TopTechnical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Technical)(Options.profile.Stats.TopTechnical.Get()))
+            Options.options.Stats.TopPhysical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical)(Options.options.Stats.TopPhysical.Get()))
+            Options.options.Stats.TopTechnical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Technical)(Options.options.Stats.TopTechnical.Get()))
             //update pbs
             let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) = 
                 if target.ContainsKey(name) then

@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI
 
 open Prelude.Common
-open Prelude.Data.Profiles
 open Interlude.Options
 open Interlude.UI.Components
 open FSharp.Reflection
@@ -29,4 +28,4 @@ type ScreenOptions() as this =
     inherit Screen()
 
     do  
-        this.Add(new ConfigEditor<Profile>(Options.profile))
+        this.Add(new ConfigEditor<GameOptions>(Options.options))

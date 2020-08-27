@@ -16,13 +16,11 @@ open Interlude.UI.Components
 open Interlude.Gameplay
 open OpenTK
 
-module ScreenLevelSelect =
+module private ScreenLevelSelectVars =
 
     //TODO LIST
     //  MAKE IT LOOK NICE
     //    SHOW PBS (LAMP, ACCURACY, GRADE)
-
-    let mutable refresh = false
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //hash
     let mutable scrollTo = false
@@ -50,6 +48,13 @@ module ScreenLevelSelect =
 
     let playCurrentChart() =
         Screens.addScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenTransitionFlag.Default)
+
+module ScreenLevelSelect =
+
+    //publicly accessible so that other importing can request that the level select is refreshed
+    let mutable refresh = false
+
+    open ScreenLevelSelectVars
 
     type ScoreCard(data: ScoreInfoProvider) as this =
         inherit Widget()
@@ -114,14 +119,14 @@ module ScreenLevelSelect =
                 if (top > 70.0f && top < Render.vheight) then
                     let bounds = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 85.0f)
                     let struct (left, _, right, bottom) = bounds
-                    Draw.rect(bounds)(Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
+                    Draw.rect(bounds)(Screens.accentShade(127, 0.8f, 0.0f))Sprite.Default
                     let twidth = Math.Max(Text.measure(font(), cc.Artist + " - " + cc.Title) * 23.0f, Text.measure(font(), cc.DiffName + " // " + cc.Creator) * 20.0f + 40.0f) + 20.0f
                     let stripeLength = twidth + (right - left) * 0.3f * hover.Value
                     Draw.quad
-                        (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength - 40.0f, bottom) <| new Vector2(left, bottom))
+                        (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength - 40.0f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
                         (Quad.colorOf <| Screens.accentShade(127, 1.0f, 0.2f))
-                        (Sprite.gridUV(0,0)Sprite.Default)
-                    Draw.rect(Rect.sliceBottom(25.0f)bounds)(Color.FromArgb(70, 0, 0, 0))Sprite.Default
+                        (Sprite.gridUV(0, 0)Sprite.Default)
+                    Draw.rect(Rect.sliceBottom(25.0f)bounds)(Screens.accentShade(60, 0.3f, 0.0f))Sprite.Default
                     Text.draw(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, Color.White)
                     Text.draw(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, Color.White)
                     let border = Rect.expand(5.0f, 5.0f)bounds
@@ -249,6 +254,7 @@ module ScreenLevelSelect =
         ]
 
 open ScreenLevelSelect
+open ScreenLevelSelectVars
 
 type ScreenLevelSelect() as this =
     inherit Screen()
@@ -261,7 +267,7 @@ type ScreenLevelSelect() as this =
     let scoreboard = new Scoreboard()
 
     let refresh() =
-        let groups = cache.GetGroups groupBy.[Options.profile.ChartGroupMode.Get()] sortBy.[Options.profile.ChartSortMode.Get()] <| searchText.Get()
+        let groups = cache.GetGroups groupBy.[Options.options.ChartGroupMode.Get()] sortBy.[Options.options.ChartSortMode.Get()] <| searchText.Get()
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
@@ -292,19 +298,19 @@ type ScreenLevelSelect() as this =
         expandedGroup <- selectedGroup
 
     do
-        if not <| sortBy.ContainsKey(Options.profile.ChartSortMode.Get()) then Options.profile.ChartSortMode.Set("Title")
-        if not <| groupBy.ContainsKey(Options.profile.ChartGroupMode.Get()) then Options.profile.ChartGroupMode.Set("Pack")
+        if not <| sortBy.ContainsKey(Options.options.ChartSortMode.Get()) then Options.options.ChartSortMode.Set("Title")
+        if not <| groupBy.ContainsKey(Options.options.ChartGroupMode.Get()) then Options.options.ChartGroupMode.Set("Pack")
         this.Animation.Add(scrollPos)
         scrollBy <- fun amt -> scrollPos.SetTarget(scrollPos.Target + amt)
         this.Add(
             let sorts = sortBy.Keys |> Array.ofSeq
-            new Dropdown(sorts, Array.IndexOf(sorts, Options.profile.ChartSortMode.Get()),
-                (fun i -> Options.profile.ChartSortMode.Set(sorts.[i]); refresh()), "Sort by", 50.0f)
+            new Dropdown(sorts, Array.IndexOf(sorts, Options.options.ChartSortMode.Get()),
+                (fun i -> Options.options.ChartSortMode.Set(sorts.[i]); refresh()), "Sort by", 50.0f)
             |> positionWidget(-400.0f, 1.0f, 100.0f, 0.0f, -250.0f, 1.0f, 400.0f, 0.0f))
         this.Add(
             let groups = groupBy.Keys |> Array.ofSeq
-            new Dropdown(groups, Array.IndexOf(groups, Options.profile.ChartGroupMode.Get()),
-                (fun i -> Options.profile.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
+            new Dropdown(groups, Array.IndexOf(groups, Options.options.ChartGroupMode.Get()),
+                (fun i -> Options.options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
             |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f))
         this.Add(
             new TextEntry(new WrappedSetting<string, string>(searchText, (fun s -> searchTimer.Restart(); s), id), Some (Options.options.Hotkeys.Search :> ISettable<Bind>), "search")

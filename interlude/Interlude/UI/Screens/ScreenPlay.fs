@@ -58,8 +58,8 @@ type NoteRenderer() as this =
     let columnPositions = Array.init keys (fun i -> float32 i * Themes.noteskinConfig.ColumnWidth)
     let columnWidths = Array.create keys (float32 Themes.noteskinConfig.ColumnWidth)
     let noteHeight = Themes.noteskinConfig.ColumnWidth
-    let scale = float32(Options.profile.ScrollSpeed.Get()) / Gameplay.rate * 1.0f</ms>
-    let hitposition = float32 <| Options.profile.HitPosition.Get()
+    let scale = float32(Options.options.ScrollSpeed.Get()) / Gameplay.rate * 1.0f</ms>
+    let hitposition = float32 <| Options.options.HitPosition.Get()
     let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
 
     let tailsprite = Themes.getTexture(if Themes.noteskinConfig.UseHoldTailTexture then "holdtail" else "holdhead")
@@ -78,8 +78,8 @@ type NoteRenderer() as this =
     let hold_pos = Array.create keys 0.0f
     let hold_colors = Array.create keys 0
 
-    let scrollDirectionPos bottom = if Options.profile.Upscroll.Get() then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
-    let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.profile.Upscroll.Get() then id else Quad.flip
+    let scrollDirectionPos bottom = if Options.options.Upscroll.Get() then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
+    let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Get() then id else Quad.flip
 
     do
         //todo: position differently for editor
@@ -290,7 +290,7 @@ type ScreenPlay() as this =
         //todo: rest of widgets
 
     override this.OnEnter(prev) =
-        Screens.backgroundDim.SetTarget(Options.profile.BackgroundDim.Get() |> float32)
+        Screens.backgroundDim.SetTarget(Options.options.BackgroundDim.Get() |> float32)
         //discord presence
         Screens.setToolbarCollapsed(true)
         //disable cursor

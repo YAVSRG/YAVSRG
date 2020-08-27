@@ -1,1 +1,13 @@
-﻿
+﻿GameOptions.name.ScrollSpeed=Scroll Speed
+GameOptions.name.HitPosition=Hit Position
+GameOptions.name.HitLighting=Hit Lighting
+GameOptions.name.Upscroll=Upscroll
+GameOptions.name.BackgroundDim=Background Dim
+GameOptions.name.PerspectiveTilt=Perspective Tilt (NYI)
+GameOptions.name.ScreenCoverUp=Screencover (Up)
+GameOptions.name.ScreenCoverDown=Screencover (Down)
+GameOptions.name.ScreenCoverFadeLength=Screencover Fade Length
+GameOptions.name.KeymodePreference=Preferred keymode
+GameOptions.name.UseKeymodePreference=Only display maps of preferred keymode
+GameOptions.name.AudioOffset=Universal Audio Offset
+GameOptions.name.AudioVolume=Audio Volume
