@@ -18,10 +18,8 @@ module ScoreManager =
     type Score = {
         time: DateTime
         hitdata: string
-        player: string
-        playerUUID: string
         rate: float32
-        selectedMods: Dictionary<string, int>
+        selectedMods: ModState
         layout: Layout
         keycount: int
     }
@@ -51,7 +49,7 @@ module ScoreManager =
 
     type ScoreInfoProvider(score: Score, chart: Chart) =
         //todo: method to set already existing values when possible
-        let (modchart, hitdata) = getModChartWithScore (ModState(score.selectedMods)) chart score.hitdata
+        let (modchart, hitdata) = getModChartWithScore (score.selectedMods) chart score.hitdata
         let difficulty =
             lazy (let (keys, notes, _, _, _) = modchart.Force()
                 RatingReport(notes, score.rate, score.layout, keys))
@@ -86,10 +84,13 @@ module ScoreManager =
             | :? FileNotFoundException -> Logging.Info("No scores database found, creating one.") ""; new Dictionary<string, ChartSaveData>()
             | err -> Logging.Critical("Could not load score database! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
 
-        member this.GetScoreData (chart: Chart) =
+        member this.GetOrCreateScoreData(chart: Chart) =
             let hash = calculateHash(chart)
-            if not <| data.ContainsKey(hash) then data.Add(hash, ChartSaveData.FromChart(chart))
+            if hash |> data.ContainsKey |> not then data.Add(hash, ChartSaveData.FromChart(chart))
             data.[hash]
+
+        member this.GetScoreData(hash: string) =
+            if hash |> data.ContainsKey |> not then None else Some data.[hash]
             
 
     type TopScore = string * DateTime * float //Hash, Timestamp, Rating

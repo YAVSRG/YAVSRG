@@ -83,7 +83,7 @@ module Common =
         static member Debug = Logging.Log LoggingLevel.DEBUG
         static member Critical = Logging.Log LoggingLevel.CRITICAL
 
-    Logging.Subscribe (fun (level, main, details) -> Console.WriteLine(sprintf "[%A]: %s" level main))
+    Logging.Subscribe (fun (level, main, details) -> printfn "[%A]: %s" level main; if level = LoggingLevel.CRITICAL then printfn " .. %s" details)
 
 (*
     Localisation
