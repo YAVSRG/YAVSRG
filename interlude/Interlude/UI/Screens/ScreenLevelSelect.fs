@@ -27,7 +27,11 @@ module private ScreenLevelSelectVars =
     let mutable expandedGroup = ""
     let mutable scrollBy = fun amt -> ()
     let mutable colorVersionGlobal = 0
-    let mutable colorFunc = fun cc -> Color.Transparent
+    let mutable colorFunc = fun (_, _, _) -> Color.Transparent
+
+    //todo: have these update when score system is changed, could be done remotely, exactly when settings are changed
+    let mutable scoreSystem = "SC+ (J4)"
+    let mutable hpSystem = "VG"
 
     type Navigation = 
     | Nothing
@@ -108,6 +112,8 @@ module ScreenLevelSelect =
         //todo: colors
         let mutable colorVersion = -1
         let mutable color = Color.Transparent
+        let mutable chartData = None
+        let mutable pbData = (None, None, None)
         let animation = new AnimationGroup()
 
         do
@@ -129,6 +135,23 @@ module ScreenLevelSelect =
                     Draw.rect(Rect.sliceBottom(25.0f)bounds)(Screens.accentShade(60, 0.3f, 0.0f))Sprite.Default
                     Text.draw(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, Color.White)
                     Text.draw(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, Color.White)
+
+                    let f p m =
+                        match p with
+                        | None -> "--"
+                        | Some ((p1, r1), (p2, r2)) ->
+                            if r1 < rate then
+                                if r2 < rate then
+                                    "--"
+                                else
+                                    sprintf "%s (%.2fx)" (m p2) r2
+                            else
+                                sprintf "%s (%.2fx)" (m p1) r1
+                    let (acc, lamp, clear) = pbData
+                    Text.draw(font(), f acc (fun x -> sprintf "%.2f%%" (100.0 * x)), 15.0f, left, top + 60.0f, Color.White)
+                    Text.draw(font(), f lamp (fun x -> x.ToString()), 15.0f, left + 200.0f, top + 60.0f, Color.White)
+                    Text.draw(font(), f clear (fun x -> if x then "CLEAR" else "FAILED"), 15.0f, left + 400.0f, top + 60.0f, Color.White)
+
                     let border = Rect.expand(5.0f, 5.0f)bounds
                     let borderColor = if selectedChart = cc.Hash then Color.White else color
                     if borderColor.A > 0uy then
@@ -157,8 +180,16 @@ module ScreenLevelSelect =
                     scrollTo <- false
                 if (top > 150.0f) then
                     if colorVersion < colorVersionGlobal then
+                        let f key (d: Collections.Generic.Dictionary<string, PersonalBests<_>>) =
+                            if d.ContainsKey(key) then Some d.[key] else None
                         colorVersion <- colorVersionGlobal
-                        color <- colorFunc(cc) 
+                        if chartData.IsNone then chartData <- scores.GetScoreData(cc.Hash)
+                        match chartData with
+                        | Some d ->
+                            pbData <- (f scoreSystem d.Accuracy, f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
+                        | None -> ()
+                        color <- colorFunc(pbData)
+
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + 85.0f)
                     if Mouse.Hover(bounds) then 
                         hover.SetTarget(1.0f)
@@ -235,22 +266,17 @@ module ScreenLevelSelect =
 
     let colorBy = dict[
             "Grade",
-            fun c ->
-                match Interlude.Gameplay.scores.GetScoreData(c.Hash) with
+            fun (acc, lamp, clear) ->
+                match acc with
                 | None -> Color.Transparent
-                | Some d ->
-                    let k = "SC+ (J4)"
-                    if d.Accuracy.ContainsKey(k) then
-                        let ((p1, r1), (p2, r2)) = d.Accuracy.[k]
-                        if r1 < Interlude.Gameplay.rate then
-                            if r2 < Interlude.Gameplay.rate then
-                                Color.Transparent
-                            else
-                                Interlude.Themes.themeConfig.GradeColors.[grade p2 Interlude.Themes.themeConfig.GradeThresholds] |> otkColor
+                | Some ((p1, r1), (p2, r2)) ->
+                    if r1 < rate then
+                        if r2 < rate then
+                            Color.Transparent
                         else
-                            Interlude.Themes.themeConfig.GradeColors.[grade p1 Interlude.Themes.themeConfig.GradeThresholds] |> otkColor
+                            themeConfig.GradeColors.[grade p2 themeConfig.GradeThresholds] |> otkColor
                     else
-                        Color.Transparent
+                        themeConfig.GradeColors.[grade p1 themeConfig.GradeThresholds] |> otkColor
         ]
 
 open ScreenLevelSelect
@@ -383,3 +409,4 @@ type ScreenLevelSelect() as this =
     override this.OnEnter(prev) =
         base.OnEnter(prev)
         scoreboard.Refresh()
+        colorVersionGlobal <- colorVersionGlobal + 1

@@ -85,8 +85,7 @@ module Gameplay =
         let d = chartSaveData.Value
         if
             match Options.options.ScoreSaveCondition.Get() with
-            | _ -> true
-            //todo: fill in this stub (pb condition will be complicated)
+            | _ -> true //todo: fill in this stub (pb condition will be complicated)
         then
             //add to score db
             d.Scores.Add(data.Score)
@@ -102,7 +101,8 @@ module Gameplay =
                     pb
                 else
                     target.Add(name, ((value, data.Score.rate), (value, data.Score.rate)))
-                    PersonalBestType.Faster 
+                    PersonalBestType.Faster
+            //todo: maybe move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
             f data.Accuracy.Name d.Lamp data.Lamp,
             f data.Accuracy.Name d.Accuracy data.Accuracy.Value,
             f (data.Accuracy.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
@@ -134,5 +134,3 @@ module Gameplay =
                 |> fun d -> d.["All"].[0]
                 |> fun c -> c, cache.LoadChart(c).Value
         changeChart(c, ch)
-        //temp while audio code isnt finished (this will automatically happen in future)
-        Audio.playFrom(ch.Header.PreviewTime)
