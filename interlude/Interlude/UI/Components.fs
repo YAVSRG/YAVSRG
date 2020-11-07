@@ -239,3 +239,19 @@ module Components =
 
         override this.Dispose() =
             if active then Input.removeInputMethod()
+
+    type SelectionWheel() =
+        inherit Widget()
+
+        let index = 0
+        let items = new List<string * Widget>()
+        member this.Add(name, w) =
+            items.Add((name, w))
+
+        override this.Draw() =
+            Draw.rect(this.Bounds |> Rect.sliceLeft(100.0f))(Color.Black)(Sprite.Default)
+            let struct (left, top, right, bottom) = this.Bounds
+            for i in 0..(items.Count-1) do
+                let (n, w) = items.[i]
+                Text.draw(Themes.font(), n, 30.0f, left + 50.0f, top + 50.0f + float32 i * 50.0f, Color.White)
+                if index = i then w.Draw()
