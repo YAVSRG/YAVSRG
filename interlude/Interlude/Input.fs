@@ -64,7 +64,7 @@ module Input =
         inputmethod <- s :: inputmethod
 
     let removeInputMethod() =
-        inputmethod <- List.tail inputmethod
+        inputmethod <- match inputmethod with x::xs -> xs | [] -> []
 
 module Keyboard = Input.Keyboard
 

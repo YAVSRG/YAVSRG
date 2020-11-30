@@ -136,21 +136,16 @@ module ScreenLevelSelect =
                     Text.draw(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, Color.White)
                     Text.draw(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, Color.White)
 
-                    let f p m =
+                    let f (p: PersonalBests<'T> option) (format: 'T -> string) (color: 'T -> Color) =
                         match p with
-                        | None -> "--"
+                        | None -> ("", Color.Transparent)
                         | Some ((p1, r1), (p2, r2)) ->
-                            if r1 < rate then
-                                if r2 < rate then
-                                    "--"
-                                else
-                                    sprintf "%s (%.2fx)" (m p2) r2
-                            else
-                                sprintf "%s (%.2fx)" (m p1) r1
-                    let (acc, lamp, clear) = pbData
-                    Text.draw(font(), f acc (fun x -> sprintf "%.2f%%" (100.0 * x)), 15.0f, left, top + 60.0f, Color.White)
-                    Text.draw(font(), f lamp (fun x -> x.ToString()), 15.0f, left + 200.0f, top + 60.0f, Color.White)
-                    Text.draw(font(), f clear (fun x -> if x then "CLEAR" else "FAILED"), 15.0f, left + 400.0f, top + 60.0f, Color.White)
+                            if r1 < rate then ((sprintf "%s (%.2fx)" (format p2) r2), if r2 < rate then Color.Silver else color p2)
+                            else ((sprintf "%s (%.2fx)" (format p1) r1), color p1)
+                    let (accAndGrades, lamp, clear) = pbData
+                    let (t, c) = f accAndGrades (fun (x, _) -> sprintf "%.2f%%" (100.0 * x)) (fun (_, g) -> ScoreColor.gradeToColor g) in Text.draw(font(), t, 15.0f, left, top + 60.0f, c)
+                    let (t, c) = f lamp (fun x -> x.ToString()) (ScoreColor.lampToColor) in Text.draw(font(), t, 15.0f, left + 200.0f, top + 60.0f, c)
+                    let (t, c) = f clear (fun x -> if x then "CLEAR" else "FAILED") (ScoreColor.clearToColor) in Text.draw(font(), t, 15.0f, left + 400.0f, top + 60.0f, c)
 
                     let border = Rect.expand(5.0f, 5.0f)bounds
                     let borderColor = if selectedChart = cc.Hash then Color.White else color
@@ -185,8 +180,7 @@ module ScreenLevelSelect =
                         colorVersion <- colorVersionGlobal
                         if chartData.IsNone then chartData <- scores.GetScoreData(cc.Hash)
                         match chartData with
-                        | Some d ->
-                            pbData <- (f scoreSystem d.Accuracy, f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
+                        | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, grade x themeConfig.GradeThresholds)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
                         | None -> ()
                         color <- colorFunc(pbData)
 
@@ -264,7 +258,7 @@ module ScreenLevelSelect =
             "Creator", Comparison(fun a b -> a.Creator.CompareTo(b.Creator))
         ]
 
-    let colorBy = dict[
+    """let colorBy = dict[
             "Grade",
             fun (acc, lamp, clear) ->
                 match acc with
@@ -277,7 +271,7 @@ module ScreenLevelSelect =
                             themeConfig.GradeColors.[grade p2 themeConfig.GradeThresholds] |> otkColor
                     else
                         themeConfig.GradeColors.[grade p1 themeConfig.GradeThresholds] |> otkColor
-        ]
+        ]""" |> ignore
 
 open ScreenLevelSelect
 open ScreenLevelSelectVars
@@ -304,7 +298,7 @@ type ScreenLevelSelect() as this =
                 | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
         lastItem <- None
         colorVersionGlobal <- 0
-        colorFunc <- colorBy.["Grade"]
+        //colorFunc <- Interlude.Utils.K Color.White
         selection <- 
             groups.Keys
             |> Seq.sort
@@ -410,3 +404,7 @@ type ScreenLevelSelect() as this =
         base.OnEnter(prev)
         scoreboard.Refresh()
         colorVersionGlobal <- colorVersionGlobal + 1
+
+    override this.OnExit(next) =
+        base.OnExit(next)
+        Input.removeInputMethod()

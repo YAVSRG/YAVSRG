@@ -10,6 +10,11 @@ open Interlude.UI.Components
 open Interlude.Gameplay
 open Interlude.Render
 
+module ScoreColor =
+    let lampToColor (lampAchieved: Lamp) = otkColor Themes.themeConfig.LampColors.[lampAchieved |> int]
+    let gradeToColor (gradeAchieved: int) = otkColor Themes.themeConfig.GradeColors.[gradeAchieved]
+    let clearToColor (cleared: bool) = if cleared then Color.FromArgb(255, 127, 255, 180) else Color.FromArgb(255, 255, 160, 140)
+
 type ScoreGraph(data: ScoreInfoProvider) =
     inherit Widget()
 
@@ -66,12 +71,12 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
     let mutable gradeAchieved = grade (scoreData.Accuracy.Value) (Themes.themeConfig.GradeThresholds)
-    let mutable lampAchieved = lamp (scoreData.Accuracy.State) |> int
+    let mutable lampAchieved = lamp (scoreData.Accuracy.State)
     let graph = new ScoreGraph(scoreData)
 
     let refresh() =
         gradeAchieved <- grade (scoreData.Accuracy.Value) (Themes.themeConfig.GradeThresholds)
-        lampAchieved <- lamp (scoreData.Accuracy.State) |> int
+        lampAchieved <- lamp (scoreData.Accuracy.State)
         lampPB <- PersonalBestType.None
         accuracyPB <- PersonalBestType.None
         clearPB <- PersonalBestType.None
@@ -80,11 +85,11 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
     do
         this.Add(new TextBox(K <| scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
         this.Add(new TextBox(K <| sprintf "%s // %s // %s" scoreData.Chart.Header.DiffName scoreData.Mods scoreData.Chart.Header.SourcePack, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 1.0f, 150.0f, 0.0f))
-        this.Add(new TextBox(scoreData.Lamp.ToString, (fun () -> otkColor Themes.themeConfig.LampColors.[lampAchieved]), 0.5f) |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f))
+        this.Add(new TextBox(scoreData.Lamp.ToString, (K <| ScoreColor.lampToColor(lampAchieved)), 0.5f) |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f))
+        this.Add(new TextBox(scoreData.Accuracy.Format, (K <| ScoreColor.gradeToColor(gradeAchieved)), 0.5f) |> positionWidget(-100.0f, 0.5f, 155.0f, 0.0f, 100.0f, 0.5f, 245.0f, 0.0f))
+        this.Add(new TextBox((fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR"), (K <| ScoreColor.clearToColor(not scoreData.HP.Failed)), 0.5f) |> positionWidget(-100.0f, 0.75f, 155.0f, 0.0f, 100.0f, 0.75f, 245.0f, 0.0f))
         this.Add(new TextBox(K <| "NEW RECORD", (fun () -> otkColor Themes.themeConfig.PBColors.[int lampPB]), 0.5f) |> positionWidget(-100.0f, 0.25f, 225.0f, 0.0f, 100.0f, 0.25f, 250.0f, 0.0f))
-        this.Add(new TextBox(scoreData.Accuracy.Format, (fun () -> otkColor Themes.themeConfig.GradeColors.[gradeAchieved]), 0.5f) |> positionWidget(-100.0f, 0.5f, 155.0f, 0.0f, 100.0f, 0.5f, 245.0f, 0.0f))
         this.Add(new TextBox(K <| "NEW RECORD", (fun () -> otkColor Themes.themeConfig.PBColors.[int accuracyPB]), 0.5f) |> positionWidget(-100.0f, 0.5f, 225.0f, 0.0f, 100.0f, 0.5f, 250.0f, 0.0f))
-        this.Add(new TextBox((fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR"), (fun () -> if scoreData.HP.Failed then Color.Red else Color.Green), 0.5f) |> positionWidget(-100.0f, 0.75f, 155.0f, 0.0f, 100.0f, 0.75f, 245.0f, 0.0f))
         this.Add(new TextBox(K <| "NEW RECORD", (fun () -> otkColor Themes.themeConfig.PBColors.[int clearPB]), 0.5f) |> positionWidget(-100.0f, 0.75f, 225.0f, 0.0f, 100.0f, 0.75f, 250.0f, 0.0f))
         //this.Add(new TextBox(K <| scoreData.Mods, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 250.0f, 0.0f, 0.0f, 1.0f, 280.0f, 0.0f))
         this.Add(graph |> positionWidget(10.0f, 0.0f, -250.0f, 1.0f, -10.0f, 1.0f, -10.0f, 1.0f))
