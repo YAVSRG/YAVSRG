@@ -368,6 +368,7 @@ module Score =
         i
 
     type PersonalBests<'T> = ('T * float32) * ('T * float32)
+    module PersonalBests = let map f ((a, f1), (b, f2)) = ((f a, f1), (f b, f2))
     type PersonalBestType =
     | FasterBetter = 3
     | Faster = 2

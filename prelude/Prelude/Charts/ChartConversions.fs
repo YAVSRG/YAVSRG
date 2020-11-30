@@ -216,7 +216,7 @@ module ChartConversions =
                         diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE; diff.STEPSTYPE.ToString() + " " + diff.METER.ToString()]
                     PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
                     AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"]
-                    BGFile = metadataFallback [sm.BACKGROUND; findBackground (sm.TITLE + "-bg.jpg")]
+                    BGFile = metadataFallback [(if File.Exists(Path.Combine(path, sm.BACKGROUND)) then sm.BACKGROUND else ""); findBackground (sm.TITLE + "-bg.jpg")]
             }
             let filepath = Path.Combine(path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
             let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)

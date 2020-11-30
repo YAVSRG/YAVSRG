@@ -13,7 +13,7 @@ module Common =
     [<Measure>] type beat
     [<Measure>] type minute
     type Time = float32<ms>
-    let toTime (f: float) = float32 f * 1.0f<ms>
+    let inline toTime (f: float) = float32 f * 1.0f<ms>
 
     module Time =
         let Abs(t: Time) = if t < 0.0f<ms> then -t else t
@@ -23,6 +23,7 @@ module Common =
     Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
     (Auto generation will be done with reflection)
 *)
+
     [<AbstractClass>]
     type ISettable<'T>() =
         abstract member Set: 'T -> unit
@@ -88,6 +89,7 @@ module Common =
 (*
     Localisation
 *)
+
     module Localisation =
         let private mapping = new Dictionary<string, string>()
         let mutable private loadedPath = ""
