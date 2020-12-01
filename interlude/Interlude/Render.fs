@@ -15,6 +15,7 @@ type Rect = (struct(float32 * float32 * float32 * float32))
 module Rect = 
 
     let create l t r b : Rect = struct(l, t, r, b)
+    let createWH l t w h : Rect = struct(l, t, l + w, t + h)
 
     let width (struct (left, _, right, _): Rect) = right - left
     let height (struct (_, top, _, bottom): Rect) = bottom - top
@@ -23,6 +24,9 @@ module Rect =
     let centerY (struct (_, top, _, bottom): Rect) = (bottom + top) * 0.5f
     let center (r: Rect) = (centerX r, centerY r)
     let centerV (r: Rect) = new Vector2(centerX r, centerY r)
+
+    let translate (x,y) (struct (left, top, right, bottom): Rect) =
+        struct (left + x, top + y, right + x, bottom + y)
 
     let expand (x,y) (struct (left, top, right, bottom): Rect) =
         struct (left - x, top - y, right + x, bottom + y)
@@ -287,26 +291,26 @@ module Draw =
 
 module Text =
     
-    open System.Drawing
+    //open System.Drawing
     open System.Drawing.Text
 
     let private fontscale = 100.f
     let private spacing = 0.25f
-    let private shadow = 0.1f
+    let private shadow = 0.09f
 
     [<AllowNullLiteral>]
-    type SpriteFont(font: Font) =
+    type SpriteFont(font: System.Drawing.Font) =
         let fontLookup = new Dictionary<char, Sprite>()
         let genChar(c: char) =
             let size =
-                use b = new Bitmap(1, 1)
+                use b = new System.Drawing.Bitmap(1, 1)
                 use g = System.Drawing.Graphics.FromImage(b)
                 g.MeasureString(c.ToString(), font)
-            let bmp = new Bitmap(int size.Width, int size.Height)
+            let bmp = new System.Drawing.Bitmap(int size.Width, int size.Height)
             let _ =
                 use g = System.Drawing.Graphics.FromImage(bmp)
                 g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit
-                g.DrawString(c.ToString(), font, Brushes.White, 0.f, 0.f)
+                g.DrawString(c.ToString(), font, System.Drawing.Brushes.White, 0.f, 0.f)
             fontLookup.Add(c, Sprite.upload(bmp, 1, 1, true))
         do
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n"
@@ -322,28 +326,35 @@ module Text =
     let measure(font: SpriteFont, text: string): float32 =
         text |> Seq.fold (fun v c -> v + (c |> function | ' ' -> spacing | c -> -0.5f + float32 (font.Char(c).Width) / fontscale)) 0.5f
 
-    let draw(font: SpriteFont, text: string, scale, x, y, color) =
+    let drawB(font: SpriteFont, text: string, scale, x, y, (fg, bg)) =
         let mutable x = x
         let scale2 = scale / fontscale
+        let shadowAdjust = shadow * scale
         text
-        |> Seq.iter
-            (function
-             | ' ' -> x <- x + spacing * scale
-             | c -> 
+        |> Seq.iter (
+            function
+            | ' ' -> x <- x + spacing * scale
+            | c -> 
                 let s = font.Char(c)
                 let w = float32 s.Width * scale2
                 let h = float32 s.Height * scale2
-                Draw.rect(Rect.create x y (x + w) (y + h)) color s
+                let r = Rect.create x y (x + w) (y + h)
+                if (bg: Color).A <> 0uy then
+                    Draw.rect(Rect.translate(shadowAdjust, shadowAdjust) r) bg s
+                Draw.rect r fg s
                 x <- x + w - 0.5f * scale)
+    let draw(font, text, scale, x, y, color) = drawB(font, text, scale, x, y, (color, Color.Transparent))
 
     let drawJust(font: SpriteFont, text, scale, x, y, color, just: float32) = draw(font, text, scale, x - measure(font, text) * scale * just, y, color)
+    let drawJustB(font: SpriteFont, text, scale, x, y, color, just: float32) = drawB(font, text, scale, x - measure(font, text) * scale * just, y, color)
 
-    let drawFill(font: SpriteFont, text, bounds, color, just: float32) =
+    let drawFillB(font: SpriteFont, text, bounds, color, just: float32) =
         let w = measure(font, text)
         let scale = Math.Min(Rect.height bounds * 0.6f, (Rect.width bounds / w))
         let struct (l, _, r, _) = bounds
         let x = (1.0f - just) * (l + scale * w * 0.5f) + just * (r - scale * w * 0.5f) - w * scale * 0.5f
-        draw(font, text, scale, x, Rect.centerY bounds - scale * 0.75f, color)
+        drawB(font, text, scale, x, Rect.centerY bounds - scale * 0.75f, color)
+    let drawFill(font, text, bounds, color, just) = drawFillB(font, text, bounds, (color, Color.Transparent), just)
 
     let createFont (str: string) =
         let f =
@@ -352,11 +363,11 @@ module Text =
                 try
                     use pfc = new PrivateFontCollection()
                     pfc.AddFontFile(str)
-                    new Font(pfc.Families.[0], fontscale)
+                    new System.Drawing.Font(pfc.Families.[0], fontscale)
                 with
                 | err ->
                     Prelude.Common.Logging.Error("Failed to load font file: " + str) (err.ToString())
-                    new Font(str, fontscale)
+                    new System.Drawing.Font(str, fontscale)
             else
-                new Font(str, fontscale)
+                new System.Drawing.Font(str, fontscale)
         new SpriteFont(f)

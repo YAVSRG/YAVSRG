@@ -188,9 +188,9 @@ module GameplayWidgets =
 
         do
             this.Animation.Add(color)
-            this.Add(new Components.TextBox(helper.Scoring.Format, color.GetColor, 0.5f) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.7f))
+            this.Add(new Components.TextBox(helper.Scoring.Format, (fun () -> color.GetColor()), 0.5f) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.7f))
             if conf.ShowName then
-                this.Add(new Components.TextBox(Utils.K helper.Scoring.Name, (fun () -> Color.White), 0.5f) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+                this.Add(new Components.TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
         
         override this.Dispose() =
             if isNull listener then () else listener.Dispose()

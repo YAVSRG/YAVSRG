@@ -36,11 +36,7 @@ let main argv =
             | err -> Logging.Critical "Game failed to launch" (err.ToString()); None
         if (game.IsSome) then
             let game = game.Value
-            try
-                game.Run(120.0)
-            with
-            | err ->
-                Logging.Critical "Game crashed" (err.ToString())
+            try game.Run(120.0) with err -> Logging.Critical "Game crashed" (err.ToString())
             game.Exit()
             Options.save()
             game.Dispose()

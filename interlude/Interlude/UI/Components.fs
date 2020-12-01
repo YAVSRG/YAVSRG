@@ -29,8 +29,11 @@ module Components =
 
     type TextBox(textFunc, color, just) =
         inherit Widget()
+
+        new(textFunc, scolor, just) = TextBox(textFunc, (fun () -> scolor(), Color.Transparent), just)
+
         override this.Draw() = 
-            Text.drawFill(Themes.font(), textFunc(), this.Bounds, color(), just)
+            Text.drawFillB(Themes.font(), textFunc(), this.Bounds, color(), just)
             base.Draw()
 
     type Clickable(onClick, onHover) =
@@ -57,7 +60,7 @@ module Components =
         override this.Draw() =
             Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
             Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
-            Text.drawFill(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value)), 0.5f)
+            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
 
         override this.Update(bounds, elapsedTime) =
             if bind.Get().Tapped(false) then onClick()
@@ -239,19 +242,3 @@ module Components =
 
         override this.Dispose() =
             if active then Input.removeInputMethod()
-
-    type SelectionWheel() =
-        inherit Widget()
-
-        let index = 0
-        let items = new List<string * Widget>()
-        member this.Add(name, w) =
-            items.Add((name, w))
-
-        override this.Draw() =
-            Draw.rect(this.Bounds |> Rect.sliceLeft(100.0f))(Color.Black)(Sprite.Default)
-            let struct (left, top, right, bottom) = this.Bounds
-            for i in 0..(items.Count-1) do
-                let (n, w) = items.[i]
-                Text.draw(Themes.font(), n, 30.0f, left + 50.0f, top + 50.0f + float32 i * 50.0f, Color.White)
-                if index = i then w.Draw()

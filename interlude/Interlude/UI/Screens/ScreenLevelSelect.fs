@@ -133,8 +133,8 @@ module ScreenLevelSelect =
                         (Quad.colorOf <| Screens.accentShade(127, 1.0f, 0.2f))
                         (Sprite.gridUV(0, 0)Sprite.Default)
                     Draw.rect(Rect.sliceBottom(25.0f)bounds)(Screens.accentShade(60, 0.3f, 0.0f))Sprite.Default
-                    Text.draw(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, Color.White)
-                    Text.draw(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, Color.White)
+                    Text.drawB(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, (Color.White, Color.Black))
+                    Text.drawB(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, (Color.White, Color.Black))
 
                     let f (p: PersonalBests<'T> option) (format: 'T -> string) (color: 'T -> Color) =
                         match p with
@@ -258,21 +258,6 @@ module ScreenLevelSelect =
             "Creator", Comparison(fun a b -> a.Creator.CompareTo(b.Creator))
         ]
 
-    """let colorBy = dict[
-            "Grade",
-            fun (acc, lamp, clear) ->
-                match acc with
-                | None -> Color.Transparent
-                | Some ((p1, r1), (p2, r2)) ->
-                    if r1 < rate then
-                        if r2 < rate then
-                            Color.Transparent
-                        else
-                            themeConfig.GradeColors.[grade p2 themeConfig.GradeThresholds] |> otkColor
-                    else
-                        themeConfig.GradeColors.[grade p1 themeConfig.GradeThresholds] |> otkColor
-        ]""" |> ignore
-
 open ScreenLevelSelect
 open ScreenLevelSelectVars
 
@@ -338,10 +323,10 @@ type ScreenLevelSelect() as this =
         this.Add(scoreboard |> positionWidget(50.0f, 0.0f, 220.0f, 0.0f, -50.0f, 0.4f, -50.0f, 1.0f))
         onChartChange <- scoreboard.Refresh
         this.Add(
-            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Title), K Color.White, 0.5f)
+            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
             |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 100.0f, 0.0f))
         this.Add(
-            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K Color.White, 0.5f)
+            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
             |> positionWidget(0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.4f, 160.0f, 0.0f))
         this.Add(
             new TextBox((fun () -> match difficultyRating with None -> "0.00" | Some d -> sprintf "%.2f" d.Physical), K Color.White, 0.5f)

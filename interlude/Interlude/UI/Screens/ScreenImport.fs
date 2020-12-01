@@ -14,7 +14,7 @@ module FileDropHandling =
 type ImportCard(name, url) as this =
     inherit Widget()
     do
-        this.Add(new TextBox(K name, K Color.White, 0.5f))
+        this.Add(new TextBox(K name, K (Color.White, Color.Black), 0.5f))
         this.Add(
             new Clickable(
                 (fun () ->
