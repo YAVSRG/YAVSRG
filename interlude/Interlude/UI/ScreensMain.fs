@@ -115,7 +115,7 @@ type Toolbar() as this =
         this.Add(new TextBox(K version, K  (Color.White, Color.Black), 1.0f) |> positionWidget(-200.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
         this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-200.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
         this.Add(new Button((fun () -> Screens.popScreen(ScreenTransitionFlag.Default)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
-        this.Add(new Button((fun () -> (ScreenOptions >> (fun s -> s :> Screen), ScreenTransitionFlag.Default) |> Screens.addScreen), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button((fun () -> Screens.addDialog(new OptionsMenu())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button((fun () -> (ScreenImport >> (fun s -> s :> Screen), ScreenTransitionFlag.Default) |> Screens.addScreen), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Jukebox())
@@ -218,23 +218,23 @@ type ScreenContainer() as this =
         Screens.parallaxX.SetTarget(Mouse.X() / Render.vwidth)
         Screens.parallaxY.SetTarget(Mouse.Y() / Render.vheight)
         Screens.accentColor.SetColor(Themes.accentColor)
-        base.Update(elapsedTime, bounds)
         if dialogs.Count > 0 then
-            dialogs.[dialogs.Count - 1].Update(elapsedTime, toolbar.Bounds)
+            dialogs.[dialogs.Count - 1].Update(elapsedTime, bounds)
             if dialogs.[dialogs.Count - 1].State = WidgetState.Disabled then
                 dialogs.[dialogs.Count - 1].Dispose()
                 dialogs.RemoveAt(dialogs.Count - 1)
             current.Animation.Update(elapsedTime)
+            Screens.logo.Update(elapsedTime, bounds)
         else
+            base.Update(elapsedTime, bounds)
             current.Update(elapsedTime, toolbar.Bounds)
 
     override this.Draw() =
         Screens.drawBackground(this.Bounds, Color.White, 1.0f)
         Draw.rect this.Bounds (Color.FromArgb(Screens.backgroundDim.Value * 255.0f |> int, 0, 0, 0)) Sprite.Default
         current.Draw()
-        for d in dialogs do
-            d.Draw()
         base.Draw()
+        //TODO: move all this transitional logic somewhere nice and have lots of them
         if not <| screenTransition.Complete() then
             let amount = Math.Clamp((if t1.Elapsed < transitionTime then t1.Elapsed / transitionTime else (transitionTime - t2.Elapsed) / transitionTime), 0.0, 1.0) |> float32
 
@@ -256,3 +256,5 @@ type ScreenContainer() as this =
             Screens.drawBackground(this.Bounds, Screens.accentShade(255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
             Stencil.finish()
             if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
+        for d in dialogs do
+            d.Draw()

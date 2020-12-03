@@ -4,6 +4,8 @@ open Prelude.Common
 open Interlude.Options
 open Interlude.Render
 open Interlude
+open Interlude.Utils
+open Interlude.Options
 open Interlude.UI.Components
 open OpenTK
 open FSharp.Reflection
@@ -14,29 +16,68 @@ type ISelectionWheelItem() =
     inherit Widget()
 
     let mutable selected = false
+    member this.Selected = selected
 
-    abstract member Left: unit -> unit
-    abstract member Right: unit -> unit
     abstract member Select: unit -> unit
+    default this.Select() = selected <- true
     abstract member Deselect: unit -> unit
-
+    default this.Deselect() = selected <- false
 
 type SelectionWheel() =
-    inherit Widget()
+    inherit ISelectionWheelItem()
 
-    let index = 0
-    let items = new List<string * Widget>()
-    member this.Add(name, w) =
-        items.Add((name, w))
+    let WIDTH = 500.0f
+
+    let mutable index = 0
+    let items = new List<ISelectionWheelItem>()
+    override this.Add(w) = failwith "don't use this, use AddItem"
+    member this.AddItem(w) = items.Add(w); w.AddTo(this)
 
     override this.Draw() =
-        Draw.rect(this.Bounds |> Rect.sliceLeft(100.0f))(Color.Black)(Sprite.Default)
+        Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH))(Color.Black)(Sprite.Default)
         let struct (left, top, right, bottom) = this.Bounds
-        for i in 0..(items.Count-1) do
-            let (n, w) = items.[i]
-            Text.draw(Themes.font(), n, 30.0f, left + 50.0f, top + 50.0f + float32 i * 50.0f, Color.White)
-            if index = i then w.Draw()
+        let mutable t = top
+        for i in 0 .. (items.Count - 1) do
+            let w = items.[i]
+            let h = w.Bounds |> Rect.height
+            if index = i then Draw.rect(Rect.create left t (left + WIDTH) (t + h))(Color.FromArgb(255, 80, 80, 80))(Sprite.Default)
+            w.Draw()
+            t <- t + h
 
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        let struct (left, _, _, bottom) = this.Bounds
+        let mutable flag = true
+        let mutable t = 0.0f
+        for i in 0 .. (items.Count-1) do
+            let w = items.[i]
+            if w.Selected then flag <- false
+            w.Update(elapsedTime, Rect.create left t (left + WIDTH) bottom)
+            let h = w.Bounds |> Rect.height
+            t <- t + h
+        if flag && this.Selected then
+            if options.Hotkeys.Select.Get().Tapped(false) then items.[index].Select()
+            elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+            elif options.Hotkeys.Next.Get().Tapped(false) then index <- (index + 1) % items.Count
+            elif options.Hotkeys.Previous.Get().Tapped(false) then index <- (index + items.Count - 1) % items.Count
+
+module SelectionWheel =
+
+    type DummyItem(name) as this =
+        inherit ISelectionWheelItem()
+        do
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow else Color.White), 0.5f))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if this.Selected && options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+
+    let fromRecord<'T>(record: 'T) =
+        let t = typeof<'T>
+        let fields = FSharpType.GetRecordFields(t)
+        let sw = new SelectionWheel()
+        fields |> Array.iter (fun f -> sw.AddItem(new DummyItem(f.Name)))
+        sw
 
 type ConfigEditor<'T>(data: 'T) as this =
     inherit FlowContainer()
@@ -57,8 +98,13 @@ type ConfigEditor<'T>(data: 'T) as this =
         |> Array.iter this.Add
         this.Reposition(100.0f, 40.0f, -100.0f, -40.0f)
 
-type ScreenOptions() as this =
-    inherit Screen()
-
+type OptionsMenu() as this =
+    inherit Dialog()
+    let sw = SelectionWheel.fromRecord(options)
     do  
-        this.Add(new ConfigEditor<GameOptions>(Options.options))
+        sw.Select()
+        this.Add(sw)
+    override this.OnClose() = ()
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if not sw.Selected then this.Close()

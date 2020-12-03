@@ -160,11 +160,10 @@ module ScreenLevelSelect =
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + 65.0f)
                     let struct (left, _, right, bottom) = bounds
                     Draw.rect(bounds)(if selectedGroup = name then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
-                    Text.drawFill(font(), name, bounds, Color.White, 0.5f)
+                    Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
                 if expandedGroup = name then
                     List.fold (fun t (i: SelectableItem) -> i.Draw(t)) (top + 80.0f) items
-                else
-                    top + 80.0f
+                else top + 80.0f
 
         member this.Update(top: float32, elapsedTime): float32 =
             this.Navigate()
@@ -272,7 +271,7 @@ type ScreenLevelSelect() as this =
     let scoreboard = new Scoreboard()
 
     let refresh() =
-        let groups = cache.GetGroups groupBy.[Options.options.ChartGroupMode.Get()] sortBy.[Options.options.ChartSortMode.Get()] <| searchText.Get()
+        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] <| searchText.Get()
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
@@ -303,22 +302,22 @@ type ScreenLevelSelect() as this =
         expandedGroup <- selectedGroup
 
     do
-        if not <| sortBy.ContainsKey(Options.options.ChartSortMode.Get()) then Options.options.ChartSortMode.Set("Title")
-        if not <| groupBy.ContainsKey(Options.options.ChartGroupMode.Get()) then Options.options.ChartGroupMode.Set("Pack")
+        if not <| sortBy.ContainsKey(options.ChartSortMode.Get()) then options.ChartSortMode.Set("Title")
+        if not <| groupBy.ContainsKey(options.ChartGroupMode.Get()) then options.ChartGroupMode.Set("Pack")
         this.Animation.Add(scrollPos)
         scrollBy <- fun amt -> scrollPos.SetTarget(scrollPos.Target + amt)
         this.Add(
             let sorts = sortBy.Keys |> Array.ofSeq
-            new Dropdown(sorts, Array.IndexOf(sorts, Options.options.ChartSortMode.Get()),
-                (fun i -> Options.options.ChartSortMode.Set(sorts.[i]); refresh()), "Sort by", 50.0f)
+            new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Get()),
+                (fun i -> options.ChartSortMode.Set(sorts.[i]); refresh()), "Sort by", 50.0f)
             |> positionWidget(-400.0f, 1.0f, 100.0f, 0.0f, -250.0f, 1.0f, 400.0f, 0.0f))
         this.Add(
             let groups = groupBy.Keys |> Array.ofSeq
-            new Dropdown(groups, Array.IndexOf(groups, Options.options.ChartGroupMode.Get()),
-                (fun i -> Options.options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
+            new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Get()),
+                (fun i -> options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
             |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f))
         this.Add(
-            new TextEntry(new WrappedSetting<string, string>(searchText, (fun s -> searchTimer.Restart(); s), id), Some (Options.options.Hotkeys.Search :> ISettable<Bind>), "search")
+            new TextEntry(new WrappedSetting<string, string>(searchText, (fun s -> searchTimer.Restart(); s), id), Some (options.Hotkeys.Search :> ISettable<Bind>), "search")
             |> positionWidget(-600.0f, 1.0f, 20.0f, 0.0f, -50.0f, 1.0f, 80.0f, 0.0f))
         this.Add(scoreboard |> positionWidget(50.0f, 0.0f, 220.0f, 0.0f, -50.0f, 0.4f, -50.0f, 1.0f))
         onChartChange <- scoreboard.Refresh
@@ -341,19 +340,18 @@ type ScreenLevelSelect() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Options.options.Hotkeys.Select.Get().Tapped(false) then
-            playCurrentChart()
-        elif Options.options.Hotkeys.UpRateSmall.Get().Tapped(false) then changeRate(0.01f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif Options.options.Hotkeys.UpRateHalf.Get().Tapped(false) then changeRate(0.05f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif Options.options.Hotkeys.UpRate.Get().Tapped(false) then changeRate(0.1f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif Options.options.Hotkeys.DownRateSmall.Get().Tapped(false) then changeRate(-0.01f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif Options.options.Hotkeys.DownRateHalf.Get().Tapped(false) then changeRate(-0.05f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif Options.options.Hotkeys.DownRate.Get().Tapped(false) then changeRate(-0.1f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif Options.options.Hotkeys.Next.Get().Tapped(false) then
+        if options.Hotkeys.Select.Get().Tapped(false) then playCurrentChart()
+        elif options.Hotkeys.UpRateSmall.Get().Tapped(false) then changeRate(0.01f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.UpRateHalf.Get().Tapped(false) then changeRate(0.05f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.UpRate.Get().Tapped(false) then changeRate(0.1f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.DownRateSmall.Get().Tapped(false) then changeRate(-0.01f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.DownRateHalf.Get().Tapped(false) then changeRate(-0.05f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.DownRate.Get().Tapped(false) then changeRate(-0.1f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.Next.Get().Tapped(false) then
             if lastItem.IsSome then
                 let h = (lastItem.Value |> snd).Hash
                 navigation <- Navigation.Forward(selectedGroup = fst lastItem.Value && selectedChart = h)
-        elif Options.options.Hotkeys.Previous.Get().Tapped(false) then
+        elif options.Hotkeys.Previous.Get().Tapped(false) then
             if lastItem.IsSome then
                 navigation <- Navigation.Backward(lastItem.Value)
         let struct (left, top, right, bottom)  = this.Bounds

@@ -1,5 +1,6 @@
-﻿namespace Interlude.Options
+﻿namespace Interlude
 
+open System
 open System.Collections.Generic
 open System.IO
 open OpenTK.Input
@@ -100,7 +101,7 @@ type FailType =
 type ListSelection<'T> = int * 'T list
 
 type ProfileStats = {
-    //todo: rrd graph of improvement over time/session performances
+    //todo: rrd graph of improvement over time/session performances. or not, link to kamai and let kiam handle it
     TopPhysical: Setting<TopScore list>
     TopTechnical: Setting<TopScore list>
 } with
@@ -218,9 +219,9 @@ module Options =
         | :? FileNotFoundException -> Logging.Info("No config file found, creating it.") ""
         | err ->
             Logging.Critical("Could not load config.json! Maybe it is corrupt?") (err.ToString())
-            System.Console.WriteLine("If you would like to launch anyway, press ENTER.")
-            System.Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
-            System.Console.ReadLine() |> ignore
+            Console.WriteLine("If you would like to launch anyway, press ENTER.")
+            Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
+            Console.ReadLine() |> ignore
             Logging.Critical("User has chosen to launch game with default config.") ""
         
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
@@ -232,9 +233,9 @@ module Options =
         | :? FileNotFoundException -> Logging.Info("No options file found, creating it.") ""
         | err ->
             Logging.Critical("Could not load options.json! Maybe it is corrupt?") (err.ToString())
-            System.Console.WriteLine("If you would like to proceed anyway, press ENTER.")
-            System.Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
-            System.Console.ReadLine() |> ignore
+            Console.WriteLine("If you would like to proceed anyway, press ENTER.")
+            Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
+            Console.ReadLine() |> ignore
             Logging.Critical("User has chosen to proceed with game setup with default game settings.") ""
 
         Themes.loadThemes(options.EnabledThemes)

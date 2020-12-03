@@ -219,6 +219,7 @@ type Dialog() as this =
     member this.Close() =
         fade.SetTarget(0.0f)
 
+    // Called when dialog actually closes (end of animation)
     abstract member OnClose: unit -> unit
 
     override this.Draw() =
