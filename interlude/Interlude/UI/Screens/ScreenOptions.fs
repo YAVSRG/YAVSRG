@@ -12,7 +12,7 @@ open FSharp.Reflection
 open System.Collections.Generic
 
 [<AbstractClass>]
-type ISelectionWheelItem() =
+type ISelectionWheel() =
     inherit Widget()
 
     let mutable selected = false
@@ -24,12 +24,12 @@ type ISelectionWheelItem() =
     default this.Deselect() = selected <- false
 
 type SelectionWheel() as this  =
-    inherit ISelectionWheelItem()
+    inherit ISelectionWheel()
 
-    let WIDTH = 500.0f
+    static let WIDTH = 350.0f
 
     let mutable index = 0
-    let items = new List<ISelectionWheelItem>()
+    let items = new List<ISelectionWheel>()
     let collapse = new Animation.AnimationFade(1.0f)
     do this.Animation.Add(collapse)
     override this.Select() = base.Select(); collapse.SetTarget(0.0f)
@@ -62,7 +62,7 @@ type SelectionWheel() as this  =
         let struct (left, _, _, bottom) = this.Bounds
         let mutable flag = true
         let mutable t = 0.0f
-        for i in 0 .. (items.Count-1) do
+        for i in 0 .. (items.Count - 1) do
             let w = items.[i]
             if w.Selected then flag <- false
             w.Update(elapsedTime, Rect.create (left - o) t (left + WIDTH - o) bottom)
@@ -77,13 +77,33 @@ type SelectionWheel() as this  =
 module SelectionWheel =
 
     type DummyItem(name) as this =
-        inherit ISelectionWheelItem()
+        inherit ISelectionWheel()
         do
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow else Color.White), 0.5f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if this.Selected && options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+
+    type SelectionWheelItem(name, sw: SelectionWheel) as this =
+        inherit ISelectionWheel()
+        do
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
+        override this.Select() = base.Select(); sw.Select()
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if not sw.Selected then this.Deselect()
+            let struct (_, _, r, _) = this.Bounds
+            sw.Update(elapsedTime, this.Parent.Bounds |> Rect.trimLeft(r))
+        override this.Draw() =
+            Stencil.create(false)
+            let struct (_, _, r, _) = this.Bounds
+            Draw.rect(this.Parent.Bounds |> Rect.trimLeft(r))(Color.Transparent)(Sprite.Default)
+            Stencil.draw()
+            sw.Draw()
+            Stencil.finish()
+            base.Draw()
 
     let fromRecord<'T>(record: 'T) =
         let t = typeof<'T>
@@ -113,8 +133,9 @@ type ConfigEditor<'T>(data: 'T) as this =
 
 type OptionsMenu() as this =
     inherit Dialog()
-    let sw = SelectionWheel.fromRecord(options)
+    let sw = new SelectionWheel()
     do  
+        sw.AddItem(new SelectionWheel.SelectionWheelItem("Test", SelectionWheel.fromRecord(options)))
         sw.Select()
         this.Add(sw)
     override this.OnClose() = ()

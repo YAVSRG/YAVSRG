@@ -66,6 +66,7 @@ type Widget() =
     member this.Position = (left, top, right, bottom)
     member this.State with get() = state and set(value) = state <- value
     member this.Children = children
+    member this.Parent = parent.Value
     member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
 
     //todo: locks on children for thread protection
