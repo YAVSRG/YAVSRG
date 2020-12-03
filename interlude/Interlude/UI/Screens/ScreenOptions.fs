@@ -23,36 +23,49 @@ type ISelectionWheelItem() =
     abstract member Deselect: unit -> unit
     default this.Deselect() = selected <- false
 
-type SelectionWheel() =
+type SelectionWheel() as this  =
     inherit ISelectionWheelItem()
 
     let WIDTH = 500.0f
 
     let mutable index = 0
     let items = new List<ISelectionWheelItem>()
+    let collapse = new Animation.AnimationFade(1.0f)
+    do this.Animation.Add(collapse)
+    override this.Select() = base.Select(); collapse.SetTarget(0.0f)
+    override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
+
     override this.Add(w) = failwith "don't use this, use AddItem"
     member this.AddItem(w) = items.Add(w); w.AddTo(this)
 
     override this.Draw() =
-        Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH))(Color.Black)(Sprite.Default)
+        let o = WIDTH * collapse.Value
         let struct (left, top, right, bottom) = this.Bounds
+        Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o))(Color.FromArgb(180, 30, 30, 30))(Sprite.Default)
+        Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o) |> Rect.sliceRight(5.0f))(Color.White)(Sprite.Default)
         let mutable t = top
         for i in 0 .. (items.Count - 1) do
             let w = items.[i]
             let h = w.Bounds |> Rect.height
-            if index = i then Draw.rect(Rect.create left t (left + WIDTH) (t + h))(Color.FromArgb(255, 80, 80, 80))(Sprite.Default)
+            if index = i then
+                Draw.quad
+                    (Rect.create (left - o) t (left + WIDTH - o) (t + h) |> Quad.ofRect)
+                    (Color.FromArgb(255,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(255,180,180,180))
+                    Sprite.DefaultQuad
             w.Draw()
             t <- t + h
 
     override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+        let struct (left, _, right, bottom) = bounds
+        base.Update(elapsedTime, struct (left, 0.0f, right, bottom))
+        let o = WIDTH * collapse.Value
         let struct (left, _, _, bottom) = this.Bounds
         let mutable flag = true
         let mutable t = 0.0f
         for i in 0 .. (items.Count-1) do
             let w = items.[i]
             if w.Selected then flag <- false
-            w.Update(elapsedTime, Rect.create left t (left + WIDTH) bottom)
+            w.Update(elapsedTime, Rect.create (left - o) t (left + WIDTH - o) bottom)
             let h = w.Bounds |> Rect.height
             t <- t + h
         if flag && this.Selected then

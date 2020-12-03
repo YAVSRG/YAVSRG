@@ -223,7 +223,7 @@ type Dialog() as this =
     abstract member OnClose: unit -> unit
 
     override this.Draw() =
-        Draw.rect(this.Bounds)(Color.FromArgb(int (127.0f * fade.Value), 0, 0, 0))(Sprite.Default)
+        Draw.rect(this.Bounds)(Color.FromArgb(int (180.0f * fade.Value), 0, 0, 0))(Sprite.Default)
         base.Draw()
 
     override this.Update(elapsedTime, bounds) =
