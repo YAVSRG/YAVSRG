@@ -25,16 +25,16 @@ type WindowResolution =
 type GameConfig = {
     WorkingDirectory: string
     Locale: string
-    WindowMode: WindowType
-    Resolution: WindowResolution
-    FrameLimiter: float
+    WindowMode: Setting<WindowType>
+    Resolution: Setting<WindowResolution>
+    FrameLimiter: Setting<float>
 } with
     static member Default = {
         WorkingDirectory = ""
         Locale = "en_GB.txt"
-        WindowMode = WindowType.BORDERLESS
-        Resolution = Custom (1024, 768)
-        FrameLimiter = 0.0
+        WindowMode = Setting(WindowType.BORDERLESS)
+        Resolution = Setting(Custom (1024, 768))
+        FrameLimiter = Setting(0.0)
     }
 
 type Hotkeys = {
@@ -96,8 +96,8 @@ type Pacemaker =
 | Lamp of Lamp
 
 type FailType =
-| Instant
-| AtEnd
+| Instant = 0
+| AtEnd = 1
 type ListSelection<'T> = int * 'T list
 
 type ProfileStats = {
@@ -113,7 +113,7 @@ type ProfileStats = {
 type GameOptions = {
     AudioOffset: NumSetting<float>
     AudioVolume: NumSetting<float>
-    CurrentProfile: Setting<string>
+    //CurrentProfile: Setting<string>
     CurrentChart: Setting<string>
     CurrentOptionsTab: Setting<string>
     EnabledThemes: List<string>
@@ -138,6 +138,7 @@ type GameOptions = {
     ScoreSaveCondition: Setting<ScoreSaving>
     FailCondition: Setting<FailType>
     Pacemaker: Setting<Pacemaker>
+    GameplayBinds: (Bind array) array
 
     Stats: ProfileStats
 
@@ -146,12 +147,11 @@ type GameOptions = {
     ChartColorMode: Setting<string>
 
     Hotkeys: Hotkeys
-    GameplayBinds: (Bind array) array
 } with
     static member Default = {
         AudioOffset = FloatSetting(0.0, -500.0, 500.0)
         AudioVolume = FloatSetting(0.1, 0.0, 1.0)
-        CurrentProfile = Setting("")
+        //CurrentProfile = Setting("")
         CurrentChart = Setting("")
         CurrentOptionsTab = Setting("General")
         EnabledThemes = new List<string>()
@@ -174,7 +174,7 @@ type GameOptions = {
         HPSystems = Setting((0, [VG]))
         AccSystems = Setting((0, [SCPlus 4]))
         ScoreSaveCondition = Setting(ScoreSaving.Always)
-        FailCondition = Setting(AtEnd)
+        FailCondition = Setting(FailType.AtEnd)
         Pacemaker = Setting(Accuracy 0.95)
 
         //todo: move to scores database
@@ -197,6 +197,9 @@ type GameOptions = {
     }
 
 module Options =
+    //forward ref for applying game config options. it is initialised in the constructor of Game
+    let mutable applyOptions = fun () -> ()
+
     let resolutions: (struct (int * int)) array =
         [|struct (800, 600); struct (1024, 768); struct (1280, 800); struct (1280, 1024); struct (1366, 768); struct (1600, 900);
             struct (1600, 1024); struct (1680, 1050); struct (1920, 1080); struct (2715, 1527)|]

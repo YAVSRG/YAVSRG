@@ -66,34 +66,6 @@ module Components =
             if bind.Get().Tapped(false) then onClick()
             base.Update(bounds, elapsedTime)
 
-    type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, label) as this =
-        inherit Widget()
-
-        let color = AnimationFade(0.5f)
-        let mutable dragging = false
-
-        do
-            this.Animation.Add(color)
-            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
-
-        override this.Update(time, struct (l, t, r, b)) =
-            base.Update(time, struct (l, t, r, b))
-            if (Mouse.pressed(Input.MouseButton.Left) && dragging) then
-                let amt = (Mouse.X() - l) / (r - l)
-                setting.SetPercent(amt)
-            else
-                dragging <- false
-
-        override this.Draw() =
-            let v = setting.GetPercent()
-            let struct (l, t, r, b) = this.Bounds
-            let cursor = Rect.create (l + (r - l) * v) (b - 20.0f) (l + (r - l) * v) (b - 10.0f)
-            Text.drawFill(Themes.font(), sprintf "%s: %s" label <| setting.Get().ToString(), Rect.trimBottom 30.0f this.Bounds, Color.White, 0.5f)
-            Draw.rect (this.Bounds |> Rect.sliceBottom 30.0f |> Rect.expand(5.0f, -5.0f)) Color.Black Sprite.Default
-            Draw.rect (this.Bounds |> Rect.sliceBottom 30.0f |> Rect.expand(0.0f, -10.0f)) (Screens.accentShade(255, 1.0f, v)) Sprite.Default
-            Draw.rect (cursor |> Rect.expand(15.0f, 15.0f)) Color.Black Sprite.Default
-            Draw.rect (cursor |> Rect.expand(10.0f, 10.0f)) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
-
     type FlowContainer(?spacingX: float32, ?spacingY: float32) =
         inherit Widget()
         let spacingX, spacingY = (defaultArg spacingX 10.0f, defaultArg spacingY 5.0f)
@@ -149,32 +121,6 @@ module Components =
             if (this.Initialised) then this.FlowContent(true)
 
         member this.Clear() = this.Children.Clear()
-            
-    type Selector(options: string array, index, func, label) as this =
-        inherit Frame()
-                    
-        let color = AnimationFade(0.5f)
-        let mutable index = index
-            
-        do
-            this.Animation.Add(color)
-            let cycle() =
-                index <- ((index + 1) % options.Length)
-                func(index, options.[index])
-            this.Add(new Clickable(cycle, fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
-            
-        override this.Draw() =
-            base.Draw()
-            Text.drawFill(Themes.font(), label, Rect.sliceTop 30.0f this.Bounds, Color.White, 0.5f)
-            Text.drawFill(Themes.font(), options.[index], Rect.trimTop 30.0f this.Bounds, Color.White, 0.5f)
-            
-        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: Setting<'T>, label) =
-            let names = Enum.GetNames(typeof<'T>)
-            let values = Enum.GetValues(typeof<'T>) :?> 'T array
-            new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])), label)
-
-        static member FromBool(setting: Setting<bool>, label) =
-            new Selector([|"NO" ; "YES"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)), label)
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()

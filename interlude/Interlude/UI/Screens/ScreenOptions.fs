@@ -1,18 +1,21 @@
 ﻿namespace Interlude.UI
 
+open System
+open FSharp.Reflection
+open System.Collections.Generic
+open OpenTK
 open Prelude.Common
 open Interlude.Options
 open Interlude.Render
 open Interlude
 open Interlude.Utils
+open Interlude.Input
 open Interlude.Options
+open Interlude.UI.Animation
 open Interlude.UI.Components
-open OpenTK
-open FSharp.Reflection
-open System.Collections.Generic
 
 [<AbstractClass>]
-type ISelectionWheel() =
+type ISelectionWheel(onDeselect) =
     inherit Widget()
 
     let mutable selected = false
@@ -21,16 +24,16 @@ type ISelectionWheel() =
     abstract member Select: unit -> unit
     default this.Select() = selected <- true
     abstract member Deselect: unit -> unit
-    default this.Deselect() = selected <- false
+    default this.Deselect() = selected <- false; onDeselect()
 
-type SelectionWheel() as this  =
-    inherit ISelectionWheel()
+type SelectionWheel(onDeselect) as this  =
+    inherit ISelectionWheel(onDeselect)
 
     static let WIDTH = 350.0f
 
     let mutable index = 0
     let items = new List<ISelectionWheel>()
-    let collapse = new Animation.AnimationFade(1.0f)
+    let collapse = new AnimationFade(1.0f)
     do this.Animation.Add(collapse)
     override this.Select() = base.Select(); collapse.SetTarget(0.0f)
     override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
@@ -77,7 +80,7 @@ type SelectionWheel() as this  =
 module SelectionWheel =
 
     type DummyItem(name) as this =
-        inherit ISelectionWheel()
+        inherit ISelectionWheel(ignore)
         do
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow else Color.White), 0.5f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
@@ -86,7 +89,7 @@ module SelectionWheel =
             if this.Selected && options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
 
     type SelectionWheelItem(name, sw: SelectionWheel) as this =
-        inherit ISelectionWheel()
+        inherit ISelectionWheel(ignore)
         do
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
@@ -105,37 +108,104 @@ module SelectionWheel =
             Stencil.finish()
             base.Draw()
 
-    let fromRecord<'T>(record: 'T) =
-        let t = typeof<'T>
-        let fields = FSharpType.GetRecordFields(t)
-        let sw = new SelectionWheel()
-        fields |> Array.iter (fun f -> sw.AddItem(new DummyItem(f.Name)))
+    type Selector(items: string array, index, func, name, onDeselect) as this =
+        inherit ISelectionWheel(onDeselect)
+        let mutable index = index
+        let fd() =
+            index <- ((index + 1) % items.Length)
+            func(index, items.[index])
+        let bk() =
+            index <- ((index + items.Length - 1) % items.Length)
+            func(index, items.[index])
+        do
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
+            this.Add(new TextBox((fun () -> items.[index]), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+            this.Add(new Clickable((fun () -> if this.Selected then fd()), ignore))
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if this.Selected then
+                if options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+                elif options.Hotkeys.Next.Get().Tapped(false) then fd()
+                elif options.Hotkeys.Previous.Get().Tapped(false) then bk()
+
+        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: Setting<'T>, label, onDeselect) =
+            let names = Enum.GetNames(typeof<'T>)
+            let values = Enum.GetValues(typeof<'T>) :?> 'T array
+            new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])), label, onDeselect)
+
+        static member FromBool(setting: Setting<bool>, label, onDeselect) =
+            new Selector([|"NO" ; "YES"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)), label, onDeselect)
+    
+    type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, name, onDeselect) as this =
+        inherit ISelectionWheel(onDeselect)
+        let color = AnimationFade(0.5f)
+        let mutable dragging = false
+        let chPercent(v) = setting.SetPercent(setting.GetPercent() + v)
+        do
+            this.Animation.Add(color)
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
+            this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            let struct (l, t, r, b) = this.Bounds |> Rect.expand(-15.0f, -15.0f)
+            if this.Selected then
+                if (Mouse.pressed(Input.MouseButton.Left) && dragging) then
+                    let amt = (Mouse.X() - l) / (r - l)
+                    setting.SetPercent(amt)
+                else
+                    dragging <- false
+                if options.Hotkeys.UpRateHalf.Get().Tapped(false) || options.Hotkeys.Next.Get().Tapped(false) then chPercent(0.05f)
+                elif options.Hotkeys.UpRateSmall.Get().Tapped(false) then chPercent(0.01f)
+                elif options.Hotkeys.UpRate.Get().Tapped(false) then chPercent(0.1f)
+                elif options.Hotkeys.DownRateHalf.Get().Tapped(false) || options.Hotkeys.Previous.Get().Tapped(false) then chPercent(-0.05f)
+                elif options.Hotkeys.DownRateSmall.Get().Tapped(false) then chPercent(-0.01f)
+                elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+                elif options.Hotkeys.DownRate.Get().Tapped(false) then chPercent(-0.1f)
+
+        override this.Draw() =
+            let v = setting.GetPercent()
+            let struct (l, t, r, b) = this.Bounds |> Rect.expand(-15.0f, -15.0f)
+            let cursor = Rect.create (l + (r - l) * v) (b - 10.0f) (l + (r - l) * v) (b)
+            Draw.rect (this.Bounds |> Rect.sliceBottom 30.0f |> Rect.expand(0.0f, -10.0f)) (Screens.accentShade(255, 1.0f, v)) Sprite.Default
+            Draw.rect (cursor |> Rect.expand(10.0f, 10.0f)) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            base.Draw()
+
+    let swBuilder items =
+        let sw = new SelectionWheel(ignore)
+        items |> List.iter sw.AddItem
+        sw
+    let swItemBuilder items name = SelectionWheelItem(name, swBuilder items)
+
+    let fromDummyList(elems) =
+        let sw = new SelectionWheel(ignore)
+        elems |> List.iter (fun f -> sw.AddItem(DummyItem(f)))
         sw
 
-type ConfigEditor<'T>(data: 'T) as this =
-    inherit FlowContainer()
-
-    do
-        let typeName = data.GetType().Name
-        let fields = FSharpType.GetRecordFields(data.GetType())
-        Array.choose (
-            fun p ->
-                let value = FSharpValue.GetRecordField(data, p)
-                match value with
-                | :? FloatSetting as s -> new Slider<float>(s, Localisation.localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
-                | :? IntSetting as s -> new Slider<int>(s, Localisation.localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
-                | :? Setting<bool> as s -> Selector.FromBool(s, Localisation.localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
-                //| :? Setting<'S> as s -> Selector.FromEnum(s, localise(typeName + ".name." + p.Name)) |> Components.positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> Some
-                | _ -> None
-            ) fields
-        |> Array.iter this.Add
-        this.Reposition(100.0f, 40.0f, -100.0f, -40.0f)
+open SelectionWheel
 
 type OptionsMenu() as this =
     inherit Dialog()
-    let sw = new SelectionWheel()
-    do  
-        sw.AddItem(new SelectionWheel.SelectionWheelItem("Test", SelectionWheel.fromRecord(options)))
+    let t s = Localisation.localise("options.name." + s)
+    let sw =
+        swBuilder [
+            swItemBuilder [
+                Slider((options.AudioOffset :?> FloatSetting), t "AudioOffset", fun () -> Audio.globalOffset <- float32 (options.AudioOffset.Get()) * 1.0f<ms>)
+                Slider((options.AudioVolume :?> FloatSetting), t "AudioVolume", fun () -> Audio.changeVolume(options.AudioVolume.Get()))](t "Audio")
+            swItemBuilder [
+                Selector.FromEnum(config.WindowMode, t "WindowMode", Options.applyOptions)
+                //todo: resolution
+                Selector([|"UNLIMITED";"30";"60";"90";"120";"240"|], int(config.FrameLimiter.Get() / 30.0) |> min(5),
+                    (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])), t "FrameLimiter", Options.applyOptions)](t "Display")
+            swItemBuilder [DummyItem("TODO")](t "Themes")
+        ]
+    do
+        sw.AddItem(new SelectionWheel.SelectionWheelItem("Gameplay", SelectionWheel.fromDummyList(["Scroll Speed"; "Hit Position"; "Upscroll"; "Background Dim"; "Screen Cover"; "Pacemaker"])))
+        sw.AddItem(new SelectionWheel.SelectionWheelItem("Noteskin", SelectionWheel.fromDummyList(["Noteskin"; "Edit Colors"])))
         sw.Select()
         this.Add(sw)
     override this.OnClose() = ()
