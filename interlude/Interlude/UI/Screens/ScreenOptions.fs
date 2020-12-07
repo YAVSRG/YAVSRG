@@ -14,70 +14,70 @@ open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
 
-[<AbstractClass>]
-type ISelectionWheel(onDeselect) =
-    inherit Widget()
-
-    let mutable selected = false
-    member this.Selected = selected
-
-    abstract member Select: unit -> unit
-    default this.Select() = selected <- true
-    abstract member Deselect: unit -> unit
-    default this.Deselect() = selected <- false; onDeselect()
-
-type SelectionWheel(onDeselect) as this  =
-    inherit ISelectionWheel(onDeselect)
-
-    static let WIDTH = 350.0f
-
-    let mutable index = 0
-    let items = new List<ISelectionWheel>()
-    let collapse = new AnimationFade(1.0f)
-    do this.Animation.Add(collapse)
-    override this.Select() = base.Select(); collapse.SetTarget(0.0f)
-    override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
-
-    override this.Add(w) = failwith "don't use this, use AddItem"
-    member this.AddItem(w) = items.Add(w); w.AddTo(this)
-
-    override this.Draw() =
-        let o = WIDTH * collapse.Value
-        let struct (left, top, right, bottom) = this.Bounds
-        Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o))(Color.FromArgb(180, 30, 30, 30))(Sprite.Default)
-        Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o) |> Rect.sliceRight(5.0f))(Color.White)(Sprite.Default)
-        let mutable t = top
-        for i in 0 .. (items.Count - 1) do
-            let w = items.[i]
-            let h = w.Bounds |> Rect.height
-            if index = i then
-                Draw.quad
-                    (Rect.create (left - o) t (left + WIDTH - o) (t + h) |> Quad.ofRect)
-                    (Color.FromArgb(255,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(255,180,180,180))
-                    Sprite.DefaultQuad
-            w.Draw()
-            t <- t + h
-
-    override this.Update(elapsedTime, bounds) =
-        let struct (left, _, right, bottom) = bounds
-        base.Update(elapsedTime, struct (left, 0.0f, right, bottom))
-        let o = WIDTH * collapse.Value
-        let struct (left, _, _, bottom) = this.Bounds
-        let mutable flag = true
-        let mutable t = 0.0f
-        for i in 0 .. (items.Count - 1) do
-            let w = items.[i]
-            if w.Selected then flag <- false
-            w.Update(elapsedTime, Rect.create (left - o) t (left + WIDTH - o) bottom)
-            let h = w.Bounds |> Rect.height
-            t <- t + h
-        if flag && this.Selected then
-            if options.Hotkeys.Select.Get().Tapped(false) then items.[index].Select()
-            elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
-            elif options.Hotkeys.Next.Get().Tapped(false) then index <- (index + 1) % items.Count
-            elif options.Hotkeys.Previous.Get().Tapped(false) then index <- (index + items.Count - 1) % items.Count
-
 module SelectionWheel =
+
+    let WIDTH = 350.0f
+
+    [<AbstractClass>]
+    type ISelectionWheel(onDeselect) =
+        inherit Widget()
+
+        let mutable selected = false
+        member this.Selected = selected
+
+        abstract member Select: unit -> unit
+        default this.Select() = selected <- true
+        abstract member Deselect: unit -> unit
+        default this.Deselect() = selected <- false; onDeselect()
+
+    type SelectionWheel(onDeselect) as this  =
+        inherit ISelectionWheel(onDeselect)
+
+        let mutable index = 0
+        let items = new List<ISelectionWheel>()
+        let collapse = new AnimationFade(1.0f)
+        do this.Animation.Add(collapse)
+        override this.Select() = base.Select(); collapse.SetTarget(0.0f)
+        override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
+
+        override this.Add(w) = failwith "don't use this, use AddItem"
+        member this.AddItem(w) = items.Add(w); w.AddTo(this)
+
+        override this.Draw() =
+            let o = WIDTH * collapse.Value
+            let struct (left, top, right, bottom) = this.Bounds
+            Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o))(Color.FromArgb(180, 30, 30, 30))(Sprite.Default)
+            Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o) |> Rect.sliceRight(5.0f))(Color.White)(Sprite.Default)
+            let mutable t = top
+            for i in 0 .. (items.Count - 1) do
+                let w = items.[i]
+                let h = w.Bounds |> Rect.height
+                if index = i then
+                    Draw.quad
+                        (Rect.create (left - o) t (left + WIDTH - o) (t + h) |> Quad.ofRect)
+                        (Color.FromArgb(255,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(255,180,180,180))
+                        Sprite.DefaultQuad
+                w.Draw()
+                t <- t + h
+
+        override this.Update(elapsedTime, bounds) =
+            let struct (left, _, right, bottom) = bounds
+            base.Update(elapsedTime, struct (left, 0.0f, right, bottom))
+            let o = WIDTH * collapse.Value
+            let struct (left, _, _, bottom) = this.Bounds
+            let mutable flag = true
+            let mutable t = 0.0f
+            for i in 0 .. (items.Count - 1) do
+                let w = items.[i]
+                if w.Selected then flag <- false
+                w.Update(elapsedTime, Rect.create (left - o) t (left + WIDTH - o) bottom)
+                let h = w.Bounds |> Rect.height
+                t <- t + h
+            if flag && this.Selected then
+                if options.Hotkeys.Select.Get().Tapped(false) then items.[index].Select()
+                elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+                elif options.Hotkeys.Next.Get().Tapped(false) then index <- (index + 1) % items.Count
+                elif options.Hotkeys.Previous.Get().Tapped(false) then index <- (index + items.Count - 1) % items.Count
 
     type DummyItem(name) as this =
         inherit ISelectionWheel(ignore)
@@ -97,12 +97,10 @@ module SelectionWheel =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if not sw.Selected then this.Deselect()
-            let struct (_, _, r, _) = this.Bounds
-            sw.Update(elapsedTime, this.Parent.Bounds |> Rect.trimLeft(r))
+            sw.Update(elapsedTime, this.Parent.Bounds |> Rect.trimLeft(WIDTH))
         override this.Draw() =
             Stencil.create(false)
-            let struct (_, _, r, _) = this.Bounds
-            Draw.rect(this.Parent.Bounds |> Rect.trimLeft(r))(Color.Transparent)(Sprite.Default)
+            Draw.rect(this.Parent.Bounds |> Rect.trimLeft(WIDTH))(Color.Transparent)(Sprite.Default)
             Stencil.draw()
             sw.Draw()
             Stencil.finish()
@@ -181,11 +179,6 @@ module SelectionWheel =
         sw
     let swItemBuilder items name = SelectionWheelItem(name, swBuilder items)
 
-    let fromDummyList(elems) =
-        let sw = new SelectionWheel(ignore)
-        elems |> List.iter (fun f -> sw.AddItem(DummyItem(f)))
-        sw
-
 open SelectionWheel
 
 type OptionsMenu() as this =
@@ -198,14 +191,26 @@ type OptionsMenu() as this =
                 Slider((options.AudioVolume :?> FloatSetting), t "AudioVolume", fun () -> Audio.changeVolume(options.AudioVolume.Get()))](t "Audio")
             swItemBuilder [
                 Selector.FromEnum(config.WindowMode, t "WindowMode", Options.applyOptions)
-                //todo: resolution
+                //todo: resolution DU editor
                 Selector([|"UNLIMITED";"30";"60";"90";"120";"240"|], int(config.FrameLimiter.Get() / 30.0) |> min(5),
                     (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])), t "FrameLimiter", Options.applyOptions)](t "Display")
             swItemBuilder [DummyItem("TODO")](t "Themes")
-        ]
+            swItemBuilder [
+                Slider((options.ScrollSpeed :?> FloatSetting), t "ScrollSpeed", ignore) :> ISelectionWheel
+                Slider((options.HitPosition :?> IntSetting), t "HitPosition", ignore) :> ISelectionWheel
+                Selector.FromBool(options.Upscroll, t "Upscroll", ignore) :> ISelectionWheel
+                Slider((options.BackgroundDim :?> FloatSetting), t "BackgroundDim", ignore) :> ISelectionWheel
+                swItemBuilder [
+                    //todo: preview of screencover
+                    Slider((options.ScreenCoverDown :?> FloatSetting), t "ScreenCoverDown", ignore) :> ISelectionWheel
+                    Slider((options.ScreenCoverUp :?> FloatSetting), t "ScreenCoverUp", ignore) :> ISelectionWheel
+                    Slider((options.ScreenCoverFadeLength :?> IntSetting), t "ScreenCoverFadeLength", ignore) :> ISelectionWheel
+                    ](t "ScreenCover") :> ISelectionWheel
+                //todo: pacemaker DU editor
+            ](t "Gameplay")
+            swItemBuilder [DummyItem("TODO")](t "Noteskin")
+            swItemBuilder [DummyItem("TODO")](t "Hotkeys")]
     do
-        sw.AddItem(new SelectionWheel.SelectionWheelItem("Gameplay", SelectionWheel.fromDummyList(["Scroll Speed"; "Hit Position"; "Upscroll"; "Background Dim"; "Screen Cover"; "Pacemaker"])))
-        sw.AddItem(new SelectionWheel.SelectionWheelItem("Noteskin", SelectionWheel.fromDummyList(["Noteskin"; "Edit Colors"])))
         sw.Select()
         this.Add(sw)
     override this.OnClose() = ()
