@@ -82,10 +82,26 @@ module SelectionWheel =
     type ActionItem(name, action) as this =
         inherit ISelectionWheel(ignore)
         do
-            this.Add(new TextBox(K name, K Color.White, 0.5f))
+            this.Add(new TextBox(K name, K (Color.White, Color.Black), 0.5f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
         override this.Select() = action()
 
+    type ContainerItem(name, w: ISelectionWheel, onDeselect) as this =
+        inherit ISelectionWheel(onDeselect)
+        do
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
+        override this.Select() = base.Select(); w.Select()
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if not w.Selected then this.Deselect()
+            w.Update(elapsedTime, this.Parent.Bounds |> Rect.trimLeft(WIDTH))
+        override this.Draw() =
+            w.Draw()
+            base.Draw()
+
+    //I'm sure there is a way to make this a special case of container item
+    //but im too dumb to figure it out rn and ultimately it doesn't matter
     type SelectionWheelItem(name, sw: SelectionWheel) as this =
         inherit ISelectionWheel(ignore)
         do
@@ -209,7 +225,7 @@ type OptionsMenu() as this =
                 { new ActionItem(t "NewTheme", ignore) with override this.Select() = Screens.addDialog(TextInputDialog(this.Bounds, "NYI", ignore)) }
                 new ActionItem(t "ChangeTheme", ignore)
                 ](t "Themes")
-            swItemBuilder [ActionItem("TODO", ignore)](t "Noteskin")
+            swItemBuilder [ContainerItem("TODO", ActionItem("TEST", ignore), ignore)](t "Noteskin")
             swItemBuilder [ActionItem("TODO", ignore)](t "Hotkeys")
             swItemBuilder [ActionItem("TODO", ignore)](t "Debug")]
     do

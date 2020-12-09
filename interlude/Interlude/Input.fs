@@ -86,47 +86,50 @@ module Mouse =
 
 type Bind =
     | Dummy
-    | Key of Key
-    | Mouse of MouseButton
-    | Shift of Bind
-    | Alt of Bind //reserved for hard coded behaviours. users should not be able to create alt binds in settings
-    | Ctrl of Bind
+    | Key of Key * modifiers:(bool * bool * bool)
+    | Mouse of MouseButton * modifiers:(bool * bool * bool)
     | Joystick of unit //NYI
     with
         override this.ToString() =
             match this with
             | Dummy -> "DUMMY"
-            | Key k -> k.ToString()
-            | Mouse m -> "M"+m.ToString()
-            | Shift b -> "Shift + " + b.ToString()
-            | Alt b -> "Alt + " + b.ToString()
-            | Ctrl b -> "Ctrl + " + b.ToString()
+            | Key (k, m) -> Bind.ModifierString(m) + k.ToString()
+            | Mouse (b, m) -> Bind.ModifierString(m) + "M"+b.ToString()
             | Joystick _ -> "nyi"
         member this.Pressed(overrideIM) =
             match this with
             | Dummy -> false
-            | Key k -> Keyboard.pressed(k, overrideIM)
-            | Mouse m -> Mouse.pressed(m)
-            | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Pressed(overrideIM)
-            | Alt b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Pressed(overrideIM)
-            | Ctrl b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Pressed(overrideIM)
+            | Key (k, m) -> Bind.ChkModifiers(m) && Keyboard.pressed(k, overrideIM)
+            | Mouse (b, m) -> Bind.ChkModifiers(m) && Mouse.pressed(b)
             | _ -> false
         member this.Tapped(overrideIM) =
             match this with
             | Dummy -> false
-            | Key k -> Keyboard.tapped(k, overrideIM)
-            | Mouse m -> Mouse.Click(m)
-            | Shift b -> (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift)) && b.Tapped(overrideIM)
-            | Alt b -> (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt)) && b.Tapped(overrideIM)
-            | Ctrl b -> (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl)) && b.Tapped(overrideIM)
+            | Key (k, m) -> Bind.ChkModifiers(m) && Keyboard.tapped(k, overrideIM)
+            | Mouse (b, m) -> Bind.ChkModifiers(m) && Mouse.Click(b)
             | _ -> false
         //note that for the sake of completeness released should take an im override too, but there is no context where it matters
         //todo: maybe put it in later
         member this.Released() =
             match this with
             | Dummy -> false
-            | Key k -> Keyboard.released(k)
-            | Mouse m -> Mouse.release(m)
-            | Shift b | Alt b | Ctrl b -> b.Released()
+            | Key (k, m) -> Keyboard.released(k)
+            | Mouse (b, m) -> Mouse.release(b)
             | _ -> false
+        static member private ModifierString((ctrl, alt, shift)) =
+            (if ctrl then "Ctrl + " else "")
+            + (if alt then "Alt + " else "")
+            + (if shift then "Shift + " else "")
+        static member private ChkModifiers((ctrl, alt, shift)) =
+            ctrl = (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl))
+            && shift = (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift))
+            && alt = (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt))
         static member DummyBind = new Setting<Bind>(Dummy)
+
+module Bind =
+    let inline mk k = Key (k, (false, false, false))
+    let inline ctrl k = Key (k, (true, false, false))
+    let inline alt k = Key (k, (false, true, false))
+    let inline shift k = Key (k, (false, false, true))
+    let inline ctrlShift k = Key (k, (true, false, true))
+    let inline ctrlAlt k = Key (k, (true, true, false))
