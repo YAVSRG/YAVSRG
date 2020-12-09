@@ -79,14 +79,12 @@ module SelectionWheel =
                 elif options.Hotkeys.Next.Get().Tapped(false) then index <- (index + 1) % items.Count
                 elif options.Hotkeys.Previous.Get().Tapped(false) then index <- (index + items.Count - 1) % items.Count
 
-    type DummyItem(name) as this =
+    type ActionItem(name, action) as this =
         inherit ISelectionWheel(ignore)
         do
-            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow else Color.White), 0.5f))
+            this.Add(new TextBox(K name, K Color.White, 0.5f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if this.Selected && options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+        override this.Select() = action()
 
     type SelectionWheelItem(name, sw: SelectionWheel) as this =
         inherit ISelectionWheel(ignore)
@@ -187,14 +185,13 @@ type OptionsMenu() as this =
     let sw =
         swBuilder [
             swItemBuilder [
-                Slider((options.AudioOffset :?> FloatSetting), t "AudioOffset", fun () -> Audio.globalOffset <- float32 (options.AudioOffset.Get()) * 1.0f<ms>)
-                Slider((options.AudioVolume :?> FloatSetting), t "AudioVolume", fun () -> Audio.changeVolume(options.AudioVolume.Get()))](t "Audio")
-            swItemBuilder [
-                Selector.FromEnum(config.WindowMode, t "WindowMode", Options.applyOptions)
+                Slider((options.AudioOffset :?> FloatSetting), t "AudioOffset", fun () -> Audio.globalOffset <- float32 (options.AudioOffset.Get()) * 1.0f<ms>) :> ISelectionWheel
+                Slider((options.AudioVolume :?> FloatSetting), t "AudioVolume", fun () -> Audio.changeVolume(options.AudioVolume.Get()))  :> ISelectionWheel
+                Selector.FromEnum(config.WindowMode, t "WindowMode", Options.applyOptions)  :> ISelectionWheel
                 //todo: resolution DU editor
                 Selector([|"UNLIMITED";"30";"60";"90";"120";"240"|], int(config.FrameLimiter.Get() / 30.0) |> min(5),
-                    (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])), t "FrameLimiter", Options.applyOptions)](t "Display")
-            swItemBuilder [DummyItem("TODO")](t "Themes")
+                    (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])), t "FrameLimiter", Options.applyOptions) :> ISelectionWheel
+                ](t "System")
             swItemBuilder [
                 Slider((options.ScrollSpeed :?> FloatSetting), t "ScrollSpeed", ignore) :> ISelectionWheel
                 Slider((options.HitPosition :?> IntSetting), t "HitPosition", ignore) :> ISelectionWheel
@@ -207,9 +204,14 @@ type OptionsMenu() as this =
                     Slider((options.ScreenCoverFadeLength :?> IntSetting), t "ScreenCoverFadeLength", ignore) :> ISelectionWheel
                     ](t "ScreenCover") :> ISelectionWheel
                 //todo: pacemaker DU editor
-            ](t "Gameplay")
-            swItemBuilder [DummyItem("TODO")](t "Noteskin")
-            swItemBuilder [DummyItem("TODO")](t "Hotkeys")]
+                ](t "Gameplay")
+            swItemBuilder [
+                { new ActionItem(t "NewTheme", ignore) with override this.Select() = Screens.addDialog(TextInputDialog(this.Bounds, "NYI", ignore)) }
+                new ActionItem(t "ChangeTheme", ignore)
+                ](t "Themes")
+            swItemBuilder [ActionItem("TODO", ignore)](t "Noteskin")
+            swItemBuilder [ActionItem("TODO", ignore)](t "Hotkeys")
+            swItemBuilder [ActionItem("TODO", ignore)](t "Debug")]
     do
         sw.Select()
         this.Add(sw)

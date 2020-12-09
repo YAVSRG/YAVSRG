@@ -1,10 +1,9 @@
 ﻿namespace Interlude.UI
 
 open System
-open System.Collections.Generic
 open Prelude.Common
 open Interlude
-open Interlude.Utils
+open Interlude.Options
 open Interlude.Render
 open Interlude.UI.Animation
 open Interlude.Input
@@ -131,12 +130,12 @@ module Components =
         do
             this.Animation.Add(color)
             let fr = new Frame()
-            this.Add((new Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.SetTarget(if b then 0.8f else 0.5f))) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
+            this.Add((Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.SetTarget(if b then 0.8f else 0.5f))) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
-                let fc = new FlowContainer(0.0f, 0.0f)
+                let fc = FlowContainer(0.0f, 0.0f)
                 fr.Add(fc)
                 Array.iteri
-                    (fun i o -> fc.Add(new Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
+                    (fun i o -> fc.Add(Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                     options
                 fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
             fr.State <- WidgetState.Disabled
@@ -152,7 +151,7 @@ module Components =
     type TextEntry(s: ISettable<string>, bind: ISettable<Bind> option, prompt: string) as this =
         inherit Frame()
 
-        let color = new AnimationFade(0.5f)
+        let color = AnimationFade(0.5f)
 
         let mutable active = false
         let toggle() =
@@ -166,25 +165,35 @@ module Components =
 
         do
             this.Animation.Add(color)
-            if Option.isNone bind then toggle()
+            if Option.isNone bind then toggle() else this.Add(new Clickable(toggle, ignore))
             this.Add(
-                new TextBox(
+                TextBox(
                     (fun () ->
                         match bind with
                         | Some b ->
                             match s.Get() with
                             | "" -> sprintf "Press %s to %s" (b.Get().ToString()) prompt
                             | text -> text
-                        | None -> prompt),
+                        | None -> match s.Get() with "" -> prompt | text -> text),
                     (fun () -> Screens.accentShade(255, 1.0f, color.Value)), 0.0f))
-            this.Add(
-                new Clickable((if (Option.isSome bind) then toggle else K ()), ignore))
 
-        override this.Update(time, bounds) =
-            base.Update(time, bounds)
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
             match bind with
             | Some b -> if b.Get().Tapped(true) then toggle()
             | None -> ()
 
         override this.Dispose() =
             if active then Input.removeInputMethod()
+
+    type TextInputDialog(bounds: Rect, prompt, callback) as this =
+        inherit Dialog()
+        let buf = Setting<string>("")
+        let tb = TextEntry(buf, None, prompt)
+        do
+            let struct (l, t, r, b) = bounds
+            this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if options.Hotkeys.Select.Get().Tapped(true) || options.Hotkeys.Exit.Get().Tapped(true) then tb.Dispose(); this.Close()
+        override this.OnClose() = callback(buf.Get())
