@@ -145,11 +145,7 @@ module Themes =
             try
                 use stream = this.GetFile(path)
                 use tr = new StreamReader(stream)
-                let json =
-                    match tr.ReadToEnd() |> Json.fromString with
-                    | Json.JsonParseResult.Success o -> o
-                    | Json.JsonParseResult.MappingFailure err
-                    | Json.JsonParseResult.ParsingFailure err -> raise err
+                let json = tr.ReadToEnd() |> Json.fromString |> Json.JsonResult.valueOrRaise
                 match storage with
                 | Zip _ -> () //do not write data to zip archives
                 | Folder f -> Json.toFile(Path.Combine(f, Path.Combine(path)), true) json
@@ -157,7 +153,7 @@ module Themes =
             with
             | err -> 
                 Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString())
-                "{}" |> Json.fromString
+                "{}" |> Json.fromString |> Json.JsonResult.valueOrRaise
 
         member this.CopyTo(targetPath) =
             if Directory.Exists(targetPath) then

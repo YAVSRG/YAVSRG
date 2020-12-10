@@ -17,7 +17,7 @@ module ChartManager =
     (*
         Caching of charts
     *)
-
+    [<Json.Required>]
     type CachedChart = {
         FilePath: string
         Title: string
@@ -30,7 +30,9 @@ module ChartManager =
         BPM: (float32<ms/beat> * float32<ms/beat>)
         DiffName: string
         Physical: float
-        Technical: float }
+        Technical: float
+    }
+    with static member Default = { FilePath = ""; Title = ""; Artist = ""; Creator = ""; Pack = ""; Hash = ""; Keys = 4; Length = 0.0f<ms>; BPM = (0.0f<ms/beat>, 0.0f<ms/beat>); DiffName = ""; Physical = 0.0; Technical = 0.0 }
 
     let cacheChart (chart : Chart) : CachedChart =
         let endTime =
@@ -79,9 +81,9 @@ module ChartManager =
 
         static member Load() =
             match Json.fromFile(Path.Combine(getDataPath("Data"), "cache.json")) with
-            | Json.JsonParseResult.Success o -> o
-            | Json.JsonParseResult.MappingFailure err
-            | Json.JsonParseResult.ParsingFailure err ->
+            | JsonResult.Success o -> o
+            | JsonResult.MappingFailure err
+            | JsonResult.ParsingFailure err ->
                 Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString())
                 (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
     

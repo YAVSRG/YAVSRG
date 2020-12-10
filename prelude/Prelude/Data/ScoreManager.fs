@@ -14,7 +14,7 @@ open Prelude.Data.ChartManager
 
 module ScoreManager =
 
-    //todo: add json required attributes to these records OR a way to insert default values
+    [<Json.Required>]
     type Score = {
         time: DateTime
         hitdata: string
@@ -23,9 +23,13 @@ module ScoreManager =
         layout: Layout
         keycount: int
     }
+    //not currently used just needed as a formality
+    with static member Default = { time = DateTime.Now; hitdata = ""; rate = 1.0f; selectedMods = null; layout = Layout.Spread; keycount = 4 }
 
     type ChartSaveData = {
+        [<Json.Required>]
         Offset: Setting<Time>
+        [<Json.Required>]
         Scores: List<Score>
         Lamp: Dictionary<string, PersonalBests<Lamp>>
         Accuracy: Dictionary<string, PersonalBests<float>>
@@ -34,11 +38,12 @@ module ScoreManager =
     with
         static member FromChart(c: Chart) = {
             Offset = Setting(if c.Notes.IsEmpty() then 0.0f<ms> else offsetOf <| c.Notes.First());
-            Scores = new List<Score>()
-            Lamp = new Dictionary<string, PersonalBests<Lamp>>()
+            Scores = List<Score>()
+            Lamp = Dictionary<string, PersonalBests<Lamp>>()
             Accuracy = Dictionary<string, PersonalBests<float>>()
             Clear = Dictionary<string, PersonalBests<bool>>()
         }
+        static member Default = { Offset = Setting(0.0f<ms>); Scores = null; Lamp = Dictionary<string, PersonalBests<Lamp>>(); Accuracy = Dictionary<string, PersonalBests<float>>(); Clear = Dictionary<string, PersonalBests<bool>>() }
 
     (*
         Gameplay pipelines that need to happen to play a chart
@@ -80,9 +85,9 @@ module ScoreManager =
 
         static member Load() =
             match Json.fromFile(Path.Combine(getDataPath("Data"), "scores.json")) with
-            | Json.JsonParseResult.Success o -> o
-            | Json.JsonParseResult.MappingFailure err
-            | Json.JsonParseResult.ParsingFailure err -> Logging.Critical("Could not load score database! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
+            | JsonResult.Success o -> o
+            | JsonResult.MappingFailure err
+            | JsonResult.ParsingFailure err -> Logging.Critical("Could not load score database! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
 
         member this.GetOrCreateScoreData(chart: Chart) =
             let hash = calculateHash(chart)

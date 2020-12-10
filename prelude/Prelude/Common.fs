@@ -6,6 +6,7 @@ open System.Threading
 open System.Threading.Tasks
 open System.Collections.Generic
 open System.Text.RegularExpressions
+open Percyqaz.Json
 
 module Common =
 
@@ -35,6 +36,11 @@ module Common =
         override this.Set(newValue) = value <- newValue
         override this.Get() = value
         override this.ToString() = value.ToString()
+        static member Pickler: Json.Mapping.JsonPickler<Setting<'T>> =
+            let tP = Json.Mapping.getPickler<'T>()
+            Json.Mapping.mkPickler
+                (fun (o: Setting<'T>) -> tP.Encode(o.Get()))
+                (fun (o: Setting<'T>) json -> tP.Decode(o.Get())(json) |> Json.MappingResult.map (fun v -> o.Set(v); o))
 
     type WrappedSetting<'T, 'U>(setting: Setting<'U>, set: 'T -> 'U, get: 'U -> 'T) =
         inherit ISettable<'T>()
@@ -50,21 +56,29 @@ module Common =
         member this.Min = min
         member this.Max = max
         override this.ToString() = sprintf "%s (%A - %A)" (base.ToString()) min max
+        static member Pickler: Json.Mapping.JsonPickler<NumSetting<'T>> =
+            let tP = Json.Mapping.getPickler<'T>()
+            Json.Mapping.mkPickler
+                (fun (o: NumSetting<'T>) -> tP.Encode(o.Get()))
+                (fun (o: NumSetting<'T>) json -> tP.Decode(o.Get())(json) |> Json.MappingResult.map (fun v -> o.Set(v); o))
 
     type IntSetting(value: int, min: int, max: int) = 
         inherit NumSetting<int>(value, min, max)
         override this.SetPercent(pc: float32) = this.Set(min + ((float32 (max - min) * pc) |> float |> Math.Round |> int))
         override this.GetPercent() = float32 (this.Get() - min) / float32 (max - min)
+        static member Pickler = Setting<int>.Pickler
 
     type FloatSetting(value: float, min: float, max: float) = 
         inherit NumSetting<float>(value, min, max)
         override this.SetPercent(pc: float32) = this.Set(min + (max - min) * float pc)
         override this.GetPercent() = (this.Get() - min) / (max - min) |> float32
         override this.Set(newValue: float) = base.Set(Math.Round(newValue, 2))
+        static member Pickler = Setting<float>.Pickler
 
     type StringSetting(value: string, allowSpecialChar: bool) =
         inherit Setting<string>(value)
         override this.Set(newValue) = base.Set(if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, ""))
+        static member Pickler = Setting<string>.Pickler
 
 (*
     Logging
