@@ -5,12 +5,13 @@ open System.IO
 open System.Linq
 open Microsoft.FSharp.Reflection
 open System.Reflection
-open Newtonsoft.Json
-open Newtonsoft.Json.Linq
+//open Newtonsoft.Json
+//open Newtonsoft.Json.Linq
 open Prelude.Common
 
 module Json =
     
+    (*
     type TupleConverter() =
         inherit JsonConverter()
 
@@ -170,7 +171,7 @@ module Json =
         settings.Converters.Add(OptionConverter())
         settings.Converters.Add(UnionConverter())
         settings.Converters.Add(RecordConverter())
-        settings
+        settings 
 
     module JsonHelper = 
         let s = JsonSerializerSettings(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate) |> addConverters |> JsonSerializer.Create
@@ -192,4 +193,6 @@ module Json =
         let saveFile<'T> (obj : 'T) (path : string) : unit = 
             use sw = new StreamWriter(path)
             use jw = new JsonTextWriter(sw)
-            s.Serialize(jw, obj)
+            s.Serialize(jw, obj) *)
+
+    ()

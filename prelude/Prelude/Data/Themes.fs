@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.IO.Compression
 open System.Drawing
-open Prelude.Json
+open Percyqaz.Json
 open Prelude.Common
 
 module Themes =
@@ -145,15 +145,19 @@ module Themes =
             try
                 use stream = this.GetFile(path)
                 use tr = new StreamReader(stream)
-                let json = tr.ReadToEnd() |> JsonHelper.load
+                let json =
+                    match tr.ReadToEnd() |> Json.fromString with
+                    | Json.JsonParseResult.Success o -> o
+                    | Json.JsonParseResult.MappingFailure err
+                    | Json.JsonParseResult.ParsingFailure err -> raise err
                 match storage with
                 | Zip _ -> () //do not write data to zip archives
-                | Folder f -> JsonHelper.saveFile json (Path.Combine(f, Path.Combine(path)))
+                | Folder f -> Json.toFile(Path.Combine(f, Path.Combine(path)), true) json
                 json
             with
             | err -> 
                 Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString())
-                "{}" |> JsonHelper.load
+                "{}" |> Json.fromString
 
         member this.CopyTo(targetPath) =
             if Directory.Exists(targetPath) then

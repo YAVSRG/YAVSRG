@@ -3,7 +3,7 @@
 open System
 open System.IO
 open System.Collections.Generic
-open Prelude.Json
+open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
@@ -75,14 +75,14 @@ module ScoreManager =
     type ScoresDB() =
         let data = ScoresDB.Load()
 
-        member this.Save() = JsonHelper.saveFile data (Path.Combine(getDataPath("Data"), "scores.json"))
+        //todo: automatic backups
+        member this.Save() = Json.toFile((Path.Combine(getDataPath("Data"), "scores.json"), true)) data
 
         static member Load() =
-            try
-                JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "scores.json"))
-            with
-            | :? FileNotFoundException -> Logging.Info("No scores database found, creating one.") ""; new Dictionary<string, ChartSaveData>()
-            | err -> Logging.Critical("Could not load score database! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
+            match Json.fromFile(Path.Combine(getDataPath("Data"), "scores.json")) with
+            | Json.JsonParseResult.Success o -> o
+            | Json.JsonParseResult.MappingFailure err
+            | Json.JsonParseResult.ParsingFailure err -> Logging.Critical("Could not load score database! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
 
         member this.GetOrCreateScoreData(chart: Chart) =
             let hash = calculateHash(chart)

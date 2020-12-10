@@ -4,6 +4,7 @@ open System
 open System.Net
 open System.Net.Http
 open System.ComponentModel
+open Percyqaz.Json
 open Prelude.Common
 
 let client = new HttpClient()
@@ -26,7 +27,10 @@ let downloadJson<'T>(url, callback) =
     downloadString(url,
         fun s ->
             try
-                callback(Json.JsonHelper.load(s) : 'T)
+                match Json.fromString<'T>(s) with
+                | Json.JsonParseResult.Success o -> callback(o)
+                | Json.JsonParseResult.MappingFailure err
+                | Json.JsonParseResult.ParsingFailure err -> raise err
             with
             | err -> Logging.Error("Failed to parse json data from "+ url)(err.ToString()))
 

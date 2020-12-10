@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.IO.Compression
 open System.Collections.Generic
-open Prelude.Json
+open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
@@ -74,16 +74,14 @@ module ChartManager =
 
         let charts, collections = Cache.Load()
 
-        member this.Save() = JsonHelper.saveFile (charts, collections) (Path.Combine(getDataPath("Data"), "cache.json"))
+        //todo: apply same backup system as score database - this is lower priority though as it can be easily remade
+        member this.Save() = Json.toFile(Path.Combine(getDataPath("Data"), "cache.json"), true)(charts, collections) 
 
         static member Load() =
-            try
-                JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "cache.json"))
-            with
-            | :? FileNotFoundException ->
-                Logging.Info("No chart cache found, creating one.") ""
-                (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
-            | err ->
+            match Json.fromFile(Path.Combine(getDataPath("Data"), "cache.json")) with
+            | Json.JsonParseResult.Success o -> o
+            | Json.JsonParseResult.MappingFailure err
+            | Json.JsonParseResult.ParsingFailure err ->
                 Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString())
                 (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
     

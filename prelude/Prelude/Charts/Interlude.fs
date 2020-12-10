@@ -6,7 +6,7 @@ open System.Collections.Generic
 open System.Security.Cryptography
 open System.ComponentModel
 open Prelude.Common
-open Prelude.Json
+open Percyqaz.Json
 
 
 //todo: divide into submodules
@@ -266,7 +266,11 @@ module Interlude =
             use br = new BinaryReader(fs)
             let keys = br.ReadByte() |> int
 
-            let header = JsonHelper.load(br.ReadString())
+            let header =
+                match Json.fromString(br.ReadString()) with
+                | Json.JsonParseResult.Success o -> o
+                | Json.JsonParseResult.MappingFailure err
+                | Json.JsonParseResult.ParsingFailure err -> raise err
 
             let notes = readSection br (readRowFromFile)
             let bpms = readSection br (fun r -> BPM(r.ReadInt32() * 1<beat>, r.ReadSingle() * 1.0f<ms/beat>))
@@ -283,7 +287,7 @@ module Interlude =
         use fs = new FileStream(filepath, FileMode.Create)
         use bw = new BinaryWriter(fs)
         bw.Write(chart.Keys |> byte)
-        bw.Write(JsonHelper.save chart.Header)
+        bw.Write(Json.toString chart.Header)
         writeSection chart.Notes bw (fun nr -> writeRowToFile bw nr)
         writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter / 1<beat>); bw.Write(float32 msPerBeat))
         for i = 0 to chart.Keys do
