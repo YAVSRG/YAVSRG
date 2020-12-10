@@ -5,7 +5,7 @@ open System.Collections.Generic
 open System.IO
 open OpenTK.Input
 open Prelude.Common
-open Prelude.Json
+open Percyqaz.Json
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.NoteColors
@@ -217,37 +217,37 @@ module Options =
     let internal configPath = Path.GetFullPath("config.json")
 
     let load() =
-        try
-            config <- JsonHelper.loadFile(configPath)
-        with
-        | :? FileNotFoundException -> Logging.Info("No config file found, creating it.") ""
-        | err ->
-            Logging.Critical("Could not load config.json! Maybe it is corrupt?") (err.ToString())
-            Console.WriteLine("If you would like to launch anyway, press ENTER.")
-            Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
-            Console.ReadLine() |> ignore
-            Logging.Critical("User has chosen to launch game with default config.") ""
+        //todo: automatic config backup
+        if File.Exists(configPath) then
+            try
+                config <- Json.fromFile(configPath) |> Json.JsonResult.valueOrRaise
+            with err ->
+                Logging.Critical("Could not load config.json! Maybe it is corrupt?") (err.ToString())
+                Console.WriteLine("If you would like to launch anyway, press ENTER.")
+                Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
+                Console.ReadLine() |> ignore
+                Logging.Critical("User has chosen to launch game with default config.") ""
+        else Logging.Info("No config file found, creating it.") ""
         
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
         Localisation.loadFile(config.Locale)
         
-        try
-            options <- JsonHelper.loadFile(Path.Combine(getDataPath("Data"), "options.json"))
-        with
-        | :? FileNotFoundException -> Logging.Info("No options file found, creating it.") ""
-        | err ->
-            Logging.Critical("Could not load options.json! Maybe it is corrupt?") (err.ToString())
-            Console.WriteLine("If you would like to proceed anyway, press ENTER.")
-            Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
-            Console.ReadLine() |> ignore
-            Logging.Critical("User has chosen to proceed with game setup with default game settings.") ""
+        if File.Exists(configPath) then
+            try
+                options <- Json.fromFile(Path.Combine(getDataPath("Data"), "options.json")) |> Json.JsonResult.valueOrRaise
+            with err ->
+                Logging.Critical("Could not load options.json! Maybe it is corrupt?") (err.ToString())
+                Console.WriteLine("If you would like to proceed anyway, press ENTER.")
+                Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
+                Console.ReadLine() |> ignore
+                Logging.Critical("User has chosen to proceed with game setup with default game settings.") ""
+        else Logging.Info("No options file found, creating it.") ""
 
         Themes.loadThemes(options.EnabledThemes)
         Themes.changeNoteSkin(options.NoteSkin.Get())
 
     let save() =
         try
-            JsonHelper.saveFile config configPath
-            JsonHelper.saveFile options <| Path.Combine(getDataPath("Data"), "options.json")
-        with
-        | err -> Logging.Critical("Failed to write options/config to file.") (err.ToString())
+            Json.toFile(configPath, true) config 
+            Json.toFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
+        with err -> Logging.Critical("Failed to write options/config to file.") (err.ToString())
