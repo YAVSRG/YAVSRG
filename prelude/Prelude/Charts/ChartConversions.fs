@@ -196,12 +196,12 @@ module ChartConversions =
                 | [] -> "----"
         let findBackground guess : string =
             if (not (File.Exists(Path.Combine(path, guess)))) then
-                let mutable result = ""
-                //todo: fix this going through all files
-                for s in Directory.GetFiles(path) do
-                    let filename = Path.GetFileNameWithoutExtension(s).ToLower()
-                    if (filename.Contains("bg") || filename.Contains("background")) then result <- Path.GetFileName(s)
-                result
+                Directory.GetFiles(path)
+                |> Array.tryPick
+                    (fun s ->
+                        let filename = Path.GetFileNameWithoutExtension(s).ToLower()
+                        if (filename.Contains("bg") || filename.Contains("background")) then Some <| Path.GetFileName(s) else None)
+                |> function Some s -> s | None -> ""
             else guess
         
         let convert_difficulty (i : int) (diff : ChartData) : Chart option = 
@@ -284,7 +284,7 @@ module ChartConversions =
 
         let tps =
             seq {
-                //todo: can be refactored as recursion
+                //todo: can be refactored as recursion and might compile as faster code
                 let mutable bs = bpm.Data |> List.ofSeq
                 if List.isEmpty bs then ()
                 else

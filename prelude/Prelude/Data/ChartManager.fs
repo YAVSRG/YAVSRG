@@ -138,7 +138,7 @@ module ChartManager =
 
         member this.RebuildCache : LoggableTask =
             fun output ->
-                lock this (fun _ -> ( charts.Clear(); ))
+                lock this (fun _ -> charts.Clear())
                 for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
                     for song in Directory.EnumerateDirectories(pack) do
                         for file in Directory.EnumerateFiles(song) do
