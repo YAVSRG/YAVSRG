@@ -195,12 +195,18 @@ module SelectionWheel =
     type KeyBinder(setting: ISettable<Bind>, name, allowModifiers, onDeselect) as this =
         inherit ISelectionWheel(onDeselect)
         do
-            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
-            this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
+            if name = "" then
+                this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 25.0f, 0.0f, -25.0f))
+            else
+                this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
+                this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        override this.Draw() =
+            if name = "" then Draw.rect(this.Bounds |> Rect.expand(0.0f, -25.0f))(Screens.accentShade(127, 0.8f, 0.0f))Sprite.Default
+            base.Draw()
         override this.Select() =
             base.Select()
-            //todo: future refactor where this logic is moved to Interlude.Input and also supports mouse/joystick inputs
+            //todo: refactor where this logic is moved to Interlude.Input and also supports mouse/joystick inputs
             //Input.Keyboard.pressedOverride is marked internal because it should only be used from Interlude.Input and i was naughty to be lazy here
             Input.grabKey(
                 fun k ->
@@ -217,7 +223,7 @@ module SelectionWheel =
         let mutable index = 0
         let mutable items: ISelectionWheel list = [0 .. (number() - 1)] |> List.map cons
         do
-            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 20.0f, 0.0f, -20.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
         member this.Refresh() =
             index <- 0
@@ -287,7 +293,7 @@ type OptionsMenu() as this =
                 { new ISettable<_>() with
                     override this.Set(v) = options.GameplayBinds.[km].[i] <- v
                     override this.Get() = options.GameplayBinds.[km].[i] }
-            let binder = SelectionRow((fun () -> keycount), (fun i -> KeyBinder(f (keycount - 3) i, "", false, ignore) :> ISelectionWheel), t "Gameplay binds", ignore)
+            let binder = SelectionRow((fun () -> keycount), (fun i -> KeyBinder(f (keycount - 3) i, "", false, ignore) :> ISelectionWheel), t "GameplayBinds", ignore)
             swItemBuilder [
                 Selector.FromKeymode(
                     { new ISettable<int>() with
