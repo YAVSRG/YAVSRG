@@ -69,7 +69,7 @@ type Hotkeys = {
         Tooltip = Setting(mk Key.Slash)
         Toolbar = Setting(ctrl Key.T)
         Screenshot = Setting(mk Key.F12)
-        Volume = Setting(mk Key.AltLeft)
+        Volume = Setting(alt Key.AltLeft)
         Previous = Setting(mk Key.Left)
         Next = Setting(mk Key.Right)
         Start = Setting(mk Key.Home)
@@ -102,7 +102,6 @@ type FailType =
 type ListSelection<'T> = int * 'T list
 
 type ProfileStats = {
-    //todo: rrd graph of improvement over time/session performances. or not, link to kamai and let kiam handle it
     TopPhysical: Setting<TopScore list>
     TopTechnical: Setting<TopScore list>
 } with
@@ -114,9 +113,7 @@ type ProfileStats = {
 type GameOptions = {
     AudioOffset: NumSetting<float>
     AudioVolume: NumSetting<float>
-    //CurrentProfile: Setting<string>
     CurrentChart: Setting<string>
-    CurrentOptionsTab: Setting<string>
     EnabledThemes: List<string>
 
     ScrollSpeed: Setting<float>
@@ -152,9 +149,7 @@ type GameOptions = {
     static member Default = {
         AudioOffset = FloatSetting(0.0, -500.0, 500.0)
         AudioVolume = FloatSetting(0.1, 0.0, 1.0)
-        //CurrentProfile = Setting("")
         CurrentChart = Setting("")
-        CurrentOptionsTab = Setting("General")
         EnabledThemes = new List<string>()
 
         ScrollSpeed = FloatSetting(2.05, 1.0, 3.0)

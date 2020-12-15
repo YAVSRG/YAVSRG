@@ -15,6 +15,7 @@ module Input =
     let mutable internal mousey = 0.f
     let mutable internal mousescroll = 0
     let mutable internal clickhandled = false
+    let mutable private keybindGrabber = ignore
     let mutable private inputmethod: ISettable<string> list = []
 
     let internal freeIM() = List.isEmpty inputmethod
@@ -25,7 +26,11 @@ module Input =
         game.MouseDown.Add(fun e -> mouse.Add(e.Button))
         game.MouseUp.Add(fun e -> while mouse.Remove(e.Button) do ())
 
-        game.KeyDown.Add(fun e -> keys.Add(e.Key))
+        game.KeyDown.Add(fun e -> 
+            keys.Add(e.Key)
+            if e.Key <> Key.ControlLeft && e.Key <> Key.ControlRight && e.Key <> Key.ShiftLeft && e.Key <> Key.ShiftRight && e.Key <> Key.AltLeft && e.Key <> Key.AltRight then
+                keybindGrabber(e.Key)
+                keybindGrabber <- ignore)
         game.KeyPress.Add(
             fun e ->
                 match List.tryHead inputmethod with
@@ -33,7 +38,10 @@ module Input =
                 | None -> ())
         game.KeyUp.Add(fun e -> while keys.Remove(e.Key) do ())
 
-    //todo: consider threading input and redesigning this system to use events instead
+    //todo: threaded input
+    //ideas on how: f# list of binds that happened this frame including timestamps; list is read by game update loop with an event listener system and wiped
+    //use struct DUs and struct tuples to represent binds for immutability/thread safety
+
     //these methods are internal until further notice as the Bind system should be used instead
     module Keyboard =
         let internal pressedOverride(k) = keys.Contains(k)
@@ -66,7 +74,8 @@ module Input =
     let removeInputMethod() =
         inputmethod <- match inputmethod with x::xs -> xs | [] -> []
 
-module Keyboard = Input.Keyboard
+    let grabKey(callback) = 
+        keybindGrabber <- callback
 
 module Mouse = 
     let X() = Input.mousex
@@ -84,6 +93,8 @@ module Mouse =
     let internal release(b) = Input.oldMouse.Contains(b) && not(Input.mouse.Contains(b))
     let Hover(struct (l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
 
+module Keyboard = Input.Keyboard
+
 type Bind =
     | Dummy
     | Key of Key * modifiers:(bool * bool * bool)
@@ -92,7 +103,7 @@ type Bind =
     with
         override this.ToString() =
             match this with
-            | Dummy -> "DUMMY"
+            | Dummy -> "NONE"
             | Key (k, m) -> Bind.ModifierString(m) + k.ToString()
             | Mouse (b, m) -> Bind.ModifierString(m) + "M"+b.ToString()
             | Joystick _ -> "nyi"

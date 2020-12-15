@@ -10,6 +10,7 @@ open Interlude.Render
 open Interlude
 open Interlude.Utils
 open Interlude.Input
+open OpenTK.Input
 open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -45,20 +46,21 @@ module SelectionWheel =
 
         override this.Draw() =
             let o = WIDTH * collapse.Value
-            let struct (left, top, right, bottom) = this.Bounds
-            Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o))(Color.FromArgb(180, 30, 30, 30))(Sprite.Default)
-            Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o) |> Rect.sliceRight(5.0f))(Color.White)(Sprite.Default)
-            let mutable t = top
-            for i in 0 .. (items.Count - 1) do
-                let w = items.[i]
-                let h = w.Bounds |> Rect.height
-                if index = i then
-                    Draw.quad
-                        (Rect.create (left - o) t (left + WIDTH - o) (t + h) |> Quad.ofRect)
-                        (Color.FromArgb(255,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(255,180,180,180))
-                        Sprite.DefaultQuad
-                w.Draw()
-                t <- t + h
+            if collapse.Value < 0.98f then
+                let struct (left, top, right, bottom) = this.Bounds
+                Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o))(Color.FromArgb(180, 30, 30, 30))(Sprite.Default)
+                Draw.rect(this.Bounds |> Rect.sliceLeft(WIDTH - o) |> Rect.sliceRight(5.0f))(Color.White)(Sprite.Default)
+                let mutable t = top
+                for i in 0 .. (items.Count - 1) do
+                    let w = items.[i]
+                    let h = w.Bounds |> Rect.height
+                    if index = i then
+                        Draw.quad
+                            (Rect.create (left - o) t (left + WIDTH - o) (t + h) |> Quad.ofRect)
+                            (Color.FromArgb(255,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(0,180,180,180), Color.FromArgb(255,180,180,180))
+                            Sprite.DefaultQuad
+                    w.Draw()
+                    t <- t + h
 
         override this.Update(elapsedTime, bounds) =
             let struct (left, _, right, bottom) = bounds
@@ -142,13 +144,16 @@ module SelectionWheel =
                 elif options.Hotkeys.Next.Get().Tapped(false) then fd()
                 elif options.Hotkeys.Previous.Get().Tapped(false) then bk()
 
-        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: Setting<'T>, label, onDeselect) =
+        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: ISettable<'T>, label, onDeselect) =
             let names = Enum.GetNames(typeof<'T>)
             let values = Enum.GetValues(typeof<'T>) :?> 'T array
             new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])), label, onDeselect)
 
-        static member FromBool(setting: Setting<bool>, label, onDeselect) =
+        static member FromBool(setting: ISettable<bool>, label, onDeselect) =
             new Selector([|"NO" ; "YES"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)), label, onDeselect)
+
+        static member FromKeymode(setting: ISettable<int>, onDeselect) =
+            new Selector([|"3K"; "4K"; "5K"; "6K"; "7K"; "8K"; "9K"; "10K"|], setting.Get(), (fun (i, _) -> setting.Set(i)), Localisation.localise "options.name.Keymode", onDeselect)
     
     type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, name, onDeselect) as this =
         inherit ISelectionWheel(onDeselect)
@@ -187,10 +192,62 @@ module SelectionWheel =
             Draw.rect (cursor |> Rect.expand(10.0f, 10.0f)) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
             base.Draw()
 
-    let swBuilder items =
-        let sw = new SelectionWheel(ignore)
-        items |> List.iter sw.AddItem
-        sw
+    type KeyBinder(setting: ISettable<Bind>, name, allowModifiers, onDeselect) as this =
+        inherit ISelectionWheel(onDeselect)
+        do
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
+            this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        override this.Select() =
+            base.Select()
+            //todo: future refactor where this logic is moved to Interlude.Input and also supports mouse/joystick inputs
+            //Input.Keyboard.pressedOverride is marked internal because it should only be used from Interlude.Input and i was naughty to be lazy here
+            Input.grabKey(
+                fun k ->
+                    if k = Key.Escape then if allowModifiers then setting.Set(Dummy)
+                    else
+                        setting.Set(
+                            Input.Key (k,
+                                (allowModifiers && (Input.Keyboard.pressedOverride(Key.ControlLeft) || Input.Keyboard.pressedOverride(Key.ControlRight)), false,
+                                    allowModifiers && (Input.Keyboard.pressedOverride(Key.ShiftLeft) || Input.Keyboard.pressedOverride(Key.ShiftRight)))))
+                    this.Deselect())
+
+    type SelectionRow(number, cons, name, onDeselect) as this =
+        inherit ISelectionWheel(onDeselect)
+        let mutable index = 0
+        let mutable items: ISelectionWheel list = [0 .. (number() - 1)] |> List.map cons
+        do
+            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        member this.Refresh() =
+            index <- 0
+            items |> List.iter (fun o -> o.Dispose())
+            items <- [0 .. (number() - 1)] |> List.map cons
+        override this.Draw() =
+            List.iteri
+                (fun i (w: ISelectionWheel) ->
+                    if this.Selected && index = i then Draw.rect w.Bounds (Color.FromArgb(255, 180, 180, 180)) Sprite.Default
+                    w.Draw()) items
+            base.Draw()
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            let struct (_, top, right, bottom) = this.Bounds
+            let h = bottom - top
+            let mutable flag = true
+            let mutable x = 0.0f
+            List.iteri
+                (fun i (w: ISelectionWheel) ->
+                    if w.Selected then flag <- false
+                    w.Update(elapsedTime, Rect.create (right + x) top (right + x + h) bottom)
+                    x <- x + h) items
+            if flag && this.Selected then
+                if options.Hotkeys.Select.Get().Tapped(false) then items.[index].Select()
+                elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
+                elif options.Hotkeys.Next.Get().Tapped(false) then index <- (index + 1) % number()
+                elif options.Hotkeys.Previous.Get().Tapped(false) then let n = number() in index <- (index + n - 1) % n
+
+    let swBuilder items = let sw = new SelectionWheel(ignore) in items |> List.iter sw.AddItem; sw
     let swItemBuilder items name = SelectionWheelItem(name, swBuilder items)
 
 open SelectionWheel
@@ -205,7 +262,7 @@ type OptionsMenu() as this =
                 Slider((options.AudioVolume :?> FloatSetting), t "AudioVolume", fun () -> Audio.changeVolume(options.AudioVolume.Get()))  :> ISelectionWheel
                 Selector.FromEnum(config.WindowMode, t "WindowMode", Options.applyOptions)  :> ISelectionWheel
                 //todo: resolution DU editor
-                Selector([|"UNLIMITED";"30";"60";"90";"120";"240"|], int(config.FrameLimiter.Get() / 30.0) |> min(5),
+                Selector([|"UNLIMITED"; "30"; "60"; "90"; "120"; "240"|], int(config.FrameLimiter.Get() / 30.0) |> min(5),
                     (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])), t "FrameLimiter", Options.applyOptions) :> ISelectionWheel
                 ](t "System")
             swItemBuilder [
@@ -225,7 +282,19 @@ type OptionsMenu() as this =
                 { new ActionItem(t "NewTheme", ignore) with override this.Select() = Screens.addDialog(TextInputDialog(this.Bounds, "NYI", ignore)) }
                 new ActionItem(t "ChangeTheme", ignore)
                 ](t "Themes")
-            swItemBuilder [ContainerItem("TODO", ActionItem("TEST", ignore), ignore)](t "Noteskin")
+            let mutable keymode = options.KeymodePreference.Get()
+            let f km i =
+                { new ISettable<_>() with
+                    override this.Set(v) = options.GameplayBinds.[km].[i] <- v
+                    override this.Get() = options.GameplayBinds.[km].[i] }
+            let binder = SelectionRow((fun () -> keymode), (fun i -> KeyBinder(f keymode i, "", false, ignore) :> ISelectionWheel), t "Gameplay binds", ignore)
+            swItemBuilder [
+                Selector.FromKeymode(
+                    { new ISettable<int>() with
+                        override this.Set(v) = keymode <- v + 3
+                        override this.Get() = keymode - 3 }, binder.Refresh) :> ISelectionWheel
+                binder :> ISelectionWheel
+                ](t "Noteskin")
             swItemBuilder [ActionItem("TODO", ignore)](t "Hotkeys")
             swItemBuilder [ActionItem("TODO", ignore)](t "Debug")]
     do
