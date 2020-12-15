@@ -282,17 +282,17 @@ type OptionsMenu() as this =
                 { new ActionItem(t "NewTheme", ignore) with override this.Select() = Screens.addDialog(TextInputDialog(this.Bounds, "NYI", ignore)) }
                 new ActionItem(t "ChangeTheme", ignore)
                 ](t "Themes")
-            let mutable keymode = options.KeymodePreference.Get()
+            let mutable keycount = options.KeymodePreference.Get()
             let f km i =
                 { new ISettable<_>() with
                     override this.Set(v) = options.GameplayBinds.[km].[i] <- v
                     override this.Get() = options.GameplayBinds.[km].[i] }
-            let binder = SelectionRow((fun () -> keymode), (fun i -> KeyBinder(f keymode i, "", false, ignore) :> ISelectionWheel), t "Gameplay binds", ignore)
+            let binder = SelectionRow((fun () -> keycount), (fun i -> KeyBinder(f (keycount - 3) i, "", false, ignore) :> ISelectionWheel), t "Gameplay binds", ignore)
             swItemBuilder [
                 Selector.FromKeymode(
                     { new ISettable<int>() with
-                        override this.Set(v) = keymode <- v + 3
-                        override this.Get() = keymode - 3 }, binder.Refresh) :> ISelectionWheel
+                        override this.Set(v) = keycount <- v + 3
+                        override this.Get() = keycount - 3 }, binder.Refresh) :> ISelectionWheel
                 binder :> ISelectionWheel
                 ](t "Noteskin")
             swItemBuilder [ActionItem("TODO", ignore)](t "Hotkeys")
