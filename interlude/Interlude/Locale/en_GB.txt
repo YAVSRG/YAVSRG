@@ -22,3 +22,6 @@ options.name.NewTheme=New Theme
 options.name.ChangeTheme=Change Theme
 options.name.Keymode=Keymode
 options.name.GameplayBinds=Gameplay Binds
+options.select.Available=Available
+options.select.Selected=Selected
+options.select.Confirm=Confirm

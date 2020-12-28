@@ -59,11 +59,11 @@ module Themes =
     let mutable private fontBuilder: Lazy<Text.SpriteFont> option = None
     let font(): Text.SpriteFont = fontBuilder.Value.Force()
 
-    let availableThemes =
-        let l = new List<string>()
+    let availableThemes = new List<string>()
+    let refreshAvailableThemes() = 
+        availableThemes.Clear()
         for t in Directory.EnumerateDirectories(getDataPath("Themes")) do
-            l.Add(Path.GetFileName(t))
-        l
+            availableThemes.Add(Path.GetFileName(t))
 
     let private sprites = new Dictionary<string, Sprite>()
     let private sounds = "nyi"

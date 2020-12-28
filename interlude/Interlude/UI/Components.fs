@@ -25,6 +25,10 @@ module Components =
             Draw.rect <| Rect.expand(5.0f, 5.0f) base.Bounds <| Screens.accentShade(127, 0.5f, 0.0f) <| Sprite.Default
             Draw.rect <| base.Bounds <| Screens.accentShade(255, 0.8f, 0.0f) <| Sprite.Default
             base.Draw()
+        static member Create(w: Widget) =
+            let f = Frame()
+            f.Add(w)
+            f
 
     type TextBox(textFunc, color, just) =
         inherit Widget()

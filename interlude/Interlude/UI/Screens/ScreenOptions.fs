@@ -30,6 +30,7 @@ module SelectionWheel =
         default this.Select() = selected <- true
         abstract member Deselect: unit -> unit
         default this.Deselect() = selected <- false; onDeselect()
+        abstract member DeselectChild: unit -> unit
 
     type SelectionWheel(onDeselect) as this  =
         inherit ISelectionWheel(onDeselect)
@@ -40,6 +41,7 @@ module SelectionWheel =
         do this.Animation.Add(collapse)
         override this.Select() = base.Select(); collapse.SetTarget(0.0f)
         override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
+        override this.DeselectChild() = Seq.iter (fun (w: ISelectionWheel) -> if w.Selected then w.Deselect()) items
 
         override this.Add(w) = failwith "don't use this, use AddItem"
         member this.AddItem(w) = items.Add(w); w.AddTo(this)
@@ -87,6 +89,7 @@ module SelectionWheel =
             this.Add(new TextBox(K name, K (Color.White, Color.Black), 0.5f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
         override this.Select() = action()
+        override this.DeselectChild() = ()
 
     type ContainerItem(name, w: ISelectionWheel, onDeselect) as this =
         inherit ISelectionWheel(onDeselect)
@@ -94,6 +97,7 @@ module SelectionWheel =
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
         override this.Select() = base.Select(); w.Select()
+        override this.DeselectChild() = () //?
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if not w.Selected then this.Deselect()
@@ -108,8 +112,10 @@ module SelectionWheel =
         inherit ISelectionWheel(ignore)
         do
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
+            //this.Add(new Clickable((fun () -> if not this.Selected then (this.Parent :?> ISelectionWheel).DeselectChild(); this.Select()), ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
         override this.Select() = base.Select(); sw.Select()
+        override this.DeselectChild() = ()
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if not sw.Selected then this.Deselect()
@@ -135,7 +141,9 @@ module SelectionWheel =
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
             this.Add(new TextBox((fun () -> items.[index]), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-            this.Add(new Clickable((fun () -> if this.Selected then fd()), ignore))
+            //this.Add(new Clickable((fun () -> (if not this.Selected then (this.Parent :?> ISelectionWheel).DeselectChild(); this.Select()); fd()), ignore))
+
+        override this.DeselectChild() = ()
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -192,6 +200,8 @@ module SelectionWheel =
             Draw.rect (cursor |> Rect.expand(10.0f, 10.0f)) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
             base.Draw()
 
+        override this.DeselectChild() = ()
+
     type KeyBinder(setting: ISettable<Bind>, name, allowModifiers, onDeselect) as this =
         inherit ISelectionWheel(onDeselect)
         do
@@ -217,6 +227,7 @@ module SelectionWheel =
                                 (allowModifiers && (Input.Keyboard.pressedOverride(Key.ControlLeft) || Input.Keyboard.pressedOverride(Key.ControlRight)), false,
                                     allowModifiers && (Input.Keyboard.pressedOverride(Key.ShiftLeft) || Input.Keyboard.pressedOverride(Key.ShiftRight)))))
                     this.Deselect())
+        override this.DeselectChild() = ()
 
     type SelectionRow(number, cons, name, onDeselect) as this =
         inherit ISelectionWheel(onDeselect)
@@ -235,6 +246,7 @@ module SelectionWheel =
                     if this.Selected && index = i then Draw.rect w.Bounds (Color.FromArgb(255, 180, 180, 180)) Sprite.Default
                     w.Draw()) items
             base.Draw()
+        override this.DeselectChild() = Seq.iter (fun (w: ISelectionWheel) -> if w.Selected then w.Deselect()) items
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -255,6 +267,49 @@ module SelectionWheel =
 
     let swBuilder items = let sw = new SelectionWheel(ignore) in items |> List.iter sw.AddItem; sw
     let swItemBuilder items name = SelectionWheelItem(name, swBuilder items)
+
+[<AutoOpen>]
+module ThemeSelector =
+    type private ThemeItem(name, m: ThemeSelector) as this =
+        inherit Widget()
+        do
+            this.Add(TextBox(K name, K Color.White, 0.5f))
+            this.Add(
+                Clickable(
+                    (fun () ->
+                        if this.Parent = (m.Selected :> Widget) then 
+                            m.Selected.Remove(this)
+                            m.Available.Add(this)
+                            options.EnabledThemes.Remove(name) |> ignore
+                        else
+                            m.Available.Remove(this)
+                            m.Selected.Add(this)
+                            options.EnabledThemes.Add(name)), ignore))
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f)
+        override this.Draw() =
+            Draw.rect(this.Bounds)(UI.Screens.accentShade(127, 1.0f, 0.0f))(Sprite.Default)
+            base.Draw()
+    and ThemeSelector() as this =
+        inherit Dialog()
+        let selected = FlowContainer()
+        let available = FlowContainer()
+        do
+            selected.Add(TextBox(K "(fallback)", K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f))
+            this.Add(available |> Frame.Create |> positionWidget(200.0f, 0.0f, 200.0f, 0.0f, -50.0f, 0.5f, -200.0f, 1.0f))
+            this.Add(selected |> Frame.Create |> positionWidget(50.0f, 0.5f, 200.0f, 0.0f, -200.0f, 1.0f, -200.0f, 1.0f))
+            this.Add(TextBox(K (Localisation.localise "options.select.Available"), K (Color.White, Color.Black), 0.5f) |> positionWidget(200.0f, 0.0f, 100.0f, 0.0f, -50.0f, 0.5f, 200.0f, 0.0f))
+            this.Add(TextBox(K (Localisation.localise "options.select.Selected"), K (Color.White, Color.Black), 0.5f) |> positionWidget(50.0f, 0.5f, 100.0f, 0.0f, -200.0f, 1.0f, 200.0f, 0.0f))
+            this.Add(Button(this.Close, (Localisation.localise "options.select.Confirm"), options.Hotkeys.Select, Sprite.Default) |> positionWidget(-100.0f, 0.5f, -150.0f, 1.0f, 100.0f, 0.5f, -50.0f, 1.0f))
+            Themes.refreshAvailableThemes()
+            for t in Themes.availableThemes do
+                if options.EnabledThemes.Contains(t) |> not then
+                    available.Add(ThemeItem(t, this))
+            for t in options.EnabledThemes do
+                selected.Add(ThemeItem(t, this))
+        member this.Selected: FlowContainer = selected
+        member this.Available: FlowContainer = available
+        override this.OnClose() =
+            Themes.loadThemes(options.EnabledThemes)
 
 open SelectionWheel
 
@@ -283,10 +338,11 @@ type OptionsMenu() as this =
                     Slider((options.ScreenCoverFadeLength :?> IntSetting), t "ScreenCoverFadeLength", ignore) :> ISelectionWheel
                     ](t "ScreenCover") :> ISelectionWheel
                 //todo: pacemaker DU editor
+                //todo: accuracy and hp system selector
                 ](t "Gameplay")
             swItemBuilder [
                 { new ActionItem(t "NewTheme", ignore) with override this.Select() = Screens.addDialog(TextInputDialog(this.Bounds, "NYI", ignore)) }
-                new ActionItem(t "ChangeTheme", ignore)
+                new ActionItem(t "ChangeTheme", fun () -> Screens.addDialog(new ThemeSelector()))
                 ](t "Themes")
             let mutable keycount = options.KeymodePreference.Get()
             let f km i =

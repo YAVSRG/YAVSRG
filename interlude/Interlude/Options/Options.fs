@@ -237,7 +237,8 @@ module Options =
                 Console.ReadLine() |> ignore
                 Logging.Critical("User has chosen to proceed with game setup with default game settings.") ""
         else Logging.Info("No options file found, creating it.") ""
-
+        
+        Themes.refreshAvailableThemes()
         Themes.loadThemes(options.EnabledThemes)
         Themes.changeNoteSkin(options.NoteSkin.Get())
 
