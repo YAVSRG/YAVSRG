@@ -22,8 +22,8 @@ module Components =
     type Frame() =
         inherit Widget()
         override this.Draw() =
-            Draw.rect <| Rect.expand(5.0f, 5.0f) base.Bounds <| Screens.accentShade(127, 0.5f, 0.0f) <| Sprite.Default
-            Draw.rect <| base.Bounds <| Screens.accentShade(255, 0.8f, 0.0f) <| Sprite.Default
+            Draw.rect <| Rect.expand(5.0f, 5.0f) base.Bounds <| Screens.accentShade(80, 0.5f, 0.0f) <| Sprite.Default
+            Draw.rect <| base.Bounds <| Screens.accentShade(200, 0.5f, 0.3f) <| Sprite.Default
             base.Draw()
         static member Create(w: Widget) =
             let f = Frame()
