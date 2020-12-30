@@ -26,16 +26,15 @@ module Input =
         game.MouseDown.Add(fun e -> mouse.Add(e.Button))
         game.MouseUp.Add(fun e -> while mouse.Remove(e.Button) do ())
 
-        game.KeyDown.Add(fun e -> 
+        game.KeyDown.Add(fun e ->
             keys.Add(e.Key)
             if e.Key <> Key.ControlLeft && e.Key <> Key.ControlRight && e.Key <> Key.ShiftLeft && e.Key <> Key.ShiftRight && e.Key <> Key.AltLeft && e.Key <> Key.AltRight then
                 keybindGrabber(e.Key)
                 keybindGrabber <- ignore)
-        game.KeyPress.Add(
-            fun e ->
-                match List.tryHead inputmethod with
-                | Some s -> s.Set(s.Get() + e.KeyChar.ToString())
-                | None -> ())
+        game.KeyPress.Add(fun e ->
+            match List.tryHead inputmethod with
+            | Some s -> s.Set(s.Get() + e.KeyChar.ToString())
+            | None -> ())
         game.KeyUp.Add(fun e -> while keys.Remove(e.Key) do ())
 
     //todo: threaded input

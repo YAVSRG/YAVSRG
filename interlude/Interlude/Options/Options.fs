@@ -48,6 +48,8 @@ type Hotkeys = {
     Volume: Setting<Bind>
     Previous: Setting<Bind>
     Next: Setting<Bind>
+    Up: Setting<Bind>
+    Down: Setting<Bind>
     Start: Setting<Bind>
     End: Setting<Bind>
 
@@ -72,6 +74,8 @@ type Hotkeys = {
         Volume = Setting(alt Key.AltLeft)
         Previous = Setting(mk Key.Left)
         Next = Setting(mk Key.Right)
+        Up = Setting(mk Key.Up)
+        Down = Setting(mk Key.Down)
         Start = Setting(mk Key.Home)
         End = Setting(mk Key.End)
 
