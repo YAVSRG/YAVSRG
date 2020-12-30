@@ -150,8 +150,7 @@ module Themes =
                 | Zip _ -> () //do not write data to zip archives
                 | Folder f -> Json.toFile(Path.Combine(f, Path.Combine(path)), true) json
                 json
-            with
-            | err -> 
+            with err -> 
                 Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString())
                 "{}" |> Json.fromString |> Json.JsonResult.valueOrRaise
 

@@ -17,9 +17,9 @@
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\NoteColors.fs" />
     <Compile Include="Gameplay\Difficulty.fs" />
+    <Compile Include="Data\Themes.fs" />
     <Compile Include="Data\ChartManager.fs" />
     <Compile Include="Data\ScoreManager.fs" />
-    <Compile Include="Data\Themes.fs" />
     <Compile Include="Data\Web.fs" />
   </ItemGroup>
 
