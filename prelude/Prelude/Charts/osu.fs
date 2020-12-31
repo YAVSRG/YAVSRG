@@ -70,13 +70,13 @@ module osu =
     type HitObject =
     | HitCircle of Point * Time * HitSound * HitAddition
     | HoldNote of Point * Time * Time * HitSound * HitAddition
-    | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * HitSound list * (SampleSet * SampleSet) list * HitAddition
+    | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * (HitSound list * (SampleSet * SampleSet) list * HitAddition) option
     | Spinner of Time * Time * HitSound * HitAddition
         override this.ToString() = 
             match this with
             | HitCircle ((x, y), offset, hs, addition) -> String.concat "," [x |> string; y |> string; offset |> string; "1"; hs |> int |> string; formatHitAddition addition]
             | HoldNote ((x, y), start, finish, hs, addition) -> String.concat "," [string x; string y; string start; "128"; hs |> int |> string; (string finish) + ":" + formatHitAddition addition]
-            | Slider ((x, y), offset, repeats, points, length, hs, phss, padditions, addition) -> "nyi"
+            | Slider ((x, y), offset, repeats, points, length, hs, sounds) -> "nyi"
             | Spinner (start, finish, hs, addition) -> String.concat "," ["320"; "240"; string start; "8"; hs |> int |> string; string finish; formatHitAddition addition]
 
     (*
@@ -185,7 +185,7 @@ module osu =
     let private parseInt = pint64 |>> int
     let private parseName = (many1Satisfy isLetterOrDigit)
     let private parseQuote =
-        between (pchar '"') (pchar '"') (many1Satisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
+        between (pchar '"') (pchar '"') (manySatisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
 
     let private parseKeyValue = parseName .>> spaces .>> colon .>> spaces .>>. (restOfLine true)
     let private parseHeaderTitle(name) = pstring ("[" + name + "]") >>% name
@@ -228,10 +228,10 @@ module osu =
             match objType &&& 139 with
             | 1 -> parseAddition |>> fun addition -> HitCircle(pos, offset, hitsound, addition)
             | 2 ->
-                tuple5 (sliderPoints .>> comma) (parseInt .>> comma) (parseNum .>> comma) (parseSliderSounds .>> comma)
-                    parseAddition
-                |>> fun (points, slides, length, (sounds, sampleSets), addition) ->
-                    Slider(pos, offset, slides, points, length, hitsound, sounds, sampleSets, addition)
+                tuple4 (sliderPoints .>> comma) (parseInt .>> comma) parseNum
+                    (opt (comma >>. (parseSliderSounds .>> comma) .>>. parseAddition) |>> Option.map (fun ((a, b), c) -> (a, b, c)))
+                |>> fun (points, slides, length, sounds) ->
+                    Slider(pos, offset, slides, points, length, hitsound, sounds)
             | 8 ->
                 pipe2 (parseNum .>> comma) parseAddition
                     (fun endTime addition -> Spinner(offset, toTime endTime, hitsound, addition))
@@ -254,11 +254,17 @@ module osu =
         //((pchar 'L' >>. comma >>. tuple3 (parseNum .>> comma) (parseInt .>> comma .>> spaces) (many (parseSpriteEvent ((pchar ' ' <|> pchar '_') >>. depthSkipper .>> skipNewline))))
         //|>> (fun (time, repeats, events) -> Loop(time, repeats, events)))
         //<|>
-        (tuple4 (((satisfy (isAnyOf "FMSVRCP") |>> string) <|> pstring "MX" <|> pstring "MY") .>> comma .>> spaces)
-                    (parseInt .>> comma .>> spaces |>> enum) (parseNum .>> comma .>> spaces) (parseNum .>> comma .>> spaces)
+        (tuple4 ((pstring "MX" <|> pstring "MY" <|> (satisfy (isAnyOf "FMSVRCP") |>> string)) .>> comma .>> spaces)
+                    (parseInt .>> comma .>> spaces |>> enum) (opt parseNum .>> comma .>> spaces) (opt parseNum .>> comma .>> spaces)
         >>= (fun (eventType, easing, startTime, endTime) ->
             let parsePoint = ((parseNum .>> comma) .>>. parseNum)
             let parseNumsWithShorthand = (parseNum .>>. opt (comma >>. parseNum)) |>> fun (a, b) -> (a, Option.defaultValue a b)
+            let startTime, endTime =
+                match startTime, endTime with
+                | None, None -> failwith "Both start time and end time were left blank"
+                | Some x, None -> x, x
+                | None, Some x -> x, x
+                | Some x, Some y -> x, y
             let startTime, endTime = toTime startTime, toTime endTime
             match eventType with
             | "F" -> parseNumsWithShorthand |>> fun (f1, f2) -> Fade(startTime, endTime, easing, f1, f2)
@@ -272,9 +278,9 @@ module osu =
                 (charReturn 'H' HorizontalFlip <|> charReturn 'V' VerticalFlip <|> charReturn 'A' AdditiveBlendColor)
                 |>> fun p -> Parameter(startTime, endTime, p)
             | "C" ->
-                (tuple3 (parseInt .>> comma) (parseInt .>> comma) (parseInt .>> comma))
-                .>>. (tuple3 (parseInt .>> comma) (parseInt .>> comma) parseInt)
-                |>> fun (c1, c2) -> Color(startTime, endTime, easing, c1, c2)
+                (tuple3 (parseInt .>> comma) (parseInt .>> comma) (parseInt))
+                .>>. opt (tuple3 (comma >>. parseInt .>> comma) (parseInt .>> comma) parseInt)
+                |>> fun (c1, c2) -> Color(startTime, endTime, easing, c1, Option.defaultValue c1 c2)
             | _ -> failwith "Unknown storyboard event")))
 
     let private parseSpriteEvents depthSkipper = many (parseSpriteEvent depthSkipper .>> skipNewline)
