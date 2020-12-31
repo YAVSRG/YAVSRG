@@ -69,7 +69,7 @@ module ChartConversions =
             | HoldNote ((x,y), time, endTime, _, _) -> hold (xToColumn x) time endTime (updateHolds time (snaps, holds))
             | _ -> (snaps, holds)
 
-        let (states, _) = updateHolds (infinityf * 1.0f<ms>) (List.fold f ([], Array.create 4 -1.0f<ms>) objects)
+        let (states, _) = updateHolds (infinityf * 1.0f<ms>) (List.fold f ([], Array.create keys -1.0f<ms>) objects)
         TimeData<NoteRow>(listToDotNet states)
 
     let private convertTimingPoints (points: TimingPoint list) (keys : int) (endTime : Time) : (TimeData<BPM> * MultiTimeData<float32>) =

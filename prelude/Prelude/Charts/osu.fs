@@ -27,19 +27,19 @@ module osu =
         "[" + title + "]\n" + (String.concat "\n" (List.map f entries))
 
     type TimingEffect =
-        | Kiai = 1
-        | OmitFirstBarline = 8
+    | Kiai = 1
+    | OmitFirstBarline = 8
 
     type SampleSet =
-        | None = 0
-        | Default = 0
-        | Normal = 1
-        | Soft = 2
-        | Drum = 3
+    | None = 0
+    | Default = 0
+    | Normal = 1
+    | Soft = 2
+    | Drum = 3
 
     type TimingPoint =
-        | BPM of Time * float32<ms/beat> * int<beat> * (SampleSet * int * int) * TimingEffect
-        | SV of Time * float32 * (SampleSet * int * int) * TimingEffect
+    | BPM of Time * float32<ms/beat> * int<beat> * (SampleSet * int * int) * TimingEffect
+    | SV of Time * float32 * (SampleSet * int * int) * TimingEffect
         override this.ToString() =
             match this with
             | BPM (time, msPerBeat, meter, (set,index,volume), effect) ->
@@ -50,10 +50,10 @@ module osu =
     type Point = float * float
 
     type SliderShape =
-        | Linear
-        | Catmull
-        | Bezier
-        | PerfectCircle
+    | Linear
+    | Catmull
+    | Bezier
+    | PerfectCircle
         override this.ToString() =
             match this with
             | Linear -> "L" | Catmull -> "C" | Bezier -> "B" | PerfectCircle -> "P"
@@ -62,16 +62,16 @@ module osu =
     let formatHitAddition (s1,s2,index,volume,file) = String.concat ":" [s1 |> int |> string; s2 |> int |> string; string index; string volume; file]
 
     type HitSound =
-        | Normal = 1
-        | Whistle = 2
-        | Finish = 4
-        | Clap = 8
+    | Normal = 1
+    | Whistle = 2
+    | Finish = 4
+    | Clap = 8
 
     type HitObject =
-        | HitCircle of Point * Time * HitSound * HitAddition
-        | HoldNote of Point * Time * Time * HitSound * HitAddition
-        | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * HitSound list * (SampleSet * SampleSet) list * HitAddition
-        | Spinner of Time * Time * HitSound * HitAddition
+    | HitCircle of Point * Time * HitSound * HitAddition
+    | HoldNote of Point * Time * Time * HitSound * HitAddition
+    | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * HitSound list * (SampleSet * SampleSet) list * HitAddition
+    | Spinner of Time * Time * HitSound * HitAddition
         override this.ToString() = 
             match this with
             | HitCircle ((x, y), offset, hs, addition) -> String.concat "," [x |> string; y |> string; offset |> string; "1"; hs |> int |> string; formatHitAddition addition]
@@ -83,57 +83,59 @@ module osu =
         Storyboard data types
     *)
 
+    //There's actually 35 of these. todo: maybe include them all?
+    //https://osu.ppy.sh/wiki/en/Storyboard_Scripting/Commands
     type Easing =
-        | None = 0
-        | Decelerate = 1
-        | Accelerate = 2
+    | None = 0
+    | Decelerate = 1
+    | Accelerate = 2
 
     type Layer =
-        | Background = 0
-        | Fail = 1
-        | Pass = 2
-        | Foreground = 3
-        | Overlay = 4
+    | Background = 0
+    | Fail = 1
+    | Pass = 2
+    | Foreground = 3
+    | Overlay = 4
 
     type LoopType =
-        | LoopForever = 0
-        | LoopOnce = 1
+    | LoopForever = 0
+    | LoopOnce = 1
 
     type TriggerType =
-        | HitSoundClap
-        | HitSoundFinish
-        | HitSoundWhistle
-        | Passing
-        | Failing
+    | HitSoundClap
+    | HitSoundFinish
+    | HitSoundWhistle
+    | Passing
+    | Failing
 
     type SpriteOrigin =
-        | TopLeft = 0
-        | TopCentre = 1
-        | TopRight = 2
-        | CentreLeft = 3
-        | Centre = 4
-        | CentreRight = 5
-        | BottomLeft = 6
-        | BottomCentre = 7
-        | BottomRight = 8
+    | TopLeft = 0
+    | TopCentre = 1
+    | TopRight = 2
+    | CentreLeft = 3
+    | Centre = 4
+    | CentreRight = 5
+    | BottomLeft = 6
+    | BottomCentre = 7
+    | BottomRight = 8
 
     type SpriteParameter =
-        | VerticalFlip
-        | HorizontalFlip
-        | AdditiveBlendColor
+    | VerticalFlip
+    | HorizontalFlip
+    | AdditiveBlendColor
 
     type StoryboardEvent =
-        | Fade of Time * Time * Easing * float * float
-        | Move of Time * Time * Easing * Point * Point
-        | Move_X of Time * Time * Easing * float * float
-        | Move_Y of Time * Time * Easing * float * float
-        | Scale of Time * Time * Easing * float * float
-        | VectorScale of Time * Time * Easing * Point * Point
-        | Rotate of Time * Time * Easing * float * float
-        | Color of Time * Time * Easing * (int * int * int) * (int * int * int)
-        | Loop of Time * int * StoryboardEvent list
-        | Trigger_Loop of Time * Time * TriggerType * StoryboardEvent list
-        | Parameter of Time * Time * SpriteParameter
+    | Fade of Time * Time * Easing * float * float
+    | Move of Time * Time * Easing * Point * Point
+    | Move_X of Time * Time * Easing * float * float
+    | Move_Y of Time * Time * Easing * float * float
+    | Scale of Time * Time * Easing * float * float
+    | VectorScale of Time * Time * Easing * Point * Point
+    | Rotate of Time * Time * Easing * float * float
+    | Color of Time * Time * Easing * (int * int * int) * (int * int * int)
+    | Loop of Time * int * StoryboardEvent list
+    | Trigger_Loop of Time * Time * TriggerType * StoryboardEvent list
+    | Parameter of Time * Time * SpriteParameter
         member this.Format(padding) =
             padding + (String.concat ","
                 (match this with
@@ -152,12 +154,13 @@ module osu =
                 ))
 
     type StoryboardObject =
-        | Sprite of Layer * SpriteOrigin * string * Point * StoryboardEvent list
-        | Animation of Layer * SpriteOrigin * string * Point * int * Time * LoopType * StoryboardEvent list
-        | Sample of Time * Layer * string * int
-        | Background of string * Point
-        | Video of Time * string * Point
-        | Break of Time * Time
+    | Sprite of Layer * SpriteOrigin * string * Point * StoryboardEvent list
+    | Animation of Layer * SpriteOrigin * string * Point * int * Time * LoopType * StoryboardEvent list
+    | Sample of Time * Layer * string * int
+    | Background of string * Point
+    | Video of Time * string * Point
+    | Break of Time * Time
+    | BackgroundColorChange of Time * int * int * int //i have no idea what this is or does
         override this.ToString() = 
             match this with
             | Background (filename, (x,y)) -> String.concat "," ["Background"; "0"; "\""+filename+"\""; string x; string y]
@@ -254,16 +257,17 @@ module osu =
         (tuple4 (((satisfy (isAnyOf "FMSVRCP") |>> string) <|> pstring "MX" <|> pstring "MY") .>> comma .>> spaces)
                     (parseInt .>> comma .>> spaces |>> enum) (parseNum .>> comma .>> spaces) (parseNum .>> comma .>> spaces)
         >>= (fun (eventType, easing, startTime, endTime) ->
-            let parse2Nums = ((parseNum .>> comma) .>>. parseNum)
+            let parsePoint = ((parseNum .>> comma) .>>. parseNum)
+            let parseNumsWithShorthand = (parseNum .>>. opt (comma >>. parseNum)) |>> fun (a, b) -> (a, Option.defaultValue a b)
             let startTime, endTime = toTime startTime, toTime endTime
             match eventType with
-            | "F" -> parse2Nums |>> fun (f1, f2) -> Fade(startTime, endTime, easing, f1, f2)
-            | "M" -> parse2Nums .>> comma .>>. parse2Nums |>> fun (p1, p2) -> Move(startTime, endTime, easing, p1, p2)
-            | "MX" -> parse2Nums |>> fun (f1, f2) -> Move_X(startTime, endTime, easing, f1, f2)
-            | "MY" -> parse2Nums |>> fun (f1, f2) -> Move_Y(startTime, endTime, easing, f1, f2)
-            | "S" -> parse2Nums |>> fun (s1, s2) -> Scale(startTime, endTime, easing, s1, s2)
-            | "V" -> parse2Nums .>>. parse2Nums |>> fun (p1, p2) -> VectorScale(startTime, endTime, easing, p1, p2)
-            | "R" -> parse2Nums |>> fun (f1, f2) -> Rotate(startTime, endTime, easing, f1, f2)
+            | "F" -> parseNumsWithShorthand |>> fun (f1, f2) -> Fade(startTime, endTime, easing, f1, f2)
+            | "M" -> parsePoint .>>. opt (comma >>. parsePoint) |>> fun (p1, p2) -> Move(startTime, endTime, easing, p1, Option.defaultValue p1 p2)
+            | "MX" -> parseNumsWithShorthand |>> fun (f1, f2) -> Move_X(startTime, endTime, easing, f1, f2)
+            | "MY" -> parseNumsWithShorthand |>> fun (f1, f2) -> Move_Y(startTime, endTime, easing, f1, f2)
+            | "S" -> parseNumsWithShorthand |>> fun (s1, s2) -> Scale(startTime, endTime, easing, s1, s2)
+            | "V" -> parsePoint .>>. opt (comma >>. parsePoint) |>> fun (p1, p2) -> VectorScale(startTime, endTime, easing, p1, Option.defaultValue p1 p2)
+            | "R" -> parseNumsWithShorthand |>> fun (f1, f2) -> Rotate(startTime, endTime, easing, f1, f2)
             | "P" ->
                 (charReturn 'H' HorizontalFlip <|> charReturn 'V' VerticalFlip <|> charReturn 'A' AdditiveBlendColor)
                 |>> fun p -> Parameter(startTime, endTime, p)
@@ -285,7 +289,7 @@ module osu =
             |>> fun ((layer, origin, file, x), (y, frames, frameTime, loopType), events) ->
                 Animation(layer, origin, file, (x, y), frames, toTime frameTime, loopType, events))
 
-        <|> (pstring "Sprite" >>. comma
+        <|> ((pstring "Sprite" <|> pstring "4") >>. comma
             >>. ((tuple5 (parseName .>> comma |>> Layer.Parse) (parseName .>> comma |>> SpriteOrigin.Parse)
                     (parseQuote .>> comma) (parseNum .>> comma) parseNum) .>> pchar '\n')
             .>>. (parseSpriteEvents (pchar '_' <|> pchar ' '))
@@ -294,14 +298,23 @@ module osu =
         <|> ((pstring "Background" <|> pstring "0") >>. comma
             >>. (tuple3 (parseNum .>> comma) parseQuote ((opt (tuple2 (comma >>. parseNum) (comma >>. parseNum))) |>> Option.defaultValue (0.0, 0.0)))
             |>> fun (time, file, (x, y)) -> Background(file, (x, y)))
+
+        <|> ((pstring "Sample") >>. comma
+            >>. (tuple4 (parseNum .>> comma) (parseName .>> comma |>> Layer.Parse) (parseQuote .>> comma) parseInt)
+            |>> fun (time, layer, file, volume) -> Sample(toTime time, layer, file, volume))
          
         <|> ((pstring "Video" <|> pstring "1") >>. comma
             >>. (tuple3 (parseNum .>> comma) parseQuote ((opt (tuple2 (comma >>. parseNum) (comma >>. parseNum))) |>> Option.defaultValue (0.0, 0.0)))
             |>> fun (time, file, (x, y)) -> Video(toTime time, file, (x, y)))
          
         <|> ((pstring "Break" <|> pstring "2") >>. comma
-            >>.  (parseNum .>> comma) .>>. parseNum
+            >>. (parseNum .>> comma) .>>. parseNum
             |>> fun (time1, time2) -> Break (toTime time1, toTime time2))
+
+        //I have no idea what this does and cannot for the life of me find any documentation on it
+        <|> ((pstring "3") >>. comma
+            >>. (tuple4 (parseNum .>> comma) (parseInt .>> comma) (parseInt .>> comma) (parseInt))
+            |>> fun (time, r, g, b) -> BackgroundColorChange(toTime time, r, g, b))
 
     let parseEvents =
         pstring "[Events]" >>. newline >>. many (pstring "//" >>. restOfLine true)
@@ -313,15 +326,15 @@ module osu =
     *)
 
     type GameMode =
-        | osu = 0
-        | Taiko = 1
-        | Catch = 2
-        | Mania = 3
+    | osu = 0
+    | Taiko = 1
+    | Catch = 2
+    | Mania = 3
 
     type OverlayPosition =
-        | NoChange = 0
-        | Below = 1
-        | Above = 2
+    | NoChange = 0
+    | Below = 1
+    | Above = 2
 
     type General =
         { AudioFilename: string
