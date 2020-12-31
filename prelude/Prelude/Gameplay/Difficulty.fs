@@ -1,10 +1,10 @@
 ﻿namespace Prelude.Gameplay
 
-open System;
+open System
+open System.Drawing
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
-open System.Drawing
 
 (*
     Representation of hand/keyboard layouts.

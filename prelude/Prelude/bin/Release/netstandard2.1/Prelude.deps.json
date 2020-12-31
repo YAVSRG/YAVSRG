@@ -1,0 +1,165 @@
+{
+  "runtimeTarget": {
+    "name": ".NETStandard,Version=v2.1/",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETStandard,Version=v2.1": {},
+    ".NETStandard,Version=v2.1/": {
+      "Prelude/1.0.0": {
+        "dependencies": {
+          "FParsec": "1.1.1",
+          "FSharp.Core": "4.7.2",
+          "Percyqaz.Json": "1.0.3",
+          "System.Drawing.Common": "5.0.0"
+        },
+        "runtime": {
+          "Prelude.dll": {}
+        }
+      },
+      "FParsec/1.1.1": {
+        "dependencies": {
+          "FSharp.Core": "4.7.2"
+        },
+        "runtime": {
+          "lib/netstandard2.0/FParsec.dll": {
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
+          },
+          "lib/netstandard2.0/FParsecCS.dll": {
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
+          }
+        }
+      },
+      "FSharp.Core/4.7.2": {
+        "runtime": {
+          "lib/netstandard2.0/FSharp.Core.dll": {
+            "assemblyVersion": "4.7.0.0",
+            "fileVersion": "4.700.20.27008"
+          }
+        },
+        "resources": {
+          "lib/netstandard2.0/cs/FSharp.Core.resources.dll": {
+            "locale": "cs"
+          },
+          "lib/netstandard2.0/de/FSharp.Core.resources.dll": {
+            "locale": "de"
+          },
+          "lib/netstandard2.0/es/FSharp.Core.resources.dll": {
+            "locale": "es"
+          },
+          "lib/netstandard2.0/fr/FSharp.Core.resources.dll": {
+            "locale": "fr"
+          },
+          "lib/netstandard2.0/it/FSharp.Core.resources.dll": {
+            "locale": "it"
+          },
+          "lib/netstandard2.0/ja/FSharp.Core.resources.dll": {
+            "locale": "ja"
+          },
+          "lib/netstandard2.0/ko/FSharp.Core.resources.dll": {
+            "locale": "ko"
+          },
+          "lib/netstandard2.0/pl/FSharp.Core.resources.dll": {
+            "locale": "pl"
+          },
+          "lib/netstandard2.0/pt-BR/FSharp.Core.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "lib/netstandard2.0/ru/FSharp.Core.resources.dll": {
+            "locale": "ru"
+          },
+          "lib/netstandard2.0/tr/FSharp.Core.resources.dll": {
+            "locale": "tr"
+          },
+          "lib/netstandard2.0/zh-Hans/FSharp.Core.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "lib/netstandard2.0/zh-Hant/FSharp.Core.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "Percyqaz.Json/1.0.3": {
+        "dependencies": {
+          "FParsec": "1.1.1",
+          "FSharp.Core": "4.7.2",
+          "TypeShape": "9.0.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/Percyqaz.Json.dll": {
+            "assemblyVersion": "1.0.1.0",
+            "fileVersion": "1.0.1.0"
+          }
+        }
+      },
+      "System.Drawing.Common/5.0.0": {
+        "runtime": {
+          "lib/netstandard2.0/System.Drawing.Common.dll": {
+            "assemblyVersion": "4.0.0.1",
+            "fileVersion": "4.6.26919.2"
+          }
+        }
+      },
+      "TypeShape/9.0.0": {
+        "dependencies": {
+          "FSharp.Core": "4.7.2"
+        },
+        "runtime": {
+          "lib/netstandard2.0/TypeShape.CSharp.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
+          },
+          "lib/netstandard2.0/TypeShape.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Prelude/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FParsec/1.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Wdjf/gCNLEwd+0nUCDh9jAIIcKGwfhRramySTnTcVVgNC6i4Vp5aJklUJJfvFkEZMYNZEDGcI8pCa36/TmwmSg==",
+      "path": "fparsec/1.1.1",
+      "hashPath": "fparsec.1.1.1.nupkg.sha512"
+    },
+    "FSharp.Core/4.7.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-w3XFVTnyZUbC8e2QT6a85ern6y7eQPPk+MYemz1FP0iBfgZcembL+wmo5cIZ1kxB8jfoXC8Q9KVkOMsGpkBKbA==",
+      "path": "fsharp.core/4.7.2",
+      "hashPath": "fsharp.core.4.7.2.nupkg.sha512"
+    },
+    "Percyqaz.Json/1.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TL2pAWVhQyaNwlKsDc8mDqJ1kH+5DEjt5TGfVicyv3jqxF9YZvU8bWH5LB71SITdHdS+fa0tEFwEOcA0mmsuYQ==",
+      "path": "percyqaz.json/1.0.3",
+      "hashPath": "percyqaz.json.1.0.3.nupkg.sha512"
+    },
+    "System.Drawing.Common/5.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-SztFwAnpfKC8+sEKXAFxCBWhKQaEd97EiOL7oZJZP56zbqnLpmxACWA8aGseaUExciuEAUuR9dY8f7HkTRAdnw==",
+      "path": "system.drawing.common/5.0.0",
+      "hashPath": "system.drawing.common.5.0.0.nupkg.sha512"
+    },
+    "TypeShape/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TFBwzUVpnJT8W4UAGNb0uQ+ZtA9wKUOZA9a825DzOZ0ejUFmLKF/QOVhMt6x9d1TsP1TxuUs/aYilKPCnttryg==",
+      "path": "typeshape/9.0.0",
+      "hashPath": "typeshape.9.0.0.nupkg.sha512"
+    }
+  }
+}

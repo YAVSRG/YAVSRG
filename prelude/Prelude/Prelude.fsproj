@@ -25,7 +25,8 @@
 
   <ItemGroup>
     <PackageReference Include="FParsec" Version="1.1.1" />
-    <PackageReference Include="Percyqaz.Json" Version="1.0.3" />
+    <PackageReference Include="Percyqaz.Json" Version="1.0.4" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
