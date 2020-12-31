@@ -15,16 +15,18 @@ module NoteColors =
     let DDRValues = [|1.0f; 2.0f; 3.0f; 4.0f; 6.0f; 8.0f; 12.0f; 16.0f|] |> Array.map (fun i -> i * 1.0f</beat>)
 
     type ColorScheme = 
-        | Column
-        | Chord
-        | DDR
-        | Jackhammer
-        member this.ColorCount keycount =
-            match this with
-            | Column -> keycount
-            | Chord -> keycount
-            | DDR -> Array.length DDRValues
-            | Jackhammer -> Array.length DDRValues
+    | Column = 0
+    | Chord = 1
+    | DDR = 2
+    | Jackhammer = 3
+
+    let colorCount keycount scheme =
+        match scheme with
+        | ColorScheme.Column -> keycount
+        | ColorScheme.Chord -> keycount
+        | ColorScheme.DDR -> Array.length DDRValues
+        | ColorScheme.Jackhammer -> Array.length DDRValues
+        | _ -> keycount
 
     type ColorData = byte array
     type ColorDataSets = ColorData array //color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
@@ -57,15 +59,15 @@ module NoteColors =
         let (keys, _, bpm, sv, m) = chart
         let ci i = colorData.[i]
         match scheme with
-        | Column ->
+        | ColorScheme.Column ->
             ((), fun _ (_, nr) ->
                 ((), [|for i in 0..(keys-1) -> ci i|]))
                 |> colorize chart
-        | Chord ->
+        | ColorScheme.Chord ->
             ((), fun _ (_, nr) ->
                 ((), Array.create keys ((nr |> noteData NoteType.NORMAL |> countBits) + (nr |> noteData NoteType.HOLDHEAD |> countBits) |> ci)))
                 |> colorize chart
-        | DDR ->
+        | ColorScheme.DDR ->
             (chart, fun c (time, nr) ->
                 let (ptime, (_, msPerBeat)) =
                     if bpm.IsEmpty() then
@@ -92,8 +94,5 @@ module NoteColors =
     let getColoredChart (config: ColorConfig) (chart: Lazy<ModChart>) =
         lazy (
             let chart = chart.Force()
-            let index =
-                if config.UseGlobalColors then 0
-                else
-                    let (keys, _, _, _, _) = chart in keys - 2
+            let index = if config.UseGlobalColors then 0 else let (keys, _, _, _, _) = chart in keys - 2
             applyScheme config.Style config.Colors.[index] chart )
