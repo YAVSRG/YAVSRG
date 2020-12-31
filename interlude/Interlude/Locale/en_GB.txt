@@ -25,3 +25,6 @@ options.name.GameplayBinds=Gameplay Binds
 options.select.Available=Available
 options.select.Selected=Selected
 options.select.Confirm=Confirm
+options.name.NoteskinAndLayout=Noteskin & Layout
+options.name.NoteColors=Note Colors
+options.name.ColorStyle=Color Style

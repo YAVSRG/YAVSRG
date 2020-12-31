@@ -81,7 +81,7 @@ type NoteRenderer() as this =
     let scrollDirectionPos bottom = if Options.options.Upscroll.Get() then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
     let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Get() then id else Quad.flip
     let noteRotation =
-        if keys = 4 then
+        if keys = 4 && Themes.noteskinConfig.UseRotation then
             fun k (struct (s, q): SpriteQuad) -> struct (s, Quad.rotate(match k with 0 -> 3 | 1 -> 0 | 2 -> 2 | 3 -> 1 | _ -> 0) q)
         else fun k -> id
 
