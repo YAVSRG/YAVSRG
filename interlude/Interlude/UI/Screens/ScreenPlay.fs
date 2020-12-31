@@ -80,6 +80,10 @@ type NoteRenderer() as this =
 
     let scrollDirectionPos bottom = if Options.options.Upscroll.Get() then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
     let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Get() then id else Quad.flip
+    let noteRotation =
+        if keys = 4 then
+            fun k (struct (s, q): SpriteQuad) -> struct (s, Quad.rotate(match k with 0 -> 3 | 1 -> 0 | 2 -> 2 | 3 -> 1 | _ -> 0) q)
+        else fun k -> id
 
     do
         //todo: position differently for editor
@@ -116,7 +120,7 @@ type NoteRenderer() as this =
                     hold_colors.[k] <- int c.[k]
                     (testForNote k NoteType.HOLDHEAD nd || testForNote k NoteType.HOLDBODY nd)
                 else false
-            Draw.rect(Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight) |> scrollDirectionPos bottom) Color.White (Themes.getTexture("receptor")) //animation for being pressed
+            Draw.quad(Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight) |> scrollDirectionPos bottom |> Quad.ofRect) (Color.White |> Quad.colorOf) (Sprite.gridUV(animation.Loops, 0)(Themes.getTexture("receptor")) |> noteRotation k) //animation for being pressed
 
         //main render loop - until the last note rendered in every column appears off screen
         let mutable min = hitposition
@@ -140,7 +144,7 @@ type NoteRenderer() as this =
                 sv_time.[k] <- t
                 min <- Math.Min(column_pos.[k], min)
                 if testForNote k NoteType.NORMAL nd then
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, int color.[k])(Themes.getTexture("note")))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, int color.[k])(Themes.getTexture("note")) |> noteRotation k)
                 elif testForNote k NoteType.HOLDHEAD nd then
                     hold_pos.[k] <- column_pos.[k]
                     hold_colors.[k] <- int color.[k]
@@ -155,7 +159,7 @@ type NoteRenderer() as this =
                             (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos + noteHeight * 0.5f)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom))
                             (Quad.colorOf Color.White)
                             (Sprite.gridUV(animation.Loops, int color.[k])(tailsprite) |> fun struct (x, y) -> struct (x, scrollDirectionFlip y))
-                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
+                    Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")) |> noteRotation k)
                     hold_presence.[k] <- false
                 elif testForNote k NoteType.MINE nd then
                     Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, int color.[k])(Themes.getTexture("mine")))

@@ -76,6 +76,13 @@ module Quad =
 
     let flip (struct (c1, c2, c3, c4): Quad): Quad = struct (c4, c3, c2, c1)
 
+    let rotate r (struct (c1, c2, c3, c4): Quad): Quad =
+        match r with
+        | 3 -> struct (c4, c1, c2, c3)
+        | 2 -> struct (c3, c4, c1, c2)
+        | 1 -> struct (c2, c3, c4, c1)
+        | 0 | _ -> struct (c1, c2, c3, c4)
+
     let map f (struct (c1, c2, c3, c4): Quad): Quad = struct (f c1, f c2, f c3, f c4)
 
 (*
