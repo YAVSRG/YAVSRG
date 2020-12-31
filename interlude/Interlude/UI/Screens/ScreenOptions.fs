@@ -19,6 +19,8 @@ module SelectionWheel =
 
     let WIDTH = 350.0f
 
+    let t s = Localisation.localise("options.name." + s)
+
     [<AbstractClass>]
     type ISelectable(onDeselect) =
         inherit Widget()
@@ -33,6 +35,7 @@ module SelectionWheel =
         abstract member DeselectChild: unit -> unit
         abstract member AutoSelect: bool
 
+    //todo: maybe try making this a special case of SelectionContainer if im feeling big brain
     type SelectionWheel(onDeselect) as this  =
         inherit ISelectable(onDeselect)
 
@@ -40,7 +43,7 @@ module SelectionWheel =
         let items = new List<ISelectable>()
         let collapse = new AnimationFade(1.0f)
         do this.Animation.Add(collapse)
-        override this.Select() = base.Select(); collapse.SetTarget(0.0f)
+        override this.Select() = base.Select(); collapse.SetTarget(0.0f); if items.[index].AutoSelect then items.[index].Select()
         override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
         override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
 
@@ -88,11 +91,69 @@ module SelectionWheel =
                     index <- (index + items.Count - 1) % items.Count
                     if items.[index].AutoSelect then items.[index].Select()
                 elif options.Hotkeys.Exit.Get().Tapped(false) || (flag = 0 && options.Hotkeys.Previous.Get().Tapped(false)) then
-                    this.Deselect()
                     this.DeselectChild()
+                    this.Deselect()
                 if flag = 0 && (options.Hotkeys.Select.Get().Tapped(false) || options.Hotkeys.Next.Get().Tapped(false)) then items.[index].Select()
         
         override this.AutoSelect = false
+
+    type SelectionContainer(onDeselect, horizontal) =
+        inherit ISelectable(onDeselect)
+
+        let mutable index = 0
+        let items = new List<ISelectable>()
+
+        let fd() = if horizontal then options.Hotkeys.Next.Get().Tapped(false) else options.Hotkeys.Down.Get().Tapped(false)
+        let bk() = if horizontal then options.Hotkeys.Previous.Get().Tapped(false) else options.Hotkeys.Up.Get().Tapped(false)
+        let sel() = (not horizontal && options.Hotkeys.Next.Get().Tapped(false)) || options.Hotkeys.Select.Get().Tapped(false)
+        let desel() = options.Hotkeys.Exit.Get().Tapped(false)
+
+        member this.Clear() = index <- 0; Seq.iter (fun (w: ISelectable) -> w.Dispose(); this.Remove(w)) items; items.Clear()
+        override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
+        override this.Select() = base.Select(); if items.[index].AutoSelect then items.[index].Select()
+        override this.Deselect() = this.DeselectChild(); base.Deselect()
+
+        override this.Add(w) = if w :? ISelectable then items.Add(w :?> ISelectable); base.Add(w)
+
+        override this.Draw() =
+            if this.Selected then
+                for i in 0 .. (items.Count - 1) do
+                    let w = items.[i]
+                    if index = i && not w.Selected then Draw.rect w.Bounds (Color.FromArgb(160,180,180,180)) Sprite.Default
+            base.Draw()
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            let mutable flag = 0
+            for w in items do if w.Selected then flag <- if w.AutoSelect then 1 else 2
+            if this.Selected && flag < 2 then
+                if fd() then
+                    if flag = 1 then items.[index].Deselect()
+                    index <- (index + 1) % items.Count
+                    if items.[index].AutoSelect then items.[index].Select()
+                elif bk() then
+                    if flag = 1 then items.[index].Deselect()
+                    index <- (index + items.Count - 1) % items.Count
+                    if items.[index].AutoSelect then items.[index].Select()
+                elif desel() then
+                    this.Deselect()
+                if flag = 0 && sel() then items.[index].Select()
+
+        override this.AutoSelect = true
+
+    type SelectionRow(number, cons, name, onDeselect) as this =
+        inherit SelectionContainer(onDeselect, true)
+
+        let SCALE = 150.0f
+        do this.Refresh()
+        member this.Refresh() =
+            let l = this.Clear()
+            let n = number()
+            let x = -SCALE * 0.5f * float32 n
+            for i in 0 .. number() - 1 do
+                let w: ISelectable = cons i
+                w.Reposition(x + float32 i * SCALE, 0.5f, 0.0f, 0.0f, x + SCALE + float32 i * SCALE, 0.5f, SCALE, 0.0f)
+                this.Add(w)
 
     type ActionItem(name, action) as this =
         inherit ISelectable(ignore)
@@ -102,24 +163,6 @@ module SelectionWheel =
         override this.Select() = action()
         override this.DeselectChild() = ()
         override this.AutoSelect = false
-
-    (*
-    type WidgetItem(name, w: ISelectable, onDeselect) as this =
-        inherit ISelectable(onDeselect)
-        do
-            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f))
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
-        override this.Select() = base.Select(); w.Select()
-        override this.DeselectChild() = () //?
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if not w.Selected then this.Deselect()
-            w.Update(elapsedTime, this.Parent.Bounds |> Rect.trimLeft(WIDTH))
-        override this.Draw() =
-            w.Draw()
-            base.Draw()
-        override this.AutoSelect = false
-    *)
 
     //I'm sure there is a way to make this a special case of container item
     //but im too dumb to figure it out rn and ultimately it doesn't matter
@@ -165,7 +208,6 @@ module SelectionWheel =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if this.Selected then
-                //if options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
                 if options.Hotkeys.Next.Get().Tapped(false) then fd()
                 elif options.Hotkeys.Previous.Get().Tapped(false) then bk()
 
@@ -206,7 +248,6 @@ module SelectionWheel =
                 elif options.Hotkeys.UpRate.Get().Tapped(false) then chPercent(0.1f)
                 elif options.Hotkeys.DownRateHalf.Get().Tapped(false) || options.Hotkeys.Previous.Get().Tapped(false) then chPercent(-0.05f)
                 elif options.Hotkeys.DownRateSmall.Get().Tapped(false) then chPercent(-0.01f)
-                elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
                 elif options.Hotkeys.DownRate.Get().Tapped(false) then chPercent(-0.1f)
 
         override this.Draw() =
@@ -228,7 +269,6 @@ module SelectionWheel =
             else
                 this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
                 this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
         override this.Draw() =
             if name = "" then Draw.rect(this.Bounds |> Rect.expand(0.0f, -25.0f))(Screens.accentShade(127, 0.8f, 0.0f))Sprite.Default
             base.Draw()
@@ -246,75 +286,10 @@ module SelectionWheel =
                                     allowModifiers && (Input.Keyboard.pressedOverride(Key.ShiftLeft) || Input.Keyboard.pressedOverride(Key.ShiftRight)))))
                     this.Deselect())
         override this.DeselectChild() = ()
-        override this.AutoSelect = true
-
-    type SelectionContainer(onDeselect) =
-        inherit ISelectable(onDeselect)
-
-        let mutable index = 0
-        let items = new List<ISelectable>()
-
-        member private this.Reset() = index <- 0; Seq.iter (fun (w: ISelectable) -> w.Dispose()) items; items.Clear(); items
-        override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
-
-        override this.Add(w) = if w :? ISelectable then items.Add(w :?> ISelectable); base.Add(w)
-
-        override this.Draw() =
-            for i in 0 .. (items.Count - 1) do
-                let w = items.[i]
-                if index = i && not w.Selected then Draw.rect w.Bounds (Color.FromArgb(180,255,255,255)) Sprite.Default
-            base.Draw()
-
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if this.Selected && items |> Seq.exists (fun (w: ISelectable) -> w.Selected) |> not then
-                if options.Hotkeys.Select.Get().Tapped(false) then items.[index].Select()
-                elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
-                elif options.Hotkeys.Next.Get().Tapped(false) then index <- (index + 1) % items.Count
-                elif options.Hotkeys.Previous.Get().Tapped(false) then index <- (index + items.Count - 1) % items.Count
-
-        override this.AutoSelect = true
-
-    type SelectionRow(number, cons, name, onDeselect) as this =
-        inherit ISelectable(onDeselect)
-        let mutable index = 0
-        let mutable items: ISelectable list = [0 .. (number() - 1)] |> List.map cons
-        do
-            this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 20.0f, 0.0f, -20.0f))
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-        member this.Refresh() =
-            index <- 0
-            items |> List.iter (fun o -> o.Dispose())
-            items <- [0 .. (number() - 1)] |> List.map cons
-        override this.Draw() =
-            List.iteri
-                (fun i (w: ISelectable) ->
-                    if this.Selected && index = i then Draw.rect w.Bounds (Color.FromArgb(255, 180, 180, 180)) Sprite.Default
-                    w.Draw()) items
-            base.Draw()
-        override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
-
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            let struct (_, top, right, bottom) = this.Bounds
-            let h = bottom - top
-            let mutable flag = true
-            let mutable x = 0.0f
-            List.iteri
-                (fun i (w: ISelectable) ->
-                    if w.Selected then flag <- false
-                    w.Update(elapsedTime, Rect.create (right + x) top (right + x + h) bottom)
-                    x <- x + h) items
-            if flag && this.Selected then
-                if options.Hotkeys.Select.Get().Tapped(false) then items.[index].Select()
-                elif options.Hotkeys.Exit.Get().Tapped(false) then this.Deselect()
-                elif options.Hotkeys.Next.Get().Tapped(false) then index <- (index + 1) % number()
-                elif options.Hotkeys.Previous.Get().Tapped(false) then let n = number() in index <- (index + n - 1) % n
-
-        override this.AutoSelect = true
+        override this.AutoSelect = false
 
     let swBuilder items = let sw = new SelectionWheel(ignore) in items |> List.iter sw.AddItem; sw
-    let swItemBuilder items name = SelectionWheelItem(name, swBuilder items)
+    let swItemBuilder items name = SelectionWheelItem(name, swBuilder items) :> ISelectable
 
 [<AutoOpen>]
 module ThemeSelector =
@@ -361,9 +336,73 @@ module ThemeSelector =
 
 open SelectionWheel
 
+[<AutoOpen>]
+module LayoutEditor =
+    open Prelude.Gameplay.NoteColors
+
+    type private ColorPicker(color: ISettable<byte>) as this =
+        inherit ISelectable(ignore)
+        let sprite = Themes.getTexture("note")
+        let n = byte sprite.Rows
+        let fd() = color.Set((color.Get() + n - 1uy) % n)
+        let bk() = color.Set((color.Get() + 1uy) % n)
+        do this.Add(new Clickable(fd, ignore))
+        override this.DeselectChild() = ()
+        override this.AutoSelect = false
+        override this.Draw() =
+            base.Draw()
+            if this.Selected then
+                Draw.rect(this.Bounds)(Screens.accentShade(127, 1.0f, 0.0f))Sprite.Default
+            Draw.quad(this.Bounds |> Quad.ofRect)(Color.White |> Quad.colorOf)(sprite |> Sprite.gridUV(3, int <| color.Get()))
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if this.Selected then
+                if options.Hotkeys.Previous.Get().Tapped(false) then fd()
+                elif options.Hotkeys.Next.Get().Tapped(false) then bk()
+
+    type LayoutEditor() as this =
+        inherit Dialog()
+        let sc = SelectionContainer(ignore, false)
+        do
+            let mutable keycount = options.KeymodePreference.Get()
+
+            let g keycount i =
+                let k = if options.ColorStyle.Get().UseGlobalColors then 0 else keycount - 2
+                { new ISettable<_>() with
+                    override this.Set(v) = options.ColorStyle.Get().Colors.[k].[i] <- v
+                    override this.Get() = options.ColorStyle.Get().Colors.[k].[i] }
+
+            let f keycount i =
+                let k = keycount - 3
+                { new ISettable<_>() with
+                    override this.Set(v) = options.GameplayBinds.[k].[i] <- v
+                    override this.Get() = options.GameplayBinds.[k].[i] }
+
+            let binder = SelectionRow((fun () -> keycount), (fun i -> KeyBinder(f keycount i, "", false, ignore) :> ISelectable), t "GameplayBinds", ignore)
+            binder |> positionWidget(0.0f, 0.0f, 300.0f, 0.0f, 0.0f, 1.0f, 550.0f, 0.0f) |> sc.Add
+            let colors = SelectionRow((fun () -> options.ColorStyle.Get().Style |> colorCount keycount), (fun i -> ColorPicker(g keycount i) :> ISelectable), t "NoteColors", ignore)
+            colors |> positionWidget(0.0f, 0.0f, 650.0f, 0.0f, 0.0f, 1.0f, 800.0f, 0.0f) |> sc.Add
+            Selector.FromKeymode(
+                { new ISettable<int>() with
+                    override this.Set(v) = keycount <- v + 3
+                    override this.Get() = keycount - 3 }, fun () -> binder.Refresh(); colors.Refresh()) |> positionWidget(200.0f, 0.0f, 100.0f, 0.0f, 400.0f, 0.0f, 200.0f, 0.0f) |> sc.Add
+            Selector.FromEnum(
+                { new ISettable<ColorScheme>() with
+                    override this.Set(v) = options.ColorStyle.Set({options.ColorStyle.Get() with Style = v})
+                    override this.Get() = options.ColorStyle.Get().Style }, t "ColorStyle", fun () -> colors.Refresh()) |> positionWidget(500.0f, 0.0f, 100.0f, 0.0f, 700.0f, 0.0f, 200.0f, 0.0f) |> sc.Add
+            let ns = Themes.noteskins() |> Seq.toArray
+            let ids = ns |> Array.map fst
+            let names = ns |> Array.map (fun (id, data) -> data.Name)
+            Selector(names, Math.Max(0, Array.IndexOf(ids, Themes.currentNoteSkin)), (fun (i, _) -> let id = ns.[i] |> fst in options.NoteSkin.Set(id); Themes.changeNoteSkin(id); colors.Refresh()), t "Noteskin", ignore) |> positionWidget(800.0f, 0.0f, 100.0f, 0.0f, 1100.0f, 0.0f, 200.0f, 0.0f) |> sc.Add
+            sc.Select()
+            this.Add(sc)
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if not sc.Selected then this.Close()
+        override this.OnClose() = ()
+
 type OptionsMenu() as this =
     inherit Dialog()
-    let t s = Localisation.localise("options.name." + s)
     let sw =
         swBuilder [
             swItemBuilder [
@@ -384,7 +423,7 @@ type OptionsMenu() as this =
                     Slider((options.ScreenCoverDown :?> FloatSetting), t "ScreenCoverDown", ignore) :> ISelectable
                     Slider((options.ScreenCoverUp :?> FloatSetting), t "ScreenCoverUp", ignore) :> ISelectable
                     Slider((options.ScreenCoverFadeLength :?> IntSetting), t "ScreenCoverFadeLength", ignore) :> ISelectable
-                    ](t "ScreenCover") :> ISelectable
+                    ](t "ScreenCover")
                 //todo: pacemaker DU editor
                 //todo: accuracy and hp system selector
                 ](t "Gameplay")
@@ -392,19 +431,7 @@ type OptionsMenu() as this =
                 { new ActionItem(t "NewTheme", ignore) with override this.Select() = Screens.addDialog(TextInputDialog(this.Bounds, "NYI", ignore)) }
                 new ActionItem(t "ChangeTheme", fun () -> Screens.addDialog(new ThemeSelector()))
                 ](t "Themes")
-            let mutable keycount = options.KeymodePreference.Get()
-            let f km i =
-                { new ISettable<_>() with
-                    override this.Set(v) = options.GameplayBinds.[km].[i] <- v
-                    override this.Get() = options.GameplayBinds.[km].[i] }
-            let binder = SelectionRow((fun () -> keycount), (fun i -> KeyBinder(f (keycount - 3) i, "", false, ignore) :> ISelectable), t "GameplayBinds", ignore)
-            swItemBuilder [
-                Selector.FromKeymode(
-                    { new ISettable<int>() with
-                        override this.Set(v) = keycount <- v + 3
-                        override this.Get() = keycount - 3 }, binder.Refresh) :> ISelectable
-                binder :> ISelectable
-                ](t "Noteskin")
+            new ActionItem(t "NoteskinAndLayout", fun () -> Screens.addDialog(new LayoutEditor())) :> ISelectable
             swItemBuilder [ActionItem("TODO", ignore)](t "Hotkeys")
             swItemBuilder [ActionItem("TODO", ignore)](t "Debug")]
     do

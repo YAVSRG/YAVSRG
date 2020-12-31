@@ -59,6 +59,9 @@ module Themes =
     let mutable private fontBuilder: Lazy<Text.SpriteFont> option = None
     let font(): Text.SpriteFont = fontBuilder.Value.Force()
 
+    let noteskins() =
+        loadedNoteskins |> Seq.map (fun kvp -> (kvp.Key, let (data, i) = kvp.Value in data))
+
     let availableThemes = new List<string>()
     let refreshAvailableThemes() = 
         availableThemes.Clear()
