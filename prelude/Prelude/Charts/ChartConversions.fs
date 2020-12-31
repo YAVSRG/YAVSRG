@@ -36,38 +36,38 @@ module ChartConversions =
                 for k in 0..(keys - 1) do
                     if (holds.[k] >= 0.0f<ms> && holds.[k] = minT) then 
                         match s with
-                          | (time, nr) :: ss ->
+                        | (time, nr) :: ss ->
                             holds.[k] <- -1.0f<ms>;
                             if time = minT then
                                 applyToNoteData NoteType.HOLDTAIL (setBit k) nr
                                 applyToNoteData NoteType.HOLDBODY (unsetBit k) nr
                             else s <- (minT, (makeNoteRow 0us 0us (getMiddles holds) (makeBitmap (seq [k])) 0us 0us 0us)) :: s
-                          | [] -> failwith "impossible"
+                        | [] -> failwith "impossible"
                 minT <- Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) (infinityf * 1.0f<ms>) holds
             (s, holds)
 
         let note k time (snaps, holds) =
             match snaps with
-                (t, nr) :: ss ->
-                    if t = time then applyToNoteData NoteType.NORMAL (setBit k) nr; (snaps, holds)
-                    else ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
-               | [] -> ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
+            | (t, nr) :: ss ->
+                if t = time then applyToNoteData NoteType.NORMAL (setBit k) nr; (snaps, holds)
+                else ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
+            | [] -> ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
 
         let hold (k : int) time (release : Time) (snaps, (holds : Time array)) =
-            assert (holds.[k] = -1.0f<ms>)
+            if holds.[k] <> -1.0f<ms> then raise <| Exception("Hold note began inside another hold note")
             let middles = getMiddles holds
             holds.[k] <- release;
             match snaps with
-                | (t, nr) :: ss ->
-                    if t = time then applyToNoteData NoteType.HOLDHEAD (setBit k) nr; (snaps, holds)
-                    else ((time, (makeNoteRow 0us (makeBitmap (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
-                | [] -> ((time, (makeNoteRow 0us (makeBitmap (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
+            | (t, nr) :: ss ->
+                if t = time then applyToNoteData NoteType.HOLDHEAD (setBit k) nr; (snaps, holds)
+                else ((time, (makeNoteRow 0us (makeBitmap (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
+            | [] -> ((time, (makeNoteRow 0us (makeBitmap (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
 
         let f (snaps, holds) (hitObj : HitObject) =
             match hitObj with
-                HitCircle ((x,y), time, _, _) -> note (xToColumn x) time (updateHolds time (snaps, holds))
-              | HoldNote ((x,y), time, endTime, _, _) -> hold (xToColumn x) time endTime (updateHolds time (snaps, holds))
-              | _ -> (snaps, holds)
+            | HitCircle ((x,y), time, _, _) -> note (xToColumn x) time (updateHolds time (snaps, holds))
+            | HoldNote ((x,y), time, endTime, _, _) -> hold (xToColumn x) time endTime (updateHolds time (snaps, holds))
+            | _ -> (snaps, holds)
 
         let (states, _) = updateHolds (infinityf * 1.0f<ms>) (List.fold f ([], Array.create 4 -1.0f<ms>) objects)
         TimeData<NoteRow>(listToDotNet states)
@@ -76,35 +76,35 @@ module ChartConversions =
         let rec bpmDurations points = 
             if List.isEmpty points then failwith "no bpm point"
             match (List.head points) with
-                | (TimingPoint.BPM (offset, msPerBeat, _, _, _)) ->
-                    let mutable current : float32<ms/beat> = msPerBeat
-                    let mutable t : Time = offset
-                    let data = new Dictionary<float32<ms/beat>, Time>()
+            | (TimingPoint.BPM (offset, msPerBeat, _, _, _)) ->
+                let mutable current : float32<ms/beat> = msPerBeat
+                let mutable t : Time = offset
+                let data = new Dictionary<float32<ms/beat>, Time>()
 
-                    for p in points do
-                        if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
-                        match p with
-                        | (TimingPoint.SV _) -> ()
-                        | (TimingPoint.BPM (offset, msPerBeat, _, _, _)) -> data.[current] <- data.[current] + offset - t; t <- offset; current <- msPerBeat
+                for p in points do
                     if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
-                    data.[current] <- data.[current] + endTime - t
-                    data
-                | _ -> bpmDurations (List.tail points)
+                    match p with
+                    | (TimingPoint.SV _) -> ()
+                    | (TimingPoint.BPM (offset, msPerBeat, _, _, _)) -> data.[current] <- data.[current] + offset - t; t <- offset; current <- msPerBeat
+                if (not (data.ContainsKey current)) then data.Add(current, 0.0f<ms>)
+                data.[current] <- data.[current] + endTime - t
+                data
+            | _ -> bpmDurations (List.tail points)
 
         let mostCommonBpm = (bpmDurations points).OrderByDescending(fun p -> p.Value).First().Key
 
         let addOrSkipSV (offset, value) sv =
             match sv with
-                | [] -> [(offset, value)]
-                | (time, oldValue) :: s -> if oldValue = value then sv else (offset, value) :: sv
+            | [] -> [(offset, value)]
+            | (time, oldValue) :: s -> if oldValue = value then sv else (offset, value) :: sv
 
         let (bpm, sv, _) = 
             let func ((bpm, sv, scroll) : (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32)) (point : TimingPoint) : (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32) =
                 match point with
-                    | (TimingPoint.BPM (offset, msPerBeat, meter, _, _)) -> 
-                        (((offset, (meter, msPerBeat)) :: bpm), addOrSkipSV (offset, (mostCommonBpm / msPerBeat)) sv, mostCommonBpm / msPerBeat)
-                    | (TimingPoint.SV (offset, value, _, _)) ->
-                        (bpm, addOrSkipSV (offset, (value * scroll)) sv, scroll)
+                | (TimingPoint.BPM (offset, msPerBeat, meter, _, _)) -> 
+                    (((offset, (meter, msPerBeat)) :: bpm), addOrSkipSV (offset, (mostCommonBpm / msPerBeat)) sv, mostCommonBpm / msPerBeat)
+                | (TimingPoint.SV (offset, value, _, _)) ->
+                    (bpm, addOrSkipSV (offset, (value * scroll)) sv, scroll)
             List.fold func ([], [], 1.0f) points
 
         let svData = MultiTimeData<float32>(keys)
@@ -115,9 +115,9 @@ module ChartConversions =
         let keys = diff.CircleSize |> int
         let rec findBGFile e =
             match e with
-                | (Background (path, _)) :: _ -> path
-                | _ :: es -> findBGFile es
-                | [] -> ""
+            | (Background (path, _)) :: _ -> path
+            | _ :: es -> findBGFile es
+            | [] -> ""
         let header = { 
             ChartHeader.Default with
                 Title = meta.Title; Artist = meta.Artist; Creator = meta.Creator; SourcePack = "osu!"
@@ -191,9 +191,9 @@ module ChartConversions =
     let convert_stepmania_interlude (sm : StepmaniaData) path = 
         let rec metadataFallback x =
             match x with
-                | "" :: xs -> metadataFallback xs
-                | s :: xs -> s
-                | [] -> "----"
+            | "" :: xs -> metadataFallback xs
+            | s :: xs -> s
+            | [] -> "----"
         let findBackground guess : string =
             if (not (File.Exists(Path.Combine(path, guess)))) then
                 Directory.GetFiles(path)
@@ -284,7 +284,7 @@ module ChartConversions =
 
         let tps =
             seq {
-                //todo: can be refactored as recursion and might compile as faster code
+                //todo: can be refactored as recursion and might compile as faster code cause fsc is smart
                 let mutable bs = bpm.Data |> List.ofSeq
                 if List.isEmpty bs then ()
                 else
@@ -339,7 +339,7 @@ module ChartConversions =
     let convert_interlude_stepmania (chart : Chart) : StepmaniaData = failwith "nyi"
 
     (*
-        Overall utilities to dynamically load different chart files and convert to interlude format
+        Overall utilities to dynamically load different chart files and convert to Interlude format
     *)
 
     let (|ChartFile|_|) (path : string) = 
@@ -395,8 +395,7 @@ module ChartConversions =
                 if (not (File.Exists(target))) then
                     try
                         File.Copy(source, target)
-                    with
-                    | err -> Logging.Error ("Could not copy media file from " + source) (err.ToString())
+                    with err -> Logging.Error ("Could not copy media file from " + source) (err.ToString())
                 else () //fail silently when repeatedly copying
             else Logging.Warn ("Missing media file at " + source) ""
     
