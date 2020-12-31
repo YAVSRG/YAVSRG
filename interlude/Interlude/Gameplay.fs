@@ -114,23 +114,23 @@ module Gameplay =
         cache.Save()
         
     let init() =
-        //cache.RebuildCache (fun x -> Logging.Info(x) "") |> ignore
-        //cache.ConvertPackFolder(osuSongFolder) "osu!" (fun x -> Logging.Info(x) "") |> ignore
-        //Options.profile.ColorStyle.Set({ Options.profile.ColorStyle.Get() with Style = ColorScheme.DDR })
-       
-        let c, ch = 
-            match cache.LookupChart(Options.options.CurrentChart.Get()) with
-            | Some cc ->
-                match cache.LoadChart(cc) with
-                | Some c -> cc, c
+        try
+            let c, ch = 
+                match cache.LookupChart(Options.options.CurrentChart.Get()) with
+                | Some cc ->
+                    match cache.LoadChart(cc) with
+                    | Some c -> cc, c
+                    | None ->
+                        Logging.Error("Could not load chart file: " + cc.FilePath) ""
+                        cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) ""
+                        |> fun d -> d.["All"].[0]
+                        |> fun c -> c, cache.LoadChart(c).Value
                 | None ->
-                    Logging.Error("Could not load chart file: " + cc.FilePath) ""
+                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Get()) ""
                     cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) ""
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, cache.LoadChart(c).Value
-            | None ->
-                Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Get()) ""
-                cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) ""
-                |> fun d -> d.["All"].[0]
-                |> fun c -> c, cache.LoadChart(c).Value
-        changeChart(c, ch)
+            changeChart(c, ch)
+        with err ->
+           Logging.Critical("Tried to auto select a chart but none exist")(err.ToString())
+        //cache.ConvertPackFolder(osuSongFolder) "osu!" (fun x -> Logging.Info(x) "") |> ignore
