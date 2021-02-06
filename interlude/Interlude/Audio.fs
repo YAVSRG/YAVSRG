@@ -19,7 +19,7 @@ module Audio =
         static member Default = { ID = 0; Frequency = 1; Duration = 1000.0f<ms> }
         static member FromFile(file: string) =
             //let ID = Bass.CreateStream(file, int64 0, int64 0, BassFlags.Decode); //loads file
-            let ID = Bass.CreateStream(file); //loads file
+            let ID = Bass.CreateStream(file) //loads file
             if ID = 0 then 
                 Logging.Error("Couldn't load audio track from " + file) <| Bass.LastError.ToString()
                 Track.Default
