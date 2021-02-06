@@ -265,7 +265,7 @@ module Interlude =
             use br = new BinaryReader(fs)
             let keys = br.ReadByte() |> int
 
-            let header = Json.fromString(br.ReadString()) |> Json.JsonResult.valueOrRaise
+            let header = Json.fromString(br.ReadString()) |> JsonResult.value
 
             let notes = readSection br (readRowFromFile)
             let bpms = readSection br (fun r -> BPM(r.ReadInt32() * 1<beat>, r.ReadSingle() * 1.0f<ms/beat>))

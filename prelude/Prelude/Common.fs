@@ -40,7 +40,7 @@ module Common =
             let tP = Json.Mapping.getPickler<'T>()
             Json.Mapping.mkPickler
                 (fun (o: Setting<'T>) -> tP.Encode(o.Get()))
-                (fun (o: Setting<'T>) json -> tP.Decode(o.Get())(json) |> Json.MappingResult.map (fun v -> o.Set(v); o))
+                (fun (o: Setting<'T>) json -> tP.Decode(o.Get())(json) |> JsonMapResult.map (fun v -> o.Set(v); o))
 
     type WrappedSetting<'T, 'U>(setting: Setting<'U>, set: 'T -> 'U, get: 'U -> 'T) =
         inherit ISettable<'T>()
@@ -60,7 +60,7 @@ module Common =
             let tP = Json.Mapping.getPickler<'T>()
             Json.Mapping.mkPickler
                 (fun (o: NumSetting<'T>) -> tP.Encode(o.Get()))
-                (fun (o: NumSetting<'T>) json -> tP.Decode(o.Get())(json) |> Json.MappingResult.map (fun v -> o.Set(v); o))
+                (fun (o: NumSetting<'T>) json -> tP.Decode(o.Get())(json) |> JsonMapResult.map (fun v -> o.Set(v); o))
 
     type IntSetting(value: int, min: int, max: int) = 
         inherit NumSetting<int>(value, min, max)
@@ -168,9 +168,9 @@ module Common =
 
         member this.Start =
             if state = ManagedTaskState.INACTIVE then
-                task <- this.CreateTask;
+                task <- this.CreateTask
                 state <- ManagedTaskState.ACTIVE
-                task.Start();
+                task.Start()
             else Logging.Warn ("Tried to start " + name + " but it has already been started") ""
 
         member this.Cancel =
@@ -213,3 +213,23 @@ module Common =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)
         Directory.CreateDirectory(p) |> ignore
         p
+
+    let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
+        if File.Exists(path) then
+            let p = Path.ChangeExtension(path, ".bak")
+            if File.Exists(p) then File.Copy(p, Path.ChangeExtension(path, ".bak2"), true)
+            File.Copy(path, p, true)
+            try
+                Json.fromFile(path) |> JsonResult.value
+            with err ->
+                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path)) (err.ToString())
+                if prompt then
+                    Console.WriteLine("If you would like to launch anyway, press ENTER.")
+                    Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
+                    Console.ReadLine() |> ignore
+                    Logging.Critical("User has chosen to launch game with default data.") ""
+                defaultData
+        else
+            Logging.Info(sprintf "No %s file found, creating it." name) ""
+            defaultData
+

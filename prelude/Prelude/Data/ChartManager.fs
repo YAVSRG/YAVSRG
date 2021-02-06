@@ -17,7 +17,7 @@ module ChartManager =
     (*
         Caching of charts
     *)
-    [<Json.Required>]
+    [<Json.AllRequired>]
     type CachedChart = {
         FilePath: string
         Title: string
@@ -73,19 +73,10 @@ module ChartManager =
 
     //todo: add reverse lookup from hash -> id and remove id storage in score data
     type Cache() =
-
         let charts, collections = Cache.Load()
 
-        //todo: apply same backup system as score database - this is lower priority though as it can be easily remade
-        member this.Save() = Json.toFile(Path.Combine(getDataPath("Data"), "cache.json"), true)(charts, collections) 
-
-        static member Load() =
-            match Json.fromFile(Path.Combine(getDataPath("Data"), "cache.json")) with
-            | JsonResult.Success o -> o
-            | JsonResult.MappingFailure err
-            | JsonResult.ParsingFailure err ->
-                Logging.Critical("Could not load cache file! Creating from scratch") (err.ToString())
-                (new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>())
+        member this.Save() = Json.toFile(Path.Combine(getDataPath("Data"), "cache.json"), true)(charts, collections)
+        static member Load() = loadImportantJsonFile("Cache")(Path.Combine(getDataPath("Data"), "cache.json"))((new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>()))(false)
     
         member this.CacheChart (c: Chart) = lock(this) (fun () -> charts.[c.FileIdentifier] <- cacheChart c)
 
@@ -184,6 +175,7 @@ module ChartManager =
                 Directory.EnumerateDirectories(path)
                 //conversion of song folders one by one.
                 //todo: consider testing performance of converting in parallel (would create hundreds of tasks)
+                //now that ive done some parallel programming may be better to set up a few workers
                 |> Seq.iter (fun song -> (this.ConvertSongFolder song packname output |> ignore))
                 true
 

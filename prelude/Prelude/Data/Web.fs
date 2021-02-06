@@ -19,14 +19,17 @@ let private downloadString(url: string, callback) =
         try
             let! result = client.GetStringAsync(url) |> Async.AwaitTask
             callback(result)
-        with err -> Logging.Error("Failed to get web data from " + url)(err.ToString())
+        with :? HttpRequestException as err ->
+            Logging.Error("Failed to get web data from " + url)(err.ToString())
     }
         
 let downloadJson<'T>(url, callback) =
     downloadString(url,
         fun s ->
-            try Json.fromString<'T>(s) |> Json.JsonResult.valueOrRaise |> callback
-            with err -> Logging.Error("Failed to parse json data from "+ url)(err.ToString()))
+            match Json.fromString<'T>(s) with
+            | JsonResult.Success s -> callback(s)
+            | JsonResult.MapFailure err -> Logging.Error("Failed to interpret json data from "+ url)(err.ToString())
+            | JsonResult.ParseFailure err -> Logging.Error("Failed to parse json data from "+ url)(err.ToString()))
 
 let downloadFile(url, target): LoggableTask =
     fun output ->

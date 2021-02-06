@@ -14,7 +14,7 @@ open Prelude.Data.ChartManager
 
 module ScoreManager =
 
-    [<Json.Required>]
+    [<Json.AllRequired>]
     type Score = {
         time: DateTime
         hitdata: string
@@ -23,8 +23,6 @@ module ScoreManager =
         layout: Layout
         keycount: int
     }
-    //not currently used just needed as a formality
-    with static member Default = { time = DateTime.Now; hitdata = ""; rate = 1.0f; selectedMods = null; layout = Layout.Spread; keycount = 4 }
 
     type ChartSaveData = {
         [<Json.Required>]
@@ -80,14 +78,8 @@ module ScoreManager =
     type ScoresDB() =
         let data = ScoresDB.Load()
 
-        //todo: automatic backups
         member this.Save() = Json.toFile((Path.Combine(getDataPath("Data"), "scores.json"), true)) data
-
-        static member Load() =
-            match Json.fromFile(Path.Combine(getDataPath("Data"), "scores.json")) with
-            | JsonResult.Success o -> o
-            | JsonResult.MappingFailure err
-            | JsonResult.ParsingFailure err -> Logging.Critical("Could not load score database! Creating from scratch") (err.ToString()); new Dictionary<string, ChartSaveData>()
+        static member Load() = loadImportantJsonFile("Scores")(Path.Combine(getDataPath("Data"), "scores.json"))(new Dictionary<string, ChartSaveData>())(true)
 
         member this.GetOrCreateScoreData(chart: Chart) =
             let hash = calculateHash(chart)
