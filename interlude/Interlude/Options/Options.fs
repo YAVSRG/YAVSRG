@@ -216,31 +216,10 @@ module Options =
     let internal configPath = Path.GetFullPath("config.json")
 
     let load() =
-        //todo: automatic config backup
-        if File.Exists(configPath) then
-            try
-                config <- Json.fromFile(configPath) |> Json.JsonResult.valueOrRaise
-            with err ->
-                Logging.Critical("Could not load config.json! Maybe it is corrupt?") (err.ToString())
-                Console.WriteLine("If you would like to launch anyway, press ENTER.")
-                Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
-                Console.ReadLine() |> ignore
-                Logging.Critical("User has chosen to launch game with default config.") ""
-        else Logging.Info("No config file found, creating it.") ""
-        
+        config <- loadImportantJsonFile("Config")(configPath)(config)(true)
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
         Localisation.loadFile(config.Locale)
-        
-        if File.Exists(configPath) then
-            try
-                options <- Json.fromFile(Path.Combine(getDataPath("Data"), "options.json")) |> Json.JsonResult.valueOrRaise
-            with err ->
-                Logging.Critical("Could not load options.json! Maybe it is corrupt?") (err.ToString())
-                Console.WriteLine("If you would like to proceed anyway, press ENTER.")
-                Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
-                Console.ReadLine() |> ignore
-                Logging.Critical("User has chosen to proceed with game setup with default game settings.") ""
-        else Logging.Info("No options file found, creating it.") ""
+        options <- loadImportantJsonFile("Options")(Path.Combine(getDataPath("Data"), "options.json"))(options)(true)
         
         Themes.refreshAvailableThemes()
         Themes.loadThemes(options.EnabledThemes)
@@ -251,3 +230,22 @@ module Options =
             Json.toFile(configPath, true) config 
             Json.toFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.") (err.ToString())
+
+    let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
+        if File.Exists(path) then
+            let p = Path.ChangeExtension(path, ".bak")
+            if File.Exists(p) then File.Copy(p, Path.ChangeExtension(path, ".bak2"), true)
+            File.Copy(path, p, true)
+            try
+                Json.fromFile(path) |> JsonResult.value
+            with err ->
+                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path)) (err.ToString())
+                if prompt then
+                    Console.WriteLine("If you would like to launch anyway, press ENTER.")
+                    Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
+                    Console.ReadLine() |> ignore
+                    Logging.Critical("User has chosen to launch game with default data.") ""
+                defaultData
+        else
+            Logging.Info(sprintf "No %s file found, creating it." name) ""
+            defaultData

@@ -51,7 +51,10 @@ module private ScreenLevelSelectVars =
         | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
 
     let playCurrentChart() =
-        Screens.addScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenTransitionFlag.Default)
+        if currentChart.IsSome then
+            Screens.addScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenTransitionFlag.Default)
+        else
+            Logging.Warn("Tried to play selected chart; There is no chart selected") ""
 
 module ScreenLevelSelect =
 

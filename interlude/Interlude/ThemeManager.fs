@@ -168,6 +168,6 @@ module Themes =
                 accentColor <- themeConfig.DefaultAccentColor
                 getTexture("background")
         | ext ->
-            Logging.Error("Unsupported file type for background: " + ext) ""
+            if ext <> "" then Logging.Error("Unsupported file type for background: " + ext) "" else Logging.Debug("Chart has no background image") ""
             accentColor <- themeConfig.DefaultAccentColor
             getTexture("background")
