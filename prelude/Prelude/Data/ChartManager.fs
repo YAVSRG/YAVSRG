@@ -197,13 +197,12 @@ module ChartManager =
                             //Logging.Debug("There is no check against possibly malicious directory traversal  (for now). Be careful")("")
                             ZipFile.ExtractToDirectory(path, dir)
                             output("Extracted! " + dir)
-                            this.AutoConvert(dir)(output) |> ignore
+                            let! b = this.AutoConvert(dir)(output)
                             Directory.Delete(dir, true)
                         | _ -> failwith "unrecognised file"
                     | _ ->
                         match path with
                         | SongFolder ->
-                            //todo: maybe make "Singles" not a hardcoded string
                             BackgroundTask.Create(TaskFlags.NONE)("Import " + Path.GetFileName(path))(this.ConvertSongFolder path "Singles")
                         | PackFolder ->
                             let packname =
@@ -212,8 +211,11 @@ module ChartManager =
                                 | s -> s
                             BackgroundTask.Create(TaskFlags.NONE)("Import pack " + Path.GetFileName(path))(this.ConvertPackFolder path packname)
                         | FolderOfPacks ->
-                            for packFolder in Directory.EnumerateDirectories(path) do
-                                this.ConvertPackFolder(packFolder)(Path.GetFileName(packFolder))(output) |> ignore
+                            do! 
+                                Directory.EnumerateDirectories(path)
+                                |> Seq.map (fun packFolder -> this.ConvertPackFolder(packFolder)(Path.GetFileName(packFolder))(output))
+                                |> fun s -> Async.Parallel(s, 5)
+                                |> Async.Ignore
                         | _ -> failwith "no importable folder structure detected"
                     return true
                 }
