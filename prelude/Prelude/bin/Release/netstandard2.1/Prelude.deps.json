@@ -11,7 +11,7 @@
         "dependencies": {
           "FParsec": "1.1.1",
           "FSharp.Core": "4.7.2",
-          "Percyqaz.Json": "1.0.3",
+          "Percyqaz.Json": "1.1.0",
           "System.Drawing.Common": "5.0.0"
         },
         "runtime": {
@@ -82,7 +82,7 @@
           }
         }
       },
-      "Percyqaz.Json/1.0.3": {
+      "Percyqaz.Json/1.1.0": {
         "dependencies": {
           "FParsec": "1.1.1",
           "FSharp.Core": "4.7.2",
@@ -90,8 +90,8 @@
         },
         "runtime": {
           "lib/netstandard2.0/Percyqaz.Json.dll": {
-            "assemblyVersion": "1.0.1.0",
-            "fileVersion": "1.0.1.0"
+            "assemblyVersion": "1.1.0.0",
+            "fileVersion": "1.1.0.0"
           }
         }
       },
@@ -140,12 +140,12 @@
       "path": "fsharp.core/4.7.2",
       "hashPath": "fsharp.core.4.7.2.nupkg.sha512"
     },
-    "Percyqaz.Json/1.0.3": {
+    "Percyqaz.Json/1.1.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-TL2pAWVhQyaNwlKsDc8mDqJ1kH+5DEjt5TGfVicyv3jqxF9YZvU8bWH5LB71SITdHdS+fa0tEFwEOcA0mmsuYQ==",
-      "path": "percyqaz.json/1.0.3",
-      "hashPath": "percyqaz.json.1.0.3.nupkg.sha512"
+      "sha512": "sha512-TKPF8T4f5IEHAyIPjUZT2U4GOjFy/I7fHhv/rjXa6ne3oJFxo5shK6gs3vLrkUutPdKNd7TklLPa/RxXd1Jcnw==",
+      "path": "percyqaz.json/1.1.0",
+      "hashPath": "percyqaz.json.1.1.0.nupkg.sha512"
     },
     "System.Drawing.Common/5.0.0": {
       "type": "package",

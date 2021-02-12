@@ -6,21 +6,30 @@ open System.Net.Http
 open System.ComponentModel
 open Percyqaz.Json
 open Prelude.Common
+open System.Threading.Tasks
 
-let client = new HttpClient()
-let wClient = new WebClient()
+let wClient() = 
+    let w = new WebClient()
+    w.Headers.Add("User-Agent", "Interlude")
+    w
+let client() =
+    let w = new HttpClient()
+    w.DefaultRequestHeaders.Add("User-Agent", "Interlude")
+    w
+
 do
-    client.DefaultRequestHeaders.Add("User-Agent", "Interlude")
-    wClient.Headers.Add("User-Agent", "Interlude")
     ServicePointManager.SecurityProtocol <- SecurityProtocolType.Tls12
 
 let private downloadString(url: string, callback) =
     async {
         try
-            let! result = client.GetStringAsync(url) |> Async.AwaitTask
+            use w = client()
+            let! result = w.GetStringAsync(url) |> Async.AwaitTask
             callback(result)
+            return true
         with :? HttpRequestException as err ->
             Logging.Error("Failed to get web data from " + url)(err.ToString())
+            return false
     }
         
 let downloadJson<'T>(url, callback) =
@@ -31,23 +40,31 @@ let downloadJson<'T>(url, callback) =
             | JsonResult.MapFailure err -> Logging.Error("Failed to interpret json data from "+ url)(err.ToString())
             | JsonResult.ParseFailure err -> Logging.Error("Failed to parse json data from "+ url)(err.ToString()))
 
-let downloadFile(url, target): LoggableTask =
+let downloadFile(url: string, target: string): StatusTask =
     fun output ->
-        let mutable wait = true
-        let mutable err = null
-        let prog = new DownloadProgressChangedEventHandler(fun (_: obj) (e: DownloadProgressChangedEventArgs) -> output(url + " (" + e.ProgressPercentage.ToString() + "%)"))
-        let finish = new AsyncCompletedEventHandler(fun (_: obj) (e: AsyncCompletedEventArgs) -> wait <- false; err <- e.Error)
-        output("Waiting for download...")
-        lock (wClient)
-            (fun () ->
-                wClient.DownloadProgressChanged.AddHandler(prog)
-                wClient.DownloadFileCompleted.AddHandler(finish)
-                wClient.DownloadFileAsync(new Uri(url), target)
-                while wait do ()
-                wClient.DownloadProgressChanged.RemoveHandler(prog)
-                wClient.DownloadFileCompleted.RemoveHandler(finish))
-        if isNull err then
-            true
-        else
-            Logging.Error("Failed to download file from " + url)(err.ToString())
-            false
+        async {
+            let tcs = new TaskCompletionSource<unit>(url)
+            let completed =
+                new AsyncCompletedEventHandler(fun cs ce ->
+                    if ce.UserState = (tcs :> obj) then
+                        if ce.Error <> null then tcs.TrySetException(ce.Error) |> ignore
+                        elif ce.Cancelled then tcs.TrySetCanceled() |> ignore
+                        else tcs.TrySetResult(()) |> ignore)
+            let x = 5
+            let prog = new DownloadProgressChangedEventHandler(fun _ e -> output(sprintf "Downloading.. %sMB/%sMB (%i%%)" "" "" e.ProgressPercentage))
+
+            output("Waiting for download...")
+            use w = wClient()
+            w.DownloadFileCompleted.AddHandler completed
+            w.DownloadProgressChanged.AddHandler prog
+            w.DownloadFileAsync(new Uri(url), target, tcs)
+            let! _ = tcs.Task |> Async.AwaitTask
+            w.DownloadFileCompleted.RemoveHandler completed
+            w.DownloadProgressChanged.RemoveHandler prog
+
+            if isNull tcs.Task.Exception then
+                return true
+            else
+                Logging.Error("Failed to download file from " + url)(tcs.Task.Exception.ToString())
+                return false
+        }

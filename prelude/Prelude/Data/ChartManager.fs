@@ -127,86 +127,93 @@ module ChartManager =
                 g.Sort(sorting)
             groups
 
-        member this.RebuildCache : LoggableTask =
+        member this.RebuildCache : StatusTask =
             fun output ->
-                lock this (fun _ -> charts.Clear())
-                for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
-                    for song in Directory.EnumerateDirectories(pack) do
-                        for file in Directory.EnumerateFiles(song) do
-                            match Path.GetExtension(file).ToLower() with
-                            | ".yav" ->
-                                lock this (fun _ ->
-                                (
-                                    match loadChartFile(file) with
-                                    | Some c ->
-                                        output("Caching " + file)
-                                        this.CacheChart(c)
-                                    | None -> ()
-                                ))
-                            | _ -> ()
-                this.Save()
-                output("Saved cache.")
-                true
+                async {
+                    lock this (fun _ -> charts.Clear())
+                    for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
+                        for song in Directory.EnumerateDirectories(pack) do
+                            for file in Directory.EnumerateFiles(song) do
+                                match Path.GetExtension(file).ToLower() with
+                                | ".yav" ->
+                                    lock this (fun _ ->
+                                    (
+                                        match loadChartFile(file) with
+                                        | Some c ->
+                                            output("Caching " + file)
+                                            this.CacheChart(c)
+                                        | None -> ()
+                                    ))
+                                | _ -> ()
+                    this.Save()
+                    output("Saved cache.")
+                    return true
+                }
 
         member this.DeleteChart (c : CachedChart) = failwith "nyi"
 
         member this.DeleteCharts (cs : List<CachedChart>) = Seq.iter (this.DeleteChart) cs
 
-        member this.ConvertSongFolder path packname : LoggableTask =
+        member this.ConvertSongFolder (path: string) (packname: string) : StatusTask =
             fun output ->
-                for file in Directory.EnumerateFiles(path) do
-                    match file with
-                    | ChartFile ->
-                        output("Converting " + file)
-                        try
-                            loadAndConvertFile file
-                            |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetFileName(path))))
-                            |> fun charts ->
-                                lock this (fun _ ->
-                                (
-                                    List.iter this.CacheChart charts
-                                ))
-                        with err -> Logging.Error("Failed to load/convert file: " + file)(err.ToString())
-                    | _ -> ()
-                true
+                async {
+                    for file in Directory.EnumerateFiles(path) do
+                        match file with
+                        | ChartFile ->
+                            output("Converting " + file)
+                            try
+                                loadAndConvertFile file
+                                |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetFileName(path))))
+                                |> fun charts ->
+                                    lock this (fun _ ->
+                                    (
+                                        List.iter this.CacheChart charts
+                                    ))
+                            with err -> Logging.Error("Failed to load/convert file: " + file)(err.ToString())
+                        | _ -> ()
+                    return true
+                }
 
-        member this.ConvertPackFolder path packname =
+        member this.ConvertPackFolder (path: string) (packname: string) : StatusTask =
             fun output ->
-                Directory.EnumerateDirectories(path)
-                //conversion of song folders one by one.
-                //todo: consider testing performance of converting in parallel (would create hundreds of tasks)
-                //now that ive done some parallel programming may be better to set up a few workers
-                |> Seq.iter (fun song -> (this.ConvertSongFolder song packname output |> ignore))
-                true
+                async {
+                    let! _ =
+                        Directory.EnumerateDirectories(path)
+                        |> Seq.map (fun song -> (this.ConvertSongFolder song packname output))
+                        |> fun s -> Async.Parallel(s, 5)
+                    return true
+                }
 
-        member this.AutoConvert path : LoggableTask =
+        member this.AutoConvert path : StatusTask =
             fun output ->
-                match File.GetAttributes(path) &&& FileAttributes.Directory |> int with
-                | 0 ->
-                    match path with
-                    | ChartFile -> failwith "single chart file not yet supported"
-                    | ChartArchive ->
-                        output("Extracting...")
-                        let dir = Path.ChangeExtension(path, null)
-                        //Logging.Debug("There is no check against possibly malicious directory traversal  (for now). Be careful")("")
-                        ZipFile.ExtractToDirectory(path, dir)
-                        output("Extracted! " + dir)
-                        this.AutoConvert(dir)(output) |> ignore
-                        Directory.Delete(dir, true)
-                    | _ -> failwith "unrecognised file"
-                | _ ->
-                    match path with
-                    | SongFolder ->
-                        //todo: maybe make "Singles" not a hardcoded string
-                        TaskManager.AddTask ("Import " + Path.GetFileName(path), this.ConvertSongFolder path "Singles", ignore, true)
-                    | PackFolder ->
-                        let packname =
-                            match Path.GetFileName(path) with
-                            | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
-                            | s -> s
-                        TaskManager.AddTask ("Import pack " + Path.GetFileName(path), this.ConvertPackFolder path packname, ignore, true)
-                    | FolderOfPacks ->
-                        for packFolder in Directory.EnumerateDirectories(path) do
-                            this.ConvertPackFolder(packFolder)(Path.GetFileName(packFolder))(output) |> ignore
-                    | _ -> failwith "no importable folder structure detected"
-                true
+                async {
+                    match File.GetAttributes(path) &&& FileAttributes.Directory |> int with
+                    | 0 ->
+                        match path with
+                        | ChartFile -> failwith "single chart file not yet supported"
+                        | ChartArchive ->
+                            output("Extracting...")
+                            let dir = Path.ChangeExtension(path, null)
+                            //Logging.Debug("There is no check against possibly malicious directory traversal  (for now). Be careful")("")
+                            ZipFile.ExtractToDirectory(path, dir)
+                            output("Extracted! " + dir)
+                            this.AutoConvert(dir)(output) |> ignore
+                            Directory.Delete(dir, true)
+                        | _ -> failwith "unrecognised file"
+                    | _ ->
+                        match path with
+                        | SongFolder ->
+                            //todo: maybe make "Singles" not a hardcoded string
+                            BackgroundTask.Create(TaskFlags.NONE)("Import " + Path.GetFileName(path))(this.ConvertSongFolder path "Singles")
+                        | PackFolder ->
+                            let packname =
+                                match Path.GetFileName(path) with
+                                | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
+                                | s -> s
+                            BackgroundTask.Create(TaskFlags.NONE)("Import pack " + Path.GetFileName(path))(this.ConvertPackFolder path packname)
+                        | FolderOfPacks ->
+                            for packFolder in Directory.EnumerateDirectories(path) do
+                                this.ConvertPackFolder(packFolder)(Path.GetFileName(packFolder))(output) |> ignore
+                        | _ -> failwith "no importable folder structure detected"
+                    return true
+                }

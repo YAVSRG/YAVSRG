@@ -85,13 +85,16 @@ module Common =
 *)
 
     type LoggingLevel = DEBUG = 0 | INFO = 1 | WARNING = 2 | ERROR = 3 | CRITICAL = 4
-    type LoggingEventArgs = LoggingLevel * string * string
+    type LoggingEvent = LoggingLevel * string * string
 
     type Logging() =
-        static let evt = new Event<LoggingEventArgs>()
+        static let evt = new Event<LoggingEvent>()
+        
+        static let agent = new MailboxProcessor<LoggingEvent>(fun box -> async { while (true) do let! e = box.Receive() in evt.Trigger(e) })
+        static do agent.Start()
 
         static member Subscribe f = evt.Publish.Add f
-        static member Log level main details = evt.Trigger((level, main, details))
+        static member Log level main details = agent.Post((level, main, details))
         static member Info = Logging.Log LoggingLevel.INFO
         static member Warn = Logging.Log LoggingLevel.WARNING
         static member Error = Logging.Log LoggingLevel.ERROR
@@ -131,78 +134,50 @@ module Common =
     Background task management
 *)
 
-    type LoggableTask = (string -> unit) -> bool
-    type ManagedTaskState = INACTIVE = 0 | ACTIVE = 1 | DONE = 2
+    type StatusTask = (string -> unit) -> Async<bool>
+    type TaskFlags = NONE = 0 | HIDDEN = 1 | LONGRUNNING = 2
 
-    type ManagedTask(name : string, t : LoggableTask, callback : bool -> unit, visible : bool) =
-        let callback = callback
-        let visible = visible
-        let cts = new CancellationTokenSource()
-        let mutable state = ManagedTaskState.INACTIVE
-        let mutable info = "Pending"
-        let mutable task : Task = new Task(fun () -> ())
+    module BackgroundTask =
+        //Some race conditions exist but do not matter for this purpose as the data is accessed by GUI code
+        type ManagedTask (name: string, t: StatusTask, options: TaskFlags, removeTask) as this =
+            let cts = new CancellationTokenSource()
+            let mutable info = ""
+            let visible = options &&& TaskFlags.HIDDEN <> TaskFlags.HIDDEN
 
-        //this exists so that...
-        member this.CreateTask =
-            let action() =
-                try
-                    info <- "Running"
-                    let outcome = t (fun s -> info <- s; if not visible then Logging.Debug (name + ": " + s) "")
-                    callback(outcome)
-                    Logging.Debug(sprintf "Task complete (%A): %s" outcome name)""
-                    info <- "Complete"
-                with
-                | err ->
-                    Logging.Error ("Exception in " + name) (err.ToString())
-                    info <- "Failed"
-                state <- ManagedTaskState.DONE
-                cts.Dispose()
-                //... I can have this line of code here. This member is used once to initialise task
-                TaskManager.RemoveTask(this)
-            new Task(action, cts.Token)
+            let task =
+                Async.StartAsTask(
+                    async {
+                        try
+                            Logging.Debug(sprintf "Task <%s> started" name) ""
+                            info <- "Running"
+                            let! outcome = t (fun s -> info <- s; if not visible then Logging.Debug (sprintf "[%s] %s" name s) "")
+                            Logging.Debug(sprintf "Task <%s> complete (%A)" name outcome) ""
+                            info <- "Complete"
+                        with
+                        | err ->
+                            Logging.Error(sprintf "Exception in task '%s'" name) (err.ToString())
+                            info <- sprintf "Failed: %O" <| err.GetType()
+                        //state <- ManagedTaskState.DONE
+                        removeTask(this)
+                        cts.Dispose()
+                        },
+                    ((*if options &&& TaskFlags.LONGRUNNING = TaskFlags.LONGRUNNING then TaskCreationOptions.LongRunning else*) TaskCreationOptions.None),
+                    cts.Token)
 
-        member this.Name = name
-        member this.Status = task.Status
-        member this.Info = info
-        member this.Visible = visible
+            member this.Name = name
+            member this.Status = task.Status
+            member this.Cancel = cts.Cancel
+            member this.Visible = visible
+            member this.Info = info
 
-        member this.Start =
-            if state = ManagedTaskState.INACTIVE then
-                task <- this.CreateTask
-                state <- ManagedTaskState.ACTIVE
-                task.Start()
-            else Logging.Warn ("Tried to start " + name + " but it has already been started") ""
+        let private evt = new Event<ManagedTask>()
+        let Subscribe f = evt.Publish.Add f
 
-        member this.Cancel =
-            if state <> ManagedTaskState.ACTIVE then Logging.Warn ("Tried to cancel " + name + " but it is not running") ""
-            else cts.Cancel(); state <- ManagedTaskState.DONE
+        let TaskList = ResizeArray<ManagedTask>()
+        let private removeTask = fun mt -> if lock(TaskList)(fun() -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name) ""
 
-    and TaskManager() =
-        static let evt = new Event<ManagedTask>()
-
-        static let tasks = new System.Collections.Generic.List<ManagedTask>()
-
-        static member CancelAll =
-            lock (tasks) (fun () ->
-                tasks.ForEach(fun x -> x.Cancel))
-
-        static member HasTaskRunning =
-            lock (tasks) (fun () ->
-                not (tasks.TrueForAll(fun x -> x.Status <> TaskStatus.Running)))
-
-        static member AddTask(t : ManagedTask) = 
-            lock (tasks) (fun () ->
-                tasks.Add(t); t.Start)
-            evt.Trigger(t)
-        static member AddTask(name, t, callback, visible) = TaskManager.AddTask(ManagedTask(name,t,callback,visible))
-
-        static member RemoveTask(t : ManagedTask) = lock (tasks) (fun () -> tasks.Remove(t) |> ignore)
-
-        static member Subscribe = evt.Publish.Add
-
-        static member Wait = while TaskManager.HasTaskRunning do Thread.Sleep(1000)
-
-    TaskManager.Subscribe (fun t -> Logging.Debug ("Task created: " + t.Name) "")
+        let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc(l) in f(v); return v }
+        let Create (options: TaskFlags) (name: string) (t: StatusTask) = let mt = new ManagedTask(name, t, options, removeTask) in lock(TaskList)(fun() -> TaskList.Add(mt)); evt.Trigger(mt)
 
 (*
     Random helper functions for things I think I will do a lot of and couldn't find a shorthand for
