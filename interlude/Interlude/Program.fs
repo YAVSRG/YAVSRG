@@ -22,9 +22,8 @@ let main argv =
         use sw = new StreamWriter(logfile)
         Logging.Subscribe
             (fun (level, main, details) ->
-                lock(sw) (fun _ ->
                 if details = "" then sprintf "[%A] %s" level main else sprintf "[%A] %s\n%s" level main details
-                |> sw.WriteLine))
+                |> sw.WriteLine)
 
         Logging.Info("Launching " + Utils.version + ", " + DateTime.Now.ToString()) ""
         let game =
