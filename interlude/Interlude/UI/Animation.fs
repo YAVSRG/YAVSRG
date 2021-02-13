@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI
 
+open System.Drawing
 open System.Collections.Generic
 
 [<AbstractClass>]
@@ -23,19 +24,17 @@ module Animation =
         override this.Update(_) = value <- value * 0.95f + target * 0.05f
         override this.Reset() = value <- target
 
-    type AnimationColorMixer(color : OpenTK.Color) =
+    type AnimationColorMixer(color : Color) =
         inherit Animation()
 
         let r = AnimationFade(float32 color.R)
         let g = AnimationFade(float32 color.G)
         let b = AnimationFade(float32 color.B)
 
-        member this.SetColor(color: OpenTK.Color) =
+        member this.SetColor(color: Color) =
             r.SetTarget(float32 color.R); g.SetTarget(float32 color.G); b.SetTarget(float32 color.B)
-        member this.SetColor(color: System.Drawing.Color) =
-            r.SetTarget(float32 color.R); g.SetTarget(float32 color.G); b.SetTarget(float32 color.B)
-        member this.GetColor(alpha) = OpenTK.Color.FromArgb(alpha, int r.Value, int g.Value, int b.Value)   
-        member this.GetColor() = OpenTK.Color.FromArgb(255, int r.Value, int g.Value, int b.Value)    
+        member this.GetColor(alpha) = Color.FromArgb(alpha, int r.Value, int g.Value, int b.Value)   
+        member this.GetColor() = Color.FromArgb(255, int r.Value, int g.Value, int b.Value)    
 
         override this.Update(t) =
             r.Update(t); g.Update(t); b.Update(t)

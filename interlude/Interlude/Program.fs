@@ -1,6 +1,4 @@
-﻿// Learn more about F# at http://fsharp.org
-
-open System
+﻿open System
 open System.Threading
 open System.Diagnostics
 open System.IO
@@ -35,8 +33,8 @@ let main argv =
             | err -> Logging.Critical "Game failed to launch" (err.ToString()); None
         if (game.IsSome) then
             let game = game.Value
-            try game.Run(120.0) with err -> Logging.Critical "Game crashed" (err.ToString())
-            game.Exit()
+            try game.Run() with err -> Logging.Critical "Game crashed" (err.ToString())
+            game.Close()
             Options.save()
             game.Dispose()
         m.ReleaseMutex()

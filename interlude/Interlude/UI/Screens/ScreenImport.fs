@@ -2,6 +2,7 @@
 
 open OpenTK
 open System.IO
+open System.Drawing
 open Percyqaz.Json
 open Prelude.Common
 open Prelude.Web

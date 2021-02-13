@@ -1,7 +1,10 @@
 ﻿namespace Interlude.UI
 
 open System
+open System.Drawing
 open System.Linq
+open OpenTK.Mathematics
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Prelude.Data.ScoreManager
 open Prelude.Data.ChartManager
@@ -14,7 +17,6 @@ open Interlude.Input
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.Gameplay
-open OpenTK
 
 module private ScreenLevelSelectVars =
 
@@ -189,12 +191,12 @@ module ScreenLevelSelect =
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + 85.0f)
                     if Mouse.Hover(bounds) then 
                         hover.SetTarget(1.0f)
-                        if Mouse.Click(Input.MouseButton.Left) then
+                        if Mouse.Click(MouseButton.Left) then
                             if selectedChart = cc.Hash then
                                 playCurrentChart()
                             else
                                 switchCurrentChart(cc, groupName)
-                        elif Mouse.Click(Input.MouseButton.Right) then
+                        elif Mouse.Click(MouseButton.Right) then
                             expandedGroup <- ""
                             scrollTo <- true
                     else
@@ -209,7 +211,7 @@ module ScreenLevelSelect =
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.9f) (top + 65.0f)
                     if Mouse.Hover(bounds) then 
                         hover.SetTarget(1.0f)
-                        if Mouse.Click(Input.MouseButton.Left) then
+                        if Mouse.Click(MouseButton.Left) then
                             if expandedGroup = name then expandedGroup <- "" else expandedGroup <- name
                     else
                         hover.SetTarget(0.0f)
@@ -362,9 +364,9 @@ type ScreenLevelSelect() as this =
             selection
             |> List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) scrollPos.Value
         let height = bottomEdge - scrollPos.Value - 320.0f
-        if Mouse.pressed(Input.MouseButton.Right) then
+        if Mouse.pressed(MouseButton.Right) then
             scrollPos.SetTarget(-(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height)
-        scrollPos.SetTarget(Math.Min(Math.Max(scrollPos.Target + float32 (Mouse.Scroll()) * 100.0f, -height + 600.0f), 300.0f))
+        scrollPos.SetTarget(Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f))
         if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
             
 

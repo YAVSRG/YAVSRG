@@ -3,7 +3,7 @@
 open System
 open System.Collections.Generic
 open System.IO
-open OpenTK.Input
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Percyqaz.Json
 open Prelude.Gameplay.Score
@@ -65,30 +65,30 @@ type Hotkeys = {
     DownRateSmall: Setting<Bind>
 } with
     static member Default = {
-        Exit = Setting(mk Key.Escape)
-        Select = Setting(mk Key.Enter)
-        Search = Setting(mk Key.Tab)
-        Tooltip = Setting(mk Key.Slash)
-        Toolbar = Setting(ctrl Key.T)
-        Screenshot = Setting(mk Key.F12)
-        Volume = Setting(alt Key.AltLeft)
-        Previous = Setting(mk Key.Left)
-        Next = Setting(mk Key.Right)
-        Up = Setting(mk Key.Up)
-        Down = Setting(mk Key.Down)
-        Start = Setting(mk Key.Home)
-        End = Setting(mk Key.End)
+        Exit = Setting(mk Keys.Escape)
+        Select = Setting(mk Keys.Enter)
+        Search = Setting(mk Keys.Tab)
+        Tooltip = Setting(mk Keys.Slash)
+        Toolbar = Setting(ctrl Keys.T)
+        Screenshot = Setting(mk Keys.F12)
+        Volume = Setting(alt Keys.LeftAlt)
+        Previous = Setting(mk Keys.Left)
+        Next = Setting(mk Keys.Right)
+        Up = Setting(mk Keys.Up)
+        Down = Setting(mk Keys.Down)
+        Start = Setting(mk Keys.Home)
+        End = Setting(mk Keys.End)
 
-        Import = Setting(ctrl Key.I)
-        Options = Setting(ctrl Key.O)
-        Help = Setting(ctrl Key.H)
+        Import = Setting(ctrl Keys.I)
+        Options = Setting(ctrl Keys.O)
+        Help = Setting(ctrl Keys.H)
 
-        UpRate = Setting(mk Key.Plus)
-        DownRate = Setting(mk Key.Minus)
-        UpRateHalf = Setting(ctrl Key.Plus)
-        DownRateHalf = Setting(ctrl Key.Minus)
-        UpRateSmall = Setting(shift Key.Plus)
-        DownRateSmall = Setting(shift Key.Minus)
+        UpRate = Setting(mk Keys.Equal)
+        DownRate = Setting(mk Keys.Minus)
+        UpRateHalf = Setting(ctrl Keys.Equal)
+        DownRateHalf = Setting(ctrl Keys.Minus)
+        UpRateSmall = Setting(shift Keys.Equal)
+        DownRateSmall = Setting(shift Keys.Minus)
     }
 
 type ScoreSaving =
@@ -185,14 +185,14 @@ type GameOptions = {
         ChartColorMode = Setting("Nothing")
         Hotkeys = Hotkeys.Default
         GameplayBinds = [|
-            [|mk Key.Left; mk Key.Down; mk Key.Right|];
-            [|mk Key.Z; mk Key.X; mk Key.Period; mk Key.Slash|];
-            [|mk Key.Z; mk Key.X; mk Key.Space; mk Key.Period; mk Key.Slash|];
-            [|mk Key.Z; mk Key.X; mk Key.C; mk Key.Comma; mk Key.Period; mk Key.Slash|];
-            [|mk Key.Z; mk Key.X; mk Key.C; mk Key.Space; mk Key.Comma; mk Key.Period; mk Key.Slash|];
-            [|mk Key.Z; mk Key.X; mk Key.C; mk Key.V; mk Key.Comma; mk Key.Period; mk Key.Slash; mk Key.RShift|];
-            [|mk Key.Z; mk Key.X; mk Key.C; mk Key.V; mk Key.Space; mk Key.Comma; mk Key.Period; mk Key.Slash; mk Key.RShift|];
-            [|mk Key.CapsLock; mk Key.Q; mk Key.W; mk Key.E; mk Key.V; mk Key.Space; mk Key.K; mk Key.L; mk Key.Semicolon; mk Key.Quote|]
+            [|mk Keys.Left; mk Keys.Down; mk Keys.Right|];
+            [|mk Keys.Z; mk Keys.X; mk Keys.Period; mk Keys.Slash|];
+            [|mk Keys.Z; mk Keys.X; mk Keys.Space; mk Keys.Period; mk Keys.Slash|];
+            [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.Comma; mk Keys.Period; mk Keys.Slash|];
+            [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.Space; mk Keys.Comma; mk Keys.Period; mk Keys.Slash|];
+            [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.V; mk Keys.Comma; mk Keys.Period; mk Keys.Slash; mk Keys.RightShift|];
+            [|mk Keys.Z; mk Keys.X; mk Keys.C; mk Keys.V; mk Keys.Space; mk Keys.Comma; mk Keys.Period; mk Keys.Slash; mk Keys.RightShift|];
+            [|mk Keys.CapsLock; mk Keys.Q; mk Keys.W; mk Keys.E; mk Keys.V; mk Keys.Space; mk Keys.K; mk Keys.L; mk Keys.Semicolon; mk Keys.Apostrophe|]
         |]
     }
 

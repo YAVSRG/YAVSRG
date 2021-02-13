@@ -45,7 +45,7 @@
   <ItemGroup>
     <PackageReference Include="ManagedBass" Version="3.0.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.0.0" />
-    <PackageReference Include="OpenTK.NetStandard" Version="1.0.5.12" />
+    <PackageReference Include="OpenTK" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>

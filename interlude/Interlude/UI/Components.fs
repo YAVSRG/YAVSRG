@@ -1,6 +1,8 @@
 ﻿namespace Interlude.UI
 
 open System
+open System.Drawing
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude
 open Interlude.Options
@@ -49,7 +51,7 @@ module Components =
             let oh = hover
             hover <- Mouse.Hover(this.Bounds)
             if oh <> hover then onHover(hover)
-            if hover && Mouse.Click(Input.MouseButton.Left) then onClick()
+            if hover && Mouse.Click(MouseButton.Left) then onClick()
 
     type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
         inherit Widget()
@@ -100,7 +102,7 @@ module Components =
             if (this.Initialised) then
                 this.FlowContent(false) 
                 base.Update(time, bounds)
-                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, contentSize - Rect.height this.Bounds))
+                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
             else
                 //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
                 base.Update(time, bounds)

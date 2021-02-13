@@ -1,19 +1,22 @@
 ﻿namespace Interlude.Input
 
 open OpenTK
-open OpenTK.Input
+open OpenTK.Windowing.Desktop
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
+open Interlude.Render
 open System.Collections.Generic
 
 module Input = 
-    let internal keys = new List<Key>()
-    let internal oldKeys = new List<Key>()
+    let internal keys = new List<Keys>()
+    let internal oldKeys = new List<Keys>()
     let internal mouse = new List<MouseButton>()
     let internal oldMouse = new List<MouseButton>()
 
     let mutable internal mousex = 0.f
     let mutable internal mousey = 0.f
-    let mutable internal mousescroll = 0
+    let mutable internal mousez = 0.f
+    let mutable internal oldmousez = 0.f
     let mutable internal clickhandled = false
     let mutable private keybindGrabber = ignore
     let mutable private inputmethod: ISettable<string> list = []
@@ -21,21 +24,21 @@ module Input =
     let internal freeIM() = List.isEmpty inputmethod
 
     let init(game : GameWindow) =
-        game.MouseWheel.Add(fun e -> mousescroll <- e.Delta)
-        game.MouseMove.Add(fun e -> mousex <- float32 e.X; mousey <- float32 e.Y) //todo: rescale mouse position by virtual pixels rather than window pixels
-        game.MouseDown.Add(fun e -> mouse.Add(e.Button))
-        game.MouseUp.Add(fun e -> while mouse.Remove(e.Button) do ())
+        game.add_MouseWheel(fun e -> mousez <- e.OffsetY)
+        game.add_MouseMove(fun e -> mousex <- Render.vwidth / float32 Render.rwidth * float32 e.X; mousey <- Render.vheight / float32 Render.rheight * float32 e.Y) //todo: rescale mouse position by virtual pixels rather than window pixels
+        game.add_MouseDown(fun e -> mouse.Add(e.Button))
+        game.add_MouseUp(fun e -> while mouse.Remove(e.Button) do ())
 
-        game.KeyDown.Add(fun e ->
+        game.add_KeyDown(fun e ->
             keys.Add(e.Key)
-            if e.Key <> Key.ControlLeft && e.Key <> Key.ControlRight && e.Key <> Key.ShiftLeft && e.Key <> Key.ShiftRight && e.Key <> Key.AltLeft && e.Key <> Key.AltRight then
+            if e.Key <> Keys.LeftControl && e.Key <> Keys.RightControl && e.Key <> Keys.LeftShift && e.Key <> Keys.RightShift && e.Key <> Keys.LeftAlt && e.Key <> Keys.RightAlt then
                 keybindGrabber(e.Key)
                 keybindGrabber <- ignore)
-        game.KeyPress.Add(fun e ->
+        game.add_TextInput(fun e ->
             match List.tryHead inputmethod with
-            | Some s -> s.Set(s.Get() + e.KeyChar.ToString())
+            | Some s -> s.Set(s.Get() + e.AsString)
             | None -> ())
-        game.KeyUp.Add(fun e -> while keys.Remove(e.Key) do ())
+        game.add_KeyUp(fun e -> while keys.Remove(e.Key) do ())
 
     //todo: threaded input
     //ideas on how: f# list of binds that happened this frame including timestamps; list is read by game update loop with an event listener system and wiped
@@ -54,8 +57,8 @@ module Input =
     let update() =
         match List.tryHead inputmethod with
         |  Some s ->
-            if Keyboard.tappedOverride(Key.BackSpace) && s.Get().Length > 0 then
-                if Keyboard.pressedOverride(Key.LControl) then s.Set("") else
+            if Keyboard.tappedOverride(Keys.Backspace) && s.Get().Length > 0 then
+                if Keyboard.pressedOverride(Keys.LeftControl) then s.Set("") else
                     let v = s.Get()
                     s.Set(v.Substring(0, v.Length - 1))
             //todo: clipboard support
@@ -65,7 +68,7 @@ module Input =
         oldMouse.Clear()
         oldMouse.AddRange(mouse)
         clickhandled <- false
-        mousescroll <- 0
+        oldmousez <- mousez
 
     let createInputMethod(s: ISettable<string>) =
         inputmethod <- s :: inputmethod
@@ -81,7 +84,7 @@ module Mouse =
     let Y() = Input.mousey
     //retrieving scroll value sets it to zero so all other queries do not receieve it
     //this means the top level widget (highest priority at the time) grabs scrolling before anything else
-    let Scroll() = let v = Input.mousescroll in Input.mousescroll <- 0; v
+    let Scroll() = let v = Input.mousez - Input.oldmousez in Input.oldmousez <- Input.mousez; v
     //same idea. once a click is grabbed it only fires the click behaviour of one widget
     //for this reason, when checking if something has been clicked on it is important to check if the mouse is in the right area BEFORE checking if it has been clicked
     let Click(b) =
@@ -96,7 +99,7 @@ module Keyboard = Input.Keyboard
 
 type Bind =
     | Dummy
-    | Key of Key * modifiers:(bool * bool * bool)
+    | Key of Keys * modifiers:(bool * bool * bool)
     | Mouse of MouseButton * modifiers:(bool * bool * bool)
     | Joystick of unit //NYI
     with
@@ -131,9 +134,9 @@ type Bind =
             + (if alt then "Alt + " else "")
             + (if shift then "Shift + " else "")
         static member private ChkModifiers((ctrl, alt, shift)) =
-            ctrl = (Keyboard.pressedOverride(Key.LControl) || Keyboard.pressedOverride(Key.RControl))
-            && shift = (Keyboard.pressedOverride(Key.LShift) || Keyboard.pressedOverride(Key.RShift))
-            && alt = (Keyboard.pressedOverride(Key.LAlt) || Keyboard.pressedOverride(Key.RAlt))
+            ctrl = (Keyboard.pressedOverride(Keys.LeftControl) || Keyboard.pressedOverride(Keys.RightControl))
+            && shift = (Keyboard.pressedOverride(Keys.LeftShift) || Keyboard.pressedOverride(Keys.RightShift))
+            && alt = (Keyboard.pressedOverride(Keys.LeftAlt) || Keyboard.pressedOverride(Keys.RightAlt))
         static member DummyBind = new Setting<Bind>(Dummy)
 
 module Bind =

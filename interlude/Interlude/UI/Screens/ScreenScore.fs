@@ -1,6 +1,6 @@
 ﻿namespace Interlude.UI
 
-open OpenTK
+open System.Drawing
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Difficulty
 open Prelude.Data.ScoreManager
@@ -11,8 +11,8 @@ open Interlude.Gameplay
 open Interlude.Render
 
 module ScoreColor =
-    let lampToColor (lampAchieved: Lamp) = otkColor Themes.themeConfig.LampColors.[lampAchieved |> int]
-    let gradeToColor (gradeAchieved: int) = otkColor Themes.themeConfig.GradeColors.[gradeAchieved]
+    let lampToColor (lampAchieved: Lamp) = Themes.themeConfig.LampColors.[lampAchieved |> int]
+    let gradeToColor (gradeAchieved: int) = Themes.themeConfig.GradeColors.[gradeAchieved]
     let clearToColor (cleared: bool) = if cleared then Color.FromArgb(255, 127, 255, 180) else Color.FromArgb(255, 255, 160, 140)
 
 type ScoreGraph(data: ScoreInfoProvider) =
@@ -47,9 +47,9 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 let (_, delta, hit) = data.ScoreData.[i]
                 let (y, col) =
                     match hit.[k] with
-                    | HitStatus.SpecialNG -> (0.0f, otkColor Themes.themeConfig.JudgementColors.[JudgementType.NG |> int])
-                    | HitStatus.NotHit -> (0.0f, otkColor Themes.themeConfig.JudgementColors.[JudgementType.MISS |> int])
-                    | HitStatus.Hit -> (h + delta.[k] / MISSWINDOW * h, otkColor Themes.themeConfig.JudgementColors.[data.Accuracy.JudgeFunc(delta.[k] |> Prelude.Common.Time.Abs)|> int])
+                    | HitStatus.SpecialNG -> (0.0f, Themes.themeConfig.JudgementColors.[JudgementType.NG |> int])
+                    | HitStatus.NotHit -> (0.0f, Themes.themeConfig.JudgementColors.[JudgementType.MISS |> int])
+                    | HitStatus.Hit -> (h + delta.[k] / MISSWINDOW * h, Themes.themeConfig.JudgementColors.[data.Accuracy.JudgeFunc(delta.[k] |> Prelude.Common.Time.Abs)|> int])
                     | _ -> (0.0f, Color.Transparent)
                 if col.A > 0uy then
                     Draw.rect(Rect.create(x - 2.5f)(top + y - 2.5f)(x + 2.5f)(top + y + 2.5f))(col)(Sprite.Default)
@@ -88,9 +88,9 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         this.Add(new TextBox((K <| scoreData.Lamp.ToString()), (K <| ScoreColor.lampToColor(lampAchieved)), 0.5f) |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f))
         this.Add(new TextBox(scoreData.Accuracy.Format, (K <| ScoreColor.gradeToColor(gradeAchieved)), 0.5f) |> positionWidget(-100.0f, 0.5f, 155.0f, 0.0f, 100.0f, 0.5f, 245.0f, 0.0f))
         this.Add(new TextBox((fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR"), (K <| ScoreColor.clearToColor(not scoreData.HP.Failed)), 0.5f) |> positionWidget(-100.0f, 0.75f, 155.0f, 0.0f, 100.0f, 0.75f, 245.0f, 0.0f))
-        this.Add(new TextBox(K <| "NEW RECORD", (fun () -> otkColor Themes.themeConfig.PBColors.[int lampPB]), 0.5f) |> positionWidget(-100.0f, 0.25f, 225.0f, 0.0f, 100.0f, 0.25f, 250.0f, 0.0f))
-        this.Add(new TextBox(K <| "NEW RECORD", (fun () -> otkColor Themes.themeConfig.PBColors.[int accuracyPB]), 0.5f) |> positionWidget(-100.0f, 0.5f, 225.0f, 0.0f, 100.0f, 0.5f, 250.0f, 0.0f))
-        this.Add(new TextBox(K <| "NEW RECORD", (fun () -> otkColor Themes.themeConfig.PBColors.[int clearPB]), 0.5f) |> positionWidget(-100.0f, 0.75f, 225.0f, 0.0f, 100.0f, 0.75f, 250.0f, 0.0f))
+        this.Add(new TextBox(K <| "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int lampPB]), 0.5f) |> positionWidget(-100.0f, 0.25f, 225.0f, 0.0f, 100.0f, 0.25f, 250.0f, 0.0f))
+        this.Add(new TextBox(K <| "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int accuracyPB]), 0.5f) |> positionWidget(-100.0f, 0.5f, 225.0f, 0.0f, 100.0f, 0.5f, 250.0f, 0.0f))
+        this.Add(new TextBox(K <| "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int clearPB]), 0.5f) |> positionWidget(-100.0f, 0.75f, 225.0f, 0.0f, 100.0f, 0.75f, 250.0f, 0.0f))
         //this.Add(new TextBox(K <| scoreData.Mods, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 250.0f, 0.0f, 0.0f, 1.0f, 280.0f, 0.0f))
         this.Add(graph |> positionWidget(10.0f, 0.0f, -250.0f, 1.0f, -10.0f, 1.0f, -10.0f, 1.0f))
 
@@ -104,8 +104,8 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         let h =  (bottom - 500.0f - top)
         let perfRect = Rect.create(w - h)(top + 175.0f + h * 0.5f)(w + h)(top + 325.0f + h * 0.5f)
         Draw.rect(perfRect)(Screens.accentShade(150, 0.4f, 0.0f))(Sprite.Default)
-        Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Physical, perfRect, physicalColor scoreData.Physical |> otkColor, 0.0f)
-        Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Technical, perfRect, technicalColor scoreData.Technical |> otkColor, 1.0f)
+        Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Physical, perfRect, physicalColor scoreData.Physical, 0.0f)
+        Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Technical, perfRect, technicalColor scoreData.Technical, 1.0f)
         Draw.quad(Quad.ofRect(Rect.create(w - h * 0.5f)(top + 250.0f)(w + h * 0.5f)(top + 250.0f + h)))(Quad.colorOf(if scoreData.HP.Failed then Color.Gray else Color.White))(Sprite.gridUV(gradeAchieved, 0)(Themes.getTexture("ranks")))
         let (judgements, pts, maxpts, combo, maxcombo, cbs) = scoreData.Accuracy.State
         for i in 1..(judgements.Length - 1) do

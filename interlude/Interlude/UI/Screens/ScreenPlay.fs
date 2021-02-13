@@ -2,6 +2,7 @@
 
 open OpenTK
 open System
+open System.Drawing
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
@@ -184,7 +185,7 @@ module GameplayWidgets =
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
-        let color = new AnimationColorMixer(if conf.GradeColors then Utils.otkColor Themes.themeConfig.GradeColors.[0] else Color.White)
+        let color = new AnimationColorMixer(if conf.GradeColors then Themes.themeConfig.GradeColors.[0] else Color.White)
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe(fun _ -> color.SetColor(Themes.themeConfig.GradeColors.[grade helper.Scoring.Value Themes.themeConfig.GradeThresholds]))

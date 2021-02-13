@@ -1,7 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System
-open FSharp.Reflection
+open System.Drawing
 open System.Collections.Generic
 open OpenTK
 open Prelude.Common
@@ -10,7 +10,7 @@ open Interlude.Render
 open Interlude
 open Interlude.Utils
 open Interlude.Input
-open OpenTK.Input
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -238,7 +238,7 @@ module SelectionWheel =
             base.Update(elapsedTime, bounds)
             let struct (l, t, r, b) = this.Bounds |> Rect.expand(-15.0f, -15.0f)
             if this.Selected then
-                if (Mouse.pressed(Input.MouseButton.Left) && dragging) then
+                if (Mouse.pressed(MouseButton.Left) && dragging) then
                     let amt = (Mouse.X() - l) / (r - l)
                     setting.SetPercent(amt)
                 else
@@ -278,12 +278,12 @@ module SelectionWheel =
             //Input.Keyboard.pressedOverride is marked internal because it should only be used from Interlude.Input and i was naughty to be lazy here
             Input.grabKey(
                 fun k ->
-                    if k = Key.Escape then if allowModifiers then setting.Set(Dummy)
+                    if k = Keys.Escape then if allowModifiers then setting.Set(Dummy)
                     else
                         setting.Set(
                             Input.Key (k,
-                                (allowModifiers && (Input.Keyboard.pressedOverride(Key.ControlLeft) || Input.Keyboard.pressedOverride(Key.ControlRight)), false,
-                                    allowModifiers && (Input.Keyboard.pressedOverride(Key.ShiftLeft) || Input.Keyboard.pressedOverride(Key.ShiftRight)))))
+                                (allowModifiers && (Input.Keyboard.pressedOverride(Keys.LeftControl) || Input.Keyboard.pressedOverride(Keys.RightControl)), false,
+                                    allowModifiers && (Input.Keyboard.pressedOverride(Keys.LeftShift) || Input.Keyboard.pressedOverride(Keys.RightShift)))))
                     this.Deselect())
         override this.DeselectChild() = ()
         override this.AutoSelect = false

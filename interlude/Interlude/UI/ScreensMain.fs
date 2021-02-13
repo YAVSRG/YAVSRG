@@ -1,7 +1,8 @@
 ﻿namespace Interlude.UI
 
 open System
-open OpenTK
+open System.Drawing
+open OpenTK.Mathematics
 open Interlude
 open Interlude.Render
 open Interlude.UI.Animation
@@ -84,7 +85,7 @@ type Jukebox() as this =
         base.Update(elapsedTime, bounds)
         if Options.options.Hotkeys.Volume.Get().Pressed(true) then
             fade.SetTarget(1.0f)
-            Options.options.AudioVolume.Set(Options.options.AudioVolume.Get() + float Interlude.Input.Input.mousescroll * 0.02)
+            Options.options.AudioVolume.Set(Options.options.AudioVolume.Get() + float (Mouse.Scroll()) * 0.02)
             Audio.changeVolume(Options.options.AudioVolume.Get())
             slider.SetTarget(float32 <| Options.options.AudioVolume.Get())
         else

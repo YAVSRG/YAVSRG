@@ -1,13 +1,14 @@
 ﻿namespace Interlude.UI
 
 open System
+open System.Drawing
 open System.Collections.Generic
+open OpenTK.Mathematics
 open Prelude.Common
 open Interlude.Render
 open Interlude.Utils
 open Interlude
 open Interlude.UI.Animation
-open OpenTK
 
 type AnchorPoint(value, anchor) =
     inherit AnimationFade(value)
@@ -256,7 +257,7 @@ module Screens =
     let parallaxY  = AnimationFade(0.0f)
     let parallaxZ  = AnimationFade(40.0f)
     let backgroundDim = AnimationFade(1.0f)
-    let accentColor = AnimationColorMixer(otkColor Themes.accentColor)
+    let accentColor = AnimationColorMixer(Themes.accentColor)
 
     let logo = new Logo()
     

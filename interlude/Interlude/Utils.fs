@@ -13,6 +13,3 @@ module Utils =
 
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
-
-    let otkColor (color: System.Drawing.Color) : OpenTK.Color =
-        OpenTK.Color.FromArgb(int color.A, int color.R, int color.G, int color.B)

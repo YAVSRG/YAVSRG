@@ -1,7 +1,8 @@
 ﻿namespace Interlude.Render
 
 open System
-open OpenTK
+open System.Drawing
+open OpenTK.Mathematics
 open OpenTK.Graphics.OpenGL
 open System.Collections.Generic
 
@@ -150,6 +151,7 @@ module Render =
     let resize(width, height) =
         rwidth <- width
         rheight <- height
+        GL.Viewport(new System.Drawing.Rectangle(0, 0, width, height))
         let width, height = float32 width, float32 height
         GL.MatrixMode(MatrixMode.Projection)
         GL.LoadIdentity()
@@ -298,14 +300,12 @@ module Draw =
 
 module Text =
     
-    //open System.Drawing
     open System.Drawing.Text
 
     let private fontscale = 100.f
     let private spacing = 0.25f
     let private shadow = 0.09f
 
-    [<AllowNullLiteral>]
     type SpriteFont(font: System.Drawing.Font) =
         let fontLookup = new Dictionary<char, Sprite>()
         let genChar(c: char) =
