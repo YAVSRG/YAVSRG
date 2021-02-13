@@ -28,7 +28,6 @@ type ScreenMenu() =
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
         base.Draw()
-        //Text.drawJust(Themes.font(), Audio.timeWithOffset().ToString(), 50.f, x, y, Color.White, 0.5f)
 
     override this.Update(time, bounds) =
         base.Update(time, bounds)
@@ -107,6 +106,7 @@ type Toolbar() as this =
     let barSlider = new AnimationFade(1.0f)
     let notifSlider = new AnimationFade(0.0f)
 
+    let mutable cursor = true
     let mutable userCollapse = false
     let mutable forceCollapse = true
     
@@ -122,6 +122,7 @@ type Toolbar() as this =
         this.Add(new Jukebox())
 
         Screens.setToolbarCollapsed <- (fun b -> forceCollapse <- b)
+        Screens.setCursorVisible <- (fun b -> cursor <- b)
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
@@ -134,6 +135,7 @@ type Toolbar() as this =
                 Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - height) (l + (float32 i + 1.0f) * s - 2.0f) (t - height + level))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
                 Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + height - level) (r - float32 i * s - 2.0f) (b + height))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
         base.Draw()
+        if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize)(Screens.accentShade(255, 1.0f, 0.5f))(Themes.getTexture("cursor"))
 
     override this.Update(elapsed, bounds) =
         if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped(false) then
@@ -216,8 +218,9 @@ type ScreenContainer() as this =
             screenTransition.Add(new AnimationAction(fun () -> t1.Reset(); t2.Reset()))
 
     override this.Update(elapsedTime, bounds) =
-        Screens.parallaxX.SetTarget(Mouse.X() / Render.vwidth)
-        Screens.parallaxY.SetTarget(Mouse.Y() / Render.vheight)
+        if Render.vwidth > 0.0f then
+            Screens.parallaxX.SetTarget(Mouse.X() / Render.vwidth)
+            Screens.parallaxY.SetTarget(Mouse.Y() / Render.vheight)
         Screens.accentColor.SetColor(Themes.accentColor)
         if dialogs.Count > 0 then
             dialogs.[dialogs.Count - 1].Update(elapsedTime, bounds)

@@ -11,7 +11,6 @@ open Interlude.Options
 open Interlude.UI
 
 type Game(config: GameConfig) as this =
-    (* new GraphicsMode(ColorFormat(32), 24, 8, 0) *)
     inherit GameWindow(GameWindowSettings.Default, NativeWindowSettings(StartVisible = false, NumberOfSamples = 24, Profile = ContextProfile.Compatability))
 
     let screens = new ScreenContainer()
@@ -20,7 +19,7 @@ type Game(config: GameConfig) as this =
         Options.applyOptions <- fun () -> this.ApplyConfig(config)
         base.Title <- Utils.version
         base.VSync <- VSyncMode.Off
-        //base.Cursor <- Input.MouseCursor.Empty
+        base.CursorVisible <- false
         base.UpdateFrequency <- 120.0
         base.IsVisible <- true
 
@@ -34,11 +33,10 @@ type Game(config: GameConfig) as this =
             base.ClientRectangle <- new Box2i(0, 0, width, height)
             base.CenterWindow()
         | WindowType.BORDERLESS ->
-            base.WindowState <- WindowState.Maximized
             base.WindowBorder <- WindowBorder.Hidden
+            base.WindowState <- WindowState.Maximized
         | WindowType.FULLSCREEN ->
             base.WindowState <- WindowState.Fullscreen
-        //todo: validation on config record data so this cannot happen
         | _ -> Logging.Error("Invalid window state. How did we get here?") ""
 
     override this.OnResize(e) =
@@ -59,8 +57,8 @@ type Game(config: GameConfig) as this =
     override this.OnUpdateFrame(e) =
         base.OnUpdateFrame(e)
         screens.Update(e.Time * 1000.0, Render.bounds)
-        Audio.update()
         Input.update()
+        Audio.update()
         if screens.Exit then base.Close()
     
     override this.OnLoad() =

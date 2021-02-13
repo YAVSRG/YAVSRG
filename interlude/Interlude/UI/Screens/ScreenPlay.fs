@@ -298,13 +298,14 @@ type ScreenPlay() as this =
         Screens.backgroundDim.SetTarget(Options.options.BackgroundDim.Get() |> float32)
         //discord presence
         Screens.setToolbarCollapsed(true)
-        //disable cursor
+        Screens.setCursorVisible(false)
         Audio.changeRate(Gameplay.rate)
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
 
     override this.OnExit(next) =
         Screens.backgroundDim.SetTarget(0.7f)
+        Screens.setCursorVisible(true)
         if (next :? ScreenScore) then () else
             Screens.setToolbarCollapsed(false)
 

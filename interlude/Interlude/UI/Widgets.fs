@@ -251,6 +251,7 @@ module Screens =
     let mutable internal addDialog: Dialog -> unit = ignore
 
     let mutable internal setToolbarCollapsed: bool -> unit = ignore
+    let mutable internal setCursorVisible: bool -> unit = ignore
 
     //background fbo
     let parallaxX  = AnimationFade(0.0f)

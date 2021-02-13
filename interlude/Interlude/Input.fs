@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Input
 
+open System
 open OpenTK
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
@@ -25,7 +26,10 @@ module Input =
 
     let init(game : GameWindow) =
         game.add_MouseWheel(fun e -> mousez <- e.OffsetY)
-        game.add_MouseMove(fun e -> mousex <- Render.vwidth / float32 Render.rwidth * float32 e.X; mousey <- Render.vheight / float32 Render.rheight * float32 e.Y) //todo: rescale mouse position by virtual pixels rather than window pixels
+        game.add_MouseMove(
+            fun e ->
+                mousex <- Math.Clamp(Render.vwidth / float32 Render.rwidth * float32 e.X, 0.0f, Render.vwidth)
+                mousey <- Math.Clamp(Render.vheight / float32 Render.rheight * float32 e.Y, 0.0f, Render.vheight))
         game.add_MouseDown(fun e -> mouse.Add(e.Button))
         game.add_MouseUp(fun e -> while mouse.Remove(e.Button) do ())
 
