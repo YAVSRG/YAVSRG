@@ -12,14 +12,43 @@ open Interlude.Input
 open Interlude.Options
 
 // Menu screen
+type MenuButton(onClick, label) as this =
+    inherit Widget()
 
-type ScreenMenu() =
+    let color = AnimationFade(0.3f)
+    do
+        this.Animation.Add(color)
+        this.Add(new Clickable(onClick, fun b -> color.SetTarget(if b then 0.3f else 0.3f)))
+        this.Add(new TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.7f, 10.0f, 0.0f, 0.0f, 1.0f, -20.0f, 1.0f))
+
+    override this.Draw() =
+        Draw.quad(Quad.parallelogram 0.5f this.Bounds)(Quad.colorOf(Screens.accentShade(200, 1.0f, color.Value)))(Sprite.DefaultQuad)
+        base.Draw()
+
+    member this.Pop() =
+        let (_, _, r, _) = this.Position
+        r.SetValue(-Render.vwidth)
+
+type ScreenMenu() as this =
     inherit Screen()
+
+    let playFunc() =
+        Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
+        Screens.addScreen(ScreenLevelSelect >> (fun s -> s :> Screen), ScreenTransitionFlag.UnderLogo)
+    let play = MenuButton(playFunc, "Play")
+    let options = MenuButton(ignore, "Options")
+    let quit = MenuButton(ignore, "Quit")
+
+    do
+        this.Add(play |> positionWidget(-100.0f, 0.0f, -200.0f, 0.5f, 1200.0f, 0.0f, -100.0f, 0.5f))
+        this.Add(options |> positionWidget(-100.0f, 0.0f, -50.0f, 0.5f, 1130.0f, 0.0f, 50.0f, 0.5f))
+        this.Add(quit |> positionWidget(-100.0f, 0.0f, 100.0f, 0.5f, 1060.0f, 0.0f, 200.0f, 0.5f))
 
     override this.OnEnter(prev: Screen) =
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
         Screens.backgroundDim.SetTarget(0.0f)
         Screens.setToolbarCollapsed(false)
+        play.Pop(); options.Pop(); quit.Pop();
 
     override this.OnExit(next: Screen) =
         Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
@@ -31,8 +60,7 @@ type ScreenMenu() =
 
     override this.Update(time, bounds) =
         base.Update(time, bounds)
-        if (Options.options.Hotkeys.Select.Get().Tapped(false)) then
-            Screens.addScreen(ScreenLevelSelect >> (fun s -> s :> Screen), ScreenTransitionFlag.Default)
+        if (Options.options.Hotkeys.Select.Get().Tapped(false)) then playFunc()
 
 // Loading screen
 
@@ -106,7 +134,6 @@ type Toolbar() as this =
     let barSlider = new AnimationFade(1.0f)
     let notifSlider = new AnimationFade(0.0f)
 
-    let mutable cursor = true
     let mutable userCollapse = false
     let mutable forceCollapse = true
     
@@ -115,14 +142,13 @@ type Toolbar() as this =
         this.Animation.Add(notifSlider)
         this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
         this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
-        this.Add(new Button((fun () -> Screens.popScreen(ScreenTransitionFlag.Default)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
+        this.Add(new Button((fun () -> Screens.popScreen(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
         this.Add(new Button((fun () -> Screens.addDialog(new OptionsMenu())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button((fun () -> (ScreenImport >> (fun s -> s :> Screen), ScreenTransitionFlag.Default) |> Screens.addScreen), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Jukebox())
 
         Screens.setToolbarCollapsed <- (fun b -> forceCollapse <- b)
-        Screens.setCursorVisible <- (fun b -> cursor <- b)
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
@@ -135,7 +161,6 @@ type Toolbar() as this =
                 Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - height) (l + (float32 i + 1.0f) * s - 2.0f) (t - height + level))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
                 Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + height - level) (r - float32 i * s - 2.0f) (b + height))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
         base.Draw()
-        if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize)(Screens.accentShade(255, 1.0f, 0.5f))(Themes.getTexture("cursor"))
 
     override this.Update(elapsed, bounds) =
         if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped(false) then
@@ -152,6 +177,8 @@ type ScreenContainer() as this =
     let mutable current = new ScreenLoading() :> Screen
     let mutable screens = [current]
     let mutable exit = false
+    
+    let mutable cursor = true
 
     let transitionTime = 500.0
     let mutable transitionFlags = ScreenTransitionFlag.Default
@@ -165,6 +192,7 @@ type ScreenContainer() as this =
         Screens.addScreen <- this.AddScreen
         Screens.popScreen <- this.RemoveScreen
         Screens.addDialog <- this.AddDialog
+        Screens.setCursorVisible <- (fun b -> cursor <- b)
         this.Add(toolbar)
         this.Add(Screens.logo |> Components.positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f))
         this.Animation.Add(screenTransition)
@@ -262,3 +290,4 @@ type ScreenContainer() as this =
             if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
         for d in dialogs do
             d.Draw()
+        if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize)(Screens.accentShade(255, 1.0f, 0.5f))(Themes.getTexture("cursor"))

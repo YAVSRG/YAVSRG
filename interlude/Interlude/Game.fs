@@ -48,7 +48,7 @@ type Game(config: GameConfig) as this =
         e.FileNames |> Array.iter FileDropHandling.import
 
     override this.OnRenderFrame(e) =
-        base.OnRenderFrame (e)
+        base.OnRenderFrame(e)
         Render.start()
         screens.Draw()
         Render.finish()

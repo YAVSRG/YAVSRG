@@ -68,8 +68,12 @@ type QuadColors = (struct(Color * Color * Color * Color))
 
 module Quad =
 
-    let ofRect (struct (l, t, r, b) : Rect): Quad =
+    let ofRect (struct (l, t, r, b): Rect): Quad =
         struct (new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b))
+
+    let parallelogram (amount: float32) (struct (l, t, r, b): Rect): Quad =
+        let a = (b - t) * 0.5f * amount
+        struct (new Vector2(l + a, t), new Vector2(r + a, t), new Vector2(r - a, b), new Vector2(l - a, b))
 
     let create c1 c2 c3 c4: Quad = struct (c1, c2, c3, c4)
 
