@@ -20,10 +20,10 @@ type GameStartDialog() as this =
 
     do
         this.Animation.Add(anim1)
-        anim1.SetTarget(1.0f)
+        anim1.Target <- 1.0f
         let g = new AnimationSequence()
         g.Add(new AnimationTimer(600.0))
-        g.Add(new AnimationAction(fun () -> anim1.SetTarget(0.0f)))
+        g.Add(new AnimationAction(fun () -> anim1.Target <- 0.0f))
         g.Add(new AnimationAction(this.Close))
         this.Animation.Add(g)
 
@@ -246,7 +246,7 @@ module GameplayWidgets =
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
                         color.SetColor(Themes.themeConfig.LampColors.[helper.Scoring.State |> lamp |> int])
-                    popAnimation.SetValue(conf.Pop))
+                    popAnimation.Value <- conf.Pop)
 
         do
             this.Animation.Add(color)
@@ -295,7 +295,7 @@ type ScreenPlay() as this =
         //todo: rest of widgets
 
     override this.OnEnter(prev) =
-        Screens.backgroundDim.SetTarget(Options.options.BackgroundDim.Get() |> float32)
+        Screens.backgroundDim.Target <- Options.options.BackgroundDim.Get() |> float32
         //discord presence
         Screens.setToolbarCollapsed(true)
         Screens.setCursorVisible(false)
@@ -304,7 +304,7 @@ type ScreenPlay() as this =
         //Screens.addDialog(new GameStartDialog())
 
     override this.OnExit(next) =
-        Screens.backgroundDim.SetTarget(0.7f)
+        Screens.backgroundDim.Target <- 0.7f
         Screens.setCursorVisible(true)
         if (next :? ScreenScore) then () else
             Screens.setToolbarCollapsed(false)

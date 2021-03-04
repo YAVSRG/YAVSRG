@@ -43,8 +43,8 @@ module SelectionWheel =
         let items = new List<ISelectable>()
         let collapse = new AnimationFade(1.0f)
         do this.Animation.Add(collapse)
-        override this.Select() = base.Select(); collapse.SetTarget(0.0f); if items.[index].AutoSelect then items.[index].Select()
-        override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
+        override this.Select() = base.Select(); collapse.Target <- 0.0f; if items.[index].AutoSelect then items.[index].Select()
+        override this.Deselect() = base.Deselect(); collapse.Target <- 1.0f
         override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
 
         override this.Add(w) = failwith "don't use this, use AddItem"
@@ -232,7 +232,7 @@ module SelectionWheel =
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
             this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
+            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.Target <- if b then 0.8f else 0.5f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)

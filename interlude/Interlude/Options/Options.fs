@@ -45,6 +45,7 @@ type Hotkeys = {
     Toolbar: Setting<Bind>
     Tooltip: Setting<Bind>
     Screenshot: Setting<Bind>
+    Tasklist: Setting<Bind>
     Volume: Setting<Bind>
     Previous: Setting<Bind>
     Next: Setting<Bind>
@@ -71,6 +72,7 @@ type Hotkeys = {
         Tooltip = Setting(mk Keys.Slash)
         Toolbar = Setting(ctrl Keys.T)
         Screenshot = Setting(mk Keys.F12)
+        Tasklist = Setting(mk Keys.F8)
         Volume = Setting(alt Keys.LeftAlt)
         Previous = Setting(mk Keys.Left)
         Next = Setting(mk Keys.Right)

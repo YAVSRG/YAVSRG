@@ -60,7 +60,7 @@ module Components =
 
         do
             this.Animation.Add(color)
-            this.Add(new Clickable(onClick, fun b -> color.SetTarget(if b then 0.7f else 0.3f)))
+            this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
 
         override this.Draw() =
             Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
@@ -125,7 +125,9 @@ module Components =
             base.Add(child)
             if (this.Initialised) then this.FlowContent(true)
 
+        member this.RemoveWhere(f: Widget -> bool) = this.Children.RemoveAll(Predicate(f))
         member this.Clear() = this.Children.Clear()
+        member this.Filter() = failwith "nyi"
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
@@ -136,7 +138,7 @@ module Components =
         do
             this.Animation.Add(color)
             let fr = new Frame()
-            this.Add((Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.SetTarget(if b then 0.8f else 0.5f))) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
+            this.Add((Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
                 let fc = FlowContainer(0.0f, 0.0f)
                 fr.Add(fc)
@@ -163,10 +165,10 @@ module Components =
         let toggle() =
             active <- not active
             if active then
-                color.SetTarget(1.0f)
+                color.Target <- 1.0f
                 Input.createInputMethod(s)
             else
-                color.SetTarget(0.5f)
+                color.Target <- 0.5f
                 Input.removeInputMethod()
 
         do

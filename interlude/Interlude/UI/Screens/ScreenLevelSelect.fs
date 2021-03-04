@@ -190,7 +190,7 @@ module ScreenLevelSelect =
 
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + 85.0f)
                     if Mouse.Hover(bounds) then 
-                        hover.SetTarget(1.0f)
+                        hover.Target <- 1.0f
                         if Mouse.Click(MouseButton.Left) then
                             if selectedChart = cc.Hash then
                                 playCurrentChart()
@@ -200,8 +200,8 @@ module ScreenLevelSelect =
                             expandedGroup <- ""
                             scrollTo <- true
                     else
-                        hover.SetTarget(0.0f)
-                    animation.Update(elapsedTime)
+                        hover.Target <- 0.0f
+                    animation.Update(elapsedTime) |> ignore
                 top + 95.0f
             | Choice2Of2 (name, items) ->
                 if scrollTo && name = selectedGroup && name <> expandedGroup then
@@ -210,12 +210,12 @@ module ScreenLevelSelect =
                 if (top > 170.0f) then                       
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.9f) (top + 65.0f)
                     if Mouse.Hover(bounds) then 
-                        hover.SetTarget(1.0f)
+                        hover.Target <- 1.0f
                         if Mouse.Click(MouseButton.Left) then
                             if expandedGroup = name then expandedGroup <- "" else expandedGroup <- name
                     else
-                        hover.SetTarget(0.0f)
-                    animation.Update(elapsedTime)
+                        hover.Target <- 0.0f
+                    animation.Update(elapsedTime) |> ignore
                 if expandedGroup = name then
                     List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) (top + 80.0f) items
                 else
@@ -310,7 +310,7 @@ type ScreenLevelSelect() as this =
         if not <| sortBy.ContainsKey(options.ChartSortMode.Get()) then options.ChartSortMode.Set("Title")
         if not <| groupBy.ContainsKey(options.ChartGroupMode.Get()) then options.ChartGroupMode.Set("Pack")
         this.Animation.Add(scrollPos)
-        scrollBy <- fun amt -> scrollPos.SetTarget(scrollPos.Target + amt)
+        scrollBy <- fun amt -> scrollPos.Target <- scrollPos.Target + amt
         this.Add(
             let sorts = sortBy.Keys |> Array.ofSeq
             new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Get()),
@@ -365,8 +365,8 @@ type ScreenLevelSelect() as this =
             |> List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) scrollPos.Value
         let height = bottomEdge - scrollPos.Value - 320.0f
         if Mouse.pressed(MouseButton.Right) then
-            scrollPos.SetTarget(-(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height)
-        scrollPos.SetTarget(Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f))
+            scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
+        scrollPos.Target <- Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f)
         if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
             
 
