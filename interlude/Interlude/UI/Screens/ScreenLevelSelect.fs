@@ -345,6 +345,8 @@ type ScreenLevelSelect() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
+        if ScreenLevelSelect.refresh then refresh(); ScreenLevelSelect.refresh <- false
+
         if options.Hotkeys.Select.Get().Tapped(false) then playCurrentChart()
         elif options.Hotkeys.UpRateSmall.Get().Tapped(false) then changeRate(0.01f); colorVersionGlobal <- colorVersionGlobal + 1
         elif options.Hotkeys.UpRateHalf.Get().Tapped(false) then changeRate(0.05f); colorVersionGlobal <- colorVersionGlobal + 1
