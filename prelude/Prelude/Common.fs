@@ -130,6 +130,11 @@ module Common =
                 if loadedPath <> "" then File.AppendAllText(loadedPath, "\n"+str+"="+str)
                 str
 
+        let localiseWith xs str =
+            let mutable s = localise str
+            List.iteri (fun i x -> s <- s.Replace("%"+i.ToString(), x)) xs
+            s
+
 (*
     Background task management
 *)
