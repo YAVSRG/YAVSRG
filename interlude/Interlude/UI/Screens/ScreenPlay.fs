@@ -394,16 +394,16 @@ type ScreenPlay() as this =
             i <- i + 1
         releaseMask <- ~~~releaseMask
         //detect holding through a mine or releasing through a holdbody
-        //todo: have a mask for mines as well
+        //todo: have a mask for mines as well AND revisit this cause of new input system
         let mutable i = noteSeek
         while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow * 0.125f do
             let (t, struct (nd, _)) = notes.Data.[i]
             if (t > now - missWindow * 0.125f) then
                 let (_, _, s) = scoreData.[i]
                 for k in noteData NoteType.HOLDBODY nd &&& releaseMask |> getBits do
-                    if s.[k] = HitStatus.Special && not (binds.[k].Pressed(true)) then s.[k] <- HitStatus.SpecialNG
+                    if s.[k] = HitStatus.Special && not (binds.[k].Pressed()) then s.[k] <- HitStatus.SpecialNG
                 for k in noteData NoteType.MINE nd |> getBits do
-                    if s.[k] = HitStatus.Special && binds.[k].Pressed(true) then s.[k] <- HitStatus.SpecialNG
+                    if s.[k] = HitStatus.Special && binds.[k].Pressed() then s.[k] <- HitStatus.SpecialNG
             i <- i + 1
         //todo: handle in all watchers
         scoring.Update(now - missWindow)(scoreData)(true)

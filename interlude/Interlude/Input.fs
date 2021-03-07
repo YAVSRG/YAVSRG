@@ -159,12 +159,12 @@ module Mouse =
     let Hover(struct (l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
 
 type Bind with
-    member this.Pressed(_) =
+    member this.Pressed() =
         match this with
         | Key _
         | Mouse _ -> Input.consumeOne(this, InputEvType.Hold).IsSome
         | _ -> false
-    member this.Tapped(_) =
+    member this.Tapped() =
         match this with
         | Key _
         | Mouse _ -> Input.consumeOne(this, InputEvType.Press).IsSome

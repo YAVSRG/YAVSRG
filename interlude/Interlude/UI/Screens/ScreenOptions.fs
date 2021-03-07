@@ -82,18 +82,18 @@ module SelectionWheel =
                 let h = w.Bounds |> Rect.height
                 t <- t + h
             if this.Selected && flag < 2 then
-                if options.Hotkeys.Down.Get().Tapped(false) then
+                if options.Hotkeys.Down.Get().Tapped() then
                     if flag = 1 then items.[index].Deselect()
                     index <- (index + 1) % items.Count
                     if items.[index].AutoSelect then items.[index].Select()
-                elif options.Hotkeys.Up.Get().Tapped(false) then
+                elif options.Hotkeys.Up.Get().Tapped() then
                     if flag = 1 then items.[index].Deselect()
                     index <- (index + items.Count - 1) % items.Count
                     if items.[index].AutoSelect then items.[index].Select()
-                elif options.Hotkeys.Exit.Get().Tapped(false) || (flag = 0 && options.Hotkeys.Previous.Get().Tapped(false)) then
+                elif options.Hotkeys.Exit.Get().Tapped() || (flag = 0 && options.Hotkeys.Previous.Get().Tapped()) then
                     this.DeselectChild()
                     this.Deselect()
-                if flag = 0 && (options.Hotkeys.Select.Get().Tapped(false) || options.Hotkeys.Next.Get().Tapped(false)) then items.[index].Select()
+                if flag = 0 && (options.Hotkeys.Select.Get().Tapped() || options.Hotkeys.Next.Get().Tapped()) then items.[index].Select()
         
         override this.AutoSelect = false
 
@@ -103,10 +103,10 @@ module SelectionWheel =
         let mutable index = 0
         let items = new List<ISelectable>()
 
-        let fd() = if horizontal then options.Hotkeys.Next.Get().Tapped(false) else options.Hotkeys.Down.Get().Tapped(false)
-        let bk() = if horizontal then options.Hotkeys.Previous.Get().Tapped(false) else options.Hotkeys.Up.Get().Tapped(false)
-        let sel() = (not horizontal && options.Hotkeys.Next.Get().Tapped(false)) || options.Hotkeys.Select.Get().Tapped(false)
-        let desel() = options.Hotkeys.Exit.Get().Tapped(false)
+        let fd() = if horizontal then options.Hotkeys.Next.Get().Tapped() else options.Hotkeys.Down.Get().Tapped()
+        let bk() = if horizontal then options.Hotkeys.Previous.Get().Tapped() else options.Hotkeys.Up.Get().Tapped()
+        let sel() = (not horizontal && options.Hotkeys.Next.Get().Tapped()) || options.Hotkeys.Select.Get().Tapped()
+        let desel() = options.Hotkeys.Exit.Get().Tapped()
 
         member this.Clear() = index <- 0; Seq.iter (fun (w: ISelectable) -> w.Dispose(); this.Remove(w)) items; items.Clear()
         override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
@@ -208,8 +208,8 @@ module SelectionWheel =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if this.Selected then
-                if options.Hotkeys.Next.Get().Tapped(false) then fd()
-                elif options.Hotkeys.Previous.Get().Tapped(false) then bk()
+                if options.Hotkeys.Next.Get().Tapped() then fd()
+                elif options.Hotkeys.Previous.Get().Tapped() then bk()
 
         static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: ISettable<'T>, label, onDeselect) =
             let names = Enum.GetNames(typeof<'T>)
@@ -243,12 +243,12 @@ module SelectionWheel =
                     setting.SetPercent(amt)
                 else
                     dragging <- false
-                if options.Hotkeys.UpRateHalf.Get().Tapped(false) || options.Hotkeys.Next.Get().Tapped(false) then chPercent(0.05f)
-                elif options.Hotkeys.UpRateSmall.Get().Tapped(false) then chPercent(0.01f)
-                elif options.Hotkeys.UpRate.Get().Tapped(false) then chPercent(0.1f)
-                elif options.Hotkeys.DownRateHalf.Get().Tapped(false) || options.Hotkeys.Previous.Get().Tapped(false) then chPercent(-0.05f)
-                elif options.Hotkeys.DownRateSmall.Get().Tapped(false) then chPercent(-0.01f)
-                elif options.Hotkeys.DownRate.Get().Tapped(false) then chPercent(-0.1f)
+                if options.Hotkeys.UpRateHalf.Get().Tapped() || options.Hotkeys.Next.Get().Tapped() then chPercent(0.05f)
+                elif options.Hotkeys.UpRateSmall.Get().Tapped() then chPercent(0.01f)
+                elif options.Hotkeys.UpRate.Get().Tapped() then chPercent(0.1f)
+                elif options.Hotkeys.DownRateHalf.Get().Tapped() || options.Hotkeys.Previous.Get().Tapped() then chPercent(-0.05f)
+                elif options.Hotkeys.DownRateSmall.Get().Tapped() then chPercent(-0.01f)
+                elif options.Hotkeys.DownRate.Get().Tapped() then chPercent(-0.1f)
 
         override this.Draw() =
             let v = setting.GetPercent()
@@ -357,8 +357,8 @@ module LayoutEditor =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if this.Selected then
-                if options.Hotkeys.Previous.Get().Tapped(false) then fd()
-                elif options.Hotkeys.Next.Get().Tapped(false) then bk()
+                if options.Hotkeys.Previous.Get().Tapped() then fd()
+                elif options.Hotkeys.Next.Get().Tapped() then bk()
 
     type LayoutEditor() as this =
         inherit Dialog()

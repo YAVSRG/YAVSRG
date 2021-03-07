@@ -68,7 +68,7 @@ module Components =
             Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
 
         override this.Update(bounds, elapsedTime) =
-            if bind.Get().Tapped(false) then onClick()
+            if bind.Get().Tapped() then onClick()
             base.Update(bounds, elapsedTime)
 
     type FlowContainer(?spacingX: float32, ?spacingY: float32) =
@@ -188,7 +188,7 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             match bind with
-            | Some b -> if b.Get().Tapped(true) then toggle()
+            | Some b -> if b.Get().Tapped() then toggle()
             | None -> ()
 
         override this.Dispose() =
@@ -203,5 +203,5 @@ module Components =
             this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if options.Hotkeys.Select.Get().Tapped(true) || options.Hotkeys.Exit.Get().Tapped(true) then tb.Dispose(); this.Close()
+            if options.Hotkeys.Select.Get().Tapped() || options.Hotkeys.Exit.Get().Tapped() then tb.Dispose(); this.Close()
         override this.OnClose() = callback(buf.Get())

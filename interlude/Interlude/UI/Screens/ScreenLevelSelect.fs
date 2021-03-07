@@ -347,18 +347,18 @@ type ScreenLevelSelect() as this =
         base.Update(elapsedTime, bounds)
         if ScreenLevelSelect.refresh then refresh(); ScreenLevelSelect.refresh <- false
 
-        if options.Hotkeys.Select.Get().Tapped(false) then playCurrentChart()
-        elif options.Hotkeys.UpRateSmall.Get().Tapped(false) then changeRate(0.01f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.UpRateHalf.Get().Tapped(false) then changeRate(0.05f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.UpRate.Get().Tapped(false) then changeRate(0.1f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.DownRateSmall.Get().Tapped(false) then changeRate(-0.01f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.DownRateHalf.Get().Tapped(false) then changeRate(-0.05f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.DownRate.Get().Tapped(false) then changeRate(-0.1f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.Next.Get().Tapped(false) then
+        if options.Hotkeys.Select.Get().Tapped() then playCurrentChart()
+        elif options.Hotkeys.UpRateSmall.Get().Tapped() then changeRate(0.01f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.UpRateHalf.Get().Tapped() then changeRate(0.05f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.UpRate.Get().Tapped() then changeRate(0.1f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.DownRateSmall.Get().Tapped() then changeRate(-0.01f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.DownRateHalf.Get().Tapped() then changeRate(-0.05f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.DownRate.Get().Tapped() then changeRate(-0.1f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.Next.Get().Tapped() then
             if lastItem.IsSome then
                 let h = (lastItem.Value |> snd).Hash
                 navigation <- Navigation.Forward(selectedGroup = fst lastItem.Value && selectedChart = h)
-        elif options.Hotkeys.Previous.Get().Tapped(false) then
+        elif options.Hotkeys.Previous.Get().Tapped() then
             if lastItem.IsSome then
                 navigation <- Navigation.Backward(lastItem.Value)
         let struct (left, top, right, bottom)  = this.Bounds

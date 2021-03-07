@@ -59,7 +59,7 @@ type ScreenMenu() as this =
 
     override this.Update(time, bounds) =
         base.Update(time, bounds)
-        if (Options.options.Hotkeys.Select.Get().Tapped(false)) then playFunc()
+        if (Options.options.Hotkeys.Select.Get().Tapped()) then playFunc()
 
 // Loading screen
 
@@ -123,7 +123,7 @@ module Notifications =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds |> Rect.translate(-WIDTH * fade.Value, 0.0f))
             if
-                Options.options.Hotkeys.Tasklist.Get().Pressed(true)
+                Options.options.Hotkeys.Tasklist.Get().Pressed()
                 || lockTime > 0
             then
                 fade.Target <- 1.0f
@@ -192,7 +192,7 @@ type Jukebox() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Options.options.Hotkeys.Volume.Get().Pressed(true) then
+        if Options.options.Hotkeys.Volume.Get().Pressed() then
             fade.Target <- 1.0f
             Options.options.AudioVolume.Set(Options.options.AudioVolume.Get() + float (Mouse.Scroll()) * 0.02)
             Audio.changeVolume(Options.options.AudioVolume.Get())
@@ -246,7 +246,7 @@ type Toolbar() as this =
         base.Draw()
 
     override this.Update(elapsed, bounds) =
-        if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped(false) then
+        if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
         base.Update(elapsed, Rect.expand (0.f, -height * if forceCollapse then 0.0f else barSlider.Value) bounds)
