@@ -58,11 +58,12 @@ module Input =
     let removeInputMethod() =
         inputmethod <- match inputmethod with x::xs -> xs | [] -> []
 
-    let consumeAll() =
+    let absorbAll() =
         oldmousez <- mousez
         let e = evts
         evts <- []
         //e
+
 
     let consumeOne(b: Bind, t: InputEvType) =
         let mutable out = ValueNone
@@ -73,6 +74,12 @@ module Input =
             | x :: xs -> x :: (f xs)
         evts <- f evts
         out
+
+    let consumeGameplay(b: Bind, t: InputEvType, f) =
+        let mutable time = consumeOne(b, t)
+        while time.IsSome do
+            f time.Value
+            time <- consumeOne(b, t)
 
     let consumeAny(t: InputEvType) =
         let mutable out = ValueNone
@@ -125,7 +132,7 @@ module Input =
                 removeInputMethod())
         gw.add_TextInput(fun e ->
             match List.tryHead inputmethod with
-            | Some s -> s.Set(s.Get() + e.AsString); consumeAll()
+            | Some s -> s.Set(s.Get() + e.AsString); absorbAll()
             | None -> ())
 
     let update() =

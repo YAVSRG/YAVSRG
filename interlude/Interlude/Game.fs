@@ -58,7 +58,7 @@ type Game(config: GameConfig) as this =
         base.OnUpdateFrame(e)
         Input.update()
         screens.Update(e.Time * 1000.0, Render.bounds)
-        Input.consumeAll()
+        Input.absorbAll()
         Audio.update()
         if screens.Exit then base.Close()
 

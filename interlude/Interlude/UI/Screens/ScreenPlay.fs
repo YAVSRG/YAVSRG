@@ -9,6 +9,7 @@ open Prelude.Gameplay.Score
 open Prelude.Data.Themes
 open Prelude.Data.ScoreManager
 open Interlude
+open Interlude.Input
 open Interlude.UI.Animation
 open Interlude.Render
 open Interlude.Options
@@ -376,10 +377,8 @@ type ScreenPlay() as this =
         base.Update(elapsedTime, bounds)
         let now = Audio.timeWithOffset()
         for k in 0 .. (keys - 1) do
-            if binds.[k].Tapped(true) then
-                this.HandleHit(k, now, false)
-            elif (binds.[k].Released()) then
-                this.HandleHit(k, now, true)
+            Input.consumeGameplay(binds.[k], InputEvType.Press, fun t -> this.HandleHit(k, t, false))
+            Input.consumeGameplay(binds.[k], InputEvType.Release, fun t -> this.HandleHit(k, t, true))
         //seek up to miss threshold and display missed notes in widgets
         while noteSeek < notes.Count && offsetOf notes.Data.[noteSeek] < now - missWindow do
             let (_, _, s) = scoreData.[noteSeek]
