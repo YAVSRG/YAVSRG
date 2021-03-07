@@ -377,6 +377,7 @@ type ScreenPlay() as this =
         base.Update(elapsedTime, bounds)
         let now = Audio.timeWithOffset()
         for k in 0 .. (keys - 1) do
+            //unable to reason about correctness. possible todo: merge these into one so that all actions are ordered by time
             Input.consumeGameplay(binds.[k], InputEvType.Press, fun t -> this.HandleHit(k, t, false))
             Input.consumeGameplay(binds.[k], InputEvType.Release, fun t -> this.HandleHit(k, t, true))
         //seek up to miss threshold and display missed notes in widgets

@@ -338,11 +338,9 @@ type ScreenContainer() as this =
             if dialogs.[dialogs.Count - 1].State = WidgetState.Disabled then
                 dialogs.[dialogs.Count - 1].Dispose()
                 dialogs.RemoveAt(dialogs.Count - 1)
-            current.Animation.Update(elapsedTime) |> ignore
-            Screens.logo.Update(elapsedTime, bounds)
-        else
-            base.Update(elapsedTime, bounds)
-            current.Update(elapsedTime, toolbar.Bounds)
+            Input.absorbAll()
+        base.Update(elapsedTime, bounds)
+        current.Update(elapsedTime, toolbar.Bounds)
 
     override this.Draw() =
         Screens.drawBackground(this.Bounds, Color.White, 1.0f)
