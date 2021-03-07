@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI
 
-open OpenTK
 open System.IO
 open System.Drawing
 open Percyqaz.Json
@@ -23,14 +22,14 @@ type ImportCard(name, url) as this =
             new Clickable(
                 (fun () ->
                     let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-                    Screens.addNotification("notification.PackDownloading", NotificationType.Task)
+                    Screens.addNotification(Localisation.localiseWith [name] "notification.PackDownloading", NotificationType.Task)
                     BackgroundTask.Create(TaskFlags.LONGRUNNING)("Downloading " + name)
                         (fun l ->
                             async { 
                                 let! b = downloadFile(url, target)(l)
                                 if b then
                                     BackgroundTask.Create(TaskFlags.LONGRUNNING)("Importing " + name)
-                                        (Gameplay.cache.AutoConvert(target) |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Screens.addNotification("notification.PackInstalled", NotificationType.Task); File.Delete(target)))
+                                        (Gameplay.cache.AutoConvert(target) |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Screens.addNotification(Localisation.localiseWith [name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
                                 return true })), ignore))
         this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)
 

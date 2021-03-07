@@ -21,11 +21,13 @@ type GameStartDialog() as this =
     do
         this.Animation.Add(anim1)
         anim1.Target <- 1.0f
-        let g = new AnimationSequence()
-        g.Add(new AnimationTimer(600.0))
-        g.Add(new AnimationAction(fun () -> anim1.Target <- 0.0f))
-        g.Add(new AnimationAction(this.Close))
-        this.Animation.Add(g)
+        this.Animation.Add(
+            Animation.Serial(
+                AnimationTimer 600.0,
+                AnimationAction(fun () -> anim1.Target <- 0.0f),
+                AnimationAction(this.Close)
+            )
+        )
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
