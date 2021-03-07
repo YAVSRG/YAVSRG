@@ -56,10 +56,15 @@ type Game(config: GameConfig) as this =
 
     override this.OnUpdateFrame(e) =
         base.OnUpdateFrame(e)
-        screens.Update(e.Time * 1000.0, Render.bounds)
         Input.update()
+        screens.Update(e.Time * 1000.0, Render.bounds)
+        Input.consumeAll()
         Audio.update()
         if screens.Exit then base.Close()
+
+    override this.ProcessEvents() =
+        base.ProcessEvents()
+        Input.poll(this)
     
     override this.OnLoad() =
         base.OnLoad()

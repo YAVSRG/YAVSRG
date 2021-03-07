@@ -366,7 +366,7 @@ type ScreenLevelSelect() as this =
             selection
             |> List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) scrollPos.Value
         let height = bottomEdge - scrollPos.Value - 320.0f
-        if Mouse.pressed(MouseButton.Right) then
+        if Mouse.Held(MouseButton.Right) then
             scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
         scrollPos.Target <- Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f)
         if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()

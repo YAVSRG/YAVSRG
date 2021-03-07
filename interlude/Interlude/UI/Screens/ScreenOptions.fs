@@ -238,7 +238,7 @@ module SelectionWheel =
             base.Update(elapsedTime, bounds)
             let struct (l, t, r, b) = this.Bounds |> Rect.expand(-15.0f, -15.0f)
             if this.Selected then
-                if (Mouse.pressed(MouseButton.Left) && dragging) then
+                if (Mouse.Held(MouseButton.Left) && dragging) then
                     let amt = (Mouse.X() - l) / (r - l)
                     setting.SetPercent(amt)
                 else
@@ -272,19 +272,19 @@ module SelectionWheel =
         override this.Draw() =
             if name = "" then Draw.rect(this.Bounds |> Rect.expand(0.0f, -25.0f))(Screens.accentShade(127, 0.8f, 0.0f))Sprite.Default
             base.Draw()
-        override this.Select() =
-            base.Select()
-            //todo: refactor where this logic is moved to Interlude.Input and also supports mouse/joystick inputs
-            //Input.Keyboard.pressedOverride is marked internal because it should only be used from Interlude.Input and i was naughty to be lazy here
-            Input.grabKey(
-                fun k ->
-                    if k = Keys.Escape then if allowModifiers then setting.Set(Dummy)
-                    else
-                        setting.Set(
-                            Input.Key (k,
-                                (allowModifiers && (Input.Keyboard.pressedOverride(Keys.LeftControl) || Input.Keyboard.pressedOverride(Keys.RightControl)), false,
-                                    allowModifiers && (Input.Keyboard.pressedOverride(Keys.LeftShift) || Input.Keyboard.pressedOverride(Keys.RightShift)))))
-                    this.Deselect())
+        override this.Update(bounds, elapsedTime) =
+            if this.Selected then
+                match Input.consumeAny(InputEvType.Press) with
+                | ValueNone -> ()
+                | ValueSome b ->
+                    match b with
+                    | Key (k, (ctrl, _, shift)) ->
+                        if k = Keys.Escape then setting.Set(Dummy)
+                        elif allowModifiers then setting.Set(Key (k, (ctrl, false, shift)))
+                        else setting.Set(Key (k, (false, false, false)))
+                        this.Deselect()
+                    | _ -> ()
+            base.Update(bounds, elapsedTime)
         override this.DeselectChild() = ()
         override this.AutoSelect = false
 
