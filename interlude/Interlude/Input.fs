@@ -99,8 +99,10 @@ module Input =
         let shift = gw.KeyboardState.IsKeyDown Keys.LeftShift || gw.KeyboardState.IsKeyDown Keys.RightShift
         let alt = gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
 
+
         // keyboard input handler
         //todo: way of remembering modifier combo for hold/release?
+        if alt then add <| struct(Key (Keys.LeftAlt, (false, false, false)), InputEvType.Hold, now)
         for k in 0 .. int Keys.LastKey do
             if k < 340 || k > 347 then
                 if gw.KeyboardState.IsKeyDown(enum k) then
