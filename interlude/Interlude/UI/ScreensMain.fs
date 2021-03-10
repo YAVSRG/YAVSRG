@@ -42,6 +42,7 @@ type ScreenMenu() as this =
         this.Add(play |> positionWidget(-100.0f, 0.0f, -200.0f, 0.5f, 1200.0f, 0.0f, -100.0f, 0.5f))
         this.Add(options |> positionWidget(-100.0f, 0.0f, -50.0f, 0.5f, 1130.0f, 0.0f, 50.0f, 0.5f))
         this.Add(quit |> positionWidget(-100.0f, 0.0f, 100.0f, 0.5f, 1060.0f, 0.0f, 200.0f, 0.5f))
+        Utils.AutoUpdate.checkForUpdates()
 
     override this.OnEnter(prev: Screen) =
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)

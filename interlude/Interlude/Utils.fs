@@ -13,3 +13,39 @@ module Utils =
 
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
+
+    module AutoUpdate =
+        open System.IO
+        open Percyqaz.Json
+        open Prelude.Common
+        open Prelude.Web
+
+        [<Json.AllRequired>]
+        type GithubAsset = {
+            name: string
+            browser_download_url: string
+        } with static member Default = { name = ""; browser_download_url = "" }
+        
+        [<Json.AllRequired>]
+        type GithubRelease = {
+            url: string
+            tag_name: string
+            name: string
+            published_at: string
+            body: string
+            assets: GithubAsset list
+        } with static member Default = { name = ""; url = ""; tag_name = ""; published_at = ""; body = ""; assets = [] }
+
+        let handleUpdate(release: GithubRelease) =
+            let current = Assembly.GetExecutingAssembly().GetName().Version.ToString(3)
+            let incoming = release.tag_name.Substring(1)
+            if incoming > current then
+                Logging.Info(sprintf "Update available (%s)!" incoming)""
+            elif incoming < current then
+                Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)""
+            else
+                Logging.Info("Game is up to date")""
+
+        let checkForUpdates() =
+            BackgroundTask.Create(TaskFlags.HIDDEN)("Checking for updates")
+                (fun output -> downloadJson("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", (fun (d: GithubRelease) -> handleUpdate(d))))

@@ -48,5 +48,5 @@ type ScreenImport() as this =
     do
         this.Add(flowContainer |> positionWidget(-400.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f))
         Percyqaz.Json.Json.Mapping.getPickler<{|data: EOPack list|}>() |> ignore
-        BackgroundTask.Create(TaskFlags.NONE)("Downloading pack data")
+        BackgroundTask.Create(TaskFlags.HIDDEN)("Downloading pack data")
             (fun output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {|data: EOPack list|}) -> for p in d.data do flowContainer.Add(new ImportCard(p.attributes.name, p.attributes.download)) )))
