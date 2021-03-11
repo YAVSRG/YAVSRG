@@ -232,7 +232,7 @@ module GameplayWidgets =
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
                     (let c = Themes.themeConfig.JudgementColors.[j] in
-                        Color.FromArgb(Math.Max(0, 255 - int (255.0f * (now - time) / conf.AnimationTime)), int c.R, int c.G, int c.B))
+                        Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), int c.R, int c.G, int c.B))
                     (Sprite.Default)
 
         override this.Dispose() =
@@ -376,10 +376,11 @@ type ScreenPlay() as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let now = Audio.timeWithOffset()
-        for k in 0 .. (keys - 1) do
-            //unable to reason about correctness. possible todo: merge these into one so that all actions are ordered by time
-            Input.consumeGameplay(binds.[k], InputEvType.Press, fun t -> this.HandleHit(k, t, false))
-            Input.consumeGameplay(binds.[k], InputEvType.Release, fun t -> this.HandleHit(k, t, true))
+        if now > -missWindow then
+            for k in 0 .. (keys - 1) do
+                //unable to reason about correctness. possible todo: merge these into one so that all actions are ordered by time
+                Input.consumeGameplay(binds.[k], InputEvType.Press, fun t -> this.HandleHit(k, t, false))
+                Input.consumeGameplay(binds.[k], InputEvType.Release, fun t -> this.HandleHit(k, t, true))
         //seek up to miss threshold and display missed notes in widgets
         while noteSeek < notes.Count && offsetOf notes.Data.[noteSeek] < now - missWindow do
             let (_, _, s) = scoreData.[noteSeek]
