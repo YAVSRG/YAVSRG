@@ -23,14 +23,13 @@ type ImportCard(name, url) as this =
                 (fun () ->
                     let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
                     Screens.addNotification(Localisation.localiseWith [name] "notification.PackDownloading", NotificationType.Task)
-                    BackgroundTask.Create(TaskFlags.LONGRUNNING)("Downloading " + name)
-                        (fun l ->
-                            async { 
-                                let! b = downloadFile(url, target)(l)
-                                if b then
-                                    BackgroundTask.Create(TaskFlags.LONGRUNNING)("Importing " + name)
-                                        (Gameplay.cache.AutoConvert(target) |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Screens.addNotification(Localisation.localiseWith [name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
-                                return true })), ignore))
+                    BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + name)
+                        (BackgroundTask.Chain
+                            [
+                                downloadFile(url, target)
+                                (Gameplay.cache.AutoConvert(target)
+                                    |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Screens.addNotification(Localisation.localiseWith [name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
+                            ])), ignore))
         this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)
 
 [<Json.AllRequired>]
@@ -39,8 +38,7 @@ type EOPack = {
     id: int
     attributes: {|name: string; average: float; download: string; size: int64|}
 }
-with
-    static member Default = {``type`` = "pack"; id = 0; attributes = {|name = ""; average = 0.0; download = ""; size = 0L|}}
+with static member Default = {``type`` = "pack"; id = 0; attributes = {|name = ""; average = 0.0; download = ""; size = 0L|}}
 
 type ScreenImport() as this =
     inherit Screen()

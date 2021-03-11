@@ -10,6 +10,8 @@ open Interlude.Options
 let main argv =
     let m = new Mutex(true, "Interlude")
 
+    let crashSplash = Utils.randomSplash("CrashSplashes.txt") >> (fun s -> Logging.Critical s "")
+
     //Check if interlude is already running (true if not already running)
     if m.WaitOne(TimeSpan.Zero, true) then
 
@@ -30,10 +32,10 @@ let main argv =
                 Options.load()
                 Some (new Game(Options.config))
             with
-            | err -> Logging.Critical "Game failed to launch" (err.ToString()); None
+            | err -> Logging.Critical "Game failed to launch" (err.ToString()); crashSplash(); None
         if (game.IsSome) then
             let game = game.Value
-            try game.Run() with err -> Logging.Critical "Game crashed" (err.ToString())
+            try game.Run() with err -> Logging.Critical "Game crashed" (err.ToString()); crashSplash()
             game.Close()
             Options.save()
             game.Dispose()

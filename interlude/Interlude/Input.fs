@@ -35,7 +35,6 @@ module Bind =
 
 type InputEvType =
 | Press = 0
-| Hold = 1
 | Release = 2
 
 type InputEv = (struct (Bind * InputEvType * float32<ms>))
@@ -50,7 +49,14 @@ module Input =
     let mutable internal mousey = 0.f
     let mutable internal mousez = 0.f
     let mutable internal oldmousez = 0.f
+    let mutable internal ctrl = false
+    let mutable internal shift = false
+    let mutable internal alt = false
+
+    let mutable internal gw: GameWindow = null
+
     let mutable internal inputmethod = []
+    let mutable internal absorbed = false
     
     let createInputMethod(s: ISettable<string>) =
         inputmethod <- s :: inputmethod
@@ -60,10 +66,9 @@ module Input =
 
     let absorbAll() =
         oldmousez <- mousez
+        absorbed <- true
         let e = evts
         evts <- []
-        //e
-
 
     let consumeOne(b: Bind, t: InputEvType) =
         let mutable out = ValueNone
@@ -91,24 +96,33 @@ module Input =
         evts <- f evts
         out
 
-    let poll(gw: GameWindow) =
+    let held(b: Bind) =
+        match b with
+        | Key (Keys.LeftControl, _) -> ctrl
+        | Key (Keys.RightControl, _) -> ctrl
+        | Key (Keys.LeftAlt, _) -> alt
+        | Key (Keys.RightAlt, _) -> alt
+        | Key (Keys.LeftShift, _) -> shift
+        | Key (Keys.RightShift, _) -> shift
+        | Key (k, m) -> gw.KeyboardState.[k] && m = (ctrl, alt, shift)
+        | Mouse m -> gw.MouseState.[m]
+        | Dummy -> false
+        | Joystick _ -> false
+
+    let poll() =
         let add x = evts <- List.append evts [x]
         let now = Audio.timeWithOffset()
 
-        let ctrl = gw.KeyboardState.IsKeyDown Keys.LeftControl || gw.KeyboardState.IsKeyDown Keys.RightControl
-        let shift = gw.KeyboardState.IsKeyDown Keys.LeftShift || gw.KeyboardState.IsKeyDown Keys.RightShift
-        let alt = gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
-
+        ctrl <- gw.KeyboardState.IsKeyDown Keys.LeftControl || gw.KeyboardState.IsKeyDown Keys.RightControl
+        shift <- gw.KeyboardState.IsKeyDown Keys.LeftShift || gw.KeyboardState.IsKeyDown Keys.RightShift
+        alt <- gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
 
         // keyboard input handler
         //todo: way of remembering modifier combo for hold/release?
-        if alt then add <| struct(Key (Keys.LeftAlt, (false, false, false)), InputEvType.Hold, now)
         for k in 0 .. int Keys.LastKey do
             if k < 340 || k > 347 then
                 if gw.KeyboardState.IsKeyDown(enum k) then
-                    if gw.KeyboardState.WasKeyDown(enum k) then
-                        struct((enum k, (false, false, false)) |> Key, InputEvType.Hold, now) |> add
-                    else
+                    if gw.KeyboardState.WasKeyDown(enum k) |> not then
                         struct((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Press, now) |> add
                 elif gw.KeyboardState.WasKeyDown(enum k) then
                     struct((enum k, (false, false, false)) |> Key, InputEvType.Release, now) |> add
@@ -116,16 +130,15 @@ module Input =
         // mouse input handler
         for b in 0 .. int MouseButton.Last do
             if gw.MouseState.IsButtonDown(enum b) then
-                if gw.MouseState.WasButtonDown(enum b) then
-                    struct(enum b |> Mouse, InputEvType.Hold, now) |> add
-                else
+                if gw.MouseState.WasButtonDown(enum b) |> not then
                     struct(enum b |> Mouse, InputEvType.Press, now) |> add
             elif gw.MouseState.WasButtonDown(enum b) then
                 struct(enum b |> Mouse, InputEvType.Release, now) |> add
 
         // joystick stuff NYI
     
-    let init(gw : GameWindow) =
+    let init(win : GameWindow) =
+        gw <- win
         gw.add_MouseWheel(fun e -> mousez <- e.OffsetY)
         gw.add_MouseMove(
             fun e ->
@@ -155,7 +168,7 @@ module Mouse =
     let Scroll() = let v = Input.mousez - Input.oldmousez in Input.oldmousez <- Input.mousez; v
 
     let Click(b) = Input.consumeOne(Mouse b, InputEvType.Press).IsSome
-    let Held(b) = Input.consumeOne(Mouse b, InputEvType.Hold).IsSome
+    let Held(b) = Input.held(Mouse b)
     let Released(b) = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
 
     let Hover(struct (l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
@@ -164,7 +177,7 @@ type Bind with
     member this.Pressed() =
         match this with
         | Key _
-        | Mouse _ -> Input.consumeOne(this, InputEvType.Hold).IsSome
+        | Mouse _ -> Input.held this
         | _ -> false
     member this.Tapped() =
         match this with

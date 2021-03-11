@@ -38,6 +38,14 @@ type Widget() =
     let mutable state = (WidgetState.Uninitialised ||| WidgetState.Normal)
     let children = new List<Widget>()
 
+    member this.Animation = animation
+    member this.Bounds = bounds
+    member this.Position = (left, top, right, bottom)
+    member this.State with get() = state and set(value) = state <- value
+    member this.Children = children
+    member this.Parent = parent.Value
+    member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
+
     abstract member Add: Widget -> unit
     default this.Add(c) =
         lock(this)
@@ -62,15 +70,11 @@ type Widget() =
         | None -> Logging.Error("Tried to remove this widget from a container it isn't in one") ""
         | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another") ""
 
-    member this.Animation = animation
-    member this.Bounds = bounds
-    member this.Position = (left, top, right, bottom)
-    member this.State with get() = state and set(value) = state <- value
-    member this.Children = children
-    member this.Parent = parent.Value
-    member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
+    member this.RemoveFromParent() =
+        match parent with
+        | None -> Logging.Error("Tried to remove a widget from non-existent parent") ""
+        | Some p -> p.Animation.Add(new AnimationAction(fun () -> p.Remove(this)))
 
-    //todo: locks on children for thread protection
     abstract member Draw: unit -> unit
     default this.Draw() =
         lock(this)

@@ -102,11 +102,21 @@ type ScreenLoading() as this =
 module Notifications =
     open Prelude.Common
 
-    type TaskBox(t: BackgroundTask.ManagedTask) as this =
-        inherit Widget()
-        do
-            this.Add(new TextBox(K t.Name, K (Color.White, Color.Black), 0.5f))
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+    let taskBox(t: BackgroundTask.ManagedTask) = 
+        let w = Frame()
+        w.Add(
+            new TextBox(t.get_Name, K (Color.White, Color.Black), 0.0f)
+            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f))
+        w.Add(
+            new TextBox(t.get_Info, K (Color.White, Color.Black), 0.0f)
+            |> positionWidget(0.0f, 0.0f, 50.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f))
+        w.Add(
+            Clickable(
+                (fun () ->
+                    match t.Status with
+                    | Threading.Tasks.TaskStatus.RanToCompletion -> w.RemoveFromParent()
+                    | _ -> t.Cancel(); w.RemoveFromParent()), ignore))
+        w |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 90.0f, 0.0f)
 
     type TaskDisplay(f) as this = 
         inherit Widget()
@@ -114,20 +124,15 @@ module Notifications =
 
         let items = FlowContainer(0.0f, 10.0f)
         let fade = new AnimationFade(0.0f)
-        let mutable lockTime = 0
         do
             this.Animation.Add(fade)
             this.Reposition(0.0f, 1.0f, -f, 0.0f, WIDTH, 1.0f, f, 1.0f)
             this.Add(items)
-            BackgroundTask.Subscribe(fun t -> items.Add(TaskBox(t)))
+            BackgroundTask.Subscribe(fun t -> if t.Visible then items.Add(taskBox(t)))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds |> Rect.translate(-WIDTH * fade.Value, 0.0f))
-            if
-                Options.options.Hotkeys.Tasklist.Get().Pressed()
-                || lockTime > 0
-            then
-                fade.Target <- 1.0f
+            if Options.options.Hotkeys.Tasklist.Get().Pressed() then fade.Target <- 1.0f
             else fade.Target <- 0.0f
 
         override this.Draw() =

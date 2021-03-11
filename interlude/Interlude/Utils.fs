@@ -2,6 +2,7 @@
 
 open System.Reflection
 open System.Diagnostics
+open System.IO
 
 module Utils =
     let version =
@@ -14,8 +15,15 @@ module Utils =
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
 
+    let randomSplash(name) =
+        let r = new System.Random()
+        use s = getResourceStream(name)
+        use tr = new StreamReader(s)
+        let lines = tr.ReadToEnd().Split("\n")
+
+        fun () -> lines.[r.Next(lines.Length)]
+
     module AutoUpdate =
-        open System.IO
         open Percyqaz.Json
         open Prelude.Common
         open Prelude.Web

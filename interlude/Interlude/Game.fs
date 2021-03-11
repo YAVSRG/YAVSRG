@@ -64,7 +64,7 @@ type Game(config: GameConfig) as this =
 
     override this.ProcessEvents() =
         base.ProcessEvents()
-        Input.poll(this)
+        Input.poll()
     
     override this.OnLoad() =
         base.OnLoad()
