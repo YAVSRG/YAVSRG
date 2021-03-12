@@ -8,8 +8,8 @@ open Prelude.Common
 
 module Audio = 
 
-    let bassError b =
-        if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
+    let bassError b = ()
+        //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
 
     type Track = {
         ID: int //id used by Bass

@@ -46,7 +46,6 @@ type GameStartDialog() as this =
     override this.OnClose() = ()
 
 //TODO LIST
-//  ARROW NOTE ROTATION
 //  SEEKING/REWINDING SUPPORT
 //  COLUMN INDEPENDENT SV
 //  MAYBE FIX HOLD TAIL CLIPPING
@@ -160,9 +159,9 @@ type NoteRenderer() as this =
                         Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight * 0.5f) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
                     if headpos - pos < noteHeight * 0.5f then
                         Draw.quad
-                            (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos + noteHeight * 0.5f)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom))
+                            (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom))
                             (Quad.colorOf Color.White)
-                            (Sprite.gridUV(animation.Loops, int color.[k])(tailsprite) |> fun struct (x, y) -> struct (x, scrollDirectionFlip y))
+                            (Sprite.gridUV(animation.Loops, int color.[k]) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
                     Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")) |> noteRotation k)
                     hold_presence.[k] <- false
                 elif testForNote k NoteType.MINE nd then
@@ -264,7 +263,6 @@ module GameplayWidgets =
         override this.Dispose() =
             listener.Dispose()
 
-
 open GameplayWidgets
 
 type ScreenPlay() as this =
@@ -284,9 +282,9 @@ type ScreenPlay() as this =
     do
         let noteRenderer = new NoteRenderer()
         this.Add(noteRenderer)
-        let inline f name (constructor : 'T -> Widget) = 
+        let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Themes.getGameplayConfig(name)
-            let pos : WidgetConfig = (^T: (member Position: WidgetConfig) (config))
+            let pos: WidgetConfig = (^T: (member Position: WidgetConfig) (config))
             if pos.Enabled then
                 config
                 |> constructor
