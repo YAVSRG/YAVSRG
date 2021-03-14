@@ -53,6 +53,7 @@ type Hotkeys = {
     Down: Setting<Bind>
     Start: Setting<Bind>
     End: Setting<Bind>
+    Skip: Setting<Bind>
 
     Import: Setting<Bind>
     Options: Setting<Bind>
@@ -80,6 +81,7 @@ type Hotkeys = {
         Down = Setting(mk Keys.Down)
         Start = Setting(mk Keys.Home)
         End = Setting(mk Keys.End)
+        Skip = Setting(mk Keys.Space)
 
         Import = Setting(ctrl Keys.I)
         Options = Setting(ctrl Keys.O)

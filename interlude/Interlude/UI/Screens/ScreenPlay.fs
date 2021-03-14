@@ -263,6 +263,21 @@ module GameplayWidgets =
         override this.Dispose() =
             listener.Dispose()
 
+    type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
+        inherit Widget()
+        let firstNote = 
+            let (_, notes, _, _, _) = Gameplay.coloredChart.Force()
+            if notes.IsEmpty() then 0.0f<ms> else notes.First() |> offsetOf
+        do
+            this.Add(Components.TextBox(sprintf "Press %O to skip" (options.Hotkeys.Skip.Get()) |> Utils.K, Utils.K Color.White, 0.5f))
+
+        override this.Update(bounds, elapsedTime) =
+            base.Update(bounds, elapsedTime)
+            if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
+                if options.Hotkeys.Skip.Get().Tapped() then
+                    Audio.playFrom(firstNote - Audio.LEADIN_TIME)
+            else this.RemoveFromParent()
+
 open GameplayWidgets
 
 type ScreenPlay() as this =
@@ -271,7 +286,7 @@ type ScreenPlay() as this =
     let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
     let scoreData = Gameplay.createScoreData()
     let scoring = createAccuracyMetric(SCPlus 4)
-    let hp = createHPMetric(VG)(scoring)
+    let hp = createHPMetric VG scoring
     let onHit = new Event<HitEvent>()
     let widgetHelper: Helper = { Scoring = scoring; HP = hp; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[keys - 3]
@@ -293,6 +308,7 @@ type ScreenPlay() as this =
         f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
         f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
         f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
+        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
     override this.OnEnter(prev) =
@@ -393,7 +409,7 @@ type ScreenPlay() as this =
             i <- i + 1
         releaseMask <- ~~~releaseMask
         //detect holding through a mine or releasing through a holdbody
-        //todo: have a mask for mines as well AND revisit this cause of new input system
+        //todo: have a mask for mines as well
         let mutable i = noteSeek
         while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow * 0.125f do
             let (t, struct (nd, _)) = notes.Data.[i]
