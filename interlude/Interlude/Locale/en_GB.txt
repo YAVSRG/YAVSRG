@@ -28,3 +28,5 @@ options.select.Confirm=Confirm
 options.name.NoteskinAndLayout=Noteskin & Layout
 options.name.NoteColors=Note Colors
 options.name.ColorStyle=Color Style
+notification.PackDownloading=Downloading Pack: %0
+notification.PackInstalled=Installed Pack: %0

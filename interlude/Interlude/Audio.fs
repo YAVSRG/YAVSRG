@@ -8,8 +8,8 @@ open Prelude.Common
 
 module Audio = 
 
-    let bassError b =
-        if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
+    let bassError b = ()
+        //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
 
     type Track = {
         ID: int //id used by Bass
@@ -37,7 +37,7 @@ module Audio =
     | Wait
     | Action of (unit -> unit)
 
-    let private LEADIN_TIME = 2000.0f<ms>
+    let LEADIN_TIME = 2000.0f<ms>
     
     let mutable private nowplaying: Track = Track.Default
     let private fft: float32 array = Array.zeroCreate 1024
@@ -69,16 +69,6 @@ module Audio =
         timer.Restart()
 
     let playLeadIn() = playFrom(-LEADIN_TIME * rate)
-
-    let seek(time) =
-        timerStart <- time
-        if (time > 0.0f<ms> && time < audioDuration()) then
-            channelPlaying <- true
-            Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
-        else
-            Bass.ChannelPause(nowplaying.ID) |> bassError
-            channelPlaying <- false
-        timer.Reset()
 
     let pause() =
         Bass.ChannelPause(nowplaying.ID) |> bassError

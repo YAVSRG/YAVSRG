@@ -2,12 +2,14 @@
 
 open OpenTK
 open System
+open System.Drawing
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Gameplay.Score
 open Prelude.Data.Themes
 open Prelude.Data.ScoreManager
 open Interlude
+open Interlude.Input
 open Interlude.UI.Animation
 open Interlude.Render
 open Interlude.Options
@@ -19,12 +21,14 @@ type GameStartDialog() as this =
 
     do
         this.Animation.Add(anim1)
-        anim1.SetTarget(1.0f)
-        let g = new AnimationSequence()
-        g.Add(new AnimationTimer(600.0))
-        g.Add(new AnimationAction(fun () -> anim1.SetTarget(0.0f)))
-        g.Add(new AnimationAction(this.Close))
-        this.Animation.Add(g)
+        anim1.Target <- 1.0f
+        this.Animation.Add(
+            Animation.Serial(
+                AnimationTimer 600.0,
+                AnimationAction(fun () -> anim1.Target <- 0.0f),
+                AnimationAction(this.Close)
+            )
+        )
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
@@ -42,7 +46,6 @@ type GameStartDialog() as this =
     override this.OnClose() = ()
 
 //TODO LIST
-//  ARROW NOTE ROTATION
 //  SEEKING/REWINDING SUPPORT
 //  COLUMN INDEPENDENT SV
 //  MAYBE FIX HOLD TAIL CLIPPING
@@ -156,9 +159,9 @@ type NoteRenderer() as this =
                         Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight * 0.5f) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdbody")))
                     if headpos - pos < noteHeight * 0.5f then
                         Draw.quad
-                            (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos + noteHeight * 0.5f)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom))
+                            (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom))
                             (Quad.colorOf Color.White)
-                            (Sprite.gridUV(animation.Loops, int color.[k])(tailsprite) |> fun struct (x, y) -> struct (x, scrollDirectionFlip y))
+                            (Sprite.gridUV(animation.Loops, int color.[k]) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
                     Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")) |> noteRotation k)
                     hold_presence.[k] <- false
                 elif testForNote k NoteType.MINE nd then
@@ -184,7 +187,7 @@ module GameplayWidgets =
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
-        let color = new AnimationColorMixer(if conf.GradeColors then Utils.otkColor Themes.themeConfig.GradeColors.[0] else Color.White)
+        let color = new AnimationColorMixer(if conf.GradeColors then Themes.themeConfig.GradeColors.[0] else Color.White)
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe(fun _ -> color.SetColor(Themes.themeConfig.GradeColors.[grade helper.Scoring.Value Themes.themeConfig.GradeThresholds]))
@@ -228,7 +231,7 @@ module GameplayWidgets =
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
                     (let c = Themes.themeConfig.JudgementColors.[j] in
-                        Color.FromArgb(Math.Max(0, 255 - int (255.0f * (now - time) / conf.AnimationTime)), int c.R, int c.G, int c.B))
+                        Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), int c.R, int c.G, int c.B))
                     (Sprite.Default)
 
         override this.Dispose() =
@@ -245,7 +248,7 @@ module GameplayWidgets =
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
                         color.SetColor(Themes.themeConfig.LampColors.[helper.Scoring.State |> lamp |> int])
-                    popAnimation.SetValue(conf.Pop))
+                    popAnimation.Value <- conf.Pop)
 
         do
             this.Animation.Add(color)
@@ -260,6 +263,20 @@ module GameplayWidgets =
         override this.Dispose() =
             listener.Dispose()
 
+    type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
+        inherit Widget()
+        let firstNote = 
+            let (_, notes, _, _, _) = Gameplay.coloredChart.Force()
+            if notes.IsEmpty() then 0.0f<ms> else notes.First() |> offsetOf
+        do
+            this.Add(Components.TextBox(sprintf "Press %O to skip" (options.Hotkeys.Skip.Get()) |> Utils.K, Utils.K Color.White, 0.5f))
+
+        override this.Update(bounds, elapsedTime) =
+            base.Update(bounds, elapsedTime)
+            if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
+                if options.Hotkeys.Skip.Get().Tapped() then
+                    Audio.playFrom(firstNote - Audio.LEADIN_TIME)
+            else this.RemoveFromParent()
 
 open GameplayWidgets
 
@@ -269,7 +286,7 @@ type ScreenPlay() as this =
     let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
     let scoreData = Gameplay.createScoreData()
     let scoring = createAccuracyMetric(SCPlus 4)
-    let hp = createHPMetric(VG)(scoring)
+    let hp = createHPMetric VG scoring
     let onHit = new Event<HitEvent>()
     let widgetHelper: Helper = { Scoring = scoring; HP = hp; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[keys - 3]
@@ -280,9 +297,9 @@ type ScreenPlay() as this =
     do
         let noteRenderer = new NoteRenderer()
         this.Add(noteRenderer)
-        let inline f name (constructor : 'T -> Widget) = 
+        let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Themes.getGameplayConfig(name)
-            let pos : WidgetConfig = (^T: (member Position: WidgetConfig) (config))
+            let pos: WidgetConfig = (^T: (member Position: WidgetConfig) (config))
             if pos.Enabled then
                 config
                 |> constructor
@@ -291,19 +308,21 @@ type ScreenPlay() as this =
         f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
         f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
         f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
+        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
     override this.OnEnter(prev) =
-        Screens.backgroundDim.SetTarget(Options.options.BackgroundDim.Get() |> float32)
+        Screens.backgroundDim.Target <- Options.options.BackgroundDim.Get() |> float32
         //discord presence
         Screens.setToolbarCollapsed(true)
-        //disable cursor
+        Screens.setCursorVisible(false)
         Audio.changeRate(Gameplay.rate)
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
 
     override this.OnExit(next) =
-        Screens.backgroundDim.SetTarget(0.7f)
+        Screens.backgroundDim.Target <- 0.7f
+        Screens.setCursorVisible(true)
         if (next :? ScreenScore) then () else
             Screens.setToolbarCollapsed(false)
 
@@ -371,11 +390,11 @@ type ScreenPlay() as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let now = Audio.timeWithOffset()
-        for k in 0 .. (keys - 1) do
-            if binds.[k].Tapped(true) then
-                this.HandleHit(k, now, false)
-            elif (binds.[k].Released()) then
-                this.HandleHit(k, now, true)
+        if now > -missWindow then
+            for k in 0 .. (keys - 1) do
+                //unable to reason about correctness. possible todo: merge these into one so that all actions are ordered by time
+                Input.consumeGameplay(binds.[k], InputEvType.Press, fun t -> this.HandleHit(k, t, false))
+                Input.consumeGameplay(binds.[k], InputEvType.Release, fun t -> this.HandleHit(k, t, true))
         //seek up to miss threshold and display missed notes in widgets
         while noteSeek < notes.Count && offsetOf notes.Data.[noteSeek] < now - missWindow do
             let (_, _, s) = scoreData.[noteSeek]
@@ -397,9 +416,9 @@ type ScreenPlay() as this =
             if (t > now - missWindow * 0.125f) then
                 let (_, _, s) = scoreData.[i]
                 for k in noteData NoteType.HOLDBODY nd &&& releaseMask |> getBits do
-                    if s.[k] = HitStatus.Special && not (binds.[k].Pressed(true)) then s.[k] <- HitStatus.SpecialNG
+                    if s.[k] = HitStatus.Special && not (binds.[k].Pressed()) then s.[k] <- HitStatus.SpecialNG
                 for k in noteData NoteType.MINE nd |> getBits do
-                    if s.[k] = HitStatus.Special && binds.[k].Pressed(true) then s.[k] <- HitStatus.SpecialNG
+                    if s.[k] = HitStatus.Special && binds.[k].Pressed() then s.[k] <- HitStatus.SpecialNG
             i <- i + 1
         //todo: handle in all watchers
         scoring.Update(now - missWindow)(scoreData)(true)

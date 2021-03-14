@@ -1,7 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System
-open FSharp.Reflection
+open System.Drawing
 open System.Collections.Generic
 open OpenTK
 open Prelude.Common
@@ -10,7 +10,7 @@ open Interlude.Render
 open Interlude
 open Interlude.Utils
 open Interlude.Input
-open OpenTK.Input
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -43,8 +43,8 @@ module SelectionWheel =
         let items = new List<ISelectable>()
         let collapse = new AnimationFade(1.0f)
         do this.Animation.Add(collapse)
-        override this.Select() = base.Select(); collapse.SetTarget(0.0f); if items.[index].AutoSelect then items.[index].Select()
-        override this.Deselect() = base.Deselect(); collapse.SetTarget(1.0f)
+        override this.Select() = base.Select(); collapse.Target <- 0.0f; if items.[index].AutoSelect then items.[index].Select()
+        override this.Deselect() = base.Deselect(); collapse.Target <- 1.0f
         override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
 
         override this.Add(w) = failwith "don't use this, use AddItem"
@@ -82,18 +82,18 @@ module SelectionWheel =
                 let h = w.Bounds |> Rect.height
                 t <- t + h
             if this.Selected && flag < 2 then
-                if options.Hotkeys.Down.Get().Tapped(false) then
+                if options.Hotkeys.Down.Get().Tapped() then
                     if flag = 1 then items.[index].Deselect()
                     index <- (index + 1) % items.Count
                     if items.[index].AutoSelect then items.[index].Select()
-                elif options.Hotkeys.Up.Get().Tapped(false) then
+                elif options.Hotkeys.Up.Get().Tapped() then
                     if flag = 1 then items.[index].Deselect()
                     index <- (index + items.Count - 1) % items.Count
                     if items.[index].AutoSelect then items.[index].Select()
-                elif options.Hotkeys.Exit.Get().Tapped(false) || (flag = 0 && options.Hotkeys.Previous.Get().Tapped(false)) then
+                elif options.Hotkeys.Exit.Get().Tapped() || (flag = 0 && options.Hotkeys.Previous.Get().Tapped()) then
                     this.DeselectChild()
                     this.Deselect()
-                if flag = 0 && (options.Hotkeys.Select.Get().Tapped(false) || options.Hotkeys.Next.Get().Tapped(false)) then items.[index].Select()
+                if flag = 0 && (options.Hotkeys.Select.Get().Tapped() || options.Hotkeys.Next.Get().Tapped()) then items.[index].Select()
         
         override this.AutoSelect = false
 
@@ -103,10 +103,10 @@ module SelectionWheel =
         let mutable index = 0
         let items = new List<ISelectable>()
 
-        let fd() = if horizontal then options.Hotkeys.Next.Get().Tapped(false) else options.Hotkeys.Down.Get().Tapped(false)
-        let bk() = if horizontal then options.Hotkeys.Previous.Get().Tapped(false) else options.Hotkeys.Up.Get().Tapped(false)
-        let sel() = (not horizontal && options.Hotkeys.Next.Get().Tapped(false)) || options.Hotkeys.Select.Get().Tapped(false)
-        let desel() = options.Hotkeys.Exit.Get().Tapped(false)
+        let fd() = if horizontal then options.Hotkeys.Next.Get().Tapped() else options.Hotkeys.Down.Get().Tapped()
+        let bk() = if horizontal then options.Hotkeys.Previous.Get().Tapped() else options.Hotkeys.Up.Get().Tapped()
+        let sel() = (not horizontal && options.Hotkeys.Next.Get().Tapped()) || options.Hotkeys.Select.Get().Tapped()
+        let desel() = options.Hotkeys.Exit.Get().Tapped()
 
         member this.Clear() = index <- 0; Seq.iter (fun (w: ISelectable) -> w.Dispose(); this.Remove(w)) items; items.Clear()
         override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
@@ -208,8 +208,8 @@ module SelectionWheel =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if this.Selected then
-                if options.Hotkeys.Next.Get().Tapped(false) then fd()
-                elif options.Hotkeys.Previous.Get().Tapped(false) then bk()
+                if options.Hotkeys.Next.Get().Tapped() then fd()
+                elif options.Hotkeys.Previous.Get().Tapped() then bk()
 
         static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: ISettable<'T>, label, onDeselect) =
             let names = Enum.GetNames(typeof<'T>)
@@ -232,23 +232,23 @@ module SelectionWheel =
             this.Add(new TextBox(K name, (fun () -> if this.Selected then Color.Yellow, Color.Black else Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 0.0f, 0.0f, -40.0f))
             this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidgetA(0.0f, 60.0f, 0.0f, 0.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.SetTarget(if b then 0.8f else 0.5f)))
+            this.Add(new Clickable((fun () -> dragging <- true), fun b -> color.Target <- if b then 0.8f else 0.5f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             let struct (l, t, r, b) = this.Bounds |> Rect.expand(-15.0f, -15.0f)
             if this.Selected then
-                if (Mouse.pressed(Input.MouseButton.Left) && dragging) then
+                if (Mouse.Held(MouseButton.Left) && dragging) then
                     let amt = (Mouse.X() - l) / (r - l)
                     setting.SetPercent(amt)
                 else
                     dragging <- false
-                if options.Hotkeys.UpRateHalf.Get().Tapped(false) || options.Hotkeys.Next.Get().Tapped(false) then chPercent(0.05f)
-                elif options.Hotkeys.UpRateSmall.Get().Tapped(false) then chPercent(0.01f)
-                elif options.Hotkeys.UpRate.Get().Tapped(false) then chPercent(0.1f)
-                elif options.Hotkeys.DownRateHalf.Get().Tapped(false) || options.Hotkeys.Previous.Get().Tapped(false) then chPercent(-0.05f)
-                elif options.Hotkeys.DownRateSmall.Get().Tapped(false) then chPercent(-0.01f)
-                elif options.Hotkeys.DownRate.Get().Tapped(false) then chPercent(-0.1f)
+                if options.Hotkeys.UpRateHalf.Get().Tapped() || options.Hotkeys.Next.Get().Tapped() then chPercent(0.05f)
+                elif options.Hotkeys.UpRateSmall.Get().Tapped() then chPercent(0.01f)
+                elif options.Hotkeys.UpRate.Get().Tapped() then chPercent(0.1f)
+                elif options.Hotkeys.DownRateHalf.Get().Tapped() || options.Hotkeys.Previous.Get().Tapped() then chPercent(-0.05f)
+                elif options.Hotkeys.DownRateSmall.Get().Tapped() then chPercent(-0.01f)
+                elif options.Hotkeys.DownRate.Get().Tapped() then chPercent(-0.1f)
 
         override this.Draw() =
             let v = setting.GetPercent()
@@ -272,19 +272,19 @@ module SelectionWheel =
         override this.Draw() =
             if name = "" then Draw.rect(this.Bounds |> Rect.expand(0.0f, -25.0f))(Screens.accentShade(127, 0.8f, 0.0f))Sprite.Default
             base.Draw()
-        override this.Select() =
-            base.Select()
-            //todo: refactor where this logic is moved to Interlude.Input and also supports mouse/joystick inputs
-            //Input.Keyboard.pressedOverride is marked internal because it should only be used from Interlude.Input and i was naughty to be lazy here
-            Input.grabKey(
-                fun k ->
-                    if k = Key.Escape then if allowModifiers then setting.Set(Dummy)
-                    else
-                        setting.Set(
-                            Input.Key (k,
-                                (allowModifiers && (Input.Keyboard.pressedOverride(Key.ControlLeft) || Input.Keyboard.pressedOverride(Key.ControlRight)), false,
-                                    allowModifiers && (Input.Keyboard.pressedOverride(Key.ShiftLeft) || Input.Keyboard.pressedOverride(Key.ShiftRight)))))
-                    this.Deselect())
+        override this.Update(bounds, elapsedTime) =
+            if this.Selected then
+                match Input.consumeAny(InputEvType.Press) with
+                | ValueNone -> ()
+                | ValueSome b ->
+                    match b with
+                    | Key (k, (ctrl, _, shift)) ->
+                        if k = Keys.Escape then setting.Set(Dummy)
+                        elif allowModifiers then setting.Set(Key (k, (ctrl, false, shift)))
+                        else setting.Set(Key (k, (false, false, false)))
+                        this.Deselect()
+                    | _ -> ()
+            base.Update(bounds, elapsedTime)
         override this.DeselectChild() = ()
         override this.AutoSelect = false
 
@@ -357,8 +357,8 @@ module LayoutEditor =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if this.Selected then
-                if options.Hotkeys.Previous.Get().Tapped(false) then fd()
-                elif options.Hotkeys.Next.Get().Tapped(false) then bk()
+                if options.Hotkeys.Previous.Get().Tapped() then fd()
+                elif options.Hotkeys.Next.Get().Tapped() then bk()
 
     type LayoutEditor() as this =
         inherit Dialog()

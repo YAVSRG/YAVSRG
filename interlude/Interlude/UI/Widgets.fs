@@ -1,21 +1,22 @@
 ﻿namespace Interlude.UI
 
 open System
+open System.Drawing
 open System.Collections.Generic
+open OpenTK.Mathematics
 open Prelude.Common
 open Interlude.Render
 open Interlude.Utils
 open Interlude
 open Interlude.UI.Animation
-open OpenTK
 
 type AnchorPoint(value, anchor) =
     inherit AnimationFade(value)
     let mutable anchor = anchor
     member this.Position(min, max) =  min + base.Value + (max - min) * anchor
-    member this.Reposition(value, a) = this.SetValue(value); this.SetTarget(value); anchor <- a
-    member this.MoveRelative(min, max, value) = this.SetTarget(value - min - (max - min) * anchor)
-    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.SetValue(value - min - (max - min) * anchor)
+    member this.Reposition(value, a) = this.Value <- value; this.Target <- value; anchor <- a
+    member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor
+    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- value - min - (max - min) * anchor
 
 type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
 
@@ -36,6 +37,14 @@ type Widget() =
     let mutable bounds = Rect.zero
     let mutable state = (WidgetState.Uninitialised ||| WidgetState.Normal)
     let children = new List<Widget>()
+
+    member this.Animation = animation
+    member this.Bounds = bounds
+    member this.Position = (left, top, right, bottom)
+    member this.State with get() = state and set(value) = state <- value
+    member this.Children = children
+    member this.Parent = parent.Value
+    member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
 
     abstract member Add: Widget -> unit
     default this.Add(c) =
@@ -61,15 +70,11 @@ type Widget() =
         | None -> Logging.Error("Tried to remove this widget from a container it isn't in one") ""
         | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another") ""
 
-    member this.Animation = animation
-    member this.Bounds = bounds
-    member this.Position = (left, top, right, bottom)
-    member this.State with get() = state and set(value) = state <- value
-    member this.Children = children
-    member this.Parent = parent.Value
-    member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
+    member this.RemoveFromParent() =
+        match parent with
+        | None -> Logging.Error("Tried to remove a widget from non-existent parent") ""
+        | Some p -> p.Animation.Add(new AnimationAction(fun () -> p.Remove(this)))
 
-    //todo: locks on children for thread protection
     abstract member Draw: unit -> unit
     default this.Draw() =
         lock(this)
@@ -80,7 +85,7 @@ type Widget() =
 
     abstract member Update: float * Rect -> unit
     default this.Update(elapsedTime, struct (l, t, r, b): Rect) =
-        animation.Update(elapsedTime)
+        animation.Update(elapsedTime) |> ignore
         this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
         bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
         lock(this)
@@ -97,10 +102,10 @@ type Widget() =
     member this.Reposition(l, t, r, b) = this.Reposition(l, 0.f, t, 0.f, r, 1.f, b, 1.f)
 
     member this.Move(l, t, r, b) =
-        left.SetTarget(l)
-        top.SetTarget(t)
-        right.SetTarget(r)
-        bottom.SetTarget(b)
+        left.Target <- l
+        top.Target <- t
+        right.Target <- r
+        bottom.Target <- b
 
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
@@ -215,10 +220,10 @@ type Dialog() as this =
 
     do
         this.Animation.Add(fade)
-        fade.SetTarget(1.0f)
+        fade.Target <- 1.0f
 
     member this.Close() =
-        fade.SetTarget(0.0f)
+        fade.Target <- 0.0f
 
     // Called when dialog actually closes (end of animation)
     abstract member OnClose: unit -> unit
@@ -244,19 +249,28 @@ type ScreenTransitionFlag =
 | UnderLogo = 1
 | NoBacktrack = 2
 
+type NotificationType =
+| Info = 0
+| System = 1
+| Task = 2
+| Error = 3
+
 module Screens =
     let mutable internal addScreen: (unit -> Screen) * ScreenTransitionFlag -> unit = ignore
     let mutable internal popScreen: ScreenTransitionFlag -> unit = ignore
     let mutable internal addDialog: Dialog -> unit = ignore
 
     let mutable internal setToolbarCollapsed: bool -> unit = ignore
+    let mutable internal setCursorVisible: bool -> unit = ignore
+
+    let mutable internal addNotification: string * NotificationType -> unit = ignore
 
     //background fbo
     let parallaxX  = AnimationFade(0.0f)
     let parallaxY  = AnimationFade(0.0f)
     let parallaxZ  = AnimationFade(40.0f)
     let backgroundDim = AnimationFade(1.0f)
-    let accentColor = AnimationColorMixer(otkColor Themes.accentColor)
+    let accentColor = AnimationColorMixer(Themes.accentColor)
 
     let logo = new Logo()
     

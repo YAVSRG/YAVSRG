@@ -1,6 +1,8 @@
 ﻿namespace Interlude.UI
 
 open System
+open System.Drawing
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude
 open Interlude.Options
@@ -49,7 +51,7 @@ module Components =
             let oh = hover
             hover <- Mouse.Hover(this.Bounds)
             if oh <> hover then onHover(hover)
-            if hover && Mouse.Click(Input.MouseButton.Left) then onClick()
+            if hover && Mouse.Click(MouseButton.Left) then onClick()
 
     type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
         inherit Widget()
@@ -58,7 +60,7 @@ module Components =
 
         do
             this.Animation.Add(color)
-            this.Add(new Clickable(onClick, fun b -> color.SetTarget(if b then 0.7f else 0.3f)))
+            this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
 
         override this.Draw() =
             Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
@@ -66,7 +68,7 @@ module Components =
             Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
 
         override this.Update(bounds, elapsedTime) =
-            if bind.Get().Tapped(false) then onClick()
+            if bind.Get().Tapped() then onClick()
             base.Update(bounds, elapsedTime)
 
     type FlowContainer(?spacingX: float32, ?spacingY: float32) =
@@ -100,7 +102,7 @@ module Components =
             if (this.Initialised) then
                 this.FlowContent(false) 
                 base.Update(time, bounds)
-                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - (Mouse.Scroll() |> float32) * 100.0f, contentSize - Rect.height this.Bounds))
+                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
             else
                 //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
                 base.Update(time, bounds)
@@ -123,7 +125,9 @@ module Components =
             base.Add(child)
             if (this.Initialised) then this.FlowContent(true)
 
+        member this.RemoveWhere(f: Widget -> bool) = this.Children.RemoveAll(Predicate(f))
         member this.Clear() = this.Children.Clear()
+        member this.Filter() = failwith "nyi"
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
@@ -134,7 +138,7 @@ module Components =
         do
             this.Animation.Add(color)
             let fr = new Frame()
-            this.Add((Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.SetTarget(if b then 0.8f else 0.5f))) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
+            this.Add((Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
                 let fc = FlowContainer(0.0f, 0.0f)
                 fr.Add(fc)
@@ -161,10 +165,10 @@ module Components =
         let toggle() =
             active <- not active
             if active then
-                color.SetTarget(1.0f)
+                color.Target <- 1.0f
                 Input.createInputMethod(s)
             else
-                color.SetTarget(0.5f)
+                color.Target <- 0.5f
                 Input.removeInputMethod()
 
         do
@@ -184,7 +188,7 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             match bind with
-            | Some b -> if b.Get().Tapped(true) then toggle()
+            | Some b -> if b.Get().Tapped() then toggle()
             | None -> ()
 
         override this.Dispose() =
@@ -199,5 +203,5 @@ module Components =
             this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if options.Hotkeys.Select.Get().Tapped(true) || options.Hotkeys.Exit.Get().Tapped(true) then tb.Dispose(); this.Close()
+            if options.Hotkeys.Select.Get().Tapped() || options.Hotkeys.Exit.Get().Tapped() then tb.Dispose(); this.Close()
         override this.OnClose() = callback(buf.Get())
