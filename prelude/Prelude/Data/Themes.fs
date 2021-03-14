@@ -38,7 +38,7 @@ module Themes =
                 Color.FromArgb(148, 210, 180); Color.FromArgb(149, 193, 220); Color.FromArgb(163, 190, 207); Color.FromArgb(202, 153, 183); Color.FromArgb(194, 162, 182); Color.FromArgb(200, 163, 155)|]
             GradeThresholds = [|0.98995; 0.97995; 0.96995; 0.95995; 0.94995; 0.93995; 0.92995; 0.91995; 0.90995; 0.89995|]
             PBColors = [|Color.Transparent; Color.FromArgb(160, 255, 160); Color.FromArgb(160, 255, 255); Color.FromArgb(255, 160, 80)|]
-            Font = "Akrobat Black"
+            Font = "Akrobat-Black.otf"
             TextColor = Color.White
             SelectChart = Color.FromArgb(0, 180, 110)
             DefaultAccentColor = Color.FromArgb(0, 255, 160)
