@@ -97,6 +97,8 @@ module Input =
         out
 
     let held(b: Bind) =
+        if absorbed then false
+        else
         match b with
         | Key (Keys.LeftControl, _) -> ctrl
         | Key (Keys.RightControl, _) -> ctrl
@@ -153,6 +155,7 @@ module Input =
     let update() =
         let delete = Bind.mk Keys.Backspace
         let bigDelete = Bind.ctrl Keys.Backspace
+        absorbed <- false
         match List.tryHead inputmethod with
         |  Some s ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Get().Length > 0 then

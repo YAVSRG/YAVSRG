@@ -38,29 +38,49 @@ type ScreenMenu() as this =
     let options = MenuButton(ignore, "Options")
     let quit = MenuButton(ignore, "Quit")
 
+    let newSplash =
+        randomSplash("MenuSplashes.txt")
+        >> fun s -> s.Split('¬')
+        >> fun l -> if l.Length > 1 then l.[0], l.[1] else l.[0], ""
+    let mutable splashText = "", ""
+    let splashAnim = AnimationFade(0.0f)
+    let splashSubAnim = AnimationFade(0.0f)
+
     do
         this.Add(play |> positionWidget(-100.0f, 0.0f, -200.0f, 0.5f, 1200.0f, 0.0f, -100.0f, 0.5f))
         this.Add(options |> positionWidget(-100.0f, 0.0f, -50.0f, 0.5f, 1130.0f, 0.0f, 50.0f, 0.5f))
         this.Add(quit |> positionWidget(-100.0f, 0.0f, 100.0f, 0.5f, 1060.0f, 0.0f, 200.0f, 0.5f))
+        this.Animation.Add(splashAnim)
+        this.Animation.Add(splashSubAnim)
         Utils.AutoUpdate.checkForUpdates()
 
     override this.OnEnter(prev: Screen) =
+        splashText <- newSplash()
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
         Screens.backgroundDim.Target <- 0.0f
-        Screens.setToolbarCollapsed(false)
-        play.Pop(); options.Pop(); quit.Pop();
+        Screens.setToolbarCollapsed false
+        splashAnim.Target <- 1.0f
+        play.Pop(); options.Pop(); quit.Pop()
 
     override this.OnExit(next: Screen) =
         Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
+        splashAnim.Target <- 0.0f
         Screens.backgroundDim.Target <- 0.7f
 
     override this.Draw() =
-        let (x, y) = Rect.center this.Bounds
+        let struct (left, top, right, bottom) = this.Bounds
+        let c = (right + left) * 0.5f
+        let (s,ss) = splashText
+        let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
+        let a2 = splashAnim.Value * 255.0f |> int
+        Text.drawJustB(Themes.font(), ss, 20.0f, c, top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb(a1, Color.White), Screens.accentShade(a1, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB(Themes.font(), s, 40.0f, c, top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb(a2, Color.White), Screens.accentShade(a2, 0.5f, 0.0f)), 0.5f)
         base.Draw()
 
     override this.Update(time, bounds) =
         base.Update(time, bounds)
-        if (Options.options.Hotkeys.Select.Get().Tapped()) then playFunc()
+        splashSubAnim.Target <- if Mouse.Hover(bounds |> Rect.expand(-400.0f, 0.0f) |> Rect.sliceTop(100.0f)) then 1.0f else 0.0f
+        if Options.options.Hotkeys.Select.Get().Tapped() then playFunc()
 
 // Loading screen
 
@@ -68,26 +88,26 @@ type ScreenLoading() as this =
     inherit Screen()
 
     let mutable closing = false
-    let fade = new AnimationFade(1.0f)
+    let fade = new AnimationFade 1.0f
     do
-        this.Animation.Add(fade)
+        this.Animation.Add fade
 
     override this.OnEnter(prev: Screen) =
         fade.Value <- 0.0f
         Screens.logo.Move(-400.0f, -400.0f, 400.0f, 400.0f)
-        Screens.setToolbarCollapsed(true)
+        Screens.setToolbarCollapsed true
         match prev with
         | :? ScreenMenu ->
             closing <- true
             let s = AnimationSequence()
-            s.Add(AnimationTimer(1500.0))
+            s.Add(AnimationTimer 1500.0)
             s.Add(AnimationAction(fun () -> Screens.popScreen(ScreenTransitionFlag.Default)))
-            this.Animation.Add(s)
+            this.Animation.Add s
         | _ -> 
             let s = AnimationSequence()
-            s.Add(AnimationTimer(1500.0))
+            s.Add(AnimationTimer 1500.0)
             s.Add(AnimationAction(fun () -> Screens.addScreen(ScreenMenu >> (fun s -> s :> Screen), ScreenTransitionFlag.UnderLogo)))
-            this.Animation.Add(s)
+            this.Animation.Add s
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -125,10 +145,10 @@ module Notifications =
         let items = FlowContainer(0.0f, 10.0f)
         let fade = new AnimationFade(0.0f)
         do
-            this.Animation.Add(fade)
+            this.Animation.Add fade
             this.Reposition(0.0f, 1.0f, -f, 0.0f, WIDTH, 1.0f, f, 1.0f)
-            this.Add(items)
-            BackgroundTask.Subscribe(fun t -> if t.Visible then items.Add(taskBox(t)))
+            this.Add items
+            BackgroundTask.Subscribe(fun t -> if t.Visible then items.Add(taskBox t))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds |> Rect.translate(-WIDTH * fade.Value, 0.0f))
@@ -137,18 +157,18 @@ module Notifications =
 
         override this.Draw() =
             if fade.Value > 0.01f then
-                Draw.rect(this.Bounds)(Screens.accentShade(180, 0.2f, 0.0f))(Sprite.Default)
+                Draw.rect this.Bounds (Screens.accentShade(180, 0.2f, 0.0f)) Sprite.Default
                 base.Draw()
 
     type NotificationDisplay() as this =
         inherit Widget()
         let items = ResizeArray<Color * string * AnimationFade>()
-        let slider = new AnimationFade(0.0f)
+        let slider = new AnimationFade 0.0f
         let notifWidth = 400.0f
         let notifHeight = 35.0f
 
         do
-            this.Animation.Add(slider)
+            this.Animation.Add slider
             Screens.addNotification <-
                 fun (str: string, t: NotificationType) ->
                     let c =
@@ -160,20 +180,20 @@ module Notifications =
                         | _ -> Color.Black
                     slider.Target <- slider.Target + 1.0f
                     let f = new AnimationFade((if items.Count = 0 then 0.0f else 1.0f), Target = 1.0f)
-                    this.Animation.Add(f)
+                    this.Animation.Add f
                     let i = (c, str, f)
-                    items.Add(i)
+                    items.Add i
                     this.Animation.Add(
                         Animation.Serial(
                             AnimationTimer 4000.0,
                             AnimationAction(fun () -> f.Target <- 0.0f),
                             AnimationTimer 1500.0,
-                            AnimationAction(fun () -> slider.Target <- slider.Target - 1.0f; slider.Value <- slider.Value - 1.0f; f.Stop(); items.Remove(i) |> ignore)
+                            AnimationAction(fun () -> slider.Target <- slider.Target - 1.0f; slider.Value <- slider.Value - 1.0f; f.Stop(); items.Remove i |> ignore)
                         ))
 
         override this.Draw() =
             if items.Count > 0 then
-                Stencil.create(false)
+                Stencil.create false
                 Draw.rect this.Bounds Color.Transparent Sprite.Default
                 Stencil.draw()
                 let struct (_, _, _, b) = this.Bounds
@@ -190,11 +210,11 @@ module Notifications =
 type Jukebox() as this =
     inherit Widget()
     //todo: right click to seek/tools to pause and play music
-    let fade = new AnimationFade(0.0f)
-    let slider = new AnimationFade(0.0f)
+    let fade = new AnimationFade 0.0f
+    let slider = new AnimationFade 0.0f
     do
-        this.Animation.Add(fade)
-        this.Animation.Add(slider)
+        this.Animation.Add fade
+        this.Animation.Add slider
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -207,9 +227,9 @@ type Jukebox() as this =
             fade.Target <- 0.0f
 
     override this.Draw() =
-        let r = Rect.sliceBottom(5.0f) this.Bounds
-        Draw.rect(r)(Screens.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f))(Sprite.Default)
-        Draw.rect(r |> Rect.sliceLeft(slider.Value * (Rect.width r)))(Screens.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f))(Sprite.Default)
+        let r = Rect.sliceBottom 5.0f this.Bounds
+        Draw.rect(r)(Screens.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
+        Draw.rect(r |> Rect.sliceLeft(slider.Value * (Rect.width r)))(Screens.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
 
 // Toolbar
 
@@ -218,15 +238,15 @@ type Toolbar() as this =
 
     static let height = 70.f
 
-    let barSlider = new AnimationFade(1.0f)
-    let notifSlider = new AnimationFade(0.0f)
+    let barSlider = new AnimationFade 1.0f
+    let notifSlider = new AnimationFade 0.0f
 
     let mutable userCollapse = false
     let mutable forceCollapse = true
     
     do
-        this.Animation.Add(barSlider)
-        this.Animation.Add(notifSlider)
+        this.Animation.Add barSlider
+        this.Animation.Add notifSlider
         this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
         this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
         this.Add(new Button((fun () -> Screens.popScreen(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
@@ -247,8 +267,8 @@ type Toolbar() as this =
             let s = (r - l) / 48.0f
             for i in 0 .. 47 do
                 let level = System.Math.Min((Audio.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, height)
-                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - height) (l + (float32 i + 1.0f) * s - 2.0f) (t - height + level))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
-                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + height - level) (r - float32 i * s - 2.0f) (b + height))(Screens.accentShade(int level, 1.0f, 0.5f))(Sprite.Default)
+                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - height) (l + (float32 i + 1.0f) * s - 2.0f) (t - height + level))(Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + height - level) (r - float32 i * s - 2.0f) (b + height))(Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
         base.Draw()
 
     override this.Update(elapsed, bounds) =

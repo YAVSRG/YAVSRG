@@ -7,7 +7,6 @@ open OpenTK.Windowing.Common
 open Prelude.Common
 open Interlude.Render
 open Interlude.Input
-open Interlude.Options
 open Interlude.UI
 
 type Game(config: GameConfig) as this =
@@ -16,7 +15,7 @@ type Game(config: GameConfig) as this =
     let screens = new ScreenContainer()
 
     do
-        Options.applyOptions <- fun () -> this.ApplyConfig(config)
+        Options.applyOptions <- fun () -> this.ApplyConfig config
         base.Title <- Utils.version
         base.VSync <- VSyncMode.Off
         base.CursorVisible <- false
@@ -39,23 +38,23 @@ type Game(config: GameConfig) as this =
             base.WindowState <- WindowState.Fullscreen
         | _ -> Logging.Error("Invalid window state. How did we get here?") ""
 
-    override this.OnResize(e) =
-        base.OnResize(e)
+    override this.OnResize e =
+        base.OnResize e
         Render.resize(base.ClientSize.X, base.ClientSize.Y)
         FBO.init()
 
-    override this.OnFileDrop(e) =
+    override this.OnFileDrop e =
         e.FileNames |> Array.iter FileDropHandling.import
 
-    override this.OnRenderFrame(e) =
-        base.OnRenderFrame(e)
+    override this.OnRenderFrame e =
+        base.OnRenderFrame e
         Render.start()
         screens.Draw()
         Render.finish()
         base.SwapBuffers()
 
-    override this.OnUpdateFrame(e) =
-        base.OnUpdateFrame(e)
+    override this.OnUpdateFrame e =
+        base.OnUpdateFrame e
         Input.update()
         screens.Update(e.Time * 1000.0, Render.bounds)
         Input.absorbAll()
@@ -68,11 +67,11 @@ type Game(config: GameConfig) as this =
     
     override this.OnLoad() =
         base.OnLoad()
-        this.ApplyConfig(config)
+        this.ApplyConfig config
         Render.init(base.ClientSize.X, base.ClientSize.Y)
         FBO.init()
         Themes.font() |> ignore
-        Input.init(this)
+        Input.init this
         Gameplay.init()
 
     override this.OnUnload() =
