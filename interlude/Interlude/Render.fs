@@ -104,7 +104,6 @@ and SpriteQuad = (struct(Sprite * Quad))
 
 module Sprite =
 
-    open System.Drawing
     open System.Drawing.Imaging
     
     let upload(bitmap : Bitmap, rows, columns, smooth) =
@@ -155,7 +154,7 @@ module Render =
     let resize(width, height) =
         rwidth <- width
         rheight <- height
-        GL.Viewport(new System.Drawing.Rectangle(0, 0, width, height))
+        GL.Viewport(new Rectangle(0, 0, width, height))
         let width, height = float32 width, float32 height
         GL.MatrixMode(MatrixMode.Projection)
         GL.LoadIdentity()
@@ -310,22 +309,22 @@ module Text =
     let private spacing = 0.25f
     let private shadow = 0.09f
 
-    type SpriteFont(font: System.Drawing.Font) =
+    type SpriteFont(font: Font) =
         let fontLookup = new Dictionary<char, Sprite>()
         let genChar(c: char) =
             let size =
-                use b = new System.Drawing.Bitmap(1, 1)
-                use g = System.Drawing.Graphics.FromImage(b)
+                use b = new Bitmap(1, 1)
+                use g = Graphics.FromImage(b)
                 g.MeasureString(c.ToString(), font)
-            let bmp = new System.Drawing.Bitmap(int size.Width, int size.Height)
+            let bmp = new Bitmap(int size.Width, int size.Height)
             let _ =
-                use g = System.Drawing.Graphics.FromImage(bmp)
+                use g = Graphics.FromImage(bmp)
                 g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit
-                g.DrawString(c.ToString(), font, System.Drawing.Brushes.White, 0.f, 0.f)
+                g.DrawString(c.ToString(), font, Brushes.White, 0.f, 0.f)
             fontLookup.Add(c, Sprite.upload(bmp, 1, 1, true))
         do
             "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n"
-            |> Seq.iter (genChar)
+            |> Seq.iter genChar
         member this.Char(c) =
             if not <| fontLookup.ContainsKey(c) then genChar(c)
             fontLookup.[c]
@@ -367,18 +366,18 @@ module Text =
         drawB(font, text, scale, x, Rect.centerY bounds - scale * 0.75f, color)
     let drawFill(font, text, bounds, color, just) = drawFillB(font, text, bounds, (color, Color.Transparent), just)
 
+    let pfc = new PrivateFontCollection()
     let createFont (str: string) =
         let f =
             if str.Contains('.') then
                 //targeting a specific file
                 try
-                    use pfc = new PrivateFontCollection()
                     pfc.AddFontFile(str)
-                    new System.Drawing.Font(pfc.Families.[0], fontscale)
+                    new Font(pfc.Families.[0], fontscale)
                 with
                 | err ->
                     Prelude.Common.Logging.Error("Failed to load font file: " + str) (err.ToString())
-                    new System.Drawing.Font(str, fontscale)
+                    new Font(str, fontscale)
             else
-                new System.Drawing.Font(str, fontscale)
+                new Font(str, fontscale)
         new SpriteFont(f)
