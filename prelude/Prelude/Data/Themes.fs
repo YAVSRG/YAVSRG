@@ -87,13 +87,14 @@ module Themes =
         with static member Default = { Position = { Enabled = true; Float = false; Left = -300.0f; LeftA = 0.5f; Top = 0.0f; TopA = 0.5f; Right = 300.0f; RightA = 0.5f; Bottom = 25.0f; BottomA = 0.5f }; AnimationTime = 1000.0f; Thickness = 5.0f; ShowGuide = true }
         type Combo = { Position: WidgetConfig; Growth: float32; Pop: float32; LampColors: bool }
         with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = -10.0f; TopA = 0.45f; Right = 100.0f; RightA = 0.5f; Bottom = 50.0f; BottomA = 0.45f }; Growth = 0.01f; Pop = 5.0f; LampColors = true }
+        type SkipButton = { Position: WidgetConfig }
+        with static member Default = { Position = { Enabled = true; Float = true; Left = -200.0f; LeftA = 0.5f; Top = 20.0f; TopA = 0.6f; Right = 200.0f; RightA = 0.5f; Bottom = 120.0f; BottomA = 0.6f } }
         type JudgementMeter = { Position: WidgetConfig; AnimationTime: float }
         type Banner = { Position: WidgetConfig; AnimationTime: float }
-        type SkipButton = { Position: WidgetConfig }
         type ProgressBar = { Position: WidgetConfig }
         //quick settings
         //song info
-        //mod info
+        //mod info 
         //current time
         //judgement counts
         //screencovers
@@ -150,8 +151,8 @@ module Themes =
                 | Zip _ -> () //do not write data to zip archives
                 | Folder f -> Json.toFile(Path.Combine(f, Path.Combine(path)), true) json
                 json
-            with err -> 
-                Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString())
+            with err ->
+                match storage with Folder f -> Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString()) | _ -> ()
                 "{}" |> Json.fromString |> JsonResult.value
 
         member this.CopyTo(targetPath) =

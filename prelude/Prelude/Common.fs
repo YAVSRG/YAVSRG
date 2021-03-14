@@ -162,7 +162,6 @@ module Common =
                         | err ->
                             Logging.Error(sprintf "Exception in task '%s'" name) (err.ToString())
                             info <- sprintf "Failed: %O" <| err.GetType()
-                        //state <- ManagedTaskState.DONE
                         removeTask(this)
                         cts.Dispose()
                         },
@@ -171,7 +170,7 @@ module Common =
 
             member this.Name = name
             member this.Status = task.Status
-            member this.Cancel = cts.Cancel
+            member this.Cancel() = Logging.Debug(sprintf "Task <%s> cancelled" name) ""; cts.Cancel(false)
             member this.Visible = visible
             member this.Info = info
 
@@ -182,11 +181,19 @@ module Common =
         let private removeTask = fun mt -> if lock(TaskList)(fun() -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name) ""
 
         let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc(l) in f(v); return v }
+        let rec Chain (procs: StatusTask list): StatusTask =
+            match procs with
+            | [] -> failwith "should not be used on empty list"
+            | x :: [] -> x
+            | x :: xs ->
+                let rest = Chain(xs)
+                fun (l: (string -> unit)) ->
+                    async { let! b = x(l) in if b then return! rest(l) else return false }
+
         let Create (options: TaskFlags) (name: string) (t: StatusTask) = let mt = new ManagedTask(name, t, options, removeTask) in lock(TaskList)(fun() -> TaskList.Add(mt)); evt.Trigger(mt)
 
 (*
-    Random helper functions for things I think I will do a lot of and couldn't find a shorthand for
-    Lots of these are likely to be temporary while I learn the language and discover the already existing shorthand
+    Random helper functions (mostly data storage)
 *)
 
     let getDataPath name =
