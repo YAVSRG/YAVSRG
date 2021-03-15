@@ -36,7 +36,7 @@ type ScreenMenu() as this =
         Screens.addScreen(ScreenLevelSelect >> (fun s -> s :> Screen), ScreenTransitionFlag.UnderLogo)
     let play = MenuButton(playFunc, "Play")
     let options = MenuButton(ignore, "Options")
-    let quit = MenuButton(ignore, "Quit")
+    let quit = MenuButton((fun () -> Screens.popScreen(ScreenTransitionFlag.UnderLogo)), "Quit")
 
     let newSplash =
         randomSplash("MenuSplashes.txt")

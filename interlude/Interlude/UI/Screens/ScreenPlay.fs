@@ -221,18 +221,49 @@ module GameplayWidgets =
             base.Draw()
             let struct (left, top, right, bottom) = this.Bounds
             let centre = (right + left) * 0.5f
-            if (conf.ShowGuide) then
+            if conf.ShowGuide then
                 Draw.rect
                     (Rect.create (centre - conf.Thickness) top (centre + conf.Thickness) bottom)
-                    (Color.White)
-                    (Sprite.Default)
+                    Color.White
+                    Sprite.Default
             let now = Audio.timeWithOffset()
             for struct (time, pos, j) in hits do
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
                     (let c = Themes.themeConfig.JudgementColors.[j] in
                         Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), int c.R, int c.G, int c.B))
-                    (Sprite.Default)
+                    Sprite.Default
+
+        override this.Dispose() =
+            listener.Dispose()
+
+    type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
+        inherit Widget()
+        let atime = conf.AnimationTime * 1.0f<ms>
+        let mutable tier = 0
+        let mutable late = 0
+        let mutable time = -atime - Audio.LEADIN_TIME
+        let texture = Themes.getTexture("judgements")
+        let listener =
+            helper.OnHit.Subscribe(
+                fun struct (_, delta, now) ->
+                    let judge = helper.Scoring.JudgeFunc(Time.Abs delta)
+                    if
+                        match judge with
+                        | JudgementType.RIDICULOUS
+                        | JudgementType.MARVELLOUS -> conf.ShowRDMA
+                        | JudgementType.OK
+                        | JudgementType.NG -> conf.ShowOKNG
+                        | _ -> true
+                    then
+                        let j = int judge in
+                        if j >= tier || now - atime > time then
+                            tier <- j
+                            time <- now
+                            late <- if delta > 0.0f<ms> then 1 else 0)
+        override this.Draw() =
+            let a = 255 - Math.Clamp(255.0f * (Audio.timeWithOffset() - time) / atime |> int, 0, 255)
+            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV(late, tier) texture)
 
         override this.Dispose() =
             listener.Dispose()
@@ -309,6 +340,7 @@ type ScreenPlay() as this =
         f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
         f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
         f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
+        f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
     override this.OnEnter(prev) =
