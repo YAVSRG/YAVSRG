@@ -166,7 +166,7 @@ module Components =
             active <- not active
             if active then
                 color.Target <- 1.0f
-                Input.createInputMethod(s)
+                Input.setInputMethod(s, fun () -> active <- false; color.Target <- 0.5f)
             else
                 color.Target <- 0.5f
                 Input.removeInputMethod()
