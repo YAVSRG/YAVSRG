@@ -89,13 +89,15 @@ module Themes =
         with static member Default = { Position = { Enabled = true; Float = false; Left = -100.0f; LeftA = 0.5f; Top = -10.0f; TopA = 0.45f; Right = 100.0f; RightA = 0.5f; Bottom = 50.0f; BottomA = 0.45f }; Growth = 0.01f; Pop = 5.0f; LampColors = true }
         type SkipButton = { Position: WidgetConfig }
         with static member Default = { Position = { Enabled = true; Float = true; Left = -200.0f; LeftA = 0.5f; Top = 20.0f; TopA = 0.6f; Right = 200.0f; RightA = 0.5f; Bottom = 120.0f; BottomA = 0.6f } }
-        type JudgementMeter = { Position: WidgetConfig; AnimationTime: float }
+        type JudgementMeter = { Position: WidgetConfig; AnimationTime: float32; ShowOKNG: bool; ShowRDMA: bool }
+        with static member Default = { Position = { Enabled = true; Float = false; Left = -128.0f; LeftA = 0.5f; Top = 30.0f; TopA = 0.5f; Right = 128.0f; RightA = 0.5f; Bottom = 86.0f; BottomA = 0.5f }; AnimationTime = 800.0f; ShowOKNG = false; ShowRDMA = true }
         type Banner = { Position: WidgetConfig; AnimationTime: float }
         type ProgressBar = { Position: WidgetConfig }
         //quick settings
         //song info
         //mod info 
         //current time
+        //life meter
         //judgement counts
         //screencovers
         //pacemaker

@@ -17,6 +17,7 @@ module ChartManager =
     (*
         Caching of charts
     *)
+
     [<Json.AllRequired>]
     type CachedChart = {
         FilePath: string
@@ -57,7 +58,9 @@ module ChartManager =
     let smPackFolder = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Stepmania 5", "Songs")
     let etternaPackFolder = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Etterna", "Songs")
 
-    type ChartGroup = (string * CachedChart list)
+    (*
+        Goals and playlists
+    *)
 
     type Goal =
         | NoGoal
@@ -70,6 +73,56 @@ module ChartManager =
         | Collection of List<string>
         | Playlist of List<PlaylistData>
         | Goals of List<PlaylistData * Goal>
+
+    (*
+        Sorting and searching
+    *)
+
+    module Sorting =
+        open FParsec
+
+        let private firstCharacter(s : string) =
+            if (s.Length = 0) then "?"
+            else
+                if Char.IsLetterOrDigit(s.[0]) then s.[0].ToString().ToUpper() else "?"
+
+        let groupBy = dict[
+                "Physical", fun c -> let i = int (c.Physical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
+                "Technical", fun c -> let i = int (c.Technical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
+                "Pack", fun c -> c.Pack
+                "Title", fun c -> firstCharacter(c.Title)
+                "Artist", fun c -> firstCharacter(c.Artist)
+                "Creator", fun c -> firstCharacter(c.Creator)
+                "Keymode", fun c -> c.Keys.ToString() + "k"
+            ]
+
+        let sortBy = dict[
+                "Physical", Comparison(fun a b -> a.Physical.CompareTo(b.Physical))
+                "Technical", Comparison(fun a b -> a.Technical.CompareTo(b.Technical))
+                "Title", Comparison(fun a b -> a.Title.CompareTo(b.Title))
+                "Artist", Comparison(fun a b -> a.Artist.CompareTo(b.Artist))
+                "Creator", Comparison(fun a b -> a.Creator.CompareTo(b.Creator))
+            ]
+
+        type FilterPart = 
+        | Criterion of string * string
+        | String of string
+        | Impossible
+
+        let string = " =:<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
+        let word = string |>> String
+        let pstring = between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy) |>> fun s -> String <| s.ToLower()
+        let criterion = string .>>. (pchar '=' >>. string) |>> Criterion
+        let filter = sepBy (attempt criterion <|> pstring <|> word) spaces1
+
+        let parseFilter str =
+            match runParserOnString filter () "" str with
+            | Success (x, _, _) -> x
+            | Failure (f, _, _) -> [Impossible]
+
+    open Sorting
+
+    type ChartGroup = (string * CachedChart list)
 
     //todo: add reverse lookup from hash -> id and remove id storage in score data
     type Cache() =
@@ -91,17 +144,27 @@ module ChartManager =
                 Some c
             | None -> None
 
-        member private this.FilterCharts(filter: string) =
-            let filter = filter.ToLower()
+        member private this.FilterCharts(filter: FilterPart list)(charts: CachedChart seq) =
             seq {
-                for c in charts.Values do
-                    if (c.Title + c.Artist + c.Creator + c.DiffName).ToLower().Contains(filter) then
-                        yield c
+                for c in charts do
+                    let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DiffName + " " + c.Pack).ToLower()
+                    if List.forall
+                        (
+                            function
+                            | Impossible -> false
+                            | String str -> s.Contains(str)
+                            | Criterion ("k", n)
+                            | Criterion ("key", n)
+                            | Criterion ("keys", n) -> c.Keys.ToString() = n
+                            | _ -> true
+                        )
+                        filter
+                    then yield c
             }
 
-        member this.GetGroups grouping (sorting : Comparison<CachedChart>) filter =
+        member this.GetGroups grouping (sorting: Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()
-            for c in this.FilterCharts filter do
+            for c in this.FilterCharts filter charts.Values do
                 let s = grouping(c)
                 if (groups.ContainsKey(s) |> not) then groups.Add(s, new List<CachedChart>())
                 groups.[s].Add(c)
@@ -109,25 +172,22 @@ module ChartManager =
                 g.Sort(sorting)
             groups
 
-        member this.GetCollections (sorting : Comparison<CachedChart>) filter = 
-            //todo: filter
+        member this.GetCollections (sorting: Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()
             for name in collections.Keys do
                 let c = collections.[name]
                 match c with
-                | Collection ids ->
-                    Seq.choose this.LookupChart ids
-                | Playlist ps ->
-                    Seq.choose (fun (i, _, _) -> this.LookupChart i) ps
-                | Goals gs ->
-                    Seq.choose (fun ((i, _, _), _) -> this.LookupChart i) gs
+                | Collection ids -> Seq.choose this.LookupChart ids
+                | Playlist ps -> Seq.choose (fun (i, _, _) -> this.LookupChart i) ps
+                | Goals gs -> Seq.choose (fun ((i, _, _), _) -> this.LookupChart i) gs
+                |> this.FilterCharts filter
                 |> ResizeArray<CachedChart>
                 |> fun x -> groups.Add(name, x)
             for g in groups.Values do
                 g.Sort(sorting)
             groups
 
-        member this.RebuildCache : StatusTask =
+        member this.RebuildCache: StatusTask =
             fun output ->
                 async {
                     lock this (fun _ -> charts.Clear())
