@@ -272,7 +272,7 @@ module SelectionWheel =
         override this.Draw() =
             if name = "" then Draw.rect(this.Bounds |> Rect.expand(0.0f, -25.0f))(Screens.accentShade(127, 0.8f, 0.0f))Sprite.Default
             base.Draw()
-        override this.Update(bounds, elapsedTime) =
+        override this.Update(elapsedTime, bounds) =
             if this.Selected then
                 match Input.consumeAny(InputEvType.Press) with
                 | ValueNone -> ()
@@ -284,7 +284,7 @@ module SelectionWheel =
                         else setting.Set(Key (k, (false, false, false)))
                         this.Deselect()
                     | _ -> ()
-            base.Update(bounds, elapsedTime)
+            base.Update(elapsedTime, bounds)
         override this.DeselectChild() = ()
         override this.AutoSelect = false
 

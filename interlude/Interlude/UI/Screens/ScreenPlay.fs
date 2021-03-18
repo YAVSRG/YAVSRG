@@ -302,8 +302,8 @@ module GameplayWidgets =
         do
             this.Add(Components.TextBox(sprintf "Press %O to skip" (options.Hotkeys.Skip.Get()) |> Utils.K, Utils.K Color.White, 0.5f))
 
-        override this.Update(bounds, elapsedTime) =
-            base.Update(bounds, elapsedTime)
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
             if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
                 if options.Hotkeys.Skip.Get().Tapped() then
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)

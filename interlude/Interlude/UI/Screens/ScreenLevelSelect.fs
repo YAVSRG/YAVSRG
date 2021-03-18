@@ -247,13 +247,13 @@ type ScreenLevelSelect() as this =
 
     let mutable selection: SelectableItem list = []
     let mutable lastItem: (string * CachedChart) option = None
+    let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
     let searchText = new Setting<string>("")
-    let searchTimer = System.Diagnostics.Stopwatch()
     let scoreboard = new Scoreboard()
 
     let refresh() =
-        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] (searchText.Get() |> parseFilter)
+        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
@@ -299,7 +299,7 @@ type ScreenLevelSelect() as this =
                 (fun i -> options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
             |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f))
         this.Add(
-            new TextEntry(new WrappedSetting<string, string>(searchText, (fun s -> searchTimer.Restart(); s), id), Some (options.Hotkeys.Search :> ISettable<Bind>), "search")
+            new SearchBox(searchText, fun f -> filter <- f; refresh())
             |> positionWidget(-600.0f, 1.0f, 20.0f, 0.0f, -50.0f, 1.0f, 80.0f, 0.0f))
         this.Add(scoreboard |> positionWidget(50.0f, 0.0f, 220.0f, 0.0f, -50.0f, 0.4f, -50.0f, 1.0f))
         onChartChange <- scoreboard.Refresh
@@ -346,8 +346,6 @@ type ScreenLevelSelect() as this =
         if Mouse.Held(MouseButton.Right) then
             scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
         scrollPos.Target <- Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f)
-        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
-            
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds

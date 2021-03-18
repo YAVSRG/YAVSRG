@@ -46,8 +46,8 @@ module Components =
 
         let mutable hover = false
 
-        override this.Update(time, bounds) =
-            base.Update(time, bounds)
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
             let oh = hover
             hover <- Mouse.Hover(this.Bounds)
             if oh <> hover then onHover(hover)
@@ -67,9 +67,9 @@ module Components =
             Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
             Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
 
-        override this.Update(bounds, elapsedTime) =
+        override this.Update(elapsedTime, bounds) =
             if bind.Get().Tapped() then onClick()
-            base.Update(bounds, elapsedTime)
+            base.Update(elapsedTime, bounds)
 
     type FlowContainer(?spacingX: float32, ?spacingY: float32) =
         inherit Widget()
@@ -98,14 +98,14 @@ module Components =
                             ) (0.0f, -scrollPos)
                         |> snd) + scrollPos)
 
-        override this.Update(time, bounds) =
+        override this.Update(elapsedTime, bounds) =
             if (this.Initialised) then
                 this.FlowContent(false) 
-                base.Update(time, bounds)
+                base.Update(elapsedTime, bounds)
                 if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
             else
                 //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
-                base.Update(time, bounds)
+                base.Update(elapsedTime, bounds)
                 this.FlowContent(true)
 
         override this.Draw() =
@@ -125,9 +125,8 @@ module Components =
             base.Add(child)
             if (this.Initialised) then this.FlowContent(true)
 
-        member this.RemoveWhere(f: Widget -> bool) = this.Children.RemoveAll(Predicate(f))
-        member this.Clear() = this.Children.Clear()
-        member this.Filter() = failwith "nyi"
+        member this.Clear() = (for c in this.Children do c.Dispose()); this.Children.Clear()
+        member this.Filter(f: Widget -> bool) = for c in this.Children do c.State <- if f c then WidgetState.Normal else WidgetState.Disabled
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
@@ -180,6 +179,7 @@ module Components =
                         match bind with
                         | Some b ->
                             match s.Get() with
+                            //todo: localise
                             | "" -> sprintf "Press %s to %s" (b.Get().ToString()) prompt
                             | text -> text
                         | None -> match s.Get() with "" -> prompt | text -> text),
@@ -194,6 +194,15 @@ module Components =
         override this.Dispose() =
             if active then Input.removeInputMethod()
 
+    type SearchBox(s: ISettable<string>, callback: Prelude.Data.ChartManager.Sorting.Filter -> unit) as this =
+        inherit Widget()
+        let searchTimer = new System.Diagnostics.Stopwatch()
+        do this.Add <| TextEntry(new WrappedSetting<string, string>(s, (fun s -> searchTimer.Restart(); s), id), Some (options.Hotkeys.Search :> ISettable<Bind>), "search")
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if searchTimer.ElapsedMilliseconds > 700L then searchTimer.Reset(); callback(s.Get() |> Prelude.Data.ChartManager.Sorting.parseFilter)
+
     type TextInputDialog(bounds: Rect, prompt, callback) as this =
         inherit Dialog()
         let buf = Setting<string>("")
@@ -205,3 +214,30 @@ module Components =
             base.Update(elapsedTime, bounds)
             if options.Hotkeys.Select.Get().Tapped() || options.Hotkeys.Exit.Get().Tapped() then tb.Dispose(); this.Close()
         override this.OnClose() = callback(buf.Get())
+
+    //provide the first tab when constructing
+    type TabContainer(name: string, widget: Widget) as this =
+        inherit Widget()
+        let mutable selectedItem = widget
+        let mutable selected = name
+        let mutable count = 0.0f
+
+        let TABHEIGHT = 80.0f
+        let TABWIDTH = 250.0f
+
+        do this.AddTab(name, widget)
+
+        member this.AddTab(name, widget) =
+            this.Add(
+                { new Button((fun () -> selected <- name; selectedItem <- widget), name, Bind.DummyBind, Sprite.Default) with member this.Dispose() = base.Dispose(); widget.Dispose() }
+                |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count+1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f))
+            count <- count + 1.0f
+
+        override this.Draw() =
+            base.Draw()
+            selectedItem.Draw()
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            selectedItem.Update(elapsedTime, Rect.trimTop TABHEIGHT this.Bounds)
+            
