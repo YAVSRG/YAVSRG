@@ -242,7 +242,7 @@ module GameplayWidgets =
         let atime = conf.AnimationTime * 1.0f<ms>
         let mutable tier = 0
         let mutable late = 0
-        let mutable time = -atime - Audio.LEADIN_TIME
+        let mutable time = -atime * 2.0f - Audio.LEADIN_TIME
         let texture = Themes.getTexture("judgements")
         let listener =
             helper.OnHit.Subscribe(
