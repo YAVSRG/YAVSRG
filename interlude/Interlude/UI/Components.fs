@@ -21,11 +21,28 @@ module Components =
         w.Reposition(l, la, t, ta, r, ra, b, ba)
         w
     
-    type Frame() =
+    type Frame(fillColor, frameColor) =
         inherit Widget()
+
+        let BORDERWIDTH = 5.0f
+
+        new() = Frame(Some (fun () -> Screens.accentShade(200, 0.5f, 0.3f)), Some (fun () -> Screens.accentShade(80, 0.5f, 0.0f)))
+
         override this.Draw() =
-            Draw.rect <| Rect.expand(5.0f, 5.0f) base.Bounds <| Screens.accentShade(80, 0.5f, 0.0f) <| Sprite.Default
-            Draw.rect <| base.Bounds <| Screens.accentShade(200, 0.5f, 0.3f) <| Sprite.Default
+            match frameColor with
+            | None -> ()
+            | Some c ->
+                let c = c()
+                let r = Rect.expand(BORDERWIDTH, BORDERWIDTH) this.Bounds
+                Draw.rect (Rect.sliceLeft BORDERWIDTH r) c Sprite.Default
+                Draw.rect (Rect.sliceRight BORDERWIDTH r) c Sprite.Default
+                let r = Rect.expand(0.0f, BORDERWIDTH) this.Bounds
+                Draw.rect (Rect.sliceTop BORDERWIDTH r) c Sprite.Default
+                Draw.rect (Rect.sliceBottom BORDERWIDTH r) c Sprite.Default
+            match fillColor with
+            | None -> ()
+            | Some c ->
+                Draw.rect base.Bounds (c()) Sprite.Default
             base.Draw()
         static member Create(w: Widget) =
             let f = Frame()
@@ -196,12 +213,13 @@ module Components =
 
     type SearchBox(s: ISettable<string>, callback: Prelude.Data.ChartManager.Sorting.Filter -> unit) as this =
         inherit Widget()
+        //todo: this seems excessive. replace with two variables?
         let searchTimer = new System.Diagnostics.Stopwatch()
         do this.Add <| TextEntry(new WrappedSetting<string, string>(s, (fun s -> searchTimer.Restart(); s), id), Some (options.Hotkeys.Search :> ISettable<Bind>), "search")
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if searchTimer.ElapsedMilliseconds > 700L then searchTimer.Reset(); callback(s.Get() |> Prelude.Data.ChartManager.Sorting.parseFilter)
+            if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback(s.Get() |> Prelude.Data.ChartManager.Sorting.parseFilter)
 
     type TextInputDialog(bounds: Rect, prompt, callback) as this =
         inherit Dialog()
@@ -222,7 +240,7 @@ module Components =
         let mutable selected = name
         let mutable count = 0.0f
 
-        let TABHEIGHT = 80.0f
+        let TABHEIGHT = 60.0f
         let TABWIDTH = 250.0f
 
         do this.AddTab(name, widget)

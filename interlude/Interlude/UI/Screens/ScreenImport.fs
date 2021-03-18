@@ -5,9 +5,12 @@ open System.IO
 open System.Drawing
 open Percyqaz.Json
 open Prelude.Common
+open Prelude.Data.ChartManager
 open Prelude.Data.ChartManager.Sorting
 open Prelude.Web
 open Interlude
+open Interlude.Input
+open Interlude.Render
 open Interlude.Utils
 open Interlude.UI.Components
 
@@ -44,7 +47,8 @@ module ScreenImport =
         artist: string
         title: string
         beatmapset_id: int
-    } with static member Default = { difficulty = 0.0; difficulty_cs = 0.0; bpm = 0; play_length = 0; mapper = ""; artist = ""; title = ""; beatmapset_id = 0 }
+        beatmap_status: int
+    } with static member Default = { difficulty = 0.0; difficulty_cs = 0.0; bpm = 0; play_length = 0; mapper = ""; artist = ""; title = ""; beatmapset_id = 0; beatmap_status = 0 }
     
     [<Json.AllRequired>]
     type BeatmapSearch = {
@@ -53,7 +57,7 @@ module ScreenImport =
     } with static member Default = { result_count = -1; beatmaps = null }
 
     type SMImportCard(data: EOPackAttrs) as this =
-        inherit Frame()
+        inherit Frame(Some (fun () -> Screens.accentShade(120, 1.0f, 0.0f)), Some (fun () -> Screens.accentShade(200, 1.0f, 0.2f)))
         let mutable downloaded = false //todo: maybe check if pack is already installed?
         let download() =
             let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
@@ -67,8 +71,8 @@ module ScreenImport =
                     ]) |> ignore
             downloaded <- true
         do
-            this.Add(new TextBox(K data.name, K (Color.White, Color.Black), 0.5f))
-            //size in mb, average difficulty
+            this.Add(new TextBox(K data.name, K (Color.White, Color.Black), 0.0f))
+            this.Add(new TextBox(K (sprintf "Difficulty: %.2f   %.1fMB" data.average (float data.size / 1000000.0)), K (Color.White, Color.Black), 1.0f))
             this.Add(new Clickable((fun () -> if not downloaded then download()), ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f)
         member this.Data = data
@@ -83,7 +87,8 @@ module ScreenImport =
                 ) filter
 
     type BeatmapImportCard(data: BeatmapData) as this =
-        inherit Frame()
+        inherit Widget()
+            
         let mutable downloaded = false
         let download() =
             let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
@@ -97,16 +102,31 @@ module ScreenImport =
                     ]) |> ignore
             downloaded <- true
         do
-            this.Add(new TextBox(K (data.artist + " - " + data.title), K (Color.White, Color.Black), 0.0f))
+            let c =
+                match data.beatmap_status with
+                | 1 -> Color.Aqua //ranked
+                | 3 -> Color.Lime //qualified
+                | 4 -> Color.HotPink //loved
+                | 0 -> Color.LightGoldenrodYellow //pending
+                | -1 -> Color.White //wip
+                | -2 //graveyard
+                | _ -> Color.Gray
+            this.Add(new Frame(Some (K (Color.FromArgb(120, c))), Some (K (Color.FromArgb(200, c)))))
+            this.Add(new TextBox(K (data.artist + " - " + data.title), K (Color.White, Color.Black), 0.0f)
+                |> positionWidgetA(0.0f, 0.0f, -400.0f, -30.0f))
+            this.Add(new TextBox(K ("Created by " + data.mapper), K (Color.White, Color.Black), 0.0f)
+                |> positionWidgetA(0.0f, 40.0f, 0.0f, 0.0f))
+            this.Add(new TextBox(K (sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs)), K (Color.White, Color.Black), 1.0f)
+                |> positionWidgetA(0.0f, 20.0f, 0.0f, -20.0f))
             this.Add(new Clickable((fun () -> if not downloaded then download()), ignore))
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f)
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f)
 
     type SearchContainerLoader(t: StatusTask) as this =
         inherit Widget()
         let mutable task = None
         do
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 20.0f, 0.0f)
-        //loader is only drawn if it is visible
+        //loader is only drawn if it is visible on screen
         override this.Draw() =
             base.Draw()
             //draw little loading indicator here
@@ -116,12 +136,12 @@ module ScreenImport =
 
     type SearchContainer(populate, handleFilter) as this =
         inherit Widget()
-        let flowContainer = new FlowContainer()
+        let flowContainer = new FlowContainer(0.0f, 15.0f)
         let populate = populate flowContainer
         let handleFilter = handleFilter flowContainer
         do
             this.Add(new SearchBox(new Setting<string>(""), fun f -> handleFilter f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f))
-            this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 60.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f))
+            this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 70.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f))
             flowContainer.Add(new SearchContainerLoader(populate))
     
     let rec beatmapSearch (filter: Filter) (page: int) : FlowContainer -> StatusTask =
@@ -156,6 +176,9 @@ open ScreenImport
 type ScreenImport() as this =
     inherit Screen()
     do
+        (*
+            Online downloaders
+        *)
         let eoDownloads = 
             SearchContainer(
                 (fun flowContainer output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes)) ))),
@@ -164,6 +187,51 @@ type ScreenImport() as this =
             SearchContainer(
                 (beatmapSearch [] 0),
                 (fun flowContainer filter -> flowContainer.Clear(); flowContainer.Add(new SearchContainerLoader(beatmapSearch filter 0 flowContainer))) )
-        let tabs = new TabContainer("EtternaOnline", eoDownloads)
-        tabs.AddTab("osu!", osuDownloads)
-        this.Add(tabs |> positionWidget(600.0f, 0.0f, 50.0f, 0.0f, -100.0f, 1.0f, -50.0f, 1.0f))
+        let tabs = new TabContainer("Etterna Packs", eoDownloads)
+        tabs.AddTab("osu! Songs", osuDownloads)
+        this.Add(tabs |> positionWidget(600.0f, 0.0f, 50.0f, 0.0f, -100.0f, 1.0f, -80.0f, 1.0f))
+        this.Add(new TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
+            |> positionWidget(600.0f, 0.0f, -90.0f, 1.0f, -100.0f, 1.0f, -30.0f, 1.0f))
+        (*
+            Offline importers from other games
+        *)
+        //todo: system that only imports folders modified after a certain date - that date being last import time
+        //todo: prevent starting another import for a game while it's already running
+        let mutable importingOsu = false
+        let mutable importingSM = false
+        let mutable importingEtterna = false
+        this.Add(
+            new Button(
+                (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Gameplay.cache.ConvertPackFolder osuSongFolder "osu!") |> ignore)),
+                "osu!",
+                Bind.DummyBind,
+                Sprite.Default
+                )
+            |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f)
+            )
+        this.Add(
+            new Button(
+                (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Gameplay.cache.AutoConvert smPackFolder) |> ignore)),
+                "Stepmania 5",
+                Bind.DummyBind,
+                Sprite.Default
+                )
+            |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f)
+            )
+        this.Add(
+            new Button(
+                (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Gameplay.cache.AutoConvert etternaPackFolder) |> ignore)),
+                "Etterna",
+                Bind.DummyBind,
+                Sprite.Default
+                )
+            |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f)
+            )
+        this.Add(
+            new TextBox(
+                (K "Directly import"),
+                (K (Color.White, Color.Black)),
+                0.5f
+                )
+            |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f)
+            )
