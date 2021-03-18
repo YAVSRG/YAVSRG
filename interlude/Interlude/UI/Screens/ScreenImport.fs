@@ -130,7 +130,7 @@ module ScreenImport =
         override this.Draw() =
             base.Draw()
             //draw little loading indicator here
-            Interlude.Render.Draw.rect this.Bounds Color.Fuchsia Interlude.Render.Sprite.Default
+            Draw.rect this.Bounds Color.Fuchsia Sprite.Default
             if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> this.RemoveFromParent()))
         override this.Dispose() = match task with None -> () | Some task -> task.Cancel()
 
@@ -203,35 +203,18 @@ type ScreenImport() as this =
         this.Add(
             new Button(
                 (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Gameplay.cache.ConvertPackFolder osuSongFolder "osu!") |> ignore)),
-                "osu!",
-                Bind.DummyBind,
-                Sprite.Default
-                )
-            |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f)
-            )
+                "osu!", Bind.DummyBind, Sprite.Default)
+            |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f) )
         this.Add(
             new Button(
                 (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Gameplay.cache.AutoConvert smPackFolder) |> ignore)),
-                "Stepmania 5",
-                Bind.DummyBind,
-                Sprite.Default
-                )
-            |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f)
-            )
+                "Stepmania 5", Bind.DummyBind, Sprite.Default)
+            |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f) )
         this.Add(
             new Button(
                 (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Gameplay.cache.AutoConvert etternaPackFolder) |> ignore)),
-                "Etterna",
-                Bind.DummyBind,
-                Sprite.Default
-                )
-            |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f)
-            )
+                "Etterna", Bind.DummyBind, Sprite.Default)
+            |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f) )
         this.Add(
-            new TextBox(
-                (K "Directly import"),
-                (K (Color.White, Color.Black)),
-                0.5f
-                )
-            |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f)
-            )
+            new TextBox( (K "Directly import"), (K (Color.White, Color.Black)), 0.5f )
+            |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f) )
