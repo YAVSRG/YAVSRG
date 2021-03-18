@@ -42,7 +42,7 @@ module Common =
                 (fun (o: Setting<'T>) -> tP.Encode(o.Get()))
                 (fun (o: Setting<'T>) json -> tP.Decode(o.Get())(json) |> JsonMapResult.map (fun v -> o.Set(v); o))
 
-    type WrappedSetting<'T, 'U>(setting: Setting<'U>, set: 'T -> 'U, get: 'U -> 'T) =
+    type WrappedSetting<'T, 'U>(setting: ISettable<'U>, set: 'T -> 'U, get: 'U -> 'T) =
         inherit ISettable<'T>()
         override this.Set(newValue) = setting.Set(set(newValue))
         override this.Get() = get(setting.Get())
@@ -143,7 +143,7 @@ module Common =
     type TaskFlags = NONE = 0 | HIDDEN = 1 | LONGRUNNING = 2
 
     module BackgroundTask =
-        //Some race conditions exist but do not matter for this purpose as the data is accessed by GUI code
+        //Some race conditions exist but the data is only used by GUI code (and so only needs informal correctness)
         type ManagedTask (name: string, t: StatusTask, options: TaskFlags, removeTask) as this =
             let cts = new CancellationTokenSource()
             let mutable info = ""
@@ -190,7 +190,7 @@ module Common =
                 fun (l: (string -> unit)) ->
                     async { let! b = x(l) in if b then return! rest(l) else return false }
 
-        let Create (options: TaskFlags) (name: string) (t: StatusTask) = let mt = new ManagedTask(name, t, options, removeTask) in lock(TaskList)(fun() -> TaskList.Add(mt)); evt.Trigger(mt)
+        let Create (options: TaskFlags) (name: string) (t: StatusTask) = let mt = new ManagedTask(name, t, options, removeTask) in lock(TaskList)(fun() -> TaskList.Add(mt)); evt.Trigger(mt); mt
 
 (*
     Random helper functions (mostly data storage)

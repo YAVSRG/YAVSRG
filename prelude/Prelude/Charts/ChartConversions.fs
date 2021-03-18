@@ -342,9 +342,10 @@ module ChartConversions =
         Overall utilities to dynamically load different chart files and convert to Interlude format
     *)
 
-    let (|ChartFile|_|) (path: string) = 
-        match Path.GetExtension(path).ToLower() with
-        | ".yav" | ".sm" | ".osu" -> Some ()
+    let (|ChartFile|_|) (path: string) =
+        let s = Path.GetExtension(path).ToLower()
+        match s with
+        | ".yav" | ".sm" | ".osu" -> Some s
         | _ -> None
 
     let (|ChartArchive|_|) (path: string) = 
@@ -354,12 +355,11 @@ module ChartConversions =
 
     let (|SongFolder|_|) (path: string) =
         Directory.EnumerateFiles(path)
-        |> Seq.forall (fun x -> match x with ChartFile -> false | _ -> true)
-        |> fun b -> if b then None else Some ()
+        |> Seq.tryPick (fun x -> match x with ChartFile s -> Some s | _ -> None)
     
     let (|PackFolder|_|) (path: string) =
         Directory.EnumerateDirectories(path)
-        |> Seq.forall (fun x -> match x with SongFolder -> false | _ -> true)
+        |> Seq.forall (fun x -> match x with SongFolder _ -> false | _ -> true)
         |> fun b -> if b then None else Some ()
 
     let (|FolderOfPacks|_|) (path: string) =
