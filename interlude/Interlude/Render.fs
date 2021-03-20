@@ -141,6 +141,13 @@ module Sprite =
         quad |>
         Quad.map (fun v -> new Vector2((v.X - left) / width, (v.Y - top) / height))
 
+    let alignedBoxX(xOrigin, yOrigin, xOffset, yOffset, xScale, yMult) (sprite: Sprite): Rect =
+        let width = xScale
+        let height = float32 sprite.Height / float32 sprite.Width * width * yMult
+        let left = xOrigin - xOffset * width
+        let top = yOrigin - yOffset * height
+        Rect.create left top (left + width) (top + height)
+
 (*
     Render handling to be used from Game
 *)
