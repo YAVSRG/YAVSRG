@@ -111,7 +111,7 @@ module Components =
                             let x, y = if x > width then cwidth + spacingX, y + cheight + spacingY else x, y
                             pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
                             pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
-                            (x + spacingY, y)
+                            (x + spacingX, y)
                             ) (0.0f, -scrollPos)
                         |> snd) + scrollPos)
 

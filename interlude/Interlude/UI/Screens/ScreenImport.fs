@@ -129,8 +129,8 @@ module ScreenImport =
         //loader is only drawn if it is visible on screen
         override this.Draw() =
             base.Draw()
-            //draw little loading indicator here
-            Draw.rect this.Bounds Color.Fuchsia Sprite.Default
+            //todo: improved loading indicator here
+            Text.drawFill(Themes.font(), "Loading...", this.Bounds, Color.White, 0.5f)
             if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> this.RemoveFromParent()))
         override this.Dispose() = match task with None -> () | Some task -> task.Cancel()
 
