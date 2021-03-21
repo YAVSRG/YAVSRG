@@ -326,7 +326,7 @@ module Text =
             let bmp = new Bitmap(int size.Width, int size.Height)
             let _ =
                 use g = Graphics.FromImage(bmp)
-                g.TextRenderingHint <- TextRenderingHint.AntiAliasGridFit
+                g.TextRenderingHint <- TextRenderingHint.AntiAlias
                 g.DrawString(c.ToString(), font, Brushes.White, 0.f, 0.f)
             fontLookup.Add(c, Sprite.upload(bmp, 1, 1, true))
         do
@@ -380,11 +380,11 @@ module Text =
                 //targeting a specific file
                 try
                     pfc.AddFontFile(str)
-                    new Font(pfc.Families.[0], fontscale)
+                    new Font(pfc.Families.[0], fontscale * 4.0f / 3.0f, GraphicsUnit.Pixel)
                 with
                 | err ->
                     Prelude.Common.Logging.Error("Failed to load font file: " + str) (err.ToString())
-                    new Font(str, fontscale)
+                    new Font(str, fontscale * 4.0f / 3.0f, GraphicsUnit.Pixel)
             else
-                new Font(str, fontscale)
+                new Font(str, fontscale * 4.0f / 3.0f, GraphicsUnit.Pixel)
         new SpriteFont(f)

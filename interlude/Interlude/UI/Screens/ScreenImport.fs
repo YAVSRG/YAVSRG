@@ -125,7 +125,7 @@ module ScreenImport =
         inherit Widget()
         let mutable task = None
         do
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 20.0f, 0.0f)
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 30.0f, 0.0f)
         //loader is only drawn if it is visible on screen
         override this.Draw() =
             base.Draw()
