@@ -166,13 +166,15 @@ module ChartManager =
 
         member this.GetGroups grouping (sorting: Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()
-            for c in this.FilterCharts filter charts.Values do
-                let s = grouping(c)
-                if (groups.ContainsKey(s) |> not) then groups.Add(s, new List<CachedChart>())
-                groups.[s].Add(c)
-            for g in groups.Values do
-                g.Sort(sorting)
-            groups
+            lock this //thread safe
+                (fun _ ->
+                    for c in this.FilterCharts filter charts.Values do
+                        let s = grouping(c)
+                        if (groups.ContainsKey(s) |> not) then groups.Add(s, new List<CachedChart>())
+                        groups.[s].Add(c)
+                    for g in groups.Values do
+                        g.Sort(sorting)
+                    groups)
 
         member this.GetCollections (sorting: Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()

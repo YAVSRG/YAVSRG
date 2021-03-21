@@ -186,10 +186,10 @@ module osu =
     let private parseName = (many1Satisfy isLetterOrDigit)
     let private parseQuote =
         between (pchar '"') (pchar '"') (manySatisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
-    let private comment = pstring "//" >>. restOfLine true
+    let private comment = (anyOf "/#=" >>% "") >>. restOfLine true
 
-    let private parseKeyValue = parseName .>> spaces .>> colon .>> manyChars (anyOf " \t") .>>. (restOfLine true)
-    let private parseHeaderTitle(name) = pstring ("[" + name + "]") .>> (restOfLine true) >>% name
+    let private parseKeyValue = parseName .>> spaces .>> colon .>> manyChars (anyOf " \t") .>>. (restOfLine true) .>> spaces
+    let private parseHeaderTitle(name) = pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
     
     let parseHeader(name): Parser<Header, unit> =
         parseHeaderTitle(name) .>>. (many comment >>. many (parseKeyValue .>> (many comment))) .>> spaces |>> Header
@@ -211,13 +211,13 @@ module osu =
         |>> fun (normal, addition, index, volume, file) -> (enum normal, enum addition, index, volume, file)
 
     let parseSliderType =
-        pchar 'L' <|> pchar 'B' <|> pchar 'C' <|> pchar 'P' |>> fun c ->
+        anyOf "LBCP" |>> fun c ->
             match c with
             | 'L' -> Linear
             | 'B' -> Bezier
             | 'C' -> Catmull
             | 'P' -> PerfectCircle
-            | _ -> failwith "Unknown slider shape"
+            | _ -> failwith "impossible"
 
     let parseSliderSounds =
         (sepBy1 (parseInt |>> enum) pipe) .>> comma
@@ -448,18 +448,18 @@ module osu =
             ("BeatDivisor", string data.BeatDivisor); ("GridSize", string data.GridSize); ("TimelineZoom", string data.TimelineZoom)])
 
 
-    type Metadata =
-        { Title: string
-          TitleUnicode: string
-          Artist: string
-          ArtistUnicode: string
-          Creator: string
-          Version: string
-          Source: string
-          Tags: string list
-          BeatmapID: int
-          BeatmapSetID: int }
-        static member Default = {
+    type Metadata = { 
+        Title: string
+        TitleUnicode: string
+        Artist: string
+        ArtistUnicode: string
+        Creator: string
+        Version: string
+        Source: string
+        Tags: string list
+        BeatmapID: int
+        BeatmapSetID: int
+    } with static member Default = {
             Title = ""
             TitleUnicode = ""
             Artist = ""
@@ -486,8 +486,8 @@ module osu =
             | "Creator" -> { s with Creator = value }
             | "Version" -> { s with Version = value }
             | "Source" -> { s with Source = value }
-            | "BeatmapID" -> { s with BeatmapID = value |> int }
-            | "BeatmapSetID" -> { s with BeatmapSetID = value |> int }
+            | "BeatmapID" -> { s with BeatmapID = int value}
+            | "BeatmapSetID" -> { s with BeatmapSetID = int value }
             | _ -> s
         List.fold f Metadata.Default settings
 

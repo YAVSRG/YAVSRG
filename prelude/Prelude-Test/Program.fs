@@ -1,7 +1,6 @@
 ﻿open System
 open System.IO
-open Prelude.Common
-open Prelude.Charts.Interlude
+open Prelude.Data.SkinConversions
 
 (*
     Prelude features required to build Interlude:
@@ -15,14 +14,12 @@ open Prelude.Charts.Interlude
 [<EntryPoint>]
 let main argv =
     Console.BufferHeight <- 32766
-    let c1 = loadChartFile("original.yav").Value
-    let c2 = loadChartFile("new.yav").Value
 
-    printfn "%s" (calculateHash c1)
-    printfn "%s" (calculateHash c2)
-
-    Seq.zip
-        (c1.Notes.Data |> Seq.map (fun (t, nd) -> t |> Convert.ToInt32))
-        (c2.Notes.Data |> Seq.map (fun (t, nd) -> t |> Convert.ToInt32))
-    |> Seq.iter(fun (a, b) -> if a <> b then printfn "%i, %i" a b)
+    printfn "Starting tests"
+    for file in Directory.EnumerateFiles("skinini/") do
+        if file.EndsWith(".ini") then
+            printfn "Testing %s" file
+            let skin = osuSkin.parseSkinINI file
+            printfn "%A" skin.Mania
+            Console.ReadLine() |> ignore
     0
