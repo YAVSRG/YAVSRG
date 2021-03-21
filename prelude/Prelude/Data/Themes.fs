@@ -55,6 +55,7 @@ module Themes =
         ColumnWidth: float32
         HoldNoteTrim: float32
         PlayfieldAlignment: float32 * float32
+        ColumnLightTime: float32
     } with
         static member Default = {
             UseRotation = false
@@ -63,7 +64,8 @@ module Themes =
             UseHoldTailTexture = true
             ColumnWidth = 150.0f
             HoldNoteTrim = 0.0f
-            PlayfieldAlignment =  0.5f, 0.5f
+            PlayfieldAlignment = 0.5f, 0.5f
+            ColumnLightTime = 0.4f
         }
 
     type TextureConfig = {

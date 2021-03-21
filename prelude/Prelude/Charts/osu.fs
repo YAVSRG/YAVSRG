@@ -186,10 +186,13 @@ module osu =
     let private parseName = (many1Satisfy isLetterOrDigit)
     let private parseQuote =
         between (pchar '"') (pchar '"') (manySatisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
+    let private comment = pstring "//" >>. restOfLine true
 
-    let private parseKeyValue = parseName .>> spaces .>> colon .>> spaces .>>. (restOfLine true)
-    let private parseHeaderTitle(name) = pstring ("[" + name + "]") >>% name
-    let parseHeader(name): Parser<Header, unit> = parseHeaderTitle(name) .>> newline .>>. many parseKeyValue |>> Header
+    let private parseKeyValue = parseName .>> spaces .>> colon .>> manyChars (anyOf " \t") .>>. (restOfLine true)
+    let private parseHeaderTitle(name) = pstring ("[" + name + "]") .>> (restOfLine true) >>% name
+    
+    let parseHeader(name): Parser<Header, unit> =
+        parseHeaderTitle(name) .>>. (many comment >>. many (parseKeyValue .>> (many comment))) .>> spaces |>> Header
 
     let parseTimingPoint: Parser<TimingPoint, unit> =
         (tuple4 (parseNum .>> comma) (parseNum .>> comma) (parseInt .>> comma) (parseInt .>> comma))
@@ -323,8 +326,8 @@ module osu =
             |>> fun (time, r, g, b) -> BackgroundColorChange(toTime time, r, g, b))
 
     let parseEvents =
-        pstring "[Events]" >>. newline >>. many (pstring "//" >>. restOfLine true)
-        >>. many ((parseStoryboardEvent .>> spaces) .>> (many (pstring "//" >>. restOfLine true))) .>> spaces
+        pstring "[Events]" >>. newline >>. many comment
+        >>. many ((parseStoryboardEvent .>> spaces) .>> (many comment)) .>> spaces
 
     (*
         Metadata structures to turn parsed headers into the meaningful metadata
@@ -359,23 +362,23 @@ module osu =
           SpecialStyle: bool
           WidescreenStoryboard: bool
           SamplesMatchPlaybackRate: bool }
-        static member Default =
-            { AudioFilename = ""
-              AudioLeadIn = 0
-              PreviewTime = -1.0f<ms>
-              Countdown = 0
-              SampleSet = SampleSet.Normal
-              StackLeniency = 0.7
-              Mode = GameMode.osu
-              LetterboxInBreaks = false
-              UseSkinSprites = false
-              OverlayPosition = OverlayPosition.NoChange
-              SkinPreference = ""
-              EpilepsyWarning = false
-              CountdownOffset = 0
-              SpecialStyle = false
-              WidescreenStoryboard = false
-              SamplesMatchPlaybackRate = false }
+        static member Default = { 
+            AudioFilename = ""
+            AudioLeadIn = 0
+            PreviewTime = -1.0f<ms>
+            Countdown = 0
+            SampleSet = SampleSet.Normal
+            StackLeniency = 0.7
+            Mode = GameMode.osu
+            LetterboxInBreaks = false
+            UseSkinSprites = false
+            OverlayPosition = OverlayPosition.NoChange
+            SkinPreference = ""
+            EpilepsyWarning = false
+            CountdownOffset = 0
+            SpecialStyle = false
+            WidescreenStoryboard = false
+            SamplesMatchPlaybackRate = false }
 
     let private readGeneral (title, settings) =
         assert (title = "General")
@@ -402,14 +405,14 @@ module osu =
             | _ -> s
         List.fold f General.Default settings
 
-    let private writeGeneral (data : General) : Header =
+    let private writeGeneral (data: General) : Header =
         ("General", [("AudioFilename", data.AudioFilename); ("AudioLeadIn", string data.AudioLeadIn); ("PreviewTime", string data.PreviewTime);
             ("Countdown", string data.Countdown); ("SampleSet", string data.SampleSet); ("StackLeniency", string data.StackLeniency);
             ("Mode", data.Mode |> int |> string); ("LetterboxInBreaks", if data.LetterboxInBreaks then "1" else "0");
             ("UseSkinSprites", if data.UseSkinSprites then "1" else "0"); ("OverlayPosition", string data.OverlayPosition);
             ("SkinPreference", data.SkinPreference); ("EpilepsyWarning", if data.EpilepsyWarning then "1" else "0");
             ("CountdownOffset", string data.CountdownOffset); ("SpecialStyle", if data.SpecialStyle then "1" else "0");
-            ("WidescreenStoryboard", if data.WidescreenStoryboard then "1" else "0"); ("SamplesMatchPlaybackRate", if data.SamplesMatchPlaybackRate then "1" else "0");])
+            ("WidescreenStoryboard", if data.WidescreenStoryboard then "1" else "0"); ("SamplesMatchPlaybackRate", if data.SamplesMatchPlaybackRate then "1" else "0")])
 
 
     type Editor =
@@ -418,12 +421,12 @@ module osu =
           BeatDivisor: float
           GridSize: int
           TimelineZoom: float }
-        static member Default =
-            { Bookmarks = []
-              DistanceSpacing = 1.0
-              BeatDivisor = 8.0
-              GridSize = 4
-              TimelineZoom = 1.0 }
+        static member Default = {
+            Bookmarks = []
+            DistanceSpacing = 1.0
+            BeatDivisor = 8.0
+            GridSize = 4
+            TimelineZoom = 1.0 }
 
     let private readEditor (title, settings) =
         assert (title = "Editor")
@@ -440,7 +443,7 @@ module osu =
             | _ -> s
         List.fold f Editor.Default settings
 
-    let private writeEditor (data : Editor) : Header =
+    let private writeEditor (data: Editor) : Header =
         ("Editor", [("Bookmarks", String.concat "," (List.map string data.Bookmarks)); ("DistanceSpacing", string data.DistanceSpacing);
             ("BeatDivisor", string data.BeatDivisor); ("GridSize", string data.GridSize); ("TimelineZoom", string data.TimelineZoom)])
 
@@ -456,17 +459,17 @@ module osu =
           Tags: string list
           BeatmapID: int
           BeatmapSetID: int }
-        static member Default =
-            { Title = ""
-              TitleUnicode = ""
-              Artist = ""
-              ArtistUnicode = ""
-              Creator = ""
-              Version = ""
-              Source = ""
-              Tags = []
-              BeatmapID = 0
-              BeatmapSetID = -1 }
+        static member Default = {
+            Title = ""
+            TitleUnicode = ""
+            Artist = ""
+            ArtistUnicode = ""
+            Creator = ""
+            Version = ""
+            Source = ""
+            Tags = []
+            BeatmapID = 0
+            BeatmapSetID = -1 }
 
     let private readMetadata (title, settings) =
         assert (title = "Metadata")
@@ -502,13 +505,13 @@ module osu =
           ApproachRate: float
           SliderMultiplier: float
           SliderTickRate: float }
-        static member Default =
-            { HPDrainRate = 5.0
-              CircleSize = 5.0
-              OverallDifficulty = 5.0
-              ApproachRate = 5.0
-              SliderMultiplier = 1.4
-              SliderTickRate = 1.0 }
+        static member Default = {
+            HPDrainRate = 5.0
+            CircleSize = 5.0
+            OverallDifficulty = 5.0
+            ApproachRate = 5.0
+            SliderMultiplier = 1.4
+            SliderTickRate = 1.0 }
 
     let private readDifficulty (title, settings) =
         assert (title = "Difficulty")
