@@ -33,7 +33,7 @@ module Audio =
             Bass.StreamFree(this.ID) |> bassError
 
     type TrackFinishBehaviour =
-    | Loop of double
+    | Loop
     | Wait
     | Action of (unit -> unit)
 
@@ -48,6 +48,7 @@ module Audio =
     let mutable private rate = 1.0f
     let mutable localOffset = 0.0f<ms>
     let mutable globalOffset = 0.0f<ms>
+    let mutable trackFinishBehaviour = Wait
 
     let audioDuration() = nowplaying.Duration
 
@@ -105,9 +106,12 @@ module Audio =
             channelPlaying <- true
             Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| t / 1000.0f<ms>)) |> bassError
             Bass.ChannelPlay(nowplaying.ID) |> bassError
-        elif (t > nowplaying.Duration) then
+        elif t > nowplaying.Duration then
             channelPlaying <- false
-            //todo: handle action for when track is complete here
+            match trackFinishBehaviour with
+            | Loop -> playFrom(0.0f<ms>)
+            | Wait -> ()
+            | Action f -> f()
 
     let changeVolume(newVolume) =
         Bass.GlobalStreamVolume <- int (newVolume * 10000.0)

@@ -42,8 +42,6 @@ type InputEv = (struct (Bind * InputEvType * float32<ms>))
 module Input =
     
     let mutable internal evts: InputEv list = []
-    //let internal keys = Set.empty
-    //let internal mouse = Set.empty
     
     let mutable internal mousex = 0.f
     let mutable internal mousey = 0.f
@@ -55,14 +53,18 @@ module Input =
 
     let mutable internal gw: GameWindow = null
 
-    let mutable internal inputmethod = []
+    let mutable internal inputmethod = None
     let mutable internal absorbed = false
     
-    let createInputMethod(s: ISettable<string>) =
-        inputmethod <- s :: inputmethod
-    
     let removeInputMethod() =
-        inputmethod <- match inputmethod with x::xs -> xs | [] -> []
+        match inputmethod with
+        | Some (s, callback) -> callback()
+        | None -> ()
+        inputmethod <- None
+    
+    let setInputMethod(s: ISettable<string>, callback: unit -> unit) =
+        removeInputMethod()
+        inputmethod <- Some (s, callback)
 
     let absorbAll() =
         oldmousez <- mousez
@@ -148,16 +150,16 @@ module Input =
                 mousey <- Math.Clamp(Render.vheight / float32 Render.rheight * float32 e.Y, 0.0f, Render.vheight)
                 removeInputMethod())
         gw.add_TextInput(fun e ->
-            match List.tryHead inputmethod with
-            | Some s -> s.Set(s.Get() + e.AsString); absorbAll()
+            match inputmethod with
+            | Some (s, c) -> s.Set(s.Get() + e.AsString); absorbAll()
             | None -> ())
 
     let update() =
         let delete = Bind.mk Keys.Backspace
         let bigDelete = Bind.ctrl Keys.Backspace
         absorbed <- false
-        match List.tryHead inputmethod with
-        |  Some s ->
+        match inputmethod with
+        |  Some (s, c) ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Get().Length > 0 then
                 let v = s.Get()
                 s.Set(v.Substring(0, v.Length - 1))

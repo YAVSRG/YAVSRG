@@ -8,6 +8,7 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Prelude.Data.ScoreManager
 open Prelude.Data.ChartManager
+open Prelude.Data.ChartManager.Sorting
 open Prelude.Gameplay.Score
 open Interlude.Themes
 open Interlude.Utils
@@ -238,30 +239,6 @@ module ScreenLevelSelect =
                         else navigation <- Backward(groupName, cc)
                 | _ -> () //nyi
 
-    let private firstCharacter(s : string) =
-        if (s.Length = 0) then "?"
-        else
-            if Char.IsLetterOrDigit(s.[0]) then s.[0].ToString().ToUpper() else "?"
-
-    //todo: maybe move to ChartManagement in Prelude
-    let groupBy = dict[
-            "Physical", fun c -> let i = int (c.Physical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
-            "Technical", fun c -> let i = int (c.Technical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
-            "Pack", fun c -> c.Pack
-            "Title", fun c -> firstCharacter(c.Title)
-            "Artist", fun c -> firstCharacter(c.Artist)
-            "Creator", fun c -> firstCharacter(c.Creator)
-            "Keymode", fun c -> c.Keys.ToString() + "k"
-        ]
-
-    let sortBy = dict[
-            "Physical", Comparison(fun a b -> a.Physical.CompareTo(b.Physical))
-            "Technical", Comparison(fun a b -> a.Technical.CompareTo(b.Technical))
-            "Title", Comparison(fun a b -> a.Title.CompareTo(b.Title))
-            "Artist", Comparison(fun a b -> a.Artist.CompareTo(b.Artist))
-            "Creator", Comparison(fun a b -> a.Creator.CompareTo(b.Creator))
-        ]
-
 open ScreenLevelSelect
 open ScreenLevelSelectVars
 
@@ -270,13 +247,13 @@ type ScreenLevelSelect() as this =
 
     let mutable selection: SelectableItem list = []
     let mutable lastItem: (string * CachedChart) option = None
+    let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
     let searchText = new Setting<string>("")
-    let searchTimer = System.Diagnostics.Stopwatch()
     let scoreboard = new Scoreboard()
 
     let refresh() =
-        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] <| searchText.Get()
+        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
@@ -322,7 +299,7 @@ type ScreenLevelSelect() as this =
                 (fun i -> options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
             |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f))
         this.Add(
-            new TextEntry(new WrappedSetting<string, string>(searchText, (fun s -> searchTimer.Restart(); s), id), Some (options.Hotkeys.Search :> ISettable<Bind>), "search")
+            new SearchBox(searchText, fun f -> filter <- f; refresh())
             |> positionWidget(-600.0f, 1.0f, 20.0f, 0.0f, -50.0f, 1.0f, 80.0f, 0.0f))
         this.Add(scoreboard |> positionWidget(50.0f, 0.0f, 220.0f, 0.0f, -50.0f, 0.4f, -50.0f, 1.0f))
         onChartChange <- scoreboard.Refresh
@@ -369,14 +346,12 @@ type ScreenLevelSelect() as this =
         if Mouse.Held(MouseButton.Right) then
             scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
         scrollPos.Target <- Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f)
-        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); refresh()
-            
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
         //level select stuff
         Stencil.create(false)
-        Draw.rect(Rect.create 0.0f (top + 170.0f) Render.vwidth bottom)(Color.Transparent)(Sprite.Default)
+        Draw.rect(Rect.create 0.0f (top + 170.0f) Render.vwidth bottom) Color.Transparent Sprite.Default
         Stencil.draw()
         let bottomEdge =
             selection
@@ -384,10 +359,10 @@ type ScreenLevelSelect() as this =
         Stencil.finish()
         //todo: make this render right, is currently bugged
         let scrollPos = (scrollPos.Value / (scrollPos.Value - bottomEdge)) * (bottom - top - 100.0f)
-        Draw.rect(Rect.create (Render.vwidth - 10.0f) (top + 225.0f + scrollPos) (Render.vwidth - 5.0f) (top + 245.0f + scrollPos))(Color.White)(Sprite.Default)
+        Draw.rect(Rect.create (Render.vwidth - 10.0f) (top + 225.0f + scrollPos) (Render.vwidth - 5.0f) (top + 245.0f + scrollPos)) Color.White Sprite.Default
 
-        Draw.rect(Rect.create left top right (top + 170.0f))(Screens.accentShade(100, 0.6f, 0.0f))(Sprite.Default)
-        Draw.rect(Rect.create left (top + 170.0f) right (top + 175.0f))(Screens.accentShade(255, 0.8f, 0.0f))(Sprite.Default)
+        Draw.rect(Rect.create left top right (top + 170.0f))(Screens.accentShade(100, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create left (top + 170.0f) right (top + 175.0f))(Screens.accentShade(255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 
     override this.OnEnter(prev) =

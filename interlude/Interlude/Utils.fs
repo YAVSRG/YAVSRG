@@ -23,6 +23,8 @@ module Utils =
 
         fun () -> lines.[r.Next(lines.Length)]
 
+    let idPrint x = printfn "%A" x; x
+
     module AutoUpdate =
         open Percyqaz.Json
         open Prelude.Common
@@ -55,5 +57,6 @@ module Utils =
                 Logging.Info("Game is up to date")""
 
         let checkForUpdates() =
-            BackgroundTask.Create(TaskFlags.HIDDEN)("Checking for updates")
+            BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"
                 (fun output -> downloadJson("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", (fun (d: GithubRelease) -> handleUpdate(d))))
+            |> ignore

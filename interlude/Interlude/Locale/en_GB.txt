@@ -30,3 +30,5 @@ options.name.NoteColors=Note Colors
 options.name.ColorStyle=Color Style
 notification.PackDownloading=Downloading Pack: %0
 notification.PackInstalled=Installed Pack: %0
+notification.SongDownloading=Downloading Song: %0
+notification.SongInstalled=Installed Song: %0

@@ -36,7 +36,7 @@ type ScreenMenu() as this =
         Screens.addScreen(ScreenLevelSelect >> (fun s -> s :> Screen), ScreenTransitionFlag.UnderLogo)
     let play = MenuButton(playFunc, "Play")
     let options = MenuButton(ignore, "Options")
-    let quit = MenuButton(ignore, "Quit")
+    let quit = MenuButton((fun () -> Screens.popScreen(ScreenTransitionFlag.UnderLogo)), "Quit")
 
     let newSplash =
         randomSplash("MenuSplashes.txt")
@@ -77,8 +77,8 @@ type ScreenMenu() as this =
         Text.drawJustB(Themes.font(), s, 40.0f, c, top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb(a2, Color.White), Screens.accentShade(a2, 0.5f, 0.0f)), 0.5f)
         base.Draw()
 
-    override this.Update(time, bounds) =
-        base.Update(time, bounds)
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
         splashSubAnim.Target <- if Mouse.Hover(bounds |> Rect.expand(-400.0f, 0.0f) |> Rect.sliceTop(100.0f)) then 1.0f else 0.0f
         if Options.options.Hotkeys.Select.Get().Tapped() then playFunc()
 
@@ -271,11 +271,11 @@ type Toolbar() as this =
                 Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + height - level) (r - float32 i * s - 2.0f) (b + height))(Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
         base.Draw()
 
-    override this.Update(elapsed, bounds) =
+    override this.Update(elapsedTime, bounds) =
         if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
-        base.Update(elapsed, Rect.expand (0.f, -height * if forceCollapse then 0.0f else barSlider.Value) bounds)
+        base.Update(elapsedTime, Rect.expand (0.f, -height * if forceCollapse then 0.0f else barSlider.Value) bounds)
 
 //Screen manager
 

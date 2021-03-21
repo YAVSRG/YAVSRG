@@ -14,6 +14,10 @@ open Interlude.UI.Animation
 open Interlude.Render
 open Interlude.Options
 
+(*
+    WIP, will be a fancy animation when beginning to play a chart
+*)
+
 type GameStartDialog() as this =
     inherit Dialog()
 
@@ -49,6 +53,10 @@ type GameStartDialog() as this =
 //  SEEKING/REWINDING SUPPORT
 //  COLUMN INDEPENDENT SV
 //  MAYBE FIX HOLD TAIL CLIPPING
+
+(*
+    Note rendering code. Designed so it could be repurposed as an editor but that may now never happen (editor will be another project)
+*)
 
 type NoteRenderer() as this =
     inherit Widget()
@@ -176,6 +184,11 @@ type NoteRenderer() as this =
                 Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")))
         base.Draw()
 
+(*
+    Handful of widgets that directly pertain to gameplay
+    They can all be toggled/repositioned/configured using themes
+*)
+
 module GameplayWidgets = 
     type HitEvent = (struct(int * Time * Time))
     type Helper = {
@@ -221,18 +234,49 @@ module GameplayWidgets =
             base.Draw()
             let struct (left, top, right, bottom) = this.Bounds
             let centre = (right + left) * 0.5f
-            if (conf.ShowGuide) then
+            if conf.ShowGuide then
                 Draw.rect
                     (Rect.create (centre - conf.Thickness) top (centre + conf.Thickness) bottom)
-                    (Color.White)
-                    (Sprite.Default)
+                    Color.White
+                    Sprite.Default
             let now = Audio.timeWithOffset()
             for struct (time, pos, j) in hits do
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
                     (let c = Themes.themeConfig.JudgementColors.[j] in
                         Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), int c.R, int c.G, int c.B))
-                    (Sprite.Default)
+                    Sprite.Default
+
+        override this.Dispose() =
+            listener.Dispose()
+
+    type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
+        inherit Widget()
+        let atime = conf.AnimationTime * 1.0f<ms>
+        let mutable tier = 0
+        let mutable late = 0
+        let mutable time = -atime * 2.0f - Audio.LEADIN_TIME
+        let texture = Themes.getTexture("judgements")
+        let listener =
+            helper.OnHit.Subscribe(
+                fun struct (_, delta, now) ->
+                    let judge = helper.Scoring.JudgeFunc(Time.Abs delta)
+                    if
+                        match judge with
+                        | JudgementType.RIDICULOUS
+                        | JudgementType.MARVELLOUS -> conf.ShowRDMA
+                        | JudgementType.OK
+                        | JudgementType.NG -> conf.ShowOKNG
+                        | _ -> true
+                    then
+                        let j = int judge in
+                        if j >= tier || now - atime > time then
+                            tier <- j
+                            time <- now
+                            late <- if delta > 0.0f<ms> then 1 else 0)
+        override this.Draw() =
+            let a = 255 - Math.Clamp(255.0f * (Audio.timeWithOffset() - time) / atime |> int, 0, 255)
+            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV(late, tier) texture)
 
         override this.Dispose() =
             listener.Dispose()
@@ -271,14 +315,57 @@ module GameplayWidgets =
         do
             this.Add(Components.TextBox(sprintf "Press %O to skip" (options.Hotkeys.Skip.Get()) |> Utils.K, Utils.K Color.White, 0.5f))
 
-        override this.Update(bounds, elapsedTime) =
-            base.Update(bounds, elapsedTime)
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
             if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
                 if options.Hotkeys.Skip.Get().Tapped() then
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
             else this.RemoveFromParent()
 
+    (*
+        These widgets are not repositioned by theme
+    *)
+
+    type ColumnLighting(keys, binds: Bind array, lightTime, helper) as this =
+        inherit Widget()
+        let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
+        let sprite = Themes.getTexture("receptorlighting")
+        let lightTime = Math.Min(0.99f, lightTime)
+
+        do
+            Array.iter this.Animation.Add sliders
+            let hp = float32 <| Options.options.HitPosition.Get()
+            this.Reposition(0.0f, hp, 0.0f, -hp)
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            Array.iteri (fun k (s: AnimationFade) -> if binds.[k].Pressed() then s.Value <- 1.0f) sliders
+
+        override this.Draw() =
+            base.Draw()
+            let struct (l, t, r, b) = this.Bounds
+            let cw = (r - l) / (float32 keys)
+            let threshold = 1.0f - lightTime
+            let f k (s: AnimationFade) =
+                if s.Value > threshold then
+                    let p = (s.Value - threshold) / lightTime
+                    let a = 255.0f * p |> int
+                    Draw.rect
+                        (
+                            if Options.options.Upscroll.Get() then
+                                Sprite.alignedBoxX(l + cw * (float32 k + 0.5f), t, 0.5f, 1.0f, cw * p, -1.0f / p) sprite
+                            else
+                                Sprite.alignedBoxX(l + cw * (float32 k + 0.5f), b, 0.5f, 1.0f, cw * p, 1.0f / p) sprite
+                        )
+                        (Color.FromArgb(a, Color.White))
+                        sprite
+            Array.iteri f sliders
+
 open GameplayWidgets
+
+(*
+    Play screen. Mostly input handling code + handling gameplay widget config
+*)
 
 type ScreenPlay() as this =
     inherit Screen()
@@ -309,7 +396,10 @@ type ScreenPlay() as this =
         f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
         f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
         f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
+        f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
+        if Themes.noteskinConfig.ColumnLightTime >= 0.0f then
+            noteRenderer.Add(new ColumnLighting(keys, binds, Themes.noteskinConfig.ColumnLightTime, widgetHelper))
 
     override this.OnEnter(prev) =
         Screens.backgroundDim.Target <- Options.options.BackgroundDim.Get() |> float32
