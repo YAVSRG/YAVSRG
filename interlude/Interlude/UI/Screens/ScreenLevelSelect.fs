@@ -10,6 +10,7 @@ open Prelude.Data.ScoreManager
 open Prelude.Data.ChartManager
 open Prelude.Data.ChartManager.Sorting
 open Prelude.Gameplay.Score
+open Interlude.Gameplay
 open Interlude.Themes
 open Interlude.Utils
 open Interlude.Render
@@ -17,13 +18,9 @@ open Interlude.Options
 open Interlude.Input
 open Interlude.UI.Animation
 open Interlude.UI.Components
-open Interlude.Gameplay
 
 module private ScreenLevelSelectVars =
 
-    //TODO LIST
-    //  MAKE IT LOOK NICE
-    //    SHOW PBS (LAMP, ACCURACY, GRADE)
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //hash
     let mutable scrollTo = false
@@ -31,6 +28,8 @@ module private ScreenLevelSelectVars =
     let mutable scrollBy = fun amt -> ()
     let mutable colorVersionGlobal = 0
     let mutable colorFunc = fun (_, _, _) -> Color.Transparent
+
+    let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1
 
     //todo: have these update when score system is changed, could be done remotely, exactly when settings are changed
     let mutable scoreSystem = "SC+ (J4)"
@@ -54,10 +53,8 @@ module private ScreenLevelSelectVars =
         | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
 
     let playCurrentChart() =
-        if currentChart.IsSome then
-            Screens.addScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenTransitionFlag.Default)
-        else
-            Logging.Warn("Tried to play selected chart; There is no chart selected") ""
+        if currentChart.IsSome then Screens.newScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenType.Play, ScreenTransitionFlag.Default)
+        else Logging.Warn("Tried to play selected chart; There is no chart selected") ""
 
 module ScreenLevelSelect =
 
@@ -82,10 +79,10 @@ module ScreenLevelSelect =
             this.Add(
                 new Clickable(
                     (fun () ->
-                        Screens.addScreen(
-                            (fun () ->
-                                new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen),
-                            ScreenTransitionFlag.Default)),
+                        Screens.newScreen(
+                            (fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen),
+                            ScreenType.Score,
+                            ScreenTransitionFlag.Default) ),
                     ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
@@ -115,7 +112,6 @@ module ScreenLevelSelect =
     type SelectableItem(content: Choice<string * CachedChart, string * SelectableItem list>) =
         
         let hover = new AnimationFade(0.0f)
-        //todo: colors
         let mutable colorVersion = -1
         let mutable color = Color.Transparent
         let mutable chartData = None
@@ -264,7 +260,6 @@ type ScreenLevelSelect() as this =
                 | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
         lastItem <- None
         colorVersionGlobal <- 0
-        //colorFunc <- Interlude.Utils.K Color.White
         selection <- 
             groups.Keys
             |> Seq.sort
@@ -318,19 +313,18 @@ type ScreenLevelSelect() as this =
         this.Add(
             new TextBox(getModString, K Color.White, 0.5f)
             |> positionWidget(0.0f, 0.0f, -140.0f, 1.0f, -50.0f, 0.4f, -70.0f, 1.0f))
-        refresh()
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if ScreenLevelSelect.refresh then refresh(); ScreenLevelSelect.refresh <- false
 
         if options.Hotkeys.Select.Get().Tapped() then playCurrentChart()
-        elif options.Hotkeys.UpRateSmall.Get().Tapped() then changeRate(0.01f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.UpRateHalf.Get().Tapped() then changeRate(0.05f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.UpRate.Get().Tapped() then changeRate(0.1f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.DownRateSmall.Get().Tapped() then changeRate(-0.01f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.DownRateHalf.Get().Tapped() then changeRate(-0.05f); colorVersionGlobal <- colorVersionGlobal + 1
-        elif options.Hotkeys.DownRate.Get().Tapped() then changeRate(-0.1f); colorVersionGlobal <- colorVersionGlobal + 1
+        elif options.Hotkeys.UpRateSmall.Get().Tapped() then changeRate(0.01f)
+        elif options.Hotkeys.UpRateHalf.Get().Tapped() then changeRate(0.05f)
+        elif options.Hotkeys.UpRate.Get().Tapped() then changeRate(0.1f)
+        elif options.Hotkeys.DownRateSmall.Get().Tapped() then changeRate(-0.01f)
+        elif options.Hotkeys.DownRateHalf.Get().Tapped() then changeRate(-0.05f)
+        elif options.Hotkeys.DownRate.Get().Tapped() then changeRate(-0.1f)
         elif options.Hotkeys.Next.Get().Tapped() then
             if lastItem.IsSome then
                 let h = (lastItem.Value |> snd).Hash
@@ -367,6 +361,7 @@ type ScreenLevelSelect() as this =
 
     override this.OnEnter(prev) =
         base.OnEnter(prev)
+        refresh()
         scoreboard.Refresh()
         colorVersionGlobal <- colorVersionGlobal + 1
 

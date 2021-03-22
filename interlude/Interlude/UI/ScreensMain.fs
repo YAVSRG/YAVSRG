@@ -33,10 +33,10 @@ type ScreenMenu() as this =
 
     let playFunc() =
         Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
-        Screens.addScreen(ScreenLevelSelect >> (fun s -> s :> Screen), ScreenTransitionFlag.UnderLogo)
+        Screens.changeScreen(ScreenType.LevelSelect, ScreenTransitionFlag.UnderLogo)
     let play = MenuButton(playFunc, "Play")
     let options = MenuButton(ignore, "Options")
-    let quit = MenuButton((fun () -> Screens.popScreen(ScreenTransitionFlag.UnderLogo)), "Quit")
+    let quit = MenuButton((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Quit")
 
     let newSplash =
         randomSplash("MenuSplashes.txt")
@@ -101,12 +101,12 @@ type ScreenLoading() as this =
             closing <- true
             let s = AnimationSequence()
             s.Add(AnimationTimer 1500.0)
-            s.Add(AnimationAction(fun () -> Screens.popScreen(ScreenTransitionFlag.Default)))
+            s.Add(AnimationAction(fun () -> Screens.back(ScreenTransitionFlag.Default)))
             this.Animation.Add s
         | _ -> 
             let s = AnimationSequence()
             s.Add(AnimationTimer 1500.0)
-            s.Add(AnimationAction(fun () -> Screens.addScreen(ScreenMenu >> (fun s -> s :> Screen), ScreenTransitionFlag.UnderLogo)))
+            s.Add(AnimationAction(fun () -> Screens.changeScreen(ScreenType.MainMenu, ScreenTransitionFlag.UnderLogo)))
             this.Animation.Add s
 
     override this.Update(elapsedTime, bounds) =
@@ -249,9 +249,9 @@ type Toolbar() as this =
         this.Animation.Add notifSlider
         this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
         this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
-        this.Add(new Button((fun () -> Screens.popScreen(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
+        this.Add(new Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
         this.Add(new Button((fun () -> Screens.addDialog(new OptionsMenu())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button((fun () -> (ScreenImport >> (fun s -> s :> Screen), ScreenTransitionFlag.Default) |> Screens.addScreen), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Jukebox())
         this.Add(new Notifications.NotificationDisplay())
@@ -284,7 +284,13 @@ type ScreenContainer() as this =
 
     let dialogs = new ResizeArray<Dialog>()
     let mutable current = new ScreenLoading() :> Screen
-    let mutable screens = [current]
+    let mutable currentType = ScreenType.SplashScreen
+    let screens = [|
+        current;
+        new ScreenMenu() :> Screen;
+        new ScreenImport() :> Screen;
+        new ScreenLevelSelect() :> Screen;
+        |]
     let mutable exit = false
     
     let mutable cursor = true
@@ -298,8 +304,9 @@ type ScreenContainer() as this =
     let toolbar = new Toolbar()
 
     do
-        Screens.addScreen <- this.AddScreen
-        Screens.popScreen <- this.RemoveScreen
+        Screens.changeScreen <- this.ChangeScreen
+        Screens.newScreen <- this.ChangeScreen
+        Screens.back <- this.Back
         Screens.addDialog <- this.AddDialog
         Screens.setCursorVisible <- (fun b -> cursor <- b)
         this.Add(toolbar)
@@ -317,42 +324,35 @@ type ScreenContainer() as this =
     member this.AddDialog(d: Dialog) =
         dialogs.Add(d)
 
-    member this.AddScreen(s: unit -> Screen, flags) =
-        transitionFlags <- flags
-        if screenTransition.Complete then
+    member this.ChangeScreen(s: unit -> Screen, screenType, flags) =
+        if screenTransition.Complete && screenType <> currentType then
+            transitionFlags <- flags
             this.Animation.Add(screenTransition)
             screenTransition.Add(t1)
             screenTransition.Add(
                 new AnimationAction(
                     fun () ->
                         let s = s()
-                        if (flags &&& ScreenTransitionFlag.NoBacktrack <> ScreenTransitionFlag.NoBacktrack) then screens <- s :: screens
                         current.OnExit(s)
                         s.OnEnter(current)
-                        current <- s))
+                        currentType <- screenType
+                        current <- s
+                    ))
             screenTransition.Add(t2)
             t2.FrameSkip() //ignore frame lag spike when initialising screen
             screenTransition.Add(new AnimationAction(fun () -> t1.Reset(); t2.Reset()))
 
-    member this.RemoveScreen(flags) =
-        transitionFlags <- flags
-        if screenTransition.Complete then
-            this.Animation.Add(screenTransition)
-            screenTransition.Add(t1)
-            screenTransition.Add(
-                new AnimationAction(
-                    fun () ->
-                        current.Dispose()
-                        let previous = current
-                        screens <- List.tail screens
-                        match List.tryHead screens with
-                        | None -> exit <- true
-                        | Some s ->
-                            current.OnExit(s)
-                            current <- s
-                            s.OnEnter(previous)))
-            screenTransition.Add(t2)
-            screenTransition.Add(new AnimationAction(fun () -> t1.Reset(); t2.Reset()))
+    member this.ChangeScreen(screenType, flags) = this.ChangeScreen((screens.[int screenType] |> K), screenType, flags)
+
+    member this.Back(flags) =
+        match currentType with
+        | ScreenType.SplashScreen -> exit <- true
+        | ScreenType.MainMenu -> this.ChangeScreen(ScreenType.SplashScreen, flags)
+        | ScreenType.LevelSelect -> this.ChangeScreen(ScreenType.MainMenu, flags)
+        | ScreenType.Import
+        | ScreenType.Play
+        | ScreenType.Score -> this.ChangeScreen(ScreenType.LevelSelect, flags)
+        | _ -> ()
 
     override this.Update(elapsedTime, bounds) =
         if Render.vwidth > 0.0f then

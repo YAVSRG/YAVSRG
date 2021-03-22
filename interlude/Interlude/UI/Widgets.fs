@@ -264,6 +264,14 @@ type NotificationType =
 | Task = 2
 | Error = 3
 
+type ScreenType =
+| SplashScreen = 0
+| MainMenu = 1
+| Import = 2
+| LevelSelect = 3
+| Play = 4
+| Score = 5
+
 (*
     Collection of mutable values to "tie the knot" in mutual dependence
        - Stuff is defined but not inialised here
@@ -273,8 +281,9 @@ type NotificationType =
 
 module Screens =
     // All of these are initialised in ScreensMain.fs
-    let mutable internal addScreen: (unit -> Screen) * ScreenTransitionFlag -> unit = ignore
-    let mutable internal popScreen: ScreenTransitionFlag -> unit = ignore
+    let mutable internal changeScreen: ScreenType * ScreenTransitionFlag -> unit = ignore
+    let mutable internal newScreen: (unit -> Screen) * ScreenType * ScreenTransitionFlag -> unit = ignore
+    let mutable internal back: ScreenTransitionFlag -> unit = ignore
     let mutable internal addDialog: Dialog -> unit = ignore
 
     let mutable internal setToolbarCollapsed: bool -> unit = ignore
