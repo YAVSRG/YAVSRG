@@ -18,6 +18,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Remove="Options\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -29,7 +33,7 @@
     <Compile Include="Render.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="ThemeManager.fs" />
-    <Compile Include="Options\Options.fs" />
+    <Compile Include="Options.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Widgets.fs" />
