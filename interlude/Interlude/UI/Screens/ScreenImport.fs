@@ -139,12 +139,12 @@ module ScreenImport =
 
     type SearchContainer(populate, handleFilter) as this =
         inherit Widget()
-        let flowContainer = new FlowContainer(0.0f, 15.0f)
+        let flowContainer = new FlowContainer(Spacing = 15.0f, Margin = (0.0f, 0.0f))
         let populate = populate flowContainer
         let handleFilter = handleFilter flowContainer
         do
             this.Add(new SearchBox(new Setting<string>(""), fun f -> handleFilter f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f))
-            this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 70.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f))
+            this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 70.0f, 0.0f, -0.0f, 1.0f, 0.0f, 1.0f))
             flowContainer.Add(new SearchContainerLoader(populate))
     
     let rec beatmapSearch (filter: Filter) (page: int) : FlowContainer -> StatusTask =

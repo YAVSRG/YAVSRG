@@ -25,7 +25,7 @@ type MenuButton(onClick, label) as this =
         base.Draw()
 
     member this.Pop() =
-        let (_, _, r, _) = this.Position
+        let (_, _, r, _) = this.Anchors
         r.Value <- -Render.vwidth
 
 type ScreenMenu() as this =
@@ -142,7 +142,7 @@ module Notifications =
         inherit Widget()
         let WIDTH = 400.0f
 
-        let items = FlowContainer(0.0f, 10.0f)
+        let items = FlowContainer()
         let fade = new AnimationFade(0.0f)
         do
             this.Animation.Add fade

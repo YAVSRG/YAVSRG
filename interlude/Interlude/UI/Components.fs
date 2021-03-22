@@ -91,44 +91,50 @@ module Components =
             if bind.Get().Tapped() then onClick()
             base.Update(elapsedTime, bounds)
 
-    type FlowContainer(?spacingX: float32, ?spacingY: float32) =
+    type FlowContainer() =
         inherit Widget()
-        let spacingX, spacingY = (defaultArg spacingX 10.0f, defaultArg spacingY 5.0f)
+        let mutable spacing = 10.0f
+        let mutable margin = (0.0f, 0.0f)
         let mutable contentSize = 0.0f
         let mutable scrollPos = 0.0f
 
-        member private this.FlowContent(instant) =
-            let width = Rect.width this.Bounds
-            let height = Rect.height this.Bounds
-            let pos (anchor : AnchorPoint) = if instant then anchor.RepositionRelative else anchor.MoveRelative
-            contentSize <-
-                (this.Children
-                |> Seq.filter (fun c -> c.Enabled)
-                |> Seq.fold (fun (x, y) w ->
-                    let (l, t, r, b) = w.Position
-                    let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
-                    let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
-                    let x = x + cwidth + spacingX
-                    let x, y = if x > width then cwidth + spacingX, y + cheight + spacingY else x, y
-                    pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
-                    pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
-                    (x + spacingX, y)
-                    ) (0.0f, -scrollPos)
-                |> snd) + scrollPos
+        member this.Spacing with set(value) = spacing <- value
+        //todo: margin doesn't work correctly
+        member this.Margin with set((x, y)) = margin <- (-x, -y)
+
+        member private this.FlowContent(thisBounds) =
+            let mutable vBounds = thisBounds |> Rect.expand margin |> Rect.translate(0.0f, -scrollPos)
+            let struct (left, top, right, bottom) = thisBounds
+            let struct (_, t1, _, _) = vBounds
+            for c in this.Children do
+                if c.Enabled then
+                    let (la, ta, ra, ba) = c.Anchors
+                    let struct (l, t, r, b) = vBounds
+                    let struct (lb, tb, rb, bb) =
+                        if c.Initialised then Rect.createWH l t (Rect.width c.Bounds) (Rect.height c.Bounds)
+                        else Rect.create (la.Position(l, r)) (ta.Position(t, b)) (ra.Position(l, r)) (ba.Position(t, b))
+                    let pos (a: AnchorPoint) = if c.Initialised then a.MoveRelative else a.RepositionRelative
+                    pos la (left, right, lb); pos ta (top, bottom, tb); pos ra (left, right, rb); pos ba (top, bottom, bb)
+                    vBounds <- Rect.translate(0.0f, bb - tb + spacing) vBounds
+            let struct (_, t2, _, _) = vBounds
+            contentSize <- t2 - t1
+            
 
         override this.Update(elapsedTime, bounds) =
-            if (this.Initialised) then
-                this.FlowContent(false) 
-                base.Update(elapsedTime, bounds)
-                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
-            else
-                //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
-                base.Update(elapsedTime, bounds)
-                this.FlowContent(true)
+            //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
+            let thisBounds =
+                if this.Initialised then this.Bounds
+                else
+                    let (left, top, right, bottom) = this.Anchors
+                    let struct (l, t, r, b) = bounds
+                    Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
+            this.FlowContent(thisBounds) 
+            base.Update(elapsedTime, bounds)
+            if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
 
         override this.Draw() =
             Stencil.create(false)
-            Draw.rect(this.Bounds)(Color.Transparent)(Sprite.Default)
+            Draw.rect this.Bounds Color.Transparent Sprite.Default
             Stencil.draw()
             let struct (_, top, _, bottom) = this.Bounds
             for c in this.Children do
@@ -137,12 +143,9 @@ module Components =
                     if t < bottom && b > top then c.Draw()
             Stencil.finish()
 
-        override this.Add(child) =
-            base.Add(child)
-            if (this.Initialised) then this.FlowContent(true)
-
         member this.Clear() = (for c in this.Children do c.Dispose()); this.Children.Clear()
         member this.Filter(f: Widget -> bool) = for c in this.Children do c.Enabled <- f c
+        member this.Sort(comp: Comparison<Widget>) = this.Children.Sort(comp)
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
@@ -155,7 +158,7 @@ module Components =
             let fr = new Frame(Enabled = false)
             this.Add((Clickable((fun () -> fr.Enabled <- not fr.Enabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
-                let fc = FlowContainer(0.0f, 0.0f)
+                let fc = FlowContainer(Spacing = 0.0f)
                 fr.Add(fc)
                 Array.iteri
                     (fun i o -> fc.Add(Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))

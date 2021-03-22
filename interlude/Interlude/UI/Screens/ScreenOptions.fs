@@ -312,6 +312,7 @@ module ThemeSelector =
         override this.Draw() =
             Draw.rect(this.Bounds)(UI.Screens.accentShade(127, 1.0f, 0.0f))(Sprite.Default)
             base.Draw()
+
     and ThemeSelector() as this =
         inherit Dialog()
         let selected = FlowContainer()

@@ -31,7 +31,7 @@ type AnchorPoint(offset, anchor) =
     member this.Reposition(offset, anchor) = this.Value <- offset; this.Target <- offset; anchor_ <- anchor
 
     member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor_
-    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- value - min - (max - min) * anchor_
+    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- this.Target
 
 type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
 
@@ -62,10 +62,7 @@ type Widget() =
 
     member this.Animation = animation
     member this.Bounds = bounds
-    member this.Position = (left, top, right, bottom)
-    //member this.State
-    //    with get() = (if enable then WidgetState.Normal else WidgetState.Disabled) ||| (if initialised then enum 0 else WidgetState.Uninitialised)
-    //    and set(value) = enable <- value &&& WidgetState.Disabled <> WidgetState.Disabled; initialised <- true
+    member this.Anchors = (left, top, right, bottom)
     member this.Children = children
     member this.Parent = parent.Value
     member this.Enabled with get() = enable and set(value) = enable <- value
