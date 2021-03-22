@@ -134,8 +134,8 @@ module Notifications =
             Clickable(
                 (fun () ->
                     match t.Status with
-                    | Threading.Tasks.TaskStatus.RanToCompletion -> w.RemoveFromParent()
-                    | _ -> t.Cancel(); w.RemoveFromParent()), ignore))
+                    | Threading.Tasks.TaskStatus.RanToCompletion -> w.Parent.Remove(w)
+                    | _ -> t.Cancel(); w.Parent.Remove(w)), ignore))
         w |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 90.0f, 0.0f)
 
     type TaskDisplay(f) as this = 
@@ -361,7 +361,7 @@ type ScreenContainer() as this =
         Screens.accentColor.SetColor(Themes.accentColor)
         if dialogs.Count > 0 then
             dialogs.[dialogs.Count - 1].Update(elapsedTime, bounds)
-            if dialogs.[dialogs.Count - 1].State = WidgetState.Disabled then
+            if not dialogs.[dialogs.Count - 1].Enabled then
                 dialogs.[dialogs.Count - 1].Dispose()
                 dialogs.RemoveAt(dialogs.Count - 1)
             Input.absorbAll()
@@ -395,6 +395,5 @@ type ScreenContainer() as this =
             Screens.drawBackground(this.Bounds, Screens.accentShade(255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
             Stencil.finish()
             if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
-        for d in dialogs do
-            d.Draw()
+        for d in dialogs do d.Draw()
         if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize)(Screens.accentShade(255, 1.0f, 0.5f))(Themes.getTexture("cursor"))

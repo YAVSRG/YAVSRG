@@ -27,8 +27,9 @@ module ScreenImport =
         name: string
         average: float
         download: string
+        mirror: string
         size: int64
-    } with static member Default = { name = ""; average = 0.0; download = ""; size = 0L }
+    } with static member Default = { name = ""; average = 0.0; download = ""; mirror = ""; size = 0L }
 
     [<Json.AllRequired>]
     type EOPack = {
@@ -78,13 +79,15 @@ module ScreenImport =
         member this.Data = data
         static member Filter(filter: Filter) =
             fun (c: Widget) ->
-                let c = c :?> SMImportCard
-                List.forall (
-                    function
-                    | Impossible -> false
-                    | String str -> c.Data.name.ToLower().Contains(str)
-                    | _ -> true
-                ) filter
+                match c with
+                | :? SMImportCard as c ->
+                    List.forall (
+                        function
+                        | Impossible -> false
+                        | String str -> c.Data.name.ToLower().Contains(str)
+                        | _ -> true
+                    ) filter
+                | _ -> true
 
     type BeatmapImportCard(data: BeatmapData) as this =
         inherit Widget()
@@ -131,7 +134,7 @@ module ScreenImport =
             base.Draw()
             //todo: improved loading indicator here
             Text.drawFill(Themes.font(), "Loading...", this.Bounds, Color.White, 0.5f)
-            if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> this.RemoveFromParent()))
+            if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(threadSafe this.Parent (fun _ -> this.Parent.Remove(this))))
         override this.Dispose() = match task with None -> () | Some task -> task.Cancel()
 
     type SearchContainer(populate, handleFilter) as this =
@@ -166,9 +169,12 @@ module ScreenImport =
         s <- s + "&offset=" + page.ToString()
         fun (flowContainer: FlowContainer) output ->
             let callback(d: BeatmapSearch) =
-                for p in d.beatmaps do flowContainer.Add(new BeatmapImportCard(p))
-                if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                    flowContainer.Add(new SearchContainerLoader(beatmapSearch filter (page + 1) flowContainer))
+                flowContainer.Synchronized(
+                    fun () -> 
+                        for p in d.beatmaps do flowContainer.Add(new BeatmapImportCard(p))
+                        if d.result_count < 0 || d.result_count > d.beatmaps.Count then
+                            flowContainer.Add(new SearchContainerLoader(beatmapSearch filter (page + 1) flowContainer))
+                )
             downloadJson(s, callback)
 
 open ScreenImport
@@ -181,7 +187,7 @@ type ScreenImport() as this =
         *)
         let eoDownloads = 
             SearchContainer(
-                (fun flowContainer output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes)) ))),
+                (fun flowContainer output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> flowContainer.Synchronized(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
                 (fun flowContainer filter -> flowContainer.Filter(SMImportCard.Filter filter)) )
         let osuDownloads =
             SearchContainer(

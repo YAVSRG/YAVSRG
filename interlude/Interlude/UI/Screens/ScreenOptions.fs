@@ -48,7 +48,7 @@ module SelectionWheel =
         override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
 
         override this.Add(w) = failwith "don't use this, use AddItem"
-        member this.AddItem(w) = items.Add(w); w.AddTo(this)
+        member this.AddItem(w) = items.Add(w); w.OnAddedTo(this)
 
         override this.Draw() =
             let o = WIDTH * collapse.Value

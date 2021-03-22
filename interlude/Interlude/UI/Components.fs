@@ -20,6 +20,9 @@ module Components =
     let positionWidget(l, la, t, ta, r, ra, b, ba) (w: Widget) : Widget =
         w.Reposition(l, la, t, ta, r, ra, b, ba)
         w
+
+    let threadSafe (w: Widget) action : 'a -> unit =
+        fun _ -> w.Synchronized(action)
     
     type Frame(fillColor, frameColor) =
         inherit Widget()
@@ -98,22 +101,20 @@ module Components =
             let width = Rect.width this.Bounds
             let height = Rect.height this.Bounds
             let pos (anchor : AnchorPoint) = if instant then anchor.RepositionRelative else anchor.MoveRelative
-            lock(this)
-                (fun () ->
-                    contentSize <-
-                        (this.Children
-                        |> Seq.filter (fun c -> c.State &&& WidgetState.Disabled < WidgetState.Disabled)
-                        |> Seq.fold (fun (x, y) w ->
-                            let (l, t, r, b) = w.Position
-                            let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
-                            let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
-                            let x = x + cwidth + spacingX
-                            let x, y = if x > width then cwidth + spacingX, y + cheight + spacingY else x, y
-                            pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
-                            pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
-                            (x + spacingX, y)
-                            ) (0.0f, -scrollPos)
-                        |> snd) + scrollPos)
+            contentSize <-
+                (this.Children
+                |> Seq.filter (fun c -> c.Enabled)
+                |> Seq.fold (fun (x, y) w ->
+                    let (l, t, r, b) = w.Position
+                    let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
+                    let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
+                    let x = x + cwidth + spacingX
+                    let x, y = if x > width then cwidth + spacingX, y + cheight + spacingY else x, y
+                    pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
+                    pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
+                    (x + spacingX, y)
+                    ) (0.0f, -scrollPos)
+                |> snd) + scrollPos
 
         override this.Update(elapsedTime, bounds) =
             if (this.Initialised) then
@@ -130,12 +131,10 @@ module Components =
             Draw.rect(this.Bounds)(Color.Transparent)(Sprite.Default)
             Stencil.draw()
             let struct (_, top, _, bottom) = this.Bounds
-            lock(this)
-                (fun () ->
-                    for c in this.Children do
-                        if c.State < WidgetState.Disabled then
-                            let struct (_, t, _, b) = c.Bounds
-                            if t < bottom && b > top then c.Draw())
+            for c in this.Children do
+                if c.Initialised && c.Enabled then
+                    let struct (_, t, _, b) = c.Bounds
+                    if t < bottom && b > top then c.Draw()
             Stencil.finish()
 
         override this.Add(child) =
@@ -143,7 +142,7 @@ module Components =
             if (this.Initialised) then this.FlowContent(true)
 
         member this.Clear() = (for c in this.Children do c.Dispose()); this.Children.Clear()
-        member this.Filter(f: Widget -> bool) = for c in this.Children do c.State <- if f c then WidgetState.Normal else WidgetState.Disabled
+        member this.Filter(f: Widget -> bool) = for c in this.Children do c.Enabled <- f c
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
@@ -153,8 +152,8 @@ module Components =
 
         do
             this.Animation.Add(color)
-            let fr = new Frame()
-            this.Add((Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
+            let fr = new Frame(Enabled = false)
+            this.Add((Clickable((fun () -> fr.Enabled <- not fr.Enabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
                 let fc = FlowContainer(0.0f, 0.0f)
                 fr.Add(fc)
@@ -162,7 +161,6 @@ module Components =
                     (fun i o -> fc.Add(Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                     options
                 fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
-            fr.State <- WidgetState.Disabled
             
         override this.Draw() =
             let bbounds = Rect.sliceTop buttonSize this.Bounds

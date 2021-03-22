@@ -75,11 +75,11 @@ module Animation =
     type AnimationGroup() =
         inherit Animation()
         let mutable animations = []
-        member this.Add(a: Animation) = animations <- a :: animations
+        member this.Add(a: Animation) = lock(this) (fun () -> animations <- a :: animations)
         member this.Complete = animations.IsEmpty
         override this.Update(elapsed) =
-            animations <- List.filter (fun (a: Animation) -> a.Update(elapsed) |> not) animations
-            this.Complete
+            if this.Complete then true
+            else lock(this) (fun () -> animations <- List.filter (fun (a: Animation) -> a.Update(elapsed) |> not) animations); this.Complete
         
     type AnimationSequence() =
         inherit Animation()

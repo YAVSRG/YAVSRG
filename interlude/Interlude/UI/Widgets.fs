@@ -6,19 +6,40 @@ open System.Collections.Generic
 open OpenTK.Mathematics
 open Prelude.Common
 open Interlude.Render
-open Interlude.Utils
 open Interlude
 open Interlude.UI.Animation
 
-type AnchorPoint(value, anchor) =
-    inherit AnimationFade(value)
-    let mutable anchor = anchor
-    member this.Position(min, max) =  min + base.Value + (max - min) * anchor
-    member this.Reposition(value, a) = this.Value <- value; this.Target <- value; anchor <- a
-    member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor
-    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- value - min - (max - min) * anchor
+(*
+    Anchorpoints calculate the position of a widget's edge relative to its parent
+    They are parameterised by an anchor and an offset
+
+     To calculate the position of an edge (for example the value v for the left edge when given the left and right edges of the parent)
+        Anchor is a value from 0-1 representing the percentage of the way across the parent widget to place the edge
+        Offset is a value added to that to translate the edge by a fixed number of pixels
+
+        Examples: AnchorPoint(50.0f, 0.0f) places the widget's edge 50 pixels left/down from the parent's left/top edge
+                  AnchorPoint(-70.0f, 0.5f) places the widget's edge 70 pixels right/up from the parent's centre
+    This can be used to flexibly describe the layout of a UI in terms of parent-child relations and these anchor points
+*)
+
+type AnchorPoint(offset, anchor) =
+    inherit AnimationFade(offset)
+    let mutable anchor_ = anchor
+    //calculates the position given lower and upper bounds from the parent
+    member this.Position(min, max) = min + base.Value + (max - min) * anchor_
+    //snaps to a brand new position as if we constructed a new point
+    member this.Reposition(offset, anchor) = this.Value <- offset; this.Target <- offset; anchor_ <- anchor
+
+    member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor_
+    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- value - min - (max - min) * anchor_
 
 type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
+
+(*
+    Widgets are the atomic components of the UI system.
+      All widgets can contain other "child" widgets embedded in them that inherit from their position
+      What widgets do with their child widgets can be up to implementation, by default all are drawn and updated with the parent.
+*)
 
 type Widget() =
 
@@ -35,26 +56,28 @@ type Widget() =
         animation.Add(bottom)
     let mutable parent = None
     let mutable bounds = Rect.zero
-    let mutable state = (WidgetState.Uninitialised ||| WidgetState.Normal)
+    let mutable initialised = false
+    let mutable enable = true
     let children = new List<Widget>()
 
     member this.Animation = animation
     member this.Bounds = bounds
     member this.Position = (left, top, right, bottom)
-    member this.State with get() = state and set(value) = state <- value
+    //member this.State
+    //    with get() = (if enable then WidgetState.Normal else WidgetState.Disabled) ||| (if initialised then enum 0 else WidgetState.Uninitialised)
+    //    and set(value) = enable <- value &&& WidgetState.Disabled <> WidgetState.Disabled; initialised <- true
     member this.Children = children
     member this.Parent = parent.Value
-    member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
+    member this.Enabled with get() = enable and set(value) = enable <- value
+    member this.Initialised = initialised
 
     abstract member Add: Widget -> unit
     default this.Add(c) =
-        lock(this)
-            (fun () ->
-                children.Add(c)
-                c.AddTo(this))
+        children.Add(c)
+        c.OnAddedTo(this)
 
-    abstract member AddTo: Widget -> unit
-    default this.AddTo(c) =
+    abstract member OnAddedTo: Widget -> unit
+    default this.OnAddedTo(c) =
         match parent with
         | None -> parent <- Some c
         | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one") ""
@@ -62,37 +85,31 @@ type Widget() =
     abstract member Remove: Widget -> unit
     default this.Remove(c) =
         if children.Remove(c) then
-            c.RemoveFrom(this)
+            c.OnRemovedFrom(this)
         else Logging.Error("Tried to remove widget that was not in this container") ""
 
-    member private this.RemoveFrom(c) =
+    member private this.OnRemovedFrom(c) =
         match parent with
         | None -> Logging.Error("Tried to remove this widget from a container it isn't in one") ""
         | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another") ""
 
-    member this.RemoveFromParent() =
-        match parent with
-        | None -> Logging.Error("Tried to remove a widget from non-existent parent") ""
-        | Some p -> p.Animation.Add(new AnimationAction(fun () -> p.Remove(this)))
+    member this.Synchronized(action) =
+        animation.Add(new AnimationAction(action))
 
+    // Draw is called at the framerate of the game (normally unlimited) and should be where the widget performs render calls to draw it on screen
     abstract member Draw: unit -> unit
-    default this.Draw() =
-        lock(this)
-            (fun () ->
-                children
-                |> Seq.filter (fun w -> w.State < WidgetState.Disabled)
-                |> Seq.iter (fun w -> w.Draw()))
+    default this.Draw() = for c in children do if c.Initialised && c.Enabled then c.Draw()
 
+    // Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit
     default this.Update(elapsedTime, struct (l, t, r, b): Rect) =
         animation.Update(elapsedTime) |> ignore
-        this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
+        initialised <- true
         bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-        lock(this)
-            (fun () ->
-                for i in children.Count - 1 .. -1 .. 0 do
-                    if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then children.[i].Update(elapsedTime, bounds))
+        for i in children.Count - 1 .. -1 .. 0 do
+            if (children.[i].Enabled) then children.[i].Update(elapsedTime, bounds)
 
+    //todo: tear these out and replace with nice idiomatic positioners
     member this.Reposition(l, la, t, ta, r, ra, b, ba) =
         left.Reposition(l, la)
         top.Reposition(t, ta)
@@ -107,6 +124,7 @@ type Widget() =
         right.Target <- r
         bottom.Target <- b
 
+    // Dispose is called when a widget is going out of scope/about to be garbage collected and allows it to release any resources
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
 
@@ -114,7 +132,6 @@ type Logo() as this =
     inherit Widget()
 
     let counter = AnimationCounter(10000000.0)
-
     do this.Animation.Add(counter)
 
     override this.Draw() =
@@ -222,6 +239,7 @@ type Dialog() as this =
         this.Animation.Add(fade)
         fade.Target <- 1.0f
 
+    // Begins closing animation
     member this.Close() =
         fade.Target <- 0.0f
 
@@ -235,14 +253,8 @@ type Dialog() as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if (fade.Value < 0.02f && fade.Target = 0.0f) then
-            this.State <- WidgetState.Disabled
+            this.Enabled <- false
             this.OnClose()
-    
-
-//Collection of mutable values to "tie the knot" in mutual dependence
-// - Stuff is defined but not inialised here
-// - Stuff is then referenced by screen logic
-// - Overall screen manager references screen logic AND initialises values, connecting the loop
 
 type ScreenTransitionFlag =
 | Default = 0
@@ -255,7 +267,15 @@ type NotificationType =
 | Task = 2
 | Error = 3
 
+(*
+    Collection of mutable values to "tie the knot" in mutual dependence
+       - Stuff is defined but not inialised here
+       - Stuff is then referenced by screen logic
+       - Overall screen manager references screen logic AND initialises values, connecting the loop
+*)
+
 module Screens =
+    // All of these are initialised in ScreensMain.fs
     let mutable internal addScreen: (unit -> Screen) * ScreenTransitionFlag -> unit = ignore
     let mutable internal popScreen: ScreenTransitionFlag -> unit = ignore
     let mutable internal addDialog: Dialog -> unit = ignore

@@ -320,7 +320,7 @@ module GameplayWidgets =
             if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
                 if options.Hotkeys.Skip.Get().Tapped() then
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
-            else this.RemoveFromParent()
+            else this.Parent.Remove(this)
 
     (*
         These widgets are not repositioned by theme
