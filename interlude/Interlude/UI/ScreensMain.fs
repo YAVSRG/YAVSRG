@@ -335,11 +335,14 @@ type ScreenContainer() as this =
                         let s = s()
                         current.OnExit(s)
                         s.OnEnter(current)
+                        match currentType with
+                        | ScreenType.Play | ScreenType.Score -> current.Dispose()
+                        | _ -> ()
                         currentType <- screenType
                         current <- s
+                        t2.FrameSkip() //ignore frame lag spike when initialising screen
                     ))
             screenTransition.Add(t2)
-            t2.FrameSkip() //ignore frame lag spike when initialising screen
             screenTransition.Add(new AnimationAction(fun () -> t1.Reset(); t2.Reset()))
 
     member this.ChangeScreen(screenType, flags) = this.ChangeScreen((screens.[int screenType] |> K), screenType, flags)

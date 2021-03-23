@@ -521,6 +521,6 @@ type ScreenPlay() as this =
                     |> ScoreInfoProvider
                 (sd, Gameplay.setScore(sd))
                 |> ScreenScore
-                :> Screen), ScreenType.Score, ScreenTransitionFlag.NoBacktrack)
+                :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)
             |> Screens.newScreen
         else ()

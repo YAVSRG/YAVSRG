@@ -256,7 +256,7 @@ type Dialog() as this =
 type ScreenTransitionFlag =
 | Default = 0
 | UnderLogo = 1
-| NoBacktrack = 2
+//more transition animations go here
 
 type NotificationType =
 | Info = 0
