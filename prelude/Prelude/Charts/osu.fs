@@ -186,7 +186,7 @@ module osu =
     let private parseName = (many1Satisfy isLetterOrDigit)
     let private parseQuote =
         between (pchar '"') (pchar '"') (manySatisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
-    let private comment = (anyOf "/#=" >>% "") >>. restOfLine true
+    let private comment = (anyOf "-/#=" >>% "") >>. restOfLine true
 
     let private parseKeyValue = parseName .>> spaces .>> colon .>> manyChars (anyOf " \t") .>>. (restOfLine true) .>> spaces
     let private parseHeaderTitle(name) = pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name

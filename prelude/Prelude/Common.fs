@@ -147,6 +147,7 @@ module Common =
         type ManagedTask (name: string, t: StatusTask, options: TaskFlags, removeTask) as this =
             let cts = new CancellationTokenSource()
             let mutable info = ""
+            let mutable complete = false
             let visible = options &&& TaskFlags.HIDDEN <> TaskFlags.HIDDEN
 
             let task =
@@ -163,6 +164,7 @@ module Common =
                             Logging.Error(sprintf "Exception in task '%s'" name) (err.ToString())
                             info <- sprintf "Failed: %O" <| err.GetType()
                         removeTask(this)
+                        complete <- true
                         cts.Dispose()
                         },
                     ((*if options &&& TaskFlags.LONGRUNNING = TaskFlags.LONGRUNNING then TaskCreationOptions.LongRunning else*) TaskCreationOptions.None),
@@ -170,7 +172,9 @@ module Common =
 
             member this.Name = name
             member this.Status = task.Status
-            member this.Cancel() = Logging.Debug(sprintf "Task <%s> cancelled" name) ""; cts.Cancel(false)
+            member this.Cancel() =
+                if complete then Logging.Warn(sprintf "Task <%s> already finished, can't cancel!" name) ""
+                else Logging.Debug(sprintf "Task <%s> cancelled" name) ""; cts.Cancel(false)
             member this.Visible = visible
             member this.Info = info
 
@@ -178,7 +182,7 @@ module Common =
         let Subscribe f = evt.Publish.Add f
 
         let TaskList = ResizeArray<ManagedTask>()
-        let private removeTask = fun mt -> if lock(TaskList)(fun() -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name) ""
+        let private removeTask = fun mt -> if lock(TaskList) (fun() -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name) ""
 
         let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc(l) in f(v); return v }
         let rec Chain (procs: StatusTask list): StatusTask =
