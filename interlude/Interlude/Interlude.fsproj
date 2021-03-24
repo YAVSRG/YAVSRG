@@ -38,6 +38,7 @@
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Widgets.fs" />
     <Compile Include="UI\Components.fs" />
+    <Compile Include="UI\OptionsMenu.fs" />
     <Compile Include="UI\Screens\ScreenScore.fs" />
     <Compile Include="UI\Screens\ScreenPlay.fs" />
     <Compile Include="UI\Screens\ScreenOptions.fs" />

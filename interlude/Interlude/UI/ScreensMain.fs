@@ -134,8 +134,8 @@ module Notifications =
             Clickable(
                 (fun () ->
                     match t.Status with
-                    | Threading.Tasks.TaskStatus.RanToCompletion -> w.Parent.Remove(w)
-                    | _ -> t.Cancel(); w.Parent.Remove(w)), ignore))
+                    | Threading.Tasks.TaskStatus.RanToCompletion -> w.Destroy()
+                    | _ -> t.Cancel(); w.Destroy()), ignore))
         w |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 90.0f, 0.0f)
 
     type TaskDisplay(f) as this = 
@@ -250,7 +250,7 @@ type Toolbar() as this =
         this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
         this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
         this.Add(new Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
-        this.Add(new Button((fun () -> Screens.addDialog(new OptionsMenu())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button((fun () -> Screens.addDialog(new OptionsDialog())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
         this.Add(new Jukebox())

@@ -64,7 +64,7 @@ type Widget() =
     member this.Bounds = bounds
     member this.Anchors = (left, top, right, bottom)
     member this.Children = children
-    member this.Parent = parent.Value
+    member this.Parent = parent
     member this.Enabled with get() = enable and set(value) = enable <- value
     member this.Initialised = initialised
 
@@ -92,6 +92,9 @@ type Widget() =
 
     member this.Synchronized(action) =
         animation.Add(new AnimationAction(action))
+
+    member this.Destroy() =
+        this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Remove(this))
 
     // Draw is called at the framerate of the game (normally unlimited) and should be where the widget performs render calls to draw it on screen
     abstract member Draw: unit -> unit

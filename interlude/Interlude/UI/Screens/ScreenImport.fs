@@ -58,7 +58,7 @@ module ScreenImport =
     } with static member Default = { result_count = -1; beatmaps = null }
 
     type SMImportCard(data: EOPackAttrs) as this =
-        inherit Frame(Some (fun () -> Screens.accentShade(120, 1.0f, 0.0f)), Some (fun () -> Screens.accentShade(200, 1.0f, 0.2f)))
+        inherit Frame((fun () -> Screens.accentShade(120, 1.0f, 0.0f)), (fun () -> Screens.accentShade(200, 1.0f, 0.2f)))
         let mutable downloaded = false //todo: maybe check if pack is already installed?
         let download() =
             let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
@@ -76,7 +76,9 @@ module ScreenImport =
             this.Add(new TextBox(K (sprintf "Difficulty: %.2f   %.1fMB" data.average (float data.size / 1000000.0)), K (Color.White, Color.Black), 1.0f))
             this.Add(new Clickable((fun () -> if not downloaded then download()), ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f)
+
         member this.Data = data
+
         static member Filter(filter: Filter) =
             fun (c: Widget) ->
                 match c with
@@ -114,7 +116,7 @@ module ScreenImport =
                 | -1 -> Color.White //wip
                 | -2 //graveyard
                 | _ -> Color.Gray
-            this.Add(new Frame(Some (K (Color.FromArgb(120, c))), Some (K (Color.FromArgb(200, c)))))
+            this.Add(new Frame(Color.FromArgb(120, c), Color.FromArgb(200, c)))
             this.Add(new TextBox(K (data.artist + " - " + data.title), K (Color.White, Color.Black), 0.0f)
                 |> positionWidgetA(0.0f, 0.0f, -400.0f, -30.0f))
             this.Add(new TextBox(K ("Created by " + data.mapper), K (Color.White, Color.Black), 0.0f)
@@ -127,14 +129,15 @@ module ScreenImport =
     type SearchContainerLoader(t: StatusTask) as this =
         inherit Widget()
         let mutable task = None
-        do
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 30.0f, 0.0f)
+        do this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 30.0f, 0.0f)
+
         //loader is only drawn if it is visible on screen
         override this.Draw() =
             base.Draw()
             //todo: improved loading indicator here
             Text.drawFill(Themes.font(), "Loading...", this.Bounds, Color.White, 0.5f)
-            if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(threadSafe this.Parent (fun _ -> this.Parent.Remove(this))))
+            if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> this.Destroy()))
+
         override this.Dispose() = match task with None -> () | Some task -> task.Cancel()
 
     type SearchContainer(populate, handleFilter) as this =

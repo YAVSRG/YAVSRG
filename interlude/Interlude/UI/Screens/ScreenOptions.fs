@@ -177,10 +177,10 @@ module SelectionWheel =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if not sw.Selected then this.Deselect()
-            sw.Update(elapsedTime, this.Parent.Bounds |> Rect.trimLeft(WIDTH))
+            sw.Update(elapsedTime, this.Parent.Value.Bounds |> Rect.trimLeft(WIDTH))
         override this.Draw() =
             Stencil.create(false)
-            Draw.rect(this.Parent.Bounds |> Rect.trimLeft(WIDTH))(Color.Transparent)(Sprite.Default)
+            Draw.rect(this.Parent.Value.Bounds |> Rect.trimLeft(WIDTH))(Color.Transparent)(Sprite.Default)
             Stencil.draw()
             sw.Draw()
             Stencil.finish()
@@ -300,7 +300,7 @@ module ThemeSelector =
             this.Add(
                 Clickable(
                     (fun () ->
-                        if this.Parent = (m.Selected :> Widget) then 
+                        if this.Parent.Value = (m.Selected :> Widget) then 
                             m.Selected.Remove(this)
                             m.Available.Add(this)
                             options.EnabledThemes.Remove(name) |> ignore
@@ -402,7 +402,7 @@ module LayoutEditor =
             if not sc.Selected then this.Close()
         override this.OnClose() = ()
 
-type OptionsMenu() as this =
+type OptionsDialog() as this =
     inherit Dialog()
     let sw =
         swBuilder [

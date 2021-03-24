@@ -97,7 +97,6 @@ type NoteRenderer() as this =
         else fun k -> id
 
     do
-        //todo: position differently for editor
         let width = Array.mapi (fun i n -> n + columnWidths.[i]) columnPositions |> Array.max
         let (screenAlign, columnAlign) = Themes.noteskinConfig.PlayfieldAlignment
         this.Reposition(-width * columnAlign, screenAlign, 0.0f, 0.0f, width * (1.0f - columnAlign), screenAlign, 0.0f, 1.0f)
@@ -320,7 +319,7 @@ module GameplayWidgets =
             if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
                 if options.Hotkeys.Skip.Get().Tapped() then
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
-            else this.Parent.Remove(this)
+            else this.Destroy()
 
     (*
         These widgets are not repositioned by theme
