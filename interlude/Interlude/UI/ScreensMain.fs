@@ -35,7 +35,7 @@ type ScreenMenu() as this =
         Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
         Screens.changeScreen(ScreenType.LevelSelect, ScreenTransitionFlag.UnderLogo)
     let play = MenuButton(playFunc, "Play")
-    let options = MenuButton(ignore, "Options")
+    let options = MenuButton((fun () -> Screens.addDialog(OptionsMenu())), "Options")
     let quit = MenuButton((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Quit")
 
     let newSplash =
