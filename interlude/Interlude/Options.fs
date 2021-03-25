@@ -98,7 +98,7 @@ type Hotkeys = {
 type ScoreSaving =
 | Always = 0
 | Pacemaker = 1
-| PB = 2
+| PersonalBest = 2
 
 type Pacemaker =
 | Accuracy of float
@@ -106,7 +106,8 @@ type Pacemaker =
 
 type FailType =
 | Instant = 0
-| AtEnd = 1
+| EndOfSong = 1
+
 type ListSelection<'T> = int * 'T list
 
 type ProfileStats = {
@@ -178,7 +179,7 @@ type GameOptions = {
         HPSystems = Setting((0, [VG]))
         AccSystems = Setting((0, [SCPlus 4]))
         ScoreSaveCondition = Setting(ScoreSaving.Always)
-        FailCondition = Setting(FailType.AtEnd)
+        FailCondition = Setting(FailType.EndOfSong)
         Pacemaker = Setting(Accuracy 0.95)
 
         //todo: move to scores database

@@ -30,8 +30,8 @@ module Gameplay =
     let scores = ScoresDB()
     let cache = Cache()
 
-    let mutable onChartUpdate = fun () -> ()
-    let mutable onChartChange = fun () -> ()
+    let mutable onChartUpdate = ignore
+    let mutable onChartChange = ignore
 
     let updateChart() =
         match currentChart with
@@ -71,14 +71,14 @@ module Gameplay =
         replayData <- getScoreData(selectedMods)(modifiedChart.Force())
         r
 
-    let makeScore(scoreData, keys) : Score =
-        {   
-            time = DateTime.Now
-            hitdata = compressScoreData scoreData
-            rate = rate
-            selectedMods = selectedMods
-            layout = Options.options.Playstyles.[keys - 2]
-            keycount = keys } : Score
+    let makeScore(scoreData, keys): Score = {   
+        time = DateTime.Now
+        hitdata = compressScoreData scoreData
+        rate = rate
+        selectedMods = selectedMods
+        layout = Options.options.Playstyles.[keys - 2]
+        keycount = keys
+    }
         
 
     let setScore(data: ScoreInfoProvider) =
@@ -102,9 +102,9 @@ module Gameplay =
                 else
                     target.Add(name, ((value, data.Score.rate), (value, data.Score.rate)))
                     PersonalBestType.Faster
-            //todo: maybe move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
             f data.Accuracy.Name d.Lamp data.Lamp,
             f data.Accuracy.Name d.Accuracy data.Accuracy.Value,
+            //todo: move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
             f (data.Accuracy.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
         else
             (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)
@@ -133,5 +133,5 @@ module Gameplay =
                     |> fun c -> c, cache.LoadChart(c).Value
             changeChart(c, ch)
         with err ->
-           Logging.Critical("Tried to auto select a chart but none exist")(err.ToString())
+           Logging.Error("Tried to auto select a chart but none exist")(err.ToString())
         //cache.ConvertPackFolder(osuSongFolder) "osu!" (fun x -> Logging.Info(x) "") |> ignore

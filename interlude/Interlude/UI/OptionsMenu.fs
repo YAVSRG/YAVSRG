@@ -234,13 +234,13 @@ module OptionsMenu =
 
     type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, incr: float32) as this =
         inherit NavigateSelectable()
-        let TEXTWIDTH = 150.0f
+        let TEXTWIDTH = 130.0f
         let color = AnimationFade(0.5f)
         let mutable dragging = false
         let chPercent(v) = setting.SetPercent(setting.GetPercent() + v)
         do
             this.Animation.Add(color)
-            this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
+            this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> Color.White, Color.Black), 0.0f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
             this.Add(new Clickable((fun () -> this.Selected <- true; dragging <- true), fun b -> color.Target <- if b then this.Hover <- true; 0.8f else 0.5f))
 
@@ -291,18 +291,21 @@ open OptionsMenu
 
 module OptionsMenuTabs =
 
+    let PRETTYTEXTWIDTH = 500.0f
+    let PRETTYHEIGHT = 80.0f
+    let PRETTYWIDTH = 1200.0f
+
     type PrettySetting(name, widget: Selectable) as this =
         inherit Selectable()
-        let TEXTWIDTH = 400.0f
         do
-            this.Add(widget |> positionWidgetA(TEXTWIDTH, 0.0f, 0.0f, 0.0f))
+            this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
             this.Add(TextBox(K (localise name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f))
     
         member this.Position(y, width, height) =
             this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
     
-        member this.Position(y, width) = this.Position(y, width, 80.0f)
-        member this.Position(y) = this.Position(y, 1100.0f)
+        member this.Position(y, width) = this.Position(y, width, PRETTYHEIGHT)
+        member this.Position(y) = this.Position(y, PRETTYWIDTH)
 
         override this.Draw() =
             if this.Selected then Draw.rect this.Bounds (Color.FromArgb(180, 0, 0, 0)) Sprite.Default
@@ -315,6 +318,14 @@ module OptionsMenuTabs =
         
         override this.OnSelect() = if not widget.Hover then widget.Selected <- true
         override this.OnDehover() = base.OnDehover(); widget.OnDehover()
+
+    type PrettyButton(name, action) as this =
+        inherit Selectable()
+        do
+            this.Add(TextBox(K (localise name + " >"), (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f))
+            this.Add(Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)))
+        override this.OnSelect() = action(); this.Selected <- false
+        member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
     
     let system() =
         column [
@@ -344,6 +355,52 @@ module OptionsMenuTabs =
                     (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])) )
                     with override this.OnDeselect() = base.OnDeselect(); Options.applyOptions() }
             ).Position(500.0f)
+        ]
+
+    let themes() =
+        //theme selection
+        //noteskin selection
+        //note color selection
+        failwith "nyi"
+
+    let gameplay(add) =
+        column [
+            PrettySetting("ScrollSpeed",
+                Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)
+            ).Position(200.0f)
+            
+            PrettySetting("HitPosition",
+                Slider(options.HitPosition :?> IntSetting, 0.005f)
+            ).Position(300.0f)
+
+            PrettySetting("Upscroll",
+                Selector.FromBool(options.Upscroll)
+            ).Position(400.0f)
+
+            PrettySetting("BackgroundDim",
+                Slider(options.BackgroundDim :?> FloatSetting, 0.01f)
+            ).Position(500.0f)
+
+            PrettyButton("ScreenCover", 
+                fun() ->
+                    //todo: preview of what screencover looks like
+                    add("ScreenCover",
+                        column [
+                            PrettySetting("ScreenCoverUp",
+                                Slider(options.ScreenCoverUp :?> FloatSetting, 0.01f)
+                            ).Position(200.0f)
+
+                            PrettySetting("ScreenCoverDown",
+                                Slider(options.ScreenCoverDown :?> FloatSetting, 0.01f)
+                            ).Position(300.0f)
+                            
+                            PrettySetting("ScreenCoverFadeLength",
+                                Slider(options.ScreenCoverFadeLength :?> IntSetting, 0.01f)
+                            ).Position(400.0f)
+                        ] )
+            ).Position(600.0f)
+            //pacemaker
+            //accuracy and hp systems
         ]
 
 open OptionsMenuTabs
@@ -382,7 +439,7 @@ type OptionsMenu() as this =
         row [
             BigButton(localise "System", fun () -> add("System", system())) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Themes", ignore) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Gameplay", ignore) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localise "Gameplay", fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Keybinds", ignore) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Debug", ignore) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
         ]
