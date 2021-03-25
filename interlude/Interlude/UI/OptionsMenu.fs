@@ -2,8 +2,8 @@
 
 open System
 open System.Drawing
-open System.Collections.Generic
 open OpenTK
+open Prelude.Gameplay.NoteColors
 open Prelude.Common
 open Interlude.Options
 open Interlude.Render
@@ -11,7 +11,6 @@ open Interlude
 open Interlude.Utils
 open Interlude.Input
 open OpenTK.Windowing.GraphicsLibraryFramework
-open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
 
@@ -31,7 +30,7 @@ module OptionsMenu =
                 - (1) Only at most 1 leaf can be hovered
                 - (2) Selected leaves are a subset, so at most 1 leaf can be selected
                 - (3) The leaf that is hovered, if it exists, implies all its ancestors are selected
-                - (4) The leaf that is hovered, if it exists, implies all its non-ancestors are not selected
+                - (4) The leaf that is hovered, if it exists, implies all its non-ancestors are not hovered
         *) 
 
         let mutable hoverChild: Selectable option = None
@@ -175,6 +174,12 @@ module OptionsMenu =
             | :? Selectable as c -> items.Add(c)
             | _ -> ()
 
+        override this.Remove(c) =
+            base.Remove(c)
+            match c with
+            | :? Selectable as c -> items.Remove(c) |> ignore
+            | _ -> ()
+
         override this.OnSelect() = base.OnSelect(); if lastHover.IsNone then this.HoverChild <- Some items.[0] else this.HoverChild <- lastHover
         override this.OnDeselect() = lastHover <- this.HoverChild; this.HoverChild <- None
         override this.OnDehover() = base.OnDehover(); for i in items do i.OnDehover()
@@ -183,6 +188,8 @@ module OptionsMenu =
         override this.Right() = if horizontal then this.Next()
         override this.Up() = if not horizontal then this.Previous()
         override this.Down() = if not horizontal then this.Next()
+
+        override this.Clear() = base.Clear(); items.Clear()
 
 
     (*
@@ -229,8 +236,9 @@ module OptionsMenu =
         static member FromBool(setting: ISettable<bool>) =
             new Selector([|"NO" ; "YES"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)))
 
-        static member FromKeymode(setting: ISettable<int>) =
-            new Selector([|"3K"; "4K"; "5K"; "6K"; "7K"; "8K"; "9K"; "10K"|], setting.Get(), (fun (i, _) -> setting.Set(i)))
+        static member FromKeymode(setting: ISettable<int>, onDeselect) =
+            { new Selector([|"3K"; "4K"; "5K"; "6K"; "7K"; "8K"; "9K"; "10K"|], setting.Get(), (fun (i, _) -> setting.Set(i)))
+                with override this.OnDeselect() = base.OnDeselect(); onDeselect() }
 
     type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, incr: float32) as this =
         inherit NavigateSelectable()
@@ -267,13 +275,51 @@ module OptionsMenu =
             Draw.rect cursor (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
             base.Draw()
 
+    type ColorPicker(color: ISettable<byte>) as this =
+        inherit NavigateSelectable()
+        let sprite = Themes.getTexture("note")
+        let n = byte sprite.Rows
+        let fd() = color.Set((color.Get() + n - 1uy) % n)
+        let bk() = color.Set((color.Get() + 1uy) % n)
+        do this.Add(new Clickable((fun () -> (if not this.Selected then this.Selected <- true); fd ()), fun b -> if b then this.Hover <- true))
+
+        override this.Draw() =
+            base.Draw()
+            if this.Selected then
+                Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then
+                Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            Draw.quad(this.Bounds |> Quad.ofRect)(Color.White |> Quad.colorOf)(sprite |> Sprite.gridUV(3, int <| color.Get()))
+
+        override this.Left() = bk()
+        override this.Up() = fd()
+        override this.Right() = fd()
+        override this.Down() = bk()
+
+    (*
+        Utils for constructing menus easily
+    *)
+
     let localise s = Localisation.localise("options.name." + s)
+
+    let refreshRow number cons =
+        let r = ListSelectable(true)
+        let refresh() =
+            r.Clear()
+            let n = number()
+            for i in 0 .. (n - 1) do
+                r.Add(cons i n)
+        refresh()
+        r, refresh
+
     let row xs =
         let r = ListSelectable(true)
         List.iter r.Add xs; r
+
     let column xs =
         let c = ListSelectable(false)
         List.iter c.Add xs; c
+
     let wrapper main =
         let mutable disposed = false
         let w = { new Selectable() with
@@ -289,6 +335,10 @@ module OptionsMenu =
 
 open OptionsMenu
 
+(*
+    Actual options menu structure/design data
+*)
+
 module OptionsMenuTabs =
 
     let PRETTYTEXTWIDTH = 500.0f
@@ -297,9 +347,13 @@ module OptionsMenuTabs =
 
     type PrettySetting(name, widget: Selectable) as this =
         inherit Selectable()
+
+        let mutable widget = widget
+
         do
             this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
-            this.Add(TextBox(K (localise name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f))
+            this.Add(TextBox(K (localise name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f))
     
         member this.Position(y, width, height) =
             this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
@@ -319,15 +373,24 @@ module OptionsMenuTabs =
         override this.OnSelect() = if not widget.Hover then widget.Selected <- true
         override this.OnDehover() = base.OnDehover(); widget.OnDehover()
 
+        member this.Refresh(w: Selectable) =
+            widget.Destroy()
+            widget <- w
+            this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
+            
+
     type PrettyButton(name, action) as this =
         inherit Selectable()
         do
-            this.Add(TextBox(K (localise name + " >"), (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f))
+            this.Add(TextBox(K (localise name + "  >"), (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f))
             this.Add(Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)))
         override this.OnSelect() = action(); this.Selected <- false
+        override this.Draw() =
+            if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
+            base.Draw()
         member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
     
-    let system() =
+    let system(add) =
         column [
             PrettySetting(
                 "AudioOffset",
@@ -357,11 +420,64 @@ module OptionsMenuTabs =
             ).Position(500.0f)
         ]
 
-    let themes() =
-        //theme selection
-        //noteskin selection
-        //note color selection
-        failwith "nyi"
+    let themes(add) =
+        let mutable keycount = options.KeymodePreference.Get()
+        
+        let g keycount i =
+            let k = if options.ColorStyle.Get().UseGlobalColors then 0 else keycount - 2
+            { new ISettable<_>() with
+                override this.Set(v) = options.ColorStyle.Get().Colors.[k].[i] <- v
+                override this.Get() = options.ColorStyle.Get().Colors.[k].[i] }
+
+        let colors, refreshColors =
+            refreshRow
+                (fun () -> options.ColorStyle.Get().Style |> colorCount keycount)
+                (fun i k ->
+                    let x = -60.0f * float32 k
+                    let n = float32 i
+                    ColorPicker(g keycount i)
+                    |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
+
+        let noteskins = PrettySetting("Noteskin", Selectable())
+        let refreshNoteskins() =
+            let ns = Themes.noteskins() |> Seq.toArray
+            let ids = ns |> Array.map fst
+            let names = ns |> Array.map (fun (id, data) -> data.Name)
+            Selector(names, Math.Max(0, Array.IndexOf(ids, Themes.currentNoteSkin)), (fun (i, _) -> let id = ns.[i] |> fst in options.NoteSkin.Set(id); Themes.changeNoteSkin(id); refreshColors()))
+            |> noteskins.Refresh
+        refreshNoteskins()
+
+        column [
+            PrettyButton("ChangeTheme",
+                fun () -> () //nyi
+            ).Position(200.0f)
+            
+            PrettyButton("EditTheme",
+                fun () -> () //nyi
+            ).Position(300.0f)
+
+            PrettySetting("Keymode",
+                Selector.FromKeymode(
+                    { new ISettable<int>() with
+                        override this.Set(v) = keycount <- v + 3
+                        override this.Get() = keycount - 3 }, refreshColors)
+            ).Position(450.0f)
+
+            PrettySetting(
+                "ColorStyle",
+                Selector.FromEnum(
+                    { new ISettable<ColorScheme>() with
+                    override this.Set(v) = options.ColorStyle.Set({options.ColorStyle.Get() with Style = v})
+                    override this.Get() = options.ColorStyle.Get().Style }, refreshColors)
+            ).Position(550.0f)
+
+            PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
+            noteskins.Position(800.0f)
+            
+            PrettyButton("EditNoteskin",
+                fun () -> () //nyi
+            ).Position(900.0f)
+        ]
 
     let gameplay(add) =
         column [
@@ -403,7 +519,20 @@ module OptionsMenuTabs =
             //accuracy and hp systems
         ]
 
+    let topLevel(add) =
+        row [
+            BigButton(localise "System", fun () -> add("System", system(add))) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localise "Themes", fun () -> add("Themes", themes(add))) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localise "Gameplay", fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localise "Keybinds", ignore) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localise "Debug", ignore) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
+        ]
+
 open OptionsMenuTabs
+
+(*
+    Options dialog which manages the scrolling effect
+*)
 
 type OptionsMenu() as this =
     inherit Dialog()
@@ -435,21 +564,12 @@ type OptionsMenu() as this =
         let n = float32 n
         body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
 
-    let main =
-        row [
-            BigButton(localise "System", fun () -> add("System", system())) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Themes", ignore) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Gameplay", fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Keybinds", ignore) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Debug", ignore) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
-        ]
-
     do
         this.Add(body)
         this.Add(
             TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
             |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
-        add("Options", main)
+        add("Options", topLevel(add))
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

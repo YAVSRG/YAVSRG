@@ -147,7 +147,6 @@ module Components =
                     if t < bottom && b > top then c.Draw()
             Stencil.finish()
 
-        member this.Clear() = (for c in this.Children do c.Dispose()); this.Children.Clear()
         member this.Filter(f: Widget -> bool) = for c in this.Children do c.Enabled <- f c
         member this.Sort(comp: Comparison<Widget>) = this.Children.Sort(comp)
 

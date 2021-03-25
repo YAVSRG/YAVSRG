@@ -79,6 +79,7 @@ type Widget() =
         | None -> parent <- Some c
         | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one") ""
         
+    // Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
     abstract member Remove: Widget -> unit
     default this.Remove(c) =
         if children.Remove(c) then
@@ -90,11 +91,25 @@ type Widget() =
         | None -> Logging.Error("Tried to remove this widget from a container it isn't in one") ""
         | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another") ""
 
+    // Often we want to add/remove child widgets during an update method
+    //   But, we are in the middle of iterating through the children collection so we cannot modify it
+    // This trick queues up the action to take place immediately before the next update loop, making it loop-safe
+    //   The animations are thread-safe too - So when updating widgets from a background task use this.
     member this.Synchronized(action) =
         animation.Add(new AnimationAction(action))
 
+    // Destroys a widget by removing it from its parent, then disposing it (will be garbage collected)
+    // Note that this is safe to call inside an update/draw method
     member this.Destroy() =
-        this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Remove(this))
+        this.Parent.Value.Synchronized(fun () -> (this.Parent.Value.Remove(this); this.Dispose()))
+
+    // Clears all children from the widget (with the intention of them being garbage collected, not reused)
+    abstract member Clear: unit -> unit
+    default this.Clear() =
+        for c in children do 
+            c.OnRemovedFrom(this)
+            c.Dispose()
+        children.Clear()
 
     // Draw is called at the framerate of the game (normally unlimited) and should be where the widget performs render calls to draw it on screen
     abstract member Draw: unit -> unit
@@ -140,55 +155,31 @@ type Logo() as this =
         let struct (l, t, r, b) = this.Bounds
 
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.08f * w, t + 0.09f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(r - 0.08f * w, t + 0.09f * w))
-        <| Quad.colorOf(Color.DarkBlue)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.08f * w, t + 0.09f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(r - 0.08f * w, t + 0.09f * w)))
+            (Quad.colorOf(Color.DarkBlue))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.08f * w, t + 0.29f * w))
-            (new Vector2(l + 0.22f * w, t + 0.29f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.96875f * w))
-        <| Quad.colorOf(Color.DarkBlue)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.08f * w, t + 0.29f * w)) (new Vector2(l + 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
+            (Quad.colorOf(Color.DarkBlue))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(r - 0.08f * w, t + 0.29f * w))
-            (new Vector2(r - 0.22f * w, t + 0.29f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.96875f * w))
-        <| Quad.colorOf(Color.DarkBlue)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(r - 0.08f * w, t + 0.29f * w)) (new Vector2(r - 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
+            (Quad.colorOf(Color.DarkBlue))
+            Sprite.DefaultQuad
 
         Stencil.create(true)
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.1f * w, t + 0.1f * w))
-            (new Vector2(l + 0.5f * w, t + 0.75f * w))
-            (new Vector2(l + 0.5f * w, t + 0.75f * w))
-            (new Vector2(r - 0.1f * w, t + 0.1f * w))
-        <| Quad.colorOf(Color.Aqua)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.1f * w, t + 0.1f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(r - 0.1f * w, t + 0.1f * w)))
+            (Quad.colorOf(Color.Aqua))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.1f * w, t + 0.3f * w))
-            (new Vector2(l + 0.2f * w, t + 0.3f * w))
-            (new Vector2(l + 0.5f * w, t + 0.7875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.95f * w))
-        <| Quad.colorOf(Color.Aqua)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.1f * w, t + 0.3f * w)) (new Vector2(l + 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
+            (Quad.colorOf(Color.Aqua))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(r - 0.1f * w, t + 0.3f * w))
-            (new Vector2(r - 0.2f * w, t + 0.3f * w))
-            (new Vector2(l + 0.5f * w, t + 0.7875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.95f * w))
-        <| Quad.colorOf(Color.Aqua)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
+            (Quad.colorOf(Color.Aqua))
+            Sprite.DefaultQuad
         Draw.rect this.Bounds Color.White <| Themes.getTexture("logo")
 
         Stencil.draw()
@@ -197,9 +188,9 @@ type Logo() as this =
         let rain = Themes.getTexture("rain")
         let v = float32 counter.Time
         let q = Quad.ofRect this.Bounds
-        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f)rain q)
-        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f)rain q)
-        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f)rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255))  <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f) rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f) rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f) rain q)
 
         let mutable prev = 0.0f
         let m = b - w * 0.5f
@@ -210,13 +201,9 @@ type Logo() as this =
                 |> Seq.sum) * 0.1f
             let i = float32 i
             Draw.quad
-            <| Quad.create
-                (new Vector2(l + i * w / 32.0f, m - prev))
-                (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level))
-                (new Vector2(l + (i + 1.0f) * w / 32.0f, b))
-                (new Vector2(l + i * w / 32.0f, b))
-            <| Quad.colorOf(Color.FromArgb(127, 0, 0, 255))
-            <| (Sprite.DefaultQuad)
+                (Quad.create(new Vector2(l + i * w / 32.0f, m - prev)) (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level)) (new Vector2(l + (i + 1.0f) * w / 32.0f, b)) (new Vector2(l + i * w / 32.0f, b)))
+                (Quad.colorOf(Color.FromArgb(127, 0, 0, 255)))
+                Sprite.DefaultQuad
             prev <- level
 
         Stencil.finish()
