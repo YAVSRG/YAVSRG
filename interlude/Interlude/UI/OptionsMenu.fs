@@ -24,6 +24,15 @@ module OptionsMenu =
     type Selectable() =
         inherit Widget()
 
+        (*
+            - There is only one item hovered per widget
+            - This one item can be marked as selected
+            Invariants:
+                - (1) Only at most 1 leaf can be hovered
+                - (2) Selected leaves are a subset, so at most 1 leaf can be selected
+                - (3) The leaf that is hovered, if it exists, implies all its ancestors are selected
+                - (4) The leaf that is hovered, if it exists, implies all its non-ancestors are not selected
+        *) 
         let mutable hoverChild: Selectable option = None
         let mutable hoverSelected: bool = false
 
@@ -36,6 +45,7 @@ module OptionsMenu =
                     | Some c ->
                         if v <> c then
                             c.OnDeselect()
+                            c.OnDehover()
                             hoverChild <- value
                             v.OnSelect()
                     | None ->
@@ -53,8 +63,10 @@ module OptionsMenu =
         member this.HoverChild
             with get() = hoverChild
             and set(value) =
-                match this.SelectedChild with
-                | Some c -> c.OnDeselect()
+                match this.HoverChild with
+                | Some c ->
+                    if hoverSelected then c.OnDeselect()
+                    if Some c <> value then c.OnDehover()
                 | None -> ()
                 hoverChild <- value
                 hoverSelected <- false
@@ -105,6 +117,9 @@ module OptionsMenu =
 
         abstract member OnDeselect: unit -> unit
         default this.OnDeselect() = ()
+
+        abstract member OnDehover: unit -> unit
+        default this.OnDehover() = this.HoverChild <- None
 
     type NavigateSelectable() =
         inherit Selectable()
@@ -161,11 +176,13 @@ module OptionsMenu =
 
         override this.OnSelect() = base.OnSelect(); if lastHover.IsNone then this.HoverChild <- Some items.[0] else this.HoverChild <- lastHover
         override this.OnDeselect() = lastHover <- this.HoverChild; this.HoverChild <- None
+        override this.OnDehover() = base.OnDehover(); for i in items do i.OnDehover()
 
         override this.Left() = if horizontal then this.Previous()
         override this.Right() = if horizontal then this.Next()
         override this.Up() = if not horizontal then this.Previous()
         override this.Down() = if not horizontal then this.Next()
+
 
     (*
         Specific widgets to actually build options screen
@@ -279,6 +296,17 @@ module OptionsMenuTabs =
         do
             this.Add(widget |> positionWidgetA(TEXTWIDTH, 0.0f, 0.0f, 0.0f))
             this.Add(TextBox(K (localise name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f))
+
+        let mutable wasChildSelected = false
+        let mutable wasChildHover = false
+        //invariants:
+            //not selected => child not selected
+            //not hovered => child not hovered
+            //the moment child is hovered, this is hovered and child is not
+            
+            //HN, selected from above -> SS
+            //HN, selected from below -> SS
+            //HN, hovered from below -> SH -> HN
     
         member this.Position(y, width, height) =
             this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
@@ -292,10 +320,11 @@ module OptionsMenuTabs =
             base.Draw()
     
         override this.Update(elapsedTime, bounds) =
+            if widget.Hover && not widget.Selected && this.Selected then this.HoverChild <- None; this.Hover <- true
             base.Update(elapsedTime, bounds)
-            if this.Selected && this.SelectedChild.IsNone then this.Selected <- false
-    
-        override this.OnSelect() = this.SelectedChild <- Some widget
+        
+        override this.OnSelect() = if not widget.Hover then widget.Selected <- true
+        override this.OnDehover() = base.OnDehover(); widget.OnDehover()
     
     let system() =
         column [
