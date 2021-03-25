@@ -33,6 +33,7 @@ module OptionsMenu =
                 - (3) The leaf that is hovered, if it exists, implies all its ancestors are selected
                 - (4) The leaf that is hovered, if it exists, implies all its non-ancestors are not selected
         *) 
+
         let mutable hoverChild: Selectable option = None
         let mutable hoverSelected: bool = false
 
@@ -212,18 +213,18 @@ module OptionsMenu =
         do
             this.Add(new TextBox((fun () -> items.[index]), K (Color.White, Color.Black), 0.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-            this.Add(new Clickable((fun () -> if this.Selected then fd() else this.Selected <- true), fun b -> if b then this.Hover <- true))
+            this.Add(new Clickable((fun () -> (if not this.Selected then this.Selected <- true); fd()), fun b -> if b then this.Hover <- true))
 
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if this.Selected then
-                if options.Hotkeys.Next.Get().Tapped() then fd()
-                elif options.Hotkeys.Previous.Get().Tapped() then bk()
+        override this.Left() = bk()
+        override this.Down() = bk()
+        override this.Up() = fd()
+        override this.Right() = fd()
 
-        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: ISettable<'T>) =
+        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: ISettable<'T>, onDeselect) =
             let names = Enum.GetNames(typeof<'T>)
             let values = Enum.GetValues(typeof<'T>) :?> 'T array
-            new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])))
+            { new Selector(names, Array.IndexOf(values, setting.Get()), (fun (i, _) -> setting.Set(values.[i])))
+                with override this.OnDeselect() = base.OnDeselect(); onDeselect() }
 
         static member FromBool(setting: ISettable<bool>) =
             new Selector([|"NO" ; "YES"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)))
@@ -296,17 +297,6 @@ module OptionsMenuTabs =
         do
             this.Add(widget |> positionWidgetA(TEXTWIDTH, 0.0f, 0.0f, 0.0f))
             this.Add(TextBox(K (localise name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f))
-
-        let mutable wasChildSelected = false
-        let mutable wasChildHover = false
-        //invariants:
-            //not selected => child not selected
-            //not hovered => child not hovered
-            //the moment child is hovered, this is hovered and child is not
-            
-            //HN, selected from above -> SS
-            //HN, selected from below -> SS
-            //HN, hovered from below -> SH -> HN
     
         member this.Position(y, width, height) =
             this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
@@ -320,8 +310,8 @@ module OptionsMenuTabs =
             base.Draw()
     
         override this.Update(elapsedTime, bounds) =
-            if widget.Hover && not widget.Selected && this.Selected then this.HoverChild <- None; this.Hover <- true
             base.Update(elapsedTime, bounds)
+            if widget.Hover && not widget.Selected && this.Selected then this.HoverChild <- None; this.Hover <- true
         
         override this.OnSelect() = if not widget.Hover then widget.Selected <- true
         override this.OnDehover() = base.OnDehover(); widget.OnDehover()
@@ -332,13 +322,28 @@ module OptionsMenuTabs =
                 "AudioOffset",
                 { new Slider<float>(options.AudioOffset, 0.01f)
                     with override this.OnDeselect() = Audio.globalOffset <- float32 (options.AudioOffset.Get()) * 1.0f<ms> }
-            ).Position(200.0f);
+            ).Position(200.0f)
             
             PrettySetting(
                 "AudioVolume",
                 { new Slider<float>(options.AudioVolume, 0.01f)
                     with override this.OnDeselect() = Audio.changeVolume(options.AudioVolume.Get()) }
             ).Position(300.0f)
+
+            PrettySetting(
+                "WindowMode",
+                Selector.FromEnum(config.WindowMode, Options.applyOptions)
+            ).Position(400.0f)
+            //todo: way to edit resolution settings?
+
+            PrettySetting(
+                "FrameLimiter",
+                { new Selector(
+                    [|"UNLIMITED"; "30"; "60"; "90"; "120"; "240"|],
+                    int(config.FrameLimiter.Get() / 30.0) |> min(5),
+                    (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])) )
+                    with override this.OnDeselect() = base.OnDeselect(); Options.applyOptions() }
+            ).Position(500.0f)
         ]
 
 open OptionsMenuTabs
@@ -383,10 +388,10 @@ type OptionsMenu() as this =
         ]
 
     do
+        this.Add(body)
         this.Add(
             TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
             |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
-        this.Add(body)
         add("Options", main)
 
     override this.Update(elapsedTime, bounds) =
