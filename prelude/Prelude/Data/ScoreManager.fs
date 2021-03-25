@@ -106,7 +106,7 @@ module ScoreManager =
                             (h, t, r) :: []
                         else
                             (hash, timestamp, rating) :: []
-                    | [] -> []
+                    | [] -> (hash, timestamp, rating) :: []
                 | _ ->
                     match data with
                     | (h, t, r) :: xs ->
@@ -120,5 +120,5 @@ module ScoreManager =
                                 (h, t, r) :: (f (count - 1) xs)
                             else
                                 (hash, timestamp, rating) :: (h, t, r) :: (f (count - 2) xs)
-                    | [] -> []
+                    | [] -> (hash, timestamp, rating) :: []
             f count data

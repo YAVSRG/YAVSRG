@@ -9,7 +9,9 @@ open Prelude.Common
 
 module Themes =
 
-    //Default config values for themes, textures, noteskins, widget layouts
+    (*
+        Default config values for themes, textures, noteskins, widget layouts
+    *)
 
     type ThemeConfig = {
         JudgementColors: Color array
@@ -106,7 +108,9 @@ module Themes =
         type HitLighting = { AnimationTime: float; Expand: float32 }
         type ColumnLighting = { AnimationTime: float }
 
-    //Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
+    (*
+        Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
+    *)
 
     type StorageType = Zip of ZipArchive | Folder of string
 

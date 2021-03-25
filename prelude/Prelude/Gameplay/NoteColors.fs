@@ -33,6 +33,7 @@ module NoteColors =
     type Colorizer<'state> = 'state -> TimeDataItem<NoteRow> -> ('state * ColorData)
 
     type private ColorNoteRow = (struct (NoteRow * ColorData))
+    //todo: make this a record.
     type ColorizedChart = int * TimeData<ColorNoteRow> * TimeData<BPM> * MultiTimeData<float32> * string list
 
     let colorize ((keys, notes, bpm, sv, m) : ModChart) (initialState, col : Colorizer<'t>) =

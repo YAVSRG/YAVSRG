@@ -10,6 +10,7 @@ open Prelude.Gameplay.Score
     Representation of hand/keyboard layouts.
     Used in the difficulty calculation to model how some things strain your hand(s) differently depending on which fingers are used
 *)
+
 module Layout =
 
     type Layout = Spread = 0 | OneHand = 1 | LeftOne = 2 | RightOne = 3 | LeftTwo = 4 | RightTwo = 5 | BMSLeft = 6 | BMSRight = 7
@@ -120,6 +121,7 @@ module Layout =
     Difficulty calculation
     this is all old and bad and i will be rewriting it properly - this is just a port of the C# version
 *)
+
 module Difficulty =
     open Layout
 
