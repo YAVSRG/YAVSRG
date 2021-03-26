@@ -285,16 +285,40 @@ module OptionsMenu =
 
         override this.Draw() =
             base.Draw()
-            if this.Selected then
-                Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then
-                Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
             Draw.quad(this.Bounds |> Quad.ofRect)(Color.White |> Quad.colorOf)(sprite |> Sprite.gridUV(3, int <| color.Get()))
 
         override this.Left() = bk()
         override this.Up() = fd()
         override this.Right() = fd()
         override this.Down() = bk()
+
+    type KeyBinder(setting: ISettable<Bind>, allowModifiers) as this =
+        inherit Selectable()
+        do
+            this.Add(new TextBox((fun () -> setting.Get().ToString()), (fun () -> (if this.Selected then Screens.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
+            this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
+
+        override this.Draw() =
+            if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            Draw.rect(this.Bounds |> Rect.expand(0.0f, -40.0f))(Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+            base.Draw()
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if this.Selected then
+                match Input.consumeAny(InputEvType.Press) with
+                | ValueNone -> ()
+                | ValueSome b ->
+                    match b with
+                    | Key (k, (ctrl, _, shift)) ->
+                        if k = Keys.Escape then setting.Set(Dummy)
+                        elif allowModifiers then setting.Set(Key (k, (ctrl, false, shift)))
+                        else setting.Set(Key (k, (false, false, false)))
+                        this.Selected <- false
+                    | _ -> ()
 
     (*
         Utils for constructing menus easily
@@ -487,15 +511,15 @@ module OptionsMenuTabs =
             
             PrettySetting("HitPosition",
                 Slider(options.HitPosition :?> IntSetting, 0.005f)
-            ).Position(300.0f)
+            ).Position(280.0f)
 
             PrettySetting("Upscroll",
                 Selector.FromBool(options.Upscroll)
-            ).Position(400.0f)
+            ).Position(360.0f)
 
             PrettySetting("BackgroundDim",
                 Slider(options.BackgroundDim :?> FloatSetting, 0.01f)
-            ).Position(500.0f)
+            ).Position(440.0f)
 
             PrettyButton("ScreenCover", 
                 fun() ->
@@ -514,9 +538,40 @@ module OptionsMenuTabs =
                                 Slider(options.ScreenCoverFadeLength :?> IntSetting, 0.01f)
                             ).Position(400.0f)
                         ] )
-            ).Position(600.0f)
-            //pacemaker
-            //accuracy and hp systems
+            ).Position(520.0f)
+
+            PrettyButton("Pacemaker", ignore).Position(670.0f)
+            PrettyButton("ScoreSystems", ignore).Position(750.0f)
+            PrettyButton("LifeSystems", ignore).Position(830.0f)
+        ]
+
+    let keybinds(add) =
+        let mutable keycount = options.KeymodePreference.Get()
+    
+        let f keycount i =
+            let k = keycount - 3
+            { new ISettable<_>() with
+                override this.Set(v) = options.GameplayBinds.[k].[i] <- v
+                override this.Get() = options.GameplayBinds.[k].[i] }
+
+        let binds, refreshBinds =
+            refreshRow
+                (fun () -> keycount)
+                (fun i k ->
+                    let x = -60.0f * float32 k
+                    let n = float32 i
+                    KeyBinder(f keycount i, false)
+                    |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
+
+        column [
+            PrettySetting("Keymode",
+                Selector.FromKeymode(
+                    { new ISettable<int>() with
+                        override this.Set(v) = keycount <- v + 3
+                        override this.Get() = keycount - 3 }, refreshBinds)
+            ).Position(200.0f)
+            PrettySetting("GameplayBinds", binds).Position(300.0f, Render.vwidth - 200.0f, 120.0f)
+            //hotkeys
         ]
 
     let topLevel(add) =
@@ -524,7 +579,7 @@ module OptionsMenuTabs =
             BigButton(localise "System", fun () -> add("System", system(add))) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Themes", fun () -> add("Themes", themes(add))) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Gameplay", fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Keybinds", ignore) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localise "Keybinds", fun () -> add("Keybinds", keybinds(add))) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Debug", ignore) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
         ]
 

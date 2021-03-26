@@ -122,7 +122,6 @@ module Components =
                     vBounds <- Rect.translate(0.0f, bb - tb + spacing) vBounds
             let struct (_, t2, _, _) = vBounds
             contentSize <- t2 - t1
-            
 
         override this.Update(elapsedTime, bounds) =
             //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
