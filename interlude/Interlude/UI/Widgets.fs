@@ -270,6 +270,8 @@ type ScreenType =
 *)
 
 module Screens =
+    let mutable currentType = ScreenType.SplashScreen
+
     // All of these are initialised in ScreensMain.fs
     let mutable internal changeScreen: ScreenType * ScreenTransitionFlag -> unit = ignore
     let mutable internal newScreen: (unit -> Screen) * ScreenType * ScreenTransitionFlag -> unit = ignore

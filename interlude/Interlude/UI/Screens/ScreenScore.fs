@@ -49,7 +49,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
                     match hit.[k] with
                     | HitStatus.SpecialNG -> (0.0f, Themes.themeConfig.JudgementColors.[JudgementType.NG |> int])
                     | HitStatus.NotHit -> (0.0f, Themes.themeConfig.JudgementColors.[JudgementType.MISS |> int])
-                    | HitStatus.Hit -> (h + delta.[k] / MISSWINDOW * h, Themes.themeConfig.JudgementColors.[data.Accuracy.JudgeFunc(delta.[k] |> Prelude.Common.Time.Abs)|> int])
+                    | HitStatus.Hit -> (h - delta.[k] / MISSWINDOW * h, Themes.themeConfig.JudgementColors.[data.Accuracy.JudgeFunc(delta.[k] |> Prelude.Common.Time.Abs)|> int])
                     | _ -> (0.0f, Color.Transparent)
                 if col.A > 0uy then
                     Draw.rect(Rect.create(x - 2.5f)(top + y - 2.5f)(x + 2.5f)(top + y + 2.5f))(col)(Sprite.Default)
