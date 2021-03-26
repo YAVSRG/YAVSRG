@@ -108,7 +108,7 @@ module SelectionWheel =
         let sel() = (not horizontal && options.Hotkeys.Next.Get().Tapped()) || options.Hotkeys.Select.Get().Tapped()
         let desel() = options.Hotkeys.Exit.Get().Tapped()
 
-        member this.Clear() = index <- 0; Seq.iter (fun (w: ISelectable) -> w.Dispose(); this.Remove(w)) items; items.Clear()
+        override this.Clear() = index <- 0; Seq.iter (fun (w: ISelectable) -> w.Dispose(); this.Remove(w)) items; items.Clear()
         override this.DeselectChild() = Seq.iter (fun (w: ISelectable) -> if w.Selected then w.Deselect()) items
         override this.Select() = base.Select(); if items.[index].AutoSelect then items.[index].Select()
         override this.Deselect() = this.DeselectChild(); base.Deselect()
@@ -310,7 +310,7 @@ module ThemeSelector =
                             options.EnabledThemes.Add(name)), ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f)
         override this.Draw() =
-            Draw.rect(this.Bounds)(UI.Screens.accentShade(127, 1.0f, 0.0f))(Sprite.Default)
+            Draw.rect(this.Bounds)(Screens.accentShade(127, 1.0f, 0.0f))(Sprite.Default)
             base.Draw()
 
     and ThemeSelector() as this =
@@ -326,10 +326,8 @@ module ThemeSelector =
             this.Add(Button(this.Close, (Localisation.localise "options.select.Confirm"), options.Hotkeys.Select, Sprite.Default) |> positionWidget(-100.0f, 0.5f, -150.0f, 1.0f, 100.0f, 0.5f, -50.0f, 1.0f))
             Themes.refreshAvailableThemes()
             for t in Themes.availableThemes do
-                if options.EnabledThemes.Contains(t) |> not then
-                    available.Add(ThemeItem(t, this))
-            for t in options.EnabledThemes do
-                selected.Add(ThemeItem(t, this))
+                if options.EnabledThemes.Contains(t) then selected.Add(ThemeItem(t, this))
+                else available.Add(ThemeItem(t, this))
         member this.Selected: FlowContainer = selected
         member this.Available: FlowContainer = available
         override this.OnClose() =

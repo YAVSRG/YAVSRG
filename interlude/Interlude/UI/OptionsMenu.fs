@@ -36,6 +36,15 @@ module OptionsMenu =
         let mutable hoverChild: Selectable option = None
         let mutable hoverSelected: bool = false
 
+        abstract member SParent: Selectable option
+        default this.SParent =
+            match this.Parent with
+            | Some p ->
+                match p with
+                | :? Selectable as p -> Some p
+                | _ -> None
+            | None -> None
+
         member this.SelectedChild
             with get() = if hoverSelected then hoverChild else None
             and set(value) =
@@ -51,11 +60,8 @@ module OptionsMenu =
                     | None ->
                         hoverChild <- value
                         hoverSelected <- true
-                        match this.Parent with
-                        | Some p ->
-                            match p with
-                            | :? Selectable as p -> p.SelectedChild <- Some this
-                            | _ -> ()
+                        match this.SParent with
+                        | Some p -> p.SelectedChild <- Some this
                         | None -> ()
                         v.OnSelect()
                 | None -> this.HoverChild <- None
@@ -71,45 +77,28 @@ module OptionsMenu =
                 hoverChild <- value
                 hoverSelected <- false
                 if value.IsSome then
-                    match this.Parent with
-                    | Some p ->
-                        match p with
-                        | :? Selectable as p -> p.SelectedChild <- Some this
-                        | _ -> ()
+                    match this.SParent with
+                    | Some p -> p.SelectedChild <- Some this
                     | None -> ()
 
         member this.Selected
             with get() =
-                match this.Parent with
-                | Some p ->
-                    match p with
-                    | :? Selectable as p -> p.SelectedChild = Some this
-                    | _ -> true
+                match this.SParent with
+                | Some p -> p.SelectedChild = Some this
                 | None -> true
             and set(value) =
-                match this.Parent with
-                | Some p ->
-                    match p with
-                    | :? Selectable as p ->
-                        if value then p.SelectedChild <- Some this elif this.Hover then p.HoverChild <- Some this
-                    | _ -> ()
+                match this.SParent with
+                | Some p -> if value then p.SelectedChild <- Some this elif this.Hover then p.HoverChild <- Some this
                 | None -> ()
 
         member this.Hover
             with get() =
-                match this.Parent with
-                | Some p ->
-                    match p with
-                    | :? Selectable as p -> p.HoverChild = Some this
-                    | _ -> true
+                match this.SParent with
+                | Some p -> p.HoverChild = Some this
                 | None -> true
             and set(value) =
-                match this.Parent with
-                | Some p ->
-                    match p with
-                    | :? Selectable as p ->
-                        if value then p.HoverChild <- Some this elif this.Hover then p.HoverChild <- None
-                    | _ -> ()
+                match this.SParent with
+                | Some p -> if value then p.HoverChild <- Some this elif this.Hover then p.HoverChild <- None
                 | None -> ()
 
         abstract member OnSelect: unit -> unit
@@ -181,7 +170,7 @@ module OptionsMenu =
             | _ -> ()
 
         override this.OnSelect() = base.OnSelect(); if lastHover.IsNone then this.HoverChild <- Some items.[0] else this.HoverChild <- lastHover
-        override this.OnDeselect() = lastHover <- this.HoverChild; this.HoverChild <- None
+        override this.OnDeselect() = base.OnDeselect(); lastHover <- this.HoverChild; this.HoverChild <- None
         override this.OnDehover() = base.OnDehover(); for i in items do i.OnDehover()
 
         override this.Left() = if horizontal then this.Previous()
@@ -320,6 +309,130 @@ module OptionsMenu =
                         this.Selected <- false
                     | _ -> ()
 
+    module ListOrderedSelect =
+        type ListOrderedItem(name, selector: ListOrderedSelector) as this =
+            inherit NavigateSelectable()
+
+            do
+                this.Add(TextBox(K name, K (Color.White, Color.Black), 0.5f))
+                this.Add(Clickable((fun () -> (if not this.Selected then this.Selected <- true); this.Left()), fun b -> if b then this.Hover <- true))
+                this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
+
+            override this.Draw() =
+                if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.4f)) Sprite.Default
+                elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.1f)) Sprite.Default
+                else Draw.rect this.Bounds (Screens.accentShade(180, 0.6f, 0.0f)) Sprite.Default
+                base.Draw()
+
+            override this.SParent = Some (selector :> Selectable)
+
+            member this.Name = name
+
+            override this.Up() =
+                let p = this.Parent.Value
+                match p with
+                | e when e = selector.Chosen ->
+                    let c = p.Children
+                    match c.IndexOf(this) with
+                    | 0 -> ()
+                    | n -> p.Synchronized(fun () -> c.Reverse(n - 1, 2))
+                | _ -> ()
+
+            override this.Down() =
+                let p = this.Parent.Value
+                match p with
+                | e when e = selector.Chosen ->
+                    let c = p.Children
+                    match c.IndexOf(this) with
+                    | x when x + 1 = c.Count -> ()
+                    | n -> p.Synchronized(fun () -> c.Reverse(n, 2))
+                | _ -> ()
+
+            override this.Left() =
+                let p = this.Parent.Value
+                let o = 
+                    match p with
+                    | e when e = selector.Chosen -> selector.Available
+                    | a when a = selector.Available -> selector.Chosen
+                    | _ -> failwith "impossible"
+                p.Synchronized(fun () -> p.Remove(this); o.Add(this))
+            override this.Right() = this.Left()
+                
+        and ListOrderedSelector(setting: ISettable<ResizeArray<string>>, items: ResizeArray<string>) as this =
+            inherit NavigateSelectable()
+
+            let available = new FlowContainer() :> Widget
+            let selected = new FlowContainer() :> Widget
+            
+            do
+                this.Add(TextBox(K (Localisation.localise "options.select.Available"), K (Color.White, Color.Black), 0.5f)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 50.0f, 0.0f) )
+                this.Add(
+                    available |> Frame.Create
+                    |> positionWidget(20.0f, 0.0f, 50.0f, 0.0f, -20.0f, 0.5f, -20.0f, 1.0f) )
+                this.Add(TextBox(K (Localisation.localise "options.select.Selected"), K (Color.White, Color.Black), 0.5f)
+                    |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 50.0f, 0.0f) )
+                this.Add(
+                    selected |> Frame.Create
+                    |> positionWidget(20.0f, 0.5f, 50.0f, 0.0f, -20.0f, 1.0f, -20.0f, 1.0f) )
+                let enabled = setting.Get()
+                for s in items do
+                    if enabled.Contains(s) |> not then
+                        available.Add(ListOrderedItem(s, this))
+                for s in enabled do
+                    selected.Add(ListOrderedItem(s, this))
+
+            override this.OnSelect() =
+                if available.Children.Count > 0 then
+                    this.HoverChild <- Some (available.Children.[0] :?> Selectable)
+            override this.OnDeselect() =
+                base.OnDeselect()
+                this.HoverChild <- None
+                this.Available.Children
+                |> Seq.map (fun c -> (c :?> ListOrderedItem).Name)
+                |> ResizeArray
+                |> setting.Set
+
+            override this.Up() =
+                match this.HoverChild with
+                | Some c ->
+                    let l =
+                        match c.Parent.Value with
+                        | a when a = available -> a.Children
+                        | e when e = selected -> e.Children
+                        | _ -> failwith "impossible"
+                    let i = l.IndexOf(c)
+                    this.HoverChild <- Some (l.[(i + l.Count - 1) % l.Count] :?> Selectable)
+                | None -> ()
+
+            override this.Down() =
+                match this.HoverChild with
+                | Some c ->
+                    let l =
+                        match c.Parent.Value with
+                        | a when a = available -> a.Children
+                        | e when e = selected -> e.Children
+                        | _ -> failwith "impossible"
+                    let i = l.IndexOf(c)
+                    this.HoverChild <- Some (l.[(i + 1) % l.Count] :?> Selectable)
+                | None -> ()
+
+            override this.Left() =
+                match this.HoverChild with
+                | Some c ->
+                    let l =
+                        match c.Parent.Value with
+                        | a when a = available -> selected.Children
+                        | e when e = selected -> available.Children
+                        | _ -> failwith "impossible"
+                    //maybe todo: index matching when moving across?
+                    if l.Count > 0 then this.HoverChild <- Some (l.[0] :?> Selectable)
+                | None -> ()
+            override this.Right() = this.Left()
+
+            member this.Chosen = selected
+            member this.Available = available
+
     (*
         Utils for constructing menus easily
     *)
@@ -416,24 +529,16 @@ module OptionsMenuTabs =
     
     let system(add) =
         column [
-            PrettySetting(
-                "AudioOffset",
+            PrettySetting("AudioOffset",
                 { new Slider<float>(options.AudioOffset, 0.01f)
                     with override this.OnDeselect() = Audio.globalOffset <- float32 (options.AudioOffset.Get()) * 1.0f<ms> }
             ).Position(200.0f)
-            
-            PrettySetting(
-                "AudioVolume",
+            PrettySetting("AudioVolume",
                 { new Slider<float>(options.AudioVolume, 0.01f)
                     with override this.OnDeselect() = Audio.changeVolume(options.AudioVolume.Get()) }
             ).Position(300.0f)
-
-            PrettySetting(
-                "WindowMode",
-                Selector.FromEnum(config.WindowMode, Options.applyOptions)
-            ).Position(400.0f)
+            PrettySetting("WindowMode", Selector.FromEnum(config.WindowMode, Options.applyOptions)).Position(400.0f)
             //todo: way to edit resolution settings?
-
             PrettySetting(
                 "FrameLimiter",
                 { new Selector(
@@ -442,6 +547,23 @@ module OptionsMenuTabs =
                     (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun (i, _) -> config.FrameLimiter.Set(e.[i])) )
                     with override this.OnDeselect() = base.OnDeselect(); Options.applyOptions() }
             ).Position(500.0f)
+        ]
+
+    let themeChanger(add, refreshNoteskins) =
+        Themes.refreshAvailableThemes()
+        column [
+            PrettySetting("ChooseTheme",
+                ListOrderedSelect.ListOrderedSelector(
+                    { new ISettable<_>() with 
+                        override this.Set(v) =
+                            options.EnabledThemes.Clear()
+                            options.EnabledThemes.AddRange(v)
+                            Themes.loadThemes(options.EnabledThemes)
+                            refreshNoteskins()
+                        override this.Get() = options.EnabledThemes }, Themes.availableThemes )
+            ).Position(200.0f, PRETTYWIDTH, 500.0f)
+            PrettyButton("OpenThemeFolder", ignore).Position(800.0f)
+            PrettyButton("NewTheme", ignore).Position(900.0f)
         ]
 
     let themes(add) =
@@ -472,21 +594,14 @@ module OptionsMenuTabs =
         refreshNoteskins()
 
         column [
-            PrettyButton("ChangeTheme",
-                fun () -> () //nyi
-            ).Position(200.0f)
-            
-            PrettyButton("EditTheme",
-                fun () -> () //nyi
-            ).Position(300.0f)
-
+            PrettyButton("ChangeTheme", fun () -> add("ChangeTheme", themeChanger(add, refreshNoteskins))).Position(200.0f)
+            PrettyButton("EditTheme", ignore).Position(300.0f)
             PrettySetting("Keymode",
                 Selector.FromKeymode(
                     { new ISettable<int>() with
                         override this.Set(v) = keycount <- v + 3
                         override this.Get() = keycount - 3 }, refreshColors)
             ).Position(450.0f)
-
             PrettySetting(
                 "ColorStyle",
                 Selector.FromEnum(
@@ -494,33 +609,17 @@ module OptionsMenuTabs =
                     override this.Set(v) = options.ColorStyle.Set({options.ColorStyle.Get() with Style = v})
                     override this.Get() = options.ColorStyle.Get().Style }, refreshColors)
             ).Position(550.0f)
-
             PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
             noteskins.Position(800.0f)
-            
-            PrettyButton("EditNoteskin",
-                fun () -> () //nyi
-            ).Position(900.0f)
+            PrettyButton("EditNoteskin", ignore).Position(900.0f)
         ]
 
     let gameplay(add) =
         column [
-            PrettySetting("ScrollSpeed",
-                Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)
-            ).Position(200.0f)
-            
-            PrettySetting("HitPosition",
-                Slider(options.HitPosition :?> IntSetting, 0.005f)
-            ).Position(280.0f)
-
-            PrettySetting("Upscroll",
-                Selector.FromBool(options.Upscroll)
-            ).Position(360.0f)
-
-            PrettySetting("BackgroundDim",
-                Slider(options.BackgroundDim :?> FloatSetting, 0.01f)
-            ).Position(440.0f)
-
+            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(200.0f)
+            PrettySetting("HitPosition", Slider(options.HitPosition :?> IntSetting, 0.005f)).Position(280.0f)
+            PrettySetting("Upscroll", Selector.FromBool(options.Upscroll)).Position(360.0f)
+            PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
             PrettyButton("ScreenCover", 
                 fun() ->
                     //todo: preview of what screencover looks like
@@ -539,7 +638,6 @@ module OptionsMenuTabs =
                             ).Position(400.0f)
                         ] )
             ).Position(520.0f)
-
             PrettyButton("Pacemaker", ignore).Position(670.0f)
             PrettyButton("ScoreSystems", ignore).Position(750.0f)
             PrettyButton("LifeSystems", ignore).Position(830.0f)
@@ -570,8 +668,8 @@ module OptionsMenuTabs =
                         override this.Set(v) = keycount <- v + 3
                         override this.Get() = keycount - 3 }, refreshBinds)
             ).Position(200.0f)
-            PrettySetting("GameplayBinds", binds).Position(300.0f, Render.vwidth - 200.0f, 120.0f)
-            //hotkeys
+            PrettySetting("GameplayBinds", binds).Position(280.0f, Render.vwidth - 200.0f, 120.0f)
+            PrettyButton("Hotkeys", ignore).Position(400.0f)
         ]
 
     let topLevel(add) =
@@ -621,8 +719,7 @@ type OptionsMenu() as this =
 
     do
         this.Add(body)
-        this.Add(
-            TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
+        this.Add(TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
             |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
         add("Options", topLevel(add))
 
