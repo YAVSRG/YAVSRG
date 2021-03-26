@@ -181,6 +181,8 @@ module ScreenImport =
             downloadJson(s, callback)
 
 open ScreenImport
+open System.Net
+open System.Net.Security
 
 type ScreenImport() as this =
     inherit Screen()
@@ -188,6 +190,15 @@ type ScreenImport() as this =
         (*
             Online downloaders
         *)
+
+        // EtternaOnline's certificate expired on 18th March 2021
+        // This hack trusts EO's SSL certificate even though it has expired
+        ServicePointManager.ServerCertificateValidationCallback <-
+            RemoteCertificateValidationCallback(
+                fun _ cert _ sslPolicyErrors ->
+                    if sslPolicyErrors = SslPolicyErrors.None then true
+                    else cert.GetCertHashString().ToLower() = "9e600748d9e989c31e43b32d1fdee21b797a8467" )
+
         let eoDownloads = 
             SearchContainer(
                 (fun flowContainer output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> flowContainer.Synchronized(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
