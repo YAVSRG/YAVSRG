@@ -216,7 +216,6 @@ type ScreenImport() as this =
             Offline importers from other games
         *)
         //todo: system that only imports folders modified after a certain date - that date being last import time
-        //todo: prevent starting another import for a game while it's already running
         let mutable importingOsu = false
         let mutable importingSM = false
         let mutable importingEtterna = false

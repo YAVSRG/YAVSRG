@@ -176,8 +176,8 @@ type GameOptions = {
         UseKeymodePreference = Setting(false)
 
         Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-        HPSystems = Setting((0, [VG]))
-        AccSystems = Setting((0, [SCPlus 4]))
+        HPSystems = Setting(0, [VG])
+        AccSystems = Setting(0, [SCPlus 4])
         ScoreSaveCondition = Setting(ScoreSaving.Always)
         FailCondition = Setting(FailType.EndOfSong)
         Pacemaker = Setting(Accuracy 0.95)

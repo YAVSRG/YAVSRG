@@ -433,6 +433,19 @@ module OptionsMenu =
             member this.Chosen = selected
             member this.Available = available
 
+    type DUEditor<'T>(options, index, setter, controls: Widget array array) as this =
+        inherit Selector(options, index, fun (i, s) -> this.ChangeU(i); setter(i, s))
+
+        let mutable current = index
+        override this.OnAddedTo(p) =
+            base.OnAddedTo(p)
+            p.Synchronized(fun () -> for w in controls.[index] do this.SParent.Value.SParent.Value.Add(w))
+
+        member this.ChangeU(newIndex) =
+            for w in controls.[current] do this.SParent.Value.SParent.Value.Remove(w)
+            for w in controls.[newIndex] do this.SParent.Value.SParent.Value.Add(w)
+            current <- newIndex
+
     (*
         Utils for constructing menus easily
     *)
@@ -482,6 +495,16 @@ module OptionsMenuTabs =
     let PRETTYHEIGHT = 80.0f
     let PRETTYWIDTH = 1200.0f
 
+    type Divider() =
+        inherit Widget()
+
+        member this.Position(y) =
+            this |> positionWidget(100.0f, 0.0f, y - 5.0f, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + 5.0f, 0.0f)
+
+        override this.Draw() =
+            base.Draw()
+            Draw.quad (Quad.ofRect this.Bounds) (struct(Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White)) Sprite.DefaultQuad
+
     type PrettySetting(name, widget: Selectable) as this =
         inherit Selectable()
 
@@ -514,7 +537,6 @@ module OptionsMenuTabs =
             widget.Destroy()
             widget <- w
             this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
-            
 
     type PrettyButton(name, action) as this =
         inherit Selectable()
@@ -563,6 +585,7 @@ module OptionsMenuTabs =
                             refreshColors()
                         override this.Get() = options.EnabledThemes }, Themes.availableThemes )
             ).Position(200.0f, PRETTYWIDTH, 500.0f)
+            Divider().Position(750.0f)
             PrettyButton("OpenThemeFolder", ignore).Position(800.0f)
             PrettyButton("NewTheme", ignore).Position(900.0f)
         ]
@@ -615,6 +638,31 @@ module OptionsMenuTabs =
             PrettyButton("EditNoteskin", ignore).Position(900.0f)
         ]
 
+    let pacemaker(add) =
+        column [
+            PrettySetting("PacemakerType",
+                DUEditor(
+                    [|"ACCURACY"; "LAMP"|],
+                    (match options.Pacemaker.Get() with
+                    | Accuracy _ -> 0
+                    | Lamp _ -> 1),
+                    (fun (i, s) ->
+                        if i <> 0 then options.Pacemaker.Set(Lamp Prelude.Gameplay.Score.Lamp.SDCB)
+                        else options.Pacemaker.Set(Accuracy 0.95)),
+                    [|
+                        [|PrettySetting("PacemakerAccuracy",
+                            Slider(
+                                { new FloatSetting(0.95, 0.0, 1.0) with
+                                    override this.Get() = match options.Pacemaker.Get() with Accuracy v -> v | Lamp l -> 0.0
+                                    override this.Set(v) = options.Pacemaker.Set(Accuracy (Math.Clamp(Math.Round(v, 2), 0.0, 1.0))) }, 0.01f) ).Position(300.0f) |]
+                        [|PrettySetting("PacemakerLamp",
+                            Selector.FromEnum(
+                                { new ISettable<Prelude.Gameplay.Score.Lamp>() with
+                                    override this.Get() = match options.Pacemaker.Get() with Accuracy v -> Prelude.Gameplay.Score.Lamp.NONE | Lamp l -> l
+                                    override this.Set(v) = options.Pacemaker.Set(Lamp v) }, ignore) ).Position(300.0f) |] |] )
+            ).Position(200.0f)
+        ]
+
     let gameplay(add) =
         column [
             PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(200.0f)
@@ -626,20 +674,12 @@ module OptionsMenuTabs =
                     //todo: preview of what screencover looks like
                     add("ScreenCover",
                         column [
-                            PrettySetting("ScreenCoverUp",
-                                Slider(options.ScreenCoverUp :?> FloatSetting, 0.01f)
-                            ).Position(200.0f)
-
-                            PrettySetting("ScreenCoverDown",
-                                Slider(options.ScreenCoverDown :?> FloatSetting, 0.01f)
-                            ).Position(300.0f)
-                            
-                            PrettySetting("ScreenCoverFadeLength",
-                                Slider(options.ScreenCoverFadeLength :?> IntSetting, 0.01f)
-                            ).Position(400.0f)
-                        ] )
+                            PrettySetting("ScreenCoverUp", Slider(options.ScreenCoverUp :?> FloatSetting, 0.01f)).Position(200.0f)
+                            PrettySetting("ScreenCoverDown", Slider(options.ScreenCoverDown :?> FloatSetting, 0.01f)).Position(300.0f)
+                            PrettySetting("ScreenCoverFadeLength", Slider(options.ScreenCoverFadeLength :?> IntSetting, 0.01f)).Position(400.0f)
+                        ])
             ).Position(520.0f)
-            PrettyButton("Pacemaker", ignore).Position(670.0f)
+            PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker(add))).Position(670.0f)
             PrettyButton("ScoreSystems", ignore).Position(750.0f)
             PrettyButton("LifeSystems", ignore).Position(830.0f)
         ]
