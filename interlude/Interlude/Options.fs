@@ -108,7 +108,17 @@ type FailType =
 | Instant = 0
 | EndOfSong = 1
 
-type ListSelection<'T> = int * 'T list
+type WatcherSelection<'T> = 'T * 'T list
+module WatcherSelection =
+    let cycleForward (main, alts) =
+        match alts with
+        | [] -> (main, alts)
+        | x :: xs -> (x, xs @ [main])
+
+    let rec cycleBackward (main, alts) =
+        match alts with
+        | [] -> (main, alts)
+        | x :: xs -> let (m, a) = cycleBackward (x, xs) in (m, main :: a)
 
 type ProfileStats = {
     TopPhysical: Setting<TopScore list>
@@ -140,8 +150,8 @@ type GameOptions = {
     NoteSkin: Setting<string>
 
     Playstyles: Layout array
-    HPSystems: Setting<ListSelection<HPSystemConfig>>
-    AccSystems: Setting<ListSelection<AccuracySystemConfig>>
+    HPSystems: Setting<WatcherSelection<HPSystemConfig>>
+    AccSystems: Setting<WatcherSelection<AccuracySystemConfig>>
     ScoreSaveCondition: Setting<ScoreSaving>
     FailCondition: Setting<FailType>
     Pacemaker: Setting<Pacemaker>
@@ -176,8 +186,8 @@ type GameOptions = {
         UseKeymodePreference = Setting(false)
 
         Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-        HPSystems = Setting(0, [VG])
-        AccSystems = Setting(0, [SCPlus 4])
+        HPSystems = Setting(VG, [])
+        AccSystems = Setting(SCPlus (4, false), [])
         ScoreSaveCondition = Setting(ScoreSaving.Always)
         FailCondition = Setting(FailType.EndOfSong)
         Pacemaker = Setting(Accuracy 0.95)

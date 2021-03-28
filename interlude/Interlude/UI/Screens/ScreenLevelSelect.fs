@@ -107,7 +107,7 @@ module ScreenLevelSelect =
             | Some d ->
                 for score in d.Scores do
                     empty <- false
-                    flowContainer.Add(new ScoreCard(new ScoreInfoProvider(score, currentChart.Value)))
+                    flowContainer.Add(new ScoreCard(new ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)))
 
     type SelectableItem(content: Choice<string * CachedChart, string * SelectableItem list>) =
         
@@ -249,6 +249,7 @@ type ScreenLevelSelect() as this =
     let scoreboard = new Scoreboard()
 
     let refresh() =
+        scoreSystem <- (options.AccSystems.Get() |> fst).ToString()
         let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()

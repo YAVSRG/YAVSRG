@@ -371,8 +371,8 @@ type ScreenPlay() as this =
     
     let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
     let scoreData = Gameplay.createScoreData()
-    let scoring = createAccuracyMetric(SCPlus 4)
-    let hp = createHPMetric VG scoring
+    let scoring = createAccuracyMetric(options.AccSystems.Get() |> fst)
+    let hp = createHPMetric (options.HPSystems.Get() |> fst) scoring
     let onHit = new Event<HitEvent>()
     let widgetHelper: Helper = { Scoring = scoring; HP = hp; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[keys - 3]
@@ -516,7 +516,8 @@ type ScreenPlay() as this =
             noteSeek <- noteSeek + 1 //hack to prevent running this code twice
             ((fun () ->
                 let sd =
-                    (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value)
+                    (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)
+                    //todo: set score system instances to save recalculation
                     |> ScoreInfoProvider
                 (sd, Gameplay.setScore(sd))
                 |> ScreenScore

@@ -4,6 +4,7 @@ open System
 open System.Drawing
 open OpenTK
 open Prelude.Gameplay.NoteColors
+open Prelude.Gameplay.Score
 open Prelude.Common
 open Interlude.Options
 open Interlude.Render
@@ -180,19 +181,25 @@ module OptionsMenu =
 
         override this.Clear() = base.Clear(); items.Clear()
 
-
     (*
         Specific widgets to actually build options screen
     *)
 
     type BigButton(label, onClick) as this =
         inherit Selectable()
-
         do
             this.Add(Frame((fun () -> Screens.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
             this.Add(TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 0.8f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
+        override this.OnSelect() =
+            this.Selected <- false
+            onClick()
 
+    type LittleButton(label, onClick) as this = 
+        inherit Selectable()
+        do
+            this.Add(TextBox(K label, (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black)), 0.5f))
+            this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
         override this.OnSelect() =
             this.Selected <- false
             onClick()
@@ -433,7 +440,7 @@ module OptionsMenu =
             member this.Chosen = selected
             member this.Available = available
 
-    type DUEditor<'T>(options, index, setter, controls: Widget array array) as this =
+    type DUEditor(options, index, setter, controls: Widget array array) as this =
         inherit Selector(options, index, fun (i, s) -> this.ChangeU(i); setter(i, s))
 
         let mutable current = index
@@ -445,6 +452,66 @@ module OptionsMenu =
             for w in controls.[current] do this.SParent.Value.SParent.Value.Remove(w)
             for w in controls.[newIndex] do this.SParent.Value.SParent.Value.Add(w)
             current <- newIndex
+
+    module WatcherSelect =
+
+        type WatcherSelectorItem<'T>(item: 'T, name, selector: WatcherSelector<'T>) as this =
+            inherit ListSelectable(true)
+            do
+                this.Add(new TextBox((fun () -> name ((this.Setting : Setting<'T>).Get())), K (Color.White, Color.Black), 0.0f)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, -50.0f, 1.0f))
+                this.Add(new LittleButton(Localisation.localise("options.wselect.Edit"), fun () -> selector.EditItem this)
+                    |> positionWidget(20.0f, 0.0f, -50.0f, 1.0f, 100.0f, 0.0f, -20.0f, 1.0f))
+                this.Add(new LittleButton(Localisation.localise("options.wselect.Duplicate"), fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Get(), name, selector)))
+                    |> positionWidget(120.0f, 0.0f, -50.0f, 1.0f, 200.0f, 0.0f, -20.0f, 1.0f))
+                this.Add(new LittleButton(Localisation.localise("options.wselect.MakeMain"), fun () -> selector.Main <- this)
+                    |> positionWidget(220.0f, 0.0f, -50.0f, 1.0f, 300.0f, 0.0f, -20.0f, 1.0f))
+                this.Add(new LittleButton(Localisation.localise("options.wselect.Delete"), fun () -> if selector.Main <> this then this.Destroy(); this.SParent.Value.SelectedChild <- None)
+                    |> positionWidget(320.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f, -20.0f, 1.0f))
+                this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 120.0f, 0.0f) |> ignore
+            member val Setting = new Setting<'T>(item)
+            override this.SParent = Some (selector :> Selectable)
+
+            override this.Draw() =
+                if selector.Main = this then Draw.rect this.Bounds (Screens.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+                if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
+                elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
+                base.Draw()
+
+        and WatcherSelector<'T>(source: Setting<WatcherSelection<'T>>, editor: ISettable<'T> -> Selectable, name: 'T -> string, add: string * Selectable -> unit) as this =
+            inherit NavigateSelectable()
+            let items = source.Get() |> fun (a, b) -> a :: b |> List.map (fun x -> WatcherSelectorItem<'T>(x, name, this))
+            let mutable currentMain = items.Head
+
+            let fc = FlowContainer()
+            do
+                this.Add(fc)
+                items |> List.iter fc.Add
+
+            override this.Up() =
+                match this.HoverChild with
+                | Some s ->
+                    let i = fc.Children.IndexOf(s)
+                    this.HoverChild <- fc.Children.[(i - 1 + fc.Children.Count) % fc.Children.Count] :?> Selectable |> Some
+                | None -> ()
+            override this.Down() =
+                match this.HoverChild with
+                | Some s ->
+                    let i = fc.Children.IndexOf(s)
+                    this.HoverChild <- fc.Children.[(i + 1) % fc.Children.Count] :?> Selectable |> Some
+                | None -> ()
+
+            member this.EditItem(item: WatcherSelectorItem<'T>) = add("EditItem", editor(item.Setting))
+            member this.Main with get() = currentMain and set(v) = currentMain <- v
+
+            override this.OnSelect() =
+                this.HoverChild <- Some (currentMain :> Selectable)
+
+            override this.OnDeselect() =
+                base.OnDeselect()
+                let x = currentMain.Setting.Get()
+                let xs = fc.Children |> Seq.map (fun w -> w :?> WatcherSelectorItem<'T>) |> List.ofSeq |> List.choose (fun i -> if currentMain = i then None else Some <| i.Setting.Get())
+                source.Set(x, xs)
 
     (*
         Utils for constructing menus easily
@@ -647,7 +714,7 @@ module OptionsMenuTabs =
                     | Accuracy _ -> 0
                     | Lamp _ -> 1),
                     (fun (i, s) ->
-                        if i <> 0 then options.Pacemaker.Set(Lamp Prelude.Gameplay.Score.Lamp.SDCB)
+                        if i <> 0 then options.Pacemaker.Set(Lamp Lamp.SDCB)
                         else options.Pacemaker.Set(Accuracy 0.95)),
                     [|
                         [|PrettySetting("PacemakerAccuracy",
@@ -657,13 +724,91 @@ module OptionsMenuTabs =
                                     override this.Set(v) = options.Pacemaker.Set(Accuracy (Math.Clamp(Math.Round(v, 2), 0.0, 1.0))) }, 0.01f) ).Position(300.0f) |]
                         [|PrettySetting("PacemakerLamp",
                             Selector.FromEnum(
-                                { new ISettable<Prelude.Gameplay.Score.Lamp>() with
-                                    override this.Get() = match options.Pacemaker.Get() with Accuracy v -> Prelude.Gameplay.Score.Lamp.NONE | Lamp l -> l
+                                { new ISettable<Lamp>() with
+                                    override this.Get() = match options.Pacemaker.Get() with Accuracy v -> Lamp.NONE | Lamp l -> l
                                     override this.Set(v) = options.Pacemaker.Set(Lamp v) }, ignore) ).Position(300.0f) |] |] )
             ).Position(200.0f)
         ]
 
-    let gameplay(add) =
+    let scoreSystems(add) =
+        let judge (s: ISettable<AccuracySystemConfig>) =
+            PrettySetting("Judge",
+                Slider(
+                    { new IntSetting(4, 1, 9) with
+                        override this.Get() = match s.Get() with SC (j, _) | SCPlus (j, _) | Wife (j, _) | DP (j, _) -> j | _ -> 4
+                        override this.Set(v) =
+                            match s.Get() with
+                            | SC (_, r) -> SC (v, r)
+                            | SCPlus (_, r) -> SCPlus (v, r)
+                            | Wife (_, r) -> Wife (v, r)
+                            | DP (_, r) -> DP (v, r)
+                            | _ -> SC (v, false) 
+                            |> s.Set }, 0.1f)
+            ).Position(300.0f)
+        
+        let ridiculous (s: ISettable<AccuracySystemConfig>) =
+            PrettySetting("EnableRidiculous",
+                Selector.FromBool(
+                    { new Setting<bool>(false) with
+                        override this.Get() = match s.Get() with SC (_, r) | SCPlus (_, r) | Wife (_, r) | DP (_, r) -> r | _ -> false
+                        override this.Set(r) =
+                            match s.Get() with
+                            | SC (j, _) -> SC (j, r)
+                            | SCPlus (j, _) -> SCPlus (j, r)
+                            | Wife (j, _) -> Wife (j, r)
+                            | DP (j, _) -> DP (j, r)
+                            | _ -> SC (4, r) 
+                            |> s.Set })
+            ).Position(400.0f)
+
+        let overallDifficulty (s: ISettable<AccuracySystemConfig>) =
+            PrettySetting("OverallDifficulty",
+                Slider(
+                    { new FloatSetting(8.0, 0.0, 10.0) with
+                        override this.Get() = match s.Get() with OM od -> float od | _ -> 8.0
+                        override this.Set(v) = s.Set(OM (float32 v)) }, 0.05f)
+            ).Position(300.0f)
+
+        let editor (s: ISettable<AccuracySystemConfig>) =
+            let judge = judge s
+            let ridiculous = ridiculous s
+            let overallDifficulty = overallDifficulty s
+            column [
+                PrettySetting("ScoreSystemType",
+                    DUEditor(
+                        [|"SC"; "SC+"; "WIFE"; "DP"; "OSUMANIA"|],
+                        (match s.Get() with SC _ -> 0 | SCPlus _ -> 1 | Wife _ -> 2 | DP _ -> 3 | OM _ -> 4 | _ -> 0),
+                        (fun (i, _) ->
+                            match s.Get() with
+                            | SC (j, r) | SCPlus (j, r) | Wife (j, r) | DP (j, r) ->
+                                match i with
+                                | 1 -> SCPlus (j, r)
+                                | 2 -> Wife (j, r)
+                                | 3 -> DP (j, r)
+                                | 4 -> OM 8.0f
+                                | _ -> SC (j, r)
+                            | _ ->
+                                match i with
+                                | 1 -> SCPlus (4, false)
+                                | 2 -> Wife (4, false)
+                                | 3 -> DP (4, false)
+                                | 4 -> OM 8.0f
+                                | _ -> SC (4, false)
+                            |> s.Set),
+                        [|
+                            [|judge; ridiculous|]; [|judge; ridiculous|]; [|judge; ridiculous|]; [|judge; ridiculous|]
+                            [|overallDifficulty|]
+                        |]
+                )).Position(200.0f)
+            ] :> Selectable
+
+        column [
+            PrettySetting("ScoreSystems",
+                WatcherSelect.WatcherSelector(options.AccSystems, editor, (fun o -> o.ToString()), add)
+            ).Position(200.0f, PRETTYWIDTH, 800.0f)
+        ]
+
+    let gameplay(add: string * Selectable -> unit) =
         column [
             PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(200.0f)
             PrettySetting("HitPosition", Slider(options.HitPosition :?> IntSetting, 0.005f)).Position(280.0f)
@@ -680,7 +825,7 @@ module OptionsMenuTabs =
                         ])
             ).Position(520.0f)
             PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker(add))).Position(670.0f)
-            PrettyButton("ScoreSystems", ignore).Position(750.0f)
+            PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(750.0f)
             PrettyButton("LifeSystems", ignore).Position(830.0f)
         ]
 
@@ -713,7 +858,7 @@ module OptionsMenuTabs =
             PrettyButton("Hotkeys", ignore).Position(400.0f)
         ]
 
-    let topLevel(add) =
+    let topLevel(add: string * Selectable -> unit) =
         row [
             BigButton(localise "System", fun () -> add("System", system(add))) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Themes", fun () -> add("Themes", themes(add))) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
@@ -770,5 +915,5 @@ type OptionsMenu() as this =
         | 0 -> this.Close()
         | n -> if stack.[n - 1].Value.SelectedChild.IsNone then back()
 
-    override this.OnClose() = ()
+    override this.OnClose() = ScreenLevelSelect.refresh <- true
 
