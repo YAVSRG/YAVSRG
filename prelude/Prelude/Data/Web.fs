@@ -3,22 +3,21 @@
 open System
 open System.Net
 open System.Net.Http
+open System.Net.Security
 open System.ComponentModel
 open Percyqaz.Json
 open Prelude.Common
 open System.Threading.Tasks
 
-let wClient() = 
+let wClient() =
     let w = new WebClient()
     w.Headers.Add("User-Agent", "Interlude")
     w
+
 let client() =
     let w = new HttpClient()
     w.DefaultRequestHeaders.Add("User-Agent", "Interlude")
     w
-
-do
-    ServicePointManager.SecurityProtocol <- SecurityProtocolType.Tls12
 
 let private downloadString(url: string, callback) =
     async {
@@ -50,7 +49,6 @@ let downloadFile(url: string, target: string): StatusTask =
                         if ce.Error <> null then tcs.TrySetException(ce.Error) |> ignore
                         elif ce.Cancelled then tcs.TrySetCanceled() |> ignore
                         else tcs.TrySetResult(()) |> ignore)
-            let x = 5
             let prog = new DownloadProgressChangedEventHandler(fun _ e -> output(sprintf "Downloading.. %sMB/%sMB (%i%%)" "" "" e.ProgressPercentage))
 
             output("Waiting for download...")

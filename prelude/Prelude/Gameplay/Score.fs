@@ -155,19 +155,28 @@ module Score =
 
     type HitWindows = (Time * JudgementType) list
 
-    //todo: ability to enable ridiculous timing windows
+    //to be used in score metrics/displayed on score graph ingame
     type AccuracyDisplayType =
     | Percentage
     | ProjectedScore
     | PointsScored
 
     type AccuracySystemConfig =
-    | SC of int
-    | SCPlus of int
-    | Wife of int
-    | DP of int
-    | OM of float32
+    | SC of judge: int * ridiculous: bool
+    | SCPlus of judge: int * ridiculous: bool
+    | Wife of judge: int * ridiculous: bool
+    | DP of judge: int * ridiculous: bool
+    | OM of od: float32
     | Custom of unit
+    with
+        override this.ToString() =
+            match this with
+            | SC (judge, rd) -> "SC (J" + (judge |> string) + ")"
+            | SCPlus (judge, rd) -> "SC+ (J" + (judge |> string) + ")"
+            | DP (judge, rd) ->"DP (J" + (judge |> string) + ")"
+            | Wife (judge, rd) -> "Wife (J" + (judge |> string) + ")"
+            | OM od -> "osu!mania (OD" + (od |> string) + ")"
+            | _ -> "unknown"
     
     let private is_regular_hit judgement =
         match judgement with
@@ -237,18 +246,19 @@ module Score =
              (fun j c -> get_combo_break JudgementType.GOOD j c))
 
     let createAccuracyMetric config =
+        let name = config.ToString()
         match config with
-        | SC judge ->
-            dp_based_accuracy ("SC (J" + (judge |> string) + ")") judge false
+        | SC (judge, rd) ->
+            dp_based_accuracy name judge rd
                 (points_func [| 2.0; 2.0; 1.8; 0.0; 1.0; 0.2; -1.6; 0.0; 0.0 |])
-        | SCPlus judge -> dp_based_accuracy ("SC+ (J" + (judge |> string) + ")") judge false (sc_curve judge)
-        | DP judge ->
-            dp_based_accuracy ("DP (J" + (judge |> string) + ")") judge false
+        | SCPlus (judge, rd) -> dp_based_accuracy name judge rd (sc_curve judge)
+        | DP (judge, rd) ->
+            dp_based_accuracy name judge rd
                 (points_func [| 2.0; 2.0; 2.0; 0.0; 1.0; -4.0; -8.0; 0.0; -8.0 |])
-        | Wife judge -> dp_based_accuracy ("Wife (J" + (judge |> string) + ")") judge false (wife_curve judge)
+        | Wife (judge, rd) -> dp_based_accuracy name judge rd (wife_curve judge)
         | OM od ->
             AccuracySystem
-                (("osu!mania (OD" + (od |> string) + ")"),
+                (name,
                     window_func [
                         (16.5f<ms>, JudgementType.MARVELLOUS)
                         (64.5f<ms> - od * 3.0f<ms>, JudgementType.PERFECT)

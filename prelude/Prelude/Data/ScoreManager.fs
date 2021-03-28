@@ -50,15 +50,15 @@ module ScoreManager =
                                 -> Difficulty rating data
     *)
 
-    type ScoreInfoProvider(score: Score, chart: Chart) =
+    type ScoreInfoProvider(score: Score, chart: Chart, scoring, hpsystem) =
         //todo: method to set already existing values when possible
         let (modchart, hitdata) = getModChartWithScore (score.selectedMods) chart score.hitdata
         let difficulty =
             lazy (let (keys, notes, _, _, _) = modchart.Force()
                 RatingReport(notes, score.rate, score.layout, keys))
         let accuracy =
-            lazy (let m = createAccuracyMetric(SCPlus 4) in m.ProcessAll(hitdata.Force()); m) //todo: connect to profile settings
-        let hp = lazy (let m = createHPMetric VG (accuracy.Force()) in m.ProcessAll(hitdata.Force()); m)
+            lazy (let m = createAccuracyMetric(scoring) in m.ProcessAll(hitdata.Force()); m) //todo: connect to profile settings
+        let hp = lazy (let m = createHPMetric hpsystem (accuracy.Force()) in m.ProcessAll(hitdata.Force()); m)
         let performance =
             lazy (
                 let (keys, _, _, _, _) = modchart.Force()
