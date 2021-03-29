@@ -73,7 +73,7 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             let oh = hover
-            hover <- Mouse.Hover(this.Bounds)
+            if Mouse.Moved() then hover <- Mouse.Hover(this.Bounds)
             if oh <> hover then onHover(hover)
             if hover && Mouse.Click(MouseButton.Left) then onClick()
 
