@@ -33,8 +33,8 @@ module Components =
         new() = Frame((fun () -> Screens.accentShade(200, 0.5f, 0.3f)), (fun () -> Screens.accentShade(80, 0.5f, 0.0f)), true, true)
         new((), frame) = Frame((K Color.Transparent), (K frame), false, true)
         new((), frame) = Frame((K Color.Transparent), frame, false, true)
-        new(fill, ()) = Frame((K fill), (K Color.Transparent), false, true)
-        new(fill, ()) = Frame(fill, (K Color.Transparent), false, true)
+        new(fill, ()) = Frame((K fill), (K Color.Transparent), true, false)
+        new(fill, ()) = Frame(fill, (K Color.Transparent), true, false)
         new(fill, frame) = Frame((K fill), (K frame), true, true)
         new(fill, frame) = Frame(fill, frame, true, true)
 

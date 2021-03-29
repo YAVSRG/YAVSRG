@@ -200,7 +200,8 @@ module OptionsMenuFramework =
     type LittleButton(label, onClick) as this = 
         inherit Selectable()
         do
-            this.Add(TextBox(K label, (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black)), 0.5f))
+            this.Add(Frame(Color.FromArgb(80, 255, 255, 255), ()))
+            this.Add(TextBox(K label, (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.5f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
         override this.OnSelect() =
             this.Selected <- false
@@ -461,15 +462,15 @@ module OptionsMenuFramework =
             inherit ListSelectable(true)
             do
                 this.Add(new TextBox((fun () -> name ((this.Setting : Setting<'T>).Get())), K (Color.White, Color.Black), 0.0f)
-                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, -50.0f, 1.0f))
+                    |> positionWidget(0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, -40.0f, 1.0f))
                 this.Add(new LittleButton(Localisation.localise("options.wselect.Edit"), fun () -> selector.EditItem this)
-                    |> positionWidget(20.0f, 0.0f, -50.0f, 1.0f, 100.0f, 0.0f, -20.0f, 1.0f))
+                    |> positionWidget(20.0f, 0.0f, -40.0f, 1.0f, 140.0f, 0.0f, -10.0f, 1.0f))
                 this.Add(new LittleButton(Localisation.localise("options.wselect.Duplicate"), fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Get(), name, selector)))
-                    |> positionWidget(120.0f, 0.0f, -50.0f, 1.0f, 200.0f, 0.0f, -20.0f, 1.0f))
+                    |> positionWidget(160.0f, 0.0f, -40.0f, 1.0f, 280.0f, 0.0f, -10.0f, 1.0f))
                 this.Add(new LittleButton(Localisation.localise("options.wselect.MakeMain"), fun () -> selector.Main <- this)
-                    |> positionWidget(220.0f, 0.0f, -50.0f, 1.0f, 300.0f, 0.0f, -20.0f, 1.0f))
+                    |> positionWidget(300.0f, 0.0f, -40.0f, 1.0f, 420.0f, 0.0f, -10.0f, 1.0f))
                 this.Add(new LittleButton(Localisation.localise("options.wselect.Delete"), fun () -> if selector.Main <> this then this.Destroy(); this.SParent.Value.SelectedChild <- None)
-                    |> positionWidget(320.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f, -20.0f, 1.0f))
+                    |> positionWidget(440.0f, 0.0f, -40.0f, 1.0f, 560.0f, 0.0f, -10.0f, 1.0f))
                 this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 120.0f, 0.0f) |> ignore
             member val Setting = new Setting<'T>(item)
             override this.SParent = Some (selector :> Selectable)
