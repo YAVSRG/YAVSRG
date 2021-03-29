@@ -97,7 +97,6 @@ type NoteRenderer() as this =
         else fun k -> id
 
     do
-        //todo: position differently for editor
         let width = Array.mapi (fun i n -> n + columnWidths.[i]) columnPositions |> Array.max
         let (screenAlign, columnAlign) = Themes.noteskinConfig.PlayfieldAlignment
         this.Reposition(-width * columnAlign, screenAlign, 0.0f, 0.0f, width * (1.0f - columnAlign), screenAlign, 0.0f, 1.0f)
@@ -320,7 +319,7 @@ module GameplayWidgets =
             if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
                 if options.Hotkeys.Skip.Get().Tapped() then
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
-            else this.RemoveFromParent()
+            else this.Destroy()
 
     (*
         These widgets are not repositioned by theme
@@ -372,8 +371,8 @@ type ScreenPlay() as this =
     
     let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
     let scoreData = Gameplay.createScoreData()
-    let scoring = createAccuracyMetric(SCPlus 4)
-    let hp = createHPMetric VG scoring
+    let scoring = createAccuracyMetric(options.AccSystems.Get() |> fst)
+    let hp = createHPMetric (options.HPSystems.Get() |> fst) scoring
     let onHit = new Event<HitEvent>()
     let widgetHelper: Helper = { Scoring = scoring; HP = hp; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[keys - 3]
@@ -517,10 +516,11 @@ type ScreenPlay() as this =
             noteSeek <- noteSeek + 1 //hack to prevent running this code twice
             ((fun () ->
                 let sd =
-                    (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value)
+                    (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)
+                    //todo: set score system instances to save recalculation
                     |> ScoreInfoProvider
                 (sd, Gameplay.setScore(sd))
                 |> ScreenScore
-                :> Screen), ScreenTransitionFlag.NoBacktrack)
-            |> Screens.addScreen
+                :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)
+            |> Screens.newScreen
         else ()

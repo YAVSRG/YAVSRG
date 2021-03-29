@@ -6,19 +6,40 @@ open System.Collections.Generic
 open OpenTK.Mathematics
 open Prelude.Common
 open Interlude.Render
-open Interlude.Utils
 open Interlude
 open Interlude.UI.Animation
 
-type AnchorPoint(value, anchor) =
-    inherit AnimationFade(value)
-    let mutable anchor = anchor
-    member this.Position(min, max) =  min + base.Value + (max - min) * anchor
-    member this.Reposition(value, a) = this.Value <- value; this.Target <- value; anchor <- a
-    member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor
-    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- value - min - (max - min) * anchor
+(*
+    Anchorpoints calculate the position of a widget's edge relative to its parent
+    They are parameterised by an anchor and an offset
+
+     To calculate the position of an edge (for example the value v for the left edge when given the left and right edges of the parent)
+        Anchor is a value from 0-1 representing the percentage of the way across the parent widget to place the edge
+        Offset is a value added to that to translate the edge by a fixed number of pixels
+
+        Examples: AnchorPoint(50.0f, 0.0f) places the widget's edge 50 pixels left/down from the parent's left/top edge
+                  AnchorPoint(-70.0f, 0.5f) places the widget's edge 70 pixels right/up from the parent's centre
+    This can be used to flexibly describe the layout of a UI in terms of parent-child relations and these anchor points
+*)
+
+type AnchorPoint(offset, anchor) =
+    inherit AnimationFade(offset)
+    let mutable anchor_ = anchor
+    //calculates the position given lower and upper bounds from the parent
+    member this.Position(min, max) = min + base.Value + (max - min) * anchor_
+    //snaps to a brand new position as if we constructed a new point
+    member this.Reposition(offset, anchor) = this.Value <- offset; this.Target <- offset; anchor_ <- anchor
+
+    member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor_
+    member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- this.Target
 
 type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
+
+(*
+    Widgets are the atomic components of the UI system.
+      All widgets can contain other "child" widgets embedded in them that inherit from their position
+      What widgets do with their child widgets can be up to implementation, by default all are drawn and updated with the parent.
+*)
 
 type Widget() =
 
@@ -35,64 +56,75 @@ type Widget() =
         animation.Add(bottom)
     let mutable parent = None
     let mutable bounds = Rect.zero
-    let mutable state = (WidgetState.Uninitialised ||| WidgetState.Normal)
+    let mutable initialised = false
+    let mutable enable = true
     let children = new List<Widget>()
 
     member this.Animation = animation
     member this.Bounds = bounds
-    member this.Position = (left, top, right, bottom)
-    member this.State with get() = state and set(value) = state <- value
+    member this.Anchors = (left, top, right, bottom)
     member this.Children = children
-    member this.Parent = parent.Value
-    member this.Initialised = int (this.State &&& WidgetState.Uninitialised) = 0
+    member this.Parent = parent
+    member this.Enabled with get() = enable and set(value) = enable <- value
+    member this.Initialised = initialised
 
     abstract member Add: Widget -> unit
     default this.Add(c) =
-        lock(this)
-            (fun () ->
-                children.Add(c)
-                c.AddTo(this))
+        children.Add(c)
+        c.OnAddedTo(this)
 
-    abstract member AddTo: Widget -> unit
-    default this.AddTo(c) =
+    abstract member OnAddedTo: Widget -> unit
+    default this.OnAddedTo(c) =
         match parent with
         | None -> parent <- Some c
         | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one") ""
         
+    // Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
     abstract member Remove: Widget -> unit
     default this.Remove(c) =
         if children.Remove(c) then
-            c.RemoveFrom(this)
+            c.OnRemovedFrom(this)
         else Logging.Error("Tried to remove widget that was not in this container") ""
 
-    member private this.RemoveFrom(c) =
+    member private this.OnRemovedFrom(c) =
         match parent with
         | None -> Logging.Error("Tried to remove this widget from a container it isn't in one") ""
         | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another") ""
 
-    member this.RemoveFromParent() =
-        match parent with
-        | None -> Logging.Error("Tried to remove a widget from non-existent parent") ""
-        | Some p -> p.Animation.Add(new AnimationAction(fun () -> p.Remove(this)))
+    // Often we want to add/remove child widgets during an update method
+    //   But, we are in the middle of iterating through the children collection so we cannot modify it
+    // This trick queues up the action to take place immediately before the next update loop, making it loop-safe
+    //   The animations are thread-safe too - So when updating widgets from a background task use this.
+    member this.Synchronized(action) =
+        animation.Add(new AnimationAction(action))
 
+    // Destroys a widget by removing it from its parent, then disposing it (will be garbage collected)
+    // Note that this is safe to call inside an update/draw method
+    member this.Destroy() =
+        this.Parent.Value.Synchronized(fun () -> (this.Parent.Value.Remove(this); this.Dispose()))
+
+    // Clears all children from the widget (with the intention of them being garbage collected, not reused)
+    abstract member Clear: unit -> unit
+    default this.Clear() =
+        for c in children do 
+            c.OnRemovedFrom(this)
+            c.Dispose()
+        children.Clear()
+
+    // Draw is called at the framerate of the game (normally unlimited) and should be where the widget performs render calls to draw it on screen
     abstract member Draw: unit -> unit
-    default this.Draw() =
-        lock(this)
-            (fun () ->
-                children
-                |> Seq.filter (fun w -> w.State < WidgetState.Disabled)
-                |> Seq.iter (fun w -> w.Draw()))
+    default this.Draw() = for c in children do if c.Initialised && c.Enabled then c.Draw()
 
+    // Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit
     default this.Update(elapsedTime, struct (l, t, r, b): Rect) =
         animation.Update(elapsedTime) |> ignore
-        this.State <- (this.State &&& WidgetState.Disabled) //removes uninitialised flag
+        initialised <- true
         bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-        lock(this)
-            (fun () ->
-                for i in children.Count - 1 .. -1 .. 0 do
-                    if (children.[i].State &&& WidgetState.Disabled < WidgetState.Disabled) then children.[i].Update(elapsedTime, bounds))
+        for i in children.Count - 1 .. -1 .. 0 do
+            if (children.[i].Enabled) then children.[i].Update(elapsedTime, bounds)
 
+    //todo: tear these out and replace with nice idiomatic positioners
     member this.Reposition(l, la, t, ta, r, ra, b, ba) =
         left.Reposition(l, la)
         top.Reposition(t, ta)
@@ -107,6 +139,7 @@ type Widget() =
         right.Target <- r
         bottom.Target <- b
 
+    // Dispose is called when a widget is going out of scope/about to be garbage collected and allows it to release any resources
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
 
@@ -114,7 +147,6 @@ type Logo() as this =
     inherit Widget()
 
     let counter = AnimationCounter(10000000.0)
-
     do this.Animation.Add(counter)
 
     override this.Draw() =
@@ -123,55 +155,31 @@ type Logo() as this =
         let struct (l, t, r, b) = this.Bounds
 
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.08f * w, t + 0.09f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(r - 0.08f * w, t + 0.09f * w))
-        <| Quad.colorOf(Color.DarkBlue)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.08f * w, t + 0.09f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(r - 0.08f * w, t + 0.09f * w)))
+            (Quad.colorOf(Color.DarkBlue))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.08f * w, t + 0.29f * w))
-            (new Vector2(l + 0.22f * w, t + 0.29f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.96875f * w))
-        <| Quad.colorOf(Color.DarkBlue)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.08f * w, t + 0.29f * w)) (new Vector2(l + 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
+            (Quad.colorOf(Color.DarkBlue))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(r - 0.08f * w, t + 0.29f * w))
-            (new Vector2(r - 0.22f * w, t + 0.29f * w))
-            (new Vector2(l + 0.5f * w, t + 0.76875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.96875f * w))
-        <| Quad.colorOf(Color.DarkBlue)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(r - 0.08f * w, t + 0.29f * w)) (new Vector2(r - 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
+            (Quad.colorOf(Color.DarkBlue))
+            Sprite.DefaultQuad
 
         Stencil.create(true)
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.1f * w, t + 0.1f * w))
-            (new Vector2(l + 0.5f * w, t + 0.75f * w))
-            (new Vector2(l + 0.5f * w, t + 0.75f * w))
-            (new Vector2(r - 0.1f * w, t + 0.1f * w))
-        <| Quad.colorOf(Color.Aqua)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.1f * w, t + 0.1f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(r - 0.1f * w, t + 0.1f * w)))
+            (Quad.colorOf(Color.Aqua))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(l + 0.1f * w, t + 0.3f * w))
-            (new Vector2(l + 0.2f * w, t + 0.3f * w))
-            (new Vector2(l + 0.5f * w, t + 0.7875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.95f * w))
-        <| Quad.colorOf(Color.Aqua)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(l + 0.1f * w, t + 0.3f * w)) (new Vector2(l + 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
+            (Quad.colorOf(Color.Aqua))
+            Sprite.DefaultQuad
         Draw.quad
-        <| Quad.create
-            (new Vector2(r - 0.1f * w, t + 0.3f * w))
-            (new Vector2(r - 0.2f * w, t + 0.3f * w))
-            (new Vector2(l + 0.5f * w, t + 0.7875f * w))
-            (new Vector2(l + 0.5f * w, t + 0.95f * w))
-        <| Quad.colorOf(Color.Aqua)
-        <| (Sprite.DefaultQuad)
+            (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
+            (Quad.colorOf(Color.Aqua))
+            Sprite.DefaultQuad
         Draw.rect this.Bounds Color.White <| Themes.getTexture("logo")
 
         Stencil.draw()
@@ -180,9 +188,9 @@ type Logo() as this =
         let rain = Themes.getTexture("rain")
         let v = float32 counter.Time
         let q = Quad.ofRect this.Bounds
-        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f)rain q)
-        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f)rain q)
-        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f)rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255))  <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f) rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f) rain q)
+        Draw.quad <| q <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f) rain q)
 
         let mutable prev = 0.0f
         let m = b - w * 0.5f
@@ -193,13 +201,9 @@ type Logo() as this =
                 |> Seq.sum) * 0.1f
             let i = float32 i
             Draw.quad
-            <| Quad.create
-                (new Vector2(l + i * w / 32.0f, m - prev))
-                (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level))
-                (new Vector2(l + (i + 1.0f) * w / 32.0f, b))
-                (new Vector2(l + i * w / 32.0f, b))
-            <| Quad.colorOf(Color.FromArgb(127, 0, 0, 255))
-            <| (Sprite.DefaultQuad)
+                (Quad.create(new Vector2(l + i * w / 32.0f, m - prev)) (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level)) (new Vector2(l + (i + 1.0f) * w / 32.0f, b)) (new Vector2(l + i * w / 32.0f, b)))
+                (Quad.colorOf(Color.FromArgb(127, 0, 0, 255)))
+                Sprite.DefaultQuad
             prev <- level
 
         Stencil.finish()
@@ -222,6 +226,7 @@ type Dialog() as this =
         this.Animation.Add(fade)
         fade.Target <- 1.0f
 
+    // Begins closing animation
     member this.Close() =
         fade.Target <- 0.0f
 
@@ -229,25 +234,19 @@ type Dialog() as this =
     abstract member OnClose: unit -> unit
 
     override this.Draw() =
-        Draw.rect(this.Bounds)(Color.FromArgb(int (180.0f * fade.Value), 0, 0, 0))(Sprite.Default)
+        Draw.rect(this.Bounds)(Color.FromArgb(int (200.0f * fade.Value), 0, 0, 0))(Sprite.Default)
         base.Draw()
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if (fade.Value < 0.02f && fade.Target = 0.0f) then
-            this.State <- WidgetState.Disabled
+            this.Enabled <- false
             this.OnClose()
-    
-
-//Collection of mutable values to "tie the knot" in mutual dependence
-// - Stuff is defined but not inialised here
-// - Stuff is then referenced by screen logic
-// - Overall screen manager references screen logic AND initialises values, connecting the loop
 
 type ScreenTransitionFlag =
 | Default = 0
 | UnderLogo = 1
-| NoBacktrack = 2
+//more transition animations go here
 
 type NotificationType =
 | Info = 0
@@ -255,9 +254,28 @@ type NotificationType =
 | Task = 2
 | Error = 3
 
+type ScreenType =
+| SplashScreen = 0
+| MainMenu = 1
+| Import = 2
+| LevelSelect = 3
+| Play = 4
+| Score = 5
+
+(*
+    Collection of mutable values to "tie the knot" in mutual dependence
+       - Stuff is defined but not inialised here
+       - Stuff is then referenced by screen logic
+       - Overall screen manager references screen logic AND initialises values, connecting the loop
+*)
+
 module Screens =
-    let mutable internal addScreen: (unit -> Screen) * ScreenTransitionFlag -> unit = ignore
-    let mutable internal popScreen: ScreenTransitionFlag -> unit = ignore
+    let mutable currentType = ScreenType.SplashScreen
+
+    // All of these are initialised in ScreensMain.fs
+    let mutable internal changeScreen: ScreenType * ScreenTransitionFlag -> unit = ignore
+    let mutable internal newScreen: (unit -> Screen) * ScreenType * ScreenTransitionFlag -> unit = ignore
+    let mutable internal back: ScreenTransitionFlag -> unit = ignore
     let mutable internal addDialog: Dialog -> unit = ignore
 
     let mutable internal setToolbarCollapsed: bool -> unit = ignore

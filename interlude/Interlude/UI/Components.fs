@@ -9,6 +9,7 @@ open Interlude.Options
 open Interlude.Render
 open Interlude.UI.Animation
 open Interlude.Input
+open Interlude.Utils
 open OpenTK
 
 module Components =
@@ -20,29 +21,35 @@ module Components =
     let positionWidget(l, la, t, ta, r, ra, b, ba) (w: Widget) : Widget =
         w.Reposition(l, la, t, ta, r, ra, b, ba)
         w
+
+    let threadSafe (w: Widget) action : 'a -> unit =
+        fun _ -> w.Synchronized(action)
     
-    type Frame(fillColor, frameColor) =
+    type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
         inherit Widget()
 
         let BORDERWIDTH = 5.0f
 
-        new() = Frame(Some (fun () -> Screens.accentShade(200, 0.5f, 0.3f)), Some (fun () -> Screens.accentShade(80, 0.5f, 0.0f)))
+        new() = Frame((fun () -> Screens.accentShade(200, 0.5f, 0.3f)), (fun () -> Screens.accentShade(80, 0.5f, 0.0f)), true, true)
+        new((), frame) = Frame((K Color.Transparent), (K frame), false, true)
+        new((), frame) = Frame((K Color.Transparent), frame, false, true)
+        new(fill, ()) = Frame((K fill), (K Color.Transparent), true, false)
+        new(fill, ()) = Frame(fill, (K Color.Transparent), true, false)
+        new(fill, frame) = Frame((K fill), (K frame), true, true)
+        new(fill, frame) = Frame(fill, frame, true, true)
 
         override this.Draw() =
-            match frameColor with
-            | None -> ()
-            | Some c ->
-                let c = c()
+            if frame then
+                let c = frameColor()
                 let r = Rect.expand(BORDERWIDTH, BORDERWIDTH) this.Bounds
                 Draw.rect (Rect.sliceLeft BORDERWIDTH r) c Sprite.Default
                 Draw.rect (Rect.sliceRight BORDERWIDTH r) c Sprite.Default
                 let r = Rect.expand(0.0f, BORDERWIDTH) this.Bounds
                 Draw.rect (Rect.sliceTop BORDERWIDTH r) c Sprite.Default
                 Draw.rect (Rect.sliceBottom BORDERWIDTH r) c Sprite.Default
-            match fillColor with
-            | None -> ()
-            | Some c ->
-                Draw.rect base.Bounds (c()) Sprite.Default
+
+            if fill then
+                Draw.rect base.Bounds (fillColor()) Sprite.Default
             base.Draw()
         static member Create(w: Widget) =
             let f = Frame()
@@ -66,7 +73,7 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             let oh = hover
-            hover <- Mouse.Hover(this.Bounds)
+            if Mouse.Moved() then hover <- Mouse.Hover(this.Bounds)
             if oh <> hover then onHover(hover)
             if hover && Mouse.Click(MouseButton.Left) then onClick()
 
@@ -88,62 +95,59 @@ module Components =
             if bind.Get().Tapped() then onClick()
             base.Update(elapsedTime, bounds)
 
-    type FlowContainer(?spacingX: float32, ?spacingY: float32) =
+    type FlowContainer() =
         inherit Widget()
-        let spacingX, spacingY = (defaultArg spacingX 10.0f, defaultArg spacingY 5.0f)
+        let mutable spacing = 10.0f
+        let mutable margin = (0.0f, 0.0f)
         let mutable contentSize = 0.0f
         let mutable scrollPos = 0.0f
 
-        member private this.FlowContent(instant) =
-            let width = Rect.width this.Bounds
-            let height = Rect.height this.Bounds
-            let pos (anchor : AnchorPoint) = if instant then anchor.RepositionRelative else anchor.MoveRelative
-            lock(this)
-                (fun () ->
-                    contentSize <-
-                        (this.Children
-                        |> Seq.filter (fun c -> c.State &&& WidgetState.Disabled < WidgetState.Disabled)
-                        |> Seq.fold (fun (x, y) w ->
-                            let (l, t, r, b) = w.Position
-                            let cwidth = r.Position(0.0f, width) - l.Position(0.0f, width)
-                            let cheight = b.Position(0.0f, height) - t.Position(0.0f, height)
-                            let x = x + cwidth + spacingX
-                            let x, y = if x > width then cwidth + spacingX, y + cheight + spacingY else x, y
-                            pos l (0.0f, width, x - cwidth - spacingX); pos t (0.0f, height, y)
-                            pos r (0.0f, width, x - spacingX); pos b (0.0f, height, y + cheight)
-                            (x + spacingX, y)
-                            ) (0.0f, -scrollPos)
-                        |> snd) + scrollPos)
+        member this.Spacing with set(value) = spacing <- value
+        //todo: margin doesn't work correctly
+        member this.Margin with set((x, y)) = margin <- (-x, -y)
+
+        member private this.FlowContent(thisBounds) =
+            let mutable vBounds = thisBounds |> Rect.expand margin |> Rect.translate(0.0f, -scrollPos)
+            let struct (left, top, right, bottom) = thisBounds
+            let struct (_, t1, _, _) = vBounds
+            for c in this.Children do
+                if c.Enabled then
+                    let (la, ta, ra, ba) = c.Anchors
+                    let struct (l, t, r, b) = vBounds
+                    let struct (lb, tb, rb, bb) =
+                        if c.Initialised then Rect.createWH l t (Rect.width c.Bounds) (Rect.height c.Bounds)
+                        else Rect.create (la.Position(l, r)) (ta.Position(t, b)) (ra.Position(l, r)) (ba.Position(t, b))
+                    let pos (a: AnchorPoint) = if c.Initialised then a.MoveRelative else a.RepositionRelative
+                    pos la (left, right, lb); pos ta (top, bottom, tb); pos ra (left, right, rb); pos ba (top, bottom, bb)
+                    vBounds <- Rect.translate(0.0f, bb - tb + spacing) vBounds
+            let struct (_, t2, _, _) = vBounds
+            contentSize <- t2 - t1
 
         override this.Update(elapsedTime, bounds) =
-            if (this.Initialised) then
-                this.FlowContent(false) 
-                base.Update(elapsedTime, bounds)
-                if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
-            else
-                //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
-                base.Update(elapsedTime, bounds)
-                this.FlowContent(true)
+            //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
+            let thisBounds =
+                if this.Initialised then this.Bounds
+                else
+                    let (left, top, right, bottom) = this.Anchors
+                    let struct (l, t, r, b) = bounds
+                    Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
+            this.FlowContent(thisBounds) 
+            base.Update(elapsedTime, bounds)
+            if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
 
         override this.Draw() =
             Stencil.create(false)
-            Draw.rect(this.Bounds)(Color.Transparent)(Sprite.Default)
+            Draw.rect this.Bounds Color.Transparent Sprite.Default
             Stencil.draw()
             let struct (_, top, _, bottom) = this.Bounds
-            lock(this)
-                (fun () ->
-                    for c in this.Children do
-                        if c.State < WidgetState.Disabled then
-                            let struct (_, t, _, b) = c.Bounds
-                            if t < bottom && b > top then c.Draw())
+            for c in this.Children do
+                if c.Initialised && c.Enabled then
+                    let struct (_, t, _, b) = c.Bounds
+                    if t < bottom && b > top then c.Draw()
             Stencil.finish()
 
-        override this.Add(child) =
-            base.Add(child)
-            if (this.Initialised) then this.FlowContent(true)
-
-        member this.Clear() = (for c in this.Children do c.Dispose()); this.Children.Clear()
-        member this.Filter(f: Widget -> bool) = for c in this.Children do c.State <- if f c then WidgetState.Normal else WidgetState.Disabled
+        member this.Filter(f: Widget -> bool) = for c in this.Children do c.Enabled <- f c
+        member this.Sort(comp: Comparison<Widget>) = this.Children.Sort(comp)
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
@@ -153,16 +157,15 @@ module Components =
 
         do
             this.Animation.Add(color)
-            let fr = new Frame()
-            this.Add((Clickable((fun () -> fr.State <- fr.State ^^^ WidgetState.Disabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
+            let fr = new Frame(Enabled = false)
+            this.Add((Clickable((fun () -> fr.Enabled <- not fr.Enabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
-                let fc = FlowContainer(0.0f, 0.0f)
+                let fc = FlowContainer(Spacing = 0.0f)
                 fr.Add(fc)
                 Array.iteri
                     (fun i o -> fc.Add(Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                     options
                 fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
-            fr.State <- WidgetState.Disabled
             
         override this.Draw() =
             let bbounds = Rect.sliceTop buttonSize this.Bounds

@@ -46,6 +46,8 @@ module Input =
     let mutable internal mousex = 0.f
     let mutable internal mousey = 0.f
     let mutable internal mousez = 0.f
+    let mutable internal oldmousex = 0.f
+    let mutable internal oldmousey = 0.f
     let mutable internal oldmousez = 0.f
     let mutable internal ctrl = false
     let mutable internal shift = false
@@ -68,6 +70,8 @@ module Input =
 
     let absorbAll() =
         oldmousez <- mousez
+        oldmousey <- mousey
+        oldmousex <- mousex
         absorbed <- true
         let e = evts
         evts <- []
@@ -175,6 +179,7 @@ module Mouse =
     let Click(b) = Input.consumeOne(Mouse b, InputEvType.Press).IsSome
     let Held(b) = Input.held(Mouse b)
     let Released(b) = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
+    let Moved() = Input.mousex <> Input.oldmousex || Input.mousey <> Input.oldmousey
 
     let Hover(struct (l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
 
