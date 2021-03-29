@@ -42,7 +42,8 @@
     <Compile Include="UI\Screens\ScreenPlay.fs" />
     <Compile Include="UI\Screens\ScreenLevelSelect.fs" />
     <Compile Include="UI\Screens\ScreenImport.fs" />
-    <Compile Include="UI\OptionsMenu.fs" />
+    <Compile Include="UI\OptionsMenu\OptionsMenuFramework.fs" />
+    <Compile Include="UI\OptionsMenu\OptionsMenu.fs" />
     <Compile Include="UI\ScreensMain.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
