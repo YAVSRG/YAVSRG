@@ -182,7 +182,7 @@ module OptionsMenuTabs =
                             Slider(
                                 { new FloatSetting(0.95, 0.0, 1.0) with
                                     override this.Get() = match options.Pacemaker.Get() with Accuracy v -> v | Lamp l -> 0.0
-                                    override this.Set(v) = options.Pacemaker.Set(Accuracy (Math.Clamp(Math.Round(v, 2), 0.0, 1.0))) }, 0.01f) ).Position(300.0f) |]
+                                    override this.Set(v) = base.Set(v); options.Pacemaker.Set(Accuracy <| base.Get()) }, 0.01f) ).Position(300.0f) |]
                         [|PrettySetting("PacemakerLamp",
                             Selector.FromEnum(
                                 { new ISettable<Lamp>() with
@@ -198,12 +198,13 @@ module OptionsMenuTabs =
                     { new IntSetting(4, 1, 9) with
                         override this.Get() = match s.Get() with SC (j, _) | SCPlus (j, _) | Wife (j, _) | DP (j, _) -> j | _ -> 4
                         override this.Set(v) =
+                            let v = Math.Clamp(v, 1, 9)
                             match s.Get() with
                             | SC (_, r) -> SC (v, r)
                             | SCPlus (_, r) -> SCPlus (v, r)
                             | Wife (_, r) -> Wife (v, r)
                             | DP (_, r) -> DP (v, r)
-                            | _ -> SC (v, false) 
+                            | _ -> SC (v, false)
                             |> s.Set }, 0.1f)
             ).Position(300.0f)
         
@@ -227,7 +228,7 @@ module OptionsMenuTabs =
                 Slider(
                     { new FloatSetting(8.0, 0.0, 10.0) with
                         override this.Get() = match s.Get() with OM od -> float od | _ -> 8.0
-                        override this.Set(v) = s.Set(OM (float32 v)) }, 0.05f)
+                        override this.Set(v) = base.Set(v); s.Set(base.Get() |> float32 |> OM) }, 0.01f)
             ).Position(300.0f)
 
         let editor (s: ISettable<AccuracySystemConfig>) =
@@ -237,7 +238,7 @@ module OptionsMenuTabs =
             column [
                 PrettySetting("ScoreSystemType",
                     DUEditor(
-                        [|"SC"; "SC+"; "WIFE"; "DP"; "OSUMANIA"|],
+                        [|"SC"; "SC+"; "WIFE"; "DP"; "OSU!MANIA"|],
                         (match s.Get() with SC _ -> 0 | SCPlus _ -> 1 | Wife _ -> 2 | DP _ -> 3 | OM _ -> 4 | _ -> 0),
                         (fun (i, _) ->
                             match s.Get() with
