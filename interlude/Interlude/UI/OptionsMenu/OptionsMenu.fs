@@ -320,13 +320,23 @@ module OptionsMenuTabs =
             PrettyButton("Hotkeys", ignore).Position(400.0f)
         ]
 
+    let debug(add) =
+        column [
+            PrettyButton("RebuildCache", ignore).Position(200.0f)
+            PrettyButton("DownloadUpdate",
+                fun () ->
+                    if Interlude.Utils.AutoUpdate.updateAvailable then
+                        Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Screens.addNotification(Localisation.localise "notification.UpdateInstalled", NotificationType.System))
+            ).Position(300.0f)
+        ]
+
     let topLevel(add: string * Selectable -> unit) =
         row [
             BigButton(localise "System", 0, fun () -> add("System", system(add))) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Themes", 1, fun () -> add("Themes", themes(add))) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Gameplay", 2, fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localise "Keybinds", 3, fun () -> add("Keybinds", keybinds(add))) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Debug", 4, ignore) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localise "Debug", 4, fun () -> add("Debug", debug(add))) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
         ]
 
 open OptionsMenuTabs

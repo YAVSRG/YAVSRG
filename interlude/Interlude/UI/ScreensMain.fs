@@ -3,6 +3,7 @@
 open System
 open System.Drawing
 open OpenTK.Mathematics
+open Prelude.Common
 open Interlude
 open Interlude.Render
 open Interlude.UI.Animation
@@ -34,6 +35,7 @@ type ScreenMenu() as this =
     let playFunc() =
         Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
         Screens.changeScreen(ScreenType.LevelSelect, ScreenTransitionFlag.UnderLogo)
+    //todo: localise these buttons
     let play = MenuButton(playFunc, "Play")
     let options = MenuButton((fun () -> Screens.addDialog(OptionsMenu())), "Options")
     let quit = MenuButton((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Quit")
@@ -54,7 +56,8 @@ type ScreenMenu() as this =
         this.Animation.Add(splashSubAnim)
         Utils.AutoUpdate.checkForUpdates()
 
-    override this.OnEnter(prev: Screen) =
+    override this.OnEnter(prev) =
+        if Utils.AutoUpdate.updateAvailable then Screens.addNotification(Localisation.localise "notification.UpdateAvailable", NotificationType.System)
         splashText <- newSplash()
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
         Screens.backgroundDim.Target <- 0.0f
@@ -62,7 +65,7 @@ type ScreenMenu() as this =
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()
 
-    override this.OnExit(next: Screen) =
+    override this.OnExit(next) =
         Screens.logo.Move(-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
         splashAnim.Target <- 0.0f
         Screens.backgroundDim.Target <- 0.7f
@@ -120,7 +123,6 @@ type ScreenLoading() as this =
 // Toolbar widgets
 
 module Notifications =
-    open Prelude.Common
 
     let taskBox(t: BackgroundTask.ManagedTask) = 
         let w = Frame()
@@ -171,25 +173,27 @@ module Notifications =
             this.Animation.Add slider
             Screens.addNotification <-
                 fun (str: string, t: NotificationType) ->
-                    let c =
-                        match t with
-                        | NotificationType.Info -> Color.Blue
-                        | NotificationType.System -> Color.Green
-                        | NotificationType.Task -> Color.Purple
-                        | NotificationType.Error -> Color.Red
-                        | _ -> Color.Black
-                    slider.Target <- slider.Target + 1.0f
-                    let f = new AnimationFade((if items.Count = 0 then 0.0f else 1.0f), Target = 1.0f)
-                    this.Animation.Add f
-                    let i = (c, str, f)
-                    items.Add i
-                    this.Animation.Add(
-                        Animation.Serial(
-                            AnimationTimer 4000.0,
-                            AnimationAction(fun () -> f.Target <- 0.0f),
-                            AnimationTimer 1500.0,
-                            AnimationAction(fun () -> slider.Target <- slider.Target - 1.0f; slider.Value <- slider.Value - 1.0f; f.Stop(); items.Remove i |> ignore)
-                        ))
+                    this.Parent.Value.Synchronized(
+                        fun () -> 
+                            let c =
+                                match t with
+                                | NotificationType.Info -> Color.Blue
+                                | NotificationType.System -> Color.Green
+                                | NotificationType.Task -> Color.Purple
+                                | NotificationType.Error -> Color.Red
+                                | _ -> Color.Black
+                            slider.Target <- slider.Target + 1.0f
+                            let f = new AnimationFade((if items.Count = 0 then 0.0f else 1.0f), Target = 1.0f)
+                            this.Animation.Add f
+                            let i = (c, str, f)
+                            items.Add i
+                            this.Animation.Add(
+                                Animation.Serial(
+                                    AnimationTimer 4000.0,
+                                    AnimationAction(fun () -> f.Target <- 0.0f),
+                                    AnimationTimer 1500.0,
+                                    AnimationAction(fun () -> slider.Target <- slider.Target - 1.0f; slider.Value <- slider.Value - 1.0f; f.Stop(); items.Remove i |> ignore)
+                                )) )
 
         override this.Draw() =
             if items.Count > 0 then

@@ -2,6 +2,8 @@
 notification.PackInstalled=Installed Pack: %0
 notification.SongDownloading=Downloading Song: %0
 notification.SongInstalled=Installed Song: %0
+notification.UpdateInstalled=Update Installed! (Relaunch the game)
+notification.UpdateAvailable=Update Available!
 options.name.AudioOffset=Audio Offset
 options.name.AudioVolume=Audio Volume
 options.name.BackgroundDim=Background Dim
@@ -50,3 +52,5 @@ options.name.Judge=Judge
 options.name.EnableRidiculous=Enable Ridiculous Judge
 options.name.OverallDifficulty=Overall Difficulty
 options.name.ScoreSystemType=Score System Type
+options.name.RebuildCache=Rebuild Cache
+options.name.DownloadUpdate=Download Update
