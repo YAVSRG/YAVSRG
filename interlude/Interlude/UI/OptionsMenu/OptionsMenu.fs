@@ -322,7 +322,7 @@ module OptionsMenuTabs =
 
     let debug(add) =
         column [
-            PrettyButton("RebuildCache", ignore).Position(200.0f)
+            PrettyButton("RebuildCache", fun () -> BackgroundTask.Create TaskFlags.LONGRUNNING "Rebuilding Cache" Gameplay.cache.RebuildCache |> ignore).Position(200.0f)
             PrettyButton("DownloadUpdate",
                 fun () ->
                     if Interlude.Utils.AutoUpdate.updateAvailable then

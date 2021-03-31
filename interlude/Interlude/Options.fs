@@ -44,6 +44,7 @@ type Hotkeys = {
     Search: Setting<Bind>
     Toolbar: Setting<Bind>
     Tooltip: Setting<Bind>
+    Delete: Setting<Bind>
     Screenshot: Setting<Bind>
     Tasklist: Setting<Bind>
     Volume: Setting<Bind>
@@ -70,8 +71,9 @@ type Hotkeys = {
         Exit = Setting(mk Keys.Escape)
         Select = Setting(mk Keys.Enter)
         Search = Setting(mk Keys.Tab)
-        Tooltip = Setting(mk Keys.Slash)
         Toolbar = Setting(ctrl Keys.T)
+        Tooltip = Setting(mk Keys.Slash)
+        Delete = Setting(mk Keys.Delete)
         Screenshot = Setting(mk Keys.F12)
         Tasklist = Setting(mk Keys.F8)
         Volume = Setting(mk Keys.LeftAlt)
