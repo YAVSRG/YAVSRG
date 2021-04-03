@@ -214,9 +214,13 @@ module ChartManager =
                     return true
                 }
 
-        member this.DeleteChart (c: CachedChart) = failwith "nyi"
+        member this.DeleteChart (c: CachedChart) =
+            if File.Exists(c.FilePath) then
+                File.Delete(c.FilePath)
+                let folder = Path.GetDirectoryName(c.FilePath)
+                match folder with SongFolder _ -> Directory.Delete(folder, true) | _ -> ()
 
-        member this.DeleteCharts (cs: List<CachedChart>) = Seq.iter (this.DeleteChart) cs
+        member this.DeleteCharts (cs: List<CachedChart>) = Seq.iter this.DeleteChart cs
 
         member this.ConvertSongFolder (path: string) (packname: string) : StatusTask =
             fun output ->
