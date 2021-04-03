@@ -71,7 +71,7 @@ module Themes =
     let private sprites = new Dictionary<string, Sprite>()
     let private sounds = "nyi"
     
-    //reminder that id is the folder name of the noteskin, NOT the name given in the noteskin metadata
+    // id is the folder name of the noteskin, NOT the name given in the noteskin metadata
     let changeNoteSkin(id: string) =
         let id = if loadedNoteskins.ContainsKey(id) then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default") ""; "default"
         currentNoteSkin <- id

@@ -13,7 +13,7 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Interlude.UI.Animation
 open Interlude.UI.Components
 
-module OptionsMenuFramework =
+module Selection =
     
     (*
         Fancy selection framework

@@ -21,9 +21,6 @@ module Components =
     let positionWidget(l, la, t, ta, r, ra, b, ba) (w: Widget) : Widget =
         w.Reposition(l, la, t, ta, r, ra, b, ba)
         w
-
-    let threadSafe (w: Widget) action : 'a -> unit =
-        fun _ -> w.Synchronized(action)
     
     type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
         inherit Widget()

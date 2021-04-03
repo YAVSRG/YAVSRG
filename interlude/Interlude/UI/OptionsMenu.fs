@@ -11,7 +11,7 @@ open Interlude.Render
 open Interlude
 open Interlude.Utils
 open Interlude.UI.Components
-open Interlude.UI.OptionsMenuFramework
+open Interlude.UI.Selection
 
 (*
     Actual options menu structure/design data
