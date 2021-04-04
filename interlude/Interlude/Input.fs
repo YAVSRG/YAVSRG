@@ -35,7 +35,7 @@ module Bind =
 
 type InputEvType =
 | Press = 0
-| Release = 2
+| Release = 1
 
 type InputEv = (struct (Bind * InputEvType * float32<ms>))
 
@@ -57,6 +57,7 @@ module Input =
 
     let mutable internal inputmethod = None
     let mutable internal absorbed = false
+    let mutable internal typed = false
     
     let removeInputMethod() =
         match inputmethod with
@@ -73,7 +74,6 @@ module Input =
         oldmousey <- mousey
         oldmousex <- mousex
         absorbed <- true
-        let e = evts
         evts <- []
 
     let consumeOne(b: Bind, t: InputEvType) =
@@ -155,7 +155,7 @@ module Input =
                 removeInputMethod())
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | Some (s, c) -> s.Set(s.Get() + e.AsString); absorbAll()
+            | Some (s, c) -> s.Set(s.Get() + e.AsString); typed <- true
             | None -> ())
 
     let update() =
@@ -170,6 +170,8 @@ module Input =
             elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Set("")
             //todo: clipboard support
         | None -> ()
+        if typed then absorbAll()
+        typed <- false
 
 module Mouse = 
     let X() = Input.mousex

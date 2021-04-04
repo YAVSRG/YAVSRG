@@ -41,6 +41,14 @@ type GameConfig = {
 type Hotkeys = {
     Exit: Setting<Bind>
     Select: Setting<Bind>
+    Previous: Setting<Bind>
+    Next: Setting<Bind>
+    Up: Setting<Bind>
+    Down: Setting<Bind>
+    Start: Setting<Bind>
+    End: Setting<Bind>
+
+    Skip: Setting<Bind>
     Search: Setting<Bind>
     Toolbar: Setting<Bind>
     Tooltip: Setting<Bind>
@@ -48,13 +56,7 @@ type Hotkeys = {
     Screenshot: Setting<Bind>
     Tasklist: Setting<Bind>
     Volume: Setting<Bind>
-    Previous: Setting<Bind>
-    Next: Setting<Bind>
-    Up: Setting<Bind>
-    Down: Setting<Bind>
-    Start: Setting<Bind>
-    End: Setting<Bind>
-    Skip: Setting<Bind>
+    Mods: Setting<Bind>
 
     Import: Setting<Bind>
     Options: Setting<Bind>
@@ -84,6 +86,7 @@ type Hotkeys = {
         Start = Setting(mk Keys.Home)
         End = Setting(mk Keys.End)
         Skip = Setting(mk Keys.Space)
+        Mods = Setting(mk Keys.M)
 
         Import = Setting(ctrl Keys.I)
         Options = Setting(ctrl Keys.O)

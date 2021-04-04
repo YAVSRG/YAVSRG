@@ -148,12 +148,12 @@ module Selection =
 
         member this.Previous() =
             match this.HoverChild with
-            | None -> failwith "impossible"
+            | None -> Logging.Debug("No hoverchild for this ListSelectable, there should always be one")""
             | Some w -> let i = (items.IndexOf(w) - 1 + items.Count) % items.Count in this.HoverChild <- Some items.[i]
 
         member this.Next() =
             match this.HoverChild with
-            | None -> failwith "impossible"
+            | None -> Logging.Debug("No hoverchild for this ListSelectable, there should always be one")""
             | Some w -> let i = (items.IndexOf(w) + 1) % items.Count in this.HoverChild <- Some items.[i]
 
         override this.Add(c) =

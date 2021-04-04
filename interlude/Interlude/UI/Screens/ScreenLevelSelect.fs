@@ -10,6 +10,7 @@ open Prelude.Data.ScoreManager
 open Prelude.Data.ChartManager
 open Prelude.Data.ChartManager.Sorting
 open Prelude.Gameplay.Score
+open Prelude.Gameplay.Mods
 open Interlude.Gameplay
 open Interlude.Themes
 open Interlude.Utils
@@ -18,6 +19,7 @@ open Interlude.Options
 open Interlude.Input
 open Interlude.UI.Animation
 open Interlude.UI.Components
+open Interlude.UI.Selection
 
 module private ScreenLevelSelectVars =
 
@@ -67,23 +69,18 @@ module ScreenLevelSelect =
         inherit Widget()
 
         do
-            this.Add(
-                new TextBox(sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs) |> K, K Color.White, 0.0f)
+            this.Add(TextBox(sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs) |> K, K Color.White, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f))
-            this.Add(
-                new TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) |> K, K Color.White, 0.0f)
+            this.Add(TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) |> K, K Color.White, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f))
-            this.Add(
-                new TextBox(K data.Mods, K Color.White, 1.0f)
+            this.Add(TextBox(K data.Mods, K Color.White, 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
             this.Add(
                 new Clickable(
                     (fun () ->
                         Screens.newScreen(
                             (fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen),
-                            ScreenType.Score,
-                            ScreenTransitionFlag.Default) ),
-                    ignore))
+                            ScreenType.Score, ScreenTransitionFlag.Default) ), ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
         override this.Draw() =
@@ -109,7 +106,56 @@ module ScreenLevelSelect =
                     empty <- false
                     flowContainer.Add(new ScoreCard(new ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)))
 
-    type SelectableItem(content: Choice<string * CachedChart, string * SelectableItem list>) =
+    type ModSelectItem(name: string) as this =
+        inherit Selectable()
+
+        do
+            this.Add(TextBox(ModState.getModName name |> K, K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f))
+            this.Add(TextBox(ModState.getModDesc name |> K, K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+
+        override this.Draw() =
+            let hi = Screens.accentShade(255, 1.0f, 0.0f)
+            let lo = Color.FromArgb(80, hi)
+            let e = selectedMods.ContainsKey(name)
+            Draw.quad (Quad.ofRect this.Bounds)
+                (struct((if this.Hover then hi else lo), (if e then hi else lo), (if e then hi else lo), if this.Hover then hi else lo))
+                Sprite.DefaultQuad
+            base.Draw()
+
+        override this.OnSelect() =
+            base.OnSelect()
+            ModState.cycleState name selectedMods
+            updateChart()
+            this.Selected <- false
+
+    type ModSelect() as this =
+        inherit Selectable()
+
+        let lc = ListSelectable(false)
+
+        let mutable expand = false
+        do
+            let mutable i = 0.0f
+            for k in modList.Keys do
+                lc.Add(ModSelectItem(k) |> positionWidget(0.0f, 0.0f, i * 80.0f, 0.0f, 0.0f, 1.0f, 80.0f + i * 80.0f, 0.0f))
+                i <- i + 1.0f
+            this.Add(lc |> positionWidgetA(-500.0f, 0.0f, -500.0f, 0.0f))
+        let toggle() = 
+            expand <- not expand
+            if expand then this.SelectedChild <- Some (lc :> Selectable) else this.SelectedChild <- None
+            let (left, _, right, _) = lc.Anchors
+            left.Target <- if expand then 0.0f else -(Rect.width this.Bounds)
+            right.Target <- if expand then 0.0f else -(Rect.width this.Bounds)
+        override this.Update(elapsedTime, bounds) =
+            if options.Hotkeys.Mods.Get().Tapped() then
+                toggle()
+            elif not lc.Selected && expand then toggle()
+            base.Update(elapsedTime, bounds)
+
+
+    type LevelSelectItem(content: Choice<string * CachedChart, string * LevelSelectItem list>) =
         
         let hover = new AnimationFade(0.0f)
         let mutable colorVersion = -1
@@ -118,8 +164,7 @@ module ScreenLevelSelect =
         let mutable pbData = (None, None, None)
         let animation = new AnimationGroup()
 
-        do
-            animation.Add(hover)
+        do animation.Add(hover)
 
         member this.Draw(top: float32): float32 =
             match content with
@@ -164,7 +209,7 @@ module ScreenLevelSelect =
                     Draw.rect(bounds)(if selectedGroup = name then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
                     Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
                 if expandedGroup = name then
-                    List.fold (fun t (i: SelectableItem) -> i.Draw(t)) (top + 80.0f) items
+                    List.fold (fun t (i: LevelSelectItem) -> i.Draw(t)) (top + 80.0f) items
                 else top + 80.0f
 
         member this.Update(top: float32, elapsedTime): float32 =
@@ -214,9 +259,9 @@ module ScreenLevelSelect =
                         hover.Target <- 0.0f
                     animation.Update(elapsedTime) |> ignore
                 if expandedGroup = name then
-                    List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) (top + 80.0f) items
+                    List.fold (fun t (i: LevelSelectItem) -> i.Update(t, elapsedTime)) (top + 80.0f) items
                 else
-                    List.iter (fun (i: SelectableItem) -> i.Navigate()) items
+                    List.iter (fun (i: LevelSelectItem) -> i.Navigate()) items
                     top + 80.0f
 
             member this.Navigate() =
@@ -241,7 +286,7 @@ open ScreenLevelSelectVars
 type ScreenLevelSelect() as this =
     inherit Screen()
 
-    let mutable selection: SelectableItem list = []
+    let mutable selection: LevelSelectItem list = []
     let mutable lastItem: (string * CachedChart) option = None
     let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
@@ -272,9 +317,9 @@ type ScreenLevelSelect() as this =
                         | None -> ()
                         | Some c -> if c.Hash = cc.Hash then selectedChart <- c.Hash; selectedGroup <- k
                         lastItem <- Some (k, cc)
-                        SelectableItem(Choice1Of2 (k, cc)))
+                        LevelSelectItem(Choice1Of2 (k, cc)))
                     |> List.ofSeq
-                    |> fun l -> SelectableItem(Choice2Of2 (k, l)))
+                    |> fun l -> LevelSelectItem(Choice2Of2 (k, l)))
             |> List.ofSeq
         scrollTo <- true
         expandedGroup <- selectedGroup
@@ -314,6 +359,7 @@ type ScreenLevelSelect() as this =
         this.Add(
             new TextBox(getModString, K Color.White, 0.5f)
             |> positionWidget(0.0f, 0.0f, -140.0f, 1.0f, -50.0f, 0.4f, -70.0f, 1.0f))
+        //this.Add(new ModSelect() |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 0.0f, 1.0f))
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -336,7 +382,7 @@ type ScreenLevelSelect() as this =
         let struct (left, top, right, bottom)  = this.Bounds
         let bottomEdge =
             selection
-            |> List.fold (fun t (i: SelectableItem) -> i.Update(t, elapsedTime)) scrollPos.Value
+            |> List.fold (fun t (i: LevelSelectItem) -> i.Update(t, elapsedTime)) scrollPos.Value
         let height = bottomEdge - scrollPos.Value - 320.0f
         if Mouse.Held(MouseButton.Right) then
             scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
@@ -350,7 +396,7 @@ type ScreenLevelSelect() as this =
         Stencil.draw()
         let bottomEdge =
             selection
-            |> List.fold (fun t (i: SelectableItem) -> i.Draw(t)) scrollPos.Value
+            |> List.fold (fun t (i: LevelSelectItem) -> i.Draw(t)) scrollPos.Value
         Stencil.finish()
         //todo: make this render right, is currently bugged
         let scrollPos = (scrollPos.Value / (scrollPos.Value - bottomEdge)) * (bottom - top - 100.0f)
