@@ -516,11 +516,14 @@ type ScreenPlay() as this =
             noteSeek <- noteSeek + 1 //hack to prevent running this code twice
             ((fun () ->
                 let sd =
-                    (Gameplay.makeScore(scoreData, keys), Gameplay.currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)
-                    //todo: set score system instances to save recalculation
-                    |> ScoreInfoProvider
+                    ScoreInfoProvider(
+                        Gameplay.makeScore(scoreData, keys),
+                        Gameplay.currentChart.Value,
+                        options.AccSystems.Get() |> fst,
+                        options.HPSystems.Get() |> fst,
+                        ModChart = Gameplay.modifiedChart.Force(),
+                        Difficulty = Gameplay.difficultyRating.Value)
                 (sd, Gameplay.setScore(sd))
                 |> ScreenScore
                 :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)
             |> Screens.newScreen
-        else ()

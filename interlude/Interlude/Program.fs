@@ -14,9 +14,6 @@ let main argv =
 
     //Check if interlude is already running (true if not already running)
     if m.WaitOne(TimeSpan.Zero, true) then
-
-        Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
-
         //Init logging
         use logfile = File.Open("log.txt", FileMode.Append)
         use sw = new StreamWriter(logfile)

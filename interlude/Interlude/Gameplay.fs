@@ -63,9 +63,6 @@ module Gameplay =
         updateChart()
         onChartChange()
 
-    let getModString() = 
-        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))
-
     let createScoreData() = 
         let r = replayData.Force()
         replayData <- getScoreData(selectedMods)(modifiedChart.Force())
@@ -79,11 +76,12 @@ module Gameplay =
         layout = Options.options.Playstyles.[keys - 2]
         keycount = keys
     }
-        
 
     let setScore(data: ScoreInfoProvider) =
         let d = chartSaveData.Value
         if
+            //todo: score uploading goes here when implemented
+            data.ModStatus < ModStatus.Unstored &&
             match Options.options.ScoreSaveCondition.Get() with
             | _ -> true //todo: fill in this stub (pb condition will be complicated)
         then
@@ -106,8 +104,7 @@ module Gameplay =
             f data.Accuracy.Name d.Accuracy data.Accuracy.Value,
             //todo: move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
             f (data.Accuracy.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
-        else
-            (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)
+        else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)
 
     let save() =
         scores.Save()
@@ -132,6 +129,4 @@ module Gameplay =
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, cache.LoadChart(c).Value
             changeChart(c, ch)
-        with err ->
-           Logging.Error("Tried to auto select a chart but none exist")(err.ToString())
-        //cache.ConvertPackFolder(osuSongFolder) "osu!" (fun x -> Logging.Info(x) "") |> ignore
+        with err -> Logging.Debug("Tried to auto select a chart but none exist")(err.ToString())

@@ -1,4 +1,10 @@
-﻿notification.PackDownloading=Downloading Pack: %0
+﻿mod.auto.name=Auto
+mod.auto.desc=Plays the chart for you.
+mod.mirror.name=Mirror
+mod.mirror.desc=Horizontally mirrors everything in the chart.
+mod.nosv.name=No SV
+mod.nosv.desc=Removes all scroll speed changes from the chart.
+notification.PackDownloading=Downloading Pack: %0
 notification.PackInstalled=Installed Pack: %0
 notification.SongDownloading=Downloading Song: %0
 notification.SongInstalled=Installed Song: %0

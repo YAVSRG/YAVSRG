@@ -5,6 +5,7 @@
 set output = "C:/Users/percy/Desktop/Source/YAVSRG/Interlude/bin/Release/"
 rmdir /s "%output%../Clean"
 xcopy /I "%output%*.dll" "%output%../Clean"
+xcopy /I "%output%*.so" "%output%../Clean"
 xcopy /I "%output%Akrobat-Black.otf" "%output%../Clean"
 xcopy /I "%output%Interlude.exe" "%output%../Clean"
 xcopy /I "%output%Interlude.runtimeconfig.json" "%output%../Clean"

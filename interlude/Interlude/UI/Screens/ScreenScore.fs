@@ -40,11 +40,11 @@ type ScoreGraph(data: ScoreInfoProvider) =
         
         //todo: graph stuff like hp/accuracy over time
 
-        let w = (width - 10.0f) / float32 data.ScoreData.Length
+        let w = (width - 10.0f) / float32 data.HitData.Length
         let mutable x = left + 5.0f
-        for i in 0 .. data.ScoreData.Length - 1 do
+        for i in 0 .. data.HitData.Length - 1 do
             for k in 0 .. data.Score.keycount - 1 do
-                let (_, delta, hit) = data.ScoreData.[i]
+                let (_, delta, hit) = data.HitData.[i]
                 let (y, col) =
                     match hit.[k] with
                     | HitStatus.SpecialNG -> (0.0f, Themes.themeConfig.JudgementColors.[JudgementType.NG |> int])
@@ -71,12 +71,10 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
     let mutable gradeAchieved = grade (scoreData.Accuracy.Value) (Themes.themeConfig.GradeThresholds)
-    let mutable lampAchieved = lamp (scoreData.Accuracy.State)
     let graph = new ScoreGraph(scoreData)
 
     let refresh() =
         gradeAchieved <- grade (scoreData.Accuracy.Value) (Themes.themeConfig.GradeThresholds)
-        lampAchieved <- lamp (scoreData.Accuracy.State)
         lampPB <- PersonalBestType.None
         accuracyPB <- PersonalBestType.None
         clearPB <- PersonalBestType.None
@@ -85,7 +83,7 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
     do
         this.Add(new TextBox(K <| scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
         this.Add(new TextBox(K <| sprintf "%s // %s // %s" scoreData.Chart.Header.DiffName scoreData.Mods scoreData.Chart.Header.SourcePack, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 1.0f, 150.0f, 0.0f))
-        this.Add(new TextBox((K <| scoreData.Lamp.ToString()), (K <| ScoreColor.lampToColor(lampAchieved)), 0.5f) |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f))
+        this.Add(new TextBox((K <| scoreData.Lamp.ToString()), (K <| ScoreColor.lampToColor(scoreData.Lamp)), 0.5f) |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f))
         this.Add(new TextBox(scoreData.Accuracy.Format, (K <| ScoreColor.gradeToColor(gradeAchieved)), 0.5f) |> positionWidget(-100.0f, 0.5f, 155.0f, 0.0f, 100.0f, 0.5f, 245.0f, 0.0f))
         this.Add(new TextBox((fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR"), (K <| ScoreColor.clearToColor(not scoreData.HP.Failed)), 0.5f) |> positionWidget(-100.0f, 0.75f, 155.0f, 0.0f, 100.0f, 0.75f, 245.0f, 0.0f))
         this.Add(new TextBox(K <| "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int lampPB]), 0.5f) |> positionWidget(-100.0f, 0.25f, 225.0f, 0.0f, 100.0f, 0.25f, 250.0f, 0.0f))

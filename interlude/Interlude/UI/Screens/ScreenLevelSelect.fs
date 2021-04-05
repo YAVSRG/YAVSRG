@@ -65,95 +65,97 @@ module ScreenLevelSelect =
 
     open ScreenLevelSelectVars
 
-    type ScoreCard(data: ScoreInfoProvider) as this =
-        inherit Widget()
+    [<AutoOpen>]
+    module InfoPanel =
 
-        do
-            this.Add(TextBox(sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs) |> K, K Color.White, 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f))
-            this.Add(TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) |> K, K Color.White, 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f))
-            this.Add(TextBox(K data.Mods, K Color.White, 1.0f)
-                |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
-            this.Add(
-                new Clickable(
-                    (fun () ->
-                        Screens.newScreen(
-                            (fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen),
-                            ScreenType.Score, ScreenTransitionFlag.Default) ), ignore))
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
+        type ScoreCard(data: ScoreInfoProvider) as this =
+            inherit Widget()
 
-        override this.Draw() =
-            Draw.rect this.Bounds (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-            base.Draw()
+            do
+                this.Add(TextBox(sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs) |> K, K Color.White, 0.0f)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f))
+                this.Add(TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) |> K, K Color.White, 0.0f)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f))
+                this.Add(TextBox(K data.Mods, K Color.White, 1.0f)
+                    |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+                this.Add(
+                    new Clickable(
+                        (fun () ->
+                            Screens.newScreen(
+                                (fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen),
+                                ScreenType.Score, ScreenTransitionFlag.Default) ), ignore))
+                this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
-    type Scoreboard() as this =
-        inherit Widget()
+            override this.Draw() =
+                Draw.rect this.Bounds (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+                base.Draw()
 
-        let flowContainer = new FlowContainer()
-        let mutable empty = false
+        type Scoreboard() as this =
+            inherit Widget()
 
-        do
-            this.Add(flowContainer)
+            let flowContainer = new FlowContainer()
+            let mutable empty = false
 
-        member this.Refresh() =
-            flowContainer.Clear()
-            empty <- true
-            match chartSaveData with
-            | None -> ()
-            | Some d ->
-                for score in d.Scores do
-                    empty <- false
-                    flowContainer.Add(new ScoreCard(new ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)))
+            do
+                this.Add(flowContainer)
 
-    type ModSelectItem(name: string) as this =
-        inherit Selectable()
+            member this.Refresh() =
+                flowContainer.Clear()
+                empty <- true
+                match chartSaveData with
+                | None -> ()
+                | Some d ->
+                    for score in d.Scores do
+                        empty <- false
+                        flowContainer.Add(new ScoreCard(new ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)))
 
-        do
-            this.Add(TextBox(ModState.getModName name |> K, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f))
-            this.Add(TextBox(ModState.getModDesc name |> K, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+        type ModSelectItem(name: string) as this =
+            inherit Selectable()
 
-        override this.Draw() =
-            let hi = Screens.accentShade(255, 1.0f, 0.0f)
-            let lo = Color.FromArgb(80, hi)
-            let e = selectedMods.ContainsKey(name)
-            Draw.quad (Quad.ofRect this.Bounds)
-                (struct((if this.Hover then hi else lo), (if e then hi else lo), (if e then hi else lo), if this.Hover then hi else lo))
-                Sprite.DefaultQuad
-            base.Draw()
+            do
+                this.Add(TextBox(ModState.getModName name |> K, K (Color.White, Color.Black), 0.0f)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f))
+                this.Add(TextBox(ModState.getModDesc name |> K, K (Color.White, Color.Black), 0.0f)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
 
-        override this.OnSelect() =
-            base.OnSelect()
-            ModState.cycleState name selectedMods
-            updateChart()
-            this.Selected <- false
+            override this.Draw() =
+                let hi = Screens.accentShade(255, 1.0f, 0.0f)
+                let lo = Color.FromArgb(80, hi)
+                let e = selectedMods.ContainsKey(name)
+                Draw.quad (Quad.ofRect this.Bounds)
+                    (struct((if this.Hover then hi else lo), (if e then hi else lo), (if e then hi else lo), if this.Hover then hi else lo))
+                    Sprite.DefaultQuad
+                base.Draw()
 
-    type ModSelect() as this =
-        inherit Selectable()
+            override this.OnSelect() =
+                base.OnSelect()
+                ModState.cycleState name selectedMods
+                updateChart()
+                this.Selected <- false
 
-        let lc = ListSelectable(false)
+        type ModSelect() as this =
+            inherit Selectable()
 
-        let mutable expand = false
-        do
-            let mutable i = 0.0f
-            for k in modList.Keys do
-                lc.Add(ModSelectItem(k) |> positionWidget(0.0f, 0.0f, i * 80.0f, 0.0f, 0.0f, 1.0f, 80.0f + i * 80.0f, 0.0f))
-                i <- i + 1.0f
-            this.Add(lc |> positionWidgetA(-500.0f, 0.0f, -500.0f, 0.0f))
-        let toggle() = 
-            expand <- not expand
-            if expand then this.SelectedChild <- Some (lc :> Selectable) else this.SelectedChild <- None
-            let (left, _, right, _) = lc.Anchors
-            left.Target <- if expand then 0.0f else -(Rect.width this.Bounds)
-            right.Target <- if expand then 0.0f else -(Rect.width this.Bounds)
-        override this.Update(elapsedTime, bounds) =
-            if options.Hotkeys.Mods.Get().Tapped() then
-                toggle()
-            elif not lc.Selected && expand then toggle()
-            base.Update(elapsedTime, bounds)
+            let lc = ListSelectable(false)
 
+            let mutable expand = false
+            do
+                let mutable i = 0.0f
+                for k in modList.Keys do
+                    lc.Add(ModSelectItem(k) |> positionWidget(0.0f, 0.0f, i * 80.0f, 0.0f, 0.0f, 1.0f, 80.0f + i * 80.0f, 0.0f))
+                    i <- i + 1.0f
+                this.Add(lc |> positionWidgetA(-500.0f, 0.0f, -500.0f, 0.0f))
+            let toggle() = 
+                expand <- not expand
+                if expand then this.SelectedChild <- Some (lc :> Selectable) else this.SelectedChild <- None
+                let (left, _, right, _) = lc.Anchors
+                left.Target <- if expand then 0.0f else -(Rect.width this.Bounds)
+                right.Target <- if expand then 0.0f else -(Rect.width this.Bounds)
+            override this.Update(elapsedTime, bounds) =
+                if options.Hotkeys.Mods.Get().Tapped() then
+                    toggle()
+                elif not lc.Selected && expand then toggle()
+                base.Update(elapsedTime, bounds)
 
     type LevelSelectItem(content: Choice<string * CachedChart, string * LevelSelectItem list>) =
         
@@ -357,7 +359,7 @@ type ScreenLevelSelect() as this =
             new TextBox((fun () -> match difficultyRating with None -> "0.00" | Some d -> sprintf "%.2f" d.Technical), K Color.White, 0.5f)
             |> positionWidget(0.0f, 0.2f, -240.0f, 1.0f, -50.0f, 0.4f, -140.0f, 1.0f))
         this.Add(
-            new TextBox(getModString, K Color.White, 0.5f)
+            new TextBox((fun () -> getModString(rate, selectedMods)), K Color.White, 0.5f)
             |> positionWidget(0.0f, 0.0f, -140.0f, 1.0f, -50.0f, 0.4f, -70.0f, 1.0f))
         //this.Add(new ModSelect() |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 0.0f, 1.0f))
 
