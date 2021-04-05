@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Gameplay
 
+open System
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
@@ -72,7 +73,7 @@ module Mods =
 
         let enumerateApplicable chart (mods: ModState) =
             enumerate mods
-            |>  Seq.choose (fun id -> if modList.[id].Check(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
+            |> Seq.choose (fun id -> if modList.[id].Check(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
 
     let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ _ -> ()); Apply_Score = fun _ _ _ -> () }
 
@@ -140,3 +141,6 @@ module Mods =
             let (keys, notes, _, _, _) = mc.Force()
             (decompressScoreData replay keys notes) )
         (mc, scoreData)
+
+    let getModString(rate: float32, selectedMods: ModState) = 
+        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))

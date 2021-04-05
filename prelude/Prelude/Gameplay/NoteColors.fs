@@ -88,11 +88,10 @@ module NoteColors =
         Style: ColorScheme
         Colors: ColorDataSets
         UseGlobalColors: bool
-    }
-    with
+    } with
         static member Default = { Style = ColorScheme.Column; Colors = Array.init 11 (fun i -> Array.init 10 byte); UseGlobalColors = true }
 
-    let getColoredChart (config: ColorConfig) (chart: Lazy<ModChart>) =
+    let getColoredChart (config: ColorConfig) (chart: Lazy<ModChart>): Lazy<ColorizedChart> =
         lazy (
             let chart = chart.Force()
             let index = if config.UseGlobalColors then 0 else let (keys, _, _, _, _) = chart in keys - 2
