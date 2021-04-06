@@ -32,8 +32,8 @@ module private ScreenLevelSelectVars =
     let mutable colorVersionGlobal = 0
     let mutable colorFunc = fun (_, _, _) -> Color.Transparent
 
-    //todo: have these update when score system is changed, could be done remotely, exactly when settings are changed
     let mutable scoreSystem = "SC+ (J4)"
+    //todo: have these update when score system is changed, could be done remotely, exactly when settings are changed
     let mutable hpSystem = "VG"
 
     type Navigation =
@@ -90,7 +90,7 @@ module ScreenLevelSelect =
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
                 |> this.Add
 
-                TextBox(K data.Mods, K Color.White, 1.0f)
+                TextBox(K data.Mods, K (Color.White, Color.Black), 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
                 |> this.Add
 
@@ -102,7 +102,6 @@ module ScreenLevelSelect =
             override this.Draw() =
                 Draw.rect this.Bounds (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
                 base.Draw()
-
             member this.Data = data
 
         type Scoreboard() as this =
@@ -153,7 +152,7 @@ module ScreenLevelSelect =
                 right.Target <- -800.0f
 
             member this.Refresh() =
-                let h = (match Interlude.Gameplay.currentCachedChart with Some c -> c.Hash | None -> "")
+                let h = match Interlude.Gameplay.currentCachedChart with Some c -> c.Hash | None -> ""
                 if h <> chart then
                     chart <- h
                     flowContainer.Clear()
@@ -161,13 +160,14 @@ module ScreenLevelSelect =
                     | None -> ()
                     | Some d ->
                         for score in d.Scores do
-                            flowContainer.Add(new ScoreboardItem(new ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)))
+                            ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)
+                            |> ScoreboardItem
+                            |> flowContainer.Add
                     empty <- flowContainer.Children.Count = 0
                 if scoring <> scoreSystem then
                     let s = options.AccSystems.Get() |> fst
+                    for c in flowContainer.Children do (c :?> ScoreboardItem).Data.AccuracyType <- s
                     scoring <- scoreSystem
-                    for c in flowContainer.Children do
-                        (c :?> ScoreboardItem).Data.AccuracyType <- s
 
                 flowContainer.Sort(
                     match sort.Get() with
@@ -250,8 +250,13 @@ module ScreenLevelSelect =
         let mutable bpm = ""
 
         do
-            this.Add (mods |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f))
-            this.Add (scores |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f))
+            mods
+            |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f)
+            |> this.Add
+
+            scores
+            |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f)
+            |> this.Add
 
             new TextBox(
                 (fun () -> match difficultyRating with None -> "0.00⭐" | Some d -> sprintf "%.2f⭐" d.Physical),
@@ -304,6 +309,10 @@ module ScreenLevelSelect =
                     else sprintf "♬ %i-%i" a b
             scores.Refresh()
 
+    let CHARTHEIGHT = 85.0f
+    let PACKHEIGHT = 65.0f
+    let ITEMSPACING = 10.0f
+
     type LevelSelectItem(content: Choice<string * CachedChart, string * LevelSelectItem list>) =
 
         let hover = new AnimationFade(0.0f)
@@ -319,16 +328,16 @@ module ScreenLevelSelect =
             match content with
             | Choice1Of2 (groupName, cc) ->
                 if (top > 70.0f && top < Render.vheight) then
-                    let bounds = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 85.0f)
+                    let bounds = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + CHARTHEIGHT)
                     let struct (left, _, right, bottom) = bounds
-                    Draw.rect(bounds)(Screens.accentShade(127, 0.8f, 0.0f))Sprite.Default
+                    Draw.rect bounds (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
                     let twidth = Math.Max(Text.measure(font(), cc.Artist + " - " + cc.Title) * 23.0f, Text.measure(font(), cc.DiffName + " // " + cc.Creator) * 20.0f + 40.0f) + 20.0f
                     let stripeLength = twidth + (right - left) * 0.3f * hover.Value
                     Draw.quad
                         (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength - 40.0f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
                         (Quad.colorOf <| Screens.accentShade(127, 1.0f, 0.2f))
-                        (Sprite.gridUV(0, 0)Sprite.Default)
-                    Draw.rect(Rect.sliceBottom(25.0f)bounds)(Screens.accentShade(60, 0.3f, 0.0f))Sprite.Default
+                        (Sprite.gridUV(0, 0) Sprite.Default)
+                    Draw.rect(Rect.sliceBottom 25.0f bounds)(Screens.accentShade(60, 0.3f, 0.0f)) Sprite.Default
                     Text.drawB(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, (Color.White, Color.Black))
                     Text.drawB(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, (Color.White, Color.Black))
 
@@ -336,30 +345,30 @@ module ScreenLevelSelect =
                         match p with
                         | None -> ("", Color.Transparent)
                         | Some ((p1, r1), (p2, r2)) ->
-                            if r1 < rate then ((sprintf "%s (%.2fx)" (format p2) r2), if r2 < rate then Color.Silver else color p2)
-                            else ((sprintf "%s (%.2fx)" (format p1) r1), color p1)
+                            if r1 < rate then (sprintf "%s (%.2fx)" (format p2) r2, if r2 < rate then Color.Silver else color p2)
+                            else (sprintf "%s (%.2fx)" (format p1) r1, color p1)
                     let (accAndGrades, lamp, clear) = pbData
                     let (t, c) = f accAndGrades (fun (x, _) -> sprintf "%.2f%%" (100.0 * x)) (fun (_, g) -> ScoreColor.gradeToColor g) in Text.draw(font(), t, 15.0f, left, top + 60.0f, c)
                     let (t, c) = f lamp (fun x -> x.ToString()) ScoreColor.lampToColor in Text.draw(font(), t, 15.0f, left + 200.0f, top + 60.0f, c)
                     let (t, c) = f clear (fun x -> if x then "CLEAR" else "FAILED") ScoreColor.clearToColor in Text.draw(font(), t, 15.0f, left + 400.0f, top + 60.0f, c)
 
-                    let border = Rect.expand(5.0f, 5.0f)bounds
+                    let border = Rect.expand(5.0f, 5.0f) bounds
                     let borderColor = if selectedChart = cc.Hash then Color.White else color
                     if borderColor.A > 0uy then
                         Draw.rect(Rect.sliceLeft 5.0f border) borderColor Sprite.Default
                         Draw.rect(Rect.sliceTop 5.0f border) borderColor Sprite.Default
                         Draw.rect(Rect.sliceRight 5.0f border) borderColor Sprite.Default
                         Draw.rect(Rect.sliceBottom 5.0f border) borderColor Sprite.Default
-                top + 95.0f
+                top + CHARTHEIGHT + ITEMSPACING
             | Choice2Of2 (name, items) ->
                 if (top > 90.0f && top < Render.vheight) then
-                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + 65.0f)
+                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + PACKHEIGHT)
                     let struct (left, _, right, bottom) = bounds
                     Draw.rect(bounds)(if selectedGroup = name then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f))Sprite.Default
                     Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
                 if expandedGroup = name then
-                    List.fold (fun t (i: LevelSelectItem) -> i.Draw(t)) (top + 80.0f) items
-                else top + 80.0f
+                    List.fold (fun t (i: LevelSelectItem) -> i.Draw(t)) (top + PACKHEIGHT + ITEMSPACING) items
+                else top + PACKHEIGHT + ITEMSPACING
 
         member this.Update(top: float32, elapsedTime): float32 =
             this.Navigate()
@@ -379,7 +388,7 @@ module ScreenLevelSelect =
                         | None -> ()
                         color <- colorFunc(pbData)
 
-                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + 85.0f)
+                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + CHARTHEIGHT)
                     if Mouse.Hover(bounds) then
                         hover.Target <- 1.0f
                         if Mouse.Click(MouseButton.Left) then
@@ -393,13 +402,13 @@ module ScreenLevelSelect =
                     else
                         hover.Target <- 0.0f
                     animation.Update(elapsedTime) |> ignore
-                top + 95.0f
+                top + CHARTHEIGHT + ITEMSPACING
             | Choice2Of2 (name, items) ->
                 if scrollTo && name = selectedGroup && name <> expandedGroup then
                     scrollBy(-top + 500.0f)
                     scrollTo <- false
                 if (top > 170.0f) then
-                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.9f) (top + 65.0f)
+                    let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.9f) (top + PACKHEIGHT)
                     if Mouse.Hover(bounds) then
                         hover.Target <- 1.0f
                         if Mouse.Click(MouseButton.Left) then
@@ -408,10 +417,10 @@ module ScreenLevelSelect =
                         hover.Target <- 0.0f
                     animation.Update(elapsedTime) |> ignore
                 if expandedGroup = name then
-                    List.fold (fun t (i: LevelSelectItem) -> i.Update(t, elapsedTime)) (top + 80.0f) items
+                    List.fold (fun t (i: LevelSelectItem) -> i.Update(t, elapsedTime)) (top + PACKHEIGHT + ITEMSPACING) items
                 else
                     List.iter (fun (i: LevelSelectItem) -> i.Navigate()) items
-                    top + 80.0f
+                    top + PACKHEIGHT + ITEMSPACING
 
             member this.Navigate() =
                 match content with

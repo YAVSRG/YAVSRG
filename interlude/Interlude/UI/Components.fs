@@ -70,9 +70,10 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             let oh = hover
-            if Mouse.Moved() then hover <- Mouse.Hover(this.Bounds)
-            if oh <> hover then onHover(hover)
-            if hover && Mouse.Click(MouseButton.Left) then onClick()
+            hover <- Mouse.Hover(this.Bounds)
+            if oh && not hover then onHover(false)
+            elif not oh && hover && Mouse.Moved() then onHover(true)
+            elif hover && Mouse.Click(MouseButton.Left) then onClick()
 
     type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
         inherit Widget()
