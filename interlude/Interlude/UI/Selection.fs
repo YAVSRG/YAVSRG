@@ -14,7 +14,7 @@ open Interlude.UI.Animation
 open Interlude.UI.Components
 
 module Selection =
-    
+
     (*
         Fancy selection framework
     *)
@@ -30,7 +30,7 @@ module Selection =
                 - (2) Selected leaves are a subset, so at most 1 leaf can be selected
                 - (3) The leaf that is hovered, if it exists, implies all its ancestors are selected
                 - (4) The leaf that is hovered, if it exists, implies all its non-ancestors are not hovered
-        *) 
+        *)
 
         let mutable hoverChild: Selectable option = None
         let mutable hoverSelected: bool = false
@@ -136,9 +136,7 @@ module Selection =
                 elif options.Hotkeys.Select.Get().Tapped() then this.SelectedChild <- this.HoverChild
                 elif options.Hotkeys.Exit.Get().Tapped() then this.Selected <- false
 
-        override this.Dispose() =
-            base.Dispose()
-            disposed <- true
+        override this.Dispose() = base.Dispose(); disposed <- true
 
     type ListSelectable(horizontal) =
         inherit NavigateSelectable()
@@ -197,11 +195,11 @@ module Selection =
             this.Selected <- false
             onClick()
 
-    type LittleButton(label, onClick) as this = 
+    type LittleButton(label, onClick) as this =
         inherit Selectable()
         do
             this.Add(Frame(Color.FromArgb(80, 255, 255, 255), ()))
-            this.Add(TextBox(label, (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.5f))
+            this.Add(TextBox(label, (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
         override this.OnSelect() =
             this.Selected <- false
@@ -366,20 +364,20 @@ module Selection =
 
             override this.Left() =
                 let p = this.Parent.Value
-                let o = 
+                let o =
                     match p with
                     | e when e = selector.Chosen -> selector.Available
                     | a when a = selector.Available -> selector.Chosen
                     | _ -> failwith "impossible"
                 p.Synchronized(fun () -> p.Remove(this); o.Add(this))
             override this.Right() = this.Left()
-                
+
         and ListOrderedSelector(setting: ISettable<ResizeArray<string>>, items: ResizeArray<string>) as this =
             inherit NavigateSelectable()
 
             let available = new FlowContainer() :> Widget
             let selected = new FlowContainer() :> Widget
-            
+
             do
                 this.Add(TextBox(K (Localisation.localise "options.select.Available"), K (Color.White, Color.Black), 0.5f)
                     |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 50.0f, 0.0f) )

@@ -12,8 +12,9 @@ let main argv =
 
     let crashSplash = Utils.randomSplash("CrashSplashes.txt") >> (fun s -> Logging.Critical s "")
 
-    //Check if interlude is already running (true if not already running)
+    //Check if interlude is already running
     if m.WaitOne(TimeSpan.Zero, true) then
+        Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
         //Init logging
         use logfile = File.Open("log.txt", FileMode.Append)
         use sw = new StreamWriter(logfile)

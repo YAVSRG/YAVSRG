@@ -15,13 +15,13 @@ open Interlude.Input
 open Interlude.Input.Bind
 
 type WindowType =
-    | WINDOWED = 0
-    | BORDERLESS = 1
-    | FULLSCREEN = 2
+| WINDOWED = 0
+| BORDERLESS = 1
+| FULLSCREEN = 2
 
-type WindowResolution = 
-    | Preset of index:int
-    | Custom of width:int * height:int
+type WindowResolution =
+| Preset of index:int
+| Custom of width:int * height:int
 
 type GameConfig = {
     WorkingDirectory: string
@@ -246,14 +246,14 @@ module Options =
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
         Localisation.loadFile(config.Locale)
         options <- loadImportantJsonFile("Options")(Path.Combine(getDataPath("Data"), "options.json"))(options)(true)
-        
+
         Themes.refreshAvailableThemes()
         Themes.loadThemes(options.EnabledThemes)
         Themes.changeNoteSkin(options.NoteSkin.Get())
 
     let save() =
         try
-            Json.toFile(configPath, true) config 
+            Json.toFile(configPath, true) config
             Json.toFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.") (err.ToString())
 

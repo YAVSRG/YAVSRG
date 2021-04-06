@@ -16,7 +16,7 @@ open Interlude.Utils
 open Interlude.Options
 
 module Gameplay =
-    
+
     let mutable internal currentChart: Chart option = None
     let mutable internal currentCachedChart: CachedChart option = None
     let mutable internal chartSaveData = None
@@ -63,12 +63,12 @@ module Gameplay =
         updateChart()
         onChartChange()
 
-    let createScoreData() = 
+    let createScoreData() =
         let r = replayData.Force()
         replayData <- getScoreData(selectedMods)(modifiedChart.Force())
         r
 
-    let makeScore(scoreData, keys): Score = {   
+    let makeScore(scoreData, keys): Score = {
         time = DateTime.Now
         hitdata = compressScoreData scoreData
         rate = rate
@@ -92,7 +92,7 @@ module Gameplay =
             Options.options.Stats.TopPhysical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical)(Options.options.Stats.TopPhysical.Get()))
             Options.options.Stats.TopTechnical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Technical)(Options.options.Stats.TopTechnical.Get()))
             //update pbs
-            let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) = 
+            let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) =
                 if target.ContainsKey(name) then
                     let n, pb = updatePB(target.[name])(value, data.Score.rate)
                     target.[name] <- n
@@ -109,10 +109,10 @@ module Gameplay =
     let save() =
         scores.Save()
         cache.Save()
-        
+
     let init() =
         try
-            let c, ch = 
+            let c, ch =
                 match cache.LookupChart(Options.options.CurrentChart.Get()) with
                 | Some cc ->
                     match cache.LoadChart(cc) with

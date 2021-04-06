@@ -11,6 +11,7 @@ open Prelude.Data.ChartManager
 open Prelude.Data.ChartManager.Sorting
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Mods
+open Prelude.Gameplay.Difficulty
 open Interlude.Gameplay
 open Interlude.Themes
 open Interlude.Utils
@@ -35,7 +36,7 @@ module private ScreenLevelSelectVars =
     let mutable scoreSystem = "SC+ (J4)"
     let mutable hpSystem = "VG"
 
-    type Navigation = 
+    type Navigation =
     | Nothing
     | Backward of string * CachedChart
     | Forward of bool
@@ -66,7 +67,7 @@ module ScreenLevelSelect =
     [<AutoOpen>]
     module private InfoPanel =
 
-        type ScoreboardSort = 
+        type ScoreboardSort =
         | Time = 0
         | Performance = 1
         | Accuracy = 2
@@ -81,18 +82,21 @@ module ScreenLevelSelect =
             inherit Widget()
 
             do
-                this.Add(TextBox(sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs) |> K, K Color.White, 0.0f)
-                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f))
-                this.Add(TextBox(sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) |> K, K Color.White, 0.0f)
-                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f))
-                this.Add(TextBox(K data.Mods, K Color.White, 1.0f)
-                    |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
-                this.Add(
-                    new Clickable(
-                        (fun () ->
-                            Screens.newScreen(
-                                (fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen),
-                                ScreenType.Score, ScreenTransitionFlag.Default) ), ignore))
+                TextBox((fun () -> sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs)), K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
+                |> this.Add
+
+                TextBox((fun () -> sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo)), K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
+                |> this.Add
+
+                TextBox(K data.Mods, K Color.White, 1.0f)
+                |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
+                |> this.Add
+
+                Clickable((fun () -> Screens.newScreen((fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
+                |> this.Add
+
                 this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
             override this.Draw() =
@@ -102,25 +106,46 @@ module ScreenLevelSelect =
             member this.Data = data
 
         type Scoreboard() as this =
-            inherit ListSelectable(true)
+            inherit Selectable()
 
             let flowContainer = new FlowContainer()
             let mutable empty = false
-            let mutable filter = ScoreboardFilter.All
-            let mutable sort = ScoreboardSort.Performance
+            //todo: store these in options
+            let filter = Setting(ScoreboardFilter.All)
+            let sort = Setting(ScoreboardSort.Performance)
 
             let mutable chart = ""
+            let mutable scoring = ""
+            let ls = new ListSelectable(true)
 
             do
-                this.Add(LittleButton(K "", ignore)) //
-                this.Add(flowContainer)
-            
+                LittleButton.FromEnum("Sort", sort, this.Refresh)
+                |> positionWidget(20.0f, 0.0f, -35.0f, 1.0f, -20.0f, 0.25f, -5.0f, 1.0f)
+                |> ls.Add
+
+                LittleButton.FromEnum("Filter", filter, this.Refresh)
+                |> positionWidget(20.0f, 0.25f, -35.0f, 1.0f, -20.0f, 0.5f, -5.0f, 1.0f)
+                |> ls.Add
+
+                LittleButton(K "Score System", this.Refresh) //nyi
+                |> positionWidget(20.0f, 0.5f, -35.0f, 1.0f, -20.0f, 0.75f, -5.0f, 1.0f)
+                |> ls.Add
+
+                LittleButton(K "Local Scores", this.Refresh) //nyi
+                |> positionWidget(20.0f, 0.75f, -35.0f, 1.0f, -20.0f, 1.0f, -5.0f, 1.0f)
+                |> ls.Add
+
+                ls |> this.Add
+                flowContainer
+                |> positionWidgetA(0.0f, 10.0f, 0.0f, -40.0f)
+                |> this.Add
+
             override this.OnSelect() =
                 base.OnSelect()
                 let (left, _, right, _) = this.Anchors
                 left.Target <- 0.0f
                 right.Target <- 0.0f
-            
+
             override this.OnDeselect() =
                 base.OnSelect()
                 let (left, _, right, _) = this.Anchors
@@ -138,28 +163,48 @@ module ScreenLevelSelect =
                         for score in d.Scores do
                             flowContainer.Add(new ScoreboardItem(new ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)))
                     empty <- flowContainer.Children.Count = 0
+                if scoring <> scoreSystem then
+                    let s = options.AccSystems.Get() |> fst
+                    scoring <- scoreSystem
+                    for c in flowContainer.Children do
+                        (c :?> ScoreboardItem).Data.AccuracyType <- s
+
                 flowContainer.Sort(
-                    match sort with
+                    match sort.Get() with
                     | ScoreboardSort.Accuracy -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Accuracy.Value.CompareTo((b :?> ScoreboardItem).Data.Accuracy.Value))
                     | ScoreboardSort.Performance -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Physical.CompareTo((b :?> ScoreboardItem).Data.Physical))
+                    | ScoreboardSort.Time
                     | _ -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Score.time.CompareTo((b :?> ScoreboardItem).Data.Score.time))
                     )
                 flowContainer.Filter(
-                    match filter with
+                    match filter.Get() with
                     | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.Score.rate = rate)
                     | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.Score.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.Score.keycount - 3])
-                    | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods <> null) //nyi
+                    | ScoreboardFilter.CurrentMods// -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods <> null) //nyi
                     | _ -> K true
                     )
+
+            override this.Update(elapsedTime, bounds) =
+                base.Update(elapsedTime, bounds)
+                if this.Selected && (ls.Selected <> options.Hotkeys.Scoreboard.Get().Pressed()) then ls.Selected <- not ls.Selected
 
         type ModSelectItem(name: string) as this =
             inherit Selectable()
 
             do
-                this.Add(TextBox(ModState.getModName name |> K, K (Color.White, Color.Black), 0.0f)
-                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f))
-                this.Add(TextBox(ModState.getModDesc name |> K, K (Color.White, Color.Black), 0.0f)
-                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+                TextBox(ModState.getModName name |> K, K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
+                |> this.Add
+
+                TextBox(ModState.getModDesc name |> K, K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
+                |> this.Add
+
+                Clickable(
+                    (fun () -> if this.SParent.Value.Selected then this.Selected <- true),
+                    (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
+                |> this.Add
+                //todo: clickable (only works when ModSelect is selected to prevent edge case)
 
             override this.Draw() =
                 let hi = Screens.accentShade(255, 1.0f, 0.0f)
@@ -201,10 +246,37 @@ module ScreenLevelSelect =
 
         let mods = ModSelect()
         let scores = Scoreboard()
+        let mutable length = ""
+        let mutable bpm = ""
 
         do
-            this.Add(mods |> positionWidgetA(-800.0f, 0.0f, -800.0f, 0.0f))
-            this.Add(scores)
+            this.Add (mods |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f))
+            this.Add (scores |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f))
+
+            new TextBox(
+                (fun () -> match difficultyRating with None -> "0.00⭐" | Some d -> sprintf "%.2f⭐" d.Physical),
+                (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
+            |> positionWidget(10.0f, 0.0f, -190.0f, 1.0f, 0.0f, 0.5f, -120.0f, 1.0f)
+            |> this.Add
+
+            new TextBox(
+                (fun () -> match difficultyRating with None -> "0.00⭐" | Some d -> sprintf "%.2f⭐" d.Technical),
+                (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
+            |> positionWidget(10.0f, 0.0f, -120.0f, 1.0f, 0.0f, 0.5f, -50.0f, 1.0f)
+            |> this.Add
+
+            new TextBox((fun () -> bpm), K (Color.White, Color.Black), 1.0f)
+            |> positionWidget(0.0f, 0.5f, -190.0f, 1.0f, -10.0f, 1.0f, -120.0f, 1.0f)
+            |> this.Add
+
+            new TextBox((fun () -> length), K (Color.White, Color.Black), 1.0f)
+            |> positionWidget(0.0f, 0.5f, -120.0f, 1.0f, -10.0f, 1.0f, -50.0f, 1.0f)
+            |> this.Add
+
+            new TextBox((fun () -> getModString(rate, selectedMods)), K (Color.White, Color.Black), 0.0f)
+            |> positionWidget(17.0f, 0.0f, -50.0f, 1.0f, -50.0f, 1.0f, -10.0f, 1.0f)
+            |> this.Add
+
             scores.Selected <- true
 
         override this.Update(elapsedTime, bounds) =
@@ -215,10 +287,25 @@ module ScreenLevelSelect =
             base.Update(elapsedTime, bounds)
 
         member this.Refresh() =
+            length <-
+                match currentCachedChart with
+                | Some cc -> cc.Length
+                | None -> 0.0f<ms>
+                |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
+                |> fun (x, y) -> sprintf "⌛ %i:%02i" x y
+            bpm <-
+                match currentCachedChart with
+                | Some cc -> cc.BPM
+                | None -> (120.0f<ms/beat>, 120.0f<ms/beat>)
+                |> fun (b, a) -> (60000.0f<ms> / a |> int, 60000.0f<ms> / b |> int)
+                |> fun (a, b) ->
+                    if Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
+                    elif a > 9000 || b < 0 then sprintf "♬ ∞"
+                    else sprintf "♬ %i-%i" a b
             scores.Refresh()
 
     type LevelSelectItem(content: Choice<string * CachedChart, string * LevelSelectItem list>) =
-        
+
         let hover = new AnimationFade(0.0f)
         let mutable colorVersion = -1
         let mutable color = Color.Transparent
@@ -293,7 +380,7 @@ module ScreenLevelSelect =
                         color <- colorFunc(pbData)
 
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.8f) (top + 85.0f)
-                    if Mouse.Hover(bounds) then 
+                    if Mouse.Hover(bounds) then
                         hover.Target <- 1.0f
                         if Mouse.Click(MouseButton.Left) then
                             if selectedChart = cc.Hash then
@@ -311,9 +398,9 @@ module ScreenLevelSelect =
                 if scrollTo && name = selectedGroup && name <> expandedGroup then
                     scrollBy(-top + 500.0f)
                     scrollTo <- false
-                if (top > 170.0f) then                       
+                if (top > 170.0f) then
                     let bounds = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.9f) (top + 65.0f)
-                    if Mouse.Hover(bounds) then 
+                    if Mouse.Hover(bounds) then
                         hover.Target <- 1.0f
                         if Mouse.Click(MouseButton.Left) then
                             if expandedGroup = name then expandedGroup <- "" else expandedGroup <- name
@@ -357,17 +444,19 @@ type ScreenLevelSelect() as this =
 
     let refresh() =
         scoreSystem <- (options.AccSystems.Get() |> fst).ToString()
+        infoPanel.Refresh()
         let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
                 let cc = groups.[g].[0]
-                match cache.LoadChart(cc) with
-                | Some c -> changeChart(cc, c)
-                | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
+                if cc.Hash <> selectedChart then
+                    match cache.LoadChart(cc) with
+                    | Some c -> changeChart(cc, c)
+                    | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
         lastItem <- None
         colorVersionGlobal <- 0
-        selection <- 
+        selection <-
             groups.Keys
             |> Seq.sort
             |> Seq.map
@@ -388,40 +477,34 @@ type ScreenLevelSelect() as this =
     let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
 
     do
-        if not <| sortBy.ContainsKey(options.ChartSortMode.Get()) then options.ChartSortMode.Set("Title")
-        if not <| groupBy.ContainsKey(options.ChartGroupMode.Get()) then options.ChartGroupMode.Set("Pack")
-        this.Animation.Add(scrollPos)
+        if not <| sortBy.ContainsKey(options.ChartSortMode.Get()) then options.ChartSortMode.Set "Title"
+        if not <| groupBy.ContainsKey(options.ChartGroupMode.Get()) then options.ChartGroupMode.Set "Pack"
+        this.Animation.Add scrollPos
         scrollBy <- fun amt -> scrollPos.Target <- scrollPos.Target + amt
+
         this.Add(
             let sorts = sortBy.Keys |> Array.ofSeq
             new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Get()),
                 (fun i -> options.ChartSortMode.Set(sorts.[i]); refresh()), "Sort by", 50.0f)
             |> positionWidget(-400.0f, 1.0f, 100.0f, 0.0f, -250.0f, 1.0f, 400.0f, 0.0f))
+
         this.Add(
             let groups = groupBy.Keys |> Array.ofSeq
             new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Get()),
                 (fun i -> options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
             |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f))
-        this.Add(
-            new SearchBox(searchText, fun f -> filter <- f; refresh())
+
+        this.Add(new SearchBox(searchText, fun f -> filter <- f; refresh())
             |> positionWidget(-600.0f, 1.0f, 20.0f, 0.0f, -50.0f, 1.0f, 80.0f, 0.0f))
-        this.Add(infoPanel |> positionWidget(10.0f, 0.0f, 220.0f, 0.0f, -10.0f, 0.4f, 0.0f, 1.0f))
-        onChartChange <- infoPanel.Refresh
-        this.Add(
-            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
+
+        this.Add(new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
             |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 100.0f, 0.0f))
-        this.Add(
-            new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
+
+        this.Add(new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
             |> positionWidget(0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.4f, 160.0f, 0.0f))
-        this.Add(
-            new TextBox((fun () -> match difficultyRating with None -> "0.00" | Some d -> sprintf "%.2f" d.Physical), K Color.White, 0.5f)
-            |> positionWidget(50.0f, 0.0f, -240.0f, 1.0f, 0.0f, 0.2f, -140.0f, 1.0f))
-        this.Add(
-            new TextBox((fun () -> match difficultyRating with None -> "0.00" | Some d -> sprintf "%.2f" d.Technical), K Color.White, 0.5f)
-            |> positionWidget(0.0f, 0.2f, -240.0f, 1.0f, -50.0f, 0.4f, -140.0f, 1.0f))
-        this.Add(
-            new TextBox((fun () -> getModString(rate, selectedMods)), K Color.White, 0.5f)
-            |> positionWidget(0.0f, 0.0f, -140.0f, 1.0f, -50.0f, 0.4f, -70.0f, 1.0f))
+
+        this.Add(infoPanel |> positionWidget(10.0f, 0.0f, 180.0f, 0.0f, -10.0f, 0.4f, 0.0f, 1.0f))
+        onChartChange <- infoPanel.Refresh
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -471,7 +554,6 @@ type ScreenLevelSelect() as this =
     override this.OnEnter(prev) =
         base.OnEnter(prev)
         refresh()
-        infoPanel.Refresh()
         colorVersionGlobal <- colorVersionGlobal + 1
 
     override this.OnExit(next) =
