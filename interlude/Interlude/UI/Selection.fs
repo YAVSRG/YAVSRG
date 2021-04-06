@@ -186,11 +186,11 @@ module Selection =
         do
             this.Add(Frame((fun () -> Screens.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
             this.Add(TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 0.8f))
+            this.Add(TextBox(K ([|"❖";"✎";"♛";"⌨";"⚒"|].[icon]), K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 1.0f, 0.0f, 0.7f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
 
         override this.Draw() =
             base.Draw()
-            Draw.quad (this.Bounds |> Rect.expand(-90.0f, -90.0f) |> Rect.translate(0.0f, -40.0f) |> Quad.ofRect) (Color.White |> Quad.colorOf) (Themes.getTexture("icons") |> Sprite.gridUV(icon, 0))
         override this.OnSelect() =
             this.Selected <- false
             onClick()
@@ -237,7 +237,7 @@ module Selection =
                 with override this.OnDeselect() = base.OnDeselect(); onDeselect() }
 
         static member FromBool(setting: ISettable<bool>) =
-            new Selector([|"NO" ; "YES"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)))
+            new Selector([|"☒" ; "☑"|], (if setting.Get() then 1 else 0), (fun (i, _) -> setting.Set(i > 0)))
 
         static member FromKeymode(setting: ISettable<int>, onDeselect) =
             { new Selector([|"3K"; "4K"; "5K"; "6K"; "7K"; "8K"; "9K"; "10K"|], setting.Get(), (fun (i, _) -> setting.Set(i)))

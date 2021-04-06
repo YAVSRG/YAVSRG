@@ -395,7 +395,7 @@ module ScreenLevelSelect =
                 let f key (d: Collections.Generic.Dictionary<string, PersonalBests<_>>) =
                     if d.ContainsKey(key) then Some d.[key] else None
                 colorVersion <- colorVersionGlobal
-                if chartData.IsNone then chartData <- scores.GetScoreData(cc.Hash)
+                if chartData.IsNone then chartData <- scores.GetScoreData cc.Hash
                 match chartData with
                 | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, grade x themeConfig.GradeThresholds)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
                 | None -> ()
