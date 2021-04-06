@@ -56,7 +56,10 @@ type Hotkeys = {
     Screenshot: Setting<Bind>
     Tasklist: Setting<Bind>
     Volume: Setting<Bind>
+
     Mods: Setting<Bind>
+    Scoreboard: Setting<Bind>
+    ChartInfo: Setting<Bind>
 
     Import: Setting<Bind>
     Options: Setting<Bind>
@@ -86,7 +89,10 @@ type Hotkeys = {
         Start = Setting(mk Keys.Home)
         End = Setting(mk Keys.End)
         Skip = Setting(mk Keys.Space)
+
         Mods = Setting(mk Keys.M)
+        Scoreboard = Setting(mk Keys.Comma)
+        ChartInfo = Setting(mk Keys.Period)
 
         Import = Setting(ctrl Keys.I)
         Options = Setting(ctrl Keys.O)
