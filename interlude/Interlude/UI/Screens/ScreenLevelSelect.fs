@@ -30,7 +30,8 @@ module private ScreenLevelSelectVars =
     let mutable expandedGroup = ""
     let mutable scrollBy = ignore
     let mutable colorVersionGlobal = 0
-    let mutable colorFunc = fun (_, _, _) -> Color.Transparent
+    //future todo: different color settings?
+    let mutable colorFunc = fun (_, _, _) -> Color.FromArgb(40, 200, 200, 200)
 
     let mutable scoreSystem = "SC+ (J4)"
     //todo: have these update when score system is changed, could be done remotely, exactly when settings are changed
@@ -82,11 +83,11 @@ module ScreenLevelSelect =
             inherit Widget()
 
             do
-                TextBox((fun () -> sprintf "%s / %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs)), K (Color.White, Color.Black), 0.0f)
+                TextBox((fun () -> sprintf "%s  •  %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs)), K (Color.White, Color.Black), 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
                 |> this.Add
 
-                TextBox((fun () -> sprintf "%s / %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo)), K (Color.White, Color.Black), 0.0f)
+                TextBox((fun () -> sprintf "%s  •  %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo)), K (Color.White, Color.Black), 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
                 |> this.Add
 
@@ -152,8 +153,8 @@ module ScreenLevelSelect =
                 right.Target <- -800.0f
 
             member this.Refresh() =
-                let h = match Interlude.Gameplay.currentCachedChart with Some c -> c.Hash | None -> ""
-                if h <> chart || (match chartSaveData with None -> false | Some d -> d.Scores.Count <> flowContainer.Children.Count)then
+                let h = match currentCachedChart with Some c -> c.Hash | None -> ""
+                if h <> chart || (match chartSaveData with None -> false | Some d -> d.Scores.Count <> flowContainer.Children.Count) then
                     chart <- h
                     flowContainer.Clear()
                     match chartSaveData with
@@ -308,14 +309,10 @@ module ScreenLevelSelect =
                     else sprintf "♬ %i-%i" a b
             scores.Refresh()
 
-    let CHARTHEIGHT = 85.0f
-    let PACKHEIGHT = 65.0f
-    let ITEMSPACING = 10.0f
-
     [<AbstractClass>]
-    type LevelSelectItem2() =
+    type LevelSelectItem() =
         abstract member Bounds: float32 -> Rect
-        abstract member IsSelected: bool
+        abstract member Selected: bool
         abstract member Navigate: unit -> unit
         abstract member OnDraw: Rect * bool -> unit
         abstract member OnUpdate: Rect * bool * float -> unit
@@ -323,18 +320,18 @@ module ScreenLevelSelect =
         abstract member Draw: float32 -> float32
         default this.Draw(top: float32) =
             let bounds = this.Bounds(top)
-            if top > 70.0f && top < Render.vheight then this.OnDraw(bounds, this.IsSelected)
-            top + Rect.height bounds + 10.0f
+            if top > 70.0f && top < Render.vheight then this.OnDraw(bounds, this.Selected)
+            top + Rect.height bounds + 15.0f
 
         abstract member Update: float32 * float -> float32
         default this.Update(top: float32, elapsedTime) =
             this.Navigate()
             let bounds = this.Bounds(top)
-            if top > 70.0f && top < Render.vheight then this.OnUpdate(bounds, this.IsSelected, elapsedTime)
-            top + Rect.height bounds + 10.0f
+            if top > 70.0f && top < Render.vheight then this.OnUpdate(bounds, this.Selected, elapsedTime)
+            top + Rect.height bounds + 15.0f
 
     type LevelSelectChartItem(groupName, cc) =
-        inherit LevelSelectItem2()
+        inherit LevelSelectItem()
 
         let hover = new AnimationFade(0.0f)
         let mutable colorVersion = -1
@@ -342,52 +339,62 @@ module ScreenLevelSelect =
         let mutable chartData = None
         let mutable pbData = (None, None, None)
 
-        override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + CHARTHEIGHT)
-        override this.IsSelected = selectedChart = cc.Hash
+        override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
+        override this.Selected = selectedChart = cc.Hash
 
         override this.Navigate() =
             match navigation with
             | Nothing -> ()
             | Forward b ->
                 if b then
-                    switchCurrentChart(cc, groupName); navigation <- Nothing
-                elif groupName = selectedGroup && this.IsSelected then
-                    navigation <- Forward true
+                    switchCurrentChart(cc, groupName)
+                    navigation <- Nothing
+                elif groupName = selectedGroup && this.Selected then navigation <- Forward true
             | Backward (groupName2, cc2) ->
-                if groupName = selectedGroup && this.IsSelected then
-                    switchCurrentChart(cc2, groupName2); navigation <- Nothing
+                if groupName = selectedGroup && this.Selected then
+                    switchCurrentChart(cc2, groupName2)
+                    navigation <- Nothing
                 else navigation <- Backward(groupName, cc)
 
         override this.OnDraw(bounds, selected) =
             let struct (left, top, right, bottom) = bounds
-            Draw.rect bounds (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-            let twidth = Math.Max(Text.measure(font(), cc.Artist + " - " + cc.Title) * 23.0f, Text.measure(font(), cc.DiffName + " // " + cc.Creator) * 20.0f + 40.0f) + 20.0f
-            let stripeLength = twidth + (right - left) * 0.3f * hover.Value
+            let accent = Screens.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
+            Draw.rect bounds (Screens.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+            let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
-                (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength - 40.0f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
-                (Quad.colorOf <| Screens.accentShade(127, 1.0f, 0.2f))
-                (Sprite.gridUV(0, 0) Sprite.Default)
-            Draw.rect(Rect.sliceBottom 25.0f bounds)(Screens.accentShade(60, 0.3f, 0.0f)) Sprite.Default
-            Text.drawB(font(), cc.Artist + " - " + cc.Title, 23.0f, left, top, (Color.White, Color.Black))
-            Text.drawB(font(), cc.DiffName + " // " + cc.Creator, 18.0f, left, top + 30.0f, (Color.White, Color.Black))
+                (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
+                (struct(accent, Color.Transparent, Color.Transparent, accent))
+                Sprite.DefaultQuad
 
-            let f (p: PersonalBests<'T> option) (format: 'T -> string) (color: 'T -> Color) =
-                match p with
-                | None -> ("", Color.Transparent)
-                | Some ((p1, r1), (p2, r2)) ->
-                    if r1 < rate then (sprintf "%s (%.2fx)" (format p2) r2, if r2 < rate then Color.Silver else color p2)
-                    else (sprintf "%s (%.2fx)" (format p1) r1, color p1)
             let (accAndGrades, lamp, clear) = pbData
-            let (t, c) = f accAndGrades (fun (x, _) -> sprintf "%.2f%%" (100.0 * x)) (fun (_, g) -> ScoreColor.gradeToColor g) in Text.draw(font(), t, 15.0f, left, top + 60.0f, c)
-            let (t, c) = f lamp (fun x -> x.ToString()) ScoreColor.lampToColor in Text.draw(font(), t, 15.0f, left + 200.0f, top + 60.0f, c)
-            let (t, c) = f clear (fun x -> if x then "CLEAR" else "FAILED") ScoreColor.clearToColor in Text.draw(font(), t, 15.0f, left + 400.0f, top + 60.0f, c)
+            let f (p: PersonalBests<'T> option) (format: 'T -> string) (color: 'T -> Color) (pos: float32) =
+                let (t, t2, c) =
+                    match p with
+                    | None -> ("", "", Color.Transparent)
+                    | Some ((p1, r1), (p2, r2)) ->
+                        if r1 < rate then (format p2, sprintf "(%.2fx)" r2, if r2 < rate then Color.Silver else color p2)
+                        else (format p1, sprintf "(%.2fx)" r1, color p1)
+                if c.A > 0uy then
+                    Draw.rect(Rect.create (right - pos - 40.0f) top (right - pos + 40.0f) bottom) accent Sprite.Default
+                    Text.drawJustB(font(), t, 20.0f, right - pos, top + 8.0f, (c, Color.Black), 0.5f)
+                    Text.drawJustB(font(), t2, 14.0f, right - pos, top + 35.0f, (c, Color.Black), 0.5f)
+
+            f accAndGrades (fun (x, _) -> sprintf "%.2f%%" (100.0 * x)) (snd >> ScoreColor.gradeToColor) 450.0f
+            f lamp (fun x -> x.ToString()) ScoreColor.lampToColor 300.0f
+            f clear (fun x -> if x then "CLEAR" else "FAILED") ScoreColor.clearToColor 150.0f
+
+            Draw.rect(Rect.sliceBottom 25.0f bounds) (Screens.accentShade(70, 0.3f, 0.0f)) Sprite.Default
+            Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
+            Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
+            Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
 
             let border = Rect.expand(5.0f, 5.0f) bounds
-            let borderColor = if selected then Color.White else color
+            let border2 = Rect.expand(5.0f, 0.0f) bounds
+            let borderColor = if selected then Screens.accentShade(180, 1.0f, 0.5f) else color
             if borderColor.A > 0uy then
-                Draw.rect(Rect.sliceLeft 5.0f border) borderColor Sprite.Default
+                Draw.rect(Rect.sliceLeft 5.0f border2) borderColor Sprite.Default
                 Draw.rect(Rect.sliceTop 5.0f border) borderColor Sprite.Default
-                Draw.rect(Rect.sliceRight 5.0f border) borderColor Sprite.Default
+                Draw.rect(Rect.sliceRight 5.0f border2) borderColor Sprite.Default
                 Draw.rect(Rect.sliceBottom 5.0f border) borderColor Sprite.Default
 
         override this.OnUpdate(bounds, selected, elapsedTime) =
@@ -411,22 +418,21 @@ module ScreenLevelSelect =
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
         override this.Update(top, elapsedTime) =
-            if scrollTo && groupName = selectedGroup && this.IsSelected then
+            if scrollTo && groupName = selectedGroup && this.Selected then
                 scrollBy(-top + 500.0f)
                 scrollTo <- false
             base.Update(top, elapsedTime)
 
     type LevelSelectPackItem(name, items: LevelSelectChartItem list) =
-        inherit LevelSelectItem2()
+        inherit LevelSelectItem()
 
-        override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + PACKHEIGHT)
-        override this.IsSelected = selectedGroup = name
+        override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + 65.0f)
+        override this.Selected = selectedGroup = name
         member this.Expanded = expandedGroup = name
 
         override this.Navigate() = () //nyi
 
         override this.OnDraw(bounds, selected) =
-            let struct (left, top, right, bottom) = bounds
             Draw.rect bounds (if selected then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f)) Sprite.Default
             Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
         override this.Draw(top) =
@@ -437,7 +443,7 @@ module ScreenLevelSelect =
             if Mouse.Hover(bounds) && Mouse.Click(MouseButton.Left) then
                 if this.Expanded then expandedGroup <- "" else expandedGroup <- name
         override this.Update(top, elapsedTime) =
-            if scrollTo && this.IsSelected && not this.Expanded then
+            if scrollTo && this.Selected && not this.Expanded then
                 scrollBy(-top + 500.0f)
                 scrollTo <- false
             let b = base.Update(top, elapsedTime)
