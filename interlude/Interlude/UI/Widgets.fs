@@ -304,10 +304,10 @@ module Screens =
 
     let drawBackground(bounds, color, depth) =
         let bg = Themes.background
-        let pwidth = Render.vwidth + parallaxZ.Value
-        let pheight = Render.vheight + parallaxZ.Value
-        let x = -parallaxX.Value * parallaxZ.Value
-        let y = -parallaxY.Value * parallaxZ.Value
+        let pwidth = Render.vwidth + parallaxZ.Value * depth
+        let pheight = Render.vheight + parallaxZ.Value * depth
+        let x = -parallaxX.Value * parallaxZ.Value * depth
+        let y = -parallaxY.Value * parallaxZ.Value * depth
         let screenaspect = pwidth / pheight
         let bgaspect = float32 bg.Width / float32 bg.Height
         let q = Quad.ofRect bounds
