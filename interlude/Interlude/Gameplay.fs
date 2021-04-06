@@ -73,7 +73,7 @@ module Gameplay =
         hitdata = compressScoreData scoreData
         rate = rate
         selectedMods = selectedMods
-        layout = Options.options.Playstyles.[keys - 2]
+        layout = Options.options.Playstyles.[keys - 3]
         keycount = keys
     }
 
