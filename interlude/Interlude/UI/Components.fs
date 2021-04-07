@@ -131,7 +131,8 @@ module Components =
                     Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
             this.FlowContent(thisBounds) 
             base.Update(elapsedTime, bounds)
-            if Mouse.Hover(this.Bounds) then scrollPos <- Math.Max(0.0f, Math.Min(scrollPos - Mouse.Scroll() * 100.0f, contentSize - Rect.height this.Bounds))
+            if Mouse.Hover(this.Bounds) then scrollPos <- scrollPos - Mouse.Scroll() * 100.0f
+            scrollPos <- Math.Max(0.0f, Math.Min(scrollPos, contentSize - Rect.height this.Bounds))
 
         override this.Draw() =
             Stencil.create(false)

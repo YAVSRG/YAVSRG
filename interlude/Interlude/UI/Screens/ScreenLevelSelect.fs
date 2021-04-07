@@ -26,9 +26,7 @@ module private ScreenLevelSelectVars =
 
     //functionality wishlist:
     // - hotkeys to navigate by pack/close and open quickly
-    // - fix for not scrolling to pack when you open it
     // - display of keycount for charts
-    // - fix for scoreboard not clamping scroll value unless mouse is over it
     // - fix for scoreboard allowing clicking of culled objects
     // - nicer looking pack buttons
     // - "random chart" hotkey
@@ -41,7 +39,6 @@ module private ScreenLevelSelectVars =
 
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //filepath
-    let mutable scrollTo = false
     let mutable expandedGroup = ""
     let mutable scrollBy = ignore
     let mutable colorVersionGlobal = 0
@@ -52,12 +49,20 @@ module private ScreenLevelSelectVars =
     let mutable scoreSystem = "SC+ (J4)"
     let mutable hpSystem = "VG"
 
+    [<Struct>]
     type Navigation =
     | Nothing
     | Backward of string * CachedChart
     | Forward of bool
 
-    let mutable navigation = Nothing
+    [<Struct>]
+    type ScrollTo =
+    | Nothing
+    | ScrollToChart
+    | ScrollToPack of string
+
+    let mutable scrollTo = ScrollTo.Nothing
+    let mutable navigation = Navigation.Nothing
 
     let switchCurrentChart(cc, groupName) =
         match cache.LoadChart(cc) with
@@ -66,7 +71,7 @@ module private ScreenLevelSelectVars =
             selectedChart <- cc.FilePath
             expandedGroup <- groupName
             selectedGroup <- groupName
-            scrollTo <- true
+            scrollTo <- ScrollToChart
         | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
 
     let playCurrentChart() =
@@ -365,16 +370,16 @@ module ScreenLevelSelect =
 
         override this.Navigate() =
             match navigation with
-            | Nothing -> ()
+            | Navigation.Nothing -> ()
             | Forward b ->
                 if b then
                     switchCurrentChart(cc, groupName)
-                    navigation <- Nothing
+                    navigation <- Navigation.Nothing
                 elif groupName = selectedGroup && this.Selected then navigation <- Forward true
             | Backward (groupName2, cc2) ->
                 if groupName = selectedGroup && this.Selected then
                     switchCurrentChart(cc2, groupName2)
-                    navigation <- Nothing
+                    navigation <- Navigation.Nothing
                 else navigation <- Backward(groupName, cc)
 
         override this.OnDraw(bounds, selected) =
@@ -435,19 +440,19 @@ module ScreenLevelSelect =
                     else switchCurrentChart(cc, groupName)
                 elif Mouse.Click(MouseButton.Right) then
                     expandedGroup <- ""
-                    scrollTo <- true
+                    scrollTo <- ScrollToPack groupName
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
         override this.Update(top, topEdge, elapsedTime) =
-            if scrollTo && groupName = selectedGroup && this.Selected then
+            if scrollTo = ScrollToChart && groupName = selectedGroup && this.Selected then
                 scrollBy(-top + 500.0f)
-                scrollTo <- false
+                scrollTo <- ScrollTo.Nothing
             base.Update(top, topEdge, elapsedTime)
 
     type LevelSelectPackItem(name, items: LevelSelectChartItem list) =
         inherit LevelSelectItem()
 
-        override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top (Render.vwidth * 0.6f) (top + 65.0f)
+        override this.Bounds(top) = Rect.create (Render.vwidth * 0.5f) top (Render.vwidth - 15.0f) (top + 65.0f)
         override this.Selected = selectedGroup = name
         member this.Expanded = expandedGroup = name
 
@@ -466,11 +471,13 @@ module ScreenLevelSelect =
 
         override this.OnUpdate(bounds, selected, elapsedTime) =
             if Mouse.Hover(bounds) && Mouse.Click(MouseButton.Left) then
-                if this.Expanded then expandedGroup <- "" else expandedGroup <- name
+                if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
         override this.Update(top, topEdge, elapsedTime) =
-            if scrollTo && this.Selected && not this.Expanded then
-                scrollBy(-top + 500.0f)
-                scrollTo <- false
+            match scrollTo with
+            | ScrollToPack s when s = name ->
+                if this.Expanded then scrollBy(-top + topEdge + 180.0f) else scrollBy(-top + topEdge + 500.0f)
+                scrollTo <- ScrollTo.Nothing
+            | _ -> ()
             let b = base.Update(top, topEdge, elapsedTime)
             if this.Expanded then List.fold (fun t (i: LevelSelectChartItem) -> i.Update(t, topEdge, elapsedTime)) b items
             else List.iter (fun (i: LevelSelectChartItem) -> i.Navigate()) items; b
@@ -518,7 +525,7 @@ type ScreenLevelSelect() as this =
                     |> List.ofSeq
                     |> fun l -> LevelSelectPackItem(k, l))
             |> List.ofSeq
-        scrollTo <- true
+        scrollTo <- ScrollToChart
         expandedGroup <- selectedGroup
 
     let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
@@ -595,9 +602,7 @@ type ScreenLevelSelect() as this =
         Stencil.create(false)
         Draw.rect(Rect.create 0.0f (top + 170.0f) Render.vwidth bottom) Color.Transparent Sprite.Default
         Stencil.draw()
-        let bottomEdge =
-            folderList
-            |> List.fold (fun t (i: LevelSelectPackItem) -> i.Draw(t, top)) scrollPos.Value
+        let bottomEdge = folderList |> List.fold (fun t (i: LevelSelectPackItem) -> i.Draw(t, top)) scrollPos.Value
         Stencil.finish()
         //todo: make this render right, is currently bugged
         let scrollPos = (scrollPos.Value / (scrollPos.Value - bottomEdge)) * (bottom - top - 100.0f)
