@@ -240,7 +240,7 @@ type Jukebox() as this =
 type Toolbar() as this =
     inherit Widget()
 
-    static let height = 70.f
+    let HEIGHT = 70.f
 
     let barSlider = new AnimationFade 1.0f
     let notifSlider = new AnimationFade 0.0f
@@ -251,35 +251,35 @@ type Toolbar() as this =
     do
         this.Animation.Add barSlider
         this.Animation.Add notifSlider
-        this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, 0.f, 1.f, 0.f, 1.f, height * 0.5f, 1.f))
-        this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.f, 1.f, height * 0.5f, 1.f, 0.f, 1.f, height, 1.f))
-        this.Add(new Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.f, 0.0f, height, 1.0f))
-        this.Add(new Button((fun () -> if Screens.currentType <> ScreenType.Play then Screens.addDialog(new OptionsMenu())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -height, 0.0f, 200.f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -height, 0.0f, 400.f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -height, 0.0f, 600.f, 0.0f, 0.0f, 0.0f))
+        this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, HEIGHT * 0.5f, 1.0f))
+        this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f))
+        this.Add(new Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f))
+        this.Add(new Button((fun () -> if Screens.currentType <> ScreenType.Play then Screens.addDialog(new OptionsMenu())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f))
+        this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f))
         this.Add(new Jukebox())
         this.Add(new Notifications.NotificationDisplay())
-        this.Add(new Notifications.TaskDisplay(height))
+        this.Add(Notifications.TaskDisplay HEIGHT)
 
         Screens.setToolbarCollapsed <- fun b -> forceCollapse <- b
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
-        Draw.rect(Rect.create l (t - height) r t) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect(Rect.create l b r (b + height)) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l (t - HEIGHT) r t) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l b r (b + HEIGHT)) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
         if barSlider.Value > 0.01f then
             let s = (r - l) / 48.0f
             for i in 0 .. 47 do
-                let level = System.Math.Min((Audio.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, height)
-                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - height) (l + (float32 i + 1.0f) * s - 2.0f) (t - height + level))(Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
-                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + height - level) (r - float32 i * s - 2.0f) (b + height))(Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                let level = System.Math.Min((Audio.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, HEIGHT)
+                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - HEIGHT) (l + (float32 i + 1.0f) * s - 2.0f) (t - HEIGHT + level)) (Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + HEIGHT - level) (r - float32 i * s - 2.0f) (b + HEIGHT)) (Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
         base.Draw()
 
     override this.Update(elapsedTime, bounds) =
         if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
-        base.Update(elapsedTime, Rect.expand (0.f, -height * if forceCollapse then 0.0f else barSlider.Value) bounds)
+        base.Update(elapsedTime, Rect.expand (0.f, -HEIGHT * if forceCollapse then 0.0f else barSlider.Value) bounds)
 
 // Screen manager
 
@@ -295,37 +295,35 @@ type ScreenContainer() as this =
         new ScreenLevelSelect() :> Screen;
         |]
     let mutable exit = false
-    
     let mutable cursor = true
 
-    let transitionTime = 500.0
+    let TRANSITIONTIME = 500.0
     let mutable transitionFlags = ScreenTransitionFlag.Default
     let screenTransition = new AnimationSequence()
-    let t1 = new AnimationTimer(transitionTime)
-    let t2 = new AnimationTimer(transitionTime)
+    let t1 = AnimationTimer TRANSITIONTIME
+    let t2 = AnimationTimer TRANSITIONTIME
 
     let toolbar = new Toolbar()
 
     do
-        Screens.changeScreen <- this.ChangeScreen
-        Screens.newScreen <- this.ChangeScreen
+        Screens.changeScreen <- this.ChangeScreen //second overload
+        Screens.newScreen <- this.ChangeScreen //first overload
         Screens.back <- this.Back
-        Screens.addDialog <- this.AddDialog
+        Screens.addDialog <- dialogs.Add
         Screens.setCursorVisible <- (fun b -> cursor <- b)
-        this.Add(toolbar)
-        this.Add(Screens.logo |> Components.positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f))
-        this.Animation.Add(screenTransition)
-        this.Animation.Add(Screens.accentColor)
-        this.Animation.Add(Screens.parallaxZ)
-        this.Animation.Add(Screens.parallaxX)
-        this.Animation.Add(Screens.parallaxY)
-        this.Animation.Add(Screens.backgroundDim)
-        current.OnEnter(current)
+        this.Add toolbar
+        Screens.logo
+        |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
+        |> this.Add
+        this.Animation.Add screenTransition
+        this.Animation.Add Screens.accentColor
+        this.Animation.Add Screens.parallaxZ
+        this.Animation.Add Screens.parallaxX
+        this.Animation.Add Screens.parallaxY
+        this.Animation.Add Screens.backgroundDim
+        current.OnEnter current
 
     member this.Exit = exit
-
-    member this.AddDialog(d: Dialog) =
-        dialogs.Add(d)
 
     member this.ChangeScreen(s: unit -> Screen, screenType, flags) =
         if screenTransition.Complete && screenType <> Screens.currentType then
@@ -347,7 +345,6 @@ type ScreenContainer() as this =
                     ))
             screenTransition.Add(t2)
             screenTransition.Add(new AnimationAction(fun () -> t1.Reset(); t2.Reset()))
-
     member this.ChangeScreen(screenType, flags) = this.ChangeScreen((screens.[int screenType] |> K), screenType, flags)
 
     member this.Back(flags) =
@@ -364,7 +361,7 @@ type ScreenContainer() as this =
         if Render.vwidth > 0.0f then
             Screens.parallaxX.Target <- Mouse.X() / Render.vwidth
             Screens.parallaxY.Target <- Mouse.Y() / Render.vheight
-        Screens.accentColor.SetColor(Themes.accentColor)
+        Screens.accentColor.SetColor Themes.accentColor
         if dialogs.Count > 0 then
             dialogs.[dialogs.Count - 1].Update(elapsedTime, bounds)
             if not dialogs.[dialogs.Count - 1].Enabled then
@@ -381,16 +378,16 @@ type ScreenContainer() as this =
         base.Draw()
         //TODO: move all this transitional logic somewhere nice and have lots of them
         if not screenTransition.Complete then
-            let amount = Math.Clamp((if t1.Elapsed < transitionTime then t1.Elapsed / transitionTime else (transitionTime - t2.Elapsed) / transitionTime), 0.0, 1.0) |> float32
+            let amount = Math.Clamp((if t1.Elapsed < TRANSITIONTIME then t1.Elapsed / TRANSITIONTIME else (TRANSITIONTIME - t2.Elapsed) / TRANSITIONTIME), 0.0, 1.0) |> float32
 
             let s = 150.0f
 
             let size x =
-                let f = Math.Clamp(((if t1.Elapsed < transitionTime then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / ((4.0f * s) / Render.vwidth), 0.0f, 1.0f)
-                if t1.Elapsed < transitionTime then f * s * 0.5f else (1.0f - f) * s * 0.5f
+                let f = Math.Clamp(((if t1.Elapsed < TRANSITIONTIME then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / ((4.0f * s) / Render.vwidth), 0.0f, 1.0f)
+                if t1.Elapsed < TRANSITIONTIME then f * s * 0.5f else (1.0f - f) * s * 0.5f
             let diamond x y =
                 let r = size x
-                Draw.quad(Quad.create <| new Vector2(x - r, y) <| new Vector2(x, y - r) <| new Vector2(x + r, y) <| new Vector2(x, y + r))(Quad.colorOf Color.Transparent)(Sprite.DefaultQuad)
+                Draw.quad(Quad.create <| new Vector2(x - r, y) <| new Vector2(x, y - r) <| new Vector2(x + r, y) <| new Vector2(x, y + r)) (Quad.colorOf Color.Transparent) Sprite.DefaultQuad
                 
             Stencil.create(false)
             for x in 0 .. (Render.vwidth / s |> float |> Math.Ceiling |> int) do
@@ -402,4 +399,4 @@ type ScreenContainer() as this =
             Stencil.finish()
             if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
         for d in dialogs do d.Draw()
-        if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize)(Screens.accentShade(255, 1.0f, 0.5f))(Themes.getTexture("cursor"))
+        if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize) (Screens.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture("cursor"))

@@ -1,5 +1,6 @@
 ﻿namespace Interlude
 
+open System
 open System.Reflection
 open System.Diagnostics
 open System.IO
@@ -24,6 +25,15 @@ module Utils =
         fun () -> lines.[r.Next(lines.Length)]
 
     let idPrint x = printfn "%A" x; x
+
+    let formatTimeOffset (ts: TimeSpan) =
+       if ts.TotalDays > 365.0 then sprintf "%.0fy" (ts.TotalDays / 365.0)
+       elif ts.TotalDays > 30.0 then sprintf "%.0fmo" (ts.TotalDays / 30.0)
+       elif ts.TotalDays > 7.0 then sprintf "%.0fw" (ts.TotalDays / 7.0)
+       elif ts.TotalDays > 1.0 then sprintf "%.0fd" ts.TotalDays
+       elif ts.TotalHours > 1.0 then sprintf "%.0fh" ts.TotalHours
+       elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
+       else sprintf "%.0fs" ts.TotalSeconds
 
     module AutoUpdate =
         open System.IO.Compression

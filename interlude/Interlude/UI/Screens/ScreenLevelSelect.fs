@@ -24,8 +24,23 @@ open Interlude.UI.Selection
 
 module private ScreenLevelSelectVars =
 
+    //functionality wishlist:
+    // - hotkeys to navigate by pack/close and open quickly
+    // - fix for not scrolling to pack when you open it
+    // - display of keycount for charts
+    // - fix for scoreboard not clamping scroll value unless mouse is over it
+    // - fix for scoreboard allowing clicking of culled objects
+    // - nicer looking pack buttons
+    // - "random chart" hotkey
+    // - ability to delete charts
+    // - cropping of text that is too long
+    
+    //eventual todo:
+    // - goals collections and playlists editor
+    // - charts in the current collection/goal/playlist you are editing have a * or something by them
+
     let mutable selectedGroup = ""
-    let mutable selectedChart = "" //hash
+    let mutable selectedChart = "" //filepath
     let mutable scrollTo = false
     let mutable expandedGroup = ""
     let mutable scrollBy = ignore
@@ -33,8 +48,8 @@ module private ScreenLevelSelectVars =
     //future todo: different color settings?
     let mutable colorFunc = fun (_, _, _) -> Color.FromArgb(40, 200, 200, 200)
 
+    //updated whenever screen refreshes
     let mutable scoreSystem = "SC+ (J4)"
-    //todo: have these update when score system is changed, could be done remotely, exactly when settings are changed
     let mutable hpSystem = "VG"
 
     type Navigation =
@@ -48,7 +63,7 @@ module private ScreenLevelSelectVars =
         match cache.LoadChart(cc) with
         | Some c ->
             changeChart(cc, c)
-            selectedChart <- cc.Hash
+            selectedChart <- cc.FilePath
             expandedGroup <- groupName
             selectedGroup <- groupName
             scrollTo <- true
@@ -87,12 +102,16 @@ module ScreenLevelSelect =
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
                 |> this.Add
 
-                TextBox((fun () -> sprintf "%s  •  %ix" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo)), K (Color.White, Color.Black), 0.0f)
+                TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) data.Physical), K (Color.White, Color.Black), 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
                 |> this.Add
 
-                TextBox(K data.Mods, K (Color.White, Color.Black), 1.0f)
+                TextBox(K (formatTimeOffset(DateTime.Now - data.Score.time)), K (Color.White, Color.Black), 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
+                |> this.Add
+
+                TextBox(K data.Mods, K (Color.White, Color.Black), 1.0f)
+                |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
                 |> this.Add
 
                 Clickable((fun () -> Screens.newScreen((fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
@@ -317,17 +336,19 @@ module ScreenLevelSelect =
         abstract member OnDraw: Rect * bool -> unit
         abstract member OnUpdate: Rect * bool * float -> unit
 
-        abstract member Draw: float32 -> float32
-        default this.Draw(top: float32) =
+        abstract member Draw: float32 * float32 -> float32
+        default this.Draw(top: float32, topEdge: float32) =
             let bounds = this.Bounds(top)
-            if top > 70.0f && top < Render.vheight then this.OnDraw(bounds, this.Selected)
+            let struct (_, _, _, bottom) = bounds
+            if bottom > topEdge + 170.0f && top < Render.vheight - topEdge then this.OnDraw(bounds, this.Selected)
             top + Rect.height bounds + 15.0f
 
-        abstract member Update: float32 * float -> float32
-        default this.Update(top: float32, elapsedTime) =
+        abstract member Update: float32 * float32 * float -> float32
+        default this.Update(top: float32, topEdge: float32, elapsedTime) =
             this.Navigate()
             let bounds = this.Bounds(top)
-            if top > 70.0f && top < Render.vheight then this.OnUpdate(bounds, this.Selected, elapsedTime)
+            let struct (_, _, _, bottom) = bounds
+            if bottom > topEdge + 170.0f && top < Render.vheight - topEdge then this.OnUpdate(bounds, this.Selected, elapsedTime)
             top + Rect.height bounds + 15.0f
 
     type LevelSelectChartItem(groupName, cc) =
@@ -340,7 +361,7 @@ module ScreenLevelSelect =
         let mutable pbData = (None, None, None)
 
         override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
-        override this.Selected = selectedChart = cc.Hash
+        override this.Selected = selectedChart = cc.FilePath
 
         override this.Navigate() =
             match navigation with
@@ -417,11 +438,11 @@ module ScreenLevelSelect =
                     scrollTo <- true
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
-        override this.Update(top, elapsedTime) =
+        override this.Update(top, topEdge, elapsedTime) =
             if scrollTo && groupName = selectedGroup && this.Selected then
                 scrollBy(-top + 500.0f)
                 scrollTo <- false
-            base.Update(top, elapsedTime)
+            base.Update(top, topEdge, elapsedTime)
 
     type LevelSelectPackItem(name, items: LevelSelectChartItem list) =
         inherit LevelSelectItem()
@@ -430,24 +451,28 @@ module ScreenLevelSelect =
         override this.Selected = selectedGroup = name
         member this.Expanded = expandedGroup = name
 
-        override this.Navigate() = () //nyi
+        override this.Navigate() = ()
 
         override this.OnDraw(bounds, selected) =
             Draw.rect bounds (if selected then Screens.accentShade(127, 1.0f, 0.2f) else Screens.accentShade(127, 0.5f, 0.0f)) Sprite.Default
             Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
-        override this.Draw(top) =
-            let b = base.Draw(top)
-            if this.Expanded then List.fold (fun t (i: LevelSelectChartItem) -> i.Draw(t)) b items else b
+        override this.Draw(top, topEdge) =
+            let b = base.Draw(top, topEdge)
+            if this.Expanded then
+                let b2 = List.fold (fun t (i: LevelSelectChartItem) -> i.Draw(t, topEdge)) b items
+                if b < topEdge + 170.0f && b2 > topEdge + 170.0f then Text.drawJustB(font(), name, 15.0f, Render.vwidth, topEdge + 180.0f, (Color.White, Color.Black), 1.0f)
+                b2
+            else b
 
         override this.OnUpdate(bounds, selected, elapsedTime) =
             if Mouse.Hover(bounds) && Mouse.Click(MouseButton.Left) then
                 if this.Expanded then expandedGroup <- "" else expandedGroup <- name
-        override this.Update(top, elapsedTime) =
+        override this.Update(top, topEdge, elapsedTime) =
             if scrollTo && this.Selected && not this.Expanded then
                 scrollBy(-top + 500.0f)
                 scrollTo <- false
-            let b = base.Update(top, elapsedTime)
-            if this.Expanded then List.fold (fun t (i: LevelSelectChartItem) -> i.Update(t, elapsedTime)) b items
+            let b = base.Update(top, topEdge, elapsedTime)
+            if this.Expanded then List.fold (fun t (i: LevelSelectChartItem) -> i.Update(t, topEdge, elapsedTime)) b items
             else List.iter (fun (i: LevelSelectChartItem) -> i.Navigate()) items; b
 
 open ScreenLevelSelect
@@ -456,7 +481,8 @@ open ScreenLevelSelectVars
 type ScreenLevelSelect() as this =
     inherit Screen()
 
-    let mutable selection: LevelSelectPackItem list = []
+    let mutable scrolling = false
+    let mutable folderList: LevelSelectPackItem list = []
     let mutable lastItem: (string * CachedChart) option = None
     let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
@@ -471,13 +497,13 @@ type ScreenLevelSelect() as this =
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
                 let cc = groups.[g].[0]
-                if cc.Hash <> selectedChart then
+                if cc.FilePath <> selectedChart then
                     match cache.LoadChart(cc) with
                     | Some c -> changeChart(cc, c)
                     | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
         lastItem <- None
         colorVersionGlobal <- 0
-        selection <-
+        folderList <-
             groups.Keys
             |> Seq.sort
             |> Seq.map
@@ -486,7 +512,7 @@ type ScreenLevelSelect() as this =
                     |> Seq.map (fun cc ->
                         match currentCachedChart with
                         | None -> ()
-                        | Some c -> if c.Hash = cc.Hash then selectedChart <- c.Hash; selectedGroup <- k
+                        | Some c -> if c.FilePath = cc.FilePath then selectedChart <- c.FilePath; selectedGroup <- k
                         lastItem <- Some (k, cc)
                         LevelSelectChartItem(k, cc))
                     |> List.ofSeq
@@ -548,19 +574,19 @@ type ScreenLevelSelect() as this =
 
         elif options.Hotkeys.Next.Get().Tapped() then
             if lastItem.IsSome then
-                let h = (lastItem.Value |> snd).Hash
-                navigation <- Navigation.Forward(selectedGroup = fst lastItem.Value && selectedChart = h)
+                let (g, c) = lastItem.Value
+                navigation <- Navigation.Forward(selectedGroup = g && selectedChart = c.FilePath)
         elif options.Hotkeys.Previous.Get().Tapped() then
-            if lastItem.IsSome then
-                navigation <- Navigation.Backward(lastItem.Value)
+            if lastItem.IsSome then navigation <- Navigation.Backward(lastItem.Value)
 
-        let struct (left, top, right, bottom)  = this.Bounds
+        let struct (left, top, right, bottom) = this.Bounds
         let bottomEdge =
-            selection
-            |> List.fold (fun t (i: LevelSelectPackItem) -> i.Update(t, elapsedTime)) scrollPos.Value
+            folderList
+            |> List.fold (fun t (i: LevelSelectPackItem) -> i.Update(t, top, elapsedTime)) scrollPos.Value
         let height = bottomEdge - scrollPos.Value - 320.0f
-        if Mouse.Held(MouseButton.Right) then
-            scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
+        if Mouse.Click(MouseButton.Right) then scrolling <- true
+        if Mouse.Held(MouseButton.Right) |> not then scrolling <- false
+        if scrolling then scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
         scrollPos.Target <- Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f)
 
     override this.Draw() =
@@ -570,8 +596,8 @@ type ScreenLevelSelect() as this =
         Draw.rect(Rect.create 0.0f (top + 170.0f) Render.vwidth bottom) Color.Transparent Sprite.Default
         Stencil.draw()
         let bottomEdge =
-            selection
-            |> List.fold (fun t (i: LevelSelectPackItem) -> i.Draw(t)) scrollPos.Value
+            folderList
+            |> List.fold (fun t (i: LevelSelectPackItem) -> i.Draw(t, top)) scrollPos.Value
         Stencil.finish()
         //todo: make this render right, is currently bugged
         let scrollPos = (scrollPos.Value / (scrollPos.Value - bottomEdge)) * (bottom - top - 100.0f)
