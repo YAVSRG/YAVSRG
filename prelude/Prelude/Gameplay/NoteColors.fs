@@ -36,7 +36,7 @@ module NoteColors =
     //todo: make this a record.
     type ColorizedChart = int * TimeData<ColorNoteRow> * TimeData<BPM> * MultiTimeData<float32> * string list
 
-    let colorize ((keys, notes, bpm, sv, m) : ModChart) (initialState, col : Colorizer<'t>) =
+    let colorize (mc : ModChart) (initialState, col : Colorizer<'t>) =
         let (_, _, data) = 
             Seq.fold (fun (lastcolors : ColorData, s, data : (TimeDataItem<ColorNoteRow>) list) (time, nr) ->
             (
@@ -44,7 +44,7 @@ module NoteColors =
                 for k in getBits ((noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.HOLDTAIL nr)) do
                     d.[k] <- lastcolors.[k]
                 (d, ns, (time, (nr, d)) :: data)
-            )) (Array.zeroCreate(keys), initialState, []) notes.Data
+            )) (Array.zeroCreate(mc.Keys), initialState, []) mc.Notes.Data
         in data
         |> Seq.rev
         |> ResizeArray<TimeDataItem<ColorNoteRow>>
@@ -56,32 +56,31 @@ module NoteColors =
         List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / n)) [0..7]
         |> Option.defaultValue DDRValues.Length
 
-    let applyScheme (scheme : ColorScheme) (colorData : ColorData) (chart : ModChart) =
-        let (keys, _, bpm, sv, m) = chart
+    let applyScheme (scheme : ColorScheme) (colorData : ColorData) (mc : ModChart) =
+        let (keys, bpm, sv, m) = (mc.Keys, mc.BPM, mc.SV, mc.ModsUsed)
         let ci i = colorData.[i]
         match scheme with
         | ColorScheme.Column ->
             ((), fun _ (_, nr) ->
                 ((), [|for i in 0..(keys-1) -> ci i|]))
-                |> colorize chart
+                |> colorize mc
         | ColorScheme.Chord ->
             ((), fun _ (_, nr) ->
                 ((), Array.create keys ((nr |> noteData NoteType.NORMAL |> countBits) + (nr |> noteData NoteType.HOLDHEAD |> countBits) |> ci)))
-                |> colorize chart
+                |> colorize mc
         | ColorScheme.DDR ->
-            (chart, fun c (time, nr) ->
+            (mc, fun c (time, nr) ->
                 let (ptime, (_, msPerBeat)) =
-                    if bpm.IsEmpty() then
+                    if bpm.Empty then
                         (0.0f<ms>, (4<beat>, 500.0f<ms/beat>))
-                    elif offsetOf <| bpm.First() >= time then bpm.First()
-                    else
-                        bpm.GetPointAt(time)
-                in (chart, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
-                |> colorize chart
+                    elif offsetOf bpm.First.Value >= time then bpm.First.Value
+                    else bpm.GetPointAt(time)
+                in (mc, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
+                |> colorize mc
         | _ ->
             ((), fun _ _ ->
                 ((), Array.zeroCreate(keys)))
-                |> colorize chart
+                |> colorize mc
         |> fun x -> (keys, x, bpm, sv, m)
 
     type ColorConfig = {
@@ -94,5 +93,5 @@ module NoteColors =
     let getColoredChart (config: ColorConfig) (chart: Lazy<ModChart>): Lazy<ColorizedChart> =
         lazy (
             let chart = chart.Force()
-            let index = if config.UseGlobalColors then 0 else let (keys, _, _, _, _) = chart in keys - 2
+            let index = if config.UseGlobalColors then 0 else chart.Keys - 2
             applyScheme config.Style config.Colors.[index] chart )

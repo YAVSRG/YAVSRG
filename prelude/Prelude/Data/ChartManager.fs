@@ -48,7 +48,7 @@ module ChartManager =
         Pack = chart.Header.SourcePack
         Hash = calculateHash chart
         Keys = chart.Keys
-        Length = if endTime = 0.0f<ms> then 0.0f<ms> else endTime - (offsetOf <| chart.Notes.First())
+        Length = if endTime = 0.0f<ms> then 0.0f<ms> else endTime - (offsetOf chart.Notes.First.Value)
         BPM = minMaxBPM (chart.BPM.Data |> List.ofSeq) endTime
         DiffName = chart.Header.DiffName
         Physical = rating.Physical

@@ -180,11 +180,9 @@ module Interlude =
                 count <- count - 1
             | (_, false) -> failwith "No point to remove here."
 
-        member this.IsEmpty() = (count = 0)
-
+        member this.Empty = count = 0
+        member this.First = if this.Empty then None else Some data.[0]
         member this.Clear() = data.Clear(); count <- 0
-
-        member this.First() = data.[0] //Use IsEmpty to check this exists first before use
         
         member this.EnumerateBetween time1 time2 = 
             seq {
@@ -197,18 +195,27 @@ module Interlude =
                     i <- i + 1
             }
 
+        member this.MapBetween time1 time2 (mapper: TimeDataItem<'t> -> 't) =
+            let mutable i =
+                match this.IndexAt(time1) with
+                | (j, false) -> j + 1
+                | (j, true) -> j
+            while (i < count && offsetOf data.[i] < time2) do
+                data.[i] <- (offsetOf data.[i], mapper data.[i])
+                i <- i + 1
+
     type MultiTimeData<'t>(keys) =
         let data = [| for i in 0 .. keys -> TimeData() |]
 
         member this.SetChannelData(k, (newData: List<TimeDataItem<'t>>)) = data.[k + 1].SetData(newData)
         member this.SetChannelData(k, (newData: TimeData<'t>)) = data.[k + 1].SetData(newData)
         member this.GetChannelData k = data.[k + 1]
-        member this.IsEmpty() = Array.fold (fun b (t: TimeData<'t>) -> b && t.IsEmpty()) true data
+        member this.IsEmpty() = Array.fold (fun b (t: TimeData<'t>) -> b && t.Empty) true data
         member this.Clear() = Array.iter (fun (t: TimeData<'t>) -> t.Clear()) data
         member this.Clone() =
             let mt = MultiTimeData(keys)
             for i in 0 .. keys do
-                mt.SetChannelData(i - 1, TimeData(this.GetChannelData(i- 1)))
+                mt.SetChannelData(i - 1, TimeData(this.GetChannelData(i - 1)))
             mt
 
     (*
@@ -278,7 +285,7 @@ module Interlude =
         with
         | err -> Logging.Error ("Could not load chart from " + filepath) (err.ToString()); None
 
-    let saveChartFileTo (chart : Chart) filepath =
+    let saveChartFileTo (chart: Chart) filepath =
         use fs = new FileStream(filepath, FileMode.Create)
         use bw = new BinaryWriter(fs)
         bw.Write(chart.Keys |> byte)
@@ -288,7 +295,7 @@ module Interlude =
         for i = 0 to chart.Keys do
             writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(f))
 
-    let saveChartFile (chart : Chart) =
+    let saveChartFile (chart: Chart) =
         saveChartFileTo chart chart.FileIdentifier
 
     let calculateHash (chart: Chart): string =
@@ -298,7 +305,7 @@ module Interlude =
         if (chart.Notes.Count = 0) then
             "_"
         else
-            let offset = offsetOf <| chart.Notes.First()
+            let offset = offsetOf <| chart.Notes.First.Value
             for (o, nr) in chart.Notes.Data do
                 bw.Write((o - offset)  * 0.2f |> Convert.ToInt32)
                 for i = 0 to 5 do

@@ -127,13 +127,13 @@ module Difficulty =
 
     let private jackCurve delta =
         let widthScale = 0.02
-        let heightScale = 26.5
+        let heightScale = 26.3
         let curveExp = 1.0
         Math.Min(heightScale / Math.Pow(widthScale * float delta, curveExp), 20.0)
 
     let private streamCurve delta =
         let widthScale = 0.02
-        let heightScale = 13.5
+        let heightScale = 13.7
         let curveExp = 1.0
         let cutoff = 10.0
         Math.Max((heightScale / Math.Pow(widthScale * float delta, curveExp) - 0.1 * heightScale / Math.Pow(widthScale * float delta, curveExp * cutoff)), 0.0)
@@ -143,15 +143,15 @@ module Difficulty =
 
     let private rootMeanPower values power = 
         match values with
-            | x :: [] -> x
-            | [] -> 0.0
-            | xs ->
-                let (count, sumpow) = List.fold (fun (count,a) b -> (count + 1.0, a + Math.Pow(b, power))) (0.0, 0.0) xs
-                Math.Pow(sumpow / count, 1.0 / power)
+        | x :: [] -> x
+        | [] -> 0.0
+        | xs ->
+            let (count, sumpow) = List.fold (fun (count,a) b -> (count + 1.0, a + Math.Pow(b, power))) (0.0, 0.0) xs
+            Math.Pow(sumpow / count, 1.0 / power)
 
     let private staminaFunc value input delta =
         let staminaBaseFunc(ratio) = 1.0 + 0.105 * ratio
-        let staminaDecayFunc(delta) = Math.Exp(-0.00045 * delta)
+        let staminaDecayFunc(delta) = Math.Exp(-0.00044 * delta)
         let v = Math.Max(value * staminaDecayFunc(float delta), 0.01)
         v * staminaBaseFunc(input/v)
    

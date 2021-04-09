@@ -3,14 +3,11 @@
 open System
 open Prelude.Charts.Interlude
 
-//todo: this is silly. make it a record
-type ModChart = int * TimeData<NoteRow> * TimeData<BPM> * MultiTimeData<float32> * string list
-
 module Filter =
 
-    type Bitmapping =
+    type BitmapFunc =
         | Column of int
-        | Not of Bitmapping
+        | Not of BitmapFunc
         | True
         member this.Evaluate(bitmap : Bitmap) =
             match this with
@@ -18,28 +15,30 @@ module Filter =
             | Not b -> b.Evaluate bitmap |> not
             | True -> true
     
-    type Bitmappings = Bitmapping array
+    type Bitmapping = BitmapFunc array
     
-    let applyBitmapping (mappings : Bitmappings) (bitmap : Bitmap) : Bitmap =
+    let applyBitmapping (mappings: Bitmapping) (bitmap: Bitmap) : Bitmap =
         makeBitmap (seq {
             for k = 0 to (Array.length mappings - 1) do
                 if mappings.[k].Evaluate(bitmap) then yield k
         })
     
-    let mirrorMapping keycount = Array.map (fun i -> Column (keycount - i - 1)) [|0 .. keycount - 1|]
+    let mirrorMapping keycount = Array.init keycount (fun i -> Column (keycount - i - 1))
     
-    let textMapping (string : string) : Bitmappings =
+    let textMapping (string: string) : Bitmapping =
         string.ToCharArray() |>
-        Array.map (fun (char : char) ->
+        Array.map (fun (char: char) ->
             match char with
             | '-' -> Not True
-            | _ -> (Char.GetNumericValue(char) |> int |> (fun x -> max 0 (x - 1)) |> Column))
+            | _ -> Char.GetNumericValue char |> int |> (fun x -> max 0 (x - 1)) |> Column)
     
-    let applyMappingBetween mapping time1 time2 (notes : TimeData<NoteRow>) =
-        for (_, nr) in notes.EnumerateBetween time1 time2 do
-            for i = 0 to 4 do nr.[i] <- applyBitmapping mapping nr.[i]
+    let applyMappingBetween mapping time1 time2 (notes: TimeData<NoteRow>) =
+        notes.MapBetween time1 time2
+            (fun (_, nr) ->
+                [|applyBitmapping mapping nr.[0]; applyBitmapping mapping nr.[1]; applyBitmapping mapping nr.[2]; applyBitmapping mapping nr.[3]; applyBitmapping mapping nr.[4];
+                    nr.[5]; nr.[6]|])
         notes
     
     //todo: design a proper arrangement for filters on charts
-    let mirror time1 time2 keys notes = applyMappingBetween (mirrorMapping (keys)) time1 time2 notes
+    let mirror time1 time2 keys notes = applyMappingBetween (mirrorMapping keys) time1 time2 notes
 

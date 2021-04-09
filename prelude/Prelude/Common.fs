@@ -62,13 +62,13 @@ module Common =
                 (fun (o: NumSetting<'T>) -> tP.Encode(o.Get()))
                 (fun (o: NumSetting<'T>) json -> tP.Decode(o.Get())(json) |> JsonMapResult.map (fun v -> o.Set(v); o))
 
-    type IntSetting(value: int, min: int, max: int) = 
+    type IntSetting(value: int, min: int, max: int) =
         inherit NumSetting<int>(value, min, max)
         override this.SetPercent(pc: float32) = this.Set(min + ((float32 (max - min) * pc) |> float |> Math.Round |> int))
         override this.GetPercent() = float32 (this.Get() - min) / float32 (max - min)
         static member Pickler = Setting<int>.Pickler
 
-    type FloatSetting(value: float, min: float, max: float) = 
+    type FloatSetting(value: float, min: float, max: float) =
         inherit NumSetting<float>(value, min, max)
         override this.SetPercent(pc: float32) = this.Set(min + (max - min) * float pc)
         override this.GetPercent() = (this.Get() - min) / (max - min) |> float32
@@ -89,7 +89,7 @@ module Common =
 
     type Logging() =
         static let evt = new Event<LoggingEvent>()
-        
+
         static let agent = new MailboxProcessor<LoggingEvent>(fun box -> async { while (true) do let! e = box.Receive() in evt.Trigger(e) })
         static do agent.Start()
 
@@ -125,7 +125,7 @@ module Common =
 
         let localise str : string =
             if mapping.ContainsKey(str) then mapping.[str]
-            else 
+            else
                 mapping.Add(str, str)
                 if loadedPath <> "" then File.AppendAllText(loadedPath, "\n"+str+"="+str)
                 str
@@ -223,4 +223,3 @@ module Common =
         else
             Logging.Info(sprintf "No %s file found, creating it." name) ""
             defaultData
-

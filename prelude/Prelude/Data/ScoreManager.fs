@@ -35,7 +35,7 @@ module ScoreManager =
     }
     with
         static member FromChart(c: Chart) = {
-            Offset = Setting(if c.Notes.IsEmpty() then 0.0f<ms> else offsetOf <| c.Notes.First());
+            Offset = Setting(c.Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>);
             Scores = List<Score>()
             Lamp = Dictionary<string, PersonalBests<Lamp>>()
             Accuracy = Dictionary<string, PersonalBests<float>>()
@@ -51,7 +51,7 @@ module ScoreManager =
     *)
 
     type ScoreInfoProvider(score: Score, chart: Chart, scoring, hpSystem) =
-        let (modchartMaker, hitdataMaker) = getModChartWithScore (score.selectedMods) chart score.hitdata
+        let (modchartMaker, hitdataMaker) = getModChartWithScore score.selectedMods chart score.hitdata
         let mutable accuracyType = scoring
         let mutable hpType = hpSystem
 
@@ -82,7 +82,7 @@ module ScoreManager =
 
         member this.Difficulty
             with get() = 
-                difficulty <- Option.defaultWith (fun () -> let (keys, notes, _, _, _) = this.ModChart in RatingReport(notes, score.rate, score.layout, keys)) difficulty |> Some
+                difficulty <- Option.defaultWith (fun () -> RatingReport(this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> Some
                 difficulty.Value
             and set(value) = difficulty <- Some value
 
@@ -97,7 +97,7 @@ module ScoreManager =
             hpMetric.Value
 
         member this.Performance =
-            perfMetric <- Option.defaultWith (fun () -> let (keys, _, _, _, _) = this.ModChart in let m = performanceMetric this.Difficulty keys in m.ProcessAll this.HitData; m) perfMetric |> Some
+            perfMetric <- Option.defaultWith (fun () -> let m = performanceMetric this.Difficulty this.ModChart.Keys in m.ProcessAll this.HitData; m) perfMetric |> Some
             perfMetric.Value
 
         member this.Lamp =
@@ -116,7 +116,7 @@ module ScoreManager =
         member this.ModStatus =
             modstatus <-
                 Option.defaultWith
-                    (fun () -> score.selectedMods.Keys |> List.ofSeq |> List.map (fun s -> modList.[s].Status) |> fun l -> ModStatus.Ranked :: l |> List.max)
+                    (fun () -> score.selectedMods |> ModState.enumerate |> List.ofSeq |> List.map (fun s -> modList.[s].Status) |> fun l -> ModStatus.Ranked :: l |> List.max)
                     modstatus |> Some
             modstatus.Value
 

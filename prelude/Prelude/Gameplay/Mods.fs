@@ -8,6 +8,16 @@ open Prelude.Editor
 open Prelude.Editor.Filter
 open Prelude.Gameplay.Score
 
+type ModChart = {
+        Keys: int
+        Notes: TimeData<NoteRow>
+        BPM: TimeData<BPM>
+        SV: MultiTimeData<float32>
+        ModsUsed: string list
+    }
+module ModChart =
+    let create (chart: Chart) : ModChart = { Keys = chart.Keys; Notes = TimeData(chart.Notes); BPM = TimeData(chart.BPM); SV = chart.SV.Clone(); ModsUsed = [] }
+
 module Mods = 
     (*
         Marker for status of mods.
@@ -41,13 +51,13 @@ module Mods =
         //Used to hide enabled mods that would have no effect e.g. a mod that removes hold notes on a chart with no hold notes
         Check: int -> ModChart -> bool
         //Applies the modifier to the content of the chart. This is where note data, timing data, sv data should be edited to create the desired effects
-        Apply: int -> ModChart -> unit
+        Apply: int -> ModChart -> ModChart
         //Applies the modifier to the hit data of the chart - This hit data maps out what notes need to be hit/what notes have been hit
         //This typically is unused - examples uses are marking all notes as hit perfectly in Autoplay or marking LN releases as not needing to be hit
         Apply_Score: int -> ModChart -> ScoreData -> unit
     }
 
-    type ModState = Dictionary<string, int>
+    type ModState = Map<string, int>
     
     let modList = new Dictionary<string, Mod>()
     let registerMod id obj = modList.Add(id, obj)
@@ -59,23 +69,24 @@ module Mods =
         let getModName id = Localisation.localise ("mod." + id + ".name")
         let getModDesc id = Localisation.localise ("mod." + id + ".desc")
 
-        let cycleState id (mods: ModState) =
+        let cycleState id (mods: ModState): ModState =
             if (mods.ContainsKey(id)) then
                 let state = mods.[id] + 1
-                if state = modList.[id].States || modList.[id].RandomSeed then mods.Remove(id) |> ignore
-                else mods.[id] <- state
+                if state = modList.[id].States || modList.[id].RandomSeed then Map.remove id mods
+                else Map.add id state mods
             else
                 let state = if modList.[id].RandomSeed then r.Next(modList.[id].States) else 0
-                mods.Add(id, state)
-                List.iter (mods.Remove >> ignore) modList.[id].Exclusions
+                List.fold (fun m i -> Map.remove i m) (Map.add id state mods) modList.[id].Exclusions
 
-        let enumerate (mods: ModState) = mods.Keys :> string seq
+        let enumerate (mods: ModState) = Map.toSeq mods |> Seq.map fst |> Seq.sort
 
-        let enumerateApplicable chart (mods: ModState) =
-            enumerate mods
-            |> Seq.choose (fun id -> if modList.[id].Check(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
+        let enumerateApplicable (chart: ModChart) (mods: ModState) =
+            enumerate mods |> Seq.choose (fun id -> if modList.[id].Check(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
 
-    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ _ -> ()); Apply_Score = fun _ _ _ -> () }
+        let filterApplicable (chart: ModChart) (mods: ModState) =
+            Seq.fold (fun m (i, _, _) -> Map.add i mods.[i] m) Map.empty (enumerateApplicable chart mods)
+
+    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ -> id); Apply_Score = fun _ _ _ -> () }
 
     let private auto _ _ hitData =
         for (t, delta, hit) in hitData do
@@ -91,14 +102,14 @@ module Mods =
     registerMod "mirror"
         { defaultMod with
             Status = ModStatus.Ranked
-            Apply = fun _ (keys, notes, _, _, _) -> mirror (-infinityf * 1.0f<ms>) (infinityf * 1.0f<ms>) keys notes |> ignore
+            Apply = fun _ mc -> { mc with Notes = mirror (-infinityf * 1.0f<ms>) (infinityf * 1.0f<ms>) mc.Keys mc.Notes }
         }
 
     registerMod "nosv"
         { defaultMod with
             Status = ModStatus.Unranked
-            Check = fun _ (_, _, _, sv, _) -> not <| sv.IsEmpty()
-            Apply = fun _ (_, _, _, sv, _) -> sv.Clear()
+            Check = fun _ mc -> mc.SV.IsEmpty()
+            Apply = fun _ mc -> mc.SV.Clear(); mc
         }
 
     //todo: no ln (removes all lns)
@@ -111,11 +122,10 @@ module Mods =
     *)
 
     let private applyMods (mods: ModState) (chart: Chart): ModChart =
-        let mutable modChart = (chart.Keys, TimeData(chart.Notes), TimeData(chart.BPM), chart.SV.Clone(), []): ModChart
+        let mutable modChart = ModChart.create chart
         for (name, m, c) in mods |> ModState.enumerateApplicable modChart do
-            m.Apply c modChart
-            let (keys, notes, bpm, sv, m) = modChart in
-                modChart <- (keys, notes, bpm, sv, m @ [name])
+            let mc = m.Apply c modChart // apply should mutate here
+            modChart <- { mc with ModsUsed = mc.ModsUsed @ [name] }
         modChart
 
     let private applyModsToScoreData (mods: ModState) (modChart: ModChart) (scoreData: ScoreData) =
@@ -124,23 +134,22 @@ module Mods =
         scoreData
 
     let getModChart (mods: ModState) (chart: Chart): Lazy<ModChart> * Lazy<ScoreData> =
-        let mc = lazy (applyMods mods chart)
+        let mcLazy = lazy (applyMods mods chart)
         let scoreData = lazy (
-            let (keys, notes, _, _, _) = mc.Force()
-            applyModsToScoreData mods (mc.Force()) (notesToScoreData keys notes)
+            let mc = mcLazy.Force()
+            applyModsToScoreData mods (mc) (notesToScoreData mc.Keys mc.Notes)
         )
-        (mc, scoreData)
+        (mcLazy, scoreData)
 
-    let getScoreData (mods: ModState) (mc: ModChart): Lazy<ScoreData> =
-        let (keys, notes, _, _, _) = mc
-        lazy (applyModsToScoreData mods mc (notesToScoreData keys notes))
+    let getScoreData (mods: ModState) (mc: ModChart) : Lazy<ScoreData> =
+        lazy (applyModsToScoreData mods mc (notesToScoreData mc.Keys mc.Notes))
 
     let getModChartWithScore (mods: ModState) (chart: Chart) (replay: string): Lazy<ModChart> * Lazy<ScoreData> =
-        let mc = lazy (applyMods mods chart)
+        let mcLazy = lazy (applyMods mods chart)
         let scoreData = lazy (
-            let (keys, notes, _, _, _) = mc.Force()
-            (decompressScoreData replay keys notes) )
-        (mc, scoreData)
+            let mc = mcLazy.Force()
+            (decompressScoreData replay mc.Keys mc.Notes) )
+        (mcLazy, scoreData)
 
     let getModString(rate: float32, selectedMods: ModState) = 
         String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))
