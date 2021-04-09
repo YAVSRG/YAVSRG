@@ -17,10 +17,10 @@ module Filter =
     
     type Bitmapping = BitmapFunc array
     
-    let applyBitmapping (mappings: Bitmapping) (bitmap: Bitmap) : Bitmap =
+    let applyBitmapping (mapping: Bitmapping) (bitmap: Bitmap) : Bitmap =
         makeBitmap (seq {
-            for k = 0 to (Array.length mappings - 1) do
-                if mappings.[k].Evaluate(bitmap) then yield k
+            for k = 0 to (Array.length mapping - 1) do
+                if mapping.[k].Evaluate(bitmap) then yield k
         })
     
     let mirrorMapping keycount = Array.init keycount (fun i -> Column (keycount - i - 1))

@@ -10,7 +10,6 @@ open Prelude.Gameplay.Score
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout
-open Prelude.Data.ChartManager
 
 module ScoreManager =
 
@@ -23,6 +22,8 @@ module ScoreManager =
         layout: Layout
         keycount: int
     }
+    //only present for performance reasons in Percyqaz.Json
+    with static member Default = { time = DateTime.Now; hitdata = ""; rate = 1.0f; selectedMods = Map.empty; layout = Layout.Spread; keycount = 4 }
 
     type ChartSaveData = {
         [<Json.Required>]
@@ -51,7 +52,6 @@ module ScoreManager =
     *)
 
     type ScoreInfoProvider(score: Score, chart: Chart, scoring, hpSystem) =
-        let (modchartMaker, hitdataMaker) = getModChartWithScore score.selectedMods chart score.hitdata
         let mutable accuracyType = scoring
         let mutable hpType = hpSystem
 
@@ -68,20 +68,20 @@ module ScoreManager =
         member this.Score = score
         member this.Chart = chart
 
-        member this.HitData
-            with get() =
-                hitdata <- Option.defaultWith hitdataMaker.Force hitdata |> Some
-                hitdata.Value
-            and set(value) = hitdata <- Some value
-
         member this.ModChart
             with get() =
-                modchart <- Option.defaultWith modchartMaker.Force modchart |> Some
+                modchart <- Option.defaultWith (fun () -> getModChart score.selectedMods chart) modchart |> Some
                 modchart.Value
             and set(value) = modchart <- Some value
 
+        member this.HitData
+            with get() =
+                hitdata <- Option.defaultWith (fun () -> loadScoreData this.ModChart score.hitdata) hitdata |> Some
+                hitdata.Value
+            and set(value) = hitdata <- Some value
+
         member this.Difficulty
-            with get() = 
+            with get() =
                 difficulty <- Option.defaultWith (fun () -> RatingReport(this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> Some
                 difficulty.Value
             and set(value) = difficulty <- Some value
@@ -107,7 +107,7 @@ module ScoreManager =
         member this.Physical = this.Performance.Value
         member this.Technical = 0.0 //nyi
         member this.Mods =
-            modstring <- 
+            modstring <-
                 Option.defaultWith
                     (fun () -> getModString(score.rate, score.selectedMods))
                     modstring |> Some
@@ -133,7 +133,6 @@ module ScoreManager =
 
         member this.GetScoreData(hash: string) =
             if hash |> data.ContainsKey |> not then None else Some data.[hash]
-            
 
     type TopScore = string * DateTime * float //Hash, Timestamp, Rating
 

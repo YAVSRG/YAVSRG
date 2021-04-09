@@ -97,7 +97,6 @@ module Interlude =
         member this.Data = data
 
         new() = TimeData<'t>(new List<TimeDataItem<'t>>())
-        new(td: TimeData<'t>) = TimeData<'t>(td.Data)
 
         member this.Count = count
 
@@ -105,8 +104,8 @@ module Interlude =
             data.Clear()
             data.AddRange(list)
             count <- list.Count
-
         member this.SetData(data: TimeData<'t>) = this.SetData(data.Data)
+        member this.Clone() = let t = TimeData<'t>() in t.SetData(this.Data); t
 
         member this.IndexAt time: int * bool =
             match count with
@@ -215,7 +214,7 @@ module Interlude =
         member this.Clone() =
             let mt = MultiTimeData(keys)
             for i in 0 .. keys do
-                mt.SetChannelData(i - 1, TimeData(this.GetChannelData(i - 1)))
+                mt.SetChannelData(i - 1, this.GetChannelData(i - 1))
             mt
 
     (*

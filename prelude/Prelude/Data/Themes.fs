@@ -36,7 +36,7 @@ module Themes =
             LampColors = [|Color.White; Color.FromArgb(255, 160, 160); Color.FromArgb(160, 160, 160); Color.FromArgb(80, 255, 80); Color.FromArgb(160, 255, 160);
                 Color.FromArgb(200, 160, 255); Color.FromArgb(255, 255, 80); Color.FromArgb(255, 255, 160); Color.FromArgb(255, 160, 255); Color.FromArgb(160, 255, 255)|]
             LampNames = [|"NONE"; "SINGLE DIGIT COMBO BREAKS"; "MISS FLAG"; "FULL COMBO"; "SINGLE DIGIT GREATS"; "BLACK FLAG"; "PERFECT FULL COMBO"; "SINGLE DIGIT PERFECTS"; "WHITE FLAG"; "MARVELLOUS FULL COMBO"|]
-            GradeColors = [|Color.FromArgb(205, 205, 205); Color.FromArgb(246, 234, 128); Color.FromArgb(237, 205, 140); Color.FromArgb(127, 231, 139); Color.FromArgb(134, 227, 183);
+            GradeColors = [|Color.FromArgb(235, 200, 220); Color.FromArgb(246, 234, 128); Color.FromArgb(237, 205, 140); Color.FromArgb(127, 231, 139); Color.FromArgb(134, 227, 183);
                 Color.FromArgb(148, 210, 180); Color.FromArgb(149, 193, 220); Color.FromArgb(163, 190, 207); Color.FromArgb(202, 153, 183); Color.FromArgb(194, 162, 182); Color.FromArgb(200, 163, 155)|]
             GradeThresholds = [|0.98995; 0.97995; 0.96995; 0.95995; 0.94995; 0.93995; 0.92995; 0.91995; 0.90995; 0.89995|]
             PBColors = [|Color.Transparent; Color.FromArgb(160, 255, 160); Color.FromArgb(160, 255, 255); Color.FromArgb(255, 160, 80)|]

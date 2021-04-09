@@ -16,7 +16,7 @@ type ModChart = {
         ModsUsed: string list
     }
 module ModChart =
-    let create (chart: Chart) : ModChart = { Keys = chart.Keys; Notes = TimeData(chart.Notes); BPM = TimeData(chart.BPM); SV = chart.SV.Clone(); ModsUsed = [] }
+    let create (chart: Chart) : ModChart = { Keys = chart.Keys; Notes = chart.Notes.Clone(); BPM = chart.BPM.Clone(); SV = chart.SV.Clone(); ModsUsed = [] }
 
 module Mods = 
     (*
@@ -89,9 +89,9 @@ module Mods =
     let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ -> id); Apply_Score = fun _ _ _ -> () }
 
     let private auto _ _ hitData =
-        for (t, delta, hit) in hitData do
+        for (t, delta, hit): ScoreDataRow in hitData do
             for i = 0 to (Array.length hit - 1) do
-                if hit.[i] = HitStatus.NotHit then hit.[i] <- HitStatus.Hit
+                if hit.[i] = HitStatus.NotHit then hit.[i] <- HitStatus.Hit; delta.[i] <- 0.0f<ms>
 
     registerMod "auto"
         { defaultMod with
@@ -121,10 +121,10 @@ module Mods =
         Mod application pipeline
     *)
 
-    let private applyMods (mods: ModState) (chart: Chart): ModChart =
+    let private applyMods (mods: ModState) (chart: Chart) : ModChart =
         let mutable modChart = ModChart.create chart
         for (name, m, c) in mods |> ModState.enumerateApplicable modChart do
-            let mc = m.Apply c modChart // apply should mutate here
+            let mc = m.Apply c modChart
             modChart <- { mc with ModsUsed = mc.ModsUsed @ [name] }
         modChart
 
@@ -133,23 +133,9 @@ module Mods =
             m.Apply_Score c modChart scoreData
         scoreData
 
-    let getModChart (mods: ModState) (chart: Chart): Lazy<ModChart> * Lazy<ScoreData> =
-        let mcLazy = lazy (applyMods mods chart)
-        let scoreData = lazy (
-            let mc = mcLazy.Force()
-            applyModsToScoreData mods (mc) (notesToScoreData mc.Keys mc.Notes)
-        )
-        (mcLazy, scoreData)
-
-    let getScoreData (mods: ModState) (mc: ModChart) : Lazy<ScoreData> =
-        lazy (applyModsToScoreData mods mc (notesToScoreData mc.Keys mc.Notes))
-
-    let getModChartWithScore (mods: ModState) (chart: Chart) (replay: string): Lazy<ModChart> * Lazy<ScoreData> =
-        let mcLazy = lazy (applyMods mods chart)
-        let scoreData = lazy (
-            let mc = mcLazy.Force()
-            (decompressScoreData replay mc.Keys mc.Notes) )
-        (mcLazy, scoreData)
+    let getModChart (mods: ModState) (chart: Chart) : ModChart = applyMods mods chart
+    let createScoreData (mods: ModState) (mc: ModChart) : ScoreData = applyModsToScoreData mods mc (notesToScoreData mc.Keys mc.Notes)
+    let loadScoreData (mc: ModChart) (replay: string) : ScoreData = decompressScoreData replay mc.Keys mc.Notes
 
     let getModString(rate: float32, selectedMods: ModState) = 
         String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))
