@@ -241,7 +241,7 @@ module ScreenLevelSelect =
 
             override this.OnSelect() =
                 base.OnSelect()
-                ModState.cycleState name selectedMods
+                selectedMods <- ModState.cycleState name selectedMods
                 updateChart()
                 this.Selected <- false
 
@@ -475,7 +475,7 @@ module ScreenLevelSelect =
         override this.Update(top, topEdge, elapsedTime) =
             match scrollTo with
             | ScrollToPack s when s = name ->
-                if this.Expanded then scrollBy(-top + topEdge + 180.0f) else scrollBy(-top + topEdge + 500.0f)
+                if this.Expanded then scrollBy(-top + topEdge + 185.0f) else scrollBy(-top + topEdge + 400.0f)
                 scrollTo <- ScrollTo.Nothing
             | _ -> ()
             let b = base.Update(top, topEdge, elapsedTime)
@@ -608,8 +608,8 @@ type ScreenLevelSelect() as this =
         let scrollPos = (scrollPos.Value / (scrollPos.Value - bottomEdge)) * (bottom - top - 100.0f)
         Draw.rect(Rect.create (Render.vwidth - 10.0f) (top + 225.0f + scrollPos) (Render.vwidth - 5.0f) (top + 245.0f + scrollPos)) Color.White Sprite.Default
 
-        Draw.rect(Rect.create left top right (top + 170.0f))(Screens.accentShade(100, 0.6f, 0.0f)) Sprite.Default
-        Draw.rect(Rect.create left (top + 170.0f) right (top + 175.0f))(Screens.accentShade(255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create left top right (top + 170.0f)) (Screens.accentShade(100, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create left (top + 170.0f) right (top + 175.0f)) (Screens.accentShade(255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 
     override this.OnEnter(prev) =

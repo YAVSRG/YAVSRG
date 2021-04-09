@@ -310,7 +310,7 @@ module GameplayWidgets =
         inherit Widget()
         let firstNote = 
             let (_, notes, _, _, _) = Gameplay.coloredChart.Force()
-            if notes.IsEmpty() then 0.0f<ms> else notes.First() |> offsetOf
+            notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
         do
             this.Add(Components.TextBox(sprintf "Press %O to skip" (options.Hotkeys.Skip.Get()) |> Utils.K, Utils.K Color.White, 0.5f))
 

@@ -4,7 +4,7 @@ open System
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
-open Prelude.Editor
+open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Difficulty
@@ -13,7 +13,6 @@ open Prelude.Data.ChartManager
 open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.Utils
-open Interlude.Options
 
 module Gameplay =
 
@@ -26,7 +25,7 @@ module Gameplay =
     let mutable difficultyRating = None
 
     let mutable rate = 1.0f
-    let selectedMods = ModState()
+    let mutable selectedMods = Map.empty
     let scores = ScoresDB()
     let cache = Cache()
 
@@ -42,8 +41,8 @@ module Gameplay =
             coloredChart <- getColoredChart(Options.options.ColorStyle.Get())(modifiedChart)
             replayData <- r
             difficultyRating <-
-                let (keys, notes, _, _, _) = m.Force() in
-                Some <| RatingReport(notes, rate, Options.options.Playstyles.[keys - 3], keys)
+                let mc = m.Force() in
+                Some <| RatingReport(mc.Notes, rate, Options.options.Playstyles.[mc.Keys - 3], mc.Keys)
             onChartUpdate()
 
     let changeRate(amount) =
@@ -56,7 +55,7 @@ module Gameplay =
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData(chart)
         Themes.loadBackground(chart.BGPath)
-        let localOffset = if chart.Notes.IsEmpty() then 0.0f<ms> else chartSaveData.Value.Offset.Get() - (offsetOf <| chart.Notes.First())
+        let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Get() - (offsetOf chart.Notes.First.Value)
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
         Audio.playFrom(chart.Header.PreviewTime)
         Options.options.CurrentChart.Set(cachedChart.FilePath)
