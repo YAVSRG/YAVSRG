@@ -19,10 +19,9 @@ module Gameplay =
     let mutable internal currentChart: Chart option = None
     let mutable internal currentCachedChart: CachedChart option = None
     let mutable internal chartSaveData = None
-    let mutable modifiedChart: Lazy<ModChart> = lazy ( failwith "tried to access modified chart when none is selected" )
-    let mutable coloredChart: Lazy<ColorizedChart> = lazy ( failwith "tried to access colored chart when none is selected" )
-    let mutable private replayData: Lazy<ScoreData> = lazy ( null )
-    let mutable difficultyRating = None
+    let mutable modifiedChart: ModChart option = None
+    let mutable private coloredChart: ColorizedChart option = None
+    let mutable difficultyRating: RatingReport option = None
 
     let mutable rate = 1.0f
     let mutable selectedMods = Map.empty
@@ -36,12 +35,10 @@ module Gameplay =
         match currentChart with
         | None -> ()
         | Some c ->
-            let (m, r) = getModChart selectedMods c
-            modifiedChart <- m
-            coloredChart <- getColoredChart(Options.options.ColorStyle.Get())(modifiedChart)
-            replayData <- r
+            modifiedChart <- Some <| getModChart selectedMods c
+            coloredChart <- None
             difficultyRating <-
-                let mc = m.Force() in
+                let mc = modifiedChart.Value in
                 Some <| RatingReport(mc.Notes, rate, Options.options.Playstyles.[mc.Keys - 3], mc.Keys)
             onChartUpdate()
 
@@ -55,23 +52,27 @@ module Gameplay =
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData(chart)
         Themes.loadBackground(chart.BGPath)
-        let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Get() - (offsetOf chart.Notes.First.Value)
+        let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Get() - offsetOf chart.Notes.First.Value
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
         Audio.playFrom(chart.Header.PreviewTime)
         Options.options.CurrentChart.Set(cachedChart.FilePath)
         updateChart()
         onChartChange()
 
-    let createScoreData() =
-        let r = replayData.Force()
-        replayData <- getScoreData(selectedMods)(modifiedChart.Force())
-        r
+    let createScoreData() = createScoreData selectedMods modifiedChart.Value
+
+    let getColoredChart() =
+        match modifiedChart with
+        | None -> failwith "Tried to get coloredChart when no modifiedChart exists"
+        | Some mc ->
+            coloredChart <- Option.defaultWith (fun () -> getColoredChart (Options.options.ColorStyle.Get()) mc) coloredChart |> Some
+            coloredChart.Value
 
     let makeScore(scoreData, keys): Score = {
         time = DateTime.Now
         hitdata = compressScoreData scoreData
         rate = rate
-        selectedMods = selectedMods
+        selectedMods = selectedMods |> ModChart.filter modifiedChart.Value
         layout = Options.options.Playstyles.[keys - 3]
         keycount = keys
     }

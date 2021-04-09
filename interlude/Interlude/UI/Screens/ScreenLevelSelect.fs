@@ -143,6 +143,10 @@ module ScreenLevelSelect =
             let ls = new ListSelectable(true)
 
             do
+                flowContainer
+                |> positionWidgetA(0.0f, 10.0f, 0.0f, -40.0f)
+                |> this.Add
+
                 LittleButton.FromEnum("Sort", sort, this.Refresh)
                 |> positionWidget(20.0f, 0.0f, -35.0f, 1.0f, -20.0f, 0.25f, -5.0f, 1.0f)
                 |> ls.Add
@@ -151,7 +155,7 @@ module ScreenLevelSelect =
                 |> positionWidget(20.0f, 0.25f, -35.0f, 1.0f, -20.0f, 0.5f, -5.0f, 1.0f)
                 |> ls.Add
 
-                LittleButton(K "Score System", this.Refresh) //nyi
+                LittleButton((fun () -> scoreSystem), fun () -> options.AccSystems.Set(WatcherSelection.cycleForward <| options.AccSystems.Get()); refresh <- true)
                 |> positionWidget(20.0f, 0.5f, -35.0f, 1.0f, -20.0f, 0.75f, -5.0f, 1.0f)
                 |> ls.Add
 
@@ -160,9 +164,6 @@ module ScreenLevelSelect =
                 |> ls.Add
 
                 ls |> this.Add
-                flowContainer
-                |> positionWidgetA(0.0f, 10.0f, 0.0f, -40.0f)
-                |> this.Add
 
             override this.OnSelect() =
                 base.OnSelect()
@@ -320,13 +321,14 @@ module ScreenLevelSelect =
                 match currentCachedChart with
                 | Some cc -> cc.Length
                 | None -> 0.0f<ms>
+                |> fun x -> x / rate
                 |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
                 |> fun (x, y) -> sprintf "⌛ %i:%02i" x y
             bpm <-
                 match currentCachedChart with
                 | Some cc -> cc.BPM
                 | None -> (120.0f<ms/beat>, 120.0f<ms/beat>)
-                |> fun (b, a) -> (60000.0f<ms> / a |> int, 60000.0f<ms> / b |> int)
+                |> fun (b, a) -> (60000.0f<ms> / a * rate |> int, 60000.0f<ms> / b * rate |> int)
                 |> fun (a, b) ->
                     if Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
                     elif a > 9000 || b < 0 then sprintf "♬ ∞"
@@ -398,7 +400,7 @@ module ScreenLevelSelect =
                     match p with
                     | None -> ("", "", Color.Transparent)
                     | Some ((p1, r1), (p2, r2)) ->
-                        if r1 < rate then (format p2, sprintf "(%.2fx)" r2, if r2 < rate then Color.Silver else color p2)
+                        if r1 < rate then (format p2, sprintf "(%.2fx)" r2, if r2 < rate then Color.FromArgb(127, Color.White) else color p2)
                         else (format p1, sprintf "(%.2fx)" r1, color p1)
                 if c.A > 0uy then
                     Draw.rect(Rect.create (right - pos - 40.0f) top (right - pos + 40.0f) bottom) accent Sprite.Default

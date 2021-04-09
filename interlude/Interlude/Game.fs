@@ -5,6 +5,7 @@ open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.Common
 open Prelude.Common
+open Interlude.Options
 open Interlude.Render
 open Interlude.Input
 open Interlude.UI

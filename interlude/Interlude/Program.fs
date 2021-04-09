@@ -4,7 +4,6 @@ open System.Diagnostics
 open System.IO
 open Prelude.Common
 open Interlude
-open Interlude.Options
 
 [<EntryPoint>]
 let main argv =
@@ -33,10 +32,14 @@ let main argv =
             | err -> Logging.Critical "Game failed to launch" (err.ToString()); crashSplash(); None
         if (game.IsSome) then
             let game = game.Value
-            try game.Run() with err -> Logging.Critical "Game crashed" (err.ToString()); crashSplash()
+            try
+                game.Run()
+                Logging.Info("Exiting game")""
+            with err -> Logging.Critical "Game crashed" (err.ToString()); crashSplash()
             game.Close()
             Options.save()
             game.Dispose()
+            Logging.Info("o/")""
         m.ReleaseMutex()
     else
         //todo: code that sends data to the running process to reappear if hidden

@@ -156,15 +156,16 @@ module Themes =
                     if themeConfig.OverrideAccentColor then themeConfig.DefaultAccentColor else
                         let vibrance (c:Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
                         seq {
-                            for x in 0 .. bmp.Width / 10 - 1 do
-                                for y in 0 .. bmp.Height / 10 - 1 do
-                                    yield bmp.GetPixel(x * 10, y * 10) }
+                            let w = bmp.Width / 50
+                            let h = bmp.Height / 50
+                            for x in 0 .. 49 do
+                                for y in 0 .. 49 do
+                                    yield bmp.GetPixel(w * x, h * x) }
                         |> Seq.maxBy vibrance
                         |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else themeConfig.DefaultAccentColor
                 Sprite.upload(bmp, 1, 1, true)
-            with
-            | err ->
-                Logging.Error("Failed to load background image: " + file) (err.ToString())
+            with err ->
+                Logging.Warn("Failed to load background image: " + file) (err.ToString())
                 accentColor <- themeConfig.DefaultAccentColor
                 getTexture("background")
         | ext ->

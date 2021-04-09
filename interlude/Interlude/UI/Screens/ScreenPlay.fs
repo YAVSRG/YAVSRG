@@ -65,7 +65,7 @@ type NoteRenderer() as this =
     //functions to get bounding boxes for things. used to place other gameplay widgets on the playfield.
 
     //constants
-    let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
+    let (keys, notes, bpm, sv, mods) = Gameplay.getColoredChart()
     let columnPositions = Array.init keys (fun i -> float32 i * Themes.noteskinConfig.ColumnWidth)
     let columnWidths = Array.create keys (float32 Themes.noteskinConfig.ColumnWidth)
     let noteHeight = Themes.noteskinConfig.ColumnWidth
@@ -309,7 +309,7 @@ module GameplayWidgets =
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
         inherit Widget()
         let firstNote = 
-            let (_, notes, _, _, _) = Gameplay.coloredChart.Force()
+            let (_, notes, _, _, _) = Gameplay.getColoredChart()
             notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
         do
             this.Add(Components.TextBox(sprintf "Press %O to skip" (options.Hotkeys.Skip.Get()) |> Utils.K, Utils.K Color.White, 0.5f))
@@ -369,7 +369,7 @@ open GameplayWidgets
 type ScreenPlay() as this =
     inherit Screen()
     
-    let (keys, notes, bpm, sv, mods) = Gameplay.coloredChart.Force()
+    let (keys, notes, bpm, sv, mods) = Gameplay.getColoredChart()
     let scoreData = Gameplay.createScoreData()
     let scoring = createAccuracyMetric(options.AccSystems.Get() |> fst)
     let hp = createHPMetric (options.HPSystems.Get() |> fst) scoring
@@ -521,7 +521,7 @@ type ScreenPlay() as this =
                         Gameplay.currentChart.Value,
                         options.AccSystems.Get() |> fst,
                         options.HPSystems.Get() |> fst,
-                        ModChart = Gameplay.modifiedChart.Force(),
+                        ModChart = Gameplay.modifiedChart.Value,
                         Difficulty = Gameplay.difficultyRating.Value)
                 (sd, Gameplay.setScore(sd))
                 |> ScreenScore
