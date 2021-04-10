@@ -33,8 +33,7 @@ type Theme(storage) =
                 try
                     let config: NoteSkinConfig = this.GetJson("Noteskins", ns, "noteskin.json")
                     Some (ns, config)
-                with
-                | err -> Logging.Error("Failed to load noteskin '" + ns + "'") (err.ToString()); None)
+                with err -> Logging.Error("Failed to load noteskin '" + ns + "'") (err.ToString()); None)
             (this.GetFolders("Noteskins"))
 
     static member FromZipStream(stream: Stream) = Theme(Zip <| new ZipArchive(stream))
@@ -92,8 +91,7 @@ module Themes =
             try
                 let config: ThemeConfig = theme.GetJson("theme.json")
                 Some (theme, config)
-            with
-            | err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
+            with err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
             themes
         |> Seq.iter (fun (t, conf) -> loadedThemes.Add(t); themeConfig <- conf)
 
@@ -130,10 +128,8 @@ module Themes =
                     loadedThemes.[i].GetTexture(Some currentNoteSkin, name)
                 else
                     getInherited (fun (t: Theme) ->
-                        try
-                            Some <| t.GetTexture(None, name)
-                        with
-                        | err -> Logging.Error("Failed to load texture '" + name + "'") (err.ToString()); None)
+                        try Some <| t.GetTexture(None, name)
+                        with err -> Logging.Error("Failed to load texture '" + name + "'") (err.ToString()); None)
             sprites.Add(name, Sprite.upload(bmp, config.Rows, config.Columns, false))
         sprites.[name]
 

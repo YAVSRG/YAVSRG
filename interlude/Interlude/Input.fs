@@ -43,12 +43,12 @@ module Input =
     
     let mutable internal evts: InputEv list = []
     
-    let mutable internal mousex = 0.f
-    let mutable internal mousey = 0.f
-    let mutable internal mousez = 0.f
-    let mutable internal oldmousex = 0.f
-    let mutable internal oldmousey = 0.f
-    let mutable internal oldmousez = 0.f
+    let mutable internal mousex = 0.0f
+    let mutable internal mousey = 0.0f
+    let mutable internal mousez = 0.0f
+    let mutable internal oldmousex = 0.0f
+    let mutable internal oldmousey = 0.0f
+    let mutable internal oldmousez = 0.0f
     let mutable internal ctrl = false
     let mutable internal shift = false
     let mutable internal alt = false
