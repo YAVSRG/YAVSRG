@@ -134,9 +134,8 @@ module ScreenLevelSelect =
 
             let flowContainer = new FlowContainer()
             let mutable empty = false
-            //todo: store these in options
             let filter = Setting(ScoreboardFilter.All)
-            let sort = Setting(ScoreboardSort.Performance)
+            let sort = WrappedSetting(options.ScoreSortMode, int, enum)
 
             let mutable chart = ""
             let mutable scoring = ""
@@ -159,11 +158,16 @@ module ScreenLevelSelect =
                 |> positionWidget(20.0f, 0.5f, -35.0f, 1.0f, -20.0f, 0.75f, -5.0f, 1.0f)
                 |> ls.Add
 
-                LittleButton(K "Local Scores", this.Refresh) //nyi
+                LittleButton(K <| Localisation.localise "scoreboard.storage.Local", this.Refresh) //nyi
                 |> positionWidget(20.0f, 0.75f, -35.0f, 1.0f, -20.0f, 1.0f, -5.0f, 1.0f)
                 |> ls.Add
 
                 ls |> this.Add
+
+                let noLocalScores = Localisation.localise("scoreboard.NoLocalScores")
+                TextBox((fun () -> if empty then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
+                |> positionWidget(50.0f, 0.0f, 0.0f, 0.3f, -50.0f, 1.0f, 0.0f, 0.5f)
+                |> this.Add
 
             override this.OnSelect() =
                 base.OnSelect()
@@ -311,7 +315,7 @@ module ScreenLevelSelect =
 
         override this.Update(elapsedTime, bounds) =
             if options.Hotkeys.Mods.Value.Tapped() then
-                mods.Selected <- true
+                if mods.Selected then scores.Selected <- true else mods.Selected <- true
             elif options.Hotkeys.Scoreboard.Value.Tapped() then
                 scores.Selected <- true
             base.Update(elapsedTime, bounds)

@@ -174,7 +174,8 @@ module Options =
 
         ChartSortMode: Setting<string>
         ChartGroupMode: Setting<string>
-        ChartColorMode: Setting<string>
+        //ChartColorMode: Setting<string>
+        ScoreSortMode: Setting<int>
 
         Hotkeys: Hotkeys
     } with
@@ -210,7 +211,7 @@ module Options =
 
             ChartSortMode = Setting("Title")
             ChartGroupMode = Setting("Pack")
-            ChartColorMode = Setting("Nothing")
+            ScoreSortMode = Setting(0)
             Hotkeys = Hotkeys.Default
             GameplayBinds = [|
                 [|mk Keys.Left; mk Keys.Down; mk Keys.Right|];

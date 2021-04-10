@@ -52,8 +52,8 @@ type ScreenMenu() as this =
         this.Add(play |> positionWidget(-100.0f, 0.0f, -200.0f, 0.5f, 1200.0f, 0.0f, -100.0f, 0.5f))
         this.Add(options |> positionWidget(-100.0f, 0.0f, -50.0f, 0.5f, 1130.0f, 0.0f, 50.0f, 0.5f))
         this.Add(quit |> positionWidget(-100.0f, 0.0f, 100.0f, 0.5f, 1060.0f, 0.0f, 200.0f, 0.5f))
-        this.Animation.Add(splashAnim)
-        this.Animation.Add(splashSubAnim)
+        this.Animation.Add splashAnim
+        this.Animation.Add splashSubAnim
         Utils.AutoUpdate.checkForUpdates()
 
     override this.OnEnter(prev) =
@@ -211,6 +211,49 @@ module Notifications =
                     y <- y + notifHeight
                 Stencil.finish()
 
+type TooltipHandler() as this =
+    inherit Widget()
+    let mutable active = false
+    let mutable bind = Dummy
+    let mutable text = [||]
+    let mutable timeLeft = 0.0
+    let mutable action = ignore
+
+    let SCALE = 30.0f
+
+    let fade = AnimationFade(0.0f)
+
+    do
+        this.Animation.Add(fade)
+        Screens.addTooltip <- 
+            fun (b, str, time, callback) ->
+                if not active then
+                    active <- true
+                    fade.Target <- 1.0f
+                    bind <- b
+                    text <- str.Split("\n")
+                    timeLeft <- time
+                    action <- callback
+
+    override this.Update(elapsedTime, bounds) =
+        if active then
+            timeLeft <- timeLeft - elapsedTime
+            if timeLeft <= 0.0 then (action(); active <- false; fade.Target <- 0.0f)
+            elif bind.Released() then (active <- false; fade.Target <- 0.0f)
+        base.Update(elapsedTime, bounds)
+
+    override this.Draw() =
+        if fade.Value > 0.01f then
+            let x = Mouse.X()
+            let mutable y = Mouse.Y() + 50.0f
+            //todo: y-clamping
+            for str in text do
+                let w = Text.measure(Themes.font(), str) * SCALE
+                //todo: x-clamping
+                Text.drawB(Themes.font(), str, SCALE, x - w * 0.5f, y, (Color.FromArgb(int(255.0f * fade.Value), Color.White), Color.Black))
+                y <- y + SCALE
+        base.Draw()
+
 type Jukebox() as this =
     inherit Widget()
     //todo: right click to seek/tools to pause and play music
@@ -227,13 +270,12 @@ type Jukebox() as this =
             Options.options.AudioVolume.Apply((+) (float (Mouse.Scroll()) * 0.02))
             Audio.changeVolume(Options.options.AudioVolume.Value)
             slider.Target <- float32 Options.options.AudioVolume.Value
-        else
-            fade.Target <- 0.0f
+        else fade.Target <- 0.0f
 
     override this.Draw() =
         let r = Rect.sliceBottom 5.0f this.Bounds
         Draw.rect r (Screens.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
-        Draw.rect (r |> Rect.sliceLeft(slider.Value * Rect.width r)) (Screens.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceLeft(slider.Value * Rect.width r) r) (Screens.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
 
 // Toolbar
 
@@ -304,6 +346,7 @@ type ScreenContainer() as this =
     let t2 = AnimationTimer TRANSITIONTIME
 
     let toolbar = new Toolbar()
+    let tooltip = new TooltipHandler()
 
     do
         Screens.changeScreen <- this.ChangeScreen //second overload
@@ -358,6 +401,7 @@ type ScreenContainer() as this =
         | _ -> ()
 
     override this.Update(elapsedTime, bounds) =
+        tooltip.Update(elapsedTime, bounds)
         if Render.vwidth > 0.0f then
             Screens.parallaxX.Target <- Mouse.X() / Render.vwidth
             Screens.parallaxY.Target <- Mouse.Y() / Render.vheight
@@ -400,3 +444,4 @@ type ScreenContainer() as this =
             if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
         for d in dialogs do d.Draw()
         if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize) (Screens.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture("cursor"))
+        tooltip.Draw()

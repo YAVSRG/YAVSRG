@@ -403,7 +403,7 @@ module Selection =
                 base.OnDeselect()
                 this.HoverChild <- None
                 setting.Value <- 
-                    this.Available.Children
+                    this.Chosen.Children
                     |> Seq.map (fun c -> (c :?> ListOrderedItem).Name)
                     |> ResizeArray
 
@@ -524,7 +524,8 @@ module Selection =
         Utils for constructing menus easily
     *)
 
-    let localise s = Localisation.localise("options.name." + s)
+    let localiseOption s = Localisation.localise("options.name." + s)
+    let localiseTooltip s = Localisation.localise("options.tooltip." + s)
 
     let refreshRow number cons =
         let r = ListSelectable(true)

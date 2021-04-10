@@ -282,6 +282,7 @@ module Screens =
     let mutable internal setCursorVisible: bool -> unit = ignore
 
     let mutable internal addNotification: string * NotificationType -> unit = ignore
+    let mutable internal addTooltip: Input.Bind * string * float * (unit -> unit) -> unit = ignore
 
     //background fbo
     let parallaxX  = AnimationFade(0.0f)

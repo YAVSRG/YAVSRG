@@ -60,3 +60,5 @@ options.name.OverallDifficulty=Overall Difficulty
 options.name.ScoreSystemType=Score System Type
 options.name.RebuildCache=Rebuild Cache
 options.name.DownloadUpdate=Download Update
+scoreboard.NoLocalScores=No local scores
+scoreboard.storage.Local=Local Scores

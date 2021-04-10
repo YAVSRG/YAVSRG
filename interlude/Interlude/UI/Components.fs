@@ -75,6 +75,14 @@ module Components =
             elif not oh && hover && Mouse.Moved() then onHover(true)
             elif hover && Mouse.Click(MouseButton.Left) then onClick()
 
+    type TooltipRegion(localisedText) =
+        inherit Widget()
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
+                Screens.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
+
     type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
         inherit Widget()
 

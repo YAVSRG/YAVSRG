@@ -39,9 +39,13 @@ module OptionsMenuTabs =
         let mutable widget = widget
 
         do
-            this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
-            this.Add(TextBox(K (localise name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f))
+            widget
+            |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
+            |> this.Add
+            TextBox(K (localiseOption name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
+            |> this.Add
+            TooltipRegion(localiseTooltip name) |> this.Add
     
         member this.Position(y, width, height) =
             this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
@@ -69,8 +73,9 @@ module OptionsMenuTabs =
     type PrettyButton(name, action) as this =
         inherit Selectable()
         do
-            this.Add(TextBox(K (localise name + "  >"), (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f))
-            this.Add(Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)))
+            TextBox(K (localiseOption name + "  >"), (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f) |> this.Add
+            Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
+            TooltipRegion(localiseTooltip name) |> this.Add
         override this.OnSelect() = action(); this.Selected <- false
         override this.Draw() =
             if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
@@ -343,11 +348,11 @@ module OptionsMenuTabs =
 
     let topLevel(add: string * Selectable -> unit) =
         row [
-            BigButton(localise "System", 0, fun () -> add("System", system(add))) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Themes", 1, fun () -> add("Themes", themes(add))) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Gameplay", 2, fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Keybinds", 3, fun () -> add("Keybinds", keybinds(add))) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
-            BigButton(localise "Debug", 4, fun () -> add("Debug", debug(add))) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localiseOption "System", 0, fun () -> add("System", system(add))) |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localiseOption "Themes", 1, fun () -> add("Themes", themes(add))) |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localiseOption "Gameplay", 2, fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localiseOption "Keybinds", 3, fun () -> add("Keybinds", keybinds(add))) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
+            BigButton(localiseOption "Debug", 4, fun () -> add("Debug", debug(add))) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
         ]
 
 open OptionsMenuTabs
@@ -366,7 +371,7 @@ type OptionsMenu() as this =
 
     let add(label, widget) =
         let n = (List.length namestack)
-        namestack <- localise label :: namestack
+        namestack <- localiseOption label :: namestack
         name <- String.Join(" > ", List.rev namestack)
         let w = wrapper widget
         match stack.[n] with
