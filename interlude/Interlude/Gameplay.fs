@@ -55,7 +55,7 @@ module Gameplay =
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Value - offsetOf chart.Notes.First.Value
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
         Audio.playFrom(chart.Header.PreviewTime)
-        Options.options.CurrentChart.Set(cachedChart.FilePath)
+        Options.options.CurrentChart.Value <- cachedChart.FilePath
         updateChart()
         onChartChange()
 

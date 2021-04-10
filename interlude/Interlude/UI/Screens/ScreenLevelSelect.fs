@@ -533,20 +533,20 @@ type ScreenLevelSelect() as this =
     let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
 
     do
-        if not <| sortBy.ContainsKey(options.ChartSortMode.Value) then options.ChartSortMode.Set "Title"
-        if not <| groupBy.ContainsKey(options.ChartGroupMode.Value) then options.ChartGroupMode.Set "Pack"
+        options.ChartSortMode.Apply(fun s -> if sortBy.ContainsKey s then s else "Title")
+        options.ChartGroupMode.Apply(fun s -> if groupBy.ContainsKey s then s else "Pack")
         this.Animation.Add scrollPos
         scrollBy <- fun amt -> scrollPos.Target <- scrollPos.Target + amt
 
         let sorts = sortBy.Keys |> Array.ofSeq
         new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Value),
-            (fun i -> options.ChartSortMode.Set(sorts.[i]); refresh()), "Sort by", 50.0f)
+            (fun i -> options.ChartSortMode.Value <- sorts.[i]; refresh()), "Sort by", 50.0f)
         |> positionWidget(-400.0f, 1.0f, 100.0f, 0.0f, -250.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
 
         let groups = groupBy.Keys |> Array.ofSeq
         new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Value),
-            (fun i -> options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
+            (fun i -> options.ChartGroupMode.Value <- groups.[i]; refresh()), "Group by", 50.0f)
         |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
 

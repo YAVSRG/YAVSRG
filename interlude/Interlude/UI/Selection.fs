@@ -248,7 +248,7 @@ module Selection =
         let TEXTWIDTH = 130.0f
         let color = AnimationFade(0.5f)
         let mutable dragging = false
-        let chPercent(v) = setting.SetPercent(setting.GetPercent() + v)
+        let chPercent(v) = setting.ValuePercent <- setting.ValuePercent + v
         do
             this.Animation.Add(color)
             this.Add(new TextBox((fun () -> setting.Value.ToString()), (fun () -> Color.White, Color.Black), 0.0f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
@@ -261,7 +261,7 @@ module Selection =
             if this.Selected then
                 if (Mouse.Held(MouseButton.Left) && dragging) then
                     let amt = (Mouse.X() - l) / (r - l)
-                    setting.SetPercent(amt)
+                    setting.ValuePercent <- amt
                 else dragging <- false
 
         override this.Left() = chPercent(-incr)
@@ -270,7 +270,7 @@ module Selection =
         override this.Down() = chPercent(-incr * 10.0f)
 
         override this.Draw() =
-            let v = setting.GetPercent()
+            let v = setting.ValuePercent
             let struct (l, t, r, b) = this.Bounds |> Rect.trimLeft(TEXTWIDTH)
             let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
             let m = (b + t) * 0.5f
