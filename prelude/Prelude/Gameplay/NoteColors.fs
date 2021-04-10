@@ -2,7 +2,7 @@
 
 open System
 open Prelude.Charts.Interlude
-open Prelude.Editor
+open Prelude.Gameplay.Mods
 open Prelude.Common
 
 //This is the final stage of preprocessing chart data before it is played by the user.

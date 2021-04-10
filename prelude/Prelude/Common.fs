@@ -20,64 +20,73 @@ module Common =
         let Abs(t: Time) = if t < 0.0f<ms> then -t else t
 
 (*
-    Settings - Store an (ideally immutable type) value that can be get and set
+    Settings - Store an (ideally immutably typed) value that can be get and set
     Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
     (Auto generation will be done with reflection)
 *)
 
     [<AbstractClass>]
     type ISettable<'T>() =
-        abstract member Set: 'T -> unit
-        abstract member Get: unit -> 'T
-
-    type Setting<'T>(value : 'T) =
-        inherit ISettable<'T>()
-        let mutable value = value
-        override this.Set(newValue) = value <- newValue
-        override this.Get() = value
-        override this.ToString() = value.ToString()
-        static member Pickler: Json.Mapping.JsonPickler<Setting<'T>> =
-            let tP = Json.Mapping.getPickler<'T>()
-            Json.Mapping.mkPickler
-                (fun (o: Setting<'T>) -> tP.Encode(o.Get()))
-                (fun (o: Setting<'T>) json -> tP.Decode(o.Get())(json) |> JsonMapResult.map (fun v -> o.Set(v); o))
+        //member this.Get() = this.Value
+        member this.Set(v) = this.Value <- v
+        abstract member Value: 'T with get, set
+        member this.Apply f = this.Value <- f this.Value
+        override this.ToString() = this.Value.ToString()
 
     type WrappedSetting<'T, 'U>(setting: ISettable<'U>, set: 'T -> 'U, get: 'U -> 'T) =
         inherit ISettable<'T>()
-        override this.Set(newValue) = setting.Set(set(newValue))
-        override this.Get() = get(setting.Get())
+        override this.Value with get() = get setting.Value and set newValue = setting.Value <- set newValue
+
+    type Setting<'T>(value: 'T) =
+        inherit ISettable<'T>()
+        let mutable value = value
+        override this.Value with get() = value and set newValue = value <- newValue
+        static member Pickler: Json.Mapping.JsonPickler<Setting<'T>> =
+            let tP = Json.Mapping.getPickler<'T>()
+            Json.Mapping.mkPickler
+                (fun (o: Setting<'T>) -> tP.Encode o.Value)
+                (fun (o: Setting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Set v; o))
 
     [<AbstractClass>]
-    type NumSetting<'T when 'T : comparison>(value : 'T, min : 'T, max : 'T) =
+    type NumSetting<'T when 'T : comparison>(value: 'T, min: 'T, max: 'T) =
         inherit Setting<'T>(value)
-        abstract member SetPercent: float32 -> unit
-        abstract member GetPercent: unit -> float32
-        override this.Set(newValue) = base.Set(if newValue > max then max elif newValue < min then min else newValue)
+        member this.GetPercent() = this.ValuePercent
+        member this.SetPercent(v) = this.ValuePercent <- v
+        abstract member ValuePercent: float32 with get, set
+        override this.Value
+            with set(newValue) = base.Value <- if newValue > max then max elif newValue < min then min else newValue
+            and get() = base.Value
         member this.Min = min
         member this.Max = max
         override this.ToString() = sprintf "%s (%A - %A)" (base.ToString()) min max
         static member Pickler: Json.Mapping.JsonPickler<NumSetting<'T>> =
             let tP = Json.Mapping.getPickler<'T>()
             Json.Mapping.mkPickler
-                (fun (o: NumSetting<'T>) -> tP.Encode(o.Get()))
-                (fun (o: NumSetting<'T>) json -> tP.Decode(o.Get())(json) |> JsonMapResult.map (fun v -> o.Set(v); o))
+                (fun (o: NumSetting<'T>) -> tP.Encode o.Value)
+                (fun (o: NumSetting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Set v; o))
 
     type IntSetting(value: int, min: int, max: int) =
         inherit NumSetting<int>(value, min, max)
-        override this.SetPercent(pc: float32) = this.Set(min + ((float32 (max - min) * pc) |> float |> Math.Round |> int))
-        override this.GetPercent() = float32 (this.Get() - min) / float32 (max - min)
+        override this.ValuePercent
+            with set(pc: float32) = this.Value <- min + ((float32 (max - min) * pc) |> float |> Math.Round |> int)
+            and get() = float32 (this.Value - min) / float32 (max - min)
         static member Pickler = Setting<int>.Pickler
 
     type FloatSetting(value: float, min: float, max: float) =
         inherit NumSetting<float>(value, min, max)
-        override this.SetPercent(pc: float32) = this.Set(min + (max - min) * float pc)
-        override this.GetPercent() = (this.Get() - min) / (max - min) |> float32
-        override this.Set(newValue: float) = base.Set(Math.Round(newValue, 2))
+        override this.ValuePercent
+            with set(pc: float32) = this.Value <- min + (max - min) * float pc
+            and get() = (this.Value - min) / (max - min) |> float32
+        override this.Value
+            with set(newValue: float) = base.Value <- Math.Round(newValue, 2)
+            and get() = base.Value
         static member Pickler = Setting<float>.Pickler
 
     type StringSetting(value: string, allowSpecialChar: bool) =
         inherit Setting<string>(value)
-        override this.Set(newValue) = base.Set(if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, ""))
+        override this.Value
+            with set(newValue) = base.Value <- if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, "")
+            and get() = base.Value
         static member Pickler = Setting<string>.Pickler
 
 (*
@@ -94,7 +103,7 @@ module Common =
         static do agent.Start()
 
         static member Subscribe f = evt.Publish.Add f
-        static member Log level main details = agent.Post((level, main, details))
+        static member Log level main details = agent.Post(level, main, details)
         static member Info = Logging.Log LoggingLevel.INFO
         static member Warn = Logging.Log LoggingLevel.WARNING
         static member Error = Logging.Log LoggingLevel.ERROR
@@ -120,8 +129,7 @@ module Common =
                         let s: string[] = l.Split([|'='|], 2)
                         mapping.Add(s.[0], s.[1])) lines
                 loadedPath <- path
-            with
-            | err -> Logging.Error("Failed to load localisation file: " + path)(err.ToString())
+            with err -> Logging.Error("Failed to load localisation file: " + path)(err.ToString())
 
         let localise str : string =
             if mapping.ContainsKey(str) then mapping.[str]
@@ -159,8 +167,7 @@ module Common =
                             let! outcome = t (fun s -> info <- s; if not visible then Logging.Debug (sprintf "[%s] %s" name s) "")
                             Logging.Debug(sprintf "Task <%s> complete (%A)" name outcome) ""
                             info <- "Complete"
-                        with
-                        | err ->
+                        with err ->
                             Logging.Error(sprintf "Exception in task '%s'" name) (err.ToString())
                             info <- sprintf "Failed: %O" <| err.GetType()
                         removeTask(this)
@@ -173,8 +180,10 @@ module Common =
             member this.Name = name
             member this.Status = task.Status
             member this.Cancel() =
-                if complete then Logging.Warn(sprintf "Task <%s> already finished, can't cancel!" name) ""
-                else Logging.Debug(sprintf "Task <%s> cancelled" name) ""; cts.Cancel(false)
+                try
+                    if complete then Logging.Warn(sprintf "Task <%s> already finished, can't cancel!" name) ""
+                    else Logging.Debug(sprintf "Task <%s> cancelled" name) ""; cts.Cancel(false)
+                with err -> ()
             member this.Visible = visible
             member this.Info = info
 
@@ -182,7 +191,7 @@ module Common =
         let Subscribe f = evt.Publish.Add f
 
         let TaskList = ResizeArray<ManagedTask>()
-        let private removeTask = fun mt -> if lock(TaskList) (fun() -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name) ""
+        let private removeTask = fun mt -> if lock(TaskList) (fun () -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name) ""
 
         let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc(l) in f(v); return v }
         let rec Chain (procs: StatusTask list): StatusTask =
@@ -190,11 +199,11 @@ module Common =
             | [] -> failwith "should not be used on empty list"
             | x :: [] -> x
             | x :: xs ->
-                let rest = Chain(xs)
+                let rest = Chain xs
                 fun (l: (string -> unit)) ->
-                    async { let! b = x(l) in if b then return! rest(l) else return false }
+                    async { let! b = x l in if b then return! rest l else return false }
 
-        let Create (options: TaskFlags) (name: string) (t: StatusTask) = let mt = new ManagedTask(name, t, options, removeTask) in lock(TaskList)(fun() -> TaskList.Add(mt)); evt.Trigger(mt); mt
+        let Create (options: TaskFlags) (name: string) (t: StatusTask) = let mt = new ManagedTask(name, t, options, removeTask) in lock(TaskList) (fun () -> TaskList.Add(mt)); evt.Trigger(mt); mt
 
 (*
     Random helper functions (mostly data storage)

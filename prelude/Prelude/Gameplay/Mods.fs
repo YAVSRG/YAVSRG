@@ -8,16 +8,6 @@ open Prelude.Editor
 open Prelude.Editor.Filter
 open Prelude.Gameplay.Score
 
-type ModChart = {
-        Keys: int
-        Notes: TimeData<NoteRow>
-        BPM: TimeData<BPM>
-        SV: MultiTimeData<float32>
-        ModsUsed: string list
-    }
-module ModChart =
-    let create (chart: Chart) : ModChart = { Keys = chart.Keys; Notes = chart.Notes.Clone(); BPM = chart.BPM.Clone(); SV = chart.SV.Clone(); ModsUsed = [] }
-
 module Mods = 
     (*
         Marker for status of mods.
@@ -26,6 +16,21 @@ module Mods =
             2 = Scores with this mod enabled should not be saved at all e.g. when testing/developing or autoplay
     *)
     type ModStatus = Ranked = 0 | Unranked = 1 | Unstored = 2
+
+    type ModState = Map<string, int>
+    type ModChart = {
+            Keys: int
+            Notes: TimeData<NoteRow>
+            BPM: TimeData<BPM>
+            SV: MultiTimeData<float32>
+            ModsUsed: string list
+        }
+
+    module ModChart =
+        let create (chart: Chart) : ModChart = { Keys = chart.Keys; Notes = chart.Notes.Clone(); BPM = chart.BPM.Clone(); SV = chart.SV.Clone(); ModsUsed = [] }
+        
+        let filter (chart: ModChart) (mods: Map<string, int>) =
+            List.fold (fun m i -> Map.add i mods.[i] m) Map.empty chart.ModsUsed
 
     (*
         Mods (Modifiers) are a set of optional effects that can be enabled for a chart before playing it
@@ -56,8 +61,6 @@ module Mods =
         //This typically is unused - examples uses are marking all notes as hit perfectly in Autoplay or marking LN releases as not needing to be hit
         Apply_Score: int -> ModChart -> ScoreData -> unit
     }
-
-    type ModState = Map<string, int>
     
     let modList = new Dictionary<string, Mod>()
     let registerMod id obj = modList.Add(id, obj)
@@ -82,9 +85,6 @@ module Mods =
 
         let enumerateApplicable (chart: ModChart) (mods: ModState) =
             enumerate mods |> Seq.choose (fun id -> if modList.[id].Check(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
-
-        let filterApplicable (chart: ModChart) (mods: ModState) =
-            Seq.fold (fun m (i, _, _) -> Map.add i mods.[i] m) Map.empty (enumerateApplicable chart mods)
 
     let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ -> id); Apply_Score = fun _ _ _ -> () }
 
