@@ -83,7 +83,7 @@ type ScreenMenu() as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         splashSubAnim.Target <- if Mouse.Hover(bounds |> Rect.expand(-400.0f, 0.0f) |> Rect.sliceTop(100.0f)) then 1.0f else 0.0f
-        if Options.options.Hotkeys.Select.Get().Tapped() then playFunc()
+        if Options.options.Hotkeys.Select.Value.Tapped() then playFunc()
 
 // Loading screen
 
@@ -114,7 +114,7 @@ type ScreenLoading() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        Audio.changeVolume(Options.options.AudioVolume.Get() * float (if closing then 1.0f - fade.Value else fade.Value))
+        Audio.changeVolume(Options.options.AudioVolume.Value * float (if closing then 1.0f - fade.Value else fade.Value))
         
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
@@ -154,7 +154,7 @@ module Notifications =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds |> Rect.translate(-WIDTH * fade.Value, 0.0f))
-            if Options.options.Hotkeys.Tasklist.Get().Pressed() then fade.Target <- 1.0f
+            if Options.options.Hotkeys.Tasklist.Value.Pressed() then fade.Target <- 1.0f
             else fade.Target <- 0.0f
 
         override this.Draw() =
@@ -222,18 +222,18 @@ type Jukebox() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Options.options.Hotkeys.Volume.Get().Pressed() then
+        if Options.options.Hotkeys.Volume.Value.Pressed() then
             fade.Target <- 1.0f
-            Options.options.AudioVolume.Set(Options.options.AudioVolume.Get() + float (Mouse.Scroll()) * 0.02)
-            Audio.changeVolume(Options.options.AudioVolume.Get())
-            slider.Target <- float32 <| Options.options.AudioVolume.Get()
+            Options.options.AudioVolume.Apply((+) (float (Mouse.Scroll()) * 0.02))
+            Audio.changeVolume(Options.options.AudioVolume.Value)
+            slider.Target <- float32 Options.options.AudioVolume.Value
         else
             fade.Target <- 0.0f
 
     override this.Draw() =
         let r = Rect.sliceBottom 5.0f this.Bounds
-        Draw.rect(r)(Screens.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
-        Draw.rect(r |> Rect.sliceLeft(slider.Value * (Rect.width r)))(Screens.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
+        Draw.rect r (Screens.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
+        Draw.rect (r |> Rect.sliceLeft(slider.Value * Rect.width r)) (Screens.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
 
 // Toolbar
 
@@ -276,7 +276,7 @@ type Toolbar() as this =
         base.Draw()
 
     override this.Update(elapsedTime, bounds) =
-        if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Get().Tapped() then
+        if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Value.Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
         base.Update(elapsedTime, Rect.expand (0.f, -HEIGHT * if forceCollapse then 0.0f else barSlider.Value) bounds)

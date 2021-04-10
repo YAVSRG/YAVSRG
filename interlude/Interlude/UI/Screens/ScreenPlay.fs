@@ -69,8 +69,8 @@ type NoteRenderer() as this =
     let columnPositions = Array.init keys (fun i -> float32 i * Themes.noteskinConfig.ColumnWidth)
     let columnWidths = Array.create keys (float32 Themes.noteskinConfig.ColumnWidth)
     let noteHeight = Themes.noteskinConfig.ColumnWidth
-    let scale = float32(Options.options.ScrollSpeed.Get()) / Gameplay.rate * 1.0f</ms>
-    let hitposition = float32 <| Options.options.HitPosition.Get()
+    let scale = float32 Options.options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
+    let hitposition = float32 Options.options.HitPosition.Value
     let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
 
     let tailsprite = Themes.getTexture(if Themes.noteskinConfig.UseHoldTailTexture then "holdtail" else "holdhead")
@@ -89,8 +89,8 @@ type NoteRenderer() as this =
     let hold_pos = Array.create keys 0.0f
     let hold_colors = Array.create keys 0
 
-    let scrollDirectionPos bottom = if Options.options.Upscroll.Get() then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
-    let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Get() then id else Quad.flip
+    let scrollDirectionPos bottom = if Options.options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
+    let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Value then id else Quad.flip
     let noteRotation =
         if keys = 4 && Themes.noteskinConfig.UseRotation then
             fun k (struct (s, q): SpriteQuad) -> struct (s, Quad.rotate(match k with 0 -> 3 | 1 -> 0 | 2 -> 2 | 3 -> 1 | _ -> 0) q)
@@ -312,12 +312,12 @@ module GameplayWidgets =
             let (_, notes, _, _, _) = Gameplay.getColoredChart()
             notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
         do
-            this.Add(Components.TextBox(sprintf "Press %O to skip" (options.Hotkeys.Skip.Get()) |> Utils.K, Utils.K Color.White, 0.5f))
+            this.Add(Components.TextBox(sprintf "Press %O to skip" options.Hotkeys.Skip.Value |> Utils.K, Utils.K Color.White, 0.5f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
-                if options.Hotkeys.Skip.Get().Tapped() then
+                if options.Hotkeys.Skip.Value.Tapped() then
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
             else this.Destroy()
 
@@ -333,7 +333,7 @@ module GameplayWidgets =
 
         do
             Array.iter this.Animation.Add sliders
-            let hp = float32 <| Options.options.HitPosition.Get()
+            let hp = float32 Options.options.HitPosition.Value
             this.Reposition(0.0f, hp, 0.0f, -hp)
 
         override this.Update(elapsedTime, bounds) =
@@ -351,10 +351,9 @@ module GameplayWidgets =
                     let a = 255.0f * p |> int
                     Draw.rect
                         (
-                            if Options.options.Upscroll.Get() then
+                            if Options.options.Upscroll.Value then
                                 Sprite.alignedBoxX(l + cw * (float32 k + 0.5f), t, 0.5f, 1.0f, cw * p, -1.0f / p) sprite
-                            else
-                                Sprite.alignedBoxX(l + cw * (float32 k + 0.5f), b, 0.5f, 1.0f, cw * p, 1.0f / p) sprite
+                            else Sprite.alignedBoxX(l + cw * (float32 k + 0.5f), b, 0.5f, 1.0f, cw * p, 1.0f / p) sprite
                         )
                         (Color.FromArgb(a, Color.White))
                         sprite
@@ -371,8 +370,8 @@ type ScreenPlay() as this =
     
     let (keys, notes, bpm, sv, mods) = Gameplay.getColoredChart()
     let scoreData = Gameplay.createScoreData()
-    let scoring = createAccuracyMetric(options.AccSystems.Get() |> fst)
-    let hp = createHPMetric (options.HPSystems.Get() |> fst) scoring
+    let scoring = createAccuracyMetric(fst options.AccSystems.Value)
+    let hp = createHPMetric (fst options.HPSystems.Value) scoring
     let onHit = new Event<HitEvent>()
     let widgetHelper: Helper = { Scoring = scoring; HP = hp; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[keys - 3]
@@ -401,7 +400,7 @@ type ScreenPlay() as this =
             noteRenderer.Add(new ColumnLighting(keys, binds, Themes.noteskinConfig.ColumnLightTime, widgetHelper))
 
     override this.OnEnter(prev) =
-        Screens.backgroundDim.Target <- Options.options.BackgroundDim.Get() |> float32
+        Screens.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
         //discord presence
         Screens.setToolbarCollapsed(true)
         Screens.setCursorVisible(false)
@@ -452,7 +451,7 @@ type ScreenPlay() as this =
                             delta <- d
                             hitAt <- i
                             noteType <- NoteType.HOLDTAIL
-                    else if noteType <> NoteType.HOLDTAIL&& (testForNote k NoteType.HOLDBODY nd) then
+                    else if noteType <> NoteType.HOLDTAIL && (testForNote k NoteType.HOLDBODY nd) then
                         if (Time.Abs(delta) > Time.Abs(d)) then
                             delta <- d
                             hitAt <- i
@@ -519,8 +518,8 @@ type ScreenPlay() as this =
                     ScoreInfoProvider(
                         Gameplay.makeScore(scoreData, keys),
                         Gameplay.currentChart.Value,
-                        options.AccSystems.Get() |> fst,
-                        options.HPSystems.Get() |> fst,
+                        fst options.AccSystems.Value,
+                        fst options.HPSystems.Value,
                         ModChart = Gameplay.modifiedChart.Value,
                         Difficulty = Gameplay.difficultyRating.Value)
                 (sd, Gameplay.setScore(sd))

@@ -155,7 +155,7 @@ module ScreenLevelSelect =
                 |> positionWidget(20.0f, 0.25f, -35.0f, 1.0f, -20.0f, 0.5f, -5.0f, 1.0f)
                 |> ls.Add
 
-                LittleButton((fun () -> scoreSystem), fun () -> options.AccSystems.Set(WatcherSelection.cycleForward <| options.AccSystems.Get()); refresh <- true)
+                LittleButton((fun () -> scoreSystem), fun () -> options.AccSystems.Apply(WatcherSelection.cycleForward); refresh <- true)
                 |> positionWidget(20.0f, 0.5f, -35.0f, 1.0f, -20.0f, 0.75f, -5.0f, 1.0f)
                 |> ls.Add
 
@@ -186,24 +186,24 @@ module ScreenLevelSelect =
                     | None -> ()
                     | Some d ->
                         for score in d.Scores do
-                            ScoreInfoProvider(score, currentChart.Value, options.AccSystems.Get() |> fst, options.HPSystems.Get() |> fst)
+                            ScoreInfoProvider(score, currentChart.Value, fst options.AccSystems.Value, fst options.HPSystems.Value)
                             |> ScoreboardItem
                             |> flowContainer.Add
                     empty <- flowContainer.Children.Count = 0
                 if scoring <> scoreSystem then
-                    let s = options.AccSystems.Get() |> fst
+                    let s = fst options.AccSystems.Value
                     for c in flowContainer.Children do (c :?> ScoreboardItem).Data.AccuracyType <- s
                     scoring <- scoreSystem
 
                 flowContainer.Sort(
-                    match sort.Get() with
+                    match sort.Value with
                     | ScoreboardSort.Accuracy -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Accuracy.Value.CompareTo((b :?> ScoreboardItem).Data.Accuracy.Value))
                     | ScoreboardSort.Performance -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Physical.CompareTo((b :?> ScoreboardItem).Data.Physical))
                     | ScoreboardSort.Time
                     | _ -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Score.time.CompareTo((b :?> ScoreboardItem).Data.Score.time))
                     )
                 flowContainer.Filter(
-                    match filter.Get() with
+                    match filter.Value with
                     | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.Score.rate = rate)
                     | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.Score.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.Score.keycount - 3])
                     | ScoreboardFilter.CurrentMods// -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods <> null) //nyi
@@ -212,7 +212,7 @@ module ScreenLevelSelect =
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
-                if this.Selected && (ls.Selected <> options.Hotkeys.Scoreboard.Get().Pressed()) then ls.Selected <- not ls.Selected
+                if this.Selected && (ls.Selected <> options.Hotkeys.Scoreboard.Value.Pressed()) then ls.Selected <- not ls.Selected
 
         type ModSelectItem(name: string) as this =
             inherit Selectable()
@@ -310,9 +310,9 @@ module ScreenLevelSelect =
             scores.Selected <- true
 
         override this.Update(elapsedTime, bounds) =
-            if options.Hotkeys.Mods.Get().Tapped() then
+            if options.Hotkeys.Mods.Value.Tapped() then
                 mods.Selected <- true
-            elif options.Hotkeys.Scoreboard.Get().Tapped() then
+            elif options.Hotkeys.Scoreboard.Value.Tapped() then
                 scores.Selected <- true
             base.Update(elapsedTime, bounds)
 
@@ -499,9 +499,9 @@ type ScreenLevelSelect() as this =
     let infoPanel = new InfoPanel()
 
     let refresh() =
-        scoreSystem <- (options.AccSystems.Get() |> fst).ToString()
+        scoreSystem <- (fst options.AccSystems.Value).ToString()
         infoPanel.Refresh()
-        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Get()] sortBy.[options.ChartSortMode.Get()] filter
+        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
@@ -533,19 +533,19 @@ type ScreenLevelSelect() as this =
     let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
 
     do
-        if not <| sortBy.ContainsKey(options.ChartSortMode.Get()) then options.ChartSortMode.Set "Title"
-        if not <| groupBy.ContainsKey(options.ChartGroupMode.Get()) then options.ChartGroupMode.Set "Pack"
+        if not <| sortBy.ContainsKey(options.ChartSortMode.Value) then options.ChartSortMode.Set "Title"
+        if not <| groupBy.ContainsKey(options.ChartGroupMode.Value) then options.ChartGroupMode.Set "Pack"
         this.Animation.Add scrollPos
         scrollBy <- fun amt -> scrollPos.Target <- scrollPos.Target + amt
 
         let sorts = sortBy.Keys |> Array.ofSeq
-        new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Get()),
+        new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Value),
             (fun i -> options.ChartSortMode.Set(sorts.[i]); refresh()), "Sort by", 50.0f)
         |> positionWidget(-400.0f, 1.0f, 100.0f, 0.0f, -250.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
 
         let groups = groupBy.Keys |> Array.ofSeq
-        new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Get()),
+        new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Value),
             (fun i -> options.ChartGroupMode.Set(groups.[i]); refresh()), "Group by", 50.0f)
         |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
@@ -572,20 +572,20 @@ type ScreenLevelSelect() as this =
         base.Update(elapsedTime, bounds)
         if ScreenLevelSelect.refresh then refresh(); ScreenLevelSelect.refresh <- false
 
-        if options.Hotkeys.Select.Get().Tapped() then playCurrentChart()
+        if options.Hotkeys.Select.Value.Tapped() then playCurrentChart()
 
-        elif options.Hotkeys.UpRateSmall.Get().Tapped() then changeRate(0.01f)
-        elif options.Hotkeys.UpRateHalf.Get().Tapped() then changeRate(0.05f)
-        elif options.Hotkeys.UpRate.Get().Tapped() then changeRate(0.1f)
-        elif options.Hotkeys.DownRateSmall.Get().Tapped() then changeRate(-0.01f)
-        elif options.Hotkeys.DownRateHalf.Get().Tapped() then changeRate(-0.05f)
-        elif options.Hotkeys.DownRate.Get().Tapped() then changeRate(-0.1f)
+        elif options.Hotkeys.UpRateSmall.Value.Tapped() then changeRate(0.01f)
+        elif options.Hotkeys.UpRateHalf.Value.Tapped() then changeRate(0.05f)
+        elif options.Hotkeys.UpRate.Value.Tapped() then changeRate(0.1f)
+        elif options.Hotkeys.DownRateSmall.Value.Tapped() then changeRate(-0.01f)
+        elif options.Hotkeys.DownRateHalf.Value.Tapped() then changeRate(-0.05f)
+        elif options.Hotkeys.DownRate.Value.Tapped() then changeRate(-0.1f)
 
-        elif options.Hotkeys.Next.Get().Tapped() then
+        elif options.Hotkeys.Next.Value.Tapped() then
             if lastItem.IsSome then
                 let (g, c) = lastItem.Value
                 navigation <- Navigation.Forward(selectedGroup = g && selectedChart = c.FilePath)
-        elif options.Hotkeys.Previous.Get().Tapped() then
+        elif options.Hotkeys.Previous.Value.Tapped() then
             if lastItem.IsSome then navigation <- Navigation.Backward(lastItem.Value)
 
         let struct (left, top, right, bottom) = this.Bounds

@@ -155,7 +155,7 @@ module Input =
                 removeInputMethod())
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | Some (s, c) -> s.Set(s.Get() + e.AsString); typed <- true
+            | Some (s, c) -> s.Apply(fun x -> x + e.AsString); typed <- true
             | None -> ())
 
     let update() =
@@ -164,10 +164,9 @@ module Input =
         absorbed <- false
         match inputmethod with
         |  Some (s, c) ->
-            if consumeOne(delete, InputEvType.Press).IsSome && s.Get().Length > 0 then
-                let v = s.Get()
-                s.Set(v.Substring(0, v.Length - 1))
-            elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Set("")
+            if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
+                s.Apply(fun x -> x.Substring(0, x.Length - 1))
+            elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
         | None -> ()
         if typed then absorbAll()

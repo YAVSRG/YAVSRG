@@ -52,7 +52,7 @@ module Gameplay =
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData(chart)
         Themes.loadBackground(chart.BGPath)
-        let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Get() - offsetOf chart.Notes.First.Value
+        let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Value - offsetOf chart.Notes.First.Value
         Audio.changeTrack(chart.AudioPath, localOffset, rate)
         Audio.playFrom(chart.Header.PreviewTime)
         Options.options.CurrentChart.Set(cachedChart.FilePath)
@@ -65,7 +65,7 @@ module Gameplay =
         match modifiedChart with
         | None -> failwith "Tried to get coloredChart when no modifiedChart exists"
         | Some mc ->
-            coloredChart <- Option.defaultWith (fun () -> getColoredChart (Options.options.ColorStyle.Get()) mc) coloredChart |> Some
+            coloredChart <- Option.defaultWith (fun () -> getColoredChart Options.options.ColorStyle.Value mc) coloredChart |> Some
             coloredChart.Value
 
     let makeScore(scoreData, keys): Score = {
@@ -82,15 +82,15 @@ module Gameplay =
         if
             //todo: score uploading goes here when implemented
             data.ModStatus < ModStatus.Unstored &&
-            match Options.options.ScoreSaveCondition.Get() with
+            match Options.options.ScoreSaveCondition.Value with
             | _ -> true //todo: fill in this stub (pb condition will be complicated)
         then
             //add to score db
             d.Scores.Add(data.Score)
             scores.Save()
             //update top scores
-            Options.options.Stats.TopPhysical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical)(Options.options.Stats.TopPhysical.Get()))
-            Options.options.Stats.TopTechnical.Set(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Technical)(Options.options.Stats.TopTechnical.Get()))
+            Options.options.Stats.TopPhysical.Apply(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical))
+            Options.options.Stats.TopTechnical.Apply(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Technical))
             //update pbs
             let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) =
                 if target.ContainsKey(name) then
@@ -113,7 +113,7 @@ module Gameplay =
     let init() =
         try
             let c, ch =
-                match cache.LookupChart(Options.options.CurrentChart.Get()) with
+                match cache.LookupChart(Options.options.CurrentChart.Value) with
                 | Some cc ->
                     match cache.LoadChart(cc) with
                     | Some c -> cc, c
@@ -124,7 +124,7 @@ module Gameplay =
                         |> fun d -> d.["All"].[0]
                         |> fun c -> c, cache.LoadChart(c).Value
                 | None ->
-                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Get()) ""
+                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Value) ""
                     cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) []
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, cache.LoadChart(c).Value

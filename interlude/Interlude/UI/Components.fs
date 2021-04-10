@@ -90,7 +90,7 @@ module Components =
             Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
 
         override this.Update(elapsedTime, bounds) =
-            if bind.Get().Tapped() then onClick()
+            if bind.Value.Tapped() then onClick()
             base.Update(elapsedTime, bounds)
 
     type FlowContainer() =
@@ -197,17 +197,17 @@ module Components =
                     (fun () ->
                         match bind with
                         | Some b ->
-                            match s.Get() with
+                            match s.Value with
                             //todo: localise
-                            | "" -> sprintf "Press %s to %s" (b.Get().ToString()) prompt
+                            | "" -> sprintf "Press %s to %s" (b.Value.ToString()) prompt
                             | text -> text
-                        | None -> match s.Get() with "" -> prompt | text -> text),
+                        | None -> match s.Value with "" -> prompt | text -> text),
                     (fun () -> Screens.accentShade(255, 1.0f, color.Value)), 0.0f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             match bind with
-            | Some b -> if b.Get().Tapped() then toggle()
+            | Some b -> if b.Value.Tapped() then toggle()
             | None -> ()
 
         override this.Dispose() =
@@ -221,7 +221,7 @@ module Components =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback(s.Get() |> Prelude.Data.ChartManager.Sorting.parseFilter)
+            if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback(Prelude.Data.ChartManager.Sorting.parseFilter s.Value)
 
     type TextInputDialog(bounds: Rect, prompt, callback) as this =
         inherit Dialog()
@@ -232,8 +232,8 @@ module Components =
             this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if options.Hotkeys.Select.Get().Tapped() || options.Hotkeys.Exit.Get().Tapped() then tb.Dispose(); this.Close()
-        override this.OnClose() = callback(buf.Get())
+            if options.Hotkeys.Select.Value.Tapped() || options.Hotkeys.Exit.Value.Tapped() then tb.Dispose(); this.Close()
+        override this.OnClose() = callback(buf.Value)
 
     //provide the first tab when constructing
     type TabContainer(name: string, widget: Widget) as this =

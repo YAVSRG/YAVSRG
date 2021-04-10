@@ -39,7 +39,6 @@ let main argv =
             game.Close()
             Options.save()
             game.Dispose()
-            Logging.Info("o/")""
         m.ReleaseMutex()
     else
         //todo: code that sends data to the running process to reappear if hidden

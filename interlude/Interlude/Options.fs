@@ -225,7 +225,7 @@ module Options =
         }
 
     //forward ref for applying game config options. it is initialised in the constructor of Game
-    let mutable applyOptions = fun () -> ()
+    let mutable applyOptions: unit -> unit = ignore
 
     let resolutions: (struct (int * int)) array =
         [|struct (800, 600); struct (1024, 768); struct (1280, 800); struct (1280, 1024); struct (1366, 768); struct (1600, 900);
@@ -243,14 +243,14 @@ module Options =
     let internal configPath = Path.GetFullPath("config.json")
 
     let load() =
-        config <- loadImportantJsonFile("Config")(configPath)(config)(true)
+        config <- loadImportantJsonFile "Config" configPath config true
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
         Localisation.loadFile(config.Locale)
-        options <- loadImportantJsonFile("Options")(Path.Combine(getDataPath("Data"), "options.json"))(options)(true)
+        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath("Data"), "options.json")) options true
 
         Themes.refreshAvailableThemes()
         Themes.loadThemes(options.EnabledThemes)
-        Themes.changeNoteSkin(options.NoteSkin.Get())
+        Themes.changeNoteSkin(options.NoteSkin.Value)
 
     let save() =
         try
