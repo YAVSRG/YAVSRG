@@ -107,8 +107,8 @@ module Mods =
 
     registerMod "nosv"
         { defaultMod with
-            Status = ModStatus.Unranked
-            Check = fun _ mc -> mc.SV.IsEmpty()
+            Status = ModStatus.Unstored //temporary cause its bugged af
+            Check = fun _ mc -> not <| mc.SV.IsEmpty()
             Apply = fun _ mc -> mc.SV.Clear(); mc
         }
 

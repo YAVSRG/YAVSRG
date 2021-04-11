@@ -90,25 +90,21 @@ module Interlude =
 
     type TimeData<'t>(list) =
         let data: List<TimeDataItem<'t>> = list
-        let mutable count: int = list.Count
 
-        //do not use this to edit the data!!! needs to be accessed like this for efficiency and if I could, I would prevent other uses from compiling
-        //perpetual todo: search for references to this.Data and if they use anything other than indexing, fix it
-        member this.Data = data
+        member this.Data = data.AsReadOnly()
 
         new() = TimeData<'t>(new List<TimeDataItem<'t>>())
 
-        member this.Count = count
+        member this.Count = data.Count
 
-        member this.SetData(list: List<TimeDataItem<'t>>) =
+        member this.SetData(list: IReadOnlyList<TimeDataItem<'t>>) =
             data.Clear()
             data.AddRange(list)
-            count <- list.Count
         member this.SetData(data: TimeData<'t>) = this.SetData(data.Data)
         member this.Clone() = let t = TimeData<'t>() in t.SetData(this.Data); t
 
         member this.IndexAt time: int * bool =
-            match count with
+            match this.Count with
             | 0 -> (-1, false)
             | 1 ->
                 let (offset, _) = data.[0]
@@ -120,7 +116,7 @@ module Interlude =
                 //(I, TRUE/FALSE) with I = the highest index with offset <= the time requested
                 //and the TRUE/FALSE flag is true if the offset = the time requested
                 let mutable low = 0
-                let mutable high = count
+                let mutable high = this.Count
                 let mutable mid = -1
                 while (low < high) do
                     mid <- (high + low) / 2
@@ -137,7 +133,7 @@ module Interlude =
 
         member this.GetNextPointAt time: TimeDataItem<'t> =
                 let (index, _) = this.IndexAt time
-                if (index + 1 < count) then data.[index + 1] else data.[index]
+                if (index + 1 < this.Count) then data.[index + 1] else data.[index]
 
         member this.InterpolatePointAt time interp_func : TimeDataItem<'t> =
             match this.IndexAt time with
@@ -148,9 +144,7 @@ module Interlude =
         member this.InsertAt time guts =
             match this.IndexAt time with
             | (_, true) -> failwith "Cannot insert two points in same place, use ReplaceAt instead."
-            | (index, false) ->
-                data.Insert(index + 1, (time, guts))
-                count <- count + 1
+            | (index, false) -> data.Insert(index + 1, (time, guts))
 
         member this.Insert(time, guts) = this.InsertAt time guts
 
@@ -166,22 +160,18 @@ module Interlude =
             | (index, true) ->
                 data.RemoveAt(index)
                 data.Insert(index, (time, guts))
-            | (index, false) ->
-                data.Insert(index + 1, (time, guts))
-                count <- count + 1
+            | (index, false) -> data.Insert(index + 1, (time, guts))
 
         member this.InsertOrReplace(time, guts) = this.InsertOrReplaceAt time guts
 
         member this.RemoveAt time =
             match this.IndexAt time with
-            | (index, true) ->
-                data.RemoveAt(index)
-                count <- count - 1
+            | (index, true) -> data.RemoveAt(index)
             | (_, false) -> failwith "No point to remove here."
 
-        member this.Empty = count = 0
+        member this.Empty = this.Count = 0
         member this.First = if this.Empty then None else Some data.[0]
-        member this.Clear() = data.Clear(); count <- 0
+        member this.Clear() = data.Clear()
         
         member this.EnumerateBetween time1 time2 = 
             seq {
@@ -189,7 +179,7 @@ module Interlude =
                     match this.IndexAt(time1) with
                     | (j, false) -> j + 1
                     | (j, true) -> j
-                while (i < count && offsetOf data.[i] < time2) do
+                while (i < this.Count && offsetOf data.[i] < time2) do
                     yield data.[i]
                     i <- i + 1
             }
@@ -199,7 +189,7 @@ module Interlude =
                 match this.IndexAt(time1) with
                 | (j, false) -> j + 1
                 | (j, true) -> j
-            while (i < count && offsetOf data.[i] < time2) do
+            while (i < this.Count && offsetOf data.[i] < time2) do
                 data.[i] <- (offsetOf data.[i], mapper data.[i])
                 i <- i + 1
 
@@ -212,9 +202,8 @@ module Interlude =
         member this.IsEmpty() = Array.fold (fun b (t: TimeData<'t>) -> b && t.Empty) true data
         member this.Clear() = Array.iter (fun (t: TimeData<'t>) -> t.Clear()) data
         member this.Clone() =
-            let mt = MultiTimeData(keys)
-            for i in 0 .. keys do
-                mt.SetChannelData(i - 1, this.GetChannelData(i - 1))
+            let mt = MultiTimeData keys
+            for i in 0 .. keys do mt.SetChannelData(i - 1, this.GetChannelData(i - 1))
             mt
 
     (*

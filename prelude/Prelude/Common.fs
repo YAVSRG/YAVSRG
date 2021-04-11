@@ -27,8 +27,6 @@ module Common =
 
     [<AbstractClass>]
     type ISettable<'T>() =
-        //member this.Get() = this.Value
-        member this.Set(v) = this.Value <- v
         abstract member Value: 'T with get, set
         member this.Apply f = this.Value <- f this.Value
         override this.ToString() = this.Value.ToString()
@@ -45,13 +43,11 @@ module Common =
             let tP = Json.Mapping.getPickler<'T>()
             Json.Mapping.mkPickler
                 (fun (o: Setting<'T>) -> tP.Encode o.Value)
-                (fun (o: Setting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Set v; o))
+                (fun (o: Setting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Value <- v; o))
 
     [<AbstractClass>]
     type NumSetting<'T when 'T : comparison>(value: 'T, min: 'T, max: 'T) =
         inherit Setting<'T>(value)
-        member this.GetPercent() = this.ValuePercent
-        member this.SetPercent(v) = this.ValuePercent <- v
         abstract member ValuePercent: float32 with get, set
         override this.Value
             with set(newValue) = base.Value <- if newValue > max then max elif newValue < min then min else newValue
@@ -63,7 +59,7 @@ module Common =
             let tP = Json.Mapping.getPickler<'T>()
             Json.Mapping.mkPickler
                 (fun (o: NumSetting<'T>) -> tP.Encode o.Value)
-                (fun (o: NumSetting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Set v; o))
+                (fun (o: NumSetting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Value <- v; o))
 
     type IntSetting(value: int, min: int, max: int) =
         inherit NumSetting<int>(value, min, max)
@@ -232,3 +228,11 @@ module Common =
         else
             Logging.Info(sprintf "No %s file found, creating it." name) ""
             defaultData
+
+    do
+        let tP = Json.Mapping.getPickler<byte * byte * byte * byte>()
+        Json.Mapping.Rules.addTypeRuleWithDefault
+            (fun (c: System.Drawing.Color) -> tP.Encode (c.A, c.R, c.G, c.B))
+            (fun (c: System.Drawing.Color) json -> tP.Decode (c.A, c.R, c.G, c.B) json |> JsonMapResult.map (fun (a, r, g, b) -> System.Drawing.Color.FromArgb(int a, int r, int g, int b)))
+            System.Drawing.Color.White
+        Json.Mapping.Rules.addPicklerRule()

@@ -116,14 +116,18 @@ module Themes =
 
     type Theme(storage) =
 
-        member this.GetFile([<ParamArray>] path: string array) =
+        member this.TryReadFile([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
-            try
+            try 
                 match storage with
-                | Zip z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open()
-                | Folder f -> File.OpenRead(Path.Combine(f, p)) :> Stream
+                | Zip z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open() |> Some
+                | Folder f ->
+                    let p = Path.Combine(f, p)
+                    File.OpenRead(p) :> Stream |> Some
             with
-            |  err -> reraise()
+            | :? FileNotFoundException | :? DirectoryNotFoundException //file doesnt exist in folder storage
+            | :? NullReferenceException -> None //file doesnt exist in zip storage
+            | _ -> reraise()
 
         member this.GetFiles([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
@@ -143,30 +147,36 @@ module Themes =
                 let p = p.Replace(Path.DirectorySeparatorChar, '/')
                 seq {
                     for e in z.Entries do
-                        if (e.Name = "" && e.FullName.Length > p.Length) then
+                        if e.Name = "" && e.FullName.Length > p.Length then
                             let s = (e.FullName.Substring(p.Length + 1)).Split('/')
                             if e.FullName = p + "/" + s.[0] + "/" then yield s.[0]
                 }
-            | Folder f -> Directory.EnumerateDirectories(p)
+            | Folder f -> Directory.EnumerateDirectories(Path.Combine(f, p)) |> Seq.map Path.GetFileName
         
-        //todo: pair with boolean marking if this is defaulting - if so can inherit from other themes
-        member this.GetJson([<ParamArray>] path: string array) =
+        member this.GetJson<'T>([<ParamArray>] path: string array): 'T * bool =
+            let defaultValue() = ("{}" |> Json.fromString<'T> |> JsonResult.value, match storage with Folder f -> false | _ -> true)
             try
-                use stream = this.GetFile(path)
-                use tr = new StreamReader(stream)
-                let json = tr.ReadToEnd() |> Json.fromString |> JsonResult.value
-                match storage with
-                | Zip _ -> () //do not write data to zip archives
-                | Folder f -> Json.toFile(Path.Combine(f, Path.Combine(path)), true) json
-                json
+                let json, success =
+                    match this.TryReadFile path with
+                    | Some stream ->
+                        use tr = new StreamReader(stream)
+                        let json, success = 
+                            tr.ReadToEnd()
+                            |> Json.fromString<'T> 
+                            |> function | JsonResult.Success v -> (v, true) | _ -> defaultValue()
+                        stream.Dispose()
+                        match storage with
+                        | Zip _ -> () //do not write data to zip archives
+                        | Folder f -> Json.toFile(Path.Combine(f, Path.Combine(path)), true) json
+                        json, success
+                    | None -> defaultValue()
+                json, success
             with err ->
-                match storage with Folder f -> Logging.Debug("Defaulting on json file: " + String.concat "/" path) (err.ToString()) | _ -> ()
-                "{}" |> Json.fromString |> JsonResult.value
+                Logging.Error(sprintf "Couldn't load json '%s' in theme '%s'" (String.concat "/" path) (match storage with Zip z -> "DEFAULT" | Folder f -> Path.GetFileName f)) (err.ToString())
+                defaultValue()
 
         member this.CopyTo(targetPath) =
-            if Directory.Exists(targetPath) then
-                match storage with
-                | Zip z -> z.ExtractToDirectory(targetPath)
-                | Folder f -> failwith "nyi, do this manually for now"
-            else //copying to zip
-                failwith "nyi, do this manually for now"
+            Directory.CreateDirectory targetPath |> ignore
+            match storage with
+            | Zip z -> z.ExtractToDirectory targetPath
+            | Folder f -> failwith "nyi, do this manually for now"

@@ -33,7 +33,7 @@ module ChartManager =
         Physical: float
         Technical: float
     }
-    with static member Default = { FilePath = ""; Title = ""; Artist = ""; Creator = ""; Pack = ""; Hash = ""; Keys = 4; Length = 0.0f<ms>; BPM = (0.0f<ms/beat>, 0.0f<ms/beat>); DiffName = ""; Physical = 0.0; Technical = 0.0 }
+    with static member Default = { FilePath = ""; Title = ""; Artist = ""; Creator = ""; Pack = ""; Hash = ""; Keys = 4; Length = 0.0f<ms>; BPM = (500.0f<ms/beat>, 500.0f<ms/beat>); DiffName = ""; Physical = 0.0; Technical = 0.0 }
 
     let cacheChart (chart : Chart) : CachedChart =
         let endTime =
