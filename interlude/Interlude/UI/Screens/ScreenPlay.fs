@@ -72,6 +72,7 @@ type NoteRenderer() as this =
     let scale = float32 Options.options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
     let hitposition = float32 Options.options.HitPosition.Value
     let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
+    let playfieldColor = Themes.themeConfig.PlayfieldColor
 
     let tailsprite = Themes.getTexture(if Themes.noteskinConfig.UseHoldTailTexture then "holdtail" else "holdhead")
     let animation = new AnimationCounter(200.0)
@@ -120,7 +121,7 @@ type NoteRenderer() as this =
             sv_value.[i] <- if sv_seek.[i] > 0 then snd sv.[i].[sv_seek.[i] - 1] else 1.0f
 
         for k in 0 .. (keys - 1) do
-            Draw.rect(Rect.create (left + columnPositions.[k]) top (left + columnPositions.[k] + columnWidths.[k]) bottom) (Color.FromArgb(127, 0, 0, 0)) Sprite.Default
+            Draw.rect(Rect.create (left + columnPositions.[k]) top (left + columnPositions.[k] + columnWidths.[k]) bottom) playfieldColor Sprite.Default
             sv_time.[k] <- now
             column_pos.[k] <- hitposition
             hold_pos.[k] <- hitposition

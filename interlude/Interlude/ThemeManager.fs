@@ -24,15 +24,13 @@ type Theme(storage) =
             | Some s -> use stream = s in new Bitmap(stream)
             | None -> new Bitmap(1, 1)
         let info: TextureConfig =
-            this.GetJson<TextureConfig>(folder, name + ".json") |> fst
+            this.GetJson<TextureConfig>(false, folder, name + ".json") |> fst
         (bmp, info)
-
-    member this.GetConfig() = this.GetJson("theme.json")
 
     member this.GetNoteSkins() =
         Seq.choose
             (fun ns ->
-                let (config: NoteSkinConfig, success: bool) = this.GetJson("Noteskins", ns, "noteskin.json")
+                let (config: NoteSkinConfig, success: bool) = this.GetJson(false, "Noteskins", ns, "noteskin.json")
                 if success then Some (ns, config) else None)
             (this.GetFolders("Noteskins"))
 
@@ -114,7 +112,7 @@ module Themes =
         else
             let o =
                 (fun (t: Theme) ->
-                    let (x, success) = t.GetJson<'T>("Interface", "Gameplay", name + ".json")
+                    let (x, success) = t.GetJson<'T>(true, "Interface", "Gameplay", name + ".json")
                     if success then Some x else None)
                 |> getInherited
             gameplayConfig.Add(name, o :> obj)
@@ -156,7 +154,7 @@ module Themes =
         Seq.choose (fun t ->
             let theme = Theme.FromThemeFolder(t)
             try
-                let config: ThemeConfig = theme.GetJson("theme.json") |> fst
+                let config: ThemeConfig = theme.GetJson(false, "theme.json") |> fst
                 Some (theme, config)
             with err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
             themes
