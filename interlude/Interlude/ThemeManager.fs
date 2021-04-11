@@ -19,10 +19,12 @@ type Theme(storage) =
                 match storage with
                 | Folder _ -> Path.Combine("Noteskins", n)
                 | Zip _ -> "Noteskins/" + n
-        use stream = base.GetFile(folder, name + ".png")
-        let bmp = new Bitmap(stream)
+        let bmp = 
+            match base.TryReadFile(folder, name + ".png") with
+            | Some s -> use stream = s in new Bitmap(stream)
+            | None -> new Bitmap(1, 1)
         let info: TextureConfig =
-            Option.defaultValue TextureConfig.Default <| this.GetJson(folder, name + ".json")
+            this.GetJson<TextureConfig>(folder, name + ".json") |> fst
         (bmp, info)
 
     member this.GetConfig() = this.GetJson("theme.json")
@@ -30,10 +32,8 @@ type Theme(storage) =
     member this.GetNoteSkins() =
         Seq.choose
             (fun ns ->
-                try
-                    let config: NoteSkinConfig = this.GetJson("Noteskins", ns, "noteskin.json")
-                    Some (ns, config)
-                with err -> Logging.Error("Failed to load noteskin '" + ns + "'") (err.ToString()); None)
+                let (config: NoteSkinConfig, success: bool) = this.GetJson("Noteskins", ns, "noteskin.json")
+                if success then Some (ns, config) else None)
             (this.GetFolders("Noteskins"))
 
     static member FromZipStream(stream: Stream) = Theme(Zip <| new ZipArchive(stream))
@@ -53,7 +53,7 @@ module Themes =
     let mutable noteskinConfig = NoteSkinConfig.Default
     let mutable currentNoteSkin = "default"
     let mutable background = Sprite.Default
-    let mutable internal accentColor = Color.White
+    let mutable internal accentColor = themeConfig.DefaultAccentColor
 
     let mutable private fontBuilder: Lazy<Text.SpriteFont> option = None
     let font(): Text.SpriteFont = fontBuilder.Value.Force()
@@ -87,36 +87,6 @@ module Themes =
         if id <> "" && availableThemes.Contains id |> not then defaultTheme.CopyTo(Path.Combine(getDataPath "themes", id))
         refreshAvailableThemes()
 
-    let loadThemes(themes: List<string>) =
-        loadedNoteskins.Clear()
-        loadedThemes.Clear()
-        loadedThemes.Add(defaultTheme)
-        Seq.choose (fun t ->
-            let theme = Theme.FromThemeFolder(t)
-            try
-                let config: ThemeConfig = theme.GetJson("theme.json")
-                Some (theme, config)
-            with err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
-            themes
-        |> Seq.iter (fun (t, conf) -> loadedThemes.Add(t); themeConfig <- conf)
-
-        loadedThemes
-        |> Seq.iteri(fun i t ->
-            //this is where we load other stuff like scripting in future
-            t.GetNoteSkins()
-            |> Seq.iter (fun (ns, c) ->
-                loadedNoteskins.Remove(ns) |> ignore //overwrites existing skin with same name
-                loadedNoteskins.Add(ns, (c, i))
-                Logging.Debug(sprintf "Loaded noteskin %s" ns) ""))
-        Seq.iter Sprite.destroy sprites.Values
-        sprites.Clear()
-        gameplayConfig.Clear()
-        changeNoteSkin(currentNoteSkin)
-        accentColor <- themeConfig.DefaultAccentColor
-        if fontBuilder.IsSome then font().Dispose(); 
-        fontBuilder <- Some (lazy (Text.createFont themeConfig.Font))
-        Logging.Debug(sprintf "Loaded %i themes (%i available)" <| loadedThemes.Count - 1 <| availableThemes.Count) ""
-
     let private getInherited f =
         let rec g i =
             if i < 0 then failwith "f should give some value for default theme"
@@ -142,7 +112,11 @@ module Themes =
         if gameplayConfig.ContainsKey(name) then
             gameplayConfig.[name] :?> 'T
         else
-            let o = getInherited(fun t -> Some <| t.GetJson("Interface", "Gameplay", name + ".json"))
+            let o =
+                (fun (t: Theme) ->
+                    let (x, success) = t.GetJson<'T>("Interface", "Gameplay", name + ".json")
+                    if success then Some x else None)
+                |> getInherited
             gameplayConfig.Add(name, o :> obj)
             o
 
@@ -173,3 +147,34 @@ module Themes =
             //if ext <> "" then Logging.Error("Unsupported file type for background: " + ext) "" else Logging.Debug("Chart has no background image") ""
             accentColor <- themeConfig.DefaultAccentColor
             getTexture("background")
+    
+    let loadThemes(themes: List<string>) =
+        Logging.Debug("===== Loading Themes =====")""
+        loadedNoteskins.Clear()
+        loadedThemes.Clear()
+        loadedThemes.Add(defaultTheme)
+        Seq.choose (fun t ->
+            let theme = Theme.FromThemeFolder(t)
+            try
+                let config: ThemeConfig = theme.GetJson("theme.json") |> fst
+                Some (theme, config)
+            with err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
+            themes
+        |> Seq.iter (fun (t, conf) -> loadedThemes.Add(t); themeConfig <- conf)
+    
+        loadedThemes
+        |> Seq.iteri(fun i t ->
+            // this is where we load other stuff like scripting in future
+            t.GetNoteSkins()
+            |> Seq.iter (fun (ns, c) ->
+                loadedNoteskins.Remove(ns) |> ignore // overwrite existing skin with same name
+                loadedNoteskins.Add(ns, (c, i))
+                Logging.Debug(sprintf "Loaded noteskin %s" ns) ""))
+        Seq.iter Sprite.destroy sprites.Values
+        sprites.Clear()
+        gameplayConfig.Clear()
+        changeNoteSkin currentNoteSkin
+        if themeConfig.OverrideAccentColor then accentColor <- themeConfig.DefaultAccentColor
+        if fontBuilder.IsSome then font().Dispose(); 
+        fontBuilder <- Some (lazy (Text.createFont themeConfig.Font))
+        Logging.Debug(sprintf "===== Loaded %i themes (%i available) =====" <| loadedThemes.Count - 1 <| availableThemes.Count) ""

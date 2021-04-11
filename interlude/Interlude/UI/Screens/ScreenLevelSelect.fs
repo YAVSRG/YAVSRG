@@ -331,7 +331,7 @@ module ScreenLevelSelect =
             bpm <-
                 match currentCachedChart with
                 | Some cc -> cc.BPM
-                | None -> (120.0f<ms/beat>, 120.0f<ms/beat>)
+                | None -> (500.0f<ms/beat>, 500.0f<ms/beat>)
                 |> fun (b, a) -> (60000.0f<ms> / a * rate |> int, 60000.0f<ms> / b * rate |> int)
                 |> fun (a, b) ->
                     if Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
