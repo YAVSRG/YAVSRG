@@ -151,6 +151,7 @@ module Themes =
         loadedNoteskins.Clear()
         loadedThemes.Clear()
         loadedThemes.Add(defaultTheme)
+        themeConfig <- ThemeConfig.Default
         Seq.choose (fun t ->
             let theme = Theme.FromThemeFolder(t)
             try

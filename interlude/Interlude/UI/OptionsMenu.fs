@@ -104,7 +104,7 @@ module OptionsMenuTabs =
             ).Position(500.0f)
         ]
 
-    let themeChanger(add, refreshColors) =
+    let themeChanger(add, refresh) =
         Themes.refreshAvailableThemes()
         column [
             PrettySetting("ChooseTheme",
@@ -116,7 +116,7 @@ module OptionsMenuTabs =
                                 options.EnabledThemes.AddRange(v)
                                 Themes.loadThemes(options.EnabledThemes)
                                 Themes.changeNoteSkin(options.NoteSkin.Value)
-                                refreshColors()
+                                refresh()
                             and get() = options.EnabledThemes }, Themes.availableThemes )
             ).Position(200.0f, PRETTYWIDTH, 500.0f)
             Divider().Position(750.0f)
@@ -157,7 +157,7 @@ module OptionsMenuTabs =
         refreshNoteskins()
 
         column [
-            PrettyButton("ChangeTheme", fun () -> add("ChangeTheme", themeChanger(add, refreshColors))).Position(200.0f)
+            PrettyButton("ChangeTheme", fun () -> add("ChangeTheme", themeChanger(add, fun () -> refreshColors(); refreshNoteskins()))).Position(200.0f)
             PrettyButton("EditTheme", ignore).Position(300.0f)
             PrettySetting("Keymode",
                 Selector.FromKeymode(
