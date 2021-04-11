@@ -82,6 +82,11 @@ module Themes =
                     sprites.Remove(t) |> ignore
             ) noteskinTextures
 
+    let createNew(id: string) =
+        let id = System.Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
+        if id <> "" && availableThemes.Contains id |> not then defaultTheme.CopyTo(Path.Combine(getDataPath "themes", id))
+        refreshAvailableThemes()
+
     let loadThemes(themes: List<string>) =
         loadedNoteskins.Clear()
         loadedThemes.Clear()

@@ -188,7 +188,7 @@ module Components =
         let color = AnimationFade(0.5f)
 
         let mutable active = false
-        let toggle() =
+        let rec toggle() =
             active <- not active
             if active then
                 color.Target <- 1.0f
@@ -216,7 +216,7 @@ module Components =
             base.Update(elapsedTime, bounds)
             match bind with
             | Some b -> if b.Value.Tapped() then toggle()
-            | None -> ()
+            | None -> if active = false then toggle()
 
         override this.Dispose() =
             if active then Input.removeInputMethod()
