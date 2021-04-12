@@ -373,6 +373,7 @@ module ScreenLevelSelect =
 
         override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
         override this.Selected = selectedChart = cc.FilePath
+        member this.Chart = cc
 
         override this.Navigate() =
             match navigation with
@@ -447,6 +448,12 @@ module ScreenLevelSelect =
                 elif Mouse.Click(MouseButton.Right) then
                     expandedGroup <- ""
                     scrollTo <- ScrollToPack groupName
+                elif options.Hotkeys.Delete.Value.Tapped() then
+                    Screens.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [cc.Title] "misc.Delete", 2000.0,
+                        fun () ->
+                            cache.DeleteChart cc
+                            refresh <- true
+                            Screens.addNotification(Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
         override this.Update(top, topEdge, elapsedTime) =
@@ -476,8 +483,15 @@ module ScreenLevelSelect =
             else b
 
         override this.OnUpdate(bounds, selected, elapsedTime) =
-            if Mouse.Hover(bounds) && Mouse.Click(MouseButton.Left) then
-                if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
+            if Mouse.Hover(bounds) then
+                if Mouse.Click(MouseButton.Left) then
+                    if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
+                elif options.Hotkeys.Delete.Value.Tapped() then
+                    Screens.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
+                        fun () ->
+                            items |> Seq.map (fun i -> i.Chart) |> cache.DeleteCharts
+                            refresh <- true
+                            Screens.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
         override this.Update(top, topEdge, elapsedTime) =
             match scrollTo with
             | ScrollToPack s when s = name ->
