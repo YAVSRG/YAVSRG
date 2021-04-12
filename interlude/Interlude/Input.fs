@@ -35,7 +35,7 @@ module Bind =
 
 type InputEvType =
 | Press = 0
-| Release = 2
+| Release = 1
 
 type InputEv = (struct (Bind * InputEvType * float32<ms>))
 
@@ -43,12 +43,12 @@ module Input =
     
     let mutable internal evts: InputEv list = []
     
-    let mutable internal mousex = 0.f
-    let mutable internal mousey = 0.f
-    let mutable internal mousez = 0.f
-    let mutable internal oldmousex = 0.f
-    let mutable internal oldmousey = 0.f
-    let mutable internal oldmousez = 0.f
+    let mutable internal mousex = 0.0f
+    let mutable internal mousey = 0.0f
+    let mutable internal mousez = 0.0f
+    let mutable internal oldmousex = 0.0f
+    let mutable internal oldmousey = 0.0f
+    let mutable internal oldmousez = 0.0f
     let mutable internal ctrl = false
     let mutable internal shift = false
     let mutable internal alt = false
@@ -57,6 +57,7 @@ module Input =
 
     let mutable internal inputmethod = None
     let mutable internal absorbed = false
+    let mutable internal typed = false
     
     let removeInputMethod() =
         match inputmethod with
@@ -73,7 +74,6 @@ module Input =
         oldmousey <- mousey
         oldmousex <- mousex
         absorbed <- true
-        let e = evts
         evts <- []
 
     let consumeOne(b: Bind, t: InputEvType) =
@@ -155,7 +155,7 @@ module Input =
                 removeInputMethod())
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | Some (s, c) -> s.Set(s.Get() + e.AsString); absorbAll()
+            | Some (s, c) -> s.Apply(fun x -> x + e.AsString); typed <- true
             | None -> ())
 
     let update() =
@@ -164,12 +164,13 @@ module Input =
         absorbed <- false
         match inputmethod with
         |  Some (s, c) ->
-            if consumeOne(delete, InputEvType.Press).IsSome && s.Get().Length > 0 then
-                let v = s.Get()
-                s.Set(v.Substring(0, v.Length - 1))
-            elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Set("")
+            if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
+                s.Apply(fun x -> x.Substring(0, x.Length - 1))
+            elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
         | None -> ()
+        if typed then absorbAll()
+        typed <- false
 
 module Mouse = 
     let X() = Input.mousex

@@ -282,6 +282,7 @@ module Screens =
     let mutable internal setCursorVisible: bool -> unit = ignore
 
     let mutable internal addNotification: string * NotificationType -> unit = ignore
+    let mutable internal addTooltip: Input.Bind * string * float * (unit -> unit) -> unit = ignore
 
     //background fbo
     let parallaxX  = AnimationFade(0.0f)
@@ -304,10 +305,10 @@ module Screens =
 
     let drawBackground(bounds, color, depth) =
         let bg = Themes.background
-        let pwidth = Render.vwidth + parallaxZ.Value
-        let pheight = Render.vheight + parallaxZ.Value
-        let x = -parallaxX.Value * parallaxZ.Value
-        let y = -parallaxY.Value * parallaxZ.Value
+        let pwidth = Render.vwidth + parallaxZ.Value * depth
+        let pheight = Render.vheight + parallaxZ.Value * depth
+        let x = -parallaxX.Value * parallaxZ.Value * depth
+        let y = -parallaxY.Value * parallaxZ.Value * depth
         let screenaspect = pwidth / pheight
         let bgaspect = float32 bg.Width / float32 bg.Height
         let q = Quad.ofRect bounds

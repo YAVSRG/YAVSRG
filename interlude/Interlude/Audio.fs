@@ -118,7 +118,7 @@ module Audio =
 
     let changeRate(newRate) =
         rate <- newRate;
-        //if (PREVENT_PITCH_CHANGE) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(rate, 2.0) * 12.0) |> ignore
+        //if (true) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0) |> bassError
         Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Frequency, float32 nowplaying.Frequency * rate) |> bassError
 
     let changeTrack(path, offset, rate) =

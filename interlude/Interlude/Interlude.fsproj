@@ -5,8 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/percyqaz/YAVSRG</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.4.3</AssemblyVersion>
-    <FileVersion>0.4.3.0</FileVersion>
+    <AssemblyVersion>0.4.5.1</AssemblyVersion>
+    <FileVersion>0.4.5.1</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -38,12 +38,12 @@
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Widgets.fs" />
     <Compile Include="UI\Components.fs" />
+    <Compile Include="UI\Selection.fs" />
     <Compile Include="UI\Screens\ScreenScore.fs" />
     <Compile Include="UI\Screens\ScreenPlay.fs" />
     <Compile Include="UI\Screens\ScreenLevelSelect.fs" />
     <Compile Include="UI\Screens\ScreenImport.fs" />
-    <Compile Include="UI\OptionsMenu\OptionsMenuFramework.fs" />
-    <Compile Include="UI\OptionsMenu\OptionsMenu.fs" />
+    <Compile Include="UI\OptionsMenu.fs" />
     <Compile Include="UI\ScreensMain.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />

@@ -4,7 +4,6 @@ open System.Diagnostics
 open System.IO
 open Prelude.Common
 open Interlude
-open Interlude.Options
 
 [<EntryPoint>]
 let main argv =
@@ -12,11 +11,9 @@ let main argv =
 
     let crashSplash = Utils.randomSplash("CrashSplashes.txt") >> (fun s -> Logging.Critical s "")
 
-    //Check if interlude is already running (true if not already running)
+    //Check if interlude is already running
     if m.WaitOne(TimeSpan.Zero, true) then
-
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
-
         //Init logging
         use logfile = File.Open("log.txt", FileMode.Append)
         use sw = new StreamWriter(logfile)
@@ -35,7 +32,10 @@ let main argv =
             | err -> Logging.Critical "Game failed to launch" (err.ToString()); crashSplash(); None
         if (game.IsSome) then
             let game = game.Value
-            try game.Run() with err -> Logging.Critical "Game crashed" (err.ToString()); crashSplash()
+            try
+                game.Run()
+                Logging.Info("Exiting game")""
+            with err -> Logging.Critical "Game crashed" (err.ToString()); crashSplash()
             game.Close()
             Options.save()
             game.Dispose()

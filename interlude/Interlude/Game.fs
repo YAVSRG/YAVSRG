@@ -5,6 +5,7 @@ open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.Common
 open Prelude.Common
+open Interlude.Options
 open Interlude.Render
 open Interlude.Input
 open Interlude.UI
@@ -23,11 +24,11 @@ type Game(config: GameConfig) as this =
         base.IsVisible <- true
 
     member this.ApplyConfig(config: GameConfig) =
-        base.RenderFrequency <- config.FrameLimiter.Get()
-        match config.WindowMode.Get() with
+        base.RenderFrequency <- config.FrameLimiter.Value
+        match config.WindowMode.Value with
         | WindowType.WINDOWED ->
             base.WindowState <- WindowState.Normal
-            let (resizable, struct (width, height)) = Options.getResolution <| config.Resolution.Get()
+            let (resizable, struct (width, height)) = Options.getResolution config.Resolution.Value
             base.WindowBorder <- if resizable then WindowBorder.Resizable else WindowBorder.Fixed
             base.ClientRectangle <- new Box2i(0, 0, width, height)
             base.CenterWindow()
