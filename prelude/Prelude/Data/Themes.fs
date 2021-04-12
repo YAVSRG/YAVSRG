@@ -187,3 +187,29 @@ module Themes =
             match storage with
             | Zip z -> z.ExtractToDirectory targetPath
             | Folder f -> failwith "nyi, do this manually for now"
+        
+        member this.GetTexture(noteskin: string option, name: string) =
+            let folder = 
+                match noteskin with
+                | None -> "Textures"
+                | Some n ->
+                    match storage with
+                    | Folder _ -> Path.Combine("Noteskins", n)
+                    | Zip _ -> "Noteskins/" + n
+            match this.TryReadFile(folder, name + ".png") with
+            | Some stream ->
+                let bmp = new Bitmap(stream)
+                let info: TextureConfig = this.GetJson<TextureConfig>(false, folder, name + ".json") |> fst
+                stream.Dispose()
+                Some (bmp, info)
+            | None -> None
+        
+        member this.GetNoteSkins() =
+            Seq.choose
+                (fun ns ->
+                    let (config: NoteSkinConfig, success: bool) = this.GetJson(false, "Noteskins", ns, "noteskin.json")
+                    if success then Some (ns, config) else None)
+                (this.GetFolders("Noteskins"))
+        
+        static member FromZipStream(stream: Stream) = Theme(Zip <| new ZipArchive(stream))
+        static member FromThemeFolder(name: string) = Theme(Folder <| getDataPath(Path.Combine("Themes", name)))

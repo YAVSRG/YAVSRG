@@ -215,12 +215,14 @@ module ChartManager =
                 }
 
         member this.DeleteChart (c: CachedChart) =
-            if File.Exists(c.FilePath) then
-                File.Delete(c.FilePath)
-                let folder = Path.GetDirectoryName(c.FilePath)
-                match folder with SongFolder _ -> Directory.Delete(folder, true) | _ -> ()
+            lock this (fun _ -> charts.Remove c.FilePath |> ignore)
+            if File.Exists c.FilePath then File.Delete c.FilePath
+            let songfolder = Path.GetDirectoryName c.FilePath
+            match songfolder with SongFolder _ -> () | _ -> Directory.Delete(songfolder, true) 
+            let packfolder = Path.GetDirectoryName songfolder
+            if packfolder |> Directory.EnumerateDirectories |> Seq.isEmpty then Directory.Delete(packfolder, false)
 
-        member this.DeleteCharts (cs: List<CachedChart>) = Seq.iter this.DeleteChart cs
+        member this.DeleteCharts (cs: CachedChart seq) = Seq.iter this.DeleteChart cs
 
         member this.ConvertSongFolder (path: string) (packname: string) : StatusTask =
             fun output ->
@@ -237,7 +239,7 @@ module ChartManager =
                                     (
                                         List.iter this.CacheChart charts
                                     ))
-                            with err -> Logging.Error("Failed to load/convert file: " + file)(err.ToString())
+                            with err -> Logging.Error("Failed to load/convert file: " + file) (err.ToString())
                         | _ -> ()
                     return true
                 }
@@ -265,22 +267,22 @@ module ChartManager =
                             // todo: is this safe from directory traversal?
                             ZipFile.ExtractToDirectory(path, dir)
                             output("Extracted! " + dir)
-                            do! (this.AutoConvert(dir) |> BackgroundTask.Callback(fun _ -> Directory.Delete(dir, true)))(output) |> Async.Ignore
+                            do! (this.AutoConvert dir |> BackgroundTask.Callback(fun _ -> Directory.Delete(dir, true))) output |> Async.Ignore
                         | _ -> failwith "unrecognised file"
                     | _ ->
                         match path with
                         | SongFolder ext ->
-                            do! (this.ConvertSongFolder path (if ext = ".osu" then "osu!" else "Singles"))(output) |> Async.Ignore
+                            do! (this.ConvertSongFolder path (if ext = ".osu" then "osu!" else "Singles")) output |> Async.Ignore
                         | PackFolder ->
                             let packname =
                                 match Path.GetFileName(path) with
                                 | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
                                 | s -> s
-                            do! (this.ConvertPackFolder path packname)(output) |> Async.Ignore
+                            do! (this.ConvertPackFolder path packname) output |> Async.Ignore
                         | FolderOfPacks ->
                             do! 
                                 Directory.EnumerateDirectories(path)
-                                |> Seq.map (fun packFolder -> this.ConvertPackFolder(packFolder)(Path.GetFileName(packFolder))(output))
+                                |> Seq.map (fun packFolder -> this.ConvertPackFolder packFolder (Path.GetFileName packFolder) output)
                                 |> fun s -> Async.Parallel(s, 5)
                                 |> Async.Ignore
                         | _ -> failwith "no importable folder structure detected"
