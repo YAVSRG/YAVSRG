@@ -22,8 +22,6 @@ module Themes =
         GradeThresholds: float array
         PBColors: Color array
         Font: string
-        TextColor: Color
-        SelectChart: Color
         DefaultAccentColor: Color
         OverrideAccentColor: bool
         PlayfieldColor: Color
@@ -41,8 +39,6 @@ module Themes =
             GradeThresholds = [|0.98995; 0.97995; 0.96995; 0.95995; 0.94995; 0.93995; 0.92995; 0.91995; 0.90995; 0.89995|]
             PBColors = [|Color.Transparent; Color.FromArgb(160, 255, 160); Color.FromArgb(160, 255, 255); Color.FromArgb(255, 160, 80)|]
             Font = "Akrobat-Black.otf"
-            TextColor = Color.White
-            SelectChart = Color.FromArgb(0, 180, 110)
             DefaultAccentColor = Color.FromArgb(0, 255, 160)
             OverrideAccentColor = false
             PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
@@ -81,8 +77,8 @@ module Themes =
             Tiling = true
         }
 
-    type WidgetConfig = { Enabled: bool; Float: bool; Left: float32; LeftA: float32; Top: float32; TopA: float32; Right: float32; RightA: float32; Bottom: float32; BottomA: float32 }
-    with
+    type WidgetConfig =
+        { Enabled: bool; Float: bool; Left: float32; LeftA: float32; Top: float32; TopA: float32; Right: float32; RightA: float32; Bottom: float32; BottomA: float32 }
         static member Default = { Enabled = false; Float = true; Left = 0.0f; LeftA = 0.0f; Top = 0.0f; TopA = 0.0f; Right = 0.0f; RightA = 1.0f; Bottom = 0.0f; BottomA = 1.0f }
     module WidgetConfig =
         type AccuracyMeter = { Position: WidgetConfig; GradeColors: bool; ShowName: bool }
@@ -99,14 +95,13 @@ module Themes =
         type ProgressBar = { Position: WidgetConfig }
         //quick settings
         //song info
-        //mod info 
+        //mod info
         //current time
         //life meter
         //judgement counts
         //screencovers
         //pacemaker
         type HitLighting = { AnimationTime: float; Expand: float32 }
-        type ColumnLighting = { AnimationTime: float }
 
     (*
         Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
@@ -118,7 +113,7 @@ module Themes =
 
         member this.TryReadFile([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
-            try 
+            try
                 match storage with
                 | Zip z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open() |> Some
                 | Folder f ->
@@ -138,7 +133,10 @@ module Themes =
                     for e in z.Entries do
                         if e.FullName = p + "/" + e.Name && Path.HasExtension(e.Name) then yield e.Name
                 }
-            | Folder f -> Directory.EnumerateFiles(p)
+            | Folder f ->
+                let target = Path.Combine(f, p)
+                Directory.CreateDirectory(target) |> ignore
+                Directory.EnumerateFiles(target) |> Seq.map Path.GetFileName
 
         member this.GetFolders([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
@@ -151,25 +149,34 @@ module Themes =
                             let s = (e.FullName.Substring(p.Length + 1)).Split('/')
                             if e.FullName = p + "/" + s.[0] + "/" then yield s.[0]
                 }
-            | Folder f -> Directory.EnumerateDirectories(Path.Combine(f, p)) |> Seq.map Path.GetFileName
-        
-        member this.GetJson<'T>([<ParamArray>] path: string array): 'T * bool =
+            | Folder f ->
+                let target = Path.Combine(f, p)
+                Directory.CreateDirectory(target) |> ignore
+                Directory.EnumerateDirectories(target) |> Seq.map Path.GetFileName
+
+        member this.GetJson<'T>(createNew: bool, [<ParamArray>] path: string array): 'T * bool =
             let defaultValue() = ("{}" |> Json.fromString<'T> |> JsonResult.value, match storage with Folder f -> false | _ -> true)
             try
+                let mutable rewrite = createNew
                 let json, success =
                     match this.TryReadFile path with
                     | Some stream ->
                         use tr = new StreamReader(stream)
-                        let json, success = 
+                        let json, success =
                             tr.ReadToEnd()
-                            |> Json.fromString<'T> 
+                            |> Json.fromString<'T>
                             |> function | JsonResult.Success v -> (v, true) | _ -> defaultValue()
                         stream.Dispose()
-                        match storage with
-                        | Zip _ -> () //do not write data to zip archives
-                        | Folder f -> Json.toFile(Path.Combine(f, Path.Combine(path)), true) json
+                        rewrite <- true
                         json, success
                     | None -> defaultValue()
+                if createNew then
+                    match storage with
+                    | Zip _ -> () //do not write data to zip archives
+                    | Folder f ->
+                        let target = Path.Combine(f, Path.Combine path)
+                        target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
+                        Json.toFile(target, true) json
                 json, success
             with err ->
                 Logging.Error(sprintf "Couldn't load json '%s' in theme '%s'" (String.concat "/" path) (match storage with Zip z -> "DEFAULT" | Folder f -> Path.GetFileName f)) (err.ToString())

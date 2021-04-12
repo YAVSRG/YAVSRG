@@ -1,13 +1,12 @@
 ﻿module Prelude.Web
 
 open System
+open System.ComponentModel
 open System.Net
 open System.Net.Http
-open System.Net.Security
-open System.ComponentModel
+open System.Threading.Tasks
 open Percyqaz.Json
 open Prelude.Common
-open System.Threading.Tasks
 
 let wClient() =
     let w = new WebClient()
@@ -30,7 +29,7 @@ let private downloadString(url: string, callback) =
             Logging.Error("Failed to get web data from " + url)(err.ToString())
             return false
     }
-        
+
 let downloadJson<'T>(url, callback) =
     downloadString(url,
         fun s ->
