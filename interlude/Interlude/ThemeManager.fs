@@ -8,35 +8,6 @@ open System.Drawing
 open Prelude.Common
 open Prelude.Data.Themes
 
-type Theme(storage) =
-    inherit Prelude.Data.Themes.Theme(storage)
-
-    member this.GetTexture(noteskin: string option, name: string) =
-        let folder = 
-            match noteskin with
-            | None -> "Textures"
-            | Some n ->
-                match storage with
-                | Folder _ -> Path.Combine("Noteskins", n)
-                | Zip _ -> "Noteskins/" + n
-        let bmp = 
-            match base.TryReadFile(folder, name + ".png") with
-            | Some s -> use stream = s in new Bitmap(stream)
-            | None -> new Bitmap(1, 1)
-        let info: TextureConfig =
-            this.GetJson<TextureConfig>(false, folder, name + ".json") |> fst
-        (bmp, info)
-
-    member this.GetNoteSkins() =
-        Seq.choose
-            (fun ns ->
-                let (config: NoteSkinConfig, success: bool) = this.GetJson(false, "Noteskins", ns, "noteskin.json")
-                if success then Some (ns, config) else None)
-            (this.GetFolders("Noteskins"))
-
-    static member FromZipStream(stream: Stream) = Theme(Zip <| new ZipArchive(stream))
-    static member FromThemeFolder(name: string) = Theme(Folder <| getDataPath(Path.Combine("Themes", name)))
-
 module Themes =
     open Interlude.Render
 
@@ -95,15 +66,18 @@ module Themes =
 
     let getTexture(name: string) =
         if not <| sprites.ContainsKey(name) then
-            let (bmp, config) =
-                if Array.contains name noteskinTextures then
-                    let (ns, i) = loadedNoteskins.[currentNoteSkin]
-                    loadedThemes.[i].GetTexture(Some currentNoteSkin, name)
-                else
+            if Array.contains name noteskinTextures then
+                let (ns, i) = loadedNoteskins.[currentNoteSkin]
+                match loadedThemes.[i].GetTexture(Some currentNoteSkin, name) with
+                | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false)
+                | None -> Sprite.Default
+                |> fun x -> sprites.Add(name, x)
+            else
+                let (bmp, config) =
                     getInherited (fun (t: Theme) ->
-                        try Some <| t.GetTexture(None, name)
+                        try t.GetTexture(None, name)
                         with err -> Logging.Error("Failed to load texture '" + name + "'") (err.ToString()); None)
-            sprites.Add(name, Sprite.upload(bmp, config.Rows, config.Columns, false))
+                sprites.Add(name, Sprite.upload(bmp, config.Rows, config.Columns, false))
         sprites.[name]
 
     let getGameplayConfig<'T>(name: string) = 
