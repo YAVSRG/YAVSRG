@@ -255,7 +255,7 @@ module ScreenLevelSelect =
             do
                 let mutable i = 0.0f
                 for k in modList.Keys do
-                    this.Add(ModSelectItem(k) |> positionWidget(0.0f, 0.0f, i * 80.0f, 0.0f, 0.0f, 1.0f, 75.0f + i * 80.0f, 0.0f))
+                    this.Add(ModSelectItem k |> positionWidget(0.0f, 0.0f, i * 80.0f, 0.0f, 0.0f, 1.0f, 75.0f + i * 80.0f, 0.0f))
                     i <- i + 1.0f
 
             override this.OnSelect() =
@@ -596,23 +596,25 @@ type ScreenLevelSelect() as this =
         let bottomEdge =
             folderList
             |> List.fold (fun t (i: LevelSelectPackItem) -> i.Update(t, top, elapsedTime)) scrollPos.Value
-        let height = bottomEdge - scrollPos.Value - 320.0f
         if Mouse.Click(MouseButton.Right) then scrolling <- true
         if Mouse.Held(MouseButton.Right) |> not then scrolling <- false
-        if scrolling then scrollPos.Target <- -(Mouse.Y() - (top + 250.0f))/(bottom - top - 250.0f) * height
-        scrollPos.Target <- Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + 600.0f), 300.0f)
+
+        let pheight = bottom - top - 170.0f
+        let height = bottomEdge - scrollPos.Value - top * 2.0f - 170.0f
+        if scrolling then scrollPos.Target <- -(Mouse.Y() - top - 170.0f) / pheight * height
+        scrollPos.Target <- Math.Min(Math.Max(scrollPos.Target + Mouse.Scroll() * 100.0f, -height + pheight - top), 190.0f + top)
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
-        //level select stuff
         Stencil.create(false)
         Draw.rect(Rect.create 0.0f (top + 170.0f) Render.vwidth bottom) Color.Transparent Sprite.Default
         Stencil.draw()
         let bottomEdge = folderList |> List.fold (fun t (i: LevelSelectPackItem) -> i.Draw(t, top)) scrollPos.Value
         Stencil.finish()
-        //todo: make this render right, is currently bugged
-        let scrollPos = (scrollPos.Value / (scrollPos.Value - bottomEdge)) * (bottom - top - 100.0f)
-        Draw.rect(Rect.create (Render.vwidth - 10.0f) (top + 225.0f + scrollPos) (Render.vwidth - 5.0f) (top + 245.0f + scrollPos)) Color.White Sprite.Default
+        let pheight = bottom - top - 210.0f
+        let height = bottomEdge - scrollPos.Value - top * 2.0f - 170.0f
+        let scrollPos = -(scrollPos.Value / height) * pheight
+        Draw.rect(Rect.create (Render.vwidth - 10.0f) (top + 195.0f + scrollPos) (Render.vwidth - 5.0f) (top + 215.0f + scrollPos)) Color.White Sprite.Default
 
         Draw.rect(Rect.create left top right (top + 170.0f)) (Screens.accentShade(100, 0.6f, 0.0f)) Sprite.Default
         Draw.rect(Rect.create left (top + 170.0f) right (top + 175.0f)) (Screens.accentShade(255, 0.8f, 0.0f)) Sprite.Default
