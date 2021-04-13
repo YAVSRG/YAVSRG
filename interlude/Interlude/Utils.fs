@@ -45,7 +45,7 @@ module Utils =
             Directory.EnumerateFiles source
             |> Seq.iter
                 (fun s ->
-                    let fDest = Path.Combine(dest, Path.GetFileName(s))
+                    let fDest = Path.Combine(dest, Path.GetFileName s)
                     try
                         File.Copy(s, fDest, true)
                     with
@@ -54,7 +54,7 @@ module Utils =
                         File.Copy(s, fDest, true)
                 )
             Directory.EnumerateDirectories source
-            |> Seq.iter (fun d -> copyFolder d (Path.Combine(dest, Path.GetFileName(d))))
+            |> Seq.iter (fun d -> copyFolder d (Path.Combine(dest, Path.GetFileName d)))
 
         [<Json.AllRequired>]
         type GithubAsset = {
@@ -87,7 +87,7 @@ module Utils =
 
         let checkForUpdates() =
             BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"
-                (fun output -> downloadJson("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", fun (d: GithubRelease) -> handleUpdate(d)))
+                (fun output -> downloadJson("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", fun (d: GithubRelease) -> handleUpdate d))
             |> ignore
 
             let path = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
@@ -100,7 +100,7 @@ module Utils =
             let path = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
             let zipPath = Path.Combine(path, "update.zip")
             let folderPath = Path.Combine(path, "update")
-            File.Delete(zipPath)
+            File.Delete zipPath
             if Directory.Exists(folderPath) then Directory.Delete(folderPath, true)
             BackgroundTask.Create TaskFlags.NONE ("Downloading update " + latestRelease.Value.tag_name)
                 ((downloadFile(download_url, zipPath))
@@ -108,7 +108,7 @@ module Utils =
                     (fun b ->
                         if b then
                             ZipFile.ExtractToDirectory(zipPath, folderPath)
-                            File.Delete(zipPath)
+                            File.Delete zipPath
                             copyFolder folderPath path
                             callback()
                     ))
