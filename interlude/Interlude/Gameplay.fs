@@ -118,15 +118,15 @@ module Gameplay =
                     match cache.LoadChart(cc) with
                     | Some c -> cc, c
                     | None ->
-                        Logging.Error("Could not load chart file: " + cc.FilePath) ""
+                        Logging.Error("Could not load chart file: " + cc.FilePath)
                         cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) []
 
                         |> fun d -> d.["All"].[0]
                         |> fun c -> c, cache.LoadChart(c).Value
                 | None ->
-                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Value) ""
+                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Value)
                     cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) []
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, cache.LoadChart(c).Value
             changeChart(c, ch)
-        with err -> Logging.Debug("Tried to auto select a chart but none exist")(err.ToString())
+        with err -> Logging.Debug("Tried to auto select a chart but none exist", err)

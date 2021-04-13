@@ -77,19 +77,19 @@ type Widget() =
     default this.OnAddedTo(c) =
         match parent with
         | None -> parent <- Some c
-        | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one") ""
+        | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one")
         
     // Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
     abstract member Remove: Widget -> unit
     default this.Remove(c) =
         if children.Remove(c) then
             c.OnRemovedFrom(this)
-        else Logging.Error("Tried to remove widget that was not in this container") ""
+        else Logging.Error("Tried to remove widget that was not in this container")
 
     member private this.OnRemovedFrom(c) =
         match parent with
-        | None -> Logging.Error("Tried to remove this widget from a container it isn't in one") ""
-        | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another") ""
+        | None -> Logging.Error("Tried to remove this widget from a container it isn't in one")
+        | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another")
 
     // Often we want to add/remove child widgets during an update method
     //   But, we are in the middle of iterating through the children collection so we cannot modify it

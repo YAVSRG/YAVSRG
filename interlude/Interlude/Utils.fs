@@ -81,9 +81,9 @@ module Utils =
             let current = Assembly.GetExecutingAssembly().GetName().Version.ToString(4)
             let incoming = release.tag_name.Substring(1)
 
-            if incoming > current then Logging.Info(sprintf "Update available (%s)!" incoming)""; updateAvailable <- true
-            elif incoming < current then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)""
-            else Logging.Info("Game is up to date.")""
+            if incoming > current then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
+            elif incoming < current then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
+            else Logging.Info("Game is up to date.")
 
         let checkForUpdates() =
             BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"

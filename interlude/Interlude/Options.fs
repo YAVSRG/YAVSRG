@@ -257,7 +257,7 @@ module Options =
         try
             Json.toFile(configPath, true) config
             Json.toFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
-        with err -> Logging.Critical("Failed to write options/config to file.") (err.ToString())
+        with err -> Logging.Critical("Failed to write options/config to file.", err)
 
     let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
         if File.Exists(path) then
@@ -267,13 +267,13 @@ module Options =
             try
                 Json.fromFile(path) |> JsonResult.value
             with err ->
-                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path)) (err.ToString())
+                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path), err)
                 if prompt then
                     Console.WriteLine("If you would like to launch anyway, press ENTER.")
                     Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
                     Console.ReadLine() |> ignore
-                    Logging.Critical("User has chosen to launch game with default data.") ""
+                    Logging.Critical("User has chosen to launch game with default data.")
                 defaultData
         else
-            Logging.Info(sprintf "No %s file found, creating it." name) ""
+            Logging.Info(sprintf "No %s file found, creating it." name)
             defaultData

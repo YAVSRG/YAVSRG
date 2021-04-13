@@ -72,11 +72,11 @@ module private ScreenLevelSelectVars =
             expandedGroup <- groupName
             selectedGroup <- groupName
             scrollTo <- ScrollToChart
-        | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
+        | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
 
     let playCurrentChart() =
         if currentChart.IsSome then Screens.newScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenType.Play, ScreenTransitionFlag.Default)
-        else Logging.Warn("Tried to play selected chart; There is no chart selected") ""
+        else Logging.Warn("Tried to play selected chart; There is no chart selected")
 
 module ScreenLevelSelect =
 
@@ -537,7 +537,7 @@ type ScreenLevelSelect() as this =
                 if cc.FilePath <> selectedChart then
                     match cache.LoadChart(cc) with
                     | Some c -> changeChart(cc, c)
-                    | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
+                    | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
         lastItem <- None
         colorVersionGlobal <- 0
         folderList <-
