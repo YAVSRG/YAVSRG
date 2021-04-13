@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.IO.Compression
 open System.Collections.Generic
+open System.Collections.Concurrent
 open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
@@ -81,7 +82,7 @@ module ChartManager =
     module Sorting =
         open FParsec
 
-        let private firstCharacter(s : string) =
+        let private firstCharacter (s: string) =
             if (s.Length = 0) then "?"
             else
                 if Char.IsLetterOrDigit(s.[0]) then s.[0].ToString().ToUpper() else "?"
@@ -124,26 +125,30 @@ module ChartManager =
 
     open Sorting
 
-    type ChartGroup = (string * CachedChart list)
+    do 
+        let tP = Json.Mapping.getPickler<Dictionary<string, CachedChart>>()
+        Json.Mapping.Rules.addTypeRuleUnchecked
+            (fun (d: ConcurrentDictionary<string, CachedChart>) -> d |> Dictionary |> tP.Encode)
+            (fun _ json -> tP.Decode null json |> JsonMapResult.map ConcurrentDictionary)
 
     //todo: add reverse lookup from hash -> id and remove id storage in score data
     type Cache() =
         let charts, collections = Cache.Load()
 
-        member this.Save() = Json.toFile(Path.Combine(getDataPath("Data"), "cache.json"), true)(charts, collections)
-        static member Load() = loadImportantJsonFile("Cache")(Path.Combine(getDataPath("Data"), "cache.json"))((new Dictionary<string, CachedChart>(), new Dictionary<string, Collection>()))(false)
+        member this.Save() = Json.toFile(Path.Combine(getDataPath "Data", "cache.json"), true) (charts, collections)
+        static member Load() = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) (new ConcurrentDictionary<string, CachedChart>(), new Dictionary<string, Collection>()) false
     
-        member this.CacheChart (c: Chart) = lock(this) (fun () -> charts.[c.FileIdentifier] <- cacheChart c)
+        member this.CacheChart (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c
 
         member this.Count = charts.Count
 
-        member this.LookupChart (id: string) : CachedChart option = if charts.ContainsKey(id) then Some charts.[id] else None
+        member this.LookupChart (id: string) : CachedChart option =
+            let t, c = charts.TryGetValue id
+            if t then Some c else None
 
-        member this.LoadChart (cc: CachedChart) : Chart option = 
+        member this.LoadChart (cc: CachedChart) : Chart Option =
             match cc.FilePath |> Chart.fromFile with
-            | Some c ->
-                this.CacheChart c
-                Some c
+            | Some c -> this.CacheChart c; Some c
             | None -> None
 
         member private this.FilterCharts (filter: Filter) (charts: CachedChart seq) =
@@ -166,15 +171,13 @@ module ChartManager =
 
         member this.GetGroups grouping (sorting: Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()
-            lock this //thread safe
-                (fun _ ->
-                    for c in this.FilterCharts filter charts.Values do
-                        let s = grouping(c)
-                        if (groups.ContainsKey(s) |> not) then groups.Add(s, new List<CachedChart>())
-                        groups.[s].Add(c)
-                    for g in groups.Values do
-                        g.Sort(sorting)
-                    groups)
+            for c in this.FilterCharts filter charts.Values do
+                let s = grouping c
+                if (groups.ContainsKey s |> not) then groups.Add(s, new List<CachedChart>())
+                groups.[s].Add c
+            for g in groups.Values do
+                g.Sort sorting
+            groups
 
         member this.GetCollections (sorting: Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()
@@ -188,26 +191,23 @@ module ChartManager =
                 |> ResizeArray<CachedChart>
                 |> fun x -> groups.Add(name, x)
             for g in groups.Values do
-                g.Sort(sorting)
+                g.Sort sorting
             groups
 
         member this.RebuildCache : StatusTask =
             fun output ->
                 async {
-                    lock this (fun _ -> charts.Clear())
+                    charts.Clear()
                     for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
                         for song in Directory.EnumerateDirectories pack do
                             for file in Directory.EnumerateFiles song do
                                 match Path.GetExtension(file).ToLower() with
                                 | ".yav" ->
-                                    lock this (fun _ ->
-                                    (
-                                        match Chart.fromFile file with
-                                        | Some c ->
-                                            output("Caching " + file)
-                                            this.CacheChart c
-                                        | None -> ()
-                                    ))
+                                    match Chart.fromFile file with
+                                    | Some c ->
+                                        output("Caching " + file)
+                                        this.CacheChart c
+                                    | None -> ()
                                 | _ -> ()
                     this.Save()
                     output("Saved cache.")
@@ -215,7 +215,7 @@ module ChartManager =
                 }
 
         member this.DeleteChart (c: CachedChart) =
-            lock this (fun _ -> charts.Remove c.FilePath |> ignore)
+            charts.TryRemove c.FilePath |> ignore
             if File.Exists c.FilePath then File.Delete c.FilePath
             let songfolder = Path.GetDirectoryName c.FilePath
             match songfolder with SongFolder _ -> () | _ -> Directory.Delete(songfolder, true) 
@@ -233,12 +233,8 @@ module ChartManager =
                             output("Converting " + file)
                             try
                                 loadAndConvertFile file
-                                |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetFileName(path))))
-                                |> fun charts ->
-                                    lock this (fun _ ->
-                                    (
-                                        List.iter this.CacheChart charts
-                                    ))
+                                |> List.map (fun c -> relocateChart c path (Path.Combine(getDataPath "Songs", packname, Path.GetFileName path)))
+                                |> fun charts -> List.iter this.CacheChart charts
                             with err -> Logging.Error("Failed to load/convert file: " + file, err)
                         | _ -> ()
                     return true
@@ -257,7 +253,7 @@ module ChartManager =
         member this.AutoConvert path : StatusTask =
             fun output ->
                 async {
-                    match File.GetAttributes(path) &&& FileAttributes.Directory |> int with
+                    match File.GetAttributes path &&& FileAttributes.Directory |> int with
                     | 0 ->
                         match path with
                         | ChartFile _ -> failwith "single chart file not yet supported"
@@ -275,13 +271,13 @@ module ChartManager =
                             do! (this.ConvertSongFolder path (if ext = ".osu" then "osu!" else "Singles")) output |> Async.Ignore
                         | PackFolder ->
                             let packname =
-                                match Path.GetFileName(path) with
+                                match Path.GetFileName path with
                                 | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
                                 | s -> s
                             do! (this.ConvertPackFolder path packname) output |> Async.Ignore
                         | FolderOfPacks ->
                             do! 
-                                Directory.EnumerateDirectories(path)
+                                Directory.EnumerateDirectories path
                                 |> Seq.map (fun packFolder -> this.ConvertPackFolder packFolder (Path.GetFileName packFolder) output)
                                 |> fun s -> Async.Parallel(s, 5)
                                 |> Async.Ignore

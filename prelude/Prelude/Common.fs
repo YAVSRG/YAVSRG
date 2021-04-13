@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Drawing
 open System.Threading
 open System.Threading.Tasks
 open System.Collections.Generic
@@ -239,7 +240,7 @@ module Common =
     do
         let tP = Json.Mapping.getPickler<byte * byte * byte * byte>()
         Json.Mapping.Rules.addTypeRuleWithDefault
-            (fun (c: System.Drawing.Color) -> tP.Encode (c.A, c.R, c.G, c.B))
-            (fun (c: System.Drawing.Color) json -> tP.Decode (c.A, c.R, c.G, c.B) json |> JsonMapResult.map (fun (a, r, g, b) -> System.Drawing.Color.FromArgb(int a, int r, int g, int b)))
-            System.Drawing.Color.White
+            (fun (c: Color) -> tP.Encode (c.A, c.R, c.G, c.B))
+            (fun (c: Color) json -> tP.Decode (c.A, c.R, c.G, c.B) json |> JsonMapResult.map (fun (a, r, g, b) -> Color.FromArgb(int a, int r, int g, int b)))
+            Color.White
         Json.Mapping.Rules.addPicklerRule()
