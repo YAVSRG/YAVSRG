@@ -24,7 +24,7 @@ module ChartConversions =
         let xToColumn (x: float) = (x / (512.0 / (keys |> float))) |> int
 
         let getMiddles (holds: (Time array)) = 
-            makeBitmap (seq {
+            Bitmap.create (seq {
             for i = 0 to (holds.Length - 1) do
                 if holds.[i] >= 0.0f<ms> then yield i
             })
@@ -39,9 +39,9 @@ module ChartConversions =
                         | (time, nr) :: ss ->
                             holds.[k] <- -1.0f<ms>;
                             if time = minT then
-                                applyToNoteData NoteType.HOLDTAIL (setBit k) nr
-                                applyToNoteData NoteType.HOLDBODY (unsetBit k) nr
-                            else s <- (minT, (makeNoteRow 0us 0us (getMiddles holds) (makeBitmap (seq [k])) 0us 0us 0us)) :: s
+                                NoteRow.apply NoteType.HOLDTAIL (Bitmap.setBit k) nr
+                                NoteRow.apply NoteType.HOLDBODY (Bitmap.unsetBit k) nr
+                            else s <- (minT, (NoteRow.create 0us 0us (getMiddles holds) (Bitmap.create (seq [k])) 0us 0us 0us)) :: s
                         | [] -> failwith "impossible"
                 minT <- Array.fold (fun y x -> if x = -1.0f<ms> then y else min y x) (infinityf * 1.0f<ms>) holds
             (s, holds)
@@ -49,9 +49,9 @@ module ChartConversions =
         let note k time (snaps, holds) =
             match snaps with
             | (t, nr) :: ss ->
-                if t = time then applyToNoteData NoteType.NORMAL (setBit k) nr; (snaps, holds)
-                else ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
-            | [] -> ((time, (makeNoteRow (makeBitmap (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
+                if t = time then NoteRow.apply NoteType.NORMAL (Bitmap.setBit k) nr; (snaps, holds)
+                else ((time, (NoteRow.create (Bitmap.create (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
+            | [] -> ((time, (NoteRow.create (Bitmap.create (seq [k])) 0us (getMiddles holds) 0us 0us 0us 0us)) :: snaps, holds)
 
         let hold (k: int) time (release: Time) (snaps, (holds: Time array)) =
             if holds.[k] <> -1.0f<ms> then failwith "Hold note began inside another hold note"
@@ -59,9 +59,9 @@ module ChartConversions =
             holds.[k] <- release;
             match snaps with
             | (t, nr) :: ss ->
-                if t = time then applyToNoteData NoteType.HOLDHEAD (setBit k) nr; (snaps, holds)
-                else ((time, (makeNoteRow 0us (makeBitmap (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
-            | [] -> ((time, (makeNoteRow 0us (makeBitmap (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
+                if t = time then NoteRow.apply NoteType.HOLDHEAD (Bitmap.setBit k) nr; (snaps, holds)
+                else ((time, (NoteRow.create 0us (Bitmap.create (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
+            | [] -> ((time, (NoteRow.create 0us (Bitmap.create (seq [k])) middles 0us 0us 0us 0us)) :: snaps, holds)
 
         let f (snaps, holds) (hitObj: HitObject) =
             match hitObj with
@@ -154,22 +154,22 @@ module ChartConversions =
             let offset = now + (float32 start * sep) - (lo * msPerBeat)
 
             for i in start .. (finish - 1) do
-                let nr = makeNoteRow 0us 0us ln 0us 0us 0us 0us
+                let nr = NoteRow.create 0us 0us ln 0us 0us 0us 0us
                 Seq.iteri (fun k c ->
                     match c with
                     | '0' -> ()
-                    | '1' -> applyToNoteData NoteType.NORMAL (setBit k) nr
+                    | '1' -> NoteRow.apply NoteType.NORMAL (Bitmap.setBit k) nr
                     | '2' | '4' ->
-                        applyToNoteData NoteType.HOLDHEAD (setBit k) nr
-                        ln <- setBit k ln
+                        NoteRow.apply NoteType.HOLDHEAD (Bitmap.setBit k) nr
+                        ln <- Bitmap.setBit k ln
                     | '3' ->
-                        applyToNoteData NoteType.HOLDTAIL (setBit k) nr
-                        applyToNoteData NoteType.HOLDBODY (unsetBit k) nr
-                        ln <- unsetBit k ln
-                    | 'M' -> applyToNoteData NoteType.MINE (setBit k) nr
+                        NoteRow.apply NoteType.HOLDTAIL (Bitmap.setBit k) nr
+                        NoteRow.apply NoteType.HOLDBODY (Bitmap.unsetBit k) nr
+                        ln <- Bitmap.unsetBit k ln
+                    | 'M' -> NoteRow.apply NoteType.MINE (Bitmap.setBit k) nr
                     | _ -> failwith ("unknown note type " + c.ToString())
                     ) m.[i]
-                if isEmptyNoteRow nr |> not then states.Add((offset + float32 (i - start) * sep), nr)
+                if NoteRow.isEmpty nr |> not then states.Add((offset + float32 (i - start) * sep), nr)
 
         List.iteri (fun i m -> 
             totalBeats <- totalBeats + fmeter
@@ -231,15 +231,15 @@ module ChartConversions =
         let columnToX k = (float k + 0.5) * 512.0 / (float keys) |> round
         let rec ln_lookahead k snaps =
             match snaps with
-            | (offset, nr) :: ss -> if testForNote k NoteType.HOLDTAIL nr then offset else ln_lookahead k ss
+            | (offset, nr) :: ss -> if NoteRow.hasNote k NoteType.HOLDTAIL nr then offset else ln_lookahead k ss
             | [] -> failwith "hold note has no end"
 
         let rec convert snaps = seq {
             match snaps with
             | (offset, nr) :: ss ->
-                for k in nr |> noteData NoteType.NORMAL |> getBits do
+                for k in nr |> NoteRow.noteData NoteType.NORMAL |> Bitmap.toSeq do
                     yield HitCircle ((columnToX k, 240.0), offset, enum 0, (enum 0, enum 0, 0, 0, ""))
-                for k in nr |> noteData NoteType.HOLDHEAD |> getBits do
+                for k in nr |> NoteRow.noteData NoteType.HOLDHEAD |> Bitmap.toSeq do
                     yield HoldNote ((columnToX k, 240.0), offset, ln_lookahead k ss, enum 0, (enum 0, enum 0, 0, 0, ""))
                 yield! convert ss
             | [] -> ()
@@ -370,7 +370,7 @@ module ChartConversions =
     let loadAndConvertFile (path: string): Chart list =
         match Path.GetExtension(path).ToLower() with
         | ".yav" ->
-            match loadChartFile path with
+            match Chart.fromFile path with
             | Some chart -> [chart]
             | None -> []
         | ".sm" -> convert_stepmania_interlude (loadStepmaniaFile path) (Path.GetDirectoryName path)
@@ -399,5 +399,5 @@ module ChartConversions =
     
         copyFile (Path.Combine(sourceFolder, c.Header.AudioFile)) (Path.Combine(targetFolder, c.Header.AudioFile))
         copyFile (Path.Combine(sourceFolder, c.Header.BGFile)) (Path.Combine(targetFolder, c.Header.BGFile))
-        saveChartFile c
+        Chart.save c
         c

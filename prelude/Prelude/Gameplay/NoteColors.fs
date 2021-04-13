@@ -38,10 +38,10 @@ module NoteColors =
 
     let colorize (mc : ModChart) (initialState, col : Colorizer<'t>) =
         let (_, _, data) = 
-            Seq.fold (fun (lastcolors : ColorData, s, data : (TimeDataItem<ColorNoteRow>) list) (time, nr) ->
+            Seq.fold (fun (lastcolors: ColorData, s, data: (TimeDataItem<ColorNoteRow>) list) (time, nr) ->
             (
                 let (ns, d) = col s (time, nr)
-                for k in getBits ((noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.HOLDTAIL nr)) do
+                for k in Bitmap.toSeq ((NoteRow.noteData NoteType.HOLDBODY nr) ||| (NoteRow.noteData NoteType.HOLDTAIL nr)) do
                     d.[k] <- lastcolors.[k]
                 (d, ns, (time, (nr, d)) :: data)
             )) (Array.zeroCreate(mc.Keys), initialState, []) mc.Notes.Data
@@ -50,13 +50,13 @@ module NoteColors =
         |> ResizeArray<TimeDataItem<ColorNoteRow>>
         |> TimeData<ColorNoteRow>
 
-    let private roughlyDivisible (a : Time) (b : Time) = Time.Abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
+    let private roughlyDivisible (a: Time) (b: Time) = Time.Abs(a - b * float32 (Math.Round(float <| a / b))) < 3.0f<ms>
 
-    let private ddr_func (delta: Time) (msPerBeat : float32<ms/beat>) : int =
+    let private ddr_func (delta: Time) (msPerBeat: float32<ms/beat>) : int =
         List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / n)) [0..7]
         |> Option.defaultValue DDRValues.Length
 
-    let applyScheme (scheme : ColorScheme) (colorData : ColorData) (mc : ModChart) =
+    let applyScheme (scheme: ColorScheme) (colorData: ColorData) (mc : ModChart) =
         let (keys, bpm, sv, m) = (mc.Keys, mc.BPM, mc.SV, mc.ModsUsed)
         let ci i = colorData.[i]
         match scheme with
@@ -66,7 +66,7 @@ module NoteColors =
                 |> colorize mc
         | ColorScheme.Chord ->
             ((), fun _ (_, nr) ->
-                ((), Array.create keys ((nr |> noteData NoteType.NORMAL |> countBits) + (nr |> noteData NoteType.HOLDHEAD |> countBits) |> ci)))
+                ((), Array.create keys ((nr |> NoteRow.noteData NoteType.NORMAL |> Bitmap.count) + (nr |> NoteRow.noteData NoteType.HOLDHEAD |> Bitmap.count) |> ci)))
                 |> colorize mc
         | ColorScheme.DDR ->
             (mc, fun c (time, nr) ->
@@ -77,10 +77,7 @@ module NoteColors =
                     else bpm.GetPointAt(time)
                 in (mc, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
                 |> colorize mc
-        | _ ->
-            ((), fun _ _ ->
-                ((), Array.zeroCreate(keys)))
-                |> colorize mc
+        | _ -> ((), fun _ _ -> (), Array.zeroCreate keys) |> colorize mc
         |> fun x -> (keys, x, bpm, sv, m)
 
     type ColorConfig = {

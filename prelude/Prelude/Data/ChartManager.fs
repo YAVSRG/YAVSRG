@@ -46,7 +46,7 @@ module ChartManager =
         Artist = chart.Header.Artist
         Creator = chart.Header.Creator
         Pack = chart.Header.SourcePack
-        Hash = calculateHash chart
+        Hash = Chart.hash chart
         Keys = chart.Keys
         Length = if endTime = 0.0f<ms> then 0.0f<ms> else endTime - (offsetOf chart.Notes.First.Value)
         BPM = minMaxBPM (chart.BPM.Data |> List.ofSeq) endTime
@@ -140,13 +140,13 @@ module ChartManager =
         member this.LookupChart (id: string) : CachedChart option = if charts.ContainsKey(id) then Some charts.[id] else None
 
         member this.LoadChart (cc: CachedChart) : Chart option = 
-            match cc.FilePath |> loadChartFile with
+            match cc.FilePath |> Chart.fromFile with
             | Some c ->
                 this.CacheChart c
                 Some c
             | None -> None
 
-        member private this.FilterCharts(filter: Filter)(charts: CachedChart seq) =
+        member private this.FilterCharts (filter: Filter) (charts: CachedChart seq) =
             seq {
                 for c in charts do
                     let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DiffName + " " + c.Pack).ToLower()
@@ -196,16 +196,16 @@ module ChartManager =
                 async {
                     lock this (fun _ -> charts.Clear())
                     for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
-                        for song in Directory.EnumerateDirectories(pack) do
-                            for file in Directory.EnumerateFiles(song) do
+                        for song in Directory.EnumerateDirectories pack do
+                            for file in Directory.EnumerateFiles song do
                                 match Path.GetExtension(file).ToLower() with
                                 | ".yav" ->
                                     lock this (fun _ ->
                                     (
-                                        match loadChartFile(file) with
+                                        match Chart.fromFile file with
                                         | Some c ->
                                             output("Caching " + file)
-                                            this.CacheChart(c)
+                                            this.CacheChart c
                                         | None -> ()
                                     ))
                                 | _ -> ()
@@ -227,7 +227,7 @@ module ChartManager =
         member this.ConvertSongFolder (path: string) (packname: string) : StatusTask =
             fun output ->
                 async {
-                    for file in Directory.EnumerateFiles(path) do
+                    for file in Directory.EnumerateFiles path do
                         match file with
                         | ChartFile _ ->
                             output("Converting " + file)

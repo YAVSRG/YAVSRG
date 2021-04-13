@@ -11,14 +11,14 @@ module Filter =
         | True
         member this.Evaluate(bitmap : Bitmap) =
             match this with
-            | Column i -> hasBit i bitmap
+            | Column i -> Bitmap.hasBit i bitmap
             | Not b -> b.Evaluate bitmap |> not
             | True -> true
     
     type Bitmapping = BitmapFunc array
     
     let applyBitmapping (mapping: Bitmapping) (bitmap: Bitmap) : Bitmap =
-        makeBitmap (seq {
+        Bitmap.create (seq {
             for k = 0 to (Array.length mapping - 1) do
                 if mapping.[k].Evaluate(bitmap) then yield k
         })

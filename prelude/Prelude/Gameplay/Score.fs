@@ -54,11 +54,11 @@ module Score =
     let notesToScoreData (keys: int) (notes: TimeData<NoteRow>): ScoreData =
         notes.Data
         |> Seq.map (fun (time, nr) ->
-            let bits = (noteData NoteType.HOLDHEAD nr) ||| (noteData NoteType.NORMAL nr) ||| (noteData NoteType.HOLDTAIL nr)
-            let bits2 = (noteData NoteType.HOLDBODY nr) ||| (noteData NoteType.MINE nr)
+            let bits = (NoteRow.noteData NoteType.HOLDHEAD nr) ||| (NoteRow.noteData NoteType.NORMAL nr) ||| (NoteRow.noteData NoteType.HOLDTAIL nr)
+            let bits2 = (NoteRow.noteData NoteType.HOLDBODY nr) ||| (NoteRow.noteData NoteType.MINE nr)
             (time,
-                Array.init keys (fun i -> if hasBit i bits then MISSWINDOW else 0.0f<ms>),
-                Array.init keys (fun i -> if hasBit i bits then HitStatus.NotHit elif hasBit i bits2 then HitStatus.Special else HitStatus.Nothing)): ScoreDataRow
+                Array.init keys (fun i -> if Bitmap.hasBit i bits then MISSWINDOW else 0.0f<ms>),
+                Array.init keys (fun i -> if Bitmap.hasBit i bits then HitStatus.NotHit elif Bitmap.hasBit i bits2 then HitStatus.Special else HitStatus.Nothing)): ScoreDataRow
             )
         |> Array.ofSeq
 

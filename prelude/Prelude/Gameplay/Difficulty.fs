@@ -24,7 +24,7 @@ module Layout =
             | [] -> -1
         f k h 0
 
-    let getHandBitMask h = h |> Seq.ofList |> makeBitmap
+    let getHandBitMask h = h |> Seq.ofList |> Bitmap.create
 
     //Expected to only contain up to 2 elements but this allows mappings
     type LayoutInfo = Hand list
@@ -178,14 +178,14 @@ module Difficulty =
         let physicalComposite = Array2D.zeroCreate notes.Count keys
 
         let updateNoteDifficulty(column, index, offset: Time, otherColumns : Bitmap) =
-            let s = otherColumns |> unsetBit column
+            let s = otherColumns |> Bitmap.unsetBit column
             let delta1 =
                 if fingers.[column] > 0.0f<ms> then
                     delta.[index, column] <- (offset - fingers.[column]) / rate
                     jack.[index,column] <- Math.Pow(jackCurve(delta.[index,column]), OHTNERF)
                     delta.[index, column]
                 else 10000.0f<ms>
-            for k in getBits s do
+            for k in Bitmap.toSeq s do
                 if fingers.[k] > 0.0f<ms> then
                     let delta2 = (offset - fingers.[k]) / rate
                     trill.[index, column] <- trill.[index, column] + Math.Pow((streamCurve delta2) * (jackCompensation delta1 delta2), OHTNERF)
@@ -194,7 +194,7 @@ module Difficulty =
         let snapDifficulty (strain : float array) mask =
             //todo: optimise
             let mutable vals = []
-            for k in getBits mask do
+            for k in Bitmap.toSeq mask do
                 vals <- strain.[k] :: vals
             rootMeanPower vals 1.0
 
@@ -203,19 +203,19 @@ module Difficulty =
             let currentStrain = Array.zeroCreate<float> keys
             let mutable i = 0
             for (offset, nr) in notes.Data do
-                let hits = (noteData NoteType.NORMAL nr) ||| (noteData NoteType.HOLDHEAD nr)
+                let hits = (NoteRow.noteData NoteType.NORMAL nr) ||| (NoteRow.noteData NoteType.HOLDHEAD nr)
                 if hits > 0us then
                     List.fold (fun h hand ->
                         let handHits = hits &&& getHandBitMask hand
-                        for k in getBits handHits do
+                        for k in Bitmap.toSeq handHits do
                             updateNoteDifficulty(k, i, offset, getHandBitMask hand)
                             currentStrain.[k] <- staminaFunc (currentStrain.[k]) (physicalComposite.[i,k] * SCALING_VALUE) ((offset - fingers.[k]) / rate)
-                        for k in getBits handHits do
+                        for k in Bitmap.toSeq handHits do
                             fingers.[k] <- offset
                         lastHandUse.[h] <- offset
                         h + 1) 0 layoutData |> ignore
                     physicalData.[i] <- snapDifficulty currentStrain hits
-                    technicalData.[i] <- countBits hits |> float
+                    technicalData.[i] <- Bitmap.count hits |> float
                 i <- i + 1
             (overallDifficulty physicalData, overallDifficulty technicalData)
 

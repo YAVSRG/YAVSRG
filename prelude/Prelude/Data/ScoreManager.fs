@@ -123,11 +123,11 @@ module ScoreManager =
     type ScoresDB() =
         let data = ScoresDB.Load()
 
-        member this.Save() = Json.toFile((Path.Combine(getDataPath("Data"), "scores.json"), true)) data
-        static member Load() = loadImportantJsonFile("Scores")(Path.Combine(getDataPath("Data"), "scores.json"))(new Dictionary<string, ChartSaveData>())(true)
+        member this.Save() = Json.toFile (Path.Combine(getDataPath "Data", "scores.json"), true) data
+        static member Load() = loadImportantJsonFile "Scores" (Path.Combine(getDataPath "Data", "scores.json")) (new Dictionary<string, ChartSaveData>()) true
 
         member this.GetOrCreateScoreData(chart: Chart) =
-            let hash = calculateHash(chart)
+            let hash = Chart.hash chart
             if hash |> data.ContainsKey |> not then data.Add(hash, ChartSaveData.FromChart(chart))
             data.[hash]
 
