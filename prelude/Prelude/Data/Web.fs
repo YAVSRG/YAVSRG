@@ -26,7 +26,7 @@ let private downloadString(url: string, callback) =
             callback(result)
             return true
         with :? HttpRequestException as err ->
-            Logging.Error("Failed to get web data from " + url)(err.ToString())
+            Logging.Error("Failed to get web data from " + url, err)
             return false
     }
 
@@ -35,8 +35,8 @@ let downloadJson<'T>(url, callback) =
         fun s ->
             match Json.fromString<'T>(s) with
             | JsonResult.Success s -> callback(s)
-            | JsonResult.MapFailure err -> Logging.Error("Failed to interpret json data from "+ url)(err.ToString())
-            | JsonResult.ParseFailure err -> Logging.Error("Failed to parse json data from "+ url)(err.ToString()))
+            | JsonResult.MapFailure err -> Logging.Error("Failed to interpret json data from "+ url, err)
+            | JsonResult.ParseFailure err -> Logging.Error("Failed to parse json data from "+ url, err))
 
 let downloadFile(url: string, target: string): StatusTask =
     fun output ->
@@ -47,7 +47,7 @@ let downloadFile(url: string, target: string): StatusTask =
                     if ce.UserState = (tcs :> obj) then
                         if ce.Error <> null then tcs.TrySetException(ce.Error) |> ignore
                         elif ce.Cancelled then tcs.TrySetCanceled() |> ignore
-                        else tcs.TrySetResult(()) |> ignore)
+                        else tcs.TrySetResult () |> ignore)
             let prog = new DownloadProgressChangedEventHandler(fun _ e -> output(sprintf "Downloading.. %sMB/%sMB (%i%%)" "" "" e.ProgressPercentage))
 
             output("Waiting for download...")
@@ -62,6 +62,6 @@ let downloadFile(url: string, target: string): StatusTask =
             if isNull tcs.Task.Exception then
                 return true
             else
-                Logging.Error("Failed to download file from " + url)(tcs.Task.Exception.ToString())
+                Logging.Error("Failed to download file from " + url, tcs.Task.Exception)
                 return false
         }

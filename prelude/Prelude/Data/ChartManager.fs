@@ -116,7 +116,7 @@ module ChartManager =
         let filter = sepBy (attempt criterion <|> pstring <|> word) spaces1
 
         let parseFilter str =
-            match runParserOnString filter () "" str with
+            match run filter str with
             | Success (x, _, _) -> x
             | Failure (f, _, _) -> [Impossible]
 
@@ -239,7 +239,7 @@ module ChartManager =
                                     (
                                         List.iter this.CacheChart charts
                                     ))
-                            with err -> Logging.Error("Failed to load/convert file: " + file) (err.ToString())
+                            with err -> Logging.Error("Failed to load/convert file: " + file, err)
                         | _ -> ()
                     return true
                 }

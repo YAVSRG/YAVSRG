@@ -99,12 +99,19 @@ module Common =
         static do agent.Start()
 
         static member Subscribe f = evt.Publish.Add f
-        static member Log level main details = agent.Post(level, main, details)
-        static member Info = Logging.Log LoggingLevel.INFO
-        static member Warn = Logging.Log LoggingLevel.WARNING
-        static member Error = Logging.Log LoggingLevel.ERROR
-        static member Debug = Logging.Log LoggingLevel.DEBUG
-        static member Critical = Logging.Log LoggingLevel.CRITICAL
+        static member Log level main details = agent.Post(level, main, details.ToString())
+
+        static member Info (s, err) = Logging.Log LoggingLevel.INFO s err
+        static member Warn (s, err) = Logging.Log LoggingLevel.WARNING s err
+        static member Error (s, err) = Logging.Log LoggingLevel.ERROR s err
+        static member Debug (s, err) = Logging.Log LoggingLevel.DEBUG s err
+        static member Critical (s, err) = Logging.Log LoggingLevel.CRITICAL s err
+
+        static member Info s = Logging.Log LoggingLevel.INFO s ""
+        static member Warn s = Logging.Log LoggingLevel.WARNING s ""
+        static member Error s = Logging.Log LoggingLevel.ERROR s ""
+        static member Debug s = Logging.Log LoggingLevel.DEBUG s ""
+        static member Critical s = Logging.Log LoggingLevel.CRITICAL s ""
 
     Logging.Subscribe (fun (level, main, details) -> printfn "[%A]: %s" level main; if level = LoggingLevel.CRITICAL then printfn " .. %s" details)
 
@@ -125,7 +132,7 @@ module Common =
                         let s: string[] = l.Split([|'='|], 2)
                         mapping.Add(s.[0], s.[1])) lines
                 loadedPath <- path
-            with err -> Logging.Error("Failed to load localisation file: " + path)(err.ToString())
+            with err -> Logging.Error("Failed to load localisation file: " + path, err)
 
         let localise str : string =
             if mapping.ContainsKey(str) then mapping.[str]
@@ -158,13 +165,13 @@ module Common =
                 Async.StartAsTask(
                     async {
                         try
-                            Logging.Debug(sprintf "Task <%s> started" name) ""
+                            Logging.Debug(sprintf "Task <%s> started" name)
                             info <- "Running"
-                            let! outcome = t (fun s -> info <- s; if not visible then Logging.Debug (sprintf "[%s] %s" name s) "")
-                            Logging.Debug(sprintf "Task <%s> complete (%A)" name outcome) ""
+                            let! outcome = t (fun s -> info <- s; if not visible then Logging.Debug (sprintf "[%s] %s" name s))
+                            Logging.Debug(sprintf "Task <%s> complete (%A)" name outcome)
                             info <- "Complete"
                         with err ->
-                            Logging.Error(sprintf "Exception in task '%s'" name) (err.ToString())
+                            Logging.Error(sprintf "Exception in task '%s'" name, err)
                             info <- sprintf "Failed: %O" <| err.GetType()
                         removeTask(this)
                         complete <- true
@@ -177,8 +184,8 @@ module Common =
             member this.Status = task.Status
             member this.Cancel() =
                 try
-                    if complete then Logging.Warn(sprintf "Task <%s> already finished, can't cancel!" name) ""
-                    else Logging.Debug(sprintf "Task <%s> cancelled" name) ""; cts.Cancel(false)
+                    if complete then Logging.Warn(sprintf "Task <%s> already finished, can't cancel!" name)
+                    else Logging.Debug(sprintf "Task <%s> cancelled" name); cts.Cancel(false)
                 with err -> ()
             member this.Visible = visible
             member this.Info = info
@@ -187,7 +194,7 @@ module Common =
         let Subscribe f = evt.Publish.Add f
 
         let TaskList = ResizeArray<ManagedTask>()
-        let private removeTask = fun mt -> if lock(TaskList) (fun () -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name) ""
+        let private removeTask = fun mt -> if lock(TaskList) (fun () -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name)
 
         let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc(l) in f(v); return v }
         let rec Chain (procs: StatusTask list): StatusTask =
@@ -218,15 +225,15 @@ module Common =
             try
                 Json.fromFile(path) |> JsonResult.value
             with err ->
-                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path)) (err.ToString())
+                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path), err)
                 if prompt then
                     Console.WriteLine("If you would like to launch anyway, press ENTER.")
                     Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
                     Console.ReadLine() |> ignore
-                    Logging.Critical("User has chosen to launch game with default data.") ""
+                    Logging.Critical("User has chosen to launch game with default data.")
                 defaultData
         else
-            Logging.Info(sprintf "No %s file found, creating it." name) ""
+            Logging.Info(sprintf "No %s file found, creating it." name)
             defaultData
 
     do

@@ -271,7 +271,7 @@ module Interlude =
             Chart (keys, header, notes, bpms, sv, filepath)
             |> Some
         with
-        | err -> Logging.Error ("Could not load chart from " + filepath) (err.ToString()); None
+        | err -> Logging.Error ("Could not load chart from " + filepath, err); None
 
     let saveChartFileTo (chart: Chart) filepath =
         use fs = new FileStream(filepath, FileMode.Create)

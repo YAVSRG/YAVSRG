@@ -179,7 +179,10 @@ module Themes =
                         Json.toFile(target, true) json
                 json, success
             with err ->
-                Logging.Error(sprintf "Couldn't load json '%s' in theme '%s'" (String.concat "/" path) (match storage with Zip z -> "DEFAULT" | Folder f -> Path.GetFileName f)) (err.ToString())
+                Logging.Error(
+                    sprintf "Couldn't load json '%s' in theme '%s'"
+                        (String.concat "/" path)
+                        (match storage with Zip z -> "DEFAULT" | Folder f -> Path.GetFileName f), err)
                 defaultValue()
 
         member this.CopyTo(targetPath) =

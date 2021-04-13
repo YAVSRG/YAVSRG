@@ -379,7 +379,7 @@ module ChartConversions =
                 let map = loadBeatmapFile path
                 if getGameMode map = GameMode.Mania && (let (_, _, _, d, _, _, _) = map in (let keys = d.CircleSize |> int in 3 <= keys && keys <= 10)) then
                     [convert_osu_interlude (loadBeatmapFile path)] else []
-            with err -> Logging.Error("Could not load .osu file: " + path) (err.ToString()); []
+            with err -> Logging.Error("Could not load .osu file: " + path, err); []
         | _ -> []
 
     //Writes chart to new location, including copying its background and audio files
@@ -393,9 +393,9 @@ module ChartConversions =
             if (File.Exists(source)) then
                 if (not (File.Exists(target))) then
                     try File.Copy(source, target)
-                    with err -> Logging.Error ("Could not copy media file from " + source) (err.ToString())
+                    with err -> Logging.Error("Could not copy media file from " + source, err)
                 else () //fail silently when repeatedly copying
-            else Logging.Warn ("Missing media file at " + source) ""
+            else Logging.Warn("Missing media file at " + source)
     
         copyFile (Path.Combine(sourceFolder, c.Header.AudioFile)) (Path.Combine(targetFolder, c.Header.AudioFile))
         copyFile (Path.Combine(sourceFolder, c.Header.BGFile)) (Path.Combine(targetFolder, c.Header.BGFile))
