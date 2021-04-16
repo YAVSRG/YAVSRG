@@ -147,23 +147,23 @@ module Selection =
         member this.Previous() =
             match this.HoverChild with
             | None -> Logging.Debug("No hoverchild for this ListSelectable, there should always be one")
-            | Some w -> let i = (items.IndexOf(w) - 1 + items.Count) % items.Count in this.HoverChild <- Some items.[i]
+            | Some w -> let i = (items.IndexOf w - 1 + items.Count) % items.Count in this.HoverChild <- Some items.[i]
 
         member this.Next() =
             match this.HoverChild with
             | None -> Logging.Debug("No hoverchild for this ListSelectable, there should always be one")
-            | Some w -> let i = (items.IndexOf(w) + 1) % items.Count in this.HoverChild <- Some items.[i]
+            | Some w -> let i = (items.IndexOf w + 1) % items.Count in this.HoverChild <- Some items.[i]
 
         override this.Add(c) =
             base.Add(c)
             match c with
-            | :? Selectable as c -> items.Add(c)
+            | :? Selectable as c -> items.Add c
             | _ -> ()
 
         override this.Remove(c) =
             base.Remove(c)
             match c with
-            | :? Selectable as c -> items.Remove(c) |> ignore
+            | :? Selectable as c -> items.Remove c |> ignore
             | _ -> ()
 
         override this.OnSelect() = base.OnSelect(); if lastHover.IsNone then this.HoverChild <- Some items.[0] else this.HoverChild <- lastHover
@@ -177,6 +177,42 @@ module Selection =
 
         override this.Clear() = base.Clear(); items.Clear()
 
+    type FlowSelectable(height, spacing, onDeselect) as this =
+        inherit Selectable()
+
+        let mutable h = 0.0f
+        let fc = new FlowContainer()
+        let ls =
+            { new ListSelectable(false) with
+                override _.SParent = this.SParent
+                override _.OnDeselect() = base.OnDeselect(); onDeselect()
+                override this.Up() = base.Up(); Option.iter fc.ScrollTo this.HoverChild
+                override this.Down() = base.Down(); Option.iter fc.ScrollTo this.HoverChild }
+
+        do
+            fc.Add ls
+            this.Add fc
+
+        override this.Add(c) =
+            if c = (fc :> Widget) then base.Add c
+            else
+                c |> positionWidget(0.0f, 0.0f, h, 0.0f, 0.0f, 1.0f, h + height, 0.0f) |> ls.Add
+                h <- h + height + spacing
+                ls.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f)
+
+        override this.Remove(c) =
+            ls.Remove c
+            h <- 0.0f
+            for child in ls.Children do
+                child.Reposition(0.0f, 0.0f, h, 0.0f, 0.0f, 1.0f, h + height, 0.0f)
+                h <- h + height + spacing
+            ls.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f)
+
+        override this.OnSelect() = base.OnSelect(); ls.Selected <- true
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+
     (*
         Specific widgets to actually build options screen
     *)
@@ -189,8 +225,6 @@ module Selection =
             this.Add(TextBox(K ([|"❖";"✎";"♛";"⌨";"⚒"|].[icon]), K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 1.0f, 0.0f, 0.7f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
 
-        override this.Draw() =
-            base.Draw()
         override this.OnSelect() =
             this.Selected <- false
             onClick()
@@ -210,6 +244,37 @@ module Selection =
             let mutable i = array.IndexOf(values, setting.Value)
             LittleButton((fun () -> sprintf "%s: %s" label names.[i]),
                 (fun () -> i <- (i + 1) % values.Length; setting.Value <- values.[i]; onClick()))
+
+    type CardButton(title, subtitle, highlight, onClick) as this =
+        inherit Selectable()
+
+        do
+            TextBox(K title, K (Color.White, Color.Black), 0.0f)
+            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
+            |> this.Add
+
+            TextBox(K subtitle, K (Color.White, Color.Black), 0.0f)
+            |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
+            |> this.Add
+
+            Clickable(
+                (fun () -> if this.SParent.Value.Selected then this.Selected <- true),
+                (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
+            |> this.Add
+
+        override this.Draw() =
+            let hi = Screens.accentShade(255, 1.0f, 0.0f)
+            let lo = Color.FromArgb(100, hi)
+            let e = highlight()
+            Draw.quad (Quad.ofRect this.Bounds)
+                (struct((if this.Hover then hi else lo), (if e then hi else lo), (if e then hi else lo), if this.Hover then hi else lo))
+                Sprite.DefaultQuad
+            base.Draw()
+
+        override this.OnSelect() =
+            base.OnSelect()
+            onClick()
+            this.Selected <- false
 
     type Selector(items: string array, index, setter) as this =
         inherit NavigateSelectable()
@@ -246,18 +311,18 @@ module Selection =
     type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, incr: float32) as this =
         inherit NavigateSelectable()
         let TEXTWIDTH = 130.0f
-        let color = AnimationFade(0.5f)
+        let color = AnimationFade 0.5f
         let mutable dragging = false
-        let chPercent(v) = setting.ValuePercent <- setting.ValuePercent + v
+        let chPercent v = setting.ValuePercent <- setting.ValuePercent + v
         do
-            this.Animation.Add(color)
-            this.Add(new TextBox((fun () -> setting.Value.ToString()), (fun () -> Color.White, Color.Black), 0.0f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
+            this.Animation.Add color
+            this.Add(new TextBox((fun () -> setting.Value.ToString()), K (Color.White, Color.Black), 0.0f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
             this.Add(new Clickable((fun () -> this.Selected <- true; dragging <- true), fun b -> color.Target <- if b then this.Hover <- true; 0.8f else 0.5f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            let struct (l, t, r, b) = this.Bounds |> Rect.trimLeft(TEXTWIDTH)
+            let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
             if this.Selected then
                 if (Mouse.Held(MouseButton.Left) && dragging) then
                     let amt = (Mouse.X() - l) / (r - l)
@@ -271,7 +336,7 @@ module Selection =
 
         override this.Draw() =
             let v = setting.ValuePercent
-            let struct (l, t, r, b) = this.Bounds |> Rect.trimLeft(TEXTWIDTH)
+            let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
             let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
             let m = (b + t) * 0.5f
             Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Screens.accentShade(255, 1.0f, 0.0f)) Sprite.Default
@@ -280,7 +345,7 @@ module Selection =
 
     type ColorPicker(color: ISettable<byte>) as this =
         inherit NavigateSelectable()
-        let sprite = Themes.getTexture("note")
+        let sprite = Themes.getTexture "note"
         let n = byte sprite.Rows
         let fd() = color.Apply(fun x -> (x + n - 1uy) % n)
         let bk() = color.Apply(fun x -> (x + 1uy) % n)
@@ -290,7 +355,7 @@ module Selection =
             base.Draw()
             if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
             elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-            Draw.quad(this.Bounds |> Quad.ofRect)(Color.White |> Quad.colorOf)(sprite |> Sprite.gridUV(3, int color.Value))
+            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
 
         override this.Left() = bk()
         override this.Up() = fd()
@@ -312,7 +377,7 @@ module Selection =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if this.Selected then
-                match Input.consumeAny(InputEvType.Press) with
+                match Input.consumeAny InputEvType.Press with
                 | ValueNone -> ()
                 | ValueSome b ->
                     match b with
@@ -347,7 +412,7 @@ module Selection =
                 match p with
                 | e when e = selector.Chosen ->
                     let c = p.Children
-                    match c.IndexOf(this) with
+                    match c.IndexOf this with
                     | 0 -> ()
                     | n -> p.Synchronized(fun () -> c.Reverse(n - 1, 2))
                 | _ -> ()
@@ -357,7 +422,7 @@ module Selection =
                 match p with
                 | e when e = selector.Chosen ->
                     let c = p.Children
-                    match c.IndexOf(this) with
+                    match c.IndexOf this with
                     | x when x + 1 = c.Count -> ()
                     | n -> p.Synchronized(fun () -> c.Reverse(n, 2))
                 | _ -> ()
@@ -369,7 +434,7 @@ module Selection =
                     | e when e = selector.Chosen -> selector.Available
                     | a when a = selector.Available -> selector.Chosen
                     | _ -> failwith "impossible"
-                p.Synchronized(fun () -> p.Remove(this); o.Add(this))
+                p.Synchronized(fun () -> p.Remove this; o.Add this)
             override this.Right() = this.Left()
 
         and ListOrderedSelector(setting: ISettable<ResizeArray<string>>, items: ResizeArray<string>) as this =
@@ -391,7 +456,7 @@ module Selection =
                     |> positionWidget(20.0f, 0.5f, 50.0f, 0.0f, -20.0f, 1.0f, -20.0f, 1.0f) )
                 let enabled = setting.Value
                 for s in items do
-                    if enabled.Contains(s) |> not then
+                    if enabled.Contains s |> not then
                         available.Add(ListOrderedItem(s, this))
                 for s in enabled do
                     selected.Add(ListOrderedItem(s, this))
@@ -448,16 +513,16 @@ module Selection =
             member this.Available = available
 
     type DUEditor(options, index, setter, controls: Widget array array) as this =
-        inherit Selector(options, index, fun (i, s) -> this.ChangeU(i); setter(i, s))
+        inherit Selector(options, index, fun (i, s) -> this.ChangeU i; setter(i, s))
 
         let mutable current = index
         override this.OnAddedTo(p) =
-            base.OnAddedTo(p)
-            p.Synchronized(fun () -> for w in controls.[index] do this.SParent.Value.SParent.Value.Add(w))
+            base.OnAddedTo p
+            p.Synchronized(fun () -> for w in controls.[index] do this.SParent.Value.SParent.Value.Add w)
 
         member this.ChangeU(newIndex) =
-            for w in controls.[current] do this.SParent.Value.SParent.Value.Remove(w)
-            for w in controls.[newIndex] do this.SParent.Value.SParent.Value.Add(w)
+            for w in controls.[current] do this.SParent.Value.SParent.Value.Remove w
+            for w in controls.[newIndex] do this.SParent.Value.SParent.Value.Add w
             current <- newIndex
 
     module WatcherSelect =
@@ -498,13 +563,13 @@ module Selection =
             override this.Up() =
                 match this.HoverChild with
                 | Some s ->
-                    let i = fc.Children.IndexOf(s)
+                    let i = fc.Children.IndexOf s
                     this.HoverChild <- fc.Children.[(i - 1 + fc.Children.Count) % fc.Children.Count] :?> Selectable |> Some
                 | None -> ()
             override this.Down() =
                 match this.HoverChild with
                 | Some s ->
-                    let i = fc.Children.IndexOf(s)
+                    let i = fc.Children.IndexOf s
                     this.HoverChild <- fc.Children.[(i + 1) % fc.Children.Count] :?> Selectable |> Some
                 | None -> ()
 
@@ -554,6 +619,6 @@ module Selection =
                 if not disposed then
                     Input.absorbAll()
             override this.Dispose() = (base.Dispose(); disposed <- true) }
-        w.Add(main)
+        w.Add main
         w.SelectedChild <- Some main
         w

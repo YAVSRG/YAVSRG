@@ -28,9 +28,7 @@ module private ScreenLevelSelectVars =
     // - hotkeys to navigate by pack/close and open quickly
     // - display of keycount for charts
     // - fix for scoreboard allowing clicking of culled objects
-    // - nicer looking pack buttons
     // - "random chart" hotkey
-    // - ability to delete charts
     // - cropping of text that is too long
     
     //eventual todo:
@@ -40,6 +38,9 @@ module private ScreenLevelSelectVars =
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //filepath
     let mutable expandedGroup = ""
+
+    //let mutable selectedCollection = ("", null)
+
     let mutable scrollBy = ignore
     let mutable colorVersionGlobal = 0
     //future todo: different color settings?
@@ -131,7 +132,7 @@ module ScreenLevelSelect =
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
-                if Mouse.Hover(this.Bounds) && options.Hotkeys.Delete.Value.Tapped() then
+                if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
                     let name = sprintf "%s | %s" (data.Accuracy.Format()) (data.Lamp.ToString())
                     Screens.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                         fun () ->
@@ -220,7 +221,7 @@ module ScreenLevelSelect =
                     match filter.Value with
                     | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.Score.rate = rate)
                     | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.Score.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.Score.keycount - 3])
-                    | ScoreboardFilter.CurrentMods// -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods <> null) //nyi
+                    | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods = selectedMods) //nyi
                     | _ -> K true
                     )
 
@@ -228,57 +229,28 @@ module ScreenLevelSelect =
                 base.Update(elapsedTime, bounds)
                 if this.Selected && (ls.Selected <> options.Hotkeys.Scoreboard.Value.Pressed()) then ls.Selected <- not ls.Selected
 
-        type ModSelectItem(name: string) as this =
-            inherit Selectable()
-
-            do
-                TextBox(ModState.getModName name |> K, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
-                |> this.Add
-
-                TextBox(ModState.getModDesc name |> K, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
-                |> this.Add
-
-                Clickable(
-                    (fun () -> if this.SParent.Value.Selected then this.Selected <- true),
-                    (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
-                |> this.Add
-
-            override this.Draw() =
-                let hi = Screens.accentShade(255, 1.0f, 0.0f)
-                let lo = Color.FromArgb(100, hi)
-                let e = selectedMods.ContainsKey(name)
-                Draw.quad (Quad.ofRect this.Bounds)
-                    (struct((if this.Hover then hi else lo), (if e then hi else lo), (if e then hi else lo), if this.Hover then hi else lo))
-                    Sprite.DefaultQuad
-                base.Draw()
-
-            override this.OnSelect() =
-                base.OnSelect()
-                selectedMods <- ModState.cycleState name selectedMods
-                updateChart()
-                this.Selected <- false
-
         type ModSelect() as this =
-            inherit ListSelectable(false)
+            inherit FlowSelectable(75.0f, 5.0f,
+                fun () ->
+                    let (left, _, right, _) = this.Anchors
+                    left.Target <- -800.0f
+                    right.Target <- -800.0f)
             do
-                let mutable i = 0.0f
-                for k in modList.Keys do
-                    this.Add(ModSelectItem k |> positionWidget(0.0f, 0.0f, i * 80.0f, 0.0f, 0.0f, 1.0f, 75.0f + i * 80.0f, 0.0f))
-                    i <- i + 1.0f
+                for name in modList.Keys do
+                    CardButton(
+                        ModState.getModName name,
+                        ModState.getModDesc name,
+                        (fun () -> selectedMods.ContainsKey name),
+                        fun () -> 
+                            selectedMods <- ModState.cycleState name selectedMods
+                            updateChart())
+                    |> this.Add
 
             override this.OnSelect() =
                 base.OnSelect()
                 let (left, _, right, _) = this.Anchors
                 left.Target <- 0.0f
                 right.Target <- 0.0f
-
-            override this.OnDeselect() =
-                base.OnSelect()
-                let (left, _, right, _) = this.Anchors
-                left.Target <- -800.0f
-                right.Target <- -800.0f
 
     type InfoPanel() as this =
         inherit Selectable()
@@ -325,7 +297,7 @@ module ScreenLevelSelect =
 
         override this.Update(elapsedTime, bounds) =
             if options.Hotkeys.Mods.Value.Tapped() then
-                if mods.Selected then scores.Selected <- true else mods.Selected <- true
+                mods.Selected <- true
             elif options.Hotkeys.Scoreboard.Value.Tapped() then
                 scores.Selected <- true
             base.Update(elapsedTime, bounds)

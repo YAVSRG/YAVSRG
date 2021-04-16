@@ -94,7 +94,7 @@ module Gameplay =
             //update pbs
             let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) =
                 if target.ContainsKey(name) then
-                    let n, pb = updatePB(target.[name])(value, data.Score.rate)
+                    let n, pb = updatePB target.[name] (value, data.Score.rate)
                     target.[name] <- n
                     pb
                 else
@@ -102,7 +102,7 @@ module Gameplay =
                     PersonalBestType.Faster
             f data.Accuracy.Name d.Lamp data.Lamp,
             f data.Accuracy.Name d.Accuracy data.Accuracy.Value,
-            //todo: move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
+            //todo: maybe move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
             f (data.Accuracy.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
         else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)
 
@@ -115,7 +115,7 @@ module Gameplay =
             let c, ch =
                 match cache.LookupChart(Options.options.CurrentChart.Value) with
                 | Some cc ->
-                    match cache.LoadChart(cc) with
+                    match cache.LoadChart cc with
                     | Some c -> cc, c
                     | None ->
                         Logging.Error("Could not load chart file: " + cc.FilePath)

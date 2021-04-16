@@ -86,10 +86,10 @@ module Components =
     type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
         inherit Widget()
 
-        let color = AnimationFade(0.3f)
+        let color = AnimationFade 0.3f
 
         do
-            this.Animation.Add(color)
+            this.Animation.Add color
             this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
 
         override this.Draw() =
@@ -153,8 +153,14 @@ module Components =
                     if t < bottom && b > top then c.Draw()
             Stencil.finish()
 
+        //scrolls so that w becomes visible. w is (mostly) expected to be a child of the container but sometimes is used for sneaky workarounds
+        member this.ScrollTo(w: Widget) =
+            let struct (_, top, _, bottom) = this.Bounds
+            let struct (_, ctop, _, cbottom) = w.Bounds
+            if cbottom > bottom then scrollPos <- scrollPos + (cbottom - bottom)
+            elif ctop < top then scrollPos <- scrollPos - (top - ctop)
         member this.Filter(f: Widget -> bool) = for c in this.Children do c.Enabled <- f c
-        member this.Sort(comp: Comparison<Widget>) = this.Children.Sort(comp)
+        member this.Sort(comp: Comparison<Widget>) = this.Children.Sort comp
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
@@ -170,7 +176,7 @@ module Components =
                 let fc = FlowContainer(Spacing = 0.0f)
                 fr.Add(fc)
                 Array.iteri
-                    (fun i o -> fc.Add(Button((fun () -> index <- i; func(i)), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
+                    (fun i o -> fc.Add(Button((fun () -> index <- i; func i), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                     options
                 fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
             
@@ -188,7 +194,7 @@ module Components =
         let color = AnimationFade(0.5f)
 
         let mutable active = false
-        let rec toggle() =
+        let toggle() =
             active <- not active
             if active then
                 color.Target <- 1.0f
@@ -241,7 +247,7 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if options.Hotkeys.Select.Value.Tapped() || options.Hotkeys.Exit.Value.Tapped() then tb.Dispose(); this.Close()
-        override this.OnClose() = callback(buf.Value)
+        override this.OnClose() = callback buf.Value
 
     //provide the first tab when constructing
     type TabContainer(name: string, widget: Widget) as this =
@@ -258,7 +264,7 @@ module Components =
         member this.AddTab(name, widget) =
             this.Add(
                 { new Button((fun () -> selected <- name; selectedItem <- widget), name, Bind.DummyBind, Sprite.Default) with member this.Dispose() = base.Dispose(); widget.Dispose() }
-                |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count+1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f))
+                |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count + 1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f))
             count <- count + 1.0f
 
         override this.Draw() =
