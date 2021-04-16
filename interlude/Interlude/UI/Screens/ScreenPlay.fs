@@ -403,9 +403,10 @@ type ScreenPlay() as this =
     override this.OnEnter(prev) =
         Screens.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
         //discord presence
-        Screens.setToolbarCollapsed(true)
-        Screens.setCursorVisible(false)
-        Audio.changeRate(Gameplay.rate)
+        Screens.setToolbarCollapsed true
+        Screens.setCursorVisible false
+        Audio.changeRate Gameplay.rate
+        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
 

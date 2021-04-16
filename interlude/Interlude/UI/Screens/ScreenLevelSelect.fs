@@ -12,6 +12,7 @@ open Prelude.Data.ChartManager.Sorting
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
+open Interlude
 open Interlude.Gameplay
 open Interlude.Themes
 open Interlude.Utils
@@ -619,9 +620,10 @@ type ScreenLevelSelect() as this =
         base.Draw()
 
     override this.OnEnter(prev) =
-        base.OnEnter(prev)
+        base.OnEnter prev
+        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Action (fun () -> Audio.playFrom currentChart.Value.Header.PreviewTime)
         refresh()
 
     override this.OnExit(next) =
-        base.OnExit(next)
+        base.OnExit next
         Input.removeInputMethod()

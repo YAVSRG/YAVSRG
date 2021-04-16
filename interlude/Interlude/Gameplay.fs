@@ -50,11 +50,11 @@ module Gameplay =
     let changeChart(cachedChart, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
-        chartSaveData <- Some <| scores.GetOrCreateScoreData(chart)
-        Themes.loadBackground(chart.BGPath)
+        chartSaveData <- Some <| scores.GetOrCreateScoreData chart
+        Themes.loadBackground chart.BGPath
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Value - offsetOf chart.Notes.First.Value
-        Audio.changeTrack(chart.AudioPath, localOffset, rate)
-        Audio.playFrom(chart.Header.PreviewTime)
+        Audio.changeTrack (chart.AudioPath, localOffset, rate)
+        Audio.playFrom chart.Header.PreviewTime
         Options.options.CurrentChart.Value <- cachedChart.FilePath
         updateChart()
         onChartChange()
@@ -86,7 +86,7 @@ module Gameplay =
             | _ -> true //todo: fill in this stub (pb condition will be complicated)
         then
             //add to score db
-            d.Scores.Add(data.Score)
+            d.Scores.Add data.Score
             scores.Save()
             //update top scores
             Options.options.Stats.TopPhysical.Apply(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical))

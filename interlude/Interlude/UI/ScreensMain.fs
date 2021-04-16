@@ -45,8 +45,8 @@ type ScreenMenu() as this =
         >> fun s -> s.Split('¬')
         >> fun l -> if l.Length > 1 then l.[0], l.[1] else l.[0], ""
     let mutable splashText = "", ""
-    let splashAnim = AnimationFade(0.0f)
-    let splashSubAnim = AnimationFade(0.0f)
+    let splashAnim = AnimationFade 0.0f
+    let splashSubAnim = AnimationFade 0.0f
 
     do
         this.Add(play |> positionWidget(-100.0f, 0.0f, -200.0f, 0.5f, 1200.0f, 0.0f, -100.0f, 0.5f))
@@ -62,6 +62,7 @@ type ScreenMenu() as this =
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
         Screens.backgroundDim.Target <- 0.0f
         Screens.setToolbarCollapsed false
+        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Loop
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()
 
