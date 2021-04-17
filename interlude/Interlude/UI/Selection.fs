@@ -245,25 +245,29 @@ module Selection =
             LittleButton((fun () -> sprintf "%s: %s" label names.[i]),
                 (fun () -> i <- (i + 1) % values.Length; setting.Value <- values.[i]; onClick()))
 
-    type CardButton(title, subtitle, highlight, onClick) as this =
+    type CardButton(title, subtitle, highlight, onClick, colorFunc) as this =
         inherit Selectable()
 
         do
-            TextBox(K title, K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
-            |> this.Add
+            if subtitle <> "" then
+                TextBox(K title, K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
+                |> this.Add
 
-            TextBox(K subtitle, K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
-            |> this.Add
+                TextBox(K subtitle, K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
+                |> this.Add
+            else TextBox(K title, K (Color.White, Color.Black), 0.0f) |> this.Add
 
             Clickable(
                 (fun () -> if this.SParent.Value.Selected then this.Selected <- true),
                 (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
             |> this.Add
 
+        new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Screens.accentShade(255, 1.0f, 0.0f))
+
         override this.Draw() =
-            let hi = Screens.accentShade(255, 1.0f, 0.0f)
+            let hi = colorFunc()
             let lo = Color.FromArgb(100, hi)
             let e = highlight()
             Draw.quad (Quad.ofRect this.Bounds)

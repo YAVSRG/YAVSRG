@@ -269,7 +269,7 @@ type Jukebox() as this =
         if Options.options.Hotkeys.Volume.Value.Pressed() then
             fade.Target <- 1.0f
             Options.options.AudioVolume.Apply((+) (float (Mouse.Scroll()) * 0.02))
-            Audio.changeVolume(Options.options.AudioVolume.Value)
+            Audio.changeVolume Options.options.AudioVolume.Value
             slider.Target <- float32 Options.options.AudioVolume.Value
         else fade.Target <- 0.0f
 
@@ -294,15 +294,35 @@ type Toolbar() as this =
     do
         this.Animation.Add barSlider
         this.Animation.Add notifSlider
-        this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, HEIGHT * 0.5f, 1.0f))
-        this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f))
-        this.Add(new Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f))
-        this.Add(new Button((fun () -> if Screens.currentType <> ScreenType.Play then Screens.addDialog(OptionsMenu.Main())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Jukebox())
-        this.Add(new Notifications.NotificationDisplay())
-        this.Add(Notifications.TaskDisplay HEIGHT)
+
+        TextBox(K version, K (Color.White, Color.Black), 1.0f)
+        |> positionWidget(-300.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, HEIGHT * 0.5f, 1.0f)
+        |> this.Add
+
+        TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f)
+        |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
+        |> this.Add
+
+        Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default)
+        |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
+        |> this.Add
+        
+        Button(
+            (fun () -> if Screens.currentType <> ScreenType.Play then Screens.addDialog(OptionsMenu.Main())), "Options", Options.options.Hotkeys.Options, Sprite.Default)
+        |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
+        |> this.Add
+
+        Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default)
+        |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
+        |> this.Add
+
+        Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default)
+        |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
+        |> this.Add
+
+        Jukebox() |> this.Add
+        Notifications.NotificationDisplay() |> this.Add
+        Notifications.TaskDisplay HEIGHT |> this.Add
 
         Screens.setToolbarCollapsed <- fun b -> forceCollapse <- b
 
@@ -355,6 +375,8 @@ type ScreenContainer() as this =
         Screens.back <- this.Back
         Screens.addDialog <- dialogs.Add
         Screens.setCursorVisible <- (fun b -> cursor <- b)
+        Screens.quickOptionsMenu <- OptionsMenu.QuickPlay >> (fun s -> s :> Dialog)
+        Screens.collectionsMenu <- OptionsMenu.Collections >> (fun s -> s :> Dialog)
         this.Add toolbar
         Screens.logo
         |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
@@ -378,8 +400,8 @@ type ScreenContainer() as this =
                 new AnimationAction(
                     fun () ->
                         let s = s()
-                        current.OnExit(s)
-                        s.OnEnter(current)
+                        current.OnExit s
+                        s.OnEnter current
                         match Screens.currentType with
                         | ScreenType.Play | ScreenType.Score -> current.Dispose()
                         | _ -> ()
@@ -389,7 +411,7 @@ type ScreenContainer() as this =
                     ))
             screenTransition.Add t2
             screenTransition.Add(new AnimationAction(fun () -> t1.Reset(); t2.Reset()))
-    member this.ChangeScreen(screenType, flags) = this.ChangeScreen((screens.[int screenType] |> K), screenType, flags)
+    member this.ChangeScreen(screenType, flags) = this.ChangeScreen(K screens.[int screenType], screenType, flags)
 
     member this.Back(flags) =
         match Screens.currentType with
@@ -428,7 +450,7 @@ type ScreenContainer() as this =
             let s = 150.0f
 
             let size x =
-                let f = Math.Clamp(((if t1.Elapsed < TRANSITIONTIME then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / ((4.0f * s) / Render.vwidth), 0.0f, 1.0f)
+                let f = Math.Clamp(((if t1.Elapsed < TRANSITIONTIME then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / (4.0f * s / Render.vwidth), 0.0f, 1.0f)
                 if t1.Elapsed < TRANSITIONTIME then f * s * 0.5f else (1.0f - f) * s * 0.5f
             let diamond x y =
                 let r = size x

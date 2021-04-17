@@ -360,14 +360,23 @@ module OptionsMenuTabs =
         ]
 
     let quickplay(add: string * Selectable -> unit) =
+        let firstNote = Gameplay.currentChart.Value.Notes.First |> Option.map Prelude.Charts.Interlude.offsetOf |> Option.defaultValue 0.0f<ms>
+        let offset = Gameplay.chartSaveData.Value.Offset
         column [
             //offset changer!
-            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(200.0f)
-            PrettySetting("HitPosition", Slider(options.HitPosition :?> IntSetting, 0.005f)).Position(280.0f)
-            PrettySetting("Upscroll", Selector.FromBool(options.Upscroll)).Position(360.0f)
-            PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
-            PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
-            PrettyButton("LifeSystems", ignore).Position(640.0f)
+            PrettySetting("SongAudioOffset",
+                Slider(
+                    { new FloatSetting(float (offset.Value - firstNote), -200.0, 200.0) with
+                        override this.Value
+                            with get() = base.Value
+                            and set(v) = base.Value <- v; offset.Value <- toTime v + firstNote; Audio.localOffset <- toTime v }, 0.01f)
+            ).Position(200.0f)
+            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(280.0f)
+            PrettySetting("HitPosition", Slider(options.HitPosition :?> IntSetting, 0.005f)).Position(360.0f)
+            PrettySetting("Upscroll", Selector.FromBool(options.Upscroll)).Position(440.0f)
+            //PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
+            //PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
+            //PrettyButton("LifeSystems", ignore).Position(640.0f)
         ]
 
 open OptionsMenuTabs
@@ -421,6 +430,8 @@ type OptionsMenu(topLevel) as this =
     override this.OnClose() = ScreenLevelSelect.refresh <- true
 
     static member Main() = OptionsMenu(topLevel)
-    static member QuickPlay() = OptionsMenu(quickplay)
+    static member QuickPlay() =
+        { new OptionsMenu(quickplay) with
+            override this.OnClose() = base.OnClose(); Audio.playLeadIn() }
     static member Collections() = OptionsMenu(topLevel)
 

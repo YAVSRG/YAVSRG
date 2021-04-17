@@ -60,6 +60,8 @@ module Options =
         Volume: Setting<Bind>
 
         Collections: Setting<Bind>
+        AddToCollection: Setting<Bind>
+        RemoveFromCollection: Setting<Bind>
         Mods: Setting<Bind>
         Scoreboard: Setting<Bind>
         ChartInfo: Setting<Bind>
@@ -94,6 +96,8 @@ module Options =
             Skip = Setting(mk Keys.Space)
 
             Collections = Setting(mk Keys.N)
+            AddToCollection = Setting(mk Keys.RightBracket)
+            RemoveFromCollection = Setting(mk Keys.LeftBracket)
             Mods = Setting(mk Keys.M)
             Scoreboard = Setting(mk Keys.Comma)
             ChartInfo = Setting(mk Keys.Period)

@@ -284,6 +284,9 @@ module Screens =
     let mutable internal addNotification: string * NotificationType -> unit = ignore
     let mutable internal addTooltip: Input.Bind * string * float * (unit -> unit) -> unit = ignore
 
+    let mutable internal quickOptionsMenu: unit -> Dialog = fun () -> failwith ""
+    let mutable internal collectionsMenu: unit -> Dialog = fun () -> failwith ""
+
     //background fbo
     let parallaxX  = AnimationFade(0.0f)
     let parallaxY  = AnimationFade(0.0f)

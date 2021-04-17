@@ -237,31 +237,63 @@ module ScreenLevelSelect =
                     left.Target <- -800.0f
                     right.Target <- -800.0f)
 
+            let collectionCard name =
+                CardButton(name, "",
+                    (fun () -> fst selectedCollection = name),
+                    fun () -> selectedCollection <- (name, (cache.GetCollection name).Value))
+
+            //todo: rename, delete
             do
-                CardButton(Localisation.localise "collections.Create", "", K false, ignore) |> this.Add
-                for name in cache.GetCollections() do
-                    CardButton(name, "",
-                        (fun () -> fst selectedCollection = name),
-                        fun () -> selectedCollection <- (name, (cache.GetCollection name).Value))
-                    |> this.Add
-                    //todo: save last selected collection in options
+                CardButton(Localisation.localise "collections.Create", "", K false,
+                    (
+                        fun () ->
+                            TextInputDialog(this.Bounds, "Name collection",
+                                fun s ->
+                                    if s <> "" && (cache.GetCollection s).IsNone then
+                                        cache.UpdateCollection(s, Collection.Blank)
+                                        collectionCard s |> this.Add)
+                            |> Screens.addDialog
+                    ), K Color.Silver) |> this.Add
+                for name in cache.GetCollections() do collectionCard name |> this.Add
+                //todo: save last selected collection in options
                 if fst selectedCollection = "" then
                     let favourites = Localisation.localise "collections.Favourites"
                     let c = 
                         match cache.GetCollection favourites with
                         | Some c -> c
                         | None ->
-                            let n = Collection.Collection (ResizeArray<_>())
+                            let n = Collection.Blank
                             cache.UpdateCollection (favourites, n)
                             n
                     selectedCollection <- (favourites, c)
                     
-
             override this.OnSelect() =
                 base.OnSelect()
                 let (left, _, right, _) = this.Anchors
                 left.Target <- 0.0f
                 right.Target <- 0.0f
+
+            override this.Update(elapsedTime, bounds) =
+                base.Update(elapsedTime, bounds)
+                if currentCachedChart.IsSome then
+                    if options.Hotkeys.AddToCollection.Value.Tapped()then
+                        if
+                            match snd selectedCollection with
+                            | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
+                            | Playlist ps -> ps.Add (selectedChart, selectedMods, rate); true
+                            | Goals gs -> false //not yet implemented
+                        then
+                            colorVersionGlobal <- colorVersionGlobal + 1
+                            Screens.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst selectedCollection] "collections.Added", NotificationType.Info)
+                    elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
+                        if
+                            match snd selectedCollection with
+                            | Collection ccs -> ccs.Remove selectedChart
+                            | Playlist ps -> ps.RemoveAll(fun (id, _, _) -> id = selectedChart) > 0
+                            | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
+                        then
+                            colorVersionGlobal <- colorVersionGlobal + 1
+                            Screens.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst selectedCollection] "collections.Removed", NotificationType.Info)
 
         type ModSelect() as this =
             inherit FlowSelectable(75.0f, 5.0f,
@@ -393,6 +425,7 @@ module ScreenLevelSelect =
         let mutable color = Color.Transparent
         let mutable chartData = None
         let mutable pbData = (None, None, None)
+        let mutable collectionIcon = ""
 
         override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
         override this.Selected = selectedChart = cc.FilePath
@@ -443,6 +476,7 @@ module ScreenLevelSelect =
             Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
             Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
             Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
+            Text.drawB(font(), collectionIcon, 40.0f, right - 80.0f, top + 10.0f, (Color.White, Color.Black))
 
             let border = Rect.expand(5.0f, 5.0f) bounds
             let border2 = Rect.expand(5.0f, 0.0f) bounds
@@ -463,6 +497,13 @@ module ScreenLevelSelect =
                 | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, grade x themeConfig.GradeThresholds)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
                 | None -> ()
                 color <- colorFunc pbData
+                collectionIcon <-
+                    if options.ChartGroupMode.Value <> "Collections" then
+                        match snd selectedCollection with
+                        | Collection ccs -> if ccs.Contains cc.FilePath then "✭" else ""
+                        | Playlist ps -> if ps.Exists(fun (id, _, _) -> id = cc.FilePath) then "➾" else ""
+                        | Goals gs -> if gs.Exists(fun ((id, _, _), _) -> id = cc.FilePath) then "@" else ""
+                    else ""
             if Mouse.Hover(bounds) then
                 hover.Target <- 1.0f
                 if Mouse.Click(MouseButton.Left) then
@@ -542,7 +583,10 @@ type ScreenLevelSelect() as this =
     let refresh() =
         scoreSystem <- (fst options.AccSystems.Value).ToString()
         infoPanel.Refresh()
-        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+        let groups =
+            if options.ChartGroupMode.Value <> "Collections" then
+                cache.GetGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+            else cache.GetCollectionGroups sortBy.[options.ChartSortMode.Value] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then

@@ -69,8 +69,6 @@ type NoteRenderer() as this =
     let columnPositions = Array.init keys (fun i -> float32 i * Themes.noteskinConfig.ColumnWidth)
     let columnWidths = Array.create keys (float32 Themes.noteskinConfig.ColumnWidth)
     let noteHeight = Themes.noteskinConfig.ColumnWidth
-    let scale = float32 Options.options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
-    let hitposition = float32 Options.options.HitPosition.Value
     let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
     let playfieldColor = Themes.themeConfig.PlayfieldColor
 
@@ -91,7 +89,7 @@ type NoteRenderer() as this =
     let hold_colors = Array.create keys 0
 
     let scrollDirectionPos bottom = if Options.options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
-    let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Value then id else Quad.flip
+    let scrollDirectionFlip = fun q -> if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Value then q else Quad.flip q
     let noteRotation =
         if keys = 4 && Themes.noteskinConfig.UseRotation then
             fun k (struct (s, q): SpriteQuad) -> struct (s, Quad.rotate(match k with 0 -> 3 | 1 -> 0 | 2 -> 2 | 3 -> 1 | _ -> 0) q)
@@ -105,6 +103,10 @@ type NoteRenderer() as this =
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
+        
+        let scale = float32 Options.options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
+        let hitposition = float32 Options.options.HitPosition.Value
+
         let playfieldHeight = bottom - top
         let now = Audio.timeWithOffset()
 
@@ -196,7 +198,7 @@ module GameplayWidgets =
         HP: HPSystem
         OnHit: IEvent<HitEvent>
     }
-
+    
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
@@ -485,6 +487,7 @@ type ScreenPlay() as this =
                 //unable to reason about correctness. possible todo: merge these into one so that all actions are ordered by time
                 Input.consumeGameplay(binds.[k], InputEvType.Press, fun t -> this.HandleHit(k, t, false))
                 Input.consumeGameplay(binds.[k], InputEvType.Release, fun t -> this.HandleHit(k, t, true))
+        elif options.Hotkeys.Options.Value.Pressed() then Audio.pause(); Screens.addDialog(Screens.quickOptionsMenu())
         //seek up to miss threshold and display missed notes in widgets
         while noteSeek < notes.Count && offsetOf notes.Data.[noteSeek] < now - missWindow do
             let (_, _, s) = scoreData.[noteSeek]

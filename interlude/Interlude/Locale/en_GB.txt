@@ -1,4 +1,7 @@
 ﻿collections.Favourites=Favourites
+collections.Create=+New collection
+collections.Added=Added %0 to '%1'
+collections.Removed=Removed %0 from '%1'
 mod.auto.name=Auto
 mod.auto.desc=Plays the chart for you.
 mod.mirror.name=Mirror
