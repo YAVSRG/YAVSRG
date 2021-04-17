@@ -1,4 +1,5 @@
-﻿mod.auto.name=Auto
+﻿collections.Favourites=Favourites
+mod.auto.name=Auto
 mod.auto.desc=Plays the chart for you.
 mod.mirror.name=Mirror
 mod.mirror.desc=Horizontally mirrors everything in the chart.

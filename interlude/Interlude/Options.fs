@@ -59,6 +59,7 @@ module Options =
         Tasklist: Setting<Bind>
         Volume: Setting<Bind>
 
+        Collections: Setting<Bind>
         Mods: Setting<Bind>
         Scoreboard: Setting<Bind>
         ChartInfo: Setting<Bind>
@@ -92,6 +93,7 @@ module Options =
             End = Setting(mk Keys.End)
             Skip = Setting(mk Keys.Space)
 
+            Collections = Setting(mk Keys.N)
             Mods = Setting(mk Keys.M)
             Scoreboard = Setting(mk Keys.Comma)
             ChartInfo = Setting(mk Keys.Period)

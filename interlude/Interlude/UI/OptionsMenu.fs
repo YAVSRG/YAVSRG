@@ -359,13 +359,24 @@ module OptionsMenuTabs =
             BigButton(localiseOption "Debug", 4, fun () -> add("Debug", debug(add))) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
         ]
 
+    let quickplay(add: string * Selectable -> unit) =
+        column [
+            //offset changer!
+            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(200.0f)
+            PrettySetting("HitPosition", Slider(options.HitPosition :?> IntSetting, 0.005f)).Position(280.0f)
+            PrettySetting("Upscroll", Selector.FromBool(options.Upscroll)).Position(360.0f)
+            PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
+            PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
+            PrettyButton("LifeSystems", ignore).Position(640.0f)
+        ]
+
 open OptionsMenuTabs
 
 (*
     Options dialog which manages the scrolling effect
 *)
 
-type OptionsMenu() as this =
+type OptionsMenu(topLevel) as this =
     inherit Dialog()
 
     let stack: Selectable option array = Array.create 10 None
@@ -374,7 +385,7 @@ type OptionsMenu() as this =
     let body = Widget()
 
     let add(label, widget) =
-        let n = (List.length namestack)
+        let n = List.length namestack
         namestack <- localiseOption label :: namestack
         name <- String.Join(" > ", List.rev namestack)
         let w = wrapper widget
@@ -382,7 +393,7 @@ type OptionsMenu() as this =
         | None -> ()
         | Some x -> x.Destroy()
         stack.[n] <- Some w
-        body.Add(w)
+        body.Add w
         let n = float32 n + 1.0f
         w.Reposition(0.0f, Render.vheight * n, 0.0f, Render.vheight * n)
         body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
@@ -408,4 +419,8 @@ type OptionsMenu() as this =
         | n -> if stack.[n - 1].Value.SelectedChild.IsNone then back()
 
     override this.OnClose() = ScreenLevelSelect.refresh <- true
+
+    static member Main() = OptionsMenu(topLevel)
+    static member QuickPlay() = OptionsMenu(quickplay)
+    static member Collections() = OptionsMenu(topLevel)
 

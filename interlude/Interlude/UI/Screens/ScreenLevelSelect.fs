@@ -40,7 +40,7 @@ module private ScreenLevelSelectVars =
     let mutable selectedChart = "" //filepath
     let mutable expandedGroup = ""
 
-    //let mutable selectedCollection = ("", null)
+    let mutable selectedCollection = ("", Unchecked.defaultof<Collection>)
 
     let mutable scrollBy = ignore
     let mutable colorVersionGlobal = 0
@@ -230,6 +230,39 @@ module ScreenLevelSelect =
                 base.Update(elapsedTime, bounds)
                 if this.Selected && (ls.Selected <> options.Hotkeys.Scoreboard.Value.Pressed()) then ls.Selected <- not ls.Selected
 
+        type CollectionManager() as this =
+            inherit FlowSelectable(60.0f, 5.0f,
+                fun () ->
+                    let (left, _, right, _) = this.Anchors
+                    left.Target <- -800.0f
+                    right.Target <- -800.0f)
+
+            do
+                CardButton(Localisation.localise "collections.Create", "", K false, ignore) |> this.Add
+                for name in cache.GetCollections() do
+                    CardButton(name, "",
+                        (fun () -> fst selectedCollection = name),
+                        fun () -> selectedCollection <- (name, (cache.GetCollection name).Value))
+                    |> this.Add
+                    //todo: save last selected collection in options
+                if fst selectedCollection = "" then
+                    let favourites = Localisation.localise "collections.Favourites"
+                    let c = 
+                        match cache.GetCollection favourites with
+                        | Some c -> c
+                        | None ->
+                            let n = Collection.Collection (ResizeArray<_>())
+                            cache.UpdateCollection (favourites, n)
+                            n
+                    selectedCollection <- (favourites, c)
+                    
+
+            override this.OnSelect() =
+                base.OnSelect()
+                let (left, _, right, _) = this.Anchors
+                left.Target <- 0.0f
+                right.Target <- 0.0f
+
         type ModSelect() as this =
             inherit FlowSelectable(75.0f, 5.0f,
                 fun () ->
@@ -258,11 +291,16 @@ module ScreenLevelSelect =
 
         let mods = ModSelect()
         let scores = Scoreboard()
+        let collections = CollectionManager()
         let mutable length = ""
         let mutable bpm = ""
 
         do
             mods
+            |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f)
+            |> this.Add
+
+            collections
             |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f)
             |> this.Add
 
@@ -297,7 +335,9 @@ module ScreenLevelSelect =
             scores.Selected <- true
 
         override this.Update(elapsedTime, bounds) =
-            if options.Hotkeys.Mods.Value.Tapped() then
+            if options.Hotkeys.Collections.Value.Tapped() then
+                collections.Selected <- true
+            elif options.Hotkeys.Mods.Value.Tapped() then
                 mods.Selected <- true
             elif options.Hotkeys.Scoreboard.Value.Tapped() then
                 scores.Selected <- true
@@ -332,7 +372,7 @@ module ScreenLevelSelect =
 
         abstract member Draw: float32 * float32 -> float32
         default this.Draw(top: float32, topEdge: float32) =
-            let bounds = this.Bounds(top)
+            let bounds = this.Bounds top
             let struct (_, _, _, bottom) = bounds
             if bottom > topEdge + 170.0f && top < Render.vheight - topEdge then this.OnDraw(bounds, this.Selected)
             top + Rect.height bounds + 15.0f
@@ -340,7 +380,7 @@ module ScreenLevelSelect =
         abstract member Update: float32 * float32 * float -> float32
         default this.Update(top: float32, topEdge: float32, elapsedTime) =
             this.Navigate()
-            let bounds = this.Bounds(top)
+            let bounds = this.Bounds top
             let struct (_, _, _, bottom) = bounds
             if bottom > topEdge + 170.0f && top < Render.vheight - topEdge then this.OnUpdate(bounds, this.Selected, elapsedTime)
             top + Rect.height bounds + 15.0f
