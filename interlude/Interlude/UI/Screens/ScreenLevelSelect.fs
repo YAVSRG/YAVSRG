@@ -238,11 +238,16 @@ module ScreenLevelSelect =
                     right.Target <- -800.0f)
 
             let collectionCard name =
-                CardButton(name, "",
+                { new CardButton(name, "",
                     (fun () -> fst selectedCollection = name),
-                    fun () -> selectedCollection <- (name, (cache.GetCollection name).Value))
+                    fun () -> colorVersionGlobal <- colorVersionGlobal + 1; selectedCollection <- (name, (cache.GetCollection name).Value)) with
+                    override self.Update(elapsedTime, bounds) =
+                        base.Update(elapsedTime, bounds)
+                        if Mouse.Hover self.Bounds && options.Hotkeys.Delete.Value.Tapped() then
+                            Screens.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
+                                fun () -> this.Synchronized(fun () -> this.Remove self; self.Dispose()); cache.DeleteCollection name; Screens.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))}
 
-            //todo: rename, delete
+            //todo: renaming/editing menu
             do
                 CardButton(Localisation.localise "collections.Create", "", K false,
                     (
@@ -476,7 +481,7 @@ module ScreenLevelSelect =
             Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
             Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
             Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
-            Text.drawB(font(), collectionIcon, 40.0f, right - 80.0f, top + 10.0f, (Color.White, Color.Black))
+            Text.drawB(font(), collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
 
             let border = Rect.expand(5.0f, 5.0f) bounds
             let border2 = Rect.expand(5.0f, 0.0f) bounds
