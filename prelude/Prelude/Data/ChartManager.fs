@@ -9,6 +9,7 @@ open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
+open Prelude.Gameplay.Score
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.Difficulty
@@ -42,38 +43,50 @@ module ChartManager =
                 chart.Notes.GetPointAt (infinityf * 1.0f<ms>) |> offsetOf
         let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
         {
-        FilePath = chart.FileIdentifier
-        Title = chart.Header.Title
-        Artist = chart.Header.Artist
-        Creator = chart.Header.Creator
-        Pack = chart.Header.SourcePack
-        Hash = Chart.hash chart
-        Keys = chart.Keys
-        Length = if endTime = 0.0f<ms> then 0.0f<ms> else endTime - (offsetOf chart.Notes.First.Value)
-        BPM = minMaxBPM (chart.BPM.Data |> List.ofSeq) endTime
-        DiffName = chart.Header.DiffName
-        Physical = rating.Physical
-        Technical = rating.Technical }
+            FilePath = chart.FileIdentifier
+            Title = chart.Header.Title
+            Artist = chart.Header.Artist
+            Creator = chart.Header.Creator
+            Pack = chart.Header.SourcePack
+            Hash = Chart.hash chart
+            Keys = chart.Keys
+            Length = if endTime = 0.0f<ms> then 0.0f<ms> else endTime - offsetOf chart.Notes.First.Value
+            BPM = minMaxBPM (List.ofSeq chart.BPM.Data) endTime
+            DiffName = chart.Header.DiffName
+            Physical = rating.Physical
+            Technical = rating.Technical
+        }
 
-    let osuSongFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "osu!", "Songs")
-    let smPackFolder = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Stepmania 5", "Songs")
-    let etternaPackFolder = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "Games", "Etterna", "Songs")
+    let osuSongFolder = Path.Combine(Environment.GetFolderPath Environment.SpecialFolder.LocalApplicationData, "osu!", "Songs")
+    let smPackFolder = Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
+    let etternaPackFolder = Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
 
     (*
         Goals and playlists
     *)
 
     type Goal =
-        | NoGoal
-        | Clear of unit
-        | Grade of unit * int
-        | Accuracy of unit * float
+    | NoGoal
+    | Clear of HPSystemConfig
+    | Lamp of AccuracySystemConfig * Lamp
+    | Accuracy of AccuracySystemConfig * float
 
-    type PlaylistData = string * ModState * float
+    type PlaylistData = string * ModState * float32
     type Collection =
-        | Collection of List<string>
-        | Playlist of List<PlaylistData>
-        | Goals of List<PlaylistData * Goal>
+    | Collection of List<string>
+    | Playlist of List<PlaylistData> //order of list matters
+    | Goals of List<PlaylistData * Goal>
+        member this.ToCollection() =
+            match this with
+            | Collection l -> Collection l
+            | Playlist p -> p |> Seq.map (fun (i, _, _) -> i) |> List |> Collection
+            | Goals g -> g |> Seq.map (fun ((i, _, _), _) -> i) |> List |> Collection
+        member this.ToPlaylist(mods, rate) = 
+            match this with
+            | Collection l -> l |> Seq.map (fun i -> (i, mods, rate)) |> List |> Playlist
+            | Playlist p -> Playlist p
+            | Goals g -> g |> Seq.map (fun (x, _) -> x) |> List |> Playlist
+        static member Blank = Collection (ResizeArray<_>())
 
     (*
         Sorting and searching
@@ -83,26 +96,27 @@ module ChartManager =
         open FParsec
 
         let private firstCharacter (s: string) =
-            if (s.Length = 0) then "?"
-            else
-                if Char.IsLetterOrDigit(s.[0]) then s.[0].ToString().ToUpper() else "?"
+            if s.Length = 0 then "?"
+            elif Char.IsLetterOrDigit s.[0] then s.[0].ToString().ToUpper()
+            else "?"
 
         let groupBy = dict[
                 "Physical", fun c -> let i = int (c.Physical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
                 "Technical", fun c -> let i = int (c.Technical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
                 "Pack", fun c -> c.Pack
-                "Title", fun c -> firstCharacter(c.Title)
-                "Artist", fun c -> firstCharacter(c.Artist)
-                "Creator", fun c -> firstCharacter(c.Creator)
+                "Title", fun c -> firstCharacter c.Title
+                "Artist", fun c -> firstCharacter c.Artist
+                "Creator", fun c -> firstCharacter c.Creator
                 "Keymode", fun c -> c.Keys.ToString() + "k"
+                "Collections", fun _ ->  "" //placeholder. this is overridden in level select
             ]
 
         let sortBy = dict[
-                "Physical", Comparison(fun a b -> a.Physical.CompareTo(b.Physical))
-                "Technical", Comparison(fun a b -> a.Technical.CompareTo(b.Technical))
-                "Title", Comparison(fun a b -> a.Title.CompareTo(b.Title))
-                "Artist", Comparison(fun a b -> a.Artist.CompareTo(b.Artist))
-                "Creator", Comparison(fun a b -> a.Creator.CompareTo(b.Creator))
+                "Physical", Comparison(fun a b -> a.Physical.CompareTo b.Physical)
+                "Technical", Comparison(fun a b -> a.Technical.CompareTo b.Technical)
+                "Title", Comparison(fun a b -> a.Title.CompareTo b.Title)
+                "Artist", Comparison(fun a b -> a.Artist.CompareTo b.Artist)
+                "Creator", Comparison(fun a b -> a.Creator.CompareTo b.Creator)
             ]
 
         type FilterPart = 
@@ -114,7 +128,7 @@ module ChartManager =
         let word = string |>> String
         let pstring = between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy) |>> fun s -> String <| s.ToLower()
         let criterion = string .>>. (pchar '=' >>. string) |>> Criterion
-        let filter = sepBy (attempt criterion <|> pstring <|> word) spaces1
+        let filter = sepBy (attempt criterion <|> pstring <|> word) spaces1 .>> spaces
 
         let parseFilter str =
             match run filter str with
@@ -125,18 +139,22 @@ module ChartManager =
 
     open Sorting
 
-    do 
-        let tP = Json.Mapping.getPickler<Dictionary<string, CachedChart>>()
-        Json.Mapping.Rules.addTypeRuleUnchecked
-            (fun (d: ConcurrentDictionary<string, CachedChart>) -> d |> Dictionary |> tP.Encode)
-            (fun _ json -> tP.Decode null json |> JsonMapResult.map ConcurrentDictionary)
+    module private CacheInit = 
+        let mutable i = false
+        let init() =
+            if not i then 
+                let tP = Json.Mapping.getPickler<Dictionary<string, CachedChart>>()
+                Json.Mapping.Rules.addTypeRuleUnchecked
+                    (fun (d: ConcurrentDictionary<string, CachedChart>) -> d |> Dictionary |> tP.Encode)
+                    (fun _ json -> tP.Decode null json |> JsonMapResult.map ConcurrentDictionary)
+                i <- true
 
-    //todo: add reverse lookup from hash -> id and remove id storage in score data
+    //todo: add reverse lookup from hash -> id for score -> chart lookup
     type Cache() =
         let charts, collections = Cache.Load()
 
         member this.Save() = Json.toFile(Path.Combine(getDataPath "Data", "cache.json"), true) (charts, collections)
-        static member Load() = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) (new ConcurrentDictionary<string, CachedChart>(), new Dictionary<string, Collection>()) false
+        static member Load() = CacheInit.init(); loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) (new ConcurrentDictionary<string, CachedChart>(), new Dictionary<string, Collection>()) false
     
         member this.CacheChart (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c
 
@@ -151,6 +169,11 @@ module ChartManager =
             | Some c -> this.CacheChart c; Some c
             | None -> None
 
+        member this.GetCollections() = collections.Keys :> string seq
+        member this.GetCollection id = if collections.ContainsKey id then Some collections.[id] else None
+        member this.DeleteCollection id = collections.Remove id |> ignore
+        member this.UpdateCollection(id, coll) = collections.[id] <- coll //update or create
+
         member private this.FilterCharts (filter: Filter) (charts: CachedChart seq) =
             seq {
                 for c in charts do
@@ -159,7 +182,7 @@ module ChartManager =
                         (
                             function
                             | Impossible -> false
-                            | String str -> s.Contains(str)
+                            | String str -> s.Contains str
                             | Criterion ("k", n)
                             | Criterion ("key", n)
                             | Criterion ("keys", n) -> c.Keys.ToString() = n
@@ -173,25 +196,26 @@ module ChartManager =
             let groups = new Dictionary<string, List<CachedChart>>()
             for c in this.FilterCharts filter charts.Values do
                 let s = grouping c
-                if (groups.ContainsKey s |> not) then groups.Add(s, new List<CachedChart>())
+                if groups.ContainsKey s |> not then groups.Add(s, new List<CachedChart>())
                 groups.[s].Add c
             for g in groups.Values do
                 g.Sort sorting
             groups
 
-        member this.GetCollections (sorting: Comparison<CachedChart>) filter =
+        member this.GetCollectionGroups (sorting: Comparison<CachedChart>) filter =
             let groups = new Dictionary<string, List<CachedChart>>()
             for name in collections.Keys do
                 let c = collections.[name]
-                match c with
-                | Collection ids -> Seq.choose this.LookupChart ids
-                | Playlist ps -> Seq.choose (fun (i, _, _) -> this.LookupChart i) ps
-                | Goals gs -> Seq.choose (fun ((i, _, _), _) -> this.LookupChart i) gs
+                let charts, orderMatters = 
+                    match c with
+                    | Collection ids -> Seq.choose this.LookupChart ids, false
+                    | Playlist ps -> Seq.choose (fun (i, _, _) -> this.LookupChart i) ps, true
+                    | Goals gs -> Seq.choose (fun ((i, _, _), _) -> this.LookupChart i) gs, false
+                charts
                 |> this.FilterCharts filter
                 |> ResizeArray<CachedChart>
-                |> fun x -> groups.Add(name, x)
-            for g in groups.Values do
-                g.Sort sorting
+                |> if orderMatters then id else fun x -> x.Sort sorting; x
+                |> fun x -> if x.Count > 0 then groups.Add(name, x)
             groups
 
         member this.RebuildCache : StatusTask =
