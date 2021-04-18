@@ -278,10 +278,17 @@ module ScreenLevelSelect =
                 left.Target <- 0.0f
                 right.Target <- 0.0f
 
+            override this.Draw() =
+                base.Draw()
+                let struct (left, top, right, bottom) = this.Bounds
+                let m = (right + left) * 0.5f
+                Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", 25.0f, m, bottom - 60.0f, (Color.White, Color.Black), 0.5f)
+                Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.RemoveFromCollection.Value.ToString()] "collections.RemoveHint", 25.0f, m, bottom - 30.0f, (Color.White, Color.Black), 0.5f)
+
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
                 if currentCachedChart.IsSome then
-                    if options.Hotkeys.AddToCollection.Value.Tapped()then
+                    if options.Hotkeys.AddToCollection.Value.Tapped() then
                         if
                             match snd selectedCollection with
                             | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true

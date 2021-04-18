@@ -2,6 +2,8 @@
 collections.Create=+New collection
 collections.Added=Added %0 to '%1'
 collections.Removed=Removed %0 from '%1'
+collections.AddHint=Press %0 to add a chart to the collection.
+collections.RemoveHint=Press %0 to remove a chart from the collection.
 mod.auto.name=Auto
 mod.auto.desc=Plays the chart for you.
 mod.mirror.name=Mirror
@@ -17,6 +19,7 @@ notification.SongInstalled=Installed Song: %0
 notification.UpdateInstalled=Update Installed! (Relaunch the game)
 notification.UpdateAvailable=Update Available!
 options.name.AudioOffset=Audio Offset
+options.name.SongAudioOffset=Local (Song) Offset
 options.name.AudioVolume=Audio Volume
 options.name.BackgroundDim=Background Dim
 options.name.ChangeTheme=Change Theme
