@@ -41,7 +41,7 @@ module Themes =
     
     // id is the folder name of the noteskin, NOT the name given in the noteskin metadata
     let changeNoteSkin(id: string) =
-        let id = if loadedNoteskins.ContainsKey(id) then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default") ""; "default"
+        let id = if loadedNoteskins.ContainsKey(id) then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default"); "default"
         currentNoteSkin <- id
         noteskinConfig <- fst loadedNoteskins.[id]
         Array.iter
@@ -76,7 +76,7 @@ module Themes =
                 let (bmp, config) =
                     getInherited (fun (t: Theme) ->
                         try t.GetTexture(None, name)
-                        with err -> Logging.Error("Failed to load texture '" + name + "'") (err.ToString()); None)
+                        with err -> Logging.Error("Failed to load texture '" + name + "'", err); None)
                 sprites.Add(name, Sprite.upload(bmp, config.Rows, config.Columns, false))
         sprites.[name]
 
@@ -112,16 +112,16 @@ module Themes =
                         |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else themeConfig.DefaultAccentColor
                 Sprite.upload(bmp, 1, 1, true)
             with err ->
-                Logging.Warn("Failed to load background image: " + file) (err.ToString())
+                Logging.Warn("Failed to load background image: " + file, err)
                 accentColor <- themeConfig.DefaultAccentColor
                 getTexture("background")
         | ext ->
-            //if ext <> "" then Logging.Error("Unsupported file type for background: " + ext) "" else Logging.Debug("Chart has no background image") ""
+            //if ext <> "" then Logging.Error("Unsupported file type for background: " + ext) else Logging.Debug("Chart has no background image")
             accentColor <- themeConfig.DefaultAccentColor
             getTexture("background")
     
     let loadThemes(themes: List<string>) =
-        Logging.Debug("===== Loading Themes =====")""
+        Logging.Debug("===== Loading Themes =====")
         loadedNoteskins.Clear()
         loadedThemes.Clear()
         loadedThemes.Add(defaultTheme)
@@ -131,7 +131,7 @@ module Themes =
             try
                 let config: ThemeConfig = theme.GetJson(false, "theme.json") |> fst
                 Some (theme, config)
-            with err -> Logging.Error("Failed to load theme '" + t + "'") (err.ToString()); None)
+            with err -> Logging.Error("Failed to load theme '" + t + "'", err); None)
             themes
         |> Seq.iter (fun (t, conf) -> loadedThemes.Add(t); themeConfig <- conf)
     
@@ -142,7 +142,7 @@ module Themes =
             |> Seq.iter (fun (ns, c) ->
                 loadedNoteskins.Remove(ns) |> ignore // overwrite existing skin with same name
                 loadedNoteskins.Add(ns, (c, i))
-                Logging.Debug(sprintf "Loaded noteskin %s" ns) ""))
+                Logging.Debug(sprintf "Loaded noteskin %s" ns)))
         Seq.iter Sprite.destroy sprites.Values
         sprites.Clear()
         gameplayConfig.Clear()
@@ -150,4 +150,4 @@ module Themes =
         if themeConfig.OverrideAccentColor then accentColor <- themeConfig.DefaultAccentColor
         if fontBuilder.IsSome then font().Dispose(); 
         fontBuilder <- Some (lazy (Text.createFont themeConfig.Font))
-        Logging.Debug(sprintf "===== Loaded %i themes (%i available) =====" <| loadedThemes.Count - 1 <| availableThemes.Count) ""
+        Logging.Debug(sprintf "===== Loaded %i themes (%i available) =====" <| loadedThemes.Count - 1 <| availableThemes.Count)

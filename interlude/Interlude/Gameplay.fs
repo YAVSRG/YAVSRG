@@ -50,11 +50,11 @@ module Gameplay =
     let changeChart(cachedChart, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
-        chartSaveData <- Some <| scores.GetOrCreateScoreData(chart)
-        Themes.loadBackground(chart.BGPath)
+        chartSaveData <- Some <| scores.GetOrCreateScoreData chart
+        Themes.loadBackground chart.BGPath
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Value - offsetOf chart.Notes.First.Value
-        Audio.changeTrack(chart.AudioPath, localOffset, rate)
-        Audio.playFrom(chart.Header.PreviewTime)
+        Audio.changeTrack (chart.AudioPath, localOffset, rate)
+        Audio.playFrom chart.Header.PreviewTime
         Options.options.CurrentChart.Value <- cachedChart.FilePath
         updateChart()
         onChartChange()
@@ -86,7 +86,7 @@ module Gameplay =
             | _ -> true //todo: fill in this stub (pb condition will be complicated)
         then
             //add to score db
-            d.Scores.Add(data.Score)
+            d.Scores.Add data.Score
             scores.Save()
             //update top scores
             Options.options.Stats.TopPhysical.Apply(TopScore.add(currentCachedChart.Value.Hash, data.Score.time, data.Physical))
@@ -94,7 +94,7 @@ module Gameplay =
             //update pbs
             let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) =
                 if target.ContainsKey(name) then
-                    let n, pb = updatePB(target.[name])(value, data.Score.rate)
+                    let n, pb = updatePB target.[name] (value, data.Score.rate)
                     target.[name] <- n
                     pb
                 else
@@ -102,7 +102,7 @@ module Gameplay =
                     PersonalBestType.Faster
             f data.Accuracy.Name d.Lamp data.Lamp,
             f data.Accuracy.Name d.Accuracy data.Accuracy.Value,
-            //todo: move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
+            //todo: maybe move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
             f (data.Accuracy.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
         else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)
 
@@ -115,18 +115,18 @@ module Gameplay =
             let c, ch =
                 match cache.LookupChart(Options.options.CurrentChart.Value) with
                 | Some cc ->
-                    match cache.LoadChart(cc) with
+                    match cache.LoadChart cc with
                     | Some c -> cc, c
                     | None ->
-                        Logging.Error("Could not load chart file: " + cc.FilePath) ""
+                        Logging.Error("Could not load chart file: " + cc.FilePath)
                         cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) []
 
                         |> fun d -> d.["All"].[0]
                         |> fun c -> c, cache.LoadChart(c).Value
                 | None ->
-                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Value) ""
+                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Value)
                     cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) []
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, cache.LoadChart(c).Value
             changeChart(c, ch)
-        with err -> Logging.Debug("Tried to auto select a chart but none exist")(err.ToString())
+        with err -> Logging.Debug("Tried to auto select a chart but none exist", err)

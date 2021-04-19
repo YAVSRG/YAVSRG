@@ -21,7 +21,7 @@ module Audio =
             //let ID = Bass.CreateStream(file, int64 0, int64 0, BassFlags.Decode); //loads file
             let ID = Bass.CreateStream(file) //loads file
             if ID = 0 then 
-                Logging.Error("Couldn't load audio track from " + file) <| Bass.LastError.ToString()
+                Logging.Error("Couldn't load audio track from " + file, Bass.LastError)
                 Track.Default
             else
                 let d = Bass.ChannelGetInfo(ID) //asks bass for info about the track

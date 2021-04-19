@@ -12,6 +12,7 @@ open Prelude.Data.ChartManager.Sorting
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
+open Interlude
 open Interlude.Gameplay
 open Interlude.Themes
 open Interlude.Utils
@@ -28,9 +29,7 @@ module private ScreenLevelSelectVars =
     // - hotkeys to navigate by pack/close and open quickly
     // - display of keycount for charts
     // - fix for scoreboard allowing clicking of culled objects
-    // - nicer looking pack buttons
     // - "random chart" hotkey
-    // - ability to delete charts
     // - cropping of text that is too long
     
     //eventual todo:
@@ -40,6 +39,9 @@ module private ScreenLevelSelectVars =
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //filepath
     let mutable expandedGroup = ""
+
+    let mutable selectedCollection = ("", Unchecked.defaultof<Collection>)
+
     let mutable scrollBy = ignore
     let mutable colorVersionGlobal = 0
     //future todo: different color settings?
@@ -72,11 +74,11 @@ module private ScreenLevelSelectVars =
             expandedGroup <- groupName
             selectedGroup <- groupName
             scrollTo <- ScrollToChart
-        | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
+        | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
 
     let playCurrentChart() =
         if currentChart.IsSome then Screens.newScreen(ScreenPlay >> (fun s -> s :> Screen), ScreenType.Play, ScreenTransitionFlag.Default)
-        else Logging.Warn("Tried to play selected chart; There is no chart selected") ""
+        else Logging.Warn("Tried to play selected chart; There is no chart selected")
 
 module ScreenLevelSelect =
 
@@ -131,7 +133,7 @@ module ScreenLevelSelect =
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
-                if Mouse.Hover(this.Bounds) && options.Hotkeys.Delete.Value.Tapped() then
+                if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
                     let name = sprintf "%s | %s" (data.Accuracy.Format()) (data.Lamp.ToString())
                     Screens.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                         fun () ->
@@ -220,7 +222,7 @@ module ScreenLevelSelect =
                     match filter.Value with
                     | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.Score.rate = rate)
                     | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.Score.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.Score.keycount - 3])
-                    | ScoreboardFilter.CurrentMods// -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods <> null) //nyi
+                    | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods = selectedMods) //nyi
                     | _ -> K true
                     )
 
@@ -228,45 +230,99 @@ module ScreenLevelSelect =
                 base.Update(elapsedTime, bounds)
                 if this.Selected && (ls.Selected <> options.Hotkeys.Scoreboard.Value.Pressed()) then ls.Selected <- not ls.Selected
 
-        type ModSelectItem(name: string) as this =
-            inherit Selectable()
+        type CollectionManager() as this =
+            inherit FlowSelectable(60.0f, 5.0f,
+                fun () ->
+                    let (left, _, right, _) = this.Anchors
+                    left.Target <- -800.0f
+                    right.Target <- -800.0f)
 
+            let collectionCard name =
+                { new CardButton(name, "",
+                    (fun () -> fst selectedCollection = name),
+                    fun () -> colorVersionGlobal <- colorVersionGlobal + 1; selectedCollection <- (name, (cache.GetCollection name).Value)) with
+                    override self.Update(elapsedTime, bounds) =
+                        base.Update(elapsedTime, bounds)
+                        if Mouse.Hover self.Bounds && options.Hotkeys.Delete.Value.Tapped() then
+                            Screens.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
+                                fun () -> this.Synchronized(fun () -> this.Remove self; self.Dispose()); cache.DeleteCollection name; Screens.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))}
+
+            //todo: renaming/editing menu
             do
-                TextBox(ModState.getModName name |> K, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
-                |> this.Add
-
-                TextBox(ModState.getModDesc name |> K, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
-                |> this.Add
-
-                Clickable(
-                    (fun () -> if this.SParent.Value.Selected then this.Selected <- true),
-                    (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
-                |> this.Add
-
-            override this.Draw() =
-                let hi = Screens.accentShade(255, 1.0f, 0.0f)
-                let lo = Color.FromArgb(100, hi)
-                let e = selectedMods.ContainsKey(name)
-                Draw.quad (Quad.ofRect this.Bounds)
-                    (struct((if this.Hover then hi else lo), (if e then hi else lo), (if e then hi else lo), if this.Hover then hi else lo))
-                    Sprite.DefaultQuad
-                base.Draw()
-
+                CardButton(Localisation.localise "collections.Create", "", K false,
+                    (
+                        fun () ->
+                            TextInputDialog(this.Bounds, "Name collection",
+                                fun s ->
+                                    if s <> "" && (cache.GetCollection s).IsNone then
+                                        cache.UpdateCollection(s, Collection.Blank)
+                                        collectionCard s |> this.Add)
+                            |> Screens.addDialog
+                    ), K Color.Silver) |> this.Add
+                for name in cache.GetCollections() do collectionCard name |> this.Add
+                //todo: save last selected collection in options
+                if fst selectedCollection = "" then
+                    let favourites = Localisation.localise "collections.Favourites"
+                    let c = 
+                        match cache.GetCollection favourites with
+                        | Some c -> c
+                        | None ->
+                            let n = Collection.Blank
+                            cache.UpdateCollection (favourites, n)
+                            n
+                    selectedCollection <- (favourites, c)
+                    
             override this.OnSelect() =
                 base.OnSelect()
-                selectedMods <- ModState.cycleState name selectedMods
-                updateChart()
-                this.Selected <- false
+                let (left, _, right, _) = this.Anchors
+                left.Target <- 0.0f
+                right.Target <- 0.0f
+
+            override this.Draw() =
+                base.Draw()
+                let struct (left, top, right, bottom) = this.Bounds
+                let m = (right + left) * 0.5f
+                Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", 25.0f, m, bottom - 60.0f, (Color.White, Color.Black), 0.5f)
+                Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.RemoveFromCollection.Value.ToString()] "collections.RemoveHint", 25.0f, m, bottom - 30.0f, (Color.White, Color.Black), 0.5f)
+
+            override this.Update(elapsedTime, bounds) =
+                base.Update(elapsedTime, bounds)
+                if currentCachedChart.IsSome then
+                    if options.Hotkeys.AddToCollection.Value.Tapped() then
+                        if
+                            match snd selectedCollection with
+                            | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
+                            | Playlist ps -> ps.Add (selectedChart, selectedMods, rate); true
+                            | Goals gs -> false //not yet implemented
+                        then
+                            colorVersionGlobal <- colorVersionGlobal + 1
+                            Screens.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst selectedCollection] "collections.Added", NotificationType.Info)
+                    elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
+                        if
+                            match snd selectedCollection with
+                            | Collection ccs -> ccs.Remove selectedChart
+                            | Playlist ps -> ps.RemoveAll(fun (id, _, _) -> id = selectedChart) > 0
+                            | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
+                        then
+                            colorVersionGlobal <- colorVersionGlobal + 1
+                            Screens.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst selectedCollection] "collections.Removed", NotificationType.Info)
 
         type ModSelect() as this =
-            inherit ListSelectable(false)
+            inherit FlowSelectable(75.0f, 5.0f,
+                fun () ->
+                    let (left, _, right, _) = this.Anchors
+                    left.Target <- -800.0f
+                    right.Target <- -800.0f)
             do
-                let mutable i = 0.0f
-                for k in modList.Keys do
-                    this.Add(ModSelectItem k |> positionWidget(0.0f, 0.0f, i * 80.0f, 0.0f, 0.0f, 1.0f, 75.0f + i * 80.0f, 0.0f))
-                    i <- i + 1.0f
+                for name in modList.Keys do
+                    CardButton(
+                        ModState.getModName name,
+                        ModState.getModDesc name,
+                        (fun () -> selectedMods.ContainsKey name),
+                        fun () -> 
+                            selectedMods <- ModState.cycleState name selectedMods
+                            updateChart())
+                    |> this.Add
 
             override this.OnSelect() =
                 base.OnSelect()
@@ -274,22 +330,21 @@ module ScreenLevelSelect =
                 left.Target <- 0.0f
                 right.Target <- 0.0f
 
-            override this.OnDeselect() =
-                base.OnSelect()
-                let (left, _, right, _) = this.Anchors
-                left.Target <- -800.0f
-                right.Target <- -800.0f
-
     type InfoPanel() as this =
         inherit Selectable()
 
         let mods = ModSelect()
         let scores = Scoreboard()
+        let collections = CollectionManager()
         let mutable length = ""
         let mutable bpm = ""
 
         do
             mods
+            |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f)
+            |> this.Add
+
+            collections
             |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f)
             |> this.Add
 
@@ -324,8 +379,10 @@ module ScreenLevelSelect =
             scores.Selected <- true
 
         override this.Update(elapsedTime, bounds) =
-            if options.Hotkeys.Mods.Value.Tapped() then
-                if mods.Selected then scores.Selected <- true else mods.Selected <- true
+            if options.Hotkeys.Collections.Value.Tapped() then
+                collections.Selected <- true
+            elif options.Hotkeys.Mods.Value.Tapped() then
+                mods.Selected <- true
             elif options.Hotkeys.Scoreboard.Value.Tapped() then
                 scores.Selected <- true
             base.Update(elapsedTime, bounds)
@@ -359,7 +416,7 @@ module ScreenLevelSelect =
 
         abstract member Draw: float32 * float32 -> float32
         default this.Draw(top: float32, topEdge: float32) =
-            let bounds = this.Bounds(top)
+            let bounds = this.Bounds top
             let struct (_, _, _, bottom) = bounds
             if bottom > topEdge + 170.0f && top < Render.vheight - topEdge then this.OnDraw(bounds, this.Selected)
             top + Rect.height bounds + 15.0f
@@ -367,7 +424,7 @@ module ScreenLevelSelect =
         abstract member Update: float32 * float32 * float -> float32
         default this.Update(top: float32, topEdge: float32, elapsedTime) =
             this.Navigate()
-            let bounds = this.Bounds(top)
+            let bounds = this.Bounds top
             let struct (_, _, _, bottom) = bounds
             if bottom > topEdge + 170.0f && top < Render.vheight - topEdge then this.OnUpdate(bounds, this.Selected, elapsedTime)
             top + Rect.height bounds + 15.0f
@@ -380,6 +437,7 @@ module ScreenLevelSelect =
         let mutable color = Color.Transparent
         let mutable chartData = None
         let mutable pbData = (None, None, None)
+        let mutable collectionIcon = ""
 
         override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
         override this.Selected = selectedChart = cc.FilePath
@@ -430,6 +488,7 @@ module ScreenLevelSelect =
             Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
             Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
             Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
+            Text.drawB(font(), collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
 
             let border = Rect.expand(5.0f, 5.0f) bounds
             let border2 = Rect.expand(5.0f, 0.0f) bounds
@@ -450,6 +509,13 @@ module ScreenLevelSelect =
                 | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, grade x themeConfig.GradeThresholds)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
                 | None -> ()
                 color <- colorFunc pbData
+                collectionIcon <-
+                    if options.ChartGroupMode.Value <> "Collections" then
+                        match snd selectedCollection with
+                        | Collection ccs -> if ccs.Contains cc.FilePath then "✭" else ""
+                        | Playlist ps -> if ps.Exists(fun (id, _, _) -> id = cc.FilePath) then "➾" else ""
+                        | Goals gs -> if gs.Exists(fun ((id, _, _), _) -> id = cc.FilePath) then "@" else ""
+                    else ""
             if Mouse.Hover(bounds) then
                 hover.Target <- 1.0f
                 if Mouse.Click(MouseButton.Left) then
@@ -529,7 +595,10 @@ type ScreenLevelSelect() as this =
     let refresh() =
         scoreSystem <- (fst options.AccSystems.Value).ToString()
         infoPanel.Refresh()
-        let groups = cache.GetGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+        let groups =
+            if options.ChartGroupMode.Value <> "Collections" then
+                cache.GetGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+            else cache.GetCollectionGroups sortBy.[options.ChartSortMode.Value] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
@@ -537,7 +606,7 @@ type ScreenLevelSelect() as this =
                 if cc.FilePath <> selectedChart then
                     match cache.LoadChart(cc) with
                     | Some c -> changeChart(cc, c)
-                    | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath) ""
+                    | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
         lastItem <- None
         colorVersionGlobal <- 0
         folderList <-
@@ -647,9 +716,10 @@ type ScreenLevelSelect() as this =
         base.Draw()
 
     override this.OnEnter(prev) =
-        base.OnEnter(prev)
+        base.OnEnter prev
+        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Action (fun () -> Audio.playFrom currentChart.Value.Header.PreviewTime)
         refresh()
 
     override this.OnExit(next) =
-        base.OnExit(next)
+        base.OnExit next
         Input.removeInputMethod()

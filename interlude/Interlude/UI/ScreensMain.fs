@@ -15,14 +15,14 @@ open Interlude.Input
 type MenuButton(onClick, label) as this =
     inherit Widget()
 
-    let color = AnimationFade(0.3f)
+    let color = AnimationFade 0.3f
     do
         this.Animation.Add(color)
         this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.3f else 0.3f))
         this.Add(new TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.7f, 10.0f, 0.0f, 0.0f, 1.0f, -20.0f, 1.0f))
 
     override this.Draw() =
-        Draw.quad(Quad.parallelogram 0.5f this.Bounds)(Quad.colorOf(Screens.accentShade(200, 1.0f, color.Value)))(Sprite.DefaultQuad)
+        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf(Screens.accentShade(200, 1.0f, color.Value))) Sprite.DefaultQuad
         base.Draw()
 
     member this.Pop() =
@@ -37,16 +37,16 @@ type ScreenMenu() as this =
         Screens.changeScreen(ScreenType.LevelSelect, ScreenTransitionFlag.UnderLogo)
     //todo: localise these buttons
     let play = MenuButton(playFunc, "Play")
-    let options = MenuButton((fun () -> Screens.addDialog(OptionsMenu())), "Options")
+    let options = MenuButton((fun () -> Screens.addDialog(OptionsMenu.Main())), "Options")
     let quit = MenuButton((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Quit")
 
     let newSplash =
-        randomSplash("MenuSplashes.txt")
+        randomSplash "MenuSplashes.txt"
         >> fun s -> s.Split('¬')
         >> fun l -> if l.Length > 1 then l.[0], l.[1] else l.[0], ""
     let mutable splashText = "", ""
-    let splashAnim = AnimationFade(0.0f)
-    let splashSubAnim = AnimationFade(0.0f)
+    let splashAnim = AnimationFade 0.0f
+    let splashSubAnim = AnimationFade 0.0f
 
     do
         this.Add(play |> positionWidget(-100.0f, 0.0f, -200.0f, 0.5f, 1200.0f, 0.0f, -100.0f, 0.5f))
@@ -62,6 +62,7 @@ type ScreenMenu() as this =
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
         Screens.backgroundDim.Target <- 0.0f
         Screens.setToolbarCollapsed false
+        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Loop
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()
 
@@ -73,7 +74,7 @@ type ScreenMenu() as this =
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
         let c = (right + left) * 0.5f
-        let (s,ss) = splashText
+        let (s, ss) = splashText
         let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
         let a2 = splashAnim.Value * 255.0f |> int
         Text.drawJustB(Themes.font(), ss, 20.0f, c, top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb(a1, Color.White), Screens.accentShade(a1, 0.5f, 0.0f)), 0.5f)
@@ -268,7 +269,7 @@ type Jukebox() as this =
         if Options.options.Hotkeys.Volume.Value.Pressed() then
             fade.Target <- 1.0f
             Options.options.AudioVolume.Apply((+) (float (Mouse.Scroll()) * 0.02))
-            Audio.changeVolume(Options.options.AudioVolume.Value)
+            Audio.changeVolume Options.options.AudioVolume.Value
             slider.Target <- float32 Options.options.AudioVolume.Value
         else fade.Target <- 0.0f
 
@@ -282,7 +283,7 @@ type Jukebox() as this =
 type Toolbar() as this =
     inherit Widget()
 
-    let HEIGHT = 70.f
+    let HEIGHT = 70.0f
 
     let barSlider = new AnimationFade 1.0f
     let notifSlider = new AnimationFade 0.0f
@@ -293,15 +294,35 @@ type Toolbar() as this =
     do
         this.Animation.Add barSlider
         this.Animation.Add notifSlider
-        this.Add(new TextBox(K version, K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, HEIGHT * 0.5f, 1.0f))
-        this.Add(new TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f) |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f))
-        this.Add(new Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f))
-        this.Add(new Button((fun () -> if Screens.currentType <> ScreenType.Play then Screens.addDialog(new OptionsMenu())), "Options", Options.options.Hotkeys.Options, Sprite.Default) |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default) |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default) |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f))
-        this.Add(new Jukebox())
-        this.Add(new Notifications.NotificationDisplay())
-        this.Add(Notifications.TaskDisplay HEIGHT)
+
+        TextBox(K version, K (Color.White, Color.Black), 1.0f)
+        |> positionWidget(-300.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, HEIGHT * 0.5f, 1.0f)
+        |> this.Add
+
+        TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f)
+        |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
+        |> this.Add
+
+        Button((fun () -> Screens.back(ScreenTransitionFlag.UnderLogo)), "Back", Options.options.Hotkeys.Exit, Sprite.Default)
+        |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
+        |> this.Add
+        
+        Button(
+            (fun () -> if Screens.currentType <> ScreenType.Play then Screens.addDialog(OptionsMenu.Main())), "Options", Options.options.Hotkeys.Options, Sprite.Default)
+        |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
+        |> this.Add
+
+        Button((fun () -> Screens.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default)
+        |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
+        |> this.Add
+
+        Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default)
+        |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
+        |> this.Add
+
+        Jukebox() |> this.Add
+        Notifications.NotificationDisplay() |> this.Add
+        Notifications.TaskDisplay HEIGHT |> this.Add
 
         Screens.setToolbarCollapsed <- fun b -> forceCollapse <- b
 
@@ -354,6 +375,8 @@ type ScreenContainer() as this =
         Screens.back <- this.Back
         Screens.addDialog <- dialogs.Add
         Screens.setCursorVisible <- (fun b -> cursor <- b)
+        Screens.quickOptionsMenu <- OptionsMenu.QuickPlay >> (fun s -> s :> Dialog)
+        Screens.collectionsMenu <- OptionsMenu.Collections >> (fun s -> s :> Dialog)
         this.Add toolbar
         Screens.logo
         |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
@@ -371,14 +394,14 @@ type ScreenContainer() as this =
     member this.ChangeScreen(s: unit -> Screen, screenType, flags) =
         if screenTransition.Complete && screenType <> Screens.currentType then
             transitionFlags <- flags
-            this.Animation.Add(screenTransition)
-            screenTransition.Add(t1)
+            this.Animation.Add screenTransition
+            screenTransition.Add t1
             screenTransition.Add(
                 new AnimationAction(
                     fun () ->
                         let s = s()
-                        current.OnExit(s)
-                        s.OnEnter(current)
+                        current.OnExit s
+                        s.OnEnter current
                         match Screens.currentType with
                         | ScreenType.Play | ScreenType.Score -> current.Dispose()
                         | _ -> ()
@@ -386,9 +409,9 @@ type ScreenContainer() as this =
                         current <- s
                         t2.FrameSkip() //ignore frame lag spike when initialising screen
                     ))
-            screenTransition.Add(t2)
+            screenTransition.Add t2
             screenTransition.Add(new AnimationAction(fun () -> t1.Reset(); t2.Reset()))
-    member this.ChangeScreen(screenType, flags) = this.ChangeScreen((screens.[int screenType] |> K), screenType, flags)
+    member this.ChangeScreen(screenType, flags) = this.ChangeScreen(K screens.[int screenType], screenType, flags)
 
     member this.Back(flags) =
         match Screens.currentType with
@@ -427,7 +450,7 @@ type ScreenContainer() as this =
             let s = 150.0f
 
             let size x =
-                let f = Math.Clamp(((if t1.Elapsed < TRANSITIONTIME then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / ((4.0f * s) / Render.vwidth), 0.0f, 1.0f)
+                let f = Math.Clamp(((if t1.Elapsed < TRANSITIONTIME then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / (4.0f * s / Render.vwidth), 0.0f, 1.0f)
                 if t1.Elapsed < TRANSITIONTIME then f * s * 0.5f else (1.0f - f) * s * 0.5f
             let diamond x y =
                 let r = size x
@@ -443,5 +466,5 @@ type ScreenContainer() as this =
             Stencil.finish()
             if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
         for d in dialogs do d.Draw()
-        if cursor then Draw.rect(Rect.create <| Mouse.X() <| Mouse.Y() <| Mouse.X() + Themes.themeConfig.CursorSize <| Mouse.Y() + Themes.themeConfig.CursorSize) (Screens.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture("cursor"))
+        if cursor then Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) Themes.themeConfig.CursorSize Themes.themeConfig.CursorSize) (Screens.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture "cursor")
         tooltip.Draw()

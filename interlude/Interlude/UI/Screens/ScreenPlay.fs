@@ -69,8 +69,6 @@ type NoteRenderer() as this =
     let columnPositions = Array.init keys (fun i -> float32 i * Themes.noteskinConfig.ColumnWidth)
     let columnWidths = Array.create keys (float32 Themes.noteskinConfig.ColumnWidth)
     let noteHeight = Themes.noteskinConfig.ColumnWidth
-    let scale = float32 Options.options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
-    let hitposition = float32 Options.options.HitPosition.Value
     let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
     let playfieldColor = Themes.themeConfig.PlayfieldColor
 
@@ -91,7 +89,7 @@ type NoteRenderer() as this =
     let hold_colors = Array.create keys 0
 
     let scrollDirectionPos bottom = if Options.options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
-    let scrollDirectionFlip = if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Value then id else Quad.flip
+    let scrollDirectionFlip = fun q -> if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Value then q else Quad.flip q
     let noteRotation =
         if keys = 4 && Themes.noteskinConfig.UseRotation then
             fun k (struct (s, q): SpriteQuad) -> struct (s, Quad.rotate(match k with 0 -> 3 | 1 -> 0 | 2 -> 2 | 3 -> 1 | _ -> 0) q)
@@ -105,6 +103,10 @@ type NoteRenderer() as this =
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
+        
+        let scale = float32 Options.options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
+        let hitposition = float32 Options.options.HitPosition.Value
+
         let playfieldHeight = bottom - top
         let now = Audio.timeWithOffset()
 
@@ -129,7 +131,7 @@ type NoteRenderer() as this =
                 if note_seek > 0 then
                     let (_, struct (nd, c)) = notes.Data.[note_seek - 1] in
                     hold_colors.[k] <- int c.[k]
-                    (testForNote k NoteType.HOLDHEAD nd || testForNote k NoteType.HOLDBODY nd)
+                    (NoteRow.hasNote k NoteType.HOLDHEAD nd || NoteRow.hasNote k NoteType.HOLDBODY nd)
                 else false
             Draw.quad(Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight) |> scrollDirectionPos bottom |> Quad.ofRect) (Color.White |> Quad.colorOf) (Sprite.gridUV(animation.Loops, 0)(Themes.getTexture("receptor")) |> noteRotation k) //animation for being pressed
 
@@ -154,13 +156,13 @@ type NoteRenderer() as this =
                 column_pos.[k] <- column_pos.[k] + scale * sv_value.[0] * (t - sv_time.[k])
                 sv_time.[k] <- t
                 min <- Math.Min(column_pos.[k], min)
-                if testForNote k NoteType.NORMAL nd then
+                if NoteRow.hasNote k NoteType.NORMAL nd then
                     Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, int color.[k])(Themes.getTexture("note")) |> noteRotation k)
-                elif testForNote k NoteType.HOLDHEAD nd then
+                elif NoteRow.hasNote k NoteType.HOLDHEAD nd then
                     hold_pos.[k] <- column_pos.[k]
                     hold_colors.[k] <- int color.[k]
                     hold_presence.[k] <- true
-                elif testForNote k NoteType.HOLDTAIL nd then
+                elif NoteRow.hasNote k NoteType.HOLDTAIL nd then
                     let headpos = hold_pos.[k]
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
@@ -172,7 +174,7 @@ type NoteRenderer() as this =
                             (Sprite.gridUV(animation.Loops, int color.[k]) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
                     Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, hold_colors.[k])(Themes.getTexture("holdhead")) |> noteRotation k)
                     hold_presence.[k] <- false
-                elif testForNote k NoteType.MINE nd then
+                elif NoteRow.hasNote k NoteType.MINE nd then
                     Draw.quad (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom)) (Quad.colorOf Color.White) (Sprite.gridUV(animation.Loops, int color.[k])(Themes.getTexture("mine")))
                     
             note_peek <- note_peek + 1
@@ -196,7 +198,7 @@ module GameplayWidgets =
         HP: HPSystem
         OnHit: IEvent<HitEvent>
     }
-
+    
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
@@ -403,9 +405,10 @@ type ScreenPlay() as this =
     override this.OnEnter(prev) =
         Screens.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
         //discord presence
-        Screens.setToolbarCollapsed(true)
-        Screens.setCursorVisible(false)
-        Audio.changeRate(Gameplay.rate)
+        Screens.setToolbarCollapsed true
+        Screens.setCursorVisible false
+        Audio.changeRate Gameplay.rate
+        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
 
@@ -447,25 +450,25 @@ type ScreenPlay() as this =
             if (status.[k] = HitStatus.NotHit || status.[k] = HitStatus.Special || deltas.[k] < -missWindow * 0.5f) then
                 let d = now - time
                 if release then
-                    if (testForNote k NoteType.HOLDTAIL nd) then
+                    if (NoteRow.hasNote k NoteType.HOLDTAIL nd) then
                         if noteType = NoteType.HOLDBODY || Time.Abs(delta) > Time.Abs(d)  then
                             delta <- d
                             hitAt <- i
                             noteType <- NoteType.HOLDTAIL
-                    else if noteType <> NoteType.HOLDTAIL && (testForNote k NoteType.HOLDBODY nd) then
+                    else if noteType <> NoteType.HOLDTAIL && (NoteRow.hasNote k NoteType.HOLDBODY nd) then
                         if (Time.Abs(delta) > Time.Abs(d)) then
                             delta <- d
                             hitAt <- i
                             noteType <- NoteType.HOLDBODY
-                    else if testForNote k NoteType.HOLDHEAD nd then
+                    else if NoteRow.hasNote k NoteType.HOLDHEAD nd then
                         i <- notes.Count //ln fix
                 else 
-                    if (testForNote k NoteType.HOLDHEAD nd) || (testForNote k NoteType.NORMAL nd) then
+                    if (NoteRow.hasNote k NoteType.HOLDHEAD nd) || (NoteRow.hasNote k NoteType.NORMAL nd) then
                         if (Time.Abs(delta) > Time.Abs(d)) || noteType = NoteType.MINE  then
                             delta <- d
                             hitAt <- i
                             noteType <- NoteType.NORMAL
-                    else if noteType <> NoteType.NORMAL && (testForNote k NoteType.MINE nd) then
+                    else if noteType <> NoteType.NORMAL && (NoteRow.hasNote k NoteType.MINE nd) then
                         if (Time.Abs(delta) > Time.Abs(d)) then
                             delta <- d
                             hitAt <- i
@@ -484,6 +487,7 @@ type ScreenPlay() as this =
                 //unable to reason about correctness. possible todo: merge these into one so that all actions are ordered by time
                 Input.consumeGameplay(binds.[k], InputEvType.Press, fun t -> this.HandleHit(k, t, false))
                 Input.consumeGameplay(binds.[k], InputEvType.Release, fun t -> this.HandleHit(k, t, true))
+        elif options.Hotkeys.Options.Value.Pressed() then Audio.pause(); Screens.addDialog(Screens.quickOptionsMenu())
         //seek up to miss threshold and display missed notes in widgets
         while noteSeek < notes.Count && offsetOf notes.Data.[noteSeek] < now - missWindow do
             let (_, _, s) = scoreData.[noteSeek]
@@ -494,7 +498,7 @@ type ScreenPlay() as this =
         let mutable releaseMask = 0us
         while i < notes.Count && offsetOf notes.Data.[i] < now + missWindow do
             let (_, struct (nd, _)) = notes.Data.[i]
-            releaseMask <- releaseMask ||| noteData NoteType.HOLDTAIL nd ||| noteData NoteType.HOLDHEAD nd
+            releaseMask <- releaseMask ||| NoteRow.noteData NoteType.HOLDTAIL nd ||| NoteRow.noteData NoteType.HOLDHEAD nd
             i <- i + 1
         releaseMask <- ~~~releaseMask
         //detect holding through a mine or releasing through a holdbody
@@ -504,9 +508,9 @@ type ScreenPlay() as this =
             let (t, struct (nd, _)) = notes.Data.[i]
             if (t > now - missWindow * 0.125f) then
                 let (_, _, s) = scoreData.[i]
-                for k in noteData NoteType.HOLDBODY nd &&& releaseMask |> getBits do
+                for k in NoteRow.noteData NoteType.HOLDBODY nd &&& releaseMask |> Bitmap.toSeq do
                     if s.[k] = HitStatus.Special && not (binds.[k].Pressed()) then s.[k] <- HitStatus.SpecialNG
-                for k in noteData NoteType.MINE nd |> getBits do
+                for k in NoteRow.noteData NoteType.MINE nd |> Bitmap.toSeq do
                     if s.[k] = HitStatus.Special && binds.[k].Pressed() then s.[k] <- HitStatus.SpecialNG
             i <- i + 1
         //todo: handle in all watchers

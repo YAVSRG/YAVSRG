@@ -383,7 +383,7 @@ module Text =
                     new Font(pfc.Families.[0], fontscale * 4.0f / 3.0f, GraphicsUnit.Pixel)
                 with
                 | err ->
-                    Prelude.Common.Logging.Error("Failed to load font file: " + str) (err.ToString())
+                    Prelude.Common.Logging.Error("Failed to load font file: " + str, err)
                     new Font(str, fontscale * 4.0f / 3.0f, GraphicsUnit.Pixel)
             else
                 new Font(str, fontscale * 4.0f / 3.0f, GraphicsUnit.Pixel)
