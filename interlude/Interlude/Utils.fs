@@ -6,10 +6,13 @@ open System.Diagnostics
 open System.IO
 
 module Utils =
+    let smallVersion =
+        let v = Assembly.GetExecutingAssembly().GetName()
+        if v.Version.Revision <> 0 then v.Version.ToString(4) else v.Version.ToString(3)
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
         let v2 = Assembly.GetExecutingAssembly().Location |> FileVersionInfo.GetVersionInfo
-        sprintf "%s %s (%s)" v.Name (if v.Version.Revision <> 0 then v.Version.ToString(4) else v.Version.ToString(3)) v2.ProductVersion
+        sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
 
     let K x _ = x
 
@@ -78,7 +81,7 @@ module Utils =
         let handleUpdate(release: GithubRelease) =
             latestRelease <- Some release
 
-            let current = Assembly.GetExecutingAssembly().GetName().Version.ToString(4)
+            let current = smallVersion
             let incoming = release.tag_name.Substring(1)
 
             if incoming > current then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
