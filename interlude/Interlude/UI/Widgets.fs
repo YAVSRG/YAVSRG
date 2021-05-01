@@ -101,7 +101,9 @@ type Widget() =
     // Destroys a widget by removing it from its parent, then disposing it (will be garbage collected)
     // Note that this is safe to call inside an update/draw method
     member this.Destroy() =
-        this.Parent.Value.Synchronized(fun () -> (this.Parent.Value.Remove(this); this.Dispose()))
+        match this.Parent with
+        | Some parent -> parent.Synchronized(fun () -> (parent.Remove(this); this.Dispose()))
+        | None -> this.Dispose()
 
     // Clears all children from the widget (with the intention of them being garbage collected, not reused)
     abstract member Clear: unit -> unit

@@ -121,7 +121,7 @@ module Themes =
             getTexture("background")
     
     let loadThemes(themes: List<string>) =
-        Logging.Debug("===== Loading Themes =====")
+        Logging.Info("===== Loading Themes =====")
         loadedNoteskins.Clear()
         loadedThemes.Clear()
         loadedThemes.Add(defaultTheme)
@@ -142,7 +142,7 @@ module Themes =
             |> Seq.iter (fun (ns, c) ->
                 loadedNoteskins.Remove(ns) |> ignore // overwrite existing skin with same name
                 loadedNoteskins.Add(ns, (c, i))
-                Logging.Debug(sprintf "Loaded noteskin %s" ns)))
+                Logging.Info(sprintf "Loaded noteskin %s" ns)))
         Seq.iter Sprite.destroy sprites.Values
         sprites.Clear()
         gameplayConfig.Clear()
@@ -150,4 +150,4 @@ module Themes =
         if themeConfig.OverrideAccentColor then accentColor <- themeConfig.DefaultAccentColor
         if fontBuilder.IsSome then font().Dispose(); 
         fontBuilder <- Some (lazy (Text.createFont themeConfig.Font))
-        Logging.Debug(sprintf "===== Loaded %i themes (%i available) =====" <| loadedThemes.Count - 1 <| availableThemes.Count)
+        Logging.Info(sprintf "===== Loaded %i themes (%i available) =====" <| loadedThemes.Count - 1 <| availableThemes.Count)

@@ -25,7 +25,7 @@ module Utils =
         use tr = new StreamReader(s)
         let lines = tr.ReadToEnd().Split("\n")
 
-        fun () -> lines.[r.Next(lines.Length)]
+        fun () -> lines.[r.Next lines.Length]
 
     let idPrint x = printfn "%A" x; x
 
