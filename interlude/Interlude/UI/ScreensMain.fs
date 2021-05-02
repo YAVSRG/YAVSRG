@@ -382,11 +382,7 @@ type ScreenContainer() as this =
         |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
         |> this.Add
         this.Animation.Add screenTransition
-        this.Animation.Add Screens.accentColor
-        this.Animation.Add Screens.parallaxZ
-        this.Animation.Add Screens.parallaxX
-        this.Animation.Add Screens.parallaxY
-        this.Animation.Add Screens.backgroundDim
+        this.Animation.Add Screens.globalAnimation
         current.OnEnter current
 
     member this.Exit = exit
@@ -424,6 +420,7 @@ type ScreenContainer() as this =
         | _ -> ()
 
     override this.Update(elapsedTime, bounds) =
+        Screens.updateBackground elapsedTime
         tooltip.Update(elapsedTime, bounds)
         if Render.vwidth > 0.0f then
             Screens.parallaxX.Target <- Mouse.X() / Render.vwidth

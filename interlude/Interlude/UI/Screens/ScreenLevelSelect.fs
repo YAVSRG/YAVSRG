@@ -67,7 +67,7 @@ module private ScreenLevelSelectVars =
     let mutable navigation = Navigation.Nothing
 
     let switchCurrentChart(cc, groupName) =
-        match cache.LoadChart(cc) with
+        match cache.LoadChart cc with
         | Some c ->
             changeChart(cc, c)
             selectedChart <- cc.FilePath
@@ -146,7 +146,7 @@ module ScreenLevelSelect =
 
             let flowContainer = new FlowContainer()
             let mutable empty = false
-            let filter = Setting(ScoreboardFilter.All)
+            let filter = Setting ScoreboardFilter.All
             let sort = WrappedSetting(options.ScoreSortMode, int, enum)
 
             let mutable chart = ""

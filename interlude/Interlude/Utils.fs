@@ -4,6 +4,7 @@ open System
 open System.Reflection
 open System.Diagnostics
 open System.IO
+open Prelude.Common
 
 module Utils =
     let smallVersion =
@@ -38,10 +39,22 @@ module Utils =
        elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
        else sprintf "%.0fs" ts.TotalSeconds
 
+    (*
+    module Profiling =
+        let mutable timers = []
+
+        let start() = 
+            timers <- Stopwatch.StartNew() :: timers
+
+        let finish(name) =
+            let t = timers.Head
+            t.Stop()
+            Logging.Debug(sprintf "%s: took %.0fms" name t.Elapsed.TotalMilliseconds)
+            timers <- timers.Tail *)
+
     module AutoUpdate =
         open System.IO.Compression
         open Percyqaz.Json
-        open Prelude.Common
         open Prelude.Web
 
         let rec copyFolder source dest =
