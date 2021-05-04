@@ -62,45 +62,6 @@ module Components =
             Text.drawFillB(Themes.font(), textFunc(), this.Bounds, color(), just)
             base.Draw()
 
-    type Clickable(onClick, onHover) =
-        inherit Widget()
-
-        let mutable hover = false
-
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            let oh = hover
-            hover <- Mouse.Hover(this.VisibleBounds)
-            if oh && not hover then onHover(false)
-            elif not oh && hover && Mouse.Moved() then onHover(true)
-            elif hover && Mouse.Click(MouseButton.Left) then onClick()
-
-    type TooltipRegion(localisedText) =
-        inherit Widget()
-
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
-                Screens.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
-
-    type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
-        inherit Widget()
-
-        let color = AnimationFade 0.3f
-
-        do
-            this.Animation.Add color
-            this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
-
-        override this.Draw() =
-            Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
-            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
-            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
-
-        override this.Update(elapsedTime, bounds) =
-            if bind.Value.Tapped() then onClick()
-            base.Update(elapsedTime, bounds)
-
     type FlowContainer() =
         inherit Widget()
         let mutable spacing = 10.0f
@@ -169,6 +130,53 @@ module Components =
             let struct (_, ctop, _, cbottom) = w.Bounds
             if cbottom > bottom then scrollPos <- scrollPos + (cbottom - bottom)
             elif ctop < top then scrollPos <- scrollPos - (top - ctop)
+
+    type Clickable (onClick, onHover) =
+        inherit Widget()
+
+        let mutable inFlowContainer = false
+        let mutable hover = false
+
+        override this.Update(elapsedTime, bounds) =
+            if not this.Initialised then
+                inFlowContainer <-
+                    let rec f (w: Widget) =
+                        match w with
+                        | :? FlowContainer -> true
+                        | _ -> match w.Parent with None -> false | Some p -> f p
+                    f this.Parent.Value
+            base.Update(elapsedTime, bounds)
+            let oh = hover
+            hover <- Mouse.Hover(if inFlowContainer then this.VisibleBounds else this.Bounds)
+            if oh && not hover then onHover(false)
+            elif not oh && hover && Mouse.Moved() then onHover(true)
+            elif hover && Mouse.Click(MouseButton.Left) then onClick()
+
+    type TooltipRegion(localisedText) =
+        inherit Widget()
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
+                Screens.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
+
+    type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
+        inherit Widget()
+
+        let color = AnimationFade 0.3f
+
+        do
+            this.Animation.Add color
+            this.Add(new Clickable(onClick, (fun b -> color.Target <- if b then 0.7f else 0.3f)))
+
+        override this.Draw() =
+            Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
+            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
+
+        override this.Update(elapsedTime, bounds) =
+            if bind.Value.Tapped() then onClick()
+            base.Update(elapsedTime, bounds)
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
