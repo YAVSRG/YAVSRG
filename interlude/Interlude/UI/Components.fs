@@ -101,15 +101,11 @@ module Components =
             contentSize <- t2 - t1
 
         override this.Update(elapsedTime, bounds) =
-            let thisBounds =
-                if this.Initialised then this.Bounds
-                else
-                    let (left, top, right, bottom) = this.Anchors
-                    let struct (l, t, r, b) = bounds
-                    Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-            this.FlowContent(thisBounds) 
-            base.Update(elapsedTime, bounds)
-            if Mouse.Hover(this.Bounds) then scrollPos <- scrollPos - Mouse.Scroll() * 100.0f
+            this.Animation.Update elapsedTime |> ignore
+            this.UpdateBounds bounds
+            this.FlowContent this.Bounds
+            for c in this.Children do if c.Enabled then c.Update (elapsedTime, this.Bounds)
+            if Mouse.Hover this.Bounds then scrollPos <- scrollPos - Mouse.Scroll() * 100.0f
             scrollPos <- Math.Max(0.0f, Math.Min(scrollPos, contentSize - Rect.height this.Bounds))
 
         override this.Draw() =
@@ -180,16 +176,16 @@ module Components =
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
 
-        let color = AnimationFade(0.5f)
+        let color = AnimationFade 0.5f
         let mutable index = index
 
         do
-            this.Animation.Add(color)
+            this.Animation.Add color
             let fr = new Frame(Enabled = false)
             this.Add((Clickable((fun () -> fr.Enabled <- not fr.Enabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
                 let fc = FlowContainer(Spacing = 0.0f)
-                fr.Add(fc)
+                fr.Add fc
                 Array.iteri
                     (fun i o -> fc.Add(Button((fun () -> index <- i; func i), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                     options

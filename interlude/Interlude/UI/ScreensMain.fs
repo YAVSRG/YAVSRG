@@ -342,7 +342,7 @@ type Toolbar() as this =
         if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Value.Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
-        base.Update(elapsedTime, Rect.expand (0.f, -HEIGHT * if forceCollapse then 0.0f else barSlider.Value) bounds)
+        base.Update(elapsedTime, Rect.expand (0.0f, -HEIGHT * if forceCollapse then 0.0f else barSlider.Value) bounds)
 
 // Screen manager
 

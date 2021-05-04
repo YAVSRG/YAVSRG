@@ -33,6 +33,8 @@ type AnchorPoint(offset, anchor) =
     member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor_
     member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- this.Target
 
+    member this.Snap() = this.Value <- this.Target
+
 type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
 
 (*
@@ -68,24 +70,24 @@ type Widget() =
     member this.Initialised = initialised
 
     abstract member Add: Widget -> unit
-    default this.Add(c) =
-        children.Add(c)
-        c.OnAddedTo(this)
+    default this.Add(c: Widget) =
+        children.Add c
+        c.OnAddedTo this
 
     abstract member OnAddedTo: Widget -> unit
-    default this.OnAddedTo(c) =
+    default this.OnAddedTo(c: Widget) =
         match parent with
         | None -> parent <- Some c
         | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one")
         
     // Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
     abstract member Remove: Widget -> unit
-    default this.Remove(c) =
-        if children.Remove(c) then
-            c.OnRemovedFrom(this)
+    default this.Remove(c: Widget) =
+        if children.Remove c then
+            c.OnRemovedFrom this
         else Logging.Error("Tried to remove widget that was not in this container")
 
-    member private this.OnRemovedFrom(c) =
+    member private this.OnRemovedFrom(c: Widget) =
         match parent with
         | None -> Logging.Error("Tried to remove this widget from a container it isn't in one")
         | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another")
@@ -101,14 +103,14 @@ type Widget() =
     // Note that this is safe to call inside an update/draw method
     member this.Destroy() =
         match this.Parent with
-        | Some parent -> parent.Synchronized(fun () -> (parent.Remove(this); this.Dispose()))
+        | Some parent -> parent.Synchronized(fun () -> (parent.Remove this; this.Dispose()))
         | None -> this.Dispose()
 
     // Clears all children from the widget (with the intention of them being garbage collected, not reused)
     abstract member Clear: unit -> unit
     default this.Clear() =
         for c in children do 
-            c.OnRemovedFrom(this)
+            c.OnRemovedFrom this
             c.Dispose()
         children.Clear()
 
@@ -116,23 +118,26 @@ type Widget() =
     abstract member Draw: unit -> unit
     default this.Draw() = for c in children do if c.Initialised && c.Enabled then c.Draw()
 
+    member this.UpdateBounds(struct (l, t, r, b): Rect) =
+        initialised <- true
+        bounds <- Rect.create <| left.Position (l, r) <| top.Position (t, b) <| right.Position (l, r) <| bottom.Position (t, b)
+
     // Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit
-    default this.Update(elapsedTime, struct (l, t, r, b): Rect) =
-        animation.Update(elapsedTime) |> ignore
-        initialised <- true
-        bounds <- Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
+    default this.Update(elapsedTime, bounds: Rect) =
+        animation.Update elapsedTime |> ignore
+        this.UpdateBounds bounds
         for i in children.Count - 1 .. -1 .. 0 do
-            if (children.[i].Enabled) then children.[i].Update(elapsedTime, bounds)
+            if children.[i].Enabled then children.[i].Update (elapsedTime, this.Bounds)
 
     //todo: tear these out and replace with nice idiomatic positioners
     member this.Reposition(l, la, t, ta, r, ra, b, ba) =
-        left.Reposition(l, la)
-        top.Reposition(t, ta)
-        right.Reposition(r, ra)
-        bottom.Reposition(b, ba)
+        left.Reposition (l, la)
+        top.Reposition (t, ta)
+        right.Reposition (r, ra)
+        bottom.Reposition (b, ba)
     
-    member this.Reposition(l, t, r, b) = this.Reposition(l, 0.f, t, 0.f, r, 1.f, b, 1.f)
+    member this.Reposition(l, t, r, b) = this.Reposition (l, 0.0f, t, 0.0f, r, 1.0f, b, 1.0f)
 
     member this.Move(l, t, r, b) =
         left.Target <- l
@@ -181,11 +186,11 @@ type Logo() as this =
             (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
             (Quad.colorOf(Color.Aqua))
             Sprite.DefaultQuad
-        Draw.rect this.Bounds Color.White <| Themes.getTexture "logo"
+        Draw.rect this.Bounds Color.White (Themes.getTexture "logo")
 
         Stencil.draw()
         //chart background
-        Draw.rect this.Bounds <| Color.Aqua <| Sprite.Default
+        Draw.rect this.Bounds Color.Aqua Sprite.Default
         let rain = Themes.getTexture "rain"
         let v = float32 counter.Time
         let q = Quad.ofRect this.Bounds
@@ -208,7 +213,7 @@ type Logo() as this =
             prev <- level
 
         Stencil.finish()
-        Draw.rect this.Bounds Color.White <| Themes.getTexture "logo"
+        Draw.rect this.Bounds Color.White (Themes.getTexture "logo")
 
 type Screen() =
     inherit Widget()

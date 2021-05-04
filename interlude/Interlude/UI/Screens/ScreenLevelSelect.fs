@@ -104,33 +104,41 @@ module ScreenLevelSelect =
         type ScoreboardItem(data: ScoreInfoProvider) as this =
             inherit Widget()
 
+            let fade = AnimationFade 0.0f
+
             do
                 data.Physical |> ignore
                 data.Lamp |> ignore
+
+                let colfun = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
                 
-                TextBox((fun () -> sprintf "%s  •  %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs)), K (Color.White, Color.Black), 0.0f)
+                TextBox((fun () -> sprintf "%s  •  %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs)), colfun, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
                 |> this.Add
 
-                TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) data.Physical), K (Color.White, Color.Black), 0.0f)
+                TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) data.Physical), colfun, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
                 |> this.Add
 
-                TextBox(K (formatTimeOffset(DateTime.Now - data.Score.time)), K (Color.White, Color.Black), 1.0f)
+                TextBox(K (formatTimeOffset(DateTime.Now - data.Score.time)), colfun, 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
                 |> this.Add
 
-                TextBox(K data.Mods, K (Color.White, Color.Black), 1.0f)
+                TextBox(K data.Mods, colfun, 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
                 |> this.Add
 
                 Clickable((fun () -> Screens.newScreen((fun () -> new ScreenScore(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
                 |> this.Add
 
+                this.Animation.Add fade
+                Animation.Serial(AnimationTimer 150.0, AnimationAction (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f))
+                |> this.Animation.Add
+
                 this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
             override this.Draw() =
-                Draw.rect this.Bounds (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+                Draw.rect this.Bounds (Screens.accentShade(int (127.0f * fade.Value), 0.8f, 0.0f)) Sprite.Default
                 base.Draw()
             member this.Data = data
 
