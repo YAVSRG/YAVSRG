@@ -105,6 +105,9 @@ module ScreenLevelSelect =
             inherit Widget()
 
             do
+                data.Physical |> ignore
+                data.Lamp |> ignore
+                
                 TextBox((fun () -> sprintf "%s  •  %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs)), K (Color.White, Color.Black), 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
                 |> this.Add
@@ -144,8 +147,7 @@ module ScreenLevelSelect =
         type Scoreboard() as this =
             inherit Selectable()
 
-            let flowContainer = new FlowContainer()
-            let mutable empty = false
+            let mutable count = -1
             let filter = Setting ScoreboardFilter.All
             let sort = WrappedSetting(options.ScoreSortMode, int, enum)
 
@@ -153,12 +155,44 @@ module ScreenLevelSelect =
             let mutable scoring = ""
             let ls = new ListSelectable(true)
 
+            let sorter() : Comparison<Widget> =
+                match sort.Value with
+                | ScoreboardSort.Accuracy -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Accuracy.Value.CompareTo((b :?> ScoreboardItem).Data.Accuracy.Value))
+                | ScoreboardSort.Performance -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Physical.CompareTo((b :?> ScoreboardItem).Data.Physical))
+                | ScoreboardSort.Time
+                | _ -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Score.time.CompareTo((b :?> ScoreboardItem).Data.Score.time))
+
+            let filterer() : Widget -> bool =
+                match filter.Value with
+                | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.Score.rate = rate)
+                | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.Score.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.Score.keycount - 3])
+                | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods = selectedMods) //nyi
+                | _ -> K true
+
+            let flowContainer = new FlowContainer(Sort = sorter(), Filter = filterer())
+            let scoreLoader =
+                let future = BackgroundTask.futureSeq<ScoreboardItem> "Scoreboard loader" (fun item -> flowContainer.Synchronized(fun () -> flowContainer.Add item))
+                fun () ->
+                    future
+                        (fun () ->
+                            flowContainer.Synchronized(flowContainer.Clear)
+                            match chartSaveData with
+                            | None -> Seq.empty
+                            | Some d ->
+                                seq { 
+                                    for score in d.Scores do
+                                        yield ScoreInfoProvider(score, currentChart.Value, fst options.AccSystems.Value, fst options.HPSystems.Value)
+                                        |> ScoreboardItem
+                                }
+                        )
+
             do
                 flowContainer
                 |> positionWidgetA(0.0f, 10.0f, 0.0f, -40.0f)
                 |> this.Add
 
-                LittleButton.FromEnum("Sort", sort, this.Refresh)
+                LittleButton.FromEnum("Sort", sort,
+                    fun () -> flowContainer.Sort <- sorter())
                 |> positionWidget(20.0f, 0.0f, -35.0f, 1.0f, -20.0f, 0.25f, -5.0f, 1.0f)
                 |> ls.Add
 
@@ -176,8 +210,8 @@ module ScreenLevelSelect =
 
                 ls |> this.Add
 
-                let noLocalScores = Localisation.localise("scoreboard.NoLocalScores")
-                TextBox((fun () -> if empty then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
+                let noLocalScores = Localisation.localise "scoreboard.NoLocalScores"
+                TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
                 |> positionWidget(50.0f, 0.0f, 0.0f, 0.3f, -50.0f, 1.0f, 0.0f, 0.5f)
                 |> this.Add
 
@@ -195,36 +229,14 @@ module ScreenLevelSelect =
 
             member this.Refresh() =
                 let h = match currentCachedChart with Some c -> c.Hash | None -> ""
-                if h <> chart || (match chartSaveData with None -> false | Some d -> d.Scores.Count <> flowContainer.Children.Count) then
+                if (match chartSaveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
                     chart <- h
-                    flowContainer.Clear()
-                    match chartSaveData with
-                    | None -> ()
-                    | Some d ->
-                        for score in d.Scores do
-                            ScoreInfoProvider(score, currentChart.Value, fst options.AccSystems.Value, fst options.HPSystems.Value)
-                            |> ScoreboardItem
-                            |> flowContainer.Add
-                    empty <- flowContainer.Children.Count = 0
-                if scoring <> scoreSystem then
+                    scoreLoader()
+                elif scoring <> scoreSystem then
                     let s = fst options.AccSystems.Value
                     for c in flowContainer.Children do (c :?> ScoreboardItem).Data.AccuracyType <- s
                     scoring <- scoreSystem
-
-                flowContainer.Sort(
-                    match sort.Value with
-                    | ScoreboardSort.Accuracy -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Accuracy.Value.CompareTo((b :?> ScoreboardItem).Data.Accuracy.Value))
-                    | ScoreboardSort.Performance -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Physical.CompareTo((b :?> ScoreboardItem).Data.Physical))
-                    | ScoreboardSort.Time
-                    | _ -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Score.time.CompareTo((b :?> ScoreboardItem).Data.Score.time))
-                    )
-                flowContainer.Filter(
-                    match filter.Value with
-                    | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.Score.rate = rate)
-                    | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.Score.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.Score.keycount - 3])
-                    | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods = selectedMods) //nyi
-                    | _ -> K true
-                    )
+                flowContainer.Filter <- filterer()
 
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
@@ -250,14 +262,13 @@ module ScreenLevelSelect =
             //todo: renaming/editing menu
             do
                 CardButton(Localisation.localise "collections.Create", "", K false,
-                    (
-                        fun () ->
-                            TextInputDialog(this.Bounds, "Name collection",
-                                fun s ->
-                                    if s <> "" && (cache.GetCollection s).IsNone then
-                                        cache.UpdateCollection(s, Collection.Blank)
-                                        collectionCard s |> this.Add)
-                            |> Screens.addDialog
+                    (fun () ->
+                        TextInputDialog(this.Bounds, "Name collection",
+                            fun s ->
+                                if s <> "" && (cache.GetCollection s).IsNone then
+                                    cache.UpdateCollection(s, Collection.Blank)
+                                    collectionCard s |> this.Add)
+                        |> Screens.addDialog
                     ), K Color.Silver) |> this.Add
                 for name in cache.GetCollections() do collectionCard name |> this.Add
                 //todo: save last selected collection in options

@@ -203,7 +203,7 @@ type ScreenImport() as this =
         let eoDownloads = 
             SearchContainer(
                 (fun flowContainer _ output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> flowContainer.Synchronized(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
-                (fun flowContainer filter -> flowContainer.Filter(SMImportCard.Filter filter)) )
+                (fun flowContainer filter -> flowContainer.Filter <- SMImportCard.Filter filter) )
         let osuDownloads =
             SearchContainer(
                 (beatmapSearch [] 0),

@@ -108,9 +108,19 @@ module Components =
         let mutable contentSize = 0.0f
         let mutable scrollPos = 0.0f
 
+        let mutable filter = K true
+        let mutable sort = None
+        member this.Filter with set value = filter <- value; for c in this.Children do c.Enabled <- filter c
+        member this.Sort with set (comp: Comparison<Widget>) = sort <- Some comp; this.Children.Sort comp
+
         member this.Spacing with set(value) = spacing <- value
         //todo: margin doesn't work correctly
-        member this.Margin with set((x, y)) = margin <- (-x, -y)
+        member this.Margin with set (x, y) = margin <- (-x, -y)
+
+        override this.Add(c) =
+            base.Add c
+            c.Enabled <- filter c
+            Option.iter (fun (comp: Comparison<Widget>) -> this.Children.Sort comp) sort
 
         member private this.FlowContent(thisBounds) =
             let mutable vBounds = thisBounds |> Rect.expand margin |> Rect.translate(0.0f, -scrollPos)
@@ -159,8 +169,6 @@ module Components =
             let struct (_, ctop, _, cbottom) = w.Bounds
             if cbottom > bottom then scrollPos <- scrollPos + (cbottom - bottom)
             elif ctop < top then scrollPos <- scrollPos - (top - ctop)
-        member this.Filter(f: Widget -> bool) = for c in this.Children do c.Enabled <- f c
-        member this.Sort(comp: Comparison<Widget>) = this.Children.Sort comp
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()

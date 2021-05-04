@@ -43,12 +43,12 @@ module Gameplay =
                 Some <| RatingReport(mc.Notes, rate, Options.options.Playstyles.[mc.Keys - 3], mc.Keys)
             onChartUpdate()
 
-    let changeRate(amount) =
+    let changeRate amount =
         rate <- Math.Round(float (rate + amount), 2) |> float32
-        Audio.changeRate(rate)
+        Audio.changeRate rate
         updateChart()
 
-    let changeChart(cachedChart, chart) =
+    let changeChart (cachedChart, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData chart
@@ -69,7 +69,7 @@ module Gameplay =
             coloredChart <- Option.defaultWith (fun () -> getColoredChart Options.options.ColorStyle.Value mc) coloredChart |> Some
             coloredChart.Value
 
-    let makeScore(scoreData, keys): Score = {
+    let makeScore (scoreData, keys) : Score = {
         time = DateTime.Now
         hitdata = compressScoreData scoreData
         rate = rate
@@ -78,7 +78,7 @@ module Gameplay =
         keycount = keys
     }
 
-    let setScore(data: ScoreInfoProvider) =
+    let setScore (data: ScoreInfoProvider) =
         let d = chartSaveData.Value
         if
             //todo: score uploading goes here when implemented
