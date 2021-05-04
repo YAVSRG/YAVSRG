@@ -43,23 +43,27 @@ type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
 
 type Widget() =
 
+    let children = new List<Widget>()
+    let mutable parent = None
+
+    let mutable bounds = Rect.zero
     let left = AnchorPoint (0.0f, 0.0f)
     let top = AnchorPoint (0.0f, 0.0f)
     let right = AnchorPoint (0.0f, 1.0f)
     let bottom = AnchorPoint (0.0f, 1.0f)
 
     let animation = Animation.Fork (left, top, right, bottom)
-    let mutable parent = None
-    let mutable bounds = Rect.zero
-    let mutable initialised = false
     let mutable enable = true
-    let children = new List<Widget>()
+    let mutable initialised = false
 
-    member this.Animation = animation
-    member this.Bounds = bounds
-    member this.Anchors = (left, top, right, bottom)
     member this.Children = children
     member this.Parent = parent
+
+    member this.Bounds = bounds
+    member this.VisibleBounds = Rect.intersect bounds (match this.Parent with None -> bounds | Some (p: Widget) -> p.VisibleBounds)
+    member this.Anchors = (left, top, right, bottom)
+
+    member this.Animation = animation
     member this.Enabled with get() = enable and set(value) = enable <- value
     member this.Initialised = initialised
 
