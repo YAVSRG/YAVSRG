@@ -166,7 +166,7 @@ module Selection =
             | :? Selectable as c -> items.Remove c |> ignore
             | _ -> ()
 
-        override this.OnSelect() = base.OnSelect(); if lastHover.IsNone then this.HoverChild <- Some items.[0] else this.HoverChild <- lastHover
+        override this.OnSelect() = base.OnSelect(); if (match lastHover with None -> true | Some l -> not (items.Contains l)) then this.HoverChild <- Some items.[0] else this.HoverChild <- lastHover
         override this.OnDeselect() = base.OnDeselect(); lastHover <- this.HoverChild; this.HoverChild <- None
         override this.OnDehover() = base.OnDehover(); for i in items do i.OnDehover()
 
@@ -386,7 +386,7 @@ module Selection =
                 | ValueSome b ->
                     match b with
                     | Key (k, (ctrl, _, shift)) ->
-                        if k = Keys.Escape then setting.Value <- Dummy
+                        if k = Keys.Escape then if allowModifiers then setting.Value <- Dummy
                         elif allowModifiers then setting.Value <- Key (k, (ctrl, false, shift))
                         else setting.Value <- Key (k, (false, false, false))
                         this.Selected <- false

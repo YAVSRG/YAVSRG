@@ -78,7 +78,7 @@ module Components =
         //todo: margin doesn't work correctly
         member this.Margin with set (x, y) = margin <- (-x, -y)
 
-        override this.Add(c) =
+        override this.Add (c: Widget) =
             base.Add c
             c.Enabled <- filter c
             Option.iter (fun (comp: Comparison<Widget>) -> this.Children.Sort comp) sort
@@ -101,7 +101,6 @@ module Components =
             contentSize <- t2 - t1
 
         override this.Update(elapsedTime, bounds) =
-            //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
             let thisBounds =
                 if this.Initialised then this.Bounds
                 else

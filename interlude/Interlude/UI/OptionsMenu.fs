@@ -191,13 +191,13 @@ module OptionsMenuTabs =
                         if i <> 0 then options.Pacemaker.Value <- Lamp Lamp.SDCB
                         else options.Pacemaker.Value <- Accuracy 0.95),
                     [|
-                        [|PrettySetting("PacemakerAccuracy",
+                        [| PrettySetting("PacemakerAccuracy",
                             Slider(
                                 { new FloatSetting(0.95, 0.0, 1.0) with
                                     override this.Value
                                         with get() = match options.Pacemaker.Value with Accuracy v -> v | Lamp l -> 0.0
                                         and set(v) = base.Value <- v; options.Pacemaker.Value <- Accuracy base.Value }, 0.01f) ).Position(300.0f) |]
-                        [|PrettySetting("PacemakerLamp",
+                        [| PrettySetting("PacemakerLamp",
                             Selector.FromEnum(
                                 { new ISettable<Lamp>() with
                                     override this.Value
@@ -325,7 +325,14 @@ module OptionsMenuTabs =
                 (fun i k ->
                     let x = -60.0f * float32 k
                     let n = float32 i
-                    KeyBinder(f keycount i, false)
+                    { new KeyBinder(f keycount i, false) with
+                        override this.OnDeselect() =
+                            base.OnDeselect()
+                            if i + 1 < k then
+                                match this.SParent.Value with
+                                | :? ListSelectable as s -> s.Synchronized(fun () -> s.Next(); s.HoverChild.Value.Selected <- true)
+                                | _ -> failwith "impossible"
+                    }
                     |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
 
         column [
