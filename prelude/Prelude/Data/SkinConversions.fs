@@ -1,5 +1,7 @@
 ﻿namespace Prelude.Data
 
+open System.IO
+
 module SkinConversions =
 
     //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
@@ -401,3 +403,8 @@ module SkinConversions =
             match runParserOnFile skinIniParser () file System.Text.Encoding.UTF8 with
             | Success (s, _, _) -> s
             | Failure (e, _, _) -> failwith e
+
+        //constructor can throw an exception!
+        type osuSkin(path) = 
+            let data = parseSkinINI (Path.Combine (path, "skin.ini"))
+

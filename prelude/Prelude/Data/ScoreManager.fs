@@ -86,7 +86,7 @@ module ScoreManager =
                 difficulty.Value
             and set(value) = difficulty <- Some value
 
-        member this.AccuracyType with get() = accuracyType and set(value) = accuracyType <- value; accMetric <- None
+        member this.AccuracyType with get() = accuracyType and set(value) = if value <> this.AccuracyType then accuracyType <- value; accMetric <- None
         member this.Accuracy =
             accMetric <- Option.defaultWith (fun () -> let m = createAccuracyMetric accuracyType in m.ProcessAll this.HitData; m) accMetric |> Some
             accMetric.Value

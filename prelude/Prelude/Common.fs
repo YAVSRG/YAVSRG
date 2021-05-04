@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Diagnostics
 open System.Drawing
 open System.Threading
 open System.Threading.Tasks
@@ -10,6 +11,12 @@ open System.Text.RegularExpressions
 open Percyqaz.Json
 
 module Common =
+
+    #if DEBUG
+    let DEBUG_MODE = true
+    #else
+    let DEBUG_MODE = false
+    #endif
 
     [<Measure>] type ms
     [<Measure>] type beat
@@ -96,7 +103,7 @@ module Common =
     type Logging() =
         static let evt = new Event<LoggingEvent>()
 
-        static let agent = new MailboxProcessor<LoggingEvent>(fun box -> async { while (true) do let! e = box.Receive() in evt.Trigger(e) })
+        static let agent = new MailboxProcessor<LoggingEvent>(fun box -> async { while (true) do let! e = box.Receive() in evt.Trigger e })
         static do agent.Start()
 
         static member Subscribe f = evt.Publish.Add f
@@ -115,6 +122,15 @@ module Common =
         static member Critical s = Logging.Log LoggingLevel.CRITICAL s ""
 
     Logging.Subscribe (fun (level, main, details) -> printfn "[%A]: %s" level main; if level = LoggingLevel.CRITICAL then printfn " .. %s" details)
+    
+    (* Profiling tool *)
+    type ProfilingBuilder(name) =
+        let sw = Stopwatch.StartNew()
+        member this.Return x =
+            Logging.Debug (sprintf "%s: took %.0fms" name sw.Elapsed.TotalMilliseconds)
+            x
+        member this.Zero () = this.Return ()
+    let profile name = new ProfilingBuilder(name)
 
 (*
     Localisation
@@ -127,18 +143,19 @@ module Common =
         let loadFile path =
             let path = Path.Combine("Locale", path)
             try
-                let lines = File.ReadAllLines(path)
+                let lines = File.ReadAllLines path
                 Array.iter(
                     fun (l: string) ->
                         let s: string[] = l.Split([|'='|], 2)
-                        mapping.Add(s.[0], s.[1])) lines
+                        mapping.Add (s.[0], s.[1])
+                    ) lines
                 loadedPath <- path
             with err -> Logging.Error("Failed to load localisation file: " + path, err)
 
         let localise str : string =
-            if mapping.ContainsKey(str) then mapping.[str]
+            if mapping.ContainsKey str then mapping.[str]
             else
-                mapping.Add(str, str)
+                mapping.Add (str, str)
                 if loadedPath <> "" then File.AppendAllText(loadedPath, "\n"+str+"="+str)
                 str
 
@@ -159,23 +176,21 @@ module Common =
         type ManagedTask (name: string, t: StatusTask, options: TaskFlags, removeTask) as this =
             let cts = new CancellationTokenSource()
             let mutable info = ""
-            let mutable complete = false
             let visible = options &&& TaskFlags.HIDDEN <> TaskFlags.HIDDEN
 
             let task =
                 Async.StartAsTask(
                     async {
                         try
-                            Logging.Debug(sprintf "Task <%s> started" name)
+                            if visible then Logging.Debug (sprintf "Task <%s> started" name)
                             info <- "Running"
                             let! outcome = t (fun s -> info <- s; if not visible then Logging.Debug (sprintf "[%s] %s" name s))
-                            Logging.Debug(sprintf "Task <%s> complete (%A)" name outcome)
+                            if visible then Logging.Debug (sprintf "Task <%s> complete (%A)" name outcome)
                             info <- "Complete"
                         with err ->
-                            Logging.Error(sprintf "Exception in task '%s'" name, err)
+                            Logging.Error (sprintf "Exception in task '%s'" name, err)
                             info <- sprintf "Failed: %O" <| err.GetType()
-                        removeTask(this)
-                        complete <- true
+                        removeTask this
                         cts.Dispose()
                         },
                     ((*if options &&& TaskFlags.LONGRUNNING = TaskFlags.LONGRUNNING then TaskCreationOptions.LongRunning else*) TaskCreationOptions.None),
@@ -185,9 +200,9 @@ module Common =
             member this.Status = task.Status
             member this.Cancel() =
                 try
-                    if complete then Logging.Warn(sprintf "Task <%s> already finished, can't cancel!" name)
-                    else Logging.Debug(sprintf "Task <%s> cancelled" name); cts.Cancel(false)
-                with err -> ()
+                    cts.Cancel false
+                    Logging.Debug(sprintf "Task <%s> cancelled" name)
+                with _ -> ()
             member this.Visible = visible
             member this.Info = info
 
@@ -195,46 +210,74 @@ module Common =
         let Subscribe f = evt.Publish.Add f
 
         let TaskList = ResizeArray<ManagedTask>()
-        let private removeTask = fun mt -> if lock(TaskList) (fun () -> TaskList.Remove(mt)) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name)
+        let private removeTask = fun mt -> if lock TaskList (fun () -> TaskList.Remove mt) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name)
 
-        let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc(l) in f(v); return v }
+        let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc l in f v; return v }
         let rec Chain (procs: StatusTask list): StatusTask =
             match procs with
             | [] -> failwith "should not be used on empty list"
             | x :: [] -> x
             | x :: xs ->
                 let rest = Chain xs
-                fun (l: (string -> unit)) ->
+                fun (l: string -> unit) ->
                     async { let! b = x l in if b then return! rest l else return false }
 
-        let Create (options: TaskFlags) (name: string) (t: StatusTask) = let mt = new ManagedTask(name, t, options, removeTask) in lock(TaskList) (fun () -> TaskList.Add(mt)); evt.Trigger(mt); mt
+        let Create (options: TaskFlags) (name: string) (t: StatusTask) =
+            let mt = new ManagedTask(name, t, options, removeTask)
+            lock TaskList (fun () -> TaskList.Add mt)
+            evt.Trigger mt
+            mt
+
+        let future<'T> (name: string) (callback: 'T -> unit) =
+            let mutable id = 0
+            let starter i cons: StatusTask =
+                fun output -> async {
+                    let v = cons()
+                    if id = i then callback v; return true
+                    else return false
+                }
+            fun (cons: unit -> 'T) ->
+                id <- id + 1
+                ignore <| Create TaskFlags.HIDDEN name (starter id cons)
+
+        let futureSeq<'T> (name: string) (callback: 'T -> unit) =
+            let mutable id = 0
+            let starter i cons: StatusTask =
+                fun output -> async {
+                    for v in cons() do
+                        if id = i then callback v
+                    return id = i
+                }
+            fun (cons: unit -> 'T seq) ->
+                id <- id + 1
+                ignore <| Create TaskFlags.HIDDEN name (starter id cons)
 
 (*
-    Random helper functions (mostly data storage)
+    Misc helper functions (mostly data storage)
 *)
 
     let getDataPath name =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)
-        Directory.CreateDirectory(p) |> ignore
+        Directory.CreateDirectory p |> ignore
         p
 
     let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
-        if File.Exists(path) then
+        if File.Exists path then
             let p = Path.ChangeExtension(path, ".bak")
-            if File.Exists(p) then File.Copy(p, Path.ChangeExtension(path, ".bak2"), true)
+            if File.Exists p then File.Copy(p, Path.ChangeExtension(path, ".bak2"), true)
             File.Copy(path, p, true)
             try
-                Json.fromFile(path) |> JsonResult.value
+                Json.fromFile path |> JsonResult.value
             with err ->
-                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path), err)
+                Logging.Critical (sprintf "Could not load %s! Maybe it is corrupt?" (Path.GetFileName path), err)
                 if prompt then
-                    Console.WriteLine("If you would like to launch anyway, press ENTER.")
-                    Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
+                    Console.WriteLine "If you would like to launch anyway, press ENTER."
+                    Console.WriteLine "If you would like to try and fix the problem youself, CLOSE THIS WINDOW."
                     Console.ReadLine() |> ignore
-                    Logging.Critical("User has chosen to launch game with default data.")
+                    Logging.Critical "User has chosen to launch game with default data."
                 defaultData
         else
-            Logging.Info(sprintf "No %s file found, creating it." name)
+            Logging.Info (sprintf "No %s file found, creating it." name)
             defaultData
 
     do

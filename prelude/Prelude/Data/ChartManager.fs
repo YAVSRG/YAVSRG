@@ -164,10 +164,10 @@ module ChartManager =
             let t, c = charts.TryGetValue id
             if t then Some c else None
 
+        //this is a member of Cache and not standalone because when the extra line is uncommented, cache is concerned with re-caching anything that has changed
         member this.LoadChart (cc: CachedChart) : Chart Option =
-            match cc.FilePath |> Chart.fromFile with
-            | Some c -> this.CacheChart c; Some c
-            | None -> None
+            cc.FilePath |> Chart.fromFile
+            (*|> function | Some c -> this.CacheChart c; Some c | None -> None*)
 
         member this.GetCollections() = collections.Keys :> string seq
         member this.GetCollection id = if collections.ContainsKey id then Some collections.[id] else None

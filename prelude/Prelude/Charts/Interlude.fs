@@ -266,15 +266,13 @@ module Interlude =
                 let keys = br.ReadByte() |> int
 
                 let header = Json.fromString(br.ReadString()) |> JsonResult.value
-
                 let notes = readSection br NoteRow.read
                 let bpms = readSection br (fun r -> BPM(r.ReadInt32() * 1<beat>, r.ReadSingle() * 1.0f<ms/beat>))
                 let sv = MultiTimeData(keys)
                 for i in 0..keys do
                     sv.SetChannelData(i - 1, readSection br (fun r -> r.ReadSingle()))
 
-                Chart (keys, header, notes, bpms, sv, filepath)
-                |> Some
+                Some (Chart (keys, header, notes, bpms, sv, filepath))
             with
             | err -> Logging.Error ("Could not load chart from " + filepath, err); None
 
