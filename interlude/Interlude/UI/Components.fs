@@ -62,45 +62,6 @@ module Components =
             Text.drawFillB(Themes.font(), textFunc(), this.Bounds, color(), just)
             base.Draw()
 
-    type Clickable(onClick, onHover) =
-        inherit Widget()
-
-        let mutable hover = false
-
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            let oh = hover
-            hover <- Mouse.Hover(this.Bounds)
-            if oh && not hover then onHover(false)
-            elif not oh && hover && Mouse.Moved() then onHover(true)
-            elif hover && Mouse.Click(MouseButton.Left) then onClick()
-
-    type TooltipRegion(localisedText) =
-        inherit Widget()
-
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
-                Screens.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
-
-    type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
-        inherit Widget()
-
-        let color = AnimationFade 0.3f
-
-        do
-            this.Animation.Add color
-            this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
-
-        override this.Draw() =
-            Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
-            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
-            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
-
-        override this.Update(elapsedTime, bounds) =
-            if bind.Value.Tapped() then onClick()
-            base.Update(elapsedTime, bounds)
-
     type FlowContainer() =
         inherit Widget()
         let mutable spacing = 10.0f
@@ -108,9 +69,19 @@ module Components =
         let mutable contentSize = 0.0f
         let mutable scrollPos = 0.0f
 
+        let mutable filter = K true
+        let mutable sort = None
+        member this.Filter with set value = filter <- value; for c in this.Children do c.Enabled <- filter c
+        member this.Sort with set (comp: Comparison<Widget>) = sort <- Some comp; this.Children.Sort comp
+
         member this.Spacing with set(value) = spacing <- value
         //todo: margin doesn't work correctly
-        member this.Margin with set((x, y)) = margin <- (-x, -y)
+        member this.Margin with set (x, y) = margin <- (-x, -y)
+
+        override this.Add (c: Widget) =
+            base.Add c
+            c.Enabled <- filter c
+            Option.iter (fun (comp: Comparison<Widget>) -> this.Children.Sort comp) sort
 
         member private this.FlowContent(thisBounds) =
             let mutable vBounds = thisBounds |> Rect.expand margin |> Rect.translate(0.0f, -scrollPos)
@@ -130,16 +101,11 @@ module Components =
             contentSize <- t2 - t1
 
         override this.Update(elapsedTime, bounds) =
-            //todo: fix for ability to interact with components that appear outside of the container (they should update but clickable components should stop working)
-            let thisBounds =
-                if this.Initialised then this.Bounds
-                else
-                    let (left, top, right, bottom) = this.Anchors
-                    let struct (l, t, r, b) = bounds
-                    Rect.create <| left.Position(l, r) <| top.Position(t, b) <| right.Position(l, r) <| bottom.Position(t, b)
-            this.FlowContent(thisBounds) 
-            base.Update(elapsedTime, bounds)
-            if Mouse.Hover(this.Bounds) then scrollPos <- scrollPos - Mouse.Scroll() * 100.0f
+            this.Animation.Update elapsedTime |> ignore
+            this.UpdateBounds bounds
+            this.FlowContent this.Bounds
+            for c in this.Children do if c.Enabled then c.Update (elapsedTime, this.Bounds)
+            if Mouse.Hover this.Bounds then scrollPos <- scrollPos - Mouse.Scroll() * 100.0f
             scrollPos <- Math.Max(0.0f, Math.Min(scrollPos, contentSize - Rect.height this.Bounds))
 
         override this.Draw() =
@@ -159,22 +125,67 @@ module Components =
             let struct (_, ctop, _, cbottom) = w.Bounds
             if cbottom > bottom then scrollPos <- scrollPos + (cbottom - bottom)
             elif ctop < top then scrollPos <- scrollPos - (top - ctop)
-        member this.Filter(f: Widget -> bool) = for c in this.Children do c.Enabled <- f c
-        member this.Sort(comp: Comparison<Widget>) = this.Children.Sort comp
+
+    type Clickable (onClick, onHover) =
+        inherit Widget()
+
+        let mutable inFlowContainer = false
+        let mutable hover = false
+
+        override this.Update(elapsedTime, bounds) =
+            if not this.Initialised then
+                inFlowContainer <-
+                    let rec f (w: Widget) =
+                        match w with
+                        | :? FlowContainer -> true
+                        | _ -> match w.Parent with None -> false | Some p -> f p
+                    f this.Parent.Value
+            base.Update(elapsedTime, bounds)
+            let oh = hover
+            hover <- Mouse.Hover(if inFlowContainer then this.VisibleBounds else this.Bounds)
+            if oh && not hover then onHover(false)
+            elif not oh && hover && Mouse.Moved() then onHover(true)
+            elif hover && Mouse.Click(MouseButton.Left) then onClick()
+
+    type TooltipRegion(localisedText) =
+        inherit Widget()
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
+                Screens.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
+
+    type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
+        inherit Widget()
+
+        let color = AnimationFade 0.3f
+
+        do
+            this.Animation.Add color
+            this.Add(new Clickable(onClick, (fun b -> color.Target <- if b then 0.7f else 0.3f)))
+
+        override this.Draw() =
+            Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
+            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
+
+        override this.Update(elapsedTime, bounds) =
+            if bind.Value.Tapped() then onClick()
+            base.Update(elapsedTime, bounds)
 
     type Dropdown(options: string array, index, func, label, buttonSize) as this =
         inherit Widget()
 
-        let color = AnimationFade(0.5f)
+        let color = AnimationFade 0.5f
         let mutable index = index
 
         do
-            this.Animation.Add(color)
+            this.Animation.Add color
             let fr = new Frame(Enabled = false)
             this.Add((Clickable((fun () -> fr.Enabled <- not fr.Enabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
             this.Add(
                 let fc = FlowContainer(Spacing = 0.0f)
-                fr.Add(fc)
+                fr.Add fc
                 Array.iteri
                     (fun i o -> fc.Add(Button((fun () -> index <- i; func i), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                     options

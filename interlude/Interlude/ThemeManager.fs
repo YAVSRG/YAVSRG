@@ -21,9 +21,8 @@ module Themes =
     let mutable themeConfig = ThemeConfig.Default
     let mutable noteskinConfig = NoteSkinConfig.Default
     let mutable currentNoteSkin = "default"
-    let mutable background = Sprite.Default
-    let mutable internal accentColor = themeConfig.DefaultAccentColor
 
+    let mutable internal accentColor = themeConfig.DefaultAccentColor
     let mutable private fontBuilder: Lazy<Text.SpriteFont> option = None
     let font(): Text.SpriteFont = fontBuilder.Value.Force()
 
@@ -91,58 +90,30 @@ module Themes =
                 |> getInherited
             gameplayConfig.Add(name, o :> obj)
             o
-
-    let loadBackground(file: string) =
-        if background.ID <> 0 && background.ID <> getTexture("background").ID then Sprite.destroy background
-        background <- 
-        match Path.GetExtension(file).ToLower() with
-        | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
-            try
-                use bmp = new Bitmap(file)
-                accentColor <-
-                    if themeConfig.OverrideAccentColor then themeConfig.DefaultAccentColor else
-                        let vibrance (c:Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
-                        seq {
-                            let w = bmp.Width / 50
-                            let h = bmp.Height / 50
-                            for x in 0 .. 49 do
-                                for y in 0 .. 49 do
-                                    yield bmp.GetPixel(w * x, h * x) }
-                        |> Seq.maxBy vibrance
-                        |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else themeConfig.DefaultAccentColor
-                Sprite.upload(bmp, 1, 1, true)
-            with err ->
-                Logging.Warn("Failed to load background image: " + file, err)
-                accentColor <- themeConfig.DefaultAccentColor
-                getTexture("background")
-        | ext ->
-            //if ext <> "" then Logging.Error("Unsupported file type for background: " + ext) else Logging.Debug("Chart has no background image")
-            accentColor <- themeConfig.DefaultAccentColor
-            getTexture("background")
     
     let loadThemes(themes: List<string>) =
-        Logging.Debug("===== Loading Themes =====")
+        Logging.Info("===== Loading Themes =====")
         loadedNoteskins.Clear()
         loadedThemes.Clear()
-        loadedThemes.Add(defaultTheme)
+        loadedThemes.Add defaultTheme
         themeConfig <- ThemeConfig.Default
         Seq.choose (fun t ->
-            let theme = Theme.FromThemeFolder(t)
+            let theme = Theme.FromThemeFolder t
             try
                 let config: ThemeConfig = theme.GetJson(false, "theme.json") |> fst
                 Some (theme, config)
             with err -> Logging.Error("Failed to load theme '" + t + "'", err); None)
             themes
-        |> Seq.iter (fun (t, conf) -> loadedThemes.Add(t); themeConfig <- conf)
+        |> Seq.iter (fun (t, conf) -> loadedThemes.Add t; themeConfig <- conf)
     
         loadedThemes
         |> Seq.iteri(fun i t ->
             // this is where we load other stuff like scripting in future
             t.GetNoteSkins()
             |> Seq.iter (fun (ns, c) ->
-                loadedNoteskins.Remove(ns) |> ignore // overwrite existing skin with same name
+                loadedNoteskins.Remove ns |> ignore // overwrite existing skin with same name
                 loadedNoteskins.Add(ns, (c, i))
-                Logging.Debug(sprintf "Loaded noteskin %s" ns)))
+                Logging.Info(sprintf "Loaded noteskin %s" ns)))
         Seq.iter Sprite.destroy sprites.Values
         sprites.Clear()
         gameplayConfig.Clear()
@@ -150,4 +121,4 @@ module Themes =
         if themeConfig.OverrideAccentColor then accentColor <- themeConfig.DefaultAccentColor
         if fontBuilder.IsSome then font().Dispose(); 
         fontBuilder <- Some (lazy (Text.createFont themeConfig.Font))
-        Logging.Debug(sprintf "===== Loaded %i themes (%i available) =====" <| loadedThemes.Count - 1 <| availableThemes.Count)
+        Logging.Info(sprintf "===== Loaded %i themes (%i available) =====" <| loadedThemes.Count - 1 <| availableThemes.Count)

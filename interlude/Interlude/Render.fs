@@ -26,34 +26,37 @@ module Rect =
     let center (r: Rect) = (centerX r, centerY r)
     let centerV (r: Rect) = new Vector2(centerX r, centerY r)
 
-    let translate (x,y) (struct (left, top, right, bottom): Rect) =
+    let intersect (struct (l, t, r, b): Rect) (struct (left, top, right, bottom): Rect) : Rect =
+        struct (Math.Max(l, left), Math.Max(t, top), Math.Min(r, right), Math.Min(b, bottom))
+
+    let translate (x,y) (struct (left, top, right, bottom): Rect) : Rect =
         struct (left + x, top + y, right + x, bottom + y)
 
-    let expand (x,y) (struct (left, top, right, bottom): Rect) =
+    let expand (x,y) (struct (left, top, right, bottom): Rect) : Rect =
         struct (left - x, top - y, right + x, bottom + y)
 
-    let sliceLeft v (struct (left, top, _, bottom): Rect) =
+    let sliceLeft v (struct (left, top, _, bottom): Rect) : Rect =
         struct (left, top, left + v, bottom)
 
-    let sliceTop v (struct (left, top, right, _): Rect) =
+    let sliceTop v (struct (left, top, right, _): Rect) : Rect =
         struct (left, top, right, top + v)
 
-    let sliceRight v (struct (_, top, right, bottom): Rect) =
+    let sliceRight v (struct (_, top, right, bottom): Rect) : Rect =
         struct (right - v, top, right, bottom)
 
-    let sliceBottom v (struct (left, _, right, bottom): Rect) =
+    let sliceBottom v (struct (left, _, right, bottom): Rect) : Rect =
         struct (left, bottom - v, right, bottom)
 
-    let trimLeft v (struct (left, top, right, bottom): Rect) =
+    let trimLeft v (struct (left, top, right, bottom): Rect) : Rect =
         struct (left + v, top, right, bottom)
 
-    let trimTop v (struct (left, top, right, bottom): Rect) =
+    let trimTop v (struct (left, top, right, bottom): Rect) : Rect =
         struct (left, top + v, right, bottom)
 
-    let trimRight v (struct (left, top, right, bottom): Rect) =
+    let trimRight v (struct (left, top, right, bottom): Rect) : Rect =
         struct (left, top, right - v, bottom)
 
-    let trimBottom v (struct (left, top, right, bottom): Rect) =
+    let trimBottom v (struct (left, top, right, bottom): Rect) : Rect =
         struct (left, top, right, bottom - v)
 
     let zero = create 0.f 0.f 0.f 0.f
@@ -68,27 +71,27 @@ type QuadColors = (struct(Color * Color * Color * Color))
 
 module Quad =
 
-    let ofRect (struct (l, t, r, b): Rect): Quad =
+    let ofRect (struct (l, t, r, b): Rect) : Quad =
         struct (new Vector2(l, t), new Vector2(r, t), new Vector2(r, b), new Vector2(l, b))
 
     let parallelogram (amount: float32) (struct (l, t, r, b): Rect): Quad =
         let a = (b - t) * 0.5f * amount
         struct (new Vector2(l + a, t), new Vector2(r + a, t), new Vector2(r - a, b), new Vector2(l - a, b))
 
-    let create c1 c2 c3 c4: Quad = struct (c1, c2, c3, c4)
+    let create c1 c2 c3 c4 : Quad = struct (c1, c2, c3, c4)
 
     let colorOf c: QuadColors = struct (c, c, c, c)
 
-    let flip (struct (c1, c2, c3, c4): Quad): Quad = struct (c4, c3, c2, c1)
+    let flip (struct (c1, c2, c3, c4): Quad) : Quad = struct (c4, c3, c2, c1)
 
-    let rotate r (struct (c1, c2, c3, c4): Quad): Quad =
+    let rotate r (struct (c1, c2, c3, c4): Quad) : Quad =
         match r with
         | 3 -> struct (c4, c1, c2, c3)
         | 2 -> struct (c3, c4, c1, c2)
         | 1 -> struct (c2, c3, c4, c1)
         | 0 | _ -> struct (c1, c2, c3, c4)
 
-    let map f (struct (c1, c2, c3, c4): Quad): Quad = struct (f c1, f c2, f c3, f c4)
+    let map f (struct (c1, c2, c3, c4): Quad) : Quad = struct (f c1, f c2, f c3, f c4)
 
 (*
     Sprites and content uploading
@@ -97,9 +100,9 @@ module Quad =
 [<Struct>]
 type Sprite = { ID: int; Width: int; Height: int; Rows: int; Columns: int }
 with
-    member this.WithUV(q: Quad): SpriteQuad = struct (this, q)
+    member this.WithUV(q: Quad) : SpriteQuad = struct (this, q)
     static member Default = { ID = 0; Width = 1; Height = 1; Rows = 1; Columns = 1 }
-    static member DefaultQuad: SpriteQuad = struct (Sprite.Default, Quad.ofRect Rect.one)
+    static member DefaultQuad : SpriteQuad = struct (Sprite.Default, Quad.ofRect Rect.one)
 and SpriteQuad = (struct(Sprite * Quad))
 
 module Sprite =

@@ -12,6 +12,7 @@ open Prelude.Gameplay.NoteColors
 open Prelude.Data.ChartManager
 open Prelude.Data.ScoreManager
 open Interlude
+open Interlude.UI
 open Interlude.Utils
 
 module Gameplay =
@@ -42,16 +43,16 @@ module Gameplay =
                 Some <| RatingReport(mc.Notes, rate, Options.options.Playstyles.[mc.Keys - 3], mc.Keys)
             onChartUpdate()
 
-    let changeRate(amount) =
+    let changeRate amount =
         rate <- Math.Round(float (rate + amount), 2) |> float32
-        Audio.changeRate(rate)
+        Audio.changeRate rate
         updateChart()
 
-    let changeChart(cachedChart, chart) =
+    let changeChart (cachedChart, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData chart
-        Themes.loadBackground chart.BGPath
+        Screens.loadBackground chart.BGPath
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Value - offsetOf chart.Notes.First.Value
         Audio.changeTrack (chart.AudioPath, localOffset, rate)
         Audio.playFrom chart.Header.PreviewTime
@@ -68,7 +69,7 @@ module Gameplay =
             coloredChart <- Option.defaultWith (fun () -> getColoredChart Options.options.ColorStyle.Value mc) coloredChart |> Some
             coloredChart.Value
 
-    let makeScore(scoreData, keys): Score = {
+    let makeScore (scoreData, keys) : Score = {
         time = DateTime.Now
         hitdata = compressScoreData scoreData
         rate = rate
@@ -77,7 +78,7 @@ module Gameplay =
         keycount = keys
     }
 
-    let setScore(data: ScoreInfoProvider) =
+    let setScore (data: ScoreInfoProvider) =
         let d = chartSaveData.Value
         if
             //todo: score uploading goes here when implemented
@@ -129,4 +130,6 @@ module Gameplay =
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, cache.LoadChart(c).Value
             changeChart(c, ch)
-        with err -> Logging.Debug("Tried to auto select a chart but none exist", err)
+        with err ->
+            Logging.Debug("Tried to auto select a chart but none exist", err)
+            Screens.loadBackground ""

@@ -126,8 +126,9 @@ module ScreenImport =
             this.Add(new Clickable((fun () -> if not downloaded then download()), ignore))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f)
 
-    type SearchContainerLoader(t: StatusTask) as this =
+    type SearchContainerLoader(t) as this =
         inherit Widget()
+        let t = t this
         let mutable task = None
         do this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 30.0f, 0.0f)
 
@@ -136,13 +137,11 @@ module ScreenImport =
             base.Draw()
             //todo: improved loading indicator here
             Text.drawFill(Themes.font(), "Loading...", this.Bounds, Color.White, 0.5f)
-            if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> this.Destroy()))
-
-        override this.Dispose() = match task with None -> () | Some task -> task.Cancel()
+            if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> if this.Parent.IsSome then this.Destroy()))
 
     type SearchContainer(populate, handleFilter) as this =
         inherit Widget()
-        let flowContainer = new FlowContainer(Spacing = 15.0f, Margin = (0.0f, 0.0f))
+        let flowContainer = new FlowContainer(Spacing = 15.0f)
         let populate = populate flowContainer
         let handleFilter = handleFilter flowContainer
         do
@@ -150,7 +149,7 @@ module ScreenImport =
             this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 70.0f, 0.0f, -0.0f, 1.0f, 0.0f, 1.0f))
             flowContainer.Add(new SearchContainerLoader(populate))
     
-    let rec beatmapSearch (filter: Filter) (page: int) : FlowContainer -> StatusTask =
+    let rec beatmapSearch (filter: Filter) (page: int) : FlowContainer -> SearchContainerLoader -> StatusTask =
         let mutable s = "https://osusearch.com/api/search?modes=Mania&key="
         let mutable invalid = false
         let mutable title = ""
@@ -170,14 +169,16 @@ module ScreenImport =
         ) filter
         s <- s + "&title=" + Uri.EscapeDataString title
         s <- s + "&offset=" + page.ToString()
-        fun (flowContainer: FlowContainer) output ->
+        fun (flowContainer: FlowContainer) (loader: SearchContainerLoader) output ->
             let callback(d: BeatmapSearch) =
-                flowContainer.Synchronized(
-                    fun () -> 
-                        for p in d.beatmaps do flowContainer.Add(new BeatmapImportCard(p))
-                        if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                            flowContainer.Add(new SearchContainerLoader(beatmapSearch filter (page + 1) flowContainer))
-                )
+                if loader.Parent.IsSome then
+                    flowContainer.Synchronized(
+                        fun () -> 
+                            for p in d.beatmaps do flowContainer.Add(BeatmapImportCard p)
+                            if d.result_count < 0 || d.result_count > d.beatmaps.Count then
+                                new SearchContainerLoader(beatmapSearch filter (page + 1) flowContainer)
+                                |> flowContainer.Add
+                    )
             downloadJson(s, callback)
 
 open ScreenImport
@@ -201,8 +202,8 @@ type ScreenImport() as this =
 
         let eoDownloads = 
             SearchContainer(
-                (fun flowContainer output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> flowContainer.Synchronized(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
-                (fun flowContainer filter -> flowContainer.Filter(SMImportCard.Filter filter)) )
+                (fun flowContainer _ output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> flowContainer.Synchronized(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
+                (fun flowContainer filter -> flowContainer.Filter <- SMImportCard.Filter filter) )
         let osuDownloads =
             SearchContainer(
                 (beatmapSearch [] 0),

@@ -50,14 +50,14 @@ type Game(config: GameConfig) as this =
     override this.OnRenderFrame e =
         base.OnRenderFrame e
         Render.start()
-        screens.Draw()
+        if Render.rheight > 0 then screens.Draw()
         Render.finish()
         base.SwapBuffers()
 
     override this.OnUpdateFrame e =
         base.OnUpdateFrame e
         Input.update()
-        screens.Update(e.Time * 1000.0, Render.bounds)
+        if Render.rheight > 0 then screens.Update(e.Time * 1000.0, Render.bounds)
         Input.absorbAll()
         Audio.update()
         if screens.Exit then base.Close()

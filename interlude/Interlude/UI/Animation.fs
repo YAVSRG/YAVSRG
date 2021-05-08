@@ -78,8 +78,14 @@ module Animation =
         member this.Add(a: Animation) = lock(this) (fun () -> animations <- a :: animations)
         member this.Complete = animations.IsEmpty
         override this.Update(elapsed) =
+            let rec filterBackwards (pred: 'T -> bool) (xs: 'T list) =
+                match xs with
+                | [] -> []
+                | x :: xs ->
+                    let f = filterBackwards pred xs
+                    if pred x then x :: f else f
             if this.Complete then true
-            else lock(this) (fun () -> animations <- List.filter (fun (a: Animation) -> a.Update(elapsed) |> not) animations); this.Complete
+            else lock(this) (fun () -> animations <- filterBackwards (fun (a: Animation) -> a.Update(elapsed) |> not) animations); this.Complete
         
     type AnimationSequence() =
         inherit Animation()

@@ -4,12 +4,16 @@ open System
 open System.Reflection
 open System.Diagnostics
 open System.IO
+open Prelude.Common
 
 module Utils =
+    let smallVersion =
+        let v = Assembly.GetExecutingAssembly().GetName()
+        if v.Version.Revision <> 0 then v.Version.ToString(4) else v.Version.ToString(3)
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
         let v2 = Assembly.GetExecutingAssembly().Location |> FileVersionInfo.GetVersionInfo
-        sprintf "%s %s (%s)" v.Name (if v.Version.Revision <> 0 then v.Version.ToString(4) else v.Version.ToString(3)) v2.ProductVersion
+        sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
 
     let K x _ = x
 
@@ -22,7 +26,7 @@ module Utils =
         use tr = new StreamReader(s)
         let lines = tr.ReadToEnd().Split("\n")
 
-        fun () -> lines.[r.Next(lines.Length)]
+        fun () -> lines.[r.Next lines.Length]
 
     let idPrint x = printfn "%A" x; x
 
@@ -35,10 +39,22 @@ module Utils =
        elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
        else sprintf "%.0fs" ts.TotalSeconds
 
+    (*
+    module Profiling =
+        let mutable timers = []
+
+        let start() = 
+            timers <- Stopwatch.StartNew() :: timers
+
+        let finish(name) =
+            let t = timers.Head
+            t.Stop()
+            Logging.Debug(sprintf "%s: took %.0fms" name t.Elapsed.TotalMilliseconds)
+            timers <- timers.Tail *)
+
     module AutoUpdate =
         open System.IO.Compression
         open Percyqaz.Json
-        open Prelude.Common
         open Prelude.Web
 
         let rec copyFolder source dest =
@@ -78,7 +94,7 @@ module Utils =
         let handleUpdate(release: GithubRelease) =
             latestRelease <- Some release
 
-            let current = Assembly.GetExecutingAssembly().GetName().Version.ToString(4)
+            let current = smallVersion
             let incoming = release.tag_name.Substring(1)
 
             if incoming > current then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
