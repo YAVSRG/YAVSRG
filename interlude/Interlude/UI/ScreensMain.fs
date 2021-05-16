@@ -316,7 +316,7 @@ type Toolbar() as this =
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default)
+        Button(MarkdownReader.test, "Help", Options.options.Hotkeys.Help, Sprite.Default)
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 

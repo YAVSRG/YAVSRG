@@ -25,7 +25,7 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Resources\Readme.md" />
+    <EmbeddedResource Include="Resources\QuickStart.md" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
@@ -39,6 +39,7 @@
     <Compile Include="UI\Widgets.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Components.fs" />
+    <Compile Include="UI\MarkdownReader.fs" />
     <Compile Include="UI\Selection.fs" />
     <Compile Include="UI\Screens\ScreenScore.fs" />
     <Compile Include="UI\Screens\ScreenPlay.fs" />

@@ -28,13 +28,11 @@ module private ScreenLevelSelectVars =
     //functionality wishlist:
     // - hotkeys to navigate by pack/close and open quickly
     // - display of keycount for charts
-    // - fix for scoreboard allowing clicking of culled objects
     // - "random chart" hotkey
     // - cropping of text that is too long
     
     //eventual todo:
-    // - goals collections and playlists editor
-    // - charts in the current collection/goal/playlist you are editing have a * or something by them
+    // - goals and playlists editor
 
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //filepath
@@ -112,7 +110,7 @@ module ScreenLevelSelect =
 
                 let colfun = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
                 
-                TextBox((fun () -> sprintf "%s  •  %i" (data.Accuracy.Format()) (let (_, _, _, _, _, cbs) = data.Accuracy.State in cbs)), colfun, 0.0f)
+                TextBox((fun() -> data.Accuracy.Format()), colfun, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
                 |> this.Add
 
@@ -587,6 +585,7 @@ module ScreenLevelSelect =
                             items |> Seq.map (fun i -> i.Chart) |> cache.DeleteCharts
                             refresh <- true
                             Screens.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+
         override this.Update(top, topEdge, elapsedTime) =
             match scrollTo with
             | ScrollToPack s when s = name ->
