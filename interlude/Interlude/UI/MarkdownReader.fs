@@ -168,4 +168,4 @@ module MarkdownReader =
                 frame.Move(-WIDTH * 0.5f, Render.vheight, WIDTH * 0.5f, Render.vheight - 200.0f)
         override this.OnClose() = ()
 
-    let test() = Screens.addDialog(MarkdownViewDialog(doc))
+    let help() = Screens.addDialog(MarkdownViewDialog(doc))

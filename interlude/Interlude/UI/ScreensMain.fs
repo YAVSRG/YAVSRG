@@ -58,6 +58,7 @@ type ScreenMenu() as this =
 
     override this.OnEnter(prev) =
         if Utils.AutoUpdate.updateAvailable then Screens.addNotification(Localisation.localise "notification.UpdateAvailable", NotificationType.System)
+        if prev :? ScreenLoading && Options.firstLaunch then MarkdownReader.help()
         splashText <- newSplash()
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
         Screens.backgroundDim.Target <- 0.0f
@@ -88,7 +89,7 @@ type ScreenMenu() as this =
 
 // Loading screen
 
-type ScreenLoading() as this =
+and ScreenLoading() as this =
     inherit Screen()
 
     let mutable closing = false
@@ -316,7 +317,7 @@ type Toolbar() as this =
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button(MarkdownReader.test, "Help", Options.options.Hotkeys.Help, Sprite.Default)
+        Button(MarkdownReader.help, "Help", Options.options.Hotkeys.Help, Sprite.Default)
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
