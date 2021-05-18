@@ -212,8 +212,8 @@ module Common =
         let TaskList = ResizeArray<ManagedTask>()
         let private removeTask = fun mt -> if lock TaskList (fun () -> TaskList.Remove mt) <> true then Logging.Debug(sprintf "Tried to remove a task that isn't there: %s" mt.Name)
 
-        let Callback (f: bool -> unit) (proc: StatusTask): StatusTask = fun (l: string -> unit) -> async { let! v = proc l in f v; return v }
-        let rec Chain (procs: StatusTask list): StatusTask =
+        let Callback (f: bool -> unit) (proc: StatusTask) : StatusTask = fun (l: string -> unit) -> async { let! v = proc l in f v; return v }
+        let rec Chain (procs: StatusTask list) : StatusTask =
             match procs with
             | [] -> failwith "should not be used on empty list"
             | x :: [] -> x

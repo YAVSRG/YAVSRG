@@ -121,21 +121,21 @@ module Score =
             let j =
                 match hit.[k] with
                 | HitStatus.NotHit -> JudgementType.MISS
-                | HitStatus.Hit -> judge_func ((deltas.[k] |> Time.Abs))
+                | HitStatus.Hit -> judge_func (Time.Abs deltas.[k])
                 | HitStatus.Special
                 | HitStatus.SpecialOK -> JudgementType.OK
                 | HitStatus.SpecialNG -> JudgementType.NG
                 | _ -> failwith "impossible hit status"
-            judgementCounts.[j |> int] <- (judgementCounts.[j |> int] + 1)
+            judgementCounts.[int j] <- (judgementCounts.[int j] + 1)
             let (newcombo, cb) = combo_func j combo
-            (judgementCounts, points + points_func j (deltas.[k] |> Time.Abs), maxPoints + max_point_func j, newcombo,
+            (judgementCounts, points + points_func j (Time.Abs deltas.[k]), maxPoints + max_point_func j, newcombo,
                 max newcombo maxCombo,
                 cbs + if cb then 1 else 0)
 
     type AccuracySystem(name: string, judge_func: Time -> JudgementType, points_func: JudgementType -> Time -> float, max_point_func: JudgementType -> float, combo_func: JudgementType -> int -> (int * bool)) =
         inherit ScoreMetric<AccuracySystemState>(
             name,
-            ([| 0; 0; 0; 0; 0; 0; 0; 0; 0 |], 0.0, 0.0, 0, 0, 0),
+            ([|0; 0; 0; 0; 0; 0; 0; 0; 0|], 0.0, 0.0, 0, 0, 0),
             (let handle_hit =
                 (accuracy_hit_func judge_func points_func max_point_func combo_func)
             (fun (offset, deltas, hit) _ (judgementCounts, points, maxPoints, combo, maxCombo, cbs) playing ->
@@ -143,15 +143,16 @@ module Score =
                     (fun s (k: int) ->
                         if hit.[k] <> HitStatus.Nothing && (not playing || hit.[k] <> HitStatus.Hit) then
                             handle_hit (offset, deltas, hit) k s
-                        else
-                            s)
+                        else s)
                     (judgementCounts, points, maxPoints, combo, maxCombo, cbs)
                     [ 0 .. (deltas.Length - 1) ])),
             (accuracy_hit_func judge_func points_func max_point_func combo_func),
             (fun (judgements, points, maxPoints, combo, maxCombo, cbs) -> points / maxPoints))
 
         member this.JudgeFunc = judge_func
-        member this.Format() = sprintf "%.2f%%" (if System.Double.IsNaN this.Value then 100.0 else 100.0 * this.Value)
+        member this.Format() =
+            sprintf "%.2f%%" (if System.Double.IsNaN this.Value then 100.0 else 100.0 * this.Value)
+            + (let (_, _, _, _, _, cbs) = this.State in if cbs > 0 then "  -" + cbs.ToString() else "")
 
     type HitWindows = (Time * JudgementType) list
 
@@ -174,7 +175,7 @@ module Score =
             | SC (judge, rd) -> "SC (J" + (judge |> string) + ")"
             | SCPlus (judge, rd) -> "SC+ (J" + (judge |> string) + ")"
             | DP (judge, rd) ->"DP (J" + (judge |> string) + ")"
-            | Wife (judge, rd) -> "Wife (J" + (judge |> string) + ")"
+            | Wife (judge, rd) -> "Wife2 (J" + (judge |> string) + ")"
             | OM od -> "osu!mania (OD" + (od |> string) + ")"
             | _ -> "unknown"
     
