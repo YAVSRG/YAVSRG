@@ -5,11 +5,13 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/percyqaz/YAVSRG</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.4.7.0</AssemblyVersion>
-    <FileVersion>0.4.7.0</FileVersion>
+    <AssemblyVersion>0.4.8.0</AssemblyVersion>
+    <FileVersion>0.4.8.0</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageIcon></PackageIcon>
+    <Win32Resource>C:\Users\percy\Desktop\Source\YAVSRG\Interlude\Resources\icon.res</Win32Resource>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -25,6 +27,7 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\QuickStart.md" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
@@ -38,6 +41,7 @@
     <Compile Include="UI\Widgets.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Components.fs" />
+    <Compile Include="UI\MarkdownReader.fs" />
     <Compile Include="UI\Selection.fs" />
     <Compile Include="UI\Screens\ScreenScore.fs" />
     <Compile Include="UI\Screens\ScreenPlay.fs" />
@@ -50,6 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="FSharp.Formatting" Version="11.1.0" />
     <PackageReference Include="ManagedBass" Version="3.0.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.0.0" />
     <PackageReference Include="OpenTK" Version="4.4.0" />
@@ -68,6 +73,10 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

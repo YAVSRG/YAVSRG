@@ -58,6 +58,7 @@ type ScreenMenu() as this =
 
     override this.OnEnter(prev) =
         if Utils.AutoUpdate.updateAvailable then Screens.addNotification(Localisation.localise "notification.UpdateAvailable", NotificationType.System)
+        if prev :? ScreenLoading && Options.firstLaunch then MarkdownReader.help()
         splashText <- newSplash()
         Screens.logo.Move(-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
         Screens.backgroundDim.Target <- 0.0f
@@ -88,7 +89,7 @@ type ScreenMenu() as this =
 
 // Loading screen
 
-type ScreenLoading() as this =
+and ScreenLoading() as this =
     inherit Screen()
 
     let mutable closing = false
@@ -316,7 +317,7 @@ type Toolbar() as this =
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button(ignore, "Help", Options.options.Hotkeys.Help, Sprite.Default)
+        Button(MarkdownReader.help, "Help", Options.options.Hotkeys.Help, Sprite.Default)
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
@@ -346,6 +347,76 @@ type Toolbar() as this =
 
 // Screen manager
 
+module ScreenTransitions =
+    let TRANSITIONTIME = 500.0
+
+    let wedge (centre: Vector2) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
+        let segments = int ((a2 - a1) / 0.10)
+        let segsize = (a2 - a1) / float segments
+        for i = 1 to segments do
+            let a2 = a1 + float i * segsize
+            let a1 = a1 + float (i - 1) * segsize
+            let ang1 = Vector2(Math.Sin a1 |> float32, -Math.Cos a1 |> float32)
+            let ang2 = Vector2(Math.Sin a2 |> float32, -Math.Cos a2 |> float32)
+            Draw.quad
+                (Quad.create (centre + ang1 * r2) (centre + ang2 * r2) (centre + ang2 * r1) (centre + ang1 * r1))
+                (Quad.colorOf col)
+                Sprite.DefaultQuad
+
+    let cwedge = wedge <| new Vector2(Render.vwidth * 0.5f, Render.vheight * 0.5f)
+
+    let bubble (x, y) (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
+        let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
+        let head = float32(Math.Pow(pos, 0.5)) * (r2 - r1) + r1
+        let tail = float32(Math.Pow(pos, 2.0)) * (r2 - r1) + r1
+        wedge (new Vector2(x, y)) tail head 0.0 (Math.PI * 2.0) col
+
+    let wedgeAnim (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
+        let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
+        let head = Math.Pow(pos, 0.5) * Math.PI * 2.0
+        let tail = Math.Pow(pos, 2.0) * Math.PI * 2.0
+        cwedge r1 r2 tail head col
+
+    let wedgeAnim2 (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
+        let pos = (amount - lo) / (hi - lo)
+        let head = float (Math.Clamp(pos * 2.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
+        let tail = float (Math.Clamp(pos * 2.0f - 1.0f, 0.0f, 1.0f)) * 2.0 * Math.PI
+        cwedge r1 r2 tail head col
+
+    let fancyTransition inbound amount bounds =
+        let amount = if inbound then amount else 2.0f - amount
+        let a = int (255.0f * (1.0f - Math.Abs(amount - 1.0f)))
+        wedgeAnim2 0.0f 1111.0f (Color.FromArgb(a, 0, 160, 255)) 0.0f 1.8f amount
+        wedgeAnim2 0.0f 1111.0f (Color.FromArgb(a, 0, 200, 255)) 0.1f 1.9f amount
+        wedgeAnim2 0.0f 1111.0f (Color.FromArgb(a, 0, 240, 255)) 0.2f 2.0f amount
+        wedgeAnim 300.0f 500.0f Color.White 0.5f 1.5f amount
+        bubble (400.0f, 200.0f) 100.0f 150.0f Color.White 1.2f 1.5f amount
+        bubble (300.0f, 250.0f) 60.0f 90.0f Color.White 1.3f 1.6f amount
+        bubble (1600.0f, 600.0f) 80.0f 120.0f Color.White 1.0f 1.3f amount
+        bubble (1400.0f, 700.0f) 50.0f 75.0f Color.White 1.4f 1.7f amount
+
+    let diamondWipe inbound amount bounds =
+        let s = 150.0f
+        let size x =
+            let f = Math.Clamp(((if inbound then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / (4.0f * s / Render.vwidth), 0.0f, 1.0f)
+            if inbound then f * s * 0.5f else (1.0f - f) * s * 0.5f
+        let diamond x y =
+            let r = size x
+            Draw.quad(Quad.create <| new Vector2(x - r, y) <| new Vector2(x, y - r) <| new Vector2(x + r, y) <| new Vector2(x, y + r)) (Quad.colorOf Color.Transparent) Sprite.DefaultQuad
+            
+        Stencil.create(false)
+        for x in 0 .. (Render.vwidth / s |> float |> Math.Ceiling |> int) do
+            for y in 0 .. (Render.vheight / s |> float |> Math.Ceiling |> int) do
+                diamond (s * float32 x) (s * float32 y)
+                diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
+        Stencil.draw()
+        Screens.drawBackground(bounds, Screens.accentShade(255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+        Stencil.finish()
+
+    let drawTransition flags inbound amount bounds =
+        diamondWipe inbound amount bounds
+        //fancyTransition inbound amount bounds
+
 type ScreenContainer() as this =
     inherit Widget()
 
@@ -360,11 +431,10 @@ type ScreenContainer() as this =
     let mutable exit = false
     let mutable cursor = true
 
-    let TRANSITIONTIME = 500.0
     let mutable transitionFlags = ScreenTransitionFlag.Default
     let screenTransition = new AnimationSequence()
-    let t1 = AnimationTimer TRANSITIONTIME
-    let t2 = AnimationTimer TRANSITIONTIME
+    let t1 = AnimationTimer ScreenTransitions.TRANSITIONTIME
+    let t2 = AnimationTimer ScreenTransitions.TRANSITIONTIME
 
     let toolbar = new Toolbar()
     let tooltip = new TooltipHandler()
@@ -440,27 +510,10 @@ type ScreenContainer() as this =
         Draw.rect this.Bounds (Color.FromArgb(Screens.backgroundDim.Value * 255.0f |> int, 0, 0, 0)) Sprite.Default
         current.Draw()
         base.Draw()
-        //TODO: move all this transitional logic somewhere nice and have lots of them
         if not screenTransition.Complete then
-            let amount = Math.Clamp((if t1.Elapsed < TRANSITIONTIME then t1.Elapsed / TRANSITIONTIME else (TRANSITIONTIME - t2.Elapsed) / TRANSITIONTIME), 0.0, 1.0) |> float32
-
-            let s = 150.0f
-
-            let size x =
-                let f = Math.Clamp(((if t1.Elapsed < TRANSITIONTIME then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / (4.0f * s / Render.vwidth), 0.0f, 1.0f)
-                if t1.Elapsed < TRANSITIONTIME then f * s * 0.5f else (1.0f - f) * s * 0.5f
-            let diamond x y =
-                let r = size x
-                Draw.quad(Quad.create <| new Vector2(x - r, y) <| new Vector2(x, y - r) <| new Vector2(x + r, y) <| new Vector2(x, y + r)) (Quad.colorOf Color.Transparent) Sprite.DefaultQuad
-                
-            Stencil.create(false)
-            for x in 0 .. (Render.vwidth / s |> float |> Math.Ceiling |> int) do
-                for y in 0 .. (Render.vheight / s |> float |> Math.Ceiling |> int) do
-                    diamond (s * float32 x) (s * float32 y)
-                    diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
-            Stencil.draw()
-            Screens.drawBackground(this.Bounds, Screens.accentShade(255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
-            Stencil.finish()
+            let inbound = t1.Elapsed < ScreenTransitions.TRANSITIONTIME
+            let amount = Math.Clamp((if inbound then t1.Elapsed / ScreenTransitions.TRANSITIONTIME else 1.0 - (t2.Elapsed / ScreenTransitions.TRANSITIONTIME)), 0.0, 1.0) |> float32
+            ScreenTransitions.drawTransition transitionFlags inbound amount this.Bounds
             if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
         for d in dialogs do d.Draw()
         if cursor then Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) Themes.themeConfig.CursorSize Themes.themeConfig.CursorSize) (Screens.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture "cursor")

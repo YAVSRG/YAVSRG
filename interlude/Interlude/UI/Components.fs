@@ -45,8 +45,7 @@ module Components =
                 Draw.rect (Rect.sliceTop BORDERWIDTH r) c Sprite.Default
                 Draw.rect (Rect.sliceBottom BORDERWIDTH r) c Sprite.Default
 
-            if fill then
-                Draw.rect base.Bounds (fillColor()) Sprite.Default
+            if fill then Draw.rect base.Bounds (fillColor()) Sprite.Default
             base.Draw()
         static member Create(w: Widget) =
             let f = Frame()
@@ -285,4 +284,3 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             selectedItem.Update(elapsedTime, Rect.trimTop TABHEIGHT this.Bounds)
-            

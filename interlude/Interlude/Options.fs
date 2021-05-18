@@ -248,11 +248,12 @@ module Options =
     let mutable internal config = GameConfig.Default
     let mutable internal options = GameOptions.Default
     let internal configPath = Path.GetFullPath("config.json")
+    let firstLaunch = not (File.Exists configPath)
 
     let load() =
         config <- loadImportantJsonFile "Config" configPath config true
-        if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
         Localisation.loadFile(config.Locale)
+        if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath("Data"), "options.json")) options true
 
         Themes.refreshAvailableThemes()

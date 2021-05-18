@@ -28,8 +28,7 @@ let main argv =
                 Audio.init()
                 Options.load()
                 Some (new Game(Options.config))
-            with
-            | err -> Logging.Critical("Game failed to launch", err); crashSplash(); None
+            with err -> Logging.Critical("Game failed to launch", err); crashSplash(); None
         if (game.IsSome) then
             let game = game.Value
             try

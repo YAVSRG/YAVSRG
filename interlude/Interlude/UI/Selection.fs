@@ -538,7 +538,7 @@ module Selection =
                     |> positionWidget(0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, -40.0f, 1.0f))
                 this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Edit"), fun () -> selector.EditItem this)
                     |> positionWidget(20.0f, 0.0f, -40.0f, 1.0f, 140.0f, 0.0f, -10.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Duplicate"), fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Value, name, selector)))
+                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Duplicate"), fun () -> this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Value, name, selector))))
                     |> positionWidget(160.0f, 0.0f, -40.0f, 1.0f, 280.0f, 0.0f, -10.0f, 1.0f))
                 this.Add(new LittleButton(K <| Localisation.localise("options.wselect.MakeMain"), fun () -> selector.Main <- this)
                     |> positionWidget(300.0f, 0.0f, -40.0f, 1.0f, 420.0f, 0.0f, -10.0f, 1.0f))
