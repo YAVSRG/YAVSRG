@@ -47,9 +47,9 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 let (_, delta, hit) = data.HitData.[i]
                 let (y, col) =
                     match hit.[k] with
-                    | HitStatus.SpecialNG -> (0.0f, Themes.themeConfig.JudgementColors.[JudgementType.NG |> int])
-                    | HitStatus.NotHit -> (0.0f, Themes.themeConfig.JudgementColors.[JudgementType.MISS |> int])
-                    | HitStatus.Hit -> (h - delta.[k] / MISSWINDOW * h, Themes.themeConfig.JudgementColors.[data.Accuracy.JudgeFunc(delta.[k] |> Prelude.Common.Time.Abs) |> int])
+                    | HitStatus.SpecialNG -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.NG])
+                    | HitStatus.NotHit -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.MISS])
+                    | HitStatus.Hit -> (h - delta.[k] / MISSWINDOW * h, Themes.themeConfig.JudgementColors.[data.Accuracy.JudgeFunc(Prelude.Common.Time.Abs delta.[k]) |> int])
                     | _ -> (0.0f, Color.Transparent)
                 if col.A > 0uy then
                     Draw.rect(Rect.create (x - 2.5f) (top + y - 2.5f) (x + 2.5f) (top + y + 2.5f)) col Sprite.Default
@@ -80,16 +80,41 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         graph.Refresh()
 
     do
-        this.Add(new TextBox(K <| scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
-        this.Add(new TextBox(K <| sprintf "%s // %s // %s" scoreData.Chart.Header.DiffName scoreData.Mods scoreData.Chart.Header.SourcePack, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 1.0f, 150.0f, 0.0f))
-        this.Add(new TextBox((K <| scoreData.Lamp.ToString()), (K <| ScoreColor.lampToColor scoreData.Lamp), 0.5f) |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f))
-        this.Add(new TextBox(scoreData.Accuracy.Format, (K <| ScoreColor.gradeToColor gradeAchieved), 0.5f) |> positionWidget(-150.0f, 0.5f, 155.0f, 0.0f, 150.0f, 0.5f, 245.0f, 0.0f))
-        this.Add(new TextBox((fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR"), (K <| ScoreColor.clearToColor(not scoreData.HP.Failed)), 0.5f) |> positionWidget(-100.0f, 0.75f, 155.0f, 0.0f, 100.0f, 0.75f, 245.0f, 0.0f))
-        this.Add(new TextBox(K "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int lampPB]), 0.5f) |> positionWidget(-100.0f, 0.25f, 225.0f, 0.0f, 100.0f, 0.25f, 250.0f, 0.0f))
-        this.Add(new TextBox(K "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int accuracyPB]), 0.5f) |> positionWidget(-100.0f, 0.5f, 225.0f, 0.0f, 100.0f, 0.5f, 250.0f, 0.0f))
-        this.Add(new TextBox(K "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int clearPB]), 0.5f) |> positionWidget(-100.0f, 0.75f, 225.0f, 0.0f, 100.0f, 0.75f, 250.0f, 0.0f))
-        //this.Add(new TextBox(K <| scoreData.Mods, K Color.White, 0.5f) |> positionWidget(0.0f, 0.0f, 250.0f, 0.0f, 0.0f, 1.0f, 280.0f, 0.0f))
-        this.Add(graph |> positionWidget(10.0f, 0.0f, -250.0f, 1.0f, -10.0f, 1.0f, -10.0f, 1.0f))
+        new TextBox(K <| scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title, K Color.White, 0.5f)
+        |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        |> this.Add
+
+        new TextBox(K <| sprintf "%s // %s // %s" scoreData.Chart.Header.DiffName scoreData.Mods scoreData.Chart.Header.SourcePack, K Color.White, 0.5f)
+        |> positionWidget(0.0f, 0.0f, 80.0f, 0.0f, 0.0f, 1.0f, 150.0f, 0.0f)
+        |> this.Add
+
+        new TextBox((K <| scoreData.Lamp.ToString()), (K <| ScoreColor.lampToColor scoreData.Lamp), 0.5f)
+        |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f)
+        |> this.Add
+
+        new TextBox(scoreData.Accuracy.Format, (K <| ScoreColor.gradeToColor gradeAchieved), 0.5f)
+        |> positionWidget(-150.0f, 0.5f, 155.0f, 0.0f, 150.0f, 0.5f, 245.0f, 0.0f)
+        |> this.Add
+
+        new TextBox((fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR"), (K <| ScoreColor.clearToColor(not scoreData.HP.Failed)), 0.5f)
+        |> positionWidget(-100.0f, 0.75f, 155.0f, 0.0f, 100.0f, 0.75f, 245.0f, 0.0f)
+        |> this.Add
+
+        new TextBox(K "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int lampPB]), 0.5f)
+        |> positionWidget(-100.0f, 0.25f, 225.0f, 0.0f, 100.0f, 0.25f, 250.0f, 0.0f)
+        |> this.Add
+
+        new TextBox(K "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int accuracyPB]), 0.5f)
+        |> positionWidget(-100.0f, 0.5f, 225.0f, 0.0f, 100.0f, 0.5f, 250.0f, 0.0f)
+        |> this.Add
+
+        new TextBox(K "NEW RECORD", (fun () -> Themes.themeConfig.PBColors.[int clearPB]), 0.5f)
+        |> positionWidget(-100.0f, 0.75f, 225.0f, 0.0f, 100.0f, 0.75f, 250.0f, 0.0f)
+        |> this.Add
+
+        graph
+        |> positionWidget(10.0f, 0.0f, -250.0f, 1.0f, -10.0f, 1.0f, -10.0f, 1.0f)
+        |> this.Add
 
     override this.Draw() =
         Draw.rect (Rect.sliceTop 150.0f this.Bounds) (Screens.accentShade(100, 0.8f, 0.0f)) Sprite.Default
@@ -103,7 +128,7 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         Draw.rect perfRect (Screens.accentShade(150, 0.4f, 0.0f)) Sprite.Default
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Physical, perfRect, physicalColor scoreData.Physical, 0.0f)
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Technical, perfRect, technicalColor scoreData.Technical, 1.0f)
-        Draw.quad (Quad.ofRect(Rect.create(w - h * 0.5f)(top + 250.0f)(w + h * 0.5f)(top + 250.0f + h))) (Quad.colorOf(if scoreData.HP.Failed then Color.Gray else Color.White)) (Sprite.gridUV(gradeAchieved, 0) (Themes.getTexture("ranks")))
+        Draw.quad (Quad.ofRect (Rect.create (w - h * 0.5f) (top + 250.0f) (w + h * 0.5f) (top + 250.0f + h))) (Quad.colorOf (if scoreData.HP.Failed then Color.Gray else Color.White)) (Sprite.gridUV (gradeAchieved, 0) (Themes.getTexture "ranks"))
         let (judgements, pts, maxpts, combo, maxcombo, cbs) = scoreData.Accuracy.State
         for i in 1..(judgements.Length - 1) do
             Text.draw(Themes.font(), ((enum i): JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 260.0f + 30.0f * float32 i, Color.White)
