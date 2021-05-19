@@ -15,6 +15,8 @@ type Game(config: GameConfig) as this =
 
     let screens = new ScreenContainer()
 
+    let sw = System.Diagnostics.Stopwatch()
+
     do
         Options.applyOptions <- fun () -> this.ApplyConfig config
         base.Title <- Utils.version
@@ -48,18 +50,24 @@ type Game(config: GameConfig) as this =
         e.FileNames |> Array.iter FileDropHandling.import
 
     override this.OnRenderFrame e =
+        sw.Restart()
         base.OnRenderFrame e
         Render.start()
         if Render.rheight > 0 then screens.Draw()
         Render.finish()
         base.SwapBuffers()
+        sw.Stop()
+        Utils.RenderPerformance.frame (float32 sw.Elapsed.TotalMilliseconds) (float32 e.Time * 1000.0f)
 
     override this.OnUpdateFrame e =
+        sw.Restart()
         base.OnUpdateFrame e
         Input.update()
         if Render.rheight > 0 then screens.Update(e.Time * 1000.0, Render.bounds)
         Input.absorbAll()
         Audio.update()
+        sw.Stop()
+        Utils.RenderPerformance.update (float32 sw.Elapsed.TotalMilliseconds) (float32 e.Time * 1000.0f)
         if screens.Exit then base.Close()
 
     override this.ProcessEvents() =

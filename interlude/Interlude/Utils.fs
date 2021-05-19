@@ -39,6 +39,20 @@ module Utils =
        elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
        else sprintf "%.0fs" ts.TotalSeconds
 
+    module RenderPerformance =
+        let add x xs =
+            List.truncate 960 (x :: xs)
+
+        let mutable frameTime = [(0.0f, 0.0f)]
+
+        let frame t1 t2 =
+            frameTime <- add (t1, t1 + t2) frameTime
+
+        let mutable updateTime = [(0.0f, 0.0f)]
+
+        let update t1 t2 =
+            updateTime <- add (t1, t1 + t2) updateTime
+
     module AutoUpdate =
         open System.IO.Compression
         open Percyqaz.Json
