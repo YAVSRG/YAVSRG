@@ -27,6 +27,8 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\shader.fsh" />
+    <EmbeddedResource Include="Resources\shader.vsh" />
     <EmbeddedResource Include="Resources\QuickStart.md" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />

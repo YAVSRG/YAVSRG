@@ -20,11 +20,15 @@ module Utils =
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
 
+    let getResourceText name =
+        use s = getResourceStream name
+        use tr = new StreamReader(s)
+        tr.ReadToEnd()
+
     let randomSplash(name) =
         let r = new System.Random()
-        use s = getResourceStream(name)
-        use tr = new StreamReader(s)
-        let lines = tr.ReadToEnd().Split("\n")
+        let text = getResourceText name
+        let lines = text.Split("\n")
 
         fun () -> lines.[r.Next lines.Length]
 

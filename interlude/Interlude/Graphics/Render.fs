@@ -3,6 +3,9 @@
 open System
 open System.Drawing
 open OpenTK.Graphics.OpenGL
+open OpenTK.Mathematics
+open Prelude.Common
+open Interlude
 
 (*
     Render handling to be used from Game
@@ -55,6 +58,7 @@ module Render =
         drawCount <- 0
         SpriteBatch.flush()
 
+    let mutable program = 0
     let mutable (rwidth, rheight) = (1, 1)
     let mutable (vwidth, vheight) = (1.0f, 1.0f)
     let mutable bounds = Rect.zero
@@ -64,8 +68,6 @@ module Render =
         rheight <- height
         GL.Viewport(new Rectangle(0, 0, width, height))
         let width, height = float32 width, float32 height
-        GL.MatrixMode(MatrixMode.Projection)
-        GL.LoadIdentity()
         
         let (width, height) =
             if (width < 1920.0f || height < 1000.0f) then
@@ -74,9 +76,11 @@ module Render =
             else (width, height)
         vwidth <- float32 <| Math.Round(float width)
         vheight <- float32 <| Math.Round(float height)
-        //GL.Ortho(-2.0, 2.0, -2.0, 2.0, 0.0, 1.0)
-        GL.Ortho(0.0, float vwidth, float vheight, 0.0, 0.0, 1.0)
-        bounds <- Rect.create 0.f 0.f vwidth vheight
+
+        let mutable mat = Matrix4.CreateOrthographicOffCenter(0.0f, vwidth, vheight, 0.0f, 0.0f, 1.0f)
+        GL.UniformMatrix4(GL.GetUniformLocation(program, "transform"), false, &mat)
+
+        bounds <- Rect.create 0.0f 0.0f vwidth vheight
 
     let start() = 
         GL.Clear(ClearBufferMask.ColorBufferBit)
@@ -85,15 +89,41 @@ module Render =
         endBlock("end of draw")
         GL.Finish()
         GL.Flush()
+        let e = GL.GetError()
+        if e <> ErrorCode.NoError then printfn "GL ERROR %O" e
 
     let init(width, height) =
+        Logging.Debug("===== Render Engine Starting =====")
+            
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
-        GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
-        GL.ClearStencil(0x00)
+        GL.ClearColor(Color.FromArgb(255, 40, 40, 40))
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
+
+        let vsh = GL.CreateShader(ShaderType.VertexShader)
+        GL.ShaderSource(vsh, Utils.getResourceText "shader.vsh")
+        GL.CompileShader(vsh)
+        Logging.Debug(sprintf "Vertex Shader: %s" (GL.GetShaderInfoLog vsh))
+
+        let fsh = GL.CreateShader(ShaderType.FragmentShader)
+        GL.ShaderSource(fsh, Utils.getResourceText "shader.fsh")
+        GL.CompileShader(fsh)
+        Logging.Debug(sprintf "Fragment Shader: %s" (GL.GetShaderInfoLog fsh))
+
+        program <- GL.CreateProgram()
+        GL.AttachShader(program, vsh)
+        GL.AttachShader(program, fsh)
+        GL.LinkProgram(program)
+        GL.ValidateProgram(program)
+        Logging.Debug(sprintf "Shader Program: %s" (GL.GetProgramInfoLog program))
+
+        GL.UseProgram(program)
+        //for i in 0..31 do GL.Uniform1(GL.GetUniformLocation(program, $"u_textures[{i}]"), i)
+
         resize(width, height)
+        
+        Logging.Debug("===== Render Engine Started =====")
 
 module FBO =
 
