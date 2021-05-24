@@ -6,7 +6,7 @@ open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude
-open Interlude.Render
+open Interlude.Graphics
 
 type Bind =
     | Dummy
@@ -182,7 +182,7 @@ module Mouse =
     let Released(b) = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
     let Moved() = Input.mousex <> Input.oldmousex || Input.mousey <> Input.oldmousey
 
-    let Hover(struct (l, t, r, b): Interlude.Render.Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
+    let Hover(struct (l, t, r, b): Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
 
 type Bind with
     member this.Pressed() =

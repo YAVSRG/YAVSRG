@@ -5,7 +5,7 @@ open System.Drawing
 open OpenTK.Mathematics
 open Prelude.Common
 open Interlude
-open Interlude.Render
+open Interlude.Graphics
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.Utils

@@ -4,11 +4,11 @@ open System.Drawing
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Difficulty
 open Prelude.Data.ScoreManager
-open Interlude.Utils
 open Interlude
+open Interlude.Utils
+open Interlude.Graphics
 open Interlude.UI.Components
 open Interlude.Gameplay
-open Interlude.Render
 
 module ScoreColor =
     let lampToColor (lampAchieved: Lamp) = Themes.themeConfig.LampColors.[lampAchieved |> int]

@@ -9,10 +9,10 @@ open Prelude.Gameplay.Score
 open Prelude.Data.Themes
 open Prelude.Data.ScoreManager
 open Interlude
+open Interlude.Graphics
 open Interlude.Input
-open Interlude.UI.Animation
-open Interlude.Render
 open Interlude.Options
+open Interlude.UI.Animation
 
 (*
     WIP, will be a fancy animation when beginning to play a chart

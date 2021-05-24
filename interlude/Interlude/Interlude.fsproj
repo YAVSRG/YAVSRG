@@ -33,7 +33,9 @@
     <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
     <Compile Include="Audio.fs" />
-    <Compile Include="Render.fs" />
+    <Compile Include="Graphics\Data.fs" />
+    <Compile Include="Graphics\Render.fs" />
+    <Compile Include="Graphics\Text.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="ThemeManager.fs" />
     <Compile Include="Options.fs" />

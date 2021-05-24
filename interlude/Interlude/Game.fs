@@ -5,9 +5,9 @@ open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.Common
 open Prelude.Common
-open Interlude.Options
-open Interlude.Render
+open Interlude.Graphics
 open Interlude.Input
+open Interlude.Options
 open Interlude.UI
 
 type Game(config: GameConfig) as this =

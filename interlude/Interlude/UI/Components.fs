@@ -2,15 +2,15 @@
 
 open System
 open System.Drawing
+open OpenTK
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude
-open Interlude.Options
-open Interlude.Render
-open Interlude.UI.Animation
 open Interlude.Input
 open Interlude.Utils
-open OpenTK
+open Interlude.Graphics
+open Interlude.Options
+open Interlude.UI.Animation
 
 module Components =
     
