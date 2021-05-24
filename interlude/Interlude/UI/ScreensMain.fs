@@ -349,6 +349,7 @@ type Toolbar() as this =
                 Draw.rect(Rect.createWH x t 2.0f b) Color.Red Sprite.Default
                 Draw.rect(Rect.createWH x t 2.0f a) Color.White Sprite.Default
                 x <- x + 2.0f
+        Text.draw(Themes.font(), (sprintf "%.2f fps" (Utils.RenderPerformance.frameTime |> List.truncate 50 |> List.map snd |> List.sum |> fun x -> 1000.0f * 50.0f / x)), 30.0f, 0.0f, 100.0f, Color.White)
         if r2 then
             let mutable x = 0.0f
             for (a, b) in Utils.RenderPerformance.updateTime do

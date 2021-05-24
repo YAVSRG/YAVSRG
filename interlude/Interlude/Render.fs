@@ -157,6 +157,17 @@ module Sprite =
 
 module Render =
 
+    let mutable f = ignore
+
+    let mutable drawCount = 0
+    let mutable tChanges = 0
+
+    let endBlock(msg) =
+        //printfn "%s: contiguous block of %i quads" msg drawCount
+        tChanges <- 0
+        drawCount <- 0
+        f ()
+
     let mutable (rwidth, rheight) = (1, 1)
     let mutable (vwidth, vheight) = (1.0f, 1.0f)
     let mutable bounds = Rect.zero
@@ -184,6 +195,7 @@ module Render =
         GL.Clear(ClearBufferMask.ColorBufferBit)
 
     let finish() =
+        endBlock("end of draw")
         GL.Finish()
         GL.Flush()
 
@@ -209,6 +221,7 @@ module FBO =
         { sprite: Sprite; fbo_id: int; fbo_index: int }
         with
             member this.Bind() =
+                Render.endBlock("fbo begin")
                 if List.isEmpty stack then
                     GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0)
                     GL.Translate(0.0f, -Render.vheight, 0.0f)
@@ -216,6 +229,7 @@ module FBO =
                 GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, this.fbo_id)
                 stack <- this.fbo_id :: stack
             member this.Unbind() =
+                Render.endBlock("fbo end")
                 stack <- List.tail stack
                 if List.isEmpty stack then
                     GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
@@ -268,6 +282,7 @@ module Stencil =
     let mutable depth = 0
 
     let create(alphaMasking) =
+        Render.endBlock("stencil begin")
         if depth = 0 then
             GL.Enable(EnableCap.StencilTest)
             GL.Enable(EnableCap.AlphaTest);
@@ -282,6 +297,7 @@ module Stencil =
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
 
     let finish() =
+        Render.endBlock("stencil end")
         depth <- depth - 1
         if depth = 0 then
             GL.Clear(ClearBufferMask.StencilBufferBit)
@@ -296,14 +312,60 @@ module Stencil =
 
 module Draw =
 
+    module SpriteBatch =
+        
+        let bufferId = GL.GenBuffer()
+        let vertexArrayId = GL.GenVertexArray()
+
+        let mutable maxToDraw = 1000
+        let SIZE = 12
+
+        let vertex = Array.create (maxToDraw * SIZE) 0.0f
+        let mutable numberToDraw = 0
+
+        let flush() =
+            GL.BufferData(BufferTarget.ArrayBuffer, bufferId, vertex, BufferUsageHint.DynamicDraw)
+            GL.EnableVertexAttribArray(0)
+            GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, true, 0, 0)
+            //GL.DrawArrays(PrimitiveType.Quads, 0, numberToDraw)
+            GL.DisableVertexAttribArray(0)
+            numberToDraw <- 0
+
+        let quad (struct (p1, p2, p3, p4): Quad) =
+            let p = numberToDraw * SIZE
+            vertex.[p] <- p1.X
+            vertex.[p + 1] <- p1.Y
+            vertex.[p + 2] <- 0.0f
+            vertex.[p + 3] <- p2.X
+            vertex.[p + 4] <- p2.Y
+            vertex.[p + 5] <- 0.0f
+            vertex.[p + 6] <- p3.X
+            vertex.[p + 7] <- p3.Y
+            vertex.[p + 8] <- 0.0f
+            vertex.[p + 9] <- p4.X
+            vertex.[p + 10] <- p4.Y
+            vertex.[p + 11] <- 0.0f
+            numberToDraw <- numberToDraw + 1
+            if numberToDraw = maxToDraw then flush()
+
+        do
+            Render.f <- flush
+
+    let mutable lastTex = -1000;
+
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
-        GL.BindTexture(TextureTarget.Texture2D, s.ID)
+        if lastTex <> s.ID then
+            GL.BindTexture(TextureTarget.Texture2D, s.ID)
+            Render.tChanges <- Render.tChanges + 1
+            lastTex <- s.ID
+        SpriteBatch.quad (struct (p1, p2, p3, p4))
         GL.Begin(PrimitiveType.Quads)
         GL.Color4(c1); GL.TexCoord2(u1); GL.Vertex2(p1)
         GL.Color4(c2); GL.TexCoord2(u2); GL.Vertex2(p2)
         GL.Color4(c3); GL.TexCoord2(u3); GL.Vertex2(p3)
         GL.Color4(c4); GL.TexCoord2(u4); GL.Vertex2(p4)
         GL.End()
+        Render.drawCount <- Render.drawCount + 1
         
     let rect (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.gridUV(0, 0) s
 
