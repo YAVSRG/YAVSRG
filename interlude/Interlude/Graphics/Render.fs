@@ -89,12 +89,14 @@ module Render =
         endBlock("end of draw")
         GL.Finish()
         GL.Flush()
-        let e = GL.GetError()
-        if e <> ErrorCode.NoError then printfn "GL ERROR %O" e
+        //let e = GL.GetError()
+        //if e <> ErrorCode.NoError then printfn "GL ERROR %O" e
 
     let init(width, height) =
         Logging.Debug("===== Render Engine Starting =====")
             
+        Logging.Debug(sprintf "GL Version: %s" (GL.GetString StringName.Version))
+
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
         GL.ClearColor(Color.FromArgb(255, 40, 40, 40))
@@ -104,19 +106,19 @@ module Render =
         let vsh = GL.CreateShader(ShaderType.VertexShader)
         GL.ShaderSource(vsh, Utils.getResourceText "shader.vsh")
         GL.CompileShader(vsh)
-        Logging.Debug(sprintf "Vertex Shader: %s" (GL.GetShaderInfoLog vsh))
+        let s = (GL.GetShaderInfoLog vsh) in if s <> "" then Logging.Debug(sprintf "Vertex Shader: %s" s)
 
         let fsh = GL.CreateShader(ShaderType.FragmentShader)
         GL.ShaderSource(fsh, Utils.getResourceText "shader.fsh")
         GL.CompileShader(fsh)
-        Logging.Debug(sprintf "Fragment Shader: %s" (GL.GetShaderInfoLog fsh))
+        let s = (GL.GetShaderInfoLog fsh) in if s <> "" then Logging.Debug(sprintf "Fragment Shader: %s" s)
 
         program <- GL.CreateProgram()
         GL.AttachShader(program, vsh)
         GL.AttachShader(program, fsh)
         GL.LinkProgram(program)
         GL.ValidateProgram(program)
-        Logging.Debug(sprintf "Shader Program: %s" (GL.GetProgramInfoLog program))
+        let s = (GL.GetProgramInfoLog program) in if s <> "" then Logging.Debug(sprintf "Shader Program: %s" s)
 
         GL.UseProgram(program)
         //for i in 0..31 do GL.Uniform1(GL.GetUniformLocation(program, $"u_textures[{i}]"), i)
