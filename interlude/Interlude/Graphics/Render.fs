@@ -2,6 +2,7 @@
 
 open System
 open System.Drawing
+open System.Runtime.InteropServices
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
 open Prelude.Common
@@ -13,55 +14,103 @@ open Interlude
 
 module Render =
 
+    [<StructLayout(LayoutKind.Sequential)>]
+    type Vertex =
+        struct
+            val Position: Vector2
+            val TextureCoordinate: Vector2
+            val Color: Vector4
+            val TextureID: float32
+            new(pos, col, texCoord, texID) = { Position = pos; Color = col; TextureCoordinate = texCoord; TextureID = texID }
+        end
+        with static member SizeInBytes = Marshal.SizeOf<Vertex>();
+
     module SpriteBatch =
-        
-        let bufferId = GL.GenBuffer()
-        let vertexArrayId = GL.GenVertexArray()
 
-        let mutable maxToDraw = 1000
-        let SIZE = 12
+        let mutable ebo = 0
+        let mutable vbo = 0
 
-        let vertex = Array.create (maxToDraw * SIZE) 0.0f
-        let mutable numberToDraw = 0
+        let maxQuads = 3000
+        let maxVertexCount = maxQuads * 4
+        let maxIndexCount = maxQuads * 4
+
+        let vertex = Array.create maxVertexCount (Vertex())
+        let index = Array.create maxIndexCount 0
+
+        let mutable quadsToDraw = 0
+
+        let init() =
+            GL.VertexAttribFormat(0, 2, VertexAttribType.Float, false, 0)
+            GL.VertexAttribBinding(0, 0)
+            GL.EnableVertexAttribArray(0)
+            
+            GL.VertexAttribFormat(1, 4, VertexAttribType.Float, false, 2 * sizeof<float>)
+            GL.VertexAttribBinding(1, 0)
+            GL.EnableVertexAttribArray(1)
+
+            GL.VertexAttribFormat(2, 2, VertexAttribType.Float, false, 6 * sizeof<float>)
+            GL.VertexAttribBinding(2, 0)
+            GL.EnableVertexAttribArray(2)
+
+            GL.VertexAttribFormat(3, 1, VertexAttribType.Float, false, 8 * sizeof<float>)
+            GL.VertexAttribBinding(3, 0)
+            GL.EnableVertexAttribArray(3)
+
+            GL.CreateBuffers(1, &vbo)
+            GL.CreateBuffers(1, &ebo)
+
+            GL.NamedBufferData(vbo, maxVertexCount * Vertex.SizeInBytes, vertex, BufferUsageHint.DynamicDraw)
+
+            let mutable offset = 0
+            for i in 0 .. (maxQuads - 1) do
+                let j = i * 4
+                index.[j] <- offset
+                index.[j + 1] <- offset + 1
+                index.[j + 2] <- offset + 2
+                index.[j + 3] <- offset + 3
+                offset <- offset + 4
+
+            GL.NamedBufferData(ebo, maxIndexCount * sizeof<int>, index, BufferUsageHint.StaticDraw)
+
+        let start() =
+            quadsToDraw <- 0
+            //reset textures too
 
         let flush() =
-            GL.BufferData(BufferTarget.ArrayBuffer, bufferId, vertex, BufferUsageHint.DynamicDraw)
-            GL.EnableVertexAttribArray(0)
-            GL.VertexAttribPointer(0, 4, VertexAttribPointerType.Float, true, 0, 0)
-            //GL.DrawArrays(PrimitiveType.Quads, 0, numberToDraw)
-            GL.DisableVertexAttribArray(0)
-            numberToDraw <- 0
+            for i in 0 .. 31 do GL.BindTextureUnit(i, 0);
+            GL.NamedBufferSubData(vbo, IntPtr.Zero, quadsToDraw * 4 * Vertex.SizeInBytes, vertex)
+            GL.BindVertexBuffer(0, vbo, IntPtr.Zero, Vertex.SizeInBytes)
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo)
+            GL.DrawElements(PrimitiveType.Quads, quadsToDraw * 4, DrawElementsType.UnsignedInt, 0)
 
-        let quad (struct (p1, p2, p3, p4): Quad) =
-            let p = numberToDraw * SIZE
-            vertex.[p] <- p1.X
-            vertex.[p + 1] <- p1.Y
-            vertex.[p + 2] <- 0.0f
-            vertex.[p + 3] <- p2.X
-            vertex.[p + 4] <- p2.Y
-            vertex.[p + 5] <- 0.0f
-            vertex.[p + 6] <- p3.X
-            vertex.[p + 7] <- p3.Y
-            vertex.[p + 8] <- 0.0f
-            vertex.[p + 9] <- p4.X
-            vertex.[p + 10] <- p4.Y
-            vertex.[p + 11] <- 0.0f
-            numberToDraw <- numberToDraw + 1
-            if numberToDraw = maxToDraw then flush()
+        let col2Vec (color: Color) =
+            Vector4(float32 color.R / 255.0f, float32 color.G / 255.0f, float32 color.B / 255.0f, float32 color.A / 255.0f)
 
-    let mutable drawCount = 0
-    let mutable tChanges = 0
-
-    let endBlock(msg) =
-        //printfn "%s: contiguous block of %i quads" msg drawCount
-        tChanges <- 0
-        drawCount <- 0
-        SpriteBatch.flush()
+        let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
+            if quadsToDraw = maxQuads then flush(); start();
+            let i = quadsToDraw * 4
+            let sprite = 0.0f //soon
+            vertex.[i + 0] <- Vertex(p1, col2Vec c1, u1, sprite)
+            vertex.[i + 1] <- Vertex(p2, col2Vec c2, u2, sprite)
+            vertex.[i + 2] <- Vertex(p3, col2Vec c3, u3, sprite)
+            vertex.[i + 3] <- Vertex(p4, col2Vec c4, u4, sprite)
+            quadsToDraw <- quadsToDraw + 1
 
     let mutable program = 0
     let mutable (rwidth, rheight) = (1, 1)
     let mutable (vwidth, vheight) = (1.0f, 1.0f)
     let mutable bounds = Rect.zero
+
+    let start() = 
+        GL.Clear(ClearBufferMask.ColorBufferBit)
+        SpriteBatch.start()
+
+    let finish() =
+        SpriteBatch.flush()
+        GL.Finish()
+        GL.Flush()
+        //let e = GL.GetError()
+        //if e <> ErrorCode.NoError then printfn "GL ERROR %O" e
 
     let resize(width, height) =
         rwidth <- width
@@ -81,16 +130,6 @@ module Render =
         GL.UniformMatrix4(GL.GetUniformLocation(program, "transform"), false, &mat)
 
         bounds <- Rect.create 0.0f 0.0f vwidth vheight
-
-    let start() = 
-        GL.Clear(ClearBufferMask.ColorBufferBit)
-
-    let finish() =
-        endBlock("end of draw")
-        GL.Finish()
-        GL.Flush()
-        //let e = GL.GetError()
-        //if e <> ErrorCode.NoError then printfn "GL ERROR %O" e
 
     let init(width, height) =
         Logging.Debug("===== Render Engine Starting =====")
@@ -122,6 +161,7 @@ module Render =
 
         GL.UseProgram(program)
         //for i in 0..31 do GL.Uniform1(GL.GetUniformLocation(program, $"u_textures[{i}]"), i)
+        SpriteBatch.init()
 
         resize(width, height)
         
@@ -140,7 +180,7 @@ module FBO =
         { sprite: Sprite; fbo_id: int; fbo_index: int }
         with
             member this.Bind() =
-                Render.endBlock("fbo begin")
+                //Render.endBlock("fbo begin")
                 if List.isEmpty stack then
                     GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0)
                     GL.Translate(0.0f, -Render.vheight, 0.0f)
@@ -148,7 +188,7 @@ module FBO =
                 GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, this.fbo_id)
                 stack <- this.fbo_id :: stack
             member this.Unbind() =
-                Render.endBlock("fbo end")
+                //Render.endBlock("fbo end")
                 stack <- List.tail stack
                 if List.isEmpty stack then
                     GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
@@ -201,7 +241,7 @@ module Stencil =
     let mutable depth = 0
 
     let create(alphaMasking) =
-        Render.endBlock("stencil begin")
+        //Render.endBlock("stencil begin")
         if depth = 0 then
             GL.Enable(EnableCap.StencilTest)
             GL.Enable(EnableCap.AlphaTest);
@@ -216,7 +256,7 @@ module Stencil =
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
 
     let finish() =
-        Render.endBlock("stencil end")
+        //Render.endBlock("stencil end")
         depth <- depth - 1
         if depth = 0 then
             GL.Clear(ClearBufferMask.StencilBufferBit)
@@ -234,17 +274,17 @@ module Draw =
     let mutable lastTex = -1000;
 
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
+        Render.SpriteBatch.quad (struct (p1, p2, p3, p4)) (struct (c1, c2, c3, c4)) (struct (s, struct (u1, u2, u3, u4)))
+        (*
         if lastTex <> s.ID then
             GL.BindTexture(TextureTarget.Texture2D, s.ID)
             Render.tChanges <- Render.tChanges + 1
             lastTex <- s.ID
-        Render.SpriteBatch.quad (struct (p1, p2, p3, p4))
         GL.Begin(PrimitiveType.Quads)
         GL.Color4(c1); GL.TexCoord2(u1); GL.Vertex2(p1)
         GL.Color4(c2); GL.TexCoord2(u2); GL.Vertex2(p2)
         GL.Color4(c3); GL.TexCoord2(u3); GL.Vertex2(p3)
         GL.Color4(c4); GL.TexCoord2(u4); GL.Vertex2(p4)
-        GL.End()
-        Render.drawCount <- Render.drawCount + 1
+        GL.End() *)
         
     let rect (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.gridUV(0, 0) s
