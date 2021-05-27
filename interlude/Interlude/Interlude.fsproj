@@ -27,8 +27,6 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <EmbeddedResource Include="Resources\shader.fsh" />
-    <EmbeddedResource Include="Resources\shader.vsh" />
     <EmbeddedResource Include="Resources\QuickStart.md" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
@@ -58,10 +56,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Formatting" Version="11.1.0" />
+    <PackageReference Include="FSharp.Formatting" Version="11.2.0" />
     <PackageReference Include="ManagedBass" Version="3.0.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.0.0" />
-    <PackageReference Include="ObjectLayoutInspector" Version="0.1.2" />
     <PackageReference Include="OpenTK" Version="4.4.0" />
   </ItemGroup>
 
