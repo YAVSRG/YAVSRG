@@ -61,6 +61,7 @@
     <PackageReference Include="FSharp.Formatting" Version="11.1.0" />
     <PackageReference Include="ManagedBass" Version="3.0.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.0.0" />
+    <PackageReference Include="ObjectLayoutInspector" Version="0.1.2" />
     <PackageReference Include="OpenTK" Version="4.4.0" />
   </ItemGroup>
 

@@ -1,4 +1,4 @@
-﻿#version 410
+﻿#version 460
 
 layout (location = 0) in vec2 in_vert;
 layout (location = 1) in vec4 in_color;
@@ -13,8 +13,8 @@ uniform mat4 transform;
 
 void main()
 {
-	out_color = in_color;
 	out_texCoord = in_texCoord;
+	out_color = in_color;
 	out_textureID = in_textureID;
 	gl_Position = transform * vec4(in_vert, 0.0, 1.0);
 }

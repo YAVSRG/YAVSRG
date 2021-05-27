@@ -252,7 +252,7 @@ type TooltipHandler() as this =
             for str in text do
                 let w = Text.measure(Themes.font(), str) * SCALE
                 //todo: x-clamping
-                Text.drawB(Themes.font(), str, SCALE, x - w * 0.5f, y, (Color.FromArgb(int(255.0f * fade.Value), Color.White), Color.Black))
+                Text.drawB(Themes.font(), str, SCALE, x - w * 0.5f, y, (Color.FromArgb(int(255.0f * fade.Value), Color.White), Color.FromArgb(int(255.0f * fade.Value), Color.Black)))
                 y <- y + SCALE
         base.Draw()
 
