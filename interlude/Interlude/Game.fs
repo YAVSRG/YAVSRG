@@ -1,5 +1,6 @@
 ﻿namespace Interlude
 
+open System
 open OpenTK
 open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
@@ -16,6 +17,7 @@ type Game(config: GameConfig) as this =
     let screens = new ScreenContainer()
 
     let sw = System.Diagnostics.Stopwatch()
+    let mutable (_gen0, _gen1, _gen2) = (0, 0, 0)
 
     do
         Options.applyOptions <- fun () -> this.ApplyConfig config
@@ -50,13 +52,13 @@ type Game(config: GameConfig) as this =
         e.FileNames |> Array.iter FileDropHandling.import
 
     override this.OnRenderFrame e =
-        sw.Restart()
         base.OnRenderFrame e
+        sw.Restart()
         Render.start()
         if Render.rheight > 0 then screens.Draw()
         Render.finish()
-        base.SwapBuffers()
         sw.Stop()
+        base.SwapBuffers()
         Utils.RenderPerformance.frame (float32 sw.Elapsed.TotalMilliseconds) (float32 e.Time * 1000.0f)
 
     override this.OnUpdateFrame e =
@@ -67,7 +69,11 @@ type Game(config: GameConfig) as this =
         Input.absorbAll()
         Audio.update()
         sw.Stop()
-        Utils.RenderPerformance.update (float32 sw.Elapsed.TotalMilliseconds) (float32 e.Time * 1000.0f)
+        let (gen0, gen1, gen2) = (GC.CollectionCount(0), GC.CollectionCount(1), GC.CollectionCount(2))
+        Utils.RenderPerformance.update (float32(gen0 - _gen0) * 30.0f) (float32(gen1 - _gen1) * 50.0f + float32(gen2 - _gen2) * 200.0f)//(float32 sw.Elapsed.TotalMilliseconds) (float32 e.Time * 1000.0f)
+        _gen0 <- gen0
+        _gen1 <- gen1
+        _gen2 <- gen2
         if screens.Exit then base.Close()
 
     override this.ProcessEvents() =
