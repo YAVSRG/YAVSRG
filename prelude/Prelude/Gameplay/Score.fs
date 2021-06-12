@@ -7,6 +7,7 @@ open Prelude.Common
 open Prelude.Charts.Interlude
 
 module Score =
+
     (*
         Representation of replay data for a score.
         All scores are stored in this replay format and accuracy/performance is reconstructed in the client from the data.
@@ -14,12 +15,12 @@ module Score =
     *)
 
     type HitStatus =
-    | Nothing = 0uy
-    | NotHit = 1uy
-    | Hit = 2uy
-    | Special = 3uy
-    | SpecialNG = 4uy
-    | SpecialOK = 5uy
+        | Nothing = 0uy
+        | NotHit = 1uy
+        | Hit = 2uy
+        | Special = 3uy
+        | SpecialNG = 4uy
+        | SpecialOK = 5uy
 
     type ScoreDataRow = Time * Time array * HitStatus array
     type ScoreData = ScoreDataRow array
@@ -32,7 +33,7 @@ module Score =
 
     let offsetOfRow ((offset, _, _): ScoreDataRow) = offset
 
-    let decompressScoreData (sd: string) (keys: int) (notes: TimeData<NoteRow>): ScoreData =
+    let decompressScoreData (sd: string) (keys: int) (notes: TimeData<NoteRow>) : ScoreData =
         let compressed = Convert.FromBase64String(sd)
         use inputStream = new MemoryStream(compressed)
         use gZipStream = new GZipStream(inputStream, CompressionMode.Decompress)
@@ -43,22 +44,22 @@ module Score =
             (time, [|for i in 1..keys -> br.ReadSingle() * 1.0f<ms>|], hit))
         |> Array.ofSeq       
 
-    let compressScoreData (sd: ScoreData): string = 
+    let compressScoreData (sd: ScoreData) : string = 
         use outputStream = new MemoryStream()
         use gZipStream = new GZipStream(outputStream, CompressionLevel.Optimal)
         use bw = new BinaryWriter(gZipStream)
         Array.iter (fun (_, delta, hit) -> Array.iter (byte >> bw.Write) hit; Array.iter (float32 >> bw.Write) delta) sd
         bw.Flush()
-        Convert.ToBase64String(outputStream.ToArray())
+        Convert.ToBase64String (outputStream.ToArray())
 
-    let notesToScoreData (keys: int) (notes: TimeData<NoteRow>): ScoreData =
+    let notesToScoreData (keys: int) (notes: TimeData<NoteRow>) : ScoreData =
         notes.Data
         |> Seq.map (fun (time, nr) ->
             let bits = (NoteRow.noteData NoteType.HOLDHEAD nr) ||| (NoteRow.noteData NoteType.NORMAL nr) ||| (NoteRow.noteData NoteType.HOLDTAIL nr)
             let bits2 = (NoteRow.noteData NoteType.HOLDBODY nr) ||| (NoteRow.noteData NoteType.MINE nr)
             (time,
                 Array.init keys (fun i -> if Bitmap.hasBit i bits then MISSWINDOW else 0.0f<ms>),
-                Array.init keys (fun i -> if Bitmap.hasBit i bits then HitStatus.NotHit elif Bitmap.hasBit i bits2 then HitStatus.Special else HitStatus.Nothing)): ScoreDataRow
+                Array.init keys (fun i -> if Bitmap.hasBit i bits then HitStatus.NotHit elif Bitmap.hasBit i bits2 then HitStatus.Special else HitStatus.Nothing)) : ScoreDataRow
             )
         |> Array.ofSeq
 
@@ -103,15 +104,15 @@ module Score =
     *)
 
     type JudgementType =
-    | RIDICULOUS = 0
-    | MARVELLOUS = 1
-    | PERFECT = 2
-    | OK = 3
-    | GREAT = 4
-    | GOOD = 5
-    | BAD = 6
-    | NG = 7
-    | MISS = 8
+        | RIDICULOUS = 0
+        | MARVELLOUS = 1
+        | PERFECT = 2
+        | OK = 3
+        | GREAT = 4
+        | GOOD = 5
+        | BAD = 6
+        | NG = 7
+        | MISS = 8
 
     //judgements, points, maxpoints, combo, maxcombo, cbs
     type AccuracySystemState = int array * float * float * int * int * int
@@ -158,18 +159,17 @@ module Score =
 
     //to be used in score metrics/displayed on score graph ingame
     type AccuracyDisplayType =
-    | Percentage
-    | ProjectedScore
-    | PointsScored
+        | Percentage
+        | ProjectedScore
+        | PointsScored
 
     type AccuracySystemConfig =
-    | SC of judge: int * ridiculous: bool
-    | SCPlus of judge: int * ridiculous: bool
-    | Wife of judge: int * ridiculous: bool
-    | DP of judge: int * ridiculous: bool
-    | OM of od: float32
-    | Custom of unit
-    with
+        | SC of judge: int * ridiculous: bool
+        | SCPlus of judge: int * ridiculous: bool
+        | Wife of judge: int * ridiculous: bool
+        | DP of judge: int * ridiculous: bool
+        | OM of od: float32
+        | Custom of unit
         override this.ToString() =
             match this with
             | SC (judge, rd) -> "SC (J" + (judge |> string) + ")"
@@ -324,11 +324,11 @@ module Score =
         member this.Failed = fst this.State
 
     type HPSystemConfig =
-    | VG
-    | OMHP of float
-    | Custom of unit
+        | VG
+        | OMHP of float
+        | Custom of unit
 
-    let createHPMetric (config : HPSystemConfig) scoring : HPSystem =
+    let createHPMetric (config: HPSystemConfig) scoring : HPSystem =
         match config with
         | VG ->
             HPSystem(
@@ -353,18 +353,18 @@ module Score =
     *)
 
     type Lamp =
-    | MFC = 9
-    | WF = 8
-    | SDP = 7
-    | PFC = 6
-    | BF = 5
-    | SDG = 4
-    | FC = 3
-    | MF = 2
-    | SDCB = 1
-    | NONE = 0
+        | MFC = 9
+        | WF = 8
+        | SDP = 7
+        | PFC = 6
+        | BF = 5
+        | SDG = 4
+        | FC = 3
+        | MF = 2
+        | SDCB = 1
+        | NONE = 0
 
-    let lamp ((judgements, _, _, _, _, cbs) : AccuracySystemState): Lamp =
+    let lamp ((judgements, _, _, _, _, cbs): AccuracySystemState) : Lamp =
         let c count (zero : Lazy<Lamp>) one singleDigit more = 
             if count = 0 then zero.Force()
             elif count = 1 then one
@@ -380,11 +380,12 @@ module Score =
 
     type PersonalBests<'T> = ('T * float32) * ('T * float32)
     module PersonalBests = let map f ((a, f1), (b, f2)) = ((f a, f1), (f b, f2))
+
     type PersonalBestType =
-    | FasterBetter = 3
-    | Faster = 2
-    | Better = 1
-    | None = 0
+        | FasterBetter = 3
+        | Faster = 2
+        | Better = 1
+        | None = 0
 
     let updatePB (((bestA, rateA), (bestR, rateR)): PersonalBests<'T>) (value: 'T, rate: float32) =
         let r, rv =

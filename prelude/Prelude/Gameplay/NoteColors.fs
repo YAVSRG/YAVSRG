@@ -36,7 +36,7 @@ module NoteColors =
     //todo: make this a record.
     type ColorizedChart = int * TimeData<ColorNoteRow> * TimeData<BPM> * MultiTimeData<float32> * string list
 
-    let colorize (mc : ModChart) (initialState, col : Colorizer<'t>) =
+    let colorize (mc: ModChart) (initialState, col : Colorizer<'t>) =
         let (_, _, data) = 
             Seq.fold (fun (lastcolors: ColorData, s, data: (TimeDataItem<ColorNoteRow>) list) (time, nr) ->
             (
@@ -56,7 +56,7 @@ module NoteColors =
         List.tryFind ((fun i -> DDRValues.[i]) >> fun n -> roughlyDivisible delta (msPerBeat / n)) [0..7]
         |> Option.defaultValue DDRValues.Length
 
-    let applyScheme (scheme: ColorScheme) (colorData: ColorData) (mc : ModChart) =
+    let applyScheme (scheme: ColorScheme) (colorData: ColorData) (mc: ModChart) =
         let (keys, bpm, sv, m) = (mc.Keys, mc.BPM, mc.SV, mc.ModsUsed)
         let ci i = colorData.[i]
         match scheme with
@@ -80,12 +80,18 @@ module NoteColors =
         | _ -> ((), fun _ _ -> (), Array.zeroCreate keys) |> colorize mc
         |> fun x -> (keys, x, bpm, sv, m)
 
-    type ColorConfig = {
-        Style: ColorScheme
-        Colors: ColorDataSets
-        UseGlobalColors: bool
-    } with
-        static member Default = { Style = ColorScheme.Column; Colors = Array.init 11 (fun i -> Array.init 10 byte); UseGlobalColors = true }
+    type ColorConfig = 
+        {
+            Style: ColorScheme
+            Colors: ColorDataSets
+            UseGlobalColors: bool
+        }
+        static member Default =
+            {
+                Style = ColorScheme.Column
+                Colors = Array.init 11 (fun i -> Array.init 10 byte)
+                UseGlobalColors = true
+            }
 
     let getColoredChart (config: ColorConfig) (chart: ModChart) : ColorizedChart =
             let index = if config.UseGlobalColors then 0 else chart.Keys - 2

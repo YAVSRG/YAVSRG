@@ -18,7 +18,8 @@ module Mods =
     type ModStatus = Ranked = 0 | Unranked = 1 | Unstored = 2
 
     type ModState = Map<string, int>
-    type ModChart = {
+    type ModChart =
+        {
             Keys: int
             Notes: TimeData<NoteRow>
             BPM: TimeData<BPM>
@@ -47,23 +48,24 @@ module Mods =
         todo: 'Apply' functions should return ModChart instead of unit to allow for mutability of key count.
     *)
 
-    type Mod = {
-        Status: ModStatus
-        States: int
-        RandomSeed: bool
-        Exclusions: string list
-        //Looks at a chart and returns true if applying the modifier will do anything, otherwise false
-        //Used to hide enabled mods that would have no effect e.g. a mod that removes hold notes on a chart with no hold notes
-        Check: int -> ModChart -> bool
-        //Applies the modifier to the content of the chart. This is where note data, timing data, sv data should be edited to create the desired effects
-        Apply: int -> ModChart -> ModChart
-        //Applies the modifier to the hit data of the chart - This hit data maps out what notes need to be hit/what notes have been hit
-        //This typically is unused - examples uses are marking all notes as hit perfectly in Autoplay or marking LN releases as not needing to be hit
-        Apply_Score: int -> ModChart -> ScoreData -> unit
-    }
+    type Mod = 
+        {
+            Status: ModStatus
+            States: int
+            RandomSeed: bool
+            Exclusions: string list
+            //Looks at a chart and returns true if applying the modifier will do anything, otherwise false
+            //Used to hide enabled mods that would have no effect e.g. a mod that removes hold notes on a chart with no hold notes
+            Check: int -> ModChart -> bool
+            //Applies the modifier to the content of the chart. This is where note data, timing data, sv data should be edited to create the desired effects
+            Apply: int -> ModChart -> ModChart
+            //Applies the modifier to the hit data of the chart - This hit data maps out what notes need to be hit/what notes have been hit
+            //This typically is unused - examples uses are marking all notes as hit perfectly in Autoplay or marking LN releases as not needing to be hit
+            Apply_Score: int -> ModChart -> ScoreData -> unit
+        }
     
     let modList = new Dictionary<string, Mod>()
-    let registerMod id obj = modList.Add(id, obj)
+    let registerMod id obj = modList.Add (id, obj)
 
     module ModState =
 
@@ -72,8 +74,8 @@ module Mods =
         let getModName id = Localisation.localise ("mod." + id + ".name")
         let getModDesc id = Localisation.localise ("mod." + id + ".desc")
 
-        let cycleState id (mods: ModState): ModState =
-            if (mods.ContainsKey(id)) then
+        let cycleState id (mods: ModState) : ModState =
+            if (mods.ContainsKey id) then
                 let state = mods.[id] + 1
                 if state = modList.[id].States || modList.[id].RandomSeed then Map.remove id mods
                 else Map.add id state mods

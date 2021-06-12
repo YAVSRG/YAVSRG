@@ -112,8 +112,10 @@ module Layout =
         | _ -> "Unknown Layout"
 
     let getAvailableLayouts (k: int) = 
-        [(Layout.Spread, k); (Layout.OneHand, k); (Layout.LeftOne, k); (Layout.RightOne, k);
-            (Layout.LeftTwo, k); (Layout.RightTwo, k); (Layout.BMSLeft, k); (Layout.BMSRight, k)]
+        [
+            (Layout.Spread, k); (Layout.OneHand, k); (Layout.LeftOne, k); (Layout.RightOne, k);
+            (Layout.LeftTwo, k); (Layout.RightTwo, k); (Layout.BMSLeft, k); (Layout.BMSRight, k)
+        ]
         |> List.filter (getLayoutInfo >> Option.isSome)
         |> List.map (fun (a, b) -> a)
 
@@ -129,34 +131,34 @@ module Difficulty =
         let widthScale = 0.02
         let heightScale = 26.3
         let curveExp = 1.0
-        Math.Min(heightScale / Math.Pow(widthScale * float delta, curveExp), 20.0)
+        Math.Min (heightScale / Math.Pow (widthScale * float delta, curveExp), 20.0)
 
     let private streamCurve delta =
         let widthScale = 0.02
         let heightScale = 13.7
         let curveExp = 1.0
         let cutoff = 10.0
-        Math.Max((heightScale / Math.Pow(widthScale * float delta, curveExp) - 0.1 * heightScale / Math.Pow(widthScale * float delta, curveExp * cutoff)), 0.0)
+        Math.Max ((heightScale / Math.Pow (widthScale * float delta, curveExp) - 0.1 * heightScale / Math.Pow (widthScale * float delta, curveExp * cutoff)), 0.0)
 
     let private jackCompensation jackDelta streamDelta =
-        Math.Min(Math.Pow(Math.Max(Math.Log(float(jackDelta / streamDelta), 2.0), 0.0), 2.0), 1.0)
+        Math.Min (Math.Pow (Math.Max (Math.Log (float (jackDelta / streamDelta), 2.0), 0.0), 2.0), 1.0)
 
     let private rootMeanPower values power = 
         match values with
         | x :: [] -> x
         | [] -> 0.0
         | xs ->
-            let (count, sumpow) = List.fold (fun (count,a) b -> (count + 1.0, a + Math.Pow(b, power))) (0.0, 0.0) xs
-            Math.Pow(sumpow / count, 1.0 / power)
+            let (count, sumpow) = List.fold (fun (count, a) b -> (count + 1.0, a + Math.Pow (b, power))) (0.0, 0.0) xs
+            Math.Pow (sumpow / count, 1.0 / power)
 
     let private staminaFunc value input delta =
-        let staminaBaseFunc(ratio) = 1.0 + 0.105 * ratio
-        let staminaDecayFunc(delta) = Math.Exp(-0.00044 * delta)
-        let v = Math.Max(value * staminaDecayFunc(float delta), 0.01)
-        v * staminaBaseFunc(input/v)
+        let staminaBaseFunc ratio = 1.0 + 0.105 * ratio
+        let staminaDecayFunc delta = Math.Exp (-0.00044 * delta)
+        let v = Math.Max (value * staminaDecayFunc (float delta), 0.01)
+        v * staminaBaseFunc (input / v)
    
     let private overallDifficulty arr =
-        Math.Pow(Array.fold (fun v x -> v * Math.Exp(0.01 * Math.Max(0.0, Math.Log(x/v)))) 0.01 arr, 0.6) * 2.5
+        Math.Pow (Array.fold (fun v x -> v * Math.Exp (0.01 * Math.Max (0.0, Math.Log (x / v)))) 0.01 arr, 0.6) * 2.5
 
     let private OHTNERF = 3.0
     let private SCALING_VALUE = 0.55
@@ -177,7 +179,7 @@ module Difficulty =
         let anchor = Array2D.zeroCreate notes.Count keys
         let physicalComposite = Array2D.zeroCreate notes.Count keys
 
-        let updateNoteDifficulty(column, index, offset: Time, otherColumns : Bitmap) =
+        let updateNoteDifficulty(column, index, offset: Time, otherColumns: Bitmap) =
             let s = otherColumns |> Bitmap.unsetBit column
             let delta1 =
                 if fingers.[column] > 0.0f<ms> then
@@ -191,7 +193,7 @@ module Difficulty =
                     trill.[index, column] <- trill.[index, column] + Math.Pow((streamCurve delta2) * (jackCompensation delta1 delta2), OHTNERF)
             physicalComposite.[index, column] <- Math.Pow(trill.[index,column] + jack.[index, column], 1.0 / OHTNERF)
 
-        let snapDifficulty (strain : float array) mask =
+        let snapDifficulty (strain: float array) mask =
             //todo: optimise
             let mutable vals = []
             for k in Bitmap.toSeq mask do
@@ -231,30 +233,28 @@ module Difficulty =
         let delta = float delta
         let phi x =
             let y = x / 1.414213562
-            Math.Max(0.0, Math.Min((0.5 + Math.Pow(Math.PI, -0.5) * (y - Math.Pow(y, 3.0) / 3.0 + Math.Pow(y, 5.0)/ 10.0 - Math.Pow(y, 7.0) / 42.0 + Math.Pow(y, 9.0)/ 216.0)), 1.0))
-        phi((17.95 - Math.Max(2.0, Math.Abs(delta))) / 15.0)
+            Math.Max (0.0, Math.Min ((0.5 + Math.Pow(Math.PI, -0.5) * (y - Math.Pow (y, 3.0) / 3.0 + Math.Pow (y, 5.0)/ 10.0 - Math.Pow (y, 7.0) / 42.0 + Math.Pow (y, 9.0) / 216.0)), 1.0))
+        phi((17.95 - Math.Max (2.0, Math.Abs delta)) / 15.0)
 
     let private performanceFunc b value deviation delta =
         staminaFunc b (value * confidenceValue deviation) delta
 
-    let technicalColor(v) =
+    let technicalColor v =
         try
             let a = Math.Min(1.0, v * 0.1)
             let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
-            Color.FromArgb(255.0 * (1.0 - a) |> int, 255.0 * b |> int, 255.0 * a |> int)
-        with
-        | _ -> Color.Blue
+            Color.FromArgb (255.0 * (1.0 - a) |> int, 255.0 * b |> int, 255.0 * a |> int)
+        with _ -> Color.Blue
 
-    let physicalColor(v) =
+    let physicalColor v =
         try
             let a = Math.Min(1.0, v * 0.1)
             let b = Math.Min(1.0, Math.Max(1.0, v * 0.1) - 1.0)
             Color.FromArgb(255.0 * a |> int, 255.0 * (1.0 - a) |> int, 255.0 * b |> int)
-        with
-        | _ -> Color.Red
+        with _ -> Color.Red
 
     type PerformanceMetricState = Time array * float * float array * float * float array
-    let performanceMetric (rr : RatingReport) (keys: int) =
+    let performanceMetric (rr: RatingReport) (keys: int) =
         ScoreMetric<PerformanceMetricState>(
             "Interlude",
             (Array.create keys 0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),

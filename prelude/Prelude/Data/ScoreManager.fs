@@ -14,35 +14,51 @@ open Prelude.Gameplay.Layout
 module ScoreManager =
 
     [<Json.AllRequired>]
-    type Score = {
-        time: DateTime
-        hitdata: string
-        rate: float32
-        selectedMods: ModState
-        layout: Layout
-        keycount: int
-    }
-    //only present for performance reasons in Percyqaz.Json
-    with static member Default = { time = DateTime.Now; hitdata = ""; rate = 1.0f; selectedMods = Map.empty; layout = Layout.Spread; keycount = 4 }
-
-    type ChartSaveData = {
-        [<Json.Required>]
-        Offset: Setting<Time>
-        [<Json.Required>]
-        Scores: List<Score>
-        Lamp: Dictionary<string, PersonalBests<Lamp>>
-        Accuracy: Dictionary<string, PersonalBests<float>>
-        Clear: Dictionary<string, PersonalBests<bool>>
-    }
-    with
-        static member FromChart(c: Chart) = {
-            Offset = Setting(c.Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>);
-            Scores = List<Score>()
-            Lamp = Dictionary<string, PersonalBests<Lamp>>()
-            Accuracy = Dictionary<string, PersonalBests<float>>()
-            Clear = Dictionary<string, PersonalBests<bool>>()
+    type Score =
+        {
+            time: DateTime
+            hitdata: string
+            rate: float32
+            selectedMods: ModState
+            layout: Layout
+            keycount: int
         }
-        static member Default = { Offset = Setting(0.0f<ms>); Scores = null; Lamp = Dictionary<string, PersonalBests<Lamp>>(); Accuracy = Dictionary<string, PersonalBests<float>>(); Clear = Dictionary<string, PersonalBests<bool>>() }
+    //only present for performance reasons in Percyqaz.Json
+        static member Default =
+            { 
+                time = DateTime.Now
+                hitdata = ""
+                rate = 1.0f
+                selectedMods = Map.empty
+                layout = Layout.Spread; keycount = 4
+            }
+
+    type ChartSaveData =
+        {
+            [<Json.Required>]
+            Offset: Setting<Time>
+            [<Json.Required>]
+            Scores: List<Score>
+            Lamp: Dictionary<string, PersonalBests<Lamp>>
+            Accuracy: Dictionary<string, PersonalBests<float>>
+            Clear: Dictionary<string, PersonalBests<bool>>
+        }
+        static member FromChart(c: Chart) =
+            {
+                Offset = Setting (c.Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>)
+                Scores = List<Score>()
+                Lamp = Dictionary<string, PersonalBests<Lamp>>()
+                Accuracy = Dictionary<string, PersonalBests<float>>()
+                Clear = Dictionary<string, PersonalBests<bool>>()
+            }
+        static member Default =
+            {
+                Offset = Setting 0.0f<ms>
+                Scores = null
+                Lamp = Dictionary<string, PersonalBests<Lamp>>()
+                Accuracy = Dictionary<string, PersonalBests<float>>()
+                Clear = Dictionary<string, PersonalBests<bool>>()
+            }
 
     (*
         Gameplay pipelines that need to happen to play a chart
@@ -82,7 +98,7 @@ module ScoreManager =
 
         member this.Difficulty
             with get() =
-                difficulty <- Option.defaultWith (fun () -> RatingReport(this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> Some
+                difficulty <- Option.defaultWith (fun () -> RatingReport (this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> Some
                 difficulty.Value
             and set(value) = difficulty <- Some value
 
@@ -123,15 +139,15 @@ module ScoreManager =
     type ScoresDB() =
         let data = ScoresDB.Load()
 
-        member this.Save() = Json.toFile (Path.Combine(getDataPath "Data", "scores.json"), true) data
-        static member Load() = loadImportantJsonFile "Scores" (Path.Combine(getDataPath "Data", "scores.json")) (new Dictionary<string, ChartSaveData>()) true
+        member this.Save() = Json.toFile (Path.Combine (getDataPath "Data", "scores.json"), true) data
+        static member Load() = loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) (new Dictionary<string, ChartSaveData>()) true
 
-        member this.GetOrCreateScoreData(chart: Chart) =
+        member this.GetOrCreateScoreData (chart: Chart) =
             let hash = Chart.hash chart
             if hash |> data.ContainsKey |> not then data.Add(hash, ChartSaveData.FromChart(chart))
             data.[hash]
 
-        member this.GetScoreData(hash: string) =
+        member this.GetScoreData (hash: string) =
             if hash |> data.ContainsKey |> not then None else Some data.[hash]
 
     type TopScore = string * DateTime * float //Hash, Timestamp, Rating

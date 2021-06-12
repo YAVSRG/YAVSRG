@@ -18,19 +18,19 @@ let client() =
     w.DefaultRequestHeaders.Add("User-Agent", "Interlude")
     w
 
-let private downloadString(url: string, callback) =
+let private downloadString (url: string, callback) =
     async {
         try
             use w = client()
-            let! result = w.GetStringAsync(url) |> Async.AwaitTask
-            callback(result)
+            let! result = w.GetStringAsync url |> Async.AwaitTask
+            callback result
             return true
         with :? HttpRequestException as err ->
             Logging.Error("Failed to get web data from " + url, err)
             return false
     }
 
-let downloadJson<'T>(url, callback) =
+let downloadJson<'T> (url, callback) =
     downloadString(url,
         fun s ->
             match Json.fromString<'T>(s) with
@@ -38,7 +38,7 @@ let downloadJson<'T>(url, callback) =
             | JsonResult.MapFailure err -> Logging.Error("Failed to interpret json data from "+ url, err)
             | JsonResult.ParseFailure err -> Logging.Error("Failed to parse json data from "+ url, err))
 
-let downloadFile(url: string, target: string): StatusTask =
+let downloadFile (url: string, target: string) : StatusTask =
     fun output ->
         async {
             let tcs = new TaskCompletionSource<unit>(url)

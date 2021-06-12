@@ -66,14 +66,16 @@ module StepMania =
     type Measure = string list
 
     type ChartData =
-        { NOTES: Measure list
-          CHARTNAME: string
-          STEPSTYPE: ChartType
-          DESCRIPTION: string
-          CHARTSTYLE: string
-          DIFFICULTY: DifficultyType
-          METER: int
-          CREDIT: string }
+        { 
+            NOTES: Measure list
+            CHARTNAME: string
+            STEPSTYPE: ChartType
+            DESCRIPTION: string
+            CHARTSTYLE: string
+            DIFFICULTY: DifficultyType
+            METER: int
+            CREDIT: string
+        }
 
     let private comment = optional (pstring "//" >>. restOfLine true >>. spaces)
     let private parseText = spaces >>. (manyChars (noneOf ":;" <|> (previousCharSatisfies (isAnyOf "\\") >>. anyChar)))
@@ -86,7 +88,8 @@ module StepMania =
     *)
 
     type StepmaniaData =
-        {   TITLE: string
+        {   
+            TITLE: string
             SUBTITLE: string
             ARTIST: string
             TITLETRANSLIT: string
@@ -111,9 +114,11 @@ module StepMania =
             WARPS: (float32<beat> * float32) list
             DELAYS: (float32<beat> * float32) list
             TIMESIGNATURES: (float32<beat> * float32<beat>) list
-            Charts: ChartData list }
+            Charts: ChartData list
+        }
             static member Default =
-                {   TITLE = "Unknown Chart"
+                {   
+                    TITLE = "Unknown Chart"
                     SUBTITLE = ""
                     ARTIST = ""
                     TITLETRANSLIT = ""
@@ -137,7 +142,8 @@ module StepMania =
                     WARPS = []
                     DELAYS = []
                     TIMESIGNATURES = []
-                    Charts = [] }
+                    Charts = []
+                }
 
     let private parsePairs = (sepBy (pfloat .>> pchar '=' .>>. pfloat .>> spaces) (pchar ',') .>> eof)
     let private parseMeasure = many ((many1Chars (anyOf "01234MLF")) .>> spaces)
@@ -174,44 +180,47 @@ module StepMania =
             | "BACKGROUND", [ t ] -> { s with BACKGROUND = t }
             | "CDTITLE", [ t ] -> { s with CDTITLE = t }
             | "MUSIC", [ t ] -> { s with MUSIC = t }
-            | "OFFSET", [ v ] -> { s with OFFSET = v |> float32 }
+            | "OFFSET", [ v ] -> { s with OFFSET = float32 v }
             | "BPMS", [ bs ] ->
                 match run parsePairs bs with
-                | Success(result, _, _) -> { s with BPMS = result |> List.map (fun (a,b) -> (float32 a * 1.0f<beat>, float32 b * 1.0f<beat/minute>)) }
+                | Success(result, _, _) -> { s with BPMS = result |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b * 1.0f<beat/minute>)) }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
             | "STOPS", [ ss ] ->
                 match run parsePairs ss with
-                | Success(result, _, _) -> { s with STOPS = result |> List.map (fun (a,b) -> (float32 a * 1.0f<beat>, float32 b)) }
+                | Success(result, _, _) -> { s with STOPS = result |> List.map (fun (a, b) -> (float32 a * 1.0f<beat>, float32 b)) }
                 | Failure(errorMsg, _, _) -> failwith errorMsg
-            | "SAMPLESTART", [ v ] -> { s with SAMPLESTART = v |> float32 }
-            | "SAMPLELENGTH", [ v ] -> { s with SAMPLELENGTH = v |> float32 }
+            | "SAMPLESTART", [ v ] -> { s with SAMPLESTART = float32 v }
+            | "SAMPLELENGTH", [ v ] -> { s with SAMPLELENGTH = float32 v }
             | "DISPLAYBPM", [ "*" ] -> { s with DISPLAYBPM = (0.0f<beat/minute>, 999.0f<beat/minute>) }
-            | "DISPLAYBPM", [ v ] -> { s with DISPLAYBPM = v |> float32 |> fun x -> (x * 1.0f<beat/minute>, x * 1.0f<beat/minute>) }
+            | "DISPLAYBPM", [ v ] -> { s with DISPLAYBPM = float32 v |> fun x -> (x * 1.0f<beat/minute>, x * 1.0f<beat/minute>) }
             | "DISPLAYBPM", [ v1; v2 ] -> { s with DISPLAYBPM = (float32 v1 * 1.0f<beat/minute>, float32 v2 * 1.0f<beat/minute>) }
             | "SELECTABLE", [ "YES" ] -> { s with SELECTABLE = true }
             | "SELECTABLE", [ "NO" ] -> { s with SELECTABLE = false }
             //Version, Origin, Warps, Delays, TimeSignatures TBI
             | "NOTES", [ chartType; author; difficultyType; footMeter; groove; noteData ] ->
                 match run parseMeasures noteData with
-                | Success(parsedNotes, _, _) ->
+                | Success (parsedNotes, _, _) ->
                     { s with
-                          Charts =
-                              { NOTES = parsedNotes
+                        Charts =
+                            { 
+                                NOTES = parsedNotes
                                 CHARTNAME = difficultyType + " " + footMeter
-                                STEPSTYPE = chartType |> readChartType
+                                STEPSTYPE = readChartType chartType
                                 DESCRIPTION = ""
                                 CHARTSTYLE = ""
-                                DIFFICULTY = difficultyType |> DifficultyType.Parse
-                                METER = footMeter |> int
-                                CREDIT = author }
-                              :: s.Charts }
-                | Failure(errorMsg, _, _) -> failwith errorMsg
+                                DIFFICULTY = DifficultyType.Parse difficultyType
+                                METER = int footMeter
+                                CREDIT = author
+                            }
+                            :: s.Charts
+                    }
+                | Failure (errorMsg, _, _) -> failwith errorMsg
             | _ -> s
         List.fold f StepmaniaData.Default header
 
     let parseStepFile = parseHeader |>> readSMData
 
-    let loadStepmaniaFile path: StepmaniaData =
+    let loadStepmaniaFile path : StepmaniaData =
         match runParserOnFile parseStepFile () path System.Text.Encoding.UTF8 with
         | Success(result, _, _) -> result
         | Failure(errorMsg, _, _) -> failwith errorMsg

@@ -9,7 +9,7 @@ module Filter =
         | Column of int
         | Not of BitmapFunc
         | True
-        member this.Evaluate(bitmap : Bitmap) =
+        member this.Evaluate (bitmap: Bitmap) =
             match this with
             | Column i -> Bitmap.hasBit i bitmap
             | Not b -> b.Evaluate bitmap |> not

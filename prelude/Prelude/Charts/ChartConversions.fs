@@ -20,7 +20,7 @@ module ChartConversions =
         result.Reverse()
         result
 
-    let private convertHitObjects (objects: HitObject list) (keys: int): TimeData<NoteRow> =
+    let private convertHitObjects (objects: HitObject list) (keys: int) : TimeData<NoteRow> =
         let xToColumn (x: float) = (x / (512.0 / (keys |> float))) |> int
 
         let getMiddles (holds: (Time array)) = 
@@ -99,7 +99,7 @@ module ChartConversions =
             | (time, oldValue) :: s -> if oldValue = value then sv else (offset, value) :: sv
 
         let (bpm, sv, _) = 
-            let func ((bpm, sv, scroll): (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32)) (point: TimingPoint): (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32) =
+            let func ((bpm, sv, scroll): (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32)) (point: TimingPoint) : (TimeDataItem<BPM> list * TimeDataItem<float32> list * float32) =
                 match point with
                 | (TimingPoint.BPM (offset, msPerBeat, meter, _, _)) -> 
                     (((offset, (meter, msPerBeat)) :: bpm), addOrSkipSV (offset, (mostCommonBpm / msPerBeat)) sv, mostCommonBpm / msPerBeat)
@@ -107,7 +107,7 @@ module ChartConversions =
                     (bpm, addOrSkipSV (offset, (value * scroll)) sv, scroll)
             List.fold func ([], [], 1.0f) points
 
-        let svData = MultiTimeData<float32>(keys)
+        let svData = new MultiTimeData<float32>(keys)
         svData.SetChannelData(-1, listToDotNet sv)
         (TimeData(listToDotNet bpm), svData)
 
@@ -194,17 +194,17 @@ module ChartConversions =
             | "" :: xs -> metadataFallback xs
             | s :: xs -> s
             | [] -> ""
-        let findBackground guess: string =
-            if (not (File.Exists(Path.Combine(path, guess)))) then
-                Directory.GetFiles(path)
+        let findBackground guess : string =
+            if (not (File.Exists (Path.Combine (path, guess)))) then
+                Directory.GetFiles path
                 |> Array.tryPick
                     (fun s ->
                         let filename = Path.GetFileNameWithoutExtension(s).ToLower()
-                        if (filename.Contains("bg") || filename.Contains("background")) then Some <| Path.GetFileName(s) else None)
+                        if (filename.Contains "bg" || filename.Contains "background") then Some <| Path.GetFileName s else None)
                 |> function Some s -> s | None -> ""
             else guess
         
-        let convert_difficulty (i: int) (diff: ChartData): Chart option = 
+        let convert_difficulty (i: int) (diff: ChartData) : Chart option = 
             let keys = keyCount diff.STEPSTYPE
             let header = {
                 ChartHeader.Default with
@@ -216,11 +216,11 @@ module ChartConversions =
                         diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE; diff.STEPSTYPE.ToString() + " " + diff.METER.ToString()]
                     PreviewTime = sm.SAMPLESTART * 1000.0f<ms>
                     AudioFile = metadataFallback [sm.MUSIC; "audio.mp3"]
-                    BGFile = metadataFallback [(if File.Exists(Path.Combine(path, sm.BACKGROUND)) then sm.BACKGROUND else ""); findBackground (sm.TITLE + "-bg.jpg")]
+                    BGFile = metadataFallback [(if File.Exists (Path.Combine (path, sm.BACKGROUND)) then sm.BACKGROUND else ""); findBackground (sm.TITLE + "-bg.jpg")]
             }
-            let filepath = Path.Combine(path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
+            let filepath = Path.Combine (path, diff.STEPSTYPE.ToString() + " " + diff.METER.ToString() + " [" + (string i) + "].yav")
             let (notes, bpm) = convert_measures diff.NOTES sm.BPMS (-sm.OFFSET * 1000.0f<ms>)
-            Some (Chart(keys, header, notes, bpm, MultiTimeData<float32>(keys), filepath))
+            Some (Chart(keys, header, notes, bpm, new MultiTimeData<float32>(keys), filepath))
         sm.Charts |> List.mapi convert_difficulty |> List.choose id
 
     (*
@@ -249,8 +249,8 @@ module ChartConversions =
     let rec private bpmDurations points (endTime: Time) = 
         if List.isEmpty points then failwith "no bpm point"
         let (offset, (_, msPerBeat)) = (List.head points)
-        let mutable current: float32<ms/beat> = msPerBeat
-        let mutable t: Time = offset
+        let mutable current : float32<ms/beat> = msPerBeat
+        let mutable t : Time = offset
         let data = new Dictionary<float32<ms/beat>, Time>()
 
         for (offset, (_, msPerBeat)) in points do
@@ -264,7 +264,7 @@ module ChartConversions =
         let d = (bpmDurations bs endTime).OrderBy(fun p -> p.Key)
         (d.First().Key, d.Last().Key)
 
-    let private convertToTimingPoints (bpm : TimeData<BPM>) (sv : MultiTimeData<float32>) (endTime : Time) =
+    let private convertToTimingPoints (bpm: TimeData<BPM>) (sv: MultiTimeData<float32>) (endTime: Time) =
         let corrective_sv offset mult = 
             if (sv.GetChannelData -1).Count = 0 then None else
                 match (sv.GetChannelData -1).IndexAt offset with
@@ -274,13 +274,14 @@ module ChartConversions =
                         Some (TimingPoint.SV (offset, mult * value, (SampleSet.Soft, 0, 10), enum 0))
                 | _ -> None
 
-        let svs time1 time2 mult = seq {
-            match corrective_sv time1 mult with
-            | None -> ()
-            | Some x -> yield x
-            for (offset, value) in (sv.GetChannelData -1).EnumerateBetween time1 time2 do
-                yield TimingPoint.SV (offset, value / mult, (SampleSet.Soft, 0, 10), enum 0)
-        }
+        let svs time1 time2 mult =
+            seq {
+                match corrective_sv time1 mult with
+                | None -> ()
+                | Some x -> yield x
+                for (offset, value) in (sv.GetChannelData -1).EnumerateBetween time1 time2 do
+                    yield TimingPoint.SV (offset, value / mult, (SampleSet.Soft, 0, 10), enum 0)
+            }
 
         let tps =
             seq {
@@ -304,30 +305,30 @@ module ChartConversions =
             }
         tps |> List.ofSeq
 
-    let convert_interlude_osu (chart: Chart): Beatmap =
-        let general = {
-            General.Default with
+    let convert_interlude_osu (chart: Chart) : Beatmap =
+        let general = 
+            { General.Default with
                 AudioFilename = chart.Header.AudioFile
                 PreviewTime = chart.Header.PreviewTime
                 SampleSet = SampleSet.Soft
                 Mode = GameMode.Mania
-        }
+            }
         let editor = Editor.Default
-        let meta = {
-            Metadata.Default with
+        let meta =
+            { Metadata.Default with
                 Title = chart.Header.Title
                 TitleUnicode = chart.Header.Title
                 Artist = chart.Header.Artist
                 ArtistUnicode = chart.Header.Artist
                 Creator = chart.Header.Creator
                 Version = chart.Header.DiffName
-        }
-        let diff = {
-            Difficulty.Default with
+            }
+        let diff =
+            { Difficulty.Default with
                 CircleSize = float chart.Keys
                 OverallDifficulty = 8.0
                 HPDrainRate = 8.0
-        }
+            }
         (general, editor, meta, diff, [(Background (chart.Header.BGFile, (0.0, 0.0)))],
             convertSnapsToHitobjects (List.ofSeq (chart.Notes.Data)) chart.Keys,
             convertToTimingPoints chart.BPM chart.SV (offsetOf (chart.Notes.GetPointAt(infinityf * 1.0f<ms>))))
@@ -336,7 +337,7 @@ module ChartConversions =
         Conversion code for Interlude -> StepMania
     *)
 
-    let convert_interlude_stepmania (chart : Chart) : StepmaniaData = failwith "nyi"
+    let convert_interlude_stepmania (chart: Chart) : StepmaniaData = failwith "nyi"
 
     (*
         Overall utilities to dynamically load different chart files and convert to Interlude format
@@ -354,20 +355,20 @@ module ChartConversions =
         | _ -> None
 
     let (|SongFolder|_|) (path: string) =
-        Directory.EnumerateFiles(path)
+        Directory.EnumerateFiles path
         |> Seq.tryPick (fun x -> match x with ChartFile s -> Some s | _ -> None)
     
     let (|PackFolder|_|) (path: string) =
-        Directory.EnumerateDirectories(path)
+        Directory.EnumerateDirectories path
         |> Seq.forall (fun x -> match x with SongFolder _ -> false | _ -> true)
         |> fun b -> if b then None else Some ()
 
     let (|FolderOfPacks|_|) (path: string) =
-        Directory.EnumerateDirectories(path)
+        Directory.EnumerateDirectories path
         |> Seq.forall (fun x -> match x with PackFolder -> false | _ -> true)
         |> fun b -> if b then None else Some ()
 
-    let loadAndConvertFile (path: string): Chart list =
+    let loadAndConvertFile (path: string) : Chart list =
         match Path.GetExtension(path).ToLower() with
         | ".yav" ->
             match Chart.fromFile path with
@@ -379,25 +380,25 @@ module ChartConversions =
                 let map = loadBeatmapFile path
                 if getGameMode map = GameMode.Mania && (let (_, _, _, d, _, _, _) = map in (let keys = d.CircleSize |> int in 3 <= keys && keys <= 10)) then
                     [convert_osu_interlude (loadBeatmapFile path)] else []
-            with err -> Logging.Error("Could not load .osu file: " + path, err); []
+            with err -> Logging.Error ("Could not load .osu file: " + path, err); []
         | _ -> []
 
     //Writes chart to new location, including copying its background and audio files
     let relocateChart (chart: Chart) (sourceFolder: string) (targetFolder: string) =
         let c =
-            Chart(chart.Keys, { chart.Header with SourcePack = Path.GetFileName(Path.GetDirectoryName(targetFolder)) },
-                chart.Notes, chart.BPM, chart.SV, Path.Combine(targetFolder, Path.ChangeExtension(Path.GetFileName(chart.FileIdentifier), ".yav")))
+            Chart(chart.Keys, { chart.Header with SourcePack = Path.GetFileName (Path.GetDirectoryName targetFolder) },
+                chart.Notes, chart.BPM, chart.SV, Path.Combine (targetFolder, Path.ChangeExtension (Path.GetFileName chart.FileIdentifier, ".yav")))
     
-        Directory.CreateDirectory(targetFolder) |> ignore
+        Directory.CreateDirectory targetFolder |> ignore
         let copyFile source target =
-            if (File.Exists(source)) then
-                if (not (File.Exists(target))) then
-                    try File.Copy(source, target)
-                    with err -> Logging.Error("Could not copy media file from " + source, err)
+            if File.Exists source then
+                if not (File.Exists target) then
+                    try File.Copy (source, target)
+                    with err -> Logging.Error ("Could not copy media file from " + source, err)
                 else () //fail silently when repeatedly copying
-            else Logging.Warn("Missing media file at " + source)
+            else Logging.Warn ("Missing media file at " + source)
     
-        copyFile (Path.Combine(sourceFolder, c.Header.AudioFile)) (Path.Combine(targetFolder, c.Header.AudioFile))
-        copyFile (Path.Combine(sourceFolder, c.Header.BGFile)) (Path.Combine(targetFolder, c.Header.BGFile))
+        copyFile (Path.Combine (sourceFolder, c.Header.AudioFile)) (Path.Combine (targetFolder, c.Header.AudioFile))
+        copyFile (Path.Combine (sourceFolder, c.Header.BGFile)) (Path.Combine (targetFolder, c.Header.BGFile))
         Chart.save c
         c

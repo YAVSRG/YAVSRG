@@ -21,23 +21,38 @@ module ChartManager =
     *)
 
     [<Json.AllRequired>]
-    type CachedChart = {
-        FilePath: string
-        Title: string
-        Artist: string
-        Creator: string
-        Pack: string
-        Hash: string
-        Keys: int
-        Length: Time
-        BPM: (float32<ms/beat> * float32<ms/beat>)
-        DiffName: string
-        Physical: float
-        Technical: float
-    }
-    with static member Default = { FilePath = ""; Title = ""; Artist = ""; Creator = ""; Pack = ""; Hash = ""; Keys = 4; Length = 0.0f<ms>; BPM = (500.0f<ms/beat>, 500.0f<ms/beat>); DiffName = ""; Physical = 0.0; Technical = 0.0 }
+    type CachedChart =
+        {
+            FilePath: string
+            Title: string
+            Artist: string
+            Creator: string
+            Pack: string
+            Hash: string
+            Keys: int
+            Length: Time
+            BPM: (float32<ms/beat> * float32<ms/beat>)
+            DiffName: string
+            Physical: float
+            Technical: float
+        }
+        static member Default =
+            {
+                FilePath = ""
+                Title = ""
+                Artist = ""
+                Creator = ""
+                Pack = ""
+                Hash = ""
+                Keys = 4
+                Length = 0.0f<ms>
+                BPM = (500.0f<ms/beat>, 500.0f<ms/beat>)
+                DiffName = ""
+                Physical = 0.0
+                Technical = 0.0
+            }
 
-    let cacheChart (chart : Chart) : CachedChart =
+    let cacheChart (chart: Chart) : CachedChart =
         let endTime =
             if chart.Notes.Count = 0 then 0.0f<ms> else
                 chart.Notes.GetPointAt (infinityf * 1.0f<ms>) |> offsetOf
@@ -57,9 +72,9 @@ module ChartManager =
             Technical = rating.Technical
         }
 
-    let osuSongFolder = Path.Combine(Environment.GetFolderPath Environment.SpecialFolder.LocalApplicationData, "osu!", "Songs")
-    let smPackFolder = Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
-    let etternaPackFolder = Path.Combine(Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
+    let osuSongFolder = Path.Combine (Environment.GetFolderPath Environment.SpecialFolder.LocalApplicationData, "osu!", "Songs")
+    let smPackFolder = Path.Combine (Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
+    let etternaPackFolder = Path.Combine (Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
 
     (*
         Goals and playlists
@@ -120,9 +135,9 @@ module ChartManager =
             ]
 
         type FilterPart = 
-        | Criterion of string * string
-        | String of string
-        | Impossible
+            | Criterion of string * string
+            | String of string
+            | Impossible
 
         let string = " =:<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
         let word = string |>> String

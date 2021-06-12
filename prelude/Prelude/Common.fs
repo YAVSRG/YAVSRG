@@ -25,7 +25,7 @@ module Common =
     let inline toTime (f: float) = float32 f * 1.0f<ms>
 
     module Time =
-        let Abs(t: Time) = if t < 0.0f<ms> then -t else t
+        let Abs (t: Time) = if t < 0.0f<ms> then -t else t
 
 (*
     Settings - Store an (ideally immutably typed) value that can be get and set
@@ -107,7 +107,7 @@ module Common =
         static do agent.Start()
 
         static member Subscribe f = evt.Publish.Add f
-        static member Log level main details = agent.Post(level, main, details.ToString())
+        static member Log level main details = agent.Post (level, main, details.ToString())
 
         static member Info (s, err) = Logging.Log LoggingLevel.INFO s err
         static member Warn (s, err) = Logging.Log LoggingLevel.WARNING s err
@@ -129,7 +129,7 @@ module Common =
         member this.Return x =
             Logging.Debug (sprintf "%s: took %.0fms" name sw.Elapsed.TotalMilliseconds)
             x
-        member this.Zero () = this.Return ()
+        member this.Zero() = this.Return()
     let profile name = new ProfilingBuilder(name)
 
 (*
@@ -141,27 +141,27 @@ module Common =
         let mutable private loadedPath = ""
 
         let loadFile path =
-            let path = Path.Combine("Locale", path)
+            let path = Path.Combine ("Locale", path)
             try
                 let lines = File.ReadAllLines path
                 Array.iter(
                     fun (l: string) ->
-                        let s: string[] = l.Split([|'='|], 2)
+                        let s: string[] = l.Split ([|'='|], 2)
                         mapping.Add (s.[0], s.[1])
                     ) lines
                 loadedPath <- path
-            with err -> Logging.Error("Failed to load localisation file: " + path, err)
+            with err -> Logging.Error ("Failed to load localisation file: " + path, err)
 
         let localise str : string =
             if mapping.ContainsKey str then mapping.[str]
             else
                 mapping.Add (str, str)
-                if loadedPath <> "" then File.AppendAllText(loadedPath, "\n"+str+"="+str)
+                if loadedPath <> "" then File.AppendAllText (loadedPath, "\n"+str+"="+str)
                 str
 
         let localiseWith xs str =
             let mutable s = localise str
-            List.iteri (fun i x -> s <- s.Replace("%"+i.ToString(), x)) xs
+            List.iteri (fun i x -> s <- s.Replace ("%" + i.ToString(), x)) xs
             s
 
 (*
@@ -263,9 +263,9 @@ module Common =
 
     let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
         if File.Exists path then
-            let p = Path.ChangeExtension(path, ".bak")
-            if File.Exists p then File.Copy(p, Path.ChangeExtension(path, ".bak2"), true)
-            File.Copy(path, p, true)
+            let p = Path.ChangeExtension (path, ".bak")
+            if File.Exists p then File.Copy (p, Path.ChangeExtension (path, ".bak2"), true)
+            File.Copy (path, p, true)
             try
                 Json.fromFile path |> JsonResult.value
             with err ->

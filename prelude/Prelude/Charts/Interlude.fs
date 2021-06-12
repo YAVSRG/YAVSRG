@@ -215,23 +215,27 @@ module Interlude =
     *)
 
     type ChartHeader =
-        { Title: string
-          Artist: string
-          Creator: string
-          DiffName: string
-          PreviewTime: Time
-          SourcePack: string
-          BGFile: string
-          AudioFile: string }
-        static member Default = {
-            Title = "Untitled Chart"
-            Artist = ""
-            Creator = ""
-            DiffName = ""
-            PreviewTime = 0.0f<ms>
-            SourcePack = "Unknown"
-            BGFile = ""
-            AudioFile = "audio.mp3" }
+        { 
+            Title: string
+            Artist: string
+            Creator: string
+            DiffName: string
+            PreviewTime: Time
+            SourcePack: string
+            BGFile: string
+            AudioFile: string
+        }
+        static member Default =
+            {
+                Title = "Untitled Chart"
+                Artist = ""
+                Creator = ""
+                DiffName = ""
+                PreviewTime = 0.0f<ms>
+                SourcePack = "Unknown"
+                BGFile = ""
+                AudioFile = "audio.mp3"
+            }
 
     type Chart(keys, header, notes, bpms, sv, path) =
         member this.Keys = keys
@@ -282,14 +286,14 @@ module Interlude =
             bw.Write(chart.Keys |> byte)
             bw.Write(Json.toString chart.Header)
             writeSection chart.Notes bw (fun nr -> NoteRow.write bw nr)
-            writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write(meter / 1<beat>); bw.Write(float32 msPerBeat))
+            writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write (meter / 1<beat>); bw.Write (float32 msPerBeat))
             for i = 0 to chart.Keys do
-                writeSection (chart.SV.GetChannelData(i-1)) bw (fun f -> bw.Write(f))
+                writeSection (chart.SV.GetChannelData (i - 1)) bw (fun f -> bw.Write f)
 
         let save (chart: Chart) =
             toFile chart chart.FileIdentifier
 
-        let hash (chart: Chart): string =
+        let hash (chart: Chart) : string =
             let h = SHA256.Create()
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
@@ -298,15 +302,15 @@ module Interlude =
             else
                 let offset = offsetOf <| chart.Notes.First.Value
                 for (o, nr) in chart.Notes.Data do
-                    bw.Write((o - offset)  * 0.2f |> Convert.ToInt32)
+                    bw.Write ((o - offset) * 0.2f |> Convert.ToInt32)
                     for i = 0 to 5 do
                         bw.Write(nr.[i])
                 for i = 0 to chart.Keys do
                     let mutable speed = 1.0
-                    for (o, f) in (chart.SV.GetChannelData(i - 1)).Data do
+                    for (o, f) in (chart.SV.GetChannelData (i - 1)).Data do
                         let f = float f
                         if (speed <> f) then
                             bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
                             bw.Write(f)
                             speed <- f
-                BitConverter.ToString(h.ComputeHash(ms.ToArray())).Replace("-", "")
+                BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")

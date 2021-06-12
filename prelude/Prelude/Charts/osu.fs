@@ -27,19 +27,19 @@ module osu =
         "[" + title + "]\n" + (String.concat "\n" (List.map f entries))
 
     type TimingEffect =
-    | Kiai = 1
-    | OmitFirstBarline = 8
+        | Kiai = 1
+        | OmitFirstBarline = 8
 
     type SampleSet =
-    | None = 0
-    | Default = 0
-    | Normal = 1
-    | Soft = 2
-    | Drum = 3
+        | None = 0
+        | Default = 0
+        | Normal = 1
+        | Soft = 2
+        | Drum = 3
 
     type TimingPoint =
-    | BPM of Time * float32<ms/beat> * int<beat> * (SampleSet * int * int) * TimingEffect
-    | SV of Time * float32 * (SampleSet * int * int) * TimingEffect
+        | BPM of Time * float32<ms/beat> * int<beat> * (SampleSet * int * int) * TimingEffect
+        | SV of Time * float32 * (SampleSet * int * int) * TimingEffect
         override this.ToString() =
             match this with
             | BPM (time, msPerBeat, meter, (set,index,volume), effect) ->
@@ -50,10 +50,10 @@ module osu =
     type Point = float * float
 
     type SliderShape =
-    | Linear
-    | Catmull
-    | Bezier
-    | PerfectCircle
+        | Linear
+        | Catmull
+        | Bezier
+        | PerfectCircle
         override this.ToString() =
             match this with
             | Linear -> "L" | Catmull -> "C" | Bezier -> "B" | PerfectCircle -> "P"
@@ -62,16 +62,16 @@ module osu =
     let formatHitAddition (s1,s2,index,volume,file) = String.concat ":" [s1 |> int |> string; s2 |> int |> string; string index; string volume; file]
 
     type HitSound =
-    | Normal = 1
-    | Whistle = 2
-    | Finish = 4
-    | Clap = 8
+        | Normal = 1
+        | Whistle = 2
+        | Finish = 4
+        | Clap = 8
 
     type HitObject =
-    | HitCircle of Point * Time * HitSound * HitAddition
-    | HoldNote of Point * Time * Time * HitSound * HitAddition
-    | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * (HitSound list * (SampleSet * SampleSet) list * HitAddition) option
-    | Spinner of Time * Time * HitSound * HitAddition
+        | HitCircle of Point * Time * HitSound * HitAddition
+        | HoldNote of Point * Time * Time * HitSound * HitAddition
+        | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * (HitSound list * (SampleSet * SampleSet) list * HitAddition) option
+        | Spinner of Time * Time * HitSound * HitAddition
         override this.ToString() = 
             match this with
             | HitCircle ((x, y), offset, hs, addition) -> String.concat "," [x |> string; y |> string; offset |> string; "1"; hs |> int |> string; formatHitAddition addition]
@@ -86,57 +86,57 @@ module osu =
     //There's actually 35 of these. todo: maybe include them all?
     //https://osu.ppy.sh/wiki/en/Storyboard_Scripting/Commands
     type Easing =
-    | None = 0
-    | Decelerate = 1
-    | Accelerate = 2
+        | None = 0
+        | Decelerate = 1
+        | Accelerate = 2
 
     type Layer =
-    | Background = 0
-    | Fail = 1
-    | Pass = 2
-    | Foreground = 3
-    | Overlay = 4
+        | Background = 0
+        | Fail = 1
+        | Pass = 2
+        | Foreground = 3
+        | Overlay = 4
 
     type LoopType =
-    | LoopForever = 0
-    | LoopOnce = 1
+        | LoopForever = 0
+        | LoopOnce = 1
 
     type TriggerType =
-    | HitSoundClap
-    | HitSoundFinish
-    | HitSoundWhistle
-    | Passing
-    | Failing
+        | HitSoundClap
+        | HitSoundFinish
+        | HitSoundWhistle
+        | Passing
+        | Failing
 
     type SpriteOrigin =
-    | TopLeft = 0
-    | TopCentre = 1
-    | TopRight = 2
-    | CentreLeft = 3
-    | Centre = 4
-    | CentreRight = 5
-    | BottomLeft = 6
-    | BottomCentre = 7
-    | BottomRight = 8
+        | TopLeft = 0
+        | TopCentre = 1
+        | TopRight = 2
+        | CentreLeft = 3
+        | Centre = 4
+        | CentreRight = 5
+        | BottomLeft = 6
+        | BottomCentre = 7
+        | BottomRight = 8
 
     type SpriteParameter =
-    | VerticalFlip
-    | HorizontalFlip
-    | AdditiveBlendColor
+        | VerticalFlip
+        | HorizontalFlip
+        | AdditiveBlendColor
 
     type StoryboardEvent =
-    | Fade of Time * Time * Easing * float * float
-    | Move of Time * Time * Easing * Point * Point
-    | Move_X of Time * Time * Easing * float * float
-    | Move_Y of Time * Time * Easing * float * float
-    | Scale of Time * Time * Easing * float * float
-    | VectorScale of Time * Time * Easing * Point * Point
-    | Rotate of Time * Time * Easing * float * float
-    | Color of Time * Time * Easing * (int * int * int) * (int * int * int)
-    | Loop of Time * int * StoryboardEvent list
-    | Trigger_Loop of Time * Time * TriggerType * StoryboardEvent list
-    | Parameter of Time * Time * SpriteParameter
-        member this.Format(padding) =
+        | Fade of Time * Time * Easing * float * float
+        | Move of Time * Time * Easing * Point * Point
+        | Move_X of Time * Time * Easing * float * float
+        | Move_Y of Time * Time * Easing * float * float
+        | Scale of Time * Time * Easing * float * float
+        | VectorScale of Time * Time * Easing * Point * Point
+        | Rotate of Time * Time * Easing * float * float
+        | Color of Time * Time * Easing * (int * int * int) * (int * int * int)
+        | Loop of Time * int * StoryboardEvent list
+        | Trigger_Loop of Time * Time * TriggerType * StoryboardEvent list
+        | Parameter of Time * Time * SpriteParameter
+        member this.Format padding =
             padding + (String.concat ","
                 (match this with
                 | Fade (time1, time2, easing, a, b) -> ["F"; easing |> int |> string; string time1; string time2; string a; string b]
@@ -154,13 +154,13 @@ module osu =
                 ))
 
     type StoryboardObject =
-    | Sprite of Layer * SpriteOrigin * string * Point * StoryboardEvent list
-    | Animation of Layer * SpriteOrigin * string * Point * int * Time * LoopType * StoryboardEvent list
-    | Sample of Time * Layer * string * int
-    | Background of string * Point
-    | Video of Time * string * Point
-    | Break of Time * Time
-    | BackgroundColorChange of Time * int * int * int //i have no idea what this is or does
+        | Sprite of Layer * SpriteOrigin * string * Point * StoryboardEvent list
+        | Animation of Layer * SpriteOrigin * string * Point * int * Time * LoopType * StoryboardEvent list
+        | Sample of Time * Layer * string * int
+        | Background of string * Point
+        | Video of Time * string * Point
+        | Break of Time * Time
+        | BackgroundColorChange of Time * int * int * int //i have no idea what this is or does
         override this.ToString() = 
             match this with
             | Background (filename, (x,y)) -> String.concat "," ["Background"; "0"; "\""+filename+"\""; string x; string y]
@@ -335,50 +335,54 @@ module osu =
     *)
 
     type GameMode =
-    | osu = 0
-    | Taiko = 1
-    | Catch = 2
-    | Mania = 3
+        | osu = 0
+        | Taiko = 1
+        | Catch = 2
+        | Mania = 3
 
     type OverlayPosition =
-    | NoChange = 0
-    | Below = 1
-    | Above = 2
+        | NoChange = 0
+        | Below = 1
+        | Above = 2
 
     type General =
-        { AudioFilename: string
-          AudioLeadIn: int
-          PreviewTime: Time
-          Countdown: int
-          SampleSet: SampleSet
-          StackLeniency: float
-          Mode: GameMode
-          LetterboxInBreaks: bool
-          UseSkinSprites: bool
-          OverlayPosition: OverlayPosition
-          SkinPreference: string
-          EpilepsyWarning: bool
-          CountdownOffset: int
-          SpecialStyle: bool
-          WidescreenStoryboard: bool
-          SamplesMatchPlaybackRate: bool }
-        static member Default = { 
-            AudioFilename = ""
-            AudioLeadIn = 0
-            PreviewTime = -1.0f<ms>
-            Countdown = 0
-            SampleSet = SampleSet.Normal
-            StackLeniency = 0.7
-            Mode = GameMode.osu
-            LetterboxInBreaks = false
-            UseSkinSprites = false
-            OverlayPosition = OverlayPosition.NoChange
-            SkinPreference = ""
-            EpilepsyWarning = false
-            CountdownOffset = 0
-            SpecialStyle = false
-            WidescreenStoryboard = false
-            SamplesMatchPlaybackRate = false }
+        { 
+            AudioFilename: string
+            AudioLeadIn: int
+            PreviewTime: Time
+            Countdown: int
+            SampleSet: SampleSet
+            StackLeniency: float
+            Mode: GameMode
+            LetterboxInBreaks: bool
+            UseSkinSprites: bool
+            OverlayPosition: OverlayPosition
+            SkinPreference: string
+            EpilepsyWarning: bool
+            CountdownOffset: int
+            SpecialStyle: bool
+            WidescreenStoryboard: bool
+            SamplesMatchPlaybackRate: bool 
+         }
+        static member Default =
+            { 
+                AudioFilename = ""
+                AudioLeadIn = 0
+                PreviewTime = -1.0f<ms>
+                Countdown = 0
+                SampleSet = SampleSet.Normal
+                StackLeniency = 0.7
+                Mode = GameMode.osu
+                LetterboxInBreaks = false
+                UseSkinSprites = false
+                OverlayPosition = OverlayPosition.NoChange
+                SkinPreference = ""
+                EpilepsyWarning = false
+                CountdownOffset = 0
+                SpecialStyle = false
+                WidescreenStoryboard = false
+                SamplesMatchPlaybackRate = false
+            }
 
     let private readGeneral (title, settings) =
         assert (title = "General")
@@ -416,17 +420,21 @@ module osu =
 
 
     type Editor =
-        { Bookmarks: Time list
-          DistanceSpacing: float
-          BeatDivisor: float
-          GridSize: int
-          TimelineZoom: float }
-        static member Default = {
-            Bookmarks = []
-            DistanceSpacing = 1.0
-            BeatDivisor = 8.0
-            GridSize = 4
-            TimelineZoom = 1.0 }
+        { 
+            Bookmarks: Time list
+            DistanceSpacing: float
+            BeatDivisor: float
+            GridSize: int
+            TimelineZoom: float
+        }
+        static member Default =
+            {
+                Bookmarks = []
+                DistanceSpacing = 1.0
+                BeatDivisor = 8.0
+                GridSize = 4
+                TimelineZoom = 1.0
+            }
 
     let private readEditor (title, settings) =
         assert (title = "Editor")
@@ -448,28 +456,32 @@ module osu =
             ("BeatDivisor", string data.BeatDivisor); ("GridSize", string data.GridSize); ("TimelineZoom", string data.TimelineZoom)])
 
 
-    type Metadata = { 
-        Title: string
-        TitleUnicode: string
-        Artist: string
-        ArtistUnicode: string
-        Creator: string
-        Version: string
-        Source: string
-        Tags: string list
-        BeatmapID: int
-        BeatmapSetID: int
-    } with static member Default = {
-            Title = ""
-            TitleUnicode = ""
-            Artist = ""
-            ArtistUnicode = ""
-            Creator = ""
-            Version = ""
-            Source = ""
-            Tags = []
-            BeatmapID = 0
-            BeatmapSetID = -1 }
+    type Metadata = 
+        { 
+            Title: string
+            TitleUnicode: string
+            Artist: string
+            ArtistUnicode: string
+            Creator: string
+            Version: string
+            Source: string
+            Tags: string list
+            BeatmapID: int
+            BeatmapSetID: int
+        } 
+        static member Default =
+            {
+                Title = ""
+                TitleUnicode = ""
+                Artist = ""
+                ArtistUnicode = ""
+                Creator = ""
+                Version = ""
+                Source = ""
+                Tags = []
+                BeatmapID = 0
+                BeatmapSetID = -1
+            }
 
     let private readMetadata (title, settings) =
         assert (title = "Metadata")
@@ -491,7 +503,7 @@ module osu =
             | _ -> s
         List.fold f Metadata.Default settings
 
-    let private writeMetadata (data : Metadata) : Header =
+    let private writeMetadata (data: Metadata) : Header =
         ("Metadata", [("Title", data.Title); ("TitleUnicode", data.TitleUnicode); ("Artist", data.Artist);
             ("ArtistUnicode", data.ArtistUnicode); ("Creator", data.Creator); ("Version", data.Version);
             ("Source", data.Source); ("Tags", String.concat " " data.Tags); ("BeatmapID", string data.BeatmapID);
@@ -499,34 +511,38 @@ module osu =
 
 
     type Difficulty =
-        { HPDrainRate: float
-          CircleSize: float
-          OverallDifficulty: float
-          ApproachRate: float
-          SliderMultiplier: float
-          SliderTickRate: float }
-        static member Default = {
-            HPDrainRate = 5.0
-            CircleSize = 5.0
-            OverallDifficulty = 5.0
-            ApproachRate = 5.0
-            SliderMultiplier = 1.4
-            SliderTickRate = 1.0 }
+        { 
+            HPDrainRate: float
+            CircleSize: float
+            OverallDifficulty: float
+            ApproachRate: float
+            SliderMultiplier: float
+            SliderTickRate: float
+        }
+        static member Default = 
+            {
+                HPDrainRate = 5.0
+                CircleSize = 5.0
+                OverallDifficulty = 5.0
+                ApproachRate = 5.0
+                SliderMultiplier = 1.4
+                SliderTickRate = 1.0
+            }
 
     let private readDifficulty (title, settings) =
         assert (title = "Difficulty")
         let f s (key, value) =
             match key with
-            | "HPDrainRate" -> { s with HPDrainRate = value |> float }
-            | "CircleSize" -> { s with CircleSize = value |> float }
-            | "OverallDifficulty" -> { s with OverallDifficulty = value |> float }
-            | "ApproachRate" -> { s with ApproachRate = value |> float }
-            | "SliderMultiplier" -> { s with SliderMultiplier = value |> float }
-            | "SliderTickRate" -> { s with SliderTickRate = value |> float }
+            | "HPDrainRate" -> { s with HPDrainRate = float value }
+            | "CircleSize" -> { s with CircleSize = float value }
+            | "OverallDifficulty" -> { s with OverallDifficulty = float value }
+            | "ApproachRate" -> { s with ApproachRate = float value }
+            | "SliderMultiplier" -> { s with SliderMultiplier = float value }
+            | "SliderTickRate" -> { s with SliderTickRate = float value }
             | _ -> s
         List.fold f Difficulty.Default settings
 
-    let private writeDifficulty (data : Difficulty) : Header =
+    let private writeDifficulty (data: Difficulty) : Header =
         ("Difficulty", [("HPDrainRate", string data.HPDrainRate); ("CircleSize", string data.CircleSize);
             ("OverallDifficulty", string data.OverallDifficulty); ("ApproachRate", string data.ApproachRate);
             ("SliderMultiplier", string data.SliderMultiplier); ("SliderTickRate", string data.SliderTickRate)])
@@ -581,6 +597,6 @@ module osu =
         | Failure(errorMsg, _, _) -> failwith errorMsg
     
     let saveStoryboardFile path events = 
-        System.IO.File.WriteAllText(path, eventsToString events + "\n\n")
+        System.IO.File.WriteAllText (path, eventsToString events + "\n\n")
 
     let getGameMode ((g, _, _, _, _, _, _): Beatmap) = g.Mode
