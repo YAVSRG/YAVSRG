@@ -551,23 +551,33 @@ module osu =
         Final parsing of .osu file into meaningful data/saving .osu files from internal representation
     *)
 
-    type Beatmap = General * Editor * Metadata * Difficulty * StoryboardObject list * HitObject list * TimingPoint list
+    type Beatmap =
+        {
+            General: General
+            Editor: Editor
+            Metadata: Metadata
+            Difficulty: Difficulty
+            Events: StoryboardObject list
+            Objects: HitObject list
+            Timing: TimingPoint list
+        }
+    //type Beatmap = General * Editor * Metadata * Difficulty * StoryboardObject list * HitObject list * TimingPoint list
 
     //todo: in future can include variables list too
     type Storyboard = StoryboardObject list
 
     let eventsToString events = "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events);
 
-    let beatmapToString (general, editor, meta, diff, events, objects, timing) = 
+    let beatmapToString beatmap = 
         String.concat "\n\n" [
             "osu file format v14";
-            general |> writeGeneral |> formatHeader;
-            editor |> writeEditor |> formatHeader;
-            meta |> writeMetadata |> formatHeader;
-            diff |> writeDifficulty |> formatHeader;
-            events |> eventsToString;
-            "[TimingPoints]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) timing);
-            "[HitObjects]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) objects);
+            beatmap.General |> writeGeneral |> formatHeader;
+            beatmap.Editor |> writeEditor |> formatHeader;
+            beatmap.Metadata |> writeMetadata |> formatHeader;
+            beatmap.Difficulty |> writeDifficulty |> formatHeader;
+            beatmap.Events |> eventsToString;
+            "[TimingPoints]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Timing);
+            "[HitObjects]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Objects);
         ]
 
     let parseBeatmap =
@@ -580,8 +590,15 @@ module osu =
             (optional (parseHeader("Colours") .>> spaces))
             (parseHitObjects .>> spaces)
         |>> fun ((format, general, editor, metadata), (difficulty, events, timingpoints, _, hitobjects)) ->
-            (readGeneral general, readEditor editor, readMetadata metadata, readDifficulty difficulty, events, hitobjects,
-             timingpoints)
+            {
+                General = readGeneral general
+                Editor = readEditor editor
+                Metadata = readMetadata metadata
+                Difficulty = readDifficulty difficulty
+                Events = events
+                Objects = hitobjects
+                Timing = timingpoints
+            }
 
     let loadBeatmapFile path : Beatmap =
         match runParserOnFile parseBeatmap () path System.Text.Encoding.UTF8 with
@@ -599,4 +616,4 @@ module osu =
     let saveStoryboardFile path events = 
         System.IO.File.WriteAllText (path, eventsToString events + "\n\n")
 
-    let getGameMode ((g, _, _, _, _, _, _): Beatmap) = g.Mode
+    let getGameMode (b: Beatmap) = b.General.Mode

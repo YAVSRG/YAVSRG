@@ -17,12 +17,12 @@ open Prelude.Charts.osu
 let main argv =
     Console.BufferHeight <- 32766
 
-    let (general, editor, meta, difficulty, sb, notes, timing) = loadBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637550765344867554-Hyperventilation\RADWIMPS - Hyperventilation (Percyqaz) [backup].osu"
+    let beatmap = loadBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637550765344867554-Hyperventilation\RADWIMPS - Hyperventilation (Percyqaz) [backup].osu"
     let timef = fun x -> if x > 218093.0f<ms> then (x - 218093.0f<ms>) * (122.0f / 120.1f) + 218093.0f<ms> else x
     let newNotes =
-        notes
+        beatmap.Objects
         |> List.map (function HitObject.HitCircle (pos, time, sound, sound2) -> HitCircle (pos, timef time, sound, sound2) | x -> x) 
-    let newmap = (general, editor, { meta with Version = "output" }, difficulty, sb, newNotes, timing)
+    let newmap = { beatmap with Metadata = { beatmap.Metadata with Version = "output" }; Objects = newNotes }
     saveBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637550765344867554-Hyperventilation\RADWIMPS - Hyperventilation (Percyqaz) [output].osu" newmap
 
     (*

@@ -111,8 +111,8 @@ module ChartConversions =
         svData.SetChannelData(-1, listToDotNet sv)
         (TimeData(listToDotNet bpm), svData)
 
-    let convert_osu_interlude ((general, _, meta, diff, events, notes, timing): Beatmap) =
-        let keys = diff.CircleSize |> int
+    let convert_osu_interlude (b: Beatmap) =
+        let keys = b.Difficulty.CircleSize |> int
         let rec findBGFile e =
             match e with
             | (Background (path, _)) :: _ -> path
@@ -120,11 +120,11 @@ module ChartConversions =
             | [] -> ""
         let header = { 
             ChartHeader.Default with
-                Title = meta.Title; Artist = meta.Artist; Creator = meta.Creator; SourcePack = "osu!"
-                DiffName = meta.Version; PreviewTime = general.PreviewTime; BGFile = findBGFile events; AudioFile = general.AudioFilename }
-        let snaps = convertHitObjects notes keys
-        let (bpm, sv) = (convertTimingPoints timing keys (offsetOf (snaps.GetPointAt(infinityf * 1.0f<ms>))))
-        Chart(keys, header, snaps, bpm, sv, String.Join("_", (meta.Title + " [" + meta.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
+                Title = b.Metadata.Title; Artist = b.Metadata.Artist; Creator = b.Metadata.Creator; SourcePack = "osu!"
+                DiffName = b.Metadata.Version; PreviewTime = b.General.PreviewTime; BGFile = findBGFile b.Events; AudioFile = b.General.AudioFilename }
+        let snaps = convertHitObjects b.Objects keys
+        let (bpm, sv) = (convertTimingPoints b.Timing keys (offsetOf (snaps.GetPointAt(infinityf * 1.0f<ms>))))
+        Chart(keys, header, snaps, bpm, sv, String.Join("_", (b.Metadata.Title + " [" + b.Metadata.Version + "].yav").Split(Path.GetInvalidFileNameChars())))
 
     (*
         Conversion code for StepMania -> Interlude
@@ -329,9 +329,15 @@ module ChartConversions =
                 OverallDifficulty = 8.0
                 HPDrainRate = 8.0
             }
-        (general, editor, meta, diff, [(Background (chart.Header.BGFile, (0.0, 0.0)))],
-            convertSnapsToHitobjects (List.ofSeq (chart.Notes.Data)) chart.Keys,
-            convertToTimingPoints chart.BPM chart.SV (offsetOf (chart.Notes.GetPointAt(infinityf * 1.0f<ms>))))
+        {
+            General = general
+            Editor = editor
+            Metadata = meta
+            Difficulty = diff
+            Events = [(Background (chart.Header.BGFile, (0.0, 0.0)))]
+            Objects = convertSnapsToHitobjects (List.ofSeq (chart.Notes.Data)) chart.Keys
+            Timing = convertToTimingPoints chart.BPM chart.SV (offsetOf (chart.Notes.GetPointAt(infinityf * 1.0f<ms>)))
+        }
 
     (*
         Conversion code for Interlude -> StepMania
@@ -378,7 +384,7 @@ module ChartConversions =
         | ".osu" -> 
             try
                 let map = loadBeatmapFile path
-                if getGameMode map = GameMode.Mania && (let (_, _, _, d, _, _, _) = map in (let keys = d.CircleSize |> int in 3 <= keys && keys <= 10)) then
+                if getGameMode map = GameMode.Mania && (let keys = map.Difficulty.CircleSize |> int in 3 <= keys && keys <= 10) then
                     [convert_osu_interlude (loadBeatmapFile path)] else []
             with err -> Logging.Error ("Could not load .osu file: " + path, err); []
         | _ -> []
