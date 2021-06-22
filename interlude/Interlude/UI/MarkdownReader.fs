@@ -84,8 +84,8 @@ module MarkdownReader =
         static member Default = { Size = SIZE; Bold = false; Italic = false; HasLink = false }
 
     let openlink (str: string) =
-        try Process.Start (ProcessStartInfo(str, UseShellExecute=true)) |> ignore
-        with err -> Prelude.Common.Logging.Debug("Failed to open link: " + str, err)
+        try Process.Start (ProcessStartInfo (str, UseShellExecute=true)) |> ignore
+        with err -> Prelude.Common.Logging.Debug ("Failed to open link: " + str, err)
 
     let rec formatSpan (settings: SpanSettings) (sp: MarkdownSpan) : WBuilder =
         match sp with
@@ -103,7 +103,7 @@ module MarkdownReader =
         | AnchorLink (link, _) -> WBuilder.sym "anchorLink"
         | DirectLink (body, link, title, _) ->
             let r = spans { settings with HasLink = true } false body
-            r.body.Add(Clickable((fun () -> openlink link), ignore))
+            r.body.Add (Clickable ((fun () -> openlink link), ignore))
             r
         | IndirectLink (body, link, title, _) -> WBuilder.sym "ilink"
         | DirectImage (body, link, title, _) -> WBuilder.sym "dimg"
@@ -163,9 +163,9 @@ module MarkdownReader =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if Mouse.Click(MouseButton.Left) || Options.options.Hotkeys.Exit.Value.Tapped() then
+            if Mouse.Click MouseButton.Left || Options.options.Hotkeys.Exit.Value.Tapped() then
                 this.Close()
                 frame.Move(-WIDTH * 0.5f, Render.vheight, WIDTH * 0.5f, Render.vheight - 200.0f)
         override this.OnClose() = ()
 
-    let help() = Screens.addDialog(MarkdownViewDialog(doc))
+    let help() = Screens.addDialog (MarkdownViewDialog doc)

@@ -13,17 +13,21 @@ type Bind =
     | Key of Keys * modifiers:(bool * bool * bool)
     | Mouse of MouseButton// * modifiers:(bool * bool * bool)
     | Joystick of unit //NYI
+
     override this.ToString() =
         match this with
         | Dummy -> "NONE"
-        | Key (k, m) -> Bind.ModifierString(m) + k.ToString()
+        | Key (k, m) -> Bind.ModifierString m + k.ToString()
         | Mouse b -> "M" + b.ToString()
         | Joystick _ -> "nyi"
-    static member private ModifierString((ctrl, alt, shift)) =
+
+    static member private ModifierString (ctrl, alt, shift) =
         (if ctrl then "Ctrl + " else "")
         + (if alt then "Alt + " else "")
         + (if shift then "Shift + " else "")
+
     static member DummyBind = new Setting<Bind>(Dummy)
+
 
 module Bind =
     let inline mk k = Key (k, (false, false, false))
@@ -53,7 +57,7 @@ module Input =
     let mutable internal shift = false
     let mutable internal alt = false
 
-    let mutable internal gw: GameWindow = null
+    let mutable internal gw : GameWindow = null
 
     let mutable internal inputmethod = None
     let mutable internal absorbed = false
@@ -65,7 +69,7 @@ module Input =
         | None -> ()
         inputmethod <- None
     
-    let setInputMethod(s: ISettable<string>, callback: unit -> unit) =
+    let setInputMethod (s: ISettable<string>, callback: unit -> unit) =
         removeInputMethod()
         inputmethod <- Some (s, callback)
 
@@ -76,7 +80,7 @@ module Input =
         absorbed <- true
         evts <- []
 
-    let consumeOne(b: Bind, t: InputEvType) =
+    let consumeOne (b: Bind, t: InputEvType) =
         let mutable out = ValueNone
         let rec f evs =
             match evs with
@@ -86,13 +90,31 @@ module Input =
         evts <- f evts
         out
 
-    let consumeGameplay(b: Bind, t: InputEvType, f) =
-        let mutable time = consumeOne(b, t)
-        while time.IsSome do
-            f time.Value
-            time <- consumeOne(b, t)
+    //admits the key with any modifiers
+    let consumeOneKeyGameplay (k: Keys, t: InputEvType) =
+        let mutable out = ValueNone
+        let rec f evs =
+            match evs with
+            | [] -> []
+            | struct (Key (K, _), T, time) :: xs when K = k && T = t -> out <- ValueSome time; xs
+            | x :: xs -> x :: (f xs)
+        evts <- f evts
+        out
 
-    let consumeAny(t: InputEvType) =
+    let consumeGameplay (b: Bind, t: InputEvType, f) =
+        match b with
+        | Key (k, _) ->
+            let mutable time = consumeOneKeyGameplay (k, t)
+            while time.IsSome do
+                f time.Value
+                time <- consumeOneKeyGameplay (k, t)
+        | _ -> 
+            let mutable time = consumeOne (b, t)
+            while time.IsSome do
+                f time.Value
+                time <- consumeOne (b, t)
+
+    let consumeAny (t: InputEvType) =
         let mutable out = ValueNone
         let rec f evs =
             match evs with
@@ -102,7 +124,7 @@ module Input =
         evts <- f evts
         out
 
-    let held(b: Bind) =
+    let held (b: Bind) =
         if absorbed then false
         else
         match b with
@@ -145,7 +167,7 @@ module Input =
 
         // joystick stuff NYI
     
-    let init(win : GameWindow) =
+    let init (win: GameWindow) =
         gw <- win
         gw.add_MouseWheel(fun e -> mousez <- e.OffsetY)
         gw.add_MouseMove(
@@ -165,7 +187,7 @@ module Input =
         match inputmethod with
         |  Some (s, c) ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
-                s.Apply(fun x -> x.Substring(0, x.Length - 1))
+                s.Apply (fun x -> x.Substring (0, x.Length - 1))
             elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
         | None -> ()
@@ -177,9 +199,9 @@ module Mouse =
     let Y() = Input.mousey
     let Scroll() = let v = Input.mousez - Input.oldmousez in Input.oldmousez <- Input.mousez; v
 
-    let Click(b) = Input.consumeOne(Mouse b, InputEvType.Press).IsSome
-    let Held(b) = Input.held(Mouse b)
-    let Released(b) = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
+    let Click b = Input.consumeOne(Mouse b, InputEvType.Press).IsSome
+    let Held b = Input.held (Mouse b)
+    let Released b = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
     let Moved() = Input.mousex <> Input.oldmousex || Input.mousey <> Input.oldmousey
 
     let Hover(struct (l, t, r, b): Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
