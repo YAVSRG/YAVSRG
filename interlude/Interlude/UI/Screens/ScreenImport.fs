@@ -9,9 +9,9 @@ open Prelude.Data.ChartManager
 open Prelude.Data.ChartManager.Sorting
 open Prelude.Web
 open Interlude
-open Interlude.Input
-open Interlude.Render
 open Interlude.Utils
+open Interlude.Graphics
+open Interlude.Input
 open Interlude.UI.Components
 
 module FileDropHandling =

@@ -2,14 +2,13 @@
 
 open System
 open System.IO
-open System.IO.Compression
 open System.Collections.Generic
 open System.Drawing
 open Prelude.Common
 open Prelude.Data.Themes
 
 module Themes =
-    open Interlude.Render
+    open Interlude.Graphics
 
     let private noteskinTextures = [|"note"; "receptor"; "mine"; "holdhead"; "holdbody"; "holdtail"|]
 

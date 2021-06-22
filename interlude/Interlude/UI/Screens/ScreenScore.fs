@@ -4,11 +4,11 @@ open System.Drawing
 open Prelude.Gameplay.Score
 open Prelude.Gameplay.Difficulty
 open Prelude.Data.ScoreManager
-open Interlude.Utils
 open Interlude
+open Interlude.Utils
+open Interlude.Graphics
 open Interlude.UI.Components
 open Interlude.Gameplay
-open Interlude.Render
 
 module ScoreColor =
     let lampToColor (lampAchieved: Lamp) = Themes.themeConfig.LampColors.[lampAchieved |> int]
@@ -32,8 +32,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
         let width = Rect.width this.Bounds
         let h = 0.5f * Rect.height this.Bounds
         let struct (left, top, right, bottom) = this.Bounds
-        fbo.Bind()
-        OpenTK.Graphics.OpenGL.GL.Clear OpenTK.Graphics.OpenGL.ClearBufferMask.ColorBufferBit
+        fbo.Bind true
 
         Draw.rect this.Bounds (Color.FromArgb(127, 0, 0, 0)) Sprite.Default
         Draw.rect (Rect.create left (top + h - 2.5f) right (top + h + 2.5f)) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default

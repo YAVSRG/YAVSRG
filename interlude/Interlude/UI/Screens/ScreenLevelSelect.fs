@@ -13,12 +13,12 @@ open Prelude.Gameplay.Score
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Interlude
+open Interlude.Utils
+open Interlude.Graphics
+open Interlude.Input
 open Interlude.Gameplay
 open Interlude.Themes
-open Interlude.Utils
-open Interlude.Render
 open Interlude.Options
-open Interlude.Input
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Selection

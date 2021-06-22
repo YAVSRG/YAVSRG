@@ -6,7 +6,7 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Interlude
 open Interlude.Utils
 open Interlude.Input
-open Interlude.Render
+open Interlude.Graphics
 open Interlude.UI.Components
 
 module MarkdownReader =

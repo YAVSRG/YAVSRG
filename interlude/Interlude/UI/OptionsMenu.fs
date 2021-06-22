@@ -6,10 +6,10 @@ open OpenTK
 open Prelude.Gameplay.NoteColors
 open Prelude.Gameplay.Score
 open Prelude.Common
-open Interlude.Options
-open Interlude.Render
 open Interlude
 open Interlude.Utils
+open Interlude.Graphics
+open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Selection
 

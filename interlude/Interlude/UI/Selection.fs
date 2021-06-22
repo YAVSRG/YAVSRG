@@ -3,13 +3,13 @@
 open System
 open System.Drawing
 open OpenTK
+open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
-open Interlude.Options
-open Interlude.Render
 open Interlude
 open Interlude.Utils
+open Interlude.Graphics
 open Interlude.Input
-open OpenTK.Windowing.GraphicsLibraryFramework
+open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
 

@@ -16,7 +16,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <Optimize>true</Optimize>
-    <Tailcalls>false</Tailcalls>
+    <Tailcalls>true</Tailcalls>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +33,9 @@
     <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
     <Compile Include="Audio.fs" />
-    <Compile Include="Render.fs" />
+    <Compile Include="Graphics\Data.fs" />
+    <Compile Include="Graphics\Render.fs" />
+    <Compile Include="Graphics\Text.fs" />
     <Compile Include="Input.fs" />
     <Compile Include="ThemeManager.fs" />
     <Compile Include="Options.fs" />
@@ -54,7 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Formatting" Version="11.1.0" />
+    <PackageReference Include="FSharp.Formatting" Version="11.2.0" />
     <PackageReference Include="ManagedBass" Version="3.0.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.0.0" />
     <PackageReference Include="OpenTK" Version="4.4.0" />
