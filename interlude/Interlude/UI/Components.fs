@@ -27,13 +27,13 @@ module Components =
 
         let BORDERWIDTH = 5.0f
 
-        new() = Frame((fun () -> Screens.accentShade(200, 0.5f, 0.3f)), (fun () -> Screens.accentShade(80, 0.5f, 0.0f)), true, true)
-        new((), frame) = Frame((K Color.Transparent), (K frame), false, true)
-        new((), frame) = Frame((K Color.Transparent), frame, false, true)
-        new(fill, ()) = Frame((K fill), (K Color.Transparent), true, false)
-        new(fill, ()) = Frame(fill, (K Color.Transparent), true, false)
-        new(fill, frame) = Frame((K fill), (K frame), true, true)
-        new(fill, frame) = Frame(fill, frame, true, true)
+        new() = Frame ((fun () -> Screens.accentShade(200, 0.5f, 0.3f)), (fun () -> Screens.accentShade(80, 0.5f, 0.0f)), true, true)
+        new((), frame) = Frame (K Color.Transparent, K frame, false, true)
+        new((), frame) = Frame (K Color.Transparent, frame, false, true)
+        new(fill, ()) = Frame (K fill, K Color.Transparent, true, false)
+        new(fill, ()) = Frame (fill, K Color.Transparent, true, false)
+        new(fill, frame) = Frame (K fill, K frame, true, true)
+        new(fill, frame) = Frame (fill, frame, true, true)
 
         override this.Draw() =
             if frame then
@@ -47,6 +47,7 @@ module Components =
 
             if fill then Draw.rect base.Bounds (fillColor()) Sprite.Default
             base.Draw()
+
         static member Create(w: Widget) =
             let f = Frame()
             f.Add(w)

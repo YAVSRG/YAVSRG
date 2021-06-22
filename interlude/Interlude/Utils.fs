@@ -43,6 +43,7 @@ module Utils =
        elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
        else sprintf "%.0fs" ts.TotalSeconds
 
+    (* was used to benchmark framerate/some other things
     module RenderPerformance =
         let add x xs =
             List.truncate 960 (x :: xs)
@@ -56,6 +57,7 @@ module Utils =
 
         let update t1 t2 =
             updateTime <- add (t1, t1 + t2) updateTime
+    *)
 
     module AutoUpdate =
         open System.IO.Compression

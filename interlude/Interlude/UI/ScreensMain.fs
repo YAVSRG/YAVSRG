@@ -289,11 +289,6 @@ type Toolbar() as this =
     let barSlider = new AnimationFade 1.0f
     let notifSlider = new AnimationFade 0.0f
 
-    let bind1 = Interlude.Input.Bind.shift OpenTK.Windowing.GraphicsLibraryFramework.Keys.A
-    let bind2 = Interlude.Input.Bind.shift OpenTK.Windowing.GraphicsLibraryFramework.Keys.S
-    let mutable r1 = false
-    let mutable r2 = false
-
     let mutable userCollapse = false
     let mutable forceCollapse = true
     
@@ -343,26 +338,11 @@ type Toolbar() as this =
                 Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - HEIGHT) (l + (float32 i + 1.0f) * s - 2.0f) (t - HEIGHT + level)) (Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
                 Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + HEIGHT - level) (r - float32 i * s - 2.0f) (b + HEIGHT)) (Screens.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
         base.Draw()
-        if r1 then
-            let mutable x = 0.0f
-            for (a, b) in Utils.RenderPerformance.frameTime do
-                Draw.rect(Rect.createWH x t 2.0f b) Color.Red Sprite.Default
-                Draw.rect(Rect.createWH x t 2.0f a) Color.White Sprite.Default
-                x <- x + 2.0f
-        if r2 then
-            let mutable x = 0.0f
-            for (a, b) in Utils.RenderPerformance.updateTime do
-                Draw.rect(Rect.createWH x t 2.0f b) Color.Blue Sprite.Default
-                Draw.rect(Rect.createWH x t 2.0f a) Color.White Sprite.Default
-                x <- x + 2.0f
-        Text.draw(Themes.font(), (sprintf "%.2f fps" (Utils.RenderPerformance.frameTime |> List.truncate 200 |> List.map snd |> List.sum |> fun x -> 1000.0f * 200.0f / x)), 30.0f, 0.0f, 100.0f, Color.White)
 
     override this.Update(elapsedTime, bounds) =
         if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Value.Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
-        r1 <- bind1.Pressed()
-        r2 <- bind2.Pressed()
         base.Update(elapsedTime, Rect.expand (0.0f, -HEIGHT * if forceCollapse then 0.0f else barSlider.Value) bounds)
 
 // Screen manager

@@ -16,9 +16,6 @@ type Game(config: GameConfig) as this =
 
     let screens = new ScreenContainer()
 
-    let sw = System.Diagnostics.Stopwatch()
-    let mutable (_gen0, _gen1, _gen2) = (0, 0, 0)
-
     do
         Options.applyOptions <- fun () -> this.ApplyConfig config
         base.Title <- Utils.version
@@ -53,27 +50,17 @@ type Game(config: GameConfig) as this =
 
     override this.OnRenderFrame e =
         base.OnRenderFrame e
-        sw.Restart()
         Render.start()
         if Render.rheight > 0 then screens.Draw()
         Render.finish()
-        sw.Stop()
         base.SwapBuffers()
-        Utils.RenderPerformance.frame (float32 sw.Elapsed.TotalMilliseconds) (float32 e.Time * 1000.0f)
 
     override this.OnUpdateFrame e =
-        sw.Restart()
         base.OnUpdateFrame e
         Input.update()
         if Render.rheight > 0 then screens.Update(e.Time * 1000.0, Render.bounds)
         Input.absorbAll()
         Audio.update()
-        sw.Stop()
-        let (gen0, gen1, gen2) = (GC.CollectionCount(0), GC.CollectionCount(1), GC.CollectionCount(2))
-        Utils.RenderPerformance.update (float32(gen0 - _gen0) * 30.0f) (float32(gen1 - _gen1) * 50.0f + float32(gen2 - _gen2) * 200.0f)//(float32 sw.Elapsed.TotalMilliseconds) (float32 e.Time * 1000.0f)
-        _gen0 <- gen0
-        _gen1 <- gen1
-        _gen2 <- gen2
         if screens.Exit then base.Close()
 
     override this.ProcessEvents() =
