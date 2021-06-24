@@ -412,11 +412,11 @@ type ScreenPlay() as this =
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
 
-    override this.OnExit(next) =
+    override this.OnExit next =
         Screens.backgroundDim.Target <- 0.7f
-        Screens.setCursorVisible(true)
-        if (next :? ScreenScore) then () else
-            Screens.setToolbarCollapsed(false)
+        Screens.setCursorVisible true
+        if next = ScreenType.Score then () else
+            Screens.setToolbarCollapsed false
 
     member private this.Hit(i, k, delta, bad, now) =
         let _, deltas, status = scoreData.[i]

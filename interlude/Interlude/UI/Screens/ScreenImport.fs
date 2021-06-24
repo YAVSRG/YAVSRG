@@ -210,9 +210,14 @@ type ScreenImport() as this =
                 (fun flowContainer filter -> flowContainer.Clear(); flowContainer.Add(new SearchContainerLoader(beatmapSearch filter 0 flowContainer))) )
         let tabs = new TabContainer("Etterna Packs", eoDownloads)
         tabs.AddTab("osu! Songs", osuDownloads)
-        this.Add(tabs |> positionWidget(600.0f, 0.0f, 50.0f, 0.0f, -100.0f, 1.0f, -80.0f, 1.0f))
-        this.Add(new TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
-            |> positionWidget(600.0f, 0.0f, -90.0f, 1.0f, -100.0f, 1.0f, -30.0f, 1.0f))
+
+        tabs
+        |> positionWidget(600.0f, 0.0f, 50.0f, 0.0f, -100.0f, 1.0f, -80.0f, 1.0f)
+        |> this.Add
+
+        new TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
+        |> positionWidget(600.0f, 0.0f, -90.0f, 1.0f, -100.0f, 1.0f, -30.0f, 1.0f)
+        |> this.Add
         (*
             Offline importers from other games
         *)
@@ -220,21 +225,28 @@ type ScreenImport() as this =
         let mutable importingOsu = false
         let mutable importingSM = false
         let mutable importingEtterna = false
-        this.Add(
-            new Button(
-                (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Gameplay.cache.ConvertPackFolder osuSongFolder "osu!") |> ignore)),
-                "osu!", Bind.DummyBind, Sprite.Default)
-            |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f) )
-        this.Add(
-            new Button(
-                (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Gameplay.cache.AutoConvert smPackFolder) |> ignore)),
-                "Stepmania 5", Bind.DummyBind, Sprite.Default)
-            |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f) )
-        this.Add(
-            new Button(
-                (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Gameplay.cache.AutoConvert etternaPackFolder) |> ignore)),
-                "Etterna", Bind.DummyBind, Sprite.Default)
-            |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f) )
-        this.Add(
-            new TextBox( (K "Directly import"), (K (Color.White, Color.Black)), 0.5f )
-            |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f) )
+
+        new Button(
+            (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Gameplay.cache.ConvertPackFolder osuSongFolder "osu!") |> ignore)),
+            "osu!", Bind.DummyBind, Sprite.Default)
+        |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f)
+        |> this.Add
+
+        new Button(
+            (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Gameplay.cache.AutoConvert smPackFolder) |> ignore)),
+            "Stepmania 5", Bind.DummyBind, Sprite.Default)
+        |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f)
+        |> this.Add
+
+        new Button(
+            (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Gameplay.cache.AutoConvert etternaPackFolder) |> ignore)),
+            "Etterna", Bind.DummyBind, Sprite.Default)
+        |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f)
+        |> this.Add
+
+        new TextBox(K "Directly import", K (Color.White, Color.Black), 0.5f )
+        |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f)
+        |> this.Add
+
+    override this.OnEnter _ = ()
+    override this.OnExit _ = ()

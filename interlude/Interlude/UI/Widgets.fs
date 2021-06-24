@@ -217,13 +217,6 @@ type Logo() as this =
             Stencil.finish()
             Draw.rect this.Bounds Color.White (Themes.getTexture "logo")
 
-type Screen() =
-    inherit Widget()
-    abstract member OnEnter: Screen -> unit
-    default this.OnEnter(prev: Screen) = ()
-    abstract member OnExit: Screen -> unit
-    default this.OnExit(next: Screen) = ()
-
 [<AbstractClass>]
 type Dialog() as this =
     inherit Widget()
@@ -252,23 +245,29 @@ type Dialog() as this =
             this.OnClose()
 
 type ScreenTransitionFlag =
-| Default = 0
-| UnderLogo = 1
-//more transition animations go here
+    | Default = 0
+    | UnderLogo = 1
+    //more transition animations go here
 
 type NotificationType =
-| Info = 0
-| System = 1
-| Task = 2
-| Error = 3
+    | Info = 0
+    | System = 1
+    | Task = 2
+    | Error = 3
 
 type ScreenType =
-| SplashScreen = 0
-| MainMenu = 1
-| Import = 2
-| LevelSelect = 3
-| Play = 4
-| Score = 5
+    | SplashScreen = 0
+    | MainMenu = 1
+    | Import = 2
+    | LevelSelect = 3
+    | Play = 4
+    | Score = 5
+
+[<AbstractClass>]
+type Screen() =
+    inherit Widget()
+    abstract member OnEnter: ScreenType -> unit
+    abstract member OnExit: ScreenType -> unit
 
 (*
     Collection of mutable values to "tie the knot" in mutual dependence

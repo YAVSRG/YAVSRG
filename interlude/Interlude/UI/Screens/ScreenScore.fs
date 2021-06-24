@@ -133,10 +133,8 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
             Text.draw(Themes.font(), ((enum i): JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 260.0f + 30.0f * float32 i, Color.White)
         base.Draw()
 
-    override this.OnEnter(prev) =
-        base.OnEnter(prev)
-        Screens.setToolbarCollapsed(true)
+    override this.OnEnter prev =
+        Screens.setToolbarCollapsed true
 
-    override this.OnExit(next) =
-        base.OnExit(next)
-        Screens.setToolbarCollapsed(false)
+    override this.OnExit next =
+        Screens.setToolbarCollapsed false
