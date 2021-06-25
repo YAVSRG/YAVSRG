@@ -17,21 +17,9 @@ open Prelude.Charts.osu
 let main argv =
     Console.BufferHeight <- 32766
 
-    let beatmap = loadBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637550765344867554-Hyperventilation\RADWIMPS - Hyperventilation (Percyqaz) [backup].osu"
-    let timef = fun x -> if x > 218093.0f<ms> then (x - 218093.0f<ms>) * (122.0f / 120.1f) + 218093.0f<ms> else x
-    let newNotes =
-        beatmap.Objects
-        |> List.map (function HitObject.HitCircle (pos, time, sound, sound2) -> HitCircle (pos, timef time, sound, sound2) | x -> x) 
-    let newmap = { beatmap with Metadata = { beatmap.Metadata with Version = "output" }; Objects = newNotes }
-    saveBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637550765344867554-Hyperventilation\RADWIMPS - Hyperventilation (Percyqaz) [output].osu" newmap
-
-    (*
-    printfn "Starting tests"
-    for file in Directory.EnumerateFiles("skinini/") do
-        if file.EndsWith(".ini") then
-            printfn "Testing %s" file
-            let skin = osuSkin.parseSkinINI file
-            printfn "%A" skin.Mania
-            Console.ReadLine() |> ignore
-    *)
+    try
+        let skin = new osuSkin.osuSkin("C:\Users\percy\AppData\Local\osu!\Skins\skins! 16-9 (4-3 Play Area)")
+        Directory.Delete("SkinTest", true)
+        skin.ToNoteSkin "SkinTest" 7
+    with err -> printfn "%O" err
     0

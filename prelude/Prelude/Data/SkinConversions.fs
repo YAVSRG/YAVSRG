@@ -1,6 +1,9 @@
 ﻿namespace Prelude.Data
 
 open System.IO
+open System.Drawing
+open Prelude.Common
+open Percyqaz.Json
 
 module SkinConversions =
 
@@ -408,16 +411,18 @@ module SkinConversions =
                 (opt (parseHeader "CatchTheBeat" .>> spaces))
                 (many (parseHeader "Mania" .>> spaces))
             |>> fun (g, c, f, ctb, ms) ->
-                    { General = readGeneral g
-                      Colours =
-                          c
-                          |> Option.map readColours
-                          |> Option.defaultValue Colours.Default
-                      Fonts =
-                          f
-                          |> Option.map readFonts
-                          |> Option.defaultValue Fonts.Default
-                      Mania = List.map readMania ms }
+                    { 
+                        General = readGeneral g
+                        Colours =
+                            c
+                            |> Option.map readColours
+                            |> Option.defaultValue Colours.Default
+                        Fonts =
+                            f
+                            |> Option.map readFonts
+                            |> Option.defaultValue Fonts.Default
+                        Mania = List.map readMania ms
+                    }
 
         let parseSkinINI file =
             match runParserOnFile skinIniParser () file System.Text.Encoding.UTF8 with
@@ -427,4 +432,120 @@ module SkinConversions =
         //constructor can throw an exception!
         type osuSkin(path) = 
             let data = parseSkinINI (Path.Combine (path, "skin.ini"))
+
+            member this.FindTexture (filename: string) : string list =
+                let file = Path.Combine(path, filename)
+                if File.Exists(file + "@2x.png") then [file + "@2x.png"]
+                elif File.Exists(file + ".png") then [file + ".png"]
+                else
+                    let rec f i =
+                        if File.Exists(file + "-" + i.ToString() + "@2x.png") then
+                            file + "-" + i.ToString() + "@2x.png" :: f (i + 1)
+                        elif File.Exists(file + "-" + i.ToString() + ".png") then
+                            file + "-" + i.ToString() + ".png" :: f (i + 1)
+                        else []
+                    let result = f 0
+                    if result.IsEmpty then failwithf "could not find texture in skin for %A" filename
+                    result
+
+            member this.StitchTextures (lnbody: bool) (input: Image list list) : Bitmap * Themes.TextureConfig =
+                let rows = input.Length
+                let columns = input |> List.map List.length |> List.max
+
+                let width = input.Head.Head.Width
+                let height = if lnbody then width else input.Head.Head.Height
+                let sq = max width height
+
+                if width = 0 || height = 0 then failwith "images cannot be 0x0!"
+                
+                if not (List.forall (List.forall (fun (i: Image) -> i.Width = width && i.Height = height)) input) then
+                    Logging.Warn "all images should be the same dimension"
+
+                let bitmap = new Bitmap(sq * columns, sq * rows)
+                use g = Graphics.FromImage bitmap
+
+                let mutable y = 0
+                for row in input do
+                    let mutable x = 0
+                    for j in 0 .. (columns - 1) do
+                        g.DrawImage
+                            (
+                                row.[j % row.Length],
+                                if width <= height then
+                                    Rectangle(x + (height - width) / 2, y, width, height)
+                                else
+                                    Rectangle(x, y + (width - height) / 2, width, height)
+                            )
+                        x <- x + sq
+                    y <- y + sq
+                (bitmap, { Rows = rows; Columns = columns; Tiling = true })
+
+            member this.ToNoteSkin (targetPath: string) (keys: int) =
+                Logging.Info "===== Beginning osu -> Interlude skin conversion ====="
+                Logging.Info (path + "->" + targetPath)
+
+                if Directory.Exists targetPath then failwith "a folder with this name already exists!"
+                Directory.CreateDirectory targetPath |> ignore
+
+                let mania = List.tryFind (fun m -> m.Keys = keys) data.Mania |> Option.defaultValue (Mania.Default keys)
+
+                let skinJson : Themes.NoteSkinConfig =
+                    { Themes.NoteSkinConfig.Default with
+                        Name = Path.GetFileName path
+                        UseHoldTailTexture = true
+                        ColumnWidth = 1024f / 512f * (mania.ColumnWidth |> List.head |> float32)
+                    }
+                Json.toFile (Path.Combine(targetPath, "noteskin.json"), true) skinJson
+                Logging.Info "Written noteskin config"
+
+                let textures =
+                    (fun i -> (mania.NoteImageΔ.[i], mania.NoteImageΔH.[i], mania.NoteImageΔL.[i], mania.NoteImageΔT.[i]))
+                    |> List.init keys
+                    |> List.distinct
+
+                printfn "%A" textures
+
+                let writer filename (bmp: Bitmap, config) =
+                    Json.toFile (Path.Combine(targetPath, filename + ".json"), true) config
+                    bmp.Save(Path.Combine(targetPath, filename + ".png"))
+                
+                Logging.Info "Stitching note.png ..."
+                textures
+                |> List.map (fun (t, _, _, _) -> t)
+                |> List.map this.FindTexture
+                |> List.map (List.map Bitmap.FromFile)
+                |> this.StitchTextures false
+                |> writer "note"
+                
+                Logging.Info "Stitching holdhead.png ..."
+                textures
+                |> List.map (fun (_, t, _, _) -> t)
+                |> List.map this.FindTexture
+                |> List.map (List.map Bitmap.FromFile)
+                |> this.StitchTextures false
+                |> writer "holdhead"
+                
+                Logging.Info "Stitching holdbody.png ..."
+                textures
+                |> List.map (fun (_, _, t, _) -> t)
+                |> List.map this.FindTexture
+                |> List.map (List.map Bitmap.FromFile)
+                |> this.StitchTextures true
+                |> writer "holdbody"
+                
+                Logging.Info "Stitching holdtail.png ..."
+                try
+                    textures
+                    |> List.map (fun (_, _, _, t) -> t)
+                    |> List.map this.FindTexture
+                with err ->
+                    Logging.Info ("Defaulting to head textures because tail textures were missing", err)
+                    textures
+                    |> List.map (fun (_, t, _, _) -> t)
+                    |> List.map this.FindTexture
+                |> List.map (List.map Bitmap.FromFile)
+                |> this.StitchTextures false
+                |> writer "holdtail"
+
+                Logging.Info "===== Complete! ====="
 
