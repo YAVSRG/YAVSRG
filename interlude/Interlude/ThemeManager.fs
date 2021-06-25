@@ -10,8 +10,6 @@ open Prelude.Data.Themes
 module Themes =
     open Interlude.Graphics
 
-    let private noteskinTextures = [|"note"; "receptor"; "mine"; "holdhead"; "holdbody"; "holdtail"|]
-
     let private defaultTheme = Theme.FromZipStream <| Interlude.Utils.getResourceStream("default.zip")
     let private loadedNoteskins = new Dictionary<string, NoteSkinConfig * int>()
     let private loadedThemes = new List<Theme>()
@@ -51,7 +49,7 @@ module Themes =
 
     let createNew(id: string) =
         let id = System.Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
-        if id <> "" && availableThemes.Contains id |> not then defaultTheme.CopyTo(Path.Combine(getDataPath "themes", id))
+        if id <> "" && availableThemes.Contains id |> not then defaultTheme.CopyTo(Path.Combine(getDataPath "Themes", id))
         refreshAvailableThemes()
 
     let private getInherited f =
@@ -84,7 +82,7 @@ module Themes =
         else
             let o =
                 (fun (t: Theme) ->
-                    let (x, success) = t.GetJson<'T>(true, "Interface", "Gameplay", name + ".json")
+                    let (x, success) = t.GetJson<'T> (true, "Interface", "Gameplay", name + ".json")
                     if success then Some x else None)
                 |> getInherited
             gameplayConfig.Add(name, o :> obj)
@@ -95,15 +93,14 @@ module Themes =
         loadedNoteskins.Clear()
         loadedThemes.Clear()
         loadedThemes.Add defaultTheme
-        themeConfig <- ThemeConfig.Default
+        themeConfig <- defaultTheme.Config
         Seq.choose (fun t ->
-            let theme = Theme.FromThemeFolder t
             try
-                let config: ThemeConfig = theme.GetJson(false, "theme.json") |> fst
-                Some (theme, config)
+                let theme = Theme.FromFolder t
+                Some theme
             with err -> Logging.Error("Failed to load theme '" + t + "'", err); None)
             themes
-        |> Seq.iter (fun (t, conf) -> loadedThemes.Add t; themeConfig <- conf)
+        |> Seq.iter (fun t -> loadedThemes.Add t; themeConfig <- t.Config)
     
         loadedThemes
         |> Seq.iteri(fun i t ->
