@@ -111,6 +111,9 @@ module Themes =
                 CursorSize = 50.0f
             }
 
+    //texture names that are loaded from Noteskin folders instead of Theme folders
+    let noteskinTextures = [|"note"; "receptor"; "mine"; "holdhead"; "holdbody"; "holdtail"; "judgements"|]
+
     type NoteSkinConfig =
         {
             UseRotation: bool
@@ -314,15 +317,15 @@ module Themes =
         Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
     *)
 
-    type StorageType = Zip of ZipArchive | Folder of string
+    type StorageType = Zip of (ZipArchive * string) | Folder of string
 
-    type Theme(storage) =
+    type StorageAccess(storage: StorageType) =
 
         member this.TryReadFile ([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
             try
                 match storage with
-                | Zip z -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open() |> Some
+                | Zip (z, _) -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open() |> Some
                 | Folder f ->
                     let p = Path.Combine(f, p)
                     File.OpenRead(p) :> Stream |> Some
@@ -330,11 +333,11 @@ module Themes =
             | :? FileNotFoundException | :? DirectoryNotFoundException //file doesnt exist in folder storage
             | :? NullReferenceException -> None //file doesnt exist in zip storage
             | _ -> reraise()
-
+        
         member this.GetFiles ([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
             match storage with
-            | Zip z ->
+            | Zip (z, _) ->
                 let p = p.Replace(Path.DirectorySeparatorChar, '/')
                 seq {
                     for e in z.Entries do
@@ -348,7 +351,7 @@ module Themes =
         member this.GetFolders ([<ParamArray>] path: string array) =
             let p = Path.Combine path
             match storage with
-            | Zip z ->
+            | Zip (z, _) ->
                 let p = p.Replace (Path.DirectorySeparatorChar, '/')
                 seq {
                     for e in z.Entries do
@@ -377,26 +380,40 @@ module Themes =
                         rewrite <- true
                         json, success
                     | None -> defaultValue()
-                if createNew then
-                    match storage with
-                    | Zip _ -> () //do not write data to zip archives
-                    | Folder f ->
-                        let target = Path.Combine(f, Path.Combine path)
-                        target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
-                        Json.toFile(target, true) json
+                if createNew then this.WriteJson (json, path)
                 json, success
             with err ->
                 Logging.Error(
-                    sprintf "Couldn't load json '%s' in theme '%s'"
+                    sprintf "Couldn't load json '%s' in '%s'"
                         (String.concat "/" path)
-                        (match storage with Zip z -> "DEFAULT" | Folder f -> Path.GetFileName f), err)
+                        (match storage with Zip (_, source) -> Path.GetFileName source | Folder f -> Path.GetFileName f), err)
                 defaultValue()
+
+        member this.WriteJson<'T> (data: 'T, [<ParamArray>] path: string array) =
+            match storage with
+            | Zip _ -> () //cannot write data to zip archives
+            | Folder f ->
+                let target = Path.Combine(f, Path.Combine path)
+                target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
+                Json.toFile(target, true) data
 
         member this.CopyTo targetPath =
             Directory.CreateDirectory targetPath |> ignore
             match storage with
-            | Zip z -> z.ExtractToDirectory targetPath
-            | Folder f -> failwith "nyi, do this manually for now"
+            | Zip (z, _) -> z.ExtractToDirectory targetPath
+            | Folder f -> failwith "NYI, do this manually for now"
+
+
+    type Theme(storage) as this =
+        inherit StorageAccess(storage)
+
+        let mutable config : ThemeConfig = ThemeConfig.Default
+        do
+            config <- this.GetJson (false, "theme.json") |> fst
+
+        member this.Config
+            with set conf = config <- conf; this.WriteJson (config, "theme.json")
+            and get () = config
         
         member this.GetTexture (noteskin: string option, name: string) =
             let folder = 
@@ -409,7 +426,7 @@ module Themes =
             match this.TryReadFile (folder, name + ".png") with
             | Some stream ->
                 let bmp = new Bitmap(stream)
-                let info: TextureConfig = this.GetJson<TextureConfig> (false, folder, name + ".json") |> fst
+                let info : TextureConfig = this.GetJson<TextureConfig> (false, folder, name + ".json") |> fst
                 stream.Dispose()
                 Some (bmp, info)
             | None -> None
@@ -421,5 +438,8 @@ module Themes =
                     if success then Some (ns, config) else None)
                 (this.GetFolders("Noteskins"))
         
-        static member FromZipStream(stream: Stream) = new Theme(Zip <| new ZipArchive(stream))
-        static member FromThemeFolder(name: string) = new Theme(Folder <| getDataPath (Path.Combine ("Themes", name)))
+        static member FromZipFile(file: string) = 
+            let stream = File.OpenRead file
+            new Theme(Zip (new ZipArchive(stream), file))
+        static member FromZipStream(stream: Stream) = new Theme(Zip (new ZipArchive(stream), "DEFAULT_ASSETS"))
+        static member FromFolder(name: string) = new Theme(Folder <| getDataPath (Path.Combine ("Themes", name)))

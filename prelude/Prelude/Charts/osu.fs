@@ -192,7 +192,7 @@ module osu =
     let private parseHeaderTitle(name) = pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
     
     let parseHeader(name): Parser<Header, unit> =
-        parseHeaderTitle(name) .>>. (many comment >>. many (parseKeyValue .>> (many comment))) .>> spaces |>> Header
+        many comment >>. parseHeaderTitle(name) .>>. (many comment >>. many (parseKeyValue .>> (many comment))) .>> spaces |>> Header
 
     let parseTimingPoint: Parser<TimingPoint, unit> =
         (tuple4 (parseNum .>> comma) (parseNum .>> comma) (parseInt .>> comma) (parseInt .>> comma))

@@ -547,5 +547,7 @@ module SkinConversions =
                 |> this.StitchTextures false
                 |> writer "holdtail"
 
+                Logging.Info "Stitching judgements.png"
+
                 Logging.Info "===== Complete! ====="
 
