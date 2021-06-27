@@ -40,8 +40,8 @@ module Themes =
     let private sprites = new Dictionary<string, Sprite>()
     let private sounds = "nyi"
     
-    // id is the folder name of the noteskin, NOT the name given in the noteskin metadata
-    let changeNoteSkin(id: string) =
+    // id is the folder/file name of the noteskin (keys of loadedNoteskins), NOT the name given in the noteskin metadata
+    let changeNoteSkin (id: string) =
         let id = if loadedNoteskins.ContainsKey(id) then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default"); "*defaultBar.isk"
         currentNoteSkin <- id
         noteskinConfig <- loadedNoteskins.[id].Config
@@ -52,7 +52,7 @@ module Themes =
                     sprites.Remove t |> ignore
             ) noteskinTextures
 
-    let createNew(id: string) =
+    let createNew (id: string) =
         let id = System.Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
         if id <> "" && availableThemes.Contains id |> not then defaultTheme.CopyTo(Path.Combine(getDataPath "Themes", id))
         refreshAvailableThemes()
@@ -66,12 +66,15 @@ module Themes =
         g (loadedThemes.Count - 1)
 
     // gets texture and handles caching it
-    let getTexture(name: string) =
+    let getTexture (name: string) =
         if not <| sprites.ContainsKey(name) then
             if Array.contains name noteskinTextures then
                 match loadedNoteskins.[currentNoteSkin].GetTexture name with
                 | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false)
-                | None -> Sprite.Default
+                | None ->
+                    match loadedNoteskins.["*defaultBar.isk"].GetTexture name with
+                    | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false)
+                    | None -> failwith "defaultBar doesnt have this texture!!"
                 |> fun x -> sprites.Add(name, x)
             else
                 let (bmp, config) =
@@ -83,7 +86,7 @@ module Themes =
 
     // gets gameplay config and handles caching it
     // todo: support for tracking where the file came from so we can modify it from ingame
-    let getGameplayConfig<'T>(name: string) = 
+    let getGameplayConfig<'T> (name: string) = 
         if gameplayConfig.ContainsKey name then
             gameplayConfig.[name] :?> 'T
         else
@@ -95,7 +98,7 @@ module Themes =
             gameplayConfig.Add(name, o :> obj)
             o
     
-    let loadThemes(themes: List<string>) =
+    let loadThemes (themes: List<string>) =
         Logging.Info("===== Loading Themes/Noteskins =====")
         loadedNoteskins.Clear()
         loadedThemes.Clear()
