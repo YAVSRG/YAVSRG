@@ -15,6 +15,7 @@ module Themes =
 
     type ThemeConfig = 
         {
+            Name: string
             JudgementColors: Color array
             JudgementNames: string array
             LampColors: Color array
@@ -30,6 +31,7 @@ module Themes =
         } 
         static member Default : ThemeConfig = 
             {
+                Name = "?"
                 JudgementColors =
                     [|
                         Color.FromArgb(127, 127, 255)
@@ -408,38 +410,50 @@ module Themes =
         inherit StorageAccess(storage)
 
         let mutable config : ThemeConfig = ThemeConfig.Default
-        do
-            config <- this.GetJson (false, "theme.json") |> fst
+        do config <- this.GetJson (false, "theme.json") |> fst
 
         member this.Config
             with set conf = config <- conf; this.WriteJson (config, "theme.json")
             and get () = config
         
-        member this.GetTexture (noteskin: string option, name: string) =
-            let folder = 
-                match noteskin with
-                | None -> "Textures"
-                | Some n ->
-                    match storage with
-                    | Folder _ -> Path.Combine("Noteskins", n)
-                    | Zip _ -> "Noteskins/" + n
-            match this.TryReadFile (folder, name + ".png") with
+        member this.GetTexture (name: string) =
+            match this.TryReadFile ("Textures", name + ".png") with
             | Some stream ->
                 let bmp = new Bitmap(stream)
-                let info : TextureConfig = this.GetJson<TextureConfig> (false, folder, name + ".json") |> fst
+                let info : TextureConfig = this.GetJson<TextureConfig> (false, "Textures", name + ".json") |> fst
+                stream.Dispose()
+                Some (bmp, info)
+            | None -> None
+
+        member this.GetGameplayConfig<'T> (name: string) = this.GetJson<'T> (true, "Interface", "Gameplay", name + ".json")
+        
+        static member FromZipFile (file: string) = 
+            let stream = File.OpenRead file
+            new Theme(Zip (new ZipArchive(stream), file))
+        static member FromZipStream (stream: Stream) = new Theme(Zip (new ZipArchive(stream), "DEFAULT_ASSETS"))
+        static member FromFolderName (name: string) = new Theme(Folder <| getDataPath (Path.Combine ("Themes", name)))
+
+    type NoteSkin(storage) as this =
+        inherit StorageAccess(storage)
+        
+        let mutable config : NoteSkinConfig = NoteSkinConfig.Default
+        do config <- this.GetJson (false, "noteskin.json") |> fst
+        
+        member this.Config
+            with set conf = config <- conf; this.WriteJson (config, "noteskin.json")
+            and get () = config
+            
+        member this.GetTexture (name: string) =
+            match this.TryReadFile (name + ".png") with
+            | Some stream ->
+                let bmp = new Bitmap(stream)
+                let info : TextureConfig = this.GetJson<TextureConfig> (false, name + ".json") |> fst
                 stream.Dispose()
                 Some (bmp, info)
             | None -> None
         
-        member this.GetNoteSkins() =
-            Seq.choose
-                (fun ns ->
-                    let (config: NoteSkinConfig, success: bool) = this.GetJson(false, "Noteskins", ns, "noteskin.json")
-                    if success then Some (ns, config) else None)
-                (this.GetFolders("Noteskins"))
-        
-        static member FromZipFile(file: string) = 
+        static member FromZipFile (file: string) = 
             let stream = File.OpenRead file
-            new Theme(Zip (new ZipArchive(stream), file))
-        static member FromZipStream(stream: Stream) = new Theme(Zip (new ZipArchive(stream), "DEFAULT_ASSETS"))
-        static member FromFolder(name: string) = new Theme(Folder <| getDataPath (Path.Combine ("Themes", name)))
+            new NoteSkin(Zip (new ZipArchive(stream), file))
+        static member FromZipStream (stream: Stream) = new NoteSkin(Zip (new ZipArchive(stream), "DEFAULT_NOTESKIN"))
+        static member FromFolder (path: string) = new NoteSkin(Folder path)

@@ -493,7 +493,7 @@ module SkinConversions =
                     { Themes.NoteSkinConfig.Default with
                         Name = Path.GetFileName path
                         UseHoldTailTexture = true
-                        ColumnWidth = 1024f / 512f * (mania.ColumnWidth |> List.head |> float32)
+                        ColumnWidth = 1920f / 512f * (mania.ColumnWidth |> List.head |> float32)
                     }
                 Json.toFile (Path.Combine(targetPath, "noteskin.json"), true) skinJson
                 Logging.Info "Written noteskin config"
@@ -547,7 +547,12 @@ module SkinConversions =
                 |> this.StitchTextures false
                 |> writer "holdtail"
 
-                Logging.Info "Stitching judgements.png"
+                Logging.Info "Stitching judgements.png ..."
+                [mania.Hit300g; mania.Hit300; ""; mania.Hit200; mania.Hit100; mania.Hit50; ""; mania.Hit0]
+                |> List.map (fun s -> if s = "" then [new Bitmap(1, 1) :> Image] else this.FindTexture s |> List.truncate 1 |> List.map Bitmap.FromFile)
+                |> fun l -> let b = List.head (List.head l) in [new Bitmap(b.Width, b.Height) :> Image] :: l //ridiculous judgement placeholder
+                |> this.StitchTextures false
+                |> writer "judgements"
 
                 Logging.Info "===== Complete! ====="
 
