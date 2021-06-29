@@ -27,6 +27,9 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\defaultArrow.isk" />
+    <EmbeddedResource Include="Resources\defaultBar.isk" />
+    <EmbeddedResource Include="Resources\defaultOrb.isk" />
     <EmbeddedResource Include="Resources\QuickStart.md" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />

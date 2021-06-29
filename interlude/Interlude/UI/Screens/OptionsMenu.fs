@@ -151,8 +151,8 @@ module OptionsMenuTabs =
         let refreshNoteskins() =
             let ns = Themes.noteskins() |> Seq.toArray
             let ids = ns |> Array.map fst
-            let names = ns |> Array.map (fun (id, data) -> data.Name)
-            Selector(names, Math.Max(0, Array.IndexOf(ids, Themes.currentNoteSkin)), (fun (i, _) -> let id = ns.[i] |> fst in options.NoteSkin.Value <- id; Themes.changeNoteSkin(id); refreshColors()))
+            let names = ns |> Array.map (fun (id, data) -> data.Config.Name)
+            Selector(names, Math.Max(0, Array.IndexOf(ids, Themes.currentNoteSkin)), (fun (i, _) -> let id = ns.[i] |> fst in options.NoteSkin.Value <- id; Themes.changeNoteSkin id; refreshColors()))
             |> noteskins.Refresh
         refreshNoteskins()
 
