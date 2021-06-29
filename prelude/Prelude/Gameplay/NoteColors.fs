@@ -15,16 +15,16 @@ module NoteColors =
     let DDRValues = [|1.0f; 2.0f; 3.0f; 4.0f; 6.0f; 8.0f; 12.0f; 16.0f|] |> Array.map (fun i -> i * 1.0f</beat>)
 
     type ColorScheme = 
-    | Column = 0
-    | Chord = 1
-    | DDR = 2
-    | Jackhammer = 3
+        | Column = 0
+        | Chord = 1
+        | DDR = 2
+        | Jackhammer = 3
 
     let colorCount keycount scheme =
         match scheme with
         | ColorScheme.Column -> keycount
         | ColorScheme.Chord -> keycount
-        | ColorScheme.DDR -> Array.length DDRValues
+        | ColorScheme.DDR -> Array.length DDRValues + 1
         | ColorScheme.Jackhammer -> Array.length DDRValues
         | _ -> keycount
 
