@@ -158,17 +158,20 @@ module ChartManager =
         let mutable i = false
         let init() =
             if not i then 
-                let tP = Json.Mapping.getPickler<Dictionary<string, CachedChart>>()
-                Json.Mapping.Rules.addTypeRuleUnchecked
-                    (fun (d: ConcurrentDictionary<string, CachedChart>) -> d |> Dictionary |> tP.Encode)
-                    (fun _ json -> tP.Decode null json |> JsonMapResult.map ConcurrentDictionary)
+                fun (cache, settings, rules) ->
+                    Json.Mapping.getCodec<Dictionary<string, CachedChart>>(cache, settings, rules)
+                    |> Json.Mapping.Codec.map
+                        (fun (d: ConcurrentDictionary<string, CachedChart>) -> Dictionary(d))
+                        (fun (d: Dictionary<string, CachedChart>) -> ConcurrentDictionary(d))
+                |> Json.Mapping.Rules.typeRule<ConcurrentDictionary<string, CachedChart>>
+                |> JSON.AddRule
                 i <- true
 
     //todo: add reverse lookup from hash -> id for score -> chart lookup
     type Cache() =
         let charts, collections = Cache.Load()
 
-        member this.Save() = Json.toFile(Path.Combine(getDataPath "Data", "cache.json"), true) (charts, collections)
+        member this.Save() = JSON.ToFile(Path.Combine(getDataPath "Data", "cache.json"), true) (charts, collections)
         static member Load() = CacheInit.init(); loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) (new ConcurrentDictionary<string, CachedChart>(), new Dictionary<string, Collection>()) false
     
         member this.CacheChart (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c

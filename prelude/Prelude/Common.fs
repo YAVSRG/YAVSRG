@@ -47,11 +47,15 @@ module Common =
         inherit ISettable<'T>()
         let mutable value = value
         override this.Value with get() = value and set newValue = value <- newValue
-        static member Pickler: Json.Mapping.JsonPickler<Setting<'T>> =
-            let tP = Json.Mapping.getPickler<'T>()
-            Json.Mapping.mkPickler
-                (fun (o: Setting<'T>) -> tP.Encode o.Value)
-                (fun (o: Setting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Value <- v; o))
+        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<Setting<'T>> =
+            let tP = Json.Mapping.getCodec<'T>(cache, settings, rules)
+            {
+                Encode = fun o -> tP.Encode o.Value
+                Decode = fun o json ->
+                    o.Value <- tP.Decode o.Value json
+                    o
+                Default = fun () -> Setting<'T>(tP.Default())
+            }
 
     [<AbstractClass>]
     type NumSetting<'T when 'T : comparison>(value: 'T, min: 'T, max: 'T) =
@@ -63,18 +67,30 @@ module Common =
         member this.Min = min
         member this.Max = max
         override this.ToString() = sprintf "%s (%A - %A)" (base.ToString()) min max
-        static member Pickler: Json.Mapping.JsonPickler<NumSetting<'T>> =
-            let tP = Json.Mapping.getPickler<'T>()
-            Json.Mapping.mkPickler
-                (fun (o: NumSetting<'T>) -> tP.Encode o.Value)
-                (fun (o: NumSetting<'T>) json -> tP.Decode o.Value json |> JsonMapResult.map (fun v -> o.Value <- v; o))
+        static member JsonCodec(cache, settings, rules) : Json.Mapping.JsonCodec<NumSetting<'T>> =
+            let tP = Json.Mapping.getCodec<'T>(cache, settings, rules)
+            {
+                Encode = fun o -> tP.Encode o.Value
+                Decode = fun o json ->
+                    o.Value <- tP.Decode o.Value json
+                    o
+                //default instance should never be called
+                Default = fun () ->
+                    let x = tP.Default()
+                    { new NumSetting<'T>(x, x, x) with
+                        override this.ValuePercent
+                            with set v = ()
+                            and get() = 0.0f
+                    }
+            }
 
     type IntSetting(value: int, min: int, max: int) =
         inherit NumSetting<int>(value, min, max)
         override this.ValuePercent
             with set(pc: float32) = this.Value <- min + ((float32 (max - min) * pc) |> float |> Math.Round |> int)
             and get() = float32 (this.Value - min) / float32 (max - min)
-        static member Pickler = Setting<int>.Pickler
+        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<IntSetting> =
+            Setting<int>.JsonCodec(cache, settings, rules) |> Json.Mapping.Helpers.cast
 
     type FloatSetting(value: float, min: float, max: float) =
         inherit NumSetting<float>(value, min, max)
@@ -84,14 +100,16 @@ module Common =
         override this.Value
             with set(newValue: float) = base.Value <- Math.Round(newValue, 2)
             and get() = base.Value
-        static member Pickler = Setting<float>.Pickler
+        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<FloatSetting> =
+            Setting<float>.JsonCodec(cache, settings, rules) |> Json.Mapping.Helpers.cast
 
     type StringSetting(value: string, allowSpecialChar: bool) =
         inherit Setting<string>(value)
         override this.Value
             with set(newValue) = base.Value <- if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, "")
             and get() = base.Value
-        static member Pickler = Setting<string>.Pickler
+        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<StringSetting> =
+            Setting<string>.JsonCodec(cache, settings, rules) |> Json.Mapping.Helpers.cast
 
 (*
     Logging
@@ -251,6 +269,19 @@ module Common =
             fun (cons: unit -> 'T seq) ->
                 id <- id + 1
                 ignore <| Create TaskFlags.HIDDEN name (starter id cons)
+    
+    let JSON =
+        let j = new JsonEncoder()
+            
+        fun (cache, settings, rules) -> 
+            Json.Mapping.getCodec<byte * byte * byte * byte>(cache, settings, rules)
+            |> Json.Mapping.Codec.map
+                (fun (c: Color) -> (c.A, c.R, c.G, c.B))
+                (fun (a, r, g, b) -> Color.FromArgb(int a, int r, int g, int b))
+        |> Json.Mapping.Rules.typeRule<Color>
+        |> j.AddRule
+
+        j
 
 (*
     Misc helper functions (mostly data storage)
@@ -266,9 +297,9 @@ module Common =
             let p = Path.ChangeExtension (path, ".bak")
             if File.Exists p then File.Copy (p, Path.ChangeExtension (path, ".bak2"), true)
             File.Copy (path, p, true)
-            try
-                Json.fromFile path |> JsonResult.value
-            with err ->
+            match JSON.FromFile path with
+            | Ok data -> data
+            | Error err ->
                 Logging.Critical (sprintf "Could not load %s! Maybe it is corrupt?" (Path.GetFileName path), err)
                 if prompt then
                     Console.WriteLine "If you would like to launch anyway, press ENTER."
@@ -279,11 +310,3 @@ module Common =
         else
             Logging.Info (sprintf "No %s file found, creating it." name)
             defaultData
-
-    do
-        let tP = Json.Mapping.getPickler<byte * byte * byte * byte>()
-        Json.Mapping.Rules.addTypeRuleWithDefault
-            (fun (c: Color) -> tP.Encode (c.A, c.R, c.G, c.B))
-            (fun (c: Color) json -> tP.Decode (c.A, c.R, c.G, c.B) json |> JsonMapResult.map (fun (a, r, g, b) -> Color.FromArgb(int a, int r, int g, int b)))
-            Color.White
-        Json.Mapping.Rules.addPicklerRule()

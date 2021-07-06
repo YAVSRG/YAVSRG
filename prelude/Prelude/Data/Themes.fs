@@ -367,7 +367,7 @@ module Themes =
                 Directory.EnumerateDirectories target |> Seq.map Path.GetFileName
 
         member this.GetJson<'T> (createNew: bool, [<ParamArray>] path: string array) : 'T * bool =
-            let defaultValue() = ("{}" |> Json.fromString<'T> |> JsonResult.value, match storage with Folder f -> false | _ -> true)
+            let defaultValue() = (JSON.Default<'T>(), match storage with Folder f -> false | _ -> true)
             try
                 let mutable rewrite = createNew
                 let json, success =
@@ -376,8 +376,8 @@ module Themes =
                         use tr = new StreamReader(stream)
                         let json, success =
                             tr.ReadToEnd()
-                            |> Json.fromString<'T>
-                            |> function | JsonResult.Success v -> (v, true) | _ -> defaultValue()
+                            |> JSON.FromString<'T>
+                            |> function Ok v -> (v, true) | _ -> defaultValue()
                         stream.Dispose()
                         rewrite <- true
                         json, success
@@ -397,7 +397,7 @@ module Themes =
             | Folder f ->
                 let target = Path.Combine(f, Path.Combine path)
                 target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
-                Json.toFile(target, true) data
+                JSON.ToFile(target, true) data
 
         member this.CopyTo targetPath =
             Directory.CreateDirectory targetPath |> ignore

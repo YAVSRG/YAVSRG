@@ -33,10 +33,9 @@ let private downloadString (url: string, callback) =
 let downloadJson<'T> (url, callback) =
     downloadString(url,
         fun s ->
-            match Json.fromString<'T>(s) with
-            | JsonResult.Success s -> callback(s)
-            | JsonResult.MapFailure err -> Logging.Error("Failed to interpret json data from "+ url, err)
-            | JsonResult.ParseFailure err -> Logging.Error("Failed to parse json data from "+ url, err))
+            match JSON.FromString<'T> s with
+            | Ok s -> callback s
+            | Error err -> Logging.Error("Failed to parse json data from "+ url, err))
 
 let downloadFile (url: string, target: string) : StatusTask =
     fun output ->

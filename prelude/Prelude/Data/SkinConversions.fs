@@ -3,7 +3,6 @@
 open System.IO
 open System.Drawing
 open Prelude.Common
-open Percyqaz.Json
 
 module SkinConversions =
 
@@ -495,7 +494,7 @@ module SkinConversions =
                         UseHoldTailTexture = true
                         ColumnWidth = 1920f / 512f * (mania.ColumnWidth |> List.head |> float32)
                     }
-                Json.toFile (Path.Combine(targetPath, "noteskin.json"), true) skinJson
+                JSON.ToFile (Path.Combine(targetPath, "noteskin.json"), true) skinJson
                 Logging.Info "Written noteskin config"
 
                 let textures =
@@ -506,7 +505,7 @@ module SkinConversions =
                 printfn "%A" textures
 
                 let writer filename (bmp: Bitmap, config) =
-                    Json.toFile (Path.Combine(targetPath, filename + ".json"), true) config
+                    JSON.ToFile (Path.Combine(targetPath, filename + ".json"), true) config
                     bmp.Save(Path.Combine(targetPath, filename + ".png"))
                 
                 Logging.Info "Stitching note.png ..."

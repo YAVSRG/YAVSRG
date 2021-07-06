@@ -139,7 +139,7 @@ module ScoreManager =
     type ScoresDB() =
         let data = ScoresDB.Load()
 
-        member this.Save() = Json.toFile (Path.Combine (getDataPath "Data", "scores.json"), true) data
+        member this.Save() = JSON.ToFile (Path.Combine (getDataPath "Data", "scores.json"), true) data
         static member Load() = loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) (new Dictionary<string, ChartSaveData>()) true
 
         member this.GetOrCreateScoreData (chart: Chart) =

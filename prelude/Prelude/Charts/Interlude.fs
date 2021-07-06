@@ -5,8 +5,8 @@ open System.IO
 open System.Collections.Generic
 open System.Security.Cryptography
 open System.ComponentModel
-open Prelude.Common
 open Percyqaz.Json
+open Prelude.Common
 
 
 module Interlude =
@@ -269,7 +269,7 @@ module Interlude =
                 use br = new BinaryReader(fs)
                 let keys = br.ReadByte() |> int
 
-                let header = Json.fromString(br.ReadString()) |> JsonResult.value
+                let header = JSON.FromString (br.ReadString()) |> JsonResult.expect
                 let notes = readSection br NoteRow.read
                 let bpms = readSection br (fun r -> BPM(r.ReadInt32() * 1<beat>, r.ReadSingle() * 1.0f<ms/beat>))
                 let sv = MultiTimeData(keys)
@@ -284,7 +284,7 @@ module Interlude =
             use fs = new FileStream(filepath, FileMode.Create)
             use bw = new BinaryWriter(fs)
             bw.Write(chart.Keys |> byte)
-            bw.Write(Json.toString chart.Header)
+            bw.Write(JSON.ToString chart.Header)
             writeSection chart.Notes bw (fun nr -> NoteRow.write bw nr)
             writeSection chart.BPM bw (fun (meter, msPerBeat) -> bw.Write (meter / 1<beat>); bw.Write (float32 msPerBeat))
             for i = 0 to chart.Keys do
