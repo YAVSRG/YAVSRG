@@ -1,4 +1,6 @@
-:: to setup beforehand, extract the zips into this folder for editing
+:: SCRIPT TO ASSIST IN ZIPPING THE DEFAULT EMBEDDED GAME ASSETS
+:: (I edit them extracted as a folder and zip them right before building)
+:: before first use, extract the zips into the same directory (under same names) for editing
 
 del default.zip
 "C:\Program Files\7-Zip\7z" a -tzip default.zip .\default\*
