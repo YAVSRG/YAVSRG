@@ -13,6 +13,8 @@
     <Compile Include="Charts\osu.fs" />
     <Compile Include="Charts\ChartConversions.fs" />
     <Compile Include="Editor\Editor.fs" />
+    <Compile Include="Scoring\Replays.fs" />
+    <Compile Include="Scoring\Metrics.fs" />
     <Compile Include="Gameplay\Score.fs" />
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\NoteColors.fs" />
