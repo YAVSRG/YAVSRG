@@ -64,15 +64,14 @@ module Utils =
         open Percyqaz.Json
         open Prelude.Web
 
+        // this doesn't just copy a folder to a destination, but renames any existing/duplicates of the same name to .old
         let rec copyFolder source dest =
             Directory.EnumerateFiles source
             |> Seq.iter
                 (fun s ->
                     let fDest = Path.Combine(dest, Path.GetFileName s)
-                    try
-                        File.Copy(s, fDest, true)
-                    with
-                    | :? IOException as err ->
+                    try File.Copy(s, fDest, true)
+                    with :? IOException as err ->
                         File.Move(fDest, s + ".old", true)
                         File.Copy(s, fDest, true)
                 )
@@ -101,11 +100,21 @@ module Utils =
         let handleUpdate(release: GithubRelease) =
             latestRelease <- Some release
 
+            let parseVer (s: string) =
+                let s = s.Split(".")
+                (int s.[0], int s.[1], int s.[2])
+
             let current = smallVersion
             let incoming = release.tag_name.Substring(1)
 
-            if incoming > current then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
-            elif incoming < current then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
+            let pcurrent = parseVer current
+            let pincoming = parseVer incoming
+
+            // if parseVer crashes because of some not-well-formed version, so be it. this is not inside the main thread and that error will get logged
+            // parseVer ensures 0.4.10 > 0.4.9 where string comparison gives the wrong answer
+
+            if pincoming > pcurrent then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
+            elif pincoming < pcurrent then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
             else Logging.Info("Game is up to date.")
 
         let checkForUpdates() =
@@ -115,18 +124,18 @@ module Utils =
 
             let path = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
             let folderPath = Path.Combine(path, "update")
-            if Directory.Exists(folderPath) then Directory.Delete(folderPath, true)
+            if Directory.Exists folderPath then Directory.Delete(folderPath, true)
 
-        //call this only if updateAvailable = true
+        // call this only if updateAvailable = true
         let applyUpdate(callback) =
             let download_url = latestRelease.Value.assets.Head.browser_download_url
             let path = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
             let zipPath = Path.Combine(path, "update.zip")
             let folderPath = Path.Combine(path, "update")
             File.Delete zipPath
-            if Directory.Exists(folderPath) then Directory.Delete(folderPath, true)
+            if Directory.Exists folderPath then Directory.Delete(folderPath, true)
             BackgroundTask.Create TaskFlags.NONE ("Downloading update " + latestRelease.Value.tag_name)
-                ((downloadFile(download_url, zipPath))
+                (downloadFile (download_url, zipPath)
                 |> BackgroundTask.Callback
                     (fun b ->
                         if b then
