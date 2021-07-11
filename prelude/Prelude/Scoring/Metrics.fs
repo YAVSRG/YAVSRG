@@ -4,19 +4,6 @@ open System
 open Prelude.Common
 open Prelude.Charts.Interlude
 
-// user-facing flags of "judgements"; how well you hit notes
-type JudgementType =
-    | RIDICULOUS = 0
-    | MARVELLOUS = 1
-    | PERFECT = 2
-    | OK = 3
-    | GREAT = 4
-    | GOOD = 5
-    | BAD = 6
-    | NG = 7
-    | MISS = 8
-module JudgementType = let count = 9
-
 (*
     Health bar system to be attached to other metrics (Bars are dependent on/coupled with the judgements scored according to other systems)
     These maintain a meter that fills as you hit notes well, and depletes as you hit notes badly (or miss)
@@ -65,7 +52,7 @@ type IHealthBarSystem
         
     member this.Failed = if onlyFailAtEnd then state.CurrentlyFailed else state.HasFailed
     member this.Name = name
-    member this.Format() = sprintf "%.2f%%" state.Health
+    member this.Format() = sprintf "%.2f%%" (state.Health * 100.0)
 
 type HealthBarPointsSystem
     (
@@ -114,7 +101,6 @@ type AccuracySystemState =
         this.MaxPointsScored <- this.MaxPointsScored + maxpoints
         this.Judgements.[int judge] <- this.Judgements.[int judge] + 1
     member this.Add(judge: JudgementType) = this.Add(0.0, 0.0, judge)
-        
 
 [<AbstractClass>]
 type ScoreMetric
@@ -147,7 +133,7 @@ type ScoreMetric
     member this.Name = name
     member this.FormatAccuracy() =
         let value = (state.PointsScored / state.MaxPointsScored)
-        (if Double.IsNaN value then 1.0 else value) |> sprintf "%.2f%%"
+        (if Double.IsNaN value then 100.0 else value * 100.0) |> sprintf "%.2f%%"
     member this.HP = healthBar
     member this.MissWindow = missWindow
     member this.State: AccuracySystemState = state
@@ -182,9 +168,9 @@ type ScoreMetric
         let mutable found = -1
         let mutable priority = -1
         let target = now + missWindow
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeek] <= now - missWindow do i <- i + 1
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeek] <= target do
-            let struct (t, _, status) = hitdata.[noteSeek]
+        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] < now - missWindow do i <- i + 1
+        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] <= target do
+            let struct (t, _, status) = hitdata.[i]
             let d = now - t
             if status.[k] = HitStatus.NEEDS_TO_BE_HIT then
                 if (Time.Abs delta > Time.Abs d) || priority < 1 then
@@ -214,9 +200,9 @@ type ScoreMetric
         let mutable found = -1
         let mutable priority = -1
         let target = now + missWindow
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeek] <= now - missWindow do i <- i + 1
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeek] <= target do
-            let struct (t, _, status) = hitdata.[noteSeek]
+        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] < now - missWindow do i <- i + 1
+        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] <= target do
+            let struct (t, _, status) = hitdata.[i]
             let d = now - t
             if status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then
                 if (Time.Abs delta > Time.Abs d) || priority < 1 then
@@ -298,11 +284,118 @@ type RegularScoreMetric
     override this.HandleHoldOK() = this.State.Add JudgementType.OK
 
     override this.HandleNote(j, delta) =
-        if comboFunc j then this.State.BreakCombo()
+        if delta <> 0.0f<ms> then printfn "hit with judge %A, %fms" j delta
+        if comboFunc j then this.State.BreakCombo() else this.State.IncrCombo()
         this.State.Add (this.PointsFunc(false, j, delta), 1.0, j)
     override this.HandleRelease(j, delta) =
-        if comboFunc j then this.State.BreakCombo()
+        if delta <> 0.0f<ms> then printfn "released with judge %A, %fms" j delta
+        if comboFunc j then this.State.BreakCombo() else this.State.IncrCombo()
         this.State.Add (this.PointsFunc(false, j, delta), 1.0, j)
 
     override this.JudgementFunc(isRelease, delta) = judgementFunc isRelease delta
     override this.PointsFunc(isRelease, judgement, delta) = pointsFunc isRelease judgement delta
+
+(*
+    Concrete implementations of health/accuracy systems
+*)
+
+type VibeGauge() =
+    inherit HealthBarPointsSystem
+        (
+            "VG",
+            0.5,
+            false,
+            (fun j ->
+                match j with
+                | JudgementType.RIDICULOUS | JudgementType.MARVELLOUS -> 0.005
+                | JudgementType.PERFECT -> 0.0025
+                | JudgementType.GREAT -> 0.0
+                | JudgementType.GOOD -> -0.05
+                | JudgementType.BAD -> -0.2
+                | JudgementType.MISS -> -0.1
+                | JudgementType.OK -> 0.0
+                | JudgementType.NG -> -0.1
+                | _ -> failwith "impossible judgement type"),
+            0.0
+        )
+
+module ScoringHelpers =
+
+    type HitWindows = (Time * JudgementType) list
+
+    let rec window_func (windows: HitWindows) delta =
+        assert (delta >= 0.0f<ms>)
+        match windows with
+        | [] -> JudgementType.MISS
+        | (w, j) :: xs ->
+            if (delta < w) then j else window_func xs delta
+
+    let dp_windows judge ridiculous _ =
+        let perf_window = 45.0f<ms> / 6.0f * (10.0f - (judge |> float32))
+
+        let windows: HitWindows =
+            [ (perf_window * 0.5f, JudgementType.MARVELLOUS)
+              (perf_window, JudgementType.PERFECT)
+              (perf_window * 2.0f, JudgementType.GREAT)
+              (min (perf_window * 3.0f) 135.0f<ms>, JudgementType.GOOD)
+              (min (perf_window * 4.0f) 180.0f<ms>, JudgementType.BAD) ]
+
+        window_func
+            (if ridiculous
+             then (perf_window * 0.25f, JudgementType.RIDICULOUS) :: windows
+             else windows)
+    
+    let sc_curve (judge: int) _ (judgement: JudgementType) (delta: Time) =
+        assert (delta >= 0.0f<ms>)
+        if delta >= 180.0f<ms> then -0.5
+        else
+            let delta = float delta
+            let scale = 6.0 / (10.0 - float judge)
+            Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
+
+    // now finally ported to wife3
+    let wife_curve (judge: int) (_: JudgementType) (delta: Time) =
+        // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
+        let erf = 
+            // you really had to put erf in this one didnt you
+            // was this really necessary
+            let a1 =  0.254829592
+            let a2 = -0.284496736
+            let a3 =  1.421413741
+            let a4 = -1.453152027
+            let a5 =  1.061405429
+            let p  =  0.3275911
+            fun (x: float) ->
+                let sign = if x < 0.0 then -1.0 else 1.0
+                let x = Math.Abs x
+                let t = 1.0 / (1.0 + p * x)
+                let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x)
+                sign * y
+
+        assert (delta >= 0.0f<ms>)
+        let delta = float delta
+
+        let scale = (10.0 - float judge) / 6.0
+        let miss_weight = -2.75
+        let ridic = 5.0 * scale
+        let boo_window = 180.0 * scale
+        let ts_pow = 0.75
+        let zero = 65.0 * Math.Pow(scale, ts_pow)
+        let dev = 22.7 * Math.Pow(scale, ts_pow)
+
+        if delta <= ridic then 1.0
+        elif delta <= zero then erf ((zero - delta) / dev)
+        elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
+        else miss_weight
+
+type ScoreClassifier(judge: int, enableRd: bool, keys, replay, notes, rate) =
+    inherit RegularScoreMetric
+        (
+            sprintf "SC+ (J%i)" judge,
+            VibeGauge(),
+            180.0f<ms>,
+            keys, replay, notes, rate,
+            (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
+            (ScoringHelpers.dp_windows judge enableRd),
+            (ScoringHelpers.sc_curve judge)
+        )

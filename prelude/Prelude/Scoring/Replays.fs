@@ -119,13 +119,13 @@ module Replay =
     // constructed with notes instead of InternalScoreData to avoid dependence on it
     // this replay is fed into score calculation when Auto-play is enabled
     let perfectReplay (keys: int) (notes: TimeData<NoteRow>) : ReplayData =
-        let timeUntilNext i = if i >= notes.Count then 50.0f<ms> else offsetOf notes.Data.[i + 1] - offsetOf notes.Data.[i]
+        let timeUntilNext i = if i >= notes.Count - 1 then 50.0f<ms> else offsetOf notes.Data.[i + 1] - offsetOf notes.Data.[i]
 
         seq {
             let mutable i = 0
             let mutable held: Bitmap = 0us
 
-            while i <= notes.Count do
+            while i < notes.Count do
                 let (time, nr) = notes.Data.[i]
                 let delay = timeUntilNext i
                 let mutable hit = held
@@ -136,10 +136,10 @@ module Replay =
                         hit <- Bitmap.setBit k hit
                         held <- Bitmap.setBit k held
                     elif NoteRow.hasNote k NoteType.HOLDTAIL nr then
+                        hit <- Bitmap.unsetBit k hit
                         held <- Bitmap.unsetBit k held
                 yield struct (time, hit)
                 yield struct (time + delay * 0.5f, held)
-
                 i <- i + 1
         } |> Array.ofSeq
 
@@ -158,7 +158,7 @@ type StoredReplayProvider(data: ReplayData) =
 
     interface IReplayProvider with
         member this.HasNext(time) =
-            if i > data.Length then false
+            if i >= data.Length then false
             else
                 let struct (t, _) = data.[i]
                 t <= time
@@ -177,7 +177,7 @@ type LiveReplayProvider() =
 
     interface IReplayProvider with
         member this.HasNext(time) =
-            if i > buffer.Count then false
+            if i >= buffer.Count then false
             else 
                 let struct (t, _) = buffer.[i]
                 t <= time

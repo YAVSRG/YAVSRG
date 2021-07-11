@@ -1,5 +1,6 @@
 ﻿open System
-open System.IO
+open Prelude.Common
+open Prelude.Test
 
 (*
     Writing tests for Prelude is HARD because checking if a thing "works" is difficult
@@ -18,11 +19,10 @@ open System.IO
 [<EntryPoint>]
 let main argv =
     Console.BufferHeight <- 32766
-    // first order of business: stop rigging stuff in here directly!
-    (*
-    try
-        let skin = new osuSkin.osuSkin("C:\Users\percy\AppData\Local\osu!\Skins\skins! 16-9 (4-3 Play Area)")
-        Directory.Delete("SkinTest", true)
-        skin.ToNoteSkin "SkinTest" 7
-    with err -> printfn "%O" err *)
+    Logging.Info "Welcome to the Prelude test track"
+    Logging.Info "Press ENTER to begin.."
+    Console.ReadLine() |> ignore
+    //Imports.main()
+    Metrics.main()
+    Console.ReadLine() |> ignore
     0
