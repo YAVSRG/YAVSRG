@@ -56,13 +56,13 @@ type IHealthBarSystem
 
     abstract member FailCondition : float -> bool
 
-    abstract member HandleMineExplosion : unit -> unit
-    abstract member HandleMineDodged : unit -> unit
-    abstract member HandleHoldDropped : unit -> unit
-    abstract member HandleHoldOK : unit -> unit
+    abstract member HandleMineExplosion : int -> unit
+    abstract member HandleMineDodged : int -> unit
+    abstract member HandleHoldDropped : int -> unit
+    abstract member HandleHoldOK : int -> unit
 
-    abstract member HandleNote : JudgementType * Time -> unit
-    abstract member HandleRelease : JudgementType * Time -> unit
+    abstract member HandleNote : int * JudgementType * Time -> unit
+    abstract member HandleRelease : int * JudgementType * Time -> unit
         
     member this.Failed = if onlyFailAtEnd then state.CurrentlyFailed else state.HasFailed
     member this.Name = name
@@ -80,13 +80,13 @@ type HealthBarPointsSystem
 
     override this.FailCondition hp = hp <= clear_threshold
 
-    override this.HandleMineExplosion() = this.ChangeHP(points_func JudgementType.NG)
-    override this.HandleMineDodged() = ()
-    override this.HandleHoldDropped() = ()
-    override this.HandleHoldOK() = ()
+    override this.HandleMineExplosion k = this.ChangeHP(points_func JudgementType.NG)
+    override this.HandleMineDodged k = ()
+    override this.HandleHoldDropped k = ()
+    override this.HandleHoldOK k = ()
 
-    override this.HandleNote (j, _: Time) = this.ChangeHP(points_func j)
-    override this.HandleRelease (j, _: Time) = this.ChangeHP(points_func j)
+    override this.HandleNote (k, j, t: Time) = this.ChangeHP(points_func j)
+    override this.HandleRelease (k, j, t: Time) = this.ChangeHP(points_func j)
 
 (*
     Accuracy/scoring system metric.
@@ -136,7 +136,7 @@ type ScoreMetric
     let mutable noteSeekPassive = 0
     let mutable noteSeekActive = 0
 
-    let mutable hitCallback = fun _ _ -> ()
+    let mutable hitCallback = fun _ _ _ -> ()
 
     let state =
         {
@@ -159,7 +159,7 @@ type ScoreMetric
     member this.State: AccuracySystemState = state
     member this.HitData: InternalScoreData = hitdata
 
-    member this.SetHitCallback (func: JudgementType -> Time -> unit) = hitCallback <- func
+    member this.SetHitCallback (func: int -> JudgementType -> Time -> unit) = hitCallback <- func
 
     member this.Finished = noteSeekPassive = hitdata.Length
 
@@ -175,13 +175,13 @@ type ScoreMetric
             let struct (t, deltas, status) = hitdata.[noteSeekPassive]
             for k = 0 to (keys - 1) do
                 if status.[k] = HitStatus.NEEDS_TO_BE_HIT then
-                    this._HandleNote(JudgementType.MISS, deltas.[k])
+                    this._HandleNote(k, JudgementType.MISS, deltas.[k])
                 elif status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then
-                    this._HandleRelease(JudgementType.MISS, deltas.[k])
+                    this._HandleRelease(k, JudgementType.MISS, deltas.[k])
                 elif status.[k] = HitStatus.NEEDS_TO_BE_DODGED then
-                    this._HandleMineDodged()
+                    this._HandleMineDodged k
                 elif status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then
-                    this._HandleHoldOK()
+                    this._HandleHoldOK k
             noteSeekPassive <- noteSeekPassive + 1
         // missing: checks key down as mine passes receptors, key up as hold middle passes receptors
         // algorithm must "forget" what it finds if
@@ -216,10 +216,10 @@ type ScoreMetric
                 delta <- delta / rate
                 status.[k] <- HitStatus.HAS_BEEN_HIT
                 deltas.[k] <- delta
-                this._HandleNote(this.JudgementFunc (false, Time.Abs deltas.[k]), deltas.[k])
+                this._HandleNote(k, this.JudgementFunc (false, Time.Abs deltas.[k]), deltas.[k])
             else //priority = 0, we found a mine
                 status.[k] <- HitStatus.HAS_NOT_BEEN_DODGED
-                this._HandleMineExplosion()
+                this._HandleMineExplosion k
                 
     override this.HandleKeyUp(now, k) =
         while noteSeekActive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekActive] < now - missWindow do 
@@ -251,47 +251,47 @@ type ScoreMetric
                 delta <- delta / rate
                 status.[k] <- HitStatus.HAS_BEEN_RELEASED
                 deltas.[k] <- delta
-                this._HandleRelease(this.JudgementFunc (true, Time.Abs deltas.[k]), deltas.[k])
+                this._HandleRelease(k, this.JudgementFunc (true, Time.Abs deltas.[k]), deltas.[k])
             else //priority = 0, we released a hold body
                 status.[k] <- HitStatus.HAS_NOT_BEEN_HELD
-                this._HandleHoldDropped()
+                this._HandleHoldDropped k
 
     abstract member JudgementFunc : bool * Time -> JudgementType
     abstract member PointsFunc : bool * JudgementType * Time -> float
     
-    abstract member HandleMineExplosion : unit -> unit
-    member private this._HandleMineExplosion() =
-        hitCallback JudgementType.NG -rawMissWindow
-        this.HandleMineExplosion()
-        healthBar.HandleMineExplosion()
+    abstract member HandleMineExplosion : int -> unit
+    member private this._HandleMineExplosion k =
+        hitCallback k JudgementType.NG -rawMissWindow
+        this.HandleMineExplosion k
+        healthBar.HandleMineExplosion k
         
-    abstract member HandleMineDodged : unit -> unit
-    member private this._HandleMineDodged() =
-        this.HandleMineDodged()
-        healthBar.HandleMineDodged()
+    abstract member HandleMineDodged : int -> unit
+    member private this._HandleMineDodged k =
+        this.HandleMineDodged k
+        healthBar.HandleMineDodged k
 
-    abstract member HandleHoldDropped : unit -> unit
-    member private this._HandleHoldDropped() =
-        hitCallback JudgementType.NG -rawMissWindow
-        this.HandleHoldDropped()
-        healthBar.HandleHoldDropped()
+    abstract member HandleHoldDropped : int -> unit
+    member private this._HandleHoldDropped k =
+        hitCallback k JudgementType.NG -rawMissWindow
+        this.HandleHoldDropped k
+        healthBar.HandleHoldDropped k
     
-    abstract member HandleHoldOK : unit -> unit
-    member private this._HandleHoldOK() =
-        this.HandleHoldOK()
-        healthBar.HandleHoldOK()
+    abstract member HandleHoldOK : int -> unit
+    member private this._HandleHoldOK k =
+        this.HandleHoldOK k
+        healthBar.HandleHoldOK k
 
-    abstract member HandleNote : JudgementType * Time -> unit
-    member private this._HandleNote(judge, time) =
-        hitCallback judge time
-        this.HandleNote(judge, time)
-        healthBar.HandleNote(judge, time)
+    abstract member HandleNote : int * JudgementType * Time -> unit
+    member private this._HandleNote(k, judge, time) =
+        hitCallback k judge time
+        this.HandleNote(k, judge, time)
+        healthBar.HandleNote(k, judge, time)
 
-    abstract member HandleRelease : JudgementType * Time -> unit
-    member private this._HandleRelease(judge, time) =
-        hitCallback judge time
-        this.HandleRelease(judge, time)
-        healthBar.HandleRelease(judge, time)
+    abstract member HandleRelease : int * JudgementType * Time -> unit
+    member private this._HandleRelease(k, judge, time) =
+        hitCallback k judge time
+        this.HandleRelease(k, judge, time)
+        healthBar.HandleRelease(k, judge, time)
 
 // simple constructor for "typical" score systems. for additional customisation of behaviour, override ScoreMetric instead
 type ScorePointsMetric
@@ -310,15 +310,15 @@ type ScorePointsMetric
     ) =
     inherit ScoreMetric(name, healthBar, missWindow, keys, replayProvider, notes, rate)
 
-    override this.HandleMineExplosion() = this.State.Add JudgementType.NG; this.State.BreakCombo()
-    override this.HandleMineDodged() = this.State.Add JudgementType.OK
-    override this.HandleHoldDropped() = this.State.Add JudgementType.NG; this.State.BreakCombo()
-    override this.HandleHoldOK() = this.State.Add JudgementType.OK
+    override this.HandleMineExplosion k = this.State.Add JudgementType.NG; this.State.BreakCombo()
+    override this.HandleMineDodged k = this.State.Add JudgementType.OK
+    override this.HandleHoldDropped k = this.State.Add JudgementType.NG; this.State.BreakCombo()
+    override this.HandleHoldOK k = this.State.Add JudgementType.OK
 
-    override this.HandleNote(j, delta) =
+    override this.HandleNote(k, j, delta) =
         if comboFunc j then this.State.BreakCombo() else this.State.IncrCombo()
         this.State.Add (this.PointsFunc(false, j, Time.Abs delta), 1.0, j)
-    override this.HandleRelease(j, delta) =
+    override this.HandleRelease(k, j, delta) =
         if comboFunc j then this.State.BreakCombo() else this.State.IncrCombo()
         this.State.Add (this.PointsFunc(false, j, Time.Abs delta), 1.0, j)
 
@@ -474,14 +474,12 @@ module Metrics =
         | SC of judge: int * ridiculous: bool
         | SCPlus of judge: int * ridiculous: bool
         | Wife of judge: int * ridiculous: bool
-        //| DP of judge: int * ridiculous: bool
         | OM of od: float32
         | Custom of unit
         override this.ToString() =
             match this with
             | SC (judge, rd) -> "SC (J" + (string judge) + ")"
             | SCPlus (judge, rd) -> "SC+ (J" + (string judge) + ")"
-            //| DP (judge, rd) ->"DP (J" + (string judge) + ")"
             | Wife (judge, rd) -> "Wife2 (J" + (string judge) + ")"
             | OM od -> "osu!mania (OD" + (string od) + ")"
             | _ -> "unknown"

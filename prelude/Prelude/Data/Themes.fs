@@ -122,10 +122,11 @@ module Themes =
             UseRotation: bool
             FlipHoldTail: bool
             UseHoldTailTexture: bool
-            ColumnWidth: float32
             HoldNoteTrim: float32
+            DroppedHoldTint: Color
             PlayfieldColor: Color
             PlayfieldAlignment: float32 * float32
+            ColumnWidth: float32
             ColumnLightTime: float32
         }
         static member Default =
@@ -136,10 +137,11 @@ module Themes =
                 UseRotation = false
                 FlipHoldTail = true
                 UseHoldTailTexture = true
-                ColumnWidth = 150.0f
                 HoldNoteTrim = 0.0f
+                DroppedHoldTint = Color.FromArgb(180, 180, 180, 180)
                 PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
                 PlayfieldAlignment = 0.5f, 0.5f
+                ColumnWidth = 150.0f
                 ColumnLightTime = 0.4f
             }
 
