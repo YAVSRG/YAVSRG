@@ -16,7 +16,6 @@
     <Compile Include="Scoring\Replays.fs" />
     <Compile Include="Scoring\Metrics.fs" />
     <Compile Include="Scoring\Grading.fs" />
-    <Compile Include="Gameplay\Score.fs" />
     <Compile Include="Gameplay\Mods.fs" />
     <Compile Include="Gameplay\NoteColors.fs" />
     <Compile Include="Gameplay\Difficulty.fs" />
@@ -25,6 +24,7 @@
     <Compile Include="Data\ChartManager.fs" />
     <Compile Include="Data\ScoreManager.fs" />
     <Compile Include="Data\Web.fs" />
+    <Compile Include="Score.fs" />
   </ItemGroup>
 
   <ItemGroup>

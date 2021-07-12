@@ -6,6 +6,11 @@ open System.IO.Compression
 open Prelude.Common
 open Prelude.Charts.Interlude
 
+(*
+    THIS FILE IS NO LONGER USED BY PRELUDE/INTERLUDE AND HERE FOR LEGACY PURPOSES - WILL BE PURGED SHORTLY
+    (All this stuff have been rewritten in the Scoring folder/Prelude.Scoring namespace)
+*)
+
 module _Score =
 
     (*
