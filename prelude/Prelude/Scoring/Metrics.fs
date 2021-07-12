@@ -121,7 +121,7 @@ type ScoreMetric
     (
         name: string,
         healthBar: IHealthBarSystem,
-        missWindow: Time,
+        rawMissWindow: Time,
         keys: int,
         replayProvider: IReplayProvider,
         notes: TimeData<NoteRow>,
@@ -129,12 +129,14 @@ type ScoreMetric
     ) =
     inherit ReplayConsumer(keys, replayProvider)
 
-    let missWindow = missWindow * rate
+    let missWindow = rawMissWindow * rate
     // some score systems can modify this internal data, to remove the need to time releases for example
     let hitdata = InternalScore.createDefault missWindow keys notes
     // having two seekers improves performance when feeding scores rather than playing live
     let mutable noteSeekPassive = 0
     let mutable noteSeekActive = 0
+
+    let mutable hitCallback = fun _ _ -> ()
 
     let state =
         {
@@ -147,13 +149,19 @@ type ScoreMetric
         }
 
     member this.Name = name
-    member this.FormatAccuracy() =
-        let value = (state.PointsScored / state.MaxPointsScored)
-        (if Double.IsNaN value then 100.0 else value * 100.0) |> sprintf "%.2f%%"
+    member this.Value =
+        let v = state.PointsScored / state.MaxPointsScored
+        if Double.IsNaN v then 1.0 else v
+    member this.FormatAccuracy() = sprintf "%.2f%%" (this.Value * 100.0)
     member this.HP = healthBar
-    member this.MissWindow = missWindow
+    member this.MissWindow = rawMissWindow
+    member this.ScaledMissWindow = missWindow
     member this.State: AccuracySystemState = state
     member this.HitData: InternalScoreData = hitdata
+
+    member this.SetHitCallback (func: JudgementType -> Time -> unit) = hitCallback <- func
+
+    member this.Finished = noteSeekPassive = hitdata.Length
 
     // correctness guaranteed up to the time you update, no matter how you update
     // call Update with infinityf to do a correct feeding of the whole replay
@@ -208,7 +216,7 @@ type ScoreMetric
                 delta <- delta / rate
                 status.[k] <- HitStatus.HAS_BEEN_HIT
                 deltas.[k] <- delta
-                this._HandleNote(this.JudgementFunc (false, deltas.[k]), deltas.[k])
+                this._HandleNote(this.JudgementFunc (false, Time.Abs deltas.[k]), deltas.[k])
             else //priority = 0, we found a mine
                 status.[k] <- HitStatus.HAS_NOT_BEEN_DODGED
                 this._HandleMineExplosion()
@@ -243,7 +251,7 @@ type ScoreMetric
                 delta <- delta / rate
                 status.[k] <- HitStatus.HAS_BEEN_RELEASED
                 deltas.[k] <- delta
-                this._HandleRelease(this.JudgementFunc (true, deltas.[k]), deltas.[k])
+                this._HandleRelease(this.JudgementFunc (true, Time.Abs deltas.[k]), deltas.[k])
             else //priority = 0, we released a hold body
                 status.[k] <- HitStatus.HAS_NOT_BEEN_HELD
                 this._HandleHoldDropped()
@@ -253,6 +261,7 @@ type ScoreMetric
     
     abstract member HandleMineExplosion : unit -> unit
     member private this._HandleMineExplosion() =
+        hitCallback JudgementType.NG -rawMissWindow
         this.HandleMineExplosion()
         healthBar.HandleMineExplosion()
         
@@ -263,6 +272,7 @@ type ScoreMetric
 
     abstract member HandleHoldDropped : unit -> unit
     member private this._HandleHoldDropped() =
+        hitCallback JudgementType.NG -rawMissWindow
         this.HandleHoldDropped()
         healthBar.HandleHoldDropped()
     
@@ -273,11 +283,13 @@ type ScoreMetric
 
     abstract member HandleNote : JudgementType * Time -> unit
     member private this._HandleNote(judge, time) =
+        hitCallback judge time
         this.HandleNote(judge, time)
         healthBar.HandleNote(judge, time)
 
     abstract member HandleRelease : JudgementType * Time -> unit
     member private this._HandleRelease(judge, time) =
+        hitCallback judge time
         this.HandleRelease(judge, time)
         healthBar.HandleRelease(judge, time)
 
@@ -304,13 +316,11 @@ type ScorePointsMetric
     override this.HandleHoldOK() = this.State.Add JudgementType.OK
 
     override this.HandleNote(j, delta) =
-        if delta <> 0.0f<ms> then printfn "hit with judge %A, %fms" j delta
         if comboFunc j then this.State.BreakCombo() else this.State.IncrCombo()
-        this.State.Add (this.PointsFunc(false, j, delta), 1.0, j)
+        this.State.Add (this.PointsFunc(false, j, Time.Abs delta), 1.0, j)
     override this.HandleRelease(j, delta) =
-        if delta <> 0.0f<ms> then printfn "released with judge %A, %fms" j delta
         if comboFunc j then this.State.BreakCombo() else this.State.IncrCombo()
-        this.State.Add (this.PointsFunc(false, j, delta), 1.0, j)
+        this.State.Add (this.PointsFunc(false, j, Time.Abs delta), 1.0, j)
 
     override this.JudgementFunc(isRelease, delta) = judgementFunc isRelease delta
     override this.PointsFunc(isRelease, judgement, delta) = pointsFunc isRelease judgement delta

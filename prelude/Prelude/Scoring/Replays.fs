@@ -175,6 +175,8 @@ type LiveReplayProvider() =
     let mutable finished = false
     let buffer = ResizeArray<ReplayRow>()
 
+    member this.Finished = finished
+
     interface IReplayProvider with
         member this.HasNext(time) =
             if i >= buffer.Count then false
