@@ -9,7 +9,7 @@ open Prelude.Common
 open Prelude.Data.ScoreManager
 open Prelude.Data.ChartManager
 open Prelude.Data.ChartManager.Sorting
-open Prelude.Gameplay.Score
+open Prelude.Scoring
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Interlude
@@ -110,15 +110,15 @@ module ScreenLevelSelect =
 
                 let colfun = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
                 
-                TextBox((fun() -> data.Accuracy.Format()), colfun, 0.0f)
+                TextBox((fun() -> data.Scoring.FormatAccuracy()), colfun, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
                 |> this.Add
 
-                TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Lamp.ToString()) (let (_, _, _, _, combo, _) = data.Accuracy.State in combo) data.Physical), colfun, 0.0f)
+                TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Lamp.ToString()) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
                 |> this.Add
 
-                TextBox(K (formatTimeOffset(DateTime.Now - data.Score.time)), colfun, 1.0f)
+                TextBox(K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)), colfun, 1.0f)
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
                 |> this.Add
 
@@ -143,10 +143,10 @@ module ScreenLevelSelect =
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
                 if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
-                    let name = sprintf "%s | %s" (data.Accuracy.Format()) (data.Lamp.ToString())
+                    let name = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
                     Screens.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                         fun () ->
-                            chartSaveData.Value.Scores.Remove data.Score |> ignore
+                            chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                             refresh <- true
                             Screens.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
@@ -163,16 +163,16 @@ module ScreenLevelSelect =
 
             let sorter() : Comparison<Widget> =
                 match sort.Value with
-                | ScoreboardSort.Accuracy -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Accuracy.Value.CompareTo((b :?> ScoreboardItem).Data.Accuracy.Value))
+                | ScoreboardSort.Accuracy -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Scoring.Value.CompareTo((b :?> ScoreboardItem).Data.Scoring.Value))
                 | ScoreboardSort.Performance -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Physical.CompareTo((b :?> ScoreboardItem).Data.Physical))
                 | ScoreboardSort.Time
-                | _ -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.Score.time.CompareTo((b :?> ScoreboardItem).Data.Score.time))
+                | _ -> Comparison(fun b a -> (a :?> ScoreboardItem).Data.ScoreInfo.time.CompareTo((b :?> ScoreboardItem).Data.ScoreInfo.time))
 
             let filterer() : Widget -> bool =
                 match filter.Value with
-                | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.Score.rate = rate)
-                | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.Score.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.Score.keycount - 3])
-                | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.Score.selectedMods = selectedMods) //nyi
+                | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.rate = rate)
+                | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.ScoreInfo.keycount - 3])
+                | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.selectedMods = selectedMods) //nyi
                 | _ -> K true
 
             let flowContainer = new FlowContainer(Sort = sorter(), Filter = filterer())
@@ -523,7 +523,7 @@ module ScreenLevelSelect =
                 colorVersion <- colorVersionGlobal
                 if chartData.IsNone then chartData <- scores.GetScoreData cc.Hash
                 match chartData with
-                | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, grade x themeConfig.GradeThresholds)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
+                | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, (*Grade.calculate themeConfig.GradeThresholds x*) 0)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
                 | None -> ()
                 color <- colorFunc pbData
                 collectionIcon <-

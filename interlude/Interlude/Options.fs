@@ -5,7 +5,7 @@ open System.Collections.Generic
 open System.IO
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
-open Prelude.Gameplay.Score
+open Prelude.Scoring
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.ScoreManager
@@ -168,8 +168,8 @@ module Options =
         NoteSkin: Setting<string>
 
         Playstyles: Layout array
-        HPSystems: Setting<WatcherSelection<HPSystemConfig>>
-        AccSystems: Setting<WatcherSelection<AccuracySystemConfig>>
+        HPSystems: Setting<WatcherSelection<Metrics.HPSystemConfig>>
+        AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
         ScoreSaveCondition: Setting<ScoreSaving>
         FailCondition: Setting<FailType>
         Pacemaker: Setting<Pacemaker>
@@ -205,8 +205,8 @@ module Options =
             UseKeymodePreference = Setting(false)
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            HPSystems = Setting(VG, [])
-            AccSystems = Setting(SCPlus (4, false), [])
+            HPSystems = Setting(Metrics.VG, [])
+            AccSystems = Setting(Metrics.SCPlus (4, false), [])
             ScoreSaveCondition = Setting(ScoreSaving.Always)
             FailCondition = Setting(FailType.EndOfSong)
             Pacemaker = Setting(Accuracy 0.95)

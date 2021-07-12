@@ -4,7 +4,8 @@ open System
 open System.Drawing
 open OpenTK
 open Prelude.Gameplay.NoteColors
-open Prelude.Gameplay.Score
+open Prelude.Scoring
+open Prelude.Scoring.Metrics
 open Prelude.Common
 open Interlude
 open Interlude.Utils
@@ -212,7 +213,7 @@ module OptionsMenuTabs =
                 Slider(
                     { new IntSetting(4, 1, 9) with
                         override this.Value
-                            with get() = match s.Value with SC (j, _) | SCPlus (j, _) | Wife (j, _) | DP (j, _) -> j | _ -> 4
+                            with get() = match s.Value with SC (j, _) | SCPlus (j, _) | Wife (j, _) -> j | _ -> 4
                             and set(v) =
                                 let v = Math.Clamp(v, 1, 9)
                                 s.Value <- 
@@ -220,7 +221,6 @@ module OptionsMenuTabs =
                                     | SC (_, r) -> SC (v, r)
                                     | SCPlus (_, r) -> SCPlus (v, r)
                                     | Wife (_, r) -> Wife (v, r)
-                                    | DP (_, r) -> DP (v, r)
                                     | _ -> SC (v, false) }, 0.1f)
             ).Position(300.0f)
         
@@ -229,14 +229,13 @@ module OptionsMenuTabs =
                 Selector.FromBool(
                     { new Setting<bool>(false) with
                         override this.Value
-                            with get() = match s.Value with SC (_, r) | SCPlus (_, r) | Wife (_, r) | DP (_, r) -> r | _ -> false
+                            with get() = match s.Value with SC (_, r) | SCPlus (_, r) | Wife (_, r) -> r | _ -> false
                             and set(r) =
                                 s.Value <- 
                                     match s.Value with
                                     | SC (j, _) -> SC (j, r)
                                     | SCPlus (j, _) -> SCPlus (j, r)
                                     | Wife (j, _) -> Wife (j, r)
-                                    | DP (j, _) -> DP (j, r)
                                     | _ -> SC (4, r) })
             ).Position(400.0f)
 
@@ -256,24 +255,22 @@ module OptionsMenuTabs =
             column [
                 PrettySetting("ScoreSystemType",
                     DUEditor(
-                        [|"SC"; "SC+"; "WIFE"; "DP"; "OSU!MANIA"|],
-                        (match s.Value with SC _ -> 0 | SCPlus _ -> 1 | Wife _ -> 2 | DP _ -> 3 | OM _ -> 4 | _ -> 0),
+                        [|"SC"; "SC+"; "WIFE"; "OSU!MANIA"|],
+                        (match s.Value with SC _ -> 0 | SCPlus _ -> 1 | Wife _ -> 2 | OM _ -> 3 | _ -> 0),
                         (fun (i, _) ->
                             s.Value <- 
                                 match s.Value with
-                                | SC (j, r) | SCPlus (j, r) | Wife (j, r) | DP (j, r) ->
+                                | SC (j, r) | SCPlus (j, r) | Wife (j, r) ->
                                     match i with
                                     | 1 -> SCPlus (j, r)
                                     | 2 -> Wife (j, r)
-                                    | 3 -> DP (j, r)
-                                    | 4 -> OM 8.0f
+                                    | 3 -> OM 8.0f
                                     | _ -> SC (j, r)
                                 | _ ->
                                     match i with
                                     | 1 -> SCPlus (4, false)
                                     | 2 -> Wife (4, false)
-                                    | 3 -> DP (4, false)
-                                    | 4 -> OM 8.0f
+                                    | 3 -> OM 8.0f
                                     | _ -> SC (4, false)),
                         [|
                             [|judge; ridiculous|]; [|judge; ridiculous|]; [|judge; ridiculous|]; [|judge; ridiculous|]

@@ -1,7 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System.Drawing
-open Prelude.Gameplay.Score
+open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
 open Prelude.Data.ScoreManager
 open Interlude
@@ -37,18 +37,20 @@ type ScoreGraph(data: ScoreInfoProvider) =
         Draw.rect this.Bounds (Color.FromArgb(127, 0, 0, 0)) Sprite.Default
         Draw.rect (Rect.create left (top + h - 2.5f) right (top + h + 2.5f)) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
         
-        //todo: graph stuff like hp/accuracy over time
+        // todo: graph stuff like hp/accuracy over time
+        // todo: let you filter to just release timing
 
         let w = (width - 10.0f) / float32 data.HitData.Length
         let mutable x = left + 5.0f
         for i in 0 .. data.HitData.Length - 1 do
-            for k in 0 .. data.Score.keycount - 1 do
-                let (_, delta, hit) = data.HitData.[i]
+            for k in 0 .. data.ScoreInfo.keycount - 1 do
+                let struct (_, delta, hit) = data.HitData.[i]
                 let (y, col) =
                     match hit.[k] with
-                    | HitStatus.SpecialNG -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.NG])
-                    | HitStatus.NotHit -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.MISS])
-                    | HitStatus.Hit -> (h - delta.[k] / MISSWINDOW * h, Themes.themeConfig.JudgementColors.[data.Accuracy.JudgeFunc(Prelude.Common.Time.Abs delta.[k]) |> int])
+                    | HitStatus.HAS_NOT_BEEN_DODGED | HitStatus.HAS_NOT_BEEN_HELD -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.NG])
+                    | HitStatus.NEEDS_TO_BE_HIT | HitStatus.NEEDS_TO_BE_RELEASED -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.MISS])
+                    | HitStatus.HAS_BEEN_HIT -> (h - delta.[k] / data.Scoring.MissWindow * h, Themes.themeConfig.JudgementColors.[data.Scoring.JudgementFunc(false, Prelude.Common.Time.Abs delta.[k]) |> int])
+                    | HitStatus.HAS_BEEN_RELEASED -> (h - delta.[k] / data.Scoring.MissWindow * h, Themes.themeConfig.JudgementColors.[data.Scoring.JudgementFunc(true, Prelude.Common.Time.Abs delta.[k]) |> int])
                     | _ -> (0.0f, Color.Transparent)
                 if col.A > 0uy then
                     Draw.rect(Rect.create (x - 2.5f) (top + y - 2.5f) (x + 2.5f) (top + y + 2.5f)) col Sprite.Default
@@ -68,11 +70,11 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
     inherit Screen()
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
-    let mutable gradeAchieved = grade scoreData.Accuracy.Value Themes.themeConfig.GradeThresholds
+    let mutable gradeAchieved = Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State
     let graph = new ScoreGraph(scoreData)
 
     let refresh() =
-        gradeAchieved <- grade scoreData.Accuracy.Value Themes.themeConfig.GradeThresholds
+        gradeAchieved <- Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State
         lampPB <- PersonalBestType.None
         accuracyPB <- PersonalBestType.None
         clearPB <- PersonalBestType.None
@@ -91,7 +93,7 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         |> positionWidget(-100.0f, 0.25f, 155.0f, 0.0f, 100.0f, 0.25f, 245.0f, 0.0f)
         |> this.Add
 
-        new TextBox(scoreData.Accuracy.Format, (K <| ScoreColor.gradeToColor gradeAchieved), 0.5f)
+        new TextBox(scoreData.Scoring.FormatAccuracy, (K <| ScoreColor.gradeToColor gradeAchieved), 0.5f)
         |> positionWidget(-150.0f, 0.5f, 155.0f, 0.0f, 150.0f, 0.5f, 245.0f, 0.0f)
         |> this.Add
 
@@ -128,7 +130,7 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Physical, perfRect, physicalColor scoreData.Physical, 0.0f)
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Technical, perfRect, technicalColor scoreData.Technical, 1.0f)
         Draw.quad (Quad.ofRect (Rect.create (w - h * 0.5f) (top + 250.0f) (w + h * 0.5f) (top + 250.0f + h))) (Quad.colorOf (if scoreData.HP.Failed then Color.Gray else Color.White)) (Sprite.gridUV (gradeAchieved, 0) (Themes.getTexture "ranks"))
-        let (judgements, pts, maxpts, combo, maxcombo, cbs) = scoreData.Accuracy.State
+        let judgements = scoreData.Scoring.State.Judgements
         for i in 1..(judgements.Length - 1) do
             Text.draw(Themes.font(), ((enum i): JudgementType).ToString() + ": " + judgements.[i].ToString(), 30.0f, 20.0f, 260.0f + 30.0f * float32 i, Color.White)
         base.Draw()

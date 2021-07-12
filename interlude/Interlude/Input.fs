@@ -101,18 +101,23 @@ module Input =
         evts <- f evts
         out
 
-    let consumeGameplay (b: Bind, t: InputEvType, f) =
-        match b with
-        | Key (k, _) ->
-            let mutable time = consumeOneKeyGameplay (k, t)
-            while time.IsSome do
-                f time.Value
-                time <- consumeOneKeyGameplay (k, t)
-        | _ -> 
-            let mutable time = consumeOne (b, t)
-            while time.IsSome do
-                f time.Value
-                time <- consumeOne (b, t)
+    let consumeGameplay (binds: Bind array, callback: int -> Time -> bool -> unit) =
+        let bmatch bind target =
+            match bind, target with
+            | Key (k, _), Key (K, _) when k = K -> true
+            | Mouse b, Mouse B when b = B -> true
+            | _ -> false
+        let rec f evs =
+            match evs with
+            | [] -> []
+            | struct (b, t, time) :: xs ->
+                let mutable i = 0
+                let mutable matched = false
+                while i < binds.Length && not matched do
+                    if bmatch binds.[i] b then callback i time (t <> InputEvType.Press); matched <- true
+                    i <- i + 1
+                if matched then f xs else struct (b, t, time) :: (f xs)
+        evts <- f evts
 
     let consumeAny (t: InputEvType) =
         let mutable out = ValueNone
