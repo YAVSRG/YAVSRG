@@ -26,7 +26,6 @@ module Themes =
             Font: string
             DefaultAccentColor: Color
             OverrideAccentColor: bool
-            PlayfieldColor: Color
             CursorSize: float32
         } 
         static member Default : ThemeConfig = 
@@ -109,7 +108,6 @@ module Themes =
                 Font = "Akrobat-Black.otf"
                 DefaultAccentColor = Color.FromArgb(0, 255, 160)
                 OverrideAccentColor = false
-                PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
                 CursorSize = 50.0f
             }
 
@@ -118,23 +116,29 @@ module Themes =
 
     type NoteSkinConfig =
         {
-            UseRotation: bool
             Name: string
+            Author: string
+            Version: string
+            UseRotation: bool
             FlipHoldTail: bool
             UseHoldTailTexture: bool
             ColumnWidth: float32
             HoldNoteTrim: float32
+            PlayfieldColor: Color
             PlayfieldAlignment: float32 * float32
             ColumnLightTime: float32
         }
         static member Default =
             {
-                UseRotation = false
                 Name = "?"
+                Author = "Unknown"
+                Version = "1.0.0"
+                UseRotation = false
                 FlipHoldTail = true
                 UseHoldTailTexture = true
                 ColumnWidth = 150.0f
                 HoldNoteTrim = 0.0f
+                PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
                 PlayfieldAlignment = 0.5f, 0.5f
                 ColumnLightTime = 0.4f
             }
