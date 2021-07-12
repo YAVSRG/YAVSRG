@@ -4,6 +4,20 @@ open System
 open Prelude.Common
 open Prelude.Charts.Interlude
 
+// user-facing flags of "judgements", how well you hit notes
+type JudgementType =
+    | RIDICULOUS = 0
+    | MARVELLOUS = 1
+    | PERFECT = 2
+    | OK = 3
+    | GREAT = 4
+    | GOOD = 5
+    | BAD = 6
+    | NG = 7
+    | MISS = 8
+module JudgementType = let count = 9
+
+
 (*
     Health bar system to be attached to other metrics (Bars are dependent on/coupled with the judgements scored according to other systems)
     These maintain a meter that fills as you hit notes well, and depletes as you hit notes badly (or miss)
@@ -394,11 +408,11 @@ module ScoringHelpers =
         elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
         else miss_weight
 
-type ScoreClassifier(judge: int, enableRd: bool, keys, replay, notes, rate) =
+type ScoreClassifier(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
     inherit ScorePointsMetric
         (
             sprintf "SC+ (J%i)" judge,
-            VibeGauge(),
+            healthBar,
             180.0f<ms>,
             keys, replay, notes, rate,
             (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
@@ -406,11 +420,11 @@ type ScoreClassifier(judge: int, enableRd: bool, keys, replay, notes, rate) =
             ScoringHelpers.sc_curve judge
         )
 
-type Wife3(judge: int, enableRd: bool, keys, replay, notes, rate) as this =
+type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) as this =
     inherit ScorePointsMetric
         (
             sprintf "Wife3 (J%i)" judge,
-            VibeGauge(),
+            healthBar,
             180.0f<ms>,
             keys, replay, notes, rate,
             (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
@@ -422,3 +436,44 @@ type Wife3(judge: int, enableRd: bool, keys, replay, notes, rate) as this =
         for struct (time, deltas, status) in this.HitData do
             for k = 0 to (keys - 1) do
                 if status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then status.[k] <- HitStatus.NOTHING
+
+module Metrics =
+    
+    type HPSystemConfig =
+        | VG
+        | OMHP of float
+        | Custom of unit
+        override this.ToString() =
+            match this with
+            | VG -> "VG"
+            | OMHP hp -> "osu!mania (HP" + (string hp) + ")"
+            | _ -> "unknown"
+
+    let createHealthBar (config: HPSystemConfig) : IHealthBarSystem =
+        match config with
+        | VG -> VibeGauge() :> IHealthBarSystem
+        | _ -> failwith "nyi"
+
+    type AccuracySystemConfig =
+        | SC of judge: int * ridiculous: bool
+        | SCPlus of judge: int * ridiculous: bool
+        | Wife of judge: int * ridiculous: bool
+        //| DP of judge: int * ridiculous: bool
+        | OM of od: float32
+        | Custom of unit
+        override this.ToString() =
+            match this with
+            | SC (judge, rd) -> "SC (J" + (string judge) + ")"
+            | SCPlus (judge, rd) -> "SC+ (J" + (string judge) + ")"
+            //| DP (judge, rd) ->"DP (J" + (string judge) + ")"
+            | Wife (judge, rd) -> "Wife2 (J" + (string judge) + ")"
+            | OM od -> "osu!mania (OD" + (string od) + ")"
+            | _ -> "unknown"
+    
+    let createScoreMetric accConfig hpConfig keys replay notes rate : ScoreMetric =
+        let hp = createHealthBar hpConfig
+        match accConfig with
+        | SC (judge, rd)
+        | SCPlus (judge, rd) -> ScoreClassifier(judge, rd, hp, keys, replay, notes, rate) :> ScoreMetric
+        | Wife (judge, rd) -> Wife3(judge, rd, hp, keys, replay, notes, rate) :> ScoreMetric
+        | _ -> failwith "nyi"

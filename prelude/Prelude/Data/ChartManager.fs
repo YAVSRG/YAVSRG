@@ -9,7 +9,7 @@ open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Charts.ChartConversions
-open Prelude.Gameplay.Score
+open Prelude.Scoring
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.Difficulty
@@ -82,9 +82,9 @@ module ChartManager =
 
     type Goal =
     | NoGoal
-    | Clear of HPSystemConfig
-    | Lamp of AccuracySystemConfig * Lamp
-    | Accuracy of AccuracySystemConfig * float
+    | Clear of Metrics.HPSystemConfig
+    | Lamp of Metrics.AccuracySystemConfig * Lamp
+    | Accuracy of Metrics.AccuracySystemConfig * float
 
     type PlaylistData = string * ModState * float32
     type Collection =

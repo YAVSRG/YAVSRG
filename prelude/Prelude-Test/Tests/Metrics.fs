@@ -9,7 +9,7 @@ module Metrics =
         
         let chart = Imports.getRandomChart()
         let perfectPlayProvider = StoredReplayProvider.AutoPlay(chart.Keys,  chart.Notes)
-        let metric = ScoreClassifier(4, false, chart.Keys, perfectPlayProvider, chart.Notes, 1.0f)
+        let metric = ScoreClassifier(4, false, VibeGauge(), chart.Keys, perfectPlayProvider, chart.Notes, 1.0f)
 
         metric.Update(infinityf * 1.0f<ms>)
 

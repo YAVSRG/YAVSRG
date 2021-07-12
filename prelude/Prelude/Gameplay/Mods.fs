@@ -6,7 +6,6 @@ open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Editor
 open Prelude.Editor.Filter
-open Prelude.Gameplay.Score
 
 module Mods = 
     (*
@@ -40,12 +39,9 @@ module Mods =
         RandomSeed indicates that state should be randomised and is used to seed random behaviour for the mod
             (This number is then saved so the mod/score can be replicated for replay purposes)
 
-
-        Rules to use this correctly
-            - 'Check' and 'Apply_score' should not modify anything about the Chart passed
+        Sanity rules
+            - 'Check' should not modify anything about the Chart passed
             - 'Apply' should not modify the header of the Chart passed
-
-        todo: 'Apply' functions should return ModChart instead of unit to allow for mutability of key count.
     *)
 
     type Mod = 
@@ -59,9 +55,6 @@ module Mods =
             Check: int -> ModChart -> bool
             //Applies the modifier to the content of the chart. This is where note data, timing data, sv data should be edited to create the desired effects
             Apply: int -> ModChart -> ModChart
-            //Applies the modifier to the hit data of the chart - This hit data maps out what notes need to be hit/what notes have been hit
-            //This typically is unused - examples uses are marking all notes as hit perfectly in Autoplay or marking LN releases as not needing to be hit
-            Apply_Score: int -> ModChart -> ScoreData -> unit
         }
     
     let modList = new Dictionary<string, Mod>()
@@ -88,18 +81,7 @@ module Mods =
         let enumerateApplicable (chart: ModChart) (mods: ModState) =
             enumerate mods |> Seq.choose (fun id -> if modList.[id].Check(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
 
-    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ -> id); Apply_Score = fun _ _ _ -> () }
-
-    let private auto _ _ hitData =
-        for (t, delta, hit): ScoreDataRow in hitData do
-            for i = 0 to (Array.length hit - 1) do
-                if hit.[i] = HitStatus.NotHit then hit.[i] <- HitStatus.Hit; delta.[i] <- 0.0f<ms>
-
-    registerMod "auto"
-        { defaultMod with
-            Status = ModStatus.Unstored
-            Apply_Score = auto
-        }
+    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ -> id); }
 
     registerMod "mirror"
         { defaultMod with
@@ -130,14 +112,7 @@ module Mods =
             modChart <- { mc with ModsUsed = mc.ModsUsed @ [name] }
         modChart
 
-    let private applyModsToScoreData (mods: ModState) (modChart: ModChart) (scoreData: ScoreData) =
-        for (name, m, c) in mods |> ModState.enumerateApplicable modChart do
-            m.Apply_Score c modChart scoreData
-        scoreData
-
     let getModChart (mods: ModState) (chart: Chart) : ModChart = applyMods mods chart
-    let createScoreData (mods: ModState) (mc: ModChart) : ScoreData = applyModsToScoreData mods mc (notesToScoreData mc.Keys mc.Notes)
-    let loadScoreData (mc: ModChart) (replay: string) : ScoreData = decompressScoreData replay mc.Keys mc.Notes
 
     let getModString(rate: float32, selectedMods: ModState) = 
         String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))

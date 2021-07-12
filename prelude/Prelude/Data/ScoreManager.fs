@@ -6,7 +6,7 @@ open System.Collections.Generic
 open Percyqaz.Json
 open Prelude.Common
 open Prelude.Charts.Interlude
-open Prelude.Gameplay.Score
+open Prelude.Scoring
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout
@@ -17,7 +17,7 @@ module ScoreManager =
     type Score =
         {
             time: DateTime
-            hitdata: string
+            replay: string
             rate: float32
             selectedMods: ModState
             layout: Layout
@@ -27,7 +27,7 @@ module ScoreManager =
         static member Default =
             { 
                 time = DateTime.Now
-                hitdata = ""
+                replay = ""
                 rate = 1.0f
                 selectedMods = Map.empty
                 layout = Layout.Spread; keycount = 4
@@ -68,72 +68,71 @@ module ScoreManager =
     *)
 
     type ScoreInfoProvider(score: Score, chart: Chart, scoring, hpSystem) =
-        let mutable accuracyType = scoring
-        let mutable hpType = hpSystem
+        let mutable accuracyType: Metrics.AccuracySystemConfig = scoring
+        let mutable hpType: Metrics.HPSystemConfig = hpSystem
 
-        let mutable modchart = None
-        let mutable modstring = None
-        let mutable modstatus = None
-        let mutable hitdata = None
-        let mutable difficulty = None
-        let mutable accMetric = None
-        let mutable hpMetric = None
-        let mutable perfMetric = None
-        let mutable lamp = None
+        let mutable modchart = ValueNone
+        let mutable modstring = ValueNone
+        let mutable modstatus = ValueNone
+        let mutable difficulty = ValueNone
+        let mutable scoreMetric = ValueNone
+        let mutable perfMetric = ValueNone
+        let mutable lamp = ValueNone
 
-        member this.Score = score
+        member this.ScoreInfo = score
         member this.Chart = chart
 
         member this.ModChart
             with get() =
-                modchart <- Option.defaultWith (fun () -> getModChart score.selectedMods chart) modchart |> Some
+                modchart <- ValueOption.defaultWith (fun () -> getModChart score.selectedMods chart) modchart |> ValueSome
                 modchart.Value
-            and set(value) = modchart <- Some value
+            and set(value) = modchart <- ValueSome value
 
-        member this.HitData
-            with get() =
-                hitdata <- Option.defaultWith (fun () -> loadScoreData this.ModChart score.hitdata) hitdata |> Some
-                hitdata.Value
-            and set(value) = hitdata <- Some value
+        member this.AccuracyType with get() = accuracyType and set(value) = if value <> this.AccuracyType then accuracyType <- value; scoreMetric <- ValueNone
+        member this.Scoring =
+            scoreMetric <-
+                ValueOption.defaultWith (fun () -> 
+                    let m = Metrics.createScoreMetric accuracyType hpType this.ModChart.Keys (StoredReplayProvider(score.replay)) this.ModChart.Notes score.rate 
+                    m.Update(infinityf * 1.0f<ms>); m)
+                    scoreMetric
+                |> ValueSome
+            scoreMetric.Value
+
+        member this.HPType with get() = hpType and set(value) = hpType <- value; scoreMetric <- ValueNone
+        member this.HP = this.Scoring.HP
+
+        member this.HitData = this.Scoring.HitData
 
         member this.Difficulty
             with get() =
-                difficulty <- Option.defaultWith (fun () -> RatingReport (this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> Some
+                difficulty <- ValueOption.defaultWith (fun () -> RatingReport (this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> ValueSome
                 difficulty.Value
-            and set(value) = difficulty <- Some value
-
-        member this.AccuracyType with get() = accuracyType and set(value) = if value <> this.AccuracyType then accuracyType <- value; accMetric <- None
-        member this.Accuracy =
-            accMetric <- Option.defaultWith (fun () -> let m = createAccuracyMetric accuracyType in m.ProcessAll this.HitData; m) accMetric |> Some
-            accMetric.Value
-
-        member this.HPType with get() = hpType and set(value) = hpType <- value; hpMetric <- None
-        member this.HP =
-            hpMetric <- Option.defaultWith (fun () -> let m = createHPMetric hpType this.Accuracy in m.ProcessAll this.HitData; m) hpMetric |> Some
-            hpMetric.Value
+            and set(value) = difficulty <- ValueSome value
 
         member this.Performance =
-            perfMetric <- Option.defaultWith (fun () -> let m = performanceMetric this.Difficulty this.ModChart.Keys in m.ProcessAll this.HitData; m) perfMetric |> Some
+            perfMetric <- ValueOption.defaultWith (fun () -> let m = performanceMetric this.Difficulty this.ModChart.Keys in (*m.ProcessAll this.HitData;*) m) perfMetric |> ValueSome
             perfMetric.Value
 
         member this.Lamp =
-            lamp <- Option.defaultWith (fun () -> Prelude.Gameplay.Score.lamp this.Accuracy.State) lamp |> Some
+            lamp <- ValueOption.defaultWith (fun () -> Prelude.Scoring.Lamp.calculate this.Scoring.State) lamp |> ValueSome
             lamp.Value
 
-        member this.Physical = this.Performance.Value
-        member this.Technical = 0.0 //nyi
+        // todo: grade info
+
+        member this.Physical = 0.0 // temp disabled
+        member this.Technical = 0.0 // nyi
         member this.Mods =
             modstring <-
-                Option.defaultWith
+                ValueOption.defaultWith
                     (fun () -> getModString(score.rate, score.selectedMods))
-                    modstring |> Some
+                    modstring |> ValueSome
             modstring.Value
 
         member this.ModStatus =
             modstatus <-
-                Option.defaultWith
+                ValueOption.defaultWith
                     (fun () -> score.selectedMods |> ModState.enumerate |> List.ofSeq |> List.map (fun s -> modList.[s].Status) |> fun l -> ModStatus.Ranked :: l |> List.max)
-                    modstatus |> Some
+                    modstatus |> ValueSome
             modstatus.Value
 
     type ScoresDB() =

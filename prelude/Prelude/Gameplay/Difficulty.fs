@@ -4,7 +4,7 @@ open System
 open System.Drawing
 open Prelude.Common
 open Prelude.Charts.Interlude
-open Prelude.Gameplay.Score
+open Prelude.Scoring
 
 (*
     Representation of hand/keyboard layouts.
@@ -254,7 +254,8 @@ module Difficulty =
         with _ -> Color.Red
 
     type PerformanceMetricState = Time array * float * float array * float * float array
-    let performanceMetric (rr: RatingReport) (keys: int) =
+    let performanceMetric (rr: RatingReport) (keys: int) = ()
+        (*
         ScoreMetric<PerformanceMetricState>(
             "Interlude",
             (Array.create keys 0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
@@ -272,3 +273,4 @@ module Difficulty =
             ),
             (fun x y -> id),
             fun (_, p, ps, t, ts) -> Math.Pow(p, 0.6) * 2.5)
+        *)

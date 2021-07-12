@@ -6,7 +6,7 @@ open System.IO.Compression
 open Prelude.Common
 open Prelude.Charts.Interlude
 
-module Score =
+module _Score =
 
     (*
         Representation of replay data for a score.

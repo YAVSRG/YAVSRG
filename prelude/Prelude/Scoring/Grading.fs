@@ -1,18 +1,5 @@
 ﻿namespace Prelude.Scoring
 
-// user-facing flags of "judgements", how well you hit notes
-type JudgementType =
-    | RIDICULOUS = 0
-    | MARVELLOUS = 1
-    | PERFECT = 2
-    | OK = 3
-    | GREAT = 4
-    | GOOD = 5
-    | BAD = 6
-    | NG = 7
-    | MISS = 8
-module JudgementType = let count = 9
-
 type Lamp =
     | MFC = 9
     | WF = 8
@@ -27,22 +14,23 @@ type Lamp =
 
 module Lamp =
 
-    let calculate perfects greats cbs : Lamp =
+    let calculate (state: AccuracySystemState) : Lamp =
         let c count (zero: unit -> Lamp) one singleDigit more = 
             if count = 0 then zero ()
             elif count = 1 then one
             elif count < 10 then singleDigit
             else more
-        c cbs (fun () -> (c greats (fun () -> (c perfects (fun () -> Lamp.MFC) Lamp.WF Lamp.SDP Lamp.PFC)) Lamp.BF Lamp.SDG Lamp.FC)) Lamp.MF Lamp.SDCB Lamp.NONE
+        c state.ComboBreaks (fun () -> (c state.Judgements.[3] (fun () -> (c state.Judgements.[2] (fun () -> Lamp.MFC) Lamp.WF Lamp.SDP Lamp.PFC)) Lamp.BF Lamp.SDG Lamp.FC)) Lamp.MF Lamp.SDCB Lamp.NONE
 
 module Grade =
 
     // todo: support cb count targets
-    let calculate percent (thresholds: float array) = 
+    let calculate (thresholds: float array) (state: AccuracySystemState) =
+        let percent = state.PointsScored / state.MaxPointsScored
         let mutable i = 0
         while i < thresholds.Length && thresholds.[i] > percent do
             i <- i + 1
-        i
+        i // higher i is worse grade
 
 type PersonalBests<'T> = ('T * float32) * ('T * float32)
 
