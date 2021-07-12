@@ -523,7 +523,7 @@ module ScreenLevelSelect =
                 colorVersion <- colorVersionGlobal
                 if chartData.IsNone then chartData <- scores.GetScoreData cc.Hash
                 match chartData with
-                | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, (*Grade.calculate themeConfig.GradeThresholds x*) 0)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
+                | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, Grade.calculateFromAcc themeConfig.GradeThresholds x)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
                 | None -> ()
                 color <- colorFunc pbData
                 collectionIcon <-
