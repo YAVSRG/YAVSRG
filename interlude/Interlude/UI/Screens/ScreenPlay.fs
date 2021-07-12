@@ -56,11 +56,10 @@ type GameStartDialog() as this =
 *)
 
 module GameplayWidgets = 
-    type HitEvent = (struct(JudgementType * Time * Time))
     type Helper = {
-        Scoring: ScoreMetric
+        Scoring: IScoreMetric
         HP: IHealthBarSystem
-        OnHit: IEvent<HitEvent>
+        OnHit: IEvent<struct (Time * HitEvent)>
     }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
@@ -86,8 +85,11 @@ module GameplayWidgets =
         let hits = ResizeArray<struct (Time * float32 * int)>()
         let mutable w = 0.0f
         let listener =
-            helper.OnHit.Subscribe(
-                fun struct (judgement, delta, now) -> hits.Add(struct (now, delta/helper.Scoring.MissWindow * w * 0.5f, int judgement)))
+            helper.OnHit.Subscribe(fun struct (now, ev) ->
+                match ev.Guts with
+                | Hit (judgement, delta) | Release (judgement, delta) ->
+                    hits.Add (struct (now, delta / helper.Scoring.MissWindow * w * 0.5f, int judgement))
+                | _ -> ())
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -122,26 +124,31 @@ module GameplayWidgets =
         let mutable tier = 0
         let mutable late = 0
         let mutable time = -atime * 2.0f - Audio.LEADIN_TIME
-        let texture = Themes.getTexture("judgements")
+        let texture = Themes.getTexture "judgements"
         let listener =
-            helper.OnHit.Subscribe(
-                fun struct (judge, delta, now) ->
-                    if
-                        match judge with
-                        | JudgementType.RIDICULOUS
-                        | JudgementType.MARVELLOUS -> conf.ShowRDMA
-                        | JudgementType.OK
-                        | JudgementType.NG -> conf.ShowOKNG
-                        | _ -> true
-                    then
-                        let j = int judge in
-                        if j >= tier || now - atime > time then
-                            tier <- j
-                            time <- now
-                            late <- if delta > 0.0f<ms> then 1 else 0)
+            helper.OnHit.Subscribe(fun struct (now, ev) ->
+                let (judge, delta) =
+                    match ev.Guts with
+                    | Hit (judge, delta)
+                    | Release (judge, delta) -> (judge, delta)
+                    | Mine good
+                    | Hold good -> if good then (JudgementType.OK, 0.0f<ms>) else (JudgementType.NG, 0.0f<ms>)
+                if
+                    match judge with
+                    | JudgementType.RIDICULOUS
+                    | JudgementType.MARVELLOUS -> conf.ShowRDMA
+                    | JudgementType.OK
+                    | JudgementType.NG -> conf.ShowOKNG
+                    | _ -> true
+                then
+                    let j = int judge in
+                    if j >= tier || now - atime > time then
+                        tier <- j
+                        time <- now
+                        late <- if delta > 0.0f<ms> then 1 else 0 )
         override this.Draw() =
             let a = 255 - Math.Clamp(255.0f * (Audio.timeWithOffset() - time) / atime |> int, 0, 255)
-            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV(late, tier) texture)
+            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
 
         override this.Dispose() =
             listener.Dispose()
@@ -191,7 +198,7 @@ module GameplayWidgets =
         These widgets are not repositioned by theme
     *)
 
-    type ColumnLighting(keys, binds: Bind array, lightTime, helper) as this =
+    type ColumnLighting(keys, lightTime, helper) as this =
         inherit Widget()
         let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
         let sprite = Themes.getTexture("receptorlighting")
@@ -225,6 +232,9 @@ module GameplayWidgets =
                         sprite
             Array.iteri f sliders
 
+    type Explosions(keys, helper) as this =
+        inherit Widget()
+
 open GameplayWidgets
 
 type ScreenPlay() as this =
@@ -233,7 +243,7 @@ type ScreenPlay() as this =
     let chart = Gameplay.modifiedChart.Value
     let liveplay = new LiveReplayProvider()
     let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys liveplay chart.Notes Gameplay.rate
-    let onHit = new Event<HitEvent>()
+    let onHit = new Event<struct (Time * HitEvent)>()
     let widgetHelper: Helper = { Scoring = scoring; HP = scoring.HP; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
@@ -241,11 +251,11 @@ type ScreenPlay() as this =
     let mutable inputKeyState = 0us
 
     do
-        let noteRenderer = new NoteRenderer()
+        let noteRenderer = new NoteRenderer(scoring)
         this.Add noteRenderer
         let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Themes.getGameplayConfig(name)
-            let pos: WidgetConfig = (^T: (member Position: WidgetConfig) (config))
+            let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 config
                 |> constructor
@@ -258,8 +268,8 @@ type ScreenPlay() as this =
         f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
         if Themes.noteskinConfig.ColumnLightTime >= 0.0f then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, binds, Themes.noteskinConfig.ColumnLightTime, widgetHelper))
-        scoring.SetHitCallback(fun judge time -> onHit.Trigger(struct (judge, time, Audio.timeWithOffset())))
+            noteRenderer.Add(new ColumnLighting(chart.Keys, Themes.noteskinConfig.ColumnLightTime, widgetHelper))
+        scoring.SetHitCallback(fun ev -> onHit.Trigger(struct (Audio.timeWithOffset(), ev)))
 
     override this.OnEnter(prev) =
         Screens.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
