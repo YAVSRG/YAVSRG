@@ -118,7 +118,9 @@ type ScoreMetric
     let missWindow = missWindow * rate
     // some score systems can modify this internal data, to remove the need to time releases for example
     let hitdata = InternalScore.createDefault missWindow keys notes
-    let mutable noteSeek = 0
+    // having two seekers improves performance when feeding scores rather than playing live
+    let mutable noteSeekPassive = 0
+    let mutable noteSeekActive = 0
 
     let state =
         {
@@ -139,14 +141,16 @@ type ScoreMetric
     member this.State: AccuracySystemState = state
     member this.HitData: InternalScoreData = hitdata
 
+    // correctness guaranteed up to the time you update, no matter how you update
+    // call Update with infinityf to do a correct feeding of the whole replay
     member this.Update(time: Time) =
         this.PollReplay time // calls HandleKeyDown and HandleKeyUp appropriately
         this.HandlePassive time
 
     member private this.HandlePassive(now) =
         let target = now - missWindow
-        while noteSeek < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeek] <= target do
-            let struct (t, deltas, status) = hitdata.[noteSeek]
+        while noteSeekPassive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekPassive] <= target do
+            let struct (t, deltas, status) = hitdata.[noteSeekPassive]
             for k = 0 to (keys - 1) do
                 if status.[k] = HitStatus.NEEDS_TO_BE_HIT then
                     this._HandleNote(JudgementType.MISS, deltas.[k])
@@ -156,19 +160,20 @@ type ScoreMetric
                     this._HandleMineDodged()
                 elif status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then
                     this._HandleHoldOK()
-            noteSeek <- noteSeek + 1
+            noteSeekPassive <- noteSeekPassive + 1
         // missing: checks key down as mine passes receptors, key up as hold middle passes receptors
         // algorithm must "forget" what it finds if
             // for mines, nothing
             // for lns, if we see a hold head or tail within misswindow
 
     override this.HandleKeyDown(now, k) =
-        let mutable i = noteSeek
+        while noteSeekActive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekActive] < now - missWindow do 
+            noteSeekActive <- noteSeekActive + 1
+        let mutable i = noteSeekActive
         let mutable delta = missWindow
         let mutable found = -1
         let mutable priority = -1
         let target = now + missWindow
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] < now - missWindow do i <- i + 1
         while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] <= target do
             let struct (t, _, status) = hitdata.[i]
             let d = now - t
@@ -195,12 +200,13 @@ type ScoreMetric
                 this._HandleMineExplosion()
                 
     override this.HandleKeyUp(now, k) =
-        let mutable i = noteSeek
+        while noteSeekActive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekActive] < now - missWindow do 
+            noteSeekActive <- noteSeekActive + 1
+        let mutable i = noteSeekActive
         let mutable delta = missWindow
         let mutable found = -1
         let mutable priority = -1
         let target = now + missWindow
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] < now - missWindow do i <- i + 1
         while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] <= target do
             let struct (t, _, status) = hitdata.[i]
             let d = now - t
@@ -262,7 +268,7 @@ type ScoreMetric
         healthBar.HandleRelease(judge, time)
 
 // simple constructor for "typical" score systems. for additional customisation of behaviour, override ScoreMetric instead
-type RegularScoreMetric
+type ScorePointsMetric
     (
         name: string,
         healthBar: IHealthBarSystem,
@@ -278,9 +284,9 @@ type RegularScoreMetric
     ) =
     inherit ScoreMetric(name, healthBar, missWindow, keys, replayProvider, notes, rate)
 
-    override this.HandleMineExplosion() = this.State.Add JudgementType.NG
+    override this.HandleMineExplosion() = this.State.Add JudgementType.NG; this.State.BreakCombo()
     override this.HandleMineDodged() = this.State.Add JudgementType.OK
-    override this.HandleHoldDropped() = this.State.Add JudgementType.NG
+    override this.HandleHoldDropped() = this.State.Add JudgementType.NG; this.State.BreakCombo()
     override this.HandleHoldOK() = this.State.Add JudgementType.OK
 
     override this.HandleNote(j, delta) =
@@ -345,7 +351,7 @@ module ScoringHelpers =
              then (perf_window * 0.25f, JudgementType.RIDICULOUS) :: windows
              else windows)
     
-    let sc_curve (judge: int) _ (judgement: JudgementType) (delta: Time) =
+    let sc_curve (judge: int) (_: bool) (judgement: JudgementType) (delta: Time) =
         assert (delta >= 0.0f<ms>)
         if delta >= 180.0f<ms> then -0.5
         else
@@ -354,7 +360,7 @@ module ScoringHelpers =
             Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
 
     // now finally ported to wife3
-    let wife_curve (judge: int) (_: JudgementType) (delta: Time) =
+    let wife_curve (judge: int) (_: bool) (_: JudgementType) (delta: Time) =
         // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
         let erf = 
             // you really had to put erf in this one didnt you
@@ -389,13 +395,30 @@ module ScoringHelpers =
         else miss_weight
 
 type ScoreClassifier(judge: int, enableRd: bool, keys, replay, notes, rate) =
-    inherit RegularScoreMetric
+    inherit ScorePointsMetric
         (
             sprintf "SC+ (J%i)" judge,
             VibeGauge(),
             180.0f<ms>,
             keys, replay, notes, rate,
             (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
-            (ScoringHelpers.dp_windows judge enableRd),
-            (ScoringHelpers.sc_curve judge)
+            ScoringHelpers.dp_windows judge enableRd,
+            ScoringHelpers.sc_curve judge
         )
+
+type Wife3(judge: int, enableRd: bool, keys, replay, notes, rate) as this =
+    inherit ScorePointsMetric
+        (
+            sprintf "Wife3 (J%i)" judge,
+            VibeGauge(),
+            180.0f<ms>,
+            keys, replay, notes, rate,
+            (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
+            ScoringHelpers.dp_windows judge enableRd,
+            ScoringHelpers.wife_curve judge
+        )
+    // disable release timing
+    do
+        for struct (time, deltas, status) in this.HitData do
+            for k = 0 to (keys - 1) do
+                if status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then status.[k] <- HitStatus.NOTHING
