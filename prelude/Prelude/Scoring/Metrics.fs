@@ -374,9 +374,15 @@ module ScoringHelpers =
             (if ridiculous
              then (perf_window * 0.25f, JudgementType.RIDICULOUS) :: windows
              else windows)
+
+    let sc_windows judge ridiculous =
+        let win = dp_windows judge ridiculous false
+        fun isRelease delta ->
+            if isRelease then win (delta * 0.5f) else win delta
     
-    let sc_curve (judge: int) (_: bool) (judgement: JudgementType) (delta: Time) =
+    let sc_curve (judge: int) (isRelease: bool) (judgement: JudgementType) (delta: Time) =
         assert (delta >= 0.0f<ms>)
+        let delta = if isRelease then delta * 0.5f else delta
         if delta >= 180.0f<ms> then -0.5
         else
             let delta = float delta
@@ -426,7 +432,7 @@ type ScoreClassifier(judge: int, enableRd: bool, healthBar, keys, replay, notes,
             180.0f<ms>,
             keys, replay, notes, rate,
             (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
-            ScoringHelpers.dp_windows judge enableRd,
+            ScoringHelpers.sc_windows judge enableRd,
             ScoringHelpers.sc_curve judge
         )
 
