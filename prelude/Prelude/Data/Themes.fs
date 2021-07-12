@@ -112,7 +112,7 @@ module Themes =
             }
 
     //texture names that are loaded from Noteskin folders instead of Theme folders
-    let noteskinTextures = [|"note"; "receptor"; "mine"; "holdhead"; "holdbody"; "holdtail"; "judgements"|]
+    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "mine"; "mineexplosion"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"|]
 
     type NoteSkinConfig =
         {
@@ -123,7 +123,6 @@ module Themes =
             FlipHoldTail: bool
             UseHoldTailTexture: bool
             HoldNoteTrim: float32
-            DroppedHoldTint: Color
             PlayfieldColor: Color
             PlayfieldAlignment: float32 * float32
             ColumnWidth: float32
@@ -138,7 +137,6 @@ module Themes =
                 FlipHoldTail = true
                 UseHoldTailTexture = true
                 HoldNoteTrim = 0.0f
-                DroppedHoldTint = Color.FromArgb(180, 180, 180, 180)
                 PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
                 PlayfieldAlignment = 0.5f, 0.5f
                 ColumnWidth = 150.0f
