@@ -97,7 +97,7 @@ module Replay =
         use gZipStream = new GZipStream(inputStream, CompressionMode.Decompress)
         use br = new BinaryReader(gZipStream)
 
-        let count: int = br.Read()
+        let count: int = br.ReadInt32()
         let output = Array.zeroCreate count
         for i = 0 to (count - 1) do
             output.[i] <- struct (br.ReadSingle() * 1.0f<ms>, br.ReadUInt16())

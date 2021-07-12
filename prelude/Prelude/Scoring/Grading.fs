@@ -24,13 +24,16 @@ module Lamp =
 
 module Grade =
 
-    // todo: support cb count targets
-    let calculate (thresholds: float array) (state: AccuracySystemState) =
-        let percent = state.PointsScored / state.MaxPointsScored
+    let calculateFromAcc (thresholds: float array) (percent: float) =
         let mutable i = 0
         while i < thresholds.Length && thresholds.[i] > percent do
             i <- i + 1
         i // higher i is worse grade
+
+    // todo: support cb count targets
+    let calculate (thresholds: float array) (state: AccuracySystemState) =
+        let percent = state.PointsScored / state.MaxPointsScored
+        calculateFromAcc thresholds percent
 
 type PersonalBests<'T> = ('T * float32) * ('T * float32)
 
