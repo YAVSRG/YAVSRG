@@ -332,7 +332,7 @@ module ScoringHelpers =
         | (w, j) :: xs ->
             if (delta < w) then j else window_func xs delta
 
-    let dp_windows judge ridiculous _ =
+    let dp_windows judge ridiculous =
         let perf_window = 45.0f<ms> / 6.0f * (10.0f - (judge |> float32))
 
         let windows: HitWindows =
@@ -347,22 +347,13 @@ module ScoringHelpers =
              then (perf_window * 0.25f, JudgementType.RIDICULOUS) :: windows
              else windows)
 
-    let sc_windows judge ridiculous =
-        let win = dp_windows judge ridiculous false
-        fun isRelease delta ->
-            if isRelease then win (delta * 0.5f) else win delta
-    
-    let sc_curve (judge: int) (isRelease: bool) (judgement: JudgementType) (delta: Time) =
-        assert (delta >= 0.0f<ms>)
-        let delta = if isRelease then delta * 0.5f else delta
-        if delta >= 180.0f<ms> then -0.5
-        else
-            let delta = float delta
-            let scale = 6.0 / (10.0 - float judge)
-            Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
+    let dp_windows_halved judge ridiculous =
+        (fun (t: Time) -> t * 0.5f) >> (dp_windows judge ridiculous)
+
+    let isComboBreaker = (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false)
 
     // now finally ported to wife3
-    let wife_curve (judge: int) (_: bool) (_: JudgementType) (delta: Time) =
+    let wife_curve (judge: int) (delta: Time) =
         // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
         let erf = 
             // you really had to put erf in this one didnt you
@@ -380,8 +371,7 @@ module ScoringHelpers =
                 let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x)
                 sign * y
 
-        assert (delta >= 0.0f<ms>)
-        let delta = float delta
+        let delta = float delta |> Math.Abs
 
         let scale = (10.0 - float judge) / 6.0
         let miss_weight = -2.75
@@ -396,34 +386,102 @@ module ScoringHelpers =
         elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
         else miss_weight
 
-type ScoreClassifier(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
-    inherit ScorePointsMetric
+type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
+    inherit IScoreMetric
         (
             sprintf "SC+ (J%i)" judge,
             healthBar,
             180.0f<ms>,
-            keys, replay, notes, rate,
-            (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
-            ScoringHelpers.sc_windows judge enableRd,
-            ScoringHelpers.sc_curve judge
+            keys, replay, notes, rate
         )
 
+    let sc_curve (judge: int) (isRelease: bool) (delta: Time) =
+        let delta = if isRelease then Time.Abs (delta * 0.5f) else Time.Abs delta
+
+        // 1.0 = 100%
+        if delta >= 180.0f<ms> then -0.5
+        else
+            let delta = float delta
+            let scale = 6.0 / (10.0 - float judge)
+            Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
+
+    override this.JudgementFunc (isRelease, delta) =
+        delta |> if isRelease then ScoringHelpers.dp_windows_halved judge enableRd else ScoringHelpers.dp_windows judge enableRd
+
+    override this.HandleEvent ev =
+        match ev.Guts with
+        | Hit (judgement, delta, _) ->
+            this.State.Add(sc_curve judge false delta, 1.0, judgement)
+            if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+        | Release (judgement, delta) ->
+            this.State.Add(sc_curve judge true delta, 1.0, judgement)
+            if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+        | Hold good
+        | Mine good -> if not good then this.State.BreakCombo()
+
 type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) as this =
-    inherit ScorePointsMetric
+    inherit IScoreMetric
         (
             sprintf "Wife3 (J%i)" judge,
             healthBar,
             180.0f<ms>,
-            keys, replay, notes, rate,
-            (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false),
-            ScoringHelpers.dp_windows judge enableRd,
-            ScoringHelpers.wife_curve judge
+            keys, replay, notes, rate
         )
-    // disable release timing
     do
         for struct (time, deltas, status) in this.HitData do
             for k = 0 to (keys - 1) do
                 if status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then status.[k] <- HitStatus.NOTHING
+
+    override this.JudgementFunc (isRelease, delta) = ScoringHelpers.dp_windows judge enableRd delta
+
+    override this.HandleEvent ev =
+        match ev.Guts with
+        | Hit (judgement, delta, _) ->
+            this.State.Add(ScoringHelpers.wife_curve judge delta, 1.0, judgement)
+            if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+        | Release _ -> failwith "this is impossible because releases are disabled"
+        | Hold good
+        | Mine good -> if not good then this.State.BreakCombo()
+
+type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
+    inherit IScoreMetric
+        (
+            sprintf "osu!mania (OD%.1f)" od,
+            healthBar,
+            180.0f<ms>, // idk apparently you can get early misses
+            keys, replay, notes, rate
+        )
+
+    let points =
+        function
+        | JudgementType.RIDICULOUS
+        | JudgementType.MARVELLOUS
+        | JudgementType.PERFECT -> 300.0
+        | JudgementType.GREAT -> 200.0
+        | JudgementType.GOOD -> 100.0
+        | JudgementType.BAD -> 50.0
+        | JudgementType.MISS -> 0.0
+        | _ -> 0.0
+
+    override this.JudgementFunc (isRelease, delta) =
+        if delta <= 16.5f<ms> then JudgementType.MARVELLOUS
+        elif delta <= 64.5f<ms> - od * 3.0f<ms> then JudgementType.PERFECT
+        elif delta <= 97.5f<ms> - od * 3.0f<ms> then JudgementType.GREAT
+        elif delta <= 127.5f<ms> - od * 3.0f<ms> then JudgementType.GOOD
+        elif delta <= 151.5f<ms> - od * 3.0f<ms> then JudgementType.BAD
+        else JudgementType.MISS
+
+    override this.HandleEvent ev =
+        match ev.Guts with
+            //todo: osu doesn't weight the begin and end of lns seperately, but as one object
+        | Hit (judgement, _, _) ->
+            this.State.Add(points judgement, 300.0, judgement)
+            if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
+        | Release (judgement, _) ->
+            this.State.Add(points judgement, 300.0, judgement)
+            if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
+        | Hold good
+        | Mine good -> if not good then this.State.BreakCombo()
 
 module Metrics =
     
@@ -460,6 +518,7 @@ module Metrics =
         let hp = createHealthBar hpConfig
         match accConfig with
         | SC (judge, rd)
-        | SCPlus (judge, rd) -> ScoreClassifier(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
+        | SCPlus (judge, rd) -> ScoreClassifierPlus(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
         | Wife (judge, rd) -> Wife3(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
+        | OM od -> OsuMania(od, hp, keys, replay, notes, rate) :> IScoreMetric
         | _ -> failwith "nyi"
