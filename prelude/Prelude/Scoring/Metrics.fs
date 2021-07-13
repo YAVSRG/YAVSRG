@@ -18,7 +18,7 @@ type JudgementType =
 module JudgementType = let count = 9
 
 type HitEventGuts =
-    | Hit of judgement: JudgementType * delta: Time
+    | Hit of judgement: JudgementType * delta: Time * isHoldHead: bool
     | Release of judgement: JudgementType * delta: Time
     | Mine of dodged: bool
     | Hold of held: bool
@@ -86,7 +86,7 @@ type HealthBarPointsSystem
 
     override this.HandleEvent ev =
         match ev.Guts with
-        | Hit (j, delta)
+        | Hit (j, delta, _)
         | Release (j, delta) -> this.ChangeHP(points_func j)
         | Mine good -> if not good then this.ChangeHP(points_func JudgementType.NG)
         | Hold good -> ()
@@ -177,7 +177,8 @@ type IScoreMetric
         while noteSeekPassive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekPassive] <= target do
             let struct (t, deltas, status) = hitdata.[noteSeekPassive]
             for k = 0 to (keys - 1) do
-                if status.[k] = HitStatus.NEEDS_TO_BE_HIT then this._HandleEvent { Column = k; Guts = Hit (JudgementType.MISS, deltas.[k]) }
+                if status.[k] = HitStatus.NEEDS_TO_BE_HIT then this._HandleEvent { Column = k; Guts = Hit (JudgementType.MISS, deltas.[k], false) }
+                elif status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then this._HandleEvent { Column = k; Guts = Hit (JudgementType.MISS, deltas.[k], true) }
                 elif status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then this._HandleEvent { Column = k; Guts = Release (JudgementType.MISS, deltas.[k]) }
                 elif status.[k] = HitStatus.NEEDS_TO_BE_DODGED then this._HandleEvent { Column = k; Guts = Mine true }
                 elif status.[k] = HitStatus.NEEDS_TO_BE_HELD then this._HandleEvent { Column = k; Guts = Hold true }
@@ -198,7 +199,7 @@ type IScoreMetric
         while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] <= target do
             let struct (t, _, status) = hitdata.[i]
             let d = now - t
-            if status.[k] = HitStatus.NEEDS_TO_BE_HIT then
+            if status.[k] = HitStatus.NEEDS_TO_BE_HIT || status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then
                 if (Time.Abs delta > Time.Abs d) || priority < 1 then
                     priority <- 1
                     found <- i
@@ -213,9 +214,10 @@ type IScoreMetric
             let struct (t, deltas, status) = hitdata.[found]
             if priority = 1 then //we found a note
                 delta <- delta / rate
+                let isHoldHead = status.[k] <> HitStatus.NEEDS_TO_BE_HIT
                 status.[k] <- HitStatus.HAS_BEEN_HIT
                 deltas.[k] <- delta
-                this._HandleEvent { Column = k; Guts = Hit (this.JudgementFunc (false, Time.Abs deltas.[k]), deltas.[k]) }
+                this._HandleEvent { Column = k; Guts = Hit (this.JudgementFunc (false, Time.Abs deltas.[k]), deltas.[k], isHoldHead) }
             else //priority = 0, we found a mine
                 status.[k] <- HitStatus.HAS_NOT_BEEN_DODGED
                 this._HandleEvent { Column = k; Guts = Mine false }
@@ -241,7 +243,7 @@ type IScoreMetric
                     priority <- 0
                     found <- i
                     delta <- d
-            elif status.[k] = HitStatus.NEEDS_TO_BE_HIT then
+            elif status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then
                 i <- hitdata.Length //stops the loop so we don't release an LN that isnt held yet
             i <- i + 1
         if found >= 0 then
@@ -282,7 +284,7 @@ type ScorePointsMetric
 
     override this.HandleEvent ev =
         match ev.Guts with
-        | Hit (j, delta) ->
+        | Hit (j, delta, _) ->
             if comboFunc j then this.State.BreakCombo() else this.State.IncrCombo()
             this.State.Add (pointsFunc false j (Time.Abs delta), 1.0, j)
         | Release (j, delta) ->

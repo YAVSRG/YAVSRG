@@ -111,38 +111,6 @@ module Themes =
                 CursorSize = 50.0f
             }
 
-    //texture names that are loaded from Noteskin folders instead of Theme folders
-    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "mine"; "mineexplosion"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"|]
-
-    type NoteSkinConfig =
-        {
-            Name: string
-            Author: string
-            Version: string
-            UseRotation: bool
-            FlipHoldTail: bool
-            UseHoldTailTexture: bool
-            HoldNoteTrim: float32
-            PlayfieldColor: Color
-            PlayfieldAlignment: float32 * float32
-            ColumnWidth: float32
-            ColumnLightTime: float32
-        }
-        static member Default =
-            {
-                Name = "?"
-                Author = "Unknown"
-                Version = "1.0.0"
-                UseRotation = false
-                FlipHoldTail = true
-                UseHoldTailTexture = true
-                HoldNoteTrim = 0.0f
-                PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
-                PlayfieldAlignment = 0.5f, 0.5f
-                ColumnWidth = 150.0f
-                ColumnLightTime = 0.4f
-            }
-
     type TextureConfig =
         {
             Columns: int
@@ -308,7 +276,22 @@ module Themes =
                     ShowOKNG = false
                     ShowRDMA = true
                 }
-        type Banner = { Position: WidgetConfig; AnimationTime: float }
+        
+        type Explosions =
+            {
+                FadeTime: float32
+                ExpandAmount: float32
+                ExplodeOnMiss: bool
+                AnimationFrameTime: float
+            }
+            static member Default =
+                {
+                    FadeTime = 1.0f
+                    ExpandAmount = 0.15f
+                    ExplodeOnMiss = false
+                    AnimationFrameTime = 50.0
+                }
+
         type ProgressBar = { Position: WidgetConfig }
         //song info
         //mod info
@@ -317,7 +300,42 @@ module Themes =
         //life meter
         //judgement counts
         //pacemaker
-        type HitLighting = { AnimationTime: float; Expand: float32 }
+        
+    //texture names that are loaded from Noteskin folders instead of Theme folders
+    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "mine"; "mineexplosion"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"|]
+        
+    type NoteSkinConfig =
+        {
+            Name: string
+            Author: string
+            Version: string
+            UseRotation: bool
+            FlipHoldTail: bool
+            UseHoldTailTexture: bool
+            HoldNoteTrim: float32
+            PlayfieldColor: Color
+            PlayfieldAlignment: float32 * float32
+            ColumnWidth: float32
+            ColumnLightTime: float32
+            AnimationFrameTime: float
+            Explosions: WidgetConfig.Explosions
+        }
+        static member Default =
+            {
+                Name = "?"
+                Author = "Unknown"
+                Version = "1.0.0"
+                UseRotation = false
+                FlipHoldTail = true
+                UseHoldTailTexture = true
+                HoldNoteTrim = 0.0f
+                PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
+                PlayfieldAlignment = 0.5f, 0.5f
+                ColumnWidth = 150.0f
+                ColumnLightTime = 0.4f
+                AnimationFrameTime = 200.0
+                Explosions = WidgetConfig.Explosions.Default
+            }
 
     (*
         Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude

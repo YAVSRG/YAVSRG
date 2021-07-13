@@ -14,18 +14,19 @@ type HitStatus =
     // the first flag indicates an active need for the player to do something
     // the second flag should be reached once they do it
     | NEEDS_TO_BE_HIT = 1
-    | HAS_BEEN_HIT = 2
+    | NEEDS_TO_BE_HIT_AND_HELD = 2
+    | HAS_BEEN_HIT = 3
 
-    | NEEDS_TO_BE_RELEASED = 3
-    | HAS_BEEN_RELEASED = 4
+    | NEEDS_TO_BE_RELEASED = 4
+    | HAS_BEEN_RELEASED = 5
     
     // the first flag indicates an passivee need for the player to NOT do something
     // the second flag is placed if they do this (bad) thing, and in a perfect replay the first flag has remained
-    | NEEDS_TO_BE_HELD = 5
-    | HAS_NOT_BEEN_HELD = 6
+    | NEEDS_TO_BE_HELD = 6
+    | HAS_NOT_BEEN_HELD = 7
 
-    | NEEDS_TO_BE_DODGED = 7
-    | HAS_NOT_BEEN_DODGED = 8
+    | NEEDS_TO_BE_DODGED = 8
+    | HAS_NOT_BEEN_DODGED = 9
 
 // this data is in-memory only and not exposed much to other parts of the code
 // the flags in particular need never be exposed anywhere else, while the hit deltas can be used on the score screen to give useful data
@@ -46,8 +47,10 @@ module InternalScore =
 
             for k = 0 to (keys - 1) do
                 // todo: match NoteRow.[k] with ...
-                if NoteRow.hasNote k NoteType.NORMAL nr || NoteRow.hasNote k NoteType.HOLDHEAD nr then
+                if NoteRow.hasNote k NoteType.NORMAL nr then
                     statuses.[k] <- HitStatus.NEEDS_TO_BE_HIT
+                elif NoteRow.hasNote k NoteType.HOLDHEAD nr then
+                    statuses.[k] <- HitStatus.NEEDS_TO_BE_HIT_AND_HELD
                 elif NoteRow.hasNote k NoteType.HOLDBODY nr then
                     statuses.[k] <- HitStatus.NEEDS_TO_BE_HELD
                 elif NoteRow.hasNote k NoteType.HOLDTAIL nr then
