@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+﻿namespace Interlude.UI.ScreenPlayComponents
 
 open OpenTK
 open System
@@ -6,49 +6,12 @@ open System.Drawing
 open Prelude.Common
 open Prelude.Charts.Interlude
 open Prelude.Scoring
-open Prelude.Scoring.Metrics
 open Prelude.Data.Themes
-open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.Graphics
-open Interlude.Input
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Animation
-
-(*
-    WIP, will be a fancy animation when beginning to play a chart
-*)
-
-type GameStartDialog() as this =
-    inherit Dialog()
-
-    let anim1 = new AnimationFade(0.0f)
-
-    do
-        this.Animation.Add(anim1)
-        anim1.Target <- 1.0f
-        this.Animation.Add(
-            Animation.Serial(
-                AnimationTimer 600.0,
-                AnimationAction(fun () -> anim1.Target <- 0.0f),
-                AnimationAction(this.Close)
-            )
-        )
-
-    override this.Draw() =
-        let struct (left, top, right, bottom) = this.Bounds
-        let w = right - left
-        let bounds =
-            let m = (top + bottom) * 0.5f
-            Rect.create left (m - 100.0f) right (m + 100.0f)
-        if anim1.Target = 1.0f then
-            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceRight(w * anim1.Value))(Screens.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
-            Draw.rect(bounds |> Rect.sliceLeft(w * anim1.Value))(Screens.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
-        else
-            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceLeft(w * anim1.Value))(Screens.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
-            Draw.rect(bounds |> Rect.sliceRight(w * anim1.Value))(Screens.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
-
-    override this.OnClose() = ()
 
 (*
     Handful of widgets that directly pertain to gameplay
@@ -56,6 +19,7 @@ type GameStartDialog() as this =
 *)
 
 module GameplayWidgets = 
+
     type Helper = {
         Scoring: IScoreMetric
         HP: IHealthBarSystem
@@ -87,7 +51,7 @@ module GameplayWidgets =
         let listener =
             helper.OnHit.Subscribe(fun struct (now, ev) ->
                 match ev.Guts with
-                | Hit (judgement, delta) | Release (judgement, delta) ->
+                | Hit (judgement, delta, _) | Release (judgement, delta) ->
                     hits.Add (struct (now, delta / helper.Scoring.MissWindow * w * 0.5f, int judgement))
                 | _ -> ())
 
@@ -129,7 +93,7 @@ module GameplayWidgets =
             helper.OnHit.Subscribe(fun struct (now, ev) ->
                 let (judge, delta) =
                     match ev.Guts with
-                    | Hit (judge, delta)
+                    | Hit (judge, delta, _)
                     | Release (judge, delta) -> (judge, delta)
                     | Mine good
                     | Hold good -> if good then (JudgementType.OK, 0.0f<ms>) else (JudgementType.NG, 0.0f<ms>)
@@ -195,19 +159,19 @@ module GameplayWidgets =
             else this.Destroy()
 
     (*
-        These widgets are not repositioned by theme
+        These widgets are configured by noteskin, not theme (and do not have positioning info)
     *)
 
     type ColumnLighting(keys, lightTime, helper) as this =
         inherit Widget()
         let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
-        let sprite = Themes.getTexture("receptorlighting")
+        let sprite = Themes.getTexture "receptorlighting"
         let lightTime = Math.Min(0.99f, lightTime)
 
         do
             Array.iter this.Animation.Add sliders
-            let hp = float32 Options.options.HitPosition.Value
-            this.Reposition(0.0f, hp, 0.0f, -hp)
+            let hitpos = float32 Options.options.HitPosition.Value
+            this.Reposition(0.0f, hitpos, 0.0f, -hitpos)
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -216,7 +180,7 @@ module GameplayWidgets =
         override this.Draw() =
             base.Draw()
             let struct (l, t, r, b) = this.Bounds
-            let cw = (r - l) / (float32 keys)
+            let columnwidth = (r - l) / (float32 keys)
             let threshold = 1.0f - lightTime
             let f k (s: AnimationFade) =
                 if s.Value > threshold then
@@ -225,92 +189,79 @@ module GameplayWidgets =
                     Draw.rect
                         (
                             if Options.options.Upscroll.Value then
-                                Sprite.alignedBoxX(l + cw * (float32 k + 0.5f), t, 0.5f, 1.0f, cw * p, -1.0f / p) sprite
-                            else Sprite.alignedBoxX(l + cw * (float32 k + 0.5f), b, 0.5f, 1.0f, cw * p, 1.0f / p) sprite
+                                Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), t, 0.5f, 1.0f, columnwidth * p, -1.0f / p) sprite
+                            else Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), b, 0.5f, 1.0f, columnwidth * p, 1.0f / p) sprite
                         )
                         (Color.FromArgb(a, Color.White))
                         sprite
             Array.iteri f sliders
 
-    type Explosions(keys, helper) as this =
+    type Explosions(keys, config: WidgetConfig.Explosions, helper) as this =
         inherit Widget()
+        let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
+        let mem = Array.create keys (HitEventGuts.Mine true)
+        let holding = Array.create keys false
+        let explodeTime = Math.Min(0.99f, config.FadeTime)
+        let animation = new AnimationCounter(config.AnimationFrameTime)
 
-open GameplayWidgets
+        let handleEvent struct (_: Time, ev: HitEvent) =
+            match ev.Guts with
+            | Hit (judge, _, true) when (config.ExplodeOnMiss || judge <> JudgementType.MISS) ->
+                sliders.[ev.Column].Target <- 1.0f
+                sliders.[ev.Column].Value <- 1.0f
+                holding.[ev.Column] <- true
+                mem.[ev.Column] <- ev.Guts
+            | Hit (judge, _, false) when (config.ExplodeOnMiss || judge <> JudgementType.MISS) ->
+                sliders.[ev.Column].Value <- 1.0f
+                mem.[ev.Column] <- ev.Guts
+            | Mine false ->
+                sliders.[ev.Column].Value <- 1.0f
+                mem.[ev.Column] <- ev.Guts
+            | _ -> ()
 
-type ScreenPlay() as this =
-    inherit Screen()
-    
-    let chart = Gameplay.modifiedChart.Value
-    let liveplay = new LiveReplayProvider()
-    let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys liveplay chart.Notes Gameplay.rate
-    let onHit = new Event<struct (Time * HitEvent)>()
-    let widgetHelper: Helper = { Scoring = scoring; HP = scoring.HP; OnHit = onHit.Publish }
-    let binds = Options.options.GameplayBinds.[chart.Keys - 3]
-    let missWindow = scoring.ScaledMissWindow
+        do
+            this.Animation.Add animation
+            Array.iter this.Animation.Add sliders
+            let hitpos = float32 Options.options.HitPosition.Value
+            this.Reposition(0.0f, hitpos, 0.0f, -hitpos)
+            helper.OnHit.Add handleEvent
 
-    let mutable inputKeyState = 0us
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            for k = 0 to (keys - 1) do
+                if holding.[k] && helper.Scoring.KeyState |> Bitmap.hasBit k |> not then
+                    holding.[k] <- false
+                    sliders.[k].Target <- 0.0f
 
-    do
-        let noteRenderer = new NoteRenderer(scoring)
-        this.Add noteRenderer
-        let inline f name (constructor: 'T -> Widget) = 
-            let config: ^T = Themes.getGameplayConfig(name)
-            let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
-            if pos.Enabled then
-                config
-                |> constructor
-                |> Components.positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
-                |> if pos.Float then this.Add else noteRenderer.Add
-        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
-        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
-        f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
-        f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
-        //todo: rest of widgets
-        if Themes.noteskinConfig.ColumnLightTime >= 0.0f then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Themes.noteskinConfig.ColumnLightTime, widgetHelper))
-        scoring.SetHitCallback(fun ev -> onHit.Trigger(struct (Audio.timeWithOffset(), ev)))
-
-    override this.OnEnter(prev) =
-        Screens.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
-        //discord presence
-        Screens.setToolbarCollapsed true
-        Screens.setCursorVisible false
-        Audio.changeRate Gameplay.rate
-        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
-        Audio.playLeadIn()
-        //Screens.addDialog(new GameStartDialog())
-
-    override this.OnExit next =
-        Screens.backgroundDim.Target <- 0.7f
-        Screens.setCursorVisible true
-        if next = ScreenType.Score then () else
-            Screens.setToolbarCollapsed false
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        let now = Audio.timeWithOffset()
-        if not liveplay.Finished then
-            // feed keyboard input into the replay provider
-            Input.consumeGameplay(binds, fun column time isRelease ->
-                if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
-                else inputKeyState <- Bitmap.setBit column inputKeyState
-                liveplay.Add(time, inputKeyState) )
-            scoring.Update(now)
-        if now <= -missWindow && options.Hotkeys.Options.Value.Pressed() then Audio.pause(); Screens.addDialog(Screens.quickOptionsMenu())
-        
-        if scoring.Finished && not liveplay.Finished then
-            liveplay.Finish()
-            ((fun () ->
-                let sd =
-                    ScoreInfoProvider(
-                        Gameplay.makeScore((liveplay :> IReplayProvider).GetFullReplay(), chart.Keys),
-                        Gameplay.currentChart.Value,
-                        fst options.AccSystems.Value,
-                        fst options.HPSystems.Value,
-                        ModChart = Gameplay.modifiedChart.Value,
-                        Difficulty = Gameplay.difficultyRating.Value)
-                (sd, Gameplay.setScore sd)
-                |> ScreenScore
-                :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)
-            |> Screens.newScreen
+        override this.Draw() =
+            base.Draw()
+            let struct (l, t, r, b) = this.Bounds
+            let columnwidth = (r - l) / (float32 keys)
+            let threshold = 1.0f - explodeTime
+            let f k (s: AnimationFade) =
+                if s.Value > threshold then
+                    let p = (s.Value - threshold) / explodeTime
+                    let a = 255.0f * p |> int
+                    
+                    let box =
+                        if Options.options.Upscroll.Value then Rect.createWH (l + columnwidth * float32 k) t columnwidth columnwidth
+                        else Rect.createWH (l + columnwidth * float32 k) (b - columnwidth) columnwidth columnwidth
+                        |> Rect.expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
+                    match mem.[k] with
+                    | Hit (judge, _, true) ->
+                        Draw.quad
+                            (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
+                            (Quad.colorOf (Color.FromArgb(a, Color.White)))
+                            (Sprite.gridUV (animation.Loops, int judge) (Themes.getTexture "holdexplosion"))
+                    | Hit (judge, _, false) ->
+                        Draw.quad
+                            (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
+                            (Quad.colorOf (Color.FromArgb(a, Color.White)))
+                            (Sprite.gridUV (animation.Loops, int judge) (Themes.getTexture "noteexplosion"))
+                    | Mine false ->
+                        Draw.quad
+                            (box |> Quad.ofRect)
+                            (Quad.colorOf (Color.FromArgb(a, Color.White)))
+                            (Sprite.gridUV (animation.Loops, 0) (Themes.getTexture "mineexplosion"))
+                    | _ -> ()
+            Array.iteri f sliders

@@ -48,9 +48,10 @@
     <Compile Include="UI\Components.fs" />
     <Compile Include="UI\MarkdownReader.fs" />
     <Compile Include="UI\Selection.fs" />
-    <Compile Include="UI\Screens\ScreenPlay\NoteRenderer.fs" />
     <Compile Include="UI\Screens\ScreenScore.fs" />
-    <Compile Include="UI\Screens\ScreenPlay.fs" />
+    <Compile Include="UI\Screens\ScreenPlay\NoteRenderer.fs" />
+    <Compile Include="UI\Screens\ScreenPlay\GameplayWidgets.fs" />
+    <Compile Include="UI\Screens\ScreenPlay\ScreenPlay.fs" />
     <Compile Include="UI\Screens\ScreenLevelSelect.fs" />
     <Compile Include="UI\Screens\ScreenImport.fs" />
     <Compile Include="UI\Screens\OptionsMenu.fs" />

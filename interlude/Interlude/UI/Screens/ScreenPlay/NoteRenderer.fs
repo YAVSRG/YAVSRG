@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+﻿namespace Interlude.UI.ScreenPlayComponents
 
 open OpenTK
 open System
@@ -10,6 +10,7 @@ open Prelude.Data.Themes
 open Interlude
 open Interlude.Graphics
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Animation
 
 // TODO LIST
@@ -20,6 +21,25 @@ open Interlude.UI.Animation
 (*
     Note rendering code. Designed so it could be repurposed as an editor but that may now never happen (editor will be another project)
 *)
+
+module NoteRenderer =
+    
+    let rotations = 
+        // short term solution until noteskins can set these as settings
+        [|
+            [|90.0; 0.0; 270.0|]
+            [|90.0; 0.0; 180.0; 270.0|]
+            [|0.0; 0.0; 0.0; 0.0; 0.0|] // pump it up has like 10 trillion standard ways to rotate arrows
+            [|90.0; 135.0; 0.0; 180.0; 225.0; 270.0|]
+            [|135.0; 90.0; 45.0; 0.0; 315.0; 270.0; 225.0|]
+            [|90.0; 0.0; 180.0; 270.0; 90.0; 0.0; 180.0; 270.0|]
+            [|0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0|]
+            [|0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0|]
+        |]
+
+    let noteRotation keys k =
+        if Themes.noteskinConfig.UseRotation then rotations.[keys - 3].[k]
+        else 0.0
 
 type NoteRenderer(scoring: IScoreMetric) as this =
     inherit Widget()
@@ -33,7 +53,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     let playfieldColor = Themes.noteskinConfig.PlayfieldColor
 
     let tailsprite = Themes.getTexture(if Themes.noteskinConfig.UseHoldTailTexture then "holdtail" else "holdhead")
-    let animation = new AnimationCounter(200.0)
+    let animation = new AnimationCounter(Themes.noteskinConfig.AnimationFrameTime)
 
     // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
     let mutable note_seek = 0 // see comments for sv_seek and sv_peek. same role but for index of next row
@@ -50,12 +70,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
 
     let scrollDirectionPos bottom = if Options.options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
     let scrollDirectionFlip = fun q -> if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Value then q else Quad.flip q
-    let noteRotation =
-        if keys = 4 && Themes.noteskinConfig.UseRotation then
-            fun k -> Quad.rotateDeg (match k with 0 -> 90.0 | 1 -> 0.0 | 2 -> 180.0 | 3 -> 270.0 | _ -> 0.0)
-        elif keys = 6 && Themes.noteskinConfig.UseRotation then
-            fun k -> Quad.rotateDeg (match k with 0 -> 90.0 | 1 -> 135.0 | 2 -> 0.0 | 3 -> 180.0 | 4 -> 225.0 | 5 -> 270.0 | _ -> 0.0)
-        else fun k -> id
+    let noteRotation = fun k -> Quad.rotateDeg (NoteRenderer.noteRotation keys k)
 
     do
         let width = Array.mapi (fun i n -> n + columnWidths.[i]) columnPositions |> Array.max
@@ -73,8 +88,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
         let now = Audio.timeWithOffset()
 
         // seek to appropriate sv and note locations in data.
-        // all of this stuff could be wrapped in an object handling seeking/peeking but would give slower performance because it's based on Seq and not ResizeArray
-        // i therefore sadly had to make a mess here. see comments on the variables for more on whats going on
+        // bit of a mess here. see comments on the variables for more on whats going on
         while note_seek < notes.Data.Count && (offsetOf notes.Data.[note_seek]) < now do
             note_seek <- note_seek + 1
         note_peek <- note_seek
@@ -85,7 +99,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
             sv_value.[i] <- if sv_seek.[i] > 0 then snd sv.[i].[sv_seek.[i] - 1] else 1.0f
 
         for k in 0 .. (keys - 1) do
-            Draw.rect(Rect.create (left + columnPositions.[k]) top (left + columnPositions.[k] + columnWidths.[k]) bottom) playfieldColor Sprite.Default
+            Draw.rect (Rect.create (left + columnPositions.[k]) top (left + columnPositions.[k] + columnWidths.[k]) bottom) playfieldColor Sprite.Default
             sv_time.[k] <- now
             column_pos.[k] <- hitposition
             hold_pos.[k] <- hitposition
