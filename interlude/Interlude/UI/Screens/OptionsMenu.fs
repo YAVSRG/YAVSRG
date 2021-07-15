@@ -273,7 +273,7 @@ module OptionsMenuTabs =
                                     | 3 -> OM 8.0f
                                     | _ -> SC (4, false)),
                         [|
-                            [|judge; ridiculous|]; [|judge; ridiculous|]; [|judge; ridiculous|]; [|judge; ridiculous|]
+                            [|judge; ridiculous|]; [|judge; ridiculous|]; [|judge; ridiculous|]
                             [|overallDifficulty|]
                         |]
                 )).Position(200.0f)
