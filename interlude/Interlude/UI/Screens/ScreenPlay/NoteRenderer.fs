@@ -45,7 +45,8 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     inherit Widget()
 
     //constants
-    let (keys, notes, bpm, sv, mods) = Gameplay.getColoredChart()
+    let chart = Gameplay.getColoredChart()
+    let (keys, notes, bpm, sv) = (chart.Keys, chart.Notes, chart.BPM, chart.SV) // todo: at some point refactor this out
     let columnPositions = Array.init keys (fun i -> float32 i * Themes.noteskinConfig.ColumnWidth)
     let columnWidths = Array.create keys (float32 Themes.noteskinConfig.ColumnWidth)
     let noteHeight = Themes.noteskinConfig.ColumnWidth

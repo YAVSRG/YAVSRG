@@ -145,9 +145,7 @@ module GameplayWidgets =
 
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
         inherit Widget()
-        let firstNote = 
-            let (_, notes, _, _, _) = Gameplay.getColoredChart()
-            notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
+        let firstNote = Gameplay.getColoredChart().Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
         do
             this.Add(Components.TextBox(sprintf "Press %O to skip" options.Hotkeys.Skip.Value |> Utils.K, Utils.K Color.White, 0.5f))
 
