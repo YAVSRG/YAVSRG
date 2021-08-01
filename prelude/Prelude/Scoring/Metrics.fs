@@ -134,8 +134,7 @@ type IScoreMetric
     inherit ReplayConsumer(keys, replayProvider)
 
     let missWindow = rawMissWindow * rate
-    // some score systems can modify this internal data, to remove the need to time releases for example
-    let hitdata = InternalScore.createDefault missWindow keys notes
+
     // having two seekers improves performance when feeding scores rather than playing live
     let mutable noteSeekPassive = 0
     let mutable noteSeekActive = 0
@@ -154,6 +153,8 @@ type IScoreMetric
             ComboBreaks = 0
         }
 
+    member val HitData = InternalScore.createDefault missWindow keys notes
+
     member this.Name = name
     member this.Value =
         let v = this.State.PointsScored / this.State.MaxPointsScored
@@ -162,11 +163,10 @@ type IScoreMetric
     member this.HP = healthBar
     member this.MissWindow = rawMissWindow
     member this.ScaledMissWindow = missWindow
-    member this.HitData: InternalScoreData = hitdata
 
     member this.SetHitCallback (func: HitEvent -> unit) = hitCallback <- func
 
-    member this.Finished = noteSeekPassive = hitdata.Length
+    member this.Finished = noteSeekPassive = this.HitData.Length
 
     // correctness guaranteed up to the time you update, no matter how you update
     // call Update with infinityf to do a correct feeding of the whole replay
@@ -176,8 +176,8 @@ type IScoreMetric
 
     member private this.HandlePassive(now) =
         let target = now - missWindow
-        while noteSeekPassive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekPassive] <= target do
-            let struct (t, deltas, status) = hitdata.[noteSeekPassive]
+        while noteSeekPassive < this.HitData.Length && InternalScore.offsetOf this.HitData.[noteSeekPassive] <= target do
+            let struct (t, deltas, status) = this.HitData.[noteSeekPassive]
             for k = 0 to (keys - 1) do
                 if status.[k] = HitStatus.NEEDS_TO_BE_HIT then this._HandleEvent { Column = k; Guts = Hit (JudgementType.MISS, deltas.[k], false) }
                 elif status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then this._HandleEvent { Column = k; Guts = Hit (JudgementType.MISS, deltas.[k], true) }
@@ -191,15 +191,15 @@ type IScoreMetric
             // for lns, if we see a hold head or tail within misswindow
 
     override this.HandleKeyDown(now, k) =
-        while noteSeekActive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekActive] < now - missWindow do 
+        while noteSeekActive < this.HitData.Length && InternalScore.offsetOf this.HitData.[noteSeekActive] < now - missWindow do 
             noteSeekActive <- noteSeekActive + 1
         let mutable i = noteSeekActive
         let mutable delta = missWindow
         let mutable found = -1
         let mutable priority = -1
         let target = now + missWindow
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] <= target do
-            let struct (t, deltas, status) = hitdata.[i]
+        while i < this.HitData.Length && InternalScore.offsetOf this.HitData.[i] <= target do
+            let struct (t, deltas, status) = this.HitData.[i]
             let d = now - t
             if status.[k] = HitStatus.NEEDS_TO_BE_HIT || status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then
                 if (Time.Abs delta > Time.Abs d) || priority < 1 then
@@ -219,7 +219,7 @@ type IScoreMetric
                     delta <- d
             i <- i + 1
         if found >= 0 then
-            let struct (t, deltas, status) = hitdata.[found]
+            let struct (t, deltas, status) = this.HitData.[found]
             if priority = 1 then //we found a note
                 if status.[k] <> HitStatus.HAS_BEEN_HIT then
                     let isHoldHead = status.[k] <> HitStatus.NEEDS_TO_BE_HIT
@@ -231,15 +231,15 @@ type IScoreMetric
                 this._HandleEvent { Column = k; Guts = Mine false }
                 
     override this.HandleKeyUp(now, k) =
-        while noteSeekActive < hitdata.Length && InternalScore.offsetOf hitdata.[noteSeekActive] < now - missWindow do 
+        while noteSeekActive < this.HitData.Length && InternalScore.offsetOf this.HitData.[noteSeekActive] < now - missWindow do 
             noteSeekActive <- noteSeekActive + 1
         let mutable i = noteSeekActive
         let mutable delta = missWindow
         let mutable found = -1
         let mutable priority = -1
         let target = now + missWindow
-        while i < hitdata.Length && InternalScore.offsetOf hitdata.[i] <= target do
-            let struct (t, _, status) = hitdata.[i]
+        while i < this.HitData.Length && InternalScore.offsetOf this.HitData.[i] <= target do
+            let struct (t, _, status) = this.HitData.[i]
             let d = now - t
             if status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then
                 if (Time.Abs delta > Time.Abs d) || priority < 1 then
@@ -252,10 +252,10 @@ type IScoreMetric
                     found <- i
                     delta <- d
             elif status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then
-                i <- hitdata.Length //stops the loop so we don't release an LN that isnt held yet
+                i <- this.HitData.Length //stops the loop so we don't release an LN that isnt held yet
             i <- i + 1
         if found >= 0 then
-            let struct (t, deltas, status) = hitdata.[found]
+            let struct (t, deltas, status) = this.HitData.[found]
             if priority = 1 then //we found a release
                 delta <- delta / rate
                 status.[k] <- HitStatus.HAS_BEEN_RELEASED
@@ -395,7 +395,8 @@ type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, no
             this.State.Add(sc_curve judge true delta, 1.0, judgement)
             if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
         | Hold good
-        | Mine good -> if not good then this.State.BreakCombo()
+        | Mine good ->
+            if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
         ev
 
 type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) as this =
@@ -420,7 +421,8 @@ type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) as 
             if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
         | Release _ -> failwith "this is impossible because releases are disabled"
         | Hold good
-        | Mine good -> if not good then this.State.BreakCombo()
+        | Mine good ->
+            if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
         ev
 
 type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
@@ -513,7 +515,7 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
             { Column = ev.Column; Guts = Release (judgement, delta) }
         | Hold good
         | Mine good ->
-            if not good then this.State.BreakCombo()
+            if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
             ev
 
 module Metrics =

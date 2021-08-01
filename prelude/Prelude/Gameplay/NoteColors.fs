@@ -33,8 +33,14 @@ module NoteColors =
     type Colorizer<'state> = 'state -> TimeDataItem<NoteRow> -> ('state * ColorData)
 
     type private ColorNoteRow = (struct (NoteRow * ColorData))
-    //todo: make this a record.
-    type ColorizedChart = int * TimeData<ColorNoteRow> * TimeData<BPM> * MultiTimeData<float32> * string list
+    type ColorizedChart =
+        {
+            Keys: int
+            Notes: TimeData<ColorNoteRow>
+            BPM: TimeData<BPM>
+            SV: MultiTimeData<float32>
+            ModsUsed: string list
+        }
 
     let colorize (mc: ModChart) (initialState, col : Colorizer<'t>) =
         let (_, _, data) = 
@@ -78,7 +84,7 @@ module NoteColors =
                 in (mc, Array.create keys ((ddr_func (time - ptime) msPerBeat) |> ci)))
                 |> colorize mc
         | _ -> ((), fun _ _ -> (), Array.zeroCreate keys) |> colorize mc
-        |> fun x -> (keys, x, bpm, sv, m)
+        |> fun output -> { Keys = keys; Notes = output; BPM = bpm; SV = sv; ModsUsed = m }
 
     type ColorConfig = 
         {
