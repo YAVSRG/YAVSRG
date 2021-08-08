@@ -56,7 +56,7 @@ type ScreenPlay() as this =
     let chart = Gameplay.modifiedChart.Value
     let liveplay = new LiveReplayProvider()
     let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys liveplay chart.Notes Gameplay.rate
-    let onHit = new Event<struct (Time * HitEvent)>()
+    let onHit = new Event<HitEvent>()
     let widgetHelper: Helper = { Scoring = scoring; HP = scoring.HP; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
@@ -88,7 +88,7 @@ type ScreenPlay() as this =
         if Themes.noteskinConfig.Explosions.FadeTime >= 0.0f then
             noteRenderer.Add(new Explosions(chart.Keys, Themes.noteskinConfig.Explosions, widgetHelper))
 
-        scoring.SetHitCallback(fun ev -> onHit.Trigger(struct (Audio.timeWithOffset(), ev)))
+        scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
         Screens.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value

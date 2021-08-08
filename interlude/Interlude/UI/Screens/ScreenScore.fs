@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System.Drawing
+open Prelude.Common
 open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
 open Prelude.Data.ScoreManager
@@ -40,21 +41,23 @@ type ScoreGraph(data: ScoreInfoProvider) =
         // todo: graph stuff like hp/accuracy over time
         // todo: let you filter to just release timing
 
-        let w = (width - 10.0f) / float32 data.HitData.Length
-        let mutable x = left + 5.0f
-        for i in 0 .. data.HitData.Length - 1 do
-            for k in 0 .. data.ScoreInfo.keycount - 1 do
-                let struct (_, delta, hit) = data.HitData.[i]
-                let (y, col) =
-                    match hit.[k] with
-                    | HitStatus.HAS_NOT_BEEN_DODGED | HitStatus.HAS_NOT_BEEN_HELD -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.NG])
-                    | HitStatus.NEEDS_TO_BE_HIT | HitStatus.NEEDS_TO_BE_RELEASED -> (0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.MISS])
-                    | HitStatus.HAS_BEEN_HIT -> (h - delta.[k] / data.Scoring.MissWindow * h, Themes.themeConfig.JudgementColors.[data.Scoring.JudgementFunc(false, Prelude.Common.Time.Abs delta.[k]) |> int])
-                    | HitStatus.HAS_BEEN_RELEASED -> (h - delta.[k] / data.Scoring.MissWindow * h, Themes.themeConfig.JudgementColors.[data.Scoring.JudgementFunc(true, Prelude.Common.Time.Abs delta.[k]) |> int])
-                    | _ -> (0.0f, Color.Transparent)
-                if col.A > 0uy then
-                    Draw.rect(Rect.create (x - 2.5f) (top + y - 2.5f) (x + 2.5f) (top + y + 2.5f)) col Sprite.Default
-            x <- x + w
+        let events = data.Scoring.HitEvents
+        assert (events.Count > 0)
+
+        let hscale = (width - 10.0f) / events.[events.Count - 1].Time
+        for ev in events do
+            let y, col =
+                match ev.Guts with
+                | HitEventGuts.Hit (judgement, delta, isHold) ->
+                    h - delta / data.Scoring.MissWindow * h, Themes.themeConfig.JudgementColors.[int judgement]
+                | HitEventGuts.Release (judgement, delta) ->
+                    h - 0.5f * delta / data.Scoring.MissWindow * h, Color.FromArgb(127, Themes.themeConfig.JudgementColors.[int judgement])
+                | HitEventGuts.Hold false
+                | HitEventGuts.Mine false -> 0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.NG]
+                | _ -> 0.0f, Color.Transparent
+            if col.A > 0uy then
+                let x = left + 5.0f + ev.Time * hscale
+                Draw.rect(Rect.create (x - 2.5f) (top + y - 2.5f) (x + 2.5f) (top + y + 2.5f)) col Sprite.Default
 
         fbo.Unbind()
 

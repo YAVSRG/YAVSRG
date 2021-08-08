@@ -23,7 +23,7 @@ module GameplayWidgets =
     type Helper = {
         Scoring: IScoreMetric
         HP: IHealthBarSystem
-        OnHit: IEvent<struct (Time * HitEvent)>
+        OnHit: IEvent<HitEvent>
     }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
@@ -49,10 +49,10 @@ module GameplayWidgets =
         let hits = ResizeArray<struct (Time * float32 * int)>()
         let mutable w = 0.0f
         let listener =
-            helper.OnHit.Subscribe(fun struct (now, ev) ->
+            helper.OnHit.Subscribe(fun ev ->
                 match ev.Guts with
                 | Hit (judgement, delta, _) | Release (judgement, delta) ->
-                    hits.Add (struct (now, delta / helper.Scoring.MissWindow * w * 0.5f, int judgement))
+                    hits.Add (struct (ev.Time, delta / helper.Scoring.MissWindow * w * 0.5f, int judgement))
                 | _ -> ())
 
         override this.Update(elapsedTime, bounds) =
@@ -90,7 +90,7 @@ module GameplayWidgets =
         let mutable time = -atime * 2.0f - Audio.LEADIN_TIME
         let texture = Themes.getTexture "judgements"
         let listener =
-            helper.OnHit.Subscribe(fun struct (now, ev) ->
+            helper.OnHit.Subscribe(fun ev ->
                 let (judge, delta) =
                     match ev.Guts with
                     | Hit (judge, delta, _)
@@ -106,9 +106,9 @@ module GameplayWidgets =
                     | _ -> true
                 then
                     let j = int judge in
-                    if j >= tier || now - atime > time then
+                    if j >= tier || ev.Time - atime > time then
                         tier <- j
-                        time <- now
+                        time <- ev.Time
                         late <- if delta > 0.0f<ms> then 1 else 0 )
         override this.Draw() =
             let a = 255 - Math.Clamp(255.0f * (Audio.timeWithOffset() - time) / atime |> int, 0, 255)
@@ -202,7 +202,7 @@ module GameplayWidgets =
         let explodeTime = Math.Min(0.99f, config.FadeTime)
         let animation = new AnimationCounter(config.AnimationFrameTime)
 
-        let handleEvent struct (_: Time, ev: HitEvent) =
+        let handleEvent (ev: HitEvent) =
             match ev.Guts with
             | Hit (judge, _, true) when (config.ExplodeOnMiss || judge <> JudgementType.MISS) ->
                 sliders.[ev.Column].Target <- 1.0f
