@@ -5,10 +5,10 @@ open Prelude.Charts.Interlude
 open Prelude.Gameplay.Mods
 open Prelude.Common
 
-//This is the final stage of preprocessing chart data before it is played by the user.
-//Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures
-//Some players may find certain coloring systems useful, for example having color coding depending on the musical beat a note is snapped to
-//It is also common just to have simple column color variation to make columns appear distinct
+// This is the final stage of preprocessing chart data before it is played by the user.
+// Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures
+// Some players may find certain coloring systems useful, for example having color coding depending on the musical beat a note is snapped to
+// It is also common just to have simple column color variation to make columns appear distinct
 
 module NoteColors = 
 
@@ -29,7 +29,7 @@ module NoteColors =
         | _ -> keycount
 
     type ColorData = byte array
-    type ColorDataSets = ColorData array //color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
+    type ColorDataSets = ColorData array // color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
     type Colorizer<'state> = 'state -> TimeDataItem<NoteRow> -> ('state * ColorData)
 
     type private ColorNoteRow = (struct (NoteRow * ColorData))

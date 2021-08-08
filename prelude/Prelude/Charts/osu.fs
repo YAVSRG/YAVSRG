@@ -163,9 +163,9 @@ module osu =
         | BackgroundColorChange of Time * int * int * int //i have no idea what this is or does
         override this.ToString() = 
             match this with
-            | Background (filename, (x,y)) -> String.concat "," ["Background"; "0"; "\""+filename+"\""; string x; string y]
-            | Video (time, filename, (x,y)) -> String.concat "," ["Video"; string time; "\""+filename+"\""; string x; string y];
-            | Break (start, finish) -> String.concat "," ["Break"; string start; string finish]
+            | Background (filename, (x,y)) -> String.concat "," ["0"; "0"; "\""+filename+"\""; string x; string y]
+            | Video (time, filename, (x,y)) -> String.concat "," ["1"; string time; "\""+filename+"\""; string x; string y];
+            | Break (start, finish) -> String.concat "," ["2"; string start; string finish]
             | Sprite (layer, origin, filename, (x,y), events) ->
                 String.concat "\n" (
                     (String.concat "," ["Sprite"; layer.ToString("G"); origin.ToString("G"); "\""+filename+"\""; string x; string y])
@@ -183,7 +183,7 @@ module osu =
     let private pipe = pchar '|'
     let private parseNum = pfloat
     let private parseInt = pint64 |>> int
-    let private parseName = (many1Satisfy isLetterOrDigit)
+    let private parseName = many1Satisfy isLetterOrDigit
     let private parseQuote =
         between (pchar '"') (pchar '"') (manySatisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
     let private comment = (anyOf "-/#=" >>% "") >>. restOfLine true
@@ -305,7 +305,7 @@ module osu =
             |>> fun ((layer, origin, file, x, y), events) -> Sprite(layer, origin, file, (x, y), events))
 
         <|> ((pstring "Background" <|> pstring "0") >>. comma
-            >>. (tuple3 (parseNum .>> comma) parseQuote ((opt (tuple2 (comma >>. parseNum) (comma >>. parseNum))) |>> Option.defaultValue (0.0, 0.0)))
+            >>. (tuple3 (parseNum .>> comma) parseQuote (opt (tuple2 (comma >>. parseNum) (comma >>. parseNum)) |>> Option.defaultValue (0.0, 0.0)))
             |>> fun (time, file, (x, y)) -> Background(file, (x, y)))
 
         <|> ((pstring "Sample") >>. comma
@@ -313,7 +313,7 @@ module osu =
             |>> fun (time, layer, file, volume) -> Sample(toTime time, layer, file, volume))
          
         <|> ((pstring "Video" <|> pstring "1") >>. comma
-            >>. (tuple3 (parseNum .>> comma) parseQuote ((opt (tuple2 (comma >>. parseNum) (comma >>. parseNum))) |>> Option.defaultValue (0.0, 0.0)))
+            >>. (tuple3 (parseNum .>> comma) parseQuote (opt (tuple2 (comma >>. parseNum) (comma >>. parseNum)) |>> Option.defaultValue (0.0, 0.0)))
             |>> fun (time, file, (x, y)) -> Video(toTime time, file, (x, y)))
          
         <|> ((pstring "Break" <|> pstring "2") >>. comma
@@ -321,7 +321,7 @@ module osu =
             |>> fun (time1, time2) -> Break (toTime time1, toTime time2))
 
         //I have no idea what this does and cannot for the life of me find any documentation on it
-        <|> ((pstring "3") >>. comma
+        <|> (pstring "3" >>. comma
             >>. (tuple4 (parseNum .>> comma) (parseInt .>> comma) (parseInt .>> comma) (parseInt))
             |>> fun (time, r, g, b) -> BackgroundColorChange(toTime time, r, g, b))
 
@@ -561,10 +561,18 @@ module osu =
             Objects: HitObject list
             Timing: TimingPoint list
         }
-    //type Beatmap = General * Editor * Metadata * Difficulty * StoryboardObject list * HitObject list * TimingPoint list
+
 
     //todo: in future can include variables list too
     type Storyboard = StoryboardObject list
+
+    let getBeatmapFilename beatmap =
+        let clean = String.filter (fun c -> System.Char.IsWhiteSpace c || System.Char.IsLetterOrDigit c)
+        sprintf "%s - %s (%s) [%s].osu"
+            (clean beatmap.Metadata.ArtistUnicode)
+            (clean beatmap.Metadata.TitleUnicode)
+            (clean beatmap.Metadata.Creator)
+            (clean beatmap.Metadata.Version)
 
     let eventsToString events = "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events);
 
@@ -582,12 +590,12 @@ module osu =
 
     let parseBeatmap =
         tuple4 (pstring "osu file format v" >>. restOfLine true .>> spaces)
-            (parseHeader("General") .>> spaces)  //General
-            (parseHeader("Editor") .>> spaces)  //Editor
-            (parseHeader("Metadata") .>> spaces)  //Metadata
+            (parseHeader "General" .>> spaces)  //General
+            (parseHeader "Editor" .>> spaces)  //Editor
+            (parseHeader "Metadata" .>> spaces)  //Metadata
         .>>.
-        tuple5 (parseHeader("Difficulty") .>> spaces) (*Difficulty*) (parseEvents .>> spaces) (parseTimingPoints .>> spaces)
-            (optional (parseHeader("Colours") .>> spaces))
+        tuple5 (parseHeader "Difficulty" .>> spaces) (*Difficulty*) (parseEvents .>> spaces) (parseTimingPoints .>> spaces)
+            (optional (parseHeader "Colours" .>> spaces))
             (parseHitObjects .>> spaces)
         |>> fun ((format, general, editor, metadata), (difficulty, events, timingpoints, _, hitobjects)) ->
             {

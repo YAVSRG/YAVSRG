@@ -4,6 +4,12 @@
     <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>Prelude</AssemblyName>
+    <PackageId>YAVSRG.Prelude</PackageId>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Percyqaz</Authors>
+    <Product>Prelude</Product>
+    <PackageProjectUrl>https://github.com/percyqaz/Prelude</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/percyqaz/Prelude</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
