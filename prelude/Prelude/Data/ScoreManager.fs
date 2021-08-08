@@ -101,8 +101,6 @@ module ScoreManager =
         member this.HPType with get() = hpType and set(value) = hpType <- value; scoreMetric <- ValueNone
         member this.HP = this.Scoring.HP
 
-        member this.HitData = this.Scoring.HitData
-
         member this.Difficulty
             with get() =
                 difficulty <- ValueOption.defaultWith (fun () -> RatingReport (this.ModChart.Notes, score.rate, score.layout, this.ModChart.Keys)) difficulty |> ValueSome

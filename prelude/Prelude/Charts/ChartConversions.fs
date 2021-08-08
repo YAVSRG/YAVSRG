@@ -384,7 +384,7 @@ module ChartConversions =
         | ".osu" -> 
             try
                 let map = loadBeatmapFile path
-                if getGameMode map = GameMode.Mania && (let keys = map.Difficulty.CircleSize |> int in 3 <= keys && keys <= 10) then
+                if map.General.Mode = GameMode.Mania && (let keys = map.Difficulty.CircleSize |> int in 3 <= keys && keys <= 10) then
                     [convert_osu_interlude (loadBeatmapFile path)] else []
             with err -> Logging.Error ("Could not load .osu file: " + path, err); []
         | _ -> []

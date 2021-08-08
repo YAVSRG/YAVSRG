@@ -163,8 +163,8 @@ module osu =
         | BackgroundColorChange of Time * int * int * int //i have no idea what this is or does
         override this.ToString() = 
             match this with
-            | Background (filename, (x,y)) -> String.concat "," ["0"; "0"; "\""+filename+"\""; string x; string y]
-            | Video (time, filename, (x,y)) -> String.concat "," ["1"; string time; "\""+filename+"\""; string x; string y];
+            | Background (filename, (x, y)) -> String.concat "," ["0"; "0"; "\""+filename+"\""; string x; string y]
+            | Video (time, filename, (x, y)) -> String.concat "," ["1"; string time; "\""+filename+"\""; string x; string y];
             | Break (start, finish) -> String.concat "," ["2"; string start; string finish]
             | Sprite (layer, origin, filename, (x,y), events) ->
                 String.concat "\n" (
@@ -189,18 +189,18 @@ module osu =
     let private comment = (anyOf "-/#=" >>% "") >>. restOfLine true
 
     let private parseKeyValue = parseName .>> spaces .>> colon .>> manyChars (anyOf " \t") .>>. (restOfLine true) .>> spaces
-    let private parseHeaderTitle(name) = pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
+    let private parseHeaderTitle name = pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
     
     let parseHeader name : Parser<Header, unit> =
-        many comment >>. parseHeaderTitle(name) .>>. (many comment >>. many (parseKeyValue .>> (many comment))) .>> spaces |>> Header
+        many comment >>. parseHeaderTitle name .>>. (many comment >>. many (parseKeyValue .>> (many comment))) .>> spaces |>> Header
 
     let parseTimingPoint: Parser<TimingPoint, unit> =
         (tuple4 (parseNum .>> comma) (parseNum .>> comma) (parseInt .>> comma) (parseInt .>> comma))
         .>>. (tuple4 (parseInt .>> comma) (parseInt .>> comma) (parseInt .>> comma) parseInt) |>>
         fun ((offset, value, meter, sampleSet), (sampleIndex, volume, isBpm, effects)) ->
             if isBpm > 0
-            then BPM(toTime offset, toTime value / 1.0f<beat>, meter * 1<beat>, (enum sampleSet, sampleIndex, volume), enum effects)
-            else SV(toTime offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
+            then BPM (toTime offset, toTime value / 1.0f<beat>, meter * 1<beat>, (enum sampleSet, sampleIndex, volume), enum effects)
+            else SV (toTime offset, -100.0f / float32 value, (enum sampleSet, sampleIndex, volume), enum effects)
 
     let parseTimingPoints = pstring "[TimingPoints]" >>. newline >>. many (parseTimingPoint .>> newline)
 
@@ -623,5 +623,3 @@ module osu =
     
     let saveStoryboardFile path events = 
         System.IO.File.WriteAllText (path, eventsToString events + "\n\n")
-
-    let getGameMode (b: Beatmap) = b.General.Mode
