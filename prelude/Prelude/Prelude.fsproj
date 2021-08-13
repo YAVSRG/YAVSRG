@@ -16,7 +16,7 @@
     <Compile Include="Common.fs" />
     <Compile Include="Charts\Interlude.fs" />
     <Compile Include="Charts\StepMania.fs" />
-    <Compile Include="Charts\osu.fs" />
+    <Compile Include="Charts\osu!.fs" />
     <Compile Include="Charts\ChartConversions.fs" />
     <Compile Include="Editor\Editor.fs" />
     <Compile Include="Scoring\Replays.fs" />

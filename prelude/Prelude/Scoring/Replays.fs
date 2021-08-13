@@ -11,22 +11,16 @@ open Prelude.Charts.Interlude
 type HitStatus =
     | NOTHING = 0
 
-    // the first flag indicates an active need for the player to do something
-    // the second flag should be reached once they do it
-    | NEEDS_TO_BE_HIT = 1
-    | NEEDS_TO_BE_HIT_AND_HELD = 2
-    | HAS_BEEN_HIT = 3
+    | HIT_REQUIRED = 1
+    | HIT_HOLD_REQUIRED = 2
+    | HIT_ACCEPTED = 3
 
-    | NEEDS_TO_BE_RELEASED = 4
-    | HAS_BEEN_RELEASED = 5
-    
-    // the first flag indicates an passivee need for the player to NOT do something
-    // the second flag is placed if they do this (bad) thing, and in a perfect replay the first flag has remained
-    | NEEDS_TO_BE_HELD = 6
-    | HAS_NOT_BEEN_HELD = 7
+    | RELEASE_REQUIRED = 4
+    | RELEASE_ACCEPTED = 5
 
-    | NEEDS_TO_BE_DODGED = 8
-    | HAS_NOT_BEEN_DODGED = 9
+    // mines
+    | DODGE = 6
+    | DODGE_FAILED = 7
 
 // this data is in-memory only and not exposed much to other parts of the code
 // the flags in particular need never be exposed anywhere else, while the hit deltas can be used on the score screen to give useful data
@@ -48,15 +42,13 @@ module InternalScore =
             for k = 0 to (keys - 1) do
                 // todo: match NoteRow.[k] with ...
                 if NoteRow.hasNote k NoteType.NORMAL nr then
-                    statuses.[k] <- HitStatus.NEEDS_TO_BE_HIT
+                    statuses.[k] <- HitStatus.HIT_REQUIRED
                 elif NoteRow.hasNote k NoteType.HOLDHEAD nr then
-                    statuses.[k] <- HitStatus.NEEDS_TO_BE_HIT_AND_HELD
-                elif NoteRow.hasNote k NoteType.HOLDBODY nr then
-                    statuses.[k] <- HitStatus.NEEDS_TO_BE_HELD
+                    statuses.[k] <- HitStatus.HIT_HOLD_REQUIRED
                 elif NoteRow.hasNote k NoteType.HOLDTAIL nr then
-                    statuses.[k] <- HitStatus.NEEDS_TO_BE_RELEASED
+                    statuses.[k] <- HitStatus.RELEASE_REQUIRED
                 elif NoteRow.hasNote k NoteType.MINE nr then
-                    statuses.[k] <- HitStatus.NEEDS_TO_BE_DODGED
+                    statuses.[k] <- HitStatus.DODGE
 
             struct (time, times, statuses)
             )
@@ -72,13 +64,11 @@ module InternalScore =
             for k = 0 to (keys - 1) do
                 // todo: match NoteRow.[k] with ...
                 if NoteRow.hasNote k NoteType.NORMAL nr || NoteRow.hasNote k NoteType.HOLDHEAD nr then
-                    statuses.[k] <- HitStatus.HAS_BEEN_HIT
-                elif NoteRow.hasNote k NoteType.HOLDBODY nr then
-                    statuses.[k] <- HitStatus.NEEDS_TO_BE_HELD
+                    statuses.[k] <- HitStatus.HIT_ACCEPTED
                 elif NoteRow.hasNote k NoteType.HOLDTAIL nr then
-                    statuses.[k] <- HitStatus.HAS_BEEN_RELEASED
+                    statuses.[k] <- HitStatus.RELEASE_ACCEPTED
                 elif NoteRow.hasNote k NoteType.MINE nr then
-                    statuses.[k] <- HitStatus.NEEDS_TO_BE_DODGED
+                    statuses.[k] <- HitStatus.DODGE
 
             struct (time, times, statuses)
             )
@@ -148,7 +138,7 @@ module Replay =
 
 type IReplayProvider =
     // is there a next bitmap before/on the given time?
-    abstract member HasNext: Time -> bool
+    abstract member HasNext : Time -> bool
 
     // get the next bitmap (call if HasNext was true)
     abstract member GetNext : unit -> ReplayRow
@@ -170,7 +160,7 @@ type StoredReplayProvider(data: ReplayData) =
             data.[i - 1]
         member this.GetFullReplay() = data
 
-    new(data: string) = StoredReplayProvider(Replay.decompress data)
+    new(data: string) = StoredReplayProvider (Replay.decompress data)
     static member AutoPlay(keys, noteData) = Replay.perfectReplay keys noteData |> StoredReplayProvider
 
 type LiveReplayProvider() =
@@ -181,7 +171,7 @@ type LiveReplayProvider() =
     member this.Finished = finished
 
     interface IReplayProvider with
-        member this.HasNext(time) =
+        member this.HasNext time =
             if i >= buffer.Count then false
             else 
                 let struct (t, _) = buffer.[i]
@@ -192,7 +182,7 @@ type LiveReplayProvider() =
         member this.GetFullReplay() =
             if finished then buffer.ToArray() else invalidOp "Live play is not declared as over, we don't have the full replay yet!"
 
-    member this.Add(time, bitmap) =
+    member this.Add (time, bitmap) =
         if not finished then buffer.Add(struct (time, bitmap)) else invalidOp "Live play is declared as over; cannot append to replay"
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Live play is already declared as over; cannot do so again"
@@ -204,16 +194,16 @@ type ReplayConsumer(keys: int, replay: IReplayProvider) =
     let mutable currentState: Bitmap = 0us
     
     member this.PollReplay(time: Time) =
-        while replay.HasNext(time) do
+        while replay.HasNext time do
             let struct (time, keystates) = replay.GetNext()
-            this.HandleReplayRow(time, keystates)
+            this.HandleReplayRow (time, keystates)
 
     member this.HandleReplayRow(time, keystates) =
         for k = 0 to (keys - 1) do
             if Bitmap.hasBit k currentState && not (Bitmap.hasBit k keystates) then
-                this.HandleKeyUp(time, k)
+                this.HandleKeyUp (time, k)
             elif Bitmap.hasBit k keystates && not (Bitmap.hasBit k currentState) then
-                this.HandleKeyDown(time, k)
+                this.HandleKeyDown (time, k)
         currentState <- keystates
 
     member this.KeyState = currentState

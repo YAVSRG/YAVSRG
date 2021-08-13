@@ -17,17 +17,30 @@ type JudgementType =
     | MISS = 8
 module JudgementType = let count = 9
 
-type HitEventGuts =
-    | Hit of judgement: JudgementType * delta: Time * isHoldHead: bool
-    | Release of judgement: JudgementType * delta: Time
-    | Mine of dodged: bool
-    | Hold of held: bool
+type HitEventGutsInternal =
+    | Hit_ of
+        delta: Time *
+        isHoldHead: bool *
+        missed: bool
+    | Release_ of
+        delta: Time *
+        missed: bool *
+        overhold: bool *
+        dropped: bool
+    | Mine_ of
+        dodged: bool
 
-type HitEvent =
+type HitEventGuts =
+    | Hit of judgement: JudgementType * delta: Time * isHold: bool
+    | Hold
+    | Release of judgement: JudgementType * delta: Time * overhold: bool * dropped: bool
+    | Mine of dodged: bool
+
+type HitEvent<'Guts> =
     {
         Time: Time
         Column: int
-        Guts: HitEventGuts
+        Guts: 'Guts
     }
 
 (*
@@ -67,7 +80,7 @@ type IHealthBarSystem
         else state.CurrentlyFailed <- false
 
     abstract member FailCondition : float -> bool
-    abstract member HandleEvent : HitEvent -> unit
+    abstract member HandleEvent : HitEvent<HitEventGuts> -> unit
         
     member this.Failed = if onlyFailAtEnd then state.CurrentlyFailed else state.HasFailed
     member this.Name = name
@@ -87,10 +100,10 @@ type HealthBarPointsSystem
 
     override this.HandleEvent ev =
         match ev.Guts with
+        | Hold -> ()
         | Hit (j, delta, _)
-        | Release (j, delta) -> this.ChangeHP(points_func j)
+        | Release (j, delta, _, _) -> this.ChangeHP(points_func j)
         | Mine good -> if not good then this.ChangeHP(points_func JudgementType.NG)
-        | Hold good -> ()
 
 (*
     Accuracy/scoring system metric.
@@ -120,6 +133,12 @@ type AccuracySystemState =
         this.Judgements.[int judge] <- this.Judgements.[int judge] + 1
     member this.Add(judge: JudgementType) = this.Add(0.0, 0.0, judge)
 
+type private InternalHoldState =
+    | Nothing = 0
+    | Holding = 1
+    | Dropped = 2
+    | MissedHead = 3
+
 [<AbstractClass>]
 type IScoreMetric
     (
@@ -140,8 +159,10 @@ type IScoreMetric
     let mutable noteSeekPassive = 0
     let mutable noteSeekActive = 0
 
+    let internalHoldStates = Array.create keys InternalHoldState.Nothing
+
     let hitData = InternalScore.createDefault rawMissWindow keys notes
-    let hitEvents = ResizeArray<HitEvent>()
+    let hitEvents = ResizeArray<HitEvent<HitEventGuts>>()
 
     let mutable hitCallback = fun ev -> ()
 
@@ -166,7 +187,7 @@ type IScoreMetric
     member this.MissWindow = rawMissWindow
     member this.ScaledMissWindow = missWindow
 
-    member this.SetHitCallback (func: HitEvent -> unit) = hitCallback <- func
+    member this.SetHitCallback (func: HitEvent<HitEventGuts> -> unit) = hitCallback <- func
 
     member this.Finished = noteSeekPassive = hitData.Length
 
@@ -174,27 +195,40 @@ type IScoreMetric
 
     // correctness guaranteed up to the time you update, no matter how you update
     // call Update with infinityf to do a correct feeding of the whole replay
-    member this.Update(time: Time) =
+    member this.Update (time: Time) =
         this.PollReplay time // calls HandleKeyDown and HandleKeyUp appropriately
         this.HandlePassive time
 
-    member private this.HandlePassive(now) =
+    member private this.HandlePassive (now: Time) =
         let target = now - missWindow
         while noteSeekPassive < hitData.Length && InternalScore.offsetOf hitData.[noteSeekPassive] <= target do
             let struct (t, deltas, status) = hitData.[noteSeekPassive]
             for k = 0 to (keys - 1) do
-                if status.[k] = HitStatus.NEEDS_TO_BE_HIT then this._HandleEvent { Time = t + missWindow; Column = k; Guts = Hit (JudgementType.MISS, deltas.[k], false) }
-                elif status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then this._HandleEvent { Time = t + missWindow; Column = k; Guts = Hit (JudgementType.MISS, deltas.[k], true) }
-                elif status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then this._HandleEvent { Time = t + missWindow; Column = k; Guts = Release (JudgementType.MISS, deltas.[k]) }
-                elif status.[k] = HitStatus.NEEDS_TO_BE_DODGED then this._HandleEvent { Time = t + missWindow; Column = k; Guts = Mine true }
-                elif status.[k] = HitStatus.NEEDS_TO_BE_HELD then this._HandleEvent { Time = t + missWindow; Column = k; Guts = Hold true }
+
+                if status.[k] = HitStatus.HIT_REQUIRED then
+                    this._HandleEvent { Time = t + missWindow; Column = k; Guts = Hit_ (deltas.[k], false, true) }
+
+                elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
+                    internalHoldStates.[k] <- InternalHoldState.MissedHead
+                    this._HandleEvent { Time = t + missWindow; Column = k; Guts = Hit_ (deltas.[k], true, true) }
+
+                elif status.[k] = HitStatus.RELEASE_REQUIRED then
+                    let overhold = internalHoldStates.[k] = InternalHoldState.Dropped && Bitmap.hasBit k this.KeyState
+                    let dropped = internalHoldStates.[k] = InternalHoldState.Dropped || internalHoldStates.[k] = InternalHoldState.MissedHead
+                    this._HandleEvent { Time = t + missWindow; Column = k; Guts = Release_ (deltas.[k], true, overhold, dropped) }
+                    internalHoldStates.[k] <- InternalHoldState.Nothing
+
+                elif status.[k] = HitStatus.DODGE then
+                    this._HandleEvent { Time = t + missWindow; Column = k; Guts = Mine_ true }
+
             noteSeekPassive <- noteSeekPassive + 1
         // missing: checks key down as mine passes receptors, key up as hold middle passes receptors
         // algorithm must "forget" what it finds if
             // for mines, nothing
             // for lns, if we see a hold head or tail within misswindow
 
-    override this.HandleKeyDown(now, k) =
+    override this.HandleKeyDown (now, k) =
+        this.HandlePassive now
         while noteSeekActive < hitData.Length && InternalScore.offsetOf hitData.[noteSeekActive] < now - missWindow do 
             noteSeekActive <- noteSeekActive + 1
         let mutable i = noteSeekActive
@@ -205,18 +239,18 @@ type IScoreMetric
         while i < hitData.Length && InternalScore.offsetOf hitData.[i] <= target do
             let struct (t, deltas, status) = hitData.[i]
             let d = now - t
-            if status.[k] = HitStatus.NEEDS_TO_BE_HIT || status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then
+            if status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED then
                 if (Time.Abs delta > Time.Abs d) || priority < 1 then
                     priority <- 1
                     found <- i
                     delta <- d
             // absorb a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
-            elif status.[k] = HitStatus.HAS_BEEN_HIT && deltas.[k] < -cbrushWindow then
+            elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -cbrushWindow then
                 if (Time.Abs delta > Time.Abs d) || priority < 0 then
                     priority <- 1
                     found <- i
                     delta <- d
-            elif status.[k] = HitStatus.NEEDS_TO_BE_DODGED then
+            elif status.[k] = HitStatus.DODGE then
                 if (Time.Abs delta > Time.Abs d) || priority < 0 then
                     priority <- 0
                     found <- i
@@ -225,53 +259,44 @@ type IScoreMetric
         if found >= 0 then
             let struct (t, deltas, status) = hitData.[found]
             if priority = 1 then //we found a note
-                if status.[k] <> HitStatus.HAS_BEEN_HIT then
-                    let isHoldHead = status.[k] <> HitStatus.NEEDS_TO_BE_HIT
-                    status.[k] <- HitStatus.HAS_BEEN_HIT
+                if status.[k] <> HitStatus.HIT_ACCEPTED then
+                    let isHoldHead = status.[k] <> HitStatus.HIT_REQUIRED
+                    status.[k] <- HitStatus.HIT_ACCEPTED
                     deltas.[k] <- delta / rate
-                    this._HandleEvent { Time = now; Column = k; Guts = Hit (this.JudgementFunc (false, Time.Abs deltas.[k]), deltas.[k], isHoldHead) }
+                    this._HandleEvent { Time = now; Column = k; Guts = Hit_ (deltas.[k], isHoldHead, false) }
+                    if isHoldHead then internalHoldStates.[k] <- InternalHoldState.Holding
             else //priority = 0, we found a mine
-                status.[k] <- HitStatus.HAS_NOT_BEEN_DODGED
-                this._HandleEvent { Time = now; Column = k; Guts = Mine false }
+                status.[k] <- HitStatus.DODGE_FAILED
+                this._HandleEvent { Time = now; Column = k; Guts = Mine_ false }
+        elif internalHoldStates.[k] = InternalHoldState.MissedHead then internalHoldStates.[k] <- InternalHoldState.Dropped
                 
-    override this.HandleKeyUp(now, k) =
+    override this.HandleKeyUp (now, k) =
+        this.HandlePassive now
         while noteSeekActive < hitData.Length && InternalScore.offsetOf hitData.[noteSeekActive] < now - missWindow do 
             noteSeekActive <- noteSeekActive + 1
         let mutable i = noteSeekActive
         let mutable delta = missWindow
         let mutable found = -1
-        let mutable priority = -1
         let target = now + missWindow
         while i < hitData.Length && InternalScore.offsetOf hitData.[i] <= target do
             let struct (t, _, status) = hitData.[i]
             let d = now - t
-            if status.[k] = HitStatus.NEEDS_TO_BE_RELEASED then
-                if (Time.Abs delta > Time.Abs d) || priority < 1 then
-                    priority <- 1
+            if status.[k] = HitStatus.RELEASE_REQUIRED then
+                if Time.Abs delta > Time.Abs d then
                     found <- i
                     delta <- d
-            elif status.[k] = HitStatus.NEEDS_TO_BE_HELD then
-                if (Time.Abs delta > Time.Abs d) || priority < 0 then
-                    priority <- 0
-                    found <- i
-                    delta <- d
-            elif status.[k] = HitStatus.NEEDS_TO_BE_HIT_AND_HELD then
+            elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
                 i <- hitData.Length //stops the loop so we don't release an LN that isnt held yet
             i <- i + 1
         if found >= 0 then
             let struct (t, deltas, status) = hitData.[found]
-            if priority = 1 then //we found a release
-                delta <- delta / rate
-                status.[k] <- HitStatus.HAS_BEEN_RELEASED
-                deltas.[k] <- delta
-                this._HandleEvent { Time = now; Column = k; Guts = Release (this.JudgementFunc (false, Time.Abs deltas.[k]), deltas.[k]) }
-            else //priority = 0, we released a hold body
-                status.[k] <- HitStatus.HAS_NOT_BEEN_HELD
-                this._HandleEvent { Time = now; Column = k; Guts = Hold false }
-
-    abstract member JudgementFunc : bool * Time -> JudgementType
+            status.[k] <- HitStatus.RELEASE_ACCEPTED
+            deltas.[k] <- delta / rate
+            this._HandleEvent { Time = now; Column = k; Guts = Release_ (deltas.[k], false, false, internalHoldStates.[k] = InternalHoldState.Dropped) }
+            internalHoldStates.[k] <- InternalHoldState.Nothing
+        elif internalHoldStates.[k] = InternalHoldState.Holding then internalHoldStates.[k] <- InternalHoldState.Dropped
     
-    abstract member HandleEvent : HitEvent -> HitEvent
+    abstract member HandleEvent : HitEvent<HitEventGutsInternal> -> HitEvent<HitEventGuts>
     member private this._HandleEvent ev =
         let ev = this.HandleEvent ev
         hitEvents.Add ev
@@ -307,7 +332,7 @@ module ScoringHelpers =
     type HitWindows = (Time * JudgementType) list
 
     let rec window_func (windows: HitWindows) delta =
-        assert (delta >= 0.0f<ms>)
+        let delta = Time.Abs delta
         match windows with
         | [] -> JudgementType.MISS
         | (w, j) :: xs ->
@@ -333,11 +358,64 @@ module ScoringHelpers =
 
     let isComboBreaker = (function JudgementType.NG | JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false)
 
+type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
+    inherit IScoreMetric
+        (
+            sprintf "SC+ (J%i)" judge,
+            healthBar,
+            180.0f<ms>,
+            90.0f<ms>,
+            keys, replay, notes, rate
+        )
+
+    let sc_curve (isRelease: bool) (delta: Time) =
+        let delta = Time.Abs delta
+
+        // 1.0 = 100%
+        if delta >= 180.0f<ms> then -0.5
+        else
+            let delta = if isRelease then delta * 0.5f else delta
+            let delta = float delta
+            let scale = 6.0 / (10.0 - float judge)
+            Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
+
+    override this.HandleEvent ev =
+        { 
+            Time = ev.Time
+            Column = ev.Column
+            Guts = 
+                match ev.Guts with
+
+                | Hit_ (delta, isHold, missed) ->
+                    let judgement = ScoringHelpers.dp_windows judge enableRd delta
+                    this.State.Add(sc_curve false delta, 1.0, judgement)
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+                    Hit (judgement, delta, isHold)
+
+                | Release_ (delta, missed, overhold, dropped) ->
+                    let judgement = ScoringHelpers.dp_windows_halved judge enableRd delta
+                    this.State.Add(sc_curve true delta, 1.0, judgement)
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+                    Release (judgement, delta, overhold, dropped)
+
+                | Mine_ good ->
+                    if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
+                    Mine good
+        }
+
+type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
+    inherit IScoreMetric
+        (
+            sprintf "Wife3 (J%i)" judge,
+            healthBar,
+            180.0f<ms>,
+            keys, replay, notes, rate
+        )
+
     // now finally ported to wife3
-    let wife_curve (judge: int) (delta: Time) =
+    let wife_curve (delta: Time) =
         // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
         let erf = 
-            // you really had to put erf in this one didnt you
             // was this really necessary
             let a1 =  0.254829592
             let a2 = -0.284496736
@@ -367,69 +445,29 @@ module ScoringHelpers =
         elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
         else miss_weight
 
-type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric
-        (
-            sprintf "SC+ (J%i)" judge,
-            healthBar,
-            180.0f<ms>,
-            90.0f<ms>,
-            keys, replay, notes, rate
-        )
-
-    let sc_curve (judge: int) (isRelease: bool) (delta: Time) =
-        let delta = Time.Abs delta
-
-        // 1.0 = 100%
-        if delta >= 180.0f<ms> then -0.5
-        else
-            let delta = if isRelease then delta * 0.5f else delta
-            let delta = float delta
-            let scale = 6.0 / (10.0 - float judge)
-            Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
-
-    override this.JudgementFunc (isRelease, delta) =
-        delta |> if isRelease then ScoringHelpers.dp_windows_halved judge enableRd else ScoringHelpers.dp_windows judge enableRd
-
     override this.HandleEvent ev =
-        match ev.Guts with
-        | Hit (judgement, delta, _) ->
-            this.State.Add(sc_curve judge false delta, 1.0, judgement)
-            if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-        | Release (judgement, delta) ->
-            this.State.Add(sc_curve judge true delta, 1.0, judgement)
-            if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-        | Hold good
-        | Mine good ->
-            if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
-        ev
+        { 
+            Time = ev.Time
+            Column = ev.Column
+            Guts = 
+                match ev.Guts with
 
-type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric
-        (
-            sprintf "Wife3 (J%i)" judge,
-            healthBar,
-            180.0f<ms>,
-            keys, replay, notes, rate
-        )
+                | Hit_ (delta, isHold, missed) ->
+                    let judgement = ScoringHelpers.dp_windows judge enableRd delta
+                    this.State.Add(wife_curve delta, 1.0, judgement)
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+                    Hit (judgement, delta, isHold)
 
-    override this.JudgementFunc (isRelease, delta) =
-        if isRelease then
-            if delta = this.MissWindow then JudgementType.NG else JudgementType.OK
-        else ScoringHelpers.dp_windows judge enableRd delta
+                | Release_ (delta, missed, overhold, dropped) ->
+                    let judgement = if overhold || not missed then JudgementType.OK else JudgementType.NG
+                    this.State.Add(0.0, 0.0, judgement)
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+                    Release (judgement, delta, overhold, dropped)
 
-    override this.HandleEvent ev =
-        match ev.Guts with
-        | Hit (judgement, delta, _) ->
-            this.State.Add(ScoringHelpers.wife_curve judge delta, 1.0, judgement)
-            if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-        | Release (judgement, delta) ->
-            this.State.Add(0.0, 0.0, judgement)
-            if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-        | Hold good
-        | Mine good ->
-            if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
-        ev
+                | Mine_ good ->
+                    if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
+                    Mine good
+        }
 
 type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
     inherit IScoreMetric
@@ -439,35 +477,6 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
             188.5f<ms> - od * 3.0f<ms>,
             keys, replay, notes, rate
         )
-
-    let hold_judgement head tail =
-        match tail with
-        | JudgementType.MARVELLOUS | JudgementType.PERFECT ->
-            match head with
-            | JudgementType.MISS -> JudgementType.BAD
-            | j -> j
-        | JudgementType.GREAT ->
-            match head with
-            | JudgementType.MARVELLOUS -> JudgementType.PERFECT
-            | JudgementType.MISS -> JudgementType.BAD
-            | j -> j
-        | JudgementType.GOOD ->
-            match head with
-            | JudgementType.MARVELLOUS | JudgementType.PERFECT -> JudgementType.GREAT
-            | JudgementType.GREAT | JudgementType.GOOD -> JudgementType.GOOD
-            | _ -> JudgementType.BAD
-        | JudgementType.BAD ->
-            match head with
-            | JudgementType.MARVELLOUS -> JudgementType.GREAT
-            | JudgementType.PERFECT | JudgementType.GREAT | JudgementType.GOOD -> JudgementType.GOOD
-            | _ -> JudgementType.BAD
-        | JudgementType.NG -> //overhold
-            match head with
-            | JudgementType.MARVELLOUS -> JudgementType.GREAT
-            | JudgementType.PERFECT | JudgementType.GREAT -> JudgementType.GOOD
-            | _ -> JudgementType.BAD
-        | JudgementType.MISS -> JudgementType.MISS
-        | _ -> failwith "impossible"
 
     let points =
         function
@@ -480,11 +489,10 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
         | JudgementType.MISS -> 0.0
         | _ -> 0.0
 
-    let headjudgements = Array.create keys JudgementType.MISS
-    let allowOverhold = Array.create keys false
+    let headDeltas = Array.create keys 0.0f<ms>
 
-    override this.JudgementFunc (isRelease, delta) =
-        //let delta = if isRelease && delta <> this.MissWindow then delta / 2.0f else delta // is this correct?
+    let judgementFunc (delta: Time) =
+        let delta = Time.Abs delta
         if delta <= 16.5f<ms> then JudgementType.MARVELLOUS
         elif delta <= 64.5f<ms> - od * 3.0f<ms> then JudgementType.PERFECT
         elif delta <= 97.5f<ms> - od * 3.0f<ms> then JudgementType.GREAT
@@ -493,36 +501,63 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
         else JudgementType.MISS
 
     override this.HandleEvent ev =
-        match ev.Guts with
-            // todo: osu doesn't weight the begin and end of lns seperately, but as one object
-        | Hit (judgement, _, isHold) ->
-            if isHold then
-                // points are awarded at the end of the LN
-                headjudgements.[ev.Column] <- judgement
-                if judgement = JudgementType.MISS then
-                    allowOverhold.[ev.Column] <- this.KeyState |> Bitmap.hasBit ev.Column |> not
-                    this.State.BreakCombo()
-                else
-                    allowOverhold.[ev.Column] <- true
-                    this.State.IncrCombo()
-            else
-                this.State.Add(points judgement, 300.0, judgement)
-                if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
-            ev
-        | Release (judgement, delta) ->
-            // if this is an overhold, mark judgement as NG
-            let judgement = if judgement = JudgementType.MISS && allowOverhold.[ev.Column] && this.KeyState |> Bitmap.hasBit ev.Column then JudgementType.NG else judgement
-            allowOverhold.[ev.Column] <- false
-            // calculate judgement for LN as a whole
-            let judgement = hold_judgement headjudgements.[ev.Column] judgement
+        { 
+            Time = ev.Time
+            Column = ev.Column
+            Guts = 
+                match ev.Guts with
 
-            this.State.Add(points judgement, 300.0, judgement)
-            if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
-            { ev with Guts = Release (judgement, delta) }
-        | Hold good
-        | Mine good ->
-            if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
-            ev
+                | Hit_ (delta, isHold, missed) ->
+                    if isHold then
+                        headDeltas.[ev.Column] <- Time.Abs delta
+                        if missed then this.State.BreakCombo() else this.State.IncrCombo()
+                        Hold
+                    else
+                        let judgement = judgementFunc delta
+                        this.State.Add(points judgement, 300.0, judgement)
+                        if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
+                        Hit (judgement, delta, isHold)
+
+                | Release_ (delta, missed, overhold, dropped) ->
+                    let headDelta = headDeltas.[ev.Column]
+                    let delta = Time.Abs delta
+
+                    let judgement =
+                        if
+                            delta < 16.5f<ms> * 1.2f &&
+                            delta + headDelta < 16.5f<ms> * 2.4f &&
+                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+                            not dropped
+                        then JudgementType.MARVELLOUS
+                        elif
+                            delta < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
+                            delta + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
+                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+                            not dropped
+                        then JudgementType.PERFECT
+                        elif 
+                            delta < 97.5f<ms> - od * 3.0f<ms> &&
+                            delta + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
+                        then JudgementType.GREAT
+                        elif
+                            delta < 127.5f<ms> - od * 3.0f<ms> &&
+                            delta + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
+                        then JudgementType.GOOD
+                        elif
+                            overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>
+                        then JudgementType.BAD
+                        else JudgementType.MISS
+
+                    this.State.Add(points judgement, 300.0, judgement)
+                    if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
+                    Release (judgement, delta, overhold, dropped)
+
+                | Mine_ good ->
+                    if not good then this.State.BreakCombo(); this.State.Add JudgementType.NG else this.State.Add JudgementType.OK
+                    Mine good
+        }
 
 module Metrics =
     
