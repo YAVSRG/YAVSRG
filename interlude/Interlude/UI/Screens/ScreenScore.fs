@@ -48,11 +48,10 @@ type ScoreGraph(data: ScoreInfoProvider) =
         for ev in events do
             let y, col =
                 match ev.Guts with
-                | HitEventGuts.Hit (judgement, delta, isHold) ->
+                | HitEventGuts.Hit (judgement, delta, _) ->
                     h - delta / data.Scoring.MissWindow * h, Themes.themeConfig.JudgementColors.[int judgement]
-                | HitEventGuts.Release (judgement, delta) ->
+                | HitEventGuts.Release (judgement, delta, _, _) ->
                     h - 0.5f * delta / data.Scoring.MissWindow * h, Color.FromArgb(127, Themes.themeConfig.JudgementColors.[int judgement])
-                | HitEventGuts.Hold false
                 | HitEventGuts.Mine false -> 0.0f, Themes.themeConfig.JudgementColors.[int JudgementType.NG]
                 | _ -> 0.0f, Color.Transparent
             if col.A > 0uy then

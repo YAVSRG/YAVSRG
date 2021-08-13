@@ -56,7 +56,7 @@ type ScreenPlay() as this =
     let chart = Gameplay.modifiedChart.Value
     let liveplay = new LiveReplayProvider()
     let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys liveplay chart.Notes Gameplay.rate
-    let onHit = new Event<HitEvent>()
+    let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper = { Scoring = scoring; HP = scoring.HP; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow

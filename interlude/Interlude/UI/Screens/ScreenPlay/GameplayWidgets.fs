@@ -23,7 +23,7 @@ module GameplayWidgets =
     type Helper = {
         Scoring: IScoreMetric
         HP: IHealthBarSystem
-        OnHit: IEvent<HitEvent>
+        OnHit: IEvent<HitEvent<HitEventGuts>>
     }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
@@ -51,7 +51,7 @@ module GameplayWidgets =
         let listener =
             helper.OnHit.Subscribe(fun ev ->
                 match ev.Guts with
-                | Hit (judgement, delta, _) | Release (judgement, delta) ->
+                | Hit (judgement, delta, _) | Release (judgement, delta, _, _) ->
                     hits.Add (struct (ev.Time, delta / helper.Scoring.MissWindow * w * 0.5f, int judgement))
                 | _ -> ())
 
@@ -94,9 +94,9 @@ module GameplayWidgets =
                 let (judge, delta) =
                     match ev.Guts with
                     | Hit (judge, delta, _)
-                    | Release (judge, delta) -> (judge, delta)
-                    | Mine good
-                    | Hold good -> if good then (JudgementType.OK, 0.0f<ms>) else (JudgementType.NG, 0.0f<ms>)
+                    | Release (judge, delta, _, _) -> (judge, delta)
+                    | Hold -> (JudgementType.OK, 0.0f<ms>)
+                    | Mine good -> if good then (JudgementType.OK, 0.0f<ms>) else (JudgementType.NG, 0.0f<ms>)
                 if
                     match judge with
                     | JudgementType.RIDICULOUS
@@ -202,9 +202,14 @@ module GameplayWidgets =
         let explodeTime = Math.Min(0.99f, config.FadeTime)
         let animation = new AnimationCounter(config.AnimationFrameTime)
 
-        let handleEvent (ev: HitEvent) =
+        let handleEvent (ev: HitEvent<HitEventGuts>) =
             match ev.Guts with
             | Hit (judge, _, true) when (config.ExplodeOnMiss || judge <> JudgementType.MISS) ->
+                sliders.[ev.Column].Target <- 1.0f
+                sliders.[ev.Column].Value <- 1.0f
+                holding.[ev.Column] <- true
+                mem.[ev.Column] <- ev.Guts
+            | Hold ->
                 sliders.[ev.Column].Target <- 1.0f
                 sliders.[ev.Column].Value <- 1.0f
                 holding.[ev.Column] <- true
@@ -246,6 +251,11 @@ module GameplayWidgets =
                         else Rect.createWH (l + columnwidth * float32 k) (b - columnwidth) columnwidth columnwidth
                         |> Rect.expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
+                    | Hold ->
+                        Draw.quad
+                            (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
+                            (Quad.colorOf (Color.FromArgb(a, Color.White)))
+                            (Sprite.gridUV (animation.Loops, 0) (Themes.getTexture "holdexplosion"))
                     | Hit (judge, _, true) ->
                         Draw.quad
                             (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
