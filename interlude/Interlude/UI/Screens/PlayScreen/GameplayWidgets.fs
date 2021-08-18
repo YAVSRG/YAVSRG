@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.ScreenPlayComponents
+﻿namespace Interlude.UI.Gameplay
 
 open OpenTK
 open System

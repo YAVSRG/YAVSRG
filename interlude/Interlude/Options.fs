@@ -55,7 +55,6 @@ module Options =
         Tooltip: Setting<Bind>
         Delete: Setting<Bind>
         Screenshot: Setting<Bind>
-        Tasklist: Setting<Bind>
         Volume: Setting<Bind>
 
         Collections: Setting<Bind>
@@ -68,6 +67,7 @@ module Options =
         Import: Setting<Bind>
         Options: Setting<Bind>
         Help: Setting<Bind>
+        Tasks: Setting<Bind>
 
         UpRate: Setting<Bind>
         DownRate: Setting<Bind>
@@ -84,7 +84,6 @@ module Options =
             Tooltip = Setting(mk Keys.Slash)
             Delete = Setting(mk Keys.Delete)
             Screenshot = Setting(mk Keys.F12)
-            Tasklist = Setting(mk Keys.F8)
             Volume = Setting(mk Keys.LeftAlt)
             Previous = Setting(mk Keys.Left)
             Next = Setting(mk Keys.Right)
@@ -104,6 +103,7 @@ module Options =
             Import = Setting(ctrl Keys.I)
             Options = Setting(ctrl Keys.O)
             Help = Setting(ctrl Keys.H)
+            Tasks = Setting(mk Keys.F8)
 
             UpRate = Setting(mk Keys.Equal)
             DownRate = Setting(mk Keys.Minus)

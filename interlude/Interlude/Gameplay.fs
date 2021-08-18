@@ -4,7 +4,6 @@ open System
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
-open Prelude.Gameplay
 open Prelude.Gameplay.Mods
 open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
@@ -52,7 +51,7 @@ module Gameplay =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData chart
-        Screens.loadBackground chart.BGPath
+        ScreenGlobals.loadBackground chart.BGPath
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Value - offsetOf chart.Notes.First.Value
         Audio.changeTrack (chart.AudioPath, localOffset, rate)
         Audio.playFrom chart.Header.PreviewTime
@@ -129,4 +128,4 @@ module Gameplay =
             changeChart(c, ch)
         with err ->
             Logging.Debug("Tried to auto select a chart but none exist", err)
-            Screens.loadBackground ""
+            ScreenGlobals.loadBackground ""

@@ -150,7 +150,7 @@ module MarkdownReader =
 
         let fc = FlowContainer()
         let frame =
-            let f = Frame((fun () -> Screens.accentShade(200, 0.7f, 0.0f)), (fun () -> Screens.accentShade(255, 1.0f, 0.3f)))
+            let f = Frame((fun () -> ScreenGlobals.accentShade(200, 0.7f, 0.0f)), (fun () -> ScreenGlobals.accentShade(255, 1.0f, 0.3f)))
             doc |> buildDocWidget |> fc.Add
             fc |> f.Add
             f
@@ -164,8 +164,8 @@ module MarkdownReader =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if Mouse.Click MouseButton.Left || Options.options.Hotkeys.Exit.Value.Tapped() then
-                this.Close()
+                this.BeginClose()
                 frame.Move(-WIDTH * 0.5f, Render.vheight, WIDTH * 0.5f, Render.vheight - 200.0f)
         override this.OnClose() = ()
 
-    let help() = Screens.addDialog (MarkdownViewDialog doc)
+    let help() = ScreenGlobals.addDialog (MarkdownViewDialog doc)

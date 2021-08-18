@@ -13,75 +13,13 @@ open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Selection
+open Interlude.UI.Screens.LevelSelect
 
 (*
     Actual options menu structure/design data
 *)
 
 module OptionsMenuTabs =
-
-    let PRETTYTEXTWIDTH = 500.0f
-    let PRETTYHEIGHT = 80.0f
-    let PRETTYWIDTH = 1200.0f
-
-    type Divider() =
-        inherit Widget()
-
-        member this.Position(y) =
-            this |> positionWidget(100.0f, 0.0f, y - 5.0f, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + 5.0f, 0.0f)
-
-        override this.Draw() =
-            base.Draw()
-            Draw.quad (Quad.ofRect this.Bounds) (struct(Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White)) Sprite.DefaultQuad
-
-    type PrettySetting(name, widget: Selectable) as this =
-        inherit Selectable()
-
-        let mutable widget = widget
-
-        do
-            widget
-            |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
-            |> this.Add
-            TextBox(K (localiseOption name + ":"), (fun () -> ((if this.Selected then Screens.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
-            |> this.Add
-            TooltipRegion(localiseTooltip name) |> this.Add
-    
-        member this.Position(y, width, height) =
-            this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
-    
-        member this.Position(y, width) = this.Position(y, width, PRETTYHEIGHT)
-        member this.Position(y) = this.Position(y, PRETTYWIDTH)
-
-        override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (Color.FromArgb(180, 0, 0, 0)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 0, 0, 0)) Sprite.Default
-            base.Draw()
-    
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if widget.Hover && not widget.Selected && this.Selected then this.HoverChild <- None; this.Hover <- true
-        
-        override this.OnSelect() = if not widget.Hover then widget.Selected <- true
-        override this.OnDehover() = base.OnDehover(); widget.OnDehover()
-
-        member this.Refresh(w: Selectable) =
-            widget.Destroy()
-            widget <- w
-            this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
-
-    type PrettyButton(name, action) as this =
-        inherit Selectable()
-        do
-            TextBox(K (localiseOption name + "  >"), (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f) |> this.Add
-            Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
-            TooltipRegion(localiseTooltip name) |> this.Add
-        override this.OnSelect() = action(); this.Selected <- false
-        override this.Draw() =
-            if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
-            base.Draw()
-        member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
     
     let system(add) =
         column [
@@ -126,7 +64,7 @@ module OptionsMenuTabs =
                     //todo: move this to utils
                     let target = System.Diagnostics.ProcessStartInfo("file://" + System.IO.Path.GetFullPath(getDataPath("Themes")), UseShellExecute = true)
                     System.Diagnostics.Process.Start target |> ignore).Position(800.0f)
-            PrettyButton("NewTheme", fun () -> Screens.addDialog <| TextInputDialog(Render.bounds, "Enter theme name", Themes.createNew)).Position(900.0f)
+            PrettyButton("NewTheme", fun () -> ScreenGlobals.addDialog <| TextInputDialog(Render.bounds, "Enter theme name", Themes.createNew)).Position(900.0f)
         ]
 
     let themes(add) =
@@ -350,7 +288,7 @@ module OptionsMenuTabs =
             PrettyButton("DownloadUpdate",
                 fun () ->
                     if Interlude.Utils.AutoUpdate.updateAvailable then
-                        Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Screens.addNotification(Localisation.localise "notification.UpdateInstalled", NotificationType.System))
+                        Interlude.Utils.AutoUpdate.applyUpdate(fun () -> ScreenGlobals.addNotification(Localisation.localise "notification.UpdateInstalled", NotificationType.System))
             ).Position(300.0f)
         ]
 
@@ -389,7 +327,7 @@ open OptionsMenuTabs
     Options dialog which manages the scrolling effect
 *)
 
-type OptionsMenu(topLevel) as this =
+type SelectionMenu(topLevel) as this =
     inherit Dialog()
 
     let stack: Selectable option array = Array.create 10 None
@@ -428,14 +366,14 @@ type OptionsMenu(topLevel) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         match List.length namestack with
-        | 0 -> this.Close()
+        | 0 -> this.BeginClose()
         | n -> if stack.[n - 1].Value.SelectedChild.IsNone then back()
 
     override this.OnClose() = ScreenLevelSelect.refresh <- true
 
-    static member Main() = OptionsMenu(topLevel)
+    static member Options() = SelectionMenu(topLevel)
     static member QuickPlay() =
-        { new OptionsMenu(quickplay) with
+        { new SelectionMenu(quickplay) with
             override this.OnClose() = base.OnClose(); Audio.playLeadIn() }
-    static member Collections() = OptionsMenu(topLevel)
+    static member Collections() = SelectionMenu(topLevel)
 

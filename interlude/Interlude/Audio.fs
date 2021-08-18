@@ -33,9 +33,9 @@ module Audio =
             Bass.StreamFree(this.ID) |> bassError
 
     type TrackFinishBehaviour =
-    | Loop
-    | Wait
-    | Action of (unit -> unit)
+        | Loop
+        | Wait
+        | Action of (unit -> unit)
 
     let LEADIN_TIME = 2000.0f<ms>
     

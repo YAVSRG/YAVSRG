@@ -220,7 +220,7 @@ module Selection =
     type BigButton(label, icon, onClick) as this =
         inherit Selectable()
         do
-            this.Add(Frame((fun () -> Screens.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
+            this.Add(Frame((fun () -> ScreenGlobals.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
             this.Add(TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 0.8f))
             this.Add(TextBox(K ([|"❖";"✎";"♛";"⌨";"⚒"|].[icon]), K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 1.0f, 0.0f, 0.7f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
@@ -233,7 +233,7 @@ module Selection =
         inherit Selectable()
         do
             this.Add(Frame(Color.FromArgb(80, 255, 255, 255), ()))
-            this.Add(TextBox(label, (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
+            this.Add(TextBox(label, (fun () -> ((if this.Hover then ScreenGlobals.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
         override this.OnSelect() =
             this.Selected <- false
@@ -264,7 +264,7 @@ module Selection =
                 (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
             |> this.Add
 
-        new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Screens.accentShade(255, 1.0f, 0.0f))
+        new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> ScreenGlobals.accentShade(255, 1.0f, 0.0f))
 
         override this.Draw() =
             let hi = colorFunc()
@@ -343,8 +343,8 @@ module Selection =
             let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
             let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
             let m = (b + t) * 0.5f
-            Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Screens.accentShade(255, 1.0f, 0.0f)) Sprite.Default
-            Draw.rect cursor (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (ScreenGlobals.accentShade(255, 1.0f, 0.0f)) Sprite.Default
+            Draw.rect cursor (ScreenGlobals.accentShade(255, 1.0f, color.Value)) Sprite.Default
             base.Draw()
 
     type ColorPicker(color: ISettable<byte>) as this =
@@ -357,8 +357,8 @@ module Selection =
 
         override this.Draw() =
             base.Draw()
-            if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (ScreenGlobals.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (ScreenGlobals.accentShade(120, 1.0f, 0.8f)) Sprite.Default
             Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
 
         override this.Left() = bk()
@@ -369,13 +369,13 @@ module Selection =
     type KeyBinder(setting: ISettable<Bind>, allowModifiers) as this =
         inherit Selectable()
         do
-            this.Add(new TextBox(setting.ToString, (fun () -> (if this.Selected then Screens.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
+            this.Add(new TextBox(setting.ToString, (fun () -> (if this.Selected then ScreenGlobals.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
             this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
         override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (ScreenGlobals.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (ScreenGlobals.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (ScreenGlobals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
             base.Draw()
 
         override this.Update(elapsedTime, bounds) =
@@ -402,9 +402,9 @@ module Selection =
                 this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
 
             override this.Draw() =
-                if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.4f)) Sprite.Default
-                elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.1f)) Sprite.Default
-                else Draw.rect this.Bounds (Screens.accentShade(180, 0.6f, 0.0f)) Sprite.Default
+                if this.Selected then Draw.rect this.Bounds (ScreenGlobals.accentShade(180, 1.0f, 0.4f)) Sprite.Default
+                elif this.Hover then Draw.rect this.Bounds (ScreenGlobals.accentShade(180, 1.0f, 0.1f)) Sprite.Default
+                else Draw.rect this.Bounds (ScreenGlobals.accentShade(180, 0.6f, 0.0f)) Sprite.Default
                 base.Draw()
 
             override this.SParent = Some (selector :> Selectable)
@@ -534,22 +534,32 @@ module Selection =
         type WatcherSelectorItem<'T>(item: 'T, name, selector: WatcherSelector<'T>) as this =
             inherit ListSelectable(true)
             do
-                this.Add(new TextBox((fun () -> name ((this.Setting : Setting<'T>).Value)), K (Color.White, Color.Black), 0.0f)
-                    |> positionWidget(0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, -40.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Edit"), fun () -> selector.EditItem this)
-                    |> positionWidget(20.0f, 0.0f, -40.0f, 1.0f, 140.0f, 0.0f, -10.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Duplicate"), fun () -> this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Value, name, selector))))
-                    |> positionWidget(160.0f, 0.0f, -40.0f, 1.0f, 280.0f, 0.0f, -10.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.MakeMain"), fun () -> selector.Main <- this)
-                    |> positionWidget(300.0f, 0.0f, -40.0f, 1.0f, 420.0f, 0.0f, -10.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Delete"), fun () -> if selector.Main <> this then this.Destroy(); this.SParent.Value.SelectedChild <- None)
-                    |> positionWidget(440.0f, 0.0f, -40.0f, 1.0f, 560.0f, 0.0f, -10.0f, 1.0f))
+                new TextBox((fun () -> name ((this.Setting : Setting<'T>).Value)), K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, -40.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.Edit", fun () -> selector.EditItem this)
+                |> positionWidget(20.0f, 0.0f, -40.0f, 1.0f, 140.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.Duplicate", fun () -> this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Value, name, selector))))
+                |> positionWidget(160.0f, 0.0f, -40.0f, 1.0f, 280.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.MakeMain", fun () -> selector.Main <- this)
+                |> positionWidget(300.0f, 0.0f, -40.0f, 1.0f, 420.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.Delete", fun () -> if selector.Main <> this then this.Destroy(); this.SParent.Value.SelectedChild <- None)
+                |> positionWidget(440.0f, 0.0f, -40.0f, 1.0f, 560.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
                 this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 120.0f, 0.0f) |> ignore
             member val Setting = new Setting<'T>(item)
             override this.SParent = Some (selector :> Selectable)
 
             override this.Draw() =
-                if selector.Main = this then Draw.rect this.Bounds (Screens.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+                if selector.Main = this then Draw.rect this.Bounds (ScreenGlobals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
                 if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
                 elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                 base.Draw()
@@ -577,7 +587,7 @@ module Selection =
                     this.HoverChild <- fc.Children.[(i + 1) % fc.Children.Count] :?> Selectable |> Some
                 | None -> ()
 
-            member this.EditItem(item: WatcherSelectorItem<'T>) = add("EditItem", editor(item.Setting))
+            member this.EditItem(item: WatcherSelectorItem<'T>) = add("EditItem", editor item.Setting)
             member this.Main with get() = currentMain and set(v) = currentMain <- v
 
             override this.OnSelect() =
@@ -626,3 +636,68 @@ module Selection =
         w.Add main
         w.SelectedChild <- Some main
         w
+
+    let PRETTYTEXTWIDTH = 500.0f
+    let PRETTYHEIGHT = 80.0f
+    let PRETTYWIDTH = 1200.0f
+
+    type Divider() =
+        inherit Widget()
+
+        member this.Position(y) =
+            this |> positionWidget(100.0f, 0.0f, y - 5.0f, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + 5.0f, 0.0f)
+
+        override this.Draw() =
+            base.Draw()
+            Draw.quad (Quad.ofRect this.Bounds) (struct(Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White)) Sprite.DefaultQuad
+
+    type PrettySetting(name, widget: Selectable) as this =
+        inherit Selectable()
+
+        let mutable widget = widget
+
+        do
+            widget
+            |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
+            |> this.Add
+
+            TextBox(K (localiseOption name + ":"), (fun () -> ((if this.Selected then ScreenGlobals.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
+            |> this.Add
+
+            TooltipRegion(localiseTooltip name) |> this.Add
+    
+        member this.Position(y, width, height) =
+            this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
+    
+        member this.Position(y, width) = this.Position(y, width, PRETTYHEIGHT)
+        member this.Position(y) = this.Position(y, PRETTYWIDTH)
+
+        override this.Draw() =
+            if this.Selected then Draw.rect this.Bounds (Color.FromArgb(180, 0, 0, 0)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 0, 0, 0)) Sprite.Default
+            base.Draw()
+    
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if widget.Hover && not widget.Selected && this.Selected then this.HoverChild <- None; this.Hover <- true
+        
+        override this.OnSelect() = if not widget.Hover then widget.Selected <- true
+        override this.OnDehover() = base.OnDehover(); widget.OnDehover()
+
+        member this.Refresh(w: Selectable) =
+            widget.Destroy()
+            widget <- w
+            this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
+
+    type PrettyButton(name, action) as this =
+        inherit Selectable()
+        do
+            TextBox(K (localiseOption name + "  >"), (fun () -> ((if this.Hover then ScreenGlobals.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f) |> this.Add
+            Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
+            TooltipRegion(localiseTooltip name) |> this.Add
+        override this.OnSelect() = action(); this.Selected <- false
+        override this.Draw() =
+            if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
+            base.Draw()
+        member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)

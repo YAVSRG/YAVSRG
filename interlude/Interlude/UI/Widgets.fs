@@ -228,7 +228,8 @@ type Dialog() as this =
         fade.Target <- 1.0f
 
     // Begins closing animation
-    member this.Close() =
+    abstract member BeginClose : unit -> unit
+    default this.BeginClose() =
         fade.Target <- 0.0f
 
     // Called when dialog actually closes (end of animation)
@@ -276,7 +277,7 @@ type Screen() =
        - Overall screen manager references screen logic AND initialises values, connecting the loop
 *)
 
-module Screens =
+module ScreenGlobals =
     open Themes
     
     let mutable currentType = ScreenType.SplashScreen

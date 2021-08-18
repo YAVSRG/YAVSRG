@@ -9,7 +9,12 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Prelude", "Prelude\Prelude\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Retrolude", "Retrolude\Retrolude.csproj", "{5EBB46B4-2F12-4258-A257-73C409BB00D9}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Interlude", "Interlude\Interlude.fsproj", "{658D835D-F5BF-462E-8080-ACC08B6AE4C0}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Interlude", "Interlude\Interlude.fsproj", "{658D835D-F5BF-462E-8080-ACC08B6AE4C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6D93F74C-03C2-44FD-8200-CB7247D26202}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -68,7 +68,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
         base.Dispose()
         fbo.Dispose()
 
-type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
+type ScoreScreen(scoreData: ScoreInfoProvider, pbs) as this =
     inherit Screen()
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
@@ -120,15 +120,15 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         |> this.Add
 
     override this.Draw() =
-        Draw.rect (Rect.sliceTop 150.0f this.Bounds) (Screens.accentShade(100, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.sliceTop 155.0f this.Bounds |> Rect.sliceBottom 5.0f) (Screens.accentShade(255, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.sliceTop 250.0f this.Bounds |> Rect.sliceBottom 100.0f) (Screens.accentShade(100, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceTop 150.0f this.Bounds) (ScreenGlobals.accentShade(100, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceTop 155.0f this.Bounds |> Rect.sliceBottom 5.0f) (ScreenGlobals.accentShade(255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceTop 250.0f this.Bounds |> Rect.sliceBottom 100.0f) (ScreenGlobals.accentShade(100, 0.6f, 0.0f)) Sprite.Default
 
         let struct (left, top, right, bottom) = this.Bounds
         let w = (right + left) * 0.5f
         let h =  (bottom - 500.0f - top)
         let perfRect = Rect.create(w - h)(top + 175.0f + h * 0.5f)(w + h)(top + 325.0f + h * 0.5f)
-        Draw.rect perfRect (Screens.accentShade(150, 0.4f, 0.0f)) Sprite.Default
+        Draw.rect perfRect (ScreenGlobals.accentShade(150, 0.4f, 0.0f)) Sprite.Default
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Physical, perfRect, physicalColor scoreData.Physical, 0.0f)
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Technical, perfRect, technicalColor scoreData.Technical, 1.0f)
         Draw.quad (Quad.ofRect (Rect.create (w - h * 0.5f) (top + 250.0f) (w + h * 0.5f) (top + 250.0f + h))) (Quad.colorOf (if scoreData.HP.Failed then Color.Gray else Color.White)) (Sprite.gridUV (gradeAchieved, 0) (Themes.getTexture "ranks"))
@@ -138,7 +138,7 @@ type ScreenScore(scoreData: ScoreInfoProvider, pbs) as this =
         base.Draw()
 
     override this.OnEnter prev =
-        Screens.setToolbarCollapsed true
+        ScreenGlobals.setToolbarCollapsed true
 
     override this.OnExit next =
-        Screens.setToolbarCollapsed false
+        ScreenGlobals.setToolbarCollapsed false
