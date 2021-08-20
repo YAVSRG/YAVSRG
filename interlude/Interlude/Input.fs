@@ -26,7 +26,7 @@ type Bind =
         + (if alt then "Alt + " else "")
         + (if shift then "Shift + " else "")
 
-    static member DummyBind = new Setting<Bind>(Dummy)
+    static member DummyBind = Setting.simple Dummy
 
 
 module Bind =
@@ -69,7 +69,7 @@ module Input =
         | None -> ()
         inputmethod <- None
     
-    let setInputMethod (s: ISettable<string>, callback: unit -> unit) =
+    let setInputMethod (s: Setting<string>, callback: unit -> unit) =
         removeInputMethod()
         inputmethod <- Some (s, callback)
 
@@ -182,7 +182,7 @@ module Input =
                 removeInputMethod())
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | Some (s, c) -> s.Apply(fun x -> x + e.AsString); typed <- true
+            | Some (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
             | None -> ())
 
     let update() =
@@ -192,7 +192,7 @@ module Input =
         match inputmethod with
         |  Some (s, c) ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
-                s.Apply (fun x -> x.Substring (0, x.Length - 1))
+                Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
             elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
         | None -> ()

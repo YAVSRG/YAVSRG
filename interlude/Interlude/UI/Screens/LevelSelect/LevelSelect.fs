@@ -100,8 +100,8 @@ module ScreenLevelSelect =
             inherit Selectable()
 
             let mutable count = -1
-            let filter = Setting ScoreboardFilter.All
-            let sort = WrappedSetting(options.ScoreSortMode, int, enum)
+            let filter = Setting.simple ScoreboardFilter.All
+            let sort = Setting.map enum int options.ScoreSortMode
 
             let mutable chart = ""
             let mutable scoring = ""
@@ -152,7 +152,7 @@ module ScreenLevelSelect =
                 |> positionWidget(20.0f, 0.25f, -35.0f, 1.0f, -20.0f, 0.5f, -5.0f, 1.0f)
                 |> ls.Add
 
-                LittleButton((fun () -> scoreSystem), fun () -> options.AccSystems.Apply(WatcherSelection.cycleForward); refresh <- true)
+                LittleButton((fun () -> scoreSystem), fun () -> Setting.app WatcherSelection.cycleForward options.AccSystems; refresh <- true)
                 |> positionWidget(20.0f, 0.5f, -35.0f, 1.0f, -20.0f, 0.75f, -5.0f, 1.0f)
                 |> ls.Add
 
@@ -456,7 +456,7 @@ type ScreenLevelSelect() as this =
     let mutable lastItem: (string * CachedChart) option = None
     let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
-    let searchText = new Setting<string>("")
+    let searchText = Setting.simple ""
     let infoPanel = new InfoPanel()
 
     let refresh() =
@@ -497,8 +497,8 @@ type ScreenLevelSelect() as this =
     let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
 
     do
-        options.ChartSortMode.Apply(fun s -> if sortBy.ContainsKey s then s else "Title")
-        options.ChartGroupMode.Apply(fun s -> if groupBy.ContainsKey s then s else "Pack")
+        Setting.app (fun s -> if sortBy.ContainsKey s then s else "Title") options.ChartSortMode
+        Setting.app (fun s -> if groupBy.ContainsKey s then s else "Pack") options.ChartGroupMode
         this.Animation.Add scrollPos
         scrollBy <- fun (amt: float32) -> scrollPos.Target <- scrollPos.Target + amt
 

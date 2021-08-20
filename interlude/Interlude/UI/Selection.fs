@@ -238,7 +238,7 @@ module Selection =
         override this.OnSelect() =
             this.Selected <- false
             onClick()
-        static member FromEnum<'T when 'T: enum<int>>(label: string, setting: ISettable<'T>, onClick) =
+        static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, onClick) =
             let names = Enum.GetNames(typeof<'T>)
             let values = Enum.GetValues(typeof<'T>) :?> 'T array
             let mutable i = array.IndexOf(values, setting.Value)
@@ -284,10 +284,10 @@ module Selection =
         inherit NavigateSelectable()
         let mutable index = index
         let fd() =
-            index <- ((index + 1) % items.Length)
+            index <- (index + 1) % items.Length
             setter(index, items.[index])
         let bk() =
-            index <- ((index + items.Length - 1) % items.Length)
+            index <- (index + items.Length - 1) % items.Length
             setter(index, items.[index])
         do
             this.Add(new TextBox((fun () -> items.[index]), K (Color.White, Color.Black), 0.0f))
@@ -299,25 +299,33 @@ module Selection =
         override this.Up() = fd()
         override this.Right() = fd()
 
-        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: ISettable<'T>, onDeselect) =
+        static member FromEnum<'T>(setting: Setting<'T>, onDeselect) =
             let names = Enum.GetNames(typeof<'T>)
             let values = Enum.GetValues(typeof<'T>) :?> 'T array
             { new Selector(names, Array.IndexOf(values, setting.Value), (fun (i, _) -> setting.Value <- values.[i]))
                 with override this.OnDeselect() = base.OnDeselect(); onDeselect() }
 
-        static member FromBool(setting: ISettable<bool>) =
+        static member FromBool(setting: Setting<bool>) =
             new Selector([|"☒" ; "☑"|], (if setting.Value then 1 else 0), (fun (i, _) -> setting.Value <- i > 0))
 
-        static member FromKeymode(setting: ISettable<int>, onDeselect) =
-            { new Selector([|"3K"; "4K"; "5K"; "6K"; "7K"; "8K"; "9K"; "10K"|], setting.Value, (fun (i, _) -> setting.Value <- i))
-                with override this.OnDeselect() = base.OnDeselect(); onDeselect() }
-
-    type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, incr: float32) as this =
+    type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
         inherit NavigateSelectable()
         let TEXTWIDTH = 130.0f
         let color = AnimationFade 0.5f
         let mutable dragging = false
-        let chPercent v = setting.ValuePercent <- setting.ValuePercent + v
+        
+        let getPercent (setting: Setting.Bounded<'T>) =
+            let (Setting.Bounds (lo, hi)) = setting.Config
+            let (lo, hi) = (Convert.ToSingle lo, Convert.ToSingle hi)
+            let value = Convert.ToSingle setting.Value
+            (value - lo) / (hi - lo)
+
+        let setPercent (v: float32) (setting: Setting.Bounded<'T>) =
+            let (Setting.Bounds (lo, hi)) = setting.Config
+            let (lo, hi) = (Convert.ToSingle lo, Convert.ToSingle hi)
+            setting.Value <- Convert.ChangeType((hi - lo) * v + lo, typeof<'T>) :?> 'T
+
+        let chPercent v = setPercent (getPercent setting + v) setting
         do
             this.Animation.Add color
             this.Add(new TextBox((fun () -> setting.Value.ToString()), K (Color.White, Color.Black), 0.0f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
@@ -330,7 +338,7 @@ module Selection =
             if this.Selected then
                 if (Mouse.Held(MouseButton.Left) && dragging) then
                     let amt = (Mouse.X() - l) / (r - l)
-                    setting.ValuePercent <- amt
+                    setPercent amt setting
                 else dragging <- false
 
         override this.Left() = chPercent(-incr)
@@ -339,7 +347,7 @@ module Selection =
         override this.Down() = chPercent(-incr * 10.0f)
 
         override this.Draw() =
-            let v = setting.ValuePercent
+            let v = getPercent setting
             let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
             let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
             let m = (b + t) * 0.5f
@@ -347,12 +355,12 @@ module Selection =
             Draw.rect cursor (ScreenGlobals.accentShade(255, 1.0f, color.Value)) Sprite.Default
             base.Draw()
 
-    type ColorPicker(color: ISettable<byte>) as this =
+    type ColorPicker(color: Setting<byte>) as this =
         inherit NavigateSelectable()
         let sprite = Themes.getTexture "note"
         let n = byte sprite.Rows
-        let fd() = color.Apply(fun x -> (x + n - 1uy) % n)
-        let bk() = color.Apply(fun x -> (x + 1uy) % n)
+        let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color
+        let bk() = Setting.app (fun x -> (x + 1uy) % n) color
         do this.Add(new Clickable((fun () -> (if not this.Selected then this.Selected <- true); fd ()), fun b -> if b then this.Hover <- true))
 
         override this.Draw() =
@@ -366,10 +374,10 @@ module Selection =
         override this.Right() = fd()
         override this.Down() = bk()
 
-    type KeyBinder(setting: ISettable<Bind>, allowModifiers) as this =
+    type KeyBinder(setting: Setting<Bind>, allowModifiers) as this =
         inherit Selectable()
         do
-            this.Add(new TextBox(setting.ToString, (fun () -> (if this.Selected then ScreenGlobals.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
+            this.Add(new TextBox((fun () -> setting.Value.ToString()), (fun () -> (if this.Selected then ScreenGlobals.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
             this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
         override this.Draw() =
@@ -441,7 +449,7 @@ module Selection =
                 p.Synchronized(fun () -> p.Remove this; o.Add this)
             override this.Right() = this.Left()
 
-        and ListOrderedSelector(setting: ISettable<ResizeArray<string>>, items: ResizeArray<string>) as this =
+        and ListOrderedSelector(setting: Setting<ResizeArray<string>>, items: ResizeArray<string>) as this =
             inherit NavigateSelectable()
 
             let available = new FlowContainer() :> Widget
@@ -555,7 +563,7 @@ module Selection =
                 |> this.Add
 
                 this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 120.0f, 0.0f) |> ignore
-            member val Setting = new Setting<'T>(item)
+            member val Setting = Setting.simple item
             override this.SParent = Some (selector :> Selectable)
 
             override this.Draw() =
@@ -564,7 +572,7 @@ module Selection =
                 elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                 base.Draw()
 
-        and WatcherSelector<'T>(source: Setting<WatcherSelection<'T>>, editor: ISettable<'T> -> Selectable, name: 'T -> string, add: string * Selectable -> unit) as this =
+        and WatcherSelector<'T>(source: Setting<WatcherSelection<'T>>, editor: Setting<'T> -> Selectable, name: 'T -> string, add: string * Selectable -> unit) as this =
             inherit NavigateSelectable()
             let items = source.Value |> fun (a, b) -> a :: b |> List.map (fun x -> WatcherSelectorItem<'T>(x, name, this))
             let mutable currentMain = items.Head

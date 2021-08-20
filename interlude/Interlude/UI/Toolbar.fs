@@ -157,7 +157,7 @@ type Jukebox() as this =
         base.Update(elapsedTime, bounds)
         if Options.options.Hotkeys.Volume.Value.Pressed() then
             fade.Target <- 1.0f
-            Options.options.AudioVolume.Apply((+) (float (Mouse.Scroll()) * 0.02))
+            Setting.app ((+) (float (Mouse.Scroll()) * 0.02)) Options.options.AudioVolume
             Audio.changeVolume Options.options.AudioVolume.Value
             slider.Target <- float32 Options.options.AudioVolume.Value
         else fade.Target <- 0.0f

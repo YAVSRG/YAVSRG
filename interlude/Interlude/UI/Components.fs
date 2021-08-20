@@ -155,7 +155,7 @@ module Components =
             if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
                 ScreenGlobals.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
 
-    type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
+    type Button(onClick, label, bind: Setting<Bind>, sprite) as this =
         inherit Widget()
 
         let color = AnimationFade 0.3f
@@ -199,7 +199,7 @@ module Components =
             Text.drawFill(Themes.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
             base.Draw()
 
-    type TextEntry(s: ISettable<string>, bind: ISettable<Bind> option, prompt: string) as this =
+    type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) as this =
         inherit Frame()
 
         let color = AnimationFade(0.5f)
@@ -238,11 +238,13 @@ module Components =
         override this.Dispose() =
             if active then Input.removeInputMethod()
 
-    type SearchBox(s: ISettable<string>, callback: Prelude.Data.ChartManager.Sorting.Filter -> unit) as this =
+    type SearchBox(s: Setting<string>, callback: Prelude.Data.ChartManager.Sorting.Filter -> unit) as this =
         inherit Widget()
         //todo: this seems excessive. replace with two variables?
         let searchTimer = new System.Diagnostics.Stopwatch()
-        do this.Add <| TextEntry(new WrappedSetting<string, string>(s, (fun s -> searchTimer.Restart(); s), id), Some (options.Hotkeys.Search :> ISettable<Bind>), "search")
+        do
+            TextEntry ( Setting.map (fun s -> searchTimer.Restart(); s) id s, Some options.Hotkeys.Search, "search" )
+            |> this.Add
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -250,7 +252,7 @@ module Components =
 
     type TextInputDialog(bounds: Rect, prompt, callback) as this =
         inherit Dialog()
-        let buf = Setting<string>("")
+        let buf = Setting.simple ""
         let tb = TextEntry(buf, None, prompt)
         do
             let struct (l, t, r, b) = bounds

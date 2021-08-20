@@ -91,7 +91,7 @@ module Collections =
                     |> addButton
 
                 this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> ignore
-            member val Setting = new Setting<'T>(item)
+            member val Setting = Setting.simple item
             override this.SParent = Some (parent :> Selectable)
 
             override this.Up() = parent.Up()
@@ -111,7 +111,7 @@ module Collections =
                 elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                 base.Draw()
 
-        and Selector<'T>(source: ISettable<'T list>, config: Config<'T>, add: string * Selectable -> unit) as this =
+        and Selector<'T>(source: Setting<'T list>, config: Config<'T>, add: string * Selectable -> unit) as this =
             inherit NavigateSelectable()
 
             let fc = FlowContainer()
@@ -173,11 +173,9 @@ module Collections =
 
     let page add =
         let setting =
-            { new ISettable<(string * Collection) list>() with
-                override this.Value
-                    with get() = cache.GetCollections() |> Seq.map (fun n -> (n, cache.GetCollection(n).Value)) |> List.ofSeq
-                    and set v = ()
-            }
+            Setting.make
+                ignore
+                (fun () -> cache.GetCollections() |> Seq.map (fun n -> (n, cache.GetCollection(n).Value)) |> List.ofSeq)
         column
             [
                 PrettySetting("Collections",

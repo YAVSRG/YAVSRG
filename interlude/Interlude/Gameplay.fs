@@ -52,7 +52,7 @@ module Gameplay =
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData chart
         ScreenGlobals.loadBackground chart.BGPath
-        let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset.Value - offsetOf chart.Notes.First.Value
+        let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset - offsetOf chart.Notes.First.Value
         Audio.changeTrack (chart.AudioPath, localOffset, rate)
         Audio.playFrom chart.Header.PreviewTime
         Options.options.CurrentChart.Value <- cachedChart.FilePath
@@ -86,8 +86,8 @@ module Gameplay =
             d.Scores.Add data.ScoreInfo
             scores.Save()
             //update top scores
-            Options.options.Stats.TopPhysical.Apply(TopScore.add(currentCachedChart.Value.Hash, data.ScoreInfo.time, data.Physical))
-            Options.options.Stats.TopTechnical.Apply(TopScore.add(currentCachedChart.Value.Hash, data.ScoreInfo.time, data.Technical))
+            //Options.options.Stats.TopPhysical |> Setting.app (TopScore.add(currentCachedChart.Value.Hash, data.ScoreInfo.time, data.Physical))
+            //Options.options.Stats.TopTechnical |> Setting.app (TopScore.add(currentCachedChart.Value.Hash, data.ScoreInfo.time, data.Technical))
             //update pbs
             let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) =
                 if target.ContainsKey(name) then

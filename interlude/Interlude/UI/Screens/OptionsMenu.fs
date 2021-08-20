@@ -48,15 +48,17 @@ module OptionsMenu =
         column [
             PrettySetting("ChooseTheme",
                 ListOrderedSelect.ListOrderedSelector(
-                    { new ISettable<_>() with
-                        override this.Value
-                            with set(v) =
-                                options.EnabledThemes.Clear()
-                                options.EnabledThemes.AddRange(v)
-                                Themes.loadThemes(options.EnabledThemes)
-                                Themes.changeNoteSkin(options.NoteSkin.Value)
-                                refresh()
-                            and get() = options.EnabledThemes }, Themes.availableThemes )
+                    Setting.make
+                        ( fun v ->
+                            options.EnabledThemes.Clear()
+                            options.EnabledThemes.AddRange(v)
+                            Themes.loadThemes(options.EnabledThemes)
+                            Themes.changeNoteSkin(options.NoteSkin.Value)
+                            refresh()
+                        )
+                        (fun () -> options.EnabledThemes),
+                    Themes.availableThemes
+                )
             ).Position(200.0f, PRETTYWIDTH, 500.0f)
             Divider().Position(750.0f)
             PrettyButton("OpenThemeFolder",
@@ -68,22 +70,21 @@ module OptionsMenu =
         ]
 
     let themes(add) =
-        let mutable keycount = options.KeymodePreference.Value
+        let keycount = Setting.simple options.KeymodePreference.Value
         
         let g keycount i =
-            let k = if options.ColorStyle.Value.UseGlobalColors then 0 else keycount - 2
-            { new ISettable<_>() with
-                override this.Value
-                    with set(v) = options.ColorStyle.Value.Colors.[k].[i] <- v
-                    and get() = options.ColorStyle.Value.Colors.[k].[i] }
+            let k = if options.ColorStyle.Value.UseGlobalColors then 0 else int keycount - 2
+            Setting.make
+                (fun v -> options.ColorStyle.Value.Colors.[k].[i] <- v)
+                (fun () -> options.ColorStyle.Value.Colors.[k].[i])
 
         let colors, refreshColors =
             refreshRow
-                (fun () -> colorCount keycount options.ColorStyle.Value.Style)
+                (fun () -> colorCount (int keycount.Value) options.ColorStyle.Value.Style)
                 (fun i k ->
                     let x = -60.0f * float32 k
                     let n = float32 i
-                    ColorPicker(g keycount i)
+                    ColorPicker(g keycount.Value i)
                     |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
 
         let noteskins = PrettySetting("Noteskin", Selectable())
@@ -99,19 +100,14 @@ module OptionsMenu =
             PrettyButton("ChangeTheme", fun () -> add("ChangeTheme", themeChanger(add, fun () -> refreshColors(); refreshNoteskins()))).Position(200.0f)
             PrettyButton("EditTheme", ignore).Position(300.0f)
             PrettySetting("Keymode",
-                Selector.FromKeymode(
-                    { new ISettable<int>() with
-                        override this.Value
-                            with set(v) = keycount <- v + 3
-                            and get() = keycount - 3 }, refreshColors)
+                Selector.FromEnum<Keymode>(keycount, refreshColors)
             ).Position(450.0f)
             PrettySetting(
                 "ColorStyle",
                 Selector.FromEnum(
-                    { new ISettable<ColorScheme>() with
-                        override this.Value
-                            with set(v) = options.ColorStyle.Apply(fun x -> { x with Style = v })
-                            and get() = options.ColorStyle.Value.Style }, refreshColors)
+                    Setting.make
+                        (fun v -> Setting.app (fun x -> { x with Style = v }) options.ColorStyle)
+                        (fun () -> options.ColorStyle.Value.Style), refreshColors)
             ).Position(550.0f)
             PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
             noteskins.Position(800.0f)
@@ -132,61 +128,84 @@ module OptionsMenu =
                     [|
                         [| PrettySetting("PacemakerAccuracy",
                             Slider(
-                                { new FloatSetting(0.95, 0.0, 1.0) with
-                                    override this.Value
-                                        with get() = match options.Pacemaker.Value with Accuracy v -> v | Lamp l -> 0.0
-                                        and set(v) = base.Value <- v; options.Pacemaker.Value <- Accuracy base.Value }, 0.01f) ).Position(300.0f) |]
+                                Setting.make
+                                    ( fun v -> options.Pacemaker.Value <- Accuracy v )
+                                    ( fun () -> match options.Pacemaker.Value with Accuracy v -> v | Lamp l -> 0.95 )
+                                |> Setting.bound 0.0 1.0
+                                |> Setting.round 3, 0.01f) ).Position(300.0f) |]
                         [| PrettySetting("PacemakerLamp",
                             Selector.FromEnum(
-                                { new ISettable<Lamp>() with
-                                    override this.Value
-                                        with get() = match options.Pacemaker.Value with Accuracy v -> Lamp.NONE | Lamp l -> l
-                                        and set(v) = options.Pacemaker.Value <- Lamp v }, ignore) ).Position(300.0f) |] |] )
+                                Setting.make
+                                    ( fun l -> options.Pacemaker.Value <- Lamp l )
+                                    ( fun () -> match options.Pacemaker.Value with Accuracy v -> Lamp.SDCB | Lamp l -> l ), ignore) ).Position(300.0f) |] |] )
             ).Position(200.0f)
         ]
 
     let scoreSystems(add) =
-        let judge (s: ISettable<AccuracySystemConfig>) =
+        let judge (s: Setting<AccuracySystemConfig>) =
             PrettySetting("Judge",
                 Slider(
-                    { new IntSetting(4, 1, 9) with
-                        override this.Value
-                            with get() = match s.Value with SC (j, _) | SCPlus (j, _) | Wife (j, _) -> j | _ -> 4
-                            and set(v) =
-                                let v = Math.Clamp(v, 1, 9)
-                                s.Value <- 
-                                    match s.Value with
-                                    | SC (_, r) -> SC (v, r)
-                                    | SCPlus (_, r) -> SCPlus (v, r)
-                                    | Wife (_, r) -> Wife (v, r)
-                                    | _ -> SC (v, false) }, 0.1f)
+                    Setting.make
+                        ( fun v ->
+                            s.Value <-
+                                match s.Value with
+                                | SC (_, r) -> SC (v, r)
+                                | SCPlus (_, r) -> SCPlus (v, r)
+                                | Wife (_, r) -> Wife (v, r)
+                                | _ -> SC (v, false)
+                        )
+                        ( fun () ->
+                            match s.Value with
+                            | SC (j, _)
+                            | SCPlus (j, _)
+                            | Wife (j, _) -> j
+                            | _ -> 4
+                        )
+                    |> Setting.bound 1 9, 0.1f)
             ).Position(300.0f)
         
-        let ridiculous (s: ISettable<AccuracySystemConfig>) =
+        let ridiculous (s: Setting<AccuracySystemConfig>) =
             PrettySetting("EnableRidiculous",
                 Selector.FromBool(
-                    { new Setting<bool>(false) with
-                        override this.Value
-                            with get() = match s.Value with SC (_, r) | SCPlus (_, r) | Wife (_, r) -> r | _ -> false
-                            and set(r) =
-                                s.Value <- 
-                                    match s.Value with
-                                    | SC (j, _) -> SC (j, r)
-                                    | SCPlus (j, _) -> SCPlus (j, r)
-                                    | Wife (j, _) -> Wife (j, r)
-                                    | _ -> SC (4, r) })
+                    Setting.make
+                        ( fun r ->
+                            s.Value <-
+                                match s.Value with
+                                | SC (v, _) -> SC (v, r)
+                                | SCPlus (v, _) -> SCPlus (v, r)
+                                | Wife (v, _) -> Wife (v, r)
+                                | _ -> SC (4, r)
+                        )
+                        ( fun () ->
+                            match s.Value with
+                            | SC (_, r)
+                            | SCPlus (_, r)
+                            | Wife (_, r) -> r
+                            | _ -> false
+                        )
+                    )
             ).Position(400.0f)
 
-        let overallDifficulty (s: ISettable<AccuracySystemConfig>) =
+        let overallDifficulty (s: Setting<AccuracySystemConfig>) =
             PrettySetting("OverallDifficulty",
                 Slider(
-                    { new FloatSetting(8.0, 0.0, 10.0) with
-                        override this.Value
-                            with get() = match s.Value with OM od -> float od | _ -> 8.0
-                            and set(v) = base.Value <- v; s.Value <- base.Value |> float32 |> OM }, 0.01f)
+                    Setting.make
+                        ( fun od ->
+                            s.Value <-
+                                match s.Value with
+                                | OM _ -> OM od
+                                | _ -> OM od
+                        )
+                        ( fun () ->
+                            match s.Value with
+                            | OM od -> od
+                            | _ -> 8.0f
+                        )
+                    |> Setting.bound 0.0f 10.0f
+                    |> Setting.roundf 1, 0.01f)
             ).Position(300.0f)
 
-        let editor (s: ISettable<AccuracySystemConfig>) =
+        let editor (s: Setting<AccuracySystemConfig>) =
             let judge = judge s
             let ridiculous = ridiculous s
             let overallDifficulty = overallDifficulty s
@@ -225,18 +244,18 @@ module OptionsMenu =
 
     let gameplay(add: string * Selectable -> unit) =
         column [
-            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(200.0f)
-            PrettySetting("HitPosition", Slider(options.HitPosition :?> IntSetting, 0.005f)).Position(280.0f)
+            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed, 0.005f)).Position(200.0f)
+            PrettySetting("HitPosition", Slider(options.HitPosition, 0.005f)).Position(280.0f)
             PrettySetting("Upscroll", Selector.FromBool(options.Upscroll)).Position(360.0f)
-            PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
+            PrettySetting("BackgroundDim", Slider(options.BackgroundDim, 0.01f)).Position(440.0f)
             PrettyButton("ScreenCover", 
                 fun() ->
                     //todo: preview of what screencover looks like
                     add("ScreenCover",
                         column [
-                            PrettySetting("ScreenCoverUp", Slider(options.ScreenCoverUp :?> FloatSetting, 0.01f)).Position(200.0f)
-                            PrettySetting("ScreenCoverDown", Slider(options.ScreenCoverDown :?> FloatSetting, 0.01f)).Position(300.0f)
-                            PrettySetting("ScreenCoverFadeLength", Slider(options.ScreenCoverFadeLength :?> IntSetting, 0.01f)).Position(400.0f)
+                            PrettySetting("ScreenCoverUp", Slider(options.ScreenCoverUp, 0.01f)).Position(200.0f)
+                            PrettySetting("ScreenCoverDown", Slider(options.ScreenCoverDown, 0.01f)).Position(300.0f)
+                            PrettySetting("ScreenCoverFadeLength", Slider(options.ScreenCoverFadeLength, 0.01f)).Position(400.0f)
                         ])
             ).Position(520.0f)
             PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker(add))).Position(670.0f)
@@ -245,22 +264,20 @@ module OptionsMenu =
         ]
 
     let keybinds(add) =
-        let mutable keycount = options.KeymodePreference.Value
-    
-        let f keycount i =
-            let k = keycount - 3
-            { new ISettable<_>() with
-                override this.Value
-                    with set(v) = options.GameplayBinds.[k].[i] <- v
-                    and get() = options.GameplayBinds.[k].[i] }
+        let keycount = Setting.simple options.KeymodePreference.Value
+        
+        let f k i =
+            Setting.make
+                (fun v -> options.GameplayBinds.[k - 3].[i] <- v)
+                (fun () -> options.GameplayBinds.[k - 3].[i])
 
         let binds, refreshBinds =
             refreshRow
-                (fun () -> keycount)
+                (fun () -> int keycount.Value)
                 (fun i k ->
                     let x = -60.0f * float32 k
                     let n = float32 i
-                    { new KeyBinder(f keycount i, false) with
+                    { new KeyBinder(f (int keycount.Value) i, false) with
                         override this.OnDeselect() =
                             base.OnDeselect()
                             if i + 1 < k then
@@ -271,13 +288,7 @@ module OptionsMenu =
                     |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
 
         column [
-            PrettySetting("Keymode",
-                Selector.FromKeymode(
-                    { new ISettable<int>() with
-                        override this.Value
-                            with set(v) = keycount <- v + 3
-                            and get() = keycount - 3 }, refreshBinds)
-            ).Position(200.0f)
+            PrettySetting("Keymode", Selector.FromEnum<Keymode>(keycount, refreshBinds)).Position(200.0f)
             PrettySetting("GameplayBinds", binds).Position(280.0f, Render.vwidth - 200.0f, 120.0f)
             PrettyButton("Hotkeys", ignore).Position(400.0f)
         ]
@@ -308,13 +319,14 @@ module OptionsMenu =
             //offset changer!
             PrettySetting("SongAudioOffset",
                 Slider(
-                    { new FloatSetting(float (offset.Value - firstNote), -200.0, 200.0) with
-                        override this.Value
-                            with get() = base.Value
-                            and set(v) = base.Value <- v; offset.Value <- toTime v + firstNote; Audio.localOffset <- toTime v }, 0.01f)
+                    Setting.make
+                        (fun v -> Gameplay.chartSaveData.Value.Offset <- toTime v + firstNote; Audio.localOffset <- toTime v)
+                        (fun () -> float (Gameplay.chartSaveData.Value.Offset - firstNote))
+                    |> Setting.bound -200.0 200.0
+                    |> Setting.round 0, 0.01f)
             ).Position(200.0f)
-            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed :?> FloatSetting, 0.005f)).Position(280.0f)
-            PrettySetting("HitPosition", Slider(options.HitPosition :?> IntSetting, 0.005f)).Position(360.0f)
+            PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed, 0.005f)).Position(280.0f)
+            PrettySetting("HitPosition", Slider(options.HitPosition, 0.005f)).Position(360.0f)
             PrettySetting("Upscroll", Selector.FromBool(options.Upscroll)).Position(440.0f)
             //PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
             //PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
