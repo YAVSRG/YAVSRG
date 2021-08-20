@@ -5,8 +5,10 @@ open System.Drawing
 open Prelude.Common
 open Interlude
 open Interlude.Graphics
+open Interlude.UI.Selection
 open Interlude.UI.Animation
 open Interlude.UI.Components
+open Interlude.UI.OptionsMenu
 open Interlude.Utils
 open Interlude.Input
 

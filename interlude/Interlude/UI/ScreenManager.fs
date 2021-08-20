@@ -8,8 +8,10 @@ open Interlude
 open Interlude.Graphics
 open Interlude.UI.Animation
 open Interlude.UI.Components
+open Interlude.UI.Selection
 open Interlude.UI.Screens.LevelSelect
 open Interlude.UI.Screens.ImportMenu
+open Interlude.UI.OptionsMenu
 open Interlude.Utils
 open Interlude.Input
 
@@ -114,7 +116,6 @@ type ScreenContainer() as this =
         ScreenGlobals.addDialog <- dialogs.Add
         ScreenGlobals.setCursorVisible <- (fun b -> cursor <- b)
         ScreenGlobals.quickOptionsMenu <- SelectionMenu.QuickPlay >> (fun s -> s :> Dialog)
-        ScreenGlobals.collectionsMenu <- SelectionMenu.Collections >> (fun s -> s :> Dialog)
         this.Add toolbar
         ScreenGlobals.logo
         |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)

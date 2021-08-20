@@ -19,7 +19,7 @@ open Interlude.UI.Screens.LevelSelect
     Actual options menu structure/design data
 *)
 
-module OptionsMenuTabs =
+module OptionsMenu =
     
     let system(add) =
         column [
@@ -299,7 +299,7 @@ module OptionsMenuTabs =
             BigButton(localiseOption "Gameplay", 2, fun () -> add("Gameplay", gameplay(add))) |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localiseOption "Keybinds", 3, fun () -> add("Keybinds", keybinds(add))) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
             BigButton(localiseOption "Debug", 4, fun () -> add("Debug", debug(add))) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
-        ]
+        ] :> Selectable
 
     let quickplay(add: string * Selectable -> unit) =
         let firstNote = Gameplay.currentChart.Value.Notes.First |> Option.map Prelude.Charts.Interlude.offsetOf |> Option.defaultValue 0.0f<ms>
@@ -319,61 +319,16 @@ module OptionsMenuTabs =
             //PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
             //PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
             //PrettyButton("LifeSystems", ignore).Position(640.0f)
-        ]
-
-open OptionsMenuTabs
+        ] :> Selectable
 
 (*
     Options dialog which manages the scrolling effect
 *)
 
-type SelectionMenu(topLevel) as this =
-    inherit Dialog()
+    type SelectionMenu with
 
-    let stack: Selectable option array = Array.create 10 None
-    let mutable namestack = []
-    let mutable name = ""
-    let body = Widget()
-
-    let add(label, widget) =
-        let n = List.length namestack
-        namestack <- localiseOption label :: namestack
-        name <- String.Join(" > ", List.rev namestack)
-        let w = wrapper widget
-        match stack.[n] with
-        | None -> ()
-        | Some x -> x.Destroy()
-        stack.[n] <- Some w
-        body.Add w
-        let n = float32 n + 1.0f
-        w.Reposition(0.0f, Render.vheight * n, 0.0f, Render.vheight * n)
-        body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
-
-    let back() =
-        namestack <- List.tail namestack
-        name <- String.Join(" > ", List.rev namestack)
-        let n = List.length namestack
-        stack.[n].Value.Dispose()
-        let n = float32 n
-        body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
-
-    do
-        this.Add(body)
-        this.Add(TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
-        add("Options", topLevel(add))
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        match List.length namestack with
-        | 0 -> this.BeginClose()
-        | n -> if stack.[n - 1].Value.SelectedChild.IsNone then back()
-
-    override this.OnClose() = ScreenLevelSelect.refresh <- true
-
-    static member Options() = SelectionMenu(topLevel)
-    static member QuickPlay() =
-        { new SelectionMenu(quickplay) with
-            override this.OnClose() = base.OnClose(); Audio.playLeadIn() }
-    static member Collections() = SelectionMenu(topLevel)
+        static member Options() = SelectionMenu(topLevel)
+        static member QuickPlay() =
+            { new SelectionMenu(quickplay) with
+                override this.OnClose() = base.OnClose(); Audio.playLeadIn() }
 

@@ -37,16 +37,32 @@ module Collections =
         let editIcon = "✎"
         let deleteIcon = "✕"
 
-        type Card<'T>(item: 'T, parent: CardSelector<'T>) as this =
+        type Config<'T> =
+            {
+                NameFunc: 'T -> string
+                EditFunc: (Setting<'T> -> SelectionPage) option
+                CreateFunc: (unit -> 'T) option
+                MarkFunc: 'T * bool -> unit
+
+                CanReorder: bool
+                CanDuplicate: bool
+                CanDelete: bool
+                CanMultiSelect: bool
+            }
+
+        type Card<'T>(item: 'T, config: Config<'T>, parent: Selector<'T>) as this =
             inherit NavigateSelectable()
             let buttons = ResizeArray<Selectable>()
             let mutable index = -1
             do
-                let h = 100.0f
+                let h = 90.0f
 
-                let addButton (b: Widget) = let b = (b :?> Selectable) in buttons.Add b; this.Add b
+                let addButton (b: Widget) =
+                    let b = (b :?> Selectable)
+                    buttons.Add b
+                    this.Add b
 
-                new TextBox((fun () -> parent.NameFunc this), K (Color.White, Color.Black), 0.0f)
+                new TextBox((fun () -> config.NameFunc (this.Setting: Setting<'T>).Value), K (Color.White, Color.Black), 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
                 |> this.Add
 
@@ -56,22 +72,22 @@ module Collections =
                 |> positionWidget(x, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
                 |> this.Add
 
-                if true then
+                if config.CanDelete then
                     x <- x - h
                     new LittleButton(K deleteIcon, fun () -> parent.Delete this)
-                    |> positionWidget(x, 1.0f, 0.0f, 1.0f, x + h, 1.0f, 0.0f, 1.0f)
+                    |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                     |> addButton
 
-                if Option.isSome parent.EditHandler then
+                if Option.isSome config.EditFunc then
                     x <- x - h
                     new LittleButton(K editIcon, fun () -> parent.Edit this)
-                    |> positionWidget(x, 1.0f, 0.0f, 1.0f, x + h, 1.0f, 0.0f, 1.0f)
+                    |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                     |> addButton
 
-                if parent.CanDuplicate then
+                if config.CanDuplicate then
                     x <- x - h
                     new LittleButton(K addIcon, fun () -> parent.Duplicate this)
-                    |> positionWidget(x, 1.0f, 0.0f, 1.0f, x + h, 1.0f, 0.0f, 1.0f)
+                    |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                     |> addButton
 
                 this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> ignore
@@ -95,33 +111,38 @@ module Collections =
                 elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                 base.Draw()
 
-            interface System.IComparable with
-                 member this.CompareTo(obj: obj) = 
-                     match obj with
-                     | :? Card<'T> as x -> compare this x
-                     | _ -> failwith ""
-
-        and CardSelector<'T>(source: ISettable<'T list>, markHandler: 'T * bool -> unit, add: string * Selectable -> unit) as this =
+        and Selector<'T>(source: ISettable<'T list>, config: Config<'T>, add: string * Selectable -> unit) as this =
             inherit NavigateSelectable()
 
-            let mutable marked = Set.empty
-            let mutable multiSelect = false
             let fc = FlowContainer()
-            let items = source.Value |> List.map (fun x -> Card<'T>(x, this))
+            let items = source.Value |> List.map (fun x -> Card<'T>(x, config, this))
+            let mutable marked = if config.CanMultiSelect then List.empty else List.singleton items.Head
             do
                 this.Add fc
                 items |> List.iter fc.Add
 
-            member val NameFunc = fun (c: Card<'T>) -> c.Setting.Value.ToString() with get, set
+            member this.Edit(item: Card<'T>) = add("EditItem", config.EditFunc.Value item.Setting add)
 
-            member val EditHandler = None with get, set
-            member val CreateHandler: 'T option = None with get, set
-            member val RefreshHandler = None with get, set //nyi
+            member this.Create() =
+                this.Synchronized(fun () -> this.Add(Card(config.CreateFunc.Value (), config, this)))
 
-            member val CanReorder = false with get, set
-            member val CanDuplicate = false with get, set
-            member val AllowDeleteMarked = false with get, set
-            member this.MultiSelect with get() = multiSelect and set(v) = multiSelect <- v; if not v && Set.isEmpty marked then marked <- Set.singleton items.Head
+            member this.Duplicate(item: Card<'T>) =
+                this.Synchronized(fun () -> this.Add(Card(item.Setting.Value, config, this)))
+
+            member this.Delete(item: Card<'T>) =
+                if not (this.IsMarked item) then
+                    if item.Selected then this.Down()
+                    item.Destroy()
+
+            member this.Mark(item: Card<'T>) =
+                if config.CanMultiSelect then
+                    marked <- if List.contains item marked then marked else item :: marked
+                else marked <- List.singleton item
+                config.MarkFunc (item.Setting.Value, true)
+            member this.Unmark(item: Card<'T>) =
+                if config.CanMultiSelect then marked <- List.except [item] marked
+                config.MarkFunc (item.Setting.Value, false)
+            member this.IsMarked(item: Card<'T>) = List.contains item marked
 
             override this.Up() =
                 match this.HoverChild with
@@ -136,30 +157,8 @@ module Collections =
                     this.HoverChild <- fc.Children.[(i + 1) % fc.Children.Count] :?> Selectable |> Some
                 | None -> ()
 
-            member this.Edit(item: Card<'T>) = add("EditItem", this.EditHandler.Value item.Setting)
-
-            member this.Create() =
-                this.Synchronized(fun () -> this.Add(Card(this.CreateHandler.Value, this)))
-
-            member this.Duplicate(item: Card<'T>) =
-                this.Synchronized(fun () -> this.Add(Card(item.Setting.Value, this)))
-
-            member this.Delete(item: Card<'T>) =
-                if not (this.IsMarked item) || this.AllowDeleteMarked then
-                    this.Unmark item
-                    item.Destroy()
-
-            member this.Mark(item: Card<'T>) =
-                if multiSelect then
-                    marked <- Set.add item marked
-                else marked <- Set.singleton item
-                markHandler(item.Setting.Value, true)
-            member this.Unmark(item: Card<'T>) =
-                if multiSelect then marked <- Set.remove item marked
-                markHandler(item.Setting.Value, false)
-            member this.IsMarked(item: Card<'T>) = Set.contains item marked
-
             override this.OnSelect() =
+                base.OnSelect()
                 this.HoverChild <- Some (fc.Children.[0] :?> Selectable)
 
             override this.OnDeselect() =
@@ -167,7 +166,12 @@ module Collections =
                 let xs = fc.Children |> Seq.map (fun w -> (w :?> Card<'T>).Setting.Value) |> List.ofSeq
                 source.Value <- xs
 
-    let gui(add)=
+    let editor setting add =
+        column [
+            PrettySetting("Coming soon", new Selectable()).Position(200.0f)
+        ] :> Selectable
+
+    let page add =
         let setting =
             { new ISettable<(string * Collection) list>() with
                 override this.Value
@@ -177,64 +181,33 @@ module Collections =
         column
             [
                 PrettySetting("Collections",
-                    CardSelect.CardSelector(setting, (fun (x, _) -> selected <- x), add))
-            ]
-    
-type CollectionManager() as this =
-    inherit FlowSelectable(60.0f, 5.0f,
-        fun () ->
-            let (left, _, right, _) = this.Anchors
-            left.Target <- -800.0f
-            right.Target <- -800.0f)
-    
-    let collectionCard name =
-        { new CardButton(name, "",
-            (fun () -> fst Collections.selected = name),
-            fun () -> colorVersionGlobal <- colorVersionGlobal + 1; Collections.selected <- (name, (cache.GetCollection name).Value)) with
-            override self.Update(elapsedTime, bounds) =
-                base.Update(elapsedTime, bounds)
-                if Mouse.Hover self.Bounds && options.Hotkeys.Delete.Value.Tapped() then
-                    ScreenGlobals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
-                        fun () -> this.Synchronized(fun () -> this.Remove self; self.Dispose()); cache.DeleteCollection name; ScreenGlobals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))}
+                    CardSelect.Selector(
+                        setting,
+                        { 
+                            NameFunc = (fun (x, _) -> x)
+                            MarkFunc = (fun (x, _) -> colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
+                            EditFunc = Some editor
+                            CreateFunc = None
 
-    do
-        CardButton(Localisation.localise "collections.Create", "", K false,
-            (fun () ->
-                TextInputDialog(this.Bounds, "Name collection",
-                    fun s ->
-                        if s <> "" && (cache.GetCollection s).IsNone then
-                            cache.UpdateCollection(s, Collection.Blank)
-                            collectionCard s |> this.Add)
-                |> ScreenGlobals.addDialog
-            ), K Color.Silver) |> this.Add
-        for name in cache.GetCollections() do collectionCard name |> this.Add
-        //todo: save last selected collection in options
-        if fst Collections.selected = "" then
-            let favourites = Localisation.localise "collections.Favourites"
-            let c = 
-                match cache.GetCollection favourites with
-                | Some c -> c
-                | None ->
-                    let n = Collection.Blank
-                    cache.UpdateCollection (favourites, n)
-                    n
-            Collections.selected <- (favourites, c)
-                        
-    override this.OnSelect() =
-        base.OnSelect()
-        let (left, _, right, _) = this.Anchors
-        left.Target <- 0.0f
-        right.Target <- 0.0f
+                            CanReorder = false
+                            CanDuplicate = false
+                            CanDelete = true
+                            CanMultiSelect = false
+                        }, add)).Position(200.0f, 1200.0f, 600.0f)
+            ] :> Selectable
+    
+type CollectionManager() =
+    inherit Widget()
     
     override this.Draw() =
         base.Draw()
-        let struct (left, top, right, bottom) = this.Bounds
-        let m = (right + left) * 0.5f
-        Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", 25.0f, m, bottom - 60.0f, (Color.White, Color.Black), 0.5f)
-        Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.RemoveFromCollection.Value.ToString()] "collections.RemoveHint", 25.0f, m, bottom - 30.0f, (Color.White, Color.Black), 0.5f)
+        //Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", 25.0f, m, bottom - 60.0f, (Color.White, Color.Black), 0.5f)
+        //Text.drawJustB(Themes.font(), Localisation.localiseWith [options.Hotkeys.RemoveFromCollection.Value.ToString()] "collections.RemoveHint", 25.0f, m, bottom - 30.0f, (Color.White, Color.Black), 0.5f)
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
+        if options.Hotkeys.Collections.Value.Tapped() then
+            ScreenGlobals.addDialog <| SelectionMenu Collections.page
         if currentCachedChart.IsSome then
             if options.Hotkeys.AddToCollection.Value.Tapped() then
                 if

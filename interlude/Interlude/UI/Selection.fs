@@ -701,3 +701,49 @@ module Selection =
             if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
             base.Draw()
         member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
+
+    type SelectionPage = (string * Selectable -> unit) -> Selectable
+
+    type SelectionMenu(topLevel: SelectionPage) as this =
+        inherit Dialog()
+    
+        let stack: Selectable option array = Array.create 10 None
+        let mutable namestack = []
+        let mutable name = ""
+        let body = Widget()
+    
+        let add (label, widget) =
+            let n = List.length namestack
+            namestack <- localiseOption label :: namestack
+            name <- String.Join(" > ", List.rev namestack)
+            let w = wrapper widget
+            match stack.[n] with
+            | None -> ()
+            | Some x -> x.Destroy()
+            stack.[n] <- Some w
+            body.Add w
+            let n = float32 n + 1.0f
+            w.Reposition(0.0f, Render.vheight * n, 0.0f, Render.vheight * n)
+            body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
+    
+        let back() =
+            namestack <- List.tail namestack
+            name <- String.Join(" > ", List.rev namestack)
+            let n = List.length namestack
+            stack.[n].Value.Dispose()
+            let n = float32 n
+            body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
+    
+        do
+            this.Add body
+            this.Add(TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
+            add ("Options", topLevel add)
+    
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            match List.length namestack with
+            | 0 -> this.BeginClose()
+            | n -> if stack.[n - 1].Value.SelectedChild.IsNone then back()
+    
+        override this.OnClose() = ()
