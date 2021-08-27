@@ -137,6 +137,9 @@ module Replay =
         } |> Array.ofSeq
 
 type IReplayProvider =
+    // are we at the end of the replay?
+    abstract member Finished : bool
+
     // is there a next bitmap before/on the given time?
     abstract member HasNext : Time -> bool
 
@@ -150,6 +153,7 @@ type StoredReplayProvider(data: ReplayData) =
     let mutable i = 0
 
     interface IReplayProvider with
+        member this.Finished = i >= data.Length
         member this.HasNext(time) =
             if i >= data.Length then false
             else
@@ -168,9 +172,8 @@ type LiveReplayProvider() =
     let mutable finished = false
     let buffer = ResizeArray<ReplayRow>()
 
-    member this.Finished = finished
-
     interface IReplayProvider with
+        member this.Finished = finished
         member this.HasNext time =
             if i >= buffer.Count then false
             else 

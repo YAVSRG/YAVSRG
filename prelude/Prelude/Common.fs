@@ -33,83 +33,87 @@ module Common =
     (Auto generation will be done with reflection)
 *)
 
-    [<AbstractClass>]
-    type ISettable<'T>() =
-        abstract member Value: 'T with get, set
-        member this.Apply f = this.Value <- f this.Value
-        override this.ToString() = this.Value.ToString()
-
-    type WrappedSetting<'T, 'U>(setting: ISettable<'U>, set: 'T -> 'U, get: 'U -> 'T) =
-        inherit ISettable<'T>()
-        override this.Value with get() = get setting.Value and set newValue = setting.Value <- set newValue
-
-    type Setting<'T>(value: 'T) =
-        inherit ISettable<'T>()
-        let mutable value = value
-        override this.Value with get() = value and set newValue = value <- newValue
-        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<Setting<'T>> =
+    type Setting<'T, 'Config> =
+        {
+            Set: 'T -> unit
+            Get: unit -> 'T
+            Config: 'Config
+        }
+        member this.Value with get() = this.Get() and set(v) = this.Set(v)
+        override this.ToString() = sprintf "<%O, %A>" this.Value this.Config
+        static member JsonCodec(cache, settings, rules) : Json.Mapping.JsonCodec<Setting<'T, 'Config>> =
             let tP = Json.Mapping.getCodec<'T>(cache, settings, rules)
             {
                 Encode = fun o -> tP.Encode o.Value
-                Decode = fun o json ->
-                    o.Value <- tP.Decode o.Value json
-                    o
-                Default = fun () -> Setting<'T>(tP.Default())
+                Decode = fun o json -> o.Value <- tP.Decode o.Value json; o
+                Default = fun () -> failwith "Default instance should be provided for settings"
             }
 
-    [<AbstractClass>]
-    type NumSetting<'T when 'T : comparison>(value: 'T, min: 'T, max: 'T) =
-        inherit Setting<'T>(value)
-        abstract member ValuePercent: float32 with get, set
-        override this.Value
-            with set(newValue) = base.Value <- if newValue > max then max elif newValue < min then min else newValue
-            and get() = base.Value
-        member this.Min = min
-        member this.Max = max
-        override this.ToString() = sprintf "%s (%A - %A)" (base.ToString()) min max
-        static member JsonCodec(cache, settings, rules) : Json.Mapping.JsonCodec<NumSetting<'T>> =
-            let tP = Json.Mapping.getCodec<'T>(cache, settings, rules)
+    type Setting<'T> = Setting<'T, unit>
+
+
+    module Setting =
+
+        type Bounds<'T> = Bounds of min: 'T * max: 'T
+        type Bounded<'T> = Setting<'T, Bounds<'T>>
+        
+        let simple (x: 'T) =
+            let mutable x = x
             {
-                Encode = fun o -> tP.Encode o.Value
-                Decode = fun o json ->
-                    o.Value <- tP.Decode o.Value json
-                    o
-                //default instance should never be called
-                Default = fun () ->
-                    let x = tP.Default()
-                    { new NumSetting<'T>(x, x, x) with
-                        override this.ValuePercent
-                            with set v = ()
-                            and get() = 0.0f
-                    }
+                Set = fun v -> x <- v
+                Get = fun () -> x
+                Config = ()
             }
 
-    type IntSetting(value: int, min: int, max: int) =
-        inherit NumSetting<int>(value, min, max)
-        override this.ValuePercent
-            with set(pc: float32) = this.Value <- min + ((float32 (max - min) * pc) |> float |> Math.Round |> int)
-            and get() = float32 (this.Value - min) / float32 (max - min)
-        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<IntSetting> =
-            Setting<int>.JsonCodec(cache, settings, rules) |> Json.Mapping.Helpers.cast
+        let make (set: 'T -> unit) (get: unit -> 'T) =
+            {
+                Set = set
+                Get = get
+                Config = ()
+            }
 
-    type FloatSetting(value: float, min: float, max: float) =
-        inherit NumSetting<float>(value, min, max)
-        override this.ValuePercent
-            with set(pc: float32) = this.Value <- min + (max - min) * float pc
-            and get() = (this.Value - min) / (max - min) |> float32
-        override this.Value
-            with set(newValue: float) = base.Value <- Math.Round(newValue, 2)
-            and get() = base.Value
-        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<FloatSetting> =
-            Setting<float>.JsonCodec(cache, settings, rules) |> Json.Mapping.Helpers.cast
+        let map (f: 'T -> 'U) (g: 'U -> 'T) (setting: Setting<'T, 'Config>) =
+            {
+                Set = g >> setting.Set
+                Get = f << setting.Get
+                Config = setting.Config
+            }
 
-    type StringSetting(value: string, allowSpecialChar: bool) =
-        inherit Setting<string>(value)
-        override this.Value
-            with set(newValue) = base.Value <- if allowSpecialChar then newValue else Regex("[^a-zA-Z0-9_-]").Replace(newValue, "")
-            and get() = base.Value
-        static member JsonCodec(cache, settings, rules): Json.Mapping.JsonCodec<StringSetting> =
-            Setting<string>.JsonCodec(cache, settings, rules) |> Json.Mapping.Helpers.cast
+        let iter (f: 'T -> unit) (setting: Setting<'T, 'Config>) = f setting.Value
+        let app (f: 'T -> 'T) (setting: Setting<'T, 'Config>) = setting.Value <- f setting.Value
+        let trigger (action: 'T -> unit) (setting: Setting<'T, 'Config>) = { setting with Set = fun x -> setting.Set x; action x }
+
+        let inline bound (min: 'T) (max: 'T) (setting: Setting<'T, 'Config>) =
+            if min > max then invalidArg (nameof min) "min cannot be more than max"
+            {
+                Set =
+                    fun v ->
+                        if v < min then setting.Set min
+                        elif v > max then setting.Set max
+                        else setting.Set v
+                Get = setting.Get
+                Config = Bounds (min, max)
+            }
+
+        let inline round (dp: int) (setting: Setting<float, 'Config>) =
+            { setting with
+                Set = fun v -> setting.Set (Math.Round (v, dp))
+            }
+
+        let inline roundf (dp: int) (setting: Setting<float32, 'Config>) =
+            { setting with
+                Set = fun v -> setting.Set (float32 (Math.Round (float v, dp)))
+            }
+
+        let alphaNum (setting: Setting<string, 'Config>) =
+            let regex = Regex("[^a-zA-Z0-9_-]")
+            map id (fun s -> regex.Replace(s, "")) setting
+
+        let inline bounded x min max =
+            simple x
+            |> bound min max
+
+        let percent x = bounded x 0.0 1.0 |> round 2
 
 (*
     Logging

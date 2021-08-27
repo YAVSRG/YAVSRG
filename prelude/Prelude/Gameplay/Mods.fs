@@ -4,7 +4,6 @@ open System
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Interlude
-open Prelude.Editor
 open Prelude.Editor.Filter
 
 module Mods = 
@@ -98,7 +97,6 @@ module Mods =
 
     //todo: no ln (removes all lns)
     //todo: inverse (exclusion with no ln)
-    //todo: no releases (exclusion with no ln)
     //todo: randomiser with seed
 
     (*

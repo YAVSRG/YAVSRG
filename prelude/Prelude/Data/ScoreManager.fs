@@ -36,7 +36,7 @@ module ScoreManager =
     type ChartSaveData =
         {
             [<Json.Required>]
-            Offset: Setting<Time>
+            mutable Offset: Time
             [<Json.Required>]
             Scores: List<Score>
             Lamp: Dictionary<string, PersonalBests<Lamp>>
@@ -45,7 +45,7 @@ module ScoreManager =
         }
         static member FromChart(c: Chart) =
             {
-                Offset = Setting (c.Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>)
+                Offset = c.Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
                 Scores = List<Score>()
                 Lamp = Dictionary<string, PersonalBests<Lamp>>()
                 Accuracy = Dictionary<string, PersonalBests<float>>()
@@ -53,7 +53,7 @@ module ScoreManager =
             }
         static member Default =
             {
-                Offset = Setting 0.0f<ms>
+                Offset = 0.0f<ms>
                 Scores = null
                 Lamp = Dictionary<string, PersonalBests<Lamp>>()
                 Accuracy = Dictionary<string, PersonalBests<float>>()
