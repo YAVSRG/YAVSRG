@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+﻿namespace Interlude.UI.Screens.Play
 
 open OpenTK
 open Prelude.Charts.Interlude
@@ -10,9 +10,9 @@ open Interlude
 open Interlude.Graphics
 open Interlude.Input
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Animation
-open Interlude.UI.Gameplay
-open Interlude.UI.Gameplay.GameplayWidgets
+open Interlude.UI.Screens.Play.GameplayWidgets
 
 (*
     WIP, will be a fancy animation when beginning to play a chart
@@ -54,8 +54,8 @@ type PlayScreenType =
     | Auto
     | Replay of ReplayData
 
-type PlayScreen(start: PlayScreenType) as this =
-    inherit Screen()
+type Screen(start: PlayScreenType) as this =
+    inherit IScreen()
     
     let chart = Gameplay.modifiedChart.Value
     let keypressData, watchingReplay, auto =
@@ -149,5 +149,5 @@ type PlayScreen(start: PlayScreenType) as this =
                         Difficulty = Gameplay.difficultyRating.Value)
                 (sd, if not watchingReplay then Gameplay.setScore sd else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None))
                 |> ScoreScreen
-                :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)
+                :> IScreen), ScreenType.Score, ScreenTransitionFlag.Default)
             |> Globals.newScreen

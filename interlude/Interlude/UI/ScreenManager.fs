@@ -9,8 +9,7 @@ open Interlude.Graphics
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Selection
-open Interlude.UI.Screens.LevelSelect
-open Interlude.UI.Screens.ImportMenu
+open Interlude.UI.Screens
 open Interlude.UI.OptionsMenu
 open Interlude.Utils
 open Interlude.Input
@@ -91,12 +90,12 @@ type ScreenContainer() as this =
     inherit Widget()
 
     let dialogs = new ResizeArray<Dialog>()
-    let mutable current = new LoadingScreen() :> Screen
+    let mutable current = new LoadingScreen() :> IScreen
     let screens = [|
         current;
-        new MainMenu() :> Screen;
-        new ImportMenu() :> Screen;
-        new ScreenLevelSelect() :> Screen;
+        new MainMenu() :> IScreen;
+        new ImportMenu.Screen() :> IScreen;
+        new LevelSelect.Screen() :> IScreen;
         |]
     let mutable exit = false
     let mutable cursor = true
@@ -125,7 +124,7 @@ type ScreenContainer() as this =
 
     member this.Exit = exit
 
-    member this.ChangeScreen (s: unit -> Screen, screenType, flags) =
+    member this.ChangeScreen (s: unit -> IScreen, screenType, flags) =
         if screenTransition.Complete && screenType <> Globals.currentType then
             transitionFlags <- flags
             this.Animation.Add screenTransition

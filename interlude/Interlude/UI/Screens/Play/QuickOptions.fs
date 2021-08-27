@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Gameplay
+﻿namespace Interlude.UI.Screens.Play
 
 open Prelude.Common
 open Interlude

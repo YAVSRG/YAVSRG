@@ -196,7 +196,7 @@ type Toolbar() as this =
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
-        Button((fun () -> if Globals.currentType <> ScreenType.Play then Globals.addDialog(SelectionMenu.Options())), "Options", Options.options.Hotkeys.Options, Sprite.Default)
+        Button((fun () -> if Globals.currentType <> ScreenType.Play then Globals.addDialog(SelectionMenu(mainOptionsMenu()))), "Options", Options.options.Hotkeys.Options, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 

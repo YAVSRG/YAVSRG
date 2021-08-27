@@ -6,7 +6,7 @@ open Interlude.UI.Selection
 open Interlude.Gameplay
 open Interlude.Options
 
-module ModSelect =
+module private ModSelect =
 
     let page() =
         {

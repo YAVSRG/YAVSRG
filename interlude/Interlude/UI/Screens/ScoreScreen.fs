@@ -69,7 +69,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
         fbo.Dispose()
 
 type ScoreScreen(scoreData: ScoreInfoProvider, pbs) as this =
-    inherit Screen()
+    inherit IScreen()
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
     let mutable gradeAchieved = Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State

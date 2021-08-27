@@ -21,7 +21,7 @@ open Interlude.UI.Screens.LevelSelect
 module FileDropHandling =
     let import(path: string) =
         BackgroundTask.Create(TaskFlags.NONE)("Import " + Path.GetFileName(path))
-            (Gameplay.cache.AutoConvert(path) |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b))
+            (Gameplay.cache.AutoConvert(path) |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
         |> ignore
 
 [<Json.AllRequired>]
@@ -70,7 +70,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
                 [
                     downloadFile(data.download, target)
                     (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
                 ]) |> ignore
         downloaded <- true
     do
@@ -105,7 +105,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
                 [
                     downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
                     (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete(target)))
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete(target)))
                 ]) |> ignore
         downloaded <- true
     do
@@ -185,8 +185,8 @@ module private Beatmap =
                     )
             downloadJson(s, callback)
 
-type ImportMenu() as this =
-    inherit Screen()
+type Screen() as this =
+    inherit IScreen()
     do
         (*
             Online downloaders

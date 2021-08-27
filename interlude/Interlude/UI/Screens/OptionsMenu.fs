@@ -326,7 +326,7 @@ module OptionsMenu =
                     BigButton(localiseOption "Keybinds", 3, fun () -> add("Keybinds", keybinds())) |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
                     BigButton(localiseOption "Debug", 4, fun () -> add("Debug", debug())) |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
                 ] :> Selectable
-            Callback = fun () -> ScreenLevelSelect.refresh <- true
+            Callback = fun () -> LevelSelect.refresh <- true
         }
 
     let quickplay() : SelectionPage =
@@ -352,12 +352,4 @@ module OptionsMenu =
                 ] :> Selectable
             Callback = ignore
         }
-
-(*
-    Options dialog which manages the scrolling effect
-*)
-
-    type SelectionMenu with
-
-        static member Options() = SelectionMenu(mainOptionsMenu())
 

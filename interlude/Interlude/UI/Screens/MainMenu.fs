@@ -1,21 +1,22 @@
-﻿namespace Interlude.UI
+﻿namespace Interlude.UI.Screens
 
 open System
 open System.Drawing
 open Prelude.Common
 open Interlude
+open Interlude.Utils
 open Interlude.Graphics
+open Interlude.UI
 open Interlude.UI.Selection
 open Interlude.UI.Animation
 open Interlude.UI.Components
-open Interlude.Utils
 open Interlude.UI.OptionsMenu
 open Interlude.Input
 
 // Loading screen
 
 type LoadingScreen() as this =
-    inherit Screen()
+    inherit IScreen()
 
     let mutable closing = false
     let fade = new AnimationFade 1.0f
@@ -49,7 +50,7 @@ type LoadingScreen() as this =
         let (x, y) = Rect.center this.Bounds
         Text.drawJust (Themes.font(), (if closing then "Bye o/" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)
 
-type MenuButton(onClick, label) as this =
+type private MenuButton(onClick, label) as this =
     inherit Widget()
 
     let color = AnimationFade 0.3f
@@ -69,7 +70,7 @@ type MenuButton(onClick, label) as this =
 // Menu screen
 
 type MainMenu() as this =
-    inherit Screen()
+    inherit IScreen()
 
     let playFunc() =
         Globals.logo.Move (-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
@@ -77,7 +78,7 @@ type MainMenu() as this =
 
     //todo: localise these buttons
     let play = MenuButton (playFunc, "Play")
-    let options = MenuButton ((fun () -> Globals.addDialog (SelectionMenu.Options())), "Options")
+    let options = MenuButton ((fun () -> Globals.addDialog (SelectionMenu(mainOptionsMenu()))), "Options")
     let quit = MenuButton ((fun () -> Globals.back ScreenTransitionFlag.UnderLogo), "Quit")
 
     let newSplash =

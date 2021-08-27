@@ -11,7 +11,7 @@ open Interlude.Gameplay
 open Interlude.Options
 open Globals
 
-module Collections =
+module private Collections =
 
     let mutable selected =
         //todo: load from settings

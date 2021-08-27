@@ -6,20 +6,25 @@ open Prelude.Data.ChartManager
 open Prelude.Scoring
 open Interlude.UI
 open Interlude.Gameplay
+open Interlude.UI.Screens.Play
 
 type PersonalBestData = PersonalBests<float * int> option * PersonalBests<Lamp> option * PersonalBests<bool> option
     
 [<Struct>]
 type Navigation =
-| Nothing
-| Backward of string * CachedChart
-| Forward of bool
+    | Nothing
+    | Backward of string * CachedChart
+    | Forward of bool
     
 [<Struct>]
 type ScrollTo =
-| Nothing
-| ScrollToChart
-| ScrollToPack of string
+    | Nothing
+    | ScrollToChart
+    | ScrollToPack of string
+
+module LevelSelect =
+
+    let mutable refresh = false
 
 module private Globals =
     
@@ -62,5 +67,5 @@ module private Globals =
     //todo: move to Gameplay
     let playCurrentChart() =
         if currentChart.IsSome then
-            Globals.newScreen((fun () -> new PlayScreen(if autoplay then PlayScreenType.Auto else PlayScreenType.Normal) :> Screen), ScreenType.Play, ScreenTransitionFlag.Default)
+            Globals.newScreen((fun () -> new Screen(if autoplay then PlayScreenType.Auto else PlayScreenType.Normal) :> IScreen), ScreenType.Play, ScreenTransitionFlag.Default)
         else Logging.Warn "Tried to play selected chart; There is no chart selected"

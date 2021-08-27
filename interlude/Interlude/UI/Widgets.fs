@@ -265,7 +265,7 @@ type ScreenType =
     | Score = 5
 
 [<AbstractClass>]
-type Screen() =
+type IScreen() =
     inherit Widget()
     abstract member OnEnter: ScreenType -> unit
     abstract member OnExit: ScreenType -> unit
@@ -284,7 +284,7 @@ module Globals =
 
     // All of these are initialised in ScreensMain.fs
     let mutable internal changeScreen: ScreenType * ScreenTransitionFlag -> unit = ignore
-    let mutable internal newScreen: (unit -> Screen) * ScreenType * ScreenTransitionFlag -> unit = ignore
+    let mutable internal newScreen: (unit -> IScreen) * ScreenType * ScreenTransitionFlag -> unit = ignore
     let mutable internal back: ScreenTransitionFlag -> unit = ignore
     let mutable internal addDialog: Dialog -> unit = ignore
 
