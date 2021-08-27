@@ -41,11 +41,11 @@ type GameStartDialog() as this =
             let m = (top + bottom) * 0.5f
             Rect.create left (m - 100.0f) right (m + 100.0f)
         if anim1.Target = 1.0f then
-            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceRight(w * anim1.Value))(ScreenGlobals.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
-            Draw.rect(bounds |> Rect.sliceLeft(w * anim1.Value))(ScreenGlobals.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceRight(w * anim1.Value))(Globals.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.sliceLeft(w * anim1.Value))(Globals.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
         else
-            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceLeft(w * anim1.Value))(ScreenGlobals.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
-            Draw.rect(bounds |> Rect.sliceRight(w * anim1.Value))(ScreenGlobals.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceLeft(w * anim1.Value))(Globals.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.sliceRight(w * anim1.Value))(Globals.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
 
     override this.OnClose() = ()
 
@@ -58,19 +58,18 @@ type PlayScreen(start: PlayScreenType) as this =
     inherit Screen()
     
     let chart = Gameplay.modifiedChart.Value
-    let liveplay, allowInput =
+    let keypressData, watchingReplay, auto =
         match start with
-        | Normal -> new LiveReplayProvider() :> IReplayProvider, true
-        | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, false
-        | Replay data -> StoredReplayProvider(data) :> IReplayProvider, false
-    let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys liveplay chart.Notes Gameplay.rate
+        | Normal -> new LiveReplayProvider() :> IReplayProvider, false, false
+        | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, true
+        | Replay data -> StoredReplayProvider(data) :> IReplayProvider, true, false
+    let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate
     let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper = { Scoring = scoring; HP = scoring.HP; OnHit = onHit.Publish }
     let binds = Options.options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
 
     let mutable inputKeyState = 0us
-    let mutable playing = false
 
     do
         let noteRenderer = new NoteRenderer(scoring)
@@ -83,11 +82,12 @@ type PlayScreen(start: PlayScreenType) as this =
                 |> constructor
                 |> Components.positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
                 |> if pos.Float then this.Add else noteRenderer.Add
-        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
-        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
-        f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
-        f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
+        if not auto then
+            f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
+            f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
+            f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
+            f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
+            f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
         if Themes.noteskinConfig.ColumnLightTime >= 0.0f then
@@ -99,55 +99,55 @@ type PlayScreen(start: PlayScreenType) as this =
         scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
-        ScreenGlobals.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
+        Globals.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
         //discord presence
-        ScreenGlobals.setToolbarCollapsed true
-        ScreenGlobals.setCursorVisible false
+        Globals.setToolbarCollapsed true
+        Globals.setCursorVisible false
         Audio.changeRate Gameplay.rate
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
-        playing <- true
         Input.absorbAll()
 
     override this.OnExit next =
-        ScreenGlobals.backgroundDim.Target <- 0.7f
-        ScreenGlobals.setCursorVisible true
+        Globals.backgroundDim.Target <- 0.7f
+        Globals.setCursorVisible true
         if next = ScreenType.Score then () else
-            ScreenGlobals.setToolbarCollapsed false
+            Globals.setToolbarCollapsed false
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let now = Audio.timeWithOffset()
 
-        if allowInput then
-            let liveplay = liveplay :?> LiveReplayProvider
-            if playing && not liveplay.Finished then
+        if not keypressData.Finished then
+            if not watchingReplay then
+                let liveplay = keypressData :?> LiveReplayProvider
                 // feed keyboard input into the replay provider
                 Input.consumeGameplay(binds, fun column time isRelease ->
                     if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
                     else inputKeyState <- Bitmap.setBit column inputKeyState
                     liveplay.Add(time, inputKeyState) )
-                scoring.Update now
+            scoring.Update now
 
         if now <= -missWindow && options.Hotkeys.Options.Value.Pressed() then
             Audio.pause()
             inputKeyState <- 0us
-            if allowInput then (liveplay :?> LiveReplayProvider).Add(now, inputKeyState)
-            ScreenGlobals.addDialog(ScreenGlobals.quickOptionsMenu())
+            if not watchingReplay then (keypressData :?> LiveReplayProvider).Add(now, inputKeyState)
+            QuickOptions.show()
         
-        if scoring.Finished && (not allowInput || not (liveplay :?> LiveReplayProvider).Finished) then
-            if allowInput then (liveplay :?> LiveReplayProvider).Finish()
+        if watchingReplay && keypressData.Finished then Globals.back ScreenTransitionFlag.Default
+        elif scoring.Finished && not keypressData.Finished then
+            (keypressData :?> LiveReplayProvider).Finish()
             ((fun () ->
                 let sd =
                     ScoreInfoProvider(
-                        Gameplay.makeScore(liveplay.GetFullReplay(), chart.Keys),
+                        Gameplay.makeScore(keypressData.GetFullReplay(), chart.Keys),
                         Gameplay.currentChart.Value,
                         fst options.AccSystems.Value,
                         fst options.HPSystems.Value,
                         ModChart = Gameplay.modifiedChart.Value,
                         Difficulty = Gameplay.difficultyRating.Value)
-                (sd, if allowInput then Gameplay.setScore sd else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None))
+                (sd, if not watchingReplay then Gameplay.setScore sd else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None))
                 |> ScoreScreen
                 :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)
-            |> ScreenGlobals.newScreen
+            |> Globals.newScreen

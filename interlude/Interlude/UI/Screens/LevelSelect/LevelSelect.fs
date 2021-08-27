@@ -72,7 +72,7 @@ module ScreenLevelSelect =
                 |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
                 |> this.Add
 
-                Clickable((fun () -> ScreenGlobals.newScreen((fun () -> new ScoreScreen(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
+                Clickable((fun () -> Globals.newScreen((fun () -> new ScoreScreen(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
                 |> this.Add
 
                 this.Animation.Add fade
@@ -82,7 +82,7 @@ module ScreenLevelSelect =
                 this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
             override this.Draw() =
-                Draw.rect this.Bounds (ScreenGlobals.accentShade(int (127.0f * fade.Value), 0.8f, 0.0f)) Sprite.Default
+                Draw.rect this.Bounds (Globals.accentShade(int (127.0f * fade.Value), 0.8f, 0.0f)) Sprite.Default
                 base.Draw()
             member this.Data = data
 
@@ -90,11 +90,11 @@ module ScreenLevelSelect =
                 base.Update(elapsedTime, bounds)
                 if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
                     let name = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                    ScreenGlobals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
+                    Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                         fun () ->
                             chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                             refresh <- true
-                            ScreenGlobals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                            Globals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
         type Scoreboard() as this =
             inherit Selectable()
@@ -182,46 +182,16 @@ module ScreenLevelSelect =
                 base.Update(elapsedTime, bounds)
                 if this.Selected && (ls.Selected <> options.Hotkeys.Scoreboard.Value.Pressed()) then ls.Selected <- not ls.Selected
 
-        type ModSelect() as this =
-            inherit FlowSelectable(75.0f, 5.0f,
-                fun () ->
-                    let (left, _, right, _) = this.Anchors
-                    left.Target <- -800.0f
-                    right.Target <- -800.0f)
-            do
-                for name in modList.Keys do
-                    CardButton(
-                        ModState.getModName name,
-                        ModState.getModDesc name,
-                        (fun () -> selectedMods.ContainsKey name),
-                        fun () -> 
-                            selectedMods <- ModState.cycleState name selectedMods
-                            updateChart())
-                    |> this.Add
-
-            override this.OnSelect() =
-                base.OnSelect()
-                let (left, _, right, _) = this.Anchors
-                left.Target <- 0.0f
-                right.Target <- 0.0f
-
     type InfoPanel() as this =
         inherit Selectable()
 
-        let mods = ModSelect()
         let scores = Scoreboard()
-        let collections = CollectionManager()
         let mutable length = ""
         let mutable bpm = ""
 
         do
-            mods
-            |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f)
-            |> this.Add
-
-            collections
-            |> positionWidgetA(-800.0f, 0.0f, -800.0f, -200.0f)
-            |> this.Add
+            this.Add (new ModSelect())
+            this.Add (new CollectionManager())
 
             scores
             |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f)
@@ -325,8 +295,8 @@ module ScreenLevelSelect =
 
         override this.OnDraw(bounds, selected) =
             let struct (left, top, right, bottom) = bounds
-            let accent = ScreenGlobals.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
-            Draw.rect bounds (ScreenGlobals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+            let accent = Globals.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
+            Draw.rect bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
             let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
                 (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
@@ -350,7 +320,7 @@ module ScreenLevelSelect =
             f lamp (fun x -> x.ToString()) ScoreColor.lampToColor 300.0f
             f clear (fun x -> if x then "CLEAR" else "FAILED") ScoreColor.clearToColor 150.0f
 
-            Draw.rect(Rect.sliceBottom 25.0f bounds) (ScreenGlobals.accentShade(70, 0.3f, 0.0f)) Sprite.Default
+            Draw.rect(Rect.sliceBottom 25.0f bounds) (Globals.accentShade(70, 0.3f, 0.0f)) Sprite.Default
             Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
             Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
             Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
@@ -358,7 +328,7 @@ module ScreenLevelSelect =
 
             let border = Rect.expand(5.0f, 5.0f) bounds
             let border2 = Rect.expand(5.0f, 0.0f) bounds
-            let borderColor = if selected then ScreenGlobals.accentShade(180, 1.0f, 0.5f) else color
+            let borderColor = if selected then Globals.accentShade(180, 1.0f, 0.5f) else color
             if borderColor.A > 0uy then
                 Draw.rect(Rect.sliceLeft 5.0f border2) borderColor Sprite.Default
                 Draw.rect(Rect.sliceTop 5.0f border) borderColor Sprite.Default
@@ -391,11 +361,11 @@ module ScreenLevelSelect =
                     expandedGroup <- ""
                     scrollTo <- ScrollToPack groupName
                 elif options.Hotkeys.Delete.Value.Tapped() then
-                    ScreenGlobals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [cc.Title] "misc.Delete", 2000.0,
+                    Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [cc.Title] "misc.Delete", 2000.0,
                         fun () ->
                             cache.DeleteChart cc
                             refresh <- true
-                            ScreenGlobals.addNotification(Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
+                            Globals.addNotification(Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
         override this.Update(top, topEdge, elapsedTime) =
@@ -414,7 +384,7 @@ module ScreenLevelSelect =
         override this.Navigate() = ()
 
         override this.OnDraw(bounds, selected) =
-            Draw.rect bounds (if selected then ScreenGlobals.accentShade(127, 1.0f, 0.2f) else ScreenGlobals.accentShade(127, 0.5f, 0.0f)) Sprite.Default
+            Draw.rect bounds (if selected then Globals.accentShade(127, 1.0f, 0.2f) else Globals.accentShade(127, 0.5f, 0.0f)) Sprite.Default
             Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
         override this.Draw(top, topEdge) =
             let b = base.Draw(top, topEdge)
@@ -429,11 +399,11 @@ module ScreenLevelSelect =
                 if Mouse.Click(MouseButton.Left) then
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
                 elif options.Hotkeys.Delete.Value.Tapped() then
-                    ScreenGlobals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
+                    Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                         fun () ->
                             items |> Seq.map (fun i -> i.Chart) |> cache.DeleteCharts
                             refresh <- true
-                            ScreenGlobals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                            Globals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
         override this.Update(top, topEdge, elapsedTime) =
             match scrollTo with
@@ -578,8 +548,8 @@ type ScreenLevelSelect() as this =
         let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * pheight
         Draw.rect (Rect.create (Render.vwidth - 10.0f) (top + 170.0f + 10.0f + scrollPos) (Render.vwidth - 5.0f) (top + 170.0f + 30.0f + scrollPos)) Color.White Sprite.Default
 
-        Draw.rect (Rect.create left top right (top + 170.0f)) (ScreenGlobals.accentShade (100, 0.6f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (ScreenGlobals.accentShade (255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left top right (top + 170.0f)) (Globals.accentShade (100, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (Globals.accentShade (255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 
     override this.OnEnter prev =

@@ -61,5 +61,6 @@ module private Globals =
     
     //todo: move to Gameplay
     let playCurrentChart() =
-        if currentChart.IsSome then ScreenGlobals.newScreen((fun () -> new PlayScreen(PlayScreenType.Normal) :> Screen), ScreenType.Play, ScreenTransitionFlag.Default)
+        if currentChart.IsSome then
+            Globals.newScreen((fun () -> new PlayScreen(if autoplay then PlayScreenType.Auto else PlayScreenType.Normal) :> Screen), ScreenType.Play, ScreenTransitionFlag.Default)
         else Logging.Warn "Tried to play selected chart; There is no chart selected"

@@ -47,7 +47,7 @@ module Notifications =
         do this.Add taskBoxes
 
         override this.Draw() =
-            Draw.rect taskBoxes.Bounds (ScreenGlobals.accentShade(180, 0.4f, 0.0f)) Sprite.Default
+            Draw.rect taskBoxes.Bounds (Globals.accentShade(180, 0.4f, 0.0f)) Sprite.Default
             base.Draw()
 
         override this.OnClose() = this.Remove taskBoxes
@@ -61,7 +61,7 @@ module Notifications =
 
         do
             this.Animation.Add slider
-            ScreenGlobals.addNotification <-
+            Globals.addNotification <-
                 fun (str: string, t: NotificationType) ->
                     this.Parent.Value.Synchronized(
                         fun () -> 
@@ -115,7 +115,7 @@ type TooltipHandler() as this =
 
     do
         this.Animation.Add(fade)
-        ScreenGlobals.addTooltip <- 
+        Globals.addTooltip <- 
             fun (b, str, time, callback) ->
                 if not active then
                     active <- true
@@ -164,8 +164,8 @@ type Jukebox() as this =
 
     override this.Draw() =
         let r = Rect.sliceBottom 5.0f this.Bounds
-        Draw.rect r (ScreenGlobals.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.sliceLeft(slider.Value * Rect.width r) r) (ScreenGlobals.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
+        Draw.rect r (Globals.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceLeft(slider.Value * Rect.width r) r) (Globals.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
 
 // Toolbar
 
@@ -192,15 +192,15 @@ type Toolbar() as this =
         |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
         |> this.Add
 
-        Button((fun () -> ScreenGlobals.back(ScreenTransitionFlag.UnderLogo)), "⮜ Back  ", Options.options.Hotkeys.Exit, Sprite.Default)
+        Button((fun () -> Globals.back(ScreenTransitionFlag.UnderLogo)), "⮜ Back  ", Options.options.Hotkeys.Exit, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
-        Button((fun () -> if ScreenGlobals.currentType <> ScreenType.Play then ScreenGlobals.addDialog(SelectionMenu.Options())), "Options", Options.options.Hotkeys.Options, Sprite.Default)
+        Button((fun () -> if Globals.currentType <> ScreenType.Play then Globals.addDialog(SelectionMenu.Options())), "Options", Options.options.Hotkeys.Options, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> ScreenGlobals.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default)
+        Button((fun () -> Globals.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default)
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
@@ -208,25 +208,25 @@ type Toolbar() as this =
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> ScreenGlobals.addDialog(new Notifications.TaskDisplayDialog())), "Tasks", Options.options.Hotkeys.Tasks, Sprite.Default)
+        Button((fun () -> Globals.addDialog(new Notifications.TaskDisplayDialog())), "Tasks", Options.options.Hotkeys.Tasks, Sprite.Default)
         |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
         Jukebox() |> this.Add
         Notifications.NotificationDisplay() |> this.Add
 
-        ScreenGlobals.setToolbarCollapsed <- fun b -> forceCollapse <- b
+        Globals.setToolbarCollapsed <- fun b -> forceCollapse <- b
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
-        Draw.rect(Rect.create l (t - HEIGHT) r t) (ScreenGlobals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect(Rect.create l b r (b + HEIGHT)) (ScreenGlobals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l (t - HEIGHT) r t) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l b r (b + HEIGHT)) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
         if barSlider.Value > 0.01f then
             let s = (r - l) / 48.0f
             for i in 0 .. 47 do
                 let level = System.Math.Min((Audio.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, HEIGHT)
-                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - HEIGHT) (l + (float32 i + 1.0f) * s - 2.0f) (t - HEIGHT + level)) (ScreenGlobals.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
-                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + HEIGHT - level) (r - float32 i * s - 2.0f) (b + HEIGHT)) (ScreenGlobals.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - HEIGHT) (l + (float32 i + 1.0f) * s - 2.0f) (t - HEIGHT + level)) (Globals.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + HEIGHT - level) (r - float32 i * s - 2.0f) (b + HEIGHT)) (Globals.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
         base.Draw()
 
     override this.Update(elapsedTime, bounds) =

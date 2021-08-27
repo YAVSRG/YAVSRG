@@ -119,16 +119,20 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs) as this =
         |> positionWidget(10.0f, 0.0f, -250.0f, 1.0f, -10.0f, 1.0f, -10.0f, 1.0f)
         |> this.Add
 
+        new Button(ignore, "Watch replay", Input.Bind.DummyBind, Sprite.Default)
+        |> positionWidget(-200.0f, 1.0f, -50.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f)
+        |> this.Add
+
     override this.Draw() =
-        Draw.rect (Rect.sliceTop 150.0f this.Bounds) (ScreenGlobals.accentShade(100, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.sliceTop 155.0f this.Bounds |> Rect.sliceBottom 5.0f) (ScreenGlobals.accentShade(255, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.sliceTop 250.0f this.Bounds |> Rect.sliceBottom 100.0f) (ScreenGlobals.accentShade(100, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceTop 150.0f this.Bounds) (Globals.accentShade(100, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceTop 155.0f this.Bounds |> Rect.sliceBottom 5.0f) (Globals.accentShade(255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceTop 250.0f this.Bounds |> Rect.sliceBottom 100.0f) (Globals.accentShade(100, 0.6f, 0.0f)) Sprite.Default
 
         let struct (left, top, right, bottom) = this.Bounds
         let w = (right + left) * 0.5f
         let h =  (bottom - 500.0f - top)
         let perfRect = Rect.create(w - h)(top + 175.0f + h * 0.5f)(w + h)(top + 325.0f + h * 0.5f)
-        Draw.rect perfRect (ScreenGlobals.accentShade(150, 0.4f, 0.0f)) Sprite.Default
+        Draw.rect perfRect (Globals.accentShade(150, 0.4f, 0.0f)) Sprite.Default
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Physical, perfRect, physicalColor scoreData.Physical, 0.0f)
         Text.drawFill(Themes.font(), sprintf "%.2f" scoreData.Technical, perfRect, technicalColor scoreData.Technical, 1.0f)
         Draw.quad (Quad.ofRect (Rect.create (w - h * 0.5f) (top + 250.0f) (w + h * 0.5f) (top + 250.0f + h))) (Quad.colorOf (if scoreData.HP.Failed then Color.Gray else Color.White)) (Sprite.gridUV (gradeAchieved, 0) (Themes.getTexture "ranks"))
@@ -138,7 +142,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs) as this =
         base.Draw()
 
     override this.OnEnter prev =
-        ScreenGlobals.setToolbarCollapsed true
+        Globals.setToolbarCollapsed true
 
     override this.OnExit next =
-        ScreenGlobals.setToolbarCollapsed false
+        Globals.setToolbarCollapsed false

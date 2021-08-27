@@ -24,19 +24,19 @@ type LoadingScreen() as this =
 
     override this.OnEnter (prev: ScreenType) =
         fade.Value <- 0.0f
-        ScreenGlobals.logo.Move (-400.0f, -400.0f, 400.0f, 400.0f)
-        ScreenGlobals.setToolbarCollapsed true
+        Globals.logo.Move (-400.0f, -400.0f, 400.0f, 400.0f)
+        Globals.setToolbarCollapsed true
         match prev with
         | ScreenType.MainMenu ->
             closing <- true
             let s = AnimationSequence()
             s.Add (AnimationTimer 1500.0)
-            s.Add (AnimationAction (fun () -> ScreenGlobals.back ScreenTransitionFlag.Default))
+            s.Add (AnimationAction (fun () -> Globals.back ScreenTransitionFlag.Default))
             this.Animation.Add s
         | _ -> 
             let s = AnimationSequence()
             s.Add (AnimationTimer 1500.0)
-            s.Add (AnimationAction(fun () -> ScreenGlobals.changeScreen (ScreenType.MainMenu, ScreenTransitionFlag.UnderLogo)))
+            s.Add (AnimationAction(fun () -> Globals.changeScreen (ScreenType.MainMenu, ScreenTransitionFlag.UnderLogo)))
             this.Animation.Add s
 
     override this.OnExit _ = ()
@@ -59,7 +59,7 @@ type MenuButton(onClick, label) as this =
         this.Add (new TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.7f, 10.0f, 0.0f, 0.0f, 1.0f, -20.0f, 1.0f))
 
     override this.Draw() =
-        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (ScreenGlobals.accentShade (200, 1.0f, color.Value))) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Globals.accentShade (200, 1.0f, color.Value))) Sprite.DefaultQuad
         base.Draw()
 
     member this.Pop() =
@@ -72,13 +72,13 @@ type MainMenu() as this =
     inherit Screen()
 
     let playFunc() =
-        ScreenGlobals.logo.Move (-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
-        ScreenGlobals.changeScreen (ScreenType.LevelSelect, ScreenTransitionFlag.UnderLogo)
+        Globals.logo.Move (-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
+        Globals.changeScreen (ScreenType.LevelSelect, ScreenTransitionFlag.UnderLogo)
 
     //todo: localise these buttons
     let play = MenuButton (playFunc, "Play")
-    let options = MenuButton ((fun () -> ScreenGlobals.addDialog (SelectionMenu.Options())), "Options")
-    let quit = MenuButton ((fun () -> ScreenGlobals.back ScreenTransitionFlag.UnderLogo), "Quit")
+    let options = MenuButton ((fun () -> Globals.addDialog (SelectionMenu.Options())), "Options")
+    let quit = MenuButton ((fun () -> Globals.back ScreenTransitionFlag.UnderLogo), "Quit")
 
     let newSplash =
         randomSplash "MenuSplashes.txt"
@@ -97,20 +97,20 @@ type MainMenu() as this =
         Utils.AutoUpdate.checkForUpdates()
 
     override this.OnEnter prev =
-        if Utils.AutoUpdate.updateAvailable then ScreenGlobals.addNotification (Localisation.localise "notification.UpdateAvailable", NotificationType.System)
+        if Utils.AutoUpdate.updateAvailable then Globals.addNotification (Localisation.localise "notification.UpdateAvailable", NotificationType.System)
         if prev = ScreenType.SplashScreen && Options.firstLaunch then MarkdownReader.help()
         splashText <- newSplash()
-        ScreenGlobals.logo.Move (-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
-        ScreenGlobals.backgroundDim.Target <- 0.0f
-        ScreenGlobals.setToolbarCollapsed false
+        Globals.logo.Move (-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
+        Globals.backgroundDim.Target <- 0.0f
+        Globals.setToolbarCollapsed false
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Loop
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()
 
     override this.OnExit next =
-        ScreenGlobals.logo.Move (-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
+        Globals.logo.Move (-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
         splashAnim.Target <- 0.0f
-        ScreenGlobals.backgroundDim.Target <- 0.7f
+        Globals.backgroundDim.Target <- 0.7f
 
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
@@ -118,8 +118,8 @@ type MainMenu() as this =
         let (s, ss) = splashText
         let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
         let a2 = splashAnim.Value * 255.0f |> int
-        Text.drawJustB (Themes.font(), ss, 20.0f, c, top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), ScreenGlobals.accentShade (a1, 0.5f, 0.0f)), 0.5f)
-        Text.drawJustB (Themes.font(), s, 40.0f, c, top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), ScreenGlobals.accentShade (a2, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Themes.font(), ss, 20.0f, c, top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Globals.accentShade (a1, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Themes.font(), s, 40.0f, c, top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Globals.accentShade (a2, 0.5f, 0.0f)), 0.5f)
         base.Draw()
 
     override this.Update (elapsedTime, bounds) =

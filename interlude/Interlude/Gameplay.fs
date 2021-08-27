@@ -25,6 +25,7 @@ module Gameplay =
 
     let mutable rate = 1.0f
     let mutable selectedMods = Map.empty
+    let mutable autoplay = false
     let scores = ScoresDB()
     let cache = Cache()
 
@@ -51,13 +52,14 @@ module Gameplay =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData chart
-        ScreenGlobals.loadBackground chart.BGPath
+        Globals.loadBackground chart.BGPath
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset - offsetOf chart.Notes.First.Value
         Audio.changeTrack (chart.AudioPath, localOffset, rate)
         Audio.playFrom chart.Header.PreviewTime
         Options.options.CurrentChart.Value <- cachedChart.FilePath
         updateChart()
         onChartChange()
+
     let getColoredChart() =
         match modifiedChart with
         | None -> failwith "Tried to get coloredChart when no modifiedChart exists"
@@ -128,4 +130,4 @@ module Gameplay =
             changeChart(c, ch)
         with err ->
             Logging.Debug("Tried to auto select a chart but none exist", err)
-            ScreenGlobals.loadBackground ""
+            Globals.loadBackground ""

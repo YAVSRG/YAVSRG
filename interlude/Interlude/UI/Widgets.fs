@@ -277,7 +277,7 @@ type Screen() =
        - Overall screen manager references screen logic AND initialises values, connecting the loop
 *)
 
-module ScreenGlobals =
+module Globals =
     open Themes
     
     let mutable currentType = ScreenType.SplashScreen
@@ -293,9 +293,6 @@ module ScreenGlobals =
 
     let mutable internal addNotification: string * NotificationType -> unit = ignore
     let mutable internal addTooltip: Input.Bind * string * float * (unit -> unit) -> unit = ignore
-
-    let mutable internal quickOptionsMenu: unit -> Dialog = fun () -> failwith ""
-    let mutable internal collectionsMenu: unit -> Dialog = fun () -> failwith ""
 
     let parallaxX = AnimationFade 0.0f
     let parallaxY = AnimationFade 0.0f

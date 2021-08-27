@@ -27,7 +27,7 @@ module Components =
 
         let BORDERWIDTH = 5.0f
 
-        new() = Frame ((fun () -> ScreenGlobals.accentShade(200, 0.5f, 0.3f)), (fun () -> ScreenGlobals.accentShade(80, 0.5f, 0.0f)), true, true)
+        new() = Frame ((fun () -> Globals.accentShade(200, 0.5f, 0.3f)), (fun () -> Globals.accentShade(80, 0.5f, 0.0f)), true, true)
         new((), frame) = Frame (K Color.Transparent, K frame, false, true)
         new((), frame) = Frame (K Color.Transparent, frame, false, true)
         new(fill, ()) = Frame (K fill, K Color.Transparent, true, false)
@@ -153,7 +153,7 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
-                ScreenGlobals.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
+                Globals.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
 
     type Button(onClick, label, bind: Setting<Bind>, sprite) as this =
         inherit Widget()
@@ -165,9 +165,9 @@ module Components =
             this.Add(new Clickable(onClick, (fun b -> color.Target <- if b then 0.7f else 0.3f)))
 
         override this.Draw() =
-            Draw.rect this.Bounds (ScreenGlobals.accentShade(80, 0.5f, color.Value)) Sprite.Default
-            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (ScreenGlobals.accentShade(255, 1.0f, color.Value)) Sprite.Default
-            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (ScreenGlobals.accentShade(255, 1.0f, color.Value), ScreenGlobals.accentShade(255, 0.4f, color.Value)), 0.5f)
+            Draw.rect this.Bounds (Globals.accentShade(80, 0.5f, color.Value)) Sprite.Default
+            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Globals.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Globals.accentShade(255, 1.0f, color.Value), Globals.accentShade(255, 0.4f, color.Value)), 0.5f)
 
         override this.Update(elapsedTime, bounds) =
             if bind.Value.Tapped() then onClick()
@@ -193,8 +193,8 @@ module Components =
             
         override this.Draw() =
             let bbounds = Rect.sliceTop buttonSize this.Bounds
-            Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (ScreenGlobals.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-            Draw.rect bbounds (ScreenGlobals.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+            Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Globals.accentShade(127, 0.5f, 0.0f)) Sprite.Default
+            Draw.rect bbounds (Globals.accentShade(255, 0.6f, 0.0f)) Sprite.Default
             Text.drawFill(Themes.font(), label, Rect.sliceTop 20.0f bbounds, Color.White, 0.5f)
             Text.drawFill(Themes.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
             base.Draw()
@@ -227,7 +227,7 @@ module Components =
                             | "" -> sprintf "Press %s to %s" (b.Value.ToString()) prompt
                             | text -> text
                         | None -> match s.Value with "" -> prompt | text -> text),
-                    (fun () -> ScreenGlobals.accentShade(255, 1.0f, color.Value)), 0.0f))
+                    (fun () -> Globals.accentShade(255, 1.0f, color.Value)), 0.0f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -243,7 +243,7 @@ module Components =
         //todo: this seems excessive. replace with two variables?
         let searchTimer = new System.Diagnostics.Stopwatch()
         do
-            TextEntry ( Setting.map (fun s -> searchTimer.Restart(); s) id s, Some options.Hotkeys.Search, "search" )
+            TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some options.Hotkeys.Search, "search" )
             |> this.Add
 
         override this.Update(elapsedTime, bounds) =

@@ -61,6 +61,7 @@ module Options =
         AddToCollection: Setting<Bind>
         RemoveFromCollection: Setting<Bind>
         Mods: Setting<Bind>
+        Autoplay: Setting<Bind>
         Scoreboard: Setting<Bind>
         ChartInfo: Setting<Bind>
 
@@ -97,6 +98,7 @@ module Options =
             AddToCollection = Setting.simple(mk Keys.RightBracket)
             RemoveFromCollection = Setting.simple(mk Keys.LeftBracket)
             Mods = Setting.simple(mk Keys.M)
+            Autoplay = Setting.simple(ctrl Keys.A)
             Scoreboard = Setting.simple(mk Keys.Comma)
             ChartInfo = Setting.simple(mk Keys.Period)
 

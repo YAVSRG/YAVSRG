@@ -60,17 +60,17 @@ type BeatmapSearch = {
 } with static member Default = { result_count = -1; beatmaps = null }
 
 type private SMImportCard(data: EOPackAttrs) as this =
-    inherit Frame((fun () -> ScreenGlobals.accentShade(120, 1.0f, 0.0f)), (fun () -> ScreenGlobals.accentShade(200, 1.0f, 0.2f)))
+    inherit Frame((fun () -> Globals.accentShade(120, 1.0f, 0.0f)), (fun () -> Globals.accentShade(200, 1.0f, 0.2f)))
     let mutable downloaded = false //todo: maybe check if pack is already installed?
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        ScreenGlobals.addNotification(Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
+        Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
             (BackgroundTask.Chain
                 [
                     downloadFile(data.download, target)
                     (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; ScreenGlobals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
+                        |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
                 ]) |> ignore
         downloaded <- true
     do
@@ -99,13 +99,13 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let mutable downloaded = false
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
-        ScreenGlobals.addNotification(Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
+        Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
                 [
                     downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
                     (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; ScreenGlobals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete(target)))
+                        |> BackgroundTask.Callback(fun b -> ScreenLevelSelect.refresh <- ScreenLevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete(target)))
                 ]) |> ignore
         downloaded <- true
     do
