@@ -21,6 +21,7 @@ open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect.Globals
+open Interlude.UI.Screens.Score
 
 [<AbstractClass>]
 type private LevelSelectItem() =

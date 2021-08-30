@@ -313,7 +313,7 @@ module Selection =
             Selector.FromArray(names, values, setting)
 
         static member FromBool(setting: Setting<bool>) =
-            new Selector([|"☒" ; "☑"|],
+            new Selector([|"◇" ; "◆"|],
                 Setting.map
                     (fun b -> if b then 1 else 0)
                     (fun i -> i > 0)
@@ -554,8 +554,8 @@ module Selection =
 
     module CardSelect =
     
-            let markedIcon = "⬤"
-            let unmarkedIcon = "○"
+            let markedIcon = "◆"
+            let unmarkedIcon = "◇"
     
             let addIcon = "➕"
             let editIcon = "✎"

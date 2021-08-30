@@ -148,6 +148,6 @@ type Screen(start: PlayScreenType) as this =
                         ModChart = Gameplay.modifiedChart.Value,
                         Difficulty = Gameplay.difficultyRating.Value)
                 (sd, if not watchingReplay then Gameplay.setScore sd else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None))
-                |> ScoreScreen
+                |> Screens.Score.Screen
                 :> IScreen), ScreenType.Score, ScreenTransitionFlag.Default)
             |> Globals.newScreen

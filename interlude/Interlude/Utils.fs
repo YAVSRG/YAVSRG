@@ -17,6 +17,8 @@ module Utils =
 
     let K x _ = x
 
+    let pair (f: 'T -> 'U) (g: 'T -> 'V) = fun t -> (f t, g t)
+
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
 

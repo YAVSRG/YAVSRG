@@ -43,12 +43,14 @@
     <Compile Include="ThemeManager.fs" />
     <Compile Include="Options.fs" />
     <Compile Include="UI\Animation.fs" />
-    <Compile Include="UI\Widgets.fs" />
+    <Compile Include="UI\Widget.fs" />
+    <Compile Include="UI\Shared.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Components.fs" />
     <Compile Include="UI\MarkdownReader.fs" />
     <Compile Include="UI\Selection.fs" />
-    <Compile Include="UI\Screens\ScoreScreen.fs" />
+    <Compile Include="UI\Screens\Score\Graph.fs" />
+    <Compile Include="UI\Screens\Score\Score.fs" />
     <Compile Include="UI\Screens\Play\QuickOptions.fs" />
     <Compile Include="UI\Screens\Play\NoteRenderer.fs" />
     <Compile Include="UI\Screens\Play\GameplayWidgets.fs" />

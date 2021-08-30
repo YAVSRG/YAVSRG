@@ -59,7 +59,7 @@ module private InfoPanel =
             |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
             |> this.Add
 
-            Clickable((fun () -> Globals.newScreen((fun () -> new ScoreScreen(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> IScreen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
+            Clickable((fun () -> Globals.newScreen((fun () -> new Screens.Score.Screen(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> IScreen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
             |> this.Add
 
             this.Animation.Add fade
@@ -84,7 +84,7 @@ module private InfoPanel =
                         Globals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
     type Scoreboard() as this =
-        inherit Widget()
+        inherit Selectable()
 
         let mutable count = -1
         let filter = Setting.simple ScoreboardFilter.All
@@ -168,7 +168,7 @@ module private InfoPanel =
 open InfoPanel
 
 type InfoPanel() as this =
-    inherit Selectable()
+    inherit Widget()
 
     let scores = Scoreboard()
     let mutable length = ""

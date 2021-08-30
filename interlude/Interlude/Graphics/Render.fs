@@ -50,7 +50,7 @@ module Render =
 
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
-        GL.ClearColor(Color.FromArgb(0, 40, 40, 40))
+        GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
 
