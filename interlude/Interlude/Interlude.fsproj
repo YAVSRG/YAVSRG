@@ -5,8 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/percyqaz/YAVSRG</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.4.9.0</AssemblyVersion>
-    <FileVersion>0.4.9.0</FileVersion>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
+    <FileVersion>0.5.0.0</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -43,17 +43,27 @@
     <Compile Include="ThemeManager.fs" />
     <Compile Include="Options.fs" />
     <Compile Include="UI\Animation.fs" />
-    <Compile Include="UI\Widgets.fs" />
+    <Compile Include="UI\Widget.fs" />
+    <Compile Include="UI\Shared.fs" />
+    <Compile Include="UI\Style.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Components.fs" />
     <Compile Include="UI\MarkdownReader.fs" />
     <Compile Include="UI\Selection.fs" />
-    <Compile Include="UI\Screens\ScreenScore.fs" />
-    <Compile Include="UI\Screens\ScreenPlay.fs" />
-    <Compile Include="UI\Screens\ScreenLevelSelect.fs" />
-    <Compile Include="UI\Screens\ScreenImport.fs" />
+    <Compile Include="UI\Screens\Score\Graph.fs" />
+    <Compile Include="UI\Screens\Score\Score.fs" />
+    <Compile Include="UI\Screens\Play\QuickOptions.fs" />
+    <Compile Include="UI\Screens\Play\NoteRenderer.fs" />
+    <Compile Include="UI\Screens\Play\GameplayWidgets.fs" />
+    <Compile Include="UI\Screens\Play\Play.fs" />
+    <Compile Include="UI\Screens\LevelSelect\Globals.fs" />
+    <Compile Include="UI\Screens\LevelSelect\Collections.fs" />
+    <Compile Include="UI\Screens\LevelSelect\ModSelect.fs" />
+    <Compile Include="UI\Screens\LevelSelect\InfoPanel.fs" />
+    <Compile Include="UI\Screens\LevelSelect\LevelSelect.fs" />
+    <Compile Include="UI\Screens\ImportMenu.fs" />
     <Compile Include="UI\Screens\OptionsMenu.fs" />
-    <Compile Include="UI\Screens\ScreenMain.fs" />
+    <Compile Include="UI\Screens\MainMenu.fs" />
     <Compile Include="UI\Toolbar.fs" />
     <Compile Include="UI\ScreenManager.fs" />
     <Compile Include="Game.fs" />

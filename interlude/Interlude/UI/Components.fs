@@ -27,7 +27,7 @@ module Components =
 
         let BORDERWIDTH = 5.0f
 
-        new() = Frame ((fun () -> Screens.accentShade(200, 0.5f, 0.3f)), (fun () -> Screens.accentShade(80, 0.5f, 0.0f)), true, true)
+        new() = Frame ((fun () -> Globals.accentShade(200, 0.5f, 0.3f)), (fun () -> Globals.accentShade(80, 0.5f, 0.0f)), true, true)
         new((), frame) = Frame (K Color.Transparent, K frame, false, true)
         new((), frame) = Frame (K Color.Transparent, frame, false, true)
         new(fill, ()) = Frame (K fill, K Color.Transparent, true, false)
@@ -153,9 +153,9 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
-                Screens.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
+                Globals.addTooltip(options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
 
-    type Button(onClick, label, bind: ISettable<Bind>, sprite) as this =
+    type Button(onClick, label, bind: Setting<Bind>, sprite) as this =
         inherit Widget()
 
         let color = AnimationFade 0.3f
@@ -165,9 +165,9 @@ module Components =
             this.Add(new Clickable(onClick, (fun b -> color.Target <- if b then 0.7f else 0.3f)))
 
         override this.Draw() =
-            Draw.rect this.Bounds (Screens.accentShade(80, 0.5f, color.Value)) Sprite.Default
-            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
-            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Screens.accentShade(255, 1.0f, color.Value), Screens.accentShade(255, 0.4f, color.Value)), 0.5f)
+            Draw.rect this.Bounds (Globals.accentShade(80, 0.5f, color.Value)) Sprite.Default
+            Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Globals.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Globals.accentShade(255, 1.0f, color.Value), Globals.accentShade(255, 0.4f, color.Value)), 0.5f)
 
         override this.Update(elapsedTime, bounds) =
             if bind.Value.Tapped() then onClick()
@@ -193,13 +193,13 @@ module Components =
             
         override this.Draw() =
             let bbounds = Rect.sliceTop buttonSize this.Bounds
-            Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Screens.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-            Draw.rect bbounds (Screens.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+            Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Globals.accentShade(127, 0.5f, 0.0f)) Sprite.Default
+            Draw.rect bbounds (Globals.accentShade(255, 0.6f, 0.0f)) Sprite.Default
             Text.drawFill(Themes.font(), label, Rect.sliceTop 20.0f bbounds, Color.White, 0.5f)
             Text.drawFill(Themes.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
             base.Draw()
 
-    type TextEntry(s: ISettable<string>, bind: ISettable<Bind> option, prompt: string) as this =
+    type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) as this =
         inherit Frame()
 
         let color = AnimationFade(0.5f)
@@ -227,7 +227,7 @@ module Components =
                             | "" -> sprintf "Press %s to %s" (b.Value.ToString()) prompt
                             | text -> text
                         | None -> match s.Value with "" -> prompt | text -> text),
-                    (fun () -> Screens.accentShade(255, 1.0f, color.Value)), 0.0f))
+                    (fun () -> Globals.accentShade(255, 1.0f, color.Value)), 0.0f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -238,11 +238,13 @@ module Components =
         override this.Dispose() =
             if active then Input.removeInputMethod()
 
-    type SearchBox(s: ISettable<string>, callback: Prelude.Data.ChartManager.Sorting.Filter -> unit) as this =
+    type SearchBox(s: Setting<string>, callback: Prelude.Data.ChartManager.Sorting.Filter -> unit) as this =
         inherit Widget()
         //todo: this seems excessive. replace with two variables?
         let searchTimer = new System.Diagnostics.Stopwatch()
-        do this.Add <| TextEntry(new WrappedSetting<string, string>(s, (fun s -> searchTimer.Restart(); s), id), Some (options.Hotkeys.Search :> ISettable<Bind>), "search")
+        do
+            TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some options.Hotkeys.Search, "search" )
+            |> this.Add
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -250,14 +252,14 @@ module Components =
 
     type TextInputDialog(bounds: Rect, prompt, callback) as this =
         inherit Dialog()
-        let buf = Setting<string>("")
+        let buf = Setting.simple ""
         let tb = TextEntry(buf, None, prompt)
         do
             let struct (l, t, r, b) = bounds
             this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if options.Hotkeys.Select.Value.Tapped() || options.Hotkeys.Exit.Value.Tapped() then tb.Dispose(); this.Close()
+            if options.Hotkeys.Select.Value.Tapped() || options.Hotkeys.Exit.Value.Tapped() then tb.Dispose(); this.BeginClose()
         override this.OnClose() = callback buf.Value
 
     //provide the first tab when constructing
@@ -273,9 +275,9 @@ module Components =
         do this.AddTab(name, widget)
 
         member this.AddTab(name, widget) =
-            this.Add(
-                { new Button((fun () -> selected <- name; selectedItem <- widget), name, Bind.DummyBind, Sprite.Default) with member this.Dispose() = base.Dispose(); widget.Dispose() }
-                |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count + 1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f))
+            { new Button((fun () -> selected <- name; selectedItem <- widget), name, Bind.DummyBind, Sprite.Default) with member this.Dispose() = base.Dispose(); widget.Dispose() }
+            |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count + 1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f)
+            |> this.Add
             count <- count + 1.0f
 
         override this.Draw() =
@@ -285,3 +287,30 @@ module Components =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             selectedItem.Update(elapsedTime, Rect.trimTop TABHEIGHT this.Bounds)
+
+    module SlideDialog =
+
+        type Direction =
+            | Left = 0
+            | Up = 1
+
+    type SlideDialog(direction: SlideDialog.Direction, distance: float32) as this =
+        inherit Dialog()
+
+        do
+            if direction = SlideDialog.Direction.Left then
+                this.Reposition(0.0f, 0.0f, distance, 0.0f)
+            else this.Reposition(0.0f, 0.0f, 0.0f, distance)
+            this.Move(0.0f, 0.0f, 0.0f, 0.0f)
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if Options.options.Hotkeys.Exit.Value.Tapped() then this.BeginClose()
+
+        override this.BeginClose() =
+            base.BeginClose()
+            if direction = SlideDialog.Direction.Left then
+                this.Move(0.0f, 0.0f, distance, 0.0f)
+            else this.Move(0.0f, 0.0f, 0.0f, distance)
+
+        override this.OnClose() = ()

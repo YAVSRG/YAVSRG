@@ -217,10 +217,16 @@ module Selection =
         Specific widgets to actually build options screen
     *)
 
+    type SelectionPage =
+        {
+            Content: (string * SelectionPage -> unit) -> Selectable
+            Callback: unit -> unit
+        }
+
     type BigButton(label, icon, onClick) as this =
         inherit Selectable()
         do
-            this.Add(Frame((fun () -> Screens.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
+            this.Add(Frame((fun () -> Globals.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
             this.Add(TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 0.8f))
             this.Add(TextBox(K ([|"❖";"✎";"♛";"⌨";"⚒"|].[icon]), K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 1.0f, 0.0f, 0.7f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
@@ -233,12 +239,12 @@ module Selection =
         inherit Selectable()
         do
             this.Add(Frame(Color.FromArgb(80, 255, 255, 255), ()))
-            this.Add(TextBox(label, (fun () -> ((if this.Hover then Screens.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
+            this.Add(TextBox(label, (fun () -> ((if this.Hover then Globals.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
         override this.OnSelect() =
             this.Selected <- false
             onClick()
-        static member FromEnum<'T when 'T: enum<int>>(label: string, setting: ISettable<'T>, onClick) =
+        static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, onClick) =
             let names = Enum.GetNames(typeof<'T>)
             let values = Enum.GetValues(typeof<'T>) :?> 'T array
             let mutable i = array.IndexOf(values, setting.Value)
@@ -264,7 +270,7 @@ module Selection =
                 (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
             |> this.Add
 
-        new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Screens.accentShade(255, 1.0f, 0.0f))
+        new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Globals.accentShade(255, 1.0f, 0.0f))
 
         override this.Draw() =
             let hi = colorFunc()
@@ -280,17 +286,12 @@ module Selection =
             onClick()
             this.Selected <- false
 
-    type Selector(items: string array, index, setter) as this =
+    type Selector(items: string array, setting: Setting<int>) as this =
         inherit NavigateSelectable()
-        let mutable index = index
-        let fd() =
-            index <- ((index + 1) % items.Length)
-            setter(index, items.[index])
-        let bk() =
-            index <- ((index + items.Length - 1) % items.Length)
-            setter(index, items.[index])
+        let fd() = setting.Value <- (setting.Value + 1) % items.Length
+        let bk() = setting.Value <- (setting.Value + items.Length - 1) % items.Length
         do
-            this.Add(new TextBox((fun () -> items.[index]), K (Color.White, Color.Black), 0.0f))
+            this.Add(new TextBox((fun () -> items.[setting.Value]), K (Color.White, Color.Black), 0.0f))
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
             this.Add(new Clickable((fun () -> (if not this.Selected then this.Selected <- true); fd()), fun b -> if b then this.Hover <- true))
 
@@ -299,25 +300,43 @@ module Selection =
         override this.Up() = fd()
         override this.Right() = fd()
 
-        static member FromEnum<'U, 'T when 'T: enum<'U>>(setting: ISettable<'T>, onDeselect) =
+        static member FromArray<'T>(names: string array, values: 'T array, setting: Setting<'T>) =
+            new Selector(names,
+                Setting.map
+                    (fun e -> Array.IndexOf(values, e))
+                    (fun i -> values.[i])
+                    setting)
+
+        static member FromEnum<'T>(setting: Setting<'T>) =
             let names = Enum.GetNames(typeof<'T>)
             let values = Enum.GetValues(typeof<'T>) :?> 'T array
-            { new Selector(names, Array.IndexOf(values, setting.Value), (fun (i, _) -> setting.Value <- values.[i]))
-                with override this.OnDeselect() = base.OnDeselect(); onDeselect() }
+            Selector.FromArray(names, values, setting)
 
-        static member FromBool(setting: ISettable<bool>) =
-            new Selector([|"☒" ; "☑"|], (if setting.Value then 1 else 0), (fun (i, _) -> setting.Value <- i > 0))
+        static member FromBool(setting: Setting<bool>) =
+            new Selector([|"◇" ; "◆"|],
+                Setting.map
+                    (fun b -> if b then 1 else 0)
+                    (fun i -> i > 0)
+                    setting)
 
-        static member FromKeymode(setting: ISettable<int>, onDeselect) =
-            { new Selector([|"3K"; "4K"; "5K"; "6K"; "7K"; "8K"; "9K"; "10K"|], setting.Value, (fun (i, _) -> setting.Value <- i))
-                with override this.OnDeselect() = base.OnDeselect(); onDeselect() }
-
-    type Slider<'T when 'T : comparison>(setting: NumSetting<'T>, incr: float32) as this =
+    type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
         inherit NavigateSelectable()
         let TEXTWIDTH = 130.0f
         let color = AnimationFade 0.5f
         let mutable dragging = false
-        let chPercent v = setting.ValuePercent <- setting.ValuePercent + v
+        
+        let getPercent (setting: Setting.Bounded<'T>) =
+            let (Setting.Bounds (lo, hi)) = setting.Config
+            let (lo, hi) = (Convert.ToSingle lo, Convert.ToSingle hi)
+            let value = Convert.ToSingle setting.Value
+            (value - lo) / (hi - lo)
+
+        let setPercent (v: float32) (setting: Setting.Bounded<'T>) =
+            let (Setting.Bounds (lo, hi)) = setting.Config
+            let (lo, hi) = (Convert.ToSingle lo, Convert.ToSingle hi)
+            setting.Value <- Convert.ChangeType((hi - lo) * v + lo, typeof<'T>) :?> 'T
+
+        let chPercent v = setPercent (getPercent setting + v) setting
         do
             this.Animation.Add color
             this.Add(new TextBox((fun () -> setting.Value.ToString()), K (Color.White, Color.Black), 0.0f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
@@ -330,7 +349,7 @@ module Selection =
             if this.Selected then
                 if (Mouse.Held(MouseButton.Left) && dragging) then
                     let amt = (Mouse.X() - l) / (r - l)
-                    setting.ValuePercent <- amt
+                    setPercent amt setting
                 else dragging <- false
 
         override this.Left() = chPercent(-incr)
@@ -339,26 +358,43 @@ module Selection =
         override this.Down() = chPercent(-incr * 10.0f)
 
         override this.Draw() =
-            let v = setting.ValuePercent
+            let v = getPercent setting
             let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
             let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
             let m = (b + t) * 0.5f
-            Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Screens.accentShade(255, 1.0f, 0.0f)) Sprite.Default
-            Draw.rect cursor (Screens.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Globals.accentShade(255, 1.0f, 0.0f)) Sprite.Default
+            Draw.rect cursor (Globals.accentShade(255, 1.0f, color.Value)) Sprite.Default
             base.Draw()
 
-    type ColorPicker(color: ISettable<byte>) as this =
+    type TextField(setting: Setting<string>) as this =
+        inherit NavigateSelectable()
+        let color = AnimationFade 0.5f
+        do
+            this.Animation.Add color
+            this.Add(new TextBox(setting.Get, (fun () -> Globals.accentShade(int (color.Value * 255.0f), 1.0f, color.Value), Color.Black), 0.0f))
+            this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
+
+        override this.OnSelect() =
+            base.OnSelect()
+            color.Target <- 1.0f
+            Input.setInputMethod (setting, fun () -> this.Selected <- false)
+
+        override this.OnDeselect() =
+            base.OnDeselect()
+            color.Target <- 0.5f
+
+    type ColorPicker(color: Setting<byte>) as this =
         inherit NavigateSelectable()
         let sprite = Themes.getTexture "note"
         let n = byte sprite.Rows
-        let fd() = color.Apply(fun x -> (x + n - 1uy) % n)
-        let bk() = color.Apply(fun x -> (x + 1uy) % n)
+        let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color
+        let bk() = Setting.app (fun x -> (x + 1uy) % n) color
         do this.Add(new Clickable((fun () -> (if not this.Selected then this.Selected <- true); fd ()), fun b -> if b then this.Hover <- true))
 
         override this.Draw() =
             base.Draw()
-            if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Globals.accentShade(120, 1.0f, 0.8f)) Sprite.Default
             Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
 
         override this.Left() = bk()
@@ -366,16 +402,16 @@ module Selection =
         override this.Right() = fd()
         override this.Down() = bk()
 
-    type KeyBinder(setting: ISettable<Bind>, allowModifiers) as this =
+    type KeyBinder(setting: Setting<Bind>, allowModifiers) as this =
         inherit Selectable()
         do
-            this.Add(new TextBox(setting.ToString, (fun () -> (if this.Selected then Screens.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
+            this.Add(new TextBox((fun () -> setting.Value.ToString()), (fun () -> (if this.Selected then Globals.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
             this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
         override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Screens.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Globals.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
             base.Draw()
 
         override this.Update(elapsedTime, bounds) =
@@ -402,9 +438,9 @@ module Selection =
                 this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
 
             override this.Draw() =
-                if this.Selected then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.4f)) Sprite.Default
-                elif this.Hover then Draw.rect this.Bounds (Screens.accentShade(180, 1.0f, 0.1f)) Sprite.Default
-                else Draw.rect this.Bounds (Screens.accentShade(180, 0.6f, 0.0f)) Sprite.Default
+                if this.Selected then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.4f)) Sprite.Default
+                elif this.Hover then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.1f)) Sprite.Default
+                else Draw.rect this.Bounds (Globals.accentShade(180, 0.6f, 0.0f)) Sprite.Default
                 base.Draw()
 
             override this.SParent = Some (selector :> Selectable)
@@ -441,7 +477,7 @@ module Selection =
                 p.Synchronized(fun () -> p.Remove this; o.Add this)
             override this.Right() = this.Left()
 
-        and ListOrderedSelector(setting: ISettable<ResizeArray<string>>, items: ResizeArray<string>) as this =
+        and ListOrderedSelector(setting: Setting<ResizeArray<string>>, items: ResizeArray<string>) as this =
             inherit NavigateSelectable()
 
             let available = new FlowContainer() :> Widget
@@ -516,45 +552,192 @@ module Selection =
             member this.Chosen = selected
             member this.Available = available
 
-    type DUEditor(options, index, setter, controls: Widget array array) as this =
-        inherit Selector(options, index, fun (i, s) -> this.ChangeU i; setter(i, s))
+    module CardSelect =
+    
+            let markedIcon = "◆"
+            let unmarkedIcon = "◇"
+    
+            let addIcon = "➕"
+            let editIcon = "✎"
+            let deleteIcon = "✕"
+    
+            type Config<'T> =
+                {
+                    NameFunc: 'T -> string
+                    EditFunc: (Setting<'T> -> SelectionPage) option
+                    CreateFunc: (unit -> 'T) option
+                    MarkFunc: 'T * bool -> unit
+    
+                    CanReorder: bool
+                    CanDuplicate: bool
+                    CanDelete: bool
+                    CanMultiSelect: bool
+                }
+    
+            type Card<'T>(item: 'T, config: Config<'T>, parent: Selector<'T>) as this =
+                inherit NavigateSelectable()
+                let mutable buttons = []
+                let mutable index = -1
+                do
+                    let h = 90.0f
+    
+                    let addButton (b: Widget) =
+                        let b = (b :?> Selectable)
+                        buttons <- b :: buttons
+                        this.Add b
+    
+                    new TextBox((fun () -> config.NameFunc (this.Setting: Setting<'T>).Value), K (Color.White, Color.Black), 0.0f)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
+                    |> this.Add
+    
+                    let mutable x = -h
+    
+                    new TextBox((fun () -> if parent.IsMarked this then markedIcon else unmarkedIcon), K (Color.White, Color.Black), 0.5f)
+                    |> positionWidget(x, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
+                    |> this.Add
+    
+                    if config.CanDelete then
+                        x <- x - h
+                        new LittleButton(K deleteIcon, fun () -> parent.Delete this)
+                        |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
+                        |> addButton
+    
+                    if Option.isSome config.EditFunc then
+                        x <- x - h
+                        new LittleButton(K editIcon, fun () -> parent.Edit this)
+                        |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
+                        |> addButton
+    
+                    if config.CanDuplicate then
+                        x <- x - h
+                        new LittleButton(K addIcon, fun () -> parent.Duplicate this)
+                        |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
+                        |> addButton
+    
+                    this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> ignore
+                member val Setting = Setting.simple item
+                override this.SParent = Some (parent :> Selectable)
+    
+                override this.Up() = 
+                    if this.HoverChild = None && config.CanReorder then
+                        ()
+                    else parent.Up()
+                override this.Down() = 
+                    if this.HoverChild = None && config.CanReorder then
+                        ()
+                    else parent.Down()
+                override this.Left() =
+                    if index < 0 then index <- buttons.Length - 1
+                    else index <- index - 1
+                    if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
+                override this.Right() =
+                    if index = buttons.Length - 1 then index <- -1
+                    else index <- index + 1
+                    if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
+                
+                override this.Update(elapsedTime, bounds) =
+                    if this.Selected && this.HoverChild = None && options.Hotkeys.Select.Value.Tapped() then
+                        if parent.IsMarked this then parent.Unmark this else parent.Mark this
+                    base.Update(elapsedTime, bounds)
+    
+                override this.Draw() =
+                    if parent.IsMarked this then Draw.rect this.Bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+                    if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
+                    elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
+                    base.Draw()
+    
+            and Selector<'T>(source: Setting<'T list>, config: Config<'T>, add: string * SelectionPage -> unit) as this =
+                inherit NavigateSelectable()
+    
+                let fc = FlowContainer()
+                let items = source.Value |> List.map (fun x -> Card<'T>(x, config, this))
+                let mutable marked = if config.CanMultiSelect then List.empty else List.singleton items.Head
+                do
+                    this.Add fc
+                    items |> List.iter fc.Add
+    
+                member this.Edit(item: Card<'T>) = add("EditItem", config.EditFunc.Value item.Setting)
+    
+                member this.Create() =
+                    this.Synchronized(fun () -> this.Add(Card(config.CreateFunc.Value (), config, this)))
+    
+                member this.Duplicate(item: Card<'T>) =
+                    this.Synchronized(fun () -> this.Add(Card(item.Setting.Value, config, this)))
+    
+                member this.Delete(item: Card<'T>) =
+                    if not (this.IsMarked item) then
+                        if item.Selected then this.Down()
+                        item.Destroy()
+    
+                member this.Mark(item: Card<'T>) =
+                    if config.CanMultiSelect then
+                        marked <- if List.contains item marked then marked else item :: marked
+                    else marked <- List.singleton item
+                    config.MarkFunc (item.Setting.Value, true)
+                member this.Unmark(item: Card<'T>) =
+                    if config.CanMultiSelect then marked <- List.except [item] marked
+                    config.MarkFunc (item.Setting.Value, false)
+                member this.IsMarked(item: Card<'T>) = List.contains item marked
+    
+                override this.Up() =
+                    match this.HoverChild with
+                    | Some s ->
+                        let i = fc.Children.IndexOf s
+                        this.HoverChild <- fc.Children.[(i - 1 + fc.Children.Count) % fc.Children.Count] :?> Selectable |> Some
+                    | None -> ()
+                override this.Down() =
+                    match this.HoverChild with
+                    | Some s ->
+                        let i = fc.Children.IndexOf s
+                        this.HoverChild <- fc.Children.[(i + 1) % fc.Children.Count] :?> Selectable |> Some
+                    | None -> ()
+    
+                override this.OnSelect() =
+                    base.OnSelect()
+                    this.HoverChild <- Some (fc.Children.[0] :?> Selectable)
+    
+                override this.OnDeselect() =
+                    base.OnDeselect()
+                    let xs = fc.Children |> Seq.map (fun w -> (w :?> Card<'T>).Setting.Value) |> List.ofSeq
+                    source.Value <- xs
 
-        let mutable current = index
-        override this.OnAddedTo(p) =
-            base.OnAddedTo p
-            p.Synchronized(fun () -> for w in controls.[index] do this.SParent.Value.SParent.Value.Add w)
-
-        member this.ChangeU(newIndex) =
-            for w in controls.[current] do this.SParent.Value.SParent.Value.Remove w
-            for w in controls.[newIndex] do this.SParent.Value.SParent.Value.Add w
-            current <- newIndex
-
+    //todo: remove this and use new (above) system
     module WatcherSelect =
 
         type WatcherSelectorItem<'T>(item: 'T, name, selector: WatcherSelector<'T>) as this =
             inherit ListSelectable(true)
             do
-                this.Add(new TextBox((fun () -> name ((this.Setting : Setting<'T>).Value)), K (Color.White, Color.Black), 0.0f)
-                    |> positionWidget(0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, -40.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Edit"), fun () -> selector.EditItem this)
-                    |> positionWidget(20.0f, 0.0f, -40.0f, 1.0f, 140.0f, 0.0f, -10.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Duplicate"), fun () -> this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Value, name, selector))))
-                    |> positionWidget(160.0f, 0.0f, -40.0f, 1.0f, 280.0f, 0.0f, -10.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.MakeMain"), fun () -> selector.Main <- this)
-                    |> positionWidget(300.0f, 0.0f, -40.0f, 1.0f, 420.0f, 0.0f, -10.0f, 1.0f))
-                this.Add(new LittleButton(K <| Localisation.localise("options.wselect.Delete"), fun () -> if selector.Main <> this then this.Destroy(); this.SParent.Value.SelectedChild <- None)
-                    |> positionWidget(440.0f, 0.0f, -40.0f, 1.0f, 560.0f, 0.0f, -10.0f, 1.0f))
+                new TextBox((fun () -> name ((this.Setting : Setting<'T>).Value)), K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, -40.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.Edit", fun () -> selector.EditItem this)
+                |> positionWidget(20.0f, 0.0f, -40.0f, 1.0f, 140.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.Duplicate", fun () -> this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Value, name, selector))))
+                |> positionWidget(160.0f, 0.0f, -40.0f, 1.0f, 280.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.MakeMain", fun () -> selector.Main <- this)
+                |> positionWidget(300.0f, 0.0f, -40.0f, 1.0f, 420.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
+                new LittleButton(K <| Localisation.localise "options.wselect.Delete", fun () -> if selector.Main <> this then this.Destroy(); this.SParent.Value.SelectedChild <- None)
+                |> positionWidget(440.0f, 0.0f, -40.0f, 1.0f, 560.0f, 0.0f, -10.0f, 1.0f)
+                |> this.Add
+
                 this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 120.0f, 0.0f) |> ignore
-            member val Setting = new Setting<'T>(item)
+            member val Setting = Setting.simple item
             override this.SParent = Some (selector :> Selectable)
 
             override this.Draw() =
-                if selector.Main = this then Draw.rect this.Bounds (Screens.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+                if selector.Main = this then Draw.rect this.Bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
                 if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
                 elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                 base.Draw()
 
-        and WatcherSelector<'T>(source: Setting<WatcherSelection<'T>>, editor: ISettable<'T> -> Selectable, name: 'T -> string, add: string * Selectable -> unit) as this =
+        and WatcherSelector<'T>(source: Setting<WatcherSelection<'T>>, editor: Setting<'T> -> SelectionPage, name: 'T -> string, add: string * SelectionPage -> unit) as this =
             inherit NavigateSelectable()
             let items = source.Value |> fun (a, b) -> a :: b |> List.map (fun x -> WatcherSelectorItem<'T>(x, name, this))
             let mutable currentMain = items.Head
@@ -577,7 +760,7 @@ module Selection =
                     this.HoverChild <- fc.Children.[(i + 1) % fc.Children.Count] :?> Selectable |> Some
                 | None -> ()
 
-            member this.EditItem(item: WatcherSelectorItem<'T>) = add("EditItem", editor(item.Setting))
+            member this.EditItem(item: WatcherSelectorItem<'T>) = add("EditItem", editor item.Setting)
             member this.Main with get() = currentMain and set(v) = currentMain <- v
 
             override this.OnSelect() =
@@ -596,6 +779,14 @@ module Selection =
     let localiseOption s = Localisation.localise("options.name." + s)
     let localiseTooltip s = Localisation.localise("options.tooltip." + s)
 
+    let row xs =
+        let r = ListSelectable(true)
+        List.iter r.Add xs; r
+
+    let column xs =
+        let c = ListSelectable(false)
+        List.iter c.Add xs; c
+
     let refreshRow number cons =
         let r = ListSelectable(true)
         let refresh() =
@@ -606,23 +797,139 @@ module Selection =
         refresh()
         r, refresh
 
-    let row xs =
-        let r = ListSelectable(true)
-        List.iter r.Add xs; r
+    let refreshChoice (options: string array) (widgets: Widget array array) (setting: Setting<int>) =
+        let rec newSetting =
+            {
+                Set =
+                    fun x ->
+                        for w in widgets.[setting.Value] do selector.SParent.Value.SParent.Value.Remove w
+                        for w in widgets.[x] do selector.SParent.Value.SParent.Value.Add w
+                        setting.Value <- x
+                Get = setting.Get
+                Config = setting.Config
+            }
+        and selector : Selector = new Selector(options, newSetting)
+        selector.Synchronized(fun () -> newSetting.Value <- newSetting.Value)
+        selector
 
-    let column xs =
-        let c = ListSelectable(false)
-        List.iter c.Add xs; c
+    let PRETTYTEXTWIDTH = 500.0f
+    let PRETTYHEIGHT = 80.0f
+    let PRETTYWIDTH = 1200.0f
 
-    let wrapper main =
-        let mutable disposed = false
-        let w = { new Selectable() with
-            override this.Update(elapsedTime, bounds) =
-                if disposed then this.HoverChild <- None
-                base.Update(elapsedTime, bounds)
-                if not disposed then
-                    Input.absorbAll()
-            override this.Dispose() = (base.Dispose(); disposed <- true) }
-        w.Add main
-        w.SelectedChild <- Some main
-        w
+    type Divider() =
+        inherit Widget()
+
+        member this.Position(y) =
+            this |> positionWidget(100.0f, 0.0f, y - 5.0f, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + 5.0f, 0.0f)
+
+        override this.Draw() =
+            base.Draw()
+            Draw.quad (Quad.ofRect this.Bounds) (struct(Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White)) Sprite.DefaultQuad
+
+    type PrettySetting(name, widget: Selectable) as this =
+        inherit Selectable()
+
+        let mutable widget = widget
+
+        do
+            widget
+            |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
+            |> this.Add
+
+            TextBox(K (localiseOption name + ":"), (fun () -> ((if this.Selected then Globals.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
+            |> this.Add
+
+            TooltipRegion(localiseTooltip name) |> this.Add
+    
+        member this.Position(y, width, height) =
+            this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
+    
+        member this.Position(y, width) = this.Position(y, width, PRETTYHEIGHT)
+        member this.Position(y) = this.Position(y, PRETTYWIDTH)
+
+        override this.Draw() =
+            if this.Selected then Draw.rect this.Bounds (Color.FromArgb(180, 0, 0, 0)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 0, 0, 0)) Sprite.Default
+            base.Draw()
+    
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if widget.Hover && not widget.Selected && this.Selected then this.HoverChild <- None; this.Hover <- true
+        
+        override this.OnSelect() = if not widget.Hover then widget.Selected <- true
+        override this.OnDehover() = base.OnDehover(); widget.OnDehover()
+
+        member this.Refresh(w: Selectable) =
+            widget.Destroy()
+            widget <- w
+            this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
+
+    type PrettyButton(name, action) as this =
+        inherit Selectable()
+        do
+            TextBox(K (localiseOption name + "  >"), (fun () -> ((if this.Hover then Globals.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f) |> this.Add
+            Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
+            TooltipRegion(localiseTooltip name) |> this.Add
+        override this.OnSelect() = action(); this.Selected <- false
+        override this.Draw() =
+            if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
+            base.Draw()
+        member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
+
+    type SelectionMenu(topLevel: SelectionPage) as this =
+        inherit Dialog()
+    
+        let stack: (Selectable * (unit -> unit)) option array = Array.create 12 None
+        let mutable namestack = []
+        let mutable name = ""
+        let body = Widget()
+
+        let wrapper main =
+            let mutable disposed = false
+            let w = { new Selectable() with
+                override this.Update(elapsedTime, bounds) =
+                    if disposed then this.HoverChild <- None
+                    base.Update(elapsedTime, bounds)
+                    if not disposed then
+                        Input.absorbAll()
+                override this.Dispose() = (base.Dispose(); disposed <- true) }
+            w.Add main
+            w.SelectedChild <- Some main
+            w
+    
+        let rec add (label, page) =
+            let n = List.length namestack
+            namestack <- localiseOption label :: namestack
+            name <- String.Join(" > ", List.rev namestack)
+            let w = wrapper (page.Content add)
+            match stack.[n] with
+            | None -> ()
+            | Some (x, _) -> x.Destroy()
+            stack.[n] <- Some (w, page.Callback)
+            body.Add w
+            let n = float32 n + 1.0f
+            w.Reposition(0.0f, Render.vheight * n, 0.0f, Render.vheight * n)
+            body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
+    
+        let back() =
+            namestack <- List.tail namestack
+            name <- String.Join(" > ", List.rev namestack)
+            let n = List.length namestack
+            let (w, callback) = stack.[n].Value in w.Dispose(); callback()
+            let n = float32 n
+            body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
+    
+        do
+            this.Add body
+            this.Add(TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
+                |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
+            add ("Options", topLevel)
+    
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            match List.length namestack with
+            | 0 -> this.BeginClose()
+            | n -> if (fst stack.[n - 1].Value).SelectedChild.IsNone then back()
+    
+        override this.OnClose() = ()

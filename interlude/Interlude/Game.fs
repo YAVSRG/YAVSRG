@@ -46,7 +46,7 @@ type Game(config: GameConfig) as this =
         FBO.init()
 
     override this.OnFileDrop e =
-        e.FileNames |> Array.iter FileDropHandling.import
+        e.FileNames |> Array.iter Screens.ImportMenu.FileDropHandling.import
 
     override this.OnRenderFrame e =
         base.OnRenderFrame e

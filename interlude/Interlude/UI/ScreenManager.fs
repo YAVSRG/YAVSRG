@@ -8,6 +8,9 @@ open Interlude
 open Interlude.Graphics
 open Interlude.UI.Animation
 open Interlude.UI.Components
+open Interlude.UI.Selection
+open Interlude.UI.Screens
+open Interlude.UI.OptionsMenu
 open Interlude.Utils
 open Interlude.Input
 
@@ -76,7 +79,7 @@ module ScreenTransitions =
                 diamond (s * float32 x) (s * float32 y)
                 diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
         Stencil.draw()
-        Screens.drawBackground (bounds, Screens.accentShade (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+        Globals.drawBackground (bounds, Globals.accentShade (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish()
 
     let drawTransition flags inbound amount bounds =
@@ -87,12 +90,12 @@ type ScreenContainer() as this =
     inherit Widget()
 
     let dialogs = new ResizeArray<Dialog>()
-    let mutable current = new ScreenLoading() :> Screen
+    let mutable current = new LoadingScreen() :> IScreen
     let screens = [|
         current;
-        new ScreenMenu() :> Screen;
-        new ScreenImport() :> Screen;
-        new ScreenLevelSelect() :> Screen;
+        new MainMenu() :> IScreen;
+        new ImportMenu.Screen() :> IScreen;
+        new LevelSelect.Screen() :> IScreen;
         |]
     let mutable exit = false
     let mutable cursor = true
@@ -106,25 +109,24 @@ type ScreenContainer() as this =
     let tooltip = new TooltipHandler()
 
     do
-        Screens.changeScreen <- this.ChangeScreen //second overload
-        Screens.newScreen <- this.ChangeScreen //first overload
-        Screens.back <- this.Back
-        Screens.addDialog <- dialogs.Add
-        Screens.setCursorVisible <- (fun b -> cursor <- b)
-        Screens.quickOptionsMenu <- OptionsMenu.QuickPlay >> (fun s -> s :> Dialog)
-        Screens.collectionsMenu <- OptionsMenu.Collections >> (fun s -> s :> Dialog)
+        Globals.changeScreen <- this.ChangeScreen //second overload
+        Globals.newScreen <- this.ChangeScreen //first overload
+        Globals.back <- this.Back
+        Globals.addDialog <- dialogs.Add
+        Globals.setCursorVisible <- (fun b -> cursor <- b)
+        Globals.watchReplay <- (fun replayData -> this.ChangeScreen((fun () -> Screens.Play.Screen(Play.PlayScreenType.Replay replayData) :> IScreen), ScreenType.Play, ScreenTransitionFlag.Default))
         this.Add toolbar
-        Screens.logo
+        Globals.logo
         |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
         |> this.Add
         this.Animation.Add screenTransition
-        this.Animation.Add Screens.globalAnimation
+        this.Animation.Add Globals.globalAnimation
         current.OnEnter ScreenType.SplashScreen
 
     member this.Exit = exit
 
-    member this.ChangeScreen (s: unit -> Screen, screenType, flags) =
-        if screenTransition.Complete && screenType <> Screens.currentType then
+    member this.ChangeScreen (s: unit -> IScreen, screenType, flags) =
+        if screenTransition.Complete && screenType <> Globals.currentType then
             transitionFlags <- flags
             this.Animation.Add screenTransition
             screenTransition.Add t1
@@ -133,11 +135,11 @@ type ScreenContainer() as this =
                     fun () ->
                         let s = s()
                         current.OnExit screenType
-                        s.OnEnter Screens.currentType
-                        match Screens.currentType with
+                        s.OnEnter Globals.currentType
+                        match Globals.currentType with
                         | ScreenType.Play | ScreenType.Score -> current.Dispose()
                         | _ -> ()
-                        Screens.currentType <- screenType
+                        Globals.currentType <- screenType
                         current <- s
                         t2.FrameSkip() //ignore frame lag spike when initialising screen
                     ))
@@ -146,7 +148,7 @@ type ScreenContainer() as this =
     member this.ChangeScreen (screenType, flags) = this.ChangeScreen(K screens.[int screenType], screenType, flags)
 
     member this.Back flags =
-        match Screens.currentType with
+        match Globals.currentType with
         | ScreenType.SplashScreen -> exit <- true
         | ScreenType.MainMenu -> this.ChangeScreen (ScreenType.SplashScreen, flags)
         | ScreenType.LevelSelect -> this.ChangeScreen (ScreenType.MainMenu, flags)
@@ -156,12 +158,12 @@ type ScreenContainer() as this =
         | _ -> ()
 
     override this.Update(elapsedTime, bounds) =
-        Screens.updateBackground elapsedTime
+        Globals.updateBackground elapsedTime
         tooltip.Update(elapsedTime, bounds)
         if Render.vwidth > 0.0f then
-            Screens.parallaxX.Target <- Mouse.X() / Render.vwidth
-            Screens.parallaxY.Target <- Mouse.Y() / Render.vheight
-        Screens.accentColor.SetColor Themes.accentColor
+            Globals.parallaxX.Target <- Mouse.X() / Render.vwidth
+            Globals.parallaxY.Target <- Mouse.Y() / Render.vheight
+        Globals.accentColor.SetColor Themes.accentColor
         if dialogs.Count > 0 then
             dialogs.[dialogs.Count - 1].Update(elapsedTime, bounds)
             if not dialogs.[dialogs.Count - 1].Enabled then
@@ -172,15 +174,15 @@ type ScreenContainer() as this =
         current.Update(elapsedTime, toolbar.Bounds)
 
     override this.Draw() =
-        Screens.drawBackground (this.Bounds, Color.White, 1.0f)
-        Draw.rect this.Bounds (Color.FromArgb (Screens.backgroundDim.Value * 255.0f |> int, 0, 0, 0)) Sprite.Default
+        Globals.drawBackground (this.Bounds, Color.White, 1.0f)
+        Draw.rect this.Bounds (Color.FromArgb (Globals.backgroundDim.Value * 255.0f |> int, 0, 0, 0)) Sprite.Default
         current.Draw()
         base.Draw()
         if not screenTransition.Complete then
             let inbound = t1.Elapsed < ScreenTransitions.TRANSITIONTIME
             let amount = Math.Clamp((if inbound then t1.Elapsed / ScreenTransitions.TRANSITIONTIME else 1.0 - (t2.Elapsed / ScreenTransitions.TRANSITIONTIME)), 0.0, 1.0) |> float32
             ScreenTransitions.drawTransition transitionFlags inbound amount this.Bounds
-            if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Screens.logo.Draw()
+            if (transitionFlags &&& ScreenTransitionFlag.UnderLogo = ScreenTransitionFlag.UnderLogo) then Globals.logo.Draw()
         for d in dialogs do d.Draw()
-        if cursor then Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) Themes.themeConfig.CursorSize Themes.themeConfig.CursorSize) (Screens.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture "cursor")
+        if cursor then Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) Themes.themeConfig.CursorSize Themes.themeConfig.CursorSize) (Globals.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture "cursor")
         tooltip.Draw()

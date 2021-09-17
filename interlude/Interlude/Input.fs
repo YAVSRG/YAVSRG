@@ -26,7 +26,7 @@ type Bind =
         + (if alt then "Alt + " else "")
         + (if shift then "Shift + " else "")
 
-    static member DummyBind = new Setting<Bind>(Dummy)
+    static member DummyBind = Setting.simple Dummy
 
 
 module Bind =
@@ -69,7 +69,7 @@ module Input =
         | None -> ()
         inputmethod <- None
     
-    let setInputMethod (s: ISettable<string>, callback: unit -> unit) =
+    let setInputMethod (s: Setting<string>, callback: unit -> unit) =
         removeInputMethod()
         inputmethod <- Some (s, callback)
 
@@ -101,18 +101,23 @@ module Input =
         evts <- f evts
         out
 
-    let consumeGameplay (b: Bind, t: InputEvType, f) =
-        match b with
-        | Key (k, _) ->
-            let mutable time = consumeOneKeyGameplay (k, t)
-            while time.IsSome do
-                f time.Value
-                time <- consumeOneKeyGameplay (k, t)
-        | _ -> 
-            let mutable time = consumeOne (b, t)
-            while time.IsSome do
-                f time.Value
-                time <- consumeOne (b, t)
+    let consumeGameplay (binds: Bind array, callback: int -> Time -> bool -> unit) =
+        let bmatch bind target =
+            match bind, target with
+            | Key (k, _), Key (K, _) when k = K -> true
+            | Mouse b, Mouse B when b = B -> true
+            | _ -> false
+        let rec f evs =
+            match evs with
+            | [] -> []
+            | struct (b, t, time) :: xs ->
+                let mutable i = 0
+                let mutable matched = false
+                while i < binds.Length && not matched do
+                    if bmatch binds.[i] b then callback i time (t <> InputEvType.Press); matched <- true
+                    i <- i + 1
+                if matched then f xs else struct (b, t, time) :: (f xs)
+        evts <- f evts
 
     let consumeAny (t: InputEvType) =
         let mutable out = ValueNone
@@ -177,7 +182,7 @@ module Input =
                 removeInputMethod())
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | Some (s, c) -> s.Apply(fun x -> x + e.AsString); typed <- true
+            | Some (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
             | None -> ())
 
     let update() =
@@ -187,7 +192,7 @@ module Input =
         match inputmethod with
         |  Some (s, c) ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
-                s.Apply (fun x -> x.Substring (0, x.Length - 1))
+                Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
             elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
         | None -> ()

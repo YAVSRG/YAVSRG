@@ -5,8 +5,7 @@ open System.Collections.Generic
 open System.IO
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
-open Percyqaz.Json
-open Prelude.Gameplay.Score
+open Prelude.Scoring
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.ScoreManager
@@ -17,13 +16,13 @@ open Interlude.Input.Bind
 module Options =
 
     type WindowType =
-    | WINDOWED = 0
-    | BORDERLESS = 1
-    | FULLSCREEN = 2
+        | WINDOWED = 0
+        | BORDERLESS = 1
+        | FULLSCREEN = 2
 
     type WindowResolution =
-    | Preset of index:int
-    | Custom of width:int * height:int
+        | Preset of index:int
+        | Custom of width:int * height:int
 
     type GameConfig = {
         WorkingDirectory: string
@@ -35,9 +34,9 @@ module Options =
         static member Default = {
             WorkingDirectory = ""
             Locale = "en_GB.txt"
-            WindowMode = Setting(WindowType.BORDERLESS)
-            Resolution = Setting(Custom (1024, 768))
-            FrameLimiter = Setting(0.0)
+            WindowMode = Setting.simple WindowType.BORDERLESS
+            Resolution = Setting.simple (Custom (1024, 768))
+            FrameLimiter = Setting.simple 0.0
         }
 
     type Hotkeys = {
@@ -56,19 +55,19 @@ module Options =
         Tooltip: Setting<Bind>
         Delete: Setting<Bind>
         Screenshot: Setting<Bind>
-        Tasklist: Setting<Bind>
         Volume: Setting<Bind>
 
         Collections: Setting<Bind>
         AddToCollection: Setting<Bind>
         RemoveFromCollection: Setting<Bind>
         Mods: Setting<Bind>
-        Scoreboard: Setting<Bind>
+        Autoplay: Setting<Bind>
         ChartInfo: Setting<Bind>
 
         Import: Setting<Bind>
         Options: Setting<Bind>
         Help: Setting<Bind>
+        Tasks: Setting<Bind>
 
         UpRate: Setting<Bind>
         DownRate: Setting<Bind>
@@ -78,54 +77,64 @@ module Options =
         DownRateSmall: Setting<Bind>
     } with
         static member Default = {
-            Exit = Setting(mk Keys.Escape)
-            Select = Setting(mk Keys.Enter)
-            Search = Setting(mk Keys.Tab)
-            Toolbar = Setting(ctrl Keys.T)
-            Tooltip = Setting(mk Keys.Slash)
-            Delete = Setting(mk Keys.Delete)
-            Screenshot = Setting(mk Keys.F12)
-            Tasklist = Setting(mk Keys.F8)
-            Volume = Setting(mk Keys.LeftAlt)
-            Previous = Setting(mk Keys.Left)
-            Next = Setting(mk Keys.Right)
-            Up = Setting(mk Keys.Up)
-            Down = Setting(mk Keys.Down)
-            Start = Setting(mk Keys.Home)
-            End = Setting(mk Keys.End)
-            Skip = Setting(mk Keys.Space)
+            Exit = Setting.simple(mk Keys.Escape)
+            Select = Setting.simple(mk Keys.Enter)
+            Search = Setting.simple(mk Keys.Tab)
+            Toolbar = Setting.simple(ctrl Keys.T)
+            Tooltip = Setting.simple(mk Keys.Slash)
+            Delete = Setting.simple(mk Keys.Delete)
+            Screenshot = Setting.simple(mk Keys.F12)
+            Volume = Setting.simple(mk Keys.LeftAlt)
+            Previous = Setting.simple(mk Keys.Left)
+            Next = Setting.simple(mk Keys.Right)
+            Up = Setting.simple(mk Keys.Up)
+            Down = Setting.simple(mk Keys.Down)
+            Start = Setting.simple(mk Keys.Home)
+            End = Setting.simple(mk Keys.End)
+            Skip = Setting.simple(mk Keys.Space)
 
-            Collections = Setting(mk Keys.N)
-            AddToCollection = Setting(mk Keys.RightBracket)
-            RemoveFromCollection = Setting(mk Keys.LeftBracket)
-            Mods = Setting(mk Keys.M)
-            Scoreboard = Setting(mk Keys.Comma)
-            ChartInfo = Setting(mk Keys.Period)
+            Collections = Setting.simple(mk Keys.N)
+            AddToCollection = Setting.simple(mk Keys.RightBracket)
+            RemoveFromCollection = Setting.simple(mk Keys.LeftBracket)
+            Mods = Setting.simple(mk Keys.M)
+            Autoplay = Setting.simple(ctrl Keys.A)
+            ChartInfo = Setting.simple(mk Keys.Period)
 
-            Import = Setting(ctrl Keys.I)
-            Options = Setting(ctrl Keys.O)
-            Help = Setting(ctrl Keys.H)
+            Import = Setting.simple(ctrl Keys.I)
+            Options = Setting.simple(ctrl Keys.O)
+            Help = Setting.simple(ctrl Keys.H)
+            Tasks = Setting.simple(mk Keys.F8)
 
-            UpRate = Setting(mk Keys.Equal)
-            DownRate = Setting(mk Keys.Minus)
-            UpRateHalf = Setting(ctrl Keys.Equal)
-            DownRateHalf = Setting(ctrl Keys.Minus)
-            UpRateSmall = Setting(shift Keys.Equal)
-            DownRateSmall = Setting(shift Keys.Minus)
+            UpRate = Setting.simple(mk Keys.Equal)
+            DownRate = Setting.simple(mk Keys.Minus)
+            UpRateHalf = Setting.simple(ctrl Keys.Equal)
+            DownRateHalf = Setting.simple(ctrl Keys.Minus)
+            UpRateSmall = Setting.simple(shift Keys.Equal)
+            DownRateSmall = Setting.simple(shift Keys.Minus)
         }
 
+    type Keymode =
+        | ``3K`` = 3
+        | ``4K`` = 4
+        | ``5K`` = 5
+        | ``6K`` = 6
+        | ``7K`` = 7
+        | ``8K`` = 8
+        | ``9K`` = 9
+        | ``10K`` = 10
+
     type ScoreSaving =
-    | Always = 0
-    | Pacemaker = 1
-    | PersonalBest = 2
+        | Always = 0
+        | Pacemaker = 1
+        | PersonalBest = 2
 
     type Pacemaker =
-    | Accuracy of float
-    | Lamp of Lamp
+        | Accuracy of float
+        | Lamp of Lamp
 
     type FailType =
-    | Instant = 0
-    | EndOfSong = 1
+        | Instant = 0
+        | EndOfSong = 1
 
     type WatcherSelection<'T> = 'T * 'T list
     module WatcherSelection =
@@ -139,44 +148,33 @@ module Options =
             | [] -> (main, alts)
             | x :: xs -> let (m, a) = cycleBackward (x, xs) in (m, main :: a)
 
-    type ProfileStats = {
-        TopPhysical: Setting<TopScore list>
-        TopTechnical: Setting<TopScore list>
-    } with
-        static member Default = {
-            TopPhysical = Setting([])
-            TopTechnical = Setting([])
-        }
-
     type GameOptions = {
-        AudioOffset: NumSetting<float>
-        AudioVolume: NumSetting<float>
+        AudioOffset: Setting.Bounded<float>
+        AudioVolume: Setting.Bounded<float>
         CurrentChart: Setting<string>
         EnabledThemes: List<string>
 
-        ScrollSpeed: Setting<float>
-        HitPosition: Setting<int>
+        ScrollSpeed: Setting.Bounded<float>
+        HitPosition: Setting.Bounded<int>
         HitLighting: Setting<bool>
         Upscroll: Setting<bool>
-        BackgroundDim: Setting<float>
-        PerspectiveTilt: Setting<float>
-        ScreenCoverUp: Setting<float>
-        ScreenCoverDown: Setting<float>
-        ScreenCoverFadeLength: Setting<int>
+        BackgroundDim: Setting.Bounded<float>
+        PerspectiveTilt: Setting.Bounded<float>
+        ScreenCoverUp: Setting.Bounded<float>
+        ScreenCoverDown: Setting.Bounded<float>
+        ScreenCoverFadeLength: Setting.Bounded<int>
         ColorStyle: Setting<ColorConfig>
-        KeymodePreference: Setting<int>
+        KeymodePreference: Setting<Keymode>
         UseKeymodePreference: Setting<bool>
         NoteSkin: Setting<string>
 
         Playstyles: Layout array
-        HPSystems: Setting<WatcherSelection<HPSystemConfig>>
-        AccSystems: Setting<WatcherSelection<AccuracySystemConfig>>
+        HPSystems: Setting<WatcherSelection<Metrics.HPSystemConfig>>
+        AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
         ScoreSaveCondition: Setting<ScoreSaving>
         FailCondition: Setting<FailType>
         Pacemaker: Setting<Pacemaker>
         GameplayBinds: (Bind array) array
-
-        Stats: ProfileStats
 
         ChartSortMode: Setting<string>
         ChartGroupMode: Setting<string>
@@ -186,38 +184,36 @@ module Options =
         Hotkeys: Hotkeys
     } with
         static member Default = {
-            AudioOffset = FloatSetting(0.0, -500.0, 500.0)
-            AudioVolume = FloatSetting(0.1, 0.0, 1.0)
-            CurrentChart = Setting("")
+            AudioOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
+            AudioVolume = Setting.percent 0.1
+            CurrentChart = Setting.simple ""
             EnabledThemes = new List<string>()
 
-            ScrollSpeed = FloatSetting(2.05, 1.0, 3.0)
-            HitPosition = IntSetting(0, -100, 400)
-            HitLighting = Setting(false)
-            Upscroll = Setting(false)
-            BackgroundDim = FloatSetting(0.5, 0.0, 1.0)
-            PerspectiveTilt = FloatSetting(0.0, -1.0, 1.0)
-            ScreenCoverUp = FloatSetting(0.0, 0.0, 1.0)
-            ScreenCoverDown = FloatSetting(0.0, 0.0, 1.0)
-            ScreenCoverFadeLength = IntSetting(200, 0, 500)
-            NoteSkin = Setting("default")
-            ColorStyle = Setting(ColorConfig.Default)
-            KeymodePreference = IntSetting(4, 3, 10)
-            UseKeymodePreference = Setting(false)
+            ScrollSpeed = Setting.bounded 2.05 1.0 3.0 |> Setting.round 2
+            HitPosition = Setting.bounded 0 -100 400
+            HitLighting = Setting.simple false
+            Upscroll = Setting.simple false
+            BackgroundDim = Setting.percent 0.5
+            PerspectiveTilt = Setting.bounded 0.0 -1.0 1.0 |> Setting.round 2
+            ScreenCoverUp = Setting.percent 0.0
+            ScreenCoverDown = Setting.percent 0.0
+            ScreenCoverFadeLength = Setting.bounded 200 0 500
+            NoteSkin = Setting.simple "default"
+            //todo: move to noteskin
+            ColorStyle = Setting.simple ColorConfig.Default
+            KeymodePreference = Setting.simple Keymode.``4K``
+            UseKeymodePreference = Setting.simple false
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            HPSystems = Setting(VG, [])
-            AccSystems = Setting(SCPlus (4, false), [])
-            ScoreSaveCondition = Setting(ScoreSaving.Always)
-            FailCondition = Setting(FailType.EndOfSong)
-            Pacemaker = Setting(Accuracy 0.95)
+            HPSystems = Setting.simple (Metrics.VG, [])
+            AccSystems = Setting.simple (Metrics.SCPlus (4, false), [])
+            ScoreSaveCondition = Setting.simple ScoreSaving.Always
+            FailCondition = Setting.simple FailType.EndOfSong
+            Pacemaker = Setting.simple (Accuracy 0.95)
 
-            //todo: move to scores database
-            Stats = ProfileStats.Default
-
-            ChartSortMode = Setting("Title")
-            ChartGroupMode = Setting("Pack")
-            ScoreSortMode = Setting(0)
+            ChartSortMode = Setting.simple "Title"
+            ChartGroupMode = Setting.simple "Pack"
+            ScoreSortMode = Setting.simple 0
             Hotkeys = Hotkeys.Default
             GameplayBinds = [|
                 [|mk Keys.Left; mk Keys.Down; mk Keys.Right|];
@@ -262,25 +258,6 @@ module Options =
 
     let save() =
         try
-            Json.toFile(configPath, true) config
-            Json.toFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
+            JSON.ToFile(configPath, true) config
+            JSON.ToFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)
-
-    let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
-        if File.Exists(path) then
-            let p = Path.ChangeExtension(path, ".bak")
-            if File.Exists(p) then File.Copy(p, Path.ChangeExtension(path, ".bak2"), true)
-            File.Copy(path, p, true)
-            try
-                Json.fromFile(path) |> JsonResult.value
-            with err ->
-                Logging.Critical(sprintf "Could not load %s! Maybe it is corrupt?" <| Path.GetFileName(path), err)
-                if prompt then
-                    Console.WriteLine("If you would like to launch anyway, press ENTER.")
-                    Console.WriteLine("If you would like to try and fix the problem youself, CLOSE THIS WINDOW.")
-                    Console.ReadLine() |> ignore
-                    Logging.Critical("User has chosen to launch game with default data.")
-                defaultData
-        else
-            Logging.Info(sprintf "No %s file found, creating it." name)
-            defaultData
