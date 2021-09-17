@@ -78,6 +78,9 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         clearPB <- PersonalBestType.None
         graph.Refresh()
 
+    let watchReplay() =
+        Globals.watchReplay <| scoreData.ReplayData
+
     let pbLabel text colorFunc pb =
         { new TextBox(text, (fun () -> colorFunc(), Color.Black), 0.5f) with
             override this.Draw() =
@@ -148,7 +151,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         new Button(ignore, "Graph settings", Input.Bind.DummyBind, Sprite.Default)
         |> positionWidget(-420.0f, 1.0f, -70.0f, 1.0f, -220.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
-        new Button(ignore, "Watch replay", Input.Bind.DummyBind, Sprite.Default)
+        new Button(watchReplay, "Watch replay", Input.Bind.DummyBind, Sprite.Default)
         |> positionWidget(-220.0f, 1.0f, -70.0f, 1.0f, -20.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
 

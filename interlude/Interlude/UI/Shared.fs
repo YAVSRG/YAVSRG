@@ -142,7 +142,7 @@ module Globals =
     
     let mutable currentType = ScreenType.SplashScreen
 
-    // All of these are initialised in Screens.MainMenu.fs
+    // All of these are initialised in ScreenManager.fs
     let mutable internal changeScreen: ScreenType * ScreenTransitionFlag -> unit = ignore
     let mutable internal newScreen: (unit -> IScreen) * ScreenType * ScreenTransitionFlag -> unit = ignore
     let mutable internal back: ScreenTransitionFlag -> unit = ignore
@@ -153,6 +153,7 @@ module Globals =
 
     let mutable internal addNotification: string * NotificationType -> unit = ignore
     let mutable internal addTooltip: Input.Bind * string * float * (unit -> unit) -> unit = ignore
+    let mutable internal watchReplay: Prelude.Scoring.ReplayData -> unit = ignore
 
     let parallaxX = AnimationFade 0.0f
     let parallaxY = AnimationFade 0.0f

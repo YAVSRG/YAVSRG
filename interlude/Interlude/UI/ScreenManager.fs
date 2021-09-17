@@ -114,6 +114,7 @@ type ScreenContainer() as this =
         Globals.back <- this.Back
         Globals.addDialog <- dialogs.Add
         Globals.setCursorVisible <- (fun b -> cursor <- b)
+        Globals.watchReplay <- (fun replayData -> this.ChangeScreen((fun () -> Screens.Play.Screen(Play.PlayScreenType.Replay replayData) :> IScreen), ScreenType.Play, ScreenTransitionFlag.Default))
         this.Add toolbar
         Globals.logo
         |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
