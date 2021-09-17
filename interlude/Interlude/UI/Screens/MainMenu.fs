@@ -56,11 +56,12 @@ type private MenuButton(onClick, label) as this =
     let color = AnimationFade 0.3f
     do
         this.Animation.Add color
-        this.Add (new Clickable(onClick, fun b -> color.Target <- if b then 0.3f else 0.3f))
+        this.Add (new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
         this.Add (new TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.7f, 10.0f, 0.0f, 0.0f, 1.0f, -20.0f, 1.0f))
 
     override this.Draw() =
-        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Globals.accentShade (200, 1.0f, color.Value))) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f (Rect.expand (5.0f, 5.0f) this.Bounds)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Style.main 80 ())) Sprite.DefaultQuad
         base.Draw()
 
     member this.Pop() =

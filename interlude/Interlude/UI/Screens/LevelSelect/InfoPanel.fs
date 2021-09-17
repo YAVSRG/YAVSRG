@@ -165,6 +165,10 @@ module private InfoPanel =
                 scoring <- scoreSystem
             flowContainer.Filter <- filterer()
 
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            this.HoverChild <- None
+
 open InfoPanel
 
 type InfoPanel() as this =

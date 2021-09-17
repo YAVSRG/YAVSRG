@@ -45,6 +45,7 @@
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Widget.fs" />
     <Compile Include="UI\Shared.fs" />
+    <Compile Include="UI\Style.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Components.fs" />
     <Compile Include="UI\MarkdownReader.fs" />
