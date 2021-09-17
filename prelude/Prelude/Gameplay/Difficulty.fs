@@ -125,6 +125,7 @@ module Layout =
 *)
 
 module Difficulty =
+
     open Layout
 
     let private jackCurve delta =
@@ -178,6 +179,7 @@ module Difficulty =
         let trill = Array2D.zeroCreate notes.Count keys
         let anchor = Array2D.zeroCreate notes.Count keys
         let physicalComposite = Array2D.zeroCreate notes.Count keys
+        let technicalComposite = Array2D.zeroCreate notes.Count keys
 
         let updateNoteDifficulty(column, index, offset: Time, otherColumns: Bitmap) =
             let s = otherColumns |> Bitmap.unsetBit column
@@ -192,6 +194,7 @@ module Difficulty =
                     let delta2 = (offset - fingers.[k]) / rate
                     trill.[index, column] <- trill.[index, column] + Math.Pow((streamCurve delta2) * (jackCompensation delta1 delta2), OHTNERF)
             physicalComposite.[index, column] <- Math.Pow(trill.[index,column] + jack.[index, column], 1.0 / OHTNERF)
+            technicalComposite.[index, column] <- Math.Pow(jack.[index, column], 1.0 / OHTNERF)
 
         let snapDifficulty (strain: float array) mask =
             //todo: optimise
@@ -211,7 +214,7 @@ module Difficulty =
                         let handHits = hits &&& getHandBitMask hand
                         for k in Bitmap.toSeq handHits do
                             updateNoteDifficulty(k, i, offset, getHandBitMask hand)
-                            currentStrain.[k] <- staminaFunc (currentStrain.[k]) (physicalComposite.[i,k] * SCALING_VALUE) ((offset - fingers.[k]) / rate)
+                            currentStrain.[k] <- staminaFunc (currentStrain.[k]) (physicalComposite.[i, k] * SCALING_VALUE) ((offset - fingers.[k]) / rate)
                         for k in Bitmap.toSeq handHits do
                             fingers.[k] <- offset
                         lastHandUse.[h] <- offset
@@ -228,6 +231,7 @@ module Difficulty =
         member this.TechnicalData = technicalData
 
         member this.PhysicalComposite = physicalComposite
+        member this.TechnicalComposite = technicalComposite
 
     let private confidenceValue (delta : Time) =
         let delta = float delta
@@ -254,23 +258,27 @@ module Difficulty =
         with _ -> Color.Red
 
     type PerformanceMetricState = Time array * float * float array * float * float array
-    let performanceMetric (rr: RatingReport) (keys: int) = ()
-        (*
-        ScoreMetric<PerformanceMetricState>(
-            "Interlude",
-            (Array.create keys 0.0f<ms>, 0.01, Array.zeroCreate keys, 0.01, Array.zeroCreate keys),
-            (fun (time, deltas, hit) i (lastTimes, p, ps, t, ts) _ ->
-                let mutable v = 0.0
-                let mutable c = 0.0
-                for k = 0 to (keys - 1) do
-                    if hit.[k] = HitStatus.Hit then
-                        ps.[k] <- performanceFunc (ps.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
-                        lastTimes.[k] <- time
-                        c <- c + 1.0
-                        v <- v + ps.[k]
-                let snapRating = if c = 0.0 then 0.0 else v / c
-                (lastTimes, p * Math.Exp(0.01 * Math.Max(0.0, Math.Log(snapRating / p))), ps, t, ts)
-            ),
-            (fun x y -> id),
-            fun (_, p, ps, t, ts) -> Math.Pow(p, 0.6) * 2.5)
-        *)
+    let getRatings (rr: RatingReport) (keys: int) (scoring: IScoreMetric) =
+        let lastTimes = Array.create keys 0.0f<ms>
+        let mutable pv = 0.01
+        let mutable tv = 0.01
+        let pvs = Array.zeroCreate keys
+        let tvs = Array.zeroCreate keys
+
+        for (i, (time, deltas, hit)) in Array.indexed scoring.HitData do
+            let mutable p = 0.0
+            let mutable t = 0.0
+            let mutable c = 0.0
+            for k = 0 to (keys - 1) do
+                if hit.[k] = HitStatus.HIT_ACCEPTED then
+                    pvs.[k] <- performanceFunc (pvs.[k]) (rr.PhysicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
+                    tvs.[k] <- performanceFunc (tvs.[k]) (rr.TechnicalComposite.[i, k]) (deltas.[k]) (time - lastTimes.[k])
+                    lastTimes.[k] <- time
+                    c <- c + 1.0
+                    p <- p + pvs.[k]
+                    t <- t + tvs.[k]
+            let p, t = if c = 0.0 then 0.0, 0.0 else p / c, t / c
+            pv <- pv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(p / pv)))
+            tv <- tv * Math.Exp(0.01 * Math.Max(0.0, Math.Log(t / tv)))
+        
+        (Math.Pow(pv, 0.6) * 2.5), (tv)

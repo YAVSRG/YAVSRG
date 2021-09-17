@@ -187,6 +187,8 @@ type IScoreMetric
     member this.MissWindow = rawMissWindow
     member this.ScaledMissWindow = missWindow
 
+    member this.HitData = hitData
+
     member this.SetHitCallback (func: HitEvent<HitEventGuts> -> unit) = hitCallback <- func
 
     member this.Finished = noteSeekPassive = hitData.Length
@@ -412,9 +414,8 @@ type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
             keys, replay, notes, rate
         )
 
-    // now finally ported to wife3
+    // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
     let wife_curve (delta: Time) =
-        // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
         let erf = 
             // was this really necessary
             let a1 =  0.254829592

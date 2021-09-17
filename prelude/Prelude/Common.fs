@@ -102,7 +102,7 @@ module Common =
 
         let inline roundf (dp: int) (setting: Setting<float32, 'Config>) =
             { setting with
-                Set = fun v -> setting.Set (float32 (Math.Round (float v, dp)))
+                Set = fun v -> setting.Set (MathF.Round (v, dp))
             }
 
         let alphaNum (setting: Setting<string, 'Config>) =

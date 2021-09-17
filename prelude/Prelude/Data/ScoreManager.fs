@@ -76,11 +76,16 @@ module ScoreManager =
         let mutable modstatus = ValueNone
         let mutable difficulty = ValueNone
         let mutable scoreMetric = ValueNone
-        let mutable perfMetric = ValueNone
+        let mutable replayData = ValueNone
+        let mutable perf = ValueNone
         let mutable lamp = ValueNone
 
         member this.ScoreInfo = score
         member this.Chart = chart
+
+        member this.ReplayData =
+            replayData <- ValueOption.defaultWith (fun () -> Replay.decompress score.replay) replayData |> ValueSome
+            replayData.Value
 
         member this.ModChart
             with get() =
@@ -92,7 +97,7 @@ module ScoreManager =
         member this.Scoring =
             scoreMetric <-
                 ValueOption.defaultWith (fun () -> 
-                    let m = Metrics.createScoreMetric accuracyType hpType this.ModChart.Keys (StoredReplayProvider(score.replay)) this.ModChart.Notes score.rate 
+                    let m = Metrics.createScoreMetric accuracyType hpType this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
                     m.Update(infinityf * 1.0f<ms>); m)
                     scoreMetric
                 |> ValueSome
@@ -107,18 +112,19 @@ module ScoreManager =
                 difficulty.Value
             and set(value) = difficulty <- ValueSome value
 
-        member this.Performance =
-            perfMetric <- ValueOption.defaultWith (fun () -> let m = performanceMetric this.Difficulty this.ModChart.Keys in (*m.ProcessAll this.HitData;*) m) perfMetric |> ValueSome
-            perfMetric.Value
-
         member this.Lamp =
             lamp <- ValueOption.defaultWith (fun () -> Prelude.Scoring.Lamp.calculate this.Scoring.State) lamp |> ValueSome
             lamp.Value
 
         // todo: grade info
 
-        member this.Physical = 0.0 // temp disabled
-        member this.Technical = 0.0 // nyi
+        member this.Physical =
+            perf <- ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf |> ValueSome
+            fst perf.Value
+        member this.Technical =
+            perf <- ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf |> ValueSome
+            snd perf.Value
+
         member this.Mods =
             modstring <-
                 ValueOption.defaultWith
