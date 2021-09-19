@@ -25,17 +25,22 @@ module private Collections =
                 n
         favourites, c
 
-    let private editCollection (setting: Setting<string * Collection>) =
-        let name =
-            setting.Value
-            |> fst
-            |> Setting.simple
+    let private editCollection ((originalName, data): string * Collection) =
+        let name = Setting.simple originalName |> Setting.alphaNum
         {
             Content = fun add ->
                 column [
                     PrettySetting("CollectionName", TextField name).Position(200.0f)
                 ] :> Selectable
-            Callback = fun () -> setting.Value <- (name.Value, snd setting.Value)
+            Callback = fun () ->
+                if name.Value <> originalName then
+                    Logging.Debug (sprintf "Renaming collection '%s' to '%s'" originalName name.Value)
+                    if (cache.GetCollection name.Value).IsSome then
+                        Logging.Debug "Rename failed, target collection already exists."
+                        name.Value <- originalName
+                    else
+                        cache.DeleteCollection originalName
+                cache.UpdateCollection (name.Value, data)
         }
 
     let page() =
@@ -44,22 +49,18 @@ module private Collections =
                 let setting =
                     Setting.make
                         ignore
-                        (fun () -> cache.GetCollections() |> Seq.map (fun n -> (n, cache.GetCollection(n).Value)) |> List.ofSeq)
+                        (fun () -> cache.GetCollections() |> Seq.map (fun n -> (n, cache.GetCollection(n).Value), fst selected = n))
                 column
                     [
                         PrettySetting("Collections",
                             CardSelect.Selector(
                                 setting,
-                                { 
+                                { CardSelect.Config.Default with
                                     NameFunc = fst
-                                    MarkFunc = (fun (x, _) -> colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
+                                    MarkFunc = (fun (x, m) -> if m then colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
                                     EditFunc = Some editCollection
-                                    CreateFunc = Some (fun () -> "New collection", Collection (ResizeArray<string>()))
-
-                                    CanReorder = false
-                                    CanDuplicate = false
-                                    CanDelete = true
-                                    CanMultiSelect = false
+                                    CreateFunc = Some (fun () -> cache.UpdateCollection ("New collection", (Collection (ResizeArray<string>()))))
+                                    DeleteFunc = Some (fun (name, _) -> if fst selected <> name then cache.DeleteCollection name)
                                 }, add)).Position(200.0f, 1200.0f, 600.0f)
                         TextBox(K <| Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", K (Color.White, Color.Black), 0.5f)
                         |> positionWidget(0.0f, 0.0f, -190.0f, 1.0f, 0.0f, 1.0f, -120.0f, 1.0f)

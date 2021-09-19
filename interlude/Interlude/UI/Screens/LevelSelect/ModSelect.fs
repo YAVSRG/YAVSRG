@@ -11,7 +11,7 @@ module private ModSelect =
     let page() =
         {
             Content = fun add ->
-                let select = FlowSelectable(75.0f, 5.0f, ignore)
+                let select = FlowSelectable(75.0f, 5.0f)
                 CardButton(
                     ModState.getModName "auto",
                     ModState.getModDesc "auto",

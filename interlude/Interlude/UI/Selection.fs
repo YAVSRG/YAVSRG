@@ -177,7 +177,7 @@ module Selection =
 
         override this.Clear() = base.Clear(); items.Clear()
 
-    type FlowSelectable(height, spacing, onDeselect) as this =
+    type FlowSelectable(height, spacing) as this =
         inherit Selectable()
 
         let mutable h = 0.0f
@@ -185,7 +185,6 @@ module Selection =
         let ls =
             { new ListSelectable(false) with
                 override _.SParent = this.SParent
-                override _.OnDeselect() = base.OnDeselect(); onDeselect()
                 override this.Up() = base.Up(); Option.iter fc.ScrollTo this.HoverChild
                 override this.Down() = base.Down(); Option.iter fc.ScrollTo this.HoverChild }
 
@@ -209,6 +208,8 @@ module Selection =
             ls.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f)
 
         override this.OnSelect() = base.OnSelect(); ls.Selected <- true
+
+        override this.Clear() = ls.Clear()
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
@@ -560,76 +561,127 @@ module Selection =
             let addIcon = "➕"
             let editIcon = "✎"
             let deleteIcon = "✕"
+
+            let private h = 75.0f
     
             type Config<'T> =
                 {
                     NameFunc: 'T -> string
-                    EditFunc: (Setting<'T> -> SelectionPage) option
-                    CreateFunc: (unit -> 'T) option
+                    CreateFunc: (unit -> unit) option
+                    DuplicateFunc: ('T -> unit) option
+                    EditFunc: ('T -> SelectionPage) option
+                    DeleteFunc: ('T -> unit) option
+                    ReorderFunc: ('T * bool -> unit) option
                     MarkFunc: 'T * bool -> unit
-    
-                    CanReorder: bool
-                    CanDuplicate: bool
-                    CanDelete: bool
-                    CanMultiSelect: bool
+
+                    mutable Refresh: unit -> unit
                 }
-    
-            type Card<'T>(item: 'T, config: Config<'T>, parent: Selector<'T>) as this =
+                static member Default : Config<'T> = 
+                    {
+                        NameFunc = fun o -> o.ToString()
+                        CreateFunc = None
+                        DuplicateFunc = None
+                        EditFunc = None
+                        DeleteFunc = None
+                        ReorderFunc = None
+                        MarkFunc = ignore
+
+                        Refresh = ignore
+                    }
+
+            type HeaderCard<'T>(config: Config<'T>, parent: NavigateSelectable) as this =
                 inherit NavigateSelectable()
                 let mutable buttons = []
                 let mutable index = -1
                 do
-                    let h = 90.0f
+                    let addButton (b: Widget) =
+                        let b = (b :?> Selectable)
+                        buttons <- b :: buttons
+                        this.Add b
+
+                    if Option.isSome config.CreateFunc then
+                        new LittleButton(K addIcon, fun () -> config.CreateFunc.Value (); config.Refresh())
+                        |> positionWidget(-h, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
+                        |> addButton
+                        this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f)
+                    else this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+
+                override this.SParent = Some (parent :> Selectable)
+    
+                override this.Up() = parent.Up()
+                override this.Down() = parent.Down()
+
+                override this.Left() =
+                    if index < 0 then index <- buttons.Length - 1
+                    else index <- index - 1
+                    if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
+
+                override this.Right() =
+                    if index = buttons.Length - 1 then index <- -1
+                    else index <- index + 1
+                    if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
+                
+                override this.Draw() =
+                    if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
+                    elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
+                    base.Draw()
+    
+            type Card<'T>(item: 'T, marked: bool, config: Config<'T>, add: string * SelectionPage -> unit, parent: NavigateSelectable) as this =
+                inherit NavigateSelectable()
+                let mutable buttons = []
+                let mutable index = -1
+                do
     
                     let addButton (b: Widget) =
                         let b = (b :?> Selectable)
                         buttons <- b :: buttons
                         this.Add b
     
-                    new TextBox((fun () -> config.NameFunc (this.Setting: Setting<'T>).Value), K (Color.White, Color.Black), 0.0f)
+                    new TextBox((fun () -> config.NameFunc item), K (Color.White, Color.Black), 0.0f)
                     |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
                     |> this.Add
     
                     let mutable x = -h
     
-                    new TextBox((fun () -> if parent.IsMarked this then markedIcon else unmarkedIcon), K (Color.White, Color.Black), 0.5f)
+                    new TextBox((fun () -> if marked then markedIcon else unmarkedIcon), K (Color.White, Color.Black), 0.5f)
                     |> positionWidget(x, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
                     |> this.Add
     
-                    if config.CanDelete then
+                    if Option.isSome config.DeleteFunc then
                         x <- x - h
-                        new LittleButton(K deleteIcon, fun () -> parent.Delete this)
+                        new LittleButton(K deleteIcon, fun () -> config.DeleteFunc.Value item; config.Refresh())
                         |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                         |> addButton
     
                     if Option.isSome config.EditFunc then
                         x <- x - h
-                        new LittleButton(K editIcon, fun () -> parent.Edit this)
+                        new LittleButton(
+                            K editIcon,
+                            fun () -> 
+                                let page = config.EditFunc.Value item
+                                add("EditItem", { page with Callback = fun () -> page.Callback(); config.Refresh() })
+                            )
                         |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                         |> addButton
     
-                    if config.CanDuplicate then
+                    if Option.isSome config.DuplicateFunc then
                         x <- x - h
-                        new LittleButton(K addIcon, fun () -> parent.Duplicate this)
+                        new LittleButton(K addIcon, fun () -> config.DuplicateFunc.Value item; config.Refresh())
                         |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                         |> addButton
     
-                    this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f) |> ignore
-                member val Setting = Setting.simple item
+                    this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f) |> ignore
+
                 override this.SParent = Some (parent :> Selectable)
     
-                override this.Up() = 
-                    if this.HoverChild = None && config.CanReorder then
-                        ()
-                    else parent.Up()
-                override this.Down() = 
-                    if this.HoverChild = None && config.CanReorder then
-                        ()
-                    else parent.Down()
+                override this.Up() = parent.Up()
+                override this.Down() = parent.Down()
+
                 override this.Left() =
                     if index < 0 then index <- buttons.Length - 1
                     else index <- index - 1
                     if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
+
                 override this.Right() =
                     if index = buttons.Length - 1 then index <- -1
                     else index <- index + 1
@@ -637,47 +689,36 @@ module Selection =
                 
                 override this.Update(elapsedTime, bounds) =
                     if this.Selected && this.HoverChild = None && options.Hotkeys.Select.Value.Tapped() then
-                        if parent.IsMarked this then parent.Unmark this else parent.Mark this
+                        if marked then config.MarkFunc (item, false) else config.MarkFunc (item, true)
+                        config.Refresh()
                     base.Update(elapsedTime, bounds)
     
                 override this.Draw() =
-                    if parent.IsMarked this then Draw.rect this.Bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+                    if marked then Draw.rect this.Bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
                     if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
                     elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                     base.Draw()
     
-            and Selector<'T>(source: Setting<'T list>, config: Config<'T>, add: string * SelectionPage -> unit) as this =
+            type Selector<'T>(source: Setting<('T * bool) seq>, config: Config<'T>, add: string * SelectionPage -> unit) as this =
                 inherit NavigateSelectable()
     
                 let fc = FlowContainer()
-                let items = source.Value |> List.map (fun x -> Card<'T>(x, config, this))
-                let mutable marked = if config.CanMultiSelect then List.empty else List.singleton items.Head
+
+                let refresh () =
+                    let index = match this.HoverChild with None -> 0 | Some x -> fc.Children.IndexOf x
+                    fc.Clear()
+
+                    fc.Add (HeaderCard(config, this))
+                    let items = source.Value |> Seq.map (fun (item, marked) -> Card<'T>(item, marked, config, add, this))
+                    items |> Seq.iter fc.Add
+
+                    let index = if index >= Seq.length items || index < 0 then 0 else index
+                    if this.Selected then this.HoverChild <- Some (fc.Children.[index] :?> Selectable)
+
                 do
                     this.Add fc
-                    items |> List.iter fc.Add
-    
-                member this.Edit(item: Card<'T>) = add("EditItem", config.EditFunc.Value item.Setting)
-    
-                member this.Create() =
-                    this.Synchronized(fun () -> this.Add(Card(config.CreateFunc.Value (), config, this)))
-    
-                member this.Duplicate(item: Card<'T>) =
-                    this.Synchronized(fun () -> this.Add(Card(item.Setting.Value, config, this)))
-    
-                member this.Delete(item: Card<'T>) =
-                    if not (this.IsMarked item) then
-                        if item.Selected then this.Down()
-                        item.Destroy()
-    
-                member this.Mark(item: Card<'T>) =
-                    if config.CanMultiSelect then
-                        marked <- if List.contains item marked then marked else item :: marked
-                    else marked <- List.singleton item
-                    config.MarkFunc (item.Setting.Value, true)
-                member this.Unmark(item: Card<'T>) =
-                    if config.CanMultiSelect then marked <- List.except [item] marked
-                    config.MarkFunc (item.Setting.Value, false)
-                member this.IsMarked(item: Card<'T>) = List.contains item marked
+                    config.Refresh <- fun () -> this.Synchronized refresh
+                    refresh()
     
                 override this.Up() =
                     match this.HoverChild with
@@ -695,11 +736,6 @@ module Selection =
                 override this.OnSelect() =
                     base.OnSelect()
                     this.HoverChild <- Some (fc.Children.[0] :?> Selectable)
-    
-                override this.OnDeselect() =
-                    base.OnDeselect()
-                    let xs = fc.Children |> Seq.map (fun w -> (w :?> Card<'T>).Setting.Value) |> List.ofSeq
-                    source.Value <- xs
 
     //todo: remove this and use new (above) system
     module WatcherSelect =

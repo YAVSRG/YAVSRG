@@ -129,7 +129,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         |> positionWidget(290.0f, 0.0f, -235.0f, 0.5f, 490.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
-        pbLabel (K "A") (fun () -> ScoreColor.gradeToColor gradeAchieved) (fun () -> accuracyPB)
+        pbLabel (K "A+") (fun () -> ScoreColor.gradeToColor gradeAchieved) (fun () -> accuracyPB)
         |> positionWidget(540.0f, 0.0f, -225.0f, 0.5f, 740.0f, 0.0f, 190.0f, 0.5f)
         |> this.Add
 
