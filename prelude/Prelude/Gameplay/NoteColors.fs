@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Gameplay
 
 open System
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 open Prelude.Gameplay.Mods
 open Prelude.Common
 

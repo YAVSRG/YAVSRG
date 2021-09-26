@@ -22,7 +22,6 @@ let main argv =
     Logging.Info "Welcome to the Prelude test track"
     Logging.Info "Press ENTER to begin.."
     Console.ReadLine() |> ignore
-    //Imports.main()
-    Metrics.main()
+    Imports.main()
     Console.ReadLine() |> ignore
     0

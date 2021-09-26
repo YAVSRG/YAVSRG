@@ -20,9 +20,9 @@ module Metrics =
 
         Logging.Info "Replay round trip was a success."
 
-        let metric = ScoreClassifier(4, false, VibeGauge(), chart.Keys, perfectPlayProvider, chart.Notes, 1.0f)
-
-        metric.Update(infinityf * 1.0f<ms>)
+        let metric = ScoreClassifierPlus(4, false, VibeGauge(), chart.Keys, perfectPlayProvider, chart.Notes, 1.0f)
+         
+        metric.Update Time.infinity
 
         printfn "%A" metric.State
         printfn "%s" <| metric.HP.Format()

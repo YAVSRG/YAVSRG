@@ -9,7 +9,7 @@ module SkinConversions =
     //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
     module osuSkin =
         open FParsec
-        open Prelude.Charts.osu
+        open Prelude.ChartFormats.``osu!``
 
         type RGB = int * int * int
         type RGBA = int * int * int * int

@@ -27,6 +27,8 @@ module Common =
     module Time =
         let Abs (t: Time) = if t < 0.0f<ms> then -t else t
 
+        let infinity = infinityf * 1.0f<ms>
+
 (*
     Settings - Store an (ideally immutably typed) value that can be get and set
     Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
@@ -220,13 +222,15 @@ module Common =
 
             member this.Name = name
             member this.Status = task.Status
+            member this.Visible = visible
+            member this.Info = info
+
+            member this.Wait() = Async.AwaitTask task |> Async.RunSynchronously
             member this.Cancel() =
                 try
                     cts.Cancel false
                     Logging.Debug(sprintf "Task <%s> cancelled" name)
                 with _ -> ()
-            member this.Visible = visible
-            member this.Info = info
 
         let private evt = new Event<ManagedTask>()
         let Subscribe f = evt.Publish.Add f

@@ -5,7 +5,6 @@ open System.ComponentModel
 open System.Net
 open System.Net.Http
 open System.Threading.Tasks
-open Percyqaz.Json
 open Prelude.Common
 
 let wClient() =

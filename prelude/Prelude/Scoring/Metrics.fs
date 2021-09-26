@@ -2,7 +2,7 @@
 
 open System
 open Prelude.Common
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 
 // user-facing flags of "judgements", how well you hit notes
 type JudgementType =

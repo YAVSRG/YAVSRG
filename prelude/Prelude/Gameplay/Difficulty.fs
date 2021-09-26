@@ -3,7 +3,7 @@
 open System
 open System.Drawing
 open Prelude.Common
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 
 (*

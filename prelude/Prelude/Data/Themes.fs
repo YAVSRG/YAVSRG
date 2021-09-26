@@ -4,7 +4,6 @@ open System
 open System.IO
 open System.IO.Compression
 open System.Drawing
-open Percyqaz.Json
 open Prelude.Common
 
 module Themes =
@@ -301,7 +300,7 @@ module Themes =
         //judgement counts
         //pacemaker
         
-    //texture names that are loaded from Noteskin folders instead of Theme folders
+    // Texture names that are loaded from Noteskin folders instead of Theme folders
     let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "mine"; "mineexplosion"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"|]
         
     type NoteSkinConfig =
@@ -352,10 +351,10 @@ module Themes =
                 | Zip (z, _) -> z.GetEntry(p.Replace(Path.DirectorySeparatorChar, '/')).Open() |> Some
                 | Folder f ->
                     let p = Path.Combine(f, p)
-                    File.OpenRead(p) :> Stream |> Some
+                    File.OpenRead p :> Stream |> Some
             with
-            | :? FileNotFoundException | :? DirectoryNotFoundException //file doesnt exist in folder storage
-            | :? NullReferenceException -> None //file doesnt exist in zip storage
+            | :? FileNotFoundException | :? DirectoryNotFoundException // File doesnt exist in folder storage
+            | :? NullReferenceException -> None // File doesnt exist in zip storage
             | _ -> reraise()
         
         member this.GetFiles ([<ParamArray>] path: string array) =
@@ -365,12 +364,12 @@ module Themes =
                 let p = p.Replace(Path.DirectorySeparatorChar, '/')
                 seq {
                     for e in z.Entries do
-                        if e.FullName = p + "/" + e.Name && Path.HasExtension(e.Name) then yield e.Name
+                        if e.FullName = p + "/" + e.Name && Path.HasExtension e.Name then yield e.Name
                 }
             | Folder f ->
                 let target = Path.Combine(f, p)
-                Directory.CreateDirectory(target) |> ignore
-                Directory.EnumerateFiles(target) |> Seq.map Path.GetFileName
+                Directory.CreateDirectory target |> ignore
+                Directory.EnumerateFiles target |> Seq.map Path.GetFileName
 
         member this.GetFolders ([<ParamArray>] path: string array) =
             let p = Path.Combine path
@@ -389,7 +388,7 @@ module Themes =
                 Directory.EnumerateDirectories target |> Seq.map Path.GetFileName
 
         member this.GetJson<'T> (createNew: bool, [<ParamArray>] path: string array) : 'T * bool =
-            let defaultValue() = (JSON.Default<'T>(), match storage with Folder f -> false | _ -> true)
+            let defaultValue() = JSON.Default<'T>(), match storage with Folder f -> false | _ -> true
             try
                 let mutable rewrite = createNew
                 let json, success =
@@ -415,7 +414,7 @@ module Themes =
 
         member this.WriteJson<'T> (data: 'T, [<ParamArray>] path: string array) =
             match storage with
-            | Zip _ -> () //cannot write data to zip archives
+            | Zip _ -> () // Cannot write data to zip archives
             | Folder f ->
                 let target = Path.Combine(f, Path.Combine path)
                 target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore

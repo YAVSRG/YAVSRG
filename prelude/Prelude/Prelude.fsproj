@@ -14,10 +14,10 @@
 
   <ItemGroup>
     <Compile Include="Common.fs" />
-    <Compile Include="Charts\Interlude.fs" />
-    <Compile Include="Charts\StepMania.fs" />
-    <Compile Include="Charts\osu!.fs" />
-    <Compile Include="Charts\ChartConversions.fs" />
+    <Compile Include="ChartFormats\Interlude.fs" />
+    <Compile Include="ChartFormats\StepMania.fs" />
+    <Compile Include="ChartFormats\osu!.fs" />
+    <Compile Include="ChartFormats\Conversions.fs" />
     <Compile Include="Editor\Editor.fs" />
     <Compile Include="Scoring\Replays.fs" />
     <Compile Include="Scoring\Metrics.fs" />
@@ -27,10 +27,9 @@
     <Compile Include="Gameplay\Difficulty.fs" />
     <Compile Include="Data\Themes.fs" />
     <Compile Include="Data\SkinConversions.fs" />
-    <Compile Include="Data\ChartManager.fs" />
-    <Compile Include="Data\ScoreManager.fs" />
+    <Compile Include="Data\Charts.fs" />
+    <Compile Include="Data\Scores.fs" />
     <Compile Include="Data\Web.fs" />
-    <Compile Include="Score.fs" />
   </ItemGroup>
 
   <ItemGroup>

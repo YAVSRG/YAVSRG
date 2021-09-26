@@ -3,7 +3,7 @@
 open System
 open System.Collections.Generic
 open Prelude.Common
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 open Prelude.Editor.Filter
 
 module Mods = 
@@ -85,14 +85,14 @@ module Mods =
     registerMod "mirror"
         { defaultMod with
             Status = ModStatus.Ranked
-            Apply = fun _ mc -> { mc with Notes = mirror (-infinityf * 1.0f<ms>) (infinityf * 1.0f<ms>) mc.Keys mc.Notes }
+            Apply = fun _ mc -> { mc with Notes = mirror -Time.infinity Time.infinity mc.Keys mc.Notes }
         }
 
     registerMod "nosv"
         { defaultMod with
-            Status = ModStatus.Unstored //temporary cause its bugged af
+            Status = ModStatus.Unranked
             Check = fun _ mc -> not <| mc.SV.IsEmpty()
-            Apply = fun _ mc -> mc.SV.Clear(); mc
+            Apply = fun _ mc -> { mc with SV = new MultiTimeData<float32>(mc.Keys) }
         }
 
     //todo: no ln (removes all lns)

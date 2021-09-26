@@ -1,7 +1,7 @@
 ﻿namespace Prelude.Editor
 
 open System
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 
 module Filter =
 
@@ -34,9 +34,15 @@ module Filter =
     
     let applyMappingBetween mapping time1 time2 (notes: TimeData<NoteRow>) =
         notes.MapBetween time1 time2
-            (fun (_, nr) ->
-                [|applyBitmapping mapping nr.[0]; applyBitmapping mapping nr.[1]; applyBitmapping mapping nr.[2]; applyBitmapping mapping nr.[3]; applyBitmapping mapping nr.[4];
-                    nr.[5]; nr.[6]|])
+            ( fun (_, nr) ->
+                let nr = NoteRow.clone nr
+                NoteRow.apply NoteType.NORMAL (applyBitmapping mapping) nr
+                NoteRow.apply NoteType.HOLDHEAD (applyBitmapping mapping) nr
+                NoteRow.apply NoteType.HOLDBODY (applyBitmapping mapping) nr
+                NoteRow.apply NoteType.HOLDTAIL (applyBitmapping mapping) nr
+                NoteRow.apply NoteType.MINE (applyBitmapping mapping) nr
+                nr
+            )
         notes
     
     //todo: design a proper arrangement for filters on charts

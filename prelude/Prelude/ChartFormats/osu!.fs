@@ -1,4 +1,4 @@
-﻿namespace Prelude.Charts
+﻿namespace Prelude.ChartFormats
 
 open FParsec
 open Prelude.Common
@@ -13,7 +13,7 @@ open Prelude.Common
     Parsing of storyboard shorthand notation
 *)
 
-module osu =
+module ``osu!`` =
 
     (*
         Basic .osu file representation
@@ -186,7 +186,7 @@ module osu =
     let private parseName = many1Satisfy isLetterOrDigit
     let private parseQuote =
         between (pchar '"') (pchar '"') (manySatisfy (fun c -> c <> '"')) <|> (many1Satisfy (Text.IsWhitespace >> not))
-    let private comment = (anyOf "-/#=" >>% "") >>. restOfLine true
+    let private comment = (anyOf "-/#=" >>% "") >>. restOfLine true .>> spaces
 
     let private parseKeyValue = parseName .>> spaces .>> colon .>> manyChars (anyOf " \t") .>>. (restOfLine true) .>> spaces
     let private parseHeaderTitle name = pstring ("[" + name + "]") .>> (restOfLine true) .>> spaces >>% name
@@ -589,7 +589,7 @@ module osu =
         ]
 
     let parseBeatmap =
-        tuple4 (pstring "osu file format v" >>. restOfLine true .>> spaces)
+        tuple4 (spaces >>. pstring "osu file format v" >>. restOfLine true .>> spaces)
             (parseHeader "General" .>> spaces)  //General
             (parseHeader "Editor" .>> spaces)  //Editor
             (parseHeader "Metadata" .>> spaces)  //Metadata
