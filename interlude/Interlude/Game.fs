@@ -38,7 +38,7 @@ type Game(config: GameConfig) as this =
             base.WindowState <- WindowState.Maximized
         | WindowType.FULLSCREEN ->
             base.WindowState <- WindowState.Fullscreen
-        | _ -> Logging.Error("Invalid window state. How did we get here?")
+        | _ -> Logging.Error "Invalid window state. How did we get here?"
 
     override this.OnResize e =
         base.OnResize e
@@ -46,7 +46,7 @@ type Game(config: GameConfig) as this =
         FBO.init()
 
     override this.OnFileDrop e =
-        e.FileNames |> Array.iter Screens.ImportMenu.FileDropHandling.import
+        e.FileNames |> Array.iter Screens.Import.FileDropHandling.import
 
     override this.OnRenderFrame e =
         base.OnRenderFrame e

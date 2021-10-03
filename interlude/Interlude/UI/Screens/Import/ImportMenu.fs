@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.ImportMenu
+﻿namespace Interlude.UI.Screens.Import
 
 open System
 open System.IO
@@ -21,9 +21,12 @@ open Interlude.UI.Screens.LevelSelect
 
 module FileDropHandling =
     let import(path: string) =
-        BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
-            (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
-        |> ignore
+        match Mounts.dropFunc with
+        | Some f -> f path
+        | None ->
+            BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
+                (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
+            |> ignore
 
 [<Json.AllRequired>]
 type EOPackAttrs = {
@@ -165,7 +168,7 @@ module private Beatmap =
             | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
             | Criterion ("k", n)
             | Criterion ("key", n)
-            | Criterion ("keys", n) -> match Int32.TryParse(n) with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
+            | Criterion ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
             | Criterion ("m", m)
             | Criterion ("c", m)
             | Criterion ("creator", m)
@@ -219,33 +222,24 @@ type Screen() as this =
         new TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
         |> positionWidget(600.0f, 0.0f, -90.0f, 1.0f, -100.0f, 1.0f, -30.0f, 1.0f)
         |> this.Add
+
         (*
             Offline importers from other games
         *)
-        //todo: implement mounting system to replace this
-        let mutable importingOsu = false
-        let mutable importingSM = false
-        let mutable importingEtterna = false
 
-        new Button(
-            (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Library.Imports.convertPackFolder Library.Imports.osuSongFolder { ConversionActionConfig.Default with PackName = "osu!"; CopyMediaFiles = false }) |> ignore)),
-            "osu!", Bind.DummyBind, Sprite.Default)
-        |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f)
+        MountControl(Mounts.Types.Osu, Options.options.OsuMount)
+        |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 360.0f, 0.0f, 260.0f, 0.0f)
         |> this.Add
 
-        new Button(
-            (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Library.Imports.autoConvert Library.Imports.smPackFolder) |> ignore)),
-            "Stepmania 5", Bind.DummyBind, Sprite.Default)
-        |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f)
+        MountControl(Mounts.Types.Stepmania, Options.options.StepmaniaMount)
+        |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 360.0f, 0.0f, 330.0f, 0.0f)
         |> this.Add
 
-        new Button(
-            (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Library.Imports.autoConvert Library.Imports.etternaPackFolder) |> ignore)),
-            "Etterna", Bind.DummyBind, Sprite.Default)
-        |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f)
+        MountControl(Mounts.Types.Etterna, Options.options.EtternaMount)
+        |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 360.0f, 0.0f, 400.0f, 0.0f)
         |> this.Add
 
-        new TextBox(K "Directly import", K (Color.White, Color.Black), 0.5f )
+        new TextBox(K "Import from game", K (Color.White, Color.Black), 0.5f )
         |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f)
         |> this.Add
 

@@ -94,7 +94,7 @@ type ScreenContainer() as this =
     let screens = [|
         current;
         new MainMenu() :> IScreen;
-        new ImportMenu.Screen() :> IScreen;
+        new Import.Screen() :> IScreen;
         new LevelSelect.Screen() :> IScreen;
         |]
     let mutable exit = false

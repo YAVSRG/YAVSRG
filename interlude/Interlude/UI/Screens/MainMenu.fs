@@ -96,7 +96,9 @@ type MainMenu() as this =
         this.Add(quit |> positionWidget (-100.0f, 0.0f, 100.0f, 0.5f, 1060.0f, 0.0f, 200.0f, 0.5f))
         this.Animation.Add splashAnim
         this.Animation.Add splashSubAnim
+
         Utils.AutoUpdate.checkForUpdates()
+        Import.Mounts.handleStartupImports()
 
     override this.OnEnter prev =
         if Utils.AutoUpdate.updateAvailable then Globals.addNotification (Localisation.localise "notification.UpdateAvailable", NotificationType.System)
