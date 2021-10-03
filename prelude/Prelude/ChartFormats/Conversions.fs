@@ -279,7 +279,7 @@ module Conversions =
             let columnToX k = (float k + 0.5) * 512.0 / float keys |> round
             let rec ln_lookahead k snaps =
                 match snaps with
-                | (offset, nr) :: ss -> if NoteRow.hasNote k NoteType.HOLDTAIL nr then offset else ln_lookahead k ss
+                | (offset: Time, nr: NoteRow) :: ss -> if nr.[k] = NoteType.HOLDTAIL then offset else ln_lookahead k ss
                 | [] -> failwith "hold note has no end"
 
             let rec convert snaps = seq {
@@ -409,18 +409,24 @@ module Conversions =
         | _ -> None
 
     let (|SongFolder|_|) (path: string) =
-        Directory.EnumerateFiles path
-        |> Seq.tryPick (fun x -> match x with ChartFile s -> Some s | _ -> None)
+        if Directory.Exists path then
+            Directory.EnumerateFiles path
+            |> Seq.tryPick (fun x -> match x with ChartFile s -> Some s | _ -> None)
+        else None
     
     let (|PackFolder|_|) (path: string) =
-        Directory.EnumerateDirectories path
-        |> Seq.forall (fun x -> match x with SongFolder _ -> false | _ -> true)
-        |> fun b -> if b then None else Some ()
+        if Directory.Exists path then
+            Directory.EnumerateDirectories path
+            |> Seq.forall (fun x -> match x with SongFolder _ -> false | _ -> true)
+            |> fun b -> if b then None else Some ()
+        else None
 
     let (|FolderOfPacks|_|) (path: string) =
-        Directory.EnumerateDirectories path
-        |> Seq.forall (fun x -> match x with PackFolder -> false | _ -> true)
-        |> fun b -> if b then None else Some ()
+        if Directory.Exists path then
+            Directory.EnumerateDirectories path
+            |> Seq.forall (fun x -> match x with PackFolder -> false | _ -> true)
+            |> fun b -> if b then None else Some ()
+        else None
 
     let loadAndConvertFile (action: ConversionAction) : Chart list =
         match Path.GetExtension(action.Source).ToLower() with

@@ -43,12 +43,12 @@ let downloadFile (url: string, target: string) : StatusTask =
             let completed =
                 new AsyncCompletedEventHandler(fun cs ce ->
                     if ce.UserState = (tcs :> obj) then
-                        if ce.Error <> null then tcs.TrySetException(ce.Error) |> ignore
+                        if ce.Error <> null then tcs.TrySetException ce.Error |> ignore
                         elif ce.Cancelled then tcs.TrySetCanceled() |> ignore
                         else tcs.TrySetResult () |> ignore)
-            let prog = new DownloadProgressChangedEventHandler(fun _ e -> output(sprintf "Downloading.. %sMB/%sMB (%i%%)" "" "" e.ProgressPercentage))
+            let prog = new DownloadProgressChangedEventHandler(fun _ e -> output(sprintf "Downloading.. %iMB/%iMB (%i%%)" (e.BytesReceived / 1000000L) (e.TotalBytesToReceive / 1000000L) e.ProgressPercentage))
 
-            output("Waiting for download...")
+            output "Waiting for download..."
             use w = wClient()
             w.DownloadFileCompleted.AddHandler completed
             w.DownloadProgressChanged.AddHandler prog

@@ -41,13 +41,13 @@ module InternalScore =
 
             for k = 0 to (keys - 1) do
                 // todo: match NoteRow.[k] with ...
-                if NoteRow.hasNote k NoteType.NORMAL nr then
+                if nr.[k] = NoteType.NORMAL then
                     statuses.[k] <- HitStatus.HIT_REQUIRED
-                elif NoteRow.hasNote k NoteType.HOLDHEAD nr then
+                elif nr.[k] = NoteType.HOLDHEAD then
                     statuses.[k] <- HitStatus.HIT_HOLD_REQUIRED
-                elif NoteRow.hasNote k NoteType.HOLDTAIL nr then
+                elif nr.[k] = NoteType.HOLDTAIL then
                     statuses.[k] <- HitStatus.RELEASE_REQUIRED
-                elif NoteRow.hasNote k NoteType.MINE nr then
+                elif nr.[k] = NoteType.MINE then
                     statuses.[k] <- HitStatus.DODGE
 
             struct (time, times, statuses)
@@ -63,11 +63,11 @@ module InternalScore =
             let statuses = Array.create keys HitStatus.NOTHING 
             for k = 0 to (keys - 1) do
                 // todo: match NoteRow.[k] with ...
-                if NoteRow.hasNote k NoteType.NORMAL nr || NoteRow.hasNote k NoteType.HOLDHEAD nr then
+                if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                     statuses.[k] <- HitStatus.HIT_ACCEPTED
-                elif NoteRow.hasNote k NoteType.HOLDTAIL nr then
+                elif nr.[k] = NoteType.HOLDTAIL then
                     statuses.[k] <- HitStatus.RELEASE_ACCEPTED
-                elif NoteRow.hasNote k NoteType.MINE nr then
+                elif nr.[k] = NoteType.MINE then
                     statuses.[k] <- HitStatus.DODGE
 
             struct (time, times, statuses)
@@ -123,12 +123,12 @@ module Replay =
                 let delay = timeUntilNext i
                 let mutable hit = held
                 for k = 0 to (keys - 1) do
-                    if NoteRow.hasNote k NoteType.NORMAL nr then
+                    if nr.[k] = NoteType.NORMAL then
                         hit <- Bitmap.setBit k hit
-                    elif NoteRow.hasNote k NoteType.HOLDHEAD nr then
+                    elif nr.[k] = NoteType.HOLDHEAD then
                         hit <- Bitmap.setBit k hit
                         held <- Bitmap.setBit k held
-                    elif NoteRow.hasNote k NoteType.HOLDTAIL nr then
+                    elif nr.[k] =  NoteType.HOLDTAIL then
                         hit <- Bitmap.unsetBit k hit
                         held <- Bitmap.unsetBit k held
                 yield struct (time, hit)

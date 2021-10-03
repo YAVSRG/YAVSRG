@@ -79,8 +79,6 @@ module Interlude =
 
         let noteData (nt: NoteType) (row: NoteRow) = Array.indexed row |> Array.filter (fun (i, x) -> x = nt) |> Array.map fst |> Seq.ofArray |> Bitmap.create
 
-        let hasNote k (nt: NoteType) (row: NoteRow) = row.[k] = nt 
-
         let apply (nt: NoteType) f (row: NoteRow) = (noteData nt row |> f |> setNoteData nt row)
 
         let read (keycount: int) (br: BinaryReader) : NoteRow =

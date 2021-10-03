@@ -187,7 +187,6 @@ module Library =
 
     let save() =
         JSON.ToFile(Path.Combine(getDataPath "Data", "cache.json"), true) (charts, collections)
-        Logging.Debug "Cache saved."
     
     let addOrUpdate (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c
 
@@ -203,14 +202,17 @@ module Library =
 
     module Collections =
         
-        /// Returns None only in thread-unsafe case when two threads both make a new collection
-        let create (data: Collection) : string option =
+        let getNewName () =
             let mutable name = "New Collection"
             let mutable n = 0
             while collections.ContainsKey name do
                 n <- n + 1
                 name <- "New Collection " + n.ToString()
-            if collections.TryAdd(name, data) then Some name else None
+            name
+
+        /// Returns false only in thread-unsafe case when two threads both make a new collection with same name
+        let create (name: string, data: Collection) : bool =
+            collections.TryAdd(name, data)
 
         let rename (id: string, newId: string) : bool =
             if collections.ContainsKey newId then false else
@@ -263,12 +265,12 @@ module Library =
                             | ".yav" ->
                                 match Chart.fromFile file with
                                 | Some c ->
-                                    output("Caching " + file)
+                                    output ("Caching " + file)
                                     addOrUpdate c
                                 | None -> ()
                             | _ -> ()
                 save()
-                output("Saved cache.")
+                output "Saved cache."
                 return true
             }
 
@@ -285,7 +287,7 @@ module Library =
     module Imports =
     
         let osuSongFolder = Path.Combine (Environment.GetFolderPath Environment.SpecialFolder.LocalApplicationData, "osu!", "Songs")
-        let smPackFolder = Path.Combine (Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
+        let stepmaniaPackFolder = Path.Combine (Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
         let etternaPackFolder = Path.Combine (Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
 
         type MountedChartSourceType =
@@ -296,11 +298,12 @@ module Library =
                 SourceFolder: string
                 mutable LastImported: DateTime
                 Type: MountedChartSourceType
+                ImportOnStartup: bool
             }
             static member Pack (name: string, path: string) =
-                { SourceFolder = path; LastImported = DateTime.UnixEpoch; Type = Pack name }
+                { SourceFolder = path; LastImported = DateTime.UnixEpoch; Type = Pack name; ImportOnStartup = false }
             static member Library (path: string) =
-                { SourceFolder = path; LastImported = DateTime.UnixEpoch; Type = Library }
+                { SourceFolder = path; LastImported = DateTime.UnixEpoch; Type = Library; ImportOnStartup = false }
 
         let convertSongFolder (path: string) (config: ConversionActionConfig) : StatusTask =
             fun output ->
@@ -342,6 +345,7 @@ module Library =
                     | Library ->
                         do! 
                             Directory.EnumerateDirectories source.SourceFolder
+                            |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= source.LastImported)
                             |> Seq.map (fun packFolder -> convertPackFolder packFolder { ConversionActionConfig.Default with CopyMediaFiles = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder } output)
                             |> fun s -> Async.Parallel(s, 5)
                             |> Async.Ignore
