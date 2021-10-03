@@ -13,14 +13,15 @@ module Imports =
     let main() =
 
         //mount.LastImported <- DateTime.Today.AddDays(-1.0)
-        Logging.Subscribe (fun (level, message, details) -> if details <> "" then printfn "%s" details)
 
+        Reporter.func <- Reports.minor
         Logging.Info "Converting osu! songs ..."
-        let t = BackgroundTask.Create TaskFlags.HIDDEN "Convert osu! songs" (Library.Imports.importMountedSource mount)
+        let t = BackgroundTask.Create TaskFlags.NONE "Convert osu! songs" (Library.Imports.importMountedSource mount)
         t.Wait()
         Library.save()
         Logging.Info "Conversion complete!"
-
+        
+        Reporter.func <- Reports.major
         Logging.Info "Checking osu! imports for defects ..."
         for id in Library.charts.Keys do
             match Chart.fromFile id with

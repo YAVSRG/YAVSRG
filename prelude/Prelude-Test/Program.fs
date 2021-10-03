@@ -20,8 +20,10 @@ open Prelude.Test
 let main argv =
     Console.BufferHeight <- 32766
     Logging.Info "Welcome to the Prelude test track"
-    Logging.Info "Press ENTER to begin.."
-    Console.ReadLine() |> ignore
+
     Imports.main()
-    Console.ReadLine() |> ignore
+
+    Logging.Info "Test track complete, showing reports ..."
+
+    Reports.display true
     0

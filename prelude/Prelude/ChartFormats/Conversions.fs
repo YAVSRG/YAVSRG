@@ -1,6 +1,7 @@
 namespace Prelude.ChartFormats
 
 open System
+open System.Text.RegularExpressions
 open System.IO
 open System.Collections.Generic
 open System.Linq
@@ -241,6 +242,17 @@ module Conversions =
                             if (filename.Contains "bg" || filename.Contains "background") then Some <| Path.GetFileName s else None)
                     |> function Some s -> s | None -> ""
                 else guess
+
+            let findAuthor () : string =
+                let folderName = Path.GetFileName path
+                let paren = folderName.LastIndexOf('(')
+                if paren > 1 then
+                    let guess = folderName.Substring (paren + 1)
+                    if guess.EndsWith(')') then guess.TrimEnd ')' else ""
+                else
+                    let paren = folderName.LastIndexOf('[')
+                    let guess = folderName.Substring (paren + 1)
+                    if guess.EndsWith(']') then guess.TrimEnd ']' else ""
         
             let convert_difficulty (i: int) (diff: ChartData) : Chart = 
                 let keys = keyCount diff.STEPSTYPE
@@ -248,7 +260,7 @@ module Conversions =
                     ChartHeader.Default with
                         Title = metadataFallback [sm.TITLETRANSLIT; sm.TITLE]
                         Artist = metadataFallback [sm.ARTISTTRANSLIT; sm.ARTIST]
-                        Creator = metadataFallback [sm.CREDIT; diff.CREDIT]
+                        Creator = metadataFallback [findAuthor(); sm.CREDIT; diff.CREDIT]
                         SourcePack = "Singles"
                         DiffName = metadataFallback [sm.SUBTITLETRANSLIT; sm.SUBTITLE;
                             diff.CHARTNAME; diff.DESCRIPTION; diff.CHARTSTYLE; diff.STEPSTYPE.ToString() + " " + diff.METER.ToString()]

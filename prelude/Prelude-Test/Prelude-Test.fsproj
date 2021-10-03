@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Utils.fs" />
     <Compile Include="Tests\Generic.fs" />
     <Compile Include="Tests\Imports.fs" />
     <Compile Include="Tests\Metrics.fs" />
