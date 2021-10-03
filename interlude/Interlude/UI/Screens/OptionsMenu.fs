@@ -5,6 +5,7 @@ open Prelude.Gameplay.NoteColors
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
 open Prelude.Common
+open Prelude.Data.Charts
 open Interlude
 open Interlude.Graphics
 open Interlude.Options
@@ -306,7 +307,7 @@ module OptionsMenu =
         {
             Content = fun add ->
                 column [
-                    PrettyButton("RebuildCache", fun () -> BackgroundTask.Create TaskFlags.LONGRUNNING "Rebuilding Cache" Gameplay.cache.RebuildCache |> ignore).Position(200.0f)
+                    PrettyButton("RebuildCache", fun () -> BackgroundTask.Create TaskFlags.LONGRUNNING "Rebuilding Cache" Library.rebuildTask |> ignore).Position(200.0f)
                     PrettyButton("DownloadUpdate",
                         fun () ->
                             if Interlude.Utils.AutoUpdate.updateAvailable then
@@ -328,28 +329,3 @@ module OptionsMenu =
                 ] :> Selectable
             Callback = fun () -> LevelSelect.refresh <- true
         }
-
-    let quickplay() : SelectionPage =
-        {
-            Content = fun add ->
-                let firstNote = Gameplay.currentChart.Value.Notes.First |> Option.map Prelude.Charts.Interlude.offsetOf |> Option.defaultValue 0.0f<ms>
-                let offset = Gameplay.chartSaveData.Value.Offset
-                column [
-                    PrettySetting("SongAudioOffset",
-                        Slider(
-                            Setting.make
-                                (fun v -> Gameplay.chartSaveData.Value.Offset <- toTime v + firstNote; Audio.localOffset <- toTime v)
-                                (fun () -> float (Gameplay.chartSaveData.Value.Offset - firstNote))
-                            |> Setting.bound -200.0 200.0
-                            |> Setting.round 0, 0.01f)
-                    ).Position(200.0f)
-                    PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed, 0.005f)).Position(280.0f)
-                    PrettySetting("HitPosition", Slider(options.HitPosition, 0.005f)).Position(360.0f)
-                    PrettySetting("Upscroll", Selector.FromBool options.Upscroll).Position(440.0f)
-                    //PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
-                    //PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
-                    //PrettyButton("LifeSystems", ignore).Position(640.0f)
-                ] :> Selectable
-            Callback = ignore
-        }
-

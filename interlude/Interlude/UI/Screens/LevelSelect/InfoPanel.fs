@@ -4,7 +4,7 @@ open System
 open System.Drawing
 open Prelude.Common
 open Prelude.Data.ScoreManager
-open Prelude.Data.ChartManager
+open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty

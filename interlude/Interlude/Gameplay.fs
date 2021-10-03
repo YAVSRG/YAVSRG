@@ -3,12 +3,13 @@
 open System
 open System.Collections.Generic
 open Prelude.Common
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 open Prelude.Gameplay.Mods
 open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.NoteColors
-open Prelude.Data.ChartManager
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Caching
 open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.UI
@@ -27,7 +28,6 @@ module Gameplay =
     let mutable selectedMods = Map.empty
     let mutable autoplay = false
     let scores = ScoresDB()
-    let cache = Cache()
 
     let mutable onChartUpdate = ignore
     let mutable onChartChange = ignore
@@ -52,7 +52,7 @@ module Gameplay =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData chart
-        Globals.loadBackground chart.BGPath
+        Globals.loadBackground chart.BackgroundPath
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset - offsetOf chart.Notes.First.Value
         Audio.changeTrack (chart.AudioPath, localOffset, rate)
         Audio.playFrom chart.Header.PreviewTime
@@ -107,26 +107,25 @@ module Gameplay =
 
     let save() =
         scores.Save()
-        cache.Save()
+        Library.save()
 
     let init() =
         try
             let c, ch =
-                match cache.LookupChart(Options.options.CurrentChart.Value) with
+                match Library.lookup Options.options.CurrentChart.Value with
                 | Some cc ->
-                    match cache.LoadChart cc with
+                    match Library.load cc with
                     | Some c -> cc, c
                     | None ->
                         Logging.Error("Could not load chart file: " + cc.FilePath)
-                        cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) []
-
+                        Library.getGroups (K "All") (Comparison(fun _ _ -> 0)) []
                         |> fun d -> d.["All"].[0]
-                        |> fun c -> c, cache.LoadChart(c).Value
+                        |> fun c -> c, Library.load(c).Value
                 | None ->
                     Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Value)
-                    cache.GetGroups(K "All") (Comparison(fun _ _ -> 0)) []
+                    Library.getGroups(K "All") (Comparison(fun _ _ -> 0)) []
                     |> fun d -> d.["All"].[0]
-                    |> fun c -> c, cache.LoadChart(c).Value
+                    |> fun c -> c, Library.load(c).Value
             changeChart(c, ch)
         with err ->
             Logging.Debug("Tried to auto select a chart but none exist", err)

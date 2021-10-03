@@ -11,7 +11,7 @@ module QuickOptions =
     let page() : SelectionPage =
         {
             Content = fun add ->
-                let firstNote = Gameplay.currentChart.Value.Notes.First |> Option.map Prelude.Charts.Interlude.offsetOf |> Option.defaultValue 0.0f<ms>
+                let firstNote = Gameplay.currentChart.Value.Notes.First |> Option.map Prelude.ChartFormats.Interlude.offsetOf |> Option.defaultValue 0.0f<ms>
                 let offset = Gameplay.chartSaveData.Value.Offset
                 column [
                     PrettySetting("SongAudioOffset",
@@ -29,7 +29,7 @@ module QuickOptions =
                     //PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
                     //PrettyButton("LifeSystems", ignore).Position(640.0f)
                 ] :> Selectable
-            Callback = ignore
+            Callback = Audio.playLeadIn
         }
 
     let show() =

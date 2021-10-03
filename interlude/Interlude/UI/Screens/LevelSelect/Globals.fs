@@ -2,7 +2,8 @@
 
 open System.Drawing
 open Prelude.Common
-open Prelude.Data.ChartManager
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Interlude.UI
 open Interlude.Gameplay
@@ -55,7 +56,7 @@ module private Globals =
     let mutable navigation = Navigation.Nothing
     
     let switchCurrentChart(cc, groupName) =
-        match cache.LoadChart cc with
+        match Library.load cc with
         | Some c ->
             changeChart(cc, c)
             selectedChart <- cc.FilePath

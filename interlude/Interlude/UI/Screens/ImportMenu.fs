@@ -7,8 +7,9 @@ open System.Net
 open System.Net.Security
 open Percyqaz.Json
 open Prelude.Common
-open Prelude.Data.ChartManager
-open Prelude.Data.ChartManager.Sorting
+open Prelude.ChartFormats.Conversions
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Sorting
 open Prelude.Web
 open Interlude
 open Interlude.Utils
@@ -20,8 +21,8 @@ open Interlude.UI.Screens.LevelSelect
 
 module FileDropHandling =
     let import(path: string) =
-        BackgroundTask.Create(TaskFlags.NONE)("Import " + Path.GetFileName(path))
-            (Gameplay.cache.AutoConvert(path) |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
+        BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
+            (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
         |> ignore
 
 [<Json.AllRequired>]
@@ -69,8 +70,8 @@ type private SMImportCard(data: EOPackAttrs) as this =
             (BackgroundTask.Chain
                 [
                     downloadFile(data.download, target)
-                    (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
+                    (Library.Imports.autoConvert target
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
@@ -104,8 +105,8 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             (BackgroundTask.Chain
                 [
                     downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
-                    (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete(target)))
+                    (Library.Imports.autoConvert target
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
@@ -192,8 +193,8 @@ type Screen() as this =
             Online downloaders
         *)
 
-        // EtternaOnline's certificate expired on 18th March 2021
-        // This hack trusts EO's SSL certificate even though it has expired
+        // EtternaOnline's certificate keeps expiring!! Rop get on it
+        // This hack force-trusts EO's SSL certificate even though it has expired (this was for 18th march 2021, there's a new working certificate currently)
         ServicePointManager.ServerCertificateValidationCallback <-
             RemoteCertificateValidationCallback(
                 fun _ cert _ sslPolicyErrors ->
@@ -221,25 +222,25 @@ type Screen() as this =
         (*
             Offline importers from other games
         *)
-        //todo: system that only imports folders modified after a certain date - that date being last import time
+        //todo: implement mounting system to replace this
         let mutable importingOsu = false
         let mutable importingSM = false
         let mutable importingEtterna = false
 
         new Button(
-            (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Gameplay.cache.ConvertPackFolder osuSongFolder "osu!") |> ignore)),
+            (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Library.Imports.convertPackFolder Library.Imports.osuSongFolder { ConversionActionConfig.Default with PackName = "osu!"; CopyMediaFiles = false }) |> ignore)),
             "osu!", Bind.DummyBind, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f)
         |> this.Add
 
         new Button(
-            (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Gameplay.cache.AutoConvert smPackFolder) |> ignore)),
+            (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Library.Imports.autoConvert Library.Imports.smPackFolder) |> ignore)),
             "Stepmania 5", Bind.DummyBind, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f)
         |> this.Add
 
         new Button(
-            (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Gameplay.cache.AutoConvert etternaPackFolder) |> ignore)),
+            (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Library.Imports.autoConvert Library.Imports.etternaPackFolder) |> ignore)),
             "Etterna", Bind.DummyBind, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f)
         |> this.Add

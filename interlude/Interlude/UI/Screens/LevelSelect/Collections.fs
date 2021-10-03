@@ -2,7 +2,8 @@
 
 open System.Drawing
 open Prelude.Common
-open Prelude.Data.ChartManager
+open Prelude.Data.Charts.Library
+open Prelude.Data.Charts.Collections
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
@@ -17,11 +18,11 @@ module private Collections =
         //todo: load from settings
         let favourites = Localisation.localise "collections.Favourites"
         let c = 
-            match cache.GetCollection favourites with
+            match Collections.get favourites with
             | Some c -> c
             | None ->
                 let n = Collection.Blank
-                cache.UpdateCollection (favourites, n)
+                Collections.create (favourites, n) |> ignore
                 n
         favourites, c
 
@@ -35,12 +36,12 @@ module private Collections =
             Callback = fun () ->
                 if name.Value <> originalName then
                     Logging.Debug (sprintf "Renaming collection '%s' to '%s'" originalName name.Value)
-                    if (cache.GetCollection name.Value).IsSome then
+                    if (Collections.get name.Value).IsSome then
                         Logging.Debug "Rename failed, target collection already exists."
                         name.Value <- originalName
                     else
-                        cache.DeleteCollection originalName
-                cache.UpdateCollection (name.Value, data)
+                        Collections.rename (originalName, name.Value) |> ignore
+                Collections.update (name.Value, data)
         }
 
     let page() =
@@ -49,7 +50,7 @@ module private Collections =
                 let setting =
                     Setting.make
                         ignore
-                        (fun () -> cache.GetCollections() |> Seq.map (fun n -> (n, cache.GetCollection(n).Value), fst selected = n))
+                        (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), fst selected = n))
                 column
                     [
                         PrettySetting("Collections",
@@ -59,8 +60,8 @@ module private Collections =
                                     NameFunc = fst
                                     MarkFunc = (fun (x, m) -> if m then colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
                                     EditFunc = Some editCollection
-                                    CreateFunc = Some (fun () -> cache.UpdateCollection ("New collection", (Collection (ResizeArray<string>()))))
-                                    DeleteFunc = Some (fun (name, _) -> if fst selected <> name then cache.DeleteCollection name)
+                                    CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
+                                    DeleteFunc = Some (fun (name, _) -> if fst selected <> name then Collections.delete name |> ignore)
                                 }, add)).Position(200.0f, 1200.0f, 600.0f)
                         TextBox(K <| Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", K (Color.White, Color.Black), 0.5f)
                         |> positionWidget(0.0f, 0.0f, -190.0f, 1.0f, 0.0f, 1.0f, -120.0f, 1.0f)

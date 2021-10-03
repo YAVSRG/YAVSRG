@@ -5,6 +5,7 @@ open System.Drawing
 open OpenTK
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
+open Prelude.Data.Charts.Sorting
 open Interlude
 open Interlude.Input
 open Interlude.Utils
@@ -238,7 +239,7 @@ module Components =
         override this.Dispose() =
             if active then Input.removeInputMethod()
 
-    type SearchBox(s: Setting<string>, callback: Prelude.Data.ChartManager.Sorting.Filter -> unit) as this =
+    type SearchBox(s: Setting<string>, callback: Filter -> unit) as this =
         inherit Widget()
         //todo: this seems excessive. replace with two variables?
         let searchTimer = new System.Diagnostics.Stopwatch()
@@ -248,7 +249,7 @@ module Components =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback(Prelude.Data.ChartManager.Sorting.parseFilter s.Value)
+            if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback(Filter.parse s.Value)
 
     type TextInputDialog(bounds: Rect, prompt, callback) as this =
         inherit Dialog()

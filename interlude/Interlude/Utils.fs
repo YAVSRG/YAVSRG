@@ -13,7 +13,11 @@ module Utils =
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
         let v2 = Assembly.GetExecutingAssembly().Location |> FileVersionInfo.GetVersionInfo
+        #if DEBUG
+        sprintf "%s %s (%s DEV BUILD)" v.Name smallVersion v2.ProductVersion
+        #else
         sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
+        #endif
 
     let K x _ = x
 

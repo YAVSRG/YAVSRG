@@ -7,8 +7,10 @@ open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Prelude.Data.ScoreManager
-open Prelude.Data.ChartManager
-open Prelude.Data.ChartManager.Sorting
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Sorting
+open Prelude.Data.Charts.Caching
+open Prelude.Data.Charts.Collections
 open Prelude.Scoring
 open Interlude
 open Interlude.UI
@@ -144,7 +146,7 @@ type private LevelSelectChartItem(groupName, cc) =
             elif options.Hotkeys.Delete.Value.Tapped() then
                 Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [cc.Title] "misc.Delete", 2000.0,
                     fun () ->
-                        cache.DeleteChart cc
+                        Library.delete cc
                         LevelSelect.refresh <- true
                         Globals.addNotification(Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
         else hover.Target <- 0.0f
@@ -182,7 +184,7 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
             elif options.Hotkeys.Delete.Value.Tapped() then
                 Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                     fun () ->
-                        items |> Seq.map (fun i -> i.Chart) |> cache.DeleteCharts
+                        items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                         LevelSelect.refresh <- true
                         Globals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
@@ -212,14 +214,14 @@ type Screen() as this =
         infoPanel.Refresh()
         let groups =
             if options.ChartGroupMode.Value <> "Collections" then
-                cache.GetGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
-            else cache.GetCollectionGroups sortBy.[options.ChartSortMode.Value] filter
+                Library.getGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+            else Library.getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
                 let cc = groups.[g].[0]
                 if cc.FilePath <> selectedChart then
-                    match cache.LoadChart(cc) with
+                    match Library.load cc with
                     | Some c -> changeChart(cc, c)
                     | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
         lastItem <- None
