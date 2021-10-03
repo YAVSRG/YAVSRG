@@ -105,9 +105,9 @@ type NoteRenderer(scoring: IScoreMetric) as this =
             hold_pos.[k] <- hitposition
             hold_presence.[k] <-
                 if note_seek > 0 then
-                    let (_, struct (nd, c)) = notes.Data.[note_seek - 1] in
+                    let (_, struct (nr, c)) = notes.Data.[note_seek - 1] in
                     hold_colors.[k] <- int c.[k]
-                    (NoteRow.hasNote k NoteType.HOLDHEAD nd || NoteRow.hasNote k NoteType.HOLDBODY nd)
+                    (nr.[k] = NoteType.HOLDHEAD || nr.[k] = NoteType.HOLDBODY)
                 else false
             Draw.quad // receptor
                 (Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight) |> scrollDirectionPos bottom |> Quad.ofRect |> noteRotation k)
@@ -135,16 +135,16 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                 column_pos.[k] <- column_pos.[k] + scale * sv_value.[0] * (t - sv_time.[k])
                 sv_time.[k] <- t
                 min <- Math.Min(column_pos.[k], min)
-                if NoteRow.hasNote k NoteType.NORMAL nd then
+                if nd.[k] = NoteType.NORMAL then
                     Draw.quad // normal note
                         (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
                         (Quad.colorOf Color.White)
                         (Sprite.gridUV (animation.Loops, int color.[k]) (Themes.getTexture "note"))
-                elif NoteRow.hasNote k NoteType.HOLDHEAD nd then
+                elif nd.[k] = NoteType.HOLDHEAD then
                     hold_pos.[k] <- column_pos.[k]
                     hold_colors.[k] <- int color.[k]
                     hold_presence.[k] <- true
-                elif NoteRow.hasNote k NoteType.HOLDTAIL nd then
+                elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
@@ -162,7 +162,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                         (Quad.colorOf Color.White)
                         (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Themes.getTexture "holdhead"))
                     hold_presence.[k] <- false
-                elif NoteRow.hasNote k NoteType.MINE nd then
+                elif nd.[k] = NoteType.MINE then
                     Draw.quad // mine
                         (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom))
                         (Quad.colorOf Color.White)

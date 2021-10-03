@@ -22,13 +22,14 @@ module MarkdownReader =
         r.ReadToEnd()
         |> Markdown.Parse
 
-    type WBuilder = {
-        body: Widget
-        lastLineHeight: float32
-        height: float32
-        width: float32
-        right: float32
-    }
+    type WBuilder = 
+        {
+            body: Widget
+            lastLineHeight: float32
+            height: float32
+            width: float32
+            right: float32
+        }
     module WBuilder =
         let add (x: WBuilder) (child: WBuilder) =
             let cheight = child.height + child.lastLineHeight
@@ -74,13 +75,13 @@ module MarkdownReader =
                 else let widest = xs |> List.maxBy (fun i -> i.width) in widest.width
             List.fold add (frame width) xs
 
-    type SpanSettings = {
-        Size: float32
-        Bold: bool
-        Italic: bool
-        HasLink: bool
-    }
-    with
+    type SpanSettings =
+        {
+            Size: float32
+            Bold: bool
+            Italic: bool
+            HasLink: bool
+        }
         static member Default = { Size = SIZE; Bold = false; Italic = false; HasLink = false }
 
     let openlink (str: string) =
