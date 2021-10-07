@@ -16,7 +16,7 @@ open Interlude.Gameplay
 open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
 open Interlude.UI.Screens.LevelSelect.Globals
 
 module private InfoPanel =
@@ -59,7 +59,7 @@ module private InfoPanel =
             |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
             |> this.Add
 
-            Clickable((fun () -> Globals.newScreen((fun () -> new Screens.Score.Screen(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> IScreen), ScreenType.Score, ScreenTransitionFlag.Default)), ignore)
+            Clickable((fun () -> Screen.changeNew (fun () -> new Screens.Score.Screen(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen.T) Screen.Type.Score Screen.TransitionFlag.Default), ignore)
             |> this.Add
 
             this.Animation.Add fade
@@ -69,7 +69,7 @@ module private InfoPanel =
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
         override this.Draw() =
-            Draw.rect this.Bounds (Globals.accentShade(int (127.0f * fade.Value), 0.8f, 0.0f)) Sprite.Default
+            Draw.rect this.Bounds (Style.accentShade(int (127.0f * fade.Value), 0.8f, 0.0f)) Sprite.Default
             base.Draw()
         member this.Data = data
 
@@ -77,11 +77,11 @@ module private InfoPanel =
             base.Update(elapsedTime, bounds)
             if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
                 let name = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
+                Tooltip.add (options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                     fun () ->
                         chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Globals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                        Notifications.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
     type Scoreboard() as this =
         inherit Selectable()

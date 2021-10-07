@@ -7,7 +7,6 @@ open System.Net
 open System.Net.Security
 open Percyqaz.Json
 open Prelude.Common
-open Prelude.ChartFormats.Conversions
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Web
@@ -64,17 +63,17 @@ type BeatmapSearch = {
 } with static member Default = { result_count = -1; beatmaps = null }
 
 type private SMImportCard(data: EOPackAttrs) as this =
-    inherit Frame((fun () -> Globals.accentShade(120, 1.0f, 0.0f)), (fun () -> Globals.accentShade(200, 1.0f, 0.2f)))
+    inherit Frame((fun () -> Style.accentShade(120, 1.0f, 0.0f)), (fun () -> Style.accentShade(200, 1.0f, 0.2f)))
     let mutable downloaded = false //todo: maybe check if pack is already installed?
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
+        Notifications.add (Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
             (BackgroundTask.Chain
                 [
                     downloadFile(data.download, target)
                     (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete target))
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notifications.add (Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
@@ -103,13 +102,13 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let mutable downloaded = false
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
-        Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
+        Notifications.add (Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
                 [
                     downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
                     (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete target))
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notifications.add (Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
@@ -190,7 +189,7 @@ module private Beatmap =
             downloadJson(s, callback)
 
 type Screen() as this =
-    inherit IScreen()
+    inherit Screen.T()
     do
         (*
             Online downloaders

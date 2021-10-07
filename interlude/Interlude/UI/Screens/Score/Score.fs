@@ -11,13 +11,16 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Gameplay
 
+module WatchReplay =
+    let mutable func : ReplayData -> unit = ignore
+
 module ScoreColor =
     let lampToColor (lampAchieved: Lamp) = Themes.themeConfig.LampColors.[lampAchieved |> int]
     let gradeToColor (gradeAchieved: int) = Themes.themeConfig.GradeColors.[gradeAchieved]
     let clearToColor (cleared: bool) = if cleared then Color.FromArgb(255, 127, 255, 180) else Color.FromArgb(255, 255, 160, 140)
 
 type Screen(scoreData: ScoreInfoProvider, pbs) as this =
-    inherit IScreen()
+    inherit Screen.T()
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
     let mutable gradeAchieved = Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State
@@ -77,9 +80,6 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         accuracyPB <- PersonalBestType.None
         clearPB <- PersonalBestType.None
         graph.Refresh()
-
-    let watchReplay() =
-        Globals.watchReplay <| scoreData.ReplayData
 
     let pbLabel text colorFunc pb =
         { new TextBox(text, (fun () -> colorFunc(), Color.Black), 0.5f) with
@@ -151,7 +151,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         new Button(ignore, "Graph settings", Input.Bind.DummyBind, Sprite.Default)
         |> positionWidget(-420.0f, 1.0f, -70.0f, 1.0f, -220.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
-        new Button(watchReplay, "Watch replay", Input.Bind.DummyBind, Sprite.Default)
+        new Button((fun () -> WatchReplay.func scoreData.ReplayData), "Watch replay", Input.Bind.DummyBind, Sprite.Default)
         |> positionWidget(-220.0f, 1.0f, -70.0f, 1.0f, -20.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
 
@@ -161,12 +161,12 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         let halfh = (bottom + top) * 0.5f
 
         //top banner
-        Draw.rect (Rect.create left (top + 15.0f) right (top + 20.0f)) (Globals.accentShade(255, 0.6f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (top + 30.0f) right (top + 180.0f)) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (top + 190.0f) right (top + 195.0f)) (Globals.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 15.0f) right (top + 20.0f)) (Style.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 30.0f) right (top + 180.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 190.0f) right (top + 195.0f)) (Style.accentShade(255, 0.6f, 0.0f)) Sprite.Default
 
         //accuracy info
-        Draw.rect (Rect.create (left + 15.0f) (halfh - 255.0f) (left + 765f) (halfh + 205.0f)) (Globals.accentShade(50, 1.0f, 0.6f)) Sprite.Default
+        Draw.rect (Rect.create (left + 15.0f) (halfh - 255.0f) (left + 765f) (halfh + 205.0f)) (Style.accentShade(50, 1.0f, 0.6f)) Sprite.Default
         Draw.rect (Rect.create (left + 20.0f) (halfh - 250.0f) (left + 760f) (halfh + 200.0f)) (Color.FromArgb(160, 0, 0, 0)) Sprite.Default
 
         let judgements = scoreData.Scoring.State.Judgements
@@ -192,13 +192,13 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         // combo, combo breaks
 
         //graph stuff
-        Draw.rect (Rect.create (left + 15.0f) (bottom - 275.0f) (right - 15.0f) (bottom - 15.0f)) (Globals.accentShade(50, 1.0f, 0.6f)) Sprite.Default
-        Draw.rect (Rect.create (left + 20.0f) (bottom - 70.0f) (right - 20.0f) (bottom - 20.0f)) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create (left + 15.0f) (bottom - 275.0f) (right - 15.0f) (bottom - 15.0f)) (Style.accentShade(50, 1.0f, 0.6f)) Sprite.Default
+        Draw.rect (Rect.create (left + 20.0f) (bottom - 70.0f) (right - 20.0f) (bottom - 20.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
 
         base.Draw()
 
     override this.OnEnter prev =
-        Globals.setToolbarCollapsed true
+        Screen.toolbar <- true
 
     override this.OnExit next =
-        Globals.setToolbarCollapsed false
+        Screen.toolbar <- false

@@ -1,9 +1,10 @@
-﻿namespace Interlude.UI
+﻿namespace Interlude.UI.Components
 
 open System.Drawing
 open System.Diagnostics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Interlude
+open Interlude.UI
 open Interlude.Utils
 open Interlude.Input
 open Interlude.Graphics
@@ -151,7 +152,7 @@ module MarkdownReader =
 
         let fc = FlowContainer()
         let frame =
-            let f = Frame((fun () -> Globals.accentShade(200, 0.7f, 0.0f)), (fun () -> Globals.accentShade(255, 1.0f, 0.3f)))
+            let f = Frame((fun () -> Style.accentShade(200, 0.7f, 0.0f)), (fun () -> Style.accentShade(255, 1.0f, 0.3f)))
             doc |> buildDocWidget |> fc.Add
             fc |> f.Add
             f
@@ -169,4 +170,4 @@ module MarkdownReader =
                 frame.Move(-WIDTH * 0.5f, Render.vheight, WIDTH * 0.5f, Render.vheight - 200.0f)
         override this.OnClose() = ()
 
-    let help() = Globals.addDialog (MarkdownViewDialog doc)
+    let help() = Dialog.add (MarkdownViewDialog doc)

@@ -10,7 +10,7 @@ open Interlude
 open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI.Components
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
 open Interlude.UI.Screens.LevelSelect
 
 (*
@@ -74,7 +74,7 @@ module OptionsMenu =
                             //todo: move this to utils
                             let target = System.Diagnostics.ProcessStartInfo("file://" + System.IO.Path.GetFullPath(getDataPath("Themes")), UseShellExecute = true)
                             System.Diagnostics.Process.Start target |> ignore).Position(800.0f)
-                    PrettyButton("NewTheme", fun () -> Globals.addDialog <| TextInputDialog(Render.bounds, "Enter theme name", Themes.createNew)).Position(900.0f)
+                    PrettyButton("NewTheme", fun () -> Dialog.add <| TextInputDialog(Render.bounds, "Enter theme name", Themes.createNew)).Position(900.0f)
                 ] :> Selectable
             Callback = refresh
         }
@@ -311,7 +311,7 @@ module OptionsMenu =
                     PrettyButton("DownloadUpdate",
                         fun () ->
                             if Interlude.Utils.AutoUpdate.updateAvailable then
-                                Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Globals.addNotification(Localisation.localise "notification.UpdateInstalled", NotificationType.System))
+                                Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Notifications.add (Localisation.localise "notification.UpdateInstalled", NotificationType.System))
                     ).Position(300.0f)
                 ] :> Selectable
             Callback = ignore

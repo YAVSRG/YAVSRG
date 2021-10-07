@@ -52,7 +52,7 @@ module Gameplay =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
         chartSaveData <- Some <| scores.GetOrCreateScoreData chart
-        Globals.loadBackground chart.BackgroundPath
+        Screen.Background.load chart.BackgroundPath
         let localOffset = if chart.Notes.Empty then 0.0f<ms> else chartSaveData.Value.Offset - offsetOf chart.Notes.First.Value
         Audio.changeTrack (chart.AudioPath, localOffset, rate)
         Audio.playFrom chart.Header.PreviewTime
@@ -129,4 +129,4 @@ module Gameplay =
             changeChart(c, ch)
         with err ->
             Logging.Debug("Tried to auto select a chart but none exist", err)
-            Globals.loadBackground ""
+            Screen.Background.load ""

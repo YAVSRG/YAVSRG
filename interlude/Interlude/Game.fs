@@ -14,7 +14,7 @@ open Interlude.UI
 type Game(config: GameConfig) as this =
     inherit GameWindow(GameWindowSettings.Default, NativeWindowSettings(StartVisible = false, NumberOfSamples = 24, Profile = ContextProfile.Compatability))
 
-    let screens = new ScreenContainer()
+    let screens = Startup.init()
 
     do
         Options.applyOptions <- fun () -> this.ApplyConfig config
@@ -61,7 +61,7 @@ type Game(config: GameConfig) as this =
         if Render.rheight > 0 then screens.Update(e.Time * 1000.0, Render.bounds)
         Input.absorbAll()
         Audio.update()
-        if screens.Exit then base.Close()
+        if Screen.exit then base.Close()
 
     override this.ProcessEvents() =
         base.ProcessEvents()

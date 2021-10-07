@@ -7,7 +7,7 @@ open Prelude.Data.Charts.Collections
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
 open Interlude.Gameplay
 open Interlude.Options
 open Globals
@@ -77,7 +77,7 @@ type CollectionManager() =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if options.Hotkeys.Collections.Value.Tapped() then
-            Globals.addDialog <| SelectionMenu(Collections.page())
+            Dialog.add <| SelectionMenu(Collections.page())
         if currentCachedChart.IsSome then
             if options.Hotkeys.AddToCollection.Value.Tapped() then
                 if
@@ -87,7 +87,7 @@ type CollectionManager() =
                     | Goals gs -> false //gs.Add ((selectedChart, selectedMods, rate), Goal.NoGoal); true
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Globals.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", NotificationType.Info)
+                    Notifications.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", NotificationType.Info)
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
                 if
                     match snd Collections.selected with
@@ -96,4 +96,4 @@ type CollectionManager() =
                     | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Globals.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", NotificationType.Info)
+                    Notifications.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", NotificationType.Info)

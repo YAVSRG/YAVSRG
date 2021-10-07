@@ -2,7 +2,7 @@
 
 open Prelude.Gameplay.Mods
 open Interlude.UI
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
 open Interlude.Gameplay
 open Interlude.Options
 
@@ -37,7 +37,6 @@ type ModSelect() =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if options.Hotkeys.Mods.Value.Tapped() then
-            Globals.addDialog <| SelectionMenu(ModSelect.page())
+        if options.Hotkeys.Mods.Value.Tapped() then SelectionMenu(ModSelect.page()).Show()
         elif options.Hotkeys.Autoplay.Value.Tapped() then
             autoplay <- not autoplay

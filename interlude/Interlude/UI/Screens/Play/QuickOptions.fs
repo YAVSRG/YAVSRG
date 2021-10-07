@@ -4,7 +4,7 @@ open Prelude.Common
 open Interlude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
 
 module QuickOptions =
 
@@ -32,6 +32,4 @@ module QuickOptions =
             Callback = Audio.playLeadIn
         }
 
-    let show() =
-        { new SelectionMenu(page()) with override this.OnClose() = base.OnClose(); Audio.playLeadIn() }
-        |> Globals.addDialog
+    let show() = { new SelectionMenu(page()) with override this.OnClose() = base.OnClose(); Audio.playLeadIn() }.Show()

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI
+﻿namespace Interlude.UI.Components
 
 open System
 open System.Drawing
@@ -10,6 +10,7 @@ open Interlude.Utils
 open Interlude.Graphics
 open Interlude.Input
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
 
@@ -146,12 +147,12 @@ module Selection =
 
         member this.Previous() =
             match this.HoverChild with
-            | None -> Logging.Debug("No hoverchild for this ListSelectable, there should always be one")
+            | None -> Logging.Debug "No hoverchild for this ListSelectable, there should always be one"
             | Some w -> let i = (items.IndexOf w - 1 + items.Count) % items.Count in this.HoverChild <- Some items.[i]
 
         member this.Next() =
             match this.HoverChild with
-            | None -> Logging.Debug("No hoverchild for this ListSelectable, there should always be one")
+            | None -> Logging.Debug "No hoverchild for this ListSelectable, there should always be one"
             | Some w -> let i = (items.IndexOf w + 1) % items.Count in this.HoverChild <- Some items.[i]
 
         override this.Add(c) =
@@ -227,7 +228,7 @@ module Selection =
     type BigButton(label, icon, onClick) as this =
         inherit Selectable()
         do
-            this.Add(Frame((fun () -> Globals.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
+            this.Add(Frame((fun () -> Style.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
             this.Add(TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 0.8f))
             this.Add(TextBox(K ([|"❖";"✎";"♛";"⌨";"⚒"|].[icon]), K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 1.0f, 0.0f, 0.7f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
@@ -240,7 +241,7 @@ module Selection =
         inherit Selectable()
         do
             this.Add(Frame(Color.FromArgb(80, 255, 255, 255), ()))
-            this.Add(TextBox(label, (fun () -> ((if this.Hover then Globals.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
+            this.Add(TextBox(label, (fun () -> ((if this.Hover then Style.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
             this.Add(Clickable((fun () -> this.Selected <- true), fun b -> if b then this.Hover <- true))
         override this.OnSelect() =
             this.Selected <- false
@@ -271,7 +272,7 @@ module Selection =
                 (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
             |> this.Add
 
-        new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Globals.accentShade(255, 1.0f, 0.0f))
+        new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Style.accentShade(255, 1.0f, 0.0f))
 
         override this.Draw() =
             let hi = colorFunc()
@@ -363,8 +364,8 @@ module Selection =
             let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
             let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
             let m = (b + t) * 0.5f
-            Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Globals.accentShade(255, 1.0f, 0.0f)) Sprite.Default
-            Draw.rect cursor (Globals.accentShade(255, 1.0f, color.Value)) Sprite.Default
+            Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
+            Draw.rect cursor (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
             base.Draw()
 
     type TextField(setting: Setting<string>) as this =
@@ -372,7 +373,7 @@ module Selection =
         let color = AnimationFade 0.5f
         do
             this.Animation.Add color
-            this.Add(new TextBox(setting.Get, (fun () -> Globals.accentShade(int (color.Value * 255.0f), 1.0f, color.Value), Color.Black), 0.0f))
+            this.Add(new TextBox(setting.Get, (fun () -> Style.accentShade(int (color.Value * 255.0f), 1.0f, color.Value), Color.Black), 0.0f))
             this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
         override this.OnSelect() =
@@ -394,8 +395,8 @@ module Selection =
 
         override this.Draw() =
             base.Draw()
-            if this.Selected then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Globals.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f)) Sprite.Default
             Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
 
         override this.Left() = bk()
@@ -406,13 +407,13 @@ module Selection =
     type KeyBinder(setting: Setting<Bind>, allowModifiers) as this =
         inherit Selectable()
         do
-            this.Add(new TextBox((fun () -> setting.Value.ToString()), (fun () -> (if this.Selected then Globals.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
+            this.Add(new TextBox((fun () -> setting.Value.ToString()), (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
             this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
         override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Globals.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f)) Sprite.Default
+            elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
             base.Draw()
 
         override this.Update(elapsedTime, bounds) =
@@ -439,9 +440,9 @@ module Selection =
                 this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f)
 
             override this.Draw() =
-                if this.Selected then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.4f)) Sprite.Default
-                elif this.Hover then Draw.rect this.Bounds (Globals.accentShade(180, 1.0f, 0.1f)) Sprite.Default
-                else Draw.rect this.Bounds (Globals.accentShade(180, 0.6f, 0.0f)) Sprite.Default
+                if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.4f)) Sprite.Default
+                elif this.Hover then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.1f)) Sprite.Default
+                else Draw.rect this.Bounds (Style.accentShade(180, 0.6f, 0.0f)) Sprite.Default
                 base.Draw()
 
             override this.SParent = Some (selector :> Selectable)
@@ -694,7 +695,7 @@ module Selection =
                     base.Update(elapsedTime, bounds)
     
                 override this.Draw() =
-                    if marked then Draw.rect this.Bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+                    if marked then Draw.rect this.Bounds (Style.accentShade(80, 1.0f, 0.0f)) Sprite.Default
                     if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
                     elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                     base.Draw()
@@ -768,7 +769,7 @@ module Selection =
             override this.SParent = Some (selector :> Selectable)
 
             override this.Draw() =
-                if selector.Main = this then Draw.rect this.Bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+                if selector.Main = this then Draw.rect this.Bounds (Style.accentShade(80, 1.0f, 0.0f)) Sprite.Default
                 if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
                 elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
                 base.Draw()
@@ -872,7 +873,7 @@ module Selection =
             |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
             |> this.Add
 
-            TextBox(K (localiseOption name + ":"), (fun () -> ((if this.Selected then Globals.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+            TextBox(K (localiseOption name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
             |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
             |> this.Add
 
@@ -904,7 +905,7 @@ module Selection =
     type PrettyButton(name, action) as this =
         inherit Selectable()
         do
-            TextBox(K (localiseOption name + "  >"), (fun () -> ((if this.Hover then Globals.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f) |> this.Add
+            TextBox(K (localiseOption name + "  >"), (fun () -> ((if this.Hover then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f) |> this.Add
             Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
             TooltipRegion(localiseTooltip name) |> this.Add
         override this.OnSelect() = action(); this.Selected <- false

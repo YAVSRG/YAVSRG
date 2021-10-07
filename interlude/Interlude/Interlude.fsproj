@@ -44,12 +44,15 @@
     <Compile Include="Options.fs" />
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Widget.fs" />
-    <Compile Include="UI\Shared.fs" />
     <Compile Include="UI\Style.fs" />
+    <Compile Include="UI\Notifications.fs" />
+    <Compile Include="UI\Dialogs.fs" />
+    <Compile Include="UI\Components\Components.fs" />
+    <Compile Include="UI\Components\Selection.fs" />
+    <Compile Include="UI\Components\Logo.fs" />
+    <Compile Include="UI\Screen.fs" />
     <Compile Include="Gameplay.fs" />
-    <Compile Include="UI\Components.fs" />
-    <Compile Include="UI\MarkdownReader.fs" />
-    <Compile Include="UI\Selection.fs" />
+    <Compile Include="UI\Components\MarkdownReader.fs" />
     <Compile Include="UI\Screens\Score\Graph.fs" />
     <Compile Include="UI\Screens\Score\Score.fs" />
     <Compile Include="UI\Screens\Play\QuickOptions.fs" />
@@ -66,7 +69,7 @@
     <Compile Include="UI\Screens\OptionsMenu.fs" />
     <Compile Include="UI\Screens\MainMenu.fs" />
     <Compile Include="UI\Toolbar.fs" />
-    <Compile Include="UI\ScreenManager.fs" />
+    <Compile Include="UI\Startup.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>

@@ -78,8 +78,8 @@ type private LevelSelectChartItem(groupName, cc) =
 
     override this.OnDraw(bounds, selected) =
         let struct (left, top, right, bottom) = bounds
-        let accent = Globals.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
-        Draw.rect bounds (Globals.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+        let accent = Style.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
+        Draw.rect bounds (Style.accentShade(80, 1.0f, 0.0f)) Sprite.Default
         let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
         Draw.quad
             (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
@@ -103,7 +103,7 @@ type private LevelSelectChartItem(groupName, cc) =
         f lamp (fun x -> x.ToString()) ScoreColor.lampToColor 300.0f
         f clear (fun x -> if x then "CLEAR" else "FAILED") ScoreColor.clearToColor 150.0f
 
-        Draw.rect(Rect.sliceBottom 25.0f bounds) (Globals.accentShade(70, 0.3f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.sliceBottom 25.0f bounds) (Style.accentShade(70, 0.3f, 0.0f)) Sprite.Default
         Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
         Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
         Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
@@ -111,7 +111,7 @@ type private LevelSelectChartItem(groupName, cc) =
 
         let border = Rect.expand(5.0f, 5.0f) bounds
         let border2 = Rect.expand(5.0f, 0.0f) bounds
-        let borderColor = if selected then Globals.accentShade(180, 1.0f, 0.5f) else color
+        let borderColor = if selected then Style.accentShade(180, 1.0f, 0.5f) else color
         if borderColor.A > 0uy then
             Draw.rect(Rect.sliceLeft 5.0f border2) borderColor Sprite.Default
             Draw.rect(Rect.sliceTop 5.0f border) borderColor Sprite.Default
@@ -144,11 +144,11 @@ type private LevelSelectChartItem(groupName, cc) =
                 expandedGroup <- ""
                 scrollTo <- ScrollToPack groupName
             elif options.Hotkeys.Delete.Value.Tapped() then
-                Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [cc.Title] "misc.Delete", 2000.0,
+                Tooltip.add (options.Hotkeys.Delete.Value, Localisation.localiseWith [cc.Title] "misc.Delete", 2000.0,
                     fun () ->
                         Library.delete cc
                         LevelSelect.refresh <- true
-                        Globals.addNotification(Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
+                        Notifications.add (Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
         else hover.Target <- 0.0f
         hover.Update(elapsedTime) |> ignore
     override this.Update(top, topEdge, elapsedTime) =
@@ -167,7 +167,7 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
     override this.Navigate() = ()
 
     override this.OnDraw(bounds, selected) =
-        Draw.rect bounds (if selected then Globals.accentShade(127, 1.0f, 0.2f) else Globals.accentShade(127, 0.5f, 0.0f)) Sprite.Default
+        Draw.rect bounds (if selected then Style.accentShade(127, 1.0f, 0.2f) else Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
         Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
     override this.Draw(top, topEdge) =
         let b = base.Draw(top, topEdge)
@@ -182,11 +182,11 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
             if Mouse.Click(MouseButton.Left) then
                 if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
             elif options.Hotkeys.Delete.Value.Tapped() then
-                Globals.addTooltip(options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
+                Tooltip.add (options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
                     fun () ->
                         items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                         LevelSelect.refresh <- true
-                        Globals.addNotification(Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                        Notifications.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
     override this.Update(top, topEdge, elapsedTime) =
         match scrollTo with
@@ -199,7 +199,7 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
         else List.iter (fun (i: LevelSelectChartItem) -> i.Navigate()) items; b
 
 type Screen() as this =
-    inherit IScreen()
+    inherit Screen.T()
 
     let mutable scrolling = false
     let mutable folderList: LevelSelectPackItem list = []
@@ -328,8 +328,8 @@ type Screen() as this =
         let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * pheight
         Draw.rect (Rect.create (Render.vwidth - 10.0f) (top + 170.0f + 10.0f + scrollPos) (Render.vwidth - 5.0f) (top + 170.0f + 30.0f + scrollPos)) Color.White Sprite.Default
 
-        Draw.rect (Rect.create left top right (top + 170.0f)) (Globals.accentShade (100, 0.6f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (Globals.accentShade (255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left top right (top + 170.0f)) (Style.accentShade (100, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 
     override this.OnEnter prev =

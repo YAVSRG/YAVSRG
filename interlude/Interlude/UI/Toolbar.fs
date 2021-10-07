@@ -5,18 +5,18 @@ open System.Drawing
 open Prelude.Common
 open Interlude
 open Interlude.Graphics
-open Interlude.UI.Selection
-open Interlude.UI.Animation
 open Interlude.UI.Components
+open Interlude.UI.Components.Selection
+open Interlude.UI.Animation
 open Interlude.UI.OptionsMenu
 open Interlude.Utils
 open Interlude.Input
 
 // Toolbar widgets
 
-module Notifications =
+module TaskDisplay =
 
-    let taskBox (t: BackgroundTask.ManagedTask) = 
+    let private taskBox (t: BackgroundTask.ManagedTask) = 
         let w = Frame()
 
         TextBox(t.get_Name, K (Color.White, Color.Black), 0.0f)
@@ -36,113 +36,22 @@ module Notifications =
 
         w |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 90.0f, 0.0f)
 
-    let taskBoxes =
+    let private taskBoxes =
         let f = FlowContainer()
-        Logging.Debug "Subscribed to background tasks"
         BackgroundTask.Subscribe(fun t -> if t.Visible then f.Add(taskBox t))
         f |> positionWidget(-500.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
 
-    type TaskDisplayDialog() as this = 
+    let init () = BackgroundTask.Subscribe(fun t -> if t.Visible then taskBoxes.Add(taskBox t))
+
+    type Dialog() as this = 
         inherit SlideDialog(SlideDialog.Direction.Left, 500.0f)
         do this.Add taskBoxes
 
         override this.Draw() =
-            Draw.rect taskBoxes.Bounds (Globals.accentShade(180, 0.4f, 0.0f)) Sprite.Default
+            Draw.rect taskBoxes.Bounds (Style.accentShade(180, 0.4f, 0.0f)) Sprite.Default
             base.Draw()
 
         override this.OnClose() = this.Remove taskBoxes
-
-    type NotificationDisplay() as this =
-        inherit Widget()
-        let items = ResizeArray<Color * string * AnimationFade>()
-        let slider = new AnimationFade 0.0f
-        let notifWidth = 400.0f
-        let notifHeight = 35.0f
-
-        do
-            this.Animation.Add slider
-            Globals.addNotification <-
-                fun (str: string, t: NotificationType) ->
-                    this.Parent.Value.Synchronized(
-                        fun () -> 
-                            let c =
-                                match t with
-                                | NotificationType.Info -> Color.Blue
-                                | NotificationType.System -> Color.Green
-                                | NotificationType.Task -> Color.Purple
-                                | NotificationType.Error -> Color.Red
-                                | _ -> Color.Black
-                            slider.Target <- slider.Target + 1.0f
-                            let f = new AnimationFade((if items.Count = 0 then 0.0f else 1.0f), Target = 1.0f)
-                            this.Animation.Add f
-                            let i = (c, str, f)
-                            items.Add i
-                            this.Animation.Add(
-                                Animation.Serial(
-                                    AnimationTimer 4000.0,
-                                    AnimationAction(fun () -> f.Target <- 0.0f),
-                                    AnimationTimer 1500.0,
-                                    AnimationAction(fun () -> slider.Target <- slider.Target - 1.0f; slider.Value <- slider.Value - 1.0f; f.Stop(); items.Remove i |> ignore)
-                                )) )
-
-        override this.Draw() =
-            if items.Count > 0 then
-                Stencil.create false
-                Draw.rect this.Bounds Color.Transparent Sprite.Default
-                Stencil.draw()
-                let struct (_, _, _, b) = this.Bounds
-                let m = Rect.centerX this.Bounds
-                let mutable y = b - notifHeight * slider.Value
-                for (c, s, f) in items do
-                    let r = Rect.create (m - notifWidth) y (m + notifWidth) (y + notifHeight)
-                    let f = f.Value * 255.0f |> int
-                    Draw.rect r (Color.FromArgb(f / 2, c)) Sprite.Default
-                    Text.drawFill(Themes.font(), s, r, Color.FromArgb(f, Color.White), 0.5f)
-                    y <- y + notifHeight
-                Stencil.finish()
-
-type TooltipHandler() as this =
-    inherit Widget()
-    let mutable active = false
-    let mutable bind = Dummy
-    let mutable text = [||]
-    let mutable timeLeft = 0.0
-    let mutable action = ignore
-
-    let SCALE = 30.0f
-
-    let fade = AnimationFade(0.0f)
-
-    do
-        this.Animation.Add(fade)
-        Globals.addTooltip <- 
-            fun (b, str, time, callback) ->
-                if not active then
-                    active <- true
-                    fade.Target <- 1.0f
-                    bind <- b
-                    text <- str.Split("\n")
-                    timeLeft <- time
-                    action <- callback
-
-    override this.Update(elapsedTime, bounds) =
-        if active then
-            timeLeft <- timeLeft - elapsedTime
-            if timeLeft <= 0.0 then (action(); active <- false; fade.Target <- 0.0f)
-            elif bind.Released() then (active <- false; fade.Target <- 0.0f)
-        base.Update(elapsedTime, bounds)
-
-    override this.Draw() =
-        if fade.Value > 0.01f then
-            let x = Mouse.X()
-            let mutable y = Mouse.Y() + 50.0f
-            //todo: y-clamping
-            for str in text do
-                let w = Text.measure(Themes.font(), str) * SCALE
-                //todo: x-clamping
-                Text.drawB(Themes.font(), str, SCALE, x - w * 0.5f, y, (Color.FromArgb(int(255.0f * fade.Value), Color.White), Color.FromArgb(int(255.0f * fade.Value), Color.Black)))
-                y <- y + SCALE
-        base.Draw()
 
 type Jukebox() as this =
     inherit Widget()
@@ -164,10 +73,10 @@ type Jukebox() as this =
 
     override this.Draw() =
         let r = Rect.sliceBottom 5.0f this.Bounds
-        Draw.rect r (Globals.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.sliceLeft(slider.Value * Rect.width r) r) (Globals.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
+        Draw.rect r (Style.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.sliceLeft(slider.Value * Rect.width r) r) (Style.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
 
-// Toolbar
+// Toolbar implementation
 
 type Toolbar() as this =
     inherit Widget()
@@ -178,7 +87,6 @@ type Toolbar() as this =
     let notifSlider = new AnimationFade 0.0f
 
     let mutable userCollapse = false
-    let mutable forceCollapse = true
     
     do
         this.Animation.Add barSlider
@@ -192,15 +100,15 @@ type Toolbar() as this =
         |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
         |> this.Add
 
-        Button((fun () -> Globals.back(ScreenTransitionFlag.UnderLogo)), "⮜ Back  ", Options.options.Hotkeys.Exit, Sprite.Default)
+        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), "⮜ Back  ", Options.options.Hotkeys.Exit, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
-        Button((fun () -> if Globals.currentType <> ScreenType.Play then Globals.addDialog(SelectionMenu(mainOptionsMenu()))), "Options", Options.options.Hotkeys.Options, Sprite.Default)
+        Button((fun () -> if Screen.currentType <> Screen.Type.Play then Dialog.add (SelectionMenu(mainOptionsMenu()))), "Options", Options.options.Hotkeys.Options, Sprite.Default)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Globals.changeScreen(ScreenType.Import, ScreenTransitionFlag.Default)), "Import", Options.options.Hotkeys.Import, Sprite.Default)
+        Button((fun () -> Screen.change Screen.Type.Import Screen.TransitionFlag.Default), "Import", Options.options.Hotkeys.Import, Sprite.Default)
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
@@ -208,29 +116,27 @@ type Toolbar() as this =
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Globals.addDialog(new Notifications.TaskDisplayDialog())), "Tasks", Options.options.Hotkeys.Tasks, Sprite.Default)
+        Button((fun () -> Dialog.add (TaskDisplay.Dialog())), "Tasks", Options.options.Hotkeys.Tasks, Sprite.Default)
         |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
         Jukebox() |> this.Add
-        Notifications.NotificationDisplay() |> this.Add
-
-        Globals.setToolbarCollapsed <- fun b -> forceCollapse <- b
+        Notifications.display |> this.Add
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
-        Draw.rect(Rect.create l (t - HEIGHT) r t) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect(Rect.create l b r (b + HEIGHT)) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l (t - HEIGHT) r t) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l b r (b + HEIGHT)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
         if barSlider.Value > 0.01f then
             let s = (r - l) / 48.0f
             for i in 0 .. 47 do
                 let level = System.Math.Min((Audio.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, HEIGHT)
-                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - HEIGHT) (l + (float32 i + 1.0f) * s - 2.0f) (t - HEIGHT + level)) (Globals.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
-                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + HEIGHT - level) (r - float32 i * s - 2.0f) (b + HEIGHT)) (Globals.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - HEIGHT) (l + (float32 i + 1.0f) * s - 2.0f) (t - HEIGHT + level)) (Style.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + HEIGHT - level) (r - float32 i * s - 2.0f) (b + HEIGHT)) (Style.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
         base.Draw()
 
     override this.Update(elapsedTime, bounds) =
-        if (not forceCollapse) && Options.options.Hotkeys.Toolbar.Value.Tapped() then
+        if (not Screen.toolbar) && Options.options.Hotkeys.Toolbar.Value.Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
-        base.Update(elapsedTime, Rect.expand (0.0f, -HEIGHT * if forceCollapse then 0.0f else barSlider.Value) bounds)
+        base.Update(elapsedTime, Rect.expand (0.0f, -HEIGHT * if Screen.toolbar then 0.0f else barSlider.Value) bounds)

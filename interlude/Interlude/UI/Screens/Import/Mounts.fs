@@ -7,7 +7,7 @@ open Prelude.Data.Charts.Library.Imports
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
 
 module Mounts =
     
@@ -54,11 +54,11 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
             fun path ->
                 match mountType, path with
                 | Mounts.Types.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack ("osu!", path) |> Some
-                | Mounts.Types.Osu, _ -> Globals.addNotification ("Should be the osu! Songs folder itself - This doesn't look like it.", NotificationType.Error)
+                | Mounts.Types.Osu, _ -> Notifications.add ("Should be the osu! Songs folder itself - This doesn't look like it.", NotificationType.Error)
                 | Mounts.Types.Stepmania, FolderOfPacks
                 | Mounts.Types.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
                 | Mounts.Types.Stepmania, _
-                | Mounts.Types.Etterna, _ -> Globals.addNotification ("Should be a Stepmania pack library - This doesn't look like one.", NotificationType.Error)
+                | Mounts.Types.Etterna, _ -> Notifications.add ("Should be a Stepmania pack library - This doesn't look like one.", NotificationType.Error)
                 | _ -> failwith "impossible"
                 if setting.Value.IsSome then this.BeginClose()
             |> Some
@@ -102,8 +102,8 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
 
     let mutable refresh = ignore
 
-    let createButton = Button((fun () -> Globals.addDialog( CreateMountDialog (mountType, setting, fun b -> if b then refresh()) )), "➕", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
-    let editButton = Button((fun () -> Globals.addDialog(SelectionMenu(Mounts.editor setting))), "✎", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
+    let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), "➕", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
+    let editButton = Button((fun () -> SelectionMenu(Mounts.editor setting).Show()), "✎", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
     let deleteButton = Button((fun () -> setting.Value <- None; refresh()), "✕", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
 
     do
