@@ -6,7 +6,7 @@ open Interlude.UI.Screens
 module Startup =
 
     let init() =
-        Screen.init [|LoadingScreen(); MainMenu(); Import.Screen(); LevelSelect.Screen()|]
+        Screen.init [|MainMenu.LoadingScreen(); MainMenu.Screen(); Import.Screen(); LevelSelect.Screen()|]
         
         Score.WatchReplay.func <- fun data -> Screen.changeNew (fun () -> Play.Screen(Play.PlayScreenType.Replay data) :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default
         TaskDisplay.init()

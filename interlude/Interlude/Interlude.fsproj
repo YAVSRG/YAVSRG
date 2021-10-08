@@ -67,7 +67,8 @@
     <Compile Include="UI\Screens\Import\Mounts.fs" />
     <Compile Include="UI\Screens\Import\ImportMenu.fs" />
     <Compile Include="UI\Screens\OptionsMenu.fs" />
-    <Compile Include="UI\Screens\MainMenu.fs" />
+    <Compile Include="UI\Screens\MainMenu\LoadingScreen.fs" />
+    <Compile Include="UI\Screens\MainMenu\MainMenu.fs" />
     <Compile Include="UI\Toolbar.fs" />
     <Compile Include="UI\Startup.fs" />
     <Compile Include="Game.fs" />
