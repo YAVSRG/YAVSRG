@@ -311,7 +311,7 @@ module OptionsMenu =
                     PrettyButton("DownloadUpdate",
                         fun () ->
                             if Interlude.Utils.AutoUpdate.updateAvailable then
-                                Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Notifications.add (Localisation.localise "notification.UpdateInstalled", NotificationType.System))
+                                Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Notification.add (Localisation.localise "notification.UpdateInstalled", NotificationType.System))
                     ).Position(300.0f)
                 ] :> Selectable
             Callback = ignore

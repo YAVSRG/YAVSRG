@@ -87,7 +87,7 @@ type CollectionManager() =
                     | Goals gs -> false //gs.Add ((selectedChart, selectedMods, rate), Goal.NoGoal); true
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Notifications.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", NotificationType.Info)
+                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", NotificationType.Info)
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
                 if
                     match snd Collections.selected with
@@ -96,4 +96,4 @@ type CollectionManager() =
                     | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Notifications.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", NotificationType.Info)
+                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", NotificationType.Info)

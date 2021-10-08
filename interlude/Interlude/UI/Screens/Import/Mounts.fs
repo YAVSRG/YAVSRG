@@ -54,11 +54,11 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
             fun path ->
                 match mountType, path with
                 | Mounts.Types.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack ("osu!", path) |> Some
-                | Mounts.Types.Osu, _ -> Notifications.add ("Should be the osu! Songs folder itself - This doesn't look like it.", NotificationType.Error)
+                | Mounts.Types.Osu, _ -> Notification.add ("Should be the osu! Songs folder itself - This doesn't look like it.", NotificationType.Error)
                 | Mounts.Types.Stepmania, FolderOfPacks
                 | Mounts.Types.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
                 | Mounts.Types.Stepmania, _
-                | Mounts.Types.Etterna, _ -> Notifications.add ("Should be a Stepmania pack library - This doesn't look like one.", NotificationType.Error)
+                | Mounts.Types.Etterna, _ -> Notification.add ("Should be a Stepmania pack library - This doesn't look like one.", NotificationType.Error)
                 | _ -> failwith "impossible"
                 if setting.Value.IsSome then this.BeginClose()
             |> Some

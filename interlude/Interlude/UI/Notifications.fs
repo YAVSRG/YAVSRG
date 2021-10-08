@@ -13,7 +13,7 @@ type NotificationType =
     | Task = 2
     | Error = 3
 
-module Notifications =
+module Notification =
 
     let private items = ResizeArray<Color * string * AnimationFade>()
     let private slider = new AnimationFade 0.0f

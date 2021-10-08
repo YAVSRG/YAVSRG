@@ -9,8 +9,8 @@ module Startup =
         Screen.init [|MainMenu.LoadingScreen(); MainMenu.Screen(); Import.Screen(); LevelSelect.Screen()|]
         
         Score.WatchReplay.func <- fun data -> Screen.changeNew (fun () -> Play.Screen(Play.PlayScreenType.Replay data) :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default
-        TaskDisplay.init()
+        Toolbar.TaskDisplay.init()
         Utils.AutoUpdate.checkForUpdates()
         Import.Mounts.handleStartupImports()
 
-        Screen.Container(Toolbar())
+        Screen.Container(Toolbar.Toolbar())

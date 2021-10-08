@@ -61,7 +61,7 @@ type Screen() as this =
         this.Animation.Add splashSubAnim
 
     override this.OnEnter prev =
-        if Utils.AutoUpdate.updateAvailable then Notifications.add (Localisation.localise "notification.UpdateAvailable", NotificationType.System)
+        if Utils.AutoUpdate.updateAvailable then Notification.add (Localisation.localise "notification.UpdateAvailable", NotificationType.System)
         if prev = Screen.Type.SplashScreen && Options.firstLaunch then MarkdownReader.help()
         splashText <- newSplash()
         Logo.moveMenu()

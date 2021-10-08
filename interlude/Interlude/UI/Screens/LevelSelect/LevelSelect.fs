@@ -148,7 +148,7 @@ type private LevelSelectChartItem(groupName, cc) =
                     fun () ->
                         Library.delete cc
                         LevelSelect.refresh <- true
-                        Notifications.add (Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
+                        Notification.add (Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
         else hover.Target <- 0.0f
         hover.Update(elapsedTime) |> ignore
     override this.Update(top, topEdge, elapsedTime) =
@@ -186,7 +186,7 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
                     fun () ->
                         items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                         LevelSelect.refresh <- true
-                        Notifications.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
     override this.Update(top, topEdge, elapsedTime) =
         match scrollTo with

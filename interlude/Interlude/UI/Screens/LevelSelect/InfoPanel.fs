@@ -81,7 +81,7 @@ module private InfoPanel =
                     fun () ->
                         chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Notifications.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
 
     type Scoreboard() as this =
         inherit Selectable()

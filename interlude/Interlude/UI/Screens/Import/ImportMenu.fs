@@ -67,13 +67,13 @@ type private SMImportCard(data: EOPackAttrs) as this =
     let mutable downloaded = false //todo: maybe check if pack is already installed?
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        Notifications.add (Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
             (BackgroundTask.Chain
                 [
                     downloadFile(data.download, target)
                     (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notifications.add (Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete target))
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notification.add (Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
@@ -102,13 +102,13 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let mutable downloaded = false
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
-        Notifications.add (Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
                 [
                     downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
                     (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notifications.add (Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete target))
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notification.add (Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
