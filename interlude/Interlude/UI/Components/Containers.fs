@@ -122,7 +122,7 @@ type TabContainer(name: string, widget: Widget) as this =
     do this.AddTab(name, widget)
 
     member this.AddTab(name, widget) =
-        { new Button((fun () -> selected <- name; selectedItem <- widget), name, Bind.DummyBind, Sprite.Default) with member this.Dispose() = base.Dispose(); widget.Dispose() }
+        { new Button((fun () -> selected <- name; selectedItem <- widget), name) with member this.Dispose() = base.Dispose(); widget.Dispose() }
         |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count + 1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f)
         |> this.Add
         count <- count + 1.0f

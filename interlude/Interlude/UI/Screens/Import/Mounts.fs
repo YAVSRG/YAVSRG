@@ -8,6 +8,8 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Controls
+open Interlude.UI.Components.Selection.Menu
 
 module Mounts =
     
@@ -83,9 +85,7 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
                 | Mounts.Types.Etterna -> etternaPackFolder
                 | _ -> failwith "impossible"
                 |> Mounts.dropFunc.Value),
-            "Or try to auto detect it",
-            Interlude.Input.Bind.DummyBind,
-            Interlude.Graphics.Sprite.Default)
+            "Or try to auto detect it")
         |> positionWidget(-150.0f, 0.5f, 200.0f, 0.5f, 150.0f, 0.5f, 260.0f, 0.5f)
         |> this.Add
 
@@ -102,9 +102,9 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
 
     let mutable refresh = ignore
 
-    let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), "➕", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
-    let editButton = Button((fun () -> SelectionMenu(Mounts.editor setting).Show()), "✎", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
-    let deleteButton = Button((fun () -> setting.Value <- None; refresh()), "✕", Interlude.Input.Bind.DummyBind, Interlude.Graphics.Sprite.Default)
+    let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), "➕")
+    let editButton = Button((fun () -> SelectionMenu(Mounts.editor setting).Show()), "✎")
+    let deleteButton = Button((fun () -> setting.Value <- None; refresh()), "✕")
 
     do
         refresh <-

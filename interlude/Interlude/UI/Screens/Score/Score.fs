@@ -9,7 +9,6 @@ open Interlude.Utils
 open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.Gameplay
 
 module WatchReplay =
     let mutable func : ReplayData -> unit = ignore
@@ -148,10 +147,10 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         |> positionWidget(620.0f, 0.0f, -70.0f, 1.0f, 920.0f, 0.0f, -20.0f, 1.0f)
         |> this.Add
 
-        new Button(ignore, "Graph settings", Input.Bind.DummyBind, Sprite.Default)
+        new Button(ignore, "Graph settings")
         |> positionWidget(-420.0f, 1.0f, -70.0f, 1.0f, -220.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
-        new Button((fun () -> WatchReplay.func scoreData.ReplayData), "Watch replay", Input.Bind.DummyBind, Sprite.Default)
+        new Button((fun () -> WatchReplay.func scoreData.ReplayData), "Watch replay")
         |> positionWidget(-220.0f, 1.0f, -70.0f, 1.0f, -20.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
 

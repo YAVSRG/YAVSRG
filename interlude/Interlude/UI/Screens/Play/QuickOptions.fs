@@ -3,8 +3,9 @@
 open Prelude.Common
 open Interlude
 open Interlude.Options
-open Interlude.UI
 open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Controls
+open Interlude.UI.Components.Selection.Menu
 
 module QuickOptions =
 

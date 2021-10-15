@@ -50,7 +50,12 @@
     <Compile Include="UI\Components\Buttons.fs" />
     <Compile Include="UI\Components\Containers.fs" />
     <Compile Include="UI\Components\Core.fs" />
-    <Compile Include="UI\Components\Selection.fs" />
+    <Compile Include="UI\Components\Selection\Selection.fs" />
+    <Compile Include="UI\Components\Selection\Containers.fs" />
+    <Compile Include="UI\Components\Selection\Buttons.fs" />
+    <Compile Include="UI\Components\Selection\Controls.fs" />
+    <Compile Include="UI\Components\Selection\Menu.fs" />
+    <Compile Include="UI\Components\Selection\Compound.fs" />
     <Compile Include="UI\Components\Logo.fs" />
     <Compile Include="UI\Screen.fs" />
     <Compile Include="Gameplay.fs" />

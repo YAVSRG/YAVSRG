@@ -7,7 +7,7 @@ open Interlude
 open Interlude.Utils
 open Interlude.Graphics
 open Interlude.UI
-open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Menu
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.OptionsMenu

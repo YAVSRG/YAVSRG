@@ -3,6 +3,9 @@
 open Prelude.Gameplay.Mods
 open Interlude.UI
 open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Containers
+open Interlude.UI.Components.Selection.Buttons
+open Interlude.UI.Components.Selection.Menu
 open Interlude.Gameplay
 open Interlude.Options
 

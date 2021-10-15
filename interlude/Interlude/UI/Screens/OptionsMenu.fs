@@ -12,6 +12,11 @@ open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Screens.LevelSelect
+open Interlude.UI.Components.Selection.Containers
+open Interlude.UI.Components.Selection.Buttons
+open Interlude.UI.Components.Selection.Controls
+open Interlude.UI.Components.Selection.Compound
+open Interlude.UI.Components.Selection.Menu
 
 (*
     Actual options menu structure/design data

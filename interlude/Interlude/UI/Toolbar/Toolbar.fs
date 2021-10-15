@@ -6,7 +6,7 @@ open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Menu
 open Interlude.UI.OptionsMenu
 open Interlude.Utils
 
@@ -32,23 +32,23 @@ type Toolbar() as this =
         |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
         |> this.Add
 
-        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), "⮜ Back  ", Options.options.Hotkeys.Exit, Sprite.Default)
+        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), "⮜ Back  ", Options.options.Hotkeys.Exit)
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
-        Button((fun () -> if Screen.currentType <> Screen.Type.Play then Dialog.add (SelectionMenu(mainOptionsMenu()))), "Options", Options.options.Hotkeys.Options, Sprite.Default)
+        Button((fun () -> if Screen.currentType <> Screen.Type.Play then Dialog.add (SelectionMenu(mainOptionsMenu()))), "Options", Options.options.Hotkeys.Options)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Screen.change Screen.Type.Import Screen.TransitionFlag.Default), "Import", Options.options.Hotkeys.Import, Sprite.Default)
+        Button((fun () -> Screen.change Screen.Type.Import Screen.TransitionFlag.Default), "Import", Options.options.Hotkeys.Import)
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button(MarkdownReader.help, "Help", Options.options.Hotkeys.Help, Sprite.Default)
+        Button(MarkdownReader.help, "Help", Options.options.Hotkeys.Help)
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Dialog.add (TaskDisplay.Dialog())), "Tasks", Options.options.Hotkeys.Tasks, Sprite.Default)
+        Button((fun () -> Dialog.add (TaskDisplay.Dialog())), "Tasks", Options.options.Hotkeys.Tasks)
         |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 

@@ -43,7 +43,7 @@ type Dropdown(options: string array, index, func, label, buttonSize) as this =
             let fc = FlowContainer(Spacing = 0.0f)
             fr.Add fc
             Array.iteri
-                (fun i o -> fc.Add(Button((fun () -> index <- i; func i), o, Bind.DummyBind, Sprite.Default) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
+                (fun i o -> fc.Add(Button((fun () -> index <- i; func i), o) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                 options
             fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
             
