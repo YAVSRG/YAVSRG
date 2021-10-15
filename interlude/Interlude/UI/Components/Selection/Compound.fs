@@ -171,54 +171,25 @@ module CardSelect =
 
                     Refresh = ignore
                 }
-
-        type HeaderCard<'T>(config: Config<'T>, parent: NavigateSelectable) as this =
-            inherit NavigateSelectable()
-            let mutable buttons = []
-            let mutable index = -1
-            do
-                let addButton (b: Widget) =
-                    let b = (b :?> Selectable)
-                    buttons <- b :: buttons
-                    this.Add b
-
-                if Option.isSome config.CreateFunc then
-                    new LittleButton(K addIcon, fun () -> config.CreateFunc.Value (); config.Refresh())
-                    |> positionWidget(-h, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
-                    |> addButton
-                    this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f)
-                else this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
-
-            override this.SParent = Some (parent :> Selectable)
-    
-            override this.Up() = parent.Up()
-            override this.Down() = parent.Down()
-
-            override this.Left() =
-                if index < 0 then index <- buttons.Length - 1
-                else index <- index - 1
-                if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
-
-            override this.Right() =
-                if index = buttons.Length - 1 then index <- -1
-                else index <- index + 1
-                if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
-                
-            override this.Draw() =
-                if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
-                elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
-                base.Draw()
     
         type Card<'T>(item: 'T, marked: bool, config: Config<'T>, add: string * SelectionPage -> unit, parent: NavigateSelectable) as this =
             inherit NavigateSelectable()
             let mutable buttons = []
             let mutable index = -1
+
+            let onSelect () =
+                if marked then config.MarkFunc (item, false) else config.MarkFunc (item, true)
+                config.Refresh()
+
             do
-    
+
                 let addButton (b: Widget) =
                     let b = (b :?> Selectable)
                     buttons <- b :: buttons
                     this.Add b
+
+                new Clickable((fun () -> onSelect()), fun b -> if b then this.Hover <- true)
+                |> this.Add
     
                 new TextBox((fun () -> config.NameFunc item), K (Color.White, Color.Black), 0.0f)
                 |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
@@ -232,14 +203,14 @@ module CardSelect =
     
                 if Option.isSome config.DeleteFunc then
                     x <- x - h
-                    new LittleButton(K deleteIcon, fun () -> config.DeleteFunc.Value item; config.Refresh())
+                    new IconButton(deleteIcon, fun () -> config.DeleteFunc.Value item; config.Refresh())
                     |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                     |> addButton
     
                 if Option.isSome config.EditFunc then
                     x <- x - h
-                    new LittleButton(
-                        K editIcon,
+                    new IconButton(
+                        editIcon,
                         fun () -> 
                             let page = config.EditFunc.Value item
                             add("EditItem", { page with Callback = fun () -> page.Callback(); config.Refresh() })
@@ -249,7 +220,7 @@ module CardSelect =
     
                 if Option.isSome config.DuplicateFunc then
                     x <- x - h
-                    new LittleButton(K addIcon, fun () -> config.DuplicateFunc.Value item; config.Refresh())
+                    new IconButton(addIcon, fun () -> config.DuplicateFunc.Value item; config.Refresh())
                     |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                     |> addButton
     
@@ -271,9 +242,7 @@ module CardSelect =
                 if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
                 
             override this.Update(elapsedTime, bounds) =
-                if this.Selected && this.HoverChild = None && options.Hotkeys.Select.Value.Tapped() then
-                    if marked then config.MarkFunc (item, false) else config.MarkFunc (item, true)
-                    config.Refresh()
+                if this.Selected && this.HoverChild = None && options.Hotkeys.Select.Value.Tapped() then onSelect()
                 base.Update(elapsedTime, bounds)
     
             override this.Draw() =
@@ -291,9 +260,14 @@ module CardSelect =
                 let index = match this.HoverChild with None -> 0 | Some x -> fc.Children.IndexOf x
                 fc.Clear()
 
-                fc.Add (HeaderCard(config, this))
                 let items = source.Value |> Seq.map (fun (item, marked) -> Card<'T>(item, marked, config, add, this))
                 items |> Seq.iter fc.Add
+
+                if config.CreateFunc.IsSome then
+                    { new IconButton(addIcon, fun () -> config.CreateFunc.Value (); config.Refresh())
+                       with override _.SParent = Some this }
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, h, 0.0f, h, 0.0f)
+                    |> fc.Add
 
                 let index = if index >= Seq.length items || index < 0 then 0 else index
                 if this.Selected then this.HoverChild <- Some (fc.Children.[index] :?> Selectable)
@@ -319,74 +293,3 @@ module CardSelect =
             override this.OnSelect() =
                 base.OnSelect()
                 this.HoverChild <- Some (fc.Children.[0] :?> Selectable)
-
-//todo: remove this and use new (above) system
-module WatcherSelect =
-
-    type WatcherSelectorItem<'T>(item: 'T, name, selector: WatcherSelector<'T>) as this =
-        inherit ListSelectable(true)
-        do
-            new TextBox((fun () -> name ((this.Setting : Setting<'T>).Value)), K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(0.0f, 0.0f, 10.0f, 0.0f, 0.0f, 1.0f, -40.0f, 1.0f)
-            |> this.Add
-
-            new LittleButton(K <| Localisation.localise "options.wselect.Edit", fun () -> selector.EditItem this)
-            |> positionWidget(20.0f, 0.0f, -40.0f, 1.0f, 140.0f, 0.0f, -10.0f, 1.0f)
-            |> this.Add
-
-            new LittleButton(K <| Localisation.localise "options.wselect.Duplicate", fun () -> this.Parent.Value.Synchronized(fun () -> this.Parent.Value.Add(WatcherSelectorItem(this.Setting.Value, name, selector))))
-            |> positionWidget(160.0f, 0.0f, -40.0f, 1.0f, 280.0f, 0.0f, -10.0f, 1.0f)
-            |> this.Add
-
-            new LittleButton(K <| Localisation.localise "options.wselect.MakeMain", fun () -> selector.Main <- this)
-            |> positionWidget(300.0f, 0.0f, -40.0f, 1.0f, 420.0f, 0.0f, -10.0f, 1.0f)
-            |> this.Add
-
-            new LittleButton(K <| Localisation.localise "options.wselect.Delete", fun () -> if selector.Main <> this then this.Destroy(); this.SParent.Value.SelectedChild <- None)
-            |> positionWidget(440.0f, 0.0f, -40.0f, 1.0f, 560.0f, 0.0f, -10.0f, 1.0f)
-            |> this.Add
-
-            this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 120.0f, 0.0f) |> ignore
-        member val Setting = Setting.simple item
-        override this.SParent = Some (selector :> Selectable)
-
-        override this.Draw() =
-            if selector.Main = this then Draw.rect this.Bounds (Style.accentShade(80, 1.0f, 0.0f)) Sprite.Default
-            if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
-            base.Draw()
-
-    and WatcherSelector<'T>(source: Setting<WatcherSelection<'T>>, editor: Setting<'T> -> SelectionPage, name: 'T -> string, add: string * SelectionPage -> unit) as this =
-        inherit NavigateSelectable()
-        let items = source.Value |> fun (a, b) -> a :: b |> List.map (fun x -> WatcherSelectorItem<'T>(x, name, this))
-        let mutable currentMain = items.Head
-
-        let fc = FlowContainer()
-        do
-            this.Add(fc)
-            items |> List.iter fc.Add
-
-        override this.Up() =
-            match this.HoverChild with
-            | Some s ->
-                let i = fc.Children.IndexOf s
-                this.HoverChild <- fc.Children.[(i - 1 + fc.Children.Count) % fc.Children.Count] :?> Selectable |> Some
-            | None -> ()
-        override this.Down() =
-            match this.HoverChild with
-            | Some s ->
-                let i = fc.Children.IndexOf s
-                this.HoverChild <- fc.Children.[(i + 1) % fc.Children.Count] :?> Selectable |> Some
-            | None -> ()
-
-        member this.EditItem(item: WatcherSelectorItem<'T>) = add("EditItem", editor item.Setting)
-        member this.Main with get() = currentMain and set(v) = currentMain <- v
-
-        override this.OnSelect() =
-            this.HoverChild <- Some (currentMain :> Selectable)
-
-        override this.OnDeselect() =
-            base.OnDeselect()
-            let x = currentMain.Setting.Value
-            let xs = fc.Children |> Seq.map (fun w -> w :?> WatcherSelectorItem<'T>) |> List.ofSeq |> List.choose (fun i -> if currentMain = i then None else Some i.Setting.Value)
-            source.Value <- (x, xs)

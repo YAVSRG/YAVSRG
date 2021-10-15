@@ -172,9 +172,9 @@ module OptionsMenu =
                 | _ -> failwith "impossible"
         }
 
-    let editAccuracySystem (setting: Setting<AccuracySystemConfig>) =
+    let editAccuracySystem (index, sys) =
         let utype =
-            match setting.Value with
+            match sys with
             | SC _ -> 0
             | SCPlus _ -> 1
             | Wife _ -> 2
@@ -183,7 +183,7 @@ module OptionsMenu =
             |> Setting.simple
 
         let judge =
-            match setting.Value with
+            match sys with
             | SC (judge, rd)
             | SCPlus (judge, rd)
             | Wife (judge, rd) -> judge
@@ -193,7 +193,7 @@ module OptionsMenu =
         let judgeEdit = PrettySetting("Judge", Slider(judge, 0.1f)).Position(300.0f)
 
         let od =
-            match setting.Value with
+            match sys with
             | OM od -> od
             | _ -> 8.0f
             |> Setting.simple
@@ -202,7 +202,7 @@ module OptionsMenu =
         let odEdit = PrettySetting("OverallDifficulty", Slider(od, 0.01f)).Position(300.0f)
 
         let ridiculous =
-            match setting.Value with
+            match sys with
             | SC (judge, rd)
             | SCPlus (judge, rd)
             | Wife (judge, rd) -> rd
@@ -225,20 +225,34 @@ module OptionsMenu =
                     ).Position(200.0f)
                 ] :> Selectable
             Callback = fun () ->
-                match utype.Value with
-                | 0 -> setting.Value <- SC (judge.Value, ridiculous.Value)
-                | 1 -> setting.Value <- SCPlus (judge.Value, ridiculous.Value)
-                | 2 -> setting.Value <- Wife (judge.Value, ridiculous.Value)
-                | 3 -> setting.Value <- OM od.Value
-                | _ -> failwith "impossible"
+                let value =
+                    match utype.Value with
+                    | 0 -> SC (judge.Value, ridiculous.Value)
+                    | 1 -> SCPlus (judge.Value, ridiculous.Value)
+                    | 2 -> Wife (judge.Value, ridiculous.Value)
+                    | 3 -> OM od.Value
+                    | _ -> failwith "impossible"
+                Setting.app (WatcherSelection.replace index value) options.AccSystems
         }
 
     let scoreSystems() : SelectionPage =
         {
             Content = fun add ->
                 column [
+                    let setting =
+                        Setting.make ignore ( fun () -> WatcherSelection.indexed options.AccSystems.Value )
                     PrettySetting("ScoreSystems",
-                        WatcherSelect.WatcherSelector(options.AccSystems, editAccuracySystem, (fun o -> o.ToString()), add)
+                        CardSelect.Selector(
+                            setting,
+                            { CardSelect.Config.Default with
+                                NameFunc = fun (_, s) -> s.ToString()
+                                DuplicateFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.add s) options.AccSystems)
+                                EditFunc = Some (fun (i, s) -> editAccuracySystem (i, s))
+                                DeleteFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.delete s) options.AccSystems)
+                                MarkFunc = fun ((_, s), b) -> if b then Setting.app (WatcherSelection.moveToTop s) options.AccSystems
+                            },
+                            add
+                        )
                     ).Position(200.0f, PRETTYWIDTH, 800.0f)
                 ] :> Selectable
             Callback = ignore

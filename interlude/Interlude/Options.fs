@@ -151,6 +151,23 @@ module Options =
             | [] -> (main, alts)
             | x :: xs -> let (m, a) = cycleBackward (x, xs) in (m, main :: a)
 
+        let indexed (main, alts) =
+            seq {
+                yield (-1, main), true
+                yield! alts |> List.mapi (fun i x -> (i, x), false)
+            }
+
+        let replace index value (main, alts) =
+            match index with
+            | -1 -> value, alts
+            | n -> main, alts |> List.mapi (fun i x -> if i = n then value else x)
+
+        let delete x (main, alts) = main, alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
+
+        let moveToTop x (main, alts) = x, main :: alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
+
+        let add x (main, alts) = main, alts @ [x]
+
     type GameOptions =
         {
             AudioOffset: Setting.Bounded<float>

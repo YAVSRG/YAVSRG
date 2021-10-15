@@ -52,7 +52,7 @@ module Helpers =
             {
                 Set =
                     fun x ->
-                        for w in widgets.[setting.Value] do selector.SParent.Value.SParent.Value.Remove w
+                        for w in widgets.[setting.Value] do if w.Parent.IsSome then selector.SParent.Value.SParent.Value.Remove w
                         for w in widgets.[x] do selector.SParent.Value.SParent.Value.Add w
                         setting.Value <- x
                 Get = setting.Get

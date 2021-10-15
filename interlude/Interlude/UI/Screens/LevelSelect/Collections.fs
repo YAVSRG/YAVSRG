@@ -51,8 +51,7 @@ module private Collections =
         {
             Content = fun add ->
                 let setting =
-                    Setting.make
-                        ignore
+                    Setting.make ignore
                         (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), fst selected = n))
                 column
                     [
