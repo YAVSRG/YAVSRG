@@ -30,10 +30,7 @@ module TaskDisplay =
 
         w |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 90.0f, 0.0f)
 
-    let private taskBoxes =
-        let f = FlowContainer()
-        BackgroundTask.Subscribe(fun t -> if t.Visible then f.Add(taskBox t))
-        f |> positionWidget(-500.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
+    let private taskBoxes = FlowContainer() |> positionWidget(-500.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
 
     let init () = BackgroundTask.Subscribe(fun t -> if t.Visible then taskBoxes.Add(taskBox t))
 

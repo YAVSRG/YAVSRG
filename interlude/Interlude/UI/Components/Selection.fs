@@ -924,13 +924,18 @@ module Selection =
 
         let wrapper main =
             let mutable disposed = false
-            let w = { new Selectable() with
-                override this.Update(elapsedTime, bounds) =
-                    if disposed then this.HoverChild <- None
-                    base.Update(elapsedTime, bounds)
-                    if not disposed then
-                        Input.absorbAll()
-                override this.Dispose() = (base.Dispose(); disposed <- true) }
+            let w = 
+                { new Selectable() with
+
+                    override this.Update(elapsedTime, bounds) =
+                        if disposed then this.HoverChild <- None
+                        base.Update(elapsedTime, bounds)
+                        if not disposed then
+                            Input.absorbAll()
+
+                    override this.VisibleBounds = this.Bounds
+                    override this.Dispose() = base.Dispose(); disposed <- true
+                }
             w.Add main
             w.SelectedChild <- Some main
             w

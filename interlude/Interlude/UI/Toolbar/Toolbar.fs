@@ -55,6 +55,8 @@ type Toolbar() as this =
         Jukebox() |> this.Add
         Notification.display |> this.Add
 
+    override this.VisibleBounds = this.Parent.Value.VisibleBounds
+
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
         Draw.rect(Rect.create l (t - HEIGHT) r t) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default

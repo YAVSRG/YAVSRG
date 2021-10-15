@@ -47,7 +47,9 @@
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Notifications.fs" />
     <Compile Include="UI\Dialogs.fs" />
-    <Compile Include="UI\Components\Components.fs" />
+    <Compile Include="UI\Components\Buttons.fs" />
+    <Compile Include="UI\Components\Containers.fs" />
+    <Compile Include="UI\Components\Core.fs" />
     <Compile Include="UI\Components\Selection.fs" />
     <Compile Include="UI\Components\Logo.fs" />
     <Compile Include="UI\Screen.fs" />

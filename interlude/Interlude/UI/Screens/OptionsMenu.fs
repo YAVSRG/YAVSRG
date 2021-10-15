@@ -288,7 +288,7 @@ module OptionsMenu =
                             base.OnDeselect()
                             if i + 1 < k then
                                 match this.SParent.Value with
-                                | :? ListSelectable as s -> s.Synchronized(fun () -> s.Next(); s.HoverChild.Value.Selected <- true)
+                                | :? ListSelectable as s -> s.Synchronized(fun () -> if s.Selected && s.HoverChild.IsSome then s.Next(); s.HoverChild.Value.Selected <- true)
                                 | _ -> failwith "impossible"
                     }
                     |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
