@@ -18,13 +18,6 @@ type ButtonBase(onClick) as this =
         onClick()
         this.Selected <- false
 
-type BigButton(label, icon, onClick) as this =
-    inherit ButtonBase(onClick)
-    do
-        this.Add(Frame((fun () -> Style.accentShade(180, 0.9f, 0.0f)), (fun () -> if this.Hover then Color.White else Color.Transparent)))
-        this.Add(TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 0.8f))
-        this.Add(TextBox(K ([|"❖";"✎";"♛";"⌨";"⚒"|].[icon]), K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.05f, 0.0f, 1.0f, 0.0f, 0.7f))
-
 type LittleButton(label, onClick) as this =
     inherit ButtonBase(onClick)
     do

@@ -79,7 +79,7 @@ type CollectionManager() =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if options.Hotkeys.Collections.Value.Tapped() then
-            Dialog.add <| SelectionMenu(Collections.page())
+            SelectionMenu(Collections.page()).Show()
         if currentCachedChart.IsSome then
             if options.Hotkeys.AddToCollection.Value.Tapped() then
                 if

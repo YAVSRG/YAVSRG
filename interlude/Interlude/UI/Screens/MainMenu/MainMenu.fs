@@ -42,7 +42,7 @@ type Screen() as this =
 
     //todo: localise these buttons
     let play = MenuButton (playFunc, "Play")
-    let options = MenuButton ((fun () -> Dialog.add <| SelectionMenu(mainOptionsMenu())), "Options")
+    let options = MenuButton (OptionsMenuRoot.show, "Options")
     let quit = MenuButton ((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), "Quit")
 
     let newSplash =
