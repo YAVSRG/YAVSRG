@@ -12,4 +12,8 @@ module Generic =
 
     let main() =
 
-        ()
+        let a = Chart.fromFile dayDreamerSM
+        let b = Chart.fromFile dayDreamerOsu
+
+        for ((time1, left), (time2, right)) in Seq.zip a.Value.Notes.Data b.Value.Notes.Data do
+            printfn "%f: %s\t\t| %f: %s" time1 (NoteRow.prettyPrint left) time2 (NoteRow.prettyPrint right)
