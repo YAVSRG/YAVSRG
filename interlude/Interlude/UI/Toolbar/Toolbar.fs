@@ -6,7 +6,6 @@ open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection.Menu
 open Interlude.UI.OptionsMenu
 open Interlude.Utils
 

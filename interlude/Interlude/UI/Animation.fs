@@ -33,7 +33,10 @@ type AnimationColorMixer(color : Color) =
     member this.GetColor() = Color.FromArgb(255, int r.Value, int g.Value, int b.Value)    
 
     override this.Update(t) =
-        r.Update(t) |> ignore; g.Update(t) |> ignore; b.Update(t) |> ignore; false
+        r.Update t |> ignore
+        g.Update t |> ignore
+        b.Update t |> ignore
+        false
     
 //Animation lasts forever and counts how many of the given time interval have passed
 type AnimationCounter(milliseconds) =
