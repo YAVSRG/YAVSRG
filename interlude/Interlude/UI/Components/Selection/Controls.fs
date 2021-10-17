@@ -97,7 +97,7 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
         base.Draw()
 
 type TextField(setting: Setting<string>) as this =
-    inherit NavigateSelectable()
+    inherit Selectable()
     let color = AnimationFade 0.5f
     do
         this.Animation.Add color

@@ -2,6 +2,7 @@
 
 open Prelude.Gameplay.NoteColors
 open Prelude.Common
+open Prelude.Data.Themes
 open Interlude
 open Interlude.Graphics
 open Interlude.Options
@@ -13,6 +14,25 @@ open Interlude.UI.Components.Selection.Compound
 open Interlude.UI.Components.Selection.Menu
 
 module Themes =
+
+    let editNoteskin (noteSkin: NoteSkin) : SelectionPage =
+        let name = Setting.simple noteSkin.Config.Name
+        {
+            Content = fun add ->
+                column [
+                    PrettySetting("NoteskinName", 
+                        TextField name
+                    ).Position(200.0f)
+                ]
+            Callback = fun () ->
+                noteSkin.Config <-
+                    { noteSkin.Config with
+                        Name = name.Value
+                    }
+                Content.Noteskins.currentConfig.Value <- noteSkin.Config
+                //todo: refresh noteskin picker with new name
+        }
+        
 
     let themeChanger refresh : SelectionPage =
         Content.Themes.detect()
@@ -90,7 +110,8 @@ module Themes =
                     ).Position(550.0f)
                     PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
                     noteskins.Position(800.0f)
-                    PrettyButton("EditNoteskin", ignore).Position(900.0f)
+                    // todo: prompt to let user know they can't edit zipped version, ask if they want to unzip+edit
+                    PrettyButton("EditNoteskin", fun () -> add ( "EditNoteskin", editNoteskin (Content.Noteskins.current()) )).Position(900.0f)
                 ] :> Selectable
             Callback = ignore
         }
