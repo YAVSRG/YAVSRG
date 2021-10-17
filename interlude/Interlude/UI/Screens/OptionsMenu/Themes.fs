@@ -15,7 +15,7 @@ open Interlude.UI.Components.Selection.Menu
 module Themes =
 
     let themeChanger refresh : SelectionPage =
-        Themes.refreshAvailableThemes()
+        Content.Themes.detect()
         {
             Content = fun add ->
                 column [
@@ -24,13 +24,12 @@ module Themes =
                             Setting.make
                                 ( fun v ->
                                     options.EnabledThemes.Clear()
-                                    options.EnabledThemes.AddRange(v)
-                                    Themes.loadThemes(options.EnabledThemes)
-                                    Themes.changeNoteSkin(options.NoteSkin.Value)
+                                    options.EnabledThemes.AddRange v
+                                    Content.Themes.load options.EnabledThemes
                                     refresh()
                                 )
                                 (fun () -> options.EnabledThemes),
-                            Themes.availableThemes
+                            Content.Themes.detected
                         )
                     ).Position(200.0f, PRETTYWIDTH, 500.0f)
                     Divider().Position(750.0f)
@@ -39,7 +38,7 @@ module Themes =
                             //todo: move this to utils
                             let target = System.Diagnostics.ProcessStartInfo("file://" + System.IO.Path.GetFullPath(getDataPath "Themes"), UseShellExecute = true)
                             System.Diagnostics.Process.Start target |> ignore).Position(800.0f)
-                    PrettyButton("NewTheme", fun () -> Dialog.add <| TextInputDialog(Render.bounds, "Enter theme name", Themes.createNew)).Position(900.0f)
+                    PrettyButton("NewTheme", fun () -> Dialog.add <| TextInputDialog(Render.bounds, "Enter theme name", Content.Themes.createNew)).Position(900.0f)
                 ] :> Selectable
             Callback = refresh
         }
@@ -65,11 +64,11 @@ module Themes =
 
         let noteskins = PrettySetting("Noteskin", Selectable())
         let refreshNoteskins() =
-            let ns = Themes.noteskins() |> Seq.toArray
+            let ns = Content.Noteskins.list() |> Seq.toArray
             let ids = ns |> Array.map fst
             let names = ns |> Array.map (fun (id, data) -> data.Config.Name)
-            options.NoteSkin.Value <- Themes.currentNoteSkin
-            Selector.FromArray(names, ids, options.NoteSkin |> Setting.trigger (fun id -> Themes.changeNoteSkin id; refreshColors()))
+            options.NoteSkin.Value <- Content.Noteskins.currentId.Value
+            Selector.FromArray(names, ids, options.NoteSkin |> Setting.trigger (fun id -> Content.Noteskins.switch id; refreshColors()))
             |> noteskins.Refresh
         refreshNoteskins()
 

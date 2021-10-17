@@ -20,6 +20,7 @@ open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Screens.LevelSelect.Globals
+open Interlude.UI.Components.Selection.Menu
 
 module private InfoPanel =
 
@@ -79,11 +80,11 @@ module private InfoPanel =
             base.Update(elapsedTime, bounds)
             if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
                 let name = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                Tooltip.add (options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
-                    fun () ->
+                ConfirmDialog(sprintf "Really delete '%s'?" name,
+                    fun () -> 
                         chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info)).Show()
 
     type Scoreboard() as this =
         inherit Selectable()

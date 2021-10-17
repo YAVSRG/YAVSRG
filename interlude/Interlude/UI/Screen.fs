@@ -7,7 +7,7 @@ open Interlude
 open Interlude.Utils
 open Interlude.Graphics
 open Interlude.Input
-open Interlude.Themes
+open Interlude.Content
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open OpenTK.Mathematics
@@ -105,7 +105,7 @@ module Screen =
                         match sprite with
                         | Some bmp ->
                             let col =
-                                if themeConfig.OverrideAccentColor then themeConfig.DefaultAccentColor else
+                                if themeConfig().OverrideAccentColor then themeConfig().DefaultAccentColor else
                                     let vibrance (c: Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
                                     seq {
                                         let w = bmp.Width / 50
@@ -114,20 +114,20 @@ module Screen =
                                             for y in 0 .. 49 do
                                                 yield bmp.GetPixel(w * x, h * x) }
                                     |> Seq.maxBy vibrance
-                                    |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else themeConfig.DefaultAccentColor
+                                    |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else themeConfig().DefaultAccentColor
                             globalAnimation.Add(
                                 AnimationAction(fun () ->
                                     let sprite = Sprite.upload(bmp, 1, 1, true)
                                     bmp.Dispose()
-                                    Themes.accentColor <- col
+                                    Content.accentColor.Value <- col
                                     background <- (sprite, AnimationFade(0.0f, Target = 1.0f), false) :: background
                                 )
                             )
                         | None ->
                             globalAnimation.Add(
                                 AnimationAction(fun () ->
-                                    background <- (Themes.getTexture "background", AnimationFade(0.0f, Target = 1.0f), true) :: background
-                                    Themes.accentColor <- themeConfig.DefaultAccentColor
+                                    background <- (Content.getTexture "background", AnimationFade(0.0f, Target = 1.0f), true) :: background
+                                    Content.accentColor.Value <- themeConfig().DefaultAccentColor
                                 )
                             )
                     )
@@ -264,7 +264,7 @@ module Screen =
             if Render.vwidth > 0.0f then
                 parallaxX.Target <- Mouse.X() / Render.vwidth
                 parallaxY.Target <- Mouse.Y() / Render.vheight
-            Style.accentColor.SetColor Themes.accentColor
+            Style.accentColor.SetColor Content.accentColor.Value
             Dialog.update(elapsedTime, bounds)
             base.Update(elapsedTime, bounds)
             current.Update(elapsedTime, toolbar.Bounds)
@@ -280,5 +280,5 @@ module Screen =
                 Transitions.drawTransition transitionFlags inbound amount this.Bounds
                 if (transitionFlags &&& TransitionFlag.UnderLogo = TransitionFlag.UnderLogo) then logo.Draw()
             Dialog.draw()
-            if cursor then Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) Themes.themeConfig.CursorSize Themes.themeConfig.CursorSize) (Style.accentShade(255, 1.0f, 0.5f)) (Themes.getTexture "cursor")
+            if cursor then Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) (Content.themeConfig().CursorSize) (Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
             Tooltip.display.Draw()

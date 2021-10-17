@@ -48,12 +48,12 @@ module Logo =
                     (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
                     (Quad.colorOf(Color.Aqua))
                     Sprite.DefaultQuad
-                Draw.rect this.Bounds Color.White (Themes.getTexture "logo")
+                Draw.rect this.Bounds Color.White (Content.getTexture "logo")
 
                 Stencil.draw()
                 //chart background
                 Draw.rect this.Bounds Color.Aqua Sprite.Default
-                let rain = Themes.getTexture "rain"
+                let rain = Content.getTexture "rain"
                 let v = float32 counter.Time
                 let q = Quad.ofRect this.Bounds
                 Draw.quad <| q <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255))  <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f) rain q)
@@ -75,7 +75,7 @@ module Logo =
                     prev <- level
 
                 Stencil.finish()
-                Draw.rect this.Bounds Color.White (Themes.getTexture "logo")
+                Draw.rect this.Bounds Color.White (Content.getTexture "logo")
 
     let display = Display() |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
 

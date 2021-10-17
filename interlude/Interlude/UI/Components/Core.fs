@@ -18,7 +18,7 @@ type TextBox(textFunc, color, just) =
     new(textFunc, scolor, just) = TextBox(textFunc, (fun () -> scolor(), Color.Transparent), just)
 
     override this.Draw() = 
-        Text.drawFillB(Themes.font(), textFunc(), this.Bounds, color(), just)
+        Text.drawFillB(Content.font(), textFunc(), this.Bounds, color(), just)
         base.Draw()
 
 type TooltipRegion(localisedText) =
@@ -26,8 +26,8 @@ type TooltipRegion(localisedText) =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Mouse.Hover(this.Bounds) && options.Hotkeys.Tooltip.Value.Tapped() then
-            Tooltip.add (options.Hotkeys.Tooltip.Value, localisedText, infinity, ignore)
+        if Mouse.Hover this.Bounds && options.Hotkeys.Tooltip.Value.Tapped() then
+            Tooltip.add (options.Hotkeys.Tooltip.Value, localisedText, infinity)
 
 type Dropdown(options: string array, index, func, label, buttonSize) as this =
     inherit Widget()
@@ -51,8 +51,8 @@ type Dropdown(options: string array, index, func, label, buttonSize) as this =
         let bbounds = Rect.sliceTop buttonSize this.Bounds
         Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
         Draw.rect bbounds (Style.accentShade(255, 0.6f, 0.0f)) Sprite.Default
-        Text.drawFill(Themes.font(), label, Rect.sliceTop 20.0f bbounds, Color.White, 0.5f)
-        Text.drawFill(Themes.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
+        Text.drawFill(Content.font(), label, Rect.sliceTop 20.0f bbounds, Color.White, 0.5f)
+        Text.drawFill(Content.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
         base.Draw()
 
 type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) as this =

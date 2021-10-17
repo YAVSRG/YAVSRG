@@ -8,10 +8,11 @@ open Interlude.Input
 open Interlude.UI.Animation
 
 type NotificationType =
-    | Info = 0
-    | System = 1
-    | Task = 2
-    | Error = 3
+    | Info
+    | Warning
+    | Error
+    | System
+    | Task
 
 module Notification =
 
@@ -39,7 +40,7 @@ module Notification =
                     let r = Rect.create (m - notifWidth) y (m + notifWidth) (y + notifHeight)
                     let f = f.Value * 255.0f |> int
                     Draw.rect r (Color.FromArgb(f / 2, c)) Sprite.Default
-                    Text.drawFill(Themes.font(), s, r, Color.FromArgb(f, Color.White), 0.5f)
+                    Text.drawFill(Content.font(), s, r, Color.FromArgb(f, Color.White), 0.5f)
                     y <- y + notifHeight
                 Stencil.finish()
 
@@ -50,11 +51,11 @@ module Notification =
             fun () -> 
                 let c =
                     match t with
-                    | NotificationType.Info -> Color.Blue
-                    | NotificationType.System -> Color.Green
-                    | NotificationType.Task -> Color.Purple
-                    | NotificationType.Error -> Color.Red
-                    | _ -> Color.Black
+                    | Info -> Color.Blue
+                    | Warning -> Color.Orange
+                    | Error -> Color.Red
+                    | System -> Color.Green
+                    | Task -> Color.Purple
                 slider.Target <- slider.Target + 1.0f
                 let f = new AnimationFade((if items.Count = 0 then 0.0f else 1.0f), Target = 1.0f)
                 display.Animation.Add f
@@ -74,7 +75,7 @@ module Tooltip =
     let mutable private bind = Dummy
     let mutable private text = [||]
     let mutable private timeLeft = 0.0
-    let mutable private action = ignore
+
     let private fade = AnimationFade 0.0f
 
     type Display() as this =
@@ -82,14 +83,14 @@ module Tooltip =
 
         let SCALE = 30.0f
 
-        do
-            this.Animation.Add fade
+        do this.Animation.Add fade
 
         override this.Update(elapsedTime, bounds) =
             if active then
                 timeLeft <- timeLeft - elapsedTime
-                if timeLeft <= 0.0 then (action(); active <- false; fade.Target <- 0.0f)
-                elif bind.Released() then (active <- false; fade.Target <- 0.0f)
+                if timeLeft <= 0.0 || bind.Released() then
+                    active <- false
+                    fade.Target <- 0.0f
             base.Update(elapsedTime, bounds)
 
         override this.Draw() =
@@ -98,19 +99,18 @@ module Tooltip =
                 let mutable y = Mouse.Y() + 50.0f
                 //todo: y-clamping
                 for str in text do
-                    let w = Text.measure(Themes.font(), str) * SCALE
+                    let w = Text.measure(Content.font(), str) * SCALE
                     //todo: x-clamping
-                    Text.drawB(Themes.font(), str, SCALE, x - w * 0.5f, y, (Color.FromArgb(int(255.0f * fade.Value), Color.White), Color.FromArgb(int(255.0f * fade.Value), Color.Black)))
+                    Text.drawB(Content.font(), str, SCALE, x - w * 0.5f, y, (Color.FromArgb(int(255.0f * fade.Value), Color.White), Color.FromArgb(int(255.0f * fade.Value), Color.Black)))
                     y <- y + SCALE
             base.Draw()
 
     let display = Display()
 
-    let add (b: Bind, str: string, time: float, callback: unit -> unit) =
+    let add (b: Bind, str: string, time: float) =
         if not active then
             active <- true
             fade.Target <- 1.0f
             bind <- b
             text <- str.Split "\n"
             timeLeft <- time
-            action <- callback

@@ -30,10 +30,10 @@ module GameplayWidgets =
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
-        let color = new AnimationColorMixer(if conf.GradeColors then Themes.themeConfig.GradeColors.[0] else Color.White)
+        let color = new AnimationColorMixer(if conf.GradeColors then Content.themeConfig().GradeColors.[0] else Color.White)
         let listener =
             if conf.GradeColors then
-                helper.OnHit.Subscribe(fun _ -> color.SetColor(Themes.themeConfig.GradeColors.[Grade.calculate Themes.themeConfig.GradeThresholds helper.Scoring.State]))
+                helper.OnHit.Subscribe(fun _ -> color.SetColor(Content.themeConfig().GradeColors.[Grade.calculate (Content.themeConfig().GradeThresholds) helper.Scoring.State]))
             else null
 
         do
@@ -76,7 +76,7 @@ module GameplayWidgets =
             for struct (time, pos, j) in hits do
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
-                    (let c = Themes.themeConfig.JudgementColors.[j] in
+                    (let c = Content.themeConfig().JudgementColors.[j] in
                         Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), int c.R, int c.G, int c.B))
                     Sprite.Default
 
@@ -89,7 +89,7 @@ module GameplayWidgets =
         let mutable tier = 0
         let mutable late = 0
         let mutable time = -atime * 2.0f - Audio.LEADIN_TIME
-        let texture = Themes.getTexture "judgements"
+        let texture = Content.getTexture "judgements"
         let listener =
             helper.OnHit.Subscribe(fun ev ->
                 let (judge, delta) =
@@ -128,7 +128,7 @@ module GameplayWidgets =
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
-                        color.SetColor(Themes.themeConfig.LampColors.[helper.Scoring.State |> Lamp.calculate |> int])
+                        color.SetColor(Content.themeConfig().LampColors.[helper.Scoring.State |> Lamp.calculate |> int])
                     popAnimation.Value <- conf.Pop)
 
         do
@@ -139,7 +139,7 @@ module GameplayWidgets =
             base.Draw()
             let combo = helper.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
-            Text.drawFill(Themes.font(), combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
+            Text.drawFill(Content.font(), combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
 
         override this.Dispose() =
             listener.Dispose()
@@ -164,7 +164,7 @@ module GameplayWidgets =
     type ColumnLighting(keys, lightTime, helper) as this =
         inherit Widget()
         let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
-        let sprite = Themes.getTexture "receptorlighting"
+        let sprite = Content.getTexture "receptorlighting"
         let lightTime = Math.Min(0.99f, lightTime)
 
         do
@@ -256,21 +256,21 @@ module GameplayWidgets =
                         Draw.quad
                             (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, 0) (Themes.getTexture "holdexplosion"))
+                            (Sprite.gridUV (animation.Loops, 0) (Content.getTexture "holdexplosion"))
                     | Hit (judge, _, true) ->
                         Draw.quad
                             (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, int judge) (Themes.getTexture "holdexplosion"))
+                            (Sprite.gridUV (animation.Loops, int judge) (Content.getTexture "holdexplosion"))
                     | Hit (judge, _, false) ->
                         Draw.quad
                             (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, int judge) (Themes.getTexture "noteexplosion"))
+                            (Sprite.gridUV (animation.Loops, int judge) (Content.getTexture "noteexplosion"))
                     | Mine false ->
                         Draw.quad
                             (box |> Quad.ofRect)
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, 0) (Themes.getTexture "mineexplosion"))
+                            (Sprite.gridUV (animation.Loops, 0) (Content.getTexture "mineexplosion"))
                     | _ -> ()
             Array.iteri f sliders

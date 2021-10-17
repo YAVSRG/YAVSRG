@@ -121,7 +121,7 @@ module Utils =
 
             if pincoming > pcurrent then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
             elif pincoming < pcurrent then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
-            else Logging.Info("Game is up to date.")
+            else Logging.Info "Game is up to date."
 
         let checkForUpdates() =
             BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"

@@ -53,7 +53,7 @@ module MarkdownReader =
                 body = TextBox(K str, K col, 0.0f)
                 lastLineHeight = 0.0f
                 height = size / 0.6f
-                width = (Text.measure(Themes.font(), str) - 0.75f) * size
+                width = (Text.measure(Content.font(), str) - 0.75f) * size
                 right = 0.0f
             }
 

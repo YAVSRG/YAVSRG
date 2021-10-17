@@ -43,4 +43,4 @@ type LoadingScreen() as this =
         
     override this.Draw() =
         let (x, y) = Rect.center this.Bounds
-        Text.drawJust (Themes.font(), (if closing then "Bye o/" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)
+        Text.drawJust (Content.font(), (if closing then "Bye o/" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)

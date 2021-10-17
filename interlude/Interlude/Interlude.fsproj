@@ -40,7 +40,7 @@
     <Compile Include="Graphics\Render.fs" />
     <Compile Include="Graphics\Text.fs" />
     <Compile Include="Input.fs" />
-    <Compile Include="ThemeManager.fs" />
+    <Compile Include="Content.fs" />
     <Compile Include="Options.fs" />
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Widget.fs" />

@@ -76,7 +76,7 @@ type Screen(start: PlayScreenType) as this =
         let noteRenderer = new NoteRenderer(scoring)
         this.Add noteRenderer
         let inline f name (constructor: 'T -> Widget) = 
-            let config: ^T = Themes.getGameplayConfig(name)
+            let config: ^T = Content.GameplayConfig.get name
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 config
@@ -91,11 +91,11 @@ type Screen(start: PlayScreenType) as this =
             f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
-        if Themes.noteskinConfig.ColumnLightTime >= 0.0f then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Themes.noteskinConfig.ColumnLightTime, widgetHelper))
+        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
+            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
 
-        if Themes.noteskinConfig.Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, Themes.noteskinConfig.Explosions, widgetHelper))
+        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
+            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
 
         scoring.SetHitCallback onHit.Trigger
 

@@ -115,7 +115,7 @@ type TextField(setting: Setting<string>) as this =
 
 type ColorPicker(color: Setting<byte>) as this =
     inherit NavigateSelectable()
-    let sprite = Themes.getTexture "note"
+    let sprite = Content.getTexture "note"
     let n = byte sprite.Rows
     let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color
     let bk() = Setting.app (fun x -> (x + 1uy) % n) color

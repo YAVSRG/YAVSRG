@@ -272,21 +272,21 @@ module Options =
 
     let mutable internal config = GameConfig.Default
     let mutable internal options = GameOptions.Default
-    let internal configPath = Path.GetFullPath("config.json")
+    let internal configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
 
     let load() =
         config <- loadImportantJsonFile "Config" configPath config true
-        Localisation.loadFile(config.Locale)
-        if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
-        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath("Data"), "options.json")) options true
+        Localisation.loadFile config.Locale
+        if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
+        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
 
-        Themes.refreshAvailableThemes()
-        Themes.loadThemes(options.EnabledThemes)
-        Themes.changeNoteSkin(options.NoteSkin.Value)
+        Content.detect()
+        Content.load options.EnabledThemes
+        Content.Noteskins.switch options.NoteSkin.Value
 
     let save() =
         try
             JSON.ToFile(configPath, true) config
-            JSON.ToFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
+            JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)

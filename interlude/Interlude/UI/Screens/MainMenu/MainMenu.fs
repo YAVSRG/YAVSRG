@@ -82,8 +82,8 @@ type Screen() as this =
         let (s, ss) = splashText
         let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
         let a2 = splashAnim.Value * 255.0f |> int
-        Text.drawJustB (Themes.font(), ss, 20.0f, c, top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Style.accentShade (a1, 0.5f, 0.0f)), 0.5f)
-        Text.drawJustB (Themes.font(), s, 40.0f, c, top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Style.accentShade (a2, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Content.font(), ss, 20.0f, c, top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Style.accentShade (a1, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Content.font(), s, 40.0f, c, top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Style.accentShade (a2, 0.5f, 0.0f)), 0.5f)
         base.Draw()
 
     override this.Update (elapsedTime, bounds) =

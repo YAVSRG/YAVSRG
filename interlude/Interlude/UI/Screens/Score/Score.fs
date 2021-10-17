@@ -14,15 +14,15 @@ module WatchReplay =
     let mutable func : ReplayData -> unit = ignore
 
 module ScoreColor =
-    let lampToColor (lampAchieved: Lamp) = Themes.themeConfig.LampColors.[lampAchieved |> int]
-    let gradeToColor (gradeAchieved: int) = Themes.themeConfig.GradeColors.[gradeAchieved]
+    let lampToColor (lampAchieved: Lamp) = Content.themeConfig().LampColors.[lampAchieved |> int]
+    let gradeToColor (gradeAchieved: int) = Content.themeConfig().GradeColors.[gradeAchieved]
     let clearToColor (cleared: bool) = if cleared then Color.FromArgb(255, 127, 255, 180) else Color.FromArgb(255, 255, 160, 140)
 
 type Screen(scoreData: ScoreInfoProvider, pbs) as this =
     inherit Screen.T()
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
-    let mutable gradeAchieved = Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State
+    let mutable gradeAchieved = Grade.calculate (Content.themeConfig().GradeThresholds) scoreData.Scoring.State
     let graph = new ScoreGraph(scoreData)
     let mutable mean = 0.0f<ms>
     let mutable standardDev = 0.0f<ms>
@@ -74,7 +74,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
 
     let refresh() =
         collect()
-        gradeAchieved <- Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State
+        gradeAchieved <- Grade.calculate (Content.themeConfig().GradeThresholds) scoreData.Scoring.State
         lampPB <- PersonalBestType.None
         accuracyPB <- PersonalBestType.None
         clearPB <- PersonalBestType.None
@@ -86,11 +86,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
                 base.Draw()
                 let struct (left, top, right, bottom) = this.Bounds
                 let h = System.MathF.Min(bottom - top, right - left)
-                let textW = Text.measure(Themes.font(), text()) * h * 0.5f
+                let textW = Text.measure(Content.font(), text()) * h * 0.5f
                 let mid = (right + left) * 0.5f
                 let hmid = (top + bottom) * 0.5f
                 let rect = Rect.createWH (mid + textW * 0.6f - h * 0.2f) (hmid - h * 0.4f) (h * 0.4f) (h * 0.4f)
-                Text.drawFill(Themes.font(), "▲", rect, Themes.themeConfig.PBColors.[int (pb())], 0.5f)
+                Text.drawFill(Content.font(), "▲", rect, Content.themeConfig().PBColors.[int (pb())], 0.5f)
         }
 
     do
@@ -174,19 +174,19 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         let h = (350.0f - 45.0f) / float32 (normalJudges.Length + 2)
         let mutable y = halfh - 140.0f
         for j in normalJudges do
-            let col = Themes.themeConfig.JudgementColors.[int j]
+            let col = Content.themeConfig().JudgementColors.[int j]
             let b = Rect.create (left + 40.0f) y (left + 530.0f) (y + h)
             Draw.rect b (Color.FromArgb(40, col)) Sprite.Default
             Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgements.[int j] / float32 normalHitCount))) (Color.FromArgb(127, col)) Sprite.Default
-            Text.drawFill(Themes.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
+            Text.drawFill(Content.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
             y <- y + h
         y <- y + 15.0f
         for j in [JudgementType.OK; JudgementType.NG] do
-            let col = Themes.themeConfig.JudgementColors.[int j]
+            let col = Content.themeConfig().JudgementColors.[int j]
             let b = Rect.create (left + 40.0f) y (left + 530.0f) (y + h)
             Draw.rect b (Color.FromArgb(40, col)) Sprite.Default
             Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgements.[int j] / float32 specialHitCount))) (Color.FromArgb(127, col)) Sprite.Default
-            Text.drawFill(Themes.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
+            Text.drawFill(Content.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
             y <- y + h
         // combo, combo breaks
 

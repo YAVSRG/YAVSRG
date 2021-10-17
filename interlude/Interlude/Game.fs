@@ -72,7 +72,7 @@ type Game(config: GameConfig) as this =
         this.ApplyConfig config
         Render.init(base.ClientSize.X, base.ClientSize.Y)
         FBO.init()
-        Themes.font() |> ignore
+        Content.font() |> ignore
         Input.init this
         Gameplay.init()
 

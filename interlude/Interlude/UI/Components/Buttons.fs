@@ -57,4 +57,4 @@ type Button(onClick, label, bind: Setting<Bind>) as this =
     override this.Draw() =
         Draw.rect this.Bounds (Style.accentShade(80, 0.5f, color.Value)) Sprite.Default
         Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
-        Text.drawFillB(Themes.font(), label, Rect.trimBottom 10.0f this.Bounds, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
+        Text.drawFillB(Content.font(), label, Rect.trimBottom 10.0f this.Bounds, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)

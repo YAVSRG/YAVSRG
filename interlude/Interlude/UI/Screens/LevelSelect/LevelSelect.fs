@@ -18,12 +18,13 @@ open Interlude.Utils
 open Interlude.Graphics
 open Interlude.Input
 open Interlude.Gameplay
-open Interlude.Themes
+open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect.Globals
 open Interlude.UI.Screens.Score
+open Interlude.UI.Components.Selection.Menu
 
 [<AbstractClass>]
 type private LevelSelectItem() =
@@ -125,7 +126,7 @@ type private LevelSelectChartItem(groupName, cc) =
             colorVersion <- colorVersionGlobal
             if chartData.IsNone then chartData <- scores.GetScoreData cc.Hash
             match chartData with
-            | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, Grade.calculateFromAcc themeConfig.GradeThresholds x)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
+            | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, Grade.calculateFromAcc (themeConfig().GradeThresholds) x)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
             | None -> ()
             color <- colorFunc pbData
             collectionIcon <-
@@ -144,11 +145,11 @@ type private LevelSelectChartItem(groupName, cc) =
                 expandedGroup <- ""
                 scrollTo <- ScrollToPack groupName
             elif options.Hotkeys.Delete.Value.Tapped() then
-                Tooltip.add (options.Hotkeys.Delete.Value, Localisation.localiseWith [cc.Title] "misc.Delete", 2000.0,
-                    fun () ->
+                ConfirmDialog(sprintf "Really delete '%s'?" cc.Title,
+                    fun () -> 
                         Library.delete cc
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info))
+                        Notification.add (Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info)).Show()
         else hover.Target <- 0.0f
         hover.Update(elapsedTime) |> ignore
     override this.Update(top, topEdge, elapsedTime) =
@@ -182,11 +183,11 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
             if Mouse.Click(MouseButton.Left) then
                 if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
             elif options.Hotkeys.Delete.Value.Tapped() then
-                Tooltip.add (options.Hotkeys.Delete.Value, Localisation.localiseWith [name] "misc.Delete", 2000.0,
-                    fun () ->
+                ConfirmDialog(sprintf "Really delete '%s'?" name,
+                    fun () -> 
                         items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info))
+                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info)).Show()
 
     override this.Update(top, topEdge, elapsedTime) =
         match scrollTo with
