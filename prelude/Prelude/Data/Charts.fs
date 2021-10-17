@@ -91,6 +91,11 @@ module Collections =
             | Collection l -> l |> Seq.map (fun i -> (i, mods, rate)) |> List |> Playlist
             | Playlist p -> Playlist p
             | Goals g -> g |> Seq.map (fun (x, _) -> x) |> List |> Playlist
+        member this.IsEmpty() =
+            match this with
+            | Collection l -> l.Count = 0
+            | Playlist p -> p.Count = 0
+            | Goals g -> g.Count = 0
         static member Blank = Collection (ResizeArray<_>())
 
 module Sorting =

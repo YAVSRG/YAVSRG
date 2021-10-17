@@ -426,6 +426,8 @@ module Themes =
             | Zip (z, _) -> z.ExtractToDirectory targetPath
             | Folder f -> failwith "NYI, do this manually for now"
 
+        member this.IsZip = match storage with Zip _ -> true | _ -> false
+
 
     type Theme(storage) as this =
         inherit StorageAccess(storage)
