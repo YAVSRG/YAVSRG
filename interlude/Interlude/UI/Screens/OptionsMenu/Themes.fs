@@ -37,7 +37,7 @@ module Themes =
                     PrettyButton("OpenThemeFolder",
                         fun () ->
                             //todo: move this to utils
-                            let target = System.Diagnostics.ProcessStartInfo("file://" + System.IO.Path.GetFullPath(getDataPath("Themes")), UseShellExecute = true)
+                            let target = System.Diagnostics.ProcessStartInfo("file://" + System.IO.Path.GetFullPath(getDataPath "Themes"), UseShellExecute = true)
                             System.Diagnostics.Process.Start target |> ignore).Position(800.0f)
                     PrettyButton("NewTheme", fun () -> Dialog.add <| TextInputDialog(Render.bounds, "Enter theme name", Themes.createNew)).Position(900.0f)
                 ] :> Selectable

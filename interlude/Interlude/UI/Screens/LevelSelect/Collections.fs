@@ -63,7 +63,12 @@ module private Collections =
                                     MarkFunc = (fun (x, m) -> if m then colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
                                     EditFunc = Some editCollection
                                     CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
-                                    DeleteFunc = Some (fun (name, _) -> if fst selected <> name then Collections.delete name |> ignore)
+                                    DeleteFunc = Some
+                                        ( fun (name, data) ->
+                                            if fst selected <> name then
+                                                if data.IsEmpty() then Collections.delete name |> ignore
+                                                else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
+                                        )
                                 }, add)).Position(200.0f, 1200.0f, 600.0f)
                         TextBox(K <| Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", K (Color.White, Color.Black), 0.5f)
                         |> positionWidget(0.0f, 0.0f, -190.0f, 1.0f, 0.0f, 1.0f, -120.0f, 1.0f)

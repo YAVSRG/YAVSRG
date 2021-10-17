@@ -175,7 +175,6 @@ module CardSelect =
         type Card<'T>(item: 'T, marked: bool, config: Config<'T>, add: string * SelectionPage -> unit, parent: NavigateSelectable) as this =
             inherit NavigateSelectable()
             let mutable buttons = []
-            let mutable index = -1
 
             let onSelect () =
                 if marked then config.MarkFunc (item, false) else config.MarkFunc (item, true)
@@ -232,14 +231,22 @@ module CardSelect =
             override this.Down() = parent.Down()
 
             override this.Left() =
-                if index < 0 then index <- buttons.Length - 1
-                else index <- index - 1
-                if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
+                match this.HoverChild with
+                | Some child ->
+                    let index = List.findIndex ((=) child) buttons
+                    if index = 0 then this.HoverChild <- None
+                    else this.HoverChild <- Some (buttons.[index - 1])
+                | None ->
+                    this.HoverChild <- Some (buttons.[buttons.Length - 1])
 
             override this.Right() =
-                if index = buttons.Length - 1 then index <- -1
-                else index <- index + 1
-                if index < 0 then this.HoverChild <- None else this.HoverChild <- Some (buttons.[index])
+                match this.HoverChild with
+                | Some child ->
+                    let index = List.findIndex ((=) child) buttons
+                    if index = buttons.Length - 1 then this.HoverChild <- None
+                    else this.HoverChild <- Some (buttons.[index + 1])
+                | None ->
+                    this.HoverChild <- Some (buttons.[0])
                 
             override this.Update(elapsedTime, bounds) =
                 if this.Selected && this.HoverChild = None && options.Hotkeys.Select.Value.Tapped() then onSelect()

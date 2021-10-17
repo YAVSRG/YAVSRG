@@ -13,10 +13,7 @@ open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 open Interlude.UI.Components.Selection.Controls
-
-(*
-    Tools to build options screen
-*)
+open Interlude.UI.Components.Selection.Buttons
 
 type SelectionPage =
     {
@@ -177,8 +174,9 @@ type SelectionMenu(topLevel: SelectionPage) as this =
     
     do
         this.Add body
-        this.Add(TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f))
+        TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
+        |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        |> this.Add
         add ("Options", topLevel)
     
     override this.Update(elapsedTime, bounds) =
@@ -188,3 +186,31 @@ type SelectionMenu(topLevel: SelectionPage) as this =
         | n -> if (fst stack.[n - 1].Value).SelectedChild.IsNone then back()
     
     override this.OnClose() = ()
+
+type ConfirmDialog(prompt, callback: unit -> unit) as this =
+    inherit Dialog()
+
+    let mutable confirm = false
+
+    let options =
+        row [ 
+            LittleButton(K "Yes", fun () ->  this.BeginClose(); confirm <- true)
+            |> position (WPos.leftSlice 200.0f);
+            LittleButton(K "No", this.BeginClose)
+            |> position (WPos.rightSlice 200.0f)
+        ]
+
+    do
+        TextBox(K prompt, K (Color.White, Color.Black), 0.5f)
+        |> positionWidget(200.0f, 0.0f, -200.0f, 0.5f, -200.0f, 1.0f, -50.0f, 0.5f)
+        |> this.Add
+        options.OnSelect()
+        options
+        |> positionWidget(-300.0f, 0.5f, 0.0f, 0.5f, 300.0f, 0.5f, 100.0f, 0.5f)
+        |> this.Add
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if not options.Selected then this.BeginClose()
+
+    override this.OnClose() = if confirm then callback()

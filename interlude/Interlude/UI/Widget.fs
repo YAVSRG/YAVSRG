@@ -60,6 +60,8 @@ module WPos =
     let bottomCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y - h, 1.0f), (x + w * 0.5f, 0.5f), (y, 1.0f)
 
     let topSlice h : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, (h, 0.0f)
+    let leftSlice w : WPos = WPosFragment.min, WPosFragment.min, (w, 0.0f), WPosFragment.max
+    let rightSlice w : WPos = (-w, 1.0f), WPosFragment.min, WPosFragment.max, WPosFragment.max
 
 
 (*
@@ -188,4 +190,4 @@ type Widget() =
 [<AutoOpen>]
 module WPosHelpers =
     
-    let position (p: WPos) (w: Widget) = w.Position <- p
+    let position (p: WPos) (w: Widget) = w.Position <- p; w

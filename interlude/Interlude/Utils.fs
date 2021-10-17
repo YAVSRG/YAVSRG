@@ -32,7 +32,7 @@ module Utils =
         tr.ReadToEnd()
 
     let randomSplash(name) =
-        let r = new System.Random()
+        let r = new Random()
         let text = getResourceText name
         let lines = text.Split("\n")
 
