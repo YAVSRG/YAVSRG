@@ -15,7 +15,7 @@ open Interlude.UI.Components.Selection.Menu
 
 module Themes =
 
-    let editNoteskin (noteSkin: NoteSkin) : SelectionPage =
+    let editNoteskin refreshNoteskins (noteSkin: NoteSkin) : SelectionPage =
         let name = Setting.simple noteSkin.Config.Name
         {
             Content = fun add ->
@@ -30,7 +30,7 @@ module Themes =
                         Name = name.Value
                     }
                 Content.Noteskins.currentConfig.Value <- noteSkin.Config
-                //todo: refresh noteskin picker with new name
+                refreshNoteskins()
         }
         
 
@@ -92,6 +92,13 @@ module Themes =
             |> noteskins.Refresh
         refreshNoteskins()
 
+        let tryEditNoteskin add =
+            let ns = Content.Noteskins.current()
+            match ns.StorageType with
+            | Zip (_, Some file) -> ConfirmDialog(sprintf "'%s' cannot be edited because it is zipped. Extract and edit?" ns.Config.Name, ignore).Show()
+            | Zip (_, None) ->  ConfirmDialog(sprintf "'%s' is an embedded default skin. Copy and edit?" ns.Config.Name, ignore).Show()
+            | Folder _ -> add ( "EditNoteSkin", editNoteskin refreshNoteskins ns )
+
         {
             Content = fun add ->
                 column [
@@ -111,7 +118,7 @@ module Themes =
                     PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
                     noteskins.Position(800.0f)
                     // todo: prompt to let user know they can't edit zipped version, ask if they want to unzip+edit
-                    PrettyButton("EditNoteskin", fun () -> add ( "EditNoteskin", editNoteskin (Content.Noteskins.current()) )).Position(900.0f)
+                    PrettyButton("EditNoteskin", fun () -> tryEditNoteskin add).Position(900.0f)
                 ] :> Selectable
             Callback = ignore
         }
