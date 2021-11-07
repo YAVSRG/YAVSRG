@@ -53,8 +53,10 @@ module GameplayWidgets =
         let listener =
             helper.OnHit.Subscribe(fun ev ->
                 match ev.Guts with
-                | Hit (judgement, delta, _) | Release (judgement, delta, _, _) ->
-                    hits.Add (struct (ev.Time, delta / helper.Scoring.MissWindow * w * 0.5f, int judgement))
+                | Hit e when e.Judgement.IsSome ->
+                    hits.Add (struct (ev.Time, e.Delta / helper.Scoring.MissWindow * w * 0.5f, int e.Judgement.Value))
+                | Release e when e.Judgement.IsSome ->
+                    hits.Add (struct (ev.Time, e.Delta / helper.Scoring.MissWindow * w * 0.5f, int e.Judgement.Value))
                 | _ -> ())
 
         override this.Update(elapsedTime, bounds) =
@@ -89,31 +91,32 @@ module GameplayWidgets =
         let atime = conf.AnimationTime * 1.0f<ms>
         let mutable tier = 0
         let mutable late = 0
-        let mutable time = -Audio.LEADIN_TIME * 3.0f
+        let mutable time = -Time.infinity
         let texture = Content.getTexture "judgements"
         let listener =
-            helper.OnHit.Subscribe(fun ev ->
-                let (judge, delta) =
-                    match ev.Guts with
-                    | Hit (judge, delta, _)
-                    | Release (judge, delta, _, _) -> (judge, delta)
-                    | Hold -> (JudgementType.OK, 0.0f<ms>)
-                if
-                    match judge with
-                    | JudgementType.RIDICULOUS
-                    | JudgementType.MARVELLOUS -> conf.ShowRDMA
-                    | JudgementType.OK
-                    | JudgementType.NG -> conf.ShowOKNG
-                    | _ -> true
-                then
-                    let j = int judge in
-                    if j >= tier || ev.Time - atime > time then
-                        tier <- j
-                        time <- ev.Time
-                        late <- if delta > 0.0f<ms> then 1 else 0 )
+            helper.OnHit.Subscribe
+                ( fun ev ->
+                    let (judge, delta) =
+                        match ev.Guts with
+                        | Hit e -> (e.Judgement, e.Delta)
+                        | Release e -> (e.Judgement, e.Delta)
+                    if
+                        judge.IsSome &&
+                        match judge.Value with
+                        | JudgementType.RIDICULOUS
+                        | JudgementType.MARVELLOUS -> conf.ShowRDMA
+                        | _ -> true
+                    then
+                        let j = int judge.Value in
+                        if j >= tier || ev.Time - atime > time then
+                            tier <- j
+                            time <- ev.Time
+                            late <- if delta > 0.0f<ms> then 1 else 0
+                )
         override this.Draw() =
-            let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
-            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
+            if time > -Time.infinity then
+                let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
+                Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
 
         override this.Dispose() =
             listener.Dispose()
@@ -204,17 +207,12 @@ module GameplayWidgets =
 
         let handleEvent (ev: HitEvent<HitEventGuts>) =
             match ev.Guts with
-            | Hit (judge, _, true) when (config.ExplodeOnMiss || judge <> JudgementType.MISS) ->
+            | Hit e when (config.ExplodeOnMiss || not e.Missed) ->
                 sliders.[ev.Column].Target <- 1.0f
                 sliders.[ev.Column].Value <- 1.0f
                 holding.[ev.Column] <- true
                 mem.[ev.Column] <- ev.Guts
-            | Hold ->
-                sliders.[ev.Column].Target <- 1.0f
-                sliders.[ev.Column].Value <- 1.0f
-                holding.[ev.Column] <- true
-                mem.[ev.Column] <- ev.Guts
-            | Hit (judge, _, false) when (config.ExplodeOnMiss || judge <> JudgementType.MISS) ->
+            | Hit e when (config.ExplodeOnMiss || not e.Missed) ->
                 sliders.[ev.Column].Value <- 1.0f
                 mem.[ev.Column] <- ev.Guts
             | _ -> ()
@@ -222,7 +220,7 @@ module GameplayWidgets =
         do
             this.Animation.Add animation
             Array.iter this.Animation.Add sliders
-            let hitpos = float32 Options.options.HitPosition.Value
+            let hitpos = float32 options.HitPosition.Value
             this.Reposition(0.0f, hitpos, 0.0f, -hitpos)
             helper.OnHit.Add handleEvent
 
@@ -248,20 +246,11 @@ module GameplayWidgets =
                         else Rect.createWH (l + columnwidth * float32 k) (b - columnwidth) columnwidth columnwidth
                         |> Rect.expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
-                    | Hold ->
+                    | Hit e ->
+                        let color = match e.Judgement with Some j -> int j | None -> 0
                         Draw.quad
                             (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, 0) (Content.getTexture "holdexplosion"))
-                    | Hit (judge, _, true) ->
-                        Draw.quad
-                            (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
-                            (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, int judge) (Content.getTexture "holdexplosion"))
-                    | Hit (judge, _, false) ->
-                        Draw.quad
-                            (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
-                            (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, int judge) (Content.getTexture "noteexplosion"))
+                            (Sprite.gridUV (animation.Loops, color) (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                     | _ -> ()
             Array.iteri f sliders

@@ -63,7 +63,9 @@ module Audio =
         if (time > 0.0f<ms> && time < audioDuration()) then
             channelPlaying <- true
             Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
-            //Logging.Debug(sprintf "Seek to audio pos: %f Bass reported time: %f" time (Bass.ChannelBytes2Seconds(nowplaying.ID, Bass.ChannelGetPosition nowplaying.ID) * 1000.0))
+            let actualTime = float32 (Bass.ChannelBytes2Seconds(nowplaying.ID, Bass.ChannelGetPosition nowplaying.ID) * 1000.0) * 1.0f<ms>
+            if actualTime - time > 0.5f<ms> then
+                Logging.Debug(sprintf "Discrepancy seek to pos: %f actual time: %f" time actualTime)
             Bass.ChannelPlay(nowplaying.ID) |> bassError
         else if channelPlaying then
             Bass.ChannelPause(nowplaying.ID) |> bassError
