@@ -1,6 +1,5 @@
 ﻿namespace Prelude.Test
 
-open System
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.ChartFormats.Conversions
@@ -31,5 +30,5 @@ module Imports =
 
     let getRandomChart() =
         // not yet a random chart
-        Prelude.ChartFormats.Interlude.Chart.fromFile @"C:\Users\percy\Desktop\Source\YAVSRG\Prelude\Prelude-Test\bin\Debug\netcoreapp3.1\Songs\\osu!\Hanatan_-_WAVE\\WAVE [Cut Ver.].yav"
+        Chart.fromFile @"C:\Users\percy\Desktop\Source\YAVSRG\Interlude\bin\Debug\netcoreapp3.1\Songs\Compulsive Chordjack Collection 2\Day Dreamer (XingRen)\Dance_Single 23 [0].yav"
         |> Option.get

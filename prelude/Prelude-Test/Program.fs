@@ -21,8 +21,9 @@ let main argv =
     Console.BufferHeight <- 32766
     Logging.Info "Welcome to the Prelude test track"
 
-    Generic.main()
+    //Generic.main()
     //Imports.main()
+    Metrics.main()
 
     Logging.Info "Test track complete, showing reports ..."
 

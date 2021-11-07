@@ -9,13 +9,11 @@ type JudgementType =
     | RIDICULOUS = 0
     | MARVELLOUS = 1
     | PERFECT = 2
-    | OK = 3
-    | GREAT = 4
-    | GOOD = 5
-    | BAD = 6
-    | NG = 7
-    | MISS = 8
-module JudgementType = let count = 9
+    | GREAT = 3
+    | GOOD = 4
+    | BAD = 5
+    | MISS = 6
+module JudgementType = let count = 7
 
 type HitEventGutsInternal =
     | Hit_ of
@@ -29,9 +27,24 @@ type HitEventGutsInternal =
         dropped: bool
 
 type HitEventGuts =
-    | Hit of judgement: JudgementType * delta: Time * isHold: bool
-    | Hold
-    | Release of judgement: JudgementType * delta: Time * overhold: bool * dropped: bool
+    | Hit of 
+        {| 
+            Judgement: JudgementType option
+            Missed: bool
+            Delta: Time
+            /// True if this is the head of a hold note
+            IsHold: bool
+        |}
+    | Release of
+        {| 
+            Judgement: JudgementType option
+            Missed: bool
+            Delta: Time
+            /// True if the hold was pressed correctly and held too long, past the window to release it
+            Overhold: bool 
+            /// True if at any point (including missing the head) the hold was released when it shouldn't have been
+            Dropped: bool
+        |}
 
 type HitEvent<'Guts> =
     {
@@ -97,9 +110,8 @@ type HealthBarPointsSystem
 
     override this.HandleEvent ev =
         match ev.Guts with
-        | Hold -> ()
-        | Hit (j, delta, _)
-        | Release (j, delta, _, _) -> this.ChangeHP(points_func j)
+        | Hit evData -> match evData.Judgement with Some j -> this.ChangeHP(points_func j) | None -> ()
+        | Release evData -> match evData.Judgement with Some j -> this.ChangeHP(points_func j) | None -> ()
 
 (*
     Accuracy/scoring system metric.
@@ -193,7 +205,7 @@ type IScoreMetric
     member this.HitEvents = hitEvents.AsReadOnly()
 
     // correctness guaranteed up to the time you update, no matter how you update
-    // call Update with infinityf to do a correct feeding of the whole replay
+    // call Update with Time.infinity to do a correct feeding of the whole replay
     member this.Update (time: ChartTime) =
         this.PollReplay time // calls HandleKeyDown and HandleKeyUp appropriately
         this.HandlePassive time
@@ -302,7 +314,7 @@ type VibeGauge() =
             "VG",
             0.5,
             false,
-            (fun j ->
+            ( fun j ->
                 match j with
                 | JudgementType.RIDICULOUS | JudgementType.MARVELLOUS -> 0.005
                 | JudgementType.PERFECT -> 0.0025
@@ -310,9 +322,8 @@ type VibeGauge() =
                 | JudgementType.GOOD -> -0.05
                 | JudgementType.BAD -> -0.2
                 | JudgementType.MISS -> -0.1
-                | JudgementType.OK -> 0.0
-                | JudgementType.NG -> -0.1
-                | _ -> failwith "impossible judgement type"),
+                | _ -> failwith "impossible judgement type"
+            ),
             0.0
         )
 
@@ -345,7 +356,7 @@ module ScoringHelpers =
     let dp_windows_halved judge ridiculous =
         (fun (t: Time) -> t * 0.5f) >> (dp_windows judge ridiculous)
 
-    let isComboBreaker = (function JudgementType.NG | JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false)
+    let isComboBreaker = (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false)
 
 type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
     inherit IScoreMetric
@@ -379,13 +390,26 @@ type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, no
                     let judgement = ScoringHelpers.dp_windows judge enableRd delta
                     this.State.Add(sc_curve false delta, 1.0, judgement)
                     if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-                    Hit (judgement, delta, isHold)
+                    Hit 
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            IsHold = isHold
+                        |}
 
                 | Release_ (delta, missed, overhold, dropped) ->
                     let judgement = ScoringHelpers.dp_windows_halved judge enableRd delta
                     this.State.Add(sc_curve true delta, 1.0, judgement)
                     if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-                    Release (judgement, delta, overhold, dropped)
+                    Release
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            Overhold = overhold
+                            Dropped = dropped
+                        |}
         }
 
 type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
@@ -440,13 +464,24 @@ type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
                     let judgement = ScoringHelpers.dp_windows judge enableRd delta
                     this.State.Add(wife_curve delta, 1.0, judgement)
                     if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-                    Hit (judgement, delta, isHold)
+                    Hit 
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            IsHold = isHold
+                        |}
 
                 | Release_ (delta, missed, overhold, dropped) ->
-                    let judgement = if overhold || not missed then JudgementType.OK else JudgementType.NG
-                    this.State.Add(0.0, 0.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
-                    Release (judgement, delta, overhold, dropped)
+                    if overhold || not missed then this.State.IncrCombo() else this.State.BreakCombo()
+                    Release
+                        {|
+                            Judgement = None
+                            Missed = missed
+                            Delta = delta
+                            Overhold = overhold
+                            Dropped = dropped
+                        |}
         }
 
 type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
@@ -491,38 +526,50 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
                     if isHold then
                         headDeltas.[ev.Column] <- Time.Abs delta
                         if missed then this.State.BreakCombo() else this.State.IncrCombo()
-                        Hold
+                        Hit 
+                            {|
+                                Judgement = None
+                                Missed = missed
+                                Delta = delta
+                                IsHold = true
+                            |}
                     else
                         let judgement = judgementFunc delta
                         this.State.Add(points judgement, 300.0, judgement)
                         if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
-                        Hit (judgement, delta, isHold)
+                        Hit 
+                            {|
+                                Judgement = Some judgement
+                                Missed = missed
+                                Delta = delta
+                                IsHold = true
+                            |}
 
                 | Release_ (delta, missed, overhold, dropped) ->
                     let headDelta = headDeltas.[ev.Column]
-                    let delta = Time.Abs delta
+                    let absolute = Time.Abs delta * 0.5f
 
                     let judgement =
                         if
-                            delta < 16.5f<ms> * 1.2f &&
-                            delta + headDelta < 16.5f<ms> * 2.4f &&
+                            absolute < 16.5f<ms> * 1.2f &&
+                            absolute + headDelta < 16.5f<ms> * 2.4f &&
                             (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
                             not dropped
                         then JudgementType.MARVELLOUS
                         elif
-                            delta < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
-                            delta + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
+                            absolute < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
+                            absolute + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
                             (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
                             not dropped
                         then JudgementType.PERFECT
                         elif 
-                            delta < 97.5f<ms> - od * 3.0f<ms> &&
-                            delta + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+                            absolute < 97.5f<ms> - od * 3.0f<ms> &&
+                            absolute + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
                             (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
                         then JudgementType.GREAT
                         elif
-                            delta < 127.5f<ms> - od * 3.0f<ms> &&
-                            delta + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+                            absolute < 127.5f<ms> - od * 3.0f<ms> &&
+                            absolute + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
                             (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
                         then JudgementType.GOOD
                         elif
@@ -532,7 +579,14 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
 
                     this.State.Add(points judgement, 300.0, judgement)
                     if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
-                    Release (judgement, delta, overhold, dropped)
+                    Release
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            Overhold = overhold
+                            Dropped = dropped
+                        |}
         }
 
 module Metrics =

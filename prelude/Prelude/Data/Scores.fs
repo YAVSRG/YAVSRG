@@ -93,7 +93,7 @@ module ScoreManager =
                 modchart.Value
             and set(value) = modchart <- ValueSome value
 
-        member this.AccuracyType with get() = accuracyType and set(value) = if value <> this.AccuracyType then accuracyType <- value; scoreMetric <- ValueNone
+        member this.AccuracyType with get() = accuracyType and set(value) = if value <> this.AccuracyType then accuracyType <- value; scoreMetric <- ValueNone; lamp <- ValueNone
         member this.Scoring =
             scoreMetric <-
                 ValueOption.defaultWith (fun () -> 
@@ -113,7 +113,7 @@ module ScoreManager =
             and set(value) = difficulty <- ValueSome value
 
         member this.Lamp =
-            lamp <- ValueOption.defaultWith (fun () -> Prelude.Scoring.Lamp.calculate this.Scoring.State) lamp |> ValueSome
+            lamp <- ValueOption.defaultWith (fun () -> Lamp.calculate this.Scoring.State) lamp |> ValueSome
             lamp.Value
 
         // todo: grade info

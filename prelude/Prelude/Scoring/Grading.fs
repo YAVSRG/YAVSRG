@@ -20,7 +20,17 @@ module Lamp =
             elif count = 1 then one
             elif count < 10 then singleDigit
             else more
-        c state.ComboBreaks (fun () -> (c state.Judgements.[4] (fun () -> (c state.Judgements.[2] (fun () -> Lamp.MFC) Lamp.WF Lamp.SDP Lamp.PFC)) Lamp.BF Lamp.SDG Lamp.FC)) Lamp.MF Lamp.SDCB Lamp.NONE
+        c state.ComboBreaks
+            ( fun () -> 
+                c state.Judgements.[3]
+                    ( fun () -> 
+                        c state.Judgements.[2]
+                            ( fun () -> Lamp.MFC )
+                            Lamp.WF Lamp.SDP Lamp.PFC
+                    )
+                    Lamp.BF Lamp.SDG Lamp.FC
+            )
+            Lamp.MF Lamp.SDCB Lamp.NONE
 
 module Grade =
 

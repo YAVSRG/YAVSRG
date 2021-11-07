@@ -35,11 +35,9 @@ module Themes =
                         Color.FromArgb(127, 127, 255)
                         Color.FromArgb(0, 255, 255)
                         Color.FromArgb(255, 255, 0)
-                        Color.FromArgb(255, 255, 0)
                         Color.FromArgb(0, 255, 100)
                         Color.FromArgb(0, 0, 255)
                         Color.Fuchsia
-                        Color.FromArgb(255, 127, 0)
                         Color.FromArgb(255, 0, 0)
                     |]
                 JudgementNames =
@@ -47,11 +45,9 @@ module Themes =
                         "Ridiculous"
                         "Marvellous"
                         "Perfect"
-                        "OK"
                         "Great"
                         "Good"
                         "Bad"
-                        "Not Good"
                         "Miss"
                     |]
                 LampColors =
@@ -253,7 +249,6 @@ module Themes =
             {
                 Position: WidgetConfig
                 AnimationTime: float32
-                ShowOKNG: bool
                 ShowRDMA: bool
             }
             static member Default = 
@@ -272,7 +267,6 @@ module Themes =
                             BottomA = 0.5f
                         }
                     AnimationTime = 800.0f
-                    ShowOKNG = false
                     ShowRDMA = true
                 }
         
