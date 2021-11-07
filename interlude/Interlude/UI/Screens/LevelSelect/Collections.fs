@@ -2,11 +2,15 @@
 
 open System.Drawing
 open Prelude.Common
-open Prelude.Data.ChartManager
+open Prelude.Data.Charts.Library
+open Prelude.Data.Charts.Collections
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Controls
+open Interlude.UI.Components.Selection.Menu
+open Interlude.UI.Components.Selection.Compound
 open Interlude.Gameplay
 open Interlude.Options
 open Globals
@@ -17,49 +21,54 @@ module private Collections =
         //todo: load from settings
         let favourites = Localisation.localise "collections.Favourites"
         let c = 
-            match cache.GetCollection favourites with
+            match Collections.get favourites with
             | Some c -> c
             | None ->
                 let n = Collection.Blank
-                cache.UpdateCollection (favourites, n)
+                Collections.create (favourites, n) |> ignore
                 n
         favourites, c
 
-    let private editCollection (setting: Setting<string * Collection>) =
-        let name =
-            setting.Value
-            |> fst
-            |> Setting.simple
+    let private editCollection ((originalName, data): string * Collection) =
+        let name = Setting.simple originalName |> Setting.alphaNum
         {
             Content = fun add ->
                 column [
                     PrettySetting("CollectionName", TextField name).Position(200.0f)
                 ] :> Selectable
-            Callback = fun () -> setting.Value <- (name.Value, snd setting.Value)
+            Callback = fun () ->
+                if name.Value <> originalName then
+                    Logging.Debug (sprintf "Renaming collection '%s' to '%s'" originalName name.Value)
+                    if (Collections.get name.Value).IsSome then
+                        Logging.Debug "Rename failed, target collection already exists."
+                        name.Value <- originalName
+                    else
+                        Collections.rename (originalName, name.Value) |> ignore
+                Collections.update (name.Value, data)
         }
 
     let page() =
         {
             Content = fun add ->
                 let setting =
-                    Setting.make
-                        ignore
-                        (fun () -> cache.GetCollections() |> Seq.map (fun n -> (n, cache.GetCollection(n).Value)) |> List.ofSeq)
+                    Setting.make ignore
+                        (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), fst selected = n))
                 column
                     [
                         PrettySetting("Collections",
                             CardSelect.Selector(
                                 setting,
-                                { 
+                                { CardSelect.Config.Default with
                                     NameFunc = fst
-                                    MarkFunc = (fun (x, _) -> colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
+                                    MarkFunc = (fun (x, m) -> if m then colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
                                     EditFunc = Some editCollection
-                                    CreateFunc = Some (fun () -> "New collection", Collection (ResizeArray<string>()))
-
-                                    CanReorder = false
-                                    CanDuplicate = false
-                                    CanDelete = true
-                                    CanMultiSelect = false
+                                    CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
+                                    DeleteFunc = Some
+                                        ( fun (name, data) ->
+                                            if fst selected <> name then
+                                                if data.IsEmpty() then Collections.delete name |> ignore
+                                                else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
+                                        )
                                 }, add)).Position(200.0f, 1200.0f, 600.0f)
                         TextBox(K <| Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", K (Color.White, Color.Black), 0.5f)
                         |> positionWidget(0.0f, 0.0f, -190.0f, 1.0f, 0.0f, 1.0f, -120.0f, 1.0f)
@@ -75,7 +84,7 @@ type CollectionManager() =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if options.Hotkeys.Collections.Value.Tapped() then
-            Globals.addDialog <| SelectionMenu(Collections.page())
+            SelectionMenu(Collections.page()).Show()
         if currentCachedChart.IsSome then
             if options.Hotkeys.AddToCollection.Value.Tapped() then
                 if
@@ -85,7 +94,7 @@ type CollectionManager() =
                     | Goals gs -> false //gs.Add ((selectedChart, selectedMods, rate), Goal.NoGoal); true
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Globals.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", NotificationType.Info)
+                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", NotificationType.Info)
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
                 if
                     match snd Collections.selected with
@@ -94,4 +103,4 @@ type CollectionManager() =
                     | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Globals.addNotification(Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", NotificationType.Info)
+                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", NotificationType.Info)

@@ -8,6 +8,7 @@ open Prelude.Common
 open Prelude.Scoring
 open Prelude.Gameplay.Layout
 open Prelude.Gameplay.NoteColors
+open Prelude.Data.Charts.Library.Imports
 open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.Input
@@ -24,13 +25,14 @@ module Options =
         | Preset of index:int
         | Custom of width:int * height:int
 
-    type GameConfig = {
-        WorkingDirectory: string
-        Locale: string
-        WindowMode: Setting<WindowType>
-        Resolution: Setting<WindowResolution>
-        FrameLimiter: Setting<float>
-    } with
+    type GameConfig = 
+        {
+            WorkingDirectory: string
+            Locale: string
+            WindowMode: Setting<WindowType>
+            Resolution: Setting<WindowResolution>
+            FrameLimiter: Setting<float>
+        }
         static member Default = {
             WorkingDirectory = ""
             Locale = "en_GB.txt"
@@ -39,43 +41,44 @@ module Options =
             FrameLimiter = Setting.simple 0.0
         }
 
-    type Hotkeys = {
-        Exit: Setting<Bind>
-        Select: Setting<Bind>
-        Previous: Setting<Bind>
-        Next: Setting<Bind>
-        Up: Setting<Bind>
-        Down: Setting<Bind>
-        Start: Setting<Bind>
-        End: Setting<Bind>
+    type Hotkeys =
+        {
+            Exit: Setting<Bind>
+            Select: Setting<Bind>
+            Previous: Setting<Bind>
+            Next: Setting<Bind>
+            Up: Setting<Bind>
+            Down: Setting<Bind>
+            Start: Setting<Bind>
+            End: Setting<Bind>
 
-        Skip: Setting<Bind>
-        Search: Setting<Bind>
-        Toolbar: Setting<Bind>
-        Tooltip: Setting<Bind>
-        Delete: Setting<Bind>
-        Screenshot: Setting<Bind>
-        Volume: Setting<Bind>
+            Skip: Setting<Bind>
+            Search: Setting<Bind>
+            Toolbar: Setting<Bind>
+            Tooltip: Setting<Bind>
+            Delete: Setting<Bind>
+            Screenshot: Setting<Bind>
+            Volume: Setting<Bind>
 
-        Collections: Setting<Bind>
-        AddToCollection: Setting<Bind>
-        RemoveFromCollection: Setting<Bind>
-        Mods: Setting<Bind>
-        Autoplay: Setting<Bind>
-        ChartInfo: Setting<Bind>
+            Collections: Setting<Bind>
+            AddToCollection: Setting<Bind>
+            RemoveFromCollection: Setting<Bind>
+            Mods: Setting<Bind>
+            Autoplay: Setting<Bind>
+            ChartInfo: Setting<Bind>
 
-        Import: Setting<Bind>
-        Options: Setting<Bind>
-        Help: Setting<Bind>
-        Tasks: Setting<Bind>
+            Import: Setting<Bind>
+            Options: Setting<Bind>
+            Help: Setting<Bind>
+            Tasks: Setting<Bind>
 
-        UpRate: Setting<Bind>
-        DownRate: Setting<Bind>
-        UpRateHalf: Setting<Bind>
-        DownRateHalf: Setting<Bind>
-        UpRateSmall: Setting<Bind>
-        DownRateSmall: Setting<Bind>
-    } with
+            UpRate: Setting<Bind>
+            DownRate: Setting<Bind>
+            UpRateHalf: Setting<Bind>
+            DownRateHalf: Setting<Bind>
+            UpRateSmall: Setting<Bind>
+            DownRateSmall: Setting<Bind>
+        }
         static member Default = {
             Exit = Setting.simple(mk Keys.Escape)
             Select = Setting.simple(mk Keys.Enter)
@@ -148,41 +151,63 @@ module Options =
             | [] -> (main, alts)
             | x :: xs -> let (m, a) = cycleBackward (x, xs) in (m, main :: a)
 
-    type GameOptions = {
-        AudioOffset: Setting.Bounded<float>
-        AudioVolume: Setting.Bounded<float>
-        CurrentChart: Setting<string>
-        EnabledThemes: List<string>
+        let indexed (main, alts) =
+            seq {
+                yield (-1, main), true
+                yield! alts |> List.mapi (fun i x -> (i, x), false)
+            }
 
-        ScrollSpeed: Setting.Bounded<float>
-        HitPosition: Setting.Bounded<int>
-        HitLighting: Setting<bool>
-        Upscroll: Setting<bool>
-        BackgroundDim: Setting.Bounded<float>
-        PerspectiveTilt: Setting.Bounded<float>
-        ScreenCoverUp: Setting.Bounded<float>
-        ScreenCoverDown: Setting.Bounded<float>
-        ScreenCoverFadeLength: Setting.Bounded<int>
-        ColorStyle: Setting<ColorConfig>
-        KeymodePreference: Setting<Keymode>
-        UseKeymodePreference: Setting<bool>
-        NoteSkin: Setting<string>
+        let replace index value (main, alts) =
+            match index with
+            | -1 -> value, alts
+            | n -> main, alts |> List.mapi (fun i x -> if i = n then value else x)
 
-        Playstyles: Layout array
-        HPSystems: Setting<WatcherSelection<Metrics.HPSystemConfig>>
-        AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
-        ScoreSaveCondition: Setting<ScoreSaving>
-        FailCondition: Setting<FailType>
-        Pacemaker: Setting<Pacemaker>
-        GameplayBinds: (Bind array) array
+        let delete x (main, alts) = main, alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
 
-        ChartSortMode: Setting<string>
-        ChartGroupMode: Setting<string>
-        //ChartColorMode: Setting<string>
-        ScoreSortMode: Setting<int>
+        let moveToTop x (main, alts) = x, main :: alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
 
-        Hotkeys: Hotkeys
-    } with
+        let add x (main, alts) = main, alts @ [x]
+
+    type GameOptions =
+        {
+            AudioOffset: Setting.Bounded<float>
+            AudioVolume: Setting.Bounded<float>
+            CurrentChart: Setting<string>
+            EnabledThemes: List<string>
+
+            ScrollSpeed: Setting.Bounded<float>
+            HitPosition: Setting.Bounded<int>
+            HitLighting: Setting<bool>
+            Upscroll: Setting<bool>
+            BackgroundDim: Setting.Bounded<float>
+            PerspectiveTilt: Setting.Bounded<float>
+            ScreenCoverUp: Setting.Bounded<float>
+            ScreenCoverDown: Setting.Bounded<float>
+            ScreenCoverFadeLength: Setting.Bounded<int>
+            ColorStyle: Setting<ColorConfig>
+            KeymodePreference: Setting<Keymode>
+            UseKeymodePreference: Setting<bool>
+            NoteSkin: Setting<string>
+
+            Playstyles: Layout array
+            HPSystems: Setting<WatcherSelection<Metrics.HPSystemConfig>>
+            AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
+            ScoreSaveCondition: Setting<ScoreSaving>
+            FailCondition: Setting<FailType>
+            Pacemaker: Setting<Pacemaker>
+
+            OsuMount: Setting<MountedChartSource option>
+            StepmaniaMount: Setting<MountedChartSource option>
+            EtternaMount: Setting<MountedChartSource option>
+
+            ChartSortMode: Setting<string>
+            ChartGroupMode: Setting<string>
+            //ChartColorMode: Setting<string>
+            ScoreSortMode: Setting<int>
+            GameplayBinds: (Bind array) array
+
+            Hotkeys: Hotkeys
+        }
         static member Default = {
             AudioOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
             AudioVolume = Setting.percent 0.1
@@ -210,6 +235,10 @@ module Options =
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemaker = Setting.simple (Accuracy 0.95)
+
+            OsuMount = Setting.simple None
+            StepmaniaMount = Setting.simple None
+            EtternaMount = Setting.simple None
 
             ChartSortMode = Setting.simple "Title"
             ChartGroupMode = Setting.simple "Pack"
@@ -243,21 +272,21 @@ module Options =
 
     let mutable internal config = GameConfig.Default
     let mutable internal options = GameOptions.Default
-    let internal configPath = Path.GetFullPath("config.json")
+    let internal configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
 
     let load() =
         config <- loadImportantJsonFile "Config" configPath config true
-        Localisation.loadFile(config.Locale)
-        if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory(config.WorkingDirectory)
-        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath("Data"), "options.json")) options true
+        Localisation.loadFile config.Locale
+        if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
+        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
 
-        Themes.refreshAvailableThemes()
-        Themes.loadThemes(options.EnabledThemes)
-        Themes.changeNoteSkin(options.NoteSkin.Value)
+        Content.detect()
+        Content.load options.EnabledThemes
+        Content.Noteskins.switch options.NoteSkin.Value
 
     let save() =
         try
             JSON.ToFile(configPath, true) config
-            JSON.ToFile(Path.Combine(getDataPath("Data"), "options.json"), true) options
+            JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)

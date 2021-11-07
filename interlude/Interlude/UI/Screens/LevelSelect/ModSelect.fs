@@ -2,7 +2,10 @@
 
 open Prelude.Gameplay.Mods
 open Interlude.UI
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Containers
+open Interlude.UI.Components.Selection.Buttons
+open Interlude.UI.Components.Selection.Menu
 open Interlude.Gameplay
 open Interlude.Options
 
@@ -11,7 +14,7 @@ module private ModSelect =
     let page() =
         {
             Content = fun add ->
-                let select = FlowSelectable(75.0f, 5.0f, ignore)
+                let select = FlowSelectable(75.0f, 5.0f)
                 CardButton(
                     ModState.getModName "auto",
                     ModState.getModDesc "auto",
@@ -37,7 +40,6 @@ type ModSelect() =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if options.Hotkeys.Mods.Value.Tapped() then
-            Globals.addDialog <| SelectionMenu(ModSelect.page())
+        if options.Hotkeys.Mods.Value.Tapped() then SelectionMenu(ModSelect.page()).Show()
         elif options.Hotkeys.Autoplay.Value.Tapped() then
             autoplay <- not autoplay

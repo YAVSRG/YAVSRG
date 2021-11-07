@@ -1,9 +1,10 @@
-﻿namespace Interlude.UI
+﻿namespace Interlude.UI.Components
 
 open System.Drawing
 open System.Diagnostics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Interlude
+open Interlude.UI
 open Interlude.Utils
 open Interlude.Input
 open Interlude.Graphics
@@ -22,13 +23,14 @@ module MarkdownReader =
         r.ReadToEnd()
         |> Markdown.Parse
 
-    type WBuilder = {
-        body: Widget
-        lastLineHeight: float32
-        height: float32
-        width: float32
-        right: float32
-    }
+    type WBuilder = 
+        {
+            body: Widget
+            lastLineHeight: float32
+            height: float32
+            width: float32
+            right: float32
+        }
     module WBuilder =
         let add (x: WBuilder) (child: WBuilder) =
             let cheight = child.height + child.lastLineHeight
@@ -51,7 +53,7 @@ module MarkdownReader =
                 body = TextBox(K str, K col, 0.0f)
                 lastLineHeight = 0.0f
                 height = size / 0.6f
-                width = (Text.measure(Themes.font(), str) - 0.75f) * size
+                width = (Text.measure(Content.font(), str) - 0.75f) * size
                 right = 0.0f
             }
 
@@ -74,13 +76,13 @@ module MarkdownReader =
                 else let widest = xs |> List.maxBy (fun i -> i.width) in widest.width
             List.fold add (frame width) xs
 
-    type SpanSettings = {
-        Size: float32
-        Bold: bool
-        Italic: bool
-        HasLink: bool
-    }
-    with
+    type SpanSettings =
+        {
+            Size: float32
+            Bold: bool
+            Italic: bool
+            HasLink: bool
+        }
         static member Default = { Size = SIZE; Bold = false; Italic = false; HasLink = false }
 
     let openlink (str: string) =
@@ -150,7 +152,7 @@ module MarkdownReader =
 
         let fc = FlowContainer()
         let frame =
-            let f = Frame((fun () -> Globals.accentShade(200, 0.7f, 0.0f)), (fun () -> Globals.accentShade(255, 1.0f, 0.3f)))
+            let f = Frame((fun () -> Style.accentShade(200, 0.7f, 0.0f)), (fun () -> Style.accentShade(255, 1.0f, 0.3f)))
             doc |> buildDocWidget |> fc.Add
             fc |> f.Add
             f
@@ -168,4 +170,4 @@ module MarkdownReader =
                 frame.Move(-WIDTH * 0.5f, Render.vheight, WIDTH * 0.5f, Render.vheight - 200.0f)
         override this.OnClose() = ()
 
-    let help() = Globals.addDialog (MarkdownViewDialog doc)
+    let help() = Dialog.add (MarkdownViewDialog doc)

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.ImportMenu
+﻿namespace Interlude.UI.Screens.Import
 
 open System
 open System.IO
@@ -7,8 +7,8 @@ open System.Net
 open System.Net.Security
 open Percyqaz.Json
 open Prelude.Common
-open Prelude.Data.ChartManager
-open Prelude.Data.ChartManager.Sorting
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Sorting
 open Prelude.Web
 open Interlude
 open Interlude.Utils
@@ -20,9 +20,12 @@ open Interlude.UI.Screens.LevelSelect
 
 module FileDropHandling =
     let import(path: string) =
-        BackgroundTask.Create(TaskFlags.NONE)("Import " + Path.GetFileName(path))
-            (Gameplay.cache.AutoConvert(path) |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
-        |> ignore
+        match Mounts.dropFunc with
+        | Some f -> f path
+        | None ->
+            BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
+                (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
+            |> ignore
 
 [<Json.AllRequired>]
 type EOPackAttrs = {
@@ -60,17 +63,17 @@ type BeatmapSearch = {
 } with static member Default = { result_count = -1; beatmaps = null }
 
 type private SMImportCard(data: EOPackAttrs) as this =
-    inherit Frame((fun () -> Globals.accentShade(120, 1.0f, 0.0f)), (fun () -> Globals.accentShade(200, 1.0f, 0.2f)))
+    inherit Frame((fun () -> Style.accentShade(120, 1.0f, 0.0f)), (fun () -> Style.accentShade(200, 1.0f, 0.2f)))
     let mutable downloaded = false //todo: maybe check if pack is already installed?
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
             (BackgroundTask.Chain
                 [
                     downloadFile(data.download, target)
-                    (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete(target)))
+                    (Library.Imports.autoConvert target
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notification.add (Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
@@ -99,13 +102,13 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let mutable downloaded = false
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
-        Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
                 [
                     downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
-                    (Gameplay.cache.AutoConvert(target)
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Globals.addNotification(Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete(target)))
+                    (Library.Imports.autoConvert target
+                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notification.add (Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete target))
                 ]) |> ignore
         downloaded <- true
     do
@@ -138,7 +141,7 @@ type private SearchContainerLoader(t) as this =
     override this.Draw() =
         base.Draw()
         //todo: improved loading indicator here
-        Text.drawFill(Themes.font(), "Loading...", this.Bounds, Color.White, 0.5f)
+        Text.drawFill(Content.font(), "Loading...", this.Bounds, Color.White, 0.5f)
         if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> if this.Parent.IsSome then this.Destroy()))
 
 type private SearchContainer(populate, handleFilter) as this =
@@ -164,7 +167,7 @@ module private Beatmap =
             | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
             | Criterion ("k", n)
             | Criterion ("key", n)
-            | Criterion ("keys", n) -> match Int32.TryParse(n) with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
+            | Criterion ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
             | Criterion ("m", m)
             | Criterion ("c", m)
             | Criterion ("creator", m)
@@ -186,14 +189,14 @@ module private Beatmap =
             downloadJson(s, callback)
 
 type Screen() as this =
-    inherit IScreen()
+    inherit Screen.T()
     do
         (*
             Online downloaders
         *)
 
-        // EtternaOnline's certificate expired on 18th March 2021
-        // This hack trusts EO's SSL certificate even though it has expired
+        // EtternaOnline's certificate keeps expiring!! Rop get on it
+        // This hack force-trusts EO's SSL certificate even though it has expired (this was for 18th march 2021, there's a new working certificate currently)
         ServicePointManager.ServerCertificateValidationCallback <-
             RemoteCertificateValidationCallback(
                 fun _ cert _ sslPolicyErrors ->
@@ -218,33 +221,24 @@ type Screen() as this =
         new TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
         |> positionWidget(600.0f, 0.0f, -90.0f, 1.0f, -100.0f, 1.0f, -30.0f, 1.0f)
         |> this.Add
+
         (*
             Offline importers from other games
         *)
-        //todo: system that only imports folders modified after a certain date - that date being last import time
-        let mutable importingOsu = false
-        let mutable importingSM = false
-        let mutable importingEtterna = false
 
-        new Button(
-            (fun () -> if not importingOsu then (importingOsu <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from osu!" (Gameplay.cache.ConvertPackFolder osuSongFolder "osu!") |> ignore)),
-            "osu!", Bind.DummyBind, Sprite.Default)
-        |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 250.0f, 0.0f, 260.0f, 0.0f)
+        MountControl(Mounts.Types.Osu, Options.options.OsuMount)
+        |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 360.0f, 0.0f, 260.0f, 0.0f)
         |> this.Add
 
-        new Button(
-            (fun () -> if not importingSM then (importingSM <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Stepmania 5" (Gameplay.cache.AutoConvert smPackFolder) |> ignore)),
-            "Stepmania 5", Bind.DummyBind, Sprite.Default)
-        |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 250.0f, 0.0f, 330.0f, 0.0f)
+        MountControl(Mounts.Types.Stepmania, Options.options.StepmaniaMount)
+        |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 360.0f, 0.0f, 330.0f, 0.0f)
         |> this.Add
 
-        new Button(
-            (fun () -> if not importingEtterna then (importingEtterna <- true; BackgroundTask.Create TaskFlags.LONGRUNNING "Import from Etterna" (Gameplay.cache.AutoConvert etternaPackFolder) |> ignore)),
-            "Etterna", Bind.DummyBind, Sprite.Default)
-        |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 250.0f, 0.0f, 400.0f, 0.0f)
+        MountControl(Mounts.Types.Etterna, Options.options.EtternaMount)
+        |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 360.0f, 0.0f, 400.0f, 0.0f)
         |> this.Add
 
-        new TextBox(K "Directly import", K (Color.White, Color.Black), 0.5f )
+        new TextBox(K "Import from game", K (Color.White, Color.Black), 0.5f )
         |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f)
         |> this.Add
 

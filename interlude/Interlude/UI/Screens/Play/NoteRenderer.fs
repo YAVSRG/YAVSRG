@@ -3,7 +3,7 @@ open OpenTK
 open System
 open System.Drawing
 open Prelude.Common
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude
@@ -37,7 +37,7 @@ module NoteRenderer =
         |]
 
     let noteRotation keys k =
-        if Themes.noteskinConfig.UseRotation then rotations.[keys - 3].[k]
+        if Content.noteskinConfig().UseRotation then rotations.[keys - 3].[k]
         else 0.0
 
 type NoteRenderer(scoring: IScoreMetric) as this =
@@ -46,14 +46,14 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     //constants
     let chart = Gameplay.getColoredChart()
     let (keys, notes, bpm, sv) = (chart.Keys, chart.Notes, chart.BPM, chart.SV) // todo: at some point refactor this out
-    let columnPositions = Array.init keys (fun i -> float32 i * Themes.noteskinConfig.ColumnWidth)
-    let columnWidths = Array.create keys (float32 Themes.noteskinConfig.ColumnWidth)
-    let noteHeight = Themes.noteskinConfig.ColumnWidth
-    let holdnoteTrim = Themes.noteskinConfig.ColumnWidth * Themes.noteskinConfig.HoldNoteTrim
-    let playfieldColor = Themes.noteskinConfig.PlayfieldColor
+    let columnPositions = Array.init keys (fun i -> float32 i * Content.noteskinConfig().ColumnWidth)
+    let columnWidths = Array.create keys (float32 <| Content.noteskinConfig().ColumnWidth)
+    let noteHeight = Content.noteskinConfig().ColumnWidth
+    let holdnoteTrim = Content.noteskinConfig().ColumnWidth * Content.noteskinConfig().HoldNoteTrim
+    let playfieldColor = Content.noteskinConfig().PlayfieldColor
 
-    let tailsprite = Themes.getTexture(if Themes.noteskinConfig.UseHoldTailTexture then "holdtail" else "holdhead")
-    let animation = new AnimationCounter(Themes.noteskinConfig.AnimationFrameTime)
+    let tailsprite = Content.getTexture(if Content.noteskinConfig().UseHoldTailTexture then "holdtail" else "holdhead")
+    let animation = new AnimationCounter(Content.noteskinConfig().AnimationFrameTime)
 
     // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
     let mutable note_seek = 0 // see comments for sv_seek and sv_peek. same role but for index of next row
@@ -69,12 +69,12 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     let hold_colors = Array.create keys 0
 
     let scrollDirectionPos bottom = if Options.options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
-    let scrollDirectionFlip = fun q -> if (not Themes.noteskinConfig.FlipHoldTail) || Options.options.Upscroll.Value then q else Quad.flip q
+    let scrollDirectionFlip = fun q -> if (not <| Content.noteskinConfig().FlipHoldTail) || Options.options.Upscroll.Value then q else Quad.flip q
     let noteRotation = fun k -> Quad.rotateDeg (NoteRenderer.noteRotation keys k)
 
     do
         let width = Array.mapi (fun i n -> n + columnWidths.[i]) columnPositions |> Array.max
-        let (screenAlign, columnAlign) = Themes.noteskinConfig.PlayfieldAlignment
+        let (screenAlign, columnAlign) = Content.noteskinConfig().PlayfieldAlignment
         this.Reposition(-width * columnAlign, screenAlign, 0.0f, 0.0f, width * (1.0f - columnAlign), screenAlign, 0.0f, 1.0f)
         this.Animation.Add(animation)
 
@@ -105,14 +105,14 @@ type NoteRenderer(scoring: IScoreMetric) as this =
             hold_pos.[k] <- hitposition
             hold_presence.[k] <-
                 if note_seek > 0 then
-                    let (_, struct (nd, c)) = notes.Data.[note_seek - 1] in
+                    let (_, struct (nr, c)) = notes.Data.[note_seek - 1] in
                     hold_colors.[k] <- int c.[k]
-                    (NoteRow.hasNote k NoteType.HOLDHEAD nd || NoteRow.hasNote k NoteType.HOLDBODY nd)
+                    (nr.[k] = NoteType.HOLDHEAD || nr.[k] = NoteType.HOLDBODY)
                 else false
             Draw.quad // receptor
                 (Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight) |> scrollDirectionPos bottom |> Quad.ofRect |> noteRotation k)
                 (Color.White |> Quad.colorOf)
-                (Sprite.gridUV (animation.Loops, if (scoring.KeyState |> Bitmap.hasBit k) then 1 else 0) (Themes.getTexture "receptor"))
+                (Sprite.gridUV (animation.Loops, if (scoring.KeyState |> Bitmap.hasBit k) then 1 else 0) (Content.getTexture "receptor"))
 
         // main render loop - until the last note rendered in every column appears off screen
         let mutable min = hitposition
@@ -135,23 +135,23 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                 column_pos.[k] <- column_pos.[k] + scale * sv_value.[0] * (t - sv_time.[k])
                 sv_time.[k] <- t
                 min <- Math.Min(column_pos.[k], min)
-                if NoteRow.hasNote k NoteType.NORMAL nd then
+                if nd.[k] = NoteType.NORMAL then
                     Draw.quad // normal note
                         (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
                         (Quad.colorOf Color.White)
-                        (Sprite.gridUV (animation.Loops, int color.[k]) (Themes.getTexture "note"))
-                elif NoteRow.hasNote k NoteType.HOLDHEAD nd then
+                        (Sprite.gridUV (animation.Loops, int color.[k]) (Content.getTexture "note"))
+                elif nd.[k] = NoteType.HOLDHEAD then
                     hold_pos.[k] <- column_pos.[k]
                     hold_colors.[k] <- int color.[k]
                     hold_presence.[k] <- true
-                elif NoteRow.hasNote k NoteType.HOLDTAIL nd then
+                elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
                         Draw.quad // body of ln
                             (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight * 0.5f) |> scrollDirectionPos bottom))
                             (Quad.colorOf Color.White)
-                            (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Themes.getTexture "holdbody"))
+                            (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdbody"))
                     if headpos - pos < noteHeight * 0.5f then
                         Draw.quad // tail of ln
                             (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom)) // todo: clipping maths
@@ -160,13 +160,8 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                     Draw.quad // head of ln
                         (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
                         (Quad.colorOf Color.White)
-                        (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Themes.getTexture "holdhead"))
+                        (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
                     hold_presence.[k] <- false
-                elif NoteRow.hasNote k NoteType.MINE nd then
-                    Draw.quad // mine
-                        (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom))
-                        (Quad.colorOf Color.White)
-                        (Sprite.gridUV (animation.Loops, int color.[k]) (Themes.getTexture "mine"))
             note_peek <- note_peek + 1
         
         for k in 0 .. (keys - 1) do
@@ -175,9 +170,9 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                 Draw.quad // body of ln, tail is offscreen
                     (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) bottom |> scrollDirectionPos bottom))
                     (Quad.colorOf Color.White)
-                    (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Themes.getTexture "holdbody"))
+                    (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdbody"))
                 Draw.quad // head of ln, tail is offscreen
                     (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
                     (Quad.colorOf Color.White)
-                    (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Themes.getTexture "holdhead"))
+                    (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
         base.Draw()

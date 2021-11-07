@@ -31,7 +31,38 @@ type AnchorPoint(offset, anchor) =
 
     member this.Snap() = this.Value <- this.Target
 
-type WidgetState = Normal = 1 | Active = 2 | Disabled = 3 | Uninitialised = 4
+type WPosFragment = float32 * float32
+module WPosFragment =
+    
+    let inline move x (a, b) = a + x, b
+
+    let min = 0.0f, 0.0f
+    let max = 0.0f, 1.0f
+    let percent x = 0.0f, x
+
+type WPos = WPosFragment * WPosFragment * WPosFragment * WPosFragment
+module WPos =
+    
+    let fill : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, WPosFragment.max
+
+    let shrink x (l, t, r, b) : WPos = WPosFragment.move x l, WPosFragment.move x t, WPosFragment.move -x r, WPosFragment.move -x b
+    let moveX x (l, t, r, b) : WPos = WPosFragment.move x l, t, WPosFragment.move x r, b
+    let moveY x (l, t, r, b) : WPos = l, WPosFragment.move x t, r, WPosFragment.move x b
+
+    let topLeft x y w h : WPos = (x, 0.0f), (y, 0.0f), (x + w, 0.0f), (y + h, 0.0f)
+    let topRight x y w h : WPos = (x - w, 1.0f), (y, 0.0f), (x, 1.0f), (y + h, 0.0f)
+    let bottomLeft x y w h : WPos = (x, 0.0f), (y - h, 1.0f), (x + w, 0.0f), (y, 1.0f)
+    let bottomRight x y w h : WPos = (x - w, 1.0f), (y - h, 1.0f), (x, 1.0f), (y, 1.0f)
+    
+    let leftCentre x y w h : WPos = (x, 0.0f), (y - h * 0.5f, 0.5f), (x + w, 0.0f), (y + h * 0.5f, 0.5f)
+    let topCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y, 0.0f), (x + w * 0.5f, 0.5f), (y + h, 0.0f)
+    let rightCentre x y w h : WPos = (x - w, 1.0f), (y - h * 0.5f, 0.5f), (x, 1.0f), (y + h * 0.5f, 0.5f)
+    let bottomCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y - h, 1.0f), (x + w * 0.5f, 0.5f), (y, 1.0f)
+
+    let topSlice h : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, (h, 0.0f)
+    let leftSlice w : WPos = WPosFragment.min, WPosFragment.min, (w, 0.0f), WPosFragment.max
+    let rightSlice w : WPos = (-w, 1.0f), WPosFragment.min, WPosFragment.max, WPosFragment.max
+
 
 (*
     Widgets are the atomic components of the UI system.
@@ -45,6 +76,7 @@ type Widget() =
     let mutable parent = None
 
     let mutable bounds = Rect.zero
+    let mutable visibleBounds = Rect.zero
     let left = AnchorPoint (0.0f, 0.0f)
     let top = AnchorPoint (0.0f, 0.0f)
     let right = AnchorPoint (0.0f, 1.0f)
@@ -58,9 +90,11 @@ type Widget() =
     member this.Parent = parent
 
     member this.Bounds = bounds
-    member this.VisibleBounds = Rect.intersect bounds (match this.Parent with None -> bounds | Some (p: Widget) -> p.VisibleBounds)
-    member this.Anchors = (left, top, right, bottom)
 
+    abstract member VisibleBounds : Rect
+    default this.VisibleBounds = visibleBounds
+
+    member this.Anchors = (left, top, right, bottom)
     member this.Animation = animation
     member this.Enabled with get() = enable and set(value) = enable <- value
     member this.Initialised = initialised
@@ -74,35 +108,35 @@ type Widget() =
     default this.OnAddedTo(c: Widget) =
         match parent with
         | None -> parent <- Some c
-        | Some _ -> Logging.Error("Tried to add this widget to a container when it is already in one")
+        | Some _ -> Logging.Error "Tried to add this widget to a container when it is already in one"
         
-    // Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
+    /// Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
     abstract member Remove: Widget -> unit
     default this.Remove(c: Widget) =
         if children.Remove c then
             c.OnRemovedFrom this
-        else Logging.Error("Tried to remove widget that was not in this container")
+        else Logging.Error "Tried to remove widget that was not in this container"
 
     member private this.OnRemovedFrom(c: Widget) =
         match parent with
-        | None -> Logging.Error("Tried to remove this widget from a container it isn't in one")
-        | Some p -> if p = c then parent <- None else Logging.Error("Tried to remove this widget from a container when it is in another")
+        | None -> Logging.Error "Tried to remove this widget from a container it isn't in one"
+        | Some p -> if p = c then parent <- None else Logging.Error "Tried to remove this widget from a container when it is in another"
 
-    // Often we want to add/remove child widgets during an update method
-    //   But, we are in the middle of iterating through the children collection so we cannot modify it
-    // This trick queues up the action to take place immediately before the next update loop, making it loop-safe
-    //   The animations are thread-safe too - So when updating widgets from a background task use this.
+    /// Often we want to add/remove child widgets during an update method
+    ///   But, we are in the middle of iterating through the children collection so we cannot modify it
+    /// This trick queues up the action to take place immediately before the next update loop, making it loop-safe
+    ///   The animations are thread-safe too - So when updating widgets from a background task use this.
     member this.Synchronized(action) =
         animation.Add(new AnimationAction(action))
 
-    // Destroys a widget by removing it from its parent, then disposing it (will be garbage collected)
-    // Note that this is safe to call inside an update/draw method
+    /// Destroys a widget by removing it from its parent, then disposing it (will be garbage collected)
+    /// Note that this is safe to call inside an update/draw method
     member this.Destroy() =
         match this.Parent with
         | Some parent -> parent.Synchronized(fun () -> (parent.Remove this; this.Dispose()))
         | None -> this.Dispose()
 
-    // Clears all children from the widget (with the intention of them being garbage collected, not reused)
+    /// Clears all children from the widget (with the intention of them being garbage collected, not reused)
     abstract member Clear: unit -> unit
     default this.Clear() =
         for c in children do 
@@ -110,15 +144,16 @@ type Widget() =
             c.Dispose()
         children.Clear()
 
-    // Draw is called at the framerate of the game (normally unlimited) and should be where the widget performs render calls to draw it on screen
+    /// Draw is called at the framerate of the game (normally unlimited) and should be where the widget performs render calls to draw it on screen
     abstract member Draw: unit -> unit
     default this.Draw() = for c in children do if c.Initialised && c.Enabled then c.Draw()
 
     member this.UpdateBounds(struct (l, t, r, b): Rect) =
         initialised <- true
         bounds <- Rect.create <| left.Position (l, r) <| top.Position (t, b) <| right.Position (l, r) <| bottom.Position (t, b)
+        visibleBounds <- Rect.intersect bounds (match this.Parent with None -> bounds | Some (p: Widget) -> p.VisibleBounds)
 
-    // Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
+    /// Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit
     default this.Update(elapsedTime, bounds: Rect) =
         animation.Update elapsedTime |> ignore
@@ -132,6 +167,13 @@ type Widget() =
         top.Reposition (t, ta)
         right.Reposition (r, ra)
         bottom.Reposition (b, ba)
+
+    member this.Position
+        with set (((l, la), (t, ta), (r, ra), (b, ba)): WPos) =
+            left.Reposition (l, la)
+            top.Reposition (t, ta)
+            right.Reposition (r, ra)
+            bottom.Reposition (b, ba)
     
     member this.Reposition(l, t, r, b) = this.Reposition (l, 0.0f, t, 0.0f, r, 1.0f, b, 1.0f)
 
@@ -144,3 +186,8 @@ type Widget() =
     // Dispose is called when a widget is going out of scope/about to be garbage collected and allows it to release any resources
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
+
+[<AutoOpen>]
+module WPosHelpers =
+    
+    let position (p: WPos) (w: Widget) = w.Position <- p; w

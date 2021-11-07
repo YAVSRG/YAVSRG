@@ -1,7 +1,7 @@
 ﻿namespace Interlude.UI.Screens.Play
 
 open OpenTK
-open Prelude.Charts.Interlude
+open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
 open Prelude.Data.Themes
@@ -11,6 +11,7 @@ open Interlude.Graphics
 open Interlude.Input
 open Interlude.Options
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.UI.Animation
 open Interlude.UI.Screens.Play.GameplayWidgets
 
@@ -41,11 +42,11 @@ type GameStartDialog() as this =
             let m = (top + bottom) * 0.5f
             Rect.create left (m - 100.0f) right (m + 100.0f)
         if anim1.Target = 1.0f then
-            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceRight(w * anim1.Value))(Globals.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
-            Draw.rect(bounds |> Rect.sliceLeft(w * anim1.Value))(Globals.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceRight(w * anim1.Value)) (Style.accentShade(255, 0.5f, 0.0f)) Sprite.Default
+            Draw.rect(bounds |> Rect.sliceLeft(w * anim1.Value)) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
         else
-            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceLeft(w * anim1.Value))(Globals.accentShade(255, 0.5f, 0.0f))(Sprite.Default)
-            Draw.rect(bounds |> Rect.sliceRight(w * anim1.Value))(Globals.accentShade(255, 1.0f, 0.0f))(Sprite.Default)
+            Draw.rect(bounds |> Rect.expand(0.0f, 10.0f) |> Rect.sliceLeft(w * anim1.Value)) (Style.accentShade(255, 0.5f, 0.0f)) Sprite.Default
+            Draw.rect(bounds |> Rect.sliceRight(w * anim1.Value)) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
 
     override this.OnClose() = ()
 
@@ -55,17 +56,25 @@ type PlayScreenType =
     | Replay of ReplayData
 
 type Screen(start: PlayScreenType) as this =
-    inherit IScreen()
+    inherit Screen.T()
     
     let chart = Gameplay.modifiedChart.Value
+    let firstNote = offsetOf chart.Notes.First.Value
+
     let keypressData, watchingReplay, auto =
         match start with
-        | Normal -> new LiveReplayProvider() :> IReplayProvider, false, false
+        | Normal -> new LiveReplayProvider(firstNote) :> IReplayProvider, false, false
         | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, true
         | Replay data -> StoredReplayProvider(data) :> IReplayProvider, true, false
     let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate
     let onHit = new Event<HitEvent<HitEventGuts>>()
-    let widgetHelper: Helper = { Scoring = scoring; HP = scoring.HP; OnHit = onHit.Publish }
+    let widgetHelper: Helper =
+        { 
+            Scoring = scoring
+            HP = scoring.HP
+            OnHit = onHit.Publish
+            CurrentChartTime = fun () -> Audio.timeWithOffset() - firstNote
+        }
     let binds = Options.options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
 
@@ -75,12 +84,12 @@ type Screen(start: PlayScreenType) as this =
         let noteRenderer = new NoteRenderer(scoring)
         this.Add noteRenderer
         let inline f name (constructor: 'T -> Widget) = 
-            let config: ^T = Themes.getGameplayConfig(name)
+            let config: ^T = Content.GameplayConfig.get name
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 config
                 |> constructor
-                |> Components.positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
+                |> positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
                 |> if pos.Float then this.Add else noteRenderer.Add
         if not auto then
             f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
@@ -90,19 +99,19 @@ type Screen(start: PlayScreenType) as this =
             f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
-        if Themes.noteskinConfig.ColumnLightTime >= 0.0f then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Themes.noteskinConfig.ColumnLightTime, widgetHelper))
+        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
+            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
 
-        if Themes.noteskinConfig.Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, Themes.noteskinConfig.Explosions, widgetHelper))
+        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
+            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
 
         scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
-        Globals.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
+        Screen.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
         //discord presence
-        Globals.setToolbarCollapsed true
-        Globals.setCursorVisible false
+        Screen.toolbar <- true
+        Screen.cursor <- false
         Audio.changeRate Gameplay.rate
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
@@ -110,14 +119,14 @@ type Screen(start: PlayScreenType) as this =
         Input.absorbAll()
 
     override this.OnExit next =
-        Globals.backgroundDim.Target <- 0.7f
-        Globals.setCursorVisible true
-        if next = ScreenType.Score then () else
-            Globals.setToolbarCollapsed false
+        Screen.backgroundDim.Target <- 0.7f
+        Screen.cursor <- true
+        if next <> Screen.Type.Score then Screen.toolbar <- false
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let now = Audio.timeWithOffset()
+        let chartTime = now - firstNote
 
         if not keypressData.Finished then
             if not watchingReplay then
@@ -127,7 +136,7 @@ type Screen(start: PlayScreenType) as this =
                     if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
                     else inputKeyState <- Bitmap.setBit column inputKeyState
                     liveplay.Add(time, inputKeyState) )
-            scoring.Update now
+            scoring.Update chartTime
 
         if now <= -missWindow && options.Hotkeys.Options.Value.Pressed() then
             Audio.pause()
@@ -135,19 +144,23 @@ type Screen(start: PlayScreenType) as this =
             if not watchingReplay then (keypressData :?> LiveReplayProvider).Add(now, inputKeyState)
             QuickOptions.show()
         
-        if watchingReplay && keypressData.Finished then Globals.back ScreenTransitionFlag.Default
+        if watchingReplay && keypressData.Finished then Screen.back Screen.TransitionFlag.Default
         elif scoring.Finished && not keypressData.Finished then
             (keypressData :?> LiveReplayProvider).Finish()
-            ((fun () ->
-                let sd =
-                    ScoreInfoProvider(
-                        Gameplay.makeScore(keypressData.GetFullReplay(), chart.Keys),
-                        Gameplay.currentChart.Value,
-                        fst options.AccSystems.Value,
-                        fst options.HPSystems.Value,
-                        ModChart = Gameplay.modifiedChart.Value,
-                        Difficulty = Gameplay.difficultyRating.Value)
-                (sd, if not watchingReplay then Gameplay.setScore sd else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None))
-                |> Screens.Score.Screen
-                :> IScreen), ScreenType.Score, ScreenTransitionFlag.Default)
-            |> Globals.newScreen
+            Screen.changeNew
+                ( fun () ->
+                    let sd =
+                        ScoreInfoProvider (
+                            Gameplay.makeScore(keypressData.GetFullReplay(), chart.Keys),
+                            Gameplay.currentChart.Value,
+                            fst options.AccSystems.Value,
+                            fst options.HPSystems.Value,
+                            ModChart = Gameplay.modifiedChart.Value,
+                            Difficulty = Gameplay.difficultyRating.Value
+                        )
+                    (sd, if not watchingReplay then Gameplay.setScore sd else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None))
+                    |> Screens.Score.Screen
+                    :> Screen.T
+                )
+                Screen.Type.Score
+                Screen.TransitionFlag.Default

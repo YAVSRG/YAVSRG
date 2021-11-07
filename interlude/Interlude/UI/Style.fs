@@ -1,13 +1,15 @@
 ﻿namespace Interlude.UI
 
 open System.Drawing
+open Interlude
 open Interlude.Utils
 open Interlude.UI.Animation
-open Interlude.UI.Globals
 
 module Style =
 
-    let private accentShade (alpha, brightness, white) =
+    let accentColor = AnimationColorMixer Content.accentColor.Value
+
+    let accentShade (alpha, brightness, white) =
         let accentColor = accentColor.GetColor()
         let rd = float32 (255uy - accentColor.R) * white
         let gd = float32 (255uy - accentColor.G) * white

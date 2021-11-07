@@ -14,7 +14,7 @@ open Interlude.UI
 type Game(config: GameConfig) as this =
     inherit GameWindow(GameWindowSettings.Default, NativeWindowSettings(StartVisible = false, NumberOfSamples = 24, Profile = ContextProfile.Compatability))
 
-    let screens = new ScreenContainer()
+    let screens = Startup.init()
 
     do
         Options.applyOptions <- fun () -> this.ApplyConfig config
@@ -38,7 +38,7 @@ type Game(config: GameConfig) as this =
             base.WindowState <- WindowState.Maximized
         | WindowType.FULLSCREEN ->
             base.WindowState <- WindowState.Fullscreen
-        | _ -> Logging.Error("Invalid window state. How did we get here?")
+        | _ -> Logging.Error "Invalid window state. How did we get here?"
 
     override this.OnResize e =
         base.OnResize e
@@ -46,7 +46,7 @@ type Game(config: GameConfig) as this =
         FBO.init()
 
     override this.OnFileDrop e =
-        e.FileNames |> Array.iter Screens.ImportMenu.FileDropHandling.import
+        e.FileNames |> Array.iter Screens.Import.FileDropHandling.import
 
     override this.OnRenderFrame e =
         base.OnRenderFrame e
@@ -61,7 +61,7 @@ type Game(config: GameConfig) as this =
         if Render.rheight > 0 then screens.Update(e.Time * 1000.0, Render.bounds)
         Input.absorbAll()
         Audio.update()
-        if screens.Exit then base.Close()
+        if Screen.exit then base.Close()
 
     override this.ProcessEvents() =
         base.ProcessEvents()
@@ -72,7 +72,7 @@ type Game(config: GameConfig) as this =
         this.ApplyConfig config
         Render.init(base.ClientSize.X, base.ClientSize.Y)
         FBO.init()
-        Themes.font() |> ignore
+        Content.font() |> ignore
         Input.init this
         Gameplay.init()
 

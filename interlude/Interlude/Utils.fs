@@ -13,7 +13,11 @@ module Utils =
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
         let v2 = Assembly.GetExecutingAssembly().Location |> FileVersionInfo.GetVersionInfo
+        #if DEBUG
+        sprintf "%s %s (%s Dev)" v.Name smallVersion v2.ProductVersion
+        #else
         sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
+        #endif
 
     let K x _ = x
 
@@ -28,7 +32,7 @@ module Utils =
         tr.ReadToEnd()
 
     let randomSplash(name) =
-        let r = new System.Random()
+        let r = new Random()
         let text = getResourceText name
         let lines = text.Split("\n")
 
@@ -117,7 +121,7 @@ module Utils =
 
             if pincoming > pcurrent then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
             elif pincoming < pcurrent then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
-            else Logging.Info("Game is up to date.")
+            else Logging.Info "Game is up to date."
 
         let checkForUpdates() =
             BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"

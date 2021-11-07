@@ -16,6 +16,7 @@ module Text =
     let private spacing = 0.25f
     let private shadow = 0.09f
 
+    [<AllowNullLiteral>]
     type SpriteFont(font: Font) =
         let fontLookup = new Dictionary<char, SpriteQuad>()
         let genChar(c: char) =

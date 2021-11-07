@@ -3,15 +3,16 @@
 open Prelude.Common
 open Interlude
 open Interlude.Options
-open Interlude.UI
-open Interlude.UI.Selection
+open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Controls
+open Interlude.UI.Components.Selection.Menu
 
 module QuickOptions =
 
     let page() : SelectionPage =
         {
             Content = fun add ->
-                let firstNote = Gameplay.currentChart.Value.Notes.First |> Option.map Prelude.Charts.Interlude.offsetOf |> Option.defaultValue 0.0f<ms>
+                let firstNote = Gameplay.currentChart.Value.FirstNote
                 let offset = Gameplay.chartSaveData.Value.Offset
                 column [
                     PrettySetting("SongAudioOffset",
@@ -29,9 +30,7 @@ module QuickOptions =
                     //PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
                     //PrettyButton("LifeSystems", ignore).Position(640.0f)
                 ] :> Selectable
-            Callback = ignore
+            Callback = Audio.playLeadIn
         }
 
-    let show() =
-        { new SelectionMenu(page()) with override this.OnClose() = base.OnClose(); Audio.playLeadIn() }
-        |> Globals.addDialog
+    let show() = { new SelectionMenu(page()) with override this.OnClose() = base.OnClose(); Audio.playLeadIn() }.Show()

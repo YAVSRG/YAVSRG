@@ -9,18 +9,20 @@ open Interlude.Utils
 open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.Gameplay
+
+module WatchReplay =
+    let mutable func : ReplayData -> unit = ignore
 
 module ScoreColor =
-    let lampToColor (lampAchieved: Lamp) = Themes.themeConfig.LampColors.[lampAchieved |> int]
-    let gradeToColor (gradeAchieved: int) = Themes.themeConfig.GradeColors.[gradeAchieved]
+    let lampToColor (lampAchieved: Lamp) = Content.themeConfig().LampColors.[lampAchieved |> int]
+    let gradeToColor (gradeAchieved: int) = Content.themeConfig().GradeColors.[gradeAchieved]
     let clearToColor (cleared: bool) = if cleared then Color.FromArgb(255, 127, 255, 180) else Color.FromArgb(255, 255, 160, 140)
 
 type Screen(scoreData: ScoreInfoProvider, pbs) as this =
-    inherit IScreen()
+    inherit Screen.T()
 
     let mutable (lampPB, accuracyPB, clearPB) = pbs
-    let mutable gradeAchieved = Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State
+    let mutable gradeAchieved = Grade.calculate (Content.themeConfig().GradeThresholds) scoreData.Scoring.State
     let graph = new ScoreGraph(scoreData)
     let mutable mean = 0.0f<ms>
     let mutable standardDev = 0.0f<ms>
@@ -63,8 +65,6 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
                 normalHitCount <- normalHitCount + 1
             | HitEventGuts.Hold ->
                 specialHitCount <- specialHitCount + 1
-            | HitEventGuts.Mine _ ->
-                specialHitCount <- specialHitCount + 1
         mean <- mean / float32 normalHitCount
         earlyMean <- earlyMean / float32 earlyHitCount
         lateMean <- lateMean / float32 lateHitCount
@@ -72,14 +72,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
 
     let refresh() =
         collect()
-        gradeAchieved <- Grade.calculate Themes.themeConfig.GradeThresholds scoreData.Scoring.State
+        gradeAchieved <- Grade.calculate (Content.themeConfig().GradeThresholds) scoreData.Scoring.State
         lampPB <- PersonalBestType.None
         accuracyPB <- PersonalBestType.None
         clearPB <- PersonalBestType.None
         graph.Refresh()
-
-    let watchReplay() =
-        Globals.watchReplay <| scoreData.ReplayData
 
     let pbLabel text colorFunc pb =
         { new TextBox(text, (fun () -> colorFunc(), Color.Black), 0.5f) with
@@ -87,11 +84,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
                 base.Draw()
                 let struct (left, top, right, bottom) = this.Bounds
                 let h = System.MathF.Min(bottom - top, right - left)
-                let textW = Text.measure(Themes.font(), text()) * h * 0.5f
+                let textW = Text.measure(Content.font(), text()) * h * 0.5f
                 let mid = (right + left) * 0.5f
                 let hmid = (top + bottom) * 0.5f
                 let rect = Rect.createWH (mid + textW * 0.6f - h * 0.2f) (hmid - h * 0.4f) (h * 0.4f) (h * 0.4f)
-                Text.drawFill(Themes.font(), "▲", rect, Themes.themeConfig.PBColors.[int (pb())], 0.5f)
+                Text.drawFill(Content.font(), "▲", rect, Content.themeConfig().PBColors.[int (pb())], 0.5f)
         }
 
     do
@@ -129,7 +126,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         |> positionWidget(290.0f, 0.0f, -235.0f, 0.5f, 490.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
-        pbLabel (K "A") (fun () -> ScoreColor.gradeToColor gradeAchieved) (fun () -> accuracyPB)
+        pbLabel (K "A+") (fun () -> ScoreColor.gradeToColor gradeAchieved) (fun () -> accuracyPB)
         |> positionWidget(540.0f, 0.0f, -225.0f, 0.5f, 740.0f, 0.0f, 190.0f, 0.5f)
         |> this.Add
 
@@ -148,10 +145,10 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         |> positionWidget(620.0f, 0.0f, -70.0f, 1.0f, 920.0f, 0.0f, -20.0f, 1.0f)
         |> this.Add
 
-        new Button(ignore, "Graph settings", Input.Bind.DummyBind, Sprite.Default)
+        new Button(ignore, "Graph settings")
         |> positionWidget(-420.0f, 1.0f, -70.0f, 1.0f, -220.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
-        new Button(watchReplay, "Watch replay", Input.Bind.DummyBind, Sprite.Default)
+        new Button((fun () -> WatchReplay.func scoreData.ReplayData), "Watch replay")
         |> positionWidget(-220.0f, 1.0f, -70.0f, 1.0f, -20.0f, 1.0f, -20.0f, 1.0f)
         |> this.Add
 
@@ -161,12 +158,12 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         let halfh = (bottom + top) * 0.5f
 
         //top banner
-        Draw.rect (Rect.create left (top + 15.0f) right (top + 20.0f)) (Globals.accentShade(255, 0.6f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (top + 30.0f) right (top + 180.0f)) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (top + 190.0f) right (top + 195.0f)) (Globals.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 15.0f) right (top + 20.0f)) (Style.accentShade(255, 0.6f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 30.0f) right (top + 180.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create left (top + 190.0f) right (top + 195.0f)) (Style.accentShade(255, 0.6f, 0.0f)) Sprite.Default
 
         //accuracy info
-        Draw.rect (Rect.create (left + 15.0f) (halfh - 255.0f) (left + 765f) (halfh + 205.0f)) (Globals.accentShade(50, 1.0f, 0.6f)) Sprite.Default
+        Draw.rect (Rect.create (left + 15.0f) (halfh - 255.0f) (left + 765f) (halfh + 205.0f)) (Style.accentShade(50, 1.0f, 0.6f)) Sprite.Default
         Draw.rect (Rect.create (left + 20.0f) (halfh - 250.0f) (left + 760f) (halfh + 200.0f)) (Color.FromArgb(160, 0, 0, 0)) Sprite.Default
 
         let judgements = scoreData.Scoring.State.Judgements
@@ -175,30 +172,30 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         let h = (350.0f - 45.0f) / float32 (normalJudges.Length + 2)
         let mutable y = halfh - 140.0f
         for j in normalJudges do
-            let col = Themes.themeConfig.JudgementColors.[int j]
+            let col = Content.themeConfig().JudgementColors.[int j]
             let b = Rect.create (left + 40.0f) y (left + 530.0f) (y + h)
             Draw.rect b (Color.FromArgb(40, col)) Sprite.Default
             Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgements.[int j] / float32 normalHitCount))) (Color.FromArgb(127, col)) Sprite.Default
-            Text.drawFill(Themes.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
+            Text.drawFill(Content.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
             y <- y + h
         y <- y + 15.0f
         for j in [JudgementType.OK; JudgementType.NG] do
-            let col = Themes.themeConfig.JudgementColors.[int j]
+            let col = Content.themeConfig().JudgementColors.[int j]
             let b = Rect.create (left + 40.0f) y (left + 530.0f) (y + h)
             Draw.rect b (Color.FromArgb(40, col)) Sprite.Default
             Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgements.[int j] / float32 specialHitCount))) (Color.FromArgb(127, col)) Sprite.Default
-            Text.drawFill(Themes.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
+            Text.drawFill(Content.font(), sprintf "%O: %i" j judgements.[int j], b, Color.White, 0.0f)
             y <- y + h
         // combo, combo breaks
 
         //graph stuff
-        Draw.rect (Rect.create (left + 15.0f) (bottom - 275.0f) (right - 15.0f) (bottom - 15.0f)) (Globals.accentShade(50, 1.0f, 0.6f)) Sprite.Default
-        Draw.rect (Rect.create (left + 20.0f) (bottom - 70.0f) (right - 20.0f) (bottom - 20.0f)) (Globals.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect (Rect.create (left + 15.0f) (bottom - 275.0f) (right - 15.0f) (bottom - 15.0f)) (Style.accentShade(50, 1.0f, 0.6f)) Sprite.Default
+        Draw.rect (Rect.create (left + 20.0f) (bottom - 70.0f) (right - 20.0f) (bottom - 20.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
 
         base.Draw()
 
     override this.OnEnter prev =
-        Globals.setToolbarCollapsed true
+        Screen.toolbar <- true
 
     override this.OnExit next =
-        Globals.setToolbarCollapsed false
+        Screen.toolbar <- false
