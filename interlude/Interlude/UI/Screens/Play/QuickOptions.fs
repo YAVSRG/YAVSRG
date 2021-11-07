@@ -12,7 +12,7 @@ module QuickOptions =
     let page() : SelectionPage =
         {
             Content = fun add ->
-                let firstNote = Gameplay.currentChart.Value.Notes.First |> Option.map Prelude.ChartFormats.Interlude.offsetOf |> Option.defaultValue 0.0f<ms>
+                let firstNote = Gameplay.currentChart.Value.FirstNote
                 let offset = Gameplay.chartSaveData.Value.Offset
                 column [
                     PrettySetting("SongAudioOffset",

@@ -59,14 +59,22 @@ type Screen(start: PlayScreenType) as this =
     inherit Screen.T()
     
     let chart = Gameplay.modifiedChart.Value
+    let firstNote = offsetOf chart.Notes.First.Value
+
     let keypressData, watchingReplay, auto =
         match start with
-        | Normal -> new LiveReplayProvider() :> IReplayProvider, false, false
+        | Normal -> new LiveReplayProvider(firstNote) :> IReplayProvider, false, false
         | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, true
         | Replay data -> StoredReplayProvider(data) :> IReplayProvider, true, false
     let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate
     let onHit = new Event<HitEvent<HitEventGuts>>()
-    let widgetHelper: Helper = { Scoring = scoring; HP = scoring.HP; OnHit = onHit.Publish }
+    let widgetHelper: Helper =
+        { 
+            Scoring = scoring
+            HP = scoring.HP
+            OnHit = onHit.Publish
+            CurrentChartTime = fun () -> Audio.timeWithOffset() - firstNote
+        }
     let binds = Options.options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
 
@@ -118,6 +126,7 @@ type Screen(start: PlayScreenType) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let now = Audio.timeWithOffset()
+        let chartTime = now - firstNote
 
         if not keypressData.Finished then
             if not watchingReplay then
@@ -127,7 +136,7 @@ type Screen(start: PlayScreenType) as this =
                     if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
                     else inputKeyState <- Bitmap.setBit column inputKeyState
                     liveplay.Add(time, inputKeyState) )
-            scoring.Update now
+            scoring.Update chartTime
 
         if now <= -missWindow && options.Hotkeys.Options.Value.Pressed() then
             Audio.pause()

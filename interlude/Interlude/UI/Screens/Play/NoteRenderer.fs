@@ -162,11 +162,6 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                         (Quad.colorOf Color.White)
                         (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
                     hold_presence.[k] <- false
-                elif nd.[k] = NoteType.MINE then
-                    Draw.quad // mine
-                        (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom))
-                        (Quad.colorOf Color.White)
-                        (Sprite.gridUV (animation.Loops, int color.[k]) (Content.getTexture "mine"))
             note_peek <- note_peek + 1
         
         for k in 0 .. (keys - 1) do

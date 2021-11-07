@@ -41,7 +41,6 @@ type ScoreGraph(data: ScoreInfoProvider) =
                     h - delta / data.Scoring.MissWindow * h, Content.themeConfig().JudgementColors.[int judgement]
                 | HitEventGuts.Release (judgement, delta, _, _) ->
                     h - 0.5f * delta / data.Scoring.MissWindow * h, Color.FromArgb(127, Content.themeConfig().JudgementColors.[int judgement])
-                | HitEventGuts.Mine false -> 0.0f, Content.themeConfig().JudgementColors.[int JudgementType.NG]
                 | _ -> 0.0f, Color.Transparent
             if col.A > 0uy then
                 let x = left + 5.0f + ev.Time * hscale

@@ -25,6 +25,7 @@ module GameplayWidgets =
         Scoring: IScoreMetric
         HP: IHealthBarSystem
         OnHit: IEvent<HitEvent<HitEventGuts>>
+        CurrentChartTime: unit -> ChartTime
     }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
@@ -38,9 +39,9 @@ module GameplayWidgets =
 
         do
             this.Animation.Add(color)
-            this.Add(new Components.TextBox(helper.Scoring.FormatAccuracy, (fun () -> color.GetColor()), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.7f))
+            this.Add(new TextBox(helper.Scoring.FormatAccuracy, (fun () -> color.GetColor()), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.7f))
             if conf.ShowName then
-                this.Add(new Components.TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+                this.Add(new TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
         
         override this.Dispose() =
             if isNull listener then () else listener.Dispose()
@@ -59,7 +60,7 @@ module GameplayWidgets =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if w = 0.0f then w <- Rect.width this.Bounds
-            let now = Audio.timeWithOffset()
+            let now = helper.CurrentChartTime()
             while hits.Count > 0 && let struct (time, _, _) = (hits.[0]) in time + conf.AnimationTime * 1.0f<ms> < now do
                 hits.RemoveAt(0)
 
@@ -72,7 +73,7 @@ module GameplayWidgets =
                     (Rect.create (centre - conf.Thickness) top (centre + conf.Thickness) bottom)
                     Color.White
                     Sprite.Default
-            let now = Audio.timeWithOffset()
+            let now = helper.CurrentChartTime()
             for struct (time, pos, j) in hits do
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
@@ -97,7 +98,6 @@ module GameplayWidgets =
                     | Hit (judge, delta, _)
                     | Release (judge, delta, _, _) -> (judge, delta)
                     | Hold -> (JudgementType.OK, 0.0f<ms>)
-                    | Mine good -> if good then (JudgementType.OK, 0.0f<ms>) else (JudgementType.NG, 0.0f<ms>)
                 if
                     match judge with
                     | JudgementType.RIDICULOUS
@@ -112,7 +112,7 @@ module GameplayWidgets =
                         time <- ev.Time
                         late <- if delta > 0.0f<ms> then 1 else 0 )
         override this.Draw() =
-            let a = 255 - Math.Clamp(255.0f * (Audio.timeWithOffset() - time) / atime |> int, 0, 255)
+            let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
             Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
 
         override this.Dispose() =
@@ -147,12 +147,11 @@ module GameplayWidgets =
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
         inherit Widget()
         let firstNote = Gameplay.getColoredChart().Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
-        do
-            this.Add(Components.TextBox(sprintf "Press %O to skip" options.Hotkeys.Skip.Value |> Utils.K, Utils.K Color.White, 0.5f))
+        do this.Add(TextBox(sprintf "Press %O to skip" options.Hotkeys.Skip.Value |> Utils.K, Utils.K Color.White, 0.5f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if Audio.time() + Audio.LEADIN_TIME * 2.5f < firstNote then
+            if helper.CurrentChartTime() < -Audio.LEADIN_TIME * 2.5f then
                 if options.Hotkeys.Skip.Value.Tapped() then
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
             else this.Destroy()
@@ -198,7 +197,7 @@ module GameplayWidgets =
     type Explosions(keys, config: WidgetConfig.Explosions, helper) as this =
         inherit Widget()
         let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
-        let mem = Array.create keys (HitEventGuts.Mine true)
+        let mem = Array.zeroCreate keys
         let holding = Array.create keys false
         let explodeTime = Math.Min(0.99f, config.FadeTime)
         let animation = new AnimationCounter(config.AnimationFrameTime)
@@ -216,9 +215,6 @@ module GameplayWidgets =
                 holding.[ev.Column] <- true
                 mem.[ev.Column] <- ev.Guts
             | Hit (judge, _, false) when (config.ExplodeOnMiss || judge <> JudgementType.MISS) ->
-                sliders.[ev.Column].Value <- 1.0f
-                mem.[ev.Column] <- ev.Guts
-            | Mine false ->
                 sliders.[ev.Column].Value <- 1.0f
                 mem.[ev.Column] <- ev.Guts
             | _ -> ()
@@ -267,10 +263,5 @@ module GameplayWidgets =
                             (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
                             (Sprite.gridUV (animation.Loops, int judge) (Content.getTexture "noteexplosion"))
-                    | Mine false ->
-                        Draw.quad
-                            (box |> Quad.ofRect)
-                            (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, 0) (Content.getTexture "mineexplosion"))
                     | _ -> ()
             Array.iteri f sliders

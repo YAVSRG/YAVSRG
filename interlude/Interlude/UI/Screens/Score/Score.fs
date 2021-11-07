@@ -65,8 +65,6 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
                 normalHitCount <- normalHitCount + 1
             | HitEventGuts.Hold ->
                 specialHitCount <- specialHitCount + 1
-            | HitEventGuts.Mine _ ->
-                specialHitCount <- specialHitCount + 1
         mean <- mean / float32 normalHitCount
         earlyMean <- earlyMean / float32 earlyHitCount
         lateMean <- lateMean / float32 lateHitCount
