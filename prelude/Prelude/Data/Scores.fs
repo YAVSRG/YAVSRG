@@ -45,7 +45,7 @@ module ScoreManager =
         }
         static member FromChart(c: Chart) =
             {
-                Offset = c.Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
+                Offset = c.FirstNote
                 Scores = List<Score>()
                 Lamp = Dictionary<string, PersonalBests<Lamp>>()
                 Accuracy = Dictionary<string, PersonalBests<float>>()

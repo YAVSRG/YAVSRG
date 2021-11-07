@@ -18,10 +18,6 @@ type HitStatus =
     | RELEASE_REQUIRED = 4
     | RELEASE_ACCEPTED = 5
 
-    // mines
-    | DODGE = 6
-    | DODGE_FAILED = 7
-
 // this data is in-memory only and not exposed much to other parts of the code
 // the flags in particular need never be exposed anywhere else, while the hit deltas can be used on the score screen to give useful data
 // most interesting things should come out of a specific score system implementation
@@ -47,8 +43,6 @@ module InternalScore =
                     statuses.[k] <- HitStatus.HIT_HOLD_REQUIRED
                 elif nr.[k] = NoteType.HOLDTAIL then
                     statuses.[k] <- HitStatus.RELEASE_REQUIRED
-                elif nr.[k] = NoteType.MINE then
-                    statuses.[k] <- HitStatus.DODGE
 
             struct (time, times, statuses)
             )
@@ -67,8 +61,6 @@ module InternalScore =
                     statuses.[k] <- HitStatus.HIT_ACCEPTED
                 elif nr.[k] = NoteType.HOLDTAIL then
                     statuses.[k] <- HitStatus.RELEASE_ACCEPTED
-                elif nr.[k] = NoteType.MINE then
-                    statuses.[k] <- HitStatus.DODGE
 
             struct (time, times, statuses)
             )
@@ -76,10 +68,12 @@ module InternalScore =
 
 // "replay" data in the sense that, with this data + the chart it was played against, you can know everything about the score and what happened
 
-// the Time is the ms offset into the chart, the Bitmap is a map of which keys are pressed down at that moment
+// the Time is the ms offset into the chart*, the Bitmap is a map of which keys are pressed down at that moment
 // ex: [|(0, 0); (1, 1)|] indicates that the leftmost (1st) column was pressed down, 1 ms into the chart
+// *into the chart = time since the first note, not audio time
 
-type ReplayRow = (struct (Time * Bitmap))
+type ChartTime = float32<ms> //Indicates that 0 = first note
+type ReplayRow = (struct (ChartTime * Bitmap))
 type ReplayData = ReplayRow array
 
 module Replay =
@@ -109,10 +103,11 @@ module Replay =
         bw.Flush()
         Convert.ToBase64String (outputStream.ToArray())
 
-    // constructed with notes instead of InternalScoreData to avoid dependence on it
     // this replay is fed into score calculation when Auto-play is enabled
     let perfectReplay (keys: int) (notes: TimeData<NoteRow>) : ReplayData =
         let timeUntilNext i = if i >= notes.Count - 1 then 50.0f<ms> else offsetOf notes.Data.[i + 1] - offsetOf notes.Data.[i]
+
+        let firstNote = fst notes.Data.[0]
 
         seq {
             let mutable i = 0
@@ -131,8 +126,8 @@ module Replay =
                     elif nr.[k] =  NoteType.HOLDTAIL then
                         hit <- Bitmap.unsetBit k hit
                         held <- Bitmap.unsetBit k held
-                yield struct (time, hit)
-                yield struct (time + delay * 0.5f, held)
+                yield struct (time - firstNote, hit)
+                yield struct (time - firstNote + delay * 0.5f, held)
                 i <- i + 1
         } |> Array.ofSeq
 
@@ -141,7 +136,7 @@ type IReplayProvider =
     abstract member Finished : bool
 
     // is there a next bitmap before/on the given time?
-    abstract member HasNext : Time -> bool
+    abstract member HasNext : ChartTime -> bool
 
     // get the next bitmap (call if HasNext was true)
     abstract member GetNext : unit -> ReplayRow
@@ -167,7 +162,7 @@ type StoredReplayProvider(data: ReplayData) =
     new(data: string) = StoredReplayProvider (Replay.decompress data)
     static member AutoPlay(keys, noteData) = Replay.perfectReplay keys noteData |> StoredReplayProvider
 
-type LiveReplayProvider() =
+type LiveReplayProvider(firstNote: Time) =
     let mutable i = 0
     let mutable finished = false
     let buffer = ResizeArray<ReplayRow>()
@@ -186,7 +181,7 @@ type LiveReplayProvider() =
             if finished then buffer.ToArray() else invalidOp "Live play is not declared as over, we don't have the full replay yet!"
 
     member this.Add (time, bitmap) =
-        if not finished then buffer.Add(struct (time, bitmap)) else invalidOp "Live play is declared as over; cannot append to replay"
+        if not finished then buffer.Add(struct (time - firstNote, bitmap)) else invalidOp "Live play is declared as over; cannot append to replay"
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Live play is already declared as over; cannot do so again"
 
@@ -196,7 +191,7 @@ type ReplayConsumer(keys: int, replay: IReplayProvider) =
 
     let mutable currentState: Bitmap = 0us
     
-    member this.PollReplay(time: Time) =
+    member this.PollReplay(time: ChartTime) =
         while replay.HasNext time do
             let struct (time, keystates) = replay.GetNext()
             this.HandleReplayRow (time, keystates)
@@ -210,5 +205,5 @@ type ReplayConsumer(keys: int, replay: IReplayProvider) =
         currentState <- keystates
 
     member this.KeyState = currentState
-    abstract member HandleKeyDown : Time * int -> unit
-    abstract member HandleKeyUp : Time * int -> unit
+    abstract member HandleKeyDown : ChartTime * int -> unit
+    abstract member HandleKeyUp : ChartTime * int -> unit

@@ -49,9 +49,7 @@ module Caching =
             }
 
     let cacheChart (chart: Chart) : CachedChart =
-        let endTime =
-            if chart.Notes.Count = 0 then 0.0f<ms> else
-                chart.Notes.GetPointAt Time.infinity |> offsetOf
+        let lastNote = chart.LastNote
         let rating = RatingReport(chart.Notes, 1.0f, Layout.Spread, chart.Keys)
         {
             FilePath = chart.FileIdentifier
@@ -61,8 +59,9 @@ module Caching =
             Pack = chart.Header.SourcePack
             Hash = Chart.hash chart
             Keys = chart.Keys
-            Length = if endTime = 0.0f<ms> then 0.0f<ms> else endTime - offsetOf chart.Notes.First.Value
-            BPM = ``Interlude to osu!``.minMaxBPM (List.ofSeq chart.BPM.Data) endTime
+            Length = lastNote - chart.FirstNote
+            // todo: move to Chart module
+            BPM = ``Interlude to osu!``.minMaxBPM (List.ofSeq chart.BPM.Data) lastNote
             DiffName = chart.Header.DiffName
             Physical = rating.Physical
             Technical = rating.Technical

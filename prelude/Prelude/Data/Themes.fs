@@ -321,7 +321,7 @@ module Themes =
         }
         static member Default =
             {
-                Name = "?"
+                Name = "Unnamed Noteskin"
                 Author = "Unknown"
                 Version = "1.0.0"
                 UseRotation = false
@@ -340,9 +340,11 @@ module Themes =
         Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
     *)
 
-    type StorageType = Zip of (ZipArchive * string) | Folder of string
+    type StorageType = Zip of ZipArchive * source: string option | Folder of string
 
     type StorageAccess(storage: StorageType) =
+
+        member this.StorageType = storage
 
         member this.TryReadFile ([<ParamArray>] path: string array) =
             let p = Path.Combine(path)
@@ -406,10 +408,16 @@ module Themes =
                 if createNew then this.WriteJson (json, path)
                 json, success
             with err ->
-                Logging.Error(
+                Logging.Error (
                     sprintf "Couldn't load json '%s' in '%s'"
                         (String.concat "/" path)
-                        (match storage with Zip (_, source) -> Path.GetFileName source | Folder f -> Path.GetFileName f), err)
+                        (
+                            match storage with
+                            | Zip (_, source) -> match source with Some s -> Path.GetFileName s | None -> "EMBEDDED ASSETS"
+                            | Folder f -> Path.GetFileName f
+                        ),
+                    err
+                )
                 defaultValue()
 
         member this.WriteJson<'T> (data: 'T, [<ParamArray>] path: string array) =
@@ -425,8 +433,6 @@ module Themes =
             match storage with
             | Zip (z, _) -> z.ExtractToDirectory targetPath
             | Folder f -> failwith "NYI, do this manually for now"
-
-        member this.IsZip = match storage with Zip _ -> true | _ -> false
 
 
     type Theme(storage) as this =
@@ -452,8 +458,8 @@ module Themes =
         
         static member FromZipFile (file: string) = 
             let stream = File.OpenRead file
-            new Theme(Zip (new ZipArchive(stream), file))
-        static member FromZipStream (stream: Stream) = new Theme(Zip (new ZipArchive(stream), "DEFAULT_ASSETS"))
+            new Theme(Zip (new ZipArchive(stream), Some file))
+        static member FromZipStream (stream: Stream) = new Theme(Zip (new ZipArchive(stream), None))
         static member FromFolderName (name: string) = new Theme(Folder <| getDataPath (Path.Combine ("Themes", name)))
 
     type NoteSkin(storage) as this =
@@ -477,6 +483,6 @@ module Themes =
         
         static member FromZipFile (file: string) = 
             let stream = File.OpenRead file
-            new NoteSkin(Zip (new ZipArchive(stream), file))
-        static member FromZipStream (stream: Stream) = new NoteSkin(Zip (new ZipArchive(stream), "DEFAULT_NOTESKIN"))
+            new NoteSkin(Zip (new ZipArchive(stream), Some file))
+        static member FromZipStream (stream: Stream) = new NoteSkin(Zip (new ZipArchive(stream), None))
         static member FromFolder (path: string) = new NoteSkin(Folder path)

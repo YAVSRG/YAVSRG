@@ -201,7 +201,7 @@ module Conversions =
                         | '3' ->
                             nr.[k] <- NoteType.HOLDTAIL
                             ln <- Bitmap.unsetBit k ln
-                        | 'M' -> nr.[k] <- NoteType.MINE
+                        | 'M' -> () //ignore mines
                         | _ -> failwith ("unknown note type " + c.ToString())
                         ) m.[i]
                     if NoteRow.isEmpty nr |> not then states.Add((offset + float32 (i - start) * sep), nr)
@@ -384,7 +384,7 @@ module Conversions =
                 Difficulty = diff
                 Events = [ Background ((match chart.Header.BackgroundFile with Relative s -> s | Absolute s -> Path.GetFileName s), (0.0, 0.0)) ]
                 Objects = convertSnapsToHitobjects (List.ofSeq (chart.Notes.Data)) chart.Keys
-                Timing = convertToTimingPoints chart.BPM chart.SV (offsetOf (chart.Notes.GetPointAt Time.infinity))
+                Timing = convertToTimingPoints chart.BPM chart.SV chart.LastNote
             }
 
     (*

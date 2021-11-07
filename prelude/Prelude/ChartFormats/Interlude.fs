@@ -54,7 +54,6 @@ module Interlude =
         | HOLDHEAD = 2uy
         | HOLDBODY = 3uy
         | HOLDTAIL = 4uy
-        | MINE = 5uy
 
     type NoteRow = NoteType array
 
@@ -82,26 +81,27 @@ module Interlude =
         let apply (nt: NoteType) f (row: NoteRow) = (noteData nt row |> f |> setNoteData nt row)
 
         let read (keycount: int) (br: BinaryReader) : NoteRow =
-            let (storage: uint16) = br.ReadByte() |> uint16
-            let data = [| 0us; 0us; 0us; 0us; 0us; 0us; 0us |]
-            for i = 0 to 6 do
-                if (Bitmap.hasBit i storage) then data.[i] <- br.ReadUInt16()
             let row = createEmpty keycount
-            setNoteData NoteType.NORMAL row data.[0]
-            setNoteData NoteType.HOLDHEAD row data.[1]
-            setNoteData NoteType.HOLDBODY row data.[2]
-            setNoteData NoteType.HOLDTAIL row data.[3]
-            setNoteData NoteType.MINE row data.[4]
+            let columns = br.ReadUInt16()
+            for k in Bitmap.toSeq columns do
+                row.[k] <-
+                    match br.ReadByte() with
+                    | 1uy -> NoteType.NORMAL
+                    | 2uy -> NoteType.HOLDHEAD
+                    | 3uy -> NoteType.HOLDBODY
+                    | 4uy -> NoteType.HOLDTAIL
+                    | b -> failwithf "unexpected note type in chart data: %i" b
             row
 
         let write (bw: BinaryWriter) (row: NoteRow) =
-            let mutable storage = 0us
-            let data = [noteData NoteType.NORMAL row; noteData NoteType.HOLDHEAD row; noteData NoteType.HOLDBODY row; noteData NoteType.HOLDTAIL row; noteData NoteType.MINE row]
-            for i = 0 to 4 do
-                if data.[i] > 0us then storage <- Bitmap.setBit i storage
-            bw.Write(storage |> byte)
-            for i = 0 to 4 do
-                if data.[i] > 0us then bw.Write(data.[i])
+            let columns = 
+                seq { 
+                    for i in 0 .. row.Length - 1 do
+                        if row.[i] <> NoteType.NOTHING then yield i
+                }
+            bw.Write(Bitmap.create columns)
+            for k in columns do
+                bw.Write(byte row.[k])
 
         let prettyPrint (row: NoteRow) =
             let p =
@@ -110,7 +110,6 @@ module Interlude =
                 | NoteType.HOLDHEAD -> '^'
                 | NoteType.HOLDBODY -> '|'
                 | NoteType.HOLDTAIL -> 'v'
-                | NoteType.MINE -> '*'
                 | NoteType.NOTHING
                 | _ -> ' '
             new string(row |> Array.map p)
@@ -208,6 +207,7 @@ module Interlude =
 
         member this.Empty = this.Count = 0
         member this.First = if this.Empty then None else Some data.[0]
+        member this.Last = if this.Empty then None else Some data.[data.Count - 1]
         member this.Clear() = data.Clear()
         
         member this.EnumerateBetween time1 time2 = 
@@ -281,7 +281,9 @@ module Interlude =
                 ChartSource = Unknown
             }
 
-    type Chart(keys, header, notes, bpms, sv, path) =
+    type Chart(keys: int, header: ChartHeader, notes: TimeData<NoteRow>, bpms: TimeData<BPM>, sv: MultiTimeData<float32>, path: string) =
+
+        do if notes.Count = 0 then invalidArg (nameof notes) "A chart cannot have no notes"
 
         member this.Keys = keys
         member this.Notes: TimeData<NoteRow> = notes
@@ -293,7 +295,10 @@ module Interlude =
         member this.BackgroundPath = match header.BackgroundFile with Relative s -> Path.Combine(Path.GetDirectoryName path, s) | Absolute s -> s
         member this.AudioPath = match header.AudioFile with Relative s -> Path.Combine(Path.GetDirectoryName path, s) | Absolute s -> s
 
-        new() = Chart(4, ChartHeader.Default, TimeData(), TimeData(), MultiTimeData(4), "unknown.yav")
+        member this.FirstNote = offsetOf this.Notes.First.Value
+        member this.LastNote = offsetOf this.Notes.Last.Value
+
+        new() = Chart(4, ChartHeader.Default, TimeData(ResizeArray([(0.0f<ms>, NoteRow.createEmpty 4)])), TimeData(), MultiTimeData(4), "unknown.yav")
 
     module Chart = 
         let private readSection<'t> (br: BinaryReader) f =
@@ -342,29 +347,24 @@ module Interlude =
             let h = SHA256.Create()
             use ms = new MemoryStream()
             use bw = new BinaryWriter(ms)
-            if (chart.Notes.Count = 0) then
-                "_"
-            else
-                let offset = offsetOf <| chart.Notes.First.Value
-                for (o, nr) in chart.Notes.Data do
+
+            let offset = chart.FirstNote
+
+            for (o, nr) in chart.Notes.Data do
+                if NoteRow.isEmpty nr |> not then
                     bw.Write ((o - offset) * 0.2f |> Convert.ToInt32)
+                    for nt in nr do bw.Write (byte nt)
 
-                    bw.Write(NoteRow.noteData NoteType.NORMAL nr)
-                    bw.Write(NoteRow.noteData NoteType.HOLDHEAD nr)
-                    bw.Write(NoteRow.noteData NoteType.HOLDBODY nr)
-                    bw.Write(NoteRow.noteData NoteType.HOLDTAIL nr)
-                    bw.Write(NoteRow.noteData NoteType.MINE nr)
-                    bw.Write(0us)
+            for i = 0 to chart.Keys do
+                let mutable speed = 1.0
+                for (o, f) in (chart.SV.GetChannelData (i - 1)).Data do
+                    let f = float f
+                    if (speed <> f) then
+                        bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
+                        bw.Write(f)
+                        speed <- f
 
-                for i = 0 to chart.Keys do
-                    let mutable speed = 1.0
-                    for (o, f) in (chart.SV.GetChannelData (i - 1)).Data do
-                        let f = float f
-                        if (speed <> f) then
-                            bw.Write((o - offset) * 0.2f |> Convert.ToInt32)
-                            bw.Write(f)
-                            speed <- f
-                BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
+            BitConverter.ToString(h.ComputeHash (ms.ToArray())).Replace("-", "")
 
         let check (chart: Chart) =
             try

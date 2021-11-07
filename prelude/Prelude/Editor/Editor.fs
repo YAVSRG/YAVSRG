@@ -40,7 +40,6 @@ module Filter =
                 NoteRow.apply NoteType.HOLDHEAD (applyBitmapping mapping) nr
                 NoteRow.apply NoteType.HOLDBODY (applyBitmapping mapping) nr
                 NoteRow.apply NoteType.HOLDTAIL (applyBitmapping mapping) nr
-                NoteRow.apply NoteType.MINE (applyBitmapping mapping) nr
                 nr
             )
         notes
