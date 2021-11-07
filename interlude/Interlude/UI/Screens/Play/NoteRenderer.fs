@@ -81,8 +81,8 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
         
-        let scale = float32 Options.options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
-        let hitposition = float32 Options.options.HitPosition.Value
+        let scale = float32 options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
+        let hitposition = float32 options.HitPosition.Value
 
         let playfieldHeight = bottom - top
         let now = Audio.timeWithOffset()
@@ -146,20 +146,21 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                     hold_presence.[k] <- true
                 elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
+                    let tint = if hold_pos.[k] = hitposition && scoring.IsHoldDropped k then Content.noteskinConfig().DroppedHoldColor else Color.White
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
                         Draw.quad // body of ln
                             (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight * 0.5f) |> scrollDirectionPos bottom))
-                            (Quad.colorOf Color.White)
+                            (Quad.colorOf tint)
                             (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdbody"))
                     if headpos - pos < noteHeight * 0.5f then
                         Draw.quad // tail of ln
                             (Quad.ofRect (Rect.create(left + columnPositions.[k]) (Math.Max(pos, headpos)) (left + columnPositions.[k] + columnWidths.[k]) (pos + noteHeight) |> scrollDirectionPos bottom)) // todo: clipping maths
-                            (Quad.colorOf Color.White)
+                            (Quad.colorOf tint)
                             (Sprite.gridUV (animation.Loops, int color.[k]) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
                     Draw.quad // head of ln
                         (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
-                        (Quad.colorOf Color.White)
+                        (Quad.colorOf tint)
                         (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
                     hold_presence.[k] <- false
             note_peek <- note_peek + 1
