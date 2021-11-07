@@ -142,10 +142,10 @@ type AccuracySystemState =
     member this.Add(judge: JudgementType) = this.Add(0.0, 0.0, judge)
 
 type private InternalHoldState =
-    | Nothing = 0
-    | Holding = 1
-    | Dropped = 2
-    | MissedHead = 3
+    | Nothing
+    | Holding
+    | Dropped
+    | MissedHead
 
 [<AbstractClass>]
 type IScoreMetric
@@ -168,7 +168,7 @@ type IScoreMetric
     let mutable noteSeekPassive = 0
     let mutable noteSeekActive = 0
 
-    let internalHoldStates = Array.create keys InternalHoldState.Nothing
+    let internalHoldStates = Array.create keys Nothing
 
     let hitData = InternalScore.createDefault rawMissWindow keys notes
     let hitEvents = ResizeArray<HitEvent<HitEventGuts>>()
@@ -196,6 +196,12 @@ type IScoreMetric
     member this.MissWindow = rawMissWindow
     member this.ScaledMissWindow = missWindow
 
+    member this.IsHoldDropped (k: int) =
+        match internalHoldStates.[k] with
+        | Dropped
+        | MissedHead -> true
+        | _ -> false
+
     member this.HitData = hitData
 
     member this.SetHitCallback (func: HitEvent<HitEventGuts> -> unit) = hitCallback <- func
@@ -221,14 +227,14 @@ type IScoreMetric
                     this._HandleEvent { Time = t - firstNote + missWindow; Column = k; Guts = Hit_ (deltas.[k], false, true) }
 
                 elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
-                    internalHoldStates.[k] <- InternalHoldState.MissedHead
+                    internalHoldStates.[k] <- MissedHead
                     this._HandleEvent { Time = t - firstNote + missWindow; Column = k; Guts = Hit_ (deltas.[k], true, true) }
 
                 elif status.[k] = HitStatus.RELEASE_REQUIRED then
-                    let overhold = internalHoldStates.[k] = InternalHoldState.Dropped && Bitmap.hasBit k this.KeyState
-                    let dropped = internalHoldStates.[k] = InternalHoldState.Dropped || internalHoldStates.[k] = InternalHoldState.MissedHead
+                    let overhold = (internalHoldStates.[k] = Dropped || internalHoldStates.[k] = Holding) && Bitmap.hasBit k this.KeyState
+                    let dropped = internalHoldStates.[k] = Dropped || internalHoldStates.[k] = MissedHead
                     this._HandleEvent { Time = t - firstNote + missWindow; Column = k; Guts = Release_ (deltas.[k], true, overhold, dropped) }
-                    internalHoldStates.[k] <- InternalHoldState.Nothing
+                    internalHoldStates.[k] <- Nothing
 
             noteSeekPassive <- noteSeekPassive + 1
         // missing: checks key up as hold middle passes receptors
@@ -267,8 +273,8 @@ type IScoreMetric
                     status.[k] <- HitStatus.HIT_ACCEPTED
                     deltas.[k] <- delta / rate
                     this._HandleEvent { Time = relativeTime; Column = k; Guts = Hit_ (deltas.[k], isHoldHead, false) }
-                    if isHoldHead then internalHoldStates.[k] <- InternalHoldState.Holding
-        elif internalHoldStates.[k] = InternalHoldState.MissedHead then internalHoldStates.[k] <- InternalHoldState.Dropped
+                    if isHoldHead then internalHoldStates.[k] <- Holding
+        elif internalHoldStates.[k] = MissedHead then internalHoldStates.[k] <- Dropped
                 
     override this.HandleKeyUp (relativeTime: ChartTime, k: int) =
         this.HandlePassive relativeTime
@@ -293,9 +299,9 @@ type IScoreMetric
             let struct (t, deltas, status) = hitData.[found]
             status.[k] <- HitStatus.RELEASE_ACCEPTED
             deltas.[k] <- delta / rate
-            this._HandleEvent { Time = relativeTime; Column = k; Guts = Release_ (deltas.[k], false, false, internalHoldStates.[k] = InternalHoldState.Dropped) }
-            internalHoldStates.[k] <- InternalHoldState.Nothing
-        elif internalHoldStates.[k] = InternalHoldState.Holding then internalHoldStates.[k] <- InternalHoldState.Dropped
+            this._HandleEvent { Time = relativeTime; Column = k; Guts = Release_ (deltas.[k], false, false, internalHoldStates.[k] = Dropped) }
+            internalHoldStates.[k] <- Nothing
+        elif internalHoldStates.[k] = Holding then internalHoldStates.[k] <- Dropped
     
     abstract member HandleEvent : HitEvent<HitEventGutsInternal> -> HitEvent<HitEventGuts>
     member private this._HandleEvent ev =

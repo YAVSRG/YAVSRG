@@ -308,6 +308,7 @@ module Themes =
             HoldNoteTrim: float32
             PlayfieldColor: Color
             PlayfieldAlignment: float32 * float32
+            DroppedHoldColor: Color
             ColumnWidth: float32
             ColumnLightTime: float32
             AnimationFrameTime: float
@@ -324,6 +325,7 @@ module Themes =
                 HoldNoteTrim = 0.0f
                 PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
                 PlayfieldAlignment = 0.5f, 0.5f
+                DroppedHoldColor = Color.Gray
                 ColumnWidth = 150.0f
                 ColumnLightTime = 0.4f
                 AnimationFrameTime = 200.0
