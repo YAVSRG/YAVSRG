@@ -301,7 +301,7 @@ module Themes =
         //pacemaker
         
     // Texture names that are loaded from Noteskin folders instead of Theme folders
-    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "mine"; "mineexplosion"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"|]
+    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"|]
         
     type NoteSkinConfig =
         {
