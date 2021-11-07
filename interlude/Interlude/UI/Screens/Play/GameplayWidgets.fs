@@ -89,7 +89,7 @@ module GameplayWidgets =
         let atime = conf.AnimationTime * 1.0f<ms>
         let mutable tier = 0
         let mutable late = 0
-        let mutable time = -atime * 2.0f - Audio.LEADIN_TIME
+        let mutable time = -Audio.LEADIN_TIME * 3.0f
         let texture = Content.getTexture "judgements"
         let listener =
             helper.OnHit.Subscribe(fun ev ->
