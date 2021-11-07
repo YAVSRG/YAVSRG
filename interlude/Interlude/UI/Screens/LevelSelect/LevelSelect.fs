@@ -100,9 +100,9 @@ type private LevelSelectChartItem(groupName, cc) =
                 Text.drawJustB(font(), t, 20.0f, right - pos, top + 8.0f, (c, Color.Black), 0.5f)
                 Text.drawJustB(font(), t2, 14.0f, right - pos, top + 35.0f, (c, Color.Black), 0.5f)
 
-        f accAndGrades (fun (x, _) -> sprintf "%.2f%%" (100.0 * x)) (snd >> ScoreColor.gradeToColor) 450.0f
-        f lamp (fun x -> x.ToString()) ScoreColor.lampToColor 300.0f
-        f clear (fun x -> if x then "CLEAR" else "FAILED") ScoreColor.clearToColor 150.0f
+        f accAndGrades (fun (x, _) -> sprintf "%.2f%%" (100.0 * x)) (snd >> Helpers.gradeToColor) 450.0f
+        f lamp (fun x -> x.ToString()) Helpers.lampToColor 300.0f
+        f clear (fun x -> if x then "CLEAR" else "FAILED") Helpers.clearToColor 150.0f
 
         Draw.rect(Rect.sliceBottom 25.0f bounds) (Style.accentShade(70, 0.3f, 0.0f)) Sprite.Default
         Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))

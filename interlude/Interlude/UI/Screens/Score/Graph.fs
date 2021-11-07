@@ -37,11 +37,14 @@ type ScoreGraph(data: ScoreInfoProvider) =
         for ev in events do
             let y, col =
                 match ev.Guts with
-                | HitEventGuts.Hit (judgement, delta, _) ->
-                    h - delta / data.Scoring.MissWindow * h, Content.themeConfig().JudgementColors.[int judgement]
-                | HitEventGuts.Release (judgement, delta, _, _) ->
-                    h - 0.5f * delta / data.Scoring.MissWindow * h, Color.FromArgb(127, Content.themeConfig().JudgementColors.[int judgement])
-                | _ -> 0.0f, Color.Transparent
+                | Hit evData ->
+                    match evData.Judgement with
+                    | Some judgement -> h - evData.Delta / data.Scoring.MissWindow * h, Content.themeConfig().JudgementColors.[int judgement]
+                    | None -> 0.0f, Color.Transparent
+                | Release evData ->
+                    match evData.Judgement with
+                    | Some judgement -> h - 0.5f * evData.Delta / data.Scoring.MissWindow * h, Color.FromArgb(127, Content.themeConfig().JudgementColors.[int judgement])
+                    | None -> 0.0f, Color.Transparent
             if col.A > 0uy then
                 let x = left + 5.0f + ev.Time * hscale
                 Draw.rect(Rect.create (x - 2.5f) (top + y - 2.5f) (x + 2.5f) (top + y + 2.5f)) col Sprite.Default
