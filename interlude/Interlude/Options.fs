@@ -7,9 +7,7 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Gameplay.Layout
-open Prelude.Gameplay.NoteColors
 open Prelude.Data.Charts.Library.Imports
-open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.Input
 open Interlude.Input.Bind
@@ -184,7 +182,6 @@ module Options =
             ScreenCoverUp: Setting.Bounded<float>
             ScreenCoverDown: Setting.Bounded<float>
             ScreenCoverFadeLength: Setting.Bounded<int>
-            ColorStyle: Setting<ColorConfig>
             KeymodePreference: Setting<Keymode>
             UseKeymodePreference: Setting<bool>
             NoteSkin: Setting<string>
@@ -224,8 +221,6 @@ module Options =
             ScreenCoverDown = Setting.percent 0.0
             ScreenCoverFadeLength = Setting.bounded 200 0 500
             NoteSkin = Setting.simple "default"
-            //todo: move to noteskin
-            ColorStyle = Setting.simple ColorConfig.Default
             KeymodePreference = Setting.simple Keymode.``4K``
             UseKeymodePreference = Setting.simple false
 

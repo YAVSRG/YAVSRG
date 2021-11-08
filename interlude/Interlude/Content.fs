@@ -133,6 +133,14 @@ module rec Content =
 
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
 
+        let extractCurrent() =
+            let id = Guid.NewGuid().ToString()
+            current().CopyTo(Path.Combine(getDataPath "Noteskins", id))
+            detect()
+            load()
+            switch id
+            current().Config <- { current().Config with Name = current().Config.Name + " (Extracted)" }
+
     module Sprites =
         
         let private cache = new Dictionary<string, Sprite>()

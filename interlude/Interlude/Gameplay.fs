@@ -63,8 +63,10 @@ module Gameplay =
         match modifiedChart with
         | None -> failwith "Tried to get coloredChart when no modifiedChart exists"
         | Some mc ->
-            coloredChart <- Option.defaultWith (fun () -> getColoredChart Options.options.ColorStyle.Value mc) coloredChart |> Some
+            coloredChart <- Option.defaultWith (fun () -> getColoredChart (Content.noteskinConfig().NoteColors) mc) coloredChart |> Some
             coloredChart.Value
+
+    let recolorChart() = coloredChart <- None
 
     let makeScore (replayData, keys) : Score = {
         time = DateTime.Now
