@@ -626,7 +626,7 @@ module Metrics =
             | OM od -> "osu!mania (OD" + (string od) + ")"
             | _ -> "unknown"
     
-    let createScoreMetric accConfig hpConfig keys replay notes rate : IScoreMetric =
+    let createScoreMetric accConfig hpConfig keys (replay: IReplayProvider) notes rate : IScoreMetric =
         let hp = createHealthBar hpConfig
         match accConfig with
         | SC (judge, rd)
@@ -634,3 +634,6 @@ module Metrics =
         | Wife (judge, rd) -> Wife3(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
         | OM od -> OsuMania(od, hp, keys, replay, notes, rate) :> IScoreMetric
         | _ -> failwith "nyi"
+
+    let createDummyMetric (chart: Chart) : IScoreMetric =
+        createScoreMetric (SC (4, false)) VG chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

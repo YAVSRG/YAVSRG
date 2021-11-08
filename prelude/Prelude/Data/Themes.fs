@@ -5,6 +5,7 @@ open System.IO
 open System.IO.Compression
 open System.Drawing
 open Prelude.Common
+open Prelude.Gameplay.NoteColors
 
 module Themes =
 
@@ -302,16 +303,34 @@ module Themes =
             Name: string
             Author: string
             Version: string
+
+            /// Enables rotation for notes. Set this to true if your notes are arrows/should rotate depending on which column they are in
             UseRotation: bool
+            /// Contains settings for the color scheme of notes
+            NoteColors: ColorConfig
+
+            /// Hold tail textures are oriented for upscroll. Set this to true if you want them to be flipped when not playing in downscroll mode.
             FlipHoldTail: bool
+            /// Set to false if you want to use the `holdhead` texture for hold tails too
             UseHoldTailTexture: bool
+            /// Visually shortens hold notes by the given number of pixels
             HoldNoteTrim: float32
-            PlayfieldColor: Color
-            PlayfieldAlignment: float32 * float32
+            /// Sets the color that hold notes should turn when they are not being held
             DroppedHoldColor: Color
+
+            /// Sets the color of the playfield behind notes
+            PlayfieldColor: Color
+            /// Sets the alignment of the playfield - 0.5, 0.5 lines up the middle of the playfield with the middle of the screen
+            PlayfieldAlignment: float32 * float32
+            /// Sets the width of columns, in pixels
             ColumnWidth: float32
+            // todo: group every animation thing under an animations object
+            /// ???
             ColumnLightTime: float32
+
+            /// ???
             AnimationFrameTime: float
+            /// Config for explosion animations
             Explosions: WidgetConfig.Explosions
         }
         static member Default =
@@ -325,11 +344,12 @@ module Themes =
                 HoldNoteTrim = 0.0f
                 PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
                 PlayfieldAlignment = 0.5f, 0.5f
-                DroppedHoldColor = Color.Gray
+                DroppedHoldColor = Color.FromArgb(180, 180, 180, 180)
                 ColumnWidth = 150.0f
                 ColumnLightTime = 0.4f
                 AnimationFrameTime = 200.0
                 Explosions = WidgetConfig.Explosions.Default
+                NoteColors = ColorConfig.Default
             }
 
     (*

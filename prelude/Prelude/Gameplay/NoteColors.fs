@@ -20,13 +20,14 @@ module NoteColors =
         | DDR = 2
         | Jackhammer = 3
 
-    let colorCount keycount scheme =
-        match scheme with
-        | ColorScheme.Column -> keycount
-        | ColorScheme.Chord -> keycount
-        | ColorScheme.DDR -> Array.length DDRValues + 1
-        | ColorScheme.Jackhammer -> Array.length DDRValues
-        | _ -> keycount
+    module ColorScheme =
+        let count (keycount: int) (scheme: ColorScheme) =
+            match scheme with
+            | ColorScheme.Column -> keycount
+            | ColorScheme.Chord -> keycount
+            | ColorScheme.DDR -> Array.length DDRValues + 1
+            | ColorScheme.Jackhammer -> Array.length DDRValues
+            | _ -> keycount
 
     type ColorData = byte array
     type ColorDataSets = ColorData array // color config per keymode. 0 stores "all keymode" data, 1 stores 3k, 2 stores 4k, etc
@@ -72,7 +73,8 @@ module NoteColors =
                 |> colorize mc
         | ColorScheme.Chord ->
             ((), fun _ (_, nr) ->
-                ((), Array.create keys ((nr |> NoteRow.noteData NoteType.NORMAL |> Bitmap.count) + (nr |> NoteRow.noteData NoteType.HOLDHEAD |> Bitmap.count) |> ci)))
+                let index nr = (nr |> NoteRow.noteData NoteType.NORMAL |> Bitmap.count) + (nr |> NoteRow.noteData NoteType.HOLDHEAD |> Bitmap.count) - 1 |> max 0
+                ((), Array.create keys (index nr |> ci)))
                 |> colorize mc
         | ColorScheme.DDR ->
             (mc, fun c (time, nr) ->
