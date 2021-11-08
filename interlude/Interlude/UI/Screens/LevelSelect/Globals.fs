@@ -37,7 +37,6 @@ module private Globals =
         
     //eventual todo:
     // - goals and playlists editor
-
     
     let mutable selectedGroup = ""
     let mutable selectedChart = "" //filepath
@@ -65,7 +64,6 @@ module private Globals =
             scrollTo <- ScrollToChart
         | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
     
-    //todo: move to Gameplay
     let playCurrentChart() =
         if currentChart.IsSome then
             Screen.changeNew (fun () -> new Screen(if autoplay then PlayScreenType.Auto else PlayScreenType.Normal) :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default

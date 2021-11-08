@@ -1,6 +1,5 @@
 ﻿namespace Interlude
 
-open System
 open OpenTK
 open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
@@ -17,7 +16,7 @@ type Game(config: GameConfig) as this =
     let screens = Startup.init()
 
     do
-        Options.applyOptions <- fun () -> this.ApplyConfig config
+        applyOptions <- fun () -> this.ApplyConfig config
         base.Title <- Utils.version
         base.VSync <- VSyncMode.Off
         base.CursorVisible <- false
@@ -29,7 +28,7 @@ type Game(config: GameConfig) as this =
         match config.WindowMode.Value with
         | WindowType.WINDOWED ->
             base.WindowState <- WindowState.Normal
-            let (resizable, struct (width, height)) = Options.getResolution config.Resolution.Value
+            let (resizable, struct (width, height)) = getResolution config.Resolution.Value
             base.WindowBorder <- if resizable then WindowBorder.Resizable else WindowBorder.Fixed
             base.ClientRectangle <- new Box2i(0, 0, width, height)
             base.CenterWindow()

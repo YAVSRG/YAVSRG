@@ -85,17 +85,17 @@ module Helpers =
                     sumOfSq ++ e.Delta * float32 e.Delta
                     inc judgementCount
 
-        let judgementCount = match !judgementCount with 0 -> 1 | n -> n
-        let mean = !sum / float32 judgementCount
+        let judgementCount = match judgementCount.Value with 0 -> 1 | n -> n
+        let mean = sum.Value / float32 judgementCount
         {
-            Notes = !notesHit, !notesCount
-            Holds = !holdsHeld, !holdsCount
-            Releases = !releasesReleased, !releasesCount
+            Notes = notesHit.Value, notesCount.Value
+            Holds = holdsHeld.Value, holdsCount.Value
+            Releases = releasesReleased.Value, releasesCount.Value
 
             Mean = mean
-            EarlyMean = !earlySum / float32 !earlyHitCount
-            LateMean = !lateSum / float32 !lateHitCount
-            StandardDeviation = System.MathF.Sqrt( ((!sumOfSq / float32 judgementCount * 1.0f<ms>) - mean * mean) |> float32 ) * 1.0f<ms>
+            EarlyMean = earlySum.Value / float32 earlyHitCount.Value
+            LateMean = lateSum.Value / float32 lateHitCount.Value
+            StandardDeviation = System.MathF.Sqrt( ((sumOfSq.Value / float32 judgementCount * 1.0f<ms>) - mean * mean) |> float32 ) * 1.0f<ms>
 
             JudgementCount = judgementCount
         }

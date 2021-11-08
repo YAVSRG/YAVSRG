@@ -31,13 +31,14 @@ module Options =
             Resolution: Setting<WindowResolution>
             FrameLimiter: Setting<float>
         }
-        static member Default = {
-            WorkingDirectory = ""
-            Locale = "en_GB.txt"
-            WindowMode = Setting.simple WindowType.BORDERLESS
-            Resolution = Setting.simple (Custom (1024, 768))
-            FrameLimiter = Setting.simple 0.0
-        }
+        static member Default = 
+            {
+                WorkingDirectory = ""
+                Locale = "en_GB.txt"
+                WindowMode = Setting.simple WindowType.BORDERLESS
+                Resolution = Setting.simple (Custom (1024, 768))
+                FrameLimiter = Setting.simple 0.0
+            }
 
     type Hotkeys =
         {

@@ -2,17 +2,10 @@
 
 open System
 open System.Drawing
-open OpenTK
-open OpenTK.Windowing.GraphicsLibraryFramework
-open Prelude.Common
-open Prelude.Data.Charts.Sorting
-open Interlude
 open Interlude.UI
 open Interlude.Input
 open Interlude.Utils
 open Interlude.Graphics
-open Interlude.Options
-open Interlude.UI.Animation
 
 type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
     inherit Widget()
