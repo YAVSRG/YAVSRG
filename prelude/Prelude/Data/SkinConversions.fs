@@ -7,24 +7,21 @@ open Prelude.Common
 module SkinConversions =
 
     //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
-    module osuSkin =
+    module OsuSkin =
         open FParsec
         open Prelude.ChartFormats.``osu!``
 
-        type RGB = int * int * int
-        type RGBA = int * int * int * int
-
         let parseBool = int >> fun x -> x <> 0
 
-        let parseRGB (s: string) : RGB =
+        let parseRGB (s: string) : Color =
             match s.Split (",") |> List.ofArray |> List.map int with
-            | r :: g :: b :: _ -> (r, g, b)
+            | r :: g :: b :: _ -> Color.FromArgb(r, g, b)
             | _ -> failwith "not enough numbers given for RGB"
 
-        let parseRGBa (s: string) : RGBA =
+        let parseRGBa (s: string) : Color =
             match s.Split (",") |> List.ofArray |> List.map int with
-            | r :: g :: b :: a :: _ -> (r, g, b, a)
-            | r :: g :: b :: _ -> (r, g, b, 255)
+            | r :: g :: b :: a :: _ -> Color.FromArgb(a, r, g, b)
+            | r :: g :: b :: _ -> Color.FromArgb(255, r, g, b)
             | _ -> failwith "not enough numbers given for RGBa"
 
         let parseInts (s: string) =
@@ -102,43 +99,43 @@ module SkinConversions =
 
         type Colours =
             { 
-                Combo1: RGB option
-                Combo2: RGB option
-                Combo3: RGB option
-                Combo4: RGB option
-                Combo5: RGB option
-                Combo6: RGB option
-                Combo7: RGB option
-                Combo8: RGB option
-                InputOverlayText: RGB
-                MenuGlow: RGB
-                SliderBall: RGB
-                SliderBorder: RGB
-                SliderTrackOverride: RGB option
-                SongSelectActiveText: RGB
-                SongSelectInactiveText: RGB
-                SpinnerBackground: RGB
-                StarBreakAdditive: RGB
+                Combo1: Color option
+                Combo2: Color option
+                Combo3: Color option
+                Combo4: Color option
+                Combo5: Color option
+                Combo6: Color option
+                Combo7: Color option
+                Combo8: Color option
+                InputOverlayText: Color
+                MenuGlow: Color
+                SliderBall: Color
+                SliderBorder: Color
+                SliderTrackOverride: Color option
+                SongSelectActiveText: Color
+                SongSelectInactiveText: Color
+                SpinnerBackground: Color
+                StarBreakAdditive: Color
             }
             static member Default : Colours =
                 { 
-                    Combo1 = Some (255, 192, 0)
-                    Combo2 = Some (0, 202, 0)
-                    Combo3 = Some (18, 124, 255)
-                    Combo4 = Some (242, 24, 57)
+                    Combo1 = Some <| Color.FromArgb(255, 192, 0)
+                    Combo2 = Some <| Color.FromArgb(0, 202, 0)
+                    Combo3 = Some <| Color.FromArgb(18, 124, 255)
+                    Combo4 = Some <| Color.FromArgb(242, 24, 57)
                     Combo5 = None
                     Combo6 = None
                     Combo7 = None
                     Combo8 = None
-                    InputOverlayText = (0, 0, 0)
-                    MenuGlow = (0, 78, 155)
-                    SliderBall = (2, 170, 255)
-                    SliderBorder = (255, 255, 255)
+                    InputOverlayText = Color.Black
+                    MenuGlow = Color.FromArgb(0, 78, 155)
+                    SliderBall = Color.FromArgb(2, 170, 255)
+                    SliderBorder = Color.White
                     SliderTrackOverride = None
-                    SongSelectActiveText = (0, 0, 0)
-                    SongSelectInactiveText = (255, 255, 255)
-                    SpinnerBackground = (100, 100, 100)
-                    StarBreakAdditive = (255, 182, 193)
+                    SongSelectActiveText = Color.Black
+                    SongSelectInactiveText = Color.White
+                    SpinnerBackground = Color.FromArgb(100, 100, 100)
+                    StarBreakAdditive = Color.FromArgb(255, 182, 193)
                 }
 
         let private readColours ((title, settings): Header) : Colours = Colours.Default
@@ -166,15 +163,15 @@ module SkinConversions =
 
         type CatchTheBeat =
             { 
-                HyperDash: RGB
-                HyperDashFruit: RGB
-                HyperDashAfterImage: RGB
+                HyperDash: Color
+                HyperDashFruit: Color
+                HyperDashAfterImage: Color
             }
             static member Default =
                 { 
-                    HyperDash = (255, 0, 0)
-                    HyperDashFruit = (255, 0, 0)
-                    HyperDashAfterImage = (255, 0, 0)
+                    HyperDash = Color.Red
+                    HyperDashFruit = Color.Red
+                    HyperDashAfterImage = Color.Red
                 }
 
         let private readCatchTheBeat ((title, settings): Header) : CatchTheBeat = CatchTheBeat.Default
@@ -229,14 +226,14 @@ module SkinConversions =
                 NoteFlipWhenUpsideDownΔT: bool array
                 NoteBodyStyle: int
                 NoteBodyStyleΔ: int array
-                ColourΔ: RGBA array
-                ColourLightΔ: RGB array
-                ColourColumnLine: RGBA
-                ColourBarline: RGBA
-                ColourJudgementLine: RGB
-                ColourKeyWarning: RGB
-                ColourHold: RGBA
-                ColourBreak: RGB
+                ColourΔ: Color array
+                ColourLightΔ: Color array
+                ColourColumnLine: Color
+                ColourBarline: Color
+                ColourJudgementLine: Color
+                ColourKeyWarning: Color
+                ColourHold: Color
+                ColourBreak: Color
                 KeyImageΔ: string array
                 KeyImageΔD: string array
                 NoteImageΔ: string array
@@ -292,14 +289,14 @@ module SkinConversions =
                     NoteFlipWhenUpsideDownΔT = Array.create k true
                     NoteBodyStyle = 1
                     NoteBodyStyleΔ = Array.create k 1
-                    ColourΔ = Array.create k (0, 0, 0, 255)
-                    ColourLightΔ = Array.create k (55, 255, 255)
-                    ColourColumnLine = 255, 255, 255, 255
-                    ColourBarline = 255, 255, 255, 255
-                    ColourJudgementLine = 255, 255, 255
-                    ColourKeyWarning = 0, 0, 0
-                    ColourHold = 255, 191, 51, 255
-                    ColourBreak = 255, 0, 0
+                    ColourΔ = Array.create k Color.Black
+                    ColourLightΔ = Array.create k (Color.FromArgb(55, 255, 255))
+                    ColourColumnLine = Color.White
+                    ColourBarline = Color.White
+                    ColourJudgementLine = Color.White
+                    ColourKeyWarning = Color.Black
+                    ColourHold = Color.FromArgb(255, 191, 51, 255)
+                    ColourBreak = Color.Red
                     KeyImageΔ = maniaDefaultTextures k "mania-key%s"
                     KeyImageΔD = maniaDefaultTextures k "mania-key%sD"
                     NoteImageΔ = maniaDefaultTextures k "mania-note%s"
@@ -429,7 +426,7 @@ module SkinConversions =
             | Failure (e, _, _) -> failwith e
 
         //constructor can throw an exception!
-        type osuSkin(path) = 
+        type Converter(path) = 
             let data = parseSkinINI (Path.Combine (path, "skin.ini"))
 
             member this.FindTexture (filename: string) : string list =
@@ -452,7 +449,11 @@ module SkinConversions =
                 let columns = input |> List.map List.length |> List.max
 
                 let width = input.Head.Head.Width
-                let height = if lnbody then width else input.Head.Head.Height
+                let height = 
+                    if lnbody then
+                        if input.Head.Head.Height / width > 10 then Logging.Warn "It looks like you're using the 'Percy LN trick' - LNs won't look right but it can be fixed in config afterwards"
+                        width
+                    else input.Head.Head.Height
                 let sq = max width height
 
                 if width = 0 || height = 0 then failwith "images cannot be 0x0!"
@@ -491,8 +492,11 @@ module SkinConversions =
                 let skinJson : Themes.NoteSkinConfig =
                     { Themes.NoteSkinConfig.Default with
                         Name = Path.GetFileName path
+                        Author = data.General.Author
                         UseHoldTailTexture = true
-                        ColumnWidth = 1920f / 512f * (mania.ColumnWidth |> List.head |> float32)
+                        FlipHoldTail = mania.NoteFlipWhenUpsideDownΔT.[0]
+                        PlayfieldColor = mania.ColourΔ.[0]
+                        ColumnWidth = 1080f / 512f * (mania.ColumnWidth |> List.head |> float32)
                     }
                 JSON.ToFile (Path.Combine(targetPath, "noteskin.json"), true) skinJson
                 Logging.Info "Written noteskin config"
@@ -547,11 +551,21 @@ module SkinConversions =
                 |> writer "holdtail"
 
                 Logging.Info "Stitching judgements.png ..."
-                [mania.Hit300g; mania.Hit300; ""; mania.Hit200; mania.Hit100; mania.Hit50; ""; mania.Hit0]
+                [mania.Hit300g; mania.Hit300; mania.Hit200; mania.Hit100; mania.Hit50; mania.Hit0]
                 |> List.map (fun s -> if s = "" then [new Bitmap(1, 1) :> Image] else this.FindTexture s |> List.truncate 1 |> List.map Bitmap.FromFile)
                 |> fun l -> let b = List.head (List.head l) in [new Bitmap(b.Width, b.Height) :> Image] :: l //ridiculous judgement placeholder
                 |> this.StitchTextures false
-                |> writer "judgements"
+                //|> writer "judgements"
+                |> ignore
 
                 Logging.Info "===== Complete! ====="
-
+    
+    let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|Unknown|) (path: string) =
+        if Directory.Exists path then
+            if File.Exists (Path.Combine(path, "skin.ini")) then OsuSkinFolder else Unknown
+        else
+            let s = Path.GetExtension(path).ToLower()
+            match s with
+            | ".isk" -> InterludeSkinArchive
+            | ".osk" -> OsuSkinArchive
+            | _ -> Unknown
