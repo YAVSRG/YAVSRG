@@ -45,7 +45,11 @@ type Game(config: GameConfig) as this =
         FBO.init()
 
     override this.OnFileDrop e =
-        e.FileNames |> Array.iter Screens.Import.FileDropHandling.import
+        let handle path =
+            if Content.Noteskins.tryImport path |> not then
+                if Screens.Import.FileDropHandling.tryImport path |> not then
+                    Logging.Warn "The file you dropped didn't look like a skin, chart or otherwise importable thing"
+        e.FileNames |> Array.iter handle
 
     override this.OnRenderFrame e =
         base.OnRenderFrame e
