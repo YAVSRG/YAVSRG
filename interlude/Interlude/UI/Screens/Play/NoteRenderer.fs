@@ -146,7 +146,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                     hold_presence.[k] <- true
                 elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
-                    let tint = if hold_pos.[k] = hitposition && scoring.IsHoldDropped k then Content.noteskinConfig().DroppedHoldColor else Color.White
+                    let tint = Color.White //if hold_pos.[k] = hitposition && scoring.IsHoldDropped 0 k then Content.noteskinConfig().DroppedHoldColor else Color.White
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
                         Draw.quad // body of ln
