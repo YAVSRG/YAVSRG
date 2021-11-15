@@ -152,15 +152,15 @@ module rec Content =
                     detect()
                     load()
                     true
-                with err -> Logging.Error("Something went wrong converting this skin!", err); false
+                with err -> Logging.Error("Something went wrong converting this skin!", err); true
             | InterludeSkinArchive ->
                 try 
                     File.Copy(path, Path.Combine(getDataPath "Noteskins", Path.GetFileName path))
                     detect()
                     load()
                     true
-                with err -> Logging.Error("Something went wrong when moving this skin!", err); false
-            | OsuSkinArchive -> Logging.Info("Can't directly drop .osks yet, sorry :( You'll have to extract it first"); false
+                with err -> Logging.Error("Something went wrong when moving this skin!", err); true
+            | OsuSkinArchive -> Logging.Info("Can't directly drop .osks yet, sorry :( You'll have to extract it first"); true
             | Unknown -> false
 
     module Sprites =

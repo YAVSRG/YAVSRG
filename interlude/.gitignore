@@ -3,16 +3,14 @@
 ################################################################################
 
 /publish
-/.vs/YAVSRG/v16/Server/sqlite3
 /packages
-/.vs/YAVSRG/v15/Server/sqlite3
+/.vs
 /Retrolude/bin
 /Retrolude/obj
 /Interlude/bin
 /Interlude/obj
 /Prelude/Prelude/bin
 /Prelude/Prelude/obj
-/.vs/YAVSRG
 .ionide/symbolCache.db
 
 .fake
