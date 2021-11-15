@@ -19,13 +19,14 @@ open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect
 
 module FileDropHandling =
-    let import(path: string) =
+    let tryImport(path: string) : bool =
         match Mounts.dropFunc with
-        | Some f -> f path
+        | Some f -> f path; true
         | None ->
             BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
                 (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
             |> ignore
+            true
 
 [<Json.AllRequired>]
 type EOPackAttrs = {

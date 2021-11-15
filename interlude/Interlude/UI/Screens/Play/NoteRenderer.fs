@@ -14,7 +14,7 @@ open Interlude.UI.Animation
 
 // TODO LIST
 //  COLUMN INDEPENDENT SV
-//  MAYBE FIX HOLD TAIL CLIPPING
+//  FIX HOLD TAIL CLIPPING
 //  NOTE PROVIDER SYSTEM
 
 (*
@@ -68,8 +68,8 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     let hold_pos = Array.create keys 0.0f
     let hold_colors = Array.create keys 0
 
-    let scrollDirectionPos bottom = if Options.options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
-    let scrollDirectionFlip = fun q -> if (not <| Content.noteskinConfig().FlipHoldTail) || Options.options.Upscroll.Value then q else Quad.flip q
+    let scrollDirectionPos bottom = if options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
+    let scrollDirectionFlip = fun q -> if not (Content.noteskinConfig().FlipHoldTail) || options.Upscroll.Value then q else Quad.flip q
     let noteRotation = fun k -> Quad.rotateDeg (NoteRenderer.noteRotation keys k)
 
     do
@@ -146,7 +146,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                     hold_presence.[k] <- true
                 elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
-                    let tint = if hold_pos.[k] = hitposition && scoring.IsHoldDropped k then Content.noteskinConfig().DroppedHoldColor else Color.White
+                    let tint = Color.White //if hold_pos.[k] = hitposition && scoring.IsHoldDropped 0 k then Content.noteskinConfig().DroppedHoldColor else Color.White
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
                         Draw.quad // body of ln

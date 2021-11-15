@@ -43,7 +43,7 @@ module Render =
         GL.LoadIdentity()
         GL.Ortho(0.0, float vwidth, float vheight, 0.0, 0.0, 1.0)
 
-        bounds <- Rect.create 0.0f 0.0f vwidth vheight
+        bounds <- Rect.create 0.0f 0.0f vwidth vheight |> Rect.expand (1.0f, 1.0f)
 
     let init(width, height) =
         Logging.Debug(sprintf "GL Version: %s" (GL.GetString StringName.Version))

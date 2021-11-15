@@ -75,6 +75,8 @@ module rec Content =
              detect()
 
     module Noteskins =
+        
+        open Prelude.Data.SkinConversions
 
         let private defaults =
             let skins = ["defaultBar.isk"; "defaultArrow.isk"; "defaultOrb.isk"]
@@ -132,6 +134,34 @@ module rec Content =
             Sprites.clearNoteskinTextures()
 
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
+
+        let extractCurrent() =
+            let id = Guid.NewGuid().ToString()
+            current().CopyTo(Path.Combine(getDataPath "Noteskins", id))
+            detect()
+            load()
+            switch id
+            current().Config <- { current().Config with Name = current().Config.Name + " (Extracted)" }
+
+        let tryImport(path: string) : bool =
+            match path with
+            | OsuSkinFolder ->
+                let id = Guid.NewGuid().ToString()
+                try
+                    OsuSkin.Converter(path).ToNoteSkin(Path.Combine(getDataPath "Noteskins", id)) 4
+                    detect()
+                    load()
+                    true
+                with err -> Logging.Error("Something went wrong converting this skin!", err); true
+            | InterludeSkinArchive ->
+                try 
+                    File.Copy(path, Path.Combine(getDataPath "Noteskins", Path.GetFileName path))
+                    detect()
+                    load()
+                    true
+                with err -> Logging.Error("Something went wrong when moving this skin!", err); true
+            | OsuSkinArchive -> Logging.Info("Can't directly drop .osks yet, sorry :( You'll have to extract it first"); true
+            | Unknown -> false
 
     module Sprites =
         

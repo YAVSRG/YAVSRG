@@ -7,7 +7,6 @@ open Interlude
 open Interlude.Utils
 open Interlude.Graphics
 open Interlude.Input
-open Interlude.Content
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open OpenTK.Mathematics
@@ -105,7 +104,7 @@ module Screen =
                         match sprite with
                         | Some bmp ->
                             let col =
-                                if themeConfig().OverrideAccentColor then themeConfig().DefaultAccentColor else
+                                if Content.themeConfig().OverrideAccentColor then Content.themeConfig().DefaultAccentColor else
                                     let vibrance (c: Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
                                     seq {
                                         let w = bmp.Width / 50
@@ -114,7 +113,7 @@ module Screen =
                                             for y in 0 .. 49 do
                                                 yield bmp.GetPixel(w * x, h * x) }
                                     |> Seq.maxBy vibrance
-                                    |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else themeConfig().DefaultAccentColor
+                                    |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
                             globalAnimation.Add(
                                 AnimationAction(fun () ->
                                     let sprite = Sprite.upload(bmp, 1, 1, true)
@@ -127,7 +126,7 @@ module Screen =
                             globalAnimation.Add(
                                 AnimationAction(fun () ->
                                     background <- (Content.getTexture "background", AnimationFade(0.0f, Target = 1.0f), true) :: background
-                                    Content.accentColor.Value <- themeConfig().DefaultAccentColor
+                                    Content.accentColor.Value <- Content.themeConfig().DefaultAccentColor
                                 )
                             )
                     )
