@@ -12,6 +12,7 @@
 /Prelude/Prelude/obj
 .ionide/symbolCache.db
 
+.vs
 .fake
 .ionide
 /Interlude/Resources/default
