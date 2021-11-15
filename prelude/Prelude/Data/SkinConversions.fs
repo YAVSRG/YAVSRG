@@ -319,9 +319,14 @@ module SkinConversions =
                     Hit300g = "mania-hit300g"
                 }
 
-        let (|P|_|) (keys: int) (pre: string) (suff: string) (target: string) =
+        let (|P_0|_|) (keys: int) (pre: string) (suff: string) (target: string) =
             match run (pstring pre >>. (pint32 .>> pstring suff) .>> eof) target with
             | Success (n, _, _) -> if 0 <= n && n < keys then Some n else None
+            | Failure (_, _, _) -> None
+
+        let (|P_1|_|) (keys: int) (pre: string) (suff: string) (target: string) =
+            match run (pstring pre >>. (pint32 .>> pstring suff) .>> eof) target with
+            | Success (n, _, _) -> if 0 < n && n <= keys then Some (n - 1) else None
             | Failure (_, _, _) -> None
 
         let private readMania ((title, settings): Header) : Mania =
@@ -355,29 +360,29 @@ module SkinConversions =
                     | "KeysUnderNotes" -> { s with KeysUnderNotes = parseBool value }
                     | "UpsideDown" -> { s with UpsideDown = parseBool value }
                     | "KeyFlipWhenUpsideDown" -> { s with KeyFlipWhenUpsideDown = parseBool value }
-                    | P keys "KeyFlipWhenUpsideDown" "" n -> s.KeyFlipWhenUpsideDownΔ.[n] <- parseBool value; s
+                    | P_0 keys "KeyFlipWhenUpsideDown" "" n -> s.KeyFlipWhenUpsideDownΔ.[n] <- parseBool value; s
                     | "NoteFlipWhenUpsideDown" -> { s with NoteFlipWhenUpsideDown = parseBool value }
-                    | P keys "KeyFlipWhenUpsideDown" "D" n -> s.KeyFlipWhenUpsideDownΔD.[n] <- parseBool value; s
-                    | P keys "NoteFlipWhenUpsideDown" "" n -> s.NoteFlipWhenUpsideDownΔ.[n] <- parseBool value; s
-                    | P keys "NoteFlipWhenUpsideDown" "H" n -> s.NoteFlipWhenUpsideDownΔH.[n] <- parseBool value; s
-                    | P keys "NoteFlipWhenUpsideDown" "L" n -> s.NoteFlipWhenUpsideDownΔL.[n] <- parseBool value; s
-                    | P keys "NoteFlipWhenUpsideDown" "T" n -> s.NoteFlipWhenUpsideDownΔT.[n] <- parseBool value; s
+                    | P_0 keys "KeyFlipWhenUpsideDown" "D" n -> s.KeyFlipWhenUpsideDownΔD.[n] <- parseBool value; s
+                    | P_0 keys "NoteFlipWhenUpsideDown" "" n -> s.NoteFlipWhenUpsideDownΔ.[n] <- parseBool value; s
+                    | P_0 keys "NoteFlipWhenUpsideDown" "H" n -> s.NoteFlipWhenUpsideDownΔH.[n] <- parseBool value; s
+                    | P_0 keys "NoteFlipWhenUpsideDown" "L" n -> s.NoteFlipWhenUpsideDownΔL.[n] <- parseBool value; s
+                    | P_0 keys "NoteFlipWhenUpsideDown" "T" n -> s.NoteFlipWhenUpsideDownΔT.[n] <- parseBool value; s
                     | "NoteBodyStyle" -> { s with NoteBodyStyle = int value }
-                    | P keys "NoteBodyStyle" "" n -> s.NoteBodyStyleΔ.[n] <- int value; s
-                    | P keys "Colour" "" n -> s.ColourΔ.[n] <- parseRGBa value; s
-                    | P keys "ColourLight" "" n -> s.ColourLightΔ.[n] <- parseRGB value; s
+                    | P_0 keys "NoteBodyStyle" "" n -> s.NoteBodyStyleΔ.[n] <- int value; s
+                    | P_1 keys "Colour" "" n -> s.ColourΔ.[n] <- parseRGBa value; s
+                    | P_1 keys "ColourLight" "" n -> s.ColourLightΔ.[n] <- parseRGB value; s
                     | "ColourColumnLine" -> { s with ColourColumnLine = parseRGBa value }
                     | "ColourBarline" -> { s with ColourBarline = parseRGBa value }
                     | "ColourJudgementLine" -> { s with ColourJudgementLine = parseRGB value }
                     | "ColourKeyWarning" -> { s with ColourKeyWarning = parseRGB value }
                     | "ColourHold" -> { s with ColourHold = parseRGBa value }
                     | "ColourBreak" -> { s with ColourBreak = parseRGB value }
-                    | P keys "KeyImage" "" n -> s.KeyImageΔ.[n] <- value; s
-                    | P keys "KeyImage" "D" n -> s.KeyImageΔD.[n] <- value; s
-                    | P keys "NoteImage" "" n -> s.NoteImageΔ.[n] <- value; s
-                    | P keys "NoteImage" "H" n -> s.NoteImageΔH.[n] <- value; s
-                    | P keys "NoteImage" "L" n -> s.NoteImageΔL.[n] <- value; s
-                    | P keys "NoteImage" "T" n -> s.NoteImageΔT.[n] <- value; s
+                    | P_0 keys "KeyImage" "" n -> s.KeyImageΔ.[n] <- value; s
+                    | P_0 keys "KeyImage" "D" n -> s.KeyImageΔD.[n] <- value; s
+                    | P_0 keys "NoteImage" "" n -> s.NoteImageΔ.[n] <- value; s
+                    | P_0 keys "NoteImage" "H" n -> s.NoteImageΔH.[n] <- value; s
+                    | P_0 keys "NoteImage" "L" n -> s.NoteImageΔL.[n] <- value; s
+                    | P_0 keys "NoteImage" "T" n -> s.NoteImageΔT.[n] <- value; s
                     | "StageLeft" -> { s with StageLeft = value }
                     | "StageRight" -> { s with StageRight = value }
                     | "StageBottom" -> { s with StageBottom = value }
@@ -480,6 +485,18 @@ module SkinConversions =
                     y <- y + sq
                 (bitmap, { Rows = rows; Columns = columns; Tiling = true })
 
+            member this.GrayscaleImage (alphaMult: float32) (bitmap: Image) =
+                let bitmap = bitmap :?> Bitmap
+                let newBmp = new Bitmap(bitmap.Width, bitmap.Height)
+                for x = 0 to bitmap.Width - 1 do
+                    for y = 0 to bitmap.Height - 1 do
+                        let col = bitmap.GetPixel(x, y)
+                        let level = ((float32 col.R * 0.3f) + (float32 col.G + 0.59f) + (float32 col.B * 0.11f)) |> int
+                        let level = min 255 level // how is this even possible
+                        let nc = Color.FromArgb(int (float32 col.A * alphaMult), level, level, level)
+                        newBmp.SetPixel(x, y, nc)
+                newBmp :> Image
+
             member this.ToNoteSkin (targetPath: string) (keys: int) =
                 Logging.Info "===== Beginning osu -> Interlude skin conversion ====="
                 Logging.Info (path + "->" + targetPath)
@@ -519,6 +536,25 @@ module SkinConversions =
                 |> List.map (List.map Bitmap.FromFile)
                 |> this.StitchTextures false
                 |> writer "note"
+
+                Logging.Info "Generating receptor.png ..."
+                mania.NoteImageΔ.[2]
+                |> this.FindTexture
+                |> List.head
+                |> Bitmap.FromFile
+                |> (fun b -> [[this.GrayscaleImage 0.5f b]; [this.GrayscaleImage 1.0f b]])
+                |> this.StitchTextures false
+                |> writer "receptor"
+
+                Logging.Info "Blank noteexplosion.png ..."
+                [[new Bitmap(1, 1) :> Image]]
+                |> this.StitchTextures false
+                |> writer "noteexplosion"
+
+                Logging.Info "Blank holdexplosion.png ..."
+                [[new Bitmap(1, 1) :> Image]]
+                |> this.StitchTextures false
+                |> writer "holdexplosion"
                 
                 Logging.Info "Stitching holdhead.png ..."
                 textures
