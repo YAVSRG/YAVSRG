@@ -69,48 +69,80 @@ module Notification =
                         AnimationAction(fun () -> slider.Target <- slider.Target - 1.0f; slider.Value <- slider.Value - 1.0f; f.Stop(); items.Remove i |> ignore)
                     )) )
 
+
+
 module Tooltip =
-    
-    let mutable private active = false
-    let mutable private bind = Dummy
-    let mutable private text = [||]
-    let mutable private timeLeft = 0.0
 
-    let private fade = AnimationFade 0.0f
+    type private T =
+        {
+            Bind: Bind
+            Message: string[]
+            Type: NotificationType
+            Callback: unit -> unit
+            mutable Duration: float
+            Fade: AnimationFade
+        }
 
-    type Display() as this =
+    let private items = ResizeArray<T>()
+
+    let private HEIGHT = 120.0f
+    let private TEXTHEIGHT = 42.0f
+
+    type Display() =
         inherit Widget()
 
-        let SCALE = 30.0f
-
-        do this.Animation.Add fade
-
         override this.Update(elapsedTime, bounds) =
-            if active then
-                timeLeft <- timeLeft - elapsedTime
-                if timeLeft <= 0.0 || bind.Released() then
-                    active <- false
-                    fade.Target <- 0.0f
+            for i in items do
+                i.Duration <- i.Duration - elapsedTime
+                i.Fade.Update elapsedTime |> ignore
+                if i.Fade.Target <> 0.0f then
+                    if i.Duration <= 0.0 then
+                        i.Fade.Target <- 0.0f
+                        i.Callback()
+                    elif not (i.Bind.Pressed()) then
+                        i.Fade.Target <- 0.0f
+                elif i.Fade.Value < 0.01f then this.Synchronized(fun () -> items.Remove i |> ignore)
             base.Update(elapsedTime, bounds)
 
         override this.Draw() =
-            if fade.Value > 0.01f then
-                let x = Mouse.X()
-                let mutable y = Mouse.Y() + 50.0f
-                //todo: y-clamping
-                for str in text do
-                    let w = Text.measure(Content.font(), str) * SCALE
-                    //todo: x-clamping
-                    Text.drawB(Content.font(), str, SCALE, x - w * 0.5f, y, (Color.FromArgb(int(255.0f * fade.Value), Color.White), Color.FromArgb(int(255.0f * fade.Value), Color.Black)))
-                    y <- y + SCALE
+            let struct (left, top, right, bottom) = this.Bounds
+            let mutable y = bottom - 200.0f
+            for i in items do
+                let h = HEIGHT + TEXTHEIGHT * float32 (i.Message.Length - 1)
+                let a = i.Fade.Value * 255.0f |> int
+                y <- y - h * i.Fade.Value
+                let bounds = Rect.create (left + 100.0f) y (right - 100.0f) (y + h)
+                let c, icon =
+                    match i.Type with
+                    | Info -> Color.FromArgb(0, 150, 180), "ⓘ"
+                    | Warning -> Color.Orange, "⚠"
+                    | Error -> Color.Red, "⚠"
+                    | System -> Color.Green, "❖"
+                    | Task -> Color.Purple, "❖"
+                Draw.rect (Rect.sliceTop 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
+                Draw.rect (Rect.sliceBottom 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
+                Draw.rect (Rect.sliceLeft 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
+                Draw.rect (Rect.sliceRight 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
+                
+                Draw.rect (Rect.expand (-5.0f, -5.0f) bounds) (Color.FromArgb(a / 4 * 3, Color.Black)) Sprite.Default
+                Draw.rect (Rect.expand (-5.0f, -5.0f) bounds) (Color.FromArgb(a / 2, c)) Sprite.Default
+                
+                Text.drawB (Content.font(), icon, 50.0f, left + 130.0f, y - 1.0f + TEXTHEIGHT * 0.5f * float32 i.Message.Length, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
+                for x = 0 to i.Message.Length - 1 do
+                    Text.drawB (Content.font(), i.Message.[x], 30.0f, left + 235.0f, y + 33.0f + TEXTHEIGHT * float32 x, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
+
             base.Draw()
 
     let display = Display()
 
     let add (b: Bind, str: string, time: float) =
-        if not active then
-            active <- true
-            fade.Target <- 1.0f
-            bind <- b
-            text <- str.Split "\n"
-            timeLeft <- time
+        let t: T =
+            {
+                Bind = b
+                Message = str.Split "\n"
+                Duration = time
+                Fade = AnimationFade(0.0f, Target = 1.0f)
+                Callback = ignore
+                Type = Info
+            }
+        display.Synchronized(fun () -> items.Add t)
