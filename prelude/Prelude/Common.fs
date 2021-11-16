@@ -171,7 +171,7 @@ module Common =
                 Array.iter(
                     fun (l: string) ->
                         let s: string[] = l.Split ([|'='|], 2)
-                        mapping.Add (s.[0], s.[1])
+                        mapping.Add (s.[0], s.[1].Replace("\\n","\n"))
                     ) lines
                 loadedPath <- path
             with err -> Logging.Error ("Failed to load localisation file: " + path, err)
