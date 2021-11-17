@@ -87,6 +87,7 @@ module Tooltip =
 
     let private HEIGHT = 120.0f
     let private TEXTHEIGHT = 42.0f
+    let mutable up = false
 
     type Display() =
         inherit Widget()
@@ -103,22 +104,22 @@ module Tooltip =
                         i.Fade.Target <- 0.0f
                 elif i.Fade.Value < 0.01f then this.Synchronized(fun () -> items.Remove i |> ignore)
             base.Update(elapsedTime, bounds)
+            if items.Count = 0 then
+                up <- Mouse.Y() > Rect.centerY this.Bounds
 
         override this.Draw() =
             let struct (left, top, right, bottom) = this.Bounds
-            let mutable y = bottom - 200.0f
-            for i in items do
-                let h = HEIGHT + TEXTHEIGHT * float32 (i.Message.Length - 1)
-                let a = i.Fade.Value * 255.0f |> int
-                y <- y - h * i.Fade.Value
+            let height i = HEIGHT + TEXTHEIGHT * float32 (i.Message.Length - 1)
+            let draw i y h =
                 let bounds = Rect.create (left + 100.0f) y (right - 100.0f) (y + h)
                 let c, icon =
                     match i.Type with
                     | Info -> Color.FromArgb(0, 150, 180), "ⓘ"
-                    | Warning -> Color.Orange, "⚠"
+                    | Warning -> Color.FromArgb(180, 150, 0), "⚠"
                     | Error -> Color.Red, "⚠"
                     | System -> Color.Green, "❖"
                     | Task -> Color.Purple, "❖"
+                let a = i.Fade.Value * 255.0f |> int
                 Draw.rect (Rect.sliceTop 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
                 Draw.rect (Rect.sliceBottom 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
                 Draw.rect (Rect.sliceLeft 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
@@ -131,6 +132,18 @@ module Tooltip =
                 for x = 0 to i.Message.Length - 1 do
                     Text.drawB (Content.font(), i.Message.[x], 30.0f, left + 235.0f, y + 33.0f + TEXTHEIGHT * float32 x, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
 
+            if up then
+                let mutable y = top + 200.0f
+                for i in items do
+                    let h = height i
+                    y <- y + h * i.Fade.Value
+                    draw i (y - h) h
+            else
+                let mutable y = bottom - 200.0f
+                for i in items do
+                    let h = height i
+                    y <- y - h * i.Fade.Value
+                    draw i y h
             base.Draw()
 
     let display = Display()
