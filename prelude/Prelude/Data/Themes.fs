@@ -102,7 +102,7 @@ module Themes =
                     |]
 
                 Font = "Akrobat-Black.otf"
-                DefaultAccentColor = Color.FromArgb(0, 255, 160)
+                DefaultAccentColor = Color.FromArgb(0, 160, 200)
                 OverrideAccentColor = false
                 CursorSize = 50.0f
             }
