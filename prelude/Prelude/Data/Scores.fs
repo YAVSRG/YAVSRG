@@ -128,7 +128,7 @@ module ScoreManager =
         member this.Mods =
             modstring <-
                 ValueOption.defaultWith
-                    (fun () -> getModString(score.rate, score.selectedMods))
+                    (fun () -> getModString(score.rate, score.selectedMods, false))
                     modstring |> ValueSome
             modstring.Value
 

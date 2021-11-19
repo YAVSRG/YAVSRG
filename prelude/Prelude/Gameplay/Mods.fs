@@ -61,7 +61,7 @@ module Mods =
 
     module ModState =
 
-        let r = new System.Random()
+        let r = new Random()
 
         let getModName id = Localisation.localise ("mod." + id + ".name")
         let getModDesc id = Localisation.localise ("mod." + id + ".desc")
@@ -112,5 +112,6 @@ module Mods =
 
     let getModChart (mods: ModState) (chart: Chart) : ModChart = applyMods mods chart
 
-    let getModString(rate: float32, selectedMods: ModState) = 
+    let getModString(rate: float32, selectedMods: ModState, autoPlay: bool) = 
         String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))
+        + if autoPlay then ", " + ModState.getModName "auto" else ""
