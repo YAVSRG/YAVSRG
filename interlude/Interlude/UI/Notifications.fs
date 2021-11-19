@@ -57,11 +57,11 @@ module Tooltip =
                 let bounds = Rect.create (left + 100.0f) y (right - 100.0f) (y + h)
                 let c, icon =
                     match i.Type with
-                    | Info -> Color.FromArgb(0, 150, 180), "ⓘ"
+                    | Info -> Color.FromArgb(0, 120, 190), "ⓘ"
                     | Warning -> Color.FromArgb(180, 150, 0), "⚠"
-                    | Error -> Color.Red, "⚠"
-                    | System -> Color.Green, "❖"
-                    | Task -> Color.Purple, "❖"
+                    | Error -> Color.FromArgb(190, 0, 0), "⚠"
+                    | System -> Color.FromArgb(0, 190, 120), "❖"
+                    | Task -> Color.FromArgb(120, 0, 190), "❖"
                 let a = i.Fade.Value * 255.0f |> int
                 Draw.rect (Rect.sliceTop 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
                 Draw.rect (Rect.sliceBottom 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
