@@ -2,10 +2,12 @@
 
 open Prelude.Gameplay.Mods
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Components.Selection.Menu
+open Interlude.Utils
 open Interlude.Gameplay
 open Interlude.Options
 
@@ -38,8 +40,7 @@ module private ModSelect =
 type ModSelect() as this =
     inherit Widget()
 
-    do
-        Components.CardButton.Basic ("Mods", (fun () -> SelectionMenu(ModSelect.page()).Show()), options.Hotkeys.Mods) |> this.Add
+    do StylishButton ((fun () -> SelectionMenu(ModSelect.page()).Show()), K "Mods", (fun () -> Style.accentShade(100, 0.8f, 0.2f)), options.Hotkeys.Mods) |> this.Add
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

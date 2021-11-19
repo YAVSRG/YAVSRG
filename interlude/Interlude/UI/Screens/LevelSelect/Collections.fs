@@ -81,8 +81,7 @@ module private Collections =
 type CollectionManager() as this =
     inherit Widget()
 
-    do
-        CardButton.Basic ("Collections", (fun () -> SelectionMenu(Collections.page()).Show()), options.Hotkeys.Collections) |> this.Add
+    do StylishButton ((fun () -> SelectionMenu(Collections.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), options.Hotkeys.Collections) |> this.Add
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

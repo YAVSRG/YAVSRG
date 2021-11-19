@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Components
 
 open System
-open System.Drawing
 open OpenTK
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
@@ -22,7 +21,7 @@ type TooltipRegion(localisedText) =
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
 
-type Dropdown(options: string array, index, func, label, buttonSize) as this =
+type Dropdown(options: string array, index, callback: int -> unit, label, buttonSize, colorFunc) as this =
     inherit Widget()
 
     let color = AnimationFade 0.5f
@@ -31,14 +30,21 @@ type Dropdown(options: string array, index, func, label, buttonSize) as this =
     do
         this.Animation.Add color
         let fr = new Frame(Enabled = false)
-        CardButton.DropdownButton (label, (fun () -> options.[index]), (fun () -> fr.Enabled <- not fr.Enabled))
+        StylishButton (
+            (fun () -> fr.Enabled <- not fr.Enabled),
+            (fun () -> label + ": " + options.[index]),
+            colorFunc )
         |> position (WPos.topSlice buttonSize)
         |> this.Add
         this.Add(
             let fc = FlowContainer(Spacing = 0.0f)
             fr.Add fc
             Array.iteri
-                (fun i o -> fc.Add(Button((fun () -> index <- i; func i), o) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
+                ( fun i (o: string) ->
+                    Button((fun () -> index <- i; callback i), o)
+                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)
+                    |> fc.Add
+                )
                 options
             fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
 

@@ -12,16 +12,18 @@ open Interlude.UI.Screens.Play
 type PersonalBestData = PersonalBests<float * int> option * PersonalBests<Lamp> option * PersonalBests<bool> option
     
 [<Struct>]
+[<RequireQualifiedAccess>]
 type Navigation =
     | Nothing
     | Backward of string * CachedChart
     | Forward of bool
     
 [<Struct>]
+[<RequireQualifiedAccess>]
 type ScrollTo =
     | Nothing
-    | ScrollToChart
-    | ScrollToPack of string
+    | Chart
+    | Pack of string
 
 module LevelSelect =
 
@@ -29,13 +31,13 @@ module LevelSelect =
 
 module private Globals =
     
-    //functionality wishlist:
+    // functionality wishlist:
     // - hotkeys to navigate by pack/close and open quickly
     // - display of keycount for charts
     // - "random chart" hotkey
     // - cropping of text that is too long
         
-    //eventual todo:
+    // eventual todo:
     // - goals and playlists editor
     
     let mutable selectedGroup = ""
@@ -44,10 +46,10 @@ module private Globals =
     
     let mutable scrollBy : float32 -> unit = ignore
     let mutable colorVersionGlobal = 0
-    //future todo: different color settings?
-    let mutable colorFunc = fun ((_, _, _): PersonalBestData) -> Color.FromArgb(40, 200, 200, 200)
+    // future todo: different color settings?
+    let mutable colorFunc = fun ((_, _, _): PersonalBestData) -> Color.FromArgb(100, 200, 200, 200)
     
-    //updated whenever screen refreshes
+    // updated whenever screen refreshes
     let mutable scoreSystem = "SC+ (J4)"
     let mutable hpSystem = "VG"
     
@@ -61,7 +63,7 @@ module private Globals =
             selectedChart <- cc.FilePath
             expandedGroup <- groupName
             selectedGroup <- groupName
-            scrollTo <- ScrollToChart
+            scrollTo <- ScrollTo.Chart
         | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
     
     let playCurrentChart() =
