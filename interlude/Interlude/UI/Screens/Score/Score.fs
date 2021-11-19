@@ -101,15 +101,15 @@ module Helpers =
         }
 
 
-
 type Screen(scoreData: ScoreInfoProvider, pbs) as this =
     inherit Screen.T()
 
-    let mutable (lampPB, accuracyPB, clearPB) = pbs
+    let mutable lampPB, accuracyPB, clearPB = pbs
     let mutable gradeAchieved = Grade.calculate (Content.themeConfig().GradeThresholds) scoreData.Scoring.State
+    let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
     let graph = new ScoreGraph(scoreData)
 
-    let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
+    let mutable scoreSystems = Options.options.AccSystems.Value
 
     let refresh() =
         eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
@@ -235,6 +235,18 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         Draw.rect (Rect.create (left + 20.0f) (bottom - 70.0f) (right - 20.0f) (bottom - 20.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
 
         base.Draw()
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+
+        if Options.options.Hotkeys.Next.Value.Tapped() then
+            scoreSystems <- Options.WatcherSelection.cycleForward scoreSystems
+            scoreData.AccuracyType <- fst scoreSystems
+            refresh()
+        elif Options.options.Hotkeys.Previous.Value.Tapped() then
+            scoreSystems <- Options.WatcherSelection.cycleBackward scoreSystems
+            scoreData.AccuracyType <- fst scoreSystems
+            refresh()
 
     override this.OnEnter prev =
         Screen.toolbar <- true
