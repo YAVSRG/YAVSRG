@@ -35,11 +35,13 @@ module private ModSelect =
             Callback = ignore
         }
     
-type ModSelect() =
+type ModSelect() as this =
     inherit Widget()
+
+    do
+        Components.CardButton.Basic ("Mods", (fun () -> SelectionMenu(ModSelect.page()).Show()), options.Hotkeys.Mods) |> this.Add
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if options.Hotkeys.Mods.Value.Tapped() then SelectionMenu(ModSelect.page()).Show()
-        elif options.Hotkeys.Autoplay.Value.Tapped() then
+        if options.Hotkeys.Autoplay.Value.Tapped() then
             autoplay <- not autoplay

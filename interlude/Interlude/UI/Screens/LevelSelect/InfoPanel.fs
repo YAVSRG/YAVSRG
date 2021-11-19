@@ -20,7 +20,6 @@ open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Screens.LevelSelect.Globals
-open Interlude.UI.Components.Selection.Menu
 
 module private InfoPanel =
 
@@ -186,9 +185,6 @@ type InfoPanel() as this =
     let mutable bpm = ""
 
     do
-        this.Add (new ModSelect())
-        this.Add (new CollectionManager())
-
         scores
         |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f)
         |> this.Add

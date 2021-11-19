@@ -266,16 +266,19 @@ type Screen() as this =
         let sorts = sortBy.Keys |> Array.ofSeq
         new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Value),
             (fun i -> options.ChartSortMode.Value <- sorts.[i]; refresh()), "Sort by", 50.0f)
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.SortBy")
         |> positionWidget(-400.0f, 1.0f, 100.0f, 0.0f, -250.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
 
         let groups = groupBy.Keys |> Array.ofSeq
         new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Value),
             (fun i -> options.ChartGroupMode.Value <- groups.[i]; refresh()), "Group by", 50.0f)
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.GroupBy")
         |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
 
         new SearchBox(searchText, fun f -> filter <- f; refresh())
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Search")
         |> positionWidget(-600.0f, 1.0f, 20.0f, 0.0f, -50.0f, 1.0f, 80.0f, 0.0f)
         |> this.Add
 
@@ -285,6 +288,16 @@ type Screen() as this =
 
         new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
         |> positionWidget(0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.4f, 160.0f, 0.0f)
+        |> this.Add
+
+        new ModSelect()
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Mods")
+        |> positionWidget(-825.0f, 1.0f, 20.0f, 0.0f, -650.0f, 1.0f, 80.0f, 0.0f)
+        |> this.Add
+
+        new CollectionManager()
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Collections")
+        |> positionWidget(-1050.0f, 1.0f, 20.0f, 0.0f, -875.0f, 1.0f, 80.0f, 0.0f)
         |> this.Add
 
         infoPanel
@@ -339,7 +352,13 @@ type Screen() as this =
         let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * pheight
         Draw.rect (Rect.create (Render.vwidth - 10.0f) (top + 170.0f + 10.0f + scrollPos) (Render.vwidth - 5.0f) (top + 170.0f + 30.0f + scrollPos)) Color.White Sprite.Default
 
-        Draw.rect (Rect.create left top right (top + 170.0f)) (Style.accentShade (100, 0.6f, 0.0f)) Sprite.Default
+        let w = (right - left) * 0.4f
+        Draw.quad
+            ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
+            (Quad.colorOf (Style.accentShade (100, 0.6f, 0.0f))) Sprite.DefaultQuad
+        Draw.quad
+            ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
+            (Quad.colorOf (Style.accentShade (100, 0.1f, 0.0f))) Sprite.DefaultQuad
         Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 

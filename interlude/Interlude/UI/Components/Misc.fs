@@ -12,15 +12,6 @@ open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI.Animation
 
-type TextBox(textFunc, color, just) =
-    inherit Widget()
-
-    new(textFunc, scolor, just) = TextBox(textFunc, (fun () -> scolor(), Color.Transparent), just)
-
-    override this.Draw() = 
-        Text.drawFillB(Content.font(), textFunc(), this.Bounds, color(), just)
-        base.Draw()
-
 type TooltipRegion(localisedText) =
     inherit Widget()
 
@@ -28,6 +19,8 @@ type TooltipRegion(localisedText) =
         base.Update(elapsedTime, bounds)
         if Mouse.Hover this.Bounds && options.Hotkeys.Tooltip.Value.Tapped() then
             Tooltip.tooltip (options.Hotkeys.Tooltip.Value, localisedText)
+
+    static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
 
 type Dropdown(options: string array, index, func, label, buttonSize) as this =
     inherit Widget()
@@ -38,7 +31,9 @@ type Dropdown(options: string array, index, func, label, buttonSize) as this =
     do
         this.Animation.Add color
         let fr = new Frame(Enabled = false)
-        this.Add((Clickable((fun () -> fr.Enabled <- not fr.Enabled), fun b -> color.Target <- if b then 0.8f else 0.5f)) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, buttonSize, 0.0f))
+        CardButton.DropdownButton (label, (fun () -> options.[index]), (fun () -> fr.Enabled <- not fr.Enabled))
+        |> position (WPos.topSlice buttonSize)
+        |> this.Add
         this.Add(
             let fc = FlowContainer(Spacing = 0.0f)
             fr.Add fc
@@ -46,17 +41,9 @@ type Dropdown(options: string array, index, func, label, buttonSize) as this =
                 (fun i o -> fc.Add(Button((fun () -> index <- i; func i), o) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)))
                 options
             fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
-            
-    override this.Draw() =
-        let bbounds = Rect.sliceTop buttonSize this.Bounds
-        Draw.rect (Rect.expand (5.0f, 5.0f) bbounds) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-        Draw.rect bbounds (Style.accentShade(255, 0.6f, 0.0f)) Sprite.Default
-        Text.drawFill(Content.font(), label, Rect.sliceTop 20.0f bbounds, Color.White, 0.5f)
-        Text.drawFill(Content.font(), options.[index], bbounds |> Rect.trimTop 20.0f, Color.White, 0.5f)
-        base.Draw()
 
 type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) as this =
-    inherit Frame()
+    inherit Widget()
 
     let color = AnimationFade(0.5f)
 
@@ -73,17 +60,22 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
     do
         this.Animation.Add(color)
         if Option.isNone bind then toggle() else this.Add(new Clickable(toggle, ignore))
-        this.Add(
-            TextBox(
-                (fun () ->
-                    match bind with
-                    | Some b ->
-                        match s.Value with
-                        //todo: localise
-                        | "" -> sprintf "Press %s to %s" (b.Value.ToString()) prompt
-                        | text -> text
-                    | None -> match s.Value with "" -> prompt | text -> text),
-                (fun () -> Style.accentShade(255, 1.0f, color.Value)), 0.0f))
+        Frame(
+            Style.main 100,
+            fun () -> Style.highlightF 100 color.Value
+        )
+        |> this.Add
+        TextBox(
+            (fun () ->
+                match bind with
+                | Some b ->
+                    match s.Value with
+                    //todo: localise
+                    | "" -> sprintf "Press %s to %s" (b.Value.ToString()) prompt
+                    | text -> text
+                | None -> match s.Value with "" -> prompt | text -> text),
+            (fun () -> Style.highlightF 255 color.Value), 0.0f)
+        |> this.Add
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -96,8 +88,7 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
 
 type SearchBox(s: Setting<string>, callback: Filter -> unit) as this =
     inherit Widget()
-    //todo: this seems excessive. replace with two variables?
-    let searchTimer = new System.Diagnostics.Stopwatch()
+    let searchTimer = new Diagnostics.Stopwatch()
     do
         TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some options.Hotkeys.Search, "search" )
         |> this.Add
