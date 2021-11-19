@@ -54,7 +54,6 @@ module Screen =
         for i = 0 to 3 do screens.[i] <- _screens.[i]
         current <- screens.[0]
     let mutable exit = false
-    let mutable cursor = true
     let mutable toolbar = false
     let mutable currentType = Type.SplashScreen
     
@@ -259,7 +258,7 @@ module Screen =
     
         override this.Update(elapsedTime, bounds) =
             Background.update elapsedTime
-            Tooltip.display.Update(elapsedTime, bounds)
+            if currentType <> Type.Play || Dialog.any() then Tooltip.display.Update(elapsedTime, bounds)
             if Render.vwidth > 0.0f then
                 parallaxX.Target <- Mouse.X() / Render.vwidth
                 parallaxY.Target <- Mouse.Y() / Render.vheight
@@ -279,5 +278,6 @@ module Screen =
                 Transitions.drawTransition transitionFlags inbound amount this.Bounds
                 if (transitionFlags &&& TransitionFlag.UnderLogo = TransitionFlag.UnderLogo) then logo.Draw()
             Dialog.draw()
-            if cursor then Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) (Content.themeConfig().CursorSize) (Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
-            Tooltip.display.Draw()
+            if currentType <> Type.Play || Dialog.any() then 
+                Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) (Content.themeConfig().CursorSize) (Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
+                Tooltip.display.Draw()

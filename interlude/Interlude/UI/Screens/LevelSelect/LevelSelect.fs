@@ -145,11 +145,16 @@ type private LevelSelectChartItem(groupName, cc) =
                 expandedGroup <- ""
                 scrollTo <- ScrollToPack groupName
             elif options.Hotkeys.Delete.Value.Tapped() then
-                ConfirmDialog(sprintf "Really delete '%s'?" cc.Title,
+                let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
+                Tooltip.callback (
+                    options.Hotkeys.Delete.Value,
+                    Localisation.localiseWith [chartName] "misc.Delete",
+                    Warning,
                     fun () -> 
                         Library.delete cc
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info)).Show()
+                        Notification.add (Localisation.localiseWith [chartName] "notification.Deleted", Info)
+                )
         else hover.Target <- 0.0f
         hover.Update(elapsedTime) |> ignore
     override this.Update(top, topEdge, elapsedTime) =
@@ -183,11 +188,16 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
             if Mouse.Click(MouseButton.Left) then
                 if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
             elif options.Hotkeys.Delete.Value.Tapped() then
-                ConfirmDialog(sprintf "Really delete '%s'?" name,
-                    fun () -> 
+                let groupName = sprintf "%s (%i charts)" name (items.Count())
+                Tooltip.callback (
+                    options.Hotkeys.Delete.Value,
+                    Localisation.localiseWith [groupName] "misc.Delete",
+                    Warning,
+                    fun () ->
                         items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info)).Show()
+                        Notification.add (Localisation.localiseWith [groupName] "notification.Deleted", Info)
+                )
 
     override this.Update(top, topEdge, elapsedTime) =
         match scrollTo with

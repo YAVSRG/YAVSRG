@@ -52,7 +52,6 @@ type Toolbar() as this =
         |> this.Add
 
         Jukebox() |> this.Add
-        Notification.display |> this.Add
 
     override this.VisibleBounds = this.Parent.Value.VisibleBounds
 

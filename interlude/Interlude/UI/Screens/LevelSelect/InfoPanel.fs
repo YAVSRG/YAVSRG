@@ -79,12 +79,16 @@ module private InfoPanel =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
-                let name = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                ConfirmDialog(sprintf "Really delete '%s'?" name,
-                    fun () -> 
+                let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
+                Tooltip.callback (
+                    options.Hotkeys.Delete.Value,
+                    Localisation.localiseWith [scoreName] "misc.Delete",
+                    Warning,
+                    fun () ->
                         chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info)).Show()
+                        Notification.add (Localisation.localiseWith [scoreName] "notification.Deleted", Info)
+                )
 
     type Scoreboard() as this =
         inherit Selectable()
@@ -209,7 +213,7 @@ type InfoPanel() as this =
         |> positionWidget(0.0f, 0.5f, -120.0f, 1.0f, -10.0f, 1.0f, -50.0f, 1.0f)
         |> this.Add
 
-        new TextBox((fun () -> getModString(rate, selectedMods)), K (Color.White, Color.Black), 0.0f)
+        new TextBox((fun () -> getModString(rate, selectedMods, autoplay)), K (Color.White, Color.Black), 0.0f)
         |> positionWidget(17.0f, 0.0f, -50.0f, 1.0f, -50.0f, 1.0f, -10.0f, 1.0f)
         |> this.Add
 

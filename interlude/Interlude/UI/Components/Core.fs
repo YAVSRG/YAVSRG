@@ -27,7 +27,7 @@ type TooltipRegion(localisedText) =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if Mouse.Hover this.Bounds && options.Hotkeys.Tooltip.Value.Tapped() then
-            Tooltip.add (options.Hotkeys.Tooltip.Value, localisedText, infinity)
+            Tooltip.tooltip (options.Hotkeys.Tooltip.Value, localisedText)
 
 type Dropdown(options: string array, index, func, label, buttonSize) as this =
     inherit Widget()

@@ -111,7 +111,6 @@ type Screen(start: PlayScreenType) as this =
         Screen.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
         //discord presence
         Screen.toolbar <- true
-        Screen.cursor <- false
         Audio.changeRate Gameplay.rate
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
@@ -120,7 +119,6 @@ type Screen(start: PlayScreenType) as this =
 
     override this.OnExit next =
         Screen.backgroundDim.Target <- 0.7f
-        Screen.cursor <- true
         if next <> Screen.Type.Score then Screen.toolbar <- false
 
     override this.Update(elapsedTime, bounds) =
