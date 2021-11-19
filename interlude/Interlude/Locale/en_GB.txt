@@ -4,7 +4,7 @@ collections.Create=+New collection
 collections.Favourites=Favourites
 collections.Removed=Removed %0 from '%1'
 collections.RemoveHint=Press %0 to remove a chart from the collection.
-misc.Delete=Deleting %0 ...
+misc.Delete=Hold to delete %0 ...
 mod.auto.desc=Plays the chart for you.
 mod.auto.name=Auto
 mod.mirror.desc=Horizontally mirrors everything in the chart.
@@ -121,3 +121,8 @@ options.wselect.EditItem=Editing
 options.wselect.MakeMain=Make Main
 scoreboard.NoLocalScores=No local scores
 scoreboard.storage.Local=Local Scores
+levelselect.tooltip.SortBy=Select how charts are ordered within groups.\nCurrently only supports ascending order.
+levelselect.tooltip.GroupBy=Select how charts are grouped.\nChoosing 'Collections' lets you view your collections.
+levelselect.tooltip.Search=Type here to search for charts!\nPut text "in quotes" to search for exact text.\nSome useful filters:\n    key=4 will match only 4K charts\n    More coming soon...
+levelselect.tooltip.Mods=Select gameplay modifiers here!\nGameplay modifiers will change how a chart is played.\nThey can add to or remove extra challenges from a chart.
+levelselect.tooltip.Collections=Organise charts into your own groupings/categories here!\nThis feature is still a work-in-progress.

@@ -7,37 +7,6 @@ open Interlude.Input
 open Interlude.Utils
 open Interlude.Graphics
 
-type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
-    inherit Widget()
-
-    let BORDERWIDTH = 5.0f
-
-    new() = Frame ((fun () -> Style.accentShade(200, 0.5f, 0.3f)), (fun () -> Style.accentShade(80, 0.5f, 0.0f)), true, true)
-    new((), frame) = Frame (K Color.Transparent, K frame, false, true)
-    new((), frame) = Frame (K Color.Transparent, frame, false, true)
-    new(fill, ()) = Frame (K fill, K Color.Transparent, true, false)
-    new(fill, ()) = Frame (fill, K Color.Transparent, true, false)
-    new(fill, frame) = Frame (K fill, K frame, true, true)
-    new(fill, frame) = Frame (fill, frame, true, true)
-
-    override this.Draw() =
-        if frame then
-            let c = frameColor()
-            let r = Rect.expand(BORDERWIDTH, BORDERWIDTH) this.Bounds
-            Draw.rect (Rect.sliceLeft BORDERWIDTH r) c Sprite.Default
-            Draw.rect (Rect.sliceRight BORDERWIDTH r) c Sprite.Default
-            let r = Rect.expand(0.0f, BORDERWIDTH) this.Bounds
-            Draw.rect (Rect.sliceTop BORDERWIDTH r) c Sprite.Default
-            Draw.rect (Rect.sliceBottom BORDERWIDTH r) c Sprite.Default
-
-        if fill then Draw.rect base.Bounds (fillColor()) Sprite.Default
-        base.Draw()
-
-    static member Create(w: Widget) =
-        let f = Frame()
-        f.Add(w)
-        f
-
 type FlowContainer() =
     inherit Widget()
     let mutable spacing = 10.0f

@@ -2,10 +2,12 @@
 
 open Prelude.Gameplay.Mods
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Components.Selection.Menu
+open Interlude.Utils
 open Interlude.Gameplay
 open Interlude.Options
 
@@ -35,11 +37,12 @@ module private ModSelect =
             Callback = ignore
         }
     
-type ModSelect() =
+type ModSelect() as this =
     inherit Widget()
+
+    do StylishButton ((fun () -> SelectionMenu(ModSelect.page()).Show()), K "Mods", (fun () -> Style.accentShade(100, 0.8f, 0.2f)), options.Hotkeys.Mods) |> this.Add
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if options.Hotkeys.Mods.Value.Tapped() then SelectionMenu(ModSelect.page()).Show()
-        elif options.Hotkeys.Autoplay.Value.Tapped() then
+        if options.Hotkeys.Autoplay.Value.Tapped() then
             autoplay <- not autoplay

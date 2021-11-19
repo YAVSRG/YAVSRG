@@ -11,13 +11,16 @@ module Style =
 
     let accentShade (alpha, brightness, white) =
         let accentColor = accentColor.GetColor()
-        let rd = float32 (255uy - accentColor.R) * white
-        let gd = float32 (255uy - accentColor.G) * white
-        let bd = float32 (255uy - accentColor.B) * white
+        let r = float32 accentColor.R
+        let g = float32 accentColor.G
+        let b = float32 accentColor.B
+        let rd = (255.0f - r * brightness) * white
+        let gd = (255.0f - g * brightness) * white
+        let bd = (255.0f - b * brightness) * white
         Color.FromArgb(alpha,
-            int ((float32 accentColor.R + rd) * brightness),
-            int ((float32 accentColor.G + gd) * brightness),
-            int ((float32 accentColor.B + bd) * brightness))
+            int ((r + rd) * brightness) |> min 255,
+            int ((g + gd) * brightness) |> min 255,
+            int ((b + bd) * brightness) |> min 255)
 
     type private ColorFunc = unit -> Color
     type private ColorFuncF = float32 -> Color
@@ -25,8 +28,8 @@ module Style =
     let alpha a (c: 'T -> Color) = fun x -> Color.FromArgb(a, c x)
     let alphaF (a: AnimationFade) (c: ColorFunc) = fun () -> Color.FromArgb(int (a.Value * 255.0f), c ())
 
-    let white a : ColorFunc = K Color.White
-    let black a : ColorFunc = K Color.Black
+    let white a : ColorFunc = K <| Color.FromArgb(a, Color.White)
+    let black a : ColorFunc = K <| Color.FromArgb(a, Color.Black)
 
     let text : unit -> Color * Color = K (Color.White, Color.Black)
 

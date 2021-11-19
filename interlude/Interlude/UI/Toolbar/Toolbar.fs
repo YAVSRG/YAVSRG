@@ -52,14 +52,13 @@ type Toolbar() as this =
         |> this.Add
 
         Jukebox() |> this.Add
-        Notification.display |> this.Add
 
     override this.VisibleBounds = this.Parent.Value.VisibleBounds
 
     override this.Draw() = 
         let struct (l, t, r, b) = this.Bounds
-        Draw.rect(Rect.create l (t - HEIGHT) r t) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-        Draw.rect(Rect.create l b r (b + HEIGHT)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.create l (t - HEIGHT) r t) (Style.main 100 ()) Sprite.Default
+        Draw.rect(Rect.create l b r (b + HEIGHT)) (Style.main 100 ()) Sprite.Default
         if barSlider.Value > 0.01f then
             let s = (r - l) / 48.0f
             for i in 0 .. 47 do

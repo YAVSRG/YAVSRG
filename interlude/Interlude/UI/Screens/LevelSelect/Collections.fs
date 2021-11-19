@@ -78,13 +78,13 @@ module private Collections =
             Callback = ignore
         }
     
-type CollectionManager() =
+type CollectionManager() as this =
     inherit Widget()
+
+    do StylishButton ((fun () -> SelectionMenu(Collections.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), options.Hotkeys.Collections) |> this.Add
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if options.Hotkeys.Collections.Value.Tapped() then
-            SelectionMenu(Collections.page()).Show()
         if currentCachedChart.IsSome then
             if options.Hotkeys.AddToCollection.Value.Tapped() then
                 if
@@ -94,7 +94,7 @@ type CollectionManager() =
                     | Goals gs -> false //gs.Add ((selectedChart, selectedMods, rate), Goal.NoGoal); true
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", NotificationType.Info)
+                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", Info)
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
                 if
                     match snd Collections.selected with
@@ -103,4 +103,4 @@ type CollectionManager() =
                     | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
-                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", NotificationType.Info)
+                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)

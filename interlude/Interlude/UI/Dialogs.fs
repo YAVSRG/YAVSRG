@@ -50,4 +50,6 @@ module rec Dialog =
 
     let draw () = for d in dialogs do d.Draw()
 
+    let any () = dialogs.Count > 0
+
 type Dialog = Dialog.T

@@ -20,7 +20,6 @@ open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Screens.LevelSelect.Globals
-open Interlude.UI.Components.Selection.Menu
 
 module private InfoPanel =
 
@@ -79,23 +78,29 @@ module private InfoPanel =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
-                let name = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                ConfirmDialog(sprintf "Really delete '%s'?" name,
-                    fun () -> 
+                let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
+                Tooltip.callback (
+                    options.Hotkeys.Delete.Value,
+                    Localisation.localiseWith [scoreName] "misc.Delete",
+                    Warning,
+                    fun () ->
                         chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info)).Show()
+                        Notification.add (Localisation.localiseWith [scoreName] "notification.Deleted", Info)
+                )
 
     type Scoreboard() as this =
         inherit Selectable()
 
         let mutable count = -1
-        let filter = Setting.simple ScoreboardFilter.All
-        let sort = Setting.map enum int options.ScoreSortMode
 
         let mutable chart = ""
         let mutable scoring = ""
         let ls = new ListSelectable(true)
+
+
+        let filter = Setting.simple ScoreboardFilter.All
+        let sort = Setting.map enum int options.ScoreSortMode
 
         let sorter() : Comparison<Widget> =
             match sort.Value with
@@ -108,10 +113,11 @@ module private InfoPanel =
             match filter.Value with
             | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.rate = rate)
             | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.ScoreInfo.keycount - 3])
-            | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.selectedMods = selectedMods) //nyi
+            | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.selectedMods = selectedMods)
             | _ -> K true
 
         let flowContainer = new FlowContainer(Sort = sorter(), Filter = filterer())
+
         let scoreLoader =
             let future = BackgroundTask.futureSeq<ScoreboardItem> "Scoreboard loader" (fun item -> flowContainer.Synchronized(fun () -> flowContainer.Add item))
             fun () ->
@@ -130,24 +136,33 @@ module private InfoPanel =
 
         do
             flowContainer
-            |> positionWidgetA(0.0f, 10.0f, 0.0f, -40.0f)
+            |> positionWidgetA(0.0f, 10.0f, 0.0f, -50.0f)
             |> this.Add
 
-            LittleButton.FromEnum("Sort", sort,
-                fun () -> flowContainer.Sort <- sorter())
-            |> positionWidget(20.0f, 0.0f, -35.0f, 1.0f, -20.0f, 0.25f, -5.0f, 1.0f)
+            StylishButton.FromEnum("Sort",
+                sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
+                Style.main 100, TiltLeft = false )
+            |> positionWidget(0.0f, 0.0f, -45.0f, 1.0f, -15.0f, 0.25f, -5.0f, 1.0f)
             |> ls.Add
 
-            LittleButton.FromEnum("Filter", filter, this.Refresh)
-            |> positionWidget(20.0f, 0.25f, -35.0f, 1.0f, -20.0f, 0.5f, -5.0f, 1.0f)
+            StylishButton.FromEnum("Filter",
+                filter |> Setting.trigger (fun _ -> this.Refresh()),
+                Style.main 90 )
+            |> positionWidget(10.0f, 0.25f, -45.0f, 1.0f, -15.0f, 0.5f, -5.0f, 1.0f)
             |> ls.Add
 
-            LittleButton((fun () -> scoreSystem), fun () -> Setting.app WatcherSelection.cycleForward options.AccSystems; LevelSelect.refresh <- true)
-            |> positionWidget(20.0f, 0.5f, -35.0f, 1.0f, -20.0f, 0.75f, -5.0f, 1.0f)
+            StylishButton(
+                (fun () -> Setting.app WatcherSelection.cycleForward options.AccSystems; LevelSelect.refresh <- true),
+                (fun () -> scoreSystem),
+                Style.main 80 )
+            |> positionWidget(10.0f, 0.5f, -45.0f, 1.0f, -15.0f, 0.75f, -5.0f, 1.0f)
             |> ls.Add
 
-            LittleButton(K <| Localisation.localise "scoreboard.storage.Local", this.Refresh) //nyi
-            |> positionWidget(20.0f, 0.75f, -35.0f, 1.0f, -20.0f, 1.0f, -5.0f, 1.0f)
+            StylishButton(
+                this.Refresh,
+                K <| Localisation.localise "scoreboard.storage.Local",
+                Style.main 70, TiltRight = false ) //nyi
+            |> positionWidget(10.0f, 0.75f, -45.0f, 1.0f, -15.0f, 1.0f, -5.0f, 1.0f)
             |> ls.Add
 
             ls |> this.Add
@@ -182,9 +197,6 @@ type InfoPanel() as this =
     let mutable bpm = ""
 
     do
-        this.Add (new ModSelect())
-        this.Add (new CollectionManager())
-
         scores
         |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f)
         |> this.Add
@@ -209,7 +221,7 @@ type InfoPanel() as this =
         |> positionWidget(0.0f, 0.5f, -120.0f, 1.0f, -10.0f, 1.0f, -50.0f, 1.0f)
         |> this.Add
 
-        new TextBox((fun () -> getModString(rate, selectedMods)), K (Color.White, Color.Black), 0.0f)
+        new TextBox((fun () -> getModString(rate, selectedMods, autoplay)), K (Color.White, Color.Black), 0.0f)
         |> positionWidget(17.0f, 0.0f, -50.0f, 1.0f, -50.0f, 1.0f, -10.0f, 1.0f)
         |> this.Add
 

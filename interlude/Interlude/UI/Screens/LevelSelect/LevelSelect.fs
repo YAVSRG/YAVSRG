@@ -66,21 +66,21 @@ type private LevelSelectChartItem(groupName, cc) =
     override this.Navigate() =
         match navigation with
         | Navigation.Nothing -> ()
-        | Forward b ->
+        | Navigation.Forward b ->
             if b then
                 switchCurrentChart(cc, groupName)
                 navigation <- Navigation.Nothing
-            elif groupName = selectedGroup && this.Selected then navigation <- Forward true
-        | Backward (groupName2, cc2) ->
+            elif groupName = selectedGroup && this.Selected then navigation <- Navigation.Forward true
+        | Navigation.Backward (groupName2, cc2) ->
             if groupName = selectedGroup && this.Selected then
                 switchCurrentChart(cc2, groupName2)
                 navigation <- Navigation.Nothing
-            else navigation <- Backward(groupName, cc)
+            else navigation <- Navigation.Backward(groupName, cc)
 
     override this.OnDraw(bounds, selected) =
         let struct (left, top, right, bottom) = bounds
         let accent = Style.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
-        Draw.rect bounds (Style.accentShade(80, 1.0f, 0.0f)) Sprite.Default
+        Draw.rect bounds (if this.Selected then Style.main 80 () else Style.black 80 ()) Sprite.Default
         let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
         Draw.quad
             (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
@@ -104,7 +104,7 @@ type private LevelSelectChartItem(groupName, cc) =
         f lamp (fun x -> x.ToString()) Helpers.lampToColor 300.0f
         f clear (fun x -> if x then "CLEAR" else "FAILED") Helpers.clearToColor 150.0f
 
-        Draw.rect(Rect.sliceBottom 25.0f bounds) (Style.accentShade(70, 0.3f, 0.0f)) Sprite.Default
+        Draw.rect(Rect.sliceBottom 25.0f bounds) (Color.FromArgb(60, 0, 0, 0)) Sprite.Default
         Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
         Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
         Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
@@ -143,17 +143,22 @@ type private LevelSelectChartItem(groupName, cc) =
                 else switchCurrentChart(cc, groupName)
             elif Mouse.Click(MouseButton.Right) then
                 expandedGroup <- ""
-                scrollTo <- ScrollToPack groupName
+                scrollTo <- ScrollTo.Pack groupName
             elif options.Hotkeys.Delete.Value.Tapped() then
-                ConfirmDialog(sprintf "Really delete '%s'?" cc.Title,
+                let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
+                Tooltip.callback (
+                    options.Hotkeys.Delete.Value,
+                    Localisation.localiseWith [chartName] "misc.Delete",
+                    Warning,
                     fun () -> 
                         Library.delete cc
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [cc.Title] "notification.Deleted", NotificationType.Info)).Show()
+                        Notification.add (Localisation.localiseWith [chartName] "notification.Deleted", Info)
+                )
         else hover.Target <- 0.0f
         hover.Update(elapsedTime) |> ignore
     override this.Update(top, topEdge, elapsedTime) =
-        if scrollTo = ScrollToChart && groupName = selectedGroup && this.Selected then
+        if scrollTo = ScrollTo.Chart && groupName = selectedGroup && this.Selected then
             scrollBy(-top + 500.0f)
             scrollTo <- ScrollTo.Nothing
         base.Update(top, topEdge, elapsedTime)
@@ -181,17 +186,22 @@ type private LevelSelectPackItem(name, items: LevelSelectChartItem list) =
     override this.OnUpdate(bounds, selected, elapsedTime) =
         if Mouse.Hover(bounds) then
             if Mouse.Click(MouseButton.Left) then
-                if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollToPack name)
+                if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
             elif options.Hotkeys.Delete.Value.Tapped() then
-                ConfirmDialog(sprintf "Really delete '%s'?" name,
-                    fun () -> 
+                let groupName = sprintf "%s (%i charts)" name (items.Count())
+                Tooltip.callback (
+                    options.Hotkeys.Delete.Value,
+                    Localisation.localiseWith [groupName] "misc.Delete",
+                    Warning,
+                    fun () ->
                         items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [name] "notification.Deleted", NotificationType.Info)).Show()
+                        Notification.add (Localisation.localiseWith [groupName] "notification.Deleted", Info)
+                )
 
     override this.Update(top, topEdge, elapsedTime) =
         match scrollTo with
-        | ScrollToPack s when s = name ->
+        | ScrollTo.Pack s when s = name ->
             if this.Expanded then scrollBy(-top + topEdge + 185.0f) else scrollBy(-top + topEdge + 400.0f)
             scrollTo <- ScrollTo.Nothing
         | _ -> ()
@@ -242,7 +252,7 @@ type Screen() as this =
                     |> List.ofSeq
                     |> fun l -> LevelSelectPackItem(k, l))
             |> List.ofSeq
-        scrollTo <- ScrollToChart
+        scrollTo <- ScrollTo.Chart
         expandedGroup <- selectedGroup
 
     let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
@@ -253,28 +263,41 @@ type Screen() as this =
         this.Animation.Add scrollPos
         scrollBy <- fun (amt: float32) -> scrollPos.Target <- scrollPos.Target + amt
 
-        let sorts = sortBy.Keys |> Array.ofSeq
-        new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Value),
-            (fun i -> options.ChartSortMode.Value <- sorts.[i]; refresh()), "Sort by", 50.0f)
-        |> positionWidget(-400.0f, 1.0f, 100.0f, 0.0f, -250.0f, 1.0f, 400.0f, 0.0f)
-        |> this.Add
-
-        let groups = groupBy.Keys |> Array.ofSeq
-        new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Value),
-            (fun i -> options.ChartGroupMode.Value <- groups.[i]; refresh()), "Group by", 50.0f)
-        |> positionWidget(-200.0f, 1.0f, 100.0f, 0.0f, -50.0f, 1.0f, 400.0f, 0.0f)
-        |> this.Add
-
-        new SearchBox(searchText, fun f -> filter <- f; refresh())
-        |> positionWidget(-600.0f, 1.0f, 20.0f, 0.0f, -50.0f, 1.0f, 80.0f, 0.0f)
-        |> this.Add
-
         new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
         |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 100.0f, 0.0f)
         |> this.Add
 
         new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
         |> positionWidget(0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.4f, 160.0f, 0.0f)
+        |> this.Add
+
+        new SearchBox(searchText, fun f -> filter <- f; refresh())
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Search")
+        |> positionWidget(-600.0f, 1.0f, 30.0f, 0.0f, -50.0f, 1.0f, 90.0f, 0.0f)
+        |> this.Add
+
+        new ModSelect()
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Mods")
+        |> positionWidget(25.0f, 0.4f, 120.0f, 0.0f, -25.0f, 0.55f, 170.0f, 0.0f)
+        |> this.Add
+
+        new CollectionManager()
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Collections")
+        |> positionWidget(0.0f, 0.55f, 120.0f, 0.0f, -25.0f, 0.7f, 170.0f, 0.0f)
+        |> this.Add
+
+        let sorts = sortBy.Keys |> Array.ofSeq
+        new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Value),
+            (fun i -> options.ChartSortMode.Value <- sorts.[i]; refresh()), "Sort", 50.0f, fun () -> Style.accentShade(100, 0.4f, 0.6f))
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.SortBy")
+        |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 400.0f, 0.0f)
+        |> this.Add
+
+        let groups = groupBy.Keys |> Array.ofSeq
+        new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Value),
+            (fun i -> options.ChartGroupMode.Value <- groups.[i]; refresh()), "Group", 50.0f, fun () -> Style.accentShade(100, 0.2f, 0.8f))
+        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.GroupBy")
+        |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
 
         infoPanel
@@ -329,7 +352,13 @@ type Screen() as this =
         let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * pheight
         Draw.rect (Rect.create (Render.vwidth - 10.0f) (top + 170.0f + 10.0f + scrollPos) (Render.vwidth - 5.0f) (top + 170.0f + 30.0f + scrollPos)) Color.White Sprite.Default
 
-        Draw.rect (Rect.create left top right (top + 170.0f)) (Style.accentShade (100, 0.6f, 0.0f)) Sprite.Default
+        let w = (right - left) * 0.4f
+        Draw.quad
+            ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
+            (Quad.colorOf (Style.accentShade (120, 0.6f, 0.0f))) Sprite.DefaultQuad
+        Draw.quad
+            ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
+            (Quad.colorOf (Style.accentShade (120, 0.1f, 0.0f))) Sprite.DefaultQuad
         Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 
