@@ -23,8 +23,6 @@ open Interlude.Options
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect.Globals
-open Interlude.UI.Screens.Score
-open Interlude.UI.Components.Selection.Menu
 
 [<AbstractClass>]
 type private LevelSelectItem() =
@@ -56,7 +54,7 @@ type private LevelSelectChartItem(groupName, cc) =
     let mutable colorVersion = -1
     let mutable color = Color.Transparent
     let mutable chartData = None
-    let mutable pbData = (None, None, None)
+    let mutable pbData: Bests option = None
     let mutable collectionIcon = ""
 
     override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
@@ -87,22 +85,37 @@ type private LevelSelectChartItem(groupName, cc) =
             (struct(accent, Color.Transparent, Color.Transparent, accent))
             Sprite.DefaultQuad
 
-        let (accAndGrades, lamp, clear) = pbData
-        let f (p: PersonalBests<'T> option) (format: 'T -> string) (color: 'T -> Color) (pos: float32) =
-            let (t, t2, c) =
-                match p with
-                | None -> ("", "", Color.Transparent)
-                | Some ((p1, r1), (p2, r2)) ->
-                    if r1 < rate then (format p2, sprintf "(%.2fx)" r2, if r2 < rate then Color.FromArgb(127, Color.White) else color p2)
-                    else (format p1, sprintf "(%.2fx)" r1, color p1)
-            if c.A > 0uy then
-                Draw.rect(Rect.create (right - pos - 40.0f) top (right - pos + 40.0f) bottom) accent Sprite.Default
-                Text.drawJustB(font(), t, 20.0f, right - pos, top + 8.0f, (c, Color.Black), 0.5f)
-                Text.drawJustB(font(), t2, 14.0f, right - pos, top + 35.0f, (c, Color.Black), 0.5f)
+        let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
+            if r1 < rate then ( p2, r2, if r2 < rate then Color.FromArgb(127, Color.White) else colorFunc p2 )
+            else ( p1, r1, colorFunc p1 )
 
-        f accAndGrades (fun (x, _) -> sprintf "%.2f%%" (100.0 * x)) (snd >> Helpers.gradeToColor) 450.0f
-        f lamp (fun x -> x.ToString()) Helpers.lampToColor 300.0f
-        f clear (fun x -> if x then "CLEAR" else "FAILED") Helpers.clearToColor 150.0f
+        let disp (pb: PersonalBests<'T>) (format: 'T -> string) (colorFunc: 'T -> Color) (pos: float32) =
+            let value, rate, color = getPb pb colorFunc
+            let formatted = format value
+            let rateLabel = sprintf "(%.2fx)" rate
+            if color.A > 0uy then
+                Draw.rect(Rect.create (right - pos - 40.0f) top (right - pos + 40.0f) bottom) accent Sprite.Default
+                Text.drawJustB(font(), formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
+                Text.drawJustB(font(), rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
+        
+        match pbData with
+        | Some d ->
+            disp 
+                d.Accuracy
+                (fun x -> sprintf "%.2f%%" (100.0 * x))
+                (fun _ -> let (_, _, c) = getPb d.Grade Themes.gradeToColor in c)
+                450.0f
+            disp
+                d.Lamp
+                (fun x -> x.ToString())
+                Themes.lampToColor
+                300.0f
+            disp
+                d.Clear
+                (fun x -> if x then "CLEAR" else "FAILED")
+                Themes.clearToColor
+                150.0f
+        | None -> ()
 
         Draw.rect(Rect.sliceBottom 25.0f bounds) (Color.FromArgb(60, 0, 0, 0)) Sprite.Default
         Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
@@ -121,13 +134,12 @@ type private LevelSelectChartItem(groupName, cc) =
 
     override this.OnUpdate(bounds, selected, elapsedTime) =
         if colorVersion < colorVersionGlobal then
-            let f key (d: Collections.Generic.Dictionary<string, PersonalBests<_>>) =
-                if d.ContainsKey(key) then Some d.[key] else None
             colorVersion <- colorVersionGlobal
             if chartData.IsNone then chartData <- scores.GetScoreData cc.Hash
             match chartData with
-            | Some d -> pbData <- (f scoreSystem d.Accuracy |> Option.map (PersonalBests.map (fun x -> x, Grade.calculateFromAcc (themeConfig().GradeThresholds) x)), f scoreSystem d.Lamp, f (scoreSystem + "|" + hpSystem) d.Clear)
-            | None -> ()
+            | Some d when d.Bests.ContainsKey scoreSystem ->
+                pbData <- Some d.Bests.[scoreSystem]
+            | _ -> ()
             color <- colorFunc pbData
             collectionIcon <-
                 if options.ChartGroupMode.Value <> "Collections" then

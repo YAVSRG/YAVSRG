@@ -66,7 +66,7 @@ type Screen(start: PlayScreenType) as this =
         | Normal -> new LiveReplayProvider(firstNote) :> IReplayProvider, false, false
         | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, true
         | Replay data -> StoredReplayProvider(data) :> IReplayProvider, true, false
-    let scoring = createScoreMetric (fst options.AccSystems.Value) (fst options.HPSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate
+    let scoring = createScoreMetric (fst options.AccSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate
     let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper =
         { 
@@ -152,11 +152,11 @@ type Screen(start: PlayScreenType) as this =
                             Gameplay.makeScore(keypressData.GetFullReplay(), chart.Keys),
                             Gameplay.currentChart.Value,
                             fst options.AccSystems.Value,
-                            fst options.HPSystems.Value,
+                            Content.themeConfig().Grades,
                             ModChart = Gameplay.modifiedChart.Value,
                             Difficulty = Gameplay.difficultyRating.Value
                         )
-                    (sd, if not watchingReplay then Gameplay.setScore sd else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None))
+                    (sd, if not watchingReplay then Gameplay.setScore sd else BestFlags.Default)
                     |> Screens.Score.Screen
                     :> Screen.T
                 )

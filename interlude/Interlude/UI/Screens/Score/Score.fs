@@ -6,6 +6,7 @@ open Prelude.Scoring
 open Prelude.Data.ScoreManager
 open Interlude
 open Interlude.Utils
+open Interlude.Content
 open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Components
@@ -25,11 +26,8 @@ type EventCounts =
     }
 
 module Helpers =
-    let mutable watchReplay : ReplayData -> unit = ignore
 
-    let lampToColor (lampAchieved: Lamp) = Content.themeConfig().LampColors.[lampAchieved |> int]
-    let gradeToColor (gradeAchieved: int) = Content.themeConfig().GradeColors.[gradeAchieved]
-    let clearToColor (cleared: bool) = if cleared then Color.FromArgb(255, 127, 255, 180) else Color.FromArgb(255, 255, 160, 140)
+    let mutable watchReplay : ReplayData -> unit = ignore
 
     let countEvents(events: HitEvent<HitEventGuts> seq) : EventCounts =
         let inc (x: int ref) = x.Value <- x.Value + 1
@@ -101,11 +99,11 @@ module Helpers =
         }
 
 
-type Screen(scoreData: ScoreInfoProvider, pbs) as this =
+type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     inherit Screen.T()
 
-    let mutable lampPB, accuracyPB, clearPB = pbs
-    let mutable gradeAchieved = Grade.calculate (Content.themeConfig().GradeThresholds) scoreData.Scoring.State
+    let mutable pbs = pbs
+    let mutable gradeAchieved = Grade.calculateWithTarget (themeConfig().Grades) scoreData.Scoring.State
     let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
     let graph = new ScoreGraph(scoreData)
 
@@ -113,10 +111,8 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
 
     let refresh() =
         eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
-        gradeAchieved <- Grade.calculate (Content.themeConfig().GradeThresholds) scoreData.Scoring.State
-        lampPB <- PersonalBestType.None
-        accuracyPB <- PersonalBestType.None
-        clearPB <- PersonalBestType.None
+        gradeAchieved <- Grade.calculateWithTarget (themeConfig().Grades) scoreData.Scoring.State
+        pbs <- BestFlags.Default
         graph.Refresh()
 
     let pbLabel text colorFunc pb =
@@ -125,11 +121,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
                 base.Draw()
                 let struct (left, top, right, bottom) = this.Bounds
                 let h = System.MathF.Min(bottom - top, right - left)
-                let textW = Text.measure(Content.font(), text()) * h * 0.5f
+                let textW = Text.measure(font(), text()) * h * 0.5f
                 let mid = (right + left) * 0.5f
                 let hmid = (top + bottom) * 0.5f
                 let rect = Rect.createWH (mid + textW * 0.6f - h * 0.2f) (hmid - h * 0.4f) (h * 0.4f) (h * 0.4f)
-                Text.drawFill(Content.font(), "▲", rect, Content.themeConfig().PBColors.[int (pb())], 0.5f)
+                Text.drawFill(font(), "▲", rect, themeConfig().PBColors.[int (pb())], 0.5f)
         }
 
     do
@@ -155,18 +151,18 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         new TextBox(K "Accuracy", K Color.White, 0.5f)
         |> positionWidget(40.0f, 0.0f, -250.0f, 0.5f, 240.0f, 0.0f, -220.0f, 0.5f)
         |> this.Add
-        pbLabel (fun () -> scoreData.Scoring.FormatAccuracy()) (fun () -> Helpers.gradeToColor gradeAchieved) (fun () -> accuracyPB)
+        pbLabel (fun () -> scoreData.Scoring.FormatAccuracy()) (fun () -> Themes.gradeToColor gradeAchieved.Grade) (fun () -> pbs.Grade)
         |> positionWidget(40.0f, 0.0f, -235.0f, 0.5f, 240.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
         new TextBox(K "Lamp", K Color.White, 0.5f)
         |> positionWidget(290.0f, 0.0f, -250.0f, 0.5f, 490.0f, 0.0f, -220.0f, 0.5f)
         |> this.Add
-        pbLabel (fun () -> scoreData.Lamp.ToString()) (fun () -> Helpers.lampToColor scoreData.Lamp) (fun () -> lampPB)
+        pbLabel (fun () -> scoreData.Lamp.ToString()) (fun () -> Themes.lampToColor scoreData.Lamp) (fun () -> pbs.Lamp)
         |> positionWidget(290.0f, 0.0f, -235.0f, 0.5f, 490.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
-        pbLabel (K "A+") (fun () -> Helpers.gradeToColor gradeAchieved) (fun () -> accuracyPB)
+        pbLabel (fun () -> themeConfig().Grades.[gradeAchieved.Grade].Name) (fun () -> Themes.gradeToColor gradeAchieved.Grade) (fun () -> pbs.Accuracy)
         |> positionWidget(540.0f, 0.0f, -225.0f, 0.5f, 740.0f, 0.0f, 190.0f, 0.5f)
         |> this.Add
 
@@ -185,7 +181,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         |> positionWidget(20.0f, 0.0f, -270.0f, 1.0f, -20.0f, 1.0f, -70.0f, 1.0f)
         |> this.Add
 
-        pbLabel (fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR") (fun () -> Helpers.clearToColor(not scoreData.HP.Failed)) (fun () -> clearPB)
+        pbLabel (fun () -> if scoreData.HP.Failed then "FAILED" else "CLEAR") (fun () -> Themes.clearToColor(not scoreData.HP.Failed)) (fun () -> pbs.Clear)
         |> positionWidget(20.0f, 0.0f, -70.0f, 1.0f, 220.0f, 0.0f, -20.0f, 1.0f)
         |> this.Add
         new TextBox((fun () -> sprintf "μ: %.1fms (%.1f - %.1fms)" eventCounts.Mean eventCounts.EarlyMean eventCounts.LateMean), K (Color.White, Color.Black), 0.0f)
@@ -222,12 +218,12 @@ type Screen(scoreData: ScoreInfoProvider, pbs) as this =
         let h = (350.0f - 80.0f) / float32 judges.Length
         let mutable y = halfh - 140.0f
         for j in judges do
-            let col = Content.themeConfig().JudgementColors.[int j]
-            let name = Content.themeConfig().JudgementNames.[int j]
+            let col = themeConfig().JudgementColors.[int j]
+            let name = themeConfig().JudgementNames.[int j]
             let b = Rect.create (left + 40.0f) y (left + 530.0f) (y + h)
             Draw.rect b (Color.FromArgb(40, col)) Sprite.Default
             Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgements.[int j] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, col)) Sprite.Default
-            Text.drawFill(Content.font(), sprintf "%s: %i" name judgements.[int j], b, Color.White, 0.0f)
+            Text.drawFill(font(), sprintf "%s: %i" name judgements.[int j], b, Color.White, 0.0f)
             y <- y + h
 
         //graph stuff

@@ -2,10 +2,12 @@
 
 open System.Drawing
 open Prelude.Common
+open Prelude.Data.ScoreManager
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Interlude.UI
+open Interlude.Content
 open Interlude.Gameplay
 open Interlude.UI.Screens.Play
 
@@ -46,8 +48,16 @@ module private Globals =
     
     let mutable scrollBy : float32 -> unit = ignore
     let mutable colorVersionGlobal = 0
+
+    let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
+        if r1 < rate then ( p2, r2, if r2 < rate then Color.FromArgb(127, Color.White) else colorFunc p2 )
+        else ( p1, r1, colorFunc p1 )
+
     // future todo: different color settings?
-    let mutable colorFunc = fun ((_, _, _): PersonalBestData) -> Color.FromArgb(100, 200, 200, 200)
+    let mutable colorFunc : Bests option -> Color = 
+        function
+        | None -> Color.FromArgb(80, 200, 200, 200)
+        | Some b -> let (_, _, c) = getPb b.Grade Themes.gradeToColor in c
     
     // updated whenever screen refreshes
     let mutable scoreSystem = "SC+ (J4)"
