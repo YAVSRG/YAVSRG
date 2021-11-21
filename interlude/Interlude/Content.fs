@@ -74,6 +74,10 @@ module rec Content =
              if id <> "" && not (Directory.Exists target) then defaultTheme.CopyTo(Path.Combine(getDataPath "Themes", id))
              detect()
 
+        let lampToColor (lampAchieved: Prelude.Scoring.Lamp) = config.Value.LampColors.[lampAchieved |> int]
+        let gradeToColor (gradeAchieved: int) = config.Value.Grades.[gradeAchieved].Color
+        let clearToColor (cleared: bool) = config.Value.ClearColors |> (if cleared then fst else snd)
+
     module Noteskins =
         
         open Prelude.Data.SkinConversions

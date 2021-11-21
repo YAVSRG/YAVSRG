@@ -188,7 +188,6 @@ module Options =
             NoteSkin: Setting<string>
 
             Playstyles: Layout array
-            HPSystems: Setting<WatcherSelection<Metrics.HPSystemConfig>>
             AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
             ScoreSaveCondition: Setting<ScoreSaving>
             FailCondition: Setting<FailType>
@@ -226,7 +225,6 @@ module Options =
             UseKeymodePreference = Setting.simple false
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            HPSystems = Setting.simple (Metrics.VG, [])
             AccSystems = Setting.simple (Metrics.SCPlus (4, false), [])
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong

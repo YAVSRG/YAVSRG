@@ -3,7 +3,7 @@
 open System
 open System.Drawing
 open Prelude.Common
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Prelude.Gameplay.Mods
@@ -61,7 +61,7 @@ module private InfoPanel =
             |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
             |> this.Add
 
-            Clickable((fun () -> Screen.changeNew (fun () -> new Screens.Score.Screen(data, (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)) :> Screen.T) Screen.Type.Score Screen.TransitionFlag.Default), ignore)
+            Clickable((fun () -> Screen.changeNew (fun () -> new Screens.Score.Screen(data, BestFlags.Default) :> Screen.T) Screen.Type.Score Screen.TransitionFlag.Default), ignore)
             |> this.Add
 
             this.Animation.Add fade
@@ -129,7 +129,7 @@ module private InfoPanel =
                         | Some d ->
                             seq { 
                                 for score in d.Scores do
-                                    yield ScoreInfoProvider(score, currentChart.Value, fst options.AccSystems.Value, fst options.HPSystems.Value)
+                                    yield ScoreInfoProvider(score, currentChart.Value, fst options.AccSystems.Value, Interlude.Content.themeConfig().Grades)
                                     |> ScoreboardItem
                             }
                     )

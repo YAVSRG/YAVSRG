@@ -145,7 +145,7 @@ module Gameplay =
                     PrettySetting("BackgroundDim", Slider(options.BackgroundDim, 0.01f)).Position(440.0f)
                     PrettyButton("ScreenCover", 
                         fun() ->
-                            //todo: preview of what screencover looks like
+                            //todo: put a playfield preview in here, once screencovers are added
                             add("ScreenCover",
                                 {
                                     Content = fun add ->
@@ -160,7 +160,6 @@ module Gameplay =
                     ).Position(520.0f)
                     PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Position(670.0f)
                     PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems())).Position(750.0f)
-                    PrettyButton("LifeSystems", ignore).Position(830.0f)
                 ] :> Selectable
             Callback = ignore
         }

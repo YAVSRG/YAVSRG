@@ -10,7 +10,7 @@ open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Interlude
 open Interlude.UI
 open Interlude.Utils
@@ -77,34 +77,45 @@ module Gameplay =
         keycount = keys
     }
 
-    let setScore (data: ScoreInfoProvider) =
+    let setScore (data: ScoreInfoProvider) : BestFlags =
         let d = chartSaveData.Value
         if
-            //todo: score uploading goes here when implemented
+            // todo: score uploading goes here when implemented
             data.ModStatus < ModStatus.Unstored &&
             match Options.options.ScoreSaveCondition.Value with
-            | _ -> true //todo: fill in this stub (pb condition will be complicated)
+            | _ -> true // todo: fill in this stub (pb condition will be complicated)
         then
-            //add to score db
+            // add to score db
             d.Scores.Add data.ScoreInfo
             scores.Save()
-            //update top scores
-            //Options.options.Stats.TopPhysical |> Setting.app (TopScore.add(currentCachedChart.Value.Hash, data.ScoreInfo.time, data.Physical))
-            //Options.options.Stats.TopTechnical |> Setting.app (TopScore.add(currentCachedChart.Value.Hash, data.ScoreInfo.time, data.Technical))
-            //update pbs
-            let f name (target: Dictionary<string, PersonalBests<'T>>) (value: 'T) =
-                if target.ContainsKey(name) then
-                    let n, pb = PersonalBests.update (value, data.ScoreInfo.rate) target.[name]
-                    target.[name] <- n
-                    pb
-                else
-                    target.Add(name, ((value, data.ScoreInfo.rate), (value, data.ScoreInfo.rate)))
-                    PersonalBestType.Faster
-            f data.Scoring.Name d.Lamp data.Lamp,
-            f data.Scoring.Name d.Accuracy data.Scoring.Value,
-            //todo: maybe move this implentation to one place since it is doubled up in ScreenLevelSelect.cs
-            f (data.Scoring.Name + "|" + data.HP.Name) d.Clear (not data.HP.Failed)
-        else (PersonalBestType.None, PersonalBestType.None, PersonalBestType.None)
+            // update score buckets
+            // update pbs
+            if d.Bests.ContainsKey data.Scoring.Name then
+                let existing = d.Bests.[data.Scoring.Name]
+                let l, lp = PersonalBests.update (data.Lamp, data.ScoreInfo.rate) existing.Lamp
+                let a, ap = PersonalBests.update (data.Scoring.Value, data.ScoreInfo.rate) existing.Accuracy
+                let g, gp = PersonalBests.update (data.Grade, data.ScoreInfo.rate) existing.Grade
+                let c, cp = PersonalBests.update (not data.HP.Failed, data.ScoreInfo.rate) existing.Clear
+                d.Bests.[data.Scoring.Name] <-
+                    {
+                        Lamp = l
+                        Accuracy = a
+                        Grade = g
+                        Clear = c
+                    }
+                { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp }
+            else
+                d.Bests.Add(
+                    data.Scoring.Name,
+                    {
+                        Lamp = PersonalBests.create (data.Lamp, data.ScoreInfo.rate)
+                        Accuracy = PersonalBests.create (data.Scoring.Value, data.ScoreInfo.rate)
+                        Grade = PersonalBests.create (data.Grade, data.ScoreInfo.rate)
+                        Clear = PersonalBests.create (not data.HP.Failed, data.ScoreInfo.rate)
+                    }
+                )
+                { Lamp = PersonalBestType.Faster; Accuracy = PersonalBestType.Faster; Grade = PersonalBestType.Faster; Clear = PersonalBestType.Faster }
+        else BestFlags.Default
 
     let save() =
         scores.Save()

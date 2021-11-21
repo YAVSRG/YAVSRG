@@ -17,8 +17,9 @@ module Debug =
                     PrettyButton("DownloadUpdate",
                         fun () ->
                             if Interlude.Utils.AutoUpdate.updateAvailable then
-                                Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Notification.add (Localisation.localise "notification.UpdateInstalled", NotificationType.System))
+                                Interlude.Utils.AutoUpdate.applyUpdate(fun () -> Notification.add (Localisation.localise "notification.UpdateInstalled", System))
                     ).Position(300.0f)
+                    PrettyButton("PatternTest", fun () -> Prelude.Editor.Patterns.Analysis.test Interlude.Gameplay.currentChart.Value).Position(400.0f)
                 ] :> Selectable
             Callback = ignore
         }

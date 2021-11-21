@@ -31,10 +31,15 @@ module GameplayWidgets =
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
-        let color = new AnimationColorMixer(if conf.GradeColors then Content.themeConfig().GradeColors.[0] else Color.White)
+        let grades = Content.themeConfig().Grades
+        let color = new AnimationColorMixer(if conf.GradeColors then Array.last(grades).Color else Color.White)
         let listener =
             if conf.GradeColors then
-                helper.OnHit.Subscribe(fun _ -> color.SetColor(Content.themeConfig().GradeColors.[Grade.calculate (Content.themeConfig().GradeThresholds) helper.Scoring.State]))
+                helper.OnHit.Subscribe
+                    ( fun _ -> 
+                        // todo: could be a performance issue, investigate.
+                        grades.[Grade.calculate grades helper.Scoring.State].Color |> color.SetColor
+                    )
             else null
 
         do

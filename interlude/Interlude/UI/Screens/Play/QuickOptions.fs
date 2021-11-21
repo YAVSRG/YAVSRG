@@ -28,7 +28,6 @@ module QuickOptions =
                     PrettySetting("Upscroll", Selector.FromBool options.Upscroll).Position(440.0f)
                     //PrettySetting("BackgroundDim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
                     //PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems(add))).Position(560.0f)
-                    //PrettyButton("LifeSystems", ignore).Position(640.0f)
                 ] :> Selectable
             Callback = Audio.playLeadIn
         }
