@@ -5,7 +5,7 @@ open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
 open Prelude.Data.Themes
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Interlude
 open Interlude.Graphics
 open Interlude.Input

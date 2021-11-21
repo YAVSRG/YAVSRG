@@ -3,7 +3,7 @@
 open System.Drawing
 open Prelude.Common
 open Prelude.Scoring
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Interlude
 open Interlude.Utils
 open Interlude.Content

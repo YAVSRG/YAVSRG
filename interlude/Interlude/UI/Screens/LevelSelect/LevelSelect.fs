@@ -6,7 +6,7 @@ open System.Linq
 open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
@@ -84,10 +84,6 @@ type private LevelSelectChartItem(groupName, cc) =
             (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
             (struct(accent, Color.Transparent, Color.Transparent, accent))
             Sprite.DefaultQuad
-
-        let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
-            if r1 < rate then ( p2, r2, if r2 < rate then Color.FromArgb(127, Color.White) else colorFunc p2 )
-            else ( p1, r1, colorFunc p1 )
 
         let disp (pb: PersonalBests<'T>) (format: 'T -> string) (colorFunc: 'T -> Color) (pos: float32) =
             let value, rate, color = getPb pb colorFunc

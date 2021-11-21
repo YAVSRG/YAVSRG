@@ -2,7 +2,7 @@
 
 open System.Drawing
 open Prelude.Scoring
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Interlude
 open Interlude.Graphics
 open Interlude.UI

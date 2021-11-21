@@ -2,7 +2,7 @@
 
 open System.Drawing
 open Prelude.Common
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
@@ -56,8 +56,8 @@ module private Globals =
     // future todo: different color settings?
     let mutable colorFunc : Bests option -> Color = 
         function
-        | None -> Color.FromArgb(80, 200, 200, 200)
-        | Some b -> let (_, _, c) = getPb b.Grade Themes.gradeToColor in c
+        | None -> Color.FromArgb(90, 150, 150, 150)
+        | Some b -> Color.FromArgb(80, Color.White)
     
     // updated whenever screen refreshes
     let mutable scoreSystem = "SC+ (J4)"

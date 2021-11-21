@@ -3,7 +3,7 @@
 open System
 open System.Drawing
 open Prelude.Common
-open Prelude.Data.ScoreManager
+open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Prelude.Gameplay.Mods
