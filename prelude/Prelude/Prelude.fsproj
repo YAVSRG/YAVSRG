@@ -18,6 +18,7 @@
     <Compile Include="ChartFormats\StepMania.fs" />
     <Compile Include="ChartFormats\osu!.fs" />
     <Compile Include="ChartFormats\Conversions.fs" />
+    <Compile Include="Editor\Patterns.fs" />
     <Compile Include="Editor\Editor.fs" />
     <Compile Include="Scoring\Replays.fs" />
     <Compile Include="Scoring\Metrics.fs" />

@@ -32,20 +32,42 @@ module Lamp =
             )
             Lamp.MF Lamp.SDCB Lamp.NONE
 
+type Grade =
+    {
+        Name: string
+        Accuracy: float option
+        ComboBreaks: float
+        Color: System.Drawing.Color
+    }
+
 module Grade =
 
-    let calculateFromAcc (thresholds: float array) (percent: float) =
-        let mutable i = 0
-        while i < thresholds.Length && thresholds.[i] > percent do
-            i <- i + 1
-        i // higher i is worse grade
-
-    // todo: support cb count targets
-    let calculate (thresholds: float array) (state: AccuracySystemState) =
+    let calculateWithTarget (grades: Grade array) (state: AccuracySystemState) =
         let percent = state.PointsScored / state.MaxPointsScored
-        calculateFromAcc thresholds percent
+        let cbPercent = float state.ComboBreaks / float state.MaxPossibleCombo
 
-type PersonalBests<'T> = ('T * float32) * ('T * float32)
+        let rec loop xs achieved =
+            match xs with
+            | x :: xs ->
+                let percentNeeded =
+                    match x.Accuracy with
+                    | Some pc when pc > percent -> Some (pc - percent)
+                    | Some _
+                    | None -> None
+                let lessCbsNeeded =
+                    if x.ComboBreaks < cbPercent then 
+                        Some (state.ComboBreaks - (x.ComboBreaks * float state.MaxPossibleCombo |> System.Math.Truncate |> int))
+                    else None
+                if percentNeeded.IsNone && lessCbsNeeded.IsNone then loop xs (achieved + 1)
+                else {| Grade = achieved; AccNeeded = percentNeeded; LessCbsNeeded = lessCbsNeeded |}
+
+            | [] -> {| Grade = achieved; AccNeeded = None; LessCbsNeeded = None |}
+        loop (List.ofArray grades) -1
+
+    let calculate (grades: Grade array) (state: AccuracySystemState) =
+        (calculateWithTarget grades state).Grade
+
+type PersonalBests<'T> = { Best: 'T * float32; Fastest: 'T * float32 }
 
 type PersonalBestType =
     | FasterBetter = 3
@@ -54,9 +76,10 @@ type PersonalBestType =
     | None = 0
 
 module PersonalBests =
-    let map f ((a, f1), (b, f2)) = ((f a, f1), (f b, f2))
 
-    let update (value: 'T, rate: float32) (((bestA, rateA), (bestR, rateR)): PersonalBests<'T>)  =
+    let create (value: 'T, rate: float32) : PersonalBests<'T> = { Best = value, rate; Fastest = value, rate }
+
+    let update (value: 'T, rate: float32) ({ Best = bestA, rateA; Fastest = bestR, rateR }: PersonalBests<'T>)  =
         let r, rv =
             if rate > rateR then (value, rate), PersonalBestType.Faster
             elif rate = rateR then
@@ -67,4 +90,4 @@ module PersonalBests =
             elif value = bestA then
                 if rate > rateA then (value, rate), PersonalBestType.Better else (bestA, rateA), PersonalBestType.None
             else (bestA, rateA), PersonalBestType.None
-        (a, r), (av ||| rv) : PersonalBests<'T> * PersonalBestType
+        { Best = a; Fastest = r }, (av ||| rv) : PersonalBests<'T> * PersonalBestType

@@ -126,13 +126,16 @@ type AccuracySystemState =
         mutable MaxPointsScored: float
         mutable CurrentCombo: int
         mutable BestCombo: int
+        mutable MaxPossibleCombo: int
         mutable ComboBreaks: int
     }
     // helpers to reduce on duplicating this logic/making mistakes later
-    member this.BreakCombo() =
+    member this.BreakCombo (wouldHaveIncreasedCombo: bool) =
+        if wouldHaveIncreasedCombo then this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
         this.CurrentCombo <- 0
         this.ComboBreaks <- this.ComboBreaks + 1
     member this.IncrCombo() =
+        this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
         this.CurrentCombo <- this.CurrentCombo + 1
         this.BestCombo <- Math.Max(this.CurrentCombo, this.BestCombo)
     member this.Add(points: float, maxpoints: float, judge: JudgementType) =
@@ -185,6 +188,7 @@ type IScoreMetric
             CurrentCombo = 0
             BestCombo = 0
             ComboBreaks = 0
+            MaxPossibleCombo = 0
         }
 
     member this.Name = name
@@ -414,7 +418,7 @@ type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, no
                 | Hit_ (delta, isHold, missed) ->
                     let judgement = ScoringHelpers.dp_windows judge enableRd delta
                     this.State.Add(sc_curve false delta, 1.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
                     Hit 
                         {|
                             Judgement = Some judgement
@@ -426,7 +430,7 @@ type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, no
                 | Release_ (delta, missed, overhold, dropped) ->
                     let judgement = if missed then JudgementType.MISS else ScoringHelpers.dp_windows_halved judge enableRd delta
                     this.State.Add(sc_curve true delta, 1.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
                     Release
                         {|
                             Judgement = Some judgement
@@ -488,7 +492,7 @@ type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
                 | Hit_ (delta, isHold, missed) ->
                     let judgement = ScoringHelpers.dp_windows judge enableRd delta
                     this.State.Add(wife_curve delta, 1.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo() else this.State.IncrCombo()
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
                     Hit 
                         {|
                             Judgement = Some judgement
@@ -498,7 +502,7 @@ type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
                         |}
 
                 | Release_ (delta, missed, overhold, dropped) ->
-                    if overhold || not missed then this.State.IncrCombo() else this.State.BreakCombo()
+                    if overhold || not missed then this.State.IncrCombo() else this.State.BreakCombo true
                     Release
                         {|
                             Judgement = None
@@ -550,7 +554,7 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
                 | Hit_ (delta, isHold, missed) ->
                     if isHold then
                         headDeltas.[ev.Column] <- Time.Abs delta
-                        if missed then this.State.BreakCombo() else this.State.IncrCombo()
+                        if missed then this.State.BreakCombo true else this.State.IncrCombo()
                         Hit 
                             {|
                                 Judgement = None
@@ -561,7 +565,7 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
                     else
                         let judgement = judgementFunc delta
                         this.State.Add(points judgement, 300.0, judgement)
-                        if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
+                        if judgement = JudgementType.MISS then this.State.BreakCombo true else this.State.IncrCombo()
                         Hit 
                             {|
                                 Judgement = Some judgement
@@ -603,7 +607,7 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
                         else JudgementType.MISS
 
                     this.State.Add(points judgement, 300.0, judgement)
-                    if judgement = JudgementType.MISS then this.State.BreakCombo() else this.State.IncrCombo()
+                    if judgement = JudgementType.MISS then this.State.BreakCombo true else this.State.IncrCombo()
                     Release
                         {|
                             Judgement = Some judgement
@@ -645,8 +649,8 @@ module Metrics =
             | OM od -> "osu!mania (OD" + (string od) + ")"
             | _ -> "unknown"
     
-    let createScoreMetric accConfig hpConfig keys (replay: IReplayProvider) notes rate : IScoreMetric =
-        let hp = createHealthBar hpConfig
+    let createScoreMetric accConfig keys (replay: IReplayProvider) notes rate : IScoreMetric =
+        let hp = createHealthBar VG
         match accConfig with
         | SC (judge, rd)
         | SCPlus (judge, rd) -> ScoreClassifierPlus(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
@@ -655,4 +659,4 @@ module Metrics =
         | _ -> failwith "nyi"
 
     let createDummyMetric (chart: Chart) : IScoreMetric =
-        createScoreMetric (SC (4, false)) VG chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
+        createScoreMetric (SC (4, false)) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

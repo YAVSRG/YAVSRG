@@ -30,7 +30,31 @@ module ScoreManager =
                 replay = ""
                 rate = 1.0f
                 selectedMods = Map.empty
-                layout = Layout.Spread; keycount = 4
+                layout = Layout.Spread
+                keycount = 4
+            }
+
+    type Bests =
+        {
+            Lamp: PersonalBests<Lamp>
+            Accuracy: PersonalBests<float>
+            Grade: PersonalBests<int>
+            Clear: PersonalBests<bool>
+        }
+
+    type BestFlags =
+        {
+            Lamp: PersonalBestType
+            Accuracy: PersonalBestType
+            Grade: PersonalBestType
+            Clear: PersonalBestType
+        }
+        static member Default = 
+            {
+                Lamp = PersonalBestType.None
+                Accuracy = PersonalBestType.None
+                Grade = PersonalBestType.None
+                Clear = PersonalBestType.None
             }
 
     type ChartSaveData =
@@ -39,25 +63,19 @@ module ScoreManager =
             mutable Offset: Time
             [<Json.Required>]
             Scores: List<Score>
-            Lamp: Dictionary<string, PersonalBests<Lamp>>
-            Accuracy: Dictionary<string, PersonalBests<float>>
-            Clear: Dictionary<string, PersonalBests<bool>>
+            Bests: Dictionary<string, Bests>
         }
         static member FromChart(c: Chart) =
             {
                 Offset = c.FirstNote
                 Scores = List<Score>()
-                Lamp = Dictionary<string, PersonalBests<Lamp>>()
-                Accuracy = Dictionary<string, PersonalBests<float>>()
-                Clear = Dictionary<string, PersonalBests<bool>>()
+                Bests = Dictionary<string, Bests>()
             }
         static member Default =
             {
                 Offset = 0.0f<ms>
                 Scores = null
-                Lamp = Dictionary<string, PersonalBests<Lamp>>()
-                Accuracy = Dictionary<string, PersonalBests<float>>()
-                Clear = Dictionary<string, PersonalBests<bool>>()
+                Bests = Dictionary<string, Bests>()
             }
 
     (*
@@ -67,9 +85,8 @@ module ScoreManager =
                                 -> Difficulty rating data
     *)
 
-    type ScoreInfoProvider(score: Score, chart: Chart, scoring, hpSystem) =
+    type ScoreInfoProvider(score: Score, chart: Chart, scoring, grades: Grade array) =
         let mutable accuracyType: Metrics.AccuracySystemConfig = scoring
-        let mutable hpType: Metrics.HPSystemConfig = hpSystem
 
         let mutable modchart = ValueNone
         let mutable modstring = ValueNone
@@ -79,6 +96,7 @@ module ScoreManager =
         let mutable replayData = ValueNone
         let mutable perf = ValueNone
         let mutable lamp = ValueNone
+        let mutable grade = ValueNone
 
         member this.ScoreInfo = score
         member this.Chart = chart
@@ -97,13 +115,12 @@ module ScoreManager =
         member this.Scoring =
             scoreMetric <-
                 ValueOption.defaultWith (fun () -> 
-                    let m = Metrics.createScoreMetric accuracyType hpType this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
+                    let m = Metrics.createScoreMetric accuracyType this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
                     m.Update Time.infinity; m)
                     scoreMetric
                 |> ValueSome
             scoreMetric.Value
 
-        member this.HPType with get() = hpType and set(value) = hpType <- value; scoreMetric <- ValueNone
         member this.HP = this.Scoring.HP
 
         member this.Difficulty
@@ -116,7 +133,9 @@ module ScoreManager =
             lamp <- ValueOption.defaultWith (fun () -> Lamp.calculate this.Scoring.State) lamp |> ValueSome
             lamp.Value
 
-        // todo: grade info
+        member this.Grade =
+            grade <- ValueOption.defaultWith (fun () -> Grade.calculate grades this.Scoring.State) grade |> ValueSome
+            grade.Value
 
         member this.Physical =
             perf <- ValueOption.defaultWith (fun () -> getRatings this.Difficulty score.keycount this.Scoring) perf |> ValueSome

@@ -5,6 +5,7 @@ open System.IO
 open System.IO.Compression
 open System.Drawing
 open Prelude.Common
+open Prelude.Scoring
 open Prelude.Gameplay.NoteColors
 
 module Themes =
@@ -20,8 +21,8 @@ module Themes =
             JudgementNames: string array
             LampColors: Color array
             LampNames: string array
-            GradeColors: Color array
-            GradeThresholds: float array
+            Grades: Grade array
+            ClearColors: Color * Color
             PBColors: Color array
             Font: string
             DefaultAccentColor: Color
@@ -77,22 +78,21 @@ module Themes =
                         "WHITE FLAG"
                         "MARVELLOUS FULL COMBO"
                     |]
-                GradeColors = 
+                Grades =
                     [|
-                        Color.FromArgb(235, 200, 220)
-                        Color.FromArgb(246, 234, 128)
-                        Color.FromArgb(237, 205, 140)
-                        Color.FromArgb(127, 231, 139)
-                        Color.FromArgb(134, 227, 183)
-                        Color.FromArgb(148, 210, 180)
-                        Color.FromArgb(149, 193, 220)
-                        Color.FromArgb(163, 190, 207)
-                        Color.FromArgb(202, 153, 183)
-                        Color.FromArgb(194, 162, 182)
-                        Color.FromArgb(200, 163, 155)
+                        { Name = "F"; Accuracy = None; ComboBreaks = 1.0; Color = Color.FromArgb(200, 163, 155) }
+                        { Name = "D"; Accuracy = Some 0.89995; ComboBreaks = 1.0; Color = Color.FromArgb(194, 162, 182) }
+                        { Name = "C"; Accuracy = Some 0.90995; ComboBreaks = 1.0; Color = Color.FromArgb(202, 153, 183) }
+                        { Name = "C+"; Accuracy = Some 0.91995; ComboBreaks = 1.0; Color = Color.FromArgb(163, 190, 207) }
+                        { Name = "B"; Accuracy = Some 0.92995; ComboBreaks = 1.0; Color = Color.FromArgb(149, 193, 220) }
+                        { Name = "B+"; Accuracy = Some 0.93995; ComboBreaks = 1.0; Color = Color.FromArgb(148, 210, 180) }
+                        { Name = "A"; Accuracy = Some 0.94995; ComboBreaks = 1.0; Color = Color.FromArgb(134, 227, 183) }
+                        { Name = "A+"; Accuracy = Some 0.95995; ComboBreaks = 0.016; Color = Color.FromArgb(127, 231, 139) }
+                        { Name = "S-"; Accuracy = Some 0.96995; ComboBreaks = 0.08; Color = Color.FromArgb(237, 205, 140) }
+                        { Name = "S"; Accuracy = Some 0.97995; ComboBreaks = 0.005; Color = Color.FromArgb(246, 234, 128) }
+                        { Name = "S+"; Accuracy = Some 0.98995; ComboBreaks = 0.002; Color = Color.FromArgb(235, 200, 220) }
                     |]
-                GradeThresholds = 
-                    [|0.98995; 0.97995; 0.96995; 0.95995; 0.94995; 0.93995; 0.92995; 0.91995; 0.90995; 0.89995|]
+                ClearColors = (Color.FromArgb(255, 127, 255, 180), Color.FromArgb(255, 255, 160, 140))
                 PBColors = 
                     [|
                         Color.Transparent
