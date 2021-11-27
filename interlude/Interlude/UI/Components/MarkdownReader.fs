@@ -18,63 +18,62 @@ module MarkdownReader =
     let WIDTH = 1200.0f
 
     let doc = 
-        use s = Utils.getResourceStream("QuickStart.md")
+        use s = getResourceStream("QuickStart.md")
         use r = new StreamReader(s)
         r.ReadToEnd()
         |> Markdown.Parse
 
-    type WBuilder = 
+    type W =
         {
-            body: Widget
-            lastLineHeight: float32
-            height: float32
-            width: float32
-            right: float32
+            Body: Widget
+            mutable LHeight: float32
+            mutable LWidth: float32
+            mutable Height: float32 //not including last line
+            mutable Width: float32
         }
-    module WBuilder =
-        let add (x: WBuilder) (child: WBuilder) =
-            let cheight = child.height + child.lastLineHeight
-            if 
-                x.right + child.width > x.width
-            then //new line
-                child.body
-                |> positionWidget(0.0f, 0.0f, x.height + x.lastLineHeight, 0.0f, child.width, 0.0f, x.height + x.lastLineHeight + cheight, 0.0f)
-                |> x.body.Add
-                { x with height = x.height + x.lastLineHeight; lastLineHeight = cheight; right = child.width }
-            else //not new line
-                child.body
-                |> positionWidget(x.right, 0.0f, x.height, 0.0f, x.right + child.width, 0.0f, x.height + cheight, 0.0f)
-                |> x.body.Add
-                { x with lastLineHeight = max x.lastLineHeight cheight; right = x.right + child.width }
+    module W =
+        let addTo (parent: W) (child: W) =
+            let childTotalHeight = child.Height + child.LHeight
+            parent.LHeight <- max parent.LHeight childTotalHeight
+            child.Body
+            |> positionWidget(parent.LWidth, 0.0f, parent.Height, 0.0f, parent.LWidth + child.Width, 0.0f, parent.Height + childTotalHeight, 0.0f)
+            |> parent.Body.Add
+            parent.LWidth <- parent.LWidth + child.Width
+            parent.Width <- max parent.LWidth parent.Width
+            parent
 
-        let text (str: string) (col: Color * Color) (size: float32) : WBuilder =
-            //let str = str + " "
+        let newline (w: W) =
+            w.Height <- w.Height + w.LHeight
+            w.LWidth <- 0.0f
+            w.LHeight <- 0.0f
+            w
+
+        let addToNL (parent: W) (child: W) = addTo parent child |> newline
+
+        let pad (x, y) (w: W) =
+            w.LWidth <- w.LWidth + x
+            w.Height <- w.Height + y
+            w
+            
+        // constructors
+
+        let make (w: Widget) (width: float32, height: float32) =
             {
-                body = TextBox(K str, K col, 0.0f)
-                lastLineHeight = 0.0f
-                height = size / 0.6f
-                width = (Text.measure(Content.font(), str) - 0.75f) * size
-                right = 0.0f
+                Body = w
+                LHeight = height
+                LWidth = width
+                Height = 0.0f
+                Width = width
             }
+
+        let text (str: string) (col: Color * Color) (size: float32) =
+            let width = (Text.measure(Content.font(), str)) * size
+            make <| TextBox(K str, K col, 0.0f) <| (width, size / 0.6f)
 
         let sym str = text str (Color.Silver, Color.Red) 25.0f
 
-        let frame (width: float32) : WBuilder =
-            {
-                body = new Widget()
-                lastLineHeight = 0.0f
-                height = 0.0f
-                width = width
-                right = 0.0f
-            }
+        let empty() = make (Widget()) (0.0f, 0.0f)
 
-        let dummy() = frame 0.0f
-
-        let pack (alwaysNewline: bool) (xs: WBuilder list) : WBuilder =
-            let width =
-                if alwaysNewline then WIDTH
-                else let widest = xs |> List.maxBy (fun i -> i.width) in widest.width
-            List.fold add (frame width) xs
 
     type SpanSettings =
         {
@@ -89,48 +88,59 @@ module MarkdownReader =
         try Process.Start (ProcessStartInfo (str, UseShellExecute=true)) |> ignore
         with err -> Prelude.Common.Logging.Debug ("Failed to open link: " + str, err)
 
-    let rec formatSpan (settings: SpanSettings) (sp: MarkdownSpan) : WBuilder =
+    let rec span (settings: SpanSettings) (sp: MarkdownSpan) : W =
         match sp with
         | Literal (text, _) ->
-            WBuilder.text text
-                (Color.White, 
-                    if settings.Bold then Color.Black
-                    elif settings.Italic then Color.Gray 
+            W.text text
+                ((if settings.Bold then Style.accentShade(255, 1.0f, 0.3f) else Color.White),
+                    if settings.Italic then Color.Gray 
                     elif settings.HasLink then Color.Blue
-                    else Color.Transparent)
+                    else Color.Black)
                 settings.Size
-        | InlineCode (code, _) -> WBuilder.text code (Color.Silver, Color.Transparent) settings.Size
-        | Strong (body, _) -> spans { settings with Bold = true } false body
-        | Emphasis (body, _) -> spans { settings with Italic = true } false body
-        | AnchorLink (link, _) -> WBuilder.sym "anchorLink"
+        | InlineCode (code, _) -> W.text code (Color.Silver, Color.Gray) settings.Size
+        | Strong (body, _) -> spans { settings with Bold = true } body
+        | Emphasis (body, _) -> spans { settings with Italic = true } body
+        | AnchorLink (link, _) -> W.sym "anchorLink"
         | DirectLink (body, link, title, _) ->
-            let r = spans { settings with HasLink = true } false body
-            r.body.Add (Clickable ((fun () -> openlink link), ignore))
+            let r = spans { settings with HasLink = true } body
+            r.Body.Add (Clickable ((fun () -> openlink link), ignore))
             r
-        | IndirectLink (body, link, title, _) -> WBuilder.sym "ilink"
-        | DirectImage (body, link, title, _) -> WBuilder.sym "dimg"
-        | IndirectImage (body, link, title, _) -> WBuilder.sym "iimg"
-        | HardLineBreak _ -> WBuilder.sym "linebreak"
+        | IndirectLink (body, link, title, _) -> W.sym "ilink"
+        | DirectImage (body, link, title, _) -> W.sym "dimg"
+        | IndirectImage (body, link, title, _) -> W.sym "iimg"
+        | HardLineBreak _ -> W.sym "linebreak"
         | EmbedSpans _
         | LatexDisplayMath _
-        | LatexInlineMath _ -> WBuilder.dummy()
+        | LatexInlineMath _ -> W.empty()
 
-    and spans settings alwaysNewline (sps: MarkdownSpans) : WBuilder =
-        sps
-        |> List.map (formatSpan settings)
-        |> WBuilder.pack alwaysNewline
+    and spans settings (sps: MarkdownSpans) : W =
+        let block = W.empty()
+        List.map (span settings) sps
+        |> List.fold W.addTo block
 
-    and formatParagraph (width: float32) (p: MarkdownParagraph) =
+    and addParagraph (body: W) (p: MarkdownParagraph) =
         match p with
-        | Heading (size, body, _) -> spans { SpanSettings.Default with Size = (SIZE + 8.0f * float32 size) } true body
-        | Paragraph (body, _) -> spans SpanSettings.Default true body
-        | Span (body, _) -> spans SpanSettings.Default true body
+        | Heading (size, body, _) -> 
+            let b = W.empty() |> W.pad (0.0f, 15.0f)
+            W.addTo b (spans { SpanSettings.Default with Size = (SIZE + 5.0f * (4.0f - float32 size)) } body)
+            |> W.pad (0.0f, 15.0f)
+        | Paragraph (body, _) -> spans SpanSettings.Default body
+        | Span (body, _) -> spans SpanSettings.Default body
         | ListBlock (kind, items, _) ->
-            let bullet() = WBuilder.text "  •" (Color.White, Color.Transparent) SIZE
+            let list = W.empty()
+            let bullet() = 
+                let b = W.empty() |> W.pad(20.0f, 0.0f)
+                W.addTo b (W.text "•" (Color.White, Color.Transparent) SIZE)
+                |> W.pad(10.0f, 0.0f)
             items
-            |> List.map (fun i -> i |> List.map (formatParagraph width) |> List.fold WBuilder.add (WBuilder.frame (width - bullet().width)))
-            |> List.fold (fun x w -> WBuilder.add (WBuilder.add x (bullet())) w) (WBuilder.frame width)
-        | HorizontalRule (char, _) -> WBuilder.sym "rule"
+            |> List.map 
+                ( 
+                    fun i -> 
+                        let block = bullet()
+                        W.addTo block (i |> List.fold addParagraph (W.empty()))
+                )
+            |> List.fold W.addToNL list
+        | HorizontalRule (char, _) -> W.sym "rule"
         | YamlFrontmatter _
         | TableBlock _
         | OutputBlock _
@@ -139,20 +149,20 @@ module MarkdownReader =
         | QuotedBlock _
         | CodeBlock _
         | EmbedParagraphs _
-        | InlineHtmlBlock _ -> WBuilder.dummy()
+        | InlineHtmlBlock _ -> W.empty()
+        |> W.addToNL body
 
     let buildDocWidget (doc: MarkdownDocument) =
         doc.Paragraphs
-        |> List.map (formatParagraph 1500.0f)
-        |> List.fold WBuilder.add (WBuilder.frame 1500.0f)
-        |> fun wb -> wb.body |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, wb.height + wb.lastLineHeight, 0.0f)
+        |> List.fold addParagraph (W.empty())
+        |> fun wb -> wb.Body |> positionWidget(10.0f, 0.0f, 10.0f, 0.0f, -10.0f, 1.0f, wb.Height + wb.LHeight, 0.0f)
 
     type MarkdownViewDialog(doc) as this =
         inherit Dialog()
 
         let fc = FlowContainer()
         let frame =
-            let f = Frame((fun () -> Style.accentShade(200, 0.7f, 0.0f)), (fun () -> Style.accentShade(255, 1.0f, 0.3f)))
+            let f = Frame((fun () -> Style.accentShade(200, 0.1f, 0.0f)), (fun () -> Style.accentShade(255, 1.0f, 0.0f)))
             doc |> buildDocWidget |> fc.Add
             fc |> f.Add
             f
