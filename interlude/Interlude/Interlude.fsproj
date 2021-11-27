@@ -91,10 +91,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FSharp.Formatting" Version="11.2.0" />
-    <PackageReference Include="ManagedBass" Version="3.0.0" />
-    <PackageReference Include="ManagedBass.Fx" Version="3.0.0" />
-    <PackageReference Include="OpenTK" Version="4.4.0" />
+    <PackageReference Include="ManagedBass" Version="3.1.0" />
+    <PackageReference Include="ManagedBass.Fx" Version="3.1.0" />
+    <PackageReference Include="OpenTK" Version="4.6.7" />
   </ItemGroup>
 
   <ItemGroup>
@@ -102,7 +101,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="5.0.1" />
+    <PackageReference Update="FSharp.Core" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -114,6 +113,15 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="FSharp.Formatting.Common">
+      <HintPath>Resources\FSharp.Formatting.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Formatting.Markdown">
+      <HintPath>Resources\FSharp.Formatting.Markdown.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
