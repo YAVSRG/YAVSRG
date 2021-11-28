@@ -174,7 +174,7 @@ module Input =
     
     let init (win: GameWindow) =
         gw <- win
-        gw.add_MouseWheel(fun e -> mousez <- e.OffsetY)
+        gw.add_MouseWheel(fun e -> mousez <- mousez + e.OffsetY)
         gw.add_MouseMove(
             fun e ->
                 mousex <- Math.Clamp(Render.vwidth / float32 Render.rwidth * float32 e.X, 0.0f, Render.vwidth)
