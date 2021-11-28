@@ -571,7 +571,7 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
                                 Judgement = Some judgement
                                 Missed = missed
                                 Delta = delta
-                                IsHold = true
+                                IsHold = false
                             |}
 
                 | Release_ (delta, missed, overhold, dropped) ->
@@ -656,7 +656,7 @@ module Metrics =
         | SCPlus (judge, rd) -> ScoreClassifierPlus(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
         | Wife (judge, rd) -> Wife3(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
         | OM od -> OsuMania(od, hp, keys, replay, notes, rate) :> IScoreMetric
-        | _ -> failwith "nyi"
+        | Custom _ -> failwith "nyi"
 
     let createDummyMetric (chart: Chart) : IScoreMetric =
         createScoreMetric (SC (4, false)) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

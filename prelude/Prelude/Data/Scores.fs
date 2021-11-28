@@ -171,36 +171,71 @@ type ScoresDB() =
         if hash |> data.ContainsKey |> not then None else Some data.[hash]
 
 
-// to be extended into a score buckety system soon
-type TopScore = string * DateTime * float //Hash, Timestamp, Rating
+[<RequireQualifiedAccess>]
+type ScoreFilter =
+    | Keymode of int
+    | Playstyle of Layout
+    | Grade of int
+    | Lamp of Lamp
+    // pattern stuff
+    
+[<RequireQualifiedAccess>]
+type ScoreSort =
+    | Physical
+    // pattern stuff
 
-module TopScore =
-    let private count = 50
+type TopScore =
+    {
+        Hash: string
+        Timestamp: DateTime
+        Physical: float
+        // other stuff for sorting in future
+    }
 
-    let add ((hash, timestamp, rating): TopScore) (data: TopScore list) =
-        let rec f count data =
-            match count with
-            | 0 -> []
-            | 1 ->
-                match data with
-                | (h, t, r) :: _ ->
-                    if r >= rating then
-                        (h, t, r) :: []
-                    else
-                        (hash, timestamp, rating) :: []
-                | [] -> (hash, timestamp, rating) :: []
-            | _ ->
-                match data with
-                | (h, t, r) :: xs ->
-                    if h = hash then
-                        if r >= rating then
-                            (h, t, r) :: xs
-                        else
-                            (hash, timestamp, rating) :: xs
-                    else
-                        if r >= rating then
-                            (h, t, r) :: (f (count - 1) xs)
-                        else
-                            (hash, timestamp, rating) :: (h, t, r) :: (f (count - 2) xs)
-                | [] -> (hash, timestamp, rating) :: []
-        f count data
+type ScoreBucket =
+    {
+        Filters: ScoreFilter list
+        Sort: ScoreSort
+        Scores: ResizeArray<TopScore>
+        Size: int
+    }
+    static member Default =
+        {
+            Filters = [ScoreFilter.Keymode 4]
+            Sort = ScoreSort.Physical
+            Scores = ResizeArray()
+            Size = 50
+        }
+module Bucket =
+    
+    let add (score: ScoreInfoProvider) (bucket: ScoreBucket) =
+        if 
+            List.forall
+                (
+                    function
+                    | ScoreFilter.Keymode k -> score.ScoreInfo.keycount = k
+                    | ScoreFilter.Playstyle p -> score.ScoreInfo.layout = p
+                    | ScoreFilter.Grade g -> score.Grade >= g
+                    | ScoreFilter.Lamp l -> score.Lamp >= l
+                )
+                bucket.Filters
+        then
+            let sort =
+                match bucket.Sort with
+                | ScoreSort.Physical -> fun a b -> a.Physical.CompareTo b.Physical
+            let topScore =
+                {
+                    Hash = score.Chart |> Chart.hash
+                    Timestamp = score.ScoreInfo.time
+                    Physical = score.Physical
+                }
+            let existingScore = bucket.Scores |> Seq.tryFind (fun x -> x.Hash = topScore.Hash)
+            if
+                match bucket.Scores |> Seq.tryFind (fun x -> x.Hash = topScore.Hash) with
+                | Some existingScore when sort existingScore topScore <= 0 -> bucket.Scores.Remove existingScore // evaluates true
+                | Some existingScore -> false
+                | None -> true
+            then
+                bucket.Scores.Add topScore
+                bucket.Scores.Sort sort
+                if bucket.Scores.Count > bucket.Size then bucket.Scores.RemoveAt bucket.Size
