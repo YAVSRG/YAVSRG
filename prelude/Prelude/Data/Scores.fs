@@ -156,21 +156,6 @@ type ScoreInfoProvider(score: Score, chart: Chart, scoring, grades: Grade array)
                 modstatus |> ValueSome
         modstatus.Value
 
-type ScoresDB() =
-    let data = ScoresDB.Load()
-
-    member this.Save() = JSON.ToFile (Path.Combine (getDataPath "Data", "scores.json"), true) data
-    static member Load() = loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) (new Dictionary<string, ChartSaveData>()) true
-
-    member this.GetOrCreateScoreData (chart: Chart) =
-        let hash = Chart.hash chart
-        if hash |> data.ContainsKey |> not then data.Add(hash, ChartSaveData.FromChart(chart))
-        data.[hash]
-
-    member this.GetScoreData (hash: string) =
-        if hash |> data.ContainsKey |> not then None else Some data.[hash]
-
-
 [<RequireQualifiedAccess>]
 type ScoreFilter =
     | Keymode of int
@@ -222,7 +207,7 @@ module Bucket =
         then
             let sort =
                 match bucket.Sort with
-                | ScoreSort.Physical -> fun a b -> a.Physical.CompareTo b.Physical
+                | ScoreSort.Physical -> fun a b -> b.Physical.CompareTo a.Physical
             let topScore =
                 {
                     Hash = score.Chart |> Chart.hash
@@ -239,3 +224,30 @@ module Bucket =
                 bucket.Scores.Add topScore
                 bucket.Scores.Sort sort
                 if bucket.Scores.Count > bucket.Size then bucket.Scores.RemoveAt bucket.Size
+
+module Scores =
+
+    type Data =
+        {
+            Entries: Dictionary<string, ChartSaveData>
+            Buckets: Dictionary<string, ScoreBucket>
+        }
+        static member Default =
+            {
+                Entries = new Dictionary<string, ChartSaveData>()
+                Buckets = [("Best 4k", ScoreBucket.Default)] |> Map.ofList |> Dictionary<string, ScoreBucket>
+            }
+
+    let data: Data =
+        loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) Data.Default true
+        |> fun d -> Logging.Info (sprintf "Scores loaded, %i chart entries and %i buckets." d.Entries.Keys.Count d.Buckets.Keys.Count); d
+
+    let save() = JSON.ToFile (Path.Combine (getDataPath "Data", "scores.json"), true) data
+
+    let getOrCreateScoreData (chart: Chart) =
+        let hash = Chart.hash chart
+        if hash |> data.Entries.ContainsKey |> not then data.Entries.Add(hash, ChartSaveData.FromChart(chart))
+        data.Entries.[hash]
+
+    let getScoreData (hash: string) =
+        if hash |> data.Entries.ContainsKey |> not then None else Some data.Entries.[hash]

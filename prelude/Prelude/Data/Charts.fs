@@ -181,16 +181,21 @@ module Library =
         |> Json.Mapping.Rules.typeRule<ConcurrentDictionary<string, CachedChart>>
         |> JSON.AddRule
 
-    let (charts: ConcurrentDictionary<string, CachedChart>), (collections: Dictionary<string, Collection>) = 
-        loadImportantJsonFile "Cache" 
-            (Path.Combine(getDataPath "Data", "cache.json"))
-            (new ConcurrentDictionary<string, CachedChart>(), new Dictionary<string, Collection>()) false
-        |> fun (ca, co) -> 
-            Logging.Debug (sprintf "Cache loaded, %i charts and %i collections." ca.Keys.Count co.Keys.Count)
-            (ca, co)
+    type Data =
+        {
+            Charts: ConcurrentDictionary<string, CachedChart>
+            Collections: Dictionary<string, Collection>
+        }
+        static member Default = { Charts = new ConcurrentDictionary<string, CachedChart>(); Collections = new Dictionary<string, Collection>() }
 
-    let save() =
-        JSON.ToFile(Path.Combine(getDataPath "Data", "cache.json"), true) (charts, collections)
+    let data =
+        loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) Data.Default false
+        |> fun d -> Logging.Info (sprintf "Cache loaded, %i charts and %i collections." d.Charts.Keys.Count d.Collections.Keys.Count); d
+    let charts, collections = data.Charts, data.Collections
+
+    // ----
+
+    let save() = JSON.ToFile(Path.Combine(getDataPath "Data", "cache.json"), true) data
     
     let addOrUpdate (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c
 
