@@ -27,7 +27,6 @@ module Gameplay =
     let mutable rate = 1.0f
     let mutable selectedMods = Map.empty
     let mutable autoplay = false
-    let scores = ScoresDB()
 
     let mutable onChartUpdate = ignore
     let mutable onChartChange = ignore
@@ -51,7 +50,7 @@ module Gameplay =
     let changeChart (cachedChart, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
-        chartSaveData <- Some <| scores.GetOrCreateScoreData chart
+        chartSaveData <- Some <| Scores.getOrCreateScoreData chart
         Screen.Background.load chart.BackgroundPath
         Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate)
         Audio.playFrom chart.Header.PreviewTime
@@ -87,8 +86,9 @@ module Gameplay =
         then
             // add to score db
             d.Scores.Add data.ScoreInfo
-            scores.Save()
             // update score buckets
+            for b in Scores.data.Buckets.Values do Bucket.add data b
+            Scores.save()
             // update pbs
             if d.Bests.ContainsKey data.Scoring.Name then
                 let existing = d.Bests.[data.Scoring.Name]
@@ -118,7 +118,7 @@ module Gameplay =
         else BestFlags.Default
 
     let save() =
-        scores.Save()
+        Scores.save()
         Library.save()
 
     let init() =
