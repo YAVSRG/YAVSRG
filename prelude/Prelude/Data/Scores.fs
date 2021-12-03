@@ -40,21 +40,6 @@ type Bests =
         Clear: PersonalBests<bool>
     }
 
-type BestFlags =
-    {
-        Lamp: PersonalBestType
-        Accuracy: PersonalBestType
-        Grade: PersonalBestType
-        Clear: PersonalBestType
-    }
-    static member Default = 
-        {
-            Lamp = PersonalBestType.None
-            Accuracy = PersonalBestType.None
-            Grade = PersonalBestType.None
-            Clear = PersonalBestType.None
-        }
-
 type ChartSaveData =
     {
         [<Json.Required>]
@@ -214,7 +199,6 @@ module Bucket =
                     Timestamp = score.ScoreInfo.time
                     Physical = score.Physical
                 }
-            let existingScore = bucket.Scores |> Seq.tryFind (fun x -> x.Hash = topScore.Hash)
             if
                 match bucket.Scores |> Seq.tryFind (fun x -> x.Hash = topScore.Hash) with
                 | Some existingScore when sort existingScore topScore <= 0 -> bucket.Scores.Remove existingScore // evaluates true
@@ -224,6 +208,22 @@ module Bucket =
                 bucket.Scores.Add topScore
                 bucket.Scores.Sort sort
                 if bucket.Scores.Count > bucket.Size then bucket.Scores.RemoveAt bucket.Size
+
+type BestFlags =
+    {
+        // future: marker of if you beat a bucket score/goals achieved etc
+        Lamp: PersonalBestType
+        Accuracy: PersonalBestType
+        Grade: PersonalBestType
+        Clear: PersonalBestType
+    }
+    static member Default = 
+        {
+            Lamp = PersonalBestType.None
+            Accuracy = PersonalBestType.None
+            Grade = PersonalBestType.None
+            Clear = PersonalBestType.None
+        }
 
 module Scores =
 
@@ -246,8 +246,42 @@ module Scores =
 
     let getOrCreateScoreData (chart: Chart) =
         let hash = Chart.hash chart
-        if hash |> data.Entries.ContainsKey |> not then data.Entries.Add(hash, ChartSaveData.FromChart(chart))
+        if hash |> data.Entries.ContainsKey |> not then data.Entries.Add(hash, ChartSaveData.FromChart chart)
         data.Entries.[hash]
 
     let getScoreData (hash: string) =
         if hash |> data.Entries.ContainsKey |> not then None else Some data.Entries.[hash]
+
+    let saveScore (d: ChartSaveData) (score: ScoreInfoProvider) : BestFlags =
+        d.Scores.Add score.ScoreInfo
+        // update score buckets
+        for b in data.Buckets.Values do Bucket.add score b
+        save()
+        // update pbs
+        if d.Bests.ContainsKey score.Scoring.Name then
+            let existing = d.Bests.[score.Scoring.Name]
+            let l, lp = PersonalBests.update (score.Lamp, score.ScoreInfo.rate) existing.Lamp
+            let a, ap = PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
+            let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
+            let c, cp = PersonalBests.update (not score.HP.Failed, score.ScoreInfo.rate) existing.Clear
+            d.Bests.[score.Scoring.Name] <-
+                {
+                    Lamp = l
+                    Accuracy = a
+                    Grade = g
+                    Clear = c
+                }
+            { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp }
+        else
+            d.Bests.Add(
+                score.Scoring.Name,
+                {
+                    Lamp = PersonalBests.create (score.Lamp, score.ScoreInfo.rate)
+                    Accuracy = PersonalBests.create (score.Scoring.Value, score.ScoreInfo.rate)
+                    Grade = PersonalBests.create (score.Grade, score.ScoreInfo.rate)
+                    Clear = PersonalBests.create (not score.HP.Failed, score.ScoreInfo.rate)
+                }
+            )
+            { Lamp = PersonalBestType.Faster; Accuracy = PersonalBestType.Faster; Grade = PersonalBestType.Faster; Clear = PersonalBestType.Faster }
+
+    //todo: background tasks to reprocess buckets from score database
