@@ -1,7 +1,6 @@
 ﻿namespace Interlude
 
 open System
-open System.Collections.Generic
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Gameplay.Mods
@@ -77,44 +76,13 @@ module Gameplay =
     }
 
     let setScore (data: ScoreInfoProvider) : BestFlags =
-        let d = chartSaveData.Value
         if
-            // todo: score uploading goes here when implemented
             data.ModStatus < ModStatus.Unstored &&
             match Options.options.ScoreSaveCondition.Value with
-            | _ -> true // todo: fill in this stub (pb condition will be complicated)
+            | _ -> true // todo: fill in this stub (pb condition requires pb knowledge)
         then
-            // add to score db
-            d.Scores.Add data.ScoreInfo
-            // update score buckets
-            for b in Scores.data.Buckets.Values do Bucket.add data b
-            Scores.save()
-            // update pbs
-            if d.Bests.ContainsKey data.Scoring.Name then
-                let existing = d.Bests.[data.Scoring.Name]
-                let l, lp = PersonalBests.update (data.Lamp, data.ScoreInfo.rate) existing.Lamp
-                let a, ap = PersonalBests.update (data.Scoring.Value, data.ScoreInfo.rate) existing.Accuracy
-                let g, gp = PersonalBests.update (data.Grade, data.ScoreInfo.rate) existing.Grade
-                let c, cp = PersonalBests.update (not data.HP.Failed, data.ScoreInfo.rate) existing.Clear
-                d.Bests.[data.Scoring.Name] <-
-                    {
-                        Lamp = l
-                        Accuracy = a
-                        Grade = g
-                        Clear = c
-                    }
-                { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp }
-            else
-                d.Bests.Add(
-                    data.Scoring.Name,
-                    {
-                        Lamp = PersonalBests.create (data.Lamp, data.ScoreInfo.rate)
-                        Accuracy = PersonalBests.create (data.Scoring.Value, data.ScoreInfo.rate)
-                        Grade = PersonalBests.create (data.Grade, data.ScoreInfo.rate)
-                        Clear = PersonalBests.create (not data.HP.Failed, data.ScoreInfo.rate)
-                    }
-                )
-                { Lamp = PersonalBestType.Faster; Accuracy = PersonalBestType.Faster; Grade = PersonalBestType.Faster; Clear = PersonalBestType.Faster }
+            // todo: score uploading goes here when implemented
+            Scores.saveScore chartSaveData.Value data
         else BestFlags.Default
 
     let save() =
