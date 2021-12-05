@@ -131,7 +131,7 @@ type private LevelSelectChartItem(groupName, cc) =
     override this.OnUpdate(bounds, selected, elapsedTime) =
         if colorVersion < colorVersionGlobal then
             colorVersion <- colorVersionGlobal
-            if chartData.IsNone then chartData <- scores.GetScoreData cc.Hash
+            if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
             match chartData with
             | Some d when d.Bests.ContainsKey scoreSystem ->
                 pbData <- Some d.Bests.[scoreSystem]
