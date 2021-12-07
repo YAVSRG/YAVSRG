@@ -266,16 +266,28 @@ module GameplayWidgets =
         inherit Widget()
 
         override this.Draw() =
-            let height = Rect.height this.Bounds
+            
             if options.ScreenCover.Enabled.Value then
-                // nyi: fade length
-                let fadeLength = options.ScreenCover.FadeLength.Value
+
+                let bounds = Rect.expand (0.0f, 2.0f) this.Bounds
+                let fadeLength = float32 options.ScreenCover.FadeLength.Value
+                let upper (amount: float32) =
+                    Draw.rect (bounds |> Rect.sliceTop (amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.quad
+                        (bounds |> Rect.sliceTop amount |> Rect.sliceBottom fadeLength |> Quad.ofRect)
+                        struct (options.ScreenCover.Color.Value, options.ScreenCover.Color.Value, Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value))
+                        Sprite.DefaultQuad
+                let lower (amount: float32) =
+                    Draw.rect (bounds |> Rect.sliceBottom (amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.quad
+                        (bounds |> Rect.sliceBottom amount |> Rect.sliceTop fadeLength |> Quad.ofRect)
+                        struct (Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value), options.ScreenCover.Color.Value, options.ScreenCover.Color.Value)
+                        Sprite.DefaultQuad
+
+                let height = Rect.height bounds
+
                 let sudden = float32 options.ScreenCover.Sudden.Value * height
                 let hidden = float32 options.ScreenCover.Hidden.Value * height
 
-                if options.Upscroll.Value then
-                    Draw.rect (this.Bounds |> Rect.sliceTop hidden) options.ScreenCover.Color.Value Sprite.Default
-                    Draw.rect (this.Bounds |> Rect.sliceBottom sudden) options.ScreenCover.Color.Value Sprite.Default
-                else
-                    Draw.rect (this.Bounds |> Rect.sliceTop sudden) options.ScreenCover.Color.Value Sprite.Default
-                    Draw.rect (this.Bounds |> Rect.sliceBottom hidden) options.ScreenCover.Color.Value Sprite.Default
+                if options.Upscroll.Value then upper hidden; lower sudden
+                else lower hidden; upper sudden
