@@ -176,4 +176,5 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                     (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
                     (Quad.colorOf Color.White)
                     (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
+
         base.Draw()

@@ -81,8 +81,17 @@ type Screen(start: PlayScreenType) as this =
     let mutable inputKeyState = 0us
 
     do
-        let noteRenderer = new NoteRenderer(scoring)
+        let noteRenderer = NoteRenderer scoring
         this.Add noteRenderer
+
+        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
+            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
+
+        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
+            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
+
+        noteRenderer.Add(Screencover())
+
         let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Content.GameplayConfig.get name
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
@@ -91,6 +100,7 @@ type Screen(start: PlayScreenType) as this =
                 |> constructor
                 |> positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
                 |> if pos.Float then this.Add else noteRenderer.Add
+
         if not auto then
             f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
             f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
@@ -98,12 +108,6 @@ type Screen(start: PlayScreenType) as this =
             f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
             f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
-
-        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
-
-        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
 
         scoring.SetHitCallback onHit.Trigger
 

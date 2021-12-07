@@ -259,3 +259,23 @@ module GameplayWidgets =
                             (Sprite.gridUV (animation.Loops, color) (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                     | _ -> ()
             Array.iteri f sliders
+
+    // Screencover is controlled by game settings, not theme or noteskin
+
+    type Screencover() =
+        inherit Widget()
+
+        override this.Draw() =
+            let height = Rect.height this.Bounds
+            if options.ScreenCover.Enabled.Value then
+                // nyi: fade length
+                let fadeLength = options.ScreenCover.FadeLength.Value
+                let sudden = float32 options.ScreenCover.Sudden.Value * height
+                let hidden = float32 options.ScreenCover.Hidden.Value * height
+
+                if options.Upscroll.Value then
+                    Draw.rect (this.Bounds |> Rect.sliceTop hidden) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.rect (this.Bounds |> Rect.sliceBottom sudden) options.ScreenCover.Color.Value Sprite.Default
+                else
+                    Draw.rect (this.Bounds |> Rect.sliceTop sudden) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.rect (this.Bounds |> Rect.sliceBottom hidden) options.ScreenCover.Color.Value Sprite.Default

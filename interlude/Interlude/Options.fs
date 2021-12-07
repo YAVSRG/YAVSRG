@@ -1,6 +1,7 @@
 ﻿namespace Interlude
 
 open System
+open System.Drawing
 open System.Collections.Generic
 open System.IO
 open OpenTK.Windowing.GraphicsLibraryFramework
@@ -167,6 +168,15 @@ module Options =
 
         let add x (main, alts) = main, alts @ [x]
 
+    type ScreenCoverOptions =
+        {
+            Enabled: Setting<bool>
+            Sudden: Setting.Bounded<float>
+            Hidden: Setting.Bounded<float>
+            FadeLength: Setting.Bounded<int>
+            Color: Setting<Color>
+        }
+
     type GameOptions =
         {
             AudioOffset: Setting.Bounded<float>
@@ -180,9 +190,7 @@ module Options =
             Upscroll: Setting<bool>
             BackgroundDim: Setting.Bounded<float>
             PerspectiveTilt: Setting.Bounded<float>
-            ScreenCoverUp: Setting.Bounded<float>
-            ScreenCoverDown: Setting.Bounded<float>
-            ScreenCoverFadeLength: Setting.Bounded<int>
+            ScreenCover: ScreenCoverOptions
             KeymodePreference: Setting<Keymode>
             UseKeymodePreference: Setting<bool>
             NoteSkin: Setting<string>
@@ -217,9 +225,14 @@ module Options =
             Upscroll = Setting.simple false
             BackgroundDim = Setting.percent 0.5
             PerspectiveTilt = Setting.bounded 0.0 -1.0 1.0 |> Setting.round 2
-            ScreenCoverUp = Setting.percent 0.0
-            ScreenCoverDown = Setting.percent 0.0
-            ScreenCoverFadeLength = Setting.bounded 200 0 500
+            ScreenCover = 
+                { 
+                    Enabled = Setting.simple false
+                    Sudden = Setting.percent 0.0
+                    Hidden = Setting.percent 0.45
+                    FadeLength = Setting.bounded 200 0 500
+                    Color = Setting.simple Color.Black
+                }
             NoteSkin = Setting.simple "default"
             KeymodePreference = Setting.simple Keymode.``4K``
             UseKeymodePreference = Setting.simple false
