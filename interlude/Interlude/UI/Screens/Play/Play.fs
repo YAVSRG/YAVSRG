@@ -75,7 +75,7 @@ type Screen(start: PlayScreenType) as this =
             OnHit = onHit.Publish
             CurrentChartTime = fun () -> Audio.timeWithOffset() - firstNote
         }
-    let binds = Options.options.GameplayBinds.[chart.Keys - 3]
+    let binds = options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
 
     let mutable inputKeyState = 0us
@@ -90,7 +90,7 @@ type Screen(start: PlayScreenType) as this =
         if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
             noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
 
-        noteRenderer.Add(Screencover())
+        noteRenderer.Add(ScreenCover())
 
         let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Content.GameplayConfig.get name
@@ -112,7 +112,7 @@ type Screen(start: PlayScreenType) as this =
         scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
-        Screen.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
+        Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
         //discord presence
         Screen.toolbar <- true
         Audio.changeRate Gameplay.rate

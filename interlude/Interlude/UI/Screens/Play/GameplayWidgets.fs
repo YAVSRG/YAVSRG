@@ -247,7 +247,7 @@ module GameplayWidgets =
                     let a = 255.0f * p |> int
                     
                     let box =
-                        if Options.options.Upscroll.Value then Rect.createWH (l + columnwidth * float32 k) t columnwidth columnwidth
+                        if options.Upscroll.Value then Rect.createWH (l + columnwidth * float32 k) t columnwidth columnwidth
                         else Rect.createWH (l + columnwidth * float32 k) (b - columnwidth) columnwidth columnwidth
                         |> Rect.expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
@@ -262,7 +262,7 @@ module GameplayWidgets =
 
     // Screencover is controlled by game settings, not theme or noteskin
 
-    type Screencover() =
+    type ScreenCover() =
         inherit Widget()
 
         override this.Draw() =
