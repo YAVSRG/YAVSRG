@@ -141,18 +141,19 @@ module Gameplay =
                 column [
                     PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed, 0.005f)).Position(200.0f)
                     PrettySetting("HitPosition", Slider(options.HitPosition, 0.005f)).Position(280.0f)
-                    PrettySetting("Upscroll", Selector.FromBool(options.Upscroll)).Position(360.0f)
+                    PrettySetting("Upscroll", Selector.FromBool options.Upscroll).Position(360.0f)
                     PrettySetting("BackgroundDim", Slider(options.BackgroundDim, 0.01f)).Position(440.0f)
                     PrettyButton("ScreenCover", 
                         fun() ->
-                            //todo: put a playfield preview in here, once screencovers are added
                             add("ScreenCover",
                                 {
                                     Content = fun add ->
                                         column [
-                                            PrettySetting("ScreenCoverUp", Slider(options.ScreenCoverUp, 0.01f)).Position(200.0f)
-                                            PrettySetting("ScreenCoverDown", Slider(options.ScreenCoverDown, 0.01f)).Position(300.0f)
-                                            PrettySetting("ScreenCoverFadeLength", Slider(options.ScreenCoverFadeLength, 0.01f)).Position(400.0f)
+                                            PrettySetting("ScreenCoverEnabled", Selector.FromBool options.ScreenCover.Enabled).Position(200.0f)
+                                            PrettySetting("ScreenCoverHidden", Slider(options.ScreenCover.Hidden, 0.01f)).Position(350.0f)
+                                            PrettySetting("ScreenCoverSudden", Slider(options.ScreenCover.Sudden, 0.01f)).Position(450.0f)
+                                            PrettySetting("ScreenCoverFadeLength", Slider(options.ScreenCover.FadeLength, 0.01f)).Position(550.0f)
+                                            Themes.NoteskinPreview 0.35f
                                         ] :> Selectable
                                     Callback = ignore
                                 }

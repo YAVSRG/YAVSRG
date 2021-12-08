@@ -24,7 +24,10 @@ module Themes =
 
         let createRenderer() =
             match Gameplay.currentChart with
-            | Some chart -> Screens.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart) :> Widget
+            | Some chart -> 
+                let nr = Screens.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
+                nr.Add(Screens.Play.GameplayWidgets.ScreenCover())
+                nr :> Widget
             | None -> new Widget()
 
         let mutable renderer = createRenderer()
@@ -84,19 +87,16 @@ module Themes =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("NoteskinName", 
-                        TextField name
-                    ).Position(200.0f)
+                    PrettySetting("NoteskinName", TextField name).Position(200.0f)
                     PrettySetting("Keymode",
-                    Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> refreshColors))
+                        Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> refreshColors))
                     ).Position(450.0f)
-                    PrettySetting(
-                    "ColorStyle",
-                    Selector.FromEnum(
-                        Setting.make
-                            (fun v -> noteColors <- { noteColors with Style = v })
-                            (fun () -> noteColors.Style)
-                        |> Setting.trigger (ignore >> refreshColors))
+                    PrettySetting("ColorStyle",
+                        Selector.FromEnum(
+                            Setting.make
+                                (fun v -> noteColors <- { noteColors with Style = v })
+                                (fun () -> noteColors.Style)
+                            |> Setting.trigger (ignore >> refreshColors))
                     ).Position(550.0f)
                     PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
                 ]

@@ -36,8 +36,7 @@ module GameplayWidgets =
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe
-                    ( fun _ -> 
-                        // todo: could be a performance issue, investigate.
+                    ( fun _ ->
                         grades.[Grade.calculate grades helper.Scoring.State].Color |> color.SetColor
                     )
             else null
@@ -176,7 +175,7 @@ module GameplayWidgets =
 
         do
             Array.iter this.Animation.Add sliders
-            let hitpos = float32 Options.options.HitPosition.Value
+            let hitpos = float32 options.HitPosition.Value
             this.Reposition(0.0f, hitpos, 0.0f, -hitpos)
 
         override this.Update(elapsedTime, bounds) =
@@ -194,7 +193,7 @@ module GameplayWidgets =
                     let a = 255.0f * p |> int
                     Draw.rect
                         (
-                            if Options.options.Upscroll.Value then
+                            if options.Upscroll.Value then
                                 Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), t, 0.5f, 1.0f, columnwidth * p, -1.0f / p) sprite
                             else Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), b, 0.5f, 1.0f, columnwidth * p, 1.0f / p) sprite
                         )
@@ -247,7 +246,7 @@ module GameplayWidgets =
                     let a = 255.0f * p |> int
                     
                     let box =
-                        if Options.options.Upscroll.Value then Rect.createWH (l + columnwidth * float32 k) t columnwidth columnwidth
+                        if options.Upscroll.Value then Rect.createWH (l + columnwidth * float32 k) t columnwidth columnwidth
                         else Rect.createWH (l + columnwidth * float32 k) (b - columnwidth) columnwidth columnwidth
                         |> Rect.expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
@@ -259,3 +258,35 @@ module GameplayWidgets =
                             (Sprite.gridUV (animation.Loops, color) (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                     | _ -> ()
             Array.iteri f sliders
+
+    // Screencover is controlled by game settings, not theme or noteskin
+
+    type ScreenCover() =
+        inherit Widget()
+
+        override this.Draw() =
+            
+            if options.ScreenCover.Enabled.Value then
+
+                let bounds = Rect.expand (0.0f, 2.0f) this.Bounds
+                let fadeLength = float32 options.ScreenCover.FadeLength.Value
+                let upper (amount: float32) =
+                    Draw.rect (bounds |> Rect.sliceTop (amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.quad
+                        (bounds |> Rect.sliceTop amount |> Rect.sliceBottom fadeLength |> Quad.ofRect)
+                        struct (options.ScreenCover.Color.Value, options.ScreenCover.Color.Value, Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value))
+                        Sprite.DefaultQuad
+                let lower (amount: float32) =
+                    Draw.rect (bounds |> Rect.sliceBottom (amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.quad
+                        (bounds |> Rect.sliceBottom amount |> Rect.sliceTop fadeLength |> Quad.ofRect)
+                        struct (Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value), options.ScreenCover.Color.Value, options.ScreenCover.Color.Value)
+                        Sprite.DefaultQuad
+
+                let height = Rect.height bounds
+
+                let sudden = float32 options.ScreenCover.Sudden.Value * height
+                let hidden = float32 options.ScreenCover.Hidden.Value * height
+
+                if options.Upscroll.Value then upper hidden; lower sudden
+                else lower hidden; upper sudden

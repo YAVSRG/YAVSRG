@@ -75,14 +75,23 @@ type Screen(start: PlayScreenType) as this =
             OnHit = onHit.Publish
             CurrentChartTime = fun () -> Audio.timeWithOffset() - firstNote
         }
-    let binds = Options.options.GameplayBinds.[chart.Keys - 3]
+    let binds = options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
 
     let mutable inputKeyState = 0us
 
     do
-        let noteRenderer = new NoteRenderer(scoring)
+        let noteRenderer = NoteRenderer scoring
         this.Add noteRenderer
+
+        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
+            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
+
+        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
+            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
+
+        noteRenderer.Add(ScreenCover())
+
         let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Content.GameplayConfig.get name
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
@@ -91,6 +100,7 @@ type Screen(start: PlayScreenType) as this =
                 |> constructor
                 |> positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
                 |> if pos.Float then this.Add else noteRenderer.Add
+
         if not auto then
             f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
             f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
@@ -99,16 +109,10 @@ type Screen(start: PlayScreenType) as this =
             f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         //todo: rest of widgets
 
-        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
-
-        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
-
         scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
-        Screen.backgroundDim.Target <- float32 Options.options.BackgroundDim.Value
+        Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
         //discord presence
         Screen.toolbar <- true
         Audio.changeRate Gameplay.rate
