@@ -36,8 +36,7 @@ module GameplayWidgets =
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe
-                    ( fun _ -> 
-                        // todo: could be a performance issue, investigate.
+                    ( fun _ ->
                         grades.[Grade.calculate grades helper.Scoring.State].Color |> color.SetColor
                     )
             else null
@@ -176,7 +175,7 @@ module GameplayWidgets =
 
         do
             Array.iter this.Animation.Add sliders
-            let hitpos = float32 Options.options.HitPosition.Value
+            let hitpos = float32 options.HitPosition.Value
             this.Reposition(0.0f, hitpos, 0.0f, -hitpos)
 
         override this.Update(elapsedTime, bounds) =
@@ -194,7 +193,7 @@ module GameplayWidgets =
                     let a = 255.0f * p |> int
                     Draw.rect
                         (
-                            if Options.options.Upscroll.Value then
+                            if options.Upscroll.Value then
                                 Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), t, 0.5f, 1.0f, columnwidth * p, -1.0f / p) sprite
                             else Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), b, 0.5f, 1.0f, columnwidth * p, 1.0f / p) sprite
                         )

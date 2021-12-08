@@ -132,7 +132,7 @@ type SlideDialog(direction: SlideDialog.Direction, distance: float32) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Options.options.Hotkeys.Exit.Value.Tapped() then this.BeginClose()
+        if options.Hotkeys.Exit.Value.Tapped() then this.BeginClose()
 
     override this.BeginClose() =
         base.BeginClose()
