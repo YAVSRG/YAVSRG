@@ -104,6 +104,7 @@ type Screen(start: PlayScreenType) as this =
         if not auto then
             f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
             f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
+            f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget)
             f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
             f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
             f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
