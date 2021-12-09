@@ -200,6 +200,35 @@ module Themes =
                     ShowGuide = true
                 }
 
+        type LifeMeter =
+            {
+                Position: WidgetConfig
+                Horizontal: bool
+                EndColor: Color
+                FullColor: Color
+                EmptyColor: Color
+            }
+            static member Default =
+                {
+                    Position =
+                        {
+                            Enabled = true
+                            Float = false
+                            Left = 0.0f
+                            LeftA = 1.0f
+                            Top = 0.0f
+                            TopA = 0.6f
+                            Right = 20.0f
+                            RightA = 1.0f
+                            Bottom = 0.0f
+                            BottomA = 1.0f
+                        }
+                    Horizontal = false
+                    EndColor = Color.FromArgb(100, Color.Red)
+                    FullColor = Color.White
+                    EmptyColor = Color.Red
+                }
+
         type Combo =
             {
                 Position: WidgetConfig

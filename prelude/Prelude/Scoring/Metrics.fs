@@ -79,22 +79,27 @@ type IHealthBarSystem
         onlyFailAtEnd: bool
     ) =
 
-    let state: HealthBarState = { HasFailed = false; CurrentlyFailed = false; Health = startingHealth }
+    member val State: HealthBarState = 
+        { 
+            HasFailed = false
+            CurrentlyFailed = false
+            Health = startingHealth
+        }
 
     member this.ChangeHP (x: float) =
-        let newHP = Math.Clamp(state.Health + x, 0.0, 1.0)
-        state.Health <- newHP
+        let newHP = Math.Clamp(this.State.Health + x, 0.0, 1.0)
+        this.State.Health <- newHP
         if this.FailCondition newHP then
-            state.HasFailed <- true
-            state.CurrentlyFailed <- true
-        else state.CurrentlyFailed <- false
+            this.State.HasFailed <- true
+            this.State.CurrentlyFailed <- true
+        else this.State.CurrentlyFailed <- false
 
     abstract member FailCondition : float -> bool
     abstract member HandleEvent : HitEvent<HitEventGuts> -> unit
         
-    member this.Failed = if onlyFailAtEnd then state.CurrentlyFailed else state.HasFailed
+    member this.Failed = if onlyFailAtEnd then this.State.CurrentlyFailed else this.State.HasFailed
     member this.Name = name
-    member this.Format() = sprintf "%.2f%%" (state.Health * 100.0)
+    member this.Format() = sprintf "%.2f%%" (this.State.Health * 100.0)
 
 type HealthBarPointsSystem
     (
@@ -346,8 +351,8 @@ type VibeGauge() =
             ( fun j ->
                 match j with
                 | JudgementType.RIDICULOUS | JudgementType.MARVELLOUS -> 0.005
-                | JudgementType.PERFECT -> 0.0025
-                | JudgementType.GREAT -> 0.0
+                | JudgementType.PERFECT -> 0.0
+                | JudgementType.GREAT -> -0.02
                 | JudgementType.GOOD -> -0.05
                 | JudgementType.BAD -> -0.2
                 | JudgementType.MISS -> -0.1
