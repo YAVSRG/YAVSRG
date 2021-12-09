@@ -11,6 +11,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Scores
 open Interlude
+open Interlude.Options
 open Interlude.UI
 open Interlude.Utils
 
@@ -38,7 +39,7 @@ module Gameplay =
             coloredChart <- None
             difficultyRating <-
                 let mc = modifiedChart.Value in
-                Some <| RatingReport(mc.Notes, rate, Options.options.Playstyles.[mc.Keys - 3], mc.Keys)
+                Some <| RatingReport(mc.Notes, rate, options.Playstyles.[mc.Keys - 3], mc.Keys)
             onChartUpdate()
 
     let changeRate amount =
@@ -53,7 +54,7 @@ module Gameplay =
         Screen.Background.load chart.BackgroundPath
         Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate)
         Audio.playFrom chart.Header.PreviewTime
-        Options.options.CurrentChart.Value <- cachedChart.FilePath
+        options.CurrentChart.Value <- cachedChart.FilePath
         updateChart()
         onChartChange()
 
@@ -71,15 +72,21 @@ module Gameplay =
         replay = Replay.compress replayData
         rate = rate
         selectedMods = selectedMods |> ModChart.filter modifiedChart.Value
-        layout = Options.options.Playstyles.[keys - 3]
+        layout = options.Playstyles.[keys - 3]
         keycount = keys
     }
 
     let setScore (data: ScoreInfoProvider) : BestFlags =
         if
             data.ModStatus < ModStatus.Unstored &&
-            match Options.options.ScoreSaveCondition.Value with
-            | _ -> true // todo: fill in this stub (pb condition requires pb knowledge)
+            match options.ScoreSaveCondition.Value with
+            | ScoreSaving.Pacemaker ->
+                match options.Pacemaker.Value with
+                | Accuracy acc -> data.Scoring.Value >= acc
+                | Lamp l -> data.Lamp >= l
+            | ScoreSaving.PersonalBest -> true // todo: nyi
+            | ScoreSaving.Always
+            | _ -> true
         then
             // todo: score uploading goes here when implemented
             Scores.saveScore chartSaveData.Value data
@@ -92,7 +99,7 @@ module Gameplay =
     let init() =
         try
             let c, ch =
-                match Library.lookup Options.options.CurrentChart.Value with
+                match Library.lookup options.CurrentChart.Value with
                 | Some cc ->
                     match Library.load cc with
                     | Some c -> cc, c
@@ -102,7 +109,7 @@ module Gameplay =
                         |> fun d -> d.["All"].[0]
                         |> fun c -> c, Library.load(c).Value
                 | None ->
-                    Logging.Info("Could not find cached chart: " + Options.options.CurrentChart.Value)
+                    Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
                     Library.getGroups(K "All") (Comparison(fun _ _ -> 0)) []
                     |> fun d -> d.["All"].[0]
                     |> fun c -> c, Library.load(c).Value
