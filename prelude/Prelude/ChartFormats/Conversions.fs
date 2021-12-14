@@ -137,7 +137,10 @@ module Conversions =
             svData.SetChannelData(-1, listToDotNet sv)
             (TimeData(listToDotNet bpm), svData)
 
-        let convert (b: Beatmap) (action: ConversionAction) =
+        let private rateRegex = Regex("""[0-2][,.][1-9][1-9]?x|x[0-2][,.][1-9][1-9]?|(^|\s)[0-2][,.][1-9][1-9]?($|\s)""");
+        let looks_like_a_rate (b: Beatmap) : bool = rateRegex.IsMatch b.Metadata.Version
+
+        let convert (b: Beatmap) (action: ConversionAction) : Chart =
             let keys = b.Difficulty.CircleSize |> int
             let rec findBackgroundFile e =
                 match e with
@@ -438,9 +441,13 @@ module Conversions =
         | ".osu" -> 
             try
                 let map = loadBeatmapFile action.Source
-                if map.General.Mode = GameMode.Mania && (let keys = map.Difficulty.CircleSize |> int in 3 <= keys && keys <= 10) then
-                    [ ``osu! to Interlude``.convert (loadBeatmapFile action.Source) action] else []
-            with err -> Logging.Error ("Could not load .osu file: " + action.Source, err); []
+                if 
+                    map.General.Mode = GameMode.Mania
+                    && (let keys = map.Difficulty.CircleSize |> int in 3 <= keys && keys <= 10)
+                    && not (``osu! to Interlude``.looks_like_a_rate map)
+                then
+                    [ ``osu! to Interlude``.convert (loadBeatmapFile action.Source) action ] else []
+            with err -> Logging.Debug ("Skipped .osu file: " + action.Source, err); []
         | _ -> []
 
     /// Writes chart to new location, including copying its background and audio files if needed

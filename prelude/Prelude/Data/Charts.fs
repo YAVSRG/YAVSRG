@@ -119,13 +119,18 @@ module Sorting =
             "Collections", fun _ ->  "" // Placeholder for UI purposes, UI is hard coded to call collection grouping behaviour when this is chosen
         ]
 
+    let private compareBy (f: 'a -> IComparable) = fun a b -> f(a).CompareTo <| f(b)
+    let private thenCompareBy (f: 'a -> IComparable) (cmp: 'a -> 'a -> int) = 
+        let cmp2 = compareBy f
+        fun a b -> match cmp a b with 0 -> cmp2 a b | x -> x
+
     type SortMethod = Comparison<CachedChart>
     let sortBy : IDictionary<string, SortMethod> = dict[
-            "Physical", Comparison(fun a b -> a.Physical.CompareTo b.Physical)
-            "Technical", Comparison(fun a b -> a.Technical.CompareTo b.Technical)
-            "Title", Comparison(fun a b -> a.Title.CompareTo b.Title)
-            "Artist", Comparison(fun a b -> a.Artist.CompareTo b.Artist)
-            "Creator", Comparison(fun a b -> a.Creator.CompareTo b.Creator)
+            "Physical", Comparison(compareBy (fun x -> x.Physical))
+            "Technical", Comparison(compareBy (fun x -> x.Technical))
+            "Title", Comparison(compareBy (fun x -> x.Title) |> thenCompareBy (fun x -> x.Physical))
+            "Artist", Comparison(compareBy (fun x -> x.Artist) |> thenCompareBy (fun x -> x.Physical))
+            "Creator", Comparison(compareBy (fun x -> x.Creator) |> thenCompareBy (fun x -> x.Physical))
         ]
 
     type FilterPart = 
@@ -176,8 +181,8 @@ module Library =
         fun (cache, settings, rules) ->
             Json.Mapping.getCodec<Dictionary<string, CachedChart>>(cache, settings, rules)
             |> Json.Mapping.Codec.map
-                (fun (d: ConcurrentDictionary<string, CachedChart>) -> Dictionary(d))
-                (fun (d: Dictionary<string, CachedChart>) -> ConcurrentDictionary(d))
+                (fun (d: ConcurrentDictionary<string, CachedChart>) -> Dictionary d)
+                (fun (d: Dictionary<string, CachedChart>) -> ConcurrentDictionary d)
         |> Json.Mapping.Rules.typeRule<ConcurrentDictionary<string, CachedChart>>
         |> JSON.AddRule
 
@@ -274,7 +279,7 @@ module Library =
                             | ".yav" ->
                                 match Chart.fromFile file with
                                 | Some c ->
-                                    output ("Caching " + file)
+                                    output ("Caching " + Path.GetFileName file)
                                     addOrUpdate c
                                 | None -> ()
                             | _ -> ()
@@ -320,7 +325,7 @@ module Library =
                     for file in Directory.EnumerateFiles path do
                         match file with
                         | ChartFile _ ->
-                            output ("Converting " + file)
+                            output ("Converting " + Path.GetFileName file)
                             try
                                 let action = { Config = config; Source = file; TargetDirectory = Path.Combine (getDataPath "Songs", config.PackName, Path.GetFileName path) }
                                 loadAndConvertFile action
