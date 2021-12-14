@@ -52,8 +52,8 @@ module Gameplay =
         currentChart <- Some chart
         chartSaveData <- Some <| Scores.getOrCreateScoreData chart
         Screen.Background.load chart.BackgroundPath
-        Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate)
-        Audio.playFrom chart.Header.PreviewTime
+        if Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate) then
+            Audio.playFrom chart.Header.PreviewTime
         options.CurrentChart.Value <- cachedChart.FilePath
         updateChart()
         onChartChange()

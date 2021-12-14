@@ -8,15 +8,16 @@ open Prelude.Common
 
 module Audio = 
 
-    let bassError b = ()
-        //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
+    let bassError b = () //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
 
-    type Track = {
-        ID: int //id used by Bass
-        Frequency: int //frequency the file is encoded in, so it knows how to up and downrate the audio correctly
-        Duration: float32<ms> //duration of the song so it doesn't have to be tediously recalculated in case of mp3 and stuff
-    } with
-        static member Default = { ID = 0; Frequency = 1; Duration = 1000.0f<ms> }
+    type Track =
+        {
+            Path: string
+            ID: int //id used by Bass
+            Frequency: int //frequency the file is encoded in, so it knows how to up and downrate the audio correctly
+            Duration: float32<ms> //duration of the song so it doesn't have to be tediously recalculated in case of mp3 and stuff
+        }
+        static member Default = { Path = ""; ID = 0; Frequency = 1; Duration = 1000.0f<ms> }
         static member FromFile(file: string) =
             //let ID = Bass.CreateStream(file, int64 0, int64 0, BassFlags.Decode); //loads file
             let ID = Bass.CreateStream(file) //loads file
@@ -28,9 +29,8 @@ module Audio =
                 let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength(ID)) * 1000.0
                 let Frequency = d.Frequency
                 //let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
-                { ID = ID; Frequency = Frequency; Duration = Duration |> toTime }
-        member this.Dispose() =
-            Bass.StreamFree(this.ID) |> bassError
+                { Path = file; ID = ID; Frequency = Frequency; Duration = Duration |> toTime }
+        member this.Dispose() = Bass.StreamFree(this.ID) |> bassError
 
     type TrackFinishBehaviour =
         | Loop
@@ -124,15 +124,18 @@ module Audio =
         //if (true) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0) |> bassError
         Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Frequency, float32 nowplaying.Frequency * rate) |> bassError
 
-    let changeTrack(path, offset, rate) =
-        if playing() then pause()
-        timerStart <- -infinityf * 1.0f<ms>
-        if nowplaying.ID <> 0 then
-            nowplaying.Dispose()
-        channelPlaying <- false
-        nowplaying <- Track.FromFile(path)
+    let changeTrack (path, offset, rate) : bool =
+        let isDifferentFile = path <> nowplaying.Path
+        if isDifferentFile then
+            if playing() then pause()
+            timerStart <- -infinityf * 1.0f<ms>
+            if nowplaying.ID <> 0 then
+                nowplaying.Dispose()
+            channelPlaying <- false
+            nowplaying <- Track.FromFile path
         localOffset <- offset
-        changeRate(rate)
+        changeRate rate
+        isDifferentFile
 
     let init() =
         Bass.Init() |> bassError
