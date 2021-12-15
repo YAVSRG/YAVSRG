@@ -106,12 +106,12 @@ module Gameplay =
                     | None ->
                         Logging.Error("Could not load chart file: " + cc.FilePath)
                         Library.getGroups (K "All") (Comparison(fun _ _ -> 0)) []
-                        |> fun d -> d.["All"].[0]
+                        |> fun d -> fst d.["All"].[0]
                         |> fun c -> c, Library.load(c).Value
                 | None ->
                     Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
                     Library.getGroups(K "All") (Comparison(fun _ _ -> 0)) []
-                    |> fun d -> d.["All"].[0]
+                    |> fun d -> fst d.["All"].[0]
                     |> fun c -> c, Library.load(c).Value
             changeChart(c, ch)
         with err ->

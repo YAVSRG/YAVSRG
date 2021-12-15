@@ -136,8 +136,8 @@ type private ChartItem(groupName, cc) =
                 if options.ChartGroupMode.Value <> "Collections" then
                     match snd Collections.selected with
                     | Collection ccs -> if ccs.Contains cc.FilePath then "✭" else ""
-                    | Playlist ps -> if ps.Exists(fun (id, _, _) -> id = cc.FilePath) then "➾" else ""
-                    | Goals gs -> if gs.Exists(fun ((id, _, _), _) -> id = cc.FilePath) then "@" else ""
+                    | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then "➾" else ""
+                    | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then "@" else ""
                 else ""
         if Mouse.Hover(bounds) then
             hover.Target <- 1.0f

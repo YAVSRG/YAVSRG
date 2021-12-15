@@ -41,7 +41,7 @@ type Screen() as this =
         if groups.Count = 1 then
             let g = groups.Keys.First()
             if groups.[g].Count = 1 then
-                let cc = groups.[g].[0]
+                let cc, context = groups.[g].[0]
                 if cc.FilePath <> selectedChart then
                     match Library.load cc with
                     | Some c -> changeChart(cc, c)
@@ -54,7 +54,7 @@ type Screen() as this =
             |> Seq.map
                 (fun k ->
                     groups.[k]
-                    |> Seq.map (fun cc ->
+                    |> Seq.map (fun (cc, context) ->
                         match currentCachedChart with
                         | None -> ()
                         | Some c -> if c.FilePath = cc.FilePath then selectedChart <- c.FilePath; selectedGroup <- k

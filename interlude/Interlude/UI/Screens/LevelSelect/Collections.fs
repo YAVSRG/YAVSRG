@@ -90,7 +90,7 @@ type CollectionManager() as this =
                 if
                     match snd Collections.selected with
                     | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
-                    | Playlist ps -> ps.Add (selectedChart, selectedMods, rate); true
+                    | Playlist ps -> ps.Add (selectedChart, { Mods = selectedMods; Rate = rate }); true
                     | Goals gs -> false //gs.Add ((selectedChart, selectedMods, rate), Goal.NoGoal); true
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
@@ -99,8 +99,8 @@ type CollectionManager() as this =
                 if
                     match snd Collections.selected with
                     | Collection ccs -> ccs.Remove selectedChart
-                    | Playlist ps -> ps.RemoveAll(fun (id, _, _) -> id = selectedChart) > 0
-                    | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
+                    | Playlist ps -> ps.RemoveAll(fun (id, _) -> id = selectedChart) > 0
+                    | Goals gs -> gs.RemoveAll(fun (id, _) -> id = selectedChart) > 0
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
                     Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)
