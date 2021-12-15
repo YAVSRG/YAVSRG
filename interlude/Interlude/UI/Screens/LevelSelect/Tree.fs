@@ -176,8 +176,14 @@ type private GroupItem(name, items: ChartItem list) =
     override this.Navigate() = ()
 
     override this.OnDraw(bounds, selected) =
-        Draw.rect bounds (if selected then Style.accentShade(127, 1.0f, 0.2f) else Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-        Text.drawFillB(font(), name, bounds, (Color.White, Color.Black), 0.5f)
+        let borderb = Rect.expand(5.0f, 5.0f) bounds
+        let colorb = if selected then Style.accentShade(200, 1.0f, 0.5f) else Style.accentShade(100, 0.7f, 0.0f)
+        Draw.rect (Rect.sliceLeft 5.0f borderb) colorb Sprite.Default
+        Draw.rect (Rect.sliceRight 5.0f borderb) colorb Sprite.Default
+        Draw.rect (Rect.sliceTop 5.0f borderb) colorb Sprite.Default
+        Draw.rect (Rect.sliceBottom 5.0f borderb) colorb Sprite.Default
+        Draw.rect bounds (if selected then Style.accentShade(127, 1.0f, 0.2f) else Style.accentShade(127, 0.3f, 0.0f)) Sprite.Default
+        Text.drawFillB(font(), name, bounds |> Rect.trimBottom 5.0f, (Color.White, Color.Black), 0.5f)
 
     override this.Draw(top, topEdge) =
         let b = base.Draw(top, topEdge)

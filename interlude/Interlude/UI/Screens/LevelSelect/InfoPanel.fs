@@ -142,12 +142,14 @@ module private InfoPanel =
             StylishButton.FromEnum("Sort",
                 sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
                 Style.main 100, TiltLeft = false )
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Sort")
             |> positionWidget(0.0f, 0.0f, -45.0f, 1.0f, -15.0f, 0.25f, -5.0f, 1.0f)
             |> ls.Add
 
             StylishButton.FromEnum("Filter",
                 filter |> Setting.trigger (fun _ -> this.Refresh()),
                 Style.main 90 )
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Filter")
             |> positionWidget(10.0f, 0.25f, -45.0f, 1.0f, -15.0f, 0.5f, -5.0f, 1.0f)
             |> ls.Add
 
@@ -155,19 +157,21 @@ module private InfoPanel =
                 (fun () -> Setting.app WatcherSelection.cycleForward options.AccSystems; LevelSelect.refresh <- true),
                 (fun () -> scoreSystem),
                 Style.main 80 )
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.ScoreSystems")
             |> positionWidget(10.0f, 0.5f, -45.0f, 1.0f, -15.0f, 0.75f, -5.0f, 1.0f)
             |> ls.Add
 
             StylishButton(
                 this.Refresh,
-                K <| Localisation.localise "scoreboard.storage.Local",
+                K <| Localisation.localise "levelselect.scoreboard.storage.Local",
                 Style.main 70, TiltRight = false ) //nyi
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Storage")
             |> positionWidget(10.0f, 0.75f, -45.0f, 1.0f, -15.0f, 1.0f, -5.0f, 1.0f)
             |> ls.Add
 
             ls |> this.Add
 
-            let noLocalScores = Localisation.localise "scoreboard.NoLocalScores"
+            let noLocalScores = Localisation.localise "levelselect.scoreboard.NoLocalScores"
             TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
             |> positionWidget(50.0f, 0.0f, 0.0f, 0.3f, -50.0f, 1.0f, 0.0f, 0.5f)
             |> this.Add

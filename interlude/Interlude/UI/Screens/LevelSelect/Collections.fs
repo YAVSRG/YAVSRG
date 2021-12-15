@@ -91,7 +91,7 @@ type CollectionManager() as this =
                     match snd Collections.selected with
                     | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
                     | Playlist ps -> ps.Add (selectedChart, { Mods = selectedMods; Rate = rate }); true
-                    | Goals gs -> false //gs.Add ((selectedChart, selectedMods, rate), Goal.NoGoal); true
+                    | Goals gs -> gs.Add (selectedChart, { Mods = selectedMods; Rate = rate; Goal = Goal.None }); true
                 then
                     colorVersionGlobal <- colorVersionGlobal + 1
                     Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", Info)
