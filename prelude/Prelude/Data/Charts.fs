@@ -177,6 +177,24 @@ module Sorting =
                         filter
                     then yield c
             }
+
+        let applyf (filter: Filter) (charts: (CachedChart * Collections.LevelSelectContext) seq) =
+               seq {
+                   for c, context in charts do
+                       let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DiffName + " " + c.Pack).ToLower()
+                       if List.forall
+                           (
+                               function
+                               | Impossible -> false
+                               | String str -> s.Contains str
+                               | Criterion ("k", n)
+                               | Criterion ("key", n)
+                               | Criterion ("keys", n) -> c.Keys.ToString() = n
+                               | _ -> true
+                           )
+                           filter
+                       then yield c, context
+               }
             
 open Sorting
 open Collections
@@ -302,12 +320,29 @@ module Library =
             let c = collections.[name]
             let charts, orderMatters = 
                 match c with
-                | Collection ids -> Seq.choose lookup ids, false
-                | Playlist ps -> Seq.choose (fun (i, data) -> lookup i) ps, true
-                | Goals gs -> Seq.choose (fun (i, data) -> lookup i) gs, false
+                | Collection ids -> 
+                    Seq.choose 
+                        (lookup >> Option.map (fun x -> x, LevelSelectContext.None))
+                        ids,
+                    false
+                | Playlist ps ->
+                    Seq.choose
+                        ( fun (index, (i, data)) -> 
+                            lookup i
+                            |> Option.map (fun x -> x, LevelSelectContext.Playlist (index, name, data))
+                        ) 
+                        (Seq.indexed ps),
+                    true
+                | Goals gs -> 
+                    Seq.choose
+                        ( fun (index, (i, data)) -> 
+                            lookup i
+                            |> Option.map (fun x -> x, LevelSelectContext.Goal (index, name, data))
+                        ) 
+                        (Seq.indexed gs),
+                    false
             charts
-            |> Filter.apply filter
-            |> Seq.map (fun x -> x, LevelSelectContext.None)
+            |> Filter.applyf filter
             |> ResizeArray<CachedChart * LevelSelectContext>
             |> if orderMatters then id else fun x -> x.Sort sorting; x
             |> fun x -> if x.Count > 0 then groups.Add(name, x)

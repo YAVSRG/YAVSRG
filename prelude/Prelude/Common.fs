@@ -53,7 +53,6 @@ module Common =
 
     type Setting<'T> = Setting<'T, unit>
 
-
     module Setting =
 
         type Bounds<'T> = Bounds of min: 'T * max: 'T
