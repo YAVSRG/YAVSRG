@@ -69,33 +69,41 @@ module Caching =
 
 module Collections =
 
+    [<RequireQualifiedAccess>]
     type Goal =
-    | NoGoal
+    | None
     | Clear of Metrics.HPSystemConfig
     | Lamp of Metrics.AccuracySystemConfig * Lamp
     | Accuracy of Metrics.AccuracySystemConfig * float
 
-    type PlaylistData = string * ModState * float32
+    type PlaylistData = { Mods: ModState; Rate: float32 }
+    type GoalData = { Mods: ModState; Rate: float32; Goal: Goal }
     type Collection =
     | Collection of List<string>
-    | Playlist of List<PlaylistData> //order of list matters
-    | Goals of List<PlaylistData * Goal>
+    | Playlist of List<string * PlaylistData> //order of list matters
+    | Goals of List<string * GoalData>
         member this.ToCollection() =
             match this with
             | Collection l -> Collection l
-            | Playlist p -> p |> Seq.map (fun (i, _, _) -> i) |> List |> Collection
-            | Goals g -> g |> Seq.map (fun ((i, _, _), _) -> i) |> List |> Collection
+            | Playlist p -> p |> Seq.map (fun (i, _) -> i) |> List |> Collection
+            | Goals g -> g |> Seq.map (fun (i, _) -> i) |> List |> Collection
         member this.ToPlaylist(mods, rate) = 
             match this with
-            | Collection l -> l |> Seq.map (fun i -> (i, mods, rate)) |> List |> Playlist
+            | Collection l -> l |> Seq.map (fun i -> i, { Mods = mods; Rate = rate}) |> List |> Playlist
             | Playlist p -> Playlist p
-            | Goals g -> g |> Seq.map (fun (x, _) -> x) |> List |> Playlist
+            | Goals g -> g |> Seq.map (fun (x, data) -> x, { Mods = data.Mods; Rate = data.Rate }) |> List |> Playlist
         member this.IsEmpty() =
             match this with
             | Collection l -> l.Count = 0
             | Playlist p -> p.Count = 0
             | Goals g -> g.Count = 0
         static member Blank = Collection (ResizeArray<_>())
+
+    [<RequireQualifiedAccess>]
+    type LevelSelectContext =
+        | None
+        | Playlist of index: int * id: string * data: PlaylistData
+        | Goal of index: int * id: string * data: GoalData
 
 module Sorting =
 
@@ -115,16 +123,16 @@ module Sorting =
             "Title", fun c -> firstCharacter c.Title
             "Artist", fun c -> firstCharacter c.Artist
             "Creator", fun c -> firstCharacter c.Creator
-            "Keymode", fun c -> c.Keys.ToString() + "k"
+            "Keymode", fun c -> if c.Keys = 10 then "~10K" else c.Keys.ToString() + "K"
             "Collections", fun _ ->  "" // Placeholder for UI purposes, UI is hard coded to call collection grouping behaviour when this is chosen
         ]
 
-    let private compareBy (f: 'a -> IComparable) = fun a b -> f(a).CompareTo <| f(b)
-    let private thenCompareBy (f: 'a -> IComparable) (cmp: 'a -> 'a -> int) = 
+    let private compareBy (f: CachedChart -> IComparable) = fun a b -> f(fst a).CompareTo <| f(fst b)
+    let private thenCompareBy (f: CachedChart -> IComparable) cmp =
         let cmp2 = compareBy f
         fun a b -> match cmp a b with 0 -> cmp2 a b | x -> x
 
-    type SortMethod = Comparison<CachedChart>
+    type SortMethod = Comparison<CachedChart * Collections.LevelSelectContext>
     let sortBy : IDictionary<string, SortMethod> = dict[
             "Physical", Comparison(compareBy (fun x -> x.Physical))
             "Technical", Comparison(compareBy (fun x -> x.Technical))
@@ -198,7 +206,7 @@ module Library =
         |> fun d -> Logging.Info (sprintf "Cache loaded, %i charts and %i collections." d.Charts.Keys.Count d.Collections.Keys.Count); d
     let charts, collections = data.Charts, data.Collections
 
-    // ----
+    // ---- Basic data layer stuff ----
 
     let save() = JSON.ToFile(Path.Combine(getDataPath "Data", "cache.json"), true) data
     
@@ -213,6 +221,38 @@ module Library =
     let load (cc: CachedChart) : Chart Option =
         cc.FilePath |> Chart.fromFile
         (*|> function | Some c -> addOrUpdate c; Some c | None -> None*)
+
+    let rebuildTask : StatusTask =
+        fun output ->
+            async {
+                charts.Clear()
+                for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
+                    for song in Directory.EnumerateDirectories pack do
+                        for file in Directory.EnumerateFiles song do
+                            match Path.GetExtension(file).ToLower() with
+                            | ".yav" ->
+                                match Chart.fromFile file with
+                                | Some c ->
+                                    output ("Caching " + Path.GetFileName file)
+                                    addOrUpdate c
+                                | None -> ()
+                            | _ -> ()
+                save()
+                output "Saved cache."
+                return true
+            }
+    
+    let delete (c: CachedChart) =
+        charts.TryRemove c.FilePath |> ignore
+        if File.Exists c.FilePath then File.Delete c.FilePath
+        let songfolder = Path.GetDirectoryName c.FilePath
+        match songfolder with SongFolder _ -> () | _ -> Directory.Delete(songfolder, true) 
+        let packfolder = Path.GetDirectoryName songfolder
+        if packfolder |> Directory.EnumerateDirectories |> Seq.isEmpty then Directory.Delete(packfolder, false)
+    
+    let deleteMany (cs: CachedChart seq) = Seq.iter delete cs
+
+    // ---- Collections stuff ----
 
     module Collections =
         
@@ -242,61 +282,38 @@ module Library =
 
         let enumerate () = collections.Keys :> string seq
 
-    let getGroups (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) =
-        let groups = new Dictionary<string, ResizeArray<CachedChart>>()
+    // ---- Retrieving library for level select ----
+
+    type Group = ResizeArray<CachedChart * LevelSelectContext>
+
+    let getGroups (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : Dictionary<string, Group> =
+        let groups = new Dictionary<string, Group>()
         for c in Filter.apply filter charts.Values do
             let s = grouping c
-            if groups.ContainsKey s |> not then groups.Add(s, new ResizeArray<CachedChart>())
-            groups.[s].Add c
+            if groups.ContainsKey s |> not then groups.Add(s, new ResizeArray<CachedChart * LevelSelectContext>())
+            groups.[s].Add (c, LevelSelectContext.None)
         for g in groups.Values do
             g.Sort sorting
         groups
 
-    let getCollectionGroups (sorting: SortMethod) (filter: Filter) =
-        let groups = new Dictionary<string, ResizeArray<CachedChart>>()
+    let getCollectionGroups (sorting: SortMethod) (filter: Filter) : Dictionary<string, Group>  =
+        let groups = new Dictionary<string, Group>()
         for name in collections.Keys do
             let c = collections.[name]
             let charts, orderMatters = 
                 match c with
                 | Collection ids -> Seq.choose lookup ids, false
-                | Playlist ps -> Seq.choose (fun (i, _, _) -> lookup i) ps, true
-                | Goals gs -> Seq.choose (fun ((i, _, _), _) -> lookup i) gs, false
+                | Playlist ps -> Seq.choose (fun (i, data) -> lookup i) ps, true
+                | Goals gs -> Seq.choose (fun (i, data) -> lookup i) gs, false
             charts
             |> Filter.apply filter
-            |> ResizeArray<CachedChart>
+            |> Seq.map (fun x -> x, LevelSelectContext.None)
+            |> ResizeArray<CachedChart * LevelSelectContext>
             |> if orderMatters then id else fun x -> x.Sort sorting; x
             |> fun x -> if x.Count > 0 then groups.Add(name, x)
         groups
 
-    let rebuildTask : StatusTask =
-        fun output ->
-            async {
-                charts.Clear()
-                for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
-                    for song in Directory.EnumerateDirectories pack do
-                        for file in Directory.EnumerateFiles song do
-                            match Path.GetExtension(file).ToLower() with
-                            | ".yav" ->
-                                match Chart.fromFile file with
-                                | Some c ->
-                                    output ("Caching " + Path.GetFileName file)
-                                    addOrUpdate c
-                                | None -> ()
-                            | _ -> ()
-                save()
-                output "Saved cache."
-                return true
-            }
-
-    let delete (c: CachedChart) =
-        charts.TryRemove c.FilePath |> ignore
-        if File.Exists c.FilePath then File.Delete c.FilePath
-        let songfolder = Path.GetDirectoryName c.FilePath
-        match songfolder with SongFolder _ -> () | _ -> Directory.Delete(songfolder, true) 
-        let packfolder = Path.GetDirectoryName songfolder
-        if packfolder |> Directory.EnumerateDirectories |> Seq.isEmpty then Directory.Delete(packfolder, false)
-
-    let deleteMany (cs: CachedChart seq) = Seq.iter delete cs
+    // ---- Importing charts to library ----
 
     module Imports =
     
