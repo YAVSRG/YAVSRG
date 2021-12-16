@@ -76,22 +76,45 @@ module Collections =
     | Lamp of Metrics.AccuracySystemConfig * Lamp
     | Accuracy of Metrics.AccuracySystemConfig * float
 
-    type PlaylistData = { Mods: ModState; Rate: float32 }
-    type GoalData = { Mods: ModState; Rate: float32; Goal: Goal }
+    type PlaylistData = { Mods: Setting<ModState>; Rate: Setting.Bounded<float32> } with
+        static member Make mods rate = { Mods = Setting.simple mods; Rate = Setting.rate rate }
+        static member Default = { Mods = Setting.simple Map.empty; Rate = Setting.rate 1.0f }
+
+    type GoalData = { Mods: Setting<ModState>; Rate: Setting.Bounded<float32>; Goal: Setting<Goal> } with
+        static member Make mods rate goal = { Mods = Setting.simple mods; Rate = Setting.rate rate; Goal = Setting.simple goal }
+        static member Default = { Mods = Setting.simple Map.empty; Rate = Setting.rate 1.0f; Goal = Setting.simple Goal.None }
+
     type Collection =
-    | Collection of List<string>
-    | Playlist of List<string * PlaylistData> //order of list matters
+    | Collection of List<string> // duplicates not allowed
+    | Playlist of List<string * PlaylistData> // order of list matters
     | Goals of List<string * GoalData>
         member this.ToCollection() =
             match this with
             | Collection l -> Collection l
-            | Playlist p -> p |> Seq.map (fun (i, _) -> i) |> List |> Collection
-            | Goals g -> g |> Seq.map (fun (i, _) -> i) |> List |> Collection
+            | Playlist p -> 
+                Seq.map fst p
+                |> Seq.distinct |> List |> Collection
+            | Goals g -> 
+                Seq.map fst g
+                |> Seq.distinct |> List |> Collection
         member this.ToPlaylist(mods, rate) = 
             match this with
-            | Collection l -> l |> Seq.map (fun i -> i, { Mods = mods; Rate = rate}) |> List |> Playlist
+            | Collection l -> 
+                Seq.map (fun i -> i, PlaylistData.Make mods rate) l
+                |> List |> Playlist
             | Playlist p -> Playlist p
-            | Goals g -> g |> Seq.map (fun (x, data) -> x, { Mods = data.Mods; Rate = data.Rate }) |> List |> Playlist
+            | Goals g -> 
+                Seq.map (fun (x, data: GoalData) -> x, PlaylistData.Make data.Mods.Value data.Rate.Value) g
+                |> List |> Playlist
+        member this.ToGoals(mods, rate) = 
+            match this with
+            | Collection l ->
+                Seq.map (fun i -> i, GoalData.Make mods rate Goal.None) l
+                |> List |> Goals
+            | Playlist p ->
+                Seq.map (fun (x, data: PlaylistData) -> x, GoalData.Make data.Mods.Value data.Rate.Value Goal.None) p
+                |> List |> Goals
+            | Goals g -> Goals g
         member this.IsEmpty() =
             match this with
             | Collection l -> l.Count = 0
@@ -104,6 +127,11 @@ module Collections =
         | None
         | Playlist of index: int * id: string * data: PlaylistData
         | Goal of index: int * id: string * data: GoalData
+        member this.Id =
+            match this with
+            | None -> -1, ""
+            | Playlist (i, id, _)
+            | Goal (i, id, _) -> i, id
 
 module Sorting =
 
