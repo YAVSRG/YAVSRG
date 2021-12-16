@@ -42,7 +42,7 @@ type private TreeItem() =
         if bottom > topEdge + 170.0f && top < Render.vheight - topEdge then this.OnUpdate(bounds, this.Selected, elapsedTime)
         top + Rect.height bounds + 15.0f
 
-type private ChartItem(groupName, cc) =
+type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectContext) =
     inherit TreeItem()
 
     let hover = new AnimationFade(0.0f)
@@ -51,9 +51,10 @@ type private ChartItem(groupName, cc) =
     let mutable chartData = None
     let mutable pbData: Bests option = None
     let mutable collectionIcon = ""
+    let collectionIndex = context.Id
 
     override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
-    override this.Selected = selectedChart = cc.FilePath
+    override this.Selected = selectedChart = cc.FilePath && collectionIndex = contextIndex
     member this.Chart = cc
 
     override this.Navigate() =
@@ -61,14 +62,14 @@ type private ChartItem(groupName, cc) =
         | Navigation.Nothing -> ()
         | Navigation.Forward b ->
             if b then
-                switchCurrentChart(cc, groupName)
+                switchCurrentChart(cc, context, groupName)
                 navigation <- Navigation.Nothing
             elif groupName = selectedGroup && this.Selected then navigation <- Navigation.Forward true
-        | Navigation.Backward (groupName2, cc2) ->
+        | Navigation.Backward (groupName2, cc2, context) ->
             if groupName = selectedGroup && this.Selected then
-                switchCurrentChart(cc2, groupName2)
+                switchCurrentChart(cc2, context, groupName2)
                 navigation <- Navigation.Nothing
-            else navigation <- Navigation.Backward(groupName, cc)
+            else navigation <- Navigation.Backward(groupName, cc, context)
 
     override this.OnDraw(bounds, selected) =
         let struct (left, top, right, bottom) = bounds
@@ -139,12 +140,12 @@ type private ChartItem(groupName, cc) =
                     | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then "➾" else ""
                     | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then "@" else ""
                 else ""
-        if Mouse.Hover(bounds) then
+        if Mouse.Hover bounds then
             hover.Target <- 1.0f
-            if Mouse.Click(MouseButton.Left) then
+            if Mouse.Click MouseButton.Left then
                 if selected then playCurrentChart()
-                else switchCurrentChart(cc, groupName)
-            elif Mouse.Click(MouseButton.Right) then
+                else switchCurrentChart(cc, context, groupName)
+            elif Mouse.Click MouseButton.Right then
                 expandedGroup <- ""
                 scrollTo <- ScrollTo.Pack groupName
             elif options.Hotkeys.Delete.Value.Tapped() then
@@ -166,7 +167,7 @@ type private ChartItem(groupName, cc) =
             scrollTo <- ScrollTo.Nothing
         base.Update(top, topEdge, elapsedTime)
 
-type private GroupItem(name, items: ChartItem list) =
+type private GroupItem(name: string, items: ChartItem list) =
     inherit TreeItem()
 
     override this.Bounds(top) = Rect.create (Render.vwidth * 0.5f) top (Render.vwidth - 15.0f) (top + 65.0f)

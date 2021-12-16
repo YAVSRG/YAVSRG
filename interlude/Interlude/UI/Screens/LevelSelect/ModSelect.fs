@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
+open Prelude.Common
 open Prelude.Gameplay.Mods
 open Interlude.UI
 open Interlude.UI.Components
@@ -27,10 +28,9 @@ module private ModSelect =
                     CardButton(
                         ModState.getModName name,
                         ModState.getModDesc name,
-                        (fun () -> selectedMods.ContainsKey name),
-                        fun () -> 
-                            selectedMods <- ModState.cycleState name selectedMods
-                            updateChart())
+                        (fun () -> selectedMods.Value.ContainsKey name),
+                        fun () -> Setting.app (ModState.cycleState name) selectedMods
+                    )
                     |> select.Add
                 select.Reposition(50.0f, 0.0f, 200.0f, 0.0f, 650.0f, 0.0f, -50.0f, 1.0f)
                 select :> Selectable

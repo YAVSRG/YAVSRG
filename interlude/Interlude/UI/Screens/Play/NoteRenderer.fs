@@ -81,7 +81,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     override this.Draw() =
         let struct (left, top, right, bottom) = this.Bounds
         
-        let scale = float32 options.ScrollSpeed.Value / Gameplay.rate * 1.0f</ms>
+        let scale = float32 options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f</ms>
         let hitposition = float32 options.HitPosition.Value
 
         let playfieldHeight = bottom - top

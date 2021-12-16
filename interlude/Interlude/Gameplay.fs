@@ -9,6 +9,7 @@ open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
+open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
@@ -18,41 +19,65 @@ open Interlude.Utils
 module Gameplay =
 
     let mutable internal currentChart: Chart option = None
+    let mutable internal currentChartContext: LevelSelectContext = LevelSelectContext.None
     let mutable internal currentCachedChart: CachedChart option = None
     let mutable internal chartSaveData = None
     let mutable modifiedChart: ModChart option = None
     let mutable private coloredChart: ColorizedChart option = None
     let mutable difficultyRating: RatingReport option = None
 
-    let mutable rate = 1.0f
-    let mutable selectedMods = Map.empty
     let mutable autoplay = false
 
-    let mutable onChartUpdate = ignore
-    let mutable onChartChange = ignore
+    let rec rate = 
+        Setting.rate 1.0f
+        |> Setting.trigger (
+            fun v ->
+                match currentChartContext with
+                | LevelSelectContext.None -> ()
+                | LevelSelectContext.Playlist (_, _, d) -> d.Rate.Value <- v
+                | LevelSelectContext.Goal (_, _, d) -> d.Rate.Value <- v
+                Audio.changeRate v
+                updateChart()
+        )
 
-    let updateChart() =
+    and selectedMods = 
+        Setting.simple Map.empty
+        |> Setting.trigger (
+            fun mods ->
+                match currentChartContext with
+                | LevelSelectContext.None -> ()
+                | LevelSelectContext.Playlist (_, _, d) -> d.Mods.Value <- mods
+                | LevelSelectContext.Goal (_, _, d) -> d.Mods.Value <- mods
+                updateChart()
+        )
+
+    and updateChart() =
         match currentChart with
         | None -> ()
         | Some c ->
-            modifiedChart <- Some <| getModChart selectedMods c
+            modifiedChart <- Some <| getModChart selectedMods.Value c
             coloredChart <- None
             difficultyRating <-
                 let mc = modifiedChart.Value in
-                Some <| RatingReport(mc.Notes, rate, options.Playstyles.[mc.Keys - 3], mc.Keys)
-            onChartUpdate()
+                Some <| RatingReport(mc.Notes, rate.Value, options.Playstyles.[mc.Keys - 3], mc.Keys)
+        
+    let mutable onChartChange = ignore
 
-    let changeRate amount =
-        rate <- Math.Round(float (rate + amount), 2) |> float32
-        Audio.changeRate rate
-        updateChart()
-
-    let changeChart (cachedChart, chart) =
+    let changeChart (cachedChart, context, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
+        currentChartContext <- context
+        match currentChartContext with
+        | LevelSelectContext.None -> ()
+        | LevelSelectContext.Playlist (_, _, d) -> 
+            rate.Value <- d.Rate.Value
+            selectedMods.Value <- d.Mods.Value
+        | LevelSelectContext.Goal (_, _, d) ->
+            rate.Value <- d.Rate.Value
+            selectedMods.Value <- d.Mods.Value
         chartSaveData <- Some <| Scores.getOrCreateScoreData chart
         Screen.Background.load chart.BackgroundPath
-        if Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate) then
+        if Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate.Value) then
             Audio.playFrom chart.Header.PreviewTime
         options.CurrentChart.Value <- cachedChart.FilePath
         updateChart()
@@ -67,14 +92,15 @@ module Gameplay =
 
     let recolorChart() = coloredChart <- None
 
-    let makeScore (replayData, keys) : Score = {
-        time = DateTime.Now
-        replay = Replay.compress replayData
-        rate = rate
-        selectedMods = selectedMods |> ModChart.filter modifiedChart.Value
-        layout = options.Playstyles.[keys - 3]
-        keycount = keys
-    }
+    let makeScore (replayData, keys) : Score =
+        {
+            time = DateTime.Now
+            replay = Replay.compress replayData
+            rate = rate.Value
+            selectedMods = selectedMods.Value |> ModChart.filter modifiedChart.Value
+            layout = options.Playstyles.[keys - 3]
+            keycount = keys
+        }
 
     let setScore (data: ScoreInfoProvider) : BestFlags =
         if
@@ -113,7 +139,7 @@ module Gameplay =
                     Library.getGroups(K "All") (Comparison(fun _ _ -> 0)) []
                     |> fun d -> fst d.["All"].[0]
                     |> fun c -> c, Library.load(c).Value
-            changeChart(c, ch)
+            changeChart(c, LevelSelectContext.None, ch)
         with err ->
             Logging.Debug("Tried to auto select a chart but none exist", err)
             Screen.Background.load ""

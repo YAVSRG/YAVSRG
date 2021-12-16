@@ -9,6 +9,7 @@ open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
+open Prelude.Data.Charts.Collections
 open Interlude
 open Interlude.UI
 open Interlude.Utils
@@ -25,7 +26,7 @@ type Screen() as this =
 
     let mutable scrolling = false
     let mutable folderList: GroupItem list = []
-    let mutable lastItem: (string * CachedChart) option = None
+    let mutable lastItem: (string * CachedChart * LevelSelectContext) option = None
     let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
     let searchText = Setting.simple ""
@@ -44,7 +45,7 @@ type Screen() as this =
                 let cc, context = groups.[g].[0]
                 if cc.FilePath <> selectedChart then
                     match Library.load cc with
-                    | Some c -> changeChart(cc, c)
+                    | Some c -> changeChart(cc, context, c)
                     | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
         lastItem <- None
         colorVersionGlobal <- 0
@@ -57,16 +58,16 @@ type Screen() as this =
                     |> Seq.map (fun (cc, context) ->
                         match currentCachedChart with
                         | None -> ()
-                        | Some c -> if c.FilePath = cc.FilePath then selectedChart <- c.FilePath; selectedGroup <- k
-                        lastItem <- Some (k, cc)
-                        ChartItem(k, cc))
+                        | Some c -> if c.FilePath = cc.FilePath && context.Id = contextIndex then selectedChart <- c.FilePath; selectedGroup <- k
+                        lastItem <- Some (k, cc, context)
+                        ChartItem(k, cc, context))
                     |> List.ofSeq
                     |> fun l -> GroupItem(k, l))
             |> List.ofSeq
         scrollTo <- ScrollTo.Chart
         expandedGroup <- selectedGroup
 
-    let changeRate(v) = Interlude.Gameplay.changeRate(v); colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
+    let changeRate v = rate.Value <- rate.Value + v; colorVersionGlobal <- colorVersionGlobal + 1; infoPanel.Refresh()
 
     do
         Setting.app (fun s -> if sortBy.ContainsKey s then s else "Title") options.ChartSortMode
@@ -115,7 +116,10 @@ type Screen() as this =
         |> positionWidget(10.0f, 0.0f, 180.0f, 0.0f, -10.0f, 0.4f, 0.0f, 1.0f)
         |> this.Add
 
-        onChartChange <- infoPanel.Refresh
+        onChartChange <- 
+            fun () -> 
+                infoPanel.Refresh()
+                contextIndex <- currentChartContext.Id
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -132,8 +136,8 @@ type Screen() as this =
 
         elif options.Hotkeys.Next.Value.Tapped() then
             if lastItem.IsSome then
-                let (g, c) = lastItem.Value
-                navigation <- Navigation.Forward (selectedGroup = g && selectedChart = c.FilePath)
+                let (g, cc, _) = lastItem.Value
+                navigation <- Navigation.Forward (selectedGroup = g && selectedChart = cc.FilePath)
         elif options.Hotkeys.Previous.Value.Tapped() then
             if lastItem.IsSome then navigation <- Navigation.Backward lastItem.Value
 
@@ -176,5 +180,4 @@ type Screen() as this =
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Action (fun () -> Audio.playFrom currentChart.Value.Header.PreviewTime)
         refresh()
 
-    override this.OnExit next =
-        Input.removeInputMethod()
+    override this.OnExit next = Input.removeInputMethod()

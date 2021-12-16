@@ -16,7 +16,7 @@ type PersonalBestData = PersonalBests<float * int> option * PersonalBests<Lamp> 
 [<RequireQualifiedAccess>]
 type Navigation =
     | Nothing
-    | Backward of string * CachedChart
+    | Backward of string * CachedChart * Collections.LevelSelectContext
     /// Forward false is consumed by the selected chart, and replaced with Forward true
     /// Forward true is consumed by any other chart, and switched to instantly
     /// Combined effect is navigating forward by one chart
@@ -52,8 +52,9 @@ module private Globals =
     /// Group's name = this string => Selected chart is in this group
     let mutable selectedGroup = ""
 
-    /// Chart's filepath = this string => It's the selected chart
+    /// Chart's filepath = this string && contextIndex match => It's the selected chart
     let mutable selectedChart = ""
+    let mutable contextIndex = -1, ""
 
     /// Group's name = this string => That group is expanded in level select
     /// Only one group can be expanded at a time, and it is independent of the "selected" group
@@ -83,13 +84,13 @@ module private Globals =
     let mutable navigation = Navigation.Nothing
 
     let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
-        if r1 < rate then ( p2, r2, if r2 < rate then Color.FromArgb(127, Color.White) else colorFunc p2 )
+        if r1 < rate.Value then ( p2, r2, if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2 )
         else ( p1, r1, colorFunc p1 )
     
-    let switchCurrentChart(cc, groupName) =
+    let switchCurrentChart(cc, context, groupName) =
         match Library.load cc with
         | Some c ->
-            changeChart(cc, c)
+            changeChart(cc, context, c)
             selectedChart <- cc.FilePath
             expandedGroup <- groupName
             selectedGroup <- groupName

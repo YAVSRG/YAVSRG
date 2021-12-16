@@ -66,7 +66,7 @@ type Screen(start: PlayScreenType) as this =
         | Normal -> new LiveReplayProvider(firstNote) :> IReplayProvider, false, false
         | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, true
         | Replay data -> StoredReplayProvider(data) :> IReplayProvider, true, false
-    let scoring = createScoreMetric (fst options.AccSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate
+    let scoring = createScoreMetric (fst options.AccSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate.Value
     let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper =
         { 
@@ -116,7 +116,7 @@ type Screen(start: PlayScreenType) as this =
         Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
         //discord presence
         Screen.toolbar <- true
-        Audio.changeRate Gameplay.rate
+        Audio.changeRate Gameplay.rate.Value
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
