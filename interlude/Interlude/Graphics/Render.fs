@@ -74,7 +74,7 @@ module FBO =
                     GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0)
                     GL.Translate(0.0f, -Render.vheight, 0.0f)
                     GL.Viewport(0, 0, int Render.vwidth, int Render.vheight)
-                GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, this.fbo_id)
+                GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
                 if clear then GL.Clear(ClearBufferMask.ColorBufferBit)
                 RenderHelper.enter()
                 stack <- this.fbo_id :: stack
@@ -82,12 +82,12 @@ module FBO =
                 stack <- List.tail stack
                 RenderHelper.exit()
                 if List.isEmpty stack then
-                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
+                    GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
                     GL.Translate(0.0f, Render.vheight, 0.0f)
                     GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
                     GL.Viewport(0, 0, Render.rwidth, Render.rheight)
                 else
-                    GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, List.head stack)
+                    GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head stack)
                 RenderHelper.enter()
             member this.Dispose() = in_use.[this.fbo_index] <- false
 
@@ -98,7 +98,7 @@ module FBO =
                 texture_ids.[i] <- 0
 
             if (fbo_ids.[i] <> 0) then
-                GL.Ext.DeleteFramebuffer(fbo_ids.[i])
+                GL.DeleteFramebuffer(fbo_ids.[i])
                 fbo_ids.[i] <- 0
 
             texture_ids.[i] <- GL.GenTexture()
@@ -109,12 +109,12 @@ module FBO =
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat)
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat)
 
-            GL.Ext.GenFramebuffers(1, &fbo_ids.[i])
-            GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, fbo_ids.[i])
+            GL.GenFramebuffers(1, &fbo_ids.[i])
+            GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_ids.[i])
             GL.RenderbufferStorage(RenderbufferTarget.RenderbufferExt, RenderbufferStorage.Depth24Stencil8, int Render.vwidth, int Render.vheight)
-            GL.Ext.FramebufferTexture2D(FramebufferTarget.FramebufferExt, FramebufferAttachment.ColorAttachment0Ext, TextureTarget.Texture2D, texture_ids.[i], 0)
+            GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, texture_ids.[i], 0)
         
-        GL.Ext.BindFramebuffer(FramebufferTarget.FramebufferExt, 0)
+        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
 
     let create() =
         { 0 .. (pool_size - 1) }
