@@ -18,8 +18,47 @@ open Interlude.Utils
 
 module Gameplay =
 
+    module Collections =
+        let mutable internal currentChartContext : LevelSelectContext = LevelSelectContext.None
+        let mutable contextIndex = -1, ""
+
+        let notifyChangeRate v =
+            match currentChartContext with
+            | LevelSelectContext.None -> ()
+            | LevelSelectContext.Playlist (_, _, d) -> d.Rate.Value <- v
+            | LevelSelectContext.Goal (_, _, d) -> d.Rate.Value <- v
+
+        let notifyChangeMods mods =
+            match currentChartContext with
+            | LevelSelectContext.None -> ()
+            | LevelSelectContext.Playlist (_, _, d) -> d.Mods.Value <- mods
+            | LevelSelectContext.Goal (_, _, d) -> d.Mods.Value <- mods
+
+        let notifyChangeChart context (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
+            currentChartContext <- context
+            match currentChartContext with
+            | LevelSelectContext.None -> ()
+            | LevelSelectContext.Playlist (_, _, d) -> 
+                rate.Value <- d.Rate.Value
+                mods.Value <- d.Mods.Value
+            | LevelSelectContext.Goal (_, _, d) ->
+                rate.Value <- d.Rate.Value
+                mods.Value <- d.Mods.Value
+            contextIndex <- currentChartContext.Id
+
+        let reorder (up: bool) : bool =
+            match currentChartContext with
+            | LevelSelectContext.None
+            | LevelSelectContext.Goal _ -> false
+            | LevelSelectContext.Playlist (index, id, d) ->
+                match Library.Collections.reorderPlaylist id index up with
+                | Some newIndex when newIndex <> index ->
+                    currentChartContext <- LevelSelectContext.Playlist (newIndex, id, d)
+                    contextIndex <- currentChartContext.Id
+                    true
+                | _ -> false
+
     let mutable internal currentChart: Chart option = None
-    let mutable internal currentChartContext: LevelSelectContext = LevelSelectContext.None
     let mutable internal currentCachedChart: CachedChart option = None
     let mutable internal chartSaveData = None
     let mutable modifiedChart: ModChart option = None
@@ -28,54 +67,42 @@ module Gameplay =
 
     let mutable autoplay = false
 
-    let rec rate = 
-        Setting.rate 1.0f
+    let private _rate = Setting.rate 1.0f
+    let private _selectedMods = Setting.simple Map.empty
+    let updateChart() =
+        match currentChart with
+        | None -> ()
+        | Some c ->
+            modifiedChart <- Some <| getModChart _selectedMods.Value c
+            coloredChart <- None
+            difficultyRating <-
+                let mc = modifiedChart.Value in
+                Some <| RatingReport(mc.Notes, _rate.Value, options.Playstyles.[mc.Keys - 3], mc.Keys)
+
+    let rate : Setting.Bounded<float32> = 
+        _rate
         |> Setting.trigger (
             fun v ->
-                match currentChartContext with
-                | LevelSelectContext.None -> ()
-                | LevelSelectContext.Playlist (_, _, d) -> d.Rate.Value <- v
-                | LevelSelectContext.Goal (_, _, d) -> d.Rate.Value <- v
+                Collections.notifyChangeRate v
                 Audio.changeRate v
                 updateChart()
         )
 
-    and selectedMods = 
-        Setting.simple Map.empty
+    let selectedMods : Setting<ModState> = 
+        _selectedMods
         |> Setting.trigger (
             fun mods ->
-                match currentChartContext with
-                | LevelSelectContext.None -> ()
-                | LevelSelectContext.Playlist (_, _, d) -> d.Mods.Value <- mods
-                | LevelSelectContext.Goal (_, _, d) -> d.Mods.Value <- mods
+                Collections.notifyChangeMods mods
                 updateChart()
         )
-
-    and updateChart() =
-        match currentChart with
-        | None -> ()
-        | Some c ->
-            modifiedChart <- Some <| getModChart selectedMods.Value c
-            coloredChart <- None
-            difficultyRating <-
-                let mc = modifiedChart.Value in
-                Some <| RatingReport(mc.Notes, rate.Value, options.Playstyles.[mc.Keys - 3], mc.Keys)
         
     let mutable onChartChange = ignore
 
     let changeChart (cachedChart, context, chart) =
         currentCachedChart <- Some cachedChart
         currentChart <- Some chart
-        currentChartContext <- context
-        match currentChartContext with
-        | LevelSelectContext.None -> ()
-        | LevelSelectContext.Playlist (_, _, d) -> 
-            rate.Value <- d.Rate.Value
-            selectedMods.Value <- d.Mods.Value
-        | LevelSelectContext.Goal (_, _, d) ->
-            rate.Value <- d.Rate.Value
-            selectedMods.Value <- d.Mods.Value
         chartSaveData <- Some <| Scores.getOrCreateScoreData chart
+        Collections.notifyChangeChart context rate selectedMods
         Screen.Background.load chart.BackgroundPath
         if Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate.Value) then
             Audio.playFrom chart.Header.PreviewTime

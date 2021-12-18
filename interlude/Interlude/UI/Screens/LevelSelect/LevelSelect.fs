@@ -58,7 +58,7 @@ type Screen() as this =
                     |> Seq.map (fun (cc, context) ->
                         match currentCachedChart with
                         | None -> ()
-                        | Some c -> if c.FilePath = cc.FilePath && context.Id = contextIndex then selectedChart <- c.FilePath; selectedGroup <- k
+                        | Some c -> if c.FilePath = cc.FilePath && context.Id = Collections.contextIndex then selectedChart <- c.FilePath; selectedGroup <- k
                         lastItem <- Some (k, cc, context)
                         ChartItem(k, cc, context))
                     |> List.ofSeq
@@ -116,10 +116,7 @@ type Screen() as this =
         |> positionWidget(10.0f, 0.0f, 180.0f, 0.0f, -10.0f, 0.4f, 0.0f, 1.0f)
         |> this.Add
 
-        onChartChange <- 
-            fun () -> 
-                infoPanel.Refresh()
-                contextIndex <- currentChartContext.Id
+        onChartChange <- infoPanel.Refresh
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

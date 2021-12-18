@@ -37,7 +37,7 @@ module private Collections =
             Content = fun add ->
                 column [
                     PrettySetting("CollectionName", TextField name).Position(200.0f)
-                    PrettySetting("CollectionType", Selector.FromArray ([|"Collection"; "Playlist"; "Goals"|],[|"Collection"; "Playlist"; "Goals"|], ctype)).Position(300.0f)
+                    PrettySetting("CollectionType", Selector.FromArray ([|"Collection"; "Playlist"; "Goals"|], [|"Collection"; "Playlist"; "Goals"|], ctype)).Position(300.0f)
                 ] :> Selectable
             Callback = fun () ->
                 if name.Value <> originalName then
@@ -99,7 +99,8 @@ type CollectionManager() as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if currentCachedChart.IsSome then
-            if options.Hotkeys.AddToCollection.Value.Tapped() && fst Collections.selected <> snd contextIndex then
+
+            if options.Hotkeys.AddToCollection.Value.Tapped() && fst Collections.selected <> snd Collections.contextIndex then
                 if
                     match snd Collections.selected with
                     | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
@@ -108,8 +109,9 @@ type CollectionManager() as this =
                 then
                     if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
                     Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", Info)
+
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
-                if fst Collections.selected <> snd contextIndex then // Remove from collection that isn't in this context
+                if fst Collections.selected <> snd Collections.contextIndex then // Remove from collection that isn't in this context
                     if
                         match snd Collections.selected with
                         | Collection ccs -> ccs.Remove selectedChart
@@ -128,9 +130,15 @@ type CollectionManager() as this =
                     if
                         match snd Collections.selected with
                         | Collection ccs -> ccs.Remove selectedChart
-                        | Playlist ps -> ps.RemoveAt(fst contextIndex); true
-                        | Goals gs -> gs.RemoveAt(fst contextIndex); true
+                        | Playlist ps -> ps.RemoveAt(fst Collections.contextIndex); true
+                        | Goals gs -> gs.RemoveAt(fst Collections.contextIndex); true
                     then
                         LevelSelect.refresh <- true
-                        contextIndex <- -1, ""
+                        Collections.notifyChangeChart LevelSelectContext.None rate selectedMods
                         Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)
+
+            elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
+                if Collections.reorder false then LevelSelect.refresh <- true
+
+            elif options.Hotkeys.ReorderCollectionUp.Value.Tapped() then
+                if Collections.reorder true then LevelSelect.refresh <- true

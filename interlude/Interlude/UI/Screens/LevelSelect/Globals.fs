@@ -54,7 +54,6 @@ module private Globals =
 
     /// Chart's filepath = this string && contextIndex match => It's the selected chart
     let mutable selectedChart = ""
-    let mutable contextIndex = -1, ""
 
     /// Group's name = this string => That group is expanded in level select
     /// Only one group can be expanded at a time, and it is independent of the "selected" group

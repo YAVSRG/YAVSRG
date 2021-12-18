@@ -16,6 +16,7 @@ open Interlude.Graphics
 open Interlude.Input
 open Interlude.Content
 open Interlude.Options
+open Interlude.Gameplay
 open Interlude.UI.Animation
 open Interlude.UI.Screens.LevelSelect.Globals
 
@@ -54,7 +55,7 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
     let collectionIndex = context.Id
 
     override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
-    override this.Selected = selectedChart = cc.FilePath && collectionIndex = contextIndex
+    override this.Selected = selectedChart = cc.FilePath && collectionIndex = Collections.contextIndex
     member this.Chart = cc
 
     override this.Navigate() =
@@ -65,9 +66,9 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
                 switchCurrentChart(cc, context, groupName)
                 navigation <- Navigation.Nothing
             elif groupName = selectedGroup && this.Selected then navigation <- Navigation.Forward true
-        | Navigation.Backward (groupName2, cc2, context) ->
+        | Navigation.Backward (groupName2, cc2, context2) ->
             if groupName = selectedGroup && this.Selected then
-                switchCurrentChart(cc2, context, groupName2)
+                switchCurrentChart(cc2, context2, groupName2)
                 navigation <- Navigation.Nothing
             else navigation <- Navigation.Backward(groupName, cc, context)
 
