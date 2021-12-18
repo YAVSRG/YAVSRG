@@ -58,7 +58,10 @@ module Interlude =
     type NoteRow = NoteType array
 
     module NoteRow =
-        let setNoteData (nt: NoteType) (row: NoteRow) (data: Bitmap) = for k in Bitmap.toSeq data do row.[k] <- nt
+        let setNoteData (nt: NoteType) (row: NoteRow) (data: Bitmap) =
+            for k = 0 to row.Length - 1 do
+                if Bitmap.hasBit k data then row.[k] <- nt
+                elif row.[k] = nt then row.[k] <- NoteType.NOTHING
 
         let clone = Array.copy
 

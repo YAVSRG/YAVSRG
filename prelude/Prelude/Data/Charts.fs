@@ -328,6 +328,19 @@ module Library =
 
         let enumerate () = collections.Keys :> string seq
 
+        /// Returns the new index if successful
+        let reorderPlaylist (id: string) (index: int) (up: bool) : int option =
+            if collections.ContainsKey id then
+                match collections.[id] with
+                | Playlist ps ->
+                    let newIndex = if up then max 0 (index - 1) else min (ps.Count - 1) (index + 1)
+                    let item = ps.[index]
+                    ps.RemoveAt index
+                    ps.Insert (newIndex, item)
+                    Some newIndex
+                | _ -> None
+            else None
+
     // ---- Retrieving library for level select ----
 
     type Group = ResizeArray<CachedChart * LevelSelectContext>
