@@ -18,7 +18,7 @@ open Globals
 module private Collections =
 
     let mutable selected =
-        //todo: load from settings
+        // todo: load from settings
         let favourites = Localisation.localise "collections.Favourites"
         let c = 
             match Collections.get favourites with
@@ -31,10 +31,13 @@ module private Collections =
 
     let private editCollection ((originalName, data): string * Collection) =
         let name = Setting.simple originalName |> Setting.alphaNum
+        let originalType = match data with Collection _ -> "Collection" | Playlist _ -> "Playlist" | Goals _ -> "Goals"
+        let ctype = Setting.simple originalType
         {
             Content = fun add ->
                 column [
                     PrettySetting("CollectionName", TextField name).Position(200.0f)
+                    PrettySetting("CollectionType", Selector.FromArray ([|"Collection"; "Playlist"; "Goals"|], [|"Collection"; "Playlist"; "Goals"|], ctype)).Position(300.0f)
                 ] :> Selectable
             Callback = fun () ->
                 if name.Value <> originalName then
@@ -44,6 +47,16 @@ module private Collections =
                         name.Value <- originalName
                     else
                         Collections.rename (originalName, name.Value) |> ignore
+
+                let data =
+                    if originalType <> ctype.Value then
+                        Logging.Debug (sprintf "Changing type of collection to %s" ctype.Value)
+                        match ctype.Value with
+                        | "Collection" -> data.ToCollection()
+                        | "Playlist" -> data.ToPlaylist(selectedMods.Value, rate.Value)
+                        | "Goals" -> data.ToGoals(selectedMods.Value, rate.Value)
+                        | _ -> failwith "impossible"
+                    else data
                 Collections.update (name.Value, data)
         }
 
@@ -86,21 +99,46 @@ type CollectionManager() as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if currentCachedChart.IsSome then
-            if options.Hotkeys.AddToCollection.Value.Tapped() then
+
+            if options.Hotkeys.AddToCollection.Value.Tapped() && fst Collections.selected <> snd Collections.contextIndex then
                 if
                     match snd Collections.selected with
                     | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
-                    | Playlist ps -> ps.Add (selectedChart, selectedMods, rate); true
-                    | Goals gs -> false //gs.Add ((selectedChart, selectedMods, rate), Goal.NoGoal); true
+                    | Playlist ps -> ps.Add (selectedChart, PlaylistData.Make selectedMods.Value rate.Value); true
+                    | Goals gs -> gs.Add (selectedChart, GoalData.Make selectedMods.Value rate.Value Goal.None); true
                 then
-                    colorVersionGlobal <- colorVersionGlobal + 1
+                    if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
                     Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", Info)
+
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
-                if
-                    match snd Collections.selected with
-                    | Collection ccs -> ccs.Remove selectedChart
-                    | Playlist ps -> ps.RemoveAll(fun (id, _, _) -> id = selectedChart) > 0
-                    | Goals gs -> gs.RemoveAll(fun ((id, _, _), _) -> id = selectedChart) > 0
-                then
-                    colorVersionGlobal <- colorVersionGlobal + 1
-                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)
+                if fst Collections.selected <> snd Collections.contextIndex then // Remove from collection that isn't in this context
+                    if
+                        match snd Collections.selected with
+                        | Collection ccs -> ccs.Remove selectedChart
+                        | Playlist ps -> 
+                            if ps.FindAll(fun (id, _) -> id = selectedChart).Count = 1 then 
+                                ps.RemoveAll(fun (id, _) -> id = selectedChart) > 0
+                            else false
+                        | Goals gs ->
+                            if gs.FindAll(fun (id, _) -> id = selectedChart).Count = 1 then 
+                                gs.RemoveAll(fun (id, _) -> id = selectedChart) > 0
+                            else false
+                    then
+                        if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
+                        Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)
+                else // Remove from this context collection
+                    if
+                        match snd Collections.selected with
+                        | Collection ccs -> ccs.Remove selectedChart
+                        | Playlist ps -> ps.RemoveAt(fst Collections.contextIndex); true
+                        | Goals gs -> gs.RemoveAt(fst Collections.contextIndex); true
+                    then
+                        LevelSelect.refresh <- true
+                        Collections.notifyChangeChart LevelSelectContext.None rate selectedMods
+                        Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)
+
+            elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
+                if Collections.reorder false then LevelSelect.refresh <- true
+
+            elif options.Hotkeys.ReorderCollectionUp.Value.Tapped() then
+                if Collections.reorder true then LevelSelect.refresh <- true

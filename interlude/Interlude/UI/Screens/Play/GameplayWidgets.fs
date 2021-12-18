@@ -163,6 +163,32 @@ module GameplayWidgets =
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
             else this.Destroy()
 
+    type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) as this =
+        inherit Widget()
+
+        let color = AnimationColorMixer(conf.FullColor)
+        let slider = AnimationFade(float32 helper.HP.State.Health)
+
+        do
+            this.Animation.Add color
+            this.Animation.Add slider
+
+        override this.Update(elapsedTime, bounds) =
+            slider.Target <- float32 helper.HP.State.Health
+            // todo: color nyi
+            base.Update(elapsedTime, bounds)
+
+        override this.Draw() =
+            let w, h = Rect.width this.Bounds, Rect.height this.Bounds
+            if conf.Horizontal then
+                let b = this.Bounds |> Rect.sliceLeft (w * float32 helper.HP.State.Health)
+                Draw.rect b (color.GetColor 255) Sprite.Default
+                Draw.rect (b |> Rect.sliceRight h) conf.EndColor Sprite.Default
+            else
+                let b = this.Bounds |> Rect.sliceBottom (h * float32 helper.HP.State.Health)
+                Draw.rect b (color.GetColor 255) Sprite.Default
+                Draw.rect (b |> Rect.sliceTop w) conf.EndColor Sprite.Default
+
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)
     *)

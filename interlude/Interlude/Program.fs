@@ -18,9 +18,10 @@ let main argv =
         use logfile = File.Open("log.txt", FileMode.Append)
         use sw = new StreamWriter(logfile)
         Logging.Subscribe
-            (fun (level, main, details) ->
+            ( fun (level, main, details) ->
                 if details = "" then sprintf "[%A] %s" level main else sprintf "[%A] %s\n%s" level main details
-                |> sw.WriteLine)
+                |> sw.WriteLine
+            )
 
         Logging.Info("Launching " + Utils.version + ", " + DateTime.Now.ToString())
         let game =
@@ -33,7 +34,7 @@ let main argv =
             let game = game.Value
             try
                 game.Run()
-                Logging.Info("Exiting game")
+                Logging.Info "Exiting game"
             with err -> Logging.Critical("Game crashed", err); crashSplash()
             game.Close()
             Options.save()

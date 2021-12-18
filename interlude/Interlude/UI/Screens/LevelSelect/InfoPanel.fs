@@ -111,9 +111,9 @@ module private InfoPanel =
 
         let filterer() : Widget -> bool =
             match filter.Value with
-            | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.rate = rate)
+            | ScoreboardFilter.CurrentRate -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.rate = rate.Value)
             | ScoreboardFilter.CurrentPlaystyle -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.layout = options.Playstyles.[(a :?> ScoreboardItem).Data.ScoreInfo.keycount - 3])
-            | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.selectedMods = selectedMods)
+            | ScoreboardFilter.CurrentMods -> (fun a -> (a :?> ScoreboardItem).Data.ScoreInfo.selectedMods = selectedMods.Value)
             | _ -> K true
 
         let flowContainer = new FlowContainer(Sort = sorter(), Filter = filterer())
@@ -142,12 +142,14 @@ module private InfoPanel =
             StylishButton.FromEnum("Sort",
                 sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
                 Style.main 100, TiltLeft = false )
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Sort")
             |> positionWidget(0.0f, 0.0f, -45.0f, 1.0f, -15.0f, 0.25f, -5.0f, 1.0f)
             |> ls.Add
 
             StylishButton.FromEnum("Filter",
                 filter |> Setting.trigger (fun _ -> this.Refresh()),
                 Style.main 90 )
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Filter")
             |> positionWidget(10.0f, 0.25f, -45.0f, 1.0f, -15.0f, 0.5f, -5.0f, 1.0f)
             |> ls.Add
 
@@ -155,19 +157,21 @@ module private InfoPanel =
                 (fun () -> Setting.app WatcherSelection.cycleForward options.AccSystems; LevelSelect.refresh <- true),
                 (fun () -> scoreSystem),
                 Style.main 80 )
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.ScoreSystems")
             |> positionWidget(10.0f, 0.5f, -45.0f, 1.0f, -15.0f, 0.75f, -5.0f, 1.0f)
             |> ls.Add
 
             StylishButton(
                 this.Refresh,
-                K <| Localisation.localise "scoreboard.storage.Local",
+                K <| Localisation.localise "levelselect.scoreboard.storage.Local",
                 Style.main 70, TiltRight = false ) //nyi
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Storage")
             |> positionWidget(10.0f, 0.75f, -45.0f, 1.0f, -15.0f, 1.0f, -5.0f, 1.0f)
             |> ls.Add
 
             ls |> this.Add
 
-            let noLocalScores = Localisation.localise "scoreboard.NoLocalScores"
+            let noLocalScores = Localisation.localise "levelselect.scoreboard.NoLocalScores"
             TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
             |> positionWidget(50.0f, 0.0f, 0.0f, 0.3f, -50.0f, 1.0f, 0.0f, 0.5f)
             |> this.Add
@@ -221,7 +225,7 @@ type InfoPanel() as this =
         |> positionWidget(0.0f, 0.5f, -120.0f, 1.0f, -10.0f, 1.0f, -50.0f, 1.0f)
         |> this.Add
 
-        new TextBox((fun () -> getModString(rate, selectedMods, autoplay)), K (Color.White, Color.Black), 0.0f)
+        new TextBox((fun () -> getModString(rate.Value, selectedMods.Value, autoplay)), K (Color.White, Color.Black), 0.0f)
         |> positionWidget(17.0f, 0.0f, -50.0f, 1.0f, -50.0f, 1.0f, -10.0f, 1.0f)
         |> this.Add
 
@@ -230,14 +234,14 @@ type InfoPanel() as this =
             match currentCachedChart with
             | Some cc -> cc.Length
             | None -> 0.0f<ms>
-            |> fun x -> x / rate
+            |> fun x -> x / rate.Value
             |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
             |> fun (x, y) -> sprintf "⌛ %i:%02i" x y
         bpm <-
             match currentCachedChart with
             | Some cc -> cc.BPM
             | None -> (500.0f<ms/beat>, 500.0f<ms/beat>)
-            |> fun (b, a) -> (60000.0f<ms> / a * rate |> int, 60000.0f<ms> / b * rate |> int)
+            |> fun (b, a) -> (60000.0f<ms> / a * rate.Value |> int, 60000.0f<ms> / b * rate.Value |> int)
             |> fun (a, b) ->
                 if Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
                 elif a > 9000 || b < 0 then sprintf "♬ ∞"

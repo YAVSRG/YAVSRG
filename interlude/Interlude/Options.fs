@@ -63,6 +63,9 @@ module Options =
             Collections: Setting<Bind>
             AddToCollection: Setting<Bind>
             RemoveFromCollection: Setting<Bind>
+            ReorderCollectionDown: Setting<Bind>
+            ReorderCollectionUp: Setting<Bind>
+
             Mods: Setting<Bind>
             Autoplay: Setting<Bind>
             ChartInfo: Setting<Bind>
@@ -99,6 +102,9 @@ module Options =
             Collections = Setting.simple(mk Keys.N)
             AddToCollection = Setting.simple(mk Keys.RightBracket)
             RemoveFromCollection = Setting.simple(mk Keys.LeftBracket)
+            ReorderCollectionDown = Setting.simple(ctrl Keys.RightBracket)
+            ReorderCollectionUp = Setting.simple(ctrl Keys.LeftBracket)
+
             Mods = Setting.simple(mk Keys.M)
             Autoplay = Setting.simple(ctrl Keys.A)
             ChartInfo = Setting.simple(mk Keys.Period)
