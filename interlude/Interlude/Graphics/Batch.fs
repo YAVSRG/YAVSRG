@@ -1,35 +1,64 @@
 ﻿namespace Interlude.Graphics
 
+open System.Runtime.InteropServices
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
 
 module Batch =
     
+    [<Struct>]
+    [<StructLayout(LayoutKind.Sequential)>]
+    type Vertex =
+        {
+            X: float32; Y: float32
+            U: float32; V: float32
+            R: uint8; G: uint8; B: uint8; A: uint8
+        }
+
     let mutable active = false
     
-    let VERTEX_COUNT = 4 // 4 corners of quad
-    let VERTEX_SIZE = 4 // 2 for pos, 2 for uv
-    let vertices : float32 array = Array.zeroCreate (VERTEX_COUNT * VERTEX_SIZE)
-    let elements = [|0; 1; 2; 2; 3; 0|]
+    let CAPACITY = 64
+    let VERTEX_COUNT = CAPACITY * 6 // 2 triangles per quad
+    let VERTEX_SIZE = sizeof<Vertex>
+
+    let vertices : Vertex array = Array.zeroCreate VERTEX_COUNT
+    let elements : int array = Array.zeroCreate (CAPACITY * 6)
+
+    for i = 0 to CAPACITY - 1 do
+        elements.[i * 6 + 0] <- i * 6
+        elements.[i * 6 + 1] <- i * 6 + 1
+        elements.[i * 6 + 2] <- i * 6 + 2
+        elements.[i * 6 + 3] <- i * 6 + 3 
+        elements.[i * 6 + 4] <- i * 6 + 4 
+        elements.[i * 6 + 5] <- i * 6 + 5
         
     let ebo = Buffer.create BufferTarget.ElementArrayBuffer elements
     let vbo = Buffer.create BufferTarget.ArrayBuffer vertices
-    let vao = VertexArrayObject.create<float32, int> (vbo, ebo)
+    let vao = VertexArrayObject.create<Vertex, int> (vbo, ebo)
         
-    // 3 floats in shader slot 0, offset 0 for pos
-    VertexArrayObject.vertexAttribPointer(0, 2, VertexAttribPointerType.Float, VERTEX_SIZE, 0)
-    // 2 floats in shader slot 1, offset 2 for uv
-    VertexArrayObject.vertexAttribPointer(1, 2, VertexAttribPointerType.Float, VERTEX_SIZE, 2)
+    // 2 floats in slot 0, for pos
+    VertexArrayObject.vertexAttribPointer<float32>(0, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, 0)
+    // 2 floats in slot 1, for uv
+    VertexArrayObject.vertexAttribPointer<float32>(1, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 2)
+    // 4 bytes in slot 2, for color
+    VertexArrayObject.vertexAttribPointer<uint8>(2, 4, VertexAttribPointerType.UnsignedByte, true, VERTEX_SIZE, sizeof<float32> * 4)
 
-    let vertex i (pos: Vector2) (uv: Vector2) =
-        vertices.[i * VERTEX_SIZE] <- pos.X
-        vertices.[i * VERTEX_SIZE + 1] <- pos.Y
-        vertices.[i * VERTEX_SIZE + 2] <- uv.X
-        vertices.[i * VERTEX_SIZE + 3] <- uv.Y
+    let mutable vcount = 0
 
     let private draw() =
         Buffer.data vertices vbo
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 4)
+        GL.DrawArrays(PrimitiveType.Triangles, 0, vcount)
+        vcount <- 0
+
+    let vertex (pos: Vector2) (uv: Vector2) (color: System.Drawing.Color) =
+        if vcount = VERTEX_COUNT then draw()
+        vertices.[vcount] <-
+            { 
+                X = pos.X; Y = pos.Y;
+                U = uv.X; V = uv.Y;
+                R = color.R; G = color.G; B = color.B; A = color.A
+            }
+        vcount <- vcount + 1
 
     let start() =
         VertexArrayObject.bind vao

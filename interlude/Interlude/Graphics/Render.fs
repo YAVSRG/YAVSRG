@@ -45,6 +45,7 @@ module Render =
             * Matrix4.CreateOrthographic(vwidth, vheight, 0.0f, 1.0f)
             * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
             * Matrix4.CreateScale(1.0f, -1.0f, 1.0f)
+            * Matrix4.CreateScale(0.7f)
         Shader.setUniformMat4 ("uProjection", projection) Shader.main
         Shader.setUniformMat4 ("uModel", Matrix4.Identity) Shader.main
         Shader.setUniformMat4 ("uView", Matrix4.Identity) Shader.main
@@ -54,6 +55,7 @@ module Render =
     let init(width, height) =
         Logging.Debug(sprintf "GL Version: %s" (GL.GetString StringName.Version))
 
+        GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
         GL.Enable(EnableCap.Texture2D)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
@@ -166,15 +168,14 @@ module Draw =
 
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
         if lastTex <> s.ID then
-            GL.BindTexture(TextureTarget.Texture2D, s.ID)
-            Shader.setUniformInt ("uTexture0", 0) Shader.main
+            //GL.BindTexture(TextureTarget.Texture2D, s.ID)
+            //Shader.setUniformInt ("uTexture0", 0) Shader.main
             lastTex <- s.ID
-        Batch.vertex 0 p1 u1
-        Batch.vertex 2 p2 u2
-        Batch.vertex 1 p3 u3
-        Batch.vertex 3 p4 u4
-
-        Batch.finish()
-        Batch.start()
+        Batch.vertex p1 u1 c1
+        Batch.vertex p2 u2 c2
+        Batch.vertex p3 u3 c3
+        Batch.vertex p1 u1 c1
+        Batch.vertex p3 u3 c3
+        Batch.vertex p4 u4 c4
         
     let rect (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.gridUV(0, 0) s

@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Graphics
 
-open System
+open Prelude.Common
 open OpenTK.Graphics.OpenGL
 
 type Buffer = BufferTarget * int
@@ -35,8 +35,9 @@ module VertexArrayObject =
     let destroy (vao: VertexArrayObject) =
         GL.DeleteVertexArray vao
 
-    let vertexAttribPointer<'Vertex>(index: int, count: int, vtype: VertexAttribPointerType, vertexSize: int, offset: int) =
-        GL.VertexAttribPointer (index, count, vtype, false, vertexSize * sizeof<'Vertex>, offset * sizeof<'Vertex>)
+    let vertexAttribPointer<'Vertex>(index: int, count: int, vtype: VertexAttribPointerType, normalise: bool, vertexSize: int, offset: int) =
+        Logging.Debug (sprintf "ATTRIBUTE %i: %i %Os at offset %i; Total stride %i" index count vtype offset vertexSize)
+        GL.VertexAttribPointer (index, count, vtype, normalise, vertexSize * sizeof<'Vertex>, offset * sizeof<'Vertex>)
         GL.EnableVertexAttribArray index
 
     let bind (vao: VertexArrayObject) =
