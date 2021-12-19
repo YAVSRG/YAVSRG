@@ -61,11 +61,6 @@ module Rect =
     let zero = create 0.f 0.f 0.f 0.f
     let one = create 0.f 0.f 1.f 1.f
 
-module RenderHelper =
-    let mutable drawing = false
-    let exit() = if drawing then GL.End()
-    let enter() = if drawing then GL.Begin(PrimitiveType.Quads)
-
 (*
     Simple storage of vertices to render as a quad
 *)
@@ -114,7 +109,6 @@ module Sprite =
     open System.Drawing.Imaging
 
     let upload (bitmap: Bitmap, rows, columns, smooth) =
-        RenderHelper.exit()
         let id = GL.GenTexture()
         let data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb)
         GL.BindTexture(TextureTarget.Texture2D, id)
@@ -129,13 +123,10 @@ module Sprite =
         else
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest)
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest)
-        RenderHelper.enter()
         { ID = id; Width = bitmap.Width; Height = bitmap.Height; Rows = rows; Columns = columns }
 
     let destroy (sprite: Sprite) =
-        RenderHelper.exit()
-        GL.DeleteTexture(sprite.ID)
-        RenderHelper.enter()
+        GL.DeleteTexture sprite.ID
 
     let gridUV (x, y) (sprite: Sprite) =
         let x = float32 x

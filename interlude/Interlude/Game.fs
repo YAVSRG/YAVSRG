@@ -11,7 +11,7 @@ open Interlude.Options
 open Interlude.UI
 
 type Game(config: GameConfig) as this =
-    inherit GameWindow(GameWindowSettings.Default, NativeWindowSettings(StartVisible = false, NumberOfSamples = 24, Profile = ContextProfile.Compatability))
+    inherit GameWindow(GameWindowSettings.Default, NativeWindowSettings(StartVisible = false, NumberOfSamples = 24))
 
     let screens = Startup.init()
 
