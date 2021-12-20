@@ -12,6 +12,10 @@
     <RepositoryUrl>https://github.com/percyqaz/Prelude</RepositoryUrl>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="ChartFormats\Interlude.fs" />
