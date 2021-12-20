@@ -98,10 +98,7 @@ module Quad =
 
 [<Struct>]
 type Sprite = { ID: int; Width: int; Height: int; Rows: int; Columns: int }
-with
-    member this.WithUV(q: Quad) : SpriteQuad = struct (this, q)
-    static member Default = { ID = 0; Width = 1; Height = 1; Rows = 1; Columns = 1 }
-    static member DefaultQuad : SpriteQuad = struct (Sprite.Default, Quad.ofRect Rect.one)
+with member this.WithUV(q: Quad) : SpriteQuad = struct (this, q)
 and SpriteQuad = (struct(Sprite * Quad))
 
 module Sprite =
@@ -124,6 +121,13 @@ module Sprite =
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest)
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest)
         { ID = id; Width = bitmap.Width; Height = bitmap.Height; Rows = rows; Columns = columns }
+
+    let Default =
+        use bmp = new Bitmap(1, 1);
+        bmp.SetPixel(0, 0, Color.White)
+        upload (bmp, 1, 1, false)
+
+    let DefaultQuad : SpriteQuad = struct (Default, Quad.ofRect Rect.one)
 
     let destroy (sprite: Sprite) =
         GL.DeleteTexture sprite.ID

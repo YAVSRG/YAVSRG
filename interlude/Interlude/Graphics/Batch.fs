@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Graphics
 
+open System.Drawing
 open System.Runtime.InteropServices
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
@@ -17,20 +18,13 @@ module Batch =
 
     let mutable active = false
     
-    let CAPACITY = 64
-    let VERTEX_COUNT = CAPACITY * 6 // 2 triangles per quad
+    let CAPACITY = 1
+    let VERTICES_PER_ELEMENT = 6
+    let VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
     let VERTEX_SIZE = sizeof<Vertex>
 
     let vertices : Vertex array = Array.zeroCreate VERTEX_COUNT
-    let elements : int array = Array.zeroCreate (CAPACITY * 6)
-
-    for i = 0 to CAPACITY - 1 do
-        elements.[i * 6 + 0] <- i * 6
-        elements.[i * 6 + 1] <- i * 6 + 1
-        elements.[i * 6 + 2] <- i * 6 + 2
-        elements.[i * 6 + 3] <- i * 6 + 3 
-        elements.[i * 6 + 4] <- i * 6 + 4 
-        elements.[i * 6 + 5] <- i * 6 + 5
+    let elements : int array = Array.init (CAPACITY * 6) id
         
     let ebo = Buffer.create BufferTarget.ElementArrayBuffer elements
     let vbo = Buffer.create BufferTarget.ArrayBuffer vertices
@@ -50,7 +44,7 @@ module Batch =
         GL.DrawArrays(PrimitiveType.Triangles, 0, vcount)
         vcount <- 0
 
-    let vertex (pos: Vector2) (uv: Vector2) (color: System.Drawing.Color) =
+    let vertex (pos: Vector2) (uv: Vector2) (color: Color) =
         if vcount = VERTEX_COUNT then draw()
         vertices.[vcount] <-
             { 

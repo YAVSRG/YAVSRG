@@ -53,10 +53,11 @@ module Render =
         bounds <- Rect.create 0.0f 0.0f vwidth vheight |> Rect.expand (1.0f, 1.0f)
 
     let init(width, height) =
-        Logging.Debug(sprintf "GL Version: %s" (GL.GetString StringName.Version))
+        Logging.Debug(sprintf "GL Version: %s | %s" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer))
 
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
+        GL.Enable(EnableCap.VertexArray)
         GL.Enable(EnableCap.Texture2D)
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
@@ -168,8 +169,10 @@ module Draw =
 
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
         if lastTex <> s.ID then
-            //GL.BindTexture(TextureTarget.Texture2D, s.ID)
-            //Shader.setUniformInt ("uTexture0", 0) Shader.main
+            Batch.finish()
+            GL.BindTexture(TextureTarget.Texture2D, s.ID)
+            //Shader.setUniformInt ("uTexture0", s.ID) Shader.main
+            Batch.start()
             lastTex <- s.ID
         Batch.vertex p1 u1 c1
         Batch.vertex p2 u2 c2
