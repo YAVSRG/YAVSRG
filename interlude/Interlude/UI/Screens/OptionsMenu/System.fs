@@ -25,18 +25,8 @@ module System =
                     ).Position(300.0f)
 
                     PrettySetting("WindowMode", Selector.FromEnum(config.WindowMode)).Position(400.0f)
-                    //todo: way to edit resolution settings?
-                    PrettySetting(
-                        "FrameLimiter",
-                        new Selector(
-                            [|"UNLIMITED"; "30"; "60"; "90"; "120"; "240"|],
-                            config.FrameLimiter.Value / 30.0
-                            |> int
-                            |> min 5
-                            |> Setting.simple
-                            |> Setting.trigger
-                                (let e = [|0.0; 30.0; 60.0; 90.0; 120.0; 240.0|] in fun i -> config.FrameLimiter.Value <- e.[i]) )
-                    ).Position(500.0f)
+                    // todo: way to edit resolution settings?
+                    PrettySetting("FrameLimiter", Selector.FromEnum(config.FrameLimit)).Position(500.0f)
                 ] :> Selectable
-            Callback = Options.applyOptions
+            Callback = applyOptions
         }

@@ -21,21 +21,31 @@ type Game(config: GameConfig) as this =
         base.VSync <- VSyncMode.Off
         base.CursorVisible <- false
         base.UpdateFrequency <- 120.0
-        base.IsVisible <- true
 
     member this.ApplyConfig(config: GameConfig) =
-        base.RenderFrequency <- config.FrameLimiter.Value
+        base.RenderFrequency <- 
+            match config.FrameLimit.Value with
+            | FrameLimit.``30`` -> 30.0
+            | FrameLimit.``60`` -> 60.0
+            | FrameLimit.``120`` -> 120.0
+            | FrameLimit.``240`` -> 240.0
+            | FrameLimit.``480 (Recommended)`` -> 480.0
+            | FrameLimit.Unlimited -> 0.0
+            | FrameLimit.Vsync -> 0.0
+            | _ -> 0.0
+        base.VSync <- if config.FrameLimit.Value = FrameLimit.Vsync then VSyncMode.On else VSyncMode.Off
+
         match config.WindowMode.Value with
-        | WindowType.WINDOWED ->
+        | WindowType.Windowed ->
             base.WindowState <- WindowState.Normal
             let (resizable, struct (width, height)) = getResolution config.Resolution.Value
             base.WindowBorder <- if resizable then WindowBorder.Resizable else WindowBorder.Fixed
             base.ClientRectangle <- new Box2i(0, 0, width, height)
             base.CenterWindow()
-        | WindowType.BORDERLESS ->
+        | WindowType.Borderless ->
             base.WindowBorder <- WindowBorder.Hidden
             base.WindowState <- WindowState.Maximized
-        | WindowType.FULLSCREEN ->
+        | WindowType.Fullscreen ->
             base.WindowState <- WindowState.Fullscreen
         | _ -> Logging.Error "Invalid window state. How did we get here?"
 
@@ -78,6 +88,7 @@ type Game(config: GameConfig) as this =
         Content.font() |> ignore
         Input.init this
         Gameplay.init()
+        base.IsVisible <- true
 
     override this.OnUnload() =
         Gameplay.save()
