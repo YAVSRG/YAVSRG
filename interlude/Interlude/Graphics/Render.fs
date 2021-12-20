@@ -22,8 +22,8 @@ module Render =
 
     let finish() =
         Batch.finish()
-        GL.Finish()
-        GL.Flush()
+        //GL.Finish()
+        //GL.Flush()
 
     let createProjection(flip: bool) =
         Matrix4.Identity
@@ -52,6 +52,7 @@ module Render =
 
     let init(width, height) =
         Logging.Debug(sprintf "GL Version: %s | %s" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer))
+        Logging.Debug(sprintf "Texture units: %i / %i" Sprite.MAX_TEXTURE_UNITS Sprite.TOTAL_TEXTURE_UNITS)
 
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
@@ -76,16 +77,16 @@ module FBO =
         { sprite: Sprite; fbo_id: int; fbo_index: int }
         with
             member this.Bind(clear) =
-                Batch.finish()
+                Batch.draw()
                 if List.isEmpty stack then
                     Shader.setUniformMat4 ("uProjection", Render.createProjection false) Shader.main
                     GL.Viewport(0, 0, int Render.vwidth, int Render.vheight)
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
                 if clear then GL.Clear(ClearBufferMask.ColorBufferBit)
                 stack <- this.fbo_id :: stack
-                Batch.start()
+
             member this.Unbind() =
-                Batch.finish()
+                Batch.draw()
                 stack <- List.tail stack
                 if List.isEmpty stack then
                     GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
@@ -93,7 +94,6 @@ module FBO =
                     GL.Viewport(0, 0, Render.rwidth, Render.rheight)
                 else
                     GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head stack)
-                Batch.start()
             member this.Dispose() = in_use.[this.fbo_index] <- false
 
     let init() =
@@ -130,7 +130,7 @@ module FBO =
                 let sprite: Sprite = { ID = texture_ids.[i]; Width = int Render.vwidth; Height = int Render.vheight; Rows = 1; Columns = 1 }
                 in_use.[i] <- true;
                 let fbo = { sprite = sprite; fbo_id = fbo_ids.[i]; fbo_index = i }
-                fbo.Bind(true)
+                fbo.Bind true
                 fbo
 
 (*
@@ -143,10 +143,9 @@ module Draw =
 
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
         if lastTex <> s.ID then
-            Batch.finish()
+            Batch.draw()
             GL.BindTexture(TextureTarget.Texture2D, s.ID)
             //Shader.setUniformInt ("uTexture0", s.ID) Shader.main
-            Batch.start()
             lastTex <- s.ID
         Batch.vertex p1 u1 c1
         Batch.vertex p2 u2 c2

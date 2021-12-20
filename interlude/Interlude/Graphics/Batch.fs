@@ -18,7 +18,7 @@ module Batch =
 
     let mutable active = false
     
-    let CAPACITY = 128
+    let CAPACITY = 256
     let VERTICES_PER_ELEMENT = 6
     let VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
     let VERTEX_SIZE = sizeof<Vertex>
@@ -38,12 +38,14 @@ module Batch =
     VertexArrayObject.vertexAttribPointer<uint8>(2, 4, VertexAttribPointerType.UnsignedByte, true, VERTEX_SIZE, sizeof<float32> * 4)
 
     let mutable vcount = 0
+    let mutable bcount = 0
 
-    let private draw() =
+    let draw() =
         if vcount > 0 then
             Buffer.data vertices vcount vbo
             GL.DrawArrays(PrimitiveType.Triangles, 0, vcount)
         vcount <- 0
+        bcount <- bcount + 1
 
     let vertex (pos: Vector2) (uv: Vector2) (color: Color) =
         if vcount = VERTEX_COUNT then draw()
@@ -56,6 +58,7 @@ module Batch =
         vcount <- vcount + 1
 
     let start() =
+        bcount <- 0
         VertexArrayObject.bind vao
         active <- true
 
@@ -67,7 +70,7 @@ module Stencil =
     let mutable depth = 0
 
     let create(alphaMasking) =
-        Batch.finish()
+        Batch.draw()
 
         if depth = 0 then
             GL.Enable(EnableCap.StencilTest)
@@ -80,19 +83,15 @@ module Stencil =
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
         depth <- depth + 1
 
-        Batch.start()
-
     let draw() = 
-        Batch.finish()
+        Batch.draw()
         
         GL.ColorMask(true, true, true, true)
         GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
 
-        Batch.start()
-
     let finish() =
-        Batch.finish()
+        Batch.draw()
 
         depth <- depth - 1
         if depth = 0 then
@@ -102,5 +101,3 @@ module Stencil =
             Shader.setUniformInt ("alphaMasking", 0) Shader.main
         else
             GL.StencilFunc(StencilFunction.Lequal, depth, 0xFF)
-
-        Batch.start()

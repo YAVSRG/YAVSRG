@@ -15,6 +15,7 @@
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -43,7 +44,8 @@
     <Compile Include="Audio.fs" />
     <Compile Include="Graphics\Buffers.fs" />
     <Compile Include="Graphics\Shader.fs" />
-    <Compile Include="Graphics\Data.fs" />
+    <Compile Include="Graphics\Math.fs" />
+    <Compile Include="Graphics\Sprite.fs" />
     <Compile Include="Graphics\Batch.fs" />
     <Compile Include="Graphics\Render.fs" />
     <Compile Include="Graphics\Text.fs" />
