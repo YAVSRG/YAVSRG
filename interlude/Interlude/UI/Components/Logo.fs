@@ -20,7 +20,7 @@ module Logo =
             let w = Rect.width this.Bounds
             let struct (l, t, r, b) = this.Bounds
 
-            if (r > 0.0f) then
+            if r > 2.0f then
 
                 Draw.quad
                     (Quad.create(new Vector2(l + 0.08f * w, t + 0.09f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(r - 0.08f * w, t + 0.09f * w)))

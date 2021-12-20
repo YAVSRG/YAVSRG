@@ -68,29 +68,39 @@ module Stencil =
 
     let create(alphaMasking) =
         Batch.finish()
+
         if depth = 0 then
             GL.Enable(EnableCap.StencilTest)
-            GL.Enable(EnableCap.AlphaTest)
             GL.Clear(ClearBufferMask.StencilBufferBit)
-            GL.AlphaFunc((if alphaMasking then AlphaFunction.Greater else AlphaFunction.Always), 0.0f)
+            GL.StencilMask(0xFF)
+            GL.ColorMask(false, false, false, false)
+            Shader.setUniformInt ("alphaMasking", if alphaMasking then 1 else 0) Shader.main
+
         GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
         depth <- depth + 1
+
         Batch.start()
 
     let draw() = 
         Batch.finish()
+        
+        GL.ColorMask(true, true, true, true)
         GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
         GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
+
         Batch.start()
 
     let finish() =
         Batch.finish()
+
         depth <- depth - 1
         if depth = 0 then
             GL.Clear(ClearBufferMask.StencilBufferBit)
             GL.Disable(EnableCap.StencilTest)
-            GL.Disable(EnableCap.AlphaTest)
+            GL.StencilMask(0x00)
+            Shader.setUniformInt ("alphaMasking", 0) Shader.main
         else
             GL.StencilFunc(StencilFunction.Lequal, depth, 0xFF)
+
         Batch.start()
