@@ -133,32 +133,6 @@ module FBO =
                 fbo.Bind(true)
                 fbo
 
-module Stencil =
-    let mutable depth = 0
-
-    let create(alphaMasking) =
-        if depth = 0 then
-            GL.Enable(EnableCap.StencilTest)
-            GL.Enable(EnableCap.AlphaTest)
-            GL.Clear(ClearBufferMask.StencilBufferBit)
-            GL.AlphaFunc((if alphaMasking then AlphaFunction.Greater else AlphaFunction.Always), 0.0f)
-        GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
-        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
-        depth <- depth + 1
-
-    let draw() = 
-        GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
-        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
-
-    let finish() =
-        depth <- depth - 1
-        if depth = 0 then
-            GL.Clear(ClearBufferMask.StencilBufferBit)
-            GL.Disable(EnableCap.StencilTest)
-            GL.Disable(EnableCap.AlphaTest)
-        else
-            GL.StencilFunc(StencilFunction.Lequal, depth, 0xFF)
-
 (*
     Drawing methods to be used by UI components
 *)

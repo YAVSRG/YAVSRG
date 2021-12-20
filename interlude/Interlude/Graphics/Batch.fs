@@ -18,7 +18,7 @@ module Batch =
 
     let mutable active = false
     
-    let CAPACITY = 1
+    let CAPACITY = 32
     let VERTICES_PER_ELEMENT = 6
     let VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
     let VERTEX_SIZE = sizeof<Vertex>
@@ -61,3 +61,35 @@ module Batch =
     let finish() =
         draw()
         active <- false
+
+module Stencil =
+    let mutable depth = 0
+
+    let create(alphaMasking) =
+        Batch.finish()
+        if depth = 0 then
+            GL.Enable(EnableCap.StencilTest)
+            GL.Enable(EnableCap.AlphaTest)
+            GL.Clear(ClearBufferMask.StencilBufferBit)
+            GL.AlphaFunc((if alphaMasking then AlphaFunction.Greater else AlphaFunction.Always), 0.0f)
+        GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
+        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr)
+        depth <- depth + 1
+        Batch.start()
+
+    let draw() = 
+        Batch.finish()
+        GL.StencilFunc(StencilFunction.Equal, depth, 0xFF)
+        GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Keep)
+        Batch.start()
+
+    let finish() =
+        Batch.finish()
+        depth <- depth - 1
+        if depth = 0 then
+            GL.Clear(ClearBufferMask.StencilBufferBit)
+            GL.Disable(EnableCap.StencilTest)
+            GL.Disable(EnableCap.AlphaTest)
+        else
+            GL.StencilFunc(StencilFunction.Lequal, depth, 0xFF)
+        Batch.start()
