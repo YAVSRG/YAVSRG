@@ -47,8 +47,6 @@ module Render =
             * Matrix4.CreateScale(1.0f, -1.0f, 1.0f)
             * Matrix4.CreateScale(0.7f)
         Shader.setUniformMat4 ("uProjection", projection) Shader.main
-        Shader.setUniformMat4 ("uModel", Matrix4.Identity) Shader.main
-        Shader.setUniformMat4 ("uView", Matrix4.Identity) Shader.main
 
         bounds <- Rect.create 0.0f 0.0f vwidth vheight |> Rect.expand (1.0f, 1.0f)
 
