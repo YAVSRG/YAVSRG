@@ -18,8 +18,8 @@ module Buffer =
     let bind ((btype, handle): Buffer) = GL.BindBuffer (btype, handle)
 
     /// Needs to be bound first
-    let data (data: 'Vertex array) ((btype, handle): Buffer) =
-        GL.BufferData (btype, data.Length * sizeof<'Vertex>, data, BufferUsageHint.DynamicDraw)
+    let data (data: 'Vertex array) (count: int) ((btype, handle): Buffer) =
+        GL.BufferSubData(btype, 0, nativeint(count * sizeof<'Vertex>), data)
 
 type VertexArrayObject = int
 
@@ -36,7 +36,7 @@ module VertexArrayObject =
         GL.DeleteVertexArray vao
 
     let vertexAttribPointer<'Vertex>(index: int, count: int, vtype: VertexAttribPointerType, normalise: bool, vertexSize: int, offset: int) =
-        Logging.Debug (sprintf "Attribute %i: %i %Os at offset %i; Total stride %i" index count vtype offset vertexSize)
+        //Logging.Debug (sprintf "Attribute %i: %i %Os at offset %i; Total stride %i" index count vtype offset vertexSize)
         GL.VertexAttribPointer (index, count, vtype, normalise, vertexSize, offset)
         GL.EnableVertexAttribArray index
 

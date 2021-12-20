@@ -25,6 +25,12 @@ module Render =
         GL.Finish()
         GL.Flush()
 
+    let createProjection(flip: bool) =
+        Matrix4.Identity
+        * Matrix4.CreateOrthographic(vwidth, vheight, 0.0f, 1.0f)
+        * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
+        * (if flip then Matrix4.CreateScale(1.0f, -1.0f, 1.0f) else Matrix4.Identity)
+
     let resize(width, height) =
         rwidth <- width
         rheight <- height
@@ -40,13 +46,7 @@ module Render =
         vheight <- float32 <| Math.Round(float height)
 
         Shader.on Shader.main
-        let projection = 
-            Matrix4.Identity
-            * Matrix4.CreateOrthographic(vwidth, vheight, 0.0f, 1.0f)
-            * Matrix4.CreateTranslation(-1.0f, -1.0f, 0.0f)
-            * Matrix4.CreateScale(1.0f, -1.0f, 1.0f)
-            * Matrix4.CreateScale(0.7f)
-        Shader.setUniformMat4 ("uProjection", projection) Shader.main
+        Shader.setUniformMat4 ("uProjection", createProjection true) Shader.main
 
         bounds <- Rect.create 0.0f 0.0f vwidth vheight |> Rect.expand (1.0f, 1.0f)
 
@@ -76,22 +76,24 @@ module FBO =
         { sprite: Sprite; fbo_id: int; fbo_index: int }
         with
             member this.Bind(clear) =
+                Batch.finish()
                 if List.isEmpty stack then
-                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0)
-                    GL.Translate(0.0f, -Render.vheight, 0.0f)
+                    Shader.setUniformMat4 ("uProjection", Render.createProjection false) Shader.main
                     GL.Viewport(0, 0, int Render.vwidth, int Render.vheight)
                 GL.BindFramebuffer(FramebufferTarget.Framebuffer, this.fbo_id)
                 if clear then GL.Clear(ClearBufferMask.ColorBufferBit)
                 stack <- this.fbo_id :: stack
+                Batch.start()
             member this.Unbind() =
+                Batch.finish()
                 stack <- List.tail stack
                 if List.isEmpty stack then
                     GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0)
-                    GL.Translate(0.0f, Render.vheight, 0.0f)
-                    GL.Ortho(-1.0, 1.0, 1.0, -1.0, -1.0, 1.0);
+                    Shader.setUniformMat4 ("uProjection", Render.createProjection true) Shader.main
                     GL.Viewport(0, 0, Render.rwidth, Render.rheight)
                 else
                     GL.BindFramebuffer(FramebufferTarget.Framebuffer, List.head stack)
+                Batch.start()
             member this.Dispose() = in_use.[this.fbo_index] <- false
 
     let init() =

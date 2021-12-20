@@ -18,7 +18,7 @@ module Batch =
 
     let mutable active = false
     
-    let CAPACITY = 32
+    let CAPACITY = 128
     let VERTICES_PER_ELEMENT = 6
     let VERTEX_COUNT = CAPACITY * VERTICES_PER_ELEMENT // 2 triangles per quad
     let VERTEX_SIZE = sizeof<Vertex>
@@ -40,8 +40,9 @@ module Batch =
     let mutable vcount = 0
 
     let private draw() =
-        Buffer.data vertices vbo
-        GL.DrawArrays(PrimitiveType.Triangles, 0, vcount)
+        if vcount > 0 then
+            Buffer.data vertices vcount vbo
+            GL.DrawArrays(PrimitiveType.Triangles, 0, vcount)
         vcount <- 0
 
     let vertex (pos: Vector2) (uv: Vector2) (color: Color) =
