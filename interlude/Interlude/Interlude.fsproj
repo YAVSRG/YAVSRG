@@ -30,6 +30,8 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <EmbeddedResource Include="Resources\shader.vert" />
+    <EmbeddedResource Include="Resources\shader.frag" />
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
     <EmbeddedResource Include="Resources\defaultBar.isk" />
     <EmbeddedResource Include="Resources\defaultOrb.isk" />
@@ -39,7 +41,10 @@
     <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
     <Compile Include="Audio.fs" />
+    <Compile Include="Graphics\Buffers.fs" />
+    <Compile Include="Graphics\Shader.fs" />
     <Compile Include="Graphics\Data.fs" />
+    <Compile Include="Graphics\Batch.fs" />
     <Compile Include="Graphics\Render.fs" />
     <Compile Include="Graphics\Text.fs" />
     <Compile Include="Input.fs" />

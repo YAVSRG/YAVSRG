@@ -11,16 +11,14 @@ open Interlude.Graphics
 open Interlude.UI.Components
 
 module MarkdownReader =
-    open System.IO
+
     open FSharp.Formatting.Markdown
 
     let SIZE = 25.0f
     let WIDTH = 1200.0f
 
     let doc = 
-        use s = getResourceStream("QuickStart.md")
-        use r = new StreamReader(s)
-        r.ReadToEnd()
+        getResourceText "QuickStart.md"
         |> Markdown.Parse
 
     type W =
