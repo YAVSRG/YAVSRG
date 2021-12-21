@@ -17,13 +17,14 @@ module Render =
     let mutable bounds = Rect.zero
 
     let start() = 
+        //for i = 0 to 15 do
+        //    let loc = sprintf "samplers[%i]" i
+        //    Shader.setUniformInt (loc, i) Shader.main
         GL.Clear(ClearBufferMask.ColorBufferBit)
         Batch.start()
 
     let finish() =
         Batch.finish()
-        //GL.Finish()
-        //GL.Flush()
 
     let createProjection(flip: bool) =
         Matrix4.Identity
@@ -52,7 +53,6 @@ module Render =
 
     let init(width, height) =
         Logging.Debug(sprintf "GL Version: %s | %s" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer))
-        Logging.Debug(sprintf "Texture units: %i / %i" Sprite.MAX_TEXTURE_UNITS Sprite.TOTAL_TEXTURE_UNITS)
 
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)
@@ -109,10 +109,10 @@ module FBO =
             texture_ids.[i] <- GL.GenTexture()
             GL.BindTexture(TextureTarget.Texture2D, texture_ids.[i])
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, int Render.vwidth, int Render.vheight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, IntPtr.Zero)
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear)
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear)
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat)
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Linear)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
 
             GL.GenFramebuffers(1, &fbo_ids.[i])
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo_ids.[i])
@@ -125,9 +125,9 @@ module FBO =
         { 0 .. (pool_size - 1) }
         |> Seq.tryFind (fun i -> not in_use.[i])
         |> function
-            | None -> failwith "All FBOs in pool are in use. Change pool size or (more likely) make sure you dispose of your FBOs"
+            | None -> failwith "All FBOs in pool are in use. Change pool size or (more likely) dispose of FBOs"
             | Some i ->
-                let sprite: Sprite = { ID = texture_ids.[i]; Width = int Render.vwidth; Height = int Render.vheight; Rows = 1; Columns = 1 }
+                let sprite: Sprite = { ID = texture_ids.[i]; TextureUnit = 0; Width = int Render.vwidth; Height = int Render.vheight; Rows = 1; Columns = 1 }
                 in_use.[i] <- true;
                 let fbo = { sprite = sprite; fbo_id = fbo_ids.[i]; fbo_index = i }
                 fbo.Bind true
@@ -144,14 +144,15 @@ module Draw =
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
         if lastTex <> s.ID then
             Batch.draw()
-            GL.BindTexture(TextureTarget.Texture2D, s.ID)
-            //Shader.setUniformInt ("uTexture0", s.ID) Shader.main
+            Shader.setUniformInt ("sampler", s.TextureUnit) Shader.main
+            if s.TextureUnit = 0 then
+                GL.BindTexture(TextureTarget.Texture2D, s.ID)
             lastTex <- s.ID
-        Batch.vertex p1 u1 c1
-        Batch.vertex p2 u2 c2
-        Batch.vertex p3 u3 c3
-        Batch.vertex p1 u1 c1
-        Batch.vertex p3 u3 c3
-        Batch.vertex p4 u4 c4
+        Batch.vertex p1 u1 c1 s.TextureUnit
+        Batch.vertex p2 u2 c2 s.TextureUnit
+        Batch.vertex p3 u3 c3 s.TextureUnit
+        Batch.vertex p1 u1 c1 s.TextureUnit
+        Batch.vertex p3 u3 c3 s.TextureUnit
+        Batch.vertex p4 u4 c4 s.TextureUnit
         
     let rect (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.gridUV(0, 0) s

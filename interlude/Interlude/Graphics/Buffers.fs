@@ -35,7 +35,7 @@ module VertexArrayObject =
     let destroy (vao: VertexArrayObject) =
         GL.DeleteVertexArray vao
 
-    let vertexAttribPointer<'Vertex>(index: int, count: int, vtype: VertexAttribPointerType, normalise: bool, vertexSize: int, offset: int) =
+    let vertexAttribPointer (index: int, count: int, vtype: VertexAttribPointerType, normalise: bool, vertexSize: int, offset: int) =
         //Logging.Debug (sprintf "Attribute %i: %i %Os at offset %i; Total stride %i" index count vtype offset vertexSize)
         GL.VertexAttribPointer (index, count, vtype, normalise, vertexSize, offset)
         GL.EnableVertexAttribArray index

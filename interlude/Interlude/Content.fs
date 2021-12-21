@@ -175,7 +175,7 @@ module rec Content =
             if not <| cache.ContainsKey name then
                 if Array.contains name noteskinTextures then
                     match Noteskins.current().GetTexture name with
-                    | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false)
+                    | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false) |> Sprite.cache name
                     | None ->
                         match Noteskins.loaded.["*defaultBar.isk"].GetTexture name with
                         | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false)
@@ -186,7 +186,7 @@ module rec Content =
                         Themes.pick (fun (t: Theme) ->
                             try t.GetTexture name
                             with err -> Logging.Error("Failed to load texture '" + name + "'", err); None)
-                    cache.Add(name, Sprite.upload (bmp, config.Rows, config.Columns, false))
+                    cache.Add(name, Sprite.upload (bmp, config.Rows, config.Columns, false) |> Sprite.cache name)
             cache.[name]
 
         let clearCache() =

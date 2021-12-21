@@ -115,7 +115,7 @@ module Screen =
                                     |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
                             globalAnimation.Add(
                                 AnimationAction(fun () ->
-                                    let sprite = Sprite.upload(bmp, 1, 1, true)
+                                    let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
                                     bmp.Dispose()
                                     Content.accentColor.Value <- col
                                     background <- (sprite, AnimationFade(0.0f, Target = 1.0f), false) :: background

@@ -14,6 +14,7 @@ module Batch =
             X: float32; Y: float32
             U: float32; V: float32
             R: uint8; G: uint8; B: uint8; A: uint8
+            //T: int32
         }
 
     let mutable active = false
@@ -24,18 +25,21 @@ module Batch =
     let VERTEX_SIZE = sizeof<Vertex>
 
     let vertices : Vertex array = Array.zeroCreate VERTEX_COUNT
-    let elements : int array = Array.init (CAPACITY * 6) id
+    let elements : int array = Array.init (CAPACITY * VERTICES_PER_ELEMENT) id
         
     let ebo = Buffer.create BufferTarget.ElementArrayBuffer elements
     let vbo = Buffer.create BufferTarget.ArrayBuffer vertices
     let vao = VertexArrayObject.create<Vertex, int> (vbo, ebo)
         
     // 2 floats in slot 0, for pos
-    VertexArrayObject.vertexAttribPointer<float32>(0, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, 0)
+    VertexArrayObject.vertexAttribPointer (0, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, 0)
     // 2 floats in slot 1, for uv
-    VertexArrayObject.vertexAttribPointer<float32>(1, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 2)
+    VertexArrayObject.vertexAttribPointer (1, 2, VertexAttribPointerType.Float, false, VERTEX_SIZE, sizeof<float32> * 2)
     // 4 bytes in slot 2, for color
-    VertexArrayObject.vertexAttribPointer<uint8>(2, 4, VertexAttribPointerType.UnsignedByte, true, VERTEX_SIZE, sizeof<float32> * 4)
+    VertexArrayObject.vertexAttribPointer (2, 4, VertexAttribPointerType.UnsignedByte, true, VERTEX_SIZE, sizeof<float32> * 4)
+    // 1 int in slot 3, for tex unit
+    // 4 bytes for padding sake
+    //VertexArrayObject.vertexAttribPointer (3, 1, VertexAttribPointerType.Int, false, VERTEX_SIZE, sizeof<float32> * 4 + 4)
 
     let mutable vcount = 0
     let mutable bcount = 0
@@ -47,13 +51,14 @@ module Batch =
         vcount <- 0
         bcount <- bcount + 1
 
-    let vertex (pos: Vector2) (uv: Vector2) (color: Color) =
+    let vertex (pos: Vector2) (uv: Vector2) (color: Color) (texUnit: int) =
         if vcount = VERTEX_COUNT then draw()
         vertices.[vcount] <-
             { 
                 X = pos.X; Y = pos.Y;
                 U = uv.X; V = uv.Y;
                 R = color.R; G = color.G; B = color.B; A = color.A
+                //T = texUnit
             }
         vcount <- vcount + 1
 
@@ -64,6 +69,7 @@ module Batch =
 
     let finish() =
         draw()
+        //printfn "%i" bcount
         active <- false
 
 module Stencil =
