@@ -17,9 +17,6 @@ module Render =
     let mutable bounds = Rect.zero
 
     let start() = 
-        //for i = 0 to 15 do
-        //    let loc = sprintf "samplers[%i]" i
-        //    Shader.setUniformInt (loc, i) Shader.main
         GL.Clear(ClearBufferMask.ColorBufferBit)
         Batch.start()
 
@@ -46,7 +43,6 @@ module Render =
         vwidth <- float32 <| Math.Round(float width)
         vheight <- float32 <| Math.Round(float height)
 
-        Shader.on Shader.main
         Shader.setUniformMat4 ("uProjection", createProjection true) Shader.main
 
         bounds <- Rect.create 0.0f 0.0f vwidth vheight |> Rect.expand (1.0f, 1.0f)
@@ -61,6 +57,10 @@ module Render =
         GL.ClearColor(Color.FromArgb(0, 0, 0, 0))
         GL.Arb.BlendFuncSeparate(0, BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha, BlendingFactor.One, BlendingFactor.OneMinusSrcAlpha)
         GL.ClearStencil(0x00)
+        Shader.on Shader.main
+        //for i = 0 to 15 do
+        //    let loc = sprintf "samplers[%i]" i
+        //    Shader.setUniformInt (loc, i) Shader.main
 
         resize(width, height)
 
@@ -144,9 +144,9 @@ module Draw =
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
         if lastTex <> s.ID then
             Batch.draw()
-            Shader.setUniformInt ("sampler", s.TextureUnit) Shader.main
             if s.TextureUnit = 0 then
                 GL.BindTexture(TextureTarget.Texture2D, s.ID)
+            Shader.setUniformInt ("sampler", s.TextureUnit) Shader.main
             lastTex <- s.ID
         Batch.vertex p1 u1 c1 s.TextureUnit
         Batch.vertex p2 u2 c2 s.TextureUnit

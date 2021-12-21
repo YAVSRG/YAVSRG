@@ -59,7 +59,7 @@ module Sprite =
                 GL.BindTexture(TextureTarget.Texture2D, sprite.ID)
                 GL.ActiveTexture(TextureUnit.Texture0)
 
-                Logging.Debug(sprintf "Cached sprite (%s) with ID %i to index %i" source sprite.ID i)
+                //Logging.Debug(sprintf "Cached sprite (%s) with ID %i to index %i" source sprite.ID i)
                 { sprite with TextureUnit = i }
 
     let Default =
