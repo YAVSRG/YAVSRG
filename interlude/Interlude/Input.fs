@@ -43,6 +43,12 @@ type InputEvType =
 
 type InputEv = (struct (Bind * InputEvType * float32<ms>))
 
+[<RequireQualifiedAccess>]
+type InputMethod =
+    | Text of setting: Setting<string> * callback: (unit -> unit)
+    | Bind of callback: (Bind -> unit)
+    | None
+
 module Input =
     
     let mutable internal evts: InputEv list = []
@@ -59,19 +65,24 @@ module Input =
 
     let mutable internal gw : GameWindow = null
 
-    let mutable internal inputmethod = None
+    let mutable internal inputmethod : InputMethod = InputMethod.None
     let mutable internal absorbed = false
     let mutable internal typed = false
     
     let removeInputMethod() =
         match inputmethod with
-        | Some (s, callback) -> callback()
-        | None -> ()
-        inputmethod <- None
+        | InputMethod.Text (s, callback) -> callback()
+        | InputMethod.Bind _
+        | InputMethod.None -> ()
+        inputmethod <- InputMethod.None
     
-    let setInputMethod (s: Setting<string>, callback: unit -> unit) =
+    let setTextInput (s: Setting<string>, callback: unit -> unit) =
         removeInputMethod()
-        inputmethod <- Some (s, callback)
+        inputmethod <- InputMethod.Text (s, callback)
+
+    let grabNextEvent (callback: Bind -> unit) =
+        removeInputMethod()
+        inputmethod <- InputMethod.Bind callback
 
     let absorbAll() =
         oldmousez <- mousez
@@ -86,17 +97,6 @@ module Input =
             match evs with
             | [] -> []
             | struct (B, T, time) :: xs when B = b && T = t -> out <- ValueSome time; xs
-            | x :: xs -> x :: (f xs)
-        evts <- f evts
-        out
-
-    //admits the key with any modifiers
-    let consumeOneKeyGameplay (k: Keys, t: InputEvType) =
-        let mutable out = ValueNone
-        let rec f evs =
-            match evs with
-            | [] -> []
-            | struct (Key (K, _), T, time) :: xs when K = k && T = t -> out <- ValueSome time; xs
             | x :: xs -> x :: (f xs)
         evts <- f evts
         out
@@ -153,9 +153,9 @@ module Input =
         alt <- gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
 
         // keyboard input handler
-        //todo: way of remembering modifier combo for hold/release?
+        // todo: way of remembering modifier combo for hold/release?
         for k in 0 .. int Keys.LastKey do
-            if k < 340 || k > 347 then
+            //if k < 340 || k > 347 then
                 if gw.KeyboardState.IsKeyDown(enum k) then
                     if gw.KeyboardState.WasKeyDown(enum k) |> not then
                         struct((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Press, now) |> add
@@ -182,20 +182,25 @@ module Input =
                 removeInputMethod())
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | Some (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
-            | None -> ())
+            | InputMethod.Text (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
+            | InputMethod.Bind _
+            | InputMethod.None -> ())
 
     let update() =
         let delete = Bind.mk Keys.Backspace
         let bigDelete = Bind.ctrl Keys.Backspace
         absorbed <- false
         match inputmethod with
-        |  Some (s, c) ->
+        | InputMethod.Text (s, _) ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
             elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
-        | None -> ()
+        | InputMethod.Bind cb ->
+            match consumeAny InputEvType.Press with
+            | ValueSome x -> removeInputMethod(); cb x; 
+            | ValueNone -> ()
+        | InputMethod.None -> ()
         if typed then absorbAll()
         typed <- false
 

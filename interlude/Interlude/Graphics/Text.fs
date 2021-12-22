@@ -51,7 +51,7 @@ module Text =
                 g.TextRenderingHint <- TextRenderingHint.AntiAlias
                 for (c, _, _, x) in chars do
                     g.DrawString(c.ToString(), font, Brushes.White, x, 0.0f)
-            let sprite = Sprite.upload (bmp, 1, 1, true)
+            let sprite = Sprite.upload (bmp, 1, 1, true) |> Sprite.cache "FONT"
             for (c, width, height, x) in chars do
                 fontLookup.Add(c, struct ({ sprite with Height = int height; Width = int width }, (Rect.createWH (x / w) 0.0f (width / w) (height / h) |> Quad.ofRect)))
 

@@ -28,24 +28,32 @@ module Mounts =
             Content = fun _ ->
                 column [
                     PrettySetting("ImportOnStartup", Selector.FromBool importOnStartup).Position(200.0f)
-                    PrettyButton("ImportNow", fun () -> import <- true).Position(400.0f)
-                    PrettyButton("ImportAllNow", fun () -> import <- true; mount.LastImported <- System.DateTime.UnixEpoch).Position(500.0f)
+                    PrettyButton.Once(
+                        "ImportNow",
+                        (fun () -> import <- true),
+                        Localisation.localiseWith ["Import new songs"] "notification.TaskStarted", Task
+                    ).Position(400.0f)
+                    PrettyButton.Once(
+                        "ImportAllNow",
+                        (fun () -> import <- true; mount.LastImported <- System.DateTime.UnixEpoch),
+                        Localisation.localiseWith ["Import all songs"] "notification.TaskStarted", Task
+                    ).Position(500.0f)
                 ] :> Selectable
             Callback = fun () ->
                 setting.Value <- Some { mount with ImportOnStartup = importOnStartup.Value }
-                if import then BackgroundTask.Create TaskFlags.NONE "Import mounted source" (importMountedSource setting.Value.Value) |> ignore
+                if import then BackgroundTask.Create TaskFlags.NONE "Import from mounted source" (importMountedSource setting.Value.Value) |> ignore
         }
 
     let handleStartupImports() =
         Logging.Debug("Checking for new songs in other games to import..")
         match Interlude.Options.options.OsuMount.Value with
-        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import mounted source" (importMountedSource mount) |> ignore
+        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new osu! songs" (importMountedSource mount) |> ignore
         | None -> ()
         match Interlude.Options.options.StepmaniaMount.Value with
-        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import mounted source" (importMountedSource mount) |> ignore
+        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new StepMania songs" (importMountedSource mount) |> ignore
         | None -> ()
         match Interlude.Options.options.EtternaMount.Value with
-        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import mounted source" (importMountedSource mount) |> ignore
+        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new Etterna songs" (importMountedSource mount) |> ignore
         | None -> ()
 
 type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSource option>, callback: bool -> unit) as this =

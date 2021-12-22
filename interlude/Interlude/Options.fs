@@ -16,13 +16,22 @@ open Interlude.Input.Bind
 module Options =
 
     type WindowType =
-        | WINDOWED = 0
-        | BORDERLESS = 1
-        | FULLSCREEN = 2
+        | Windowed = 0
+        | Borderless = 1
+        | Fullscreen = 2
 
     type WindowResolution =
         | Preset of index:int
         | Custom of width:int * height:int
+
+    type FrameLimit =
+        | ``30`` = 0
+        | ``60`` = 1
+        | ``120`` = 2
+        | ``240`` = 3
+        | ``480 (Recommended)`` = 4
+        | Unlimited = 5
+        | Vsync = 6
 
     type GameConfig = 
         {
@@ -30,15 +39,15 @@ module Options =
             Locale: string
             WindowMode: Setting<WindowType>
             Resolution: Setting<WindowResolution>
-            FrameLimiter: Setting<float>
+            FrameLimit: Setting<FrameLimit>
         }
         static member Default = 
             {
                 WorkingDirectory = ""
                 Locale = "en_GB.txt"
-                WindowMode = Setting.simple WindowType.BORDERLESS
+                WindowMode = Setting.simple WindowType.Borderless
                 Resolution = Setting.simple (Custom (1024, 768))
-                FrameLimiter = Setting.simple 0.0
+                FrameLimit = Setting.simple FrameLimit.``240``
             }
 
     type Hotkeys =

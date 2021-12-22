@@ -107,7 +107,7 @@ type TextField(setting: Setting<string>) as this =
     override this.OnSelect() =
         base.OnSelect()
         color.Target <- 1.0f
-        Input.setInputMethod (setting, fun () -> this.Selected <- false)
+        Input.setTextInput (setting, fun () -> this.Selected <- false)
 
     override this.OnDeselect() =
         base.OnDeselect()
@@ -132,6 +132,7 @@ type ColorPicker(color: Setting<byte>) as this =
     override this.Right() = fd()
     override this.Down() = bk()
 
+// for hotkey purposes, NOT for gameplay
 type KeyBinder(setting: Setting<Bind>, allowModifiers) as this =
     inherit Selectable()
     do
