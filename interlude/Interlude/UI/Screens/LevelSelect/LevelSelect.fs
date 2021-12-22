@@ -53,16 +53,16 @@ type Screen() as this =
             groups.Keys
             |> Seq.sort
             |> Seq.map
-                (fun k ->
-                    groups.[k]
+                (fun (sortIndex, groupName) ->
+                    groups.[(sortIndex, groupName)]
                     |> Seq.map (fun (cc, context) ->
                         match currentCachedChart with
                         | None -> ()
-                        | Some c -> if c.FilePath = cc.FilePath && context.Id = Collections.contextIndex then selectedChart <- c.FilePath; selectedGroup <- k
-                        lastItem <- Some (k, cc, context)
-                        ChartItem(k, cc, context))
+                        | Some c -> if c.FilePath = cc.FilePath && context.Id = Collections.contextIndex then selectedChart <- c.FilePath; selectedGroup <- groupName
+                        lastItem <- Some (groupName, cc, context)
+                        ChartItem(groupName, cc, context))
                     |> List.ofSeq
-                    |> fun l -> GroupItem(k, l))
+                    |> fun l -> GroupItem(groupName, l))
             |> List.ofSeq
         scrollTo <- ScrollTo.Chart
         expandedGroup <- selectedGroup
