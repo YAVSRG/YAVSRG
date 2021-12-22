@@ -39,7 +39,7 @@ module Keybinds =
                 if progress = int keymode.Value then this.Selected <- false
                 else Input.grabNextEvent inputCallback
                 refreshText()
-            | _ -> ()
+            | _ -> Input.grabNextEvent inputCallback
 
         do
             TextBox(
@@ -58,6 +58,11 @@ module Keybinds =
             progress <- 0
             refreshText()
             Input.grabNextEvent inputCallback
+
+        override this.OnDeselect() =
+            base.OnDeselect()
+            Input.removeInputMethod()
+            text <- options.GameplayBinds.[int keymode.Value - 3] |> Seq.map (sprintf "%O") |> String.concat ",  "
 
         member this.OnKeymodeChanged() = refreshText()
         
