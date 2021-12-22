@@ -153,9 +153,9 @@ module Input =
         alt <- gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
 
         // keyboard input handler
-        //todo: way of remembering modifier combo for hold/release?
+        // todo: way of remembering modifier combo for hold/release?
         for k in 0 .. int Keys.LastKey do
-            if k < 340 || k > 347 then
+            //if k < 340 || k > 347 then
                 if gw.KeyboardState.IsKeyDown(enum k) then
                     if gw.KeyboardState.WasKeyDown(enum k) |> not then
                         struct((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Press, now) |> add

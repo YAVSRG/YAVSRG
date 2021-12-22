@@ -132,6 +132,7 @@ type ColorPicker(color: Setting<byte>) as this =
     override this.Right() = fd()
     override this.Down() = bk()
 
+// for hotkey purposes, NOT for gameplay
 type KeyBinder(setting: Setting<Bind>, allowModifiers) as this =
     inherit Selectable()
     do
