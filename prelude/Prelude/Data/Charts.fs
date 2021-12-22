@@ -143,16 +143,15 @@ module Sorting =
         elif Char.IsLetterOrDigit s.[0] then s.[0].ToString().ToUpper()
         else "?"
 
-    type GroupMethod = CachedChart -> string
+    type GroupMethod = CachedChart -> int * string
     let groupBy : IDictionary<string, GroupMethod> = dict[
-            "Physical", fun c -> let i = int (c.Physical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
-            "Technical", fun c -> let i = int (c.Technical / 2.0) * 2 in i.ToString().PadLeft(2, '0') + " - " + (i + 2).ToString().PadLeft(2, '0')
-            "Pack", fun c -> c.Pack
-            "Title", fun c -> firstCharacter c.Title
-            "Artist", fun c -> firstCharacter c.Artist
-            "Creator", fun c -> firstCharacter c.Creator
-            "Keymode", fun c -> if c.Keys = 10 then "~10K" else c.Keys.ToString() + "K"
-            "Collections", fun _ ->  "" // Placeholder for UI purposes, UI is hard coded to call collection grouping behaviour when this is chosen
+            "Level", fun c -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
+            "Pack", fun c -> 0, c.Pack
+            "Title", fun c -> 0, firstCharacter c.Title
+            "Artist", fun c -> 0, firstCharacter c.Artist
+            "Creator", fun c -> 0, firstCharacter c.Creator
+            "Keymode", fun c -> c.Keys, c.Keys.ToString() + "K"
+            "Collections", fun _ -> 0, "" // Placeholder for UI purposes, UI is hard coded to call collection grouping behaviour when this is chosen
         ]
 
     let private compareBy (f: CachedChart -> IComparable) = fun a b -> f(fst a).CompareTo <| f(fst b)
@@ -344,9 +343,10 @@ module Library =
     // ---- Retrieving library for level select ----
 
     type Group = ResizeArray<CachedChart * LevelSelectContext>
+    type LexSortedGroups = Dictionary<int * string, Group>
 
-    let getGroups (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : Dictionary<string, Group> =
-        let groups = new Dictionary<string, Group>()
+    let getGroups (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+        let groups = new Dictionary<int * string, Group>()
         for c in Filter.apply filter charts.Values do
             let s = grouping c
             if groups.ContainsKey s |> not then groups.Add(s, new ResizeArray<CachedChart * LevelSelectContext>())
@@ -355,8 +355,8 @@ module Library =
             g.Sort sorting
         groups
 
-    let getCollectionGroups (sorting: SortMethod) (filter: Filter) : Dictionary<string, Group>  =
-        let groups = new Dictionary<string, Group>()
+    let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups  =
+        let groups = new Dictionary<int * string, Group>()
         for name in collections.Keys do
             let c = collections.[name]
             let charts, orderMatters = 
@@ -386,7 +386,7 @@ module Library =
             |> Filter.applyf filter
             |> ResizeArray<CachedChart * LevelSelectContext>
             |> if orderMatters then id else fun x -> x.Sort sorting; x
-            |> fun x -> if x.Count > 0 then groups.Add(name, x)
+            |> fun x -> if x.Count > 0 then groups.Add((0, name), x)
         groups
 
     // ---- Importing charts to library ----
