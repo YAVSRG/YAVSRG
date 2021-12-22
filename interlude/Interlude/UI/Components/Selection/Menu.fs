@@ -114,15 +114,38 @@ type PrettySetting(name, widget: Selectable) as this =
 
 type PrettyButton(name, action) as this =
     inherit Selectable()
+
     do
-        TextBox(K (localiseOption name + "  >"), (fun () -> ((if this.Hover then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black)), 0.0f) |> this.Add
+        TextBox(
+            K (localiseOption name + "  >"),
+            ( 
+                fun () -> 
+                    if this.Enabled then
+                        ( (if this.Hover then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black )
+                    else (Color.Gray, Color.Black)
+            ),
+            0.0f
+        )
+        |> this.Add
         Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
         TooltipRegion(localiseTooltip name) |> this.Add
-    override this.OnSelect() = action(); this.Selected <- false
+    override this.OnSelect() =
+        if this.Enabled then action()
+        this.Selected <- false
     override this.Draw() =
         if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
         base.Draw()
     member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
+
+    member val Enabled = true with get, set
+
+    static member Once(name, action, notifText, notifType) =
+        { new PrettyButton(name, action) with
+            override this.OnSelect() =
+                base.OnSelect()
+                if base.Enabled then Notification.add (notifText, notifType)
+                base.Enabled <- false
+        }
 
 type SelectionMenu(topLevel: SelectionPage) as this =
     inherit Dialog()
