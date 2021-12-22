@@ -107,7 +107,7 @@ type TextField(setting: Setting<string>) as this =
     override this.OnSelect() =
         base.OnSelect()
         color.Target <- 1.0f
-        Input.setInputMethod (setting, fun () -> this.Selected <- false)
+        Input.setTextInput (setting, fun () -> this.Selected <- false)
 
     override this.OnDeselect() =
         base.OnDeselect()

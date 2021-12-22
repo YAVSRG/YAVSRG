@@ -58,7 +58,7 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
         active <- not active
         if active then
             color.Target <- 1.0f
-            Input.setInputMethod(s, fun () -> active <- false; color.Target <- 0.5f)
+            Input.setTextInput(s, fun () -> active <- false; color.Target <- 0.5f)
         else
             color.Target <- 0.5f
             Input.removeInputMethod()
