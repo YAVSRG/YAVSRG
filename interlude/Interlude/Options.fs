@@ -235,7 +235,7 @@ module Options =
             EnabledThemes = new List<string>()
 
             ScrollSpeed = Setting.bounded 2.05 1.0 3.0 |> Setting.round 2
-            HitPosition = Setting.bounded 0 -100 400
+            HitPosition = Setting.bounded 0 -300 600
             HitLighting = Setting.simple false
             Upscroll = Setting.simple false
             BackgroundDim = Setting.percent 0.5
