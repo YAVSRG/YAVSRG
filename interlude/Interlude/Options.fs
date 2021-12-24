@@ -197,7 +197,7 @@ module Options =
             AudioOffset: Setting.Bounded<float>
             AudioVolume: Setting.Bounded<float>
             CurrentChart: Setting<string>
-            EnabledThemes: List<string>
+            Theme: Setting<string>
 
             ScrollSpeed: Setting.Bounded<float>
             HitPosition: Setting.Bounded<int>
@@ -208,7 +208,7 @@ module Options =
             ScreenCover: ScreenCoverOptions
             KeymodePreference: Setting<Keymode>
             UseKeymodePreference: Setting<bool>
-            NoteSkin: Setting<string>
+            Noteskin: Setting<string>
 
             Playstyles: Layout array
             AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
@@ -232,7 +232,7 @@ module Options =
             AudioOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
             AudioVolume = Setting.percent 0.1
             CurrentChart = Setting.simple ""
-            EnabledThemes = new List<string>()
+            Theme = Setting.simple "*default"
 
             ScrollSpeed = Setting.bounded 2.05 1.0 3.0 |> Setting.round 2
             HitPosition = Setting.bounded 0 -300 600
@@ -248,7 +248,7 @@ module Options =
                     FadeLength = Setting.bounded 200 0 500
                     Color = Setting.simple Color.Black
                 }
-            NoteSkin = Setting.simple "default"
+            Noteskin = Setting.simple "*defaultBar.isk"
             KeymodePreference = Setting.simple Keymode.``4K``
             UseKeymodePreference = Setting.simple false
 
@@ -304,8 +304,9 @@ module Options =
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
 
         Content.detect()
-        Content.load options.EnabledThemes
-        Content.Noteskins.switch options.NoteSkin.Value
+        Content.load()
+        Content.Themes.switch options.Theme.Value
+        Content.Noteskins.switch options.Noteskin.Value
 
     let save() =
         try

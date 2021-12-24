@@ -12,7 +12,6 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Controls
-open Interlude.UI.Components.Selection.Compound
 open Interlude.UI.Components.Selection.Menu
 
 module Themes =
@@ -64,7 +63,7 @@ module Themes =
             base.Dispose()
             fbo.Dispose()
 
-    let editNoteskin refreshNoteskins (noteSkin: NoteSkin) : SelectionPage =
+    let editNoteskin refreshNoteskins (noteSkin: Noteskin) : SelectionPage =
 
         let name = Setting.simple noteSkin.Config.Name
         let keycount = Setting.simple options.KeymodePreference.Value
@@ -109,36 +108,6 @@ module Themes =
                 Content.Noteskins.currentConfig.Value <- noteSkin.Config
                 refreshNoteskins()
         }
-        
-
-    let themeChanger refresh : SelectionPage =
-        Content.Themes.detect()
-        {
-            Content = fun add ->
-                column [
-                    PrettySetting("ChooseTheme",
-                        ListOrderedSelect.ListOrderedSelector(
-                            Setting.make
-                                ( fun v ->
-                                    options.EnabledThemes.Clear()
-                                    options.EnabledThemes.AddRange v
-                                    Content.Themes.load options.EnabledThemes
-                                    refresh()
-                                )
-                                (fun () -> options.EnabledThemes),
-                            Content.Themes.detected
-                        )
-                    ).Position(200.0f, PRETTYWIDTH, 500.0f)
-                    Divider().Position(750.0f)
-                    PrettyButton("OpenThemeFolder",
-                        fun () ->
-                            //todo: move this to utils
-                            let target = System.Diagnostics.ProcessStartInfo("file://" + System.IO.Path.GetFullPath(getDataPath "Themes"), UseShellExecute = true)
-                            System.Diagnostics.Process.Start target |> ignore).Position(800.0f)
-                    PrettyButton("NewTheme", fun () -> Dialog.add <| TextInputDialog(Render.bounds, "Enter theme name", Content.Themes.createNew)).Position(900.0f)
-                ] :> Selectable
-            Callback = refresh
-        }
 
     let icon = "✎"
     let page() : SelectionPage =
@@ -147,14 +116,21 @@ module Themes =
 
         let noteskins = PrettySetting("Noteskin", Selectable())
         let refreshNoteskins() =
-            let ns = Content.Noteskins.list() |> Seq.toArray
-            let ids = ns |> Array.map fst
-            let names = ns |> Array.map (fun (id, data) -> data.Config.Name)
-            options.NoteSkin.Value <- Content.Noteskins.currentId.Value
-            Selector.FromArray(names, ids, options.NoteSkin |> Setting.trigger (fun id -> Content.Noteskins.switch id; preview.Refresh()))
+            options.Noteskin.Value <- Content.Noteskins.currentId.Value
+            let ids, names = Content.Noteskins.list() |> Array.unzip
+            Selector.FromArray(names, ids, options.Noteskin |> Setting.trigger (fun id -> Content.Noteskins.switch id; preview.Refresh()))
             |> noteskins.Refresh
             preview.Refresh()
         refreshNoteskins()
+
+        let themes = PrettySetting("Theme", Selectable())
+        let refreshThemes() =
+            options.Theme.Value <- Content.Themes.currentId.Value
+            let ids, names = Content.Themes.list() |> Array.unzip
+            Selector.FromArray(names, ids, options.Theme |> Setting.trigger (fun id -> Content.Themes.switch id; preview.Refresh()))
+            |> themes.Refresh
+            preview.Refresh()
+        refreshThemes()
 
         let tryEditNoteskin add =
             let ns = Content.Noteskins.current()
@@ -169,15 +145,20 @@ module Themes =
                     sprintf "'%s' is an embedded default skin. Copy and edit?" ns.Config.Name,
                     fun () -> Content.Noteskins.extractCurrent(); refreshNoteskins()
                 ).Show()
-            | Folder _ -> add ( "EditNoteSkin", editNoteskin refreshNoteskins ns )
+            | Folder _ -> add ( "EditNoteskin", editNoteskin refreshNoteskins ns )
 
         {
             Content = fun add ->
                 column [
-                    PrettyButton("ChangeTheme", fun () -> add ("ChangeTheme", themeChanger ignore)).Position(200.0f)
+                    themes.Position(200.0f)
                     PrettyButton("EditTheme", ignore).Position(300.0f)
-                    noteskins.Position(800.0f)
-                    PrettyButton("EditNoteskin", fun () -> tryEditNoteskin add).Position(900.0f)
+                    PrettyButton("OpenThemeFolder", fun () -> openDirectory (getDataPath "Themes")).Position(400.0f)
+
+                    Divider().Position(550.0f)
+
+                    noteskins.Position(600.0f)
+                    PrettyButton("EditNoteskin", fun () -> tryEditNoteskin add).Position(700.0f)
+                    PrettyButton("OpenNoteskinFolder", fun () -> openDirectory (getDataPath "Noteskins")).Position(800.0f)
                     preview
                 ] :> Selectable
             Callback = ignore

@@ -49,6 +49,11 @@ module Utils =
        elif ts.TotalMinutes > 1.0 then sprintf "%.0fm" ts.TotalMinutes
        else sprintf "%.0fs" ts.TotalSeconds
 
+    let openDirectory (path: string) =
+        ProcessStartInfo("file://" + System.IO.Path.GetFullPath path, UseShellExecute = true)
+        |> Process.Start
+        |> ignore
+
     (* was used to benchmark framerate/some other things
     module RenderPerformance =
         let add x xs =
