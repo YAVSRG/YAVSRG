@@ -12,7 +12,7 @@ module rec Content =
 
     let accentColor = ref ThemeConfig.Default.DefaultAccentColor
     let _font : Lazy<Text.SpriteFont> ref = ref null
-    let font () = _font.Value.Force()
+    let font () = _font.Value.Value
 
     let inline themeConfig () = Themes.config.Value
     let inline noteskinConfig () = Noteskins.currentConfig.Value
@@ -59,12 +59,12 @@ module rec Content =
 
         let switch (id: string) =
             let id = if loaded.ContainsKey id then id else Logging.Warn("Theme '" + id + "' not found, switching to default"); "*default"
-            if id <> currentId.Value || _font.Value = null then
+            if id <> currentId.Value then
                 currentId.Value <- id
                 config.Value <- loaded.[id].Config
 
                 if config.Value.OverrideAccentColor then accentColor.Value <- config.Value.DefaultAccentColor
-                if _font.Value <> null then _font.Value.Force().Dispose()
+                if _font.Value <> null then if _font.Value.IsValueCreated then _font.Value.Value.Dispose()
                 _font.Value <- lazy (Text.createFont config.Value.Font)
 
                 GameplayConfig.clearCache()
