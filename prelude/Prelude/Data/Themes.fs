@@ -31,7 +31,7 @@ module Themes =
         } 
         static member Default : ThemeConfig = 
             {
-                Name = "?"
+                Name = "Unnamed Theme"
                 JudgementColors =
                     [|
                         Color.FromArgb(127, 127, 255)
@@ -212,7 +212,7 @@ module Themes =
                 {
                     Position =
                         {
-                            Enabled = true
+                            Enabled = false
                             Float = false
                             Left = 0.0f
                             LeftA = 1.0f
@@ -299,6 +299,35 @@ module Themes =
                     AnimationTime = 800.0f
                     ShowRDMA = true
                 }
+
+        type ProgressMeter =
+            { 
+                Position: WidgetConfig
+                BarHeight: float32
+                BarColor: Color
+                GlowSize: float32
+                GlowColor: Color
+            }
+            static member Default =
+                {
+                    Position =
+                        {
+                            Enabled = true
+                            Float = false
+                            Left = -12.0f
+                            LeftA = 0.0f
+                            Top = 10.0f
+                            TopA = 0.0f
+                            Right = -5.0f
+                            RightA = 0.0f
+                            Bottom = -10.0f
+                            BottomA = 1.0f
+                        }
+                    BarHeight = 15.0f
+                    BarColor = Color.FromArgb(180, 0, 170, 255)
+                    GlowSize = 2.0f
+                    GlowColor = Color.FromArgb(100, 80, 190, 255)
+                }
         
         type Explosions =
             {
@@ -315,19 +344,17 @@ module Themes =
                     AnimationFrameTime = 50.0
                 }
 
-        type ProgressBar = { Position: WidgetConfig }
         //song info
         //mod info
         //current real time
-        //current song time
-        //life meter
+        //current song time, as bms falling dot
         //judgement counts
         //pacemaker
         
     // Texture names that are loaded from Noteskin folders instead of Theme folders
-    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"|]
+    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"; "receptorlighting"|]
         
-    type NoteSkinConfig =
+    type NoteskinConfig =
         {
             Name: string
             Author: string
@@ -507,10 +534,10 @@ module Themes =
         static member FromZipStream (stream: Stream) = new Theme(Zip (new ZipArchive(stream), None))
         static member FromFolderName (name: string) = new Theme(Folder <| getDataPath (Path.Combine ("Themes", name)))
 
-    type NoteSkin(storage) as this =
+    type Noteskin(storage) as this =
         inherit StorageAccess(storage)
         
-        let mutable config : NoteSkinConfig = NoteSkinConfig.Default
+        let mutable config : NoteskinConfig = NoteskinConfig.Default
         do config <- this.GetJson (false, "noteskin.json") |> fst
         
         member this.Config
@@ -528,6 +555,6 @@ module Themes =
         
         static member FromZipFile (file: string) = 
             let stream = File.OpenRead file
-            new NoteSkin(Zip (new ZipArchive(stream), Some file))
-        static member FromZipStream (stream: Stream) = new NoteSkin(Zip (new ZipArchive(stream), None))
-        static member FromFolder (path: string) = new NoteSkin(Folder path)
+            new Noteskin(Zip (new ZipArchive(stream), Some file))
+        static member FromZipStream (stream: Stream) = new Noteskin(Zip (new ZipArchive(stream), None))
+        static member FromFolder (path: string) = new Noteskin(Folder path)

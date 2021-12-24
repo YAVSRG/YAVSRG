@@ -497,7 +497,7 @@ module SkinConversions =
                         newBmp.SetPixel(x, y, nc)
                 newBmp :> Image
 
-            member this.ToNoteSkin (targetPath: string) (keys: int) =
+            member this.ToNoteskin (targetPath: string) (keys: int) =
                 Logging.Info "===== Beginning osu -> Interlude skin conversion ====="
                 Logging.Info (path + "->" + targetPath)
 
@@ -506,8 +506,8 @@ module SkinConversions =
 
                 let mania = List.tryFind (fun m -> m.Keys = keys) data.Mania |> Option.defaultValue (Mania.Default keys)
 
-                let skinJson : Themes.NoteSkinConfig =
-                    { Themes.NoteSkinConfig.Default with
+                let skinJson : Themes.NoteskinConfig =
+                    { Themes.NoteskinConfig.Default with
                         Name = Path.GetFileName path
                         Author = data.General.Author
                         UseHoldTailTexture = true
