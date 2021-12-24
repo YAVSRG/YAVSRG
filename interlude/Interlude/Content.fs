@@ -59,7 +59,7 @@ module rec Content =
 
         let switch (id: string) =
             let id = if loaded.ContainsKey id then id else Logging.Warn("Theme '" + id + "' not found, switching to default"); "*default"
-            if id <> currentId.Value then
+            if id <> currentId.Value || _font.Value = null then
                 currentId.Value <- id
                 config.Value <- loaded.[id].Config
 
