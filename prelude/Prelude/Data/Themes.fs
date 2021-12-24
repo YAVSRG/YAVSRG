@@ -331,6 +331,7 @@ module Themes =
         
         type Explosions =
             {
+                Scale: float32
                 FadeTime: float32
                 ExpandAmount: float32
                 ExplodeOnMiss: bool
@@ -338,6 +339,7 @@ module Themes =
             }
             static member Default =
                 {
+                    Scale = 1.0f
                     FadeTime = 1.0f
                     ExpandAmount = 0.15f
                     ExplodeOnMiss = false
