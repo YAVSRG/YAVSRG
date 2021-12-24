@@ -151,9 +151,35 @@ module GameplayWidgets =
         override this.Dispose() =
             listener.Dispose()
 
+    type ProgressMeter(conf: WidgetConfig.ProgressMeter, helper) as this =
+        inherit Widget()
+
+        let duration = 
+            let chart = Gameplay.getColoredChart()
+            offsetOf chart.Notes.Last.Value - offsetOf chart.Notes.First.Value
+
+        let pulse = new AnimationCounter(1000.0)
+
+        do
+            this.Animation.Add pulse
+
+        override this.Draw() =
+            base.Draw()
+
+            let struct (l, t, r, b) = this.Bounds
+            let height = b - t - conf.BarHeight
+            let pc = helper.CurrentChartTime() / duration
+
+            let bar = Rect.createWH l (t + height * pc) (r - l) conf.BarHeight
+            let glowA = (float conf.GlowColor.A) * pulse.Time / 1000.0 |> int
+            Draw.rect (Rect.expand (conf.GlowSize, conf.GlowSize) bar) (Color.FromArgb(glowA, conf.GlowColor)) Sprite.Default
+            Draw.rect bar conf.BarColor Sprite.Default
+
+
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
         inherit Widget()
-        let firstNote = Gameplay.getColoredChart().Notes.First |> Option.map offsetOf |> Option.defaultValue 0.0f<ms>
+        
+        let firstNote = offsetOf (Gameplay.getColoredChart().Notes.First.Value)
         do this.Add(TextBox(sprintf "Press %O to skip" options.Hotkeys.Skip.Value |> Utils.K, Utils.K Color.White, 0.5f))
 
         override this.Update(elapsedTime, bounds) =
@@ -274,6 +300,7 @@ module GameplayWidgets =
                     let box =
                         if options.Upscroll.Value then Rect.createWH (l + columnwidth * float32 k) t columnwidth columnwidth
                         else Rect.createWH (l + columnwidth * float32 k) (b - columnwidth) columnwidth columnwidth
+                        |> Rect.expand((config.Scale - 1.0f) * columnwidth, (config.Scale - 1.0f) * columnwidth)
                         |> Rect.expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
                     | Hit e ->

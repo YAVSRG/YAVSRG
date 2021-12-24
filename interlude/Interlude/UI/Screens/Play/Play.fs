@@ -106,9 +106,9 @@ type Screen(start: PlayScreenType) as this =
             f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
             f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget)
             f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
-            f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
             f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
-        //todo: rest of widgets
+        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
+        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget)
 
         scoring.SetHitCallback onHit.Trigger
 

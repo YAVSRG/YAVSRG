@@ -35,7 +35,7 @@ module Text =
             let mutable w = 0.0f
             let chars =
                 seq {
-                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n⭐♬∞⌛•" do
+                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n⭐♬∞⌛•⮜" do
                         use b = new Bitmap(1, 1)
                         use g = Graphics.FromImage(b)
                         let s = g.MeasureString(c.ToString(), font)

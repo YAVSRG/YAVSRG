@@ -12,16 +12,19 @@ module rec Content =
 
     let accentColor = ref ThemeConfig.Default.DefaultAccentColor
     let _font : Lazy<Text.SpriteFont> ref = ref null
-    let font () = _font.Value.Force()
+    let font () = _font.Value.Value
 
     let inline themeConfig () = Themes.config.Value
     let inline noteskinConfig () = Noteskins.currentConfig.Value
 
     module Themes =
         
-        let private defaultTheme = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
+        let private _default = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
+
+        let currentId = ref "*default"
+        let current () = loaded.[currentId.Value]
         
-        let config : ThemeConfig ref = ref defaultTheme.Config
+        let config : ThemeConfig ref = ref _default.Config
 
         // Detection from file system
 
@@ -33,46 +36,58 @@ module rec Content =
 
         // Loading into memory
 
-        let loaded = new List<Theme>()
-        let load (ids: List<string>) =
+        let loaded : Dictionary<string, Theme> = new Dictionary<string, Theme>()
+        let load() =
 
             loaded.Clear()
 
-            loaded.Add defaultTheme
-            config.Value <- defaultTheme.Config
-            Seq.choose 
-                ( fun t ->
-                    try
-                        let theme = Theme.FromFolderName t
-                        Logging.Info(sprintf "  Loaded theme '%s' (%s)" theme.Config.Name t)
-                        Some theme
-                    with err -> Logging.Error("  Failed to load theme '" + t + "'", err); None )
-                ids
-            |> Seq.iter (fun t -> loaded.Add t; config.Value <- t.Config)
-            Logging.Info(sprintf "Loaded %i themes. (%i available) " <| loaded.Count - 1 <| detected.Count)
+            loaded.Add ("*default", _default)
+            config.Value <- _default.Config
+            for source in detected do
+                let id = Path.GetFileName source
+                try
+                    let theme = Theme.FromFolderName id
+                    Logging.Info(sprintf "  Loaded theme '%s' (%s)" theme.Config.Name id)
+                    loaded.Add(id, theme)
+                with err -> Logging.Error("  Failed to load theme '" + id + "'", err)
 
-            if config.Value.OverrideAccentColor then accentColor.Value <- config.Value.DefaultAccentColor
-            if _font.Value <> null then _font.Value.Force().Dispose()
-            _font.Value <- lazy (Text.createFont config.Value.Font)
-            
-            GameplayConfig.clearCache()
-            Sprites.clearCache()
+            Logging.Info(sprintf "Loaded %i themes. (Including default)" loaded.Count)
+
+            switch currentId.Value
 
         // The other stuff
 
+        let switch (id: string) =
+            let id = if loaded.ContainsKey id then id else Logging.Warn("Theme '" + id + "' not found, switching to default"); "*default"
+            if id <> currentId.Value || _font.Value = null then
+                currentId.Value <- id
+                config.Value <- loaded.[id].Config
+
+                if config.Value.OverrideAccentColor then accentColor.Value <- config.Value.DefaultAccentColor
+                if _font.Value <> null then if _font.Value.IsValueCreated then _font.Value.Value.Dispose()
+                _font.Value <- lazy (Text.createFont config.Value.Font)
+
+                GameplayConfig.clearCache()
+                Sprites.clearCache()
+
+        let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
+
         let pick f =
-            let rec g i =
-                if i < 0 then failwith "f should give some value for default theme!!"
-                match f loaded.[i] with
-                | Some v -> v
-                | None -> g (i - 1)
-            g (loaded.Count - 1)
+            match f (current ()) with
+            | Some x -> x
+            | None ->
+                match f loaded.["*default"] with
+                | Some x -> x
+                | None -> failwith "f should give some value for default theme!!"
 
         let createNew (id: string) =
              let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
              let target = Path.Combine(getDataPath "Themes", id)
-             if id <> "" && not (Directory.Exists target) then defaultTheme.CopyTo(Path.Combine(getDataPath "Themes", id))
+             if id <> "" && not (Directory.Exists target) then _default.CopyTo(Path.Combine(getDataPath "Themes", id))
              detect()
+             load()
+             switch id
+             current().Config <- { current().Config with Name = current().Config.Name + " (Extracted)" }
 
         let lampToColor (lampAchieved: Prelude.Scoring.Lamp) = config.Value.LampColors.[lampAchieved |> int]
         let gradeToColor (gradeAchieved: int) = config.Value.Grades.[gradeAchieved].Color
@@ -86,12 +101,12 @@ module rec Content =
             let skins = ["defaultBar.isk"; "defaultArrow.isk"; "defaultOrb.isk"]
             skins
             |> List.map Utils.getResourceStream
-            |> List.map NoteSkin.FromZipStream
+            |> List.map Noteskin.FromZipStream
             |> List.zip (List.map (fun s -> "*" + s) skins)
 
         let currentId = ref "*defaultBar.isk"
         let current () = loaded.[currentId.Value]
-        let currentConfig : NoteSkinConfig ref = ref NoteSkinConfig.Default
+        let currentConfig : NoteskinConfig ref = ref NoteskinConfig.Default
         
         // Detection from file system
 
@@ -109,7 +124,7 @@ module rec Content =
 
         // Loading into memory
 
-        let loaded : Dictionary<string, NoteSkin> = new Dictionary<string, NoteSkin>()
+        let loaded : Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()
         let load () =
 
             loaded.Clear()
@@ -120,7 +135,7 @@ module rec Content =
             for source, isZip in detected do
                 let id = Path.GetFileName source
                 try 
-                    let ns = if isZip then NoteSkin.FromZipFile source else NoteSkin.FromFolder source
+                    let ns = if isZip then Noteskin.FromZipFile source else Noteskin.FromFolder source
                     loaded.Add(id, ns)
                     Logging.Info(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
                 with err -> Logging.Error("  Failed to load noteskin '" + id + "'", err)
@@ -133,11 +148,12 @@ module rec Content =
 
         let switch (id: string) =
             let id = if loaded.ContainsKey id then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default"); "*defaultBar.isk"
-            currentId.Value <- id
+            if id <> currentId.Value then
+                currentId.Value <- id
+                Sprites.clearNoteskinTextures()
             currentConfig.Value <- loaded.[id].Config
-            Sprites.clearNoteskinTextures()
 
-        let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value))
+        let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
         let extractCurrent() =
             let id = Guid.NewGuid().ToString()
@@ -152,7 +168,7 @@ module rec Content =
             | OsuSkinFolder ->
                 let id = Guid.NewGuid().ToString()
                 try
-                    OsuSkin.Converter(path).ToNoteSkin(Path.Combine(getDataPath "Noteskins", id)) 4
+                    OsuSkin.Converter(path).ToNoteskin(Path.Combine(getDataPath "Noteskins", id)) 4
                     detect()
                     load()
                     true
@@ -227,9 +243,9 @@ module rec Content =
         Themes.detect()
         Noteskins.detect()
 
-    let load (themes: List<string>) =
+    let load () =
         Logging.Info "===== Loading Themes/Noteskins ====="
-        Themes.load themes
+        Themes.load()
         Noteskins.load()
 
     let inline getTexture (id: string) = Sprites.getTexture id
