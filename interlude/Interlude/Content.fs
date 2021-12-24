@@ -85,6 +85,9 @@ module rec Content =
              let target = Path.Combine(getDataPath "Themes", id)
              if id <> "" && not (Directory.Exists target) then _default.CopyTo(Path.Combine(getDataPath "Themes", id))
              detect()
+             load()
+             switch id
+             current().Config <- { current().Config with Name = current().Config.Name + " (Extracted)" }
 
         let lampToColor (lampAchieved: Prelude.Scoring.Lamp) = config.Value.LampColors.[lampAchieved |> int]
         let gradeToColor (gradeAchieved: int) = config.Value.Grades.[gradeAchieved].Color

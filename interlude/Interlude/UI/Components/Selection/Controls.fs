@@ -113,6 +113,11 @@ type TextField(setting: Setting<string>) as this =
         base.OnDeselect()
         color.Target <- 0.5f
 
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if this.Selected && Options.options.Hotkeys.Exit.Value.Tapped() then
+            Input.removeInputMethod()
+
 type ColorPicker(color: Setting<byte>) as this =
     inherit NavigateSelectable()
     let sprite = Content.getTexture "note"

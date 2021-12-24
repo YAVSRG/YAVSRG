@@ -109,6 +109,24 @@ module Themes =
                 refreshNoteskins()
         }
 
+    let editTheme refreshThemes (theme: Theme) : SelectionPage =
+
+        let name = Setting.simple theme.Config.Name
+
+        {
+            Content = fun add ->
+                column [
+                    PrettySetting("ThemeName", TextField name).Position(200.0f)
+                ]
+            Callback = fun () ->
+                theme.Config <-
+                    { theme.Config with
+                        Name = name.Value
+                    }
+                Content.Themes.config.Value <- theme.Config
+                refreshThemes()
+        }
+
     let icon = "✎"
     let page() : SelectionPage =
 
@@ -142,16 +160,27 @@ module Themes =
                 ).Show()
             | Zip (_, None) ->
                 ConfirmDialog(
-                    sprintf "'%s' is an embedded default skin. Copy and edit?" ns.Config.Name,
+                    sprintf "'%s' is an embedded default skin. Extract a copy and edit?" ns.Config.Name,
                     fun () -> Content.Noteskins.extractCurrent(); refreshNoteskins()
                 ).Show()
             | Folder _ -> add ( "EditNoteskin", editNoteskin refreshNoteskins ns )
+
+        let tryEditTheme add =
+            let theme = Content.Themes.current()
+            match theme.StorageType with
+            | Zip (_, None) ->
+                ConfirmDialog(
+                    sprintf "'%s' is the default theme. Extract a copy and edit?" theme.Config.Name,
+                    fun () -> Content.Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes()
+                ).Show()
+            | Folder _ -> add ( "EditTheme", editTheme refreshThemes theme )
+            | Zip (_, Some file) -> failwith "User themes with zip storage not supported"
 
         {
             Content = fun add ->
                 column [
                     themes.Position(200.0f)
-                    PrettyButton("EditTheme", ignore).Position(300.0f)
+                    PrettyButton("EditTheme", fun () -> tryEditTheme add).Position(300.0f)
                     PrettyButton("OpenThemeFolder", fun () -> openDirectory (getDataPath "Themes")).Position(400.0f)
 
                     Divider().Position(550.0f)

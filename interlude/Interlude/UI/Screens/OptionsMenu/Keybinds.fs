@@ -78,7 +78,7 @@ module Keybinds =
                 column [
                     PrettySetting("Keymode", Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Position(200.0f)
                     PrettySetting("GameplayBinds", binds).Position(280.0f, Render.vwidth - 200.0f)
-                    PrettyButton("Hotkeys", ignore).Position(400.0f)
+                    PrettyButton("Hotkeys", ignore, Enabled = false).Position(400.0f)
                 ] :> Selectable
             Callback = ignore
         }
