@@ -149,7 +149,7 @@ type AccuracySystemState =
         this.Judgements.[int judge] <- this.Judgements.[int judge] + 1
     member this.Add(judge: JudgementType) = this.Add(0.0, 0.0, judge)
 
-type private InternalHoldState =
+type private HoldState =
     | Nothing
     | Holding
     | Dropped
@@ -207,8 +207,7 @@ type IScoreMetric
 
     member this.IsHoldDropped (index: int) (k: int) =
         match internalHoldStates.[k] with
-        | Dropped, i
-        | MissedHead, i when i >= index -> true
+        | Dropped, i | MissedHead, i when i >= index -> true
         | _ -> false
 
     member this.HitData = hitData
@@ -221,9 +220,9 @@ type IScoreMetric
 
     // correctness guaranteed up to the time you update, no matter how you update
     // call Update with Time.infinity to do a correct feeding of the whole replay
-    member this.Update (time: ChartTime) =
-        this.PollReplay time // calls HandleKeyDown and HandleKeyUp appropriately
-        this.HandlePassive time
+    member this.Update (relativeTime: ChartTime) =
+        this.PollReplay relativeTime // calls HandleKeyDown and HandleKeyUp appropriately
+        this.HandlePassive relativeTime
 
     member private this.HandlePassive (relativeTime: ChartTime) =
         let now = firstNote + relativeTime
@@ -242,8 +241,7 @@ type IScoreMetric
                 elif status.[k] = HitStatus.RELEASE_REQUIRED then
                     let overhold =
                         match internalHoldStates.[k] with
-                        | Dropped, i
-                        | Holding, i when i <= noteSeekPassive -> true
+                        | Dropped, i | Holding, i when i <= noteSeekPassive -> true
                         | _ -> false
                         && Bitmap.hasBit k this.KeyState
                     let dropped =
@@ -257,44 +255,43 @@ type IScoreMetric
                     | _ -> ()
 
             noteSeekPassive <- noteSeekPassive + 1
-        // missing: checks key up as hold middle passes receptors
-        // algorithm must "forget" what it finds if we see a hold head or tail within misswindow
 
     override this.HandleKeyDown (relativeTime: ChartTime, k: int) =
         this.HandlePassive relativeTime
         let now = firstNote + relativeTime
         while noteSeekActive < hitData.Length && InternalScore.offsetOf hitData.[noteSeekActive] < now - missWindow do 
             noteSeekActive <- noteSeekActive + 1
+
         let mutable i = noteSeekActive
         let mutable delta = missWindow
         let mutable found = -1
-        let mutable priority = -1
         let target = now + missWindow
+
         while i < hitData.Length && InternalScore.offsetOf hitData.[i] <= target do
             let struct (t, deltas, status) = hitData.[i]
             let d = now - t
             if status.[k] = HitStatus.HIT_REQUIRED || status.[k] = HitStatus.HIT_HOLD_REQUIRED then
-                if (Time.Abs delta > Time.Abs d) || priority < 1 then
-                    priority <- 1
+                if (Time.Abs delta > Time.Abs d) then
                     found <- i
                     delta <- d
-            // absorb a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
+            // Accept a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
             elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -cbrushWindow then
-                if (Time.Abs delta > Time.Abs d) || priority < 0 then
-                    priority <- 1
+                if (Time.Abs delta > Time.Abs d) then
                     found <- i
                     delta <- d
             i <- i + 1
+
         if found >= 0 then
             let struct (t, deltas, status) = hitData.[found]
-            if priority = 1 then //we found a note
-                if status.[k] <> HitStatus.HIT_ACCEPTED then
-                    let isHoldHead = status.[k] <> HitStatus.HIT_REQUIRED
-                    status.[k] <- HitStatus.HIT_ACCEPTED
-                    deltas.[k] <- delta / rate
-                    this._HandleEvent { Time = relativeTime; Column = k; Guts = Hit_ (deltas.[k], isHoldHead, false) }
-                    if isHoldHead then internalHoldStates.[k] <- Holding, found
-        else
+            if status.[k] <> HitStatus.HIT_ACCEPTED then // Could be an already hit note, in which case just swallow the extra input
+                let isHoldHead = status.[k] <> HitStatus.HIT_REQUIRED
+                status.[k] <- HitStatus.HIT_ACCEPTED
+                deltas.[k] <- delta / rate
+                this._HandleEvent { Time = relativeTime; Column = k; Guts = Hit_ (deltas.[k], isHoldHead, false) }
+                // Begin tracking if it's a hold note
+                //assert(fst internalHoldStates.[k] = Nothing)
+                if isHoldHead then internalHoldStates.[k] <- Holding, found
+        else // If no note to hit, but a hold note head was missed, pressing key marks it dropped instead
             internalHoldStates.[k] <- 
                 match internalHoldStates.[k] with
                 | MissedHead, i -> Dropped, i
@@ -303,33 +300,38 @@ type IScoreMetric
     override this.HandleKeyUp (relativeTime: ChartTime, k: int) =
         this.HandlePassive relativeTime
         let now = firstNote + relativeTime
-        while noteSeekActive < hitData.Length && InternalScore.offsetOf hitData.[noteSeekActive] < now - missWindow do 
-            noteSeekActive <- noteSeekActive + 1
-        let mutable i = noteSeekActive
-        let mutable delta = missWindow
-        let mutable found = -1
-        let target = now + missWindow
-        while i < hitData.Length && InternalScore.offsetOf hitData.[i] <= target do
-            let struct (t, _, status) = hitData.[i]
-            let d = now - t
-            if status.[k] = HitStatus.RELEASE_REQUIRED then
-                if Time.Abs delta > Time.Abs d then
+        match internalHoldStates.[k] with
+        | Holding, holdHeadIndex
+        | Dropped, holdHeadIndex ->
+
+            let mutable i = holdHeadIndex + 1
+            let mutable delta = missWindow
+            let mutable found = -1
+            let target = now + missWindow
+
+            while i < hitData.Length && InternalScore.offsetOf hitData.[i] <= target do
+                let struct (t, _, status) = hitData.[i]
+                let d = now - t
+                if status.[k] = HitStatus.RELEASE_REQUIRED then
+                    // Get the first unreleased hold tail we see, after the head of the hold we're tracking
                     found <- i
                     delta <- d
-            elif status.[k] = HitStatus.HIT_HOLD_REQUIRED then
-                i <- hitData.Length //stops the loop so we don't release an LN that isnt held yet
-            i <- i + 1
-        if found >= 0 then
-            let struct (t, deltas, status) = hitData.[found]
-            status.[k] <- HitStatus.RELEASE_ACCEPTED
-            deltas.[k] <- delta / rate
-            this._HandleEvent { Time = relativeTime; Column = k; Guts = Release_ (deltas.[k], false, false, fst internalHoldStates.[k] = Dropped) }
-            internalHoldStates.[k] <- Nothing, found
-        else
-            internalHoldStates.[k] <- 
-                match internalHoldStates.[k] with
-                | Holding, i -> Dropped, i
-                | x -> x
+                    i <- hitData.Length
+                i <- i + 1
+
+            if found >= 0 then
+                let struct (t, deltas, status) = hitData.[found]
+                status.[k] <- HitStatus.RELEASE_ACCEPTED
+                deltas.[k] <- delta / rate
+                this._HandleEvent { Time = relativeTime; Column = k; Guts = Release_ (deltas.[k], false, false, fst internalHoldStates.[k] = Dropped) }
+                internalHoldStates.[k] <- Nothing, found
+            else // If we released but too early (no sign of the tail within range) make the long note dropped
+                internalHoldStates.[k] <- 
+                    match internalHoldStates.[k] with
+                    | Holding, i -> Dropped, i
+                    | x -> x
+        | MissedHead, _
+        | Nothing, _ -> ()
     
     abstract member HandleEvent : HitEvent<HitEventGutsInternal> -> HitEvent<HitEventGuts>
     member private this._HandleEvent ev =

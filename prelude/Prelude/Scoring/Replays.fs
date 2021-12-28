@@ -48,7 +48,7 @@ module InternalScore =
             )
         |> Array.ofSeq
 
-    // used for debug purposes, and not called normally.
+    // used for debug/test purposes, and not called normally.
     // creates what the internal data should look like after a "perfect" play
     let createAuto (keys: int) (notes: TimeData<NoteRow>) : InternalScoreData =
         notes.Data
