@@ -67,6 +67,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     let hold_presence = Array.create keys false
     let hold_pos = Array.create keys 0.0f
     let hold_colors = Array.create keys 0
+    let hold_index = Array.create keys -1
 
     let scrollDirectionPos bottom = if options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
     let scrollDirectionFlip = fun q -> if not (Content.noteskinConfig().FlipHoldTail) || options.Upscroll.Value then q else Quad.flip q
@@ -90,9 +91,12 @@ type NoteRenderer(scoring: IScoreMetric) as this =
         // seek to appropriate sv and note locations in data.
         // bit of a mess here. see comments on the variables for more on whats going on
         while note_seek < notes.Data.Count && (offsetOf notes.Data.[note_seek]) < now do
+            let _, struct (nr, _) = notes.Data.[note_seek]
+            for k = 0 to keys - 1 do
+                if nr.[k] = NoteType.HOLDHEAD then hold_index.[k] <- note_seek
             note_seek <- note_seek + 1
         note_peek <- note_seek
-        for i in 0 .. keys do
+        for i = 0 to keys do
             while sv_seek.[i] < sv.[i].Count && (offsetOf <| sv.[i].[sv_seek.[i]]) < now do
                 sv_seek.[i] <- sv_seek.[i] + 1
             sv_peek.[i] <- sv_seek.[i]
@@ -146,7 +150,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                     hold_presence.[k] <- true
                 elif nd.[k] = NoteType.HOLDTAIL then
                     let headpos = hold_pos.[k]
-                    let tint = Color.White //if hold_pos.[k] = hitposition && scoring.IsHoldDropped 0 k then Content.noteskinConfig().DroppedHoldColor else Color.White
+                    let tint = if hold_pos.[k] = hitposition && scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
                     let pos = column_pos.[k] - holdnoteTrim
                     if headpos < pos then
                         Draw.quad // body of ln
