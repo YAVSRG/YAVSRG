@@ -67,6 +67,7 @@ module Themes =
 
         let name = Setting.simple noteSkin.Config.Name
         let keycount = Setting.simple options.KeymodePreference.Value
+        let holdNoteTrim = Setting.bounded noteSkin.Config.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
         let mutable noteColors = noteSkin.Config.NoteColors
         
         let g keycount i =
@@ -87,6 +88,7 @@ module Themes =
             Content = fun add ->
                 column [
                     PrettySetting("NoteskinName", TextField name).Position(200.0f)
+                    PrettySetting("HoldNoteTrim", Slider(holdNoteTrim, 0.05f)).Position(300.0f)
                     PrettySetting("Keymode",
                         Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> refreshColors))
                     ).Position(450.0f)
@@ -103,6 +105,7 @@ module Themes =
                 noteSkin.Config <-
                     { noteSkin.Config with
                         Name = name.Value
+                        HoldNoteTrim = holdNoteTrim.Value
                         NoteColors = noteColors
                     }
                 Content.Noteskins.currentConfig.Value <- noteSkin.Config

@@ -8,6 +8,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
+open Prelude.ChartFormats.Interlude
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Graphics
@@ -18,7 +19,6 @@ open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
-open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Screens.LevelSelect.Globals
 
 module private InfoPanel =
@@ -199,6 +199,7 @@ type InfoPanel() as this =
     let scores = Scoreboard()
     let mutable length = ""
     let mutable bpm = ""
+    let mutable notecount = ""
 
     do
         scores
@@ -225,8 +226,12 @@ type InfoPanel() as this =
         |> positionWidget(0.0f, 0.5f, -120.0f, 1.0f, -10.0f, 1.0f, -50.0f, 1.0f)
         |> this.Add
 
+        new TextBox((fun () -> notecount), K (Color.White, Color.Black), 1.0f)
+        |> positionWidget(10.0f, 0.0f, -50.0f, 1.0f, -17.0f, 1.0f, -10.0f, 1.0f)
+        |> this.Add
+
         new TextBox((fun () -> getModString(rate.Value, selectedMods.Value, autoplay)), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(17.0f, 0.0f, -50.0f, 1.0f, -50.0f, 1.0f, -10.0f, 1.0f)
+        |> positionWidget(17.0f, 0.0f, -50.0f, 1.0f, -10.0f, 1.0f, -10.0f, 1.0f)
         |> this.Add
 
     member this.Refresh() =
@@ -246,4 +251,15 @@ type InfoPanel() as this =
                 if Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
                 elif a > 9000 || b < 0 then sprintf "♬ ∞"
                 else sprintf "♬ %i-%i" a b
+        notecount <-
+            match currentChart with
+            | Some c ->
+                let mutable notes = 0
+                let mutable lnotes = 0
+                for (_, nr) in c.Notes.Data do
+                    for n in nr do
+                        if n = NoteType.NORMAL then notes <- notes + 1
+                        elif n = NoteType.HOLDHEAD then notes <- notes + 1; lnotes <- lnotes + 1
+                sprintf "%i Notes | %.0f%% Holds" notes (100.0f * float32 lnotes / float32 notes)
+            | None -> ""
         scores.Refresh()
