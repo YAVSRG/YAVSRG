@@ -3,7 +3,6 @@
 open System
 open System.IO
 open System.Collections.Generic
-open System.Drawing
 open Prelude.Common
 open Prelude.Data.Themes
 open Interlude.Graphics

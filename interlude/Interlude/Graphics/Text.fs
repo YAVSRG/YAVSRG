@@ -10,6 +10,8 @@ open Prelude.Common
 
 module Fonts =
 
+    open System.IO
+
     let SCALE = 100.0f
     
     [<AllowNullLiteral>]
@@ -62,20 +64,19 @@ module Fonts =
             
     let collection = new FontCollection()
 
+    let init() =
+        for file in Directory.EnumerateFiles(Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")) do
+            if Path.GetExtension file = ".ttf" then
+                collection.Install file |> ignore
+        Logging.Info (sprintf "Loaded %i font families" (Seq.length collection.Families))
+
     let create (name: string) =
-        let f =
-            if name.Contains('.') then
-                //targeting a specific file
-                try
-                    let family = collection.Install name
-                    family.CreateFont(SCALE * 4.0f / 3.0f)
-                with
-                | err ->
-                    Prelude.Common.Logging.Error("Failed to load font file: " + name, err)
-                    failwith ""
-            else
-                collection.Find(name).CreateFont(SCALE * 4.0f / 3.0f)
-        new SpriteFont(f)
+        let found, family = collection.TryFind name
+        let family = 
+            if found then family
+            else Logging.Error (sprintf "Couldn't find font '%s', defaulting to Akrobat Black" name); collection.Find "Akrobat Black"
+        let font = family.CreateFont(SCALE * 4.0f / 3.0f)
+        new SpriteFont(font)
 
 (*
     Font rendering

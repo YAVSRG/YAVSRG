@@ -84,6 +84,7 @@ type Game(config: GameConfig) as this =
         base.OnLoad()
         this.ApplyConfig config
         Render.init(base.ClientSize.X, base.ClientSize.Y)
+        Fonts.init()
         FBO.init()
         Content.font() |> ignore
         Input.init this

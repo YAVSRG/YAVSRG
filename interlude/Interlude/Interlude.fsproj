@@ -5,8 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/percyqaz/YAVSRG</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.5.5.0</AssemblyVersion>
-    <FileVersion>0.5.5.0</FileVersion>
+    <AssemblyVersion>0.5.6.0</AssemblyVersion>
+    <FileVersion>0.5.6.0</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -28,6 +28,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Fonts\Akrobat-Black.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Fonts\Akrobat-Regular.ttf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
