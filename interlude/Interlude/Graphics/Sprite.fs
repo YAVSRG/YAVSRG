@@ -33,14 +33,12 @@ module Sprite =
         let width = image.Width
         let height = image.Height
 
-        // todo: I'm sure there's a way to directly grab this data (it's already in this arrangement in memory for the image)
-        let data = Array.zeroCreate<uint32> (width * height)
-        for x = 0 to image.Width - 1 do
-            for y = 0 to image.Height - 1 do
-                data.[y * width + x] <- image.[x, y].Rgba
+        let mutable data = System.Span<PixelFormats.Rgba32>.Empty
+        let success = image.TryGetSinglePixelSpan(&data)
+        if not success then Logging.Critical "Couldn't get pixel span for image!"
 
         GL.BindTexture(TextureTarget.Texture2D, id)
-        GL.TexImage2D<uint32>(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data)
+        GL.TexImage2D<PixelFormats.Rgba32>(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data.ToArray())
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
