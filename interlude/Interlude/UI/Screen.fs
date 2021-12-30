@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System
+open SixLabors.ImageSharp
 open System.Drawing
 open Prelude.Common
 open Interlude
@@ -98,7 +99,7 @@ module Screen =
 
         let load =
             let future = 
-                BackgroundTask.future<Bitmap option> "Background Loader"
+                BackgroundTask.future<Image<PixelFormats.Rgba32> option> "Background Loader"
                     (fun sprite ->
                         match sprite with
                         | Some bmp ->
@@ -108,9 +109,9 @@ module Screen =
                                     seq {
                                         let w = bmp.Width / 50
                                         let h = bmp.Height / 50
-                                        for x in 0 .. 49 do
-                                            for y in 0 .. 49 do
-                                                yield bmp.GetPixel(w * x, h * x) }
+                                        for x = 0 to 49 do
+                                            for y = 0 to 49 do
+                                                yield Color.FromArgb(bmp.[w * x, h * x].PackedValue >>> 8 |> int) }
                                     |> Seq.maxBy vibrance
                                     |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
                             globalAnimation.Add(
@@ -129,16 +130,16 @@ module Screen =
                                 )
                             )
                     )
-            let bitmapLoader (file: string) =
+            let imageLoader (file: string) : unit -> Image<PixelFormats.Rgba32> option =
                 fun () -> 
                     match System.IO.Path.GetExtension(file).ToLower() with
                     | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
-                        try Some (new Bitmap(file))
+                        try Some (Image.Load file)
                         with err -> Logging.Warn("Failed to load background image: " + file, err); None
                     | ext -> None
             fun path ->
                 List.iter (fun (_, fade: AnimationFade, _) -> fade.Target <- 0.0f) background
-                future (bitmapLoader path)
+                future (imageLoader path)
 
         let update elapsedTime =
             background <-

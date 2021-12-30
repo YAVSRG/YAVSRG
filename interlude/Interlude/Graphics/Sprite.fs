@@ -1,6 +1,6 @@
 ﻿namespace Interlude.Graphics
 
-open System.Drawing
+open SixLabors.ImageSharp
 open OpenTK.Mathematics
 open OpenTK.Graphics.OpenGL
 open Prelude.Common
@@ -20,8 +20,6 @@ and SpriteQuad = (struct(Sprite * Quad))
 
 module Sprite =
 
-    open System.Drawing.Imaging
-
     let MAX_TEXTURE_UNITS = GL.GetInteger GetPName.MaxTextureImageUnits
     let TOTAL_TEXTURE_UNITS = GL.GetInteger GetPName.MaxCombinedTextureImageUnits
 
@@ -29,12 +27,20 @@ module Sprite =
     let texUnit_cache : int array = Array.zeroCreate MAX_TEXTURE_UNITS
     let texUnit_inUse : bool array = Array.zeroCreate MAX_TEXTURE_UNITS
 
-    let upload (bitmap: Bitmap, rows, columns, smooth) : Sprite =
+    let upload (image: Image<PixelFormats.Rgba32>, rows, columns, smooth) : Sprite =
         let id = GL.GenTexture()
-        let data = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb)
+
+        let width = image.Width
+        let height = image.Height
+
+        // todo: I'm sure there's a way to directly grab this data (it's already in this arrangement in memory for the image)
+        let data = Array.zeroCreate<uint32> (width * height)
+        for x = 0 to image.Width - 1 do
+            for y = 0 to image.Height - 1 do
+                data.[y * width + x] <- image.[x, y].Rgba
+
         GL.BindTexture(TextureTarget.Texture2D, id)
-        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0)
-        bitmap.UnlockBits(data)
+        GL.TexImage2D<uint32>(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, width, height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, data)
 
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, int TextureWrapMode.Repeat)
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, int TextureWrapMode.Repeat)
@@ -44,7 +50,7 @@ module Sprite =
         else
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, int TextureMinFilter.Nearest)
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, int TextureMagFilter.Nearest)
-        { ID = id; TextureUnit = 0; Width = bitmap.Width; Height = bitmap.Height; Rows = rows; Columns = columns }
+        { ID = id; TextureUnit = 0; Width = width; Height = height; Rows = rows; Columns = columns }
 
     let cache (source: string) (sprite: Sprite) : Sprite =
         { 1 .. (MAX_TEXTURE_UNITS - 1) }
@@ -63,9 +69,9 @@ module Sprite =
                 { sprite with TextureUnit = i }
 
     let Default =
-        use bmp = new Bitmap(1, 1)
-        bmp.SetPixel(0, 0, Color.White)
-        upload (bmp, 1, 1, false)
+        use img = new Image<PixelFormats.Rgba32>(1, 1)
+        img.[0, 0] <- new PixelFormats.Rgba32(255uy, 255uy, 255uy, 255uy)
+        upload (img, 1, 1, false)
         |> cache "BLANK"
 
     let DefaultQuad : SpriteQuad = struct (Default, Quad.ofRect Rect.one)
