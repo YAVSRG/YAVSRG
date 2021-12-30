@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Graphics
 
-open Prelude.Common
 open OpenTK.Graphics.OpenGL
 
 type Buffer = BufferTarget * int
