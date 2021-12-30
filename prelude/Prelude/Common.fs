@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Diagnostics
+open SixLabors.ImageSharp
 open System.Drawing
 open System.Threading
 open System.Threading.Tasks
@@ -291,6 +292,11 @@ module Common =
         |> j.AddRule
 
         j
+
+    type Bitmap = Image<PixelFormats.Rgba32>
+    module Bitmap =
+        let load (stream: Stream) : Bitmap = Bitmap.Load<PixelFormats.Rgba32> stream
+    type Color = Drawing.Color
 
 (*
     Misc helper functions (mostly data storage)

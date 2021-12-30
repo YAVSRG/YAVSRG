@@ -3,7 +3,6 @@ namespace Prelude.Data
 open System
 open System.IO
 open System.IO.Compression
-open System.Drawing
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Gameplay.NoteColors
@@ -101,7 +100,7 @@ module Themes =
                         Color.FromArgb(255, 160, 80)
                     |]
 
-                Font = "Akrobat-Black.otf"
+                Font = "Akrobat-Black.ttf"
                 DefaultAccentColor = Color.FromArgb(0, 160, 200)
                 OverrideAccentColor = false
                 CursorSize = 50.0f
@@ -519,13 +518,13 @@ module Themes =
             with set conf = config <- conf; this.WriteJson (config, "theme.json")
             and get () = config
         
-        member this.GetTexture (name: string) =
+        member this.GetTexture (name: string) : (Bitmap * TextureConfig) option=
             match this.TryReadFile ("Textures", name + ".png") with
             | Some stream ->
-                let bmp = new Bitmap(stream)
+                let img = Bitmap.load stream
                 let info : TextureConfig = this.GetJson<TextureConfig> (false, "Textures", name + ".json") |> fst
                 stream.Dispose()
-                Some (bmp, info)
+                Some (img, info)
             | None -> None
 
         member this.GetGameplayConfig<'T> (name: string) = this.GetJson<'T> (true, "Interface", "Gameplay", name + ".json")
@@ -546,13 +545,13 @@ module Themes =
             with set conf = config <- conf; this.WriteJson (config, "noteskin.json")
             and get () = config
             
-        member this.GetTexture (name: string) =
+        member this.GetTexture (name: string) : (Bitmap * TextureConfig) option =
             match this.TryReadFile (name + ".png") with
             | Some stream ->
-                let bmp = new Bitmap(stream)
+                let img = Bitmap.load stream
                 let info : TextureConfig = this.GetJson<TextureConfig> (false, name + ".json") |> fst
                 stream.Dispose()
-                Some (bmp, info)
+                Some (img, info)
             | None -> None
         
         static member FromZipFile (file: string) = 

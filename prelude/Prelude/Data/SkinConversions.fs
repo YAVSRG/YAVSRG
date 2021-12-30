@@ -1,7 +1,6 @@
 ﻿namespace Prelude.Data
 
 open System.IO
-open System.Drawing
 open Prelude.Common
 
 module SkinConversions =
@@ -430,6 +429,7 @@ module SkinConversions =
             | Success (s, _, _) -> s
             | Failure (e, _, _) -> failwith e
 
+        (*
         //constructor can throw an exception!
         type Converter(path) = 
             let data = parseSkinINI (Path.Combine (path, "skin.ini"))
@@ -595,6 +595,7 @@ module SkinConversions =
                 |> ignore
 
                 Logging.Info "===== Complete! ====="
+            *)
     
     let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|Unknown|) (path: string) =
         if Directory.Exists path then
