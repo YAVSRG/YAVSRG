@@ -498,7 +498,7 @@ module Themes =
             match storage with
             | Zip _ -> () // Cannot write data to zip archives
             | Folder f ->
-                let target = Path.Combine(f, Path.Combine path)
+                let target = Path.Combine (f, Path.Combine path)
                 target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
                 JSON.ToFile(target, true) data
 

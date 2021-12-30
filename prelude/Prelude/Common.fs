@@ -303,19 +303,26 @@ module Common =
 
     let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
         if File.Exists path then
-            let p = Path.ChangeExtension (path, ".bak")
-            if File.Exists p then File.Copy (p, Path.ChangeExtension (path, ".bak2"), true)
-            File.Copy (path, p, true)
             match JSON.FromFile path with
             | Ok data -> data
             | Error err ->
                 Logging.Critical (sprintf "Could not load %s! Maybe it is corrupt?" (Path.GetFileName path), err)
                 if prompt then
-                    Console.WriteLine "If you would like to launch anyway, press ENTER."
-                    Console.WriteLine "If you would like to try and fix the problem youself, CLOSE THIS WINDOW."
+                    Console.WriteLine "If you would like to launch anyway (WILL WIPE THIS DATA!!), press ENTER."
+                    Console.WriteLine "If you would like to try and fix the problem youself, CLOSE THIS WINDOW NOW."
                     Console.ReadLine() |> ignore
                     Logging.Critical "User has chosen to launch game with default data."
                 defaultData
         else
             Logging.Info (sprintf "No %s file found, creating it." name)
             defaultData
+
+    let saveImportantJsonFile<'T> path (data: 'T) =
+        let write = Path.ChangeExtension (path, ".new")
+        let bak = Path.ChangeExtension (path, ".bak")
+        let bak2 = Path.ChangeExtension (path, ".bak2")
+        JSON.ToFile (write, true) data
+        if File.Exists bak2 then File.Delete bak2
+        if File.Exists bak then File.Move (bak, bak2)
+        if File.Exists path then File.Move (path, bak)
+        File.Move (write, path)

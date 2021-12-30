@@ -253,7 +253,7 @@ module Library =
 
     // ---- Basic data layer stuff ----
 
-    let save() = JSON.ToFile(Path.Combine(getDataPath "Data", "cache.json"), true) data
+    let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "cache.json")) data
     
     let addOrUpdate (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c
 

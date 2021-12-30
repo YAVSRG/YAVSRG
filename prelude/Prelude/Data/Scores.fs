@@ -242,7 +242,7 @@ module Scores =
         loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) Data.Default true
         |> fun d -> Logging.Info (sprintf "Scores loaded, %i chart entries and %i buckets." d.Entries.Keys.Count d.Buckets.Keys.Count); d
 
-    let save() = JSON.ToFile (Path.Combine (getDataPath "Data", "scores.json"), true) data
+    let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "scores.json")) data
 
     let getOrCreateScoreData (chart: Chart) =
         let hash = Chart.hash chart
