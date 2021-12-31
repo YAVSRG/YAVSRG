@@ -111,7 +111,7 @@ module Screen =
                                         let h = bmp.Height / 50
                                         for x = 0 to 49 do
                                             for y = 0 to 49 do
-                                                yield Color.FromArgb(bmp.[w * x, h * x].PackedValue >>> 8 |> int) }
+                                                yield Color.FromArgb(int bmp.[w * x, h * x].R, int bmp.[w * x, h * x].G, int bmp.[w * x, h * x].B) }
                                     |> Seq.maxBy vibrance
                                     |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
                             globalAnimation.Add(

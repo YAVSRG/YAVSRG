@@ -56,7 +56,7 @@ module Fonts =
 
         do genAtlas()
         member this.Char(c) =
-            if not <| fontLookup.ContainsKey(c) then genChar(c)
+            if not <| fontLookup.ContainsKey c then genChar c
             fontLookup.[c]
         member this.Dispose() =
             fontLookup.Values
@@ -66,15 +66,17 @@ module Fonts =
 
     let init() =
         for file in Directory.EnumerateFiles(Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")) do
-            if Path.GetExtension file = ".ttf" then
+            match Path.GetExtension file with
+            | ".ttf" | ".otf" ->
                 collection.Install file |> ignore
+            | _ -> ()
         Logging.Info (sprintf "Loaded %i font families" (Seq.length collection.Families))
 
     let create (name: string) =
-        let found, family = collection.TryFind name
+        let found, family = collection.TryFind (name, Globalization.CultureInfo.InvariantCulture)
         let family = 
             if found then family
-            else Logging.Error (sprintf "Couldn't find font '%s', defaulting to Akrobat Black" name); collection.Find "Akrobat Black"
+            else Logging.Error (sprintf "Couldn't find font '%s', defaulting to Akrobat Black" name); collection.Find ("Akrobat Black", Globalization.CultureInfo.InvariantCulture)
         let font = family.CreateFont(SCALE * 4.0f / 3.0f)
         new SpriteFont(font)
 
