@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Graphics
 
 open System
+open System.Globalization
 open SixLabors.Fonts
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
@@ -12,47 +13,63 @@ module Fonts =
 
     open System.IO
 
-    let SCALE = 100.0f
+    let SCALE = 100f
+
+    type private GlyphInfo =
+        {
+            Char: char
+            Size: FontRectangle
+            Offset: float32
+        }
+        member this.Width = this.Size.Width
+        member this.Height = this.Size.Height
     
     [<AllowNullLiteral>]
-    type SpriteFont(font: Font) =
+    type SpriteFont(font: Font, fallbacks: FontFamily list) =
         let fontLookup = new Dictionary<char, SpriteQuad>()
 
-        let drawOptions = new RendererOptions(font, ApplyKerning = false)
+        let renderOptions = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+        let textOptions = let x = new TextOptions() in x.FallbackFonts.AddRange(fallbacks); x
+        let drawOptions = new DrawingOptions(TextOptions = textOptions)
 
         let genChar(c: char) =
-            let size = TextMeasurer.Measure(c.ToString(), drawOptions)
+            let size = TextMeasurer.Measure(c.ToString(), renderOptions)
             use img = new Bitmap(int size.Width, int size.Height)
             img.Mutate<PixelFormats.Rgba32>(
                 fun img -> 
-                    img.DrawText(c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(0f, 0f))
+                    img.DrawText(drawOptions, c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(0f, size.Top / 2f))
                     |> ignore
             )
             fontLookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.gridUV (0, 0))
 
         let genAtlas() =
             let mutable w = 0.0f
-            let chars =
+            let glyphs =
                 seq {
-                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n⭐♬∞⌛•⮜" do
-                        let s = TextMeasurer.Measure(c.ToString(), drawOptions)
-                        w <- w + s.Width + 2.0f
-                        yield (c, s.Width, s.Height, w - s.Width - 1.0f)
+                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n⭐🎵∞⌛•⬅" do
+                        let size = TextMeasurer.Measure(c.ToString(), renderOptions)
+                        w <- w + size.Width + 2.0f
+                        yield { Char = c; Size = size; Offset = w - size.Width - 1.0f }
                 } |> List.ofSeq
 
-            let h = List.map (fun (_, _, h, _) -> h) chars |> List.max
+            let h = List.map (fun (info: GlyphInfo) -> info.Height) glyphs |> List.max
 
             use img = new Bitmap(int w, int h)
-            let _ =
-                for (c, _, _, x) in chars do
-                    img.Mutate<PixelFormats.Rgba32>(
-                        fun img ->
-                            img.DrawText(c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(x, 0f))
-                            |> ignore
-                    )
+            for glyph in glyphs do
+                img.Mutate<PixelFormats.Rgba32>(
+                    fun img ->
+                        img.DrawText(drawOptions, glyph.Char.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(glyph.Offset, 0f))
+                        |> ignore
+                )
             let sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT"
-            for (c, width, height, x) in chars do
-                fontLookup.Add(c, struct ({ sprite with Height = int height; Width = int width }, (Rect.createWH (x / w) 0.0f (width / w) (height / h) |> Quad.ofRect)))
+            for glyph in glyphs do
+                fontLookup.Add
+                    ( glyph.Char,
+                        struct (
+                            { sprite with Height = int glyph.Height; Width = int glyph.Width },
+                            (Rect.createWH (glyph.Offset / w) 0.0f (glyph.Width / w) (glyph.Height / h) |> Quad.ofRect)
+                        )
+                    )
 
         do genAtlas()
         member this.Char(c) =
@@ -73,12 +90,12 @@ module Fonts =
         Logging.Info (sprintf "Loaded %i font families" (Seq.length collection.Families))
 
     let create (name: string) =
-        let found, family = collection.TryFind (name, Globalization.CultureInfo.InvariantCulture)
+        let found, family = collection.TryFind (name, CultureInfo.InvariantCulture)
         let family = 
             if found then family
-            else Logging.Error (sprintf "Couldn't find font '%s', defaulting to Akrobat Black" name); collection.Find ("Akrobat Black", Globalization.CultureInfo.InvariantCulture)
+            else Logging.Error (sprintf "Couldn't find font '%s', defaulting to Akrobat Black" name); collection.Find ("Akrobat Black", CultureInfo.InvariantCulture)
         let font = family.CreateFont(SCALE * 4.0f / 3.0f)
-        new SpriteFont(font)
+        new SpriteFont(font, [collection.Find ("Noto Emoji", CultureInfo.InvariantCulture)])
 
 (*
     Font rendering

@@ -248,8 +248,8 @@ type InfoPanel() as this =
             | None -> (500.0f<ms/beat>, 500.0f<ms/beat>)
             |> fun (b, a) -> (60000.0f<ms> / a * rate.Value |> int, 60000.0f<ms> / b * rate.Value |> int)
             |> fun (a, b) ->
-                if Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
-                elif a > 9000 || b < 0 then sprintf "♬ ∞"
+                if a > 9000 || b < 0 then sprintf "♬ ∞"
+                elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
                 else sprintf "♬ %i-%i" a b
         notecount <-
             match currentChart with
