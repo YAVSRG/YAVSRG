@@ -34,7 +34,7 @@ module Fonts =
 
         let genChar(c: char) =
             let size = TextMeasurer.Measure(c.ToString(), renderOptions)
-            use img = new Bitmap(int size.Width, int size.Height)
+            use img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
             img.Mutate<PixelFormats.Rgba32>(
                 fun img -> 
                     img.DrawText(drawOptions, c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(0f, size.Top / 2f))
@@ -46,7 +46,7 @@ module Fonts =
             let mutable w = 0.0f
             let glyphs =
                 seq {
-                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n⭐🎵∞⌛•⬅" do
+                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n•∞⭐🎵⌛⬅" do
                         let size = TextMeasurer.Measure(c.ToString(), renderOptions)
                         w <- w + size.Width + 2.0f
                         yield { Char = c; Size = size; Offset = w - size.Width - 1.0f }

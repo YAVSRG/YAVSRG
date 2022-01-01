@@ -230,7 +230,7 @@ module Options =
         }
         static member Default = {
             AudioOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
-            AudioVolume = Setting.percent 0.1
+            AudioVolume = Setting.percent 0.05
             CurrentChart = Setting.simple ""
             Theme = Setting.simple "*default"
 
