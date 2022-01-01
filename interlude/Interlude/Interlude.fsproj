@@ -116,8 +116,6 @@
     <PackageReference Include="ManagedBass" Version="3.1.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.1.0" />
     <PackageReference Include="OpenTK" Version="4.6.7" />
-    <PackageReference Include="SharpFont.Dependencies" Version="2.6.0" />
-    <PackageReference Include="SharpFont.NetStandard" Version="1.0.5" />
   </ItemGroup>
 
   <ItemGroup>

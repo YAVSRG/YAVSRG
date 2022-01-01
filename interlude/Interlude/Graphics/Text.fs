@@ -1,11 +1,13 @@
 ﻿namespace Interlude.Graphics
 
 open System
+open System.Globalization
 open SixLabors.Fonts
 open SixLabors.ImageSharp
+open SixLabors.ImageSharp.Processing
+open SixLabors.ImageSharp.Drawing.Processing
 open System.Collections.Generic
 open Prelude.Common
-open SharpFont
 
 module Fonts =
 
@@ -16,29 +18,31 @@ module Fonts =
     type private GlyphInfo =
         {
             Char: char
-            Width: float32
-            Height: float32
+            Size: FontRectangle
             Offset: float32
         }
+        member this.Width = this.Size.Width
+        member this.Height = this.Size.Height
     
     [<AllowNullLiteral>]
-    type SpriteFont(face: Face) =
+    type SpriteFont(font: Font, fallbacks: FontFamily list) =
         let fontLookup = new Dictionary<char, SpriteQuad>()
 
+        let renderOptions = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
+        let textOptions = let x = new TextOptions() in x.FallbackFonts.AddRange(fallbacks); x
+        let drawOptions = new DrawingOptions(TextOptions = textOptions)
+
         let genChar(c: char) =
-            face.LoadChar(uint c, LoadFlags.Render, LoadTarget.Normal)
-            let width = face.Glyph.Bitmap.Width
-            let height = face.Glyph.Bitmap.Rows
-            use img = new Bitmap(width, height)
-            for x = 0 to width - 1 do
-                for y = 0 to height - 1 do
-                    let value = face.Glyph.Bitmap.BufferData.[y * width + x]
-                    img.[x, y] <- PixelFormats.Rgba32(255uy, 255uy, 255uy, value)
+            let size = TextMeasurer.Measure(c.ToString(), renderOptions)
+            use img = new Bitmap(int size.Width, int size.Height)
+            img.Mutate<PixelFormats.Rgba32>(
+                fun img -> 
+                    img.DrawText(drawOptions, c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(0f, size.Top / 2f))
+                    |> ignore
+            )
             fontLookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.gridUV (0, 0))
 
         let genAtlas() =
-            ()
-            (*
             let mutable w = 0.0f
             let glyphs =
                 seq {
@@ -65,7 +69,7 @@ module Fonts =
                             { sprite with Height = int glyph.Height; Width = int glyph.Width },
                             (Rect.createWH (glyph.Offset / w) 0.0f (glyph.Width / w) (glyph.Height / h) |> Quad.ofRect)
                         )
-                    )*)
+                    )
 
         do genAtlas()
         member this.Char(c) =
@@ -76,7 +80,6 @@ module Fonts =
             |> Seq.iter (fun struct (s, _) -> Sprite.destroy s)
             
     let collection = new FontCollection()
-    let library = new Library()
 
     let init() =
         for file in Directory.EnumerateFiles(Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")) do
@@ -87,15 +90,12 @@ module Fonts =
         Logging.Info (sprintf "Loaded %i font families" (Seq.length collection.Families))
 
     let create (name: string) =
-        let face = new Face(library, Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts", "Akrobat-Black.ttf"))
-        (*
         let found, family = collection.TryFind (name, CultureInfo.InvariantCulture)
         let family = 
             if found then family
             else Logging.Error (sprintf "Couldn't find font '%s', defaulting to Akrobat Black" name); collection.Find ("Akrobat Black", CultureInfo.InvariantCulture)
-        let font = family.CreateFont(SCALE * 4.0f / 3.0f) *)
-        face.SetPixelSizes(0u, uint (SCALE * 4.0f / 3.0f))
-        new SpriteFont(face)
+        let font = family.CreateFont(SCALE * 4.0f / 3.0f)
+        new SpriteFont(font, [collection.Find ("Noto Emoji", CultureInfo.InvariantCulture)])
 
 (*
     Font rendering
@@ -107,7 +107,7 @@ module Text =
 
     let private FONTSCALE = SCALE
     let private WHITESPACE = 0.25f
-    let private SPACING = 0.04f
+    let private SPACING = -0.04f
     let private SHADOW = 0.09f
 
     let measure (font: SpriteFont, text: string) : float32 =
