@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open System
-open System.Drawing
 open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
@@ -207,13 +206,13 @@ type InfoPanel() as this =
         |> this.Add
 
         new TextBox(
-            (fun () -> match difficultyRating with None -> "0.00⭐" | Some d -> sprintf "%.2f⭐" d.Physical),
+            (fun () -> sprintf "%.2f%s" (match difficultyRating with None -> 0.0 | Some d -> d.Physical) Interlude.Icons.star),
             (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -190.0f, 1.0f, 0.0f, 0.5f, -120.0f, 1.0f)
         |> this.Add
 
         new TextBox(
-            (fun () -> match difficultyRating with None -> "0.00⭐" | Some d -> sprintf "%.2f⭐" d.Technical),
+            (fun () -> sprintf "%.2f%s" (match difficultyRating with None -> 0.0 | Some d -> d.Technical) Interlude.Icons.star),
             (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -120.0f, 1.0f, 0.0f, 0.5f, -50.0f, 1.0f)
         |> this.Add

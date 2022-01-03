@@ -158,3 +158,7 @@ module Utils =
                             callback()
                     ))
             |> ignore
+
+module Icons = 
+    let star = "⭐"
+    let back = "\u8656"

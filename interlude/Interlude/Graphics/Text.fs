@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Graphics
 
 open System
-open System.Globalization
 open SixLabors.Fonts
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
@@ -35,11 +34,13 @@ module Fonts =
         let genChar(c: char) =
             let size = TextMeasurer.Measure(c.ToString(), renderOptions)
             use img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
-            img.Mutate<PixelFormats.Rgba32>(
-                fun img -> 
-                    img.DrawText(drawOptions, c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(0f, size.Top / 2f))
-                    |> ignore
-            )
+            try
+                img.Mutate<PixelFormats.Rgba32>(
+                    fun img -> 
+                        img.DrawText(drawOptions, c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(0f, 0f))
+                        |> ignore
+                )
+            with err -> Logging.Error (sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
             fontLookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.gridUV (0, 0))
 
         let genAtlas() =
@@ -82,20 +83,21 @@ module Fonts =
     let collection = new FontCollection()
 
     let init() =
+        //todo: load interlude as embedded font
         for file in Directory.EnumerateFiles(Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")) do
             match Path.GetExtension file with
             | ".ttf" | ".otf" ->
                 collection.Install file |> ignore
             | _ -> ()
-        Logging.Info (sprintf "Loaded %i font families" (Seq.length collection.Families))
+        Logging.Info (sprintf "Loaded %i external fonts" (Seq.length collection.Families))
 
     let create (name: string) =
-        let found, family = collection.TryFind (name, CultureInfo.InvariantCulture)
+        let found, family = collection.TryFind name
         let family = 
             if found then family
-            else Logging.Error (sprintf "Couldn't find font '%s', defaulting to Akrobat Black" name); collection.Find ("Akrobat Black", CultureInfo.InvariantCulture)
+            else Logging.Error (sprintf "Couldn't find font '%s', defaulting" name); collection.Find "Interlude"
         let font = family.CreateFont(SCALE * 4.0f / 3.0f)
-        new SpriteFont(font, [collection.Find ("Noto Emoji", CultureInfo.InvariantCulture)])
+        new SpriteFont(font, [collection.Find "Interlude"])
 
 (*
     Font rendering

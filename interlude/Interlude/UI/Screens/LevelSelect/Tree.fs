@@ -137,7 +137,7 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
             collectionIcon <-
                 if options.ChartGroupMode.Value <> "Collections" then
                     match snd Collections.selected with
-                    | Collection ccs -> if ccs.Contains cc.FilePath then "✭" else ""
+                    | Collection ccs -> if ccs.Contains cc.FilePath then Interlude.Icons.star else ""
                     | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then "➾" else ""
                     | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then "@" else ""
                 else ""
