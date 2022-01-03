@@ -99,7 +99,7 @@ module Themes =
                         Color.FromArgb(160, 255, 255)
                         Color.FromArgb(255, 160, 80)
                     |]
-                Font = "Akrobat Black"
+                Font = "Interlude"
                 DefaultAccentColor = Color.FromArgb(0, 160, 200)
                 OverrideAccentColor = false
                 CursorSize = 50.0f
