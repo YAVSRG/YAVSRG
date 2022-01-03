@@ -125,7 +125,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 let mid = (right + left) * 0.5f
                 let hmid = (top + bottom) * 0.5f
                 let rect = Rect.createWH (mid + textW * 0.6f - h * 0.2f) (hmid - h * 0.4f) (h * 0.4f) (h * 0.4f)
-                Text.drawFill(font(), "▲", rect, themeConfig().PBColors.[int (pb())], 0.5f)
+                Text.drawFill(font(), Icons.sparkle, rect, themeConfig().PBColors.[int (pb())], 0.5f)
         }
 
     do

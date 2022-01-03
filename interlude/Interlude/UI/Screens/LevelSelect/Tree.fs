@@ -138,8 +138,8 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
                 if options.ChartGroupMode.Value <> "Collections" then
                     match snd Collections.selected with
                     | Collection ccs -> if ccs.Contains cc.FilePath then Interlude.Icons.star else ""
-                    | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then "➾" else ""
-                    | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then "@" else ""
+                    | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.playlist else ""
+                    | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.goal else ""
                 else ""
         if Mouse.Hover bounds then
             hover.Target <- 1.0f

@@ -110,9 +110,9 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
 
     let mutable refresh = ignore
 
-    let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), "➕")
-    let editButton = Button((fun () -> SelectionMenu(Mounts.editor setting).Show()), "✎")
-    let deleteButton = Button((fun () -> setting.Value <- None; refresh()), "✕")
+    let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), Interlude.Icons.add)
+    let editButton = Button((fun () -> SelectionMenu(Mounts.editor setting).Show()), Interlude.Icons.edit)
+    let deleteButton = Button((fun () -> setting.Value <- None; refresh()), Interlude.Icons.remove)
 
     do
         refresh <-

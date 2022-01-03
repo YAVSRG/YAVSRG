@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI.Components.Selection.Compound
 
-open System.Drawing
 open Prelude.Common
 open Interlude.Utils
 open Interlude.Graphics
@@ -13,13 +12,6 @@ open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Components.Selection.Menu
 
 module CardSelect =
-    
-        let markedIcon = "◆"
-        let unmarkedIcon = "◇"
-    
-        let addIcon = "➕"
-        let editIcon = "✎"
-        let deleteIcon = "✕"
 
         let private h = 75.0f
     
@@ -72,20 +64,20 @@ module CardSelect =
     
                 let mutable x = -h
     
-                new TextBox((fun () -> if marked then markedIcon else unmarkedIcon), K (Color.White, Color.Black), 0.5f)
+                new TextBox((fun () -> if marked then Interlude.Icons.selected else Interlude.Icons.unselected), K (Color.White, Color.Black), 0.5f)
                 |> positionWidget(x, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
                 |> this.Add
     
                 if Option.isSome config.DeleteFunc then
                     x <- x - h
-                    new IconButton(deleteIcon, fun () -> config.DeleteFunc.Value item; config.Refresh())
+                    new IconButton(Interlude.Icons.remove, fun () -> config.DeleteFunc.Value item; config.Refresh())
                     |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                     |> addButton
     
                 if Option.isSome config.EditFunc then
                     x <- x - h
                     new IconButton(
-                        editIcon,
+                        Interlude.Icons.edit,
                         fun () -> 
                             let page = config.EditFunc.Value item
                             add("EditItem", { page with Callback = fun () -> page.Callback(); config.Refresh() })
@@ -95,7 +87,7 @@ module CardSelect =
     
                 if Option.isSome config.DuplicateFunc then
                     x <- x - h
-                    new IconButton(addIcon, fun () -> config.DuplicateFunc.Value item; config.Refresh())
+                    new IconButton(Interlude.Icons.add, fun () -> config.DuplicateFunc.Value item; config.Refresh())
                     |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                     |> addButton
     
@@ -147,7 +139,7 @@ module CardSelect =
                 items |> Seq.iter fc.Add
 
                 if config.CreateFunc.IsSome then
-                    { new IconButton(addIcon, fun () -> config.CreateFunc.Value (); config.Refresh())
+                    { new IconButton(Interlude.Icons.add, fun () -> config.CreateFunc.Value (); config.Refresh())
                        with override _.SParent = Some this }
                     |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, h, 0.0f, h, 0.0f)
                     |> fc.Add
