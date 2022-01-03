@@ -66,8 +66,6 @@ module Keybinds =
 
         member this.OnKeymodeChanged() = refreshText()
         
-
-    let icon = "⌨"
     let page() : SelectionPage = 
         let keycount = Setting.simple options.KeymodePreference.Value
 

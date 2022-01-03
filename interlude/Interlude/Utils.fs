@@ -161,4 +161,25 @@ module Utils =
 
 module Icons = 
     let star = "⭐"
-    let back = "\u8656"
+    let back = "👈"
+    let bpm = "♬"
+    let time = "⌛"
+    let sparkle = "✨"
+
+    let edit = "✏"
+    let add = "✚"
+    let remove = "❌"
+    let selected = "◆"
+    let unselected = "◇"
+
+    let goal = "🏁"
+    let playlist = "📃"
+
+    let system = "❖"
+    let themes = "🎨"
+    let gameplay = "🎮"
+    let binds = "🎮"
+    let debug = "🔧"
+
+    let info = "ℹ"
+    let alert = "⚠"

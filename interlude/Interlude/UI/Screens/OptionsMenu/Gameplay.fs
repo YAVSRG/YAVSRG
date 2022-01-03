@@ -134,7 +134,6 @@ module Gameplay =
             Callback = ignore
         }
 
-    let icon = "♛"
     let page() : SelectionPage =
         {
             Content = fun add ->

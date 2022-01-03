@@ -16,7 +16,7 @@ module Fonts =
 
     type private GlyphInfo =
         {
-            Char: char
+            Code: int32
             Size: FontRectangle
             Offset: float32
         }
@@ -25,19 +25,22 @@ module Fonts =
     
     [<AllowNullLiteral>]
     type SpriteFont(font: Font, fallbacks: FontFamily list) =
-        let fontLookup = new Dictionary<char, SpriteQuad>()
+        let fontLookup = new Dictionary<int32, SpriteQuad>()
 
         let renderOptions = new RendererOptions(font, ApplyKerning = false, FallbackFontFamilies = fallbacks)
         let textOptions = let x = new TextOptions() in x.FallbackFonts.AddRange(fallbacks); x
         let drawOptions = new DrawingOptions(TextOptions = textOptions)
 
-        let genChar(c: char) =
-            let size = TextMeasurer.Measure(c.ToString(), renderOptions)
+        let codepointToString(c: int32) : string = Char.ConvertFromUtf32 c
+
+        let genChar(c: int32) =
+            let s = codepointToString c
+            let size = TextMeasurer.Measure(s, renderOptions)
             use img = new Bitmap(max 1 (int size.Width), max 1 (int size.Height))
             try
                 img.Mutate<PixelFormats.Rgba32>(
                     fun img -> 
-                        img.DrawText(drawOptions, c.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(0f, 0f))
+                        img.DrawText(drawOptions, s, font, SixLabors.ImageSharp.Color.White, new PointF(0f, 0f))
                         |> ignore
                 )
             with err -> Logging.Error (sprintf "Exception occurred rendering glyph with code point %i" (int c), err)
@@ -45,12 +48,17 @@ module Fonts =
 
         let genAtlas() =
             let mutable w = 0.0f
+            let mutable highSurrogate : char = ' '
             let glyphs =
                 seq {
-                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n•∞⭐🎵⌛⬅" do
-                        let size = TextMeasurer.Measure(c.ToString(), renderOptions)
-                        w <- w + size.Width + 2.0f
-                        yield { Char = c; Size = size; Offset = w - size.Width - 1.0f }
+                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n•∞⭐⌛⬅" do
+                        if Char.IsHighSurrogate c then
+                            highSurrogate <- c
+                        else
+                            let code = if Char.IsLowSurrogate c then Char.ConvertToUtf32(highSurrogate, c) else int32 c
+                            let size = TextMeasurer.Measure(codepointToString code, renderOptions)
+                            w <- w + size.Width + 2.0f
+                            yield { Code = code; Size = size; Offset = w - size.Width - 1.0f }
                 } |> List.ofSeq
 
             let h = List.map (fun (info: GlyphInfo) -> info.Height) glyphs |> List.max
@@ -59,13 +67,13 @@ module Fonts =
             for glyph in glyphs do
                 img.Mutate<PixelFormats.Rgba32>(
                     fun img ->
-                        img.DrawText(drawOptions, glyph.Char.ToString(), font, SixLabors.ImageSharp.Color.White, new PointF(glyph.Offset, 0f))
+                        img.DrawText(drawOptions, codepointToString glyph.Code, font, SixLabors.ImageSharp.Color.White, new PointF(glyph.Offset, 0f))
                         |> ignore
                 )
             let sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT"
             for glyph in glyphs do
                 fontLookup.Add
-                    ( glyph.Char,
+                    ( glyph.Code,
                         struct (
                             { sprite with Height = int glyph.Height; Width = int glyph.Width },
                             (Rect.createWH (glyph.Offset / w) 0.0f (glyph.Width / w) (glyph.Height / h) |> Quad.ofRect)
@@ -73,7 +81,7 @@ module Fonts =
                     )
 
         do genAtlas()
-        member this.Char(c) =
+        member this.Char(c: int32) =
             if not <| fontLookup.ContainsKey c then genChar c
             fontLookup.[c]
         member this.Dispose() =
@@ -113,25 +121,50 @@ module Text =
     let private SHADOW = 0.09f
 
     let measure (font: SpriteFont, text: string) : float32 =
-        text |> Seq.fold (fun v c -> v + (c |> function | ' ' -> WHITESPACE | c -> float32 (let struct (s, _) = font.Char(c) in s.Width) / FONTSCALE) + SPACING) -SPACING
+        let mutable width = -SPACING
+        let mutable highSurrogate = ' '
+        let mutable i = 0
+        while i < text.Length do
+            let thisChar = text.[i]
+            if thisChar = ' ' then
+                width <- width + WHITESPACE
+            elif Char.IsHighSurrogate thisChar then
+                highSurrogate <- thisChar
+            else
+                let code = 
+                    if Char.IsLowSurrogate thisChar then Char.ConvertToUtf32(highSurrogate, thisChar)
+                    else int32 thisChar
+                let struct (s, _) = font.Char code
+                width <- width + (float32 s.Width) / FONTSCALE + SPACING
+            i <- i + 1
+        width
 
     let drawB (font: SpriteFont, text: string, scale, x, y, (fg, bg)) =
-        let mutable x = x
         let scale2 = scale / FONTSCALE
         let shadowAdjust = SHADOW * scale
-        text
-        |> Seq.iter (
-            function
-            | ' ' -> x <- x + WHITESPACE * scale
-            | c -> 
-                let struct (s, q) = font.Char(c)
+        let mutable x = x
+        let mutable highSurrogate = ' '
+        let mutable i = 0
+        while i < text.Length do
+            let thisChar = text.[i]
+            if thisChar = ' ' then
+                x <- x + WHITESPACE * scale
+            elif Char.IsHighSurrogate thisChar then
+                highSurrogate <- thisChar
+            else
+                let code = 
+                    if Char.IsLowSurrogate thisChar then Char.ConvertToUtf32(highSurrogate, thisChar)
+                    else int32 thisChar
+                let struct (s, q) = font.Char code
                 let w = float32 s.Width * scale2
                 let h = float32 s.Height * scale2
                 let r = Rect.create x y (x + w) (y + h)
                 if (bg: Color).A <> 0uy then
                     Draw.quad (Quad.ofRect (Rect.translate(shadowAdjust, shadowAdjust) r)) (Quad.colorOf bg) struct (s, q)
                 Draw.quad (Quad.ofRect r) (Quad.colorOf fg) struct (s, q)
-                x <- x + w + SPACING * scale)
+                x <- x + w + SPACING * scale
+            i <- i + 1
+
     let draw (font, text, scale, x, y, color) = drawB(font, text, scale, x, y, (color, Color.Transparent))
 
     let drawJust (font: SpriteFont, text, scale, x, y, color, just: float32) = draw(font, text, scale, x - measure(font, text) * scale * just, y, color)

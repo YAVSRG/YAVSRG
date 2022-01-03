@@ -9,7 +9,6 @@ open Interlude.UI.Components.Selection.Menu
 
 module Debug =
 
-    let icon = "⚒"
     let page() : SelectionPage =
         {
             Content = fun add ->
