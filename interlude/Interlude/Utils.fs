@@ -175,9 +175,9 @@ module Icons =
     let goal = "🏁"
     let playlist = "📃"
 
-    let system = "❖"
+    let system = "※"
     let themes = "🎨"
-    let gameplay = "🎮"
+    let gameplay = "☔"
     let binds = "🎮"
     let debug = "🔧"
 
