@@ -111,9 +111,9 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
         | None -> ()
 
         Draw.rect(Rect.sliceBottom 25.0f bounds) (Color.FromArgb(60, 0, 0, 0)) Sprite.Default
-        Text.drawB(font(), cc.Title, 23.0f, left, top, (Color.White, Color.Black))
-        Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left, top + 34.0f, (Color.White, Color.Black))
-        Text.drawB(font(), cc.DiffName, 15.0f, left, top + 65.0f, (Color.White, Color.Black))
+        Text.drawB(font(), cc.Title, 23.0f, left + 5f, top, (Color.White, Color.Black))
+        Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, (Color.White, Color.Black))
+        Text.drawB(font(), cc.DiffName, 15.0f, left + 5f, top + 65.0f, (Color.White, Color.Black))
         Text.drawB(font(), collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
 
         let border = Rect.expand(5.0f, 5.0f) bounds
@@ -137,9 +137,9 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
             collectionIcon <-
                 if options.ChartGroupMode.Value <> "Collections" then
                     match snd Collections.selected with
-                    | Collection ccs -> if ccs.Contains cc.FilePath then "✭" else ""
-                    | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then "➾" else ""
-                    | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then "@" else ""
+                    | Collection ccs -> if ccs.Contains cc.FilePath then Interlude.Icons.star else ""
+                    | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.playlist else ""
+                    | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.goal else ""
                 else ""
         if Mouse.Hover bounds then
             hover.Target <- 1.0f
@@ -185,7 +185,7 @@ type private GroupItem(name: string, items: ChartItem list) =
         Draw.rect (Rect.sliceTop 5.0f borderb) colorb Sprite.Default
         Draw.rect (Rect.sliceBottom 5.0f borderb) colorb Sprite.Default
         Draw.rect bounds (if selected then Style.accentShade(127, 1.0f, 0.2f) else Style.accentShade(127, 0.3f, 0.0f)) Sprite.Default
-        Text.drawFillB(font(), name, bounds |> Rect.trimBottom 5.0f, (Color.White, Color.Black), 0.5f)
+        Text.drawFillB(font(), name, bounds |> Rect.expand(-5.0f, -5.0f), (Color.White, Color.Black), 0.5f)
 
     override this.Draw(top, topEdge) =
         let b = base.Draw(top, topEdge)

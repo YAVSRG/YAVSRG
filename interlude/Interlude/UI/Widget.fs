@@ -59,9 +59,10 @@ module WPos =
     let rightCentre x y w h : WPos = (x - w, 1.0f), (y - h * 0.5f, 0.5f), (x, 1.0f), (y + h * 0.5f, 0.5f)
     let bottomCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y - h, 1.0f), (x + w * 0.5f, 0.5f), (y, 1.0f)
 
-    let topSlice h : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, (h, 0.0f)
     let leftSlice w : WPos = WPosFragment.min, WPosFragment.min, (w, 0.0f), WPosFragment.max
+    let topSlice h : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, (h, 0.0f)
     let rightSlice w : WPos = (-w, 1.0f), WPosFragment.min, WPosFragment.max, WPosFragment.max
+    let bottomSlice h : WPos = WPosFragment.min, (-h, 1.0f), WPosFragment.max, WPosFragment.max
 
 
 (*

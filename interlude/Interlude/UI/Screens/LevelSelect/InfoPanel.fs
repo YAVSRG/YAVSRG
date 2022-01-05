@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open System
-open System.Drawing
 open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
@@ -46,19 +45,19 @@ module private InfoPanel =
             let colfun = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
             
             TextBox((fun() -> data.Scoring.FormatAccuracy()), colfun, 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
+            |> positionWidget(5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
             |> this.Add
 
             TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Lamp.ToString()) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
+            |> positionWidget(5.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
             |> this.Add
 
             TextBox(K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)), colfun, 1.0f)
-            |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
+            |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, -5.0f, 1.0f, 0.0f, 1.0f)
             |> this.Add
 
             TextBox(K data.Mods, colfun, 1.0f)
-            |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
+            |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.6f)
             |> this.Add
 
             Clickable((fun () -> Screen.changeNew (fun () -> new Screens.Score.Screen(data, BestFlags.Default) :> Screen.T) Screen.Type.Score Screen.TransitionFlag.Default), ignore)
@@ -207,13 +206,13 @@ type InfoPanel() as this =
         |> this.Add
 
         new TextBox(
-            (fun () -> match difficultyRating with None -> "0.00⭐" | Some d -> sprintf "%.2f⭐" d.Physical),
+            (fun () -> sprintf "%.2f%s" (match difficultyRating with None -> 0.0 | Some d -> d.Physical) Interlude.Icons.star),
             (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -190.0f, 1.0f, 0.0f, 0.5f, -120.0f, 1.0f)
         |> this.Add
 
         new TextBox(
-            (fun () -> match difficultyRating with None -> "0.00⭐" | Some d -> sprintf "%.2f⭐" d.Technical),
+            (fun () -> sprintf "%.2f%s" (match difficultyRating with None -> 0.0 | Some d -> d.Technical) Interlude.Icons.star),
             (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -120.0f, 1.0f, 0.0f, 0.5f, -50.0f, 1.0f)
         |> this.Add
@@ -241,16 +240,16 @@ type InfoPanel() as this =
             | None -> 0.0f<ms>
             |> fun x -> x / rate.Value
             |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
-            |> fun (x, y) -> sprintf "⌛ %i:%02i" x y
+            |> fun (x, y) -> sprintf "%s%i:%02i" Interlude.Icons.time x y
         bpm <-
             match currentCachedChart with
             | Some cc -> cc.BPM
             | None -> (500.0f<ms/beat>, 500.0f<ms/beat>)
             |> fun (b, a) -> (60000.0f<ms> / a * rate.Value |> int, 60000.0f<ms> / b * rate.Value |> int)
             |> fun (a, b) ->
-                if Math.Abs(a - b) < 5 || b > 9000 then sprintf "♬ %i" a
-                elif a > 9000 || b < 0 then sprintf "♬ ∞"
-                else sprintf "♬ %i-%i" a b
+                if a > 9000 || b < 0 then sprintf "%s∞" Interlude.Icons.bpm
+                elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "%s%i" Interlude.Icons.bpm a
+                else sprintf "%s%i-%i" Interlude.Icons.bpm a b
         notecount <-
             match currentChart with
             | Some c ->

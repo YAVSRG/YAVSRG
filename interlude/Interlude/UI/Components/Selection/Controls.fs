@@ -43,7 +43,7 @@ type Selector(items: string array, setting: Setting<int>) as this =
         Selector.FromArray(names, values, setting)
 
     static member FromBool(setting: Setting<bool>) =
-        new Selector([|"◇" ; "◆"|],
+        new Selector([|Icons.unselected ; Icons.selected|],
             Setting.map
                 (fun b -> if b then 1 else 0)
                 (fun i -> i > 0)

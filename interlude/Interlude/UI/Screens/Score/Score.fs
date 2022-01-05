@@ -125,7 +125,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 let mid = (right + left) * 0.5f
                 let hmid = (top + bottom) * 0.5f
                 let rect = Rect.createWH (mid + textW * 0.6f - h * 0.2f) (hmid - h * 0.4f) (h * 0.4f) (h * 0.4f)
-                Text.drawFill(font(), "▲", rect, themeConfig().PBColors.[int (pb())], 0.5f)
+                Text.drawFill(font(), Icons.sparkle, rect, themeConfig().PBColors.[int (pb())], 0.5f)
         }
 
     do
@@ -223,7 +223,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             let b = Rect.create (left + 40.0f) y (left + 530.0f) (y + h)
             Draw.rect b (Color.FromArgb(40, col)) Sprite.Default
             Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgements.[int j] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, col)) Sprite.Default
-            Text.drawFill(font(), sprintf "%s: %i" name judgements.[int j], b, Color.White, 0.0f)
+            Text.drawFill(font(), sprintf "%s: %i" name judgements.[int j], Rect.expand(-5.0f, 0.0f) b, Color.White, 0.0f)
             y <- y + h
 
         //graph stuff

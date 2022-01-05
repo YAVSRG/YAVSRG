@@ -3,7 +3,6 @@
 open System
 open System.IO
 open System.Collections.Generic
-open System.Drawing
 open Prelude.Common
 open Prelude.Data.Themes
 open Interlude.Graphics
@@ -11,7 +10,7 @@ open Interlude.Graphics
 module rec Content =
 
     let accentColor = ref ThemeConfig.Default.DefaultAccentColor
-    let _font : Lazy<Text.SpriteFont> ref = ref null
+    let _font : Lazy<Fonts.SpriteFont> ref = ref null
     let font () = _font.Value.Value
 
     let inline themeConfig () = Themes.config.Value
@@ -65,7 +64,7 @@ module rec Content =
 
                 if config.Value.OverrideAccentColor then accentColor.Value <- config.Value.DefaultAccentColor
                 if _font.Value <> null then if _font.Value.IsValueCreated then _font.Value.Value.Dispose()
-                _font.Value <- lazy (Text.createFont config.Value.Font)
+                _font.Value <- lazy (Fonts.create config.Value.Font)
 
                 GameplayConfig.clearCache()
                 Sprites.clearCache()
@@ -168,7 +167,7 @@ module rec Content =
             | OsuSkinFolder ->
                 let id = Guid.NewGuid().ToString()
                 try
-                    OsuSkin.Converter(path).ToNoteskin(Path.Combine(getDataPath "Noteskins", id)) 4
+                    //OsuSkin.Converter(path).ToNoteskin(Path.Combine(getDataPath "Noteskins", id)) 4
                     detect()
                     load()
                     true
@@ -191,18 +190,18 @@ module rec Content =
             if not <| cache.ContainsKey name then
                 if Array.contains name noteskinTextures then
                     match Noteskins.current().GetTexture name with
-                    | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false) |> Sprite.cache name
+                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache name
                     | None ->
                         match Noteskins.loaded.["*defaultBar.isk"].GetTexture name with
-                        | Some (bmp, config) -> Sprite.upload(bmp, config.Rows, config.Columns, false)
+                        | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false)
                         | None -> failwith "defaultBar doesnt have this texture!!"
                     |> fun x -> cache.Add(name, x)
                 else
-                    let (bmp, config) =
+                    let (img, config) =
                         Themes.pick (fun (t: Theme) ->
                             try t.GetTexture name
                             with err -> Logging.Error("Failed to load texture '" + name + "'", err); None)
-                    cache.Add(name, Sprite.upload (bmp, config.Rows, config.Columns, false) |> Sprite.cache name)
+                    cache.Add(name, Sprite.upload (img, config.Rows, config.Columns, false) |> Sprite.cache name)
             cache.[name]
 
         let clearCache() =

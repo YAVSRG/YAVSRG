@@ -194,6 +194,7 @@ module Options =
 
     type GameOptions =
         {
+            VisualOffset: Setting.Bounded<float>
             AudioOffset: Setting.Bounded<float>
             AudioVolume: Setting.Bounded<float>
             CurrentChart: Setting<string>
@@ -229,8 +230,9 @@ module Options =
             Hotkeys: Hotkeys
         }
         static member Default = {
+            VisualOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
             AudioOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
-            AudioVolume = Setting.percent 0.1
+            AudioVolume = Setting.percent 0.05
             CurrentChart = Setting.simple ""
             Theme = Setting.simple "*default"
 

@@ -31,7 +31,7 @@ type Toolbar() as this =
         |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
         |> this.Add
 
-        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), "⮜ Back  ", Options.options.Hotkeys.Exit)
+        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), Icons.back + " Back  ", Options.options.Hotkeys.Exit)
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         

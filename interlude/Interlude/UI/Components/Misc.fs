@@ -76,11 +76,11 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
                 match bind with
                 | Some b ->
                     match s.Value with
-                    //todo: localise
-                    | "" -> sprintf "Press %s to %s" (b.Value.ToString()) prompt
+                    | "" -> Localisation.localiseWith [b.Value.ToString(); prompt] "misc.Search"
                     | text -> text
                 | None -> match s.Value with "" -> prompt | text -> text),
             (fun () -> Style.highlightF 255 color.Value), 0.0f)
+        |> positionWidgetA(10.0f, 0.0f, -10.0f, 0.0f)
         |> this.Add
 
     override this.Update(elapsedTime, bounds) =

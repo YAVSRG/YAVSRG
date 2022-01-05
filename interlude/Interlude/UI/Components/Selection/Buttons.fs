@@ -41,11 +41,11 @@ type CardButton(title, subtitle, highlight, onClick, colorFunc) as this =
     do
         if subtitle <> "" then
             TextBox(K title, K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
+            |> positionWidget(5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.6f)
             |> this.Add
 
             TextBox(K subtitle, K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
+            |> positionWidget(5.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f)
             |> this.Add
         else TextBox(K title, K (Color.White, Color.Black), 0.0f) |> this.Add
 

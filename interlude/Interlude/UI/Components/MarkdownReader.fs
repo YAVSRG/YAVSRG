@@ -162,7 +162,7 @@ module MarkdownReader =
         let frame =
             let f = Frame((fun () -> Style.accentShade(200, 0.1f, 0.0f)), (fun () -> Style.accentShade(255, 1.0f, 0.0f)))
             doc |> buildDocWidget |> fc.Add
-            fc |> f.Add
+            fc |> positionWidgetA (15.0f, 0.0f, -15.0f, 0.0f) |> f.Add
             f
 
         do

@@ -47,13 +47,14 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     let chart = Gameplay.getColoredChart()
     let (keys, notes, bpm, sv) = (chart.Keys, chart.Notes, chart.BPM, chart.SV) // todo: at some point refactor this out
     let columnPositions = Array.init keys (fun i -> float32 i * Content.noteskinConfig().ColumnWidth)
-    let columnWidths = Array.create keys (float32 <| Content.noteskinConfig().ColumnWidth)
+    let columnWidths = Array.create keys (Content.noteskinConfig().ColumnWidth)
     let noteHeight = Content.noteskinConfig().ColumnWidth
     let holdnoteTrim = Content.noteskinConfig().ColumnWidth * Content.noteskinConfig().HoldNoteTrim
     let playfieldColor = Content.noteskinConfig().PlayfieldColor
 
     let tailsprite = Content.getTexture(if Content.noteskinConfig().UseHoldTailTexture then "holdtail" else "holdhead")
     let animation = new AnimationCounter(Content.noteskinConfig().AnimationFrameTime)
+    let visualOffset = float32 options.VisualOffset.Value * 1.0f<ms>
 
     // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection
     let mutable note_seek = 0 // see comments for sv_seek and sv_peek. same role but for index of next row
@@ -86,7 +87,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
         let hitposition = float32 options.HitPosition.Value
 
         let playfieldHeight = bottom - top
-        let now = Audio.timeWithOffset()
+        let now = Audio.timeWithOffset() + visualOffset
 
         // seek to appropriate sv and note locations in data.
         // bit of a mess here. see comments on the variables for more on whats going on

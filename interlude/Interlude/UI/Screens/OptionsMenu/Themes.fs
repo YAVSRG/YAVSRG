@@ -130,7 +130,6 @@ module Themes =
                 refreshThemes()
         }
 
-    let icon = "✎"
     let page() : SelectionPage =
 
         let preview = NoteskinPreview 0.5f

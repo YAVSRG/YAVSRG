@@ -23,6 +23,8 @@ module Utils =
 
     let F (f: 'T -> unit) (g: 'T -> unit) = fun t -> f t; g t
 
+    let getInterludeLocation() = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
+
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
 
@@ -133,14 +135,14 @@ module Utils =
                 (fun output -> downloadJson("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", fun (d: GithubRelease) -> handleUpdate d))
             |> ignore
 
-            let path = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
+            let path = getInterludeLocation()
             let folderPath = Path.Combine(path, "update")
             if Directory.Exists folderPath then Directory.Delete(folderPath, true)
 
         // call this only if updateAvailable = true
         let applyUpdate(callback) =
             let download_url = latestRelease.Value.assets.Head.browser_download_url
-            let path = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
+            let path = getInterludeLocation()
             let zipPath = Path.Combine(path, "update.zip")
             let folderPath = Path.Combine(path, "update")
             File.Delete zipPath
@@ -156,3 +158,28 @@ module Utils =
                             callback()
                     ))
             |> ignore
+
+module Icons = 
+    let star = "⭐"
+    let back = "👈"
+    let bpm = "♬"
+    let time = "⌛"
+    let sparkle = "✨"
+
+    let edit = "✏"
+    let add = "✚"
+    let remove = "❌"
+    let selected = "◆"
+    let unselected = "◇"
+
+    let goal = "🏁"
+    let playlist = "📃"
+
+    let system = "※"
+    let themes = "🎨"
+    let gameplay = "☔"
+    let binds = "🎮"
+    let debug = "🔧"
+
+    let info = "ℹ"
+    let alert = "⚠"
