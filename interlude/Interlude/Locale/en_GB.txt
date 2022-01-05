@@ -16,6 +16,7 @@ levelselect.tooltip.Mods=Select gameplay modifiers here!\nGameplay modifiers wil
 levelselect.tooltip.Search=Type here to search for charts!\nPut text "in quotes" to search for exact text.\nSome useful filters:\n    key=4 will match only 4K charts\n    More coming soon...
 levelselect.tooltip.SortBy=Select how charts are ordered within groups.\nCurrently only supports ascending order.
 misc.Delete=Hold to delete %0 ...
+misc.Search=Press %0 to %1
 mod.auto.desc=Plays the chart for you.
 mod.auto.name=Auto
 mod.mirror.desc=Horizontally mirrors everything in the chart.
