@@ -14,18 +14,20 @@ module System =
         {
             Content = fun add ->
                 column [
+                    PrettySetting("VisualOffset", new Slider<float>(options.VisualOffset, 0.01f)).Position(200.0f)
+
                     PrettySetting("AudioOffset",
                         { new Slider<float>(options.AudioOffset, 0.01f)
                             with override this.OnDeselect() = Audio.globalOffset <- float32 options.AudioOffset.Value * 1.0f<ms> }
-                    ).Position(200.0f)
+                    ).Position(300.0f)
 
                     PrettySetting("AudioVolume",
                         new Slider<float>(options.AudioVolume |> Setting.trigger Audio.changeVolume, 0.01f)
-                    ).Position(300.0f)
+                    ).Position(400.0f)
 
-                    PrettySetting("WindowMode", Selector.FromEnum config.WindowMode).Position(400.0f)
+                    PrettySetting("WindowMode", Selector.FromEnum config.WindowMode).Position(500.0f)
                     // todo: way to edit resolution settings?
-                    PrettySetting("FrameLimiter", Selector.FromEnum config.FrameLimit).Position(500.0f)
+                    PrettySetting("FrameLimiter", Selector.FromEnum config.FrameLimit).Position(600.0f)
                 ] :> Selectable
             Callback = applyOptions
         }
