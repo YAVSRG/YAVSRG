@@ -81,6 +81,7 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
                     | text -> text
                 | None -> match s.Value with "" -> prompt | text -> text),
             (fun () -> Style.highlightF 255 color.Value), 0.0f)
+        |> positionWidgetA(10.0f, 0.0f, -10.0f, 0.0f)
         |> this.Add
 
     override this.Update(elapsedTime, bounds) =
