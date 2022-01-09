@@ -92,7 +92,9 @@ module Fonts =
 
     let init() =
         //todo: load interlude as embedded font
-        for file in Directory.EnumerateFiles(Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")) do
+        let fontdir = Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")
+        Directory.CreateDirectory fontdir |> ignore
+        for file in Directory.EnumerateFiles fontdir do
             match Path.GetExtension file with
             | ".ttf" | ".otf" ->
                 collection.Install file |> ignore

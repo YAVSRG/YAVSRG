@@ -55,6 +55,7 @@ module Gameplay =
             | SCPlus _ -> 1
             | Wife _ -> 2
             | OM _ -> 3
+            | EX_Score -> 4
             | _ -> 0 //nyi
             |> Setting.simple
 
@@ -91,12 +92,13 @@ module Gameplay =
                 column [
                     PrettySetting("ScoreSystemType",
                         refreshChoice
-                            [|"SC"; "SC+"; "Wife3"; "osu!mania"|]
+                            [|"SC"; "SC+"; "Wife3"; "osu!mania"; "EX-SCORE (SDVX)"|]
                             [|
                                 [| judgeEdit; ridiculousEdit |]
                                 [| judgeEdit; ridiculousEdit |]
                                 [| judgeEdit; ridiculousEdit |]
                                 [| odEdit |]
+                                [| |]
                             |] utype
                     ).Position(200.0f)
                 ] :> Selectable
@@ -107,6 +109,7 @@ module Gameplay =
                     | 1 -> SCPlus (judge.Value, ridiculous.Value)
                     | 2 -> Wife (judge.Value, ridiculous.Value)
                     | 3 -> OM od.Value
+                    | 4 -> EX_Score
                     | _ -> failwith "impossible"
                 Setting.app (WatcherSelection.replace index value) options.AccSystems
         }

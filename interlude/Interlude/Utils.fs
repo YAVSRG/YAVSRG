@@ -89,7 +89,12 @@ module Utils =
                         File.Copy(s, fDest, true)
                 )
             Directory.EnumerateDirectories source
-            |> Seq.iter (fun d -> copyFolder d (Path.Combine(dest, Path.GetFileName d)))
+            |> Seq.iter
+                ( fun d ->
+                    let targetd = Path.Combine(dest, Path.GetFileName d)
+                    Directory.CreateDirectory targetd |> ignore
+                    copyFolder d targetd
+                )
 
         [<Json.AllRequired>]
         type GithubAsset = {

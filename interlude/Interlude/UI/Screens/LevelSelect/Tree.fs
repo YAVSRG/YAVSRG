@@ -94,8 +94,8 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
         match pbData with
         | Some d ->
             disp 
-                d.Accuracy
-                (fun x -> sprintf "%.2f%%" (100.0 * x))
+                d.Grade
+                (fun x -> themeConfig().Grades.[x].Name)
                 (fun _ -> let (_, _, c) = getPb d.Grade Themes.gradeToColor in c)
                 450.0f
             disp
