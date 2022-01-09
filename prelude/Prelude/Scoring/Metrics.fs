@@ -394,6 +394,78 @@ module ScoringHelpers =
 
     let isComboBreaker = (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false)
 
+type ScoreClassifier(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
+    inherit IScoreMetric
+        (
+            sprintf "SC (J%i)" judge,
+            healthBar,
+            180.0f<ms>,
+            keys, replay, notes, rate
+        )
+
+    let points =
+        function
+        | JudgementType.RIDICULOUS
+        | JudgementType.MARVELLOUS -> 1.0
+        | JudgementType.PERFECT -> 0.9
+        | JudgementType.GREAT -> 0.5
+        | JudgementType.GOOD -> -0.5
+        | JudgementType.BAD -> -1.0
+        | JudgementType.MISS -> -1.0
+        | _ -> failwith "unknown judgement"
+
+    let headJudgements = Array.create keys JudgementType.MISS
+
+    override this.HandleEvent ev =
+        { 
+            Time = ev.Time
+            Column = ev.Column
+            Guts = 
+                match ev.Guts with
+                | Hit_ (delta, isHold, missed) ->
+                    let judgement = ScoringHelpers.dp_windows judge enableRd delta
+
+                    if isHold then headJudgements.[ev.Column] <- judgement
+                    else this.State.Add(points judgement, 1.0, judgement)
+
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
+                    Hit 
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            IsHold = isHold
+                        |}
+                | Release_ (delta, missed, overhold, dropped) ->
+                    let headJudgement = headJudgements.[ev.Column]
+                    let tailJudgement = ScoringHelpers.dp_windows_halved judge enableRd delta
+
+                    let judgement =
+                        let j = max JudgementType.MARVELLOUS headJudgement
+                        if overhold then max JudgementType.GOOD j
+                        elif missed then int j + 2 |> enum
+                        elif tailJudgement >= JudgementType.GREAT then int j + 1 |> enum
+                        else headJudgement
+
+                    let judgement =
+                        let j = max JudgementType.MARVELLOUS judgement
+                        if dropped then int j + 2 |> enum
+                        else judgement
+
+                    let judgement = min JudgementType.MISS judgement
+
+                    this.State.Add(points judgement, 1.0, judgement)
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
+                    Release
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            Overhold = overhold
+                            Dropped = dropped
+                        |}
+        }
+
 type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
     inherit IScoreMetric
         (
@@ -408,7 +480,7 @@ type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, no
         let delta = Time.Abs delta
 
         // 1.0 = 100%
-        if delta >= 180.0f<ms> then -0.5
+        if delta >= 180.0f<ms> then -1.0
         else
             let delta = if isRelease then delta * 0.5f else delta
             let delta = float delta
@@ -625,6 +697,69 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
                         |}
         }
 
+type ExScore(pgreat: Time, great: Time, window: Time, healthBar, keys, replay, notes, rate) =
+    inherit IScoreMetric
+        (
+            "EX-SCORE (SDVX)",
+            healthBar,
+            window,
+            keys, replay, notes, rate
+        )
+        
+    let judgementFunc (delta: Time) =
+        let delta = Time.Abs delta
+        if delta <= pgreat then JudgementType.MARVELLOUS
+        elif delta <= great then JudgementType.PERFECT
+        elif delta < window then JudgementType.GOOD
+        else JudgementType.MISS
+
+    let points =
+        function
+        | JudgementType.MARVELLOUS -> 2.0
+        | JudgementType.PERFECT -> 1.0
+        | _ -> 0.0
+
+    let headJudgements = Array.create keys JudgementType.MISS
+
+    override this.HandleEvent ev =
+        { 
+            Time = ev.Time
+            Column = ev.Column
+            Guts = 
+                match ev.Guts with
+                | Hit_ (delta, isHold, missed) ->
+                    let judgement = if missed then JudgementType.MISS else judgementFunc delta
+
+                    if isHold then headJudgements.[ev.Column] <- judgement
+                    else this.State.Add(points judgement, 2.0, judgement)
+
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
+                    Hit 
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            IsHold = isHold
+                        |}
+                | Release_ (delta, missed, overhold, dropped) ->
+                    let headJudgement = headJudgements.[ev.Column]
+
+                    let judgement =
+                        if dropped || missed then max JudgementType.GOOD headJudgement
+                        else headJudgement
+
+                    this.State.Add(points judgement, 2.0, judgement)
+                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
+                    Release
+                        {|
+                            Judgement = Some judgement
+                            Missed = missed
+                            Delta = delta
+                            Overhold = overhold
+                            Dropped = dropped
+                        |}
+        }
+
 module Metrics =
     
     type HPSystemConfig =
@@ -647,6 +782,7 @@ module Metrics =
         | SCPlus of judge: int * ridiculous: bool
         | Wife of judge: int * ridiculous: bool
         | OM of od: float32
+        | EX_Score
         | Custom of unit
         override this.ToString() =
             match this with
@@ -654,15 +790,17 @@ module Metrics =
             | SCPlus (judge, rd) -> "SC+ (J" + (string judge) + ")"
             | Wife (judge, rd) -> "Wife3 (J" + (string judge) + ")"
             | OM od -> "osu!mania (OD" + (string od) + ")"
+            | EX_Score -> "EX-SCORE (SDVX)"
             | _ -> "unknown"
     
     let createScoreMetric accConfig keys (replay: IReplayProvider) notes rate : IScoreMetric =
         let hp = createHealthBar VG
         match accConfig with
-        | SC (judge, rd)
+        | SC (judge, rd) ->  ScoreClassifier(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
         | SCPlus (judge, rd) -> ScoreClassifierPlus(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
         | Wife (judge, rd) -> Wife3(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
         | OM od -> OsuMania(od, hp, keys, replay, notes, rate) :> IScoreMetric
+        | EX_Score -> ExScore(50.0f<ms>, 150.0f<ms>, 150.0f<ms>, hp, keys, replay, notes, rate) :> IScoreMetric
         | Custom _ -> failwith "nyi"
 
     let createDummyMetric (chart: Chart) : IScoreMetric =
