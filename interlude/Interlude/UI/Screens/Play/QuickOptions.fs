@@ -18,7 +18,7 @@ module QuickOptions =
                     PrettySetting("SongAudioOffset",
                         Slider(
                             Setting.make
-                                (fun v -> Gameplay.chartSaveData.Value.Offset <- toTime v + firstNote; Audio.localOffset <- toTime v)
+                                (fun v -> Gameplay.chartSaveData.Value.Offset <- toTime v + firstNote; Audio.changeLocalOffset(toTime v))
                                 (fun () -> float (Gameplay.chartSaveData.Value.Offset - firstNote))
                             |> Setting.bound -200.0 200.0
                             |> Setting.round 0, 0.01f)

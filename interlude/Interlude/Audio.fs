@@ -46,8 +46,8 @@ module Audio =
     let mutable private timerStart = 0.0f<ms>
     let mutable private channelPlaying = false
     let mutable private rate = 1.0f
-    let mutable localOffset = 0.0f<ms>
-    let mutable globalOffset = 0.0f<ms>
+    let mutable private localOffset = 0.0f<ms>
+    let mutable private globalOffset = 0.0f<ms>
     let mutable trackFinishBehaviour = Wait
 
     let audioDuration() = nowplaying.Duration
@@ -116,8 +116,10 @@ module Audio =
             | Wait -> ()
             | Action f -> f()
 
-    let changeVolume(newVolume) =
-        Bass.GlobalStreamVolume <- int (newVolume * 10000.0)
+    let changeGlobalOffset(offset) = globalOffset <- offset
+    let changeLocalOffset(offset) = localOffset <- offset
+
+    let changeVolume(newVolume) = Bass.GlobalStreamVolume <- int (newVolume * 10000.0)
 
     let changeRate(newRate) =
         rate <- newRate;
@@ -133,7 +135,7 @@ module Audio =
                 nowplaying.Dispose()
             channelPlaying <- false
             nowplaying <- Track.FromFile path
-        localOffset <- offset
+        changeLocalOffset offset
         changeRate rate
         isDifferentFile
 

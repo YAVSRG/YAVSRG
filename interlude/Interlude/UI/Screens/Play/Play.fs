@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.Play
 
 open OpenTK
+open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
@@ -117,6 +118,7 @@ type Screen(start: PlayScreenType) as this =
         //discord presence
         Screen.toolbar <- true
         Audio.changeRate Gameplay.rate.Value
+        Audio.changeGlobalOffset (toTime options.AudioOffset.Value)
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())

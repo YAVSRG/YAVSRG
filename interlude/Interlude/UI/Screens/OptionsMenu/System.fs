@@ -18,7 +18,7 @@ module System =
 
                     PrettySetting("AudioOffset",
                         { new Slider<float>(options.AudioOffset, 0.01f)
-                            with override this.OnDeselect() = Audio.globalOffset <- float32 options.AudioOffset.Value * 1.0f<ms> }
+                            with override this.OnDeselect() = Audio.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>) }
                     ).Position(300.0f)
 
                     PrettySetting("AudioVolume",
