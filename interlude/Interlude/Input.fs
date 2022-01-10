@@ -66,6 +66,7 @@ module Input =
     let mutable internal gw : GameWindow = null
 
     let mutable internal inputmethod : InputMethod = InputMethod.None
+    let mutable internal inputmethod_mouse = 0f
     let mutable internal absorbed = false
     let mutable internal typed = false
     
@@ -79,6 +80,7 @@ module Input =
     let setTextInput (s: Setting<string>, callback: unit -> unit) =
         removeInputMethod()
         inputmethod <- InputMethod.Text (s, callback)
+        inputmethod_mouse <- 0f
 
     let grabNextEvent (callback: Bind -> unit) =
         removeInputMethod()
@@ -86,6 +88,7 @@ module Input =
 
     let absorbAll() =
         oldmousez <- mousez
+        inputmethod_mouse <- inputmethod_mouse + abs(mousey - oldmousey) + abs (mousex - oldmousex)
         oldmousey <- mousey
         oldmousex <- mousex
         absorbed <- true
@@ -178,8 +181,7 @@ module Input =
         gw.add_MouseMove(
             fun e ->
                 mousex <- Math.Clamp(Render.vwidth / float32 Render.rwidth * float32 e.X, 0.0f, Render.vwidth)
-                mousey <- Math.Clamp(Render.vheight / float32 Render.rheight * float32 e.Y, 0.0f, Render.vheight)
-                removeInputMethod())
+                mousey <- Math.Clamp(Render.vheight / float32 Render.rheight * float32 e.Y, 0.0f, Render.vheight))
         gw.add_TextInput(fun e ->
             match inputmethod with
             | InputMethod.Text (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
@@ -196,6 +198,7 @@ module Input =
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
             elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
+            if inputmethod_mouse > 200f then removeInputMethod()
         | InputMethod.Bind cb ->
             match consumeAny InputEvType.Press with
             | ValueSome x -> removeInputMethod(); cb x; 

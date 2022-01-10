@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Components.Selection.Controls
 
 open System
-open System.Drawing
 open OpenTK
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
@@ -118,7 +117,7 @@ type TextField(setting: Setting<string>) as this =
         if this.Selected && Options.options.Hotkeys.Exit.Value.Tapped() then
             Input.removeInputMethod()
 
-type ColorPicker(color: Setting<byte>) as this =
+type NoteColorPicker(color: Setting<byte>) as this =
     inherit NavigateSelectable()
     let sprite = Content.getTexture "note"
     let n = byte sprite.Rows

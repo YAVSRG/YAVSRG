@@ -82,7 +82,7 @@ module Themes =
                 (fun i k ->
                     let x = -60.0f * float32 k
                     let n = float32 i
-                    ColorPicker(g keycount.Value i)
+                    NoteColorPicker(g keycount.Value i)
                     |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
         {
             Content = fun add ->

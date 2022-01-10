@@ -119,7 +119,7 @@ module Audio =
     let changeGlobalOffset(offset) = globalOffset <- offset
     let changeLocalOffset(offset) = localOffset <- offset
 
-    let changeVolume(newVolume) = Bass.GlobalStreamVolume <- int (newVolume * 10000.0)
+    let changeVolume(newVolume) = Bass.GlobalStreamVolume <- int (newVolume * 8000.0) |> max 0
 
     let changeRate(newRate) =
         rate <- newRate;
