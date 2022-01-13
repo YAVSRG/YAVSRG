@@ -22,7 +22,7 @@ module System =
                     ).Position(300.0f)
 
                     PrettySetting("AudioVolume",
-                        new Slider<float>(options.AudioVolume |> Setting.trigger Audio.changeVolume, 0.01f)
+                        Slider<_>.Percent(options.AudioVolume |> Setting.trigger Audio.changeVolume, 0.01f)
                     ).Position(400.0f)
 
                     PrettySetting("WindowMode", Selector.FromEnum config.WindowMode).Position(500.0f)

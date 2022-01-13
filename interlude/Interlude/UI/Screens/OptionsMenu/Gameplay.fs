@@ -141,10 +141,10 @@ module Gameplay =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("ScrollSpeed", Slider(options.ScrollSpeed, 0.005f)).Position(200.0f)
+                    PrettySetting("ScrollSpeed", Slider<_>.Percent(options.ScrollSpeed, 0.005f)).Position(200.0f)
                     PrettySetting("HitPosition", Slider(options.HitPosition, 0.005f)).Position(280.0f)
                     PrettySetting("Upscroll", Selector.FromBool options.Upscroll).Position(360.0f)
-                    PrettySetting("BackgroundDim", Slider(options.BackgroundDim, 0.01f)).Position(440.0f)
+                    PrettySetting("BackgroundDim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Position(440.0f)
                     PrettyButton("ScreenCover", 
                         fun() ->
                             add("ScreenCover",
@@ -152,8 +152,8 @@ module Gameplay =
                                     Content = fun add ->
                                         column [
                                             PrettySetting("ScreenCoverEnabled", Selector.FromBool options.ScreenCover.Enabled).Position(200.0f)
-                                            PrettySetting("ScreenCoverHidden", Slider(options.ScreenCover.Hidden, 0.01f)).Position(350.0f)
-                                            PrettySetting("ScreenCoverSudden", Slider(options.ScreenCover.Sudden, 0.01f)).Position(450.0f)
+                                            PrettySetting("ScreenCoverHidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Position(350.0f)
+                                            PrettySetting("ScreenCoverSudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Position(450.0f)
                                             PrettySetting("ScreenCoverFadeLength", Slider(options.ScreenCover.FadeLength, 0.01f)).Position(550.0f)
                                             Themes.NoteskinPreview 0.35f
                                         ] :> Selectable

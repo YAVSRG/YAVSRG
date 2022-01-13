@@ -66,7 +66,7 @@ module Input =
     let mutable internal gw : GameWindow = null
 
     let mutable internal inputmethod : InputMethod = InputMethod.None
-    let mutable internal inputmethod_mouse = 0f
+    let mutable internal inputmethod_mousedist = 0f
     let mutable internal absorbed = false
     let mutable internal typed = false
     
@@ -80,7 +80,7 @@ module Input =
     let setTextInput (s: Setting<string>, callback: unit -> unit) =
         removeInputMethod()
         inputmethod <- InputMethod.Text (s, callback)
-        inputmethod_mouse <- 0f
+        inputmethod_mousedist <- 0f
 
     let grabNextEvent (callback: Bind -> unit) =
         removeInputMethod()
@@ -88,7 +88,7 @@ module Input =
 
     let absorbAll() =
         oldmousez <- mousez
-        inputmethod_mouse <- inputmethod_mouse + abs(mousey - oldmousey) + abs (mousex - oldmousex)
+        inputmethod_mousedist <- inputmethod_mousedist + abs(mousey - oldmousey) + abs (mousex - oldmousex)
         oldmousey <- mousey
         oldmousex <- mousex
         absorbed <- true
@@ -198,7 +198,7 @@ module Input =
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
             elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
             //todo: clipboard support
-            if inputmethod_mouse > 200f then removeInputMethod()
+            if inputmethod_mousedist > 200f then removeInputMethod()
         | InputMethod.Bind cb ->
             match consumeAny InputEvType.Press with
             | ValueSome x -> removeInputMethod(); cb x; 
