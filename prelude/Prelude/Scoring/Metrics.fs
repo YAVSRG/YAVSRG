@@ -4,16 +4,82 @@ open System
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 
-// user-facing flags of "judgements", how well you hit notes
-type JudgementType =
-    | RIDICULOUS = 0
-    | MARVELLOUS = 1
-    | PERFECT = 2
-    | GREAT = 3
-    | GOOD = 4
-    | BAD = 5
-    | MISS = 6
-module JudgementType = let count = 7
+type JudgementId = int
+/// Judgements are an indicator of how good a hit was, like "Perfect!" or "Nearly!"
+/// Scores are commonly measured by how many of each judgement you get (for example a good score might be getting all "Perfect!" judgements)
+type Judgement =
+    {
+        Name: string
+        Color: Color
+        BreaksCombo: bool
+    }
+
+/// Assignment of points per hit
+/// Your total points are the sum of the points for each note you hit
+/// Your % accuracy is number of points you get / max points possible
+[<RequireQualifiedAccess>]
+type AccuracyPoints =
+    | WifeCurve of judge: int
+    | Weights of maxweight: float * weights: float array
+
+/// Behaviour for hold notes
+[<RequireQualifiedAccess>]
+type HoldNoteBehaviour =
+    | Osu of od: float32
+    | JustBreakCombo
+    | Normal of {| JudgementIfDropped: JudgementId; JudgementIfOverheld: JudgementId |}
+    | JudgeReleases of {| Timegates: (Time * JudgementId) list |}
+    | OnlyJudgeReleases // uses base timegates
+
+/// Grades are awarded at the end of a score as a summarising "rank" of how well you did
+/// They typically follow lettering systems similar to academic exam grades
+type Grade =
+    {
+        Name: string
+        Accuracy: float
+        Color: Color
+    }
+
+/// Lamps are awarded at the end of the score as a summarising "tag" to indicate certain accomplishments
+/// Examples: You didn't miss a single note, so you get a "Full Combo" tag, you only got "Perfect" judgements, so you get a "Perfect Full Combo" tag
+/// These provide alternative accomplishments to grades that can provide different challenge
+type Lamp =
+    {
+        Name: string
+        Judgement: JudgementId
+        JudgementThreshold: int
+        Color: Color
+    }
+
+type GradingConfig =
+    {
+        Grades: Grade array
+        Lamps: Lamp array
+    }
+
+type HealthBarConfig =
+    {
+        x: unit
+    }
+
+type AccuracyConfig =
+    {
+        MissWindow: Time
+        CbrushWindow: Time
+        Timegates: (Time * JudgementId) list
+        Points: AccuracyPoints
+        HoldNoteBehaviour: HoldNoteBehaviour
+    }
+
+type ScoreSystemConfig =
+    {
+        Name: string
+        Judgements: Judgement array
+        Accuracy: AccuracyConfig
+        Health: HealthBarConfig
+        Grading: GradingConfig
+    }
+    member this.DefaultJudgement : JudgementId = this.Judgements.Length - 1
 
 type HitEventGutsInternal =
     | Hit_ of
@@ -29,7 +95,7 @@ type HitEventGutsInternal =
 type HitEventGuts =
     | Hit of 
         {| 
-            Judgement: JudgementType option
+            Judgement: JudgementId option
             Missed: bool
             Delta: Time
             /// True if this is the head of a hold note
@@ -37,7 +103,7 @@ type HitEventGuts =
         |}
     | Release of
         {| 
-            Judgement: JudgementType option
+            Judgement: JudgementId option
             Missed: bool
             Delta: Time
             /// True if the hold was pressed correctly and held too long, past the window to release it
@@ -106,7 +172,7 @@ type HealthBarPointsSystem
         name: string,
         startingHealth: float,
         onlyFailAtEnd: bool,
-        points_func: JudgementType -> float,
+        points_func: JudgementId -> float,
         clear_threshold: float
     ) =
     inherit IHealthBarSystem(name, startingHealth, onlyFailAtEnd)
@@ -134,20 +200,22 @@ type AccuracySystemState =
         mutable MaxPossibleCombo: int
         mutable ComboBreaks: int
     }
-    // helpers to reduce on duplicating this logic/making mistakes later
     member this.BreakCombo (wouldHaveIncreasedCombo: bool) =
         if wouldHaveIncreasedCombo then this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
         this.CurrentCombo <- 0
         this.ComboBreaks <- this.ComboBreaks + 1
+
     member this.IncrCombo() =
         this.MaxPossibleCombo <- this.MaxPossibleCombo + 1
         this.CurrentCombo <- this.CurrentCombo + 1
         this.BestCombo <- Math.Max(this.CurrentCombo, this.BestCombo)
-    member this.Add(points: float, maxpoints: float, judge: JudgementType) =
+
+    member this.Add(points: float, maxpoints: float, judge: JudgementId) =
         this.PointsScored <- this.PointsScored + points
         this.MaxPointsScored <- this.MaxPointsScored + maxpoints
-        this.Judgements.[int judge] <- this.Judgements.[int judge] + 1
-    member this.Add(judge: JudgementType) = this.Add(0.0, 0.0, judge)
+        this.Judgements.[judge] <- this.Judgements.[judge] + 1
+
+    member this.Add(judge: JudgementId) = this.Add(0.0, 0.0, judge)
 
 type private HoldState =
     | Nothing
@@ -158,10 +226,8 @@ type private HoldState =
 [<AbstractClass>]
 type IScoreMetric
     (
-        name: string,
+        config: ScoreSystemConfig,
         healthBar: IHealthBarSystem,
-        rawMissWindow: Time,
-        cbrushWindow: Time,
         keys: int,
         replayProvider: IReplayProvider,
         notes: TimeData<NoteRow>,
@@ -170,7 +236,7 @@ type IScoreMetric
     inherit ReplayConsumer(keys, replayProvider)
 
     let firstNote = offsetOf notes.First.Value
-    let missWindow = rawMissWindow * rate
+    let missWindow = config.Accuracy.MissWindow * rate
 
     // having two seekers improves performance when feeding scores rather than playing live
     let mutable noteSeekPassive = 0
@@ -178,16 +244,14 @@ type IScoreMetric
 
     let internalHoldStates = Array.create keys (Nothing, -1)
 
-    let hitData = InternalScore.createDefault rawMissWindow keys notes
+    let hitData = InternalScore.createDefault config.Accuracy.MissWindow keys notes
     let hitEvents = ResizeArray<HitEvent<HitEventGuts>>()
 
     let mutable hitCallback = fun ev -> ()
 
-    new(name, hp, misswindow, keys, replay, notes, rate) = IScoreMetric(name, hp, misswindow, misswindow, keys, replay, notes, rate)
-
     member val State =
         {
-            Judgements = Array.zeroCreate JudgementType.count
+            Judgements = Array.zeroCreate config.Judgements.Length
             PointsScored = 0.0
             MaxPointsScored = 0.0
             CurrentCombo = 0
@@ -196,13 +260,13 @@ type IScoreMetric
             MaxPossibleCombo = 0
         }
 
-    member this.Name = name
+    member this.Name = config.Name
     member this.Value =
         let v = this.State.PointsScored / this.State.MaxPointsScored
         if Double.IsNaN v then 1.0 else v
     member this.FormatAccuracy() = sprintf "%.2f%%" (this.Value * 100.0)
     member this.HP = healthBar
-    member this.MissWindow = rawMissWindow
+    member this.MissWindow = config.Accuracy.MissWindow
     member this.ScaledMissWindow = missWindow
 
     member this.IsHoldDropped (index: int) (k: int) =
@@ -275,7 +339,7 @@ type IScoreMetric
                     found <- i
                     delta <- d
             // Accept a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
-            elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -cbrushWindow then
+            elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -config.Accuracy.CbrushWindow then
                 if (Time.Abs delta > Time.Abs d) then
                     found <- i
                     delta <- d
@@ -350,50 +414,241 @@ type VibeGauge() =
             "VG",
             0.5,
             false,
-            ( fun j ->
-                match j with
-                | JudgementType.RIDICULOUS | JudgementType.MARVELLOUS -> 0.005
-                | JudgementType.PERFECT -> 0.0
-                | JudgementType.GREAT -> -0.02
-                | JudgementType.GOOD -> -0.05
-                | JudgementType.BAD -> -0.2
-                | JudgementType.MISS -> -0.1
-                | _ -> failwith "impossible judgement type"
-            ),
+            ( fun j -> 0.0 ),
             0.0
         )
 
-module ScoringHelpers =
+module DP_Utils =
 
-    type HitWindows = (Time * JudgementType) list
+    let windows judge ridiculous =
+        let pf = 45.0f<ms> / 6.0f * (10.0f - (judge |> float32))
 
-    let rec window_func (windows: HitWindows) delta =
-        let delta = Time.Abs delta
-        match windows with
-        | [] -> JudgementType.MISS
-        | (w, j) :: xs ->
-            if (delta < w) then j else window_func xs delta
+        let ma = pf * 0.5f
+        let gr = pf * 2f
+        let gd = pf * 3f |> min 135.0f<ms>
+        let bd = pf * 4f |> min 180.0f<ms>
 
-    let dp_windows judge ridiculous =
-        let perf_window = 45.0f<ms> / 6.0f * (10.0f - (judge |> float32))
+        let rd = pf * 0.25f
 
-        let windows: HitWindows =
-            [ (perf_window * 0.5f, JudgementType.MARVELLOUS)
-              (perf_window, JudgementType.PERFECT)
-              (perf_window * 2.0f, JudgementType.GREAT)
-              (min (perf_window * 3.0f) 135.0f<ms>, JudgementType.GOOD)
-              (min (perf_window * 4.0f) 180.0f<ms>, JudgementType.BAD) ]
+        if ridiculous then
+            [
+                -bd, 6; -gd, 5; -gr, 4; -pf, 3; -ma, 2; -rd, 1
+                rd, 0; ma, 1; pf, 2; gr, 3; gd, 4; bd, 5
+            ]
+        else
+            [
+                -bd, 5; -gd, 4; -gr, 3; -pf, 2; -ma, 1
+                ma, 0; pf, 1; gr, 2; gd, 3; bd, 4
+            ]
 
-        window_func
-            (if ridiculous
-             then (perf_window * 0.25f, JudgementType.RIDICULOUS) :: windows
-             else windows)
+module Wife_Utils =
+    
+    // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
+    let wife_curve (judge: int) (delta: Time) =
+        let erf = 
+            // was this really necessary
+            let a1 =  0.254829592
+            let a2 = -0.284496736
+            let a3 =  1.421413741
+            let a4 = -1.453152027
+            let a5 =  1.061405429
+            let p  =  0.3275911
+            fun (x: float) ->
+                let sign = if x < 0.0 then -1.0 else 1.0
+                let x = Math.Abs x
+                let t = 1.0 / (1.0 + p * x)
+                let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x)
+                sign * y
 
-    let dp_windows_halved judge ridiculous =
-        (fun (t: Time) -> t * 0.5f) >> (dp_windows judge ridiculous)
+        let delta = float delta |> Math.Abs
 
-    let isComboBreaker = (function JudgementType.MISS | JudgementType.BAD | JudgementType.GOOD -> true | _ -> false)
+        let scale = (10.0 - float judge) / 6.0
+        let miss_weight = -2.75
+        let ridic = 5.0 * scale
+        let boo_window = 180.0 * scale
+        let ts_pow = 0.75
+        let zero = 65.0 * Math.Pow(scale, ts_pow)
+        let dev = 22.7 * Math.Pow(scale, ts_pow)
 
+        if delta <= ridic then 1.0
+        elif delta <= zero then erf ((zero - delta) / dev)
+        elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
+        else miss_weight
+
+module Osu_Utils =
+    
+    let ln_judgement (od: float32) (headDelta: Time) (endDelta: Time) (overhold: bool) (dropped: bool) : JudgementId =
+        let absolute = Time.Abs endDelta * 0.5f
+        let headDelta = Time.Abs headDelta
+
+        if
+            absolute < 16.5f<ms> * 1.2f &&
+            absolute + headDelta < 16.5f<ms> * 2.4f &&
+            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+            not dropped
+        then 0 // 300g
+        elif
+            absolute < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
+            absolute + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
+            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+            not dropped
+        then 1 // 300
+        elif 
+            absolute < 97.5f<ms> - od * 3.0f<ms> &&
+            absolute + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
+        then 2 // 200
+        elif
+            absolute < 127.5f<ms> - od * 3.0f<ms> &&
+            absolute + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
+            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
+        then 3 // 100
+        elif
+            overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>
+        then 4 // 50
+        else 5 // MISS
+
+    let windows od =
+        let ma = 16.5f<ms>
+        let pf = 64.5f<ms> - od * 3.0f<ms>
+        let gr = 97.5f<ms> - od * 3.0f<ms>
+        let gd = 127.5f<ms> - od * 3.0f<ms>
+        let bd = 151.5f<ms> - od * 3.0f<ms>
+        [
+            -bd, 5; -gd, 4; -gr, 3; -pf, 2; -ma, 1
+            ma, 0; pf, 1; gr, 2; gd, 3; bd, 4;
+        ]
+
+    let config (od: float32) : ScoreSystemConfig =
+        {
+            Name = sprintf "osu! (OD%.1f)" od
+            Judgements =
+                [|
+                    { Name = "300g"; Color = Color.Purple; BreaksCombo = false }
+                    { Name = "300"; Color = Color.Yellow; BreaksCombo = false }
+                    { Name = "200"; Color = Color.Green; BreaksCombo = false }
+                    { Name = "100"; Color = Color.Blue; BreaksCombo = false }
+                    { Name = "50"; Color = Color.Gray; BreaksCombo = false }
+                    { Name = "MISS"; Color = Color.Red; BreaksCombo = true }
+                |]
+            Accuracy = 
+                {
+                    MissWindow = 180.0f<ms>
+                    CbrushWindow = 180.0f<ms>
+                    Timegates = windows od
+                    Points = AccuracyPoints.Weights (300.0, [|300.0; 300.0; 200.0; 100.0; 50.0; 0.0|])
+                    HoldNoteBehaviour = HoldNoteBehaviour.Osu od
+                }
+            Health = { x = () } //nyi
+            Grading = 
+                {
+                    Grades = 
+                        [|
+                            { Name = "D"; Accuracy = 0.0; Color = Color.Red }
+                            { Name = "C"; Accuracy = 0.7; Color = Color.Purple }
+                            { Name = "B"; Accuracy = 0.8; Color = Color.Blue }
+                            { Name = "A"; Accuracy = 0.9; Color = Color.Green }
+                            { Name = "S"; Accuracy = 0.95; Color = Color.Orange }
+                            { Name = "SS"; Accuracy = 1.0; Color = Color.Yellow }
+                        |]
+                    Lamps =
+                        [|
+                            { Name = "FC"; Judgement = 5; JudgementThreshold = 0; Color = Color.Green }
+                            { Name = "PFC"; Judgement = 3; JudgementThreshold = 0; Color = Color.Orange }
+                            { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.White }
+                        |]
+                }
+        }
+
+module Helpers =
+
+    let window_func (default_judge: JudgementId) (gates: (Time * JudgementId) list) (delta: Time) : JudgementId =
+        let rec loop gates =
+            match gates with
+            | [] -> default_judge
+            | (w, j) :: xs ->
+                if delta < w then j else loop xs
+        loop gates
+
+    let points (conf: ScoreSystemConfig) (delta: Time) (judge: JudgementId) : float =
+        match conf.Accuracy.Points with
+        | AccuracyPoints.WifeCurve j -> Wife_Utils.wife_curve j delta
+        | AccuracyPoints.Weights (maxweight, weights) -> weights.[judge] / maxweight
+
+type CustomScoring(config: ScoreSystemConfig, healthBar, keys, replay, notes, rate) =
+    inherit IScoreMetric(config, healthBar, keys, replay, notes, rate)
+
+    let headJudgements = Array.create keys config.DefaultJudgement
+    let headDeltas = Array.create keys config.Accuracy.MissWindow
+
+    let point_func = Helpers.points config
+    let window_func = Helpers.window_func config.DefaultJudgement config.Accuracy.Timegates
+
+    override this.HandleEvent ev =
+        { 
+            Time = ev.Time
+            Column = ev.Column
+            Guts = 
+                match ev.Guts with
+                | Hit_ (delta, isHold, missed) ->
+                    let judgement = window_func delta
+                    if isHold then
+                        headJudgements.[ev.Column] <- judgement
+                        headDeltas.[ev.Column] <- delta
+
+                        match config.Accuracy.HoldNoteBehaviour with
+                        | HoldNoteBehaviour.JustBreakCombo
+                        | HoldNoteBehaviour.JudgeReleases _ -> 
+                            this.State.Add(point_func delta judgement, 1.0, judgement)
+                            if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
+                            Hit {| Judgement = Some judgement; Missed = missed; Delta = delta; IsHold = isHold |}
+
+                        | HoldNoteBehaviour.Osu _
+                        | HoldNoteBehaviour.Normal _
+                        | HoldNoteBehaviour.OnlyJudgeReleases ->
+                            Hit {| Judgement = None; Missed = missed; Delta = delta; IsHold = isHold |}
+                    else
+                        this.State.Add(point_func delta judgement, 1.0, judgement)
+                        if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
+                        Hit {| Judgement = Some judgement; Missed = missed; Delta = delta; IsHold = isHold |}
+
+                | Release_ (delta, missed, overhold, dropped) ->
+                    let headJudgement = headJudgements.[ev.Column]
+
+                    match config.Accuracy.HoldNoteBehaviour with
+                    | HoldNoteBehaviour.Osu od ->
+                        let judgement = Osu_Utils.ln_judgement od headDeltas.[ev.Column] delta overhold dropped
+                        this.State.Add(point_func delta judgement, 1.0, judgement)
+                        if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
+                        Release {| Judgement = Some judgement; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
+
+                    | HoldNoteBehaviour.JustBreakCombo ->
+                        if missed || dropped then this.State.BreakCombo true else this.State.IncrCombo()
+                        Release {| Judgement = None; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
+
+                    | HoldNoteBehaviour.JudgeReleases d -> 
+                        let judgement = Helpers.window_func config.DefaultJudgement d.Timegates delta
+                        this.State.Add(point_func delta judgement, 1.0, judgement)
+                        if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
+                        Release {| Judgement = Some judgement; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
+
+                    | HoldNoteBehaviour.Normal rules ->
+                        let judgement =
+                            if missed || dropped then max headJudgement rules.JudgementIfDropped
+                            elif overhold then max headJudgement rules.JudgementIfOverheld
+                            else headJudgement
+                        this.State.Add(point_func delta judgement, 1.0, judgement)
+                        if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
+                        Release {| Judgement = Some judgement; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
+
+                    | HoldNoteBehaviour.OnlyJudgeReleases ->
+                        let judgement = window_func delta
+                        this.State.Add(point_func delta judgement, 1.0, judgement)
+                        if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
+                        Release {| Judgement = Some judgement; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
+        }
+
+        (*
 type ScoreClassifier(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
     inherit IScoreMetric
         (
@@ -405,13 +660,13 @@ type ScoreClassifier(judge: int, enableRd: bool, healthBar, keys, replay, notes,
 
     let points =
         function
-        | JudgementType.RIDICULOUS
-        | JudgementType.MARVELLOUS -> 1.0
-        | JudgementType.PERFECT -> 0.9
-        | JudgementType.GREAT -> 0.5
-        | JudgementType.GOOD -> -0.5
-        | JudgementType.BAD -> -1.0
-        | JudgementType.MISS -> -1.0
+        | _JType.RIDICULOUS
+        | _JType.MARVELLOUS -> 1.0
+        | _JType.PERFECT -> 0.9
+        | _JType.GREAT -> 0.5
+        | _JType.GOOD -> -0.5
+        | _JType.BAD -> -1.0
+        | _JType.MISS -> -1.0
         | _ -> failwith "unknown judgement"
 
     let headJudgements = Array.create keys JudgementType.MISS
@@ -529,38 +784,6 @@ type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
             keys, replay, notes, rate
         )
 
-    // lifted from https://github.com/etternagame/etterna/blob/0a7bd768cffd6f39a3d84d76964097e43011ce33/Themes/_fallback/Scripts/10%20Scores.lua#L606-L627
-    let wife_curve (delta: Time) =
-        let erf = 
-            // was this really necessary
-            let a1 =  0.254829592
-            let a2 = -0.284496736
-            let a3 =  1.421413741
-            let a4 = -1.453152027
-            let a5 =  1.061405429
-            let p  =  0.3275911
-            fun (x: float) ->
-                let sign = if x < 0.0 then -1.0 else 1.0
-                let x = Math.Abs x
-                let t = 1.0 / (1.0 + p * x)
-                let y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.Exp(-x * x)
-                sign * y
-
-        let delta = float delta |> Math.Abs
-
-        let scale = (10.0 - float judge) / 6.0
-        let miss_weight = -2.75
-        let ridic = 5.0 * scale
-        let boo_window = 180.0 * scale
-        let ts_pow = 0.75
-        let zero = 65.0 * Math.Pow(scale, ts_pow)
-        let dev = 22.7 * Math.Pow(scale, ts_pow)
-
-        if delta <= ridic then 1.0
-        elif delta <= zero then erf ((zero - delta) / dev)
-        elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
-        else miss_weight
-
     override this.HandleEvent ev =
         { 
             Time = ev.Time
@@ -603,13 +826,13 @@ type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
 
     let points =
         function
-        | JudgementType.RIDICULOUS
-        | JudgementType.MARVELLOUS
-        | JudgementType.PERFECT -> 300.0
-        | JudgementType.GREAT -> 200.0
-        | JudgementType.GOOD -> 100.0
-        | JudgementType.BAD -> 50.0
-        | JudgementType.MISS -> 0.0
+        | _JType.RIDICULOUS
+        | _JType.MARVELLOUS
+        | _JType.PERFECT -> 300.0
+        | _JType.GREAT -> 200.0
+        | _JType.GOOD -> 100.0
+        | _JType.BAD -> 50.0
+        | _JType.MISS -> 0.0
         | _ -> 0.0
 
     let headDeltas = Array.create keys 0.0f<ms>
@@ -715,8 +938,8 @@ type ExScore(pgreat: Time, great: Time, window: Time, healthBar, keys, replay, n
 
     let points =
         function
-        | JudgementType.MARVELLOUS -> 2.0
-        | JudgementType.PERFECT -> 1.0
+        | _JType.MARVELLOUS -> 2.0
+        | _JType.PERFECT -> 1.0
         | _ -> 0.0
 
     let headJudgements = Array.create keys JudgementType.MISS
@@ -758,7 +981,7 @@ type ExScore(pgreat: Time, great: Time, window: Time, healthBar, keys, replay, n
                             Overhold = overhold
                             Dropped = dropped
                         |}
-        }
+        }*)
 
 module Metrics =
     
@@ -795,13 +1018,7 @@ module Metrics =
     
     let createScoreMetric accConfig keys (replay: IReplayProvider) notes rate : IScoreMetric =
         let hp = createHealthBar VG
-        match accConfig with
-        | SC (judge, rd) ->  ScoreClassifier(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
-        | SCPlus (judge, rd) -> ScoreClassifierPlus(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
-        | Wife (judge, rd) -> Wife3(judge, rd, hp, keys, replay, notes, rate) :> IScoreMetric
-        | OM od -> OsuMania(od, hp, keys, replay, notes, rate) :> IScoreMetric
-        | EX_Score -> ExScore(50.0f<ms>, 150.0f<ms>, 150.0f<ms>, hp, keys, replay, notes, rate) :> IScoreMetric
-        | Custom _ -> failwith "nyi"
+        CustomScoring(Osu_Utils.config 8.0f, hp, keys, replay, notes, rate)
 
     let createDummyMetric (chart: Chart) : IScoreMetric =
         createScoreMetric (SC (4, false)) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
