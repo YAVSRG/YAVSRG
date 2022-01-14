@@ -7,6 +7,7 @@ open Percyqaz.Json
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
+open Prelude.Scoring.Grading
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout
@@ -34,7 +35,7 @@ type Score =
 
 type Bests =
     {
-        Lamp: PersonalBests<Lamp>
+        Lamp: PersonalBests<int>
         Accuracy: PersonalBests<float>
         Grade: PersonalBests<int>
         Clear: PersonalBests<bool>
@@ -68,8 +69,8 @@ type ChartSaveData =
                             -> Difficulty rating data
 *)
 
-type ScoreInfoProvider(score: Score, chart: Chart, scoring, grades: Grade array) =
-    let mutable accuracyType: Metrics.AccuracySystemConfig = scoring
+type ScoreInfoProvider(score: Score, chart: Chart, scoring: ScoreSystemConfig) =
+    let mutable scoringConfig: ScoreSystemConfig = scoring
 
     let mutable modchart = ValueNone
     let mutable modstring = ValueNone
@@ -94,11 +95,11 @@ type ScoreInfoProvider(score: Score, chart: Chart, scoring, grades: Grade array)
             modchart.Value
         and set(value) = modchart <- ValueSome value
 
-    member this.AccuracyType with get() = accuracyType and set(value) = if value <> this.AccuracyType then accuracyType <- value; scoreMetric <- ValueNone; lamp <- ValueNone
+    member this.ScoringConfig with get() = scoringConfig and set(value) = if value <> this.ScoringConfig then scoringConfig <- value; scoreMetric <- ValueNone; lamp <- ValueNone
     member this.Scoring =
         scoreMetric <-
             ValueOption.defaultWith (fun () -> 
-                let m = Metrics.createScoreMetric accuracyType this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
+                let m = Metrics.createScoreMetric (Metrics.AccuracySystemConfig.Custom scoringConfig) this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
                 m.Update Time.infinity; m)
                 scoreMetric
             |> ValueSome
@@ -113,11 +114,11 @@ type ScoreInfoProvider(score: Score, chart: Chart, scoring, grades: Grade array)
         and set(value) = difficulty <- ValueSome value
 
     member this.Lamp =
-        lamp <- ValueOption.defaultWith (fun () -> Lamp.calculate this.Scoring.State) lamp |> ValueSome
+        lamp <- ValueOption.defaultWith (fun () -> Lamp.calculate scoring.Grading.Lamps this.Scoring.State) lamp |> ValueSome
         lamp.Value
 
     member this.Grade =
-        grade <- ValueOption.defaultWith (fun () -> Grade.calculate grades this.Scoring.State) grade |> ValueSome
+        grade <- ValueOption.defaultWith (fun () -> Grade.calculate scoring.Grading.Grades this.Scoring.State) grade |> ValueSome
         grade.Value
 
     member this.Physical =
@@ -146,7 +147,7 @@ type ScoreFilter =
     | Keymode of int
     | Playstyle of Layout
     | Grade of int
-    | Lamp of Lamp
+    | Lamp of int
     // pattern stuff
     
 [<RequireQualifiedAccess>]

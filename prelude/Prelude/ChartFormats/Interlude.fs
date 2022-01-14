@@ -4,7 +4,6 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Security.Cryptography
-open System.ComponentModel
 open Percyqaz.Json
 open Prelude.Common
 
@@ -152,9 +151,9 @@ module Interlude =
                 else if time = offset then (0, true)
                 else (0, false)
             | n ->
-                //Binary search with the added touch that you get
-                //(I, TRUE/FALSE) with I = the highest index with offset <= the time requested
-                //and the TRUE/FALSE flag is true if the offset = the time requested
+                // Binary search with the added touch that you get
+                // (I, TRUE/FALSE) with I = the highest index with offset <= the time requested
+                // and the TRUE/FALSE flag is true if the offset = the time requested
                 let mutable low = 0
                 let mutable high = this.Count
                 let mutable mid = -1

@@ -80,6 +80,49 @@ type ScoreSystemConfig =
         Grading: GradingConfig
     }
     member this.DefaultJudgement : JudgementId = this.Judgements.Length - 1
+    member this.GradeName i = if i < 0 then "--" else this.Grading.Grades.[i].Name
+    member this.GradeColor i = if i < 0 then Color.Gray else this.Grading.Grades.[i].Color
+    member this.LampName i = if i < 0 then "--" else  this.Grading.Lamps.[i].Name
+    member this.LampColor i = if i < 0 then Color.Gray else this.Grading.Lamps.[i].Color
+    member this.JudgementName i = this.Judgements.[i].Name
+    member this.JudgementColor i = this.Judgements.[i].Color
+module ScoreSystemConfig =
+
+    open System.IO
+    open System.Security.Cryptography
+
+    let hash (config: ScoreSystemConfig) =
+        let h = SHA256.Create()
+        use ms = new MemoryStream()
+        use bw = new BinaryWriter(ms)
+
+        for j in config.Judgements do
+            bw.Write j.BreaksCombo
+        bw.Write (float32 config.Accuracy.MissWindow)
+        bw.Write (float32 config.Accuracy.CbrushWindow)
+        for t, j in config.Accuracy.Timegates do
+            bw.Write (float32 t)
+            bw.Write j
+        match config.Accuracy.Points with
+        | AccuracyPoints.WifeCurve j -> bw.Write j
+        | AccuracyPoints.Weights (max, pts) ->
+            bw.Write max
+            for p in pts do bw.Write p
+        match config.Accuracy.HoldNoteBehaviour with
+        | HoldNoteBehaviour.Osu od -> bw.Write od
+        | HoldNoteBehaviour.JustBreakCombo -> bw.Write 0s
+        | HoldNoteBehaviour.Normal rules -> bw.Write rules.JudgementIfDropped; bw.Write rules.JudgementIfOverheld
+        | HoldNoteBehaviour.JudgeReleases d ->
+            for t, j in d.Timegates do
+                bw.Write (float32 t)
+                bw.Write j
+        | HoldNoteBehaviour.OnlyJudgeReleases -> bw.Write 1s
+
+        let s =
+            ms.ToArray()
+            |> h.ComputeHash
+            |> BitConverter.ToString
+        (config.Name.Replace(" ", "") + s).Replace("-", "").Substring(0, 6)
 
 type HitEventGutsInternal =
     | Hit_ of
@@ -524,9 +567,9 @@ module Osu_Utils =
             Name = sprintf "osu! (OD%.1f)" od
             Judgements =
                 [|
-                    { Name = "300g"; Color = Color.Purple; BreaksCombo = false }
+                    { Name = "300g"; Color = Color.Aqua; BreaksCombo = false }
                     { Name = "300"; Color = Color.Yellow; BreaksCombo = false }
-                    { Name = "200"; Color = Color.Green; BreaksCombo = false }
+                    { Name = "200"; Color = Color.Lime; BreaksCombo = false }
                     { Name = "100"; Color = Color.Blue; BreaksCombo = false }
                     { Name = "50"; Color = Color.Gray; BreaksCombo = false }
                     { Name = "MISS"; Color = Color.Red; BreaksCombo = true }
@@ -547,15 +590,16 @@ module Osu_Utils =
                             { Name = "D"; Accuracy = 0.0; Color = Color.Red }
                             { Name = "C"; Accuracy = 0.7; Color = Color.Purple }
                             { Name = "B"; Accuracy = 0.8; Color = Color.Blue }
-                            { Name = "A"; Accuracy = 0.9; Color = Color.Green }
-                            { Name = "S"; Accuracy = 0.95; Color = Color.Orange }
+                            { Name = "A"; Accuracy = 0.9; Color = Color.Lime }
+                            { Name = "S"; Accuracy = 0.95; Color = Color.Gold }
                             { Name = "SS"; Accuracy = 1.0; Color = Color.Yellow }
                         |]
                     Lamps =
                         [|
-                            { Name = "FC"; Judgement = 5; JudgementThreshold = 0; Color = Color.Green }
-                            { Name = "PFC"; Judgement = 3; JudgementThreshold = 0; Color = Color.Orange }
-                            { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.White }
+                            { Name = "SDCB"; Judgement = 5; JudgementThreshold = 9; Color = Color.White }
+                            { Name = "FC"; Judgement = 5; JudgementThreshold = 0; Color = Color.Lime }
+                            { Name = "PFC"; Judgement = 3; JudgementThreshold = 0; Color = Color.Gold }
+                            { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.Aqua }
                         |]
                 }
         }
@@ -988,7 +1032,7 @@ module Metrics =
     type HPSystemConfig =
         | VG
         | OMHP of float
-        | Custom of unit
+        | Custom of HPSystemConfig
         override this.ToString() =
             match this with
             | VG -> "VG"
@@ -1006,7 +1050,7 @@ module Metrics =
         | Wife of judge: int * ridiculous: bool
         | OM of od: float32
         | EX_Score
-        | Custom of unit
+        | Custom of ScoreSystemConfig
         override this.ToString() =
             match this with
             | SC (judge, rd) -> "SC (J" + (string judge) + ")"
@@ -1016,7 +1060,7 @@ module Metrics =
             | EX_Score -> "EX-SCORE (SDVX)"
             | _ -> "unknown"
     
-    let createScoreMetric accConfig keys (replay: IReplayProvider) notes rate : IScoreMetric =
+    let createScoreMetric config keys (replay: IReplayProvider) notes rate : IScoreMetric =
         let hp = createHealthBar VG
         CustomScoring(Osu_Utils.config 8.0f, hp, keys, replay, notes, rate)
 

@@ -1,4 +1,6 @@
-﻿namespace Prelude.Scoring
+﻿namespace Prelude.Scoring.Grading
+
+open Prelude.Scoring
 
 module Lamp =
 
