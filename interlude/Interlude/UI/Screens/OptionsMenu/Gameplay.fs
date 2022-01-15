@@ -47,87 +47,27 @@ module Gameplay =
                 | _ -> failwith "impossible"
         }
 
-    let editAccuracySystem (index, sys) =
-        let utype =
-            match sys with
-            | SC _ -> 0
-            | SCPlus _ -> 1
-            | Wife _ -> 2
-            | OM _ -> 3
-            | EX_Score -> 4
-            | _ -> 0 //nyi
-            |> Setting.simple
-
-        let judge =
-            match sys with
-            | SC (judge, rd)
-            | SCPlus (judge, rd)
-            | Wife (judge, rd) -> judge
-            | _ -> 4
-            |> Setting.simple
-            |> Setting.bound 1 9
-        let judgeEdit = PrettySetting("Judge", Slider(judge, 0.1f)).Position(300.0f)
-
-        let od =
-            match sys with
-            | OM od -> od
-            | _ -> 8.0f
-            |> Setting.simple
-            |> Setting.bound 0.0f 10.0f
-            |> Setting.roundf 1
-        let odEdit = PrettySetting("OverallDifficulty", Slider(od, 0.01f)).Position(300.0f)
-
-        let ridiculous =
-            match sys with
-            | SC (judge, rd)
-            | SCPlus (judge, rd)
-            | Wife (judge, rd) -> rd
-            | _ -> false
-            |> Setting.simple
-        let ridiculousEdit = PrettySetting("EnableRidiculous", Selector.FromBool ridiculous).Position(400.0f)
-
-        {
-            Content = fun add ->
-                column [
-                    PrettySetting("ScoreSystemType",
-                        refreshChoice
-                            [|"SC"; "SC+"; "Wife3"; "osu!mania"; "EX-SCORE (SDVX)"|]
-                            [|
-                                [| judgeEdit; ridiculousEdit |]
-                                [| judgeEdit; ridiculousEdit |]
-                                [| judgeEdit; ridiculousEdit |]
-                                [| odEdit |]
-                                [| |]
-                            |] utype
-                    ).Position(200.0f)
-                ] :> Selectable
-            Callback = fun () ->
-                let value =
-                    match utype.Value with
-                    | 0 -> SC (judge.Value, ridiculous.Value)
-                    | 1 -> SCPlus (judge.Value, ridiculous.Value)
-                    | 2 -> Wife (judge.Value, ridiculous.Value)
-                    | 3 -> OM od.Value
-                    | 4 -> EX_Score
-                    | _ -> failwith "impossible"
-                ()//Setting.app (WatcherSelection.replace index value) options.ScoringSystems
-        }
-
     let scoreSystems() : SelectionPage =
         {
             Content = fun add ->
                 column [
                     let setting =
-                        Setting.make ignore ( fun () -> WatcherSelection.indexed options.ScoringSystems.Value )
+                        Setting.make ignore
+                            ( fun () -> 
+                                seq { 
+                                    for id in Interlude.Content.Themes.scoreSystems.Keys do
+                                        yield ((id, Interlude.Content.Themes.scoreSystems.[id]), WatcherSelection.contains id options.ScoringSystems.Value)
+                                }
+                            )
                     PrettySetting("ScoreSystems",
                         CardSelect.Selector(
                             setting,
                             { CardSelect.Config.Default with
-                                NameFunc = fun (_, s) -> s.ToString()
-                                DuplicateFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.add s) options.ScoringSystems)
-                                //EditFunc = Some (fun (i, s) -> editAccuracySystem (i, s))
-                                DeleteFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.delete s) options.ScoringSystems)
-                                MarkFunc = fun ((_, s), b) -> if b then Setting.app (WatcherSelection.moveToTop s) options.ScoringSystems
+                                NameFunc = fun s -> (snd s).Name
+                                MarkFunc = 
+                                    fun (s, b) -> 
+                                        if b then Setting.app (WatcherSelection.add (fst s)) options.ScoringSystems
+                                        else Setting.app (WatcherSelection.delete (fst s)) options.ScoringSystems
                             },
                             add
                         )

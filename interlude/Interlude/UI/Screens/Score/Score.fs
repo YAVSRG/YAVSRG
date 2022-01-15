@@ -144,7 +144,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         |> this.Add
 
         //accuracy info text
-        new TextBox((fun () -> sprintf "%s ~ %s" scoreData.Scoring.Name scoreData.Scoring.HP.Name), (K (Color.White, Color.Black)), 0.5f)
+        new TextBox((fun () -> sprintf "%s" scoreData.Scoring.Name), (K (Color.White, Color.Black)), 0.5f)
         |> positionWidget(40.0f, 0.0f, -310.0f, 0.5f, 740.0f, 0.0f, -260.0f, 0.5f)
         |> this.Add
 
@@ -234,11 +234,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
         if Options.options.Hotkeys.Next.Value.Tapped() then
             scoreSystems <- Options.WatcherSelection.cycleForward scoreSystems
-            scoreData.ScoringConfig <- Options.getScoreSystem(fst scoreSystems)
+            scoreData.ScoringConfig <- Options.getScoreSystem(List.head scoreSystems)
             refresh()
         elif Options.options.Hotkeys.Previous.Value.Tapped() then
             scoreSystems <- Options.WatcherSelection.cycleBackward scoreSystems
-            scoreData.ScoringConfig <- Options.getScoreSystem(fst scoreSystems)
+            scoreData.ScoringConfig <- Options.getScoreSystem(List.head scoreSystems)
             refresh()
 
     override this.OnEnter prev =

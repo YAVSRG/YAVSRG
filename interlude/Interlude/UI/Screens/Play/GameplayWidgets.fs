@@ -24,7 +24,7 @@ module GameplayWidgets =
     type Helper = {
         ScoringConfig: ScoreSystemConfig
         Scoring: IScoreMetric
-        HP: IHealthBarSystem
+        HP: HealthBarMetric
         OnHit: IEvent<HitEvent<HitEventGuts>>
         CurrentChartTime: unit -> ChartTime
     }
@@ -91,6 +91,7 @@ module GameplayWidgets =
         override this.Dispose() =
             listener.Dispose()
 
+    // disabled for now
     type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
         inherit Widget()
         let atime = conf.AnimationTime * 1.0f<ms>

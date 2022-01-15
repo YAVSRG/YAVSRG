@@ -152,34 +152,24 @@ module Options =
         | Instant = 0
         | EndOfSong = 1
 
-    type WatcherSelection<'T> = 'T * 'T list
+    type WatcherSelection<'T> = 'T list
     module WatcherSelection =
-        let cycleForward (main, alts) =
-            match alts with
-            | [] -> (main, alts)
-            | x :: xs -> (x, xs @ [main])
+        let cycleForward xs =
+            match xs with
+            | x :: xs -> xs @ [x]
+            | _ -> failwith "impossible"
 
-        let rec cycleBackward (main, alts) =
-            match alts with
-            | [] -> (main, alts)
-            | x :: xs -> let (m, a) = cycleBackward (x, xs) in (m, main :: a)
+        let rec cycleBackward xs =
+            match xs with
+            | [] -> failwith "impossible"
+            | x :: [] -> [x]
+            | x :: xs -> match cycleBackward xs with (y :: ys) -> (y :: x :: ys) | _ -> failwith "impossible by case 2"
 
-        let indexed (main, alts) =
-            seq {
-                yield (-1, main), true
-                yield! alts |> List.mapi (fun i x -> (i, x), false)
-            }
+        let contains x xs = xs |> List.exists (fun o -> o = x)
 
-        let replace index value (main, alts) =
-            match index with
-            | -1 -> value, alts
-            | n -> main, alts |> List.mapi (fun i x -> if i = n then value else x)
+        let delete x xs = xs |> List.filter (fun o -> o <> x)
 
-        let delete x (main, alts) = main, alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
-
-        let moveToTop x (main, alts) = x, main :: alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
-
-        let add x (main, alts) = main, alts @ [x]
+        let add x xs = x :: xs
 
     type ScreenCoverOptions =
         {
@@ -253,7 +243,18 @@ module Options =
             UseKeymodePreference = Setting.simple false
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            ScoringSystems = Setting.simple ("*osu-od-8", [])
+            ScoringSystems =
+                Setting.simple ["sc-j4"]
+                |> Setting.map 
+                    ( fun xs -> 
+                        let filtered = 
+                            List.filter 
+                                ( fun x -> 
+                                    if Content.Themes.scoreSystems.ContainsKey x then true
+                                    else Logging.Debug(sprintf "Score system '%s' not found, deselecting" x); false
+                                ) xs
+                        if filtered.IsEmpty then ["sc-j4"] else filtered
+                    ) id
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemaker = Setting.simple (Accuracy 0.95)
@@ -319,4 +320,4 @@ module Options =
         else Osu_Utils.config 8.0f
 
     let getCurrentScoreSystem() =
-        getScoreSystem (fst options.ScoringSystems.Value)
+        getScoreSystem (List.head options.ScoringSystems.Value)
