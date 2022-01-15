@@ -122,7 +122,7 @@ module ScoreSystemConfig =
             ms.ToArray()
             |> h.ComputeHash
             |> BitConverter.ToString
-        (config.Name.Replace(" ", "") + s).Replace("-", "").Substring(0, 6)
+        config.Name.Replace(" ", "") + s.Replace("-", "").Substring(0, 6)
 
 type HitEventGutsInternal =
     | Hit_ of
