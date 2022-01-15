@@ -59,7 +59,10 @@ type GradingConfig =
 
 type HealthBarConfig =
     {
-        x: unit
+        StartingHealth: float
+        OnlyFailAtEnd: bool
+        ClearThreshold: float
+        Points: float array
     }
 
 type AccuracyConfig =
@@ -80,10 +83,10 @@ type ScoreSystemConfig =
         Grading: GradingConfig
     }
     member this.DefaultJudgement : JudgementId = this.Judgements.Length - 1
-    member this.GradeName i = if i < 0 then "--" else this.Grading.Grades.[i].Name
+    member this.GradeName i = if i < 0 then "F" else this.Grading.Grades.[i].Name
     member this.GradeColor i = if i < 0 then Color.Gray else this.Grading.Grades.[i].Color
-    member this.LampName i = if i < 0 then "--" else  this.Grading.Lamps.[i].Name
-    member this.LampColor i = if i < 0 then Color.Gray else this.Grading.Lamps.[i].Color
+    member this.LampName i = if i < 0 then "NONE" else  this.Grading.Lamps.[i].Name
+    member this.LampColor i = if i < 0 then Color.White else this.Grading.Lamps.[i].Color
     member this.JudgementName i = this.Judgements.[i].Name
     member this.JudgementColor i = this.Judgements.[i].Color
 module ScoreSystemConfig =
@@ -180,19 +183,13 @@ type HealthBarState =
         mutable Health: float
     }
 
-[<AbstractClass>]
-type IHealthBarSystem
-    (
-        name: string,
-        startingHealth: float,
-        onlyFailAtEnd: bool
-    ) =
+type HealthBarMetric(config: HealthBarConfig) =
 
     member val State: HealthBarState = 
         { 
             HasFailed = false
             CurrentlyFailed = false
-            Health = startingHealth
+            Health = config.StartingHealth
         }
 
     member this.ChangeHP (x: float) =
@@ -202,30 +199,16 @@ type IHealthBarSystem
             this.State.HasFailed <- true
             this.State.CurrentlyFailed <- true
         else this.State.CurrentlyFailed <- false
-
-    abstract member FailCondition : float -> bool
-    abstract member HandleEvent : HitEvent<HitEventGuts> -> unit
         
-    member this.Failed = if onlyFailAtEnd then this.State.CurrentlyFailed else this.State.HasFailed
-    member this.Name = name
+    member this.Failed = if config.OnlyFailAtEnd then this.State.CurrentlyFailed else this.State.HasFailed
     member this.Format() = sprintf "%.2f%%" (this.State.Health * 100.0)
 
-type HealthBarPointsSystem
-    (
-        name: string,
-        startingHealth: float,
-        onlyFailAtEnd: bool,
-        points_func: JudgementId -> float,
-        clear_threshold: float
-    ) =
-    inherit IHealthBarSystem(name, startingHealth, onlyFailAtEnd)
+    member this.FailCondition hp = hp <= config.ClearThreshold
 
-    override this.FailCondition hp = hp <= clear_threshold
-
-    override this.HandleEvent ev =
+    member this.HandleEvent ev =
         match ev.Guts with
-        | Hit evData -> match evData.Judgement with Some j -> this.ChangeHP(points_func j) | None -> ()
-        | Release evData -> match evData.Judgement with Some j -> this.ChangeHP(points_func j) | None -> ()
+        | Hit evData -> match evData.Judgement with Some j -> this.ChangeHP(config.Points[j]) | None -> ()
+        | Release evData -> match evData.Judgement with Some j -> this.ChangeHP(config.Points[j]) | None -> ()
 
 (*
     Accuracy/scoring system metric.
@@ -270,7 +253,7 @@ type private HoldState =
 type IScoreMetric
     (
         config: ScoreSystemConfig,
-        healthBar: IHealthBarSystem,
+        healthBar: HealthBarMetric,
         keys: int,
         replayProvider: IReplayProvider,
         notes: TimeData<NoteRow>,
@@ -451,16 +434,6 @@ type IScoreMetric
     Concrete implementations of health/accuracy systems
 *)
 
-type VibeGauge() =
-    inherit HealthBarPointsSystem
-        (
-            "VG",
-            0.5,
-            false,
-            ( fun j -> 0.0 ),
-            0.0
-        )
-
 module DP_Utils =
 
     let windows judge ridiculous =
@@ -518,6 +491,69 @@ module Wife_Utils =
         elif delta <= boo_window then (delta - zero) * miss_weight / (boo_window - zero)
         else miss_weight
 
+    let config (judge: int) =
+        {
+            Name = if judge = 9 then "Wife3 JUSTICE" else sprintf "Wife3 (J%i)" judge
+            Judgements =
+                [|
+                    { Name = "Marvellous"; Color = Color.Aqua; BreaksCombo = false }
+                    { Name = "Perfect"; Color = Color.Yellow; BreaksCombo = false }
+                    { Name = "Great"; Color = Color.FromArgb(0, 255, 100); BreaksCombo = false }
+                    { Name = "Good"; Color = Color.Blue; BreaksCombo = true }
+                    { Name = "Bad"; Color = Color.Fuchsia; BreaksCombo = true }
+                    { Name = "Miss"; Color = Color.Red; BreaksCombo = true }
+                |]
+            Accuracy = 
+                {
+                    MissWindow = 180.0f<ms>
+                    CbrushWindow = 180.0f<ms>
+                    Timegates = DP_Utils.windows judge false
+                    Points = AccuracyPoints.WifeCurve judge
+                    HoldNoteBehaviour = HoldNoteBehaviour.JustBreakCombo
+                }
+            Health =
+                {
+                    StartingHealth = 0.5
+                    OnlyFailAtEnd = false
+                    ClearThreshold = 0.0
+                    Points = [|0.008; 0.008; 0.004; 0.0; -0.04; -0.08|]
+                }
+            Grading = 
+                {
+                    Grades = 
+                        [|
+                            { Name = "D"; Accuracy = 0.0; Color = Color.Red }
+                            { Name = "C"; Accuracy = 0.6; Color = Color.Purple }
+                            { Name = "B"; Accuracy = 0.7; Color = Color.Blue }
+                            { Name = "A"; Accuracy = 0.8; Color = Color.Lime }
+                            { Name = "A."; Accuracy = 0.85; Color = Color.Lime }
+                            { Name = "A:"; Accuracy = 0.9; Color = Color.Lime }
+                            { Name = "AA"; Accuracy = 0.93; Color = Color.Gold }
+                            { Name = "AA."; Accuracy = 0.965; Color = Color.Gold }
+                            { Name = "AA:"; Accuracy = 0.99; Color = Color.Gold }
+                            { Name = "AAA"; Accuracy = 0.997; Color = Color.Gold }
+                            { Name = "AAA."; Accuracy = 0.998; Color = Color.Gold }
+                            { Name = "AAA:"; Accuracy = 0.999; Color = Color.Gold }
+                            { Name = "AAAA"; Accuracy = 0.99955; Color = Color.Gold }
+                            { Name = "AAAA."; Accuracy = 0.9997; Color = Color.Gold }
+                            { Name = "AAAA:"; Accuracy = 0.9998; Color = Color.Gold }
+                            { Name = "AAAAA"; Accuracy = 0.999935; Color = Color.Gold }
+                        |]
+                    Lamps =
+                        [|
+                            { Name = "SDCB"; Judgement = -1; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
+                            { Name = "MF"; Judgement = -1; JudgementThreshold = 1; Color = Color.FromArgb(160, 160, 160) }
+                            { Name = "FC"; Judgement = -1; JudgementThreshold = 0; Color = Color.FromArgb(80, 255, 80) }
+                            { Name = "SDG"; Judgement = 2; JudgementThreshold = 9; Color = Color.FromArgb(160, 255, 160) }
+                            { Name = "BF"; Judgement = 2; JudgementThreshold = 1; Color = Color.FromArgb(200, 160, 255) }
+                            { Name = "PFC"; Judgement = 2; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 80) }
+                            { Name = "SDP"; Judgement = 1; JudgementThreshold = 9; Color = Color.FromArgb(255, 255, 160) }
+                            { Name = "WF"; Judgement = 1; JudgementThreshold = 1; Color = Color.FromArgb(255, 160, 255) }
+                            { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
+                        |]
+                }
+        }
+
 module Osu_Utils =
     
     let ln_judgement (od: float32) (headDelta: Time) (endDelta: Time) (overhold: bool) (dropped: bool) : JudgementId =
@@ -559,7 +595,7 @@ module Osu_Utils =
         let bd = 151.5f<ms> - od * 3.0f<ms>
         [
             -bd, 5; -gd, 4; -gr, 3; -pf, 2; -ma, 1
-            ma, 0; pf, 1; gr, 2; gd, 3; bd, 4;
+            ma, 0; pf, 1; gr, 2; gd, 3; bd, 4
         ]
 
     let config (od: float32) : ScoreSystemConfig =
@@ -569,10 +605,10 @@ module Osu_Utils =
                 [|
                     { Name = "300g"; Color = Color.Aqua; BreaksCombo = false }
                     { Name = "300"; Color = Color.Yellow; BreaksCombo = false }
-                    { Name = "200"; Color = Color.Lime; BreaksCombo = false }
-                    { Name = "100"; Color = Color.Blue; BreaksCombo = false }
-                    { Name = "50"; Color = Color.Gray; BreaksCombo = false }
-                    { Name = "MISS"; Color = Color.Red; BreaksCombo = true }
+                    { Name = "200"; Color = Color.FromArgb(0, 255, 100); BreaksCombo = false }
+                    { Name = "100"; Color = Color.FromArgb(0, 160, 255); BreaksCombo = false }
+                    { Name = "50"; Color = Color.FromArgb(160, 160, 160); BreaksCombo = false }
+                    { Name = "MISS"; Color = Color.FromArgb(255, 80, 80); BreaksCombo = true }
                 |]
             Accuracy = 
                 {
@@ -582,24 +618,103 @@ module Osu_Utils =
                     Points = AccuracyPoints.Weights (300.0, [|300.0; 300.0; 200.0; 100.0; 50.0; 0.0|])
                     HoldNoteBehaviour = HoldNoteBehaviour.Osu od
                 }
-            Health = { x = () } //nyi
+            Health =
+                {
+                    StartingHealth = 1.0
+                    OnlyFailAtEnd = false
+                    ClearThreshold = 0.0
+                    // Roughly HP8
+                    Points = [|0.008; 0.008; 0.004; 0.0; -0.033; -0.066|]
+                }
             Grading = 
                 {
                     Grades = 
                         [|
-                            { Name = "D"; Accuracy = 0.0; Color = Color.Red }
-                            { Name = "C"; Accuracy = 0.7; Color = Color.Purple }
-                            { Name = "B"; Accuracy = 0.8; Color = Color.Blue }
-                            { Name = "A"; Accuracy = 0.9; Color = Color.Lime }
-                            { Name = "S"; Accuracy = 0.95; Color = Color.Gold }
-                            { Name = "SS"; Accuracy = 1.0; Color = Color.Yellow }
+                            { Name = "D"; Accuracy = 0.0; Color = Color.FromArgb(255, 80, 80) }
+                            { Name = "C"; Accuracy = 0.7; Color = Color.FromArgb(255, 80, 255) }
+                            { Name = "B"; Accuracy = 0.8; Color = Color.FromArgb(0, 80, 255) }
+                            { Name = "A"; Accuracy = 0.9; Color = Color.FromArgb(0, 255, 100) }
+                            { Name = "S"; Accuracy = 0.95; Color = Color.FromArgb(246, 234, 128) }
+                            { Name = "SS"; Accuracy = 1.0; Color = Color.FromArgb(255, 255, 160) }
                         |]
                     Lamps =
                         [|
-                            { Name = "SDCB"; Judgement = 5; JudgementThreshold = 9; Color = Color.White }
-                            { Name = "FC"; Judgement = 5; JudgementThreshold = 0; Color = Color.Lime }
-                            { Name = "PFC"; Judgement = 3; JudgementThreshold = 0; Color = Color.Gold }
-                            { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.Aqua }
+                            { Name = "SDCB"; Judgement = 5; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
+                            { Name = "FC"; Judgement = 5; JudgementThreshold = 0; Color = Color.FromArgb(0, 255, 160) }
+                            { Name = "PFC"; Judgement = 3; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 160) }
+                            { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
+                        |]
+                }
+        }
+
+module SC_Utils =
+
+    // not used at
+    let sc_curve (judge: int) (isRelease: bool) (delta: Time) =
+        let delta = Time.Abs delta
+
+        // 1.0 = 100%
+        if delta >= 180.0f<ms> then -1.0
+        else
+            let delta = if isRelease then delta * 0.5f else delta
+            let delta = float delta
+            let scale = 6.0 / (10.0 - float judge)
+            Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
+
+    let config (judge: int) =
+        {
+            Name = sprintf "SC (J%i)" judge
+            Judgements =
+                [|
+                    { Name = "Marvellous"; Color = Color.Aqua; BreaksCombo = false }
+                    { Name = "Perfect"; Color = Color.Yellow; BreaksCombo = false }
+                    { Name = "Great"; Color = Color.FromArgb(0, 255, 100); BreaksCombo = false }
+                    { Name = "Good"; Color = Color.Blue; BreaksCombo = true }
+                    { Name = "Bad"; Color = Color.Fuchsia; BreaksCombo = true }
+                    { Name = "Miss"; Color = Color.Red; BreaksCombo = true }
+                |]
+            Accuracy = 
+                {
+                    MissWindow = 180.0f<ms>
+                    CbrushWindow = 180.0f<ms>
+                    Timegates = DP_Utils.windows judge false
+                    Points = AccuracyPoints.Weights (10.0, [|10.0; 9.0; 5.0; -5.0; -10.0; -10.0|])
+                    HoldNoteBehaviour = HoldNoteBehaviour.JustBreakCombo
+                }
+            Health =
+                {
+                    StartingHealth = 0.5
+                    OnlyFailAtEnd = false
+                    ClearThreshold = 0.0
+                    Points = [|0.008; 0.008; 0.004; 0.0; -0.04; -0.08|]
+                }
+            Grading = 
+                {
+                    Grades = 
+                        [|
+                            { Name = "F"; Accuracy = 0.0; Color = Color.FromArgb(200, 163, 155) }
+                            { Name = "D"; Accuracy = 0.89995; Color = Color.FromArgb(194, 162, 182) }
+                            { Name = "C"; Accuracy = 0.90995; Color = Color.FromArgb(202, 153, 183) }
+                            { Name = "C+"; Accuracy = 0.91995; Color = Color.FromArgb(163, 190, 207) }
+                            { Name = "B"; Accuracy = 0.92995; Color = Color.FromArgb(149, 193, 220) }
+                            { Name = "B+"; Accuracy = 0.93995; Color = Color.FromArgb(148, 210, 180) }
+                            { Name = "A"; Accuracy = 0.94995; Color = Color.FromArgb(134, 227, 183) }
+                            { Name = "A+"; Accuracy = 0.95995; Color = Color.FromArgb(127, 231, 139) }
+                            { Name = "S-"; Accuracy = 0.96995; Color = Color.FromArgb(237, 205, 140) }
+                            { Name = "S"; Accuracy = 0.97995; Color = Color.FromArgb(246, 234, 128) }
+                            { Name = "S+"; Accuracy = 0.98995; Color = Color.FromArgb(235, 200, 220) }
+                        |]
+                    Lamps =
+                        [|
+                            { Name = "SDCB"; Judgement = -1; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
+                            { Name = "MF"; Judgement = -1; JudgementThreshold = 1; Color = Color.FromArgb(160, 160, 160) }
+                            { Name = "FC"; Judgement = -1; JudgementThreshold = 0; Color = Color.FromArgb(80, 255, 80) }
+                            { Name = "SDG"; Judgement = 2; JudgementThreshold = 9; Color = Color.FromArgb(160, 255, 160) }
+                            { Name = "BF"; Judgement = 2; JudgementThreshold = 1; Color = Color.FromArgb(200, 160, 255) }
+                            { Name = "PFC"; Judgement = 2; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 80) }
+                            { Name = "SDP"; Judgement = 1; JudgementThreshold = 9; Color = Color.FromArgb(255, 255, 160) }
+                            { Name = "WF"; Judgement = 1; JudgementThreshold = 1; Color = Color.FromArgb(255, 160, 255) }
+                            { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
                         |]
                 }
         }
@@ -619,8 +734,8 @@ module Helpers =
         | AccuracyPoints.WifeCurve j -> Wife_Utils.wife_curve j delta
         | AccuracyPoints.Weights (maxweight, weights) -> weights.[judge] / maxweight
 
-type CustomScoring(config: ScoreSystemConfig, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric(config, healthBar, keys, replay, notes, rate)
+type CustomScoring(config: ScoreSystemConfig, keys, replay, notes, rate) =
+    inherit IScoreMetric(config, HealthBarMetric(config.Health), keys, replay, notes, rate)
 
     let headJudgements = Array.create keys config.DefaultJudgement
     let headDeltas = Array.create keys config.Accuracy.MissWindow
@@ -693,277 +808,6 @@ type CustomScoring(config: ScoreSystemConfig, healthBar, keys, replay, notes, ra
         }
 
         (*
-type ScoreClassifier(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric
-        (
-            sprintf "SC (J%i)" judge,
-            healthBar,
-            180.0f<ms>,
-            keys, replay, notes, rate
-        )
-
-    let points =
-        function
-        | _JType.RIDICULOUS
-        | _JType.MARVELLOUS -> 1.0
-        | _JType.PERFECT -> 0.9
-        | _JType.GREAT -> 0.5
-        | _JType.GOOD -> -0.5
-        | _JType.BAD -> -1.0
-        | _JType.MISS -> -1.0
-        | _ -> failwith "unknown judgement"
-
-    let headJudgements = Array.create keys JudgementType.MISS
-
-    override this.HandleEvent ev =
-        { 
-            Time = ev.Time
-            Column = ev.Column
-            Guts = 
-                match ev.Guts with
-                | Hit_ (delta, isHold, missed) ->
-                    let judgement = ScoringHelpers.dp_windows judge enableRd delta
-
-                    if isHold then headJudgements.[ev.Column] <- judgement
-                    else this.State.Add(points judgement, 1.0, judgement)
-
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
-                    Hit 
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            IsHold = isHold
-                        |}
-                | Release_ (delta, missed, overhold, dropped) ->
-                    let headJudgement = headJudgements.[ev.Column]
-                    let tailJudgement = ScoringHelpers.dp_windows_halved judge enableRd delta
-
-                    let judgement =
-                        let j = max JudgementType.MARVELLOUS headJudgement
-                        if overhold then max JudgementType.GOOD j
-                        elif missed then int j + 2 |> enum
-                        elif tailJudgement >= JudgementType.GREAT then int j + 1 |> enum
-                        else headJudgement
-
-                    let judgement =
-                        let j = max JudgementType.MARVELLOUS judgement
-                        if dropped then int j + 2 |> enum
-                        else judgement
-
-                    let judgement = min JudgementType.MISS judgement
-
-                    this.State.Add(points judgement, 1.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
-                    Release
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            Overhold = overhold
-                            Dropped = dropped
-                        |}
-        }
-
-type ScoreClassifierPlus(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric
-        (
-            sprintf "SC+ (J%i)" judge,
-            healthBar,
-            180.0f<ms>,
-            90.0f<ms>,
-            keys, replay, notes, rate
-        )
-
-    let sc_curve (isRelease: bool) (delta: Time) =
-        let delta = Time.Abs delta
-
-        // 1.0 = 100%
-        if delta >= 180.0f<ms> then -1.0
-        else
-            let delta = if isRelease then delta * 0.5f else delta
-            let delta = float delta
-            let scale = 6.0 / (10.0 - float judge)
-            Math.Max(-1.0, (1.0 - Math.Pow(delta * scale, 2.8) * 0.0000056))
-
-    override this.HandleEvent ev =
-        { 
-            Time = ev.Time
-            Column = ev.Column
-            Guts = 
-                match ev.Guts with
-
-                | Hit_ (delta, isHold, missed) ->
-                    let judgement = ScoringHelpers.dp_windows judge enableRd delta
-                    this.State.Add(sc_curve false delta, 1.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
-                    Hit 
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            IsHold = isHold
-                        |}
-
-                | Release_ (delta, missed, overhold, dropped) ->
-                    let judgement = if missed then JudgementType.MISS else ScoringHelpers.dp_windows_halved judge enableRd delta
-                    this.State.Add(sc_curve true delta, 1.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
-                    Release
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            Overhold = overhold
-                            Dropped = dropped
-                        |}
-        }
-
-type Wife3(judge: int, enableRd: bool, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric
-        (
-            sprintf "Wife3 (J%i)" judge,
-            healthBar,
-            180.0f<ms>,
-            keys, replay, notes, rate
-        )
-
-    override this.HandleEvent ev =
-        { 
-            Time = ev.Time
-            Column = ev.Column
-            Guts = 
-                match ev.Guts with
-
-                | Hit_ (delta, isHold, missed) ->
-                    let judgement = ScoringHelpers.dp_windows judge enableRd delta
-                    this.State.Add(wife_curve delta, 1.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
-                    Hit 
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            IsHold = isHold
-                        |}
-
-                | Release_ (delta, missed, overhold, dropped) ->
-                    if overhold || not missed then this.State.IncrCombo() else this.State.BreakCombo true
-                    Release
-                        {|
-                            Judgement = None
-                            Missed = missed
-                            Delta = delta
-                            Overhold = overhold
-                            Dropped = dropped
-                        |}
-        }
-
-type OsuMania(od: float32, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric
-        (
-            sprintf "osu!mania (OD%.1f)" od,
-            healthBar,
-            188.5f<ms> - od * 3.0f<ms>,
-            keys, replay, notes, rate
-        )
-
-    let points =
-        function
-        | _JType.RIDICULOUS
-        | _JType.MARVELLOUS
-        | _JType.PERFECT -> 300.0
-        | _JType.GREAT -> 200.0
-        | _JType.GOOD -> 100.0
-        | _JType.BAD -> 50.0
-        | _JType.MISS -> 0.0
-        | _ -> 0.0
-
-    let headDeltas = Array.create keys 0.0f<ms>
-
-    let judgementFunc (delta: Time) =
-        let delta = Time.Abs delta
-        if delta <= 16.5f<ms> then JudgementType.MARVELLOUS
-        elif delta <= 64.5f<ms> - od * 3.0f<ms> then JudgementType.PERFECT
-        elif delta <= 97.5f<ms> - od * 3.0f<ms> then JudgementType.GREAT
-        elif delta <= 127.5f<ms> - od * 3.0f<ms> then JudgementType.GOOD
-        elif delta <= 151.5f<ms> - od * 3.0f<ms> then JudgementType.BAD
-        else JudgementType.MISS
-
-    override this.HandleEvent ev =
-        { 
-            Time = ev.Time
-            Column = ev.Column
-            Guts = 
-                match ev.Guts with
-
-                | Hit_ (delta, isHold, missed) ->
-                    if isHold then
-                        headDeltas.[ev.Column] <- Time.Abs delta
-                        if missed then this.State.BreakCombo true else this.State.IncrCombo()
-                        Hit 
-                            {|
-                                Judgement = None
-                                Missed = missed
-                                Delta = delta
-                                IsHold = true
-                            |}
-                    else
-                        let judgement = judgementFunc delta
-                        this.State.Add(points judgement, 300.0, judgement)
-                        if judgement = JudgementType.MISS then this.State.BreakCombo true else this.State.IncrCombo()
-                        Hit 
-                            {|
-                                Judgement = Some judgement
-                                Missed = missed
-                                Delta = delta
-                                IsHold = false
-                            |}
-
-                | Release_ (delta, missed, overhold, dropped) ->
-                    let headDelta = headDeltas.[ev.Column]
-                    let absolute = Time.Abs delta * 0.5f
-
-                    let judgement =
-                        if
-                            absolute < 16.5f<ms> * 1.2f &&
-                            absolute + headDelta < 16.5f<ms> * 2.4f &&
-                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
-                            not dropped
-                        then JudgementType.MARVELLOUS
-                        elif
-                            absolute < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
-                            absolute + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
-                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
-                            not dropped
-                        then JudgementType.PERFECT
-                        elif 
-                            absolute < 97.5f<ms> - od * 3.0f<ms> &&
-                            absolute + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
-                        then JudgementType.GREAT
-                        elif
-                            absolute < 127.5f<ms> - od * 3.0f<ms> &&
-                            absolute + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-                            (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
-                        then JudgementType.GOOD
-                        elif
-                            overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>
-                        then JudgementType.BAD
-                        else JudgementType.MISS
-
-                    this.State.Add(points judgement, 300.0, judgement)
-                    if judgement = JudgementType.MISS then this.State.BreakCombo true else this.State.IncrCombo()
-                    Release
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            Overhold = overhold
-                            Dropped = dropped
-                        |}
-        }
-
 type ExScore(pgreat: Time, great: Time, window: Time, healthBar, keys, replay, notes, rate) =
     inherit IScoreMetric
         (
@@ -1029,40 +873,8 @@ type ExScore(pgreat: Time, great: Time, window: Time, healthBar, keys, replay, n
 
 module Metrics =
     
-    type HPSystemConfig =
-        | VG
-        | OMHP of float
-        | Custom of HPSystemConfig
-        override this.ToString() =
-            match this with
-            | VG -> "VG"
-            | OMHP hp -> "osu!mania (HP" + (string hp) + ")"
-            | _ -> "unknown"
-
-    let createHealthBar (config: HPSystemConfig) : IHealthBarSystem =
-        match config with
-        | VG -> VibeGauge() :> IHealthBarSystem
-        | _ -> failwith "nyi"
-
-    type AccuracySystemConfig =
-        | SC of judge: int * ridiculous: bool
-        | SCPlus of judge: int * ridiculous: bool
-        | Wife of judge: int * ridiculous: bool
-        | OM of od: float32
-        | EX_Score
-        | Custom of ScoreSystemConfig
-        override this.ToString() =
-            match this with
-            | SC (judge, rd) -> "SC (J" + (string judge) + ")"
-            | SCPlus (judge, rd) -> "SC+ (J" + (string judge) + ")"
-            | Wife (judge, rd) -> "Wife3 (J" + (string judge) + ")"
-            | OM od -> "osu!mania (OD" + (string od) + ")"
-            | EX_Score -> "EX-SCORE (SDVX)"
-            | _ -> "unknown"
-    
     let createScoreMetric config keys (replay: IReplayProvider) notes rate : IScoreMetric =
-        let hp = createHealthBar VG
-        CustomScoring(Osu_Utils.config 8.0f, hp, keys, replay, notes, rate)
+        CustomScoring(config, keys, replay, notes, rate)
 
     let createDummyMetric (chart: Chart) : IScoreMetric =
-        createScoreMetric (SC (4, false)) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f
+        createScoreMetric (SC_Utils.config 4) chart.Keys (StoredReplayProvider Array.empty) chart.Notes 1.0f

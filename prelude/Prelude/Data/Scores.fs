@@ -95,11 +95,13 @@ type ScoreInfoProvider(score: Score, chart: Chart, scoring: ScoreSystemConfig) =
             modchart.Value
         and set(value) = modchart <- ValueSome value
 
-    member this.ScoringConfig with get() = scoringConfig and set(value) = if value <> this.ScoringConfig then scoringConfig <- value; scoreMetric <- ValueNone; lamp <- ValueNone
+    member this.ScoringConfig
+        with get() = scoringConfig
+        and set(value) = if value <> this.ScoringConfig then scoringConfig <- value; scoreMetric <- ValueNone; lamp <- ValueNone; grade <- ValueNone
     member this.Scoring =
         scoreMetric <-
             ValueOption.defaultWith (fun () -> 
-                let m = Metrics.createScoreMetric (Metrics.AccuracySystemConfig.Custom scoringConfig) this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
+                let m = Metrics.createScoreMetric scoringConfig this.ModChart.Keys (StoredReplayProvider this.ReplayData) this.ModChart.Notes score.rate 
                 m.Update Time.infinity; m)
                 scoreMetric
             |> ValueSome

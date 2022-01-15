@@ -26,13 +26,16 @@ module Lamp =
                 { Lamp = achieved; ImprovementNeeded = None }
             else
                 let nextLamp = lamps.[achieved + 1]
-                if worstJudgement > nextLamp.Judgement then
-                    { Lamp = achieved; ImprovementNeeded = Some {| Judgement = worstJudgement; LessNeeded = state.Judgements.[worstJudgement] |} }
-                elif state.Judgements.[nextLamp.Judgement] > nextLamp.JudgementThreshold then
-                    { Lamp = achieved; ImprovementNeeded = Some {| Judgement = nextLamp.Judgement; LessNeeded = state.Judgements.[nextLamp.Judgement] - nextLamp.JudgementThreshold |} }
+                if nextLamp.Judgement < 0 then // then it refers to cbs
+                    if state.ComboBreaks > nextLamp.JudgementThreshold then
+                        { Lamp = achieved; ImprovementNeeded = Some {| Judgement = -1; LessNeeded = state.ComboBreaks - nextLamp.JudgementThreshold |} }
+                    else loop (achieved + 1)
                 else
-                    loop (achieved + 1)
-
+                    if worstJudgement > nextLamp.Judgement then
+                        { Lamp = achieved; ImprovementNeeded = Some {| Judgement = worstJudgement; LessNeeded = state.Judgements.[worstJudgement] |} }
+                    elif state.Judgements.[nextLamp.Judgement] > nextLamp.JudgementThreshold then
+                        { Lamp = achieved; ImprovementNeeded = Some {| Judgement = nextLamp.Judgement; LessNeeded = state.Judgements.[nextLamp.Judgement] - nextLamp.JudgementThreshold |} }
+                    else loop (achieved + 1)
         loop -1
     
     let calculate (lamps: Lamp array) (state: AccuracySystemState) : int =
