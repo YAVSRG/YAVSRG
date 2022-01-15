@@ -649,7 +649,7 @@ module Osu_Utils =
 
 module SC_Utils =
 
-    // not used at
+    // not used at the moment
     let sc_curve (judge: int) (isRelease: bool) (delta: Time) =
         let delta = Time.Abs delta
 
@@ -676,10 +676,10 @@ module SC_Utils =
             Accuracy = 
                 {
                     MissWindow = 180.0f<ms>
-                    CbrushWindow = 180.0f<ms>
+                    CbrushWindow = 90.0f<ms>
                     Timegates = DP_Utils.windows judge false
                     Points = AccuracyPoints.Weights (10.0, [|10.0; 9.0; 5.0; -5.0; -10.0; -10.0|])
-                    HoldNoteBehaviour = HoldNoteBehaviour.JustBreakCombo
+                    HoldNoteBehaviour = HoldNoteBehaviour.Normal {| JudgementIfDropped = 3; JudgementIfOverheld = 3 |}
                 }
             Health =
                 {
@@ -715,6 +715,73 @@ module SC_Utils =
                             { Name = "SDP"; Judgement = 1; JudgementThreshold = 9; Color = Color.FromArgb(255, 255, 160) }
                             { Name = "WF"; Judgement = 1; JudgementThreshold = 1; Color = Color.FromArgb(255, 160, 255) }
                             { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
+                        |]
+                }
+        }
+
+module Ex_Score_Utils =
+
+    type ExScoreType =
+        {
+            Name: string
+            Critical: Time
+            Near: Time
+            MissWindow: Time
+        }
+
+    let sdvx : ExScoreType =
+        {
+            Name = "SDVX"
+            Critical = 50.0f<ms>
+            Near = 150.0f<ms>
+            MissWindow = 150.0f<ms>
+        }
+
+    let config (data: ExScoreType) =
+        {
+            Name = sprintf "EXSCORE (%s)" data.Name
+            Judgements =
+                [|
+                    { Name = "CRITICAL"; Color = Color.Aqua; BreaksCombo = false }
+                    { Name = "NEAR"; Color = Color.Yellow; BreaksCombo = false }
+                    { Name = "BREAK"; Color = Color.FromArgb(0, 255, 100); BreaksCombo = true }
+                    { Name = "MISS"; Color = Color.FromArgb(255, 100, 100); BreaksCombo = true }
+                |]
+            Accuracy = 
+                {
+                    MissWindow = 150.0f<ms>
+                    CbrushWindow = 150.0f<ms>
+                    Timegates = [-data.Critical, 1; data.Critical, 0; data.Near, 1]
+                    Points = AccuracyPoints.Weights (1.0, [|1.0; 0.5; 0.0; 0.0|])
+                    HoldNoteBehaviour = HoldNoteBehaviour.Normal {| JudgementIfDropped = 2; JudgementIfOverheld = 1 |}
+                }
+            Health =
+                {
+                    StartingHealth = 0.5
+                    OnlyFailAtEnd = false
+                    ClearThreshold = 0.0
+                    Points = [|0.008; 0.008; 0.004; 0.0; -0.04; -0.08|]
+                }
+            Grading = 
+                {
+                    Grades = 
+                        [|
+                            { Name = "B"; Accuracy = 0.90; Color = Color.FromArgb(202, 153, 183) }
+                            { Name = "B+"; Accuracy = 0.92; Color = Color.FromArgb(163, 190, 207) }
+                            { Name = "A"; Accuracy = 0.93; Color = Color.FromArgb(149, 193, 220) }
+                            { Name = "A+"; Accuracy = 0.94; Color = Color.FromArgb(148, 210, 180) }
+                            { Name = "AA"; Accuracy = 0.95; Color = Color.FromArgb(134, 227, 183) }
+                            { Name = "AA+"; Accuracy = 0.96; Color = Color.FromArgb(127, 231, 139) }
+                            { Name = "AAA"; Accuracy = 0.97; Color = Color.FromArgb(237, 205, 140) }
+                            { Name = "AAA+"; Accuracy = 0.98; Color = Color.FromArgb(246, 234, 128) }
+                            { Name = "S"; Accuracy = 0.99; Color = Color.FromArgb(235, 200, 220) }
+                        |]
+                    Lamps =
+                        [|
+                            { Name = "PFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 80) }
+                            { Name = "SDP"; Judgement = 1; JudgementThreshold = 9; Color = Color.FromArgb(255, 255, 160) }
+                            { Name = "1P"; Judgement = 1; JudgementThreshold = 1; Color = Color.FromArgb(255, 255, 200) }
+                            { Name = "UFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
                         |]
                 }
         }
@@ -806,70 +873,6 @@ type CustomScoring(config: ScoreSystemConfig, keys, replay, notes, rate) =
                         if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
                         Release {| Judgement = Some judgement; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
         }
-
-        (*
-type ExScore(pgreat: Time, great: Time, window: Time, healthBar, keys, replay, notes, rate) =
-    inherit IScoreMetric
-        (
-            "EX-SCORE (SDVX)",
-            healthBar,
-            window,
-            keys, replay, notes, rate
-        )
-        
-    let judgementFunc (delta: Time) =
-        let delta = Time.Abs delta
-        if delta <= pgreat then JudgementType.MARVELLOUS
-        elif delta <= great then JudgementType.PERFECT
-        elif delta < window then JudgementType.GOOD
-        else JudgementType.MISS
-
-    let points =
-        function
-        | _JType.MARVELLOUS -> 2.0
-        | _JType.PERFECT -> 1.0
-        | _ -> 0.0
-
-    let headJudgements = Array.create keys JudgementType.MISS
-
-    override this.HandleEvent ev =
-        { 
-            Time = ev.Time
-            Column = ev.Column
-            Guts = 
-                match ev.Guts with
-                | Hit_ (delta, isHold, missed) ->
-                    let judgement = if missed then JudgementType.MISS else judgementFunc delta
-
-                    if isHold then headJudgements.[ev.Column] <- judgement
-                    else this.State.Add(points judgement, 2.0, judgement)
-
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
-                    Hit 
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            IsHold = isHold
-                        |}
-                | Release_ (delta, missed, overhold, dropped) ->
-                    let headJudgement = headJudgements.[ev.Column]
-
-                    let judgement =
-                        if dropped || missed then max JudgementType.GOOD headJudgement
-                        else headJudgement
-
-                    this.State.Add(points judgement, 2.0, judgement)
-                    if ScoringHelpers.isComboBreaker judgement then this.State.BreakCombo true else this.State.IncrCombo()
-                    Release
-                        {|
-                            Judgement = Some judgement
-                            Missed = missed
-                            Delta = delta
-                            Overhold = overhold
-                            Dropped = dropped
-                        |}
-        }*)
 
 module Metrics =
     
