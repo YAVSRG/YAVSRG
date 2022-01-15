@@ -517,7 +517,7 @@ module Themes =
             with set conf = config <- conf; this.WriteJson (config, "theme.json")
             and get () = config
         
-        member this.GetTexture (name: string) : (Bitmap * TextureConfig) option=
+        member this.GetTexture (name: string) : (Bitmap * TextureConfig) option =
             match this.TryReadFile ("Textures", name + ".png") with
             | Some stream ->
                 let img = Bitmap.load stream
@@ -525,6 +525,13 @@ module Themes =
                 stream.Dispose()
                 Some (img, info)
             | None -> None
+
+        member this.GetScoreSystems () =
+            seq {
+                for folder in this.GetFolders("ScoreSystems") do
+                    let v, success = this.GetJson (false, "ScoreSystems", folder, "config.json")
+                    if success then yield folder, v
+            }
 
         member this.GetGameplayConfig<'T> (name: string) = this.GetJson<'T> (true, "Interface", "Gameplay", name + ".json")
         
