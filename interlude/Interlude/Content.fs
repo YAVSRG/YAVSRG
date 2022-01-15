@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open Prelude.Common
+open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude.Graphics
 
@@ -24,6 +25,12 @@ module rec Content =
         let current () = loaded.[currentId.Value]
         
         let config : ThemeConfig ref = ref _default.Config
+        let scoreSystems = Dictionary<string, ScoreSystemConfig>()
+
+        let private defaultScoreSystems =
+            List.map
+                (fun od -> (sprintf "osu-od-%.0f" od, Osu_Utils.config od))
+                [0.0f; 1.0f; 2.0f; 3.0f; 4.0f; 5.0f; 6.0f; 7.0f; 8.0f; 9.0f; 10.0f]
 
         // Detection from file system
 
@@ -69,6 +76,12 @@ module rec Content =
                 GameplayConfig.clearCache()
                 Sprites.clearCache()
 
+                scoreSystems.Clear()
+                for name, conf in defaultScoreSystems do
+                    scoreSystems.Add("*" + name, conf)
+                for name, conf in current().GetScoreSystems() do
+                    scoreSystems.Add( name, conf)
+
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
         let pick f =
@@ -88,8 +101,6 @@ module rec Content =
              switch id
              current().Config <- { current().Config with Name = current().Config.Name + " (Extracted)" }
 
-        let lampToColor (lampAchieved: Prelude.Scoring.Lamp) = config.Value.LampColors.[lampAchieved |> int]
-        let gradeToColor (gradeAchieved: int) = config.Value.Grades.[gradeAchieved].Color
         let clearToColor (cleared: bool) = config.Value.ClearColors |> (if cleared then fst else snd)
 
     module Noteskins =

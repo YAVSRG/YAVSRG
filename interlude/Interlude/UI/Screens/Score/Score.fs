@@ -1,8 +1,8 @@
 ﻿namespace Interlude.UI.Screens.Score
 
-open System.Drawing
 open Prelude.Common
 open Prelude.Scoring
+open Prelude.Scoring.Grading
 open Prelude.Data.Scores
 open Interlude
 open Interlude.Utils
@@ -103,15 +103,15 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     inherit Screen.T()
 
     let mutable pbs = pbs
-    let mutable gradeAchieved = Grade.calculateWithTarget (themeConfig().Grades) scoreData.Scoring.State
+    let mutable gradeAchieved = Grade.calculateWithTarget scoreData.ScoringConfig.Grading.Grades scoreData.Scoring.State
     let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
     let graph = new ScoreGraph(scoreData)
 
-    let mutable scoreSystems = Options.options.AccSystems.Value
+    let mutable scoreSystems = Options.options.ScoringSystems.Value
 
     let refresh() =
         eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
-        gradeAchieved <- Grade.calculateWithTarget (themeConfig().Grades) scoreData.Scoring.State
+        gradeAchieved <- Grade.calculateWithTarget scoreData.ScoringConfig.Grading.Grades scoreData.Scoring.State
         pbs <- BestFlags.Default
         graph.Refresh()
 
@@ -151,18 +151,18 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         new TextBox(K "Accuracy", K Color.White, 0.5f)
         |> positionWidget(40.0f, 0.0f, -250.0f, 0.5f, 240.0f, 0.0f, -220.0f, 0.5f)
         |> this.Add
-        pbLabel (fun () -> scoreData.Scoring.FormatAccuracy()) (fun () -> Themes.gradeToColor gradeAchieved.Grade) (fun () -> pbs.Grade)
+        pbLabel (fun () -> scoreData.Scoring.FormatAccuracy()) (fun () -> scoreData.ScoringConfig.GradeColor gradeAchieved.Grade) (fun () -> pbs.Grade)
         |> positionWidget(40.0f, 0.0f, -235.0f, 0.5f, 240.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
         new TextBox(K "Lamp", K Color.White, 0.5f)
         |> positionWidget(290.0f, 0.0f, -250.0f, 0.5f, 490.0f, 0.0f, -220.0f, 0.5f)
         |> this.Add
-        pbLabel (fun () -> scoreData.Lamp.ToString()) (fun () -> Themes.lampToColor scoreData.Lamp) (fun () -> pbs.Lamp)
+        pbLabel (fun () -> scoreData.ScoringConfig.LampName scoreData.Lamp) (fun () -> scoreData.ScoringConfig.LampColor scoreData.Lamp) (fun () -> pbs.Lamp)
         |> positionWidget(290.0f, 0.0f, -235.0f, 0.5f, 490.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
-        pbLabel (fun () -> themeConfig().Grades.[gradeAchieved.Grade].Name) (fun () -> Themes.gradeToColor gradeAchieved.Grade) (fun () -> pbs.Accuracy)
+        pbLabel (fun () -> scoreData.ScoringConfig.GradeName gradeAchieved.Grade) (fun () -> scoreData.ScoringConfig.GradeColor gradeAchieved.Grade) (fun () -> pbs.Accuracy)
         |> positionWidget(540.0f, 0.0f, -225.0f, 0.5f, 740.0f, 0.0f, 190.0f, 0.5f)
         |> this.Add
 
@@ -212,18 +212,15 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         Draw.rect (Rect.create (left + 15.0f) (halfh - 255.0f) (left + 765f) (halfh + 205.0f)) (Style.accentShade(50, 1.0f, 0.6f)) Sprite.Default
         Draw.rect (Rect.create (left + 20.0f) (halfh - 250.0f) (left + 760f) (halfh + 200.0f)) (Color.FromArgb(160, 0, 0, 0)) Sprite.Default
 
-        let judgements = scoreData.Scoring.State.Judgements
-        let judges = [JudgementType.MARVELLOUS; JudgementType.PERFECT; JudgementType.GREAT; JudgementType.GOOD; JudgementType.BAD; JudgementType.MISS]
-        let judges = if judgements.[int JudgementType.RIDICULOUS] > 0 then JudgementType.RIDICULOUS :: judges else judges
-        let h = (350.0f - 80.0f) / float32 judges.Length
+        let judgeCounts = scoreData.Scoring.State.Judgements
+        let judgements = scoreData.ScoringConfig.Judgements |> Array.indexed
+        let h = (350.0f - 80.0f) / float32 judgements.Length
         let mutable y = halfh - 140.0f
-        for j in judges do
-            let col = themeConfig().JudgementColors.[int j]
-            let name = themeConfig().JudgementNames.[int j]
+        for i, j in judgements do
             let b = Rect.create (left + 40.0f) y (left + 530.0f) (y + h)
-            Draw.rect b (Color.FromArgb(40, col)) Sprite.Default
-            Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgements.[int j] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, col)) Sprite.Default
-            Text.drawFill(font(), sprintf "%s: %i" name judgements.[int j], Rect.expand(-5.0f, 0.0f) b, Color.White, 0.0f)
+            Draw.rect b (Color.FromArgb(40, j.Color)) Sprite.Default
+            Draw.rect (b |> Rect.sliceLeft (490.0f * (float32 judgeCounts.[i] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, j.Color)) Sprite.Default
+            Text.drawFill(font(), sprintf "%s: %i" j.Name judgeCounts.[i], Rect.expand(-5.0f, 0.0f) b, Color.White, 0.0f)
             y <- y + h
 
         //graph stuff
@@ -237,11 +234,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
         if Options.options.Hotkeys.Next.Value.Tapped() then
             scoreSystems <- Options.WatcherSelection.cycleForward scoreSystems
-            scoreData.AccuracyType <- fst scoreSystems
+            scoreData.ScoringConfig <- Options.getScoreSystem(fst scoreSystems)
             refresh()
         elif Options.options.Hotkeys.Previous.Value.Tapped() then
             scoreSystems <- Options.WatcherSelection.cycleBackward scoreSystems
-            scoreData.AccuracyType <- fst scoreSystems
+            scoreData.ScoringConfig <- Options.getScoreSystem(fst scoreSystems)
             refresh()
 
     override this.OnEnter prev =

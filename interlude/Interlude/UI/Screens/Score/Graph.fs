@@ -39,11 +39,11 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 match ev.Guts with
                 | Hit evData ->
                     match evData.Judgement with
-                    | Some judgement -> h - evData.Delta / data.Scoring.MissWindow * h, Content.themeConfig().JudgementColors.[int judgement]
+                    | Some judgement -> h - evData.Delta / data.Scoring.MissWindow * h, data.ScoringConfig.JudgementColor judgement
                     | None -> 0.0f, Color.Transparent
                 | Release evData ->
                     match evData.Judgement with
-                    | Some judgement -> h - 0.5f * evData.Delta / data.Scoring.MissWindow * h, Color.FromArgb(127, Content.themeConfig().JudgementColors.[int judgement])
+                    | Some judgement -> h - 0.5f * evData.Delta / data.Scoring.MissWindow * h, Color.FromArgb(127, data.ScoringConfig.JudgementColor judgement)
                     | None -> 0.0f, Color.Transparent
             if col.A > 0uy then
                 let x = left + 5.0f + ev.Time * hscale

@@ -2,10 +2,10 @@
 
 open OpenTK
 open System
-open System.Drawing
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
+open Prelude.Scoring.Grading
 open Prelude.Data.Themes
 open Interlude
 open Interlude.Graphics
@@ -22,6 +22,7 @@ open Interlude.UI.Animation
 module GameplayWidgets = 
 
     type Helper = {
+        ScoringConfig: ScoreSystemConfig
         Scoring: IScoreMetric
         HP: IHealthBarSystem
         OnHit: IEvent<HitEvent<HitEventGuts>>
@@ -31,13 +32,13 @@ module GameplayWidgets =
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
-        let grades = Content.themeConfig().Grades
+        let grades = helper.ScoringConfig.Grading.Grades
         let color = new AnimationColorMixer(if conf.GradeColors then Array.last(grades).Color else Color.White)
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe
                     ( fun _ ->
-                        grades.[Grade.calculate grades helper.Scoring.State].Color |> color.SetColor
+                        Grade.calculate grades helper.Scoring.State |> helper.ScoringConfig.GradeColor |> color.SetColor
                     )
             else null
 
@@ -83,8 +84,8 @@ module GameplayWidgets =
             for struct (time, pos, j) in hits do
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
-                    (let c = Content.themeConfig().JudgementColors.[j] in
-                        Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), int c.R, int c.G, int c.B))
+                    (let c = helper.ScoringConfig.JudgementColor j in
+                        Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), c))
                     Sprite.Default
 
         override this.Dispose() =
@@ -105,11 +106,11 @@ module GameplayWidgets =
                         | Hit e -> (e.Judgement, e.Delta)
                         | Release e -> (e.Judgement, e.Delta)
                     if
-                        judge.IsSome &&
-                        match judge.Value with
-                        | JudgementType.RIDICULOUS
-                        | JudgementType.MARVELLOUS -> conf.ShowRDMA
-                        | _ -> true
+                        judge.IsSome && true
+                        //match judge.Value with
+                        //| _JType.RIDICULOUS
+                        //| _JType.MARVELLOUS -> conf.ShowRDMA
+                        //| _ -> true
                     then
                         let j = int judge.Value in
                         if j >= tier || ev.Time - atime > time then
@@ -135,7 +136,9 @@ module GameplayWidgets =
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
-                        color.SetColor(Content.themeConfig().LampColors.[helper.Scoring.State |> Lamp.calculate |> int])
+                        Lamp.calculate helper.ScoringConfig.Grading.Lamps helper.Scoring.State
+                        |> helper.ScoringConfig.LampColor
+                        |> color.SetColor
                     popAnimation.Value <- conf.Pop)
 
         do

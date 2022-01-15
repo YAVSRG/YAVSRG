@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
-open Prelude.Scoring
 open Prelude.Scoring.Metrics
 open Prelude.Common
 open Interlude.Options
@@ -26,7 +25,7 @@ module Gameplay =
             |> Setting.round 3
         let lamp =
             match options.Pacemaker.Value with
-            | Accuracy _ -> Lamp.SDCB
+            | Accuracy _ -> 0
             | Lamp l -> l
             |> Setting.simple
         {
@@ -111,7 +110,7 @@ module Gameplay =
                     | 3 -> OM od.Value
                     | 4 -> EX_Score
                     | _ -> failwith "impossible"
-                Setting.app (WatcherSelection.replace index value) options.AccSystems
+                ()//Setting.app (WatcherSelection.replace index value) options.ScoringSystems
         }
 
     let scoreSystems() : SelectionPage =
@@ -119,16 +118,16 @@ module Gameplay =
             Content = fun add ->
                 column [
                     let setting =
-                        Setting.make ignore ( fun () -> WatcherSelection.indexed options.AccSystems.Value )
+                        Setting.make ignore ( fun () -> WatcherSelection.indexed options.ScoringSystems.Value )
                     PrettySetting("ScoreSystems",
                         CardSelect.Selector(
                             setting,
                             { CardSelect.Config.Default with
                                 NameFunc = fun (_, s) -> s.ToString()
-                                DuplicateFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.add s) options.AccSystems)
-                                EditFunc = Some (fun (i, s) -> editAccuracySystem (i, s))
-                                DeleteFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.delete s) options.AccSystems)
-                                MarkFunc = fun ((_, s), b) -> if b then Setting.app (WatcherSelection.moveToTop s) options.AccSystems
+                                DuplicateFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.add s) options.ScoringSystems)
+                                //EditFunc = Some (fun (i, s) -> editAccuracySystem (i, s))
+                                DeleteFunc = Some (fun (_, s) -> Setting.app (WatcherSelection.delete s) options.ScoringSystems)
+                                MarkFunc = fun ((_, s), b) -> if b then Setting.app (WatcherSelection.moveToTop s) options.ScoringSystems
                             },
                             add
                         )

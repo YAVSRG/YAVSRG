@@ -1,16 +1,16 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open System
-open System.Drawing
 open System.Linq
 open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
+open Prelude.Scoring
+open Prelude.Scoring.Grading
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
-open Prelude.Scoring
 open Interlude.UI
 open Interlude.Graphics
 open Interlude.Input
@@ -95,13 +95,13 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
         | Some d ->
             disp 
                 d.Grade
-                (fun x -> themeConfig().Grades.[x].Name)
-                (fun _ -> let (_, _, c) = getPb d.Grade Themes.gradeToColor in c)
+                currentScoreSystem.GradeName
+                (fun _ -> let (_, _, c) = getPb d.Grade currentScoreSystem.GradeColor in c)
                 450.0f
             disp
                 d.Lamp
-                (fun x -> x.ToString())
-                Themes.lampToColor
+                currentScoreSystem.LampName
+                currentScoreSystem.LampColor
                 300.0f
             disp
                 d.Clear
@@ -130,8 +130,8 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
             colorVersion <- colorVersionGlobal
             if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
             match chartData with
-            | Some d when d.Bests.ContainsKey scoreSystem ->
-                pbData <- Some d.Bests.[scoreSystem]
+            | Some d when d.Bests.ContainsKey scoreSystemId ->
+                pbData <- Some d.Bests.[scoreSystemId]
             | _ -> ()
             color <- colorFunc pbData
             collectionIcon <-

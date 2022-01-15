@@ -1,11 +1,11 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open System
-open System.Drawing
 open System.Linq
 open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
+open Prelude.Scoring
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
@@ -33,7 +33,8 @@ type Screen() as this =
     let infoPanel = new InfoPanel()
 
     let refresh() =
-        scoreSystem <- (fst options.AccSystems.Value).ToString()
+        currentScoreSystem <- getCurrentScoreSystem()
+        scoreSystemId <- ScoreSystemConfig.hash currentScoreSystem
         infoPanel.Refresh()
         let groups =
             if options.ChartGroupMode.Value <> "Collections" then

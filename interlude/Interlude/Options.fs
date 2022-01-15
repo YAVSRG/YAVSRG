@@ -1,8 +1,6 @@
 ﻿namespace Interlude
 
 open System
-open System.Drawing
-open System.Collections.Generic
 open System.IO
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
@@ -148,7 +146,7 @@ module Options =
 
     type Pacemaker =
         | Accuracy of float
-        | Lamp of Lamp
+        | Lamp of int
 
     type FailType =
         | Instant = 0
@@ -212,7 +210,7 @@ module Options =
             Noteskin: Setting<string>
 
             Playstyles: Layout array
-            AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
+            ScoringSystems: Setting<WatcherSelection<string>>
             ScoreSaveCondition: Setting<ScoreSaving>
             FailCondition: Setting<FailType>
             Pacemaker: Setting<Pacemaker>
@@ -255,7 +253,7 @@ module Options =
             UseKeymodePreference = Setting.simple false
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            AccSystems = Setting.simple (Metrics.SCPlus (4, false), [])
+            ScoringSystems = Setting.simple ("*osu-od-8", [])
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemaker = Setting.simple (Accuracy 0.95)
@@ -315,3 +313,10 @@ module Options =
             JSON.ToFile(configPath, true) config
             JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)
+
+    let getScoreSystem(id: string) =
+        if Content.Themes.scoreSystems.ContainsKey id then Content.Themes.scoreSystems.[id]
+        else Osu_Utils.config 8.0f
+
+    let getCurrentScoreSystem() =
+        getScoreSystem (fst options.ScoringSystems.Value)
