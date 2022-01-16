@@ -460,12 +460,22 @@ module Themes =
                 stream.Dispose()
                 Some (img, info)
             | None -> None
+            
+        member this.GetScoreSystemTexture (name: string) : (Bitmap * TextureConfig) =
+            match this.TryReadFile ("ScoreSystems", name + ".png") with
+            | Some stream ->
+                let img = Bitmap.load stream
+                let info : TextureConfig = this.GetJson<TextureConfig> (false, "ScoreSystems", name + ".json") |> fst
+                stream.Dispose()
+                img, info
+            | None -> new Bitmap(1, 1), TextureConfig.Default
 
         member this.GetScoreSystems () =
             seq {
-                for folder in this.GetFolders("ScoreSystems") do
-                    let v, success = this.GetJson (false, "ScoreSystems", folder, "config.json")
-                    if success then yield folder, v
+                for config in this.GetFiles "ScoreSystems" do
+                    if Path.GetExtension(config).ToLower() = ".iss" then
+                        let v, success = this.GetJson (false, "ScoreSystems", config)
+                        if success then yield Path.GetFileNameWithoutExtension config, v
             }
 
         member this.GetGameplayConfig<'T> (name: string) = this.GetJson<'T> (true, "Interface", "Gameplay", name + ".json")

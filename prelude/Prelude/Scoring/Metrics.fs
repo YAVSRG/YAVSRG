@@ -120,6 +120,16 @@ module ScoreSystemConfig =
                 bw.Write (float32 t)
                 bw.Write j
         | HoldNoteBehaviour.OnlyJudgeReleases -> bw.Write 1s
+        bw.Write config.Health.StartingHealth
+        bw.Write config.Health.ClearThreshold
+        bw.Write config.Health.OnlyFailAtEnd
+        for p in config.Health.Points do
+            bw.Write p
+        for g in config.Grading.Grades do
+            bw.Write g.Accuracy
+        for l in config.Grading.Lamps do
+            bw.Write l.Judgement
+            bw.Write l.JudgementThreshold
 
         let s =
             ms.ToArray()
@@ -429,10 +439,6 @@ type IScoreMetric
         hitEvents.Add ev
         hitCallback ev
         healthBar.HandleEvent ev
-
-(*
-    Concrete implementations of health/accuracy systems
-*)
 
 module DP_Utils =
 
@@ -800,6 +806,8 @@ module Helpers =
         match conf.Accuracy.Points with
         | AccuracyPoints.WifeCurve j -> Wife_Utils.wife_curve j delta
         | AccuracyPoints.Weights (maxweight, weights) -> weights.[judge] / maxweight
+
+// Concrete implementation of rulesets
 
 type CustomScoring(config: ScoreSystemConfig, keys, replay, notes, rate) =
     inherit IScoreMetric(config, HealthBarMetric(config.Health), keys, replay, notes, rate)
