@@ -244,7 +244,7 @@ module Options =
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
             Rulesets =
-                Setting.simple ["sc-j4"]
+                Setting.simple ["*sc-j4"]
                 |> Setting.map 
                     ( fun xs -> 
                         let filtered = 
@@ -253,7 +253,7 @@ module Options =
                                     if Content.Themes.rulesets.ContainsKey x then true
                                     else Logging.Debug(sprintf "Score system '%s' not found, deselecting" x); false
                                 ) xs
-                        if filtered.IsEmpty then ["sc-j4"] else filtered
+                        if filtered.IsEmpty then ["*sc-j4"] else filtered
                     ) id
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
