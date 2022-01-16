@@ -95,13 +95,13 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
         | Some d ->
             disp 
                 d.Grade
-                currentScoreSystem.GradeName
-                (fun _ -> let (_, _, c) = getPb d.Grade currentScoreSystem.GradeColor in c)
+                ruleset.GradeName
+                (fun _ -> let (_, _, c) = getPb d.Grade ruleset.GradeColor in c)
                 450.0f
             disp
                 d.Lamp
-                currentScoreSystem.LampName
-                currentScoreSystem.LampColor
+                ruleset.LampName
+                ruleset.LampColor
                 300.0f
             disp
                 d.Clear
@@ -130,8 +130,8 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
             colorVersion <- colorVersionGlobal
             if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
             match chartData with
-            | Some d when d.Bests.ContainsKey scoreSystemId ->
-                pbData <- Some d.Bests.[scoreSystemId]
+            | Some d when d.Bests.ContainsKey rulesetId ->
+                pbData <- Some d.Bests.[rulesetId]
             | _ -> ()
             color <- colorFunc pbData
             collectionIcon <-

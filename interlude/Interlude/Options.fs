@@ -200,7 +200,7 @@ module Options =
             Noteskin: Setting<string>
 
             Playstyles: Layout array
-            ScoringSystems: Setting<WatcherSelection<string>>
+            Rulesets: Setting<WatcherSelection<string>>
             ScoreSaveCondition: Setting<ScoreSaving>
             FailCondition: Setting<FailType>
             Pacemaker: Setting<Pacemaker>
@@ -243,14 +243,14 @@ module Options =
             UseKeymodePreference = Setting.simple false
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            ScoringSystems =
+            Rulesets =
                 Setting.simple ["sc-j4"]
                 |> Setting.map 
                     ( fun xs -> 
                         let filtered = 
                             List.filter 
                                 ( fun x -> 
-                                    if Content.Themes.scoreSystems.ContainsKey x then true
+                                    if Content.Themes.rulesets.ContainsKey x then true
                                     else Logging.Debug(sprintf "Score system '%s' not found, deselecting" x); false
                                 ) xs
                         if filtered.IsEmpty then ["sc-j4"] else filtered
@@ -315,9 +315,9 @@ module Options =
             JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)
 
-    let getScoreSystem(id: string) =
-        if Content.Themes.scoreSystems.ContainsKey id then Content.Themes.scoreSystems.[id]
-        else Osu_Utils.config 8.0f
+    let getRuleset(id: string) =
+        if Content.Themes.rulesets.ContainsKey id then Content.Themes.rulesets.[id]
+        else failwithf "Tried to get a ruleset that doesn't exist/isn't loaded: %s" id
 
-    let getCurrentScoreSystem() =
-        getScoreSystem (List.head options.ScoringSystems.Value)
+    let getCurrentRuleset() =
+        getRuleset (List.head options.Rulesets.Value)

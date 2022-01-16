@@ -103,15 +103,15 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     inherit Screen.T()
 
     let mutable pbs = pbs
-    let mutable gradeAchieved = Grade.calculateWithTarget scoreData.ScoringConfig.Grading.Grades scoreData.Scoring.State
+    let mutable gradeAchieved = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
     let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
     let graph = new ScoreGraph(scoreData)
 
-    let mutable scoreSystems = Options.options.ScoringSystems.Value
+    let mutable rulesets = Options.options.Rulesets.Value
 
     let refresh() =
         eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
-        gradeAchieved <- Grade.calculateWithTarget scoreData.ScoringConfig.Grading.Grades scoreData.Scoring.State
+        gradeAchieved <- Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
         pbs <- BestFlags.Default
         graph.Refresh()
 
@@ -151,18 +151,18 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         new TextBox(K "Accuracy", K Color.White, 0.5f)
         |> positionWidget(40.0f, 0.0f, -250.0f, 0.5f, 240.0f, 0.0f, -220.0f, 0.5f)
         |> this.Add
-        pbLabel (fun () -> scoreData.Scoring.FormatAccuracy()) (fun () -> scoreData.ScoringConfig.GradeColor gradeAchieved.Grade) (fun () -> pbs.Grade)
+        pbLabel (fun () -> scoreData.Scoring.FormatAccuracy()) (fun () -> scoreData.Ruleset.GradeColor gradeAchieved.Grade) (fun () -> pbs.Grade)
         |> positionWidget(40.0f, 0.0f, -235.0f, 0.5f, 240.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
         new TextBox(K "Lamp", K Color.White, 0.5f)
         |> positionWidget(290.0f, 0.0f, -250.0f, 0.5f, 490.0f, 0.0f, -220.0f, 0.5f)
         |> this.Add
-        pbLabel (fun () -> scoreData.ScoringConfig.LampName scoreData.Lamp) (fun () -> scoreData.ScoringConfig.LampColor scoreData.Lamp) (fun () -> pbs.Lamp)
+        pbLabel (fun () -> scoreData.Ruleset.LampName scoreData.Lamp) (fun () -> scoreData.Ruleset.LampColor scoreData.Lamp) (fun () -> pbs.Lamp)
         |> positionWidget(290.0f, 0.0f, -235.0f, 0.5f, 490.0f, 0.0f, -140.0f, 0.5f)
         |> this.Add
         
-        pbLabel (fun () -> scoreData.ScoringConfig.GradeName gradeAchieved.Grade) (fun () -> scoreData.ScoringConfig.GradeColor gradeAchieved.Grade) (fun () -> pbs.Accuracy)
+        pbLabel (fun () -> scoreData.Ruleset.GradeName gradeAchieved.Grade) (fun () -> scoreData.Ruleset.GradeColor gradeAchieved.Grade) (fun () -> pbs.Accuracy)
         |> positionWidget(540.0f, 0.0f, -225.0f, 0.5f, 740.0f, 0.0f, 190.0f, 0.5f)
         |> this.Add
 
@@ -213,7 +213,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         Draw.rect (Rect.create (left + 20.0f) (halfh - 250.0f) (left + 760f) (halfh + 200.0f)) (Color.FromArgb(160, 0, 0, 0)) Sprite.Default
 
         let judgeCounts = scoreData.Scoring.State.Judgements
-        let judgements = scoreData.ScoringConfig.Judgements |> Array.indexed
+        let judgements = scoreData.Ruleset.Judgements |> Array.indexed
         let h = (350.0f - 80.0f) / float32 judgements.Length
         let mutable y = halfh - 140.0f
         for i, j in judgements do
@@ -233,12 +233,12 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         base.Update(elapsedTime, bounds)
 
         if Options.options.Hotkeys.Next.Value.Tapped() then
-            scoreSystems <- Options.WatcherSelection.cycleForward scoreSystems
-            scoreData.ScoringConfig <- Options.getScoreSystem(List.head scoreSystems)
+            rulesets <- Options.WatcherSelection.cycleForward rulesets
+            scoreData.Ruleset <- Options.getRuleset(List.head rulesets)
             refresh()
         elif Options.options.Hotkeys.Previous.Value.Tapped() then
-            scoreSystems <- Options.WatcherSelection.cycleBackward scoreSystems
-            scoreData.ScoringConfig <- Options.getScoreSystem(List.head scoreSystems)
+            rulesets <- Options.WatcherSelection.cycleBackward rulesets
+            scoreData.Ruleset <- Options.getRuleset(List.head rulesets)
             refresh()
 
     override this.OnEnter prev =

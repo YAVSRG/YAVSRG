@@ -22,7 +22,7 @@ open Interlude.UI.Animation
 module GameplayWidgets = 
 
     type Helper = {
-        ScoringConfig: ScoreSystemConfig
+        ScoringConfig: Ruleset
         Scoring: IScoreMetric
         HP: HealthBarMetric
         OnHit: IEvent<HitEvent<HitEventGuts>>

@@ -67,6 +67,9 @@ module Gameplay =
 
     let mutable autoplay = false
 
+    let mutable ruleset : Ruleset = getCurrentRuleset()
+    let mutable rulesetId = Ruleset.hash ruleset
+
     let private _rate = Setting.rate 1.0f
     let private _selectedMods = Setting.simple Map.empty
     let updateChart() =
@@ -142,7 +145,7 @@ module Gameplay =
             | _ -> true
         then
             // todo: score uploading goes here when implemented
-            Scores.saveScore chartSaveData.Value data
+            Scores.saveScore chartSaveData.Value rulesetId data
         else BestFlags.Default
 
     let save() =

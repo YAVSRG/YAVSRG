@@ -73,10 +73,6 @@ module private Globals =
         | None -> Color.FromArgb(90, 150, 150, 150)
         | Some b -> Color.FromArgb(80, Color.White)
     
-    /// Updated whenever screen refreshes
-    let mutable scoreSystemId = ""
-    let mutable currentScoreSystem : ScoreSystemConfig = Unchecked.defaultof<_>
-    
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable scrollTo = ScrollTo.Nothing
     let mutable navigation = Navigation.Nothing

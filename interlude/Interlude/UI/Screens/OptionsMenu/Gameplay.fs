@@ -47,7 +47,7 @@ module Gameplay =
                 | _ -> failwith "impossible"
         }
 
-    let scoreSystems() : SelectionPage =
+    let rulesets() : SelectionPage =
         {
             Content = fun add ->
                 column [
@@ -55,19 +55,19 @@ module Gameplay =
                         Setting.make ignore
                             ( fun () -> 
                                 seq { 
-                                    for id in Interlude.Content.Themes.scoreSystems.Keys do
-                                        yield ((id, Interlude.Content.Themes.scoreSystems.[id]), WatcherSelection.contains id options.ScoringSystems.Value)
+                                    for id in Interlude.Content.Themes.rulesets.Keys do
+                                        yield ((id, Interlude.Content.Themes.rulesets.[id]), WatcherSelection.contains id options.Rulesets.Value)
                                 }
                             )
-                    PrettySetting("ScoreSystems",
+                    PrettySetting("Rulesets",
                         CardSelect.Selector(
                             setting,
                             { CardSelect.Config.Default with
                                 NameFunc = fun s -> (snd s).Name
                                 MarkFunc = 
                                     fun (s, b) -> 
-                                        if b then Setting.app (WatcherSelection.add (fst s)) options.ScoringSystems
-                                        else Setting.app (WatcherSelection.delete (fst s)) options.ScoringSystems
+                                        if b then Setting.app (WatcherSelection.add (fst s)) options.Rulesets
+                                        else Setting.app (WatcherSelection.delete (fst s)) options.Rulesets
                             },
                             add
                         )
@@ -101,7 +101,7 @@ module Gameplay =
                             )
                     ).Position(520.0f)
                     PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Position(670.0f)
-                    PrettyButton("ScoreSystems", fun () -> add("ScoreSystems", scoreSystems())).Position(750.0f)
+                    PrettyButton("Rulesets", fun () -> add("Rulesets", rulesets())).Position(750.0f)
                 ] :> Selectable
             Callback = ignore
         }

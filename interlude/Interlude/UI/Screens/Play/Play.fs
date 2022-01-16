@@ -67,7 +67,7 @@ type Screen(start: PlayScreenType) as this =
         | Normal -> new LiveReplayProvider(firstNote) :> IReplayProvider, false, false
         | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, true
         | Replay data -> StoredReplayProvider(data) :> IReplayProvider, true, false
-    let scoringConfig = getCurrentScoreSystem()
+    let scoringConfig = getCurrentRuleset()
     let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes Gameplay.rate.Value
     let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper =

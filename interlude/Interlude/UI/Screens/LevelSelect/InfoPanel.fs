@@ -48,7 +48,7 @@ module private InfoPanel =
             |> positionWidget(5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
             |> this.Add
 
-            TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.ScoringConfig.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
+            TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
             |> positionWidget(5.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
             |> this.Add
 
@@ -128,7 +128,7 @@ module private InfoPanel =
                         | Some d ->
                             seq { 
                                 for score in d.Scores do
-                                    yield ScoreInfoProvider(score, currentChart.Value, getCurrentScoreSystem())
+                                    yield ScoreInfoProvider(score, currentChart.Value, getCurrentRuleset())
                                     |> ScoreboardItem
                             }
                     )
@@ -153,10 +153,10 @@ module private InfoPanel =
             |> ls.Add
 
             StylishButton(
-                (fun () -> Setting.app WatcherSelection.cycleForward options.ScoringSystems; LevelSelect.refresh <- true),
-                (fun () -> currentScoreSystem.Name),
+                (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
+                (fun () -> ruleset.Name),
                 Style.main 80 )
-            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.ScoreSystems")
+            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Rulesets")
             |> positionWidget(10.0f, 0.5f, -45.0f, 1.0f, -15.0f, 0.75f, -5.0f, 1.0f)
             |> ls.Add
 
@@ -180,10 +180,10 @@ module private InfoPanel =
             if (match chartSaveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
                 chart <- h
                 scoreLoader()
-            elif scoring <> scoreSystemId then
-                let s = getCurrentScoreSystem()
-                for c in flowContainer.Children do (c :?> ScoreboardItem).Data.ScoringConfig <- s
-                scoring <- scoreSystemId
+            elif scoring <> rulesetId then
+                let s = getCurrentRuleset()
+                for c in flowContainer.Children do (c :?> ScoreboardItem).Data.Ruleset <- s
+                scoring <- rulesetId
             flowContainer.Filter <- filterer()
 
         override this.Update(elapsedTime, bounds) =

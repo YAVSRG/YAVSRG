@@ -26,20 +26,21 @@ module rec Content =
         
         let config : ThemeConfig ref = ref _default.Config
 
-        let private defaultScoreSystems =
+        let private defaultRulesets =
             List.map
-                (fun od -> (sprintf "osu-od-%.0f" od, Osu_Utils.config od))
+                (fun od -> (sprintf "osu-od-%.0f" od, Rulesets.Osu.create od))
                 [0.0f; 1.0f; 2.0f; 3.0f; 4.0f; 5.0f; 6.0f; 7.0f; 8.0f; 9.0f; 10.0f]
-            @
-            List.map
-                (fun j -> (sprintf "sc-j%i" j, SC_Utils.config j))
+            @ List.map
+                (fun j -> (sprintf "sc-j%i" j, Rulesets.SC.create j))
                 [1; 2; 3; 4; 5; 6; 7; 8; 9]
-            @
-            List.map
-                (fun j -> (sprintf "wife-j%i" j, Wife_Utils.config j))
+            @ List.map
+                (fun j -> (sprintf "wife-j%i" j, Rulesets.Wife.create j))
                 [1; 2; 3; 4; 5; 6; 7; 8; 9]
+            @ List.map
+                (fun (d: Rulesets.Ex_Score.Type) -> (sprintf "xs-%s" (d.Name.ToLower()), Rulesets.Ex_Score.create d))
+                [Rulesets.Ex_Score.sdvx]
 
-        let scoreSystems = Dictionary<string, ScoreSystemConfig>()
+        let rulesets = Dictionary<string, Ruleset>()
 
         // Detection from file system
 
@@ -85,11 +86,11 @@ module rec Content =
                 GameplayConfig.clearCache()
                 Sprites.clearCache()
 
-                scoreSystems.Clear()
-                for name, conf in defaultScoreSystems do
-                    scoreSystems.Add("*" + name, conf)
-                for name, conf in current().GetScoreSystems() do
-                    scoreSystems.Add( name, conf)
+                rulesets.Clear()
+                for name, conf in defaultRulesets do
+                    rulesets.Add("*" + name, conf)
+                for name, conf in current().GetRulesets() do
+                    rulesets.Add( name, conf)
 
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 

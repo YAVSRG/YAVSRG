@@ -33,8 +33,8 @@ type Screen() as this =
     let infoPanel = new InfoPanel()
 
     let refresh() =
-        currentScoreSystem <- getCurrentScoreSystem()
-        scoreSystemId <- ScoreSystemConfig.hash currentScoreSystem
+        ruleset <- getCurrentRuleset()
+        rulesetId <- Ruleset.hash ruleset
         infoPanel.Refresh()
         let groups =
             if options.ChartGroupMode.Value <> "Collections" then
