@@ -69,8 +69,8 @@ type ChartSaveData =
                             -> Difficulty rating data
 *)
 
-type ScoreInfoProvider(score: Score, chart: Chart, scoring: ScoreSystemConfig) =
-    let mutable scoringConfig: ScoreSystemConfig = scoring
+type ScoreInfoProvider(score: Score, chart: Chart, scoring: Ruleset) =
+    let mutable scoringConfig: Ruleset = scoring
 
     let mutable modchart = ValueNone
     let mutable modstring = ValueNone
