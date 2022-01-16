@@ -458,7 +458,7 @@ module Rulesets =
                         CbrushWindow = 150.0f<ms>
                         Timegates = [-data.Critical, 1; data.Critical, 0; data.Near, 1]
                         Points = AccuracyPoints.Weights (1.0, [|1.0; 0.5; 0.0; 0.0|])
-                        HoldNoteBehaviour = HoldNoteBehaviour.Normal {| JudgementIfDropped = 2; JudgementIfOverheld = 2 |}
+                        HoldNoteBehaviour = HoldNoteBehaviour.Normal {| JudgementIfDropped = 2; JudgementIfOverheld = 1 |}
                     }
                 Health =
                     {
