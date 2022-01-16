@@ -483,10 +483,10 @@ module Rulesets =
                             |]
                         Lamps =
                             [|
-                                { Name = "PFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 80) }
-                                { Name = "SDP"; Judgement = 1; JudgementThreshold = 9; Color = Color.FromArgb(255, 255, 160) }
+                                { Name = "FC"; Judgement = -1; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 80) }
+                                { Name = "SDN"; Judgement = 1; JudgementThreshold = 9; Color = Color.FromArgb(255, 255, 160) }
                                 { Name = "1P"; Judgement = 1; JudgementThreshold = 1; Color = Color.FromArgb(255, 255, 200) }
-                                { Name = "UFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
+                                { Name = "PFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
                             |]
                     }
             }

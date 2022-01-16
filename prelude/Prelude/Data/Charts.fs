@@ -72,9 +72,9 @@ module Collections =
     [<RequireQualifiedAccess>]
     type Goal =
     | None
-    | Clear of scoreSystemId: string
-    | Lamp of scoreSystemId: string * lamp: int
-    | Accuracy of scoreSystemId: string * float
+    | Clear of rulesetId: string
+    | Lamp of rulesetId: string * lamp: int
+    | Accuracy of rulesetId: string * float
 
     type PlaylistData = { Mods: Setting<ModState>; Rate: Setting.Bounded<float32> } with
         static member Make mods rate = { Mods = Setting.simple mods; Rate = Setting.rate rate }

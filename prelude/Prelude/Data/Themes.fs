@@ -461,20 +461,20 @@ module Themes =
                 Some (img, info)
             | None -> None
             
-        member this.GetScoreSystemTexture (name: string) : (Bitmap * TextureConfig) =
-            match this.TryReadFile ("ScoreSystems", name + ".png") with
+        member this.GetRulesetTexture (name: string) : (Bitmap * TextureConfig) =
+            match this.TryReadFile ("Rulesets", name + ".png") with
             | Some stream ->
                 let img = Bitmap.load stream
-                let info : TextureConfig = this.GetJson<TextureConfig> (false, "ScoreSystems", name + ".json") |> fst
+                let info : TextureConfig = this.GetJson<TextureConfig> (false, "Rulesets", name + ".json") |> fst
                 stream.Dispose()
                 img, info
             | None -> new Bitmap(1, 1), TextureConfig.Default
 
-        member this.GetScoreSystems () =
+        member this.GetRulesets() =
             seq {
-                for config in this.GetFiles "ScoreSystems" do
+                for config in this.GetFiles "Rulesets" do
                     if Path.GetExtension(config).ToLower() = ".iss" then
-                        let v, success = this.GetJson (false, "ScoreSystems", config)
+                        let v, success = this.GetJson (false, "Rulesets", config)
                         if success then yield Path.GetFileNameWithoutExtension config, v
             }
 
