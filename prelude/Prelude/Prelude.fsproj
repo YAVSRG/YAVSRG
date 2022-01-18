@@ -33,8 +33,8 @@
     <Compile Include="Gameplay\Difficulty.fs" />
     <Compile Include="Data\Themes.fs" />
     <Compile Include="Data\SkinConversions.fs" />
-    <Compile Include="Data\Charts.fs" />
     <Compile Include="Data\Scores.fs" />
+    <Compile Include="Data\Charts.fs" />
     <Compile Include="Data\Web.fs" />
   </ItemGroup>
 

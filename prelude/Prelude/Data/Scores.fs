@@ -48,18 +48,21 @@ type ChartSaveData =
         [<Json.Required>]
         Scores: List<Score>
         Bests: Dictionary<string, Bests>
+        mutable LastPlayed: DateTime
     }
     static member FromChart(c: Chart) =
         {
             Offset = c.FirstNote
             Scores = List<Score>()
             Bests = Dictionary<string, Bests>()
+            LastPlayed = DateTime.UnixEpoch
         }
     static member Default =
         {
             Offset = 0.0f<ms>
             Scores = null
             Bests = Dictionary<string, Bests>()
+            LastPlayed = DateTime.UnixEpoch
         }
 
 (*

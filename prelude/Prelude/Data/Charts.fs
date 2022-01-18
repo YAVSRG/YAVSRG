@@ -143,10 +143,27 @@ module Sorting =
         elif Char.IsLetterOrDigit s.[0] then s.[0].ToString().ToUpper()
         else "?"
 
+    let dateLastPlayed (c: CachedChart) =
+        match Prelude.Data.Scores.Scores.getScoreData c.Hash with
+        | Some d ->
+            let daysAgo = (DateTime.Now - d.LastPlayed).Days
+            if daysAgo < 1 then 0, "Today"
+            elif daysAgo < 2 then 1, "Yesterday"
+            elif daysAgo < 8 then 2, "Last week"
+            elif daysAgo < 30 then 3, "Last month"
+            elif daysAgo < 60 then 4, "A month ago"
+            elif daysAgo < 90 then 5, "2 months ago"
+            elif daysAgo < 120 then 6, "3 months ago"
+            elif daysAgo < 210 then 7, "6 months ago"
+            elif daysAgo < 3600 then 8, "A long time ago"
+            else 9, "Never"
+        | None -> 9, "Never"
+
     type GroupMethod = CachedChart -> int * string
     let groupBy : IDictionary<string, GroupMethod> = dict[
             "Level", fun c -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
             "Pack", fun c -> 0, c.Pack
+            "Date Played", dateLastPlayed
             "Title", fun c -> 0, firstCharacter c.Title
             "Artist", fun c -> 0, firstCharacter c.Artist
             "Creator", fun c -> 0, firstCharacter c.Creator
