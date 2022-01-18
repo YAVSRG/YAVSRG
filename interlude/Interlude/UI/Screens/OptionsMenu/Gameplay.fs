@@ -80,7 +80,7 @@ module Gameplay =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("ScrollSpeed", Slider<_>.Percent(options.ScrollSpeed, 0.005f)).Position(200.0f)
+                    PrettySetting("ScrollSpeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Position(200.0f)
                     PrettySetting("HitPosition", Slider(options.HitPosition, 0.005f)).Position(280.0f)
                     PrettySetting("Upscroll", Selector.FromBool options.Upscroll).Position(360.0f)
                     PrettySetting("BackgroundDim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Position(440.0f)

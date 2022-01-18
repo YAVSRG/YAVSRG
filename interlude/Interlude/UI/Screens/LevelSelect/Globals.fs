@@ -93,5 +93,6 @@ module private Globals =
     
     let playCurrentChart() =
         if currentChart.IsSome then
+            chartSaveData.Value.LastPlayed <- System.DateTime.Now
             Screen.changeNew (fun () -> new Screen(if autoplay then PlayScreenType.Auto else PlayScreenType.Normal) :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default
         else Logging.Warn "Tried to play selected chart; There is no chart selected"

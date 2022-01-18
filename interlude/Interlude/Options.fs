@@ -224,7 +224,7 @@ module Options =
             CurrentChart = Setting.simple ""
             Theme = Setting.simple "*default"
 
-            ScrollSpeed = Setting.bounded 2.05 1.0 3.0 |> Setting.round 2
+            ScrollSpeed = Setting.bounded 2.05 1.0 5.0 |> Setting.round 2
             HitPosition = Setting.bounded 0 -300 600
             HitLighting = Setting.simple false
             Upscroll = Setting.simple false
