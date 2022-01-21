@@ -143,14 +143,14 @@ module Sorting =
         elif Char.IsLetterOrDigit s.[0] then s.[0].ToString().ToUpper()
         else "?"
 
-    let dateLastPlayed (c: CachedChart) =
+    let dateLastPlayed (c: CachedChart, ctx) =
         match Prelude.Data.Scores.Scores.getScoreData c.Hash with
         | Some d ->
-            let daysAgo = (DateTime.Now - d.LastPlayed).Days
-            if daysAgo < 1 then 0, "Today"
-            elif daysAgo < 2 then 1, "Yesterday"
-            elif daysAgo < 8 then 2, "Last week"
-            elif daysAgo < 30 then 3, "Last month"
+            let daysAgo = (DateTime.Today - d.LastPlayed).TotalDays
+            if daysAgo < 0 then 0, "Today"
+            elif daysAgo < 1 then 1, "Yesterday"
+            elif daysAgo < 7 then 2, "This week"
+            elif daysAgo < 30 then 3, "This month"
             elif daysAgo < 60 then 4, "A month ago"
             elif daysAgo < 90 then 5, "2 months ago"
             elif daysAgo < 120 then 6, "3 months ago"
@@ -159,15 +159,39 @@ module Sorting =
             else 9, "Never"
         | None -> 9, "Never"
 
-    type GroupMethod = CachedChart -> int * string
+    type GroupContext = { Rate: float32; RulesetId: string; Ruleset: Ruleset }
+
+    let gradeAchieved (c: CachedChart, ctx: GroupContext) =
+        match Prelude.Data.Scores.Scores.getScoreData c.Hash with
+        | Some d ->
+            if d.Bests.ContainsKey ctx.RulesetId then
+                match Grading.PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Grade with
+                | Some i -> i, ctx.Ruleset.GradeName i
+                | None -> -2, "No grade achieved"
+            else -2, "No grade achieved"
+        | None -> -2, "No grade achieved"
+
+    let lampAchieved (c: CachedChart, ctx: GroupContext) =
+        match Prelude.Data.Scores.Scores.getScoreData c.Hash with
+        | Some d ->
+            if d.Bests.ContainsKey ctx.RulesetId then
+                match Grading.PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Lamp with
+                | Some i -> i, ctx.Ruleset.LampName i
+                | None -> -2, "No lamp achieved"
+            else -2, "No lamp achieved"
+        | None -> -2, "No lamp achieved"
+
+    type GroupMethod = CachedChart * GroupContext -> int * string
     let groupBy : IDictionary<string, GroupMethod> = dict[
-            "Level", fun c -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
-            "Pack", fun c -> 0, c.Pack
+            "Level", fun (c, _) -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
+            "Pack", fun (c, _) -> 0, c.Pack
             "Date Played", dateLastPlayed
-            "Title", fun c -> 0, firstCharacter c.Title
-            "Artist", fun c -> 0, firstCharacter c.Artist
-            "Creator", fun c -> 0, firstCharacter c.Creator
-            "Keymode", fun c -> c.Keys, c.Keys.ToString() + "K"
+            "Grade", gradeAchieved
+            "Lamp", lampAchieved
+            "Title", fun (c, _) -> 0, firstCharacter c.Title
+            "Artist", fun (c, _) -> 0, firstCharacter c.Artist
+            "Creator", fun (c, _) -> 0, firstCharacter c.Creator
+            "Keymode", fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
             "Collections", fun _ -> 0, "" // Placeholder for UI purposes, UI is hard coded to call collection grouping behaviour when this is chosen
         ]
 
@@ -244,7 +268,6 @@ open Sorting
 open Collections
 open Caching
 
-//todo: add reverse lookup from hash -> id for score -> chart lookup
 module Library =
 
     do
@@ -362,10 +385,10 @@ module Library =
     type Group = ResizeArray<CachedChart * LevelSelectContext>
     type LexSortedGroups = Dictionary<int * string, Group>
 
-    let getGroups (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+    let getGroups (ctx: GroupContext) (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
         for c in Filter.apply filter charts.Values do
-            let s = grouping c
+            let s = grouping (c, ctx)
             if groups.ContainsKey s |> not then groups.Add(s, new ResizeArray<CachedChart * LevelSelectContext>())
             groups.[s].Add (c, LevelSelectContext.None)
         for g in groups.Values do

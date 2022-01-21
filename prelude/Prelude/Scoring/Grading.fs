@@ -90,3 +90,8 @@ module PersonalBests =
                 if rate > rateA then (value, rate), PersonalBestType.Better else (bestA, rateA), PersonalBestType.None
             else (bestA, rateA), PersonalBestType.None
         { Best = a; Fastest = r }, (av ||| rv) : PersonalBests<'T> * PersonalBestType
+
+    let best_this_rate (rate: float32) ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) : 'T option =
+        if r1 < rate then
+            if r2 < rate then None else Some p2
+        else Some p1
