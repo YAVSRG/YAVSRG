@@ -202,7 +202,7 @@ type Screen() as this =
             RemoteCertificateValidationCallback(
                 fun _ cert _ sslPolicyErrors ->
                     if sslPolicyErrors = SslPolicyErrors.None then true
-                    else cert.GetCertHashString().ToLower() = "9e600748d9e989c31e43b32d1fdee21b797a8467" )
+                    else cert.GetCertHashString().ToLower() = "a4deab1b3cbd43ac7d21c9d17b80d97df09e67ee" )
 
         let eoDownloads = 
             SearchContainer(

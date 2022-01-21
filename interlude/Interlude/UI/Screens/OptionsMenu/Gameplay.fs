@@ -36,7 +36,7 @@ module Gameplay =
                             [|"ACCURACY"; "LAMP"|]
                             [|
                                 [| PrettySetting("PacemakerAccuracy", Slider(accuracy, 0.01f)).Position(300.0f) |]
-                                [| PrettySetting("PacemakerLamp", Selector.FromEnum lamp).Position(300.0f) |]
+                                [| PrettySetting("PacemakerLamp", Selector.FromEnum lamp).Position(300.0f) |] // broken
                             |] utype
                     ).Position(200.0f)
                 ] :> Selectable
@@ -100,7 +100,7 @@ module Gameplay =
                                 }
                             )
                     ).Position(520.0f)
-                    PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Position(670.0f)
+                    //PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Position(670.0f)
                     PrettyButton("Rulesets", fun () -> add("Rulesets", rulesets())).Position(750.0f)
                 ] :> Selectable
             Callback = ignore

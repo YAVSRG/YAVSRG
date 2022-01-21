@@ -37,8 +37,9 @@ type Screen() as this =
         rulesetId <- Ruleset.hash ruleset
         infoPanel.Refresh()
         let groups =
+            let ctx : GroupContext = { Rate = rate.Value; RulesetId = rulesetId; Ruleset = ruleset }
             if options.ChartGroupMode.Value <> "Collections" then
-                Library.getGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+                Library.getGroups ctx groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
             else Library.getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()
