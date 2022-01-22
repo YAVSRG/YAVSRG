@@ -60,8 +60,8 @@ module TaskDisplay =
             Draw.rect inner (Color.FromArgb(a / 4 * 3, Color.Black)) Sprite.Default
             Draw.rect inner (Color.FromArgb(a / 2, col)) Sprite.Default
 
-            Text.drawFillB(Interlude.Content.font(), task.Name, inner |> Rect.sliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
-            Text.drawFillB(Interlude.Content.font(), task.Info, inner |> Rect.sliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
+            Text.drawFillB(Interlude.Content.font, task.Name, inner |> Rect.sliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
+            Text.drawFillB(Interlude.Content.font, task.Info, inner |> Rect.sliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
 
         override this.Update(elapsedTime, bounds) =
 

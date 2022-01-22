@@ -98,7 +98,7 @@ module GameplayWidgets =
         let mutable tier = 0
         let mutable late = 0
         let mutable time = -Time.infinity
-        let texture = Content.getTexture "judgements"
+        let texture = Content.getTexture "judgement"
         let listener =
             helper.OnHit.Subscribe
                 ( fun ev ->
@@ -150,7 +150,7 @@ module GameplayWidgets =
             base.Draw()
             let combo = helper.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
-            Text.drawFill(Content.font(), combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
+            Text.drawFill(Content.font, combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
 
         override this.Dispose() =
             listener.Dispose()

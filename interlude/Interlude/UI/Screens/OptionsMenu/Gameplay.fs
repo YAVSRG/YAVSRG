@@ -55,8 +55,8 @@ module Gameplay =
                         Setting.make ignore
                             ( fun () -> 
                                 seq { 
-                                    for id in Interlude.Content.Themes.rulesets.Keys do
-                                        yield ((id, Interlude.Content.Themes.rulesets.[id]), WatcherSelection.contains id options.Rulesets.Value)
+                                    for id in Interlude.Content.Themes.Current.Rulesets.loaded.Keys do
+                                        yield ((id, Interlude.Content.Themes.Current.Rulesets.loaded.[id]), WatcherSelection.contains id options.Rulesets.Value)
                                 }
                             )
                     PrettySetting("Rulesets",

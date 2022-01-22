@@ -96,7 +96,7 @@ type Screen(start: PlayScreenType) as this =
         noteRenderer.Add(ScreenCover())
 
         let inline f name (constructor: 'T -> Widget) = 
-            let config: ^T = Content.GameplayConfig.get name
+            let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 config

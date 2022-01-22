@@ -28,7 +28,7 @@ type Button(onClick, labelFunc: unit -> string, bind: Setting<Bind>) as this =
     override this.Draw() =
         Draw.rect this.Bounds (Style.accentShade(80, 0.5f, color.Value)) Sprite.Default
         Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
-        Text.drawFillB(Content.font(), labelFunc(), Rect.trimBottom 10.0f this.Bounds, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
+        Text.drawFillB(Content.font, labelFunc(), Rect.trimBottom 10.0f this.Bounds, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Setting<Bind>) as this =
     inherit Widget()
@@ -56,7 +56,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Setting<
                 <| Vector2(left - (if this.TiltLeft then h * 0.5f else 0.0f), bottom)
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
-        Text.drawFillB(Content.font(), labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.accentShade(255, 0.4f, color.Value)), 0.5f)
+        Text.drawFillB(Content.font, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.accentShade(255, 0.4f, color.Value)), 0.5f)
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =
         let names = Enum.GetNames(typeof<'T>)

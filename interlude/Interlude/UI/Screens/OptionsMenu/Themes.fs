@@ -1,10 +1,10 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
-open System.Drawing
 open Prelude.Gameplay.NoteColors
 open Prelude.Common
 open Prelude.Data.Themes
 open Interlude
+open Interlude.Content
 open Interlude.Utils
 open Interlude.Graphics
 open Interlude.Options
@@ -63,12 +63,12 @@ module Themes =
             base.Dispose()
             fbo.Dispose()
 
-    let editNoteskin refreshNoteskins (noteSkin: Noteskin) : SelectionPage =
+    let editNoteskin refreshNoteskins (data: NoteskinConfig) : SelectionPage =
 
-        let name = Setting.simple noteSkin.Config.Name
+        let name = Setting.simple data.Name
         let keycount = Setting.simple options.KeymodePreference.Value
-        let holdNoteTrim = Setting.bounded noteSkin.Config.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
-        let mutable noteColors = noteSkin.Config.NoteColors
+        let holdNoteTrim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
+        let mutable noteColors = data.NoteColors
         
         let g keycount i =
             let k = if noteColors.UseGlobalColors then 0 else int keycount - 2
@@ -102,19 +102,18 @@ module Themes =
                     PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
                 ]
             Callback = fun () ->
-                noteSkin.Config <-
-                    { noteSkin.Config with
+                Noteskins.Current.changeConfig
+                    { data with
                         Name = name.Value
                         HoldNoteTrim = holdNoteTrim.Value
                         NoteColors = noteColors
                     }
-                Content.Noteskins.currentConfig.Value <- noteSkin.Config
                 refreshNoteskins()
         }
 
-    let editTheme refreshThemes (theme: Theme) : SelectionPage =
+    let editTheme refreshThemes (data: ThemeConfig) : SelectionPage =
 
-        let name = Setting.simple theme.Config.Name
+        let name = Setting.simple data.Name
 
         {
             Content = fun add ->
@@ -122,11 +121,10 @@ module Themes =
                     PrettySetting("ThemeName", TextField name).Position(200.0f)
                 ]
             Callback = fun () ->
-                theme.Config <-
-                    { theme.Config with
+                Themes.Current.changeConfig
+                    { data with
                         Name = name.Value
                     }
-                Content.Themes.config.Value <- theme.Config
                 refreshThemes()
         }
 
@@ -136,46 +134,46 @@ module Themes =
 
         let noteskins = PrettySetting("Noteskin", Selectable())
         let refreshNoteskins() =
-            options.Noteskin.Value <- Content.Noteskins.currentId.Value
-            let ids, names = Content.Noteskins.list() |> Array.unzip
-            Selector.FromArray(names, ids, options.Noteskin |> Setting.trigger (fun id -> Content.Noteskins.switch id; preview.Refresh()))
+            options.Noteskin.Value <- Noteskins.Current.id
+            let ids, names = Noteskins.list() |> Array.unzip
+            Selector.FromArray(names, ids, options.Noteskin |> Setting.trigger (fun id -> Noteskins.Current.switch id; preview.Refresh()))
             |> noteskins.Refresh
             preview.Refresh()
         refreshNoteskins()
 
         let themes = PrettySetting("Theme", Selectable())
         let refreshThemes() =
-            options.Theme.Value <- Content.Themes.currentId.Value
-            let ids, names = Content.Themes.list() |> Array.unzip
-            Selector.FromArray(names, ids, options.Theme |> Setting.trigger (fun id -> Content.Themes.switch id; preview.Refresh()))
+            options.Theme.Value <- Themes.Current.id
+            let ids, names = Themes.list() |> Array.unzip
+            Selector.FromArray(names, ids, options.Theme |> Setting.trigger (fun id -> Themes.Current.switch id; preview.Refresh()))
             |> themes.Refresh
             preview.Refresh()
         refreshThemes()
 
         let tryEditNoteskin add =
-            let ns = Content.Noteskins.current()
+            let ns = Noteskins.Current.instance
             match ns.StorageType with
             | Zip (_, Some file) -> 
                 ConfirmDialog(
                     sprintf "'%s' cannot be edited because it is zipped. Extract and edit?" ns.Config.Name,
-                    fun () -> Content.Noteskins.extractCurrent(); refreshNoteskins()
+                    fun () -> Noteskins.extractCurrent(); refreshNoteskins()
                 ).Show()
             | Zip (_, None) ->
                 ConfirmDialog(
                     sprintf "'%s' is an embedded default skin. Extract a copy and edit?" ns.Config.Name,
-                    fun () -> Content.Noteskins.extractCurrent(); refreshNoteskins()
+                    fun () -> Noteskins.extractCurrent(); refreshNoteskins()
                 ).Show()
-            | Folder _ -> add ( "EditNoteskin", editNoteskin refreshNoteskins ns )
+            | Folder _ -> add ( "EditNoteskin", editNoteskin refreshNoteskins ns.Config )
 
         let tryEditTheme add =
-            let theme = Content.Themes.current()
+            let theme = Themes.Current.instance
             match theme.StorageType with
             | Zip (_, None) ->
                 ConfirmDialog(
                     sprintf "'%s' is the default theme. Extract a copy and edit?" theme.Config.Name,
-                    fun () -> Content.Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes()
+                    fun () -> Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes()
                 ).Show()
-            | Folder _ -> add ( "EditTheme", editTheme refreshThemes theme )
+            | Folder _ -> add ( "EditTheme", editTheme refreshThemes theme.Config )
             | Zip (_, Some file) -> failwith "User themes with zip storage not supported"
 
         {

@@ -250,7 +250,7 @@ module Options =
                         let filtered = 
                             List.filter 
                                 ( fun x -> 
-                                    if Content.Themes.rulesets.ContainsKey x then true
+                                    if Content.Themes.Current.Rulesets.exists x then true
                                     else Logging.Debug(sprintf "Score system '%s' not found, deselecting" x); false
                                 ) xs
                         if filtered.IsEmpty then ["*sc-j4"] else filtered
@@ -304,11 +304,6 @@ module Options =
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
 
-        Content.detect()
-        Content.load()
-        Content.Themes.switch options.Theme.Value
-        Content.Noteskins.switch options.Noteskin.Value
-
     let save() =
         try
             JSON.ToFile(configPath, true) config
@@ -316,7 +311,7 @@ module Options =
         with err -> Logging.Critical("Failed to write options/config to file.", err)
 
     let getRuleset(id: string) =
-        if Content.Themes.rulesets.ContainsKey id then Content.Themes.rulesets.[id]
+        if Content.Themes.Current.Rulesets.exists id then Content.Themes.Current.Rulesets.loaded.[id]
         else failwithf "Tried to get a ruleset that doesn't exist/isn't loaded: %s" id
 
     let getCurrentRuleset() =

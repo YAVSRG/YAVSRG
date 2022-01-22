@@ -7,7 +7,7 @@ open Interlude.UI.Animation
 
 module Style =
 
-    let accentColor = AnimationColorMixer Content.accentColor.Value
+    let accentColor = AnimationColorMixer Content.accentColor
 
     let accentShade (alpha, brightness, white) =
         let accentColor = accentColor.GetColor()

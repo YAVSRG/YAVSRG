@@ -71,9 +71,9 @@ module Tooltip =
                 Draw.rect (Rect.expand (-5.0f, -5.0f) bounds) (Color.FromArgb(a / 4 * 3, Color.Black)) Sprite.Default
                 Draw.rect (Rect.expand (-5.0f, -5.0f) bounds) (Color.FromArgb(a / 2, c)) Sprite.Default
                 
-                Text.drawB (Content.font(), icon, 50.0f, left + 130.0f, y - 1.0f + TEXTHEIGHT * 0.5f * float32 i.Message.Length, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
+                Text.drawB (Content.font, icon, 50.0f, left + 130.0f, y - 1.0f + TEXTHEIGHT * 0.5f * float32 i.Message.Length, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
                 for x = 0 to i.Message.Length - 1 do
-                    Text.drawB (Content.font(), i.Message.[x], 30.0f, left + 235.0f, y + 33.0f + TEXTHEIGHT * float32 x, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
+                    Text.drawB (Content.font, i.Message.[x], 30.0f, left + 235.0f, y + 33.0f + TEXTHEIGHT * float32 x, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
 
             if up then
                 let mutable y = top + 200.0f

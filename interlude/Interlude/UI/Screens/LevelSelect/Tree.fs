@@ -88,8 +88,8 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
             let rateLabel = sprintf "(%.2fx)" rate
             if color.A > 0uy then
                 Draw.rect(Rect.create (right - pos - 40.0f) top (right - pos + 40.0f) bottom) accent Sprite.Default
-                Text.drawJustB(font(), formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
-                Text.drawJustB(font(), rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
+                Text.drawJustB(font, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
+                Text.drawJustB(font, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
         
         match pbData with
         | Some d ->
@@ -111,10 +111,10 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
         | None -> ()
 
         Draw.rect(Rect.sliceBottom 25.0f bounds) (Color.FromArgb(60, 0, 0, 0)) Sprite.Default
-        Text.drawB(font(), cc.Title, 23.0f, left + 5f, top, (Color.White, Color.Black))
-        Text.drawB(font(), cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, (Color.White, Color.Black))
-        Text.drawB(font(), cc.DiffName, 15.0f, left + 5f, top + 65.0f, (Color.White, Color.Black))
-        Text.drawB(font(), collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
+        Text.drawB(font, cc.Title, 23.0f, left + 5f, top, (Color.White, Color.Black))
+        Text.drawB(font, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, (Color.White, Color.Black))
+        Text.drawB(font, cc.DiffName, 15.0f, left + 5f, top + 65.0f, (Color.White, Color.Black))
+        Text.drawB(font, collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
 
         let border = Rect.expand(5.0f, 5.0f) bounds
         let border2 = Rect.expand(5.0f, 0.0f) bounds
@@ -185,13 +185,13 @@ type private GroupItem(name: string, items: ChartItem list) =
         Draw.rect (Rect.sliceTop 5.0f borderb) colorb Sprite.Default
         Draw.rect (Rect.sliceBottom 5.0f borderb) colorb Sprite.Default
         Draw.rect bounds (if selected then Style.accentShade(127, 1.0f, 0.2f) else Style.accentShade(127, 0.3f, 0.0f)) Sprite.Default
-        Text.drawFillB(font(), name, bounds |> Rect.expand(-5.0f, -5.0f), (Color.White, Color.Black), 0.5f)
+        Text.drawFillB(font, name, bounds |> Rect.expand(-5.0f, -5.0f), (Color.White, Color.Black), 0.5f)
 
     override this.Draw(top, topEdge) =
         let b = base.Draw(top, topEdge)
         if this.Expanded then
             let b2 = List.fold (fun t (i: ChartItem) -> i.Draw(t, topEdge)) b items
-            if b < topEdge + 170.0f && b2 > topEdge + 170.0f then Text.drawJustB(font(), name, 15.0f, Render.vwidth, topEdge + 180.0f, (Color.White, Color.Black), 1.0f)
+            if b < topEdge + 170.0f && b2 > topEdge + 170.0f then Text.drawJustB(font, name, 15.0f, Render.vwidth, topEdge + 180.0f, (Color.White, Color.Black), 1.0f)
             b2
         else b
 

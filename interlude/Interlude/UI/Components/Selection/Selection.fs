@@ -16,7 +16,7 @@ type Selectable() =
             - (1) Only at most 1 leaf can be hovered
             - (2) Selected leaves are a subset of hovered leaves, so at most 1 leaf can be selected
             - (3) Existence of a hovered leaf implies all its ancestors are selected
-            - (4) Existence of a hovered leaf-- implies all its non-ancestors are not hovered
+            - (4) Existence of a hovered leaf implies all its non-ancestors are not hovered
     *)
 
     let mutable hoverChild: Selectable option = None
