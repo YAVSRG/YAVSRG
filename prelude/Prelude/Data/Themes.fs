@@ -286,8 +286,9 @@ module Themes =
         //judgement counts
         //pacemaker
         
-    // Texture names that are loaded from Noteskin folders instead of Theme folders
-    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "judgements"; "receptorlighting"|]
+    let noteskinTextures = [|"note"; "noteexplosion"; "receptor"; "holdhead"; "holdbody"; "holdtail"; "holdexplosion"; "receptorlighting"|]
+    let themeTextures = [|"background"; "rain"; "logo"; "cursor"|]
+    let rulesetTextures = [|"judgement"; "grade-base"; "grade-lamp-overlay"; "grade-overlay"|]
         
     type NoteskinConfig =
         {
@@ -476,6 +477,22 @@ module Themes =
                     if Path.GetExtension(config).ToLower() = ".iss" then
                         let v, success = this.GetJson (false, "Rulesets", config)
                         if success then yield Path.GetFileNameWithoutExtension config, v
+            }
+
+        member this.GetFonts() =
+            seq {
+                for file in this.GetFiles "Fonts" do
+                    match Path.GetExtension(file).ToLower() with
+                    | ".otf" | ".ttf" ->
+                        match this.TryReadFile("Fonts", file) with
+                        | Some s -> 
+                            // Font loading requires seek
+                            use ms = new MemoryStream()
+                            s.CopyTo ms
+                            ms.Position <- 0
+                            yield ms; s.Dispose()
+                        | None -> ()
+                    | _ -> ()
             }
 
         member this.GetGameplayConfig<'T> (name: string) = this.GetJson<'T> (true, "Interface", "Gameplay", name + ".json")
