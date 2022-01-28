@@ -11,7 +11,7 @@ open Interlude.Graphics
 type Bind =
     | Dummy
     | Key of Keys * modifiers: (bool * bool * bool)
-    | Mouse of MouseButton// * modifiers:(bool * bool * bool)
+    | Mouse of MouseButton
     | Joystick of unit //NYI
 
     override this.ToString() =
