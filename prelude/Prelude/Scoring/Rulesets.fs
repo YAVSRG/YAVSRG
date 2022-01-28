@@ -76,6 +76,8 @@ type AccuracyConfig =
 type Ruleset =
     {
         Name: string
+        TextureNamePrefix: string
+
         Judgements: Judgement array
         Accuracy: AccuracyConfig
         Health: HealthBarConfig
@@ -199,6 +201,7 @@ module Rulesets =
         let create (judge: int) =
             {
                 Name = if judge = 9 then "Wife3 JUSTICE" else sprintf "Wife3 (J%i)" judge
+                TextureNamePrefix = "wife-"
                 Judgements =
                     [|
                         { Name = "Marvellous"; Color = Color.Aqua; BreaksCombo = false }
@@ -306,6 +309,7 @@ module Rulesets =
         let create (od: float32) : Ruleset =
             {
                 Name = sprintf "osu! (OD%.1f)" od
+                TextureNamePrefix = "osu-"
                 Judgements =
                     [|
                         { Name = "300g"; Color = Color.Aqua; BreaksCombo = false }
@@ -369,6 +373,7 @@ module Rulesets =
         let create (judge: int) =
             {
                 Name = sprintf "SC (J%i)" judge
+                TextureNamePrefix = "sc-"
                 Judgements =
                     [|
                         { Name = "Marvellous"; Color = Color.Aqua; BreaksCombo = false }
@@ -445,6 +450,7 @@ module Rulesets =
         let create (data: Type) =
             {
                 Name = sprintf "EXSCORE (%s)" data.Name
+                TextureNamePrefix = "xs-"
                 Judgements =
                     [|
                         { Name = "CRITICAL"; Color = Color.Aqua; BreaksCombo = false }

@@ -447,7 +447,7 @@ module Themes =
         inherit StorageAccess(storage)
 
         let mutable config : ThemeConfig = ThemeConfig.Default
-        do config <- this.GetJson (false, "theme.json") |> fst
+        do config <- this.GetJson (true, "theme.json") |> fst
 
         member this.Config
             with set conf = config <- conf; this.WriteJson (config, "theme.json")
@@ -474,8 +474,8 @@ module Themes =
         member this.GetRulesets() =
             seq {
                 for config in this.GetFiles "Rulesets" do
-                    if Path.GetExtension(config).ToLower() = ".iss" then
-                        let v, success = this.GetJson (false, "Rulesets", config)
+                    if Path.GetExtension(config).ToLower() = ".irs" then
+                        let v, success = this.GetJson<Ruleset>(true, "Rulesets", config)
                         if success then yield Path.GetFileNameWithoutExtension config, v
             }
 
@@ -507,7 +507,7 @@ module Themes =
         inherit StorageAccess(storage)
         
         let mutable config : NoteskinConfig = NoteskinConfig.Default
-        do config <- this.GetJson (false, "noteskin.json") |> fst
+        do config <- this.GetJson (true, "noteskin.json") |> fst
         
         member this.Config
             with set conf = config <- conf; this.WriteJson (config, "noteskin.json")

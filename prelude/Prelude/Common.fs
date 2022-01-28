@@ -74,10 +74,10 @@ module Common =
                 Config = ()
             }
 
-        let map (f: 'T -> 'U) (g: 'U -> 'T) (setting: Setting<'T, 'Config>) =
+        let map (after_get: 'T -> 'U) (before_set: 'U -> 'T) (setting: Setting<'T, 'Config>) =
             {
-                Set = g >> setting.Set
-                Get = f << setting.Get
+                Set = before_set >> setting.Set
+                Get = after_get << setting.Get
                 Config = setting.Config
             }
 
