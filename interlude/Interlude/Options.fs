@@ -244,17 +244,20 @@ module Options =
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
             Rulesets =
-                Setting.simple ["*sc-j4"]
-                |> Setting.map 
+                Setting.simple [Content.Rulesets.DEFAULT]
+                |> Setting.map
+                    id
                     ( fun xs -> 
                         let filtered = 
                             List.filter 
                                 ( fun x -> 
-                                    if Content.Themes.Current.Rulesets.exists x then true
+                                    if Content.Rulesets.exists x then true
                                     else Logging.Debug(sprintf "Score system '%s' not found, deselecting" x); false
                                 ) xs
-                        if filtered.IsEmpty then ["*sc-j4"] else filtered
-                    ) id
+                        let l = if filtered.IsEmpty then [Content.Rulesets.DEFAULT] else filtered
+                        Content.Rulesets.switch (List.head l) false
+                        l
+                    )
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemaker = Setting.simple (Accuracy 0.95)
@@ -310,9 +313,4 @@ module Options =
             JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)
 
-    let getRuleset(id: string) =
-        if Content.Themes.Current.Rulesets.exists id then Content.Themes.Current.Rulesets.loaded.[id]
-        else failwithf "Tried to get a ruleset that doesn't exist/isn't loaded: %s" id
-
-    let getCurrentRuleset() =
-        getRuleset (List.head options.Rulesets.Value)
+    let getCurrentRuleset() = Content.Rulesets.current

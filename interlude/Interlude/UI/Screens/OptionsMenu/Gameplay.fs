@@ -53,11 +53,9 @@ module Gameplay =
                 column [
                     let setting =
                         Setting.make ignore
-                            ( fun () -> 
-                                seq { 
-                                    for id in Interlude.Content.Themes.Current.Rulesets.loaded.Keys do
-                                        yield ((id, Interlude.Content.Themes.Current.Rulesets.loaded.[id]), WatcherSelection.contains id options.Rulesets.Value)
-                                }
+                            ( fun () ->
+                                Interlude.Content.Rulesets.list()
+                                |> Seq.map (fun (key, value) -> (key, value), WatcherSelection.contains key options.Rulesets.Value)
                             )
                     PrettySetting("Rulesets",
                         CardSelect.Selector(

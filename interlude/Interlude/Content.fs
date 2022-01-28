@@ -31,6 +31,59 @@ module Content =
         "not yet implemented"
         |> ignore
 
+    module Rulesets =
+
+        let DEFAULT = "*sc-j4"
+        
+        let private defaultRulesets =
+            List.map
+                (fun od -> (sprintf "osu-od-%.0f" od, Rulesets.Osu.create od))
+                [0.0f; 1.0f; 2.0f; 3.0f; 4.0f; 5.0f; 6.0f; 7.0f; 8.0f; 9.0f; 10.0f]
+            @ List.map
+                (fun j -> (sprintf "sc-j%i" j, Rulesets.SC.create j))
+                [1; 2; 3; 4; 5; 6; 7; 8; 9]
+            @ List.map
+                (fun j -> (sprintf "wife-j%i" j, Rulesets.Wife.create j))
+                [1; 2; 3; 4; 5; 6; 7; 8; 9]
+            @ List.map
+                (fun (d: Rulesets.Ex_Score.Type) -> (sprintf "xs-%s" (d.Name.ToLower()), Rulesets.Ex_Score.create d))
+                [Rulesets.Ex_Score.sdvx]
+
+        let private loaded = let x = Dictionary<string, Ruleset>() in (for name, rs in defaultRulesets do x.Add("*" + name, rs)); x
+        let mutable private _theme : Theme = Unchecked.defaultof<_>
+        let mutable private id = DEFAULT
+        let mutable current = loaded.[DEFAULT]
+
+        let list() = 
+            seq {
+                for k in loaded.Keys do
+                    yield (k, loaded.[k])
+            }
+
+        let reload() =
+            for id in rulesetTextures do
+                let fileid = current.TextureNamePrefix + id 
+                match _theme.GetTexture fileid with
+                | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false)
+                | None -> use bmp = new Bitmap(1, 1) in Sprite.upload(bmp, 1, 1, false)
+                |> Sprite.cache id |> Sprites.add id
+
+        let switch (new_id: string) (themeChanged: bool) =
+            let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Ruleset '" + new_id + "' not found, switching to default"); DEFAULT
+            if Object.ReferenceEquals(_theme, null) |> not && (new_id <> id || themeChanged) then
+                id <- new_id
+                current <- loaded.[id]
+                reload()
+
+        let load_from_theme (theme: Theme) =
+            _theme <- theme
+            loaded.Clear()
+            for name, rs in defaultRulesets do loaded.Add("*" + name, rs)
+            for name, rs in _theme.GetRulesets() do loaded.Add(name, rs)
+            switch id true
+
+        let exists = loaded.ContainsKey
+
     module Themes =
         
         let private _default = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
@@ -42,34 +95,6 @@ module Content =
             let mutable id = "*default"
             let mutable instance = _default
             let mutable config = instance.Config
-
-            module Rulesets =
-                
-                let private defaultRulesets =
-                    List.map
-                        (fun od -> (sprintf "osu-od-%.0f" od, Rulesets.Osu.create od))
-                        [0.0f; 1.0f; 2.0f; 3.0f; 4.0f; 5.0f; 6.0f; 7.0f; 8.0f; 9.0f; 10.0f]
-                    @ List.map
-                        (fun j -> (sprintf "sc-j%i" j, Rulesets.SC.create j))
-                        [1; 2; 3; 4; 5; 6; 7; 8; 9]
-                    @ List.map
-                        (fun j -> (sprintf "wife-j%i" j, Rulesets.Wife.create j))
-                        [1; 2; 3; 4; 5; 6; 7; 8; 9]
-                    @ List.map
-                        (fun (d: Rulesets.Ex_Score.Type) -> (sprintf "xs-%s" (d.Name.ToLower()), Rulesets.Ex_Score.create d))
-                        [Rulesets.Ex_Score.sdvx]
-
-                let loaded = 
-                    let x = Dictionary<string, Ruleset>()
-                    for name, rs in defaultRulesets do x.Add("*" + name, rs)
-                    x
-
-                let reload() =
-                    loaded.Clear()
-                    for name, rs in defaultRulesets do loaded.Add("*" + name, rs)
-                    for name, rs in instance.GetRulesets() do loaded.Add(name, rs)
-
-                let exists = loaded.ContainsKey
 
             module GameplayConfig =
 
@@ -119,12 +144,12 @@ module Content =
                         | None -> failwith "default doesnt have this texture!!"
 
                 GameplayConfig.reload()
-                Rulesets.reload()
+                Rulesets.load_from_theme(instance)
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Theme '" + new_id + "' not found, switching to default"); "*default"
                 if new_id <> id || font = null then // font = null acts as flag for first load
-                    id <- id
+                    id <- new_id
                     instance <- loaded.[id]
                     config <- loaded.[id].Config
                     reload()

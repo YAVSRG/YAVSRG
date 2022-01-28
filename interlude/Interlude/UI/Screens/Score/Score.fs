@@ -107,7 +107,8 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
     let graph = new ScoreGraph(scoreData)
 
-    let mutable rulesets = Options.options.Rulesets.Value
+    let originalRulesets = Options.options.Rulesets.Value
+    let mutable rulesets = originalRulesets
 
     let refresh() =
         eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
@@ -234,15 +235,19 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
         if Options.options.Hotkeys.Next.Value.Tapped() then
             rulesets <- Options.WatcherSelection.cycleForward rulesets
-            scoreData.Ruleset <- Options.getRuleset(List.head rulesets)
+            Options.options.Rulesets.Value <- rulesets
+            scoreData.Ruleset <- Options.getCurrentRuleset()
             refresh()
         elif Options.options.Hotkeys.Previous.Value.Tapped() then
             rulesets <- Options.WatcherSelection.cycleBackward rulesets
-            scoreData.Ruleset <- Options.getRuleset(List.head rulesets)
+            Options.options.Rulesets.Value <- rulesets
+            scoreData.Ruleset <- Options.getCurrentRuleset()
             refresh()
 
     override this.OnEnter prev =
         Screen.toolbar <- true
 
     override this.OnExit next =
+        Options.options.Rulesets.Value <- originalRulesets
+        scoreData.Ruleset <- Options.getCurrentRuleset()
         Screen.toolbar <- false
