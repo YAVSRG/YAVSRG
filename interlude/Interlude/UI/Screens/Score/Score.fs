@@ -104,6 +104,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
     let mutable pbs = pbs
     let mutable gradeAchieved = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+    let mutable lampAchieved = Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
     let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
     let graph = new ScoreGraph(scoreData)
 
@@ -113,6 +114,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     let refresh() =
         eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
         gradeAchieved <- Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+        lampAchieved <- Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
         pbs <- BestFlags.Default
         graph.Refresh()
 
@@ -227,6 +229,12 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         //graph stuff
         Draw.rect (Rect.create (left + 15.0f) (bottom - 275.0f) (right - 15.0f) (bottom - 15.0f)) (Style.accentShade(50, 1.0f, 0.6f)) Sprite.Default
         Draw.rect (Rect.create (left + 20.0f) (bottom - 70.0f) (right - 20.0f) (bottom - 20.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+
+        //grade stuff
+        let gradeBounds = Rect.create (right - 600.0f) (halfh - 300.0f) (right - 100.0f) (halfh + 200.0f)
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (gradeAchieved.Grade, 0) <| getTexture "grade-base")
+        if lampAchieved.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (lampAchieved.Lamp, 0) <| getTexture "grade-lamp-overlay")
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (gradeAchieved.Grade, 0) <| getTexture "grade-overlay")
 
         base.Draw()
 

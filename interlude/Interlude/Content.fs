@@ -10,6 +10,8 @@ open Interlude.Graphics
 
 module Content =
 
+    let private defaultTheme = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
+
     let mutable accentColor = ThemeConfig.Default.DefaultAccentColor
     let mutable font : Fonts.SpriteFont = null
 
@@ -61,11 +63,11 @@ module Content =
             }
 
         let reload() =
+            let sourceTheme = if id.StartsWith('*') then defaultTheme else _theme
             for id in rulesetTextures do
                 let fileid = current.TextureNamePrefix + id 
-                match _theme.GetTexture fileid with
-                | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false)
-                | None -> use bmp = new Bitmap(1, 1) in Sprite.upload(bmp, 1, 1, false)
+                let img, config = sourceTheme.GetRulesetTexture fileid
+                Sprite.upload(img, config.Rows, config.Columns, true)
                 |> Sprite.cache id |> Sprites.add id
 
         let switch (new_id: string) (themeChanged: bool) =
@@ -85,15 +87,13 @@ module Content =
         let exists = loaded.ContainsKey
 
     module Themes =
-        
-        let private _default = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
 
         let private loaded = Dictionary<string, Theme>()
 
         module Current =
 
             let mutable id = "*default"
-            let mutable instance = _default
+            let mutable instance = defaultTheme
             let mutable config = instance.Config
 
             module GameplayConfig =
@@ -128,7 +128,7 @@ module Content =
 
             let reload() =
                 if config.OverrideAccentColor then accentColor <- config.DefaultAccentColor
-                for font in _default.GetFonts() do
+                for font in defaultTheme.GetFonts() do
                     Fonts.add font
                 for font in instance.GetFonts() do
                     Fonts.add font
@@ -158,7 +158,7 @@ module Content =
 
         let load() =
             loaded.Clear()
-            loaded.Add ("*default", _default)
+            loaded.Add ("*default", defaultTheme)
 
             for source in Directory.EnumerateDirectories(getDataPath "Themes") do
                 let id = Path.GetFileName source
@@ -177,7 +177,7 @@ module Content =
         let createNew (id: string) =
              let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
              let target = Path.Combine(getDataPath "Themes", id)
-             if id <> "" && not (Directory.Exists target) then _default.CopyTo(Path.Combine(getDataPath "Themes", id))
+             if id <> "" && not (Directory.Exists target) then defaultTheme.CopyTo(Path.Combine(getDataPath "Themes", id))
              load()
              Current.switch id
              Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
