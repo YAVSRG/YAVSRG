@@ -402,12 +402,12 @@ module Rulesets =
                     {
                         Grades = 
                             [|
-                                { Name = "F"; Accuracy = 0.0; Color = Color.FromArgb(200, 163, 155) }
-                                { Name = "D"; Accuracy = 0.89995; Color = Color.FromArgb(194, 162, 182) }
+                                { Name = "D"; Accuracy = 0.0; Color = Color.FromArgb(200, 163, 155) }
+                                { Name = "C-"; Accuracy = 0.89995; Color = Color.FromArgb(194, 162, 182) }
                                 { Name = "C"; Accuracy = 0.90995; Color = Color.FromArgb(202, 153, 183) }
-                                { Name = "C+"; Accuracy = 0.91995; Color = Color.FromArgb(163, 190, 207) }
+                                { Name = "B-"; Accuracy = 0.91995; Color = Color.FromArgb(163, 190, 207) }
                                 { Name = "B"; Accuracy = 0.92995; Color = Color.FromArgb(149, 193, 220) }
-                                { Name = "B+"; Accuracy = 0.93995; Color = Color.FromArgb(148, 210, 180) }
+                                { Name = "A-"; Accuracy = 0.93995; Color = Color.FromArgb(148, 210, 180) }
                                 { Name = "A"; Accuracy = 0.94995; Color = Color.FromArgb(134, 227, 183) }
                                 { Name = "A+"; Accuracy = 0.95995; Color = Color.FromArgb(127, 231, 139) }
                                 { Name = "S-"; Accuracy = 0.96995; Color = Color.FromArgb(237, 205, 140) }
