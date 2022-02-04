@@ -77,7 +77,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     do
         let width = Array.mapi (fun i n -> n + columnWidths.[i]) columnPositions |> Array.max
         let (screenAlign, columnAlign) = Content.noteskinConfig().PlayfieldAlignment
-        this.Reposition(-width * columnAlign, screenAlign, 0.0f, 0.0f, width * (1.0f - columnAlign), screenAlign, 0.0f, 1.0f)
+        this.Reposition(-width * columnAlign, screenAlign, -1.0f, 0.0f, width * (1.0f - columnAlign), screenAlign, 0.0f, 1.0f)
         this.Animation.Add(animation)
 
     override this.Draw() =
@@ -86,7 +86,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
         let scale = float32 options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f</ms>
         let hitposition = float32 options.HitPosition.Value
 
-        let playfieldHeight = bottom - top
+        let playfieldHeight = bottom - top + 2.0f + columnWidths.[0] * Content.noteskinConfig().HoldNoteTrim
         let now = Audio.timeWithOffset() + visualOffset
 
         // seek to appropriate sv and note locations in data.

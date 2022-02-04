@@ -15,6 +15,8 @@ module Content =
     let mutable accentColor = ThemeConfig.Default.DefaultAccentColor
     let mutable font : Fonts.SpriteFont = null
 
+    let mutable private first_init = true
+
     module Sprites =
         
         let private cache = new Dictionary<string, Sprite>()
@@ -148,7 +150,7 @@ module Content =
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Theme '" + new_id + "' not found, switching to default"); "*default"
-                if new_id <> id || font = null then // font = null acts as flag for first load
+                if new_id <> id || first_init then
                     id <- new_id
                     instance <- loaded.[id]
                     config <- loaded.[id].Config
@@ -218,7 +220,7 @@ module Content =
 
             let switch (new_id: string) =
                 let new_id = if loaded.ContainsKey id then new_id else Logging.Warn("Noteskin '" + new_id + "' not found, switching to default"); "*defaultBar.isk"
-                if new_id <> id then
+                if new_id <> id || first_init then
                     id <- new_id
                     instance <- loaded.[id]
                     config <- instance.Config
@@ -284,6 +286,7 @@ module Content =
         Logging.Info "===== Loading game content ====="
         Noteskins.load()
         Themes.load()
+        first_init <- false
 
     let inline getGameplayConfig<'T>() = Themes.Current.GameplayConfig.get<'T>()
     let inline getTexture (id: string) = Sprites.getTexture id
