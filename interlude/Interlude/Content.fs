@@ -4,97 +4,193 @@ open System
 open System.IO
 open System.Collections.Generic
 open Prelude.Common
+open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude.Graphics
 
-module rec Content =
+module Content =
 
-    let accentColor = ref ThemeConfig.Default.DefaultAccentColor
-    let _font : Lazy<Fonts.SpriteFont> ref = ref null
-    let font () = _font.Value.Value
+    let private defaultTheme = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
 
-    let inline themeConfig () = Themes.config.Value
-    let inline noteskinConfig () = Noteskins.currentConfig.Value
+    let mutable accentColor = ThemeConfig.Default.DefaultAccentColor
+    let mutable font : Fonts.SpriteFont = null
+
+    let mutable private first_init = true
+
+    module Sprites =
+        
+        let private cache = new Dictionary<string, Sprite>()
+        
+        let getTexture (id: string) =
+            if cache.ContainsKey id then cache.[id]
+            else failwithf "should have already loaded %s" id
+
+        let add (id: string) (s: Sprite) = 
+            if cache.ContainsKey id then
+                Sprite.destroy cache.[id]
+                cache.Remove id |> ignore
+            cache.Add(id, s)
+
+    module Sounds =
+        "not yet implemented"
+        |> ignore
+
+    module Rulesets =
+
+        let DEFAULT = "*sc-j4"
+        
+        let private defaultRulesets =
+            List.map
+                (fun od -> (sprintf "osu-od-%.0f" od, Rulesets.Osu.create od))
+                [0.0f; 1.0f; 2.0f; 3.0f; 4.0f; 5.0f; 6.0f; 7.0f; 8.0f; 9.0f; 10.0f]
+            @ List.map
+                (fun j -> (sprintf "sc-j%i" j, Rulesets.SC.create j))
+                [1; 2; 3; 4; 5; 6; 7; 8; 9]
+            @ List.map
+                (fun j -> (sprintf "wife-j%i" j, Rulesets.Wife.create j))
+                [1; 2; 3; 4; 5; 6; 7; 8; 9]
+            @ List.map
+                (fun (d: Rulesets.Ex_Score.Type) -> (sprintf "xs-%s" (d.Name.ToLower()), Rulesets.Ex_Score.create d))
+                [Rulesets.Ex_Score.sdvx]
+
+        let private loaded = let x = Dictionary<string, Ruleset>() in (for name, rs in defaultRulesets do x.Add("*" + name, rs)); x
+        let mutable private _theme : Theme = Unchecked.defaultof<_>
+        let mutable private id = DEFAULT
+        let mutable current = loaded.[DEFAULT]
+
+        let list() = 
+            seq {
+                for k in loaded.Keys do
+                    yield (k, loaded.[k])
+            }
+
+        let reload() =
+            let sourceTheme = if id.StartsWith('*') then defaultTheme else _theme
+            for id in rulesetTextures do
+                let fileid = current.TextureNamePrefix + id 
+                let img, config = sourceTheme.GetRulesetTexture fileid
+                Sprite.upload(img, config.Rows, config.Columns, true)
+                |> Sprite.cache id |> Sprites.add id
+
+        let switch (new_id: string) (themeChanged: bool) =
+            let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Ruleset '" + new_id + "' not found, switching to default"); DEFAULT
+            if Object.ReferenceEquals(_theme, null) |> not && (new_id <> id || themeChanged) then
+                id <- new_id
+                current <- loaded.[id]
+                reload()
+
+        let load_from_theme (theme: Theme) =
+            _theme <- theme
+            loaded.Clear()
+            for name, rs in defaultRulesets do loaded.Add("*" + name, rs)
+            for name, rs in _theme.GetRulesets() do loaded.Add(name, rs)
+            switch id true
+
+        let exists = loaded.ContainsKey
 
     module Themes =
-        
-        let private _default = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
 
-        let currentId = ref "*default"
-        let current () = loaded.[currentId.Value]
-        
-        let config : ThemeConfig ref = ref _default.Config
+        let private loaded = Dictionary<string, Theme>()
 
-        // Detection from file system
+        module Current =
 
-        let detected = new List<string>()
-        let detect () = 
-            detected.Clear()
-            for t in Directory.EnumerateDirectories(getDataPath "Themes") do
-                detected.Add(Path.GetFileName t)
+            let mutable id = "*default"
+            let mutable instance = defaultTheme
+            let mutable config = instance.Config
+
+            module GameplayConfig =
+
+                open WidgetConfig
+
+                let private cache = Dictionary<string, obj>()
+
+                let private add<'T>() =
+                    let id = typeof<'T>.Name
+                    cache.Remove(id) |> ignore
+                    cache.Add(id, fst (instance.GetGameplayConfig<'T> id))
+
+                let reload() =
+                    add<AccuracyMeter>()
+                    add<HitMeter>()
+                    add<LifeMeter>()
+                    add<Combo>()
+                    add<SkipButton>()
+                    add<ProgressMeter>()
+                    add<JudgementMeter>()
+            
+                let get<'T>() = 
+                    let id = typeof<'T>.Name
+                    if cache.ContainsKey id then
+                        cache.[id] :?> 'T
+                    else failwithf "config not loaded: %s" id
+
+            let changeConfig(new_config: ThemeConfig) =
+                instance.Config <- new_config
+                config <- instance.Config
+
+            let reload() =
+                if config.OverrideAccentColor then accentColor <- config.DefaultAccentColor
+                for font in defaultTheme.GetFonts() do
+                    Fonts.add font
+                for font in instance.GetFonts() do
+                    Fonts.add font
+                if font <> null then font.Dispose()
+                font <- Fonts.create config.Font
+
+                for id in themeTextures do
+                    match instance.GetTexture id with
+                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
+                    | None ->
+                        match loaded.["*default"].GetTexture id with
+                        | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
+                        | None -> failwith "default doesnt have this texture!!"
+
+                GameplayConfig.reload()
+                Rulesets.load_from_theme(instance)
+
+            let switch (new_id: string) =
+                let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Theme '" + new_id + "' not found, switching to default"); "*default"
+                if new_id <> id || first_init then
+                    id <- new_id
+                    instance <- loaded.[id]
+                    config <- loaded.[id].Config
+                    reload()
 
         // Loading into memory
 
-        let loaded : Dictionary<string, Theme> = new Dictionary<string, Theme>()
         let load() =
-
             loaded.Clear()
+            loaded.Add ("*default", defaultTheme)
 
-            loaded.Add ("*default", _default)
-            config.Value <- _default.Config
-            for source in detected do
+            for source in Directory.EnumerateDirectories(getDataPath "Themes") do
                 let id = Path.GetFileName source
                 try
                     let theme = Theme.FromFolderName id
-                    Logging.Info(sprintf "  Loaded theme '%s' (%s)" theme.Config.Name id)
+                    Logging.Debug(sprintf "  Loaded theme '%s' (%s)" theme.Config.Name id)
                     loaded.Add(id, theme)
                 with err -> Logging.Error("  Failed to load theme '" + id + "'", err)
 
             Logging.Info(sprintf "Loaded %i themes. (Including default)" loaded.Count)
 
-            switch currentId.Value
+            Current.switch Current.id
 
-        // The other stuff
-
-        let switch (id: string) =
-            let id = if loaded.ContainsKey id then id else Logging.Warn("Theme '" + id + "' not found, switching to default"); "*default"
-            if id <> currentId.Value || _font.Value = null then
-                currentId.Value <- id
-                config.Value <- loaded.[id].Config
-
-                if config.Value.OverrideAccentColor then accentColor.Value <- config.Value.DefaultAccentColor
-                if _font.Value <> null then if _font.Value.IsValueCreated then _font.Value.Value.Dispose()
-                _font.Value <- lazy (Fonts.create config.Value.Font)
-
-                GameplayConfig.clearCache()
-                Sprites.clearCache()
-
-        let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
-
-        let pick f =
-            match f (current ()) with
-            | Some x -> x
-            | None ->
-                match f loaded.["*default"] with
-                | Some x -> x
-                | None -> failwith "f should give some value for default theme!!"
+        let list() = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
         let createNew (id: string) =
              let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
              let target = Path.Combine(getDataPath "Themes", id)
-             if id <> "" && not (Directory.Exists target) then _default.CopyTo(Path.Combine(getDataPath "Themes", id))
-             detect()
+             if id <> "" && not (Directory.Exists target) then defaultTheme.CopyTo(Path.Combine(getDataPath "Themes", id))
              load()
-             switch id
-             current().Config <- { current().Config with Name = current().Config.Name + " (Extracted)" }
+             Current.switch id
+             Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
 
-        let lampToColor (lampAchieved: Prelude.Scoring.Lamp) = config.Value.LampColors.[lampAchieved |> int]
-        let gradeToColor (gradeAchieved: int) = config.Value.Grades.[gradeAchieved].Color
-        let clearToColor (cleared: bool) = config.Value.ClearColors |> (if cleared then fst else snd)
+        let clearToColor (cleared: bool) = Current.config.ClearColors |> (if cleared then fst else snd)
 
     module Noteskins =
         
         open Prelude.Data.SkinConversions
+
+        let loaded : Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()
 
         let private defaults =
             let skins = ["defaultBar.isk"; "defaultArrow.isk"; "defaultOrb.isk"]
@@ -103,27 +199,35 @@ module rec Content =
             |> List.map Noteskin.FromZipStream
             |> List.zip (List.map (fun s -> "*" + s) skins)
 
-        let currentId = ref "*defaultBar.isk"
-        let current () = loaded.[currentId.Value]
-        let currentConfig : NoteskinConfig ref = ref NoteskinConfig.Default
-        
-        // Detection from file system
+        module Current =
+            
+            let mutable id = fst defaults.[0]
+            let mutable instance = snd defaults.[0]
+            let mutable config = instance.Config
+            
+            let changeConfig(new_config: NoteskinConfig) =
+                instance.Config <- new_config
+                config <- instance.Config
 
-        let detected = new List<string * bool>()
-        let detect () = 
+            let reload() =
+                for id in noteskinTextures do
+                    match instance.GetTexture id with
+                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
+                    | None ->
+                        match loaded.["*defaultBar.isk"].GetTexture id with
+                        | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
+                        | None -> failwith "defaultBar doesnt have this texture!!"
 
-            detected.Clear()
-
-            for t in Directory.EnumerateDirectories(getDataPath "Noteskins") do
-                detected.Add(t, false)
-
-            for t in Directory.EnumerateDirectories(getDataPath "Noteskins")
-                |> Seq.filter (fun p -> let ext = Path.GetExtension(p).ToLower() in ext = ".isk" || ext = ".zip") do
-                detected.Add(t, true)
+            let switch (new_id: string) =
+                let new_id = if loaded.ContainsKey id then new_id else Logging.Warn("Noteskin '" + new_id + "' not found, switching to default"); "*defaultBar.isk"
+                if new_id <> id || first_init then
+                    id <- new_id
+                    instance <- loaded.[id]
+                    config <- instance.Config
+                reload()
 
         // Loading into memory
 
-        let loaded : Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()
         let load () =
 
             loaded.Clear()
@@ -131,36 +235,32 @@ module rec Content =
             for (id, ns) in defaults do
                 loaded.Add(id, ns)
 
-            for source, isZip in detected do
+            let add (source: string) (isZip: bool) =
                 let id = Path.GetFileName source
                 try 
                     let ns = if isZip then Noteskin.FromZipFile source else Noteskin.FromFolder source
                     loaded.Add(id, ns)
-                    Logging.Info(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
+                    Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
                 with err -> Logging.Error("  Failed to load noteskin '" + id + "'", err)
+
+            for source in Directory.EnumerateDirectories(getDataPath "Noteskins") do add source false
+            for source in 
+                Directory.EnumerateFiles(getDataPath "Noteskins")
+                |> Seq.filter (fun p -> Path.GetExtension(p).ToLower() = ".isk")
+                do add source true
 
             Logging.Info(sprintf "Loaded %i noteskins. (%i by default)" loaded.Count defaults.Length)
             
-            switch currentId.Value
-
-        // The other stuff
-
-        let switch (id: string) =
-            let id = if loaded.ContainsKey id then id else Logging.Warn("Noteskin '" + id + "' not found, switching to default"); "*defaultBar.isk"
-            if id <> currentId.Value then
-                currentId.Value <- id
-                Sprites.clearNoteskinTextures()
-            currentConfig.Value <- loaded.[id].Config
+            Current.switch Current.id
 
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
         let extractCurrent() =
             let id = Guid.NewGuid().ToString()
-            current().CopyTo(Path.Combine(getDataPath "Noteskins", id))
-            detect()
+            Current.instance.CopyTo(Path.Combine(getDataPath "Noteskins", id))
             load()
-            switch id
-            current().Config <- { current().Config with Name = current().Config.Name + " (Extracted)" }
+            Current.switch id
+            Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
 
         let tryImport(path: string) : bool =
             match path with
@@ -168,83 +268,27 @@ module rec Content =
                 let id = Guid.NewGuid().ToString()
                 try
                     //OsuSkin.Converter(path).ToNoteskin(Path.Combine(getDataPath "Noteskins", id)) 4
-                    detect()
                     load()
                     true
                 with err -> Logging.Error("Something went wrong converting this skin!", err); true
             | InterludeSkinArchive ->
                 try 
                     File.Copy(path, Path.Combine(getDataPath "Noteskins", Path.GetFileName path))
-                    detect()
                     load()
                     true
                 with err -> Logging.Error("Something went wrong when moving this skin!", err); true
             | OsuSkinArchive -> Logging.Info("Can't directly drop .osks yet, sorry :( You'll have to extract it first"); true
             | Unknown -> false
 
-    module Sprites =
-        
-        let private cache = new Dictionary<string, Sprite>()
-
-        let getTexture (name: string) =
-            if not <| cache.ContainsKey name then
-                if Array.contains name noteskinTextures then
-                    match Noteskins.current().GetTexture name with
-                    | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache name
-                    | None ->
-                        match Noteskins.loaded.["*defaultBar.isk"].GetTexture name with
-                        | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false)
-                        | None -> failwith "defaultBar doesnt have this texture!!"
-                    |> fun x -> cache.Add(name, x)
-                else
-                    let (img, config) =
-                        Themes.pick (fun (t: Theme) ->
-                            try t.GetTexture name
-                            with err -> Logging.Error("Failed to load texture '" + name + "'", err); None)
-                    cache.Add(name, Sprite.upload (img, config.Rows, config.Columns, false) |> Sprite.cache name)
-            cache.[name]
-
-        let clearCache() =
-            Seq.iter Sprite.destroy cache.Values
-            cache.Clear()
-
-        let clearNoteskinTextures() =
-            Array.iter
-                ( fun t -> 
-                    if cache.ContainsKey t then
-                        Sprite.destroy cache.[t]
-                        cache.Remove t |> ignore
-                ) noteskinTextures
-    
-    module Sounds =
-        "not yet implemented"
-        |> ignore
-
-    module GameplayConfig =
-
-        let private cache = new Dictionary<string, obj>()
-
-        let get<'T> (name: string) = 
-            if cache.ContainsKey name then
-                cache.[name] :?> 'T
-            else
-                let o =
-                    (fun (t: Theme) ->
-                        let (x, success) = t.GetGameplayConfig name
-                        if success then Some x else None)
-                    |> Themes.pick
-                cache.Add(name, o :> obj)
-                o
-
-        let clearCache() = cache.Clear()
-
-    let detect () =
-        Themes.detect()
-        Noteskins.detect()
-
-    let load () =
-        Logging.Info "===== Loading Themes/Noteskins ====="
-        Themes.load()
+    let init (themeId: string) (noteskinId: string) =
+        Themes.Current.id <- themeId
+        Noteskins.Current.id <- noteskinId
+        Logging.Info "===== Loading game content ====="
         Noteskins.load()
+        Themes.load()
+        first_init <- false
 
+    let inline getGameplayConfig<'T>() = Themes.Current.GameplayConfig.get<'T>()
     let inline getTexture (id: string) = Sprites.getTexture id
+    let inline noteskinConfig() = Noteskins.Current.config
+    let inline themeConfig() = Themes.Current.config

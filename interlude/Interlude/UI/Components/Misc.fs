@@ -76,7 +76,7 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
                 match bind with
                 | Some b ->
                     match s.Value with
-                    | "" -> Localisation.localiseWith [b.Value.ToString(); prompt] "misc.Search"
+                    | "" -> Localisation.localiseWith [b.Value.ToString(); prompt] "misc.search"
                     | text -> text
                 | None -> match s.Value with "" -> prompt | text -> text),
             (fun () -> Style.highlightF 255 color.Value), 0.0f)

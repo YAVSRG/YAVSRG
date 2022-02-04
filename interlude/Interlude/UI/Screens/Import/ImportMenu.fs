@@ -2,7 +2,6 @@
 
 open System
 open System.IO
-open System.Drawing
 open System.Net
 open System.Net.Security
 open Percyqaz.Json
@@ -13,7 +12,6 @@ open Prelude.Web
 open Interlude
 open Interlude.Utils
 open Interlude.Graphics
-open Interlude.Input
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect
@@ -68,7 +66,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
     let mutable downloaded = false //todo: maybe check if pack is already installed?
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        Notification.add (Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
             (BackgroundTask.Chain
                 [
@@ -103,7 +101,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let mutable downloaded = false
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
-        Notification.add (Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
                 [
@@ -142,7 +140,7 @@ type private SearchContainerLoader(t) as this =
     override this.Draw() =
         base.Draw()
         //todo: improved loading indicator here
-        Text.drawFill(Content.font(), "Loading...", this.Bounds, Color.White, 0.5f)
+        Text.drawFill(Content.font, "Loading...", this.Bounds, Color.White, 0.5f)
         if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> if this.Parent.IsSome then this.Destroy()))
 
 type private SearchContainer(populate, handleFilter) as this =
@@ -202,7 +200,7 @@ type Screen() as this =
             RemoteCertificateValidationCallback(
                 fun _ cert _ sslPolicyErrors ->
                     if sslPolicyErrors = SslPolicyErrors.None then true
-                    else cert.GetCertHashString().ToLower() = "9e600748d9e989c31e43b32d1fdee21b797a8467" )
+                    else cert.GetCertHashString().ToLower() = "a4deab1b3cbd43ac7d21c9d17b80d97df09e67ee" )
 
         let eoDownloads = 
             SearchContainer(

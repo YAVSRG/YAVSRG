@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Components.Selection.Controls
 
 open System
-open System.Drawing
 open OpenTK
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
@@ -69,23 +68,32 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
     let chPercent v = setPercent (getPercent setting + v) setting
     do
         this.Animation.Add color
-        this.Add(new TextBox((fun () -> setting.Value.ToString()), K (Color.White, Color.Black), 0.0f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f))
+        new TextBox((fun () -> this.Format setting.Value), K (Color.White, Color.Black), 0.0f)
+        |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f)
+        |> this.Add
         this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-        this.Add(new Clickable((fun () -> this.Selected <- true; dragging <- true), fun b -> color.Target <- if b then this.Hover <- true; 0.8f else 0.5f))
+        this.Add(new Clickable((fun () -> this.Selected <- true; dragging <- true), fun b -> color.Target <- if b && not this.Hover then this.Hover <- true; 0.8f else 0.5f))
+
+    member val Format = (fun x -> x.ToString()) with get, set
+
+    static member Percent(setting, incr) = Slider<float>(setting, incr, Format = fun x -> sprintf "%.0f%%" (x * 100.0))
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
+        if this.Selected || Mouse.Hover this.Bounds then
+            chPercent(incr * Mouse.Scroll())
         if this.Selected then
-            if (Mouse.Held(MouseButton.Left) && dragging) then
+            if (Mouse.Held MouseButton.Left && dragging) then
+                let l, r = if Input.shift then 0.0f, Render.vwidth else l, r
                 let amt = (Mouse.X() - l) / (r - l)
                 setPercent amt setting
             else dragging <- false
 
     override this.Left() = chPercent(-incr)
-    override this.Up() = chPercent(incr * 10.0f)
+    override this.Up() = chPercent(incr * 5.0f)
     override this.Right() = chPercent(incr)
-    override this.Down() = chPercent(-incr * 10.0f)
+    override this.Down() = chPercent(-incr * 5.0f)
 
     override this.Draw() =
         let v = getPercent setting
@@ -118,7 +126,7 @@ type TextField(setting: Setting<string>) as this =
         if this.Selected && Options.options.Hotkeys.Exit.Value.Tapped() then
             Input.removeInputMethod()
 
-type ColorPicker(color: Setting<byte>) as this =
+type NoteColorPicker(color: Setting<byte>) as this =
     inherit NavigateSelectable()
     let sprite = Content.getTexture "note"
     let n = byte sprite.Rows

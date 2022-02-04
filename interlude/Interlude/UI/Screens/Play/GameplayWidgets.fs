@@ -2,10 +2,10 @@
 
 open OpenTK
 open System
-open System.Drawing
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
+open Prelude.Scoring.Grading
 open Prelude.Data.Themes
 open Interlude
 open Interlude.Graphics
@@ -22,8 +22,9 @@ open Interlude.UI.Animation
 module GameplayWidgets = 
 
     type Helper = {
+        ScoringConfig: Ruleset
         Scoring: IScoreMetric
-        HP: IHealthBarSystem
+        HP: HealthBarMetric
         OnHit: IEvent<HitEvent<HitEventGuts>>
         CurrentChartTime: unit -> ChartTime
     }
@@ -31,13 +32,13 @@ module GameplayWidgets =
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
         inherit Widget()
 
-        let grades = Content.themeConfig().Grades
+        let grades = helper.ScoringConfig.Grading.Grades
         let color = new AnimationColorMixer(if conf.GradeColors then Array.last(grades).Color else Color.White)
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe
                     ( fun _ ->
-                        grades.[Grade.calculate grades helper.Scoring.State].Color |> color.SetColor
+                        Grade.calculate grades helper.Scoring.State |> helper.ScoringConfig.GradeColor |> color.SetColor
                     )
             else null
 
@@ -83,20 +84,21 @@ module GameplayWidgets =
             for struct (time, pos, j) in hits do
                 Draw.rect
                     (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
-                    (let c = Content.themeConfig().JudgementColors.[j] in
-                        Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), int c.R, int c.G, int c.B))
+                    (let c = helper.ScoringConfig.JudgementColor j in
+                        Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), c))
                     Sprite.Default
 
         override this.Dispose() =
             listener.Dispose()
 
+    // disabled for now
     type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
         inherit Widget()
         let atime = conf.AnimationTime * 1.0f<ms>
         let mutable tier = 0
         let mutable late = 0
         let mutable time = -Time.infinity
-        let texture = Content.getTexture "judgements"
+        let texture = Content.getTexture "judgement"
         let listener =
             helper.OnHit.Subscribe
                 ( fun ev ->
@@ -105,11 +107,11 @@ module GameplayWidgets =
                         | Hit e -> (e.Judgement, e.Delta)
                         | Release e -> (e.Judgement, e.Delta)
                     if
-                        judge.IsSome &&
-                        match judge.Value with
-                        | JudgementType.RIDICULOUS
-                        | JudgementType.MARVELLOUS -> conf.ShowRDMA
-                        | _ -> true
+                        judge.IsSome && true
+                        //match judge.Value with
+                        //| _JType.RIDICULOUS
+                        //| _JType.MARVELLOUS -> conf.ShowRDMA
+                        //| _ -> true
                     then
                         let j = int judge.Value in
                         if j >= tier || ev.Time - atime > time then
@@ -135,7 +137,9 @@ module GameplayWidgets =
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
-                        color.SetColor(Content.themeConfig().LampColors.[helper.Scoring.State |> Lamp.calculate |> int])
+                        Lamp.calculate helper.ScoringConfig.Grading.Lamps helper.Scoring.State
+                        |> helper.ScoringConfig.LampColor
+                        |> color.SetColor
                     popAnimation.Value <- conf.Pop)
 
         do
@@ -146,7 +150,7 @@ module GameplayWidgets =
             base.Draw()
             let combo = helper.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
-            Text.drawFill(Content.font(), combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
+            Text.drawFill(Content.font, combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
 
         override this.Dispose() =
             listener.Dispose()
@@ -186,6 +190,7 @@ module GameplayWidgets =
             base.Update(elapsedTime, bounds)
             if helper.CurrentChartTime() < -Audio.LEADIN_TIME * 2.5f then
                 if options.Hotkeys.Skip.Value.Tapped() then
+                    Audio.pause()
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
             else this.Destroy()
 

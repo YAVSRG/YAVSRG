@@ -1,16 +1,16 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
-open System.Drawing
 open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
+open Prelude.Scoring.Grading
 open Interlude.UI
 open Interlude.Gameplay
 open Interlude.UI.Screens.Play
 
-type PersonalBestData = PersonalBests<float * int> option * PersonalBests<Lamp> option * PersonalBests<bool> option
+type PersonalBestData = PersonalBests<float * int> option * PersonalBests<int> option * PersonalBests<bool> option
     
 [<Struct>]
 [<RequireQualifiedAccess>]
@@ -73,11 +73,6 @@ module private Globals =
         | None -> Color.FromArgb(90, 150, 150, 150)
         | Some b -> Color.FromArgb(80, Color.White)
     
-    /// Updated whenever screen refreshes
-    /// Contains name of score/hp systems being used
-    let mutable scoreSystem = "SC+ (J4)"
-    let mutable hpSystem = "VG"
-    
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable scrollTo = ScrollTo.Nothing
     let mutable navigation = Navigation.Nothing
@@ -98,5 +93,6 @@ module private Globals =
     
     let playCurrentChart() =
         if currentChart.IsSome then
+            chartSaveData.Value.LastPlayed <- System.DateTime.Now
             Screen.changeNew (fun () -> new Screen(if autoplay then PlayScreenType.Auto else PlayScreenType.Normal) :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default
         else Logging.Warn "Tried to play selected chart; There is no chart selected"

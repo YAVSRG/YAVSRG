@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
-open System.Drawing
 open Prelude.Common
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
@@ -19,7 +18,7 @@ module private Collections =
 
     let mutable selected =
         // todo: load from settings
-        let favourites = Localisation.localise "collections.Favourites"
+        let favourites = Localisation.localise "collections.favourites"
         let c = 
             match Collections.get favourites with
             | Some c -> c
@@ -36,8 +35,8 @@ module private Collections =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("CollectionName", TextField name).Position(200.0f)
-                    PrettySetting("CollectionType", Selector.FromArray ([|"Collection"; "Playlist"; "Goals"|], [|"Collection"; "Playlist"; "Goals"|], ctype)).Position(300.0f)
+                    PrettySetting("collections.edit.collectionname", TextField name).Position(200.0f)
+                    PrettySetting("collections.edit.type", Selector.FromArray ([|"Collection"; "Playlist"; "Goals"|], [|"Collection"; "Playlist"; "Goals"|], ctype)).Position(300.0f)
                 ] :> Selectable
             Callback = fun () ->
                 if name.Value <> originalName then
@@ -68,7 +67,7 @@ module private Collections =
                         (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), fst selected = n))
                 column
                     [
-                        PrettySetting("Collections",
+                        PrettySetting("collections",
                             CardSelect.Selector(
                                 setting,
                                 { CardSelect.Config.Default with
@@ -83,9 +82,9 @@ module private Collections =
                                                 else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
                                         )
                                 }, add)).Position(200.0f, 1200.0f, 600.0f)
-                        TextBox(K <| Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.AddHint", K (Color.White, Color.Black), 0.5f)
+                        TextBox(K <| Localisation.localiseWith [options.Hotkeys.AddToCollection.Value.ToString()] "collections.addhint", K (Color.White, Color.Black), 0.5f)
                         |> positionWidget(0.0f, 0.0f, -190.0f, 1.0f, 0.0f, 1.0f, -120.0f, 1.0f)
-                        TextBox(K <| Localisation.localiseWith [options.Hotkeys.RemoveFromCollection.Value.ToString()] "collections.RemoveHint", K (Color.White, Color.Black), 0.5f)
+                        TextBox(K <| Localisation.localiseWith [options.Hotkeys.RemoveFromCollection.Value.ToString()] "collections.removehint", K (Color.White, Color.Black), 0.5f)
                         |> positionWidget(0.0f, 0.0f, -120.0f, 1.0f, 0.0f, 1.0f, -50.0f, 1.0f)
                     ] :> Selectable
             Callback = ignore

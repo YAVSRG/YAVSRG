@@ -67,6 +67,9 @@ module Gameplay =
 
     let mutable autoplay = false
 
+    let mutable ruleset : Ruleset = getCurrentRuleset()
+    let mutable rulesetId = Ruleset.hash ruleset
+
     let private _rate = Setting.rate 1.0f
     let private _selectedMods = Setting.simple Map.empty
     let updateChart() =
@@ -142,7 +145,7 @@ module Gameplay =
             | _ -> true
         then
             // todo: score uploading goes here when implemented
-            Scores.saveScore chartSaveData.Value data
+            Scores.saveScore chartSaveData.Value rulesetId data
         else BestFlags.Default
 
     let save() =
@@ -158,12 +161,12 @@ module Gameplay =
                     | Some c -> cc, c
                     | None ->
                         Logging.Error("Could not load chart file: " + cc.FilePath)
-                        Library.getGroups (K (0, "All")) (Comparison(fun _ _ -> 0)) []
+                        Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
                         |> fun d -> fst d.[(0, "All")].[0]
                         |> fun c -> c, Library.load(c).Value
                 | None ->
                     Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
-                    Library.getGroups(K (0, "All")) (Comparison(fun _ _ -> 0)) []
+                    Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
                     |> fun d -> fst d.[(0, "All")].[0]
                     |> fun c -> c, Library.load(c).Value
             changeChart(c, LevelSelectContext.None, ch)

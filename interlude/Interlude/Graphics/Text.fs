@@ -90,16 +90,18 @@ module Fonts =
             
     let collection = new FontCollection()
 
-    let init() =
-        //todo: load interlude as embedded font
-        let fontdir = Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")
-        Directory.CreateDirectory fontdir |> ignore
-        for file in Directory.EnumerateFiles fontdir do
-            match Path.GetExtension file with
-            | ".ttf" | ".otf" ->
-                collection.Install file |> ignore
-            | _ -> ()
-        Logging.Info (sprintf "Loaded %i external fonts" (Seq.length collection.Families))
+    let add (stream: Stream) = collection.Install stream |> ignore
+
+    //let init() =
+    //    //todo: load interlude as embedded font
+    //    let fontdir = Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")
+    //    Directory.CreateDirectory fontdir |> ignore
+    //    for file in Directory.EnumerateFiles fontdir do
+    //        match Path.GetExtension file with
+    //        | ".ttf" | ".otf" ->
+    //            collection.Install file |> ignore
+    //        | _ -> ()
+    //    Logging.Info (sprintf "Loaded %i external fonts" (Seq.length collection.Families))
 
     let create (name: string) =
         let found, family = collection.TryFind name

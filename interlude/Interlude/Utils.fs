@@ -23,6 +23,8 @@ module Utils =
 
     let F (f: 'T -> unit) (g: 'T -> unit) = fun t -> f t; g t
 
+    let L = Localisation.localise
+
     let getInterludeLocation() = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
 
     let getResourceStream name =
@@ -55,22 +57,6 @@ module Utils =
         ProcessStartInfo("file://" + System.IO.Path.GetFullPath path, UseShellExecute = true)
         |> Process.Start
         |> ignore
-
-    (* was used to benchmark framerate/some other things
-    module RenderPerformance =
-        let add x xs =
-            List.truncate 960 (x :: xs)
-
-        let mutable frameTime = [(0.0f, 0.0f)]
-
-        let frame t1 t2 =
-            frameTime <- add (t1, t1 + t2) frameTime
-
-        let mutable updateTime = [(0.0f, 0.0f)]
-
-        let update t1 t2 =
-            updateTime <- add (t1, t1 + t2) updateTime
-    *)
 
     module AutoUpdate =
         open System.IO.Compression

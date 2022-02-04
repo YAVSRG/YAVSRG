@@ -46,13 +46,13 @@ module Audio =
     let mutable private timerStart = 0.0f<ms>
     let mutable private channelPlaying = false
     let mutable private rate = 1.0f
-    let mutable localOffset = 0.0f<ms>
-    let mutable globalOffset = 0.0f<ms>
+    let mutable private localOffset = 0.0f<ms>
+    let mutable private globalOffset = 0.0f<ms>
     let mutable trackFinishBehaviour = Wait
 
     let audioDuration() = nowplaying.Duration
 
-    let time() = rate * (float32 timer.ElapsedMilliseconds * 1.0f<ms>) + timerStart
+    let time() = rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms>) + timerStart
 
     let timeWithOffset() = time() + localOffset + globalOffset * rate
 
@@ -116,11 +116,13 @@ module Audio =
             | Wait -> ()
             | Action f -> f()
 
-    let changeVolume(newVolume) =
-        Bass.GlobalStreamVolume <- int (newVolume * 10000.0)
+    let changeGlobalOffset(offset) = globalOffset <- offset
+    let changeLocalOffset(offset) = localOffset <- offset
+
+    let changeVolume(newVolume) = Bass.GlobalStreamVolume <- int (newVolume * 8000.0) |> max 0
 
     let changeRate(newRate) =
-        rate <- newRate;
+        rate <- newRate
         //if (true) then Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Pitch, -Math.Log(float rate, 2.0) * 12.0) |> bassError
         Bass.ChannelSetAttribute(nowplaying.ID, ChannelAttribute.Frequency, float32 nowplaying.Frequency * rate) |> bassError
 
@@ -133,7 +135,7 @@ module Audio =
                 nowplaying.Dispose()
             channelPlaying <- false
             nowplaying <- Track.FromFile path
-        localOffset <- offset
+        changeLocalOffset offset
         changeRate rate
         isDifferentFile
 

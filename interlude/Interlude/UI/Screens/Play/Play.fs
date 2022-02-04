@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.Play
 
 open OpenTK
+open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
@@ -66,10 +67,12 @@ type Screen(start: PlayScreenType) as this =
         | Normal -> new LiveReplayProvider(firstNote) :> IReplayProvider, false, false
         | Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, true
         | Replay data -> StoredReplayProvider(data) :> IReplayProvider, true, false
-    let scoring = createScoreMetric (fst options.AccSystems.Value) chart.Keys keypressData chart.Notes Gameplay.rate.Value
+    let scoringConfig = getCurrentRuleset()
+    let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes Gameplay.rate.Value
     let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper =
-        { 
+        {
+            ScoringConfig = scoringConfig
             Scoring = scoring
             HP = scoring.HP
             OnHit = onHit.Publish
@@ -93,7 +96,7 @@ type Screen(start: PlayScreenType) as this =
         noteRenderer.Add(ScreenCover())
 
         let inline f name (constructor: 'T -> Widget) = 
-            let config: ^T = Content.GameplayConfig.get name
+            let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 config
@@ -106,7 +109,7 @@ type Screen(start: PlayScreenType) as this =
             f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
             f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget)
             f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
-            f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
+            //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
         f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
         f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget)
 
@@ -117,6 +120,7 @@ type Screen(start: PlayScreenType) as this =
         //discord presence
         Screen.toolbar <- true
         Audio.changeRate Gameplay.rate.Value
+        Audio.changeGlobalOffset (toTime options.AudioOffset.Value)
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()
         //Screens.addDialog(new GameStartDialog())
@@ -156,8 +160,7 @@ type Screen(start: PlayScreenType) as this =
                         ScoreInfoProvider (
                             Gameplay.makeScore(keypressData.GetFullReplay(), chart.Keys),
                             Gameplay.currentChart.Value,
-                            fst options.AccSystems.Value,
-                            Content.themeConfig().Grades,
+                            scoringConfig,
                             ModChart = Gameplay.modifiedChart.Value,
                             Difficulty = Gameplay.difficultyRating.Value
                         )

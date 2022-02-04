@@ -39,17 +39,17 @@ type ScoreGraph(data: ScoreInfoProvider) =
                 match ev.Guts with
                 | Hit evData ->
                     match evData.Judgement with
-                    | Some judgement -> h - evData.Delta / data.Scoring.MissWindow * h, Content.themeConfig().JudgementColors.[int judgement]
+                    | Some judgement -> h - evData.Delta / data.Scoring.MissWindow * h, data.Ruleset.JudgementColor judgement
                     | None -> 0.0f, Color.Transparent
                 | Release evData ->
                     match evData.Judgement with
-                    | Some judgement -> h - 0.5f * evData.Delta / data.Scoring.MissWindow * h, Color.FromArgb(127, Content.themeConfig().JudgementColors.[int judgement])
+                    | Some judgement -> h - 0.5f * evData.Delta / data.Scoring.MissWindow * h, Color.FromArgb(127, data.Ruleset.JudgementColor judgement)
                     | None -> 0.0f, Color.Transparent
             if col.A > 0uy then
                 let x = left + 5.0f + ev.Time * hscale
                 Draw.rect(Rect.create (x - 2.5f) (top + y - 2.5f) (x + 2.5f) (top + y + 2.5f)) col Sprite.Default
-        Text.draw(Content.font(), "Early", 18.0f, left + 5.0f, bottom - 35.0f, Color.FromArgb(127, Color.White))
-        Text.draw(Content.font(), "Late", 18.0f, left + 5.0f, top + 5.0f, Color.FromArgb(127, Color.White))
+        Text.draw(Content.font, "Early", 18.0f, left + 5.0f, bottom - 35.0f, Color.FromArgb(127, Color.White))
+        Text.draw(Content.font, "Late", 18.0f, left + 5.0f, top + 5.0f, Color.FromArgb(127, Color.White))
 
         fbo.Unbind()
 

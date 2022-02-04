@@ -27,7 +27,7 @@ type TextBox(textFunc, color, just) =
     new(textFunc, scolor, just) = TextBox(textFunc, (fun () -> scolor(), Color.Transparent), just)
 
     override this.Draw() = 
-        Text.drawFillB(Content.font(), textFunc(), this.Bounds, color(), just)
+        Text.drawFillB(Content.font, textFunc(), this.Bounds, color(), just)
         base.Draw()
 
 type Clickable (onClick, onHover) =

@@ -48,7 +48,7 @@ module private InfoPanel =
             |> positionWidget(5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
             |> this.Add
 
-            TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Lamp.ToString()) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
+            TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
             |> positionWidget(5.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
             |> this.Add
 
@@ -80,12 +80,12 @@ module private InfoPanel =
                 let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
                 Tooltip.callback (
                     options.Hotkeys.Delete.Value,
-                    Localisation.localiseWith [scoreName] "misc.Delete",
+                    Localisation.localiseWith [scoreName] "misc.delete",
                     Warning,
                     fun () ->
                         chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [scoreName] "notification.Deleted", Info)
+                        Notification.add (Localisation.localiseWith [scoreName] "notification.deleted", Info)
                 )
 
     type Scoreboard() as this =
@@ -128,7 +128,7 @@ module private InfoPanel =
                         | Some d ->
                             seq { 
                                 for score in d.Scores do
-                                    yield ScoreInfoProvider(score, currentChart.Value, fst options.AccSystems.Value, Interlude.Content.themeConfig().Grades)
+                                    yield ScoreInfoProvider(score, currentChart.Value, getCurrentRuleset())
                                     |> ScoreboardItem
                             }
                     )
@@ -141,36 +141,36 @@ module private InfoPanel =
             StylishButton.FromEnum("Sort",
                 sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
                 Style.main 100, TiltLeft = false )
-            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Sort")
+            |> TooltipRegion.Create (L"levelselect.scoreboard.sort.tooltip")
             |> positionWidget(0.0f, 0.0f, -45.0f, 1.0f, -15.0f, 0.25f, -5.0f, 1.0f)
             |> ls.Add
 
             StylishButton.FromEnum("Filter",
                 filter |> Setting.trigger (fun _ -> this.Refresh()),
                 Style.main 90 )
-            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Filter")
+            |> TooltipRegion.Create (L"levelselect.scoreboard.filter.tooltip")
             |> positionWidget(10.0f, 0.25f, -45.0f, 1.0f, -15.0f, 0.5f, -5.0f, 1.0f)
             |> ls.Add
 
             StylishButton(
-                (fun () -> Setting.app WatcherSelection.cycleForward options.AccSystems; LevelSelect.refresh <- true),
-                (fun () -> scoreSystem),
+                (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
+                (fun () -> ruleset.Name),
                 Style.main 80 )
-            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.ScoreSystems")
+            |> TooltipRegion.Create (L"levelselect.scoreboard.ruleset.tooltip")
             |> positionWidget(10.0f, 0.5f, -45.0f, 1.0f, -15.0f, 0.75f, -5.0f, 1.0f)
             |> ls.Add
 
             StylishButton(
                 this.Refresh,
-                K <| Localisation.localise "levelselect.scoreboard.storage.Local",
+                K <| Localisation.localise "levelselect.scoreboard.storage.local",
                 Style.main 70, TiltRight = false ) //nyi
-            |> TooltipRegion.Create (Localisation.localise "levelselect.scoreboard.tooltip.Storage")
+            |> TooltipRegion.Create (L"levelselect.scoreboard.storage.tooltip")
             |> positionWidget(10.0f, 0.75f, -45.0f, 1.0f, -15.0f, 1.0f, -5.0f, 1.0f)
             |> ls.Add
 
             ls |> this.Add
 
-            let noLocalScores = Localisation.localise "levelselect.scoreboard.NoLocalScores"
+            let noLocalScores = Localisation.localise "levelselect.scoreboard.empty"
             TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
             |> positionWidget(50.0f, 0.0f, 0.0f, 0.3f, -50.0f, 1.0f, 0.0f, 0.5f)
             |> this.Add
@@ -180,10 +180,10 @@ module private InfoPanel =
             if (match chartSaveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
                 chart <- h
                 scoreLoader()
-            elif scoring <> scoreSystem then
-                let s = fst options.AccSystems.Value
-                for c in flowContainer.Children do (c :?> ScoreboardItem).Data.AccuracyType <- s
-                scoring <- scoreSystem
+            elif scoring <> rulesetId then
+                let s = getCurrentRuleset()
+                for c in flowContainer.Children do (c :?> ScoreboardItem).Data.Ruleset <- s
+                scoring <- rulesetId
             flowContainer.Filter <- filterer()
 
         override this.Update(elapsedTime, bounds) =

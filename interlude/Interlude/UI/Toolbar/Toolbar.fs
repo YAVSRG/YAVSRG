@@ -31,23 +31,23 @@ type Toolbar() as this =
         |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
         |> this.Add
 
-        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), Icons.back + " Back  ", Options.options.Hotkeys.Exit)
+        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), sprintf "%s %s  " Icons.back (L"menu.back"), Options.options.Hotkeys.Exit)
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
-        Button(( fun () -> if Screen.currentType <> Screen.Type.Play then OptionsMenuRoot.show() ), "Options", Options.options.Hotkeys.Options)
+        Button(( fun () -> if Screen.currentType <> Screen.Type.Play then OptionsMenuRoot.show() ), L"menu.options", Options.options.Hotkeys.Options)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Screen.change Screen.Type.Import Screen.TransitionFlag.Default), "Import", Options.options.Hotkeys.Import)
+        Button((fun () -> Screen.change Screen.Type.Import Screen.TransitionFlag.Default), L"menu.import", Options.options.Hotkeys.Import)
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button(MarkdownReader.help, "Help", Options.options.Hotkeys.Help)
+        Button(MarkdownReader.help, L"menu.help", Options.options.Hotkeys.Help)
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Dialog.add (TaskDisplay.Dialog())), "Tasks", Options.options.Hotkeys.Tasks)
+        Button((fun () -> Dialog.add (TaskDisplay.Dialog())), L"menu.tasks", Options.options.Hotkeys.Tasks)
         |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 

@@ -1,11 +1,11 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open System
-open System.Drawing
 open System.Linq
 open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
+open Prelude.Scoring
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
@@ -33,11 +33,13 @@ type Screen() as this =
     let infoPanel = new InfoPanel()
 
     let refresh() =
-        scoreSystem <- (fst options.AccSystems.Value).ToString()
+        ruleset <- getCurrentRuleset()
+        rulesetId <- Ruleset.hash ruleset
         infoPanel.Refresh()
         let groups =
+            let ctx : GroupContext = { Rate = rate.Value; RulesetId = rulesetId; Ruleset = ruleset }
             if options.ChartGroupMode.Value <> "Collections" then
-                Library.getGroups groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
+                Library.getGroups ctx groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
             else Library.getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
         if groups.Count = 1 then
             let g = groups.Keys.First()

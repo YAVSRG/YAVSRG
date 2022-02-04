@@ -118,7 +118,7 @@ module Screen =
                                 AnimationAction(fun () ->
                                     let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
                                     bmp.Dispose()
-                                    Content.accentColor.Value <- col
+                                    Content.accentColor <- col
                                     background <- (sprite, AnimationFade(0.0f, Target = 1.0f), false) :: background
                                 )
                             )
@@ -126,7 +126,7 @@ module Screen =
                             globalAnimation.Add(
                                 AnimationAction(fun () ->
                                     background <- (Content.getTexture "background", AnimationFade(0.0f, Target = 1.0f), true) :: background
-                                    Content.accentColor.Value <- Content.themeConfig().DefaultAccentColor
+                                    Content.accentColor <- Content.themeConfig().DefaultAccentColor
                                 )
                             )
                     )
@@ -263,7 +263,7 @@ module Screen =
             if Render.vwidth > 0.0f then
                 parallaxX.Target <- Mouse.X() / Render.vwidth
                 parallaxY.Target <- Mouse.Y() / Render.vheight
-            Style.accentColor.SetColor Content.accentColor.Value
+            Style.accentColor.SetColor Content.accentColor
             Dialog.update(elapsedTime, bounds)
             base.Update(elapsedTime, bounds)
             current.Update(elapsedTime, toolbar.Bounds)

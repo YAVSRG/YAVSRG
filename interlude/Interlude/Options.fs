@@ -1,8 +1,6 @@
 ﻿namespace Interlude
 
 open System
-open System.Drawing
-open System.Collections.Generic
 open System.IO
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
@@ -148,40 +146,30 @@ module Options =
 
     type Pacemaker =
         | Accuracy of float
-        | Lamp of Lamp
+        | Lamp of int
 
     type FailType =
         | Instant = 0
         | EndOfSong = 1
 
-    type WatcherSelection<'T> = 'T * 'T list
+    type WatcherSelection<'T> = 'T list
     module WatcherSelection =
-        let cycleForward (main, alts) =
-            match alts with
-            | [] -> (main, alts)
-            | x :: xs -> (x, xs @ [main])
+        let cycleForward xs =
+            match xs with
+            | x :: xs -> xs @ [x]
+            | _ -> failwith "impossible"
 
-        let rec cycleBackward (main, alts) =
-            match alts with
-            | [] -> (main, alts)
-            | x :: xs -> let (m, a) = cycleBackward (x, xs) in (m, main :: a)
+        let rec cycleBackward xs =
+            match xs with
+            | [] -> failwith "impossible"
+            | x :: [] -> [x]
+            | x :: xs -> match cycleBackward xs with (y :: ys) -> (y :: x :: ys) | _ -> failwith "impossible by case 2"
 
-        let indexed (main, alts) =
-            seq {
-                yield (-1, main), true
-                yield! alts |> List.mapi (fun i x -> (i, x), false)
-            }
+        let contains x xs = xs |> List.exists (fun o -> o = x)
 
-        let replace index value (main, alts) =
-            match index with
-            | -1 -> value, alts
-            | n -> main, alts |> List.mapi (fun i x -> if i = n then value else x)
+        let delete x xs = xs |> List.filter (fun o -> o <> x)
 
-        let delete x (main, alts) = main, alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
-
-        let moveToTop x (main, alts) = x, main :: alts |> List.filter (fun o -> Object.ReferenceEquals(x, o) |> not)
-
-        let add x (main, alts) = main, alts @ [x]
+        let add x xs = x :: xs
 
     type ScreenCoverOptions =
         {
@@ -212,7 +200,7 @@ module Options =
             Noteskin: Setting<string>
 
             Playstyles: Layout array
-            AccSystems: Setting<WatcherSelection<Metrics.AccuracySystemConfig>>
+            Rulesets: Setting<WatcherSelection<string>>
             ScoreSaveCondition: Setting<ScoreSaving>
             FailCondition: Setting<FailType>
             Pacemaker: Setting<Pacemaker>
@@ -236,7 +224,7 @@ module Options =
             CurrentChart = Setting.simple ""
             Theme = Setting.simple "*default"
 
-            ScrollSpeed = Setting.bounded 2.05 1.0 3.0 |> Setting.round 2
+            ScrollSpeed = Setting.bounded 2.05 1.0 5.0 |> Setting.round 2
             HitPosition = Setting.bounded 0 -300 600
             HitLighting = Setting.simple false
             Upscroll = Setting.simple false
@@ -255,7 +243,21 @@ module Options =
             UseKeymodePreference = Setting.simple false
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            AccSystems = Setting.simple (Metrics.SCPlus (4, false), [])
+            Rulesets =
+                Setting.simple [Content.Rulesets.DEFAULT]
+                |> Setting.map
+                    id
+                    ( fun xs -> 
+                        let filtered = 
+                            List.filter 
+                                ( fun x -> 
+                                    if Content.Rulesets.exists x then true
+                                    else Logging.Debug(sprintf "Score system '%s' not found, deselecting" x); false
+                                ) xs
+                        let l = if filtered.IsEmpty then [Content.Rulesets.DEFAULT] else filtered
+                        Content.Rulesets.switch (List.head l) false
+                        l
+                    )
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemaker = Setting.simple (Accuracy 0.95)
@@ -305,13 +307,10 @@ module Options =
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
 
-        Content.detect()
-        Content.load()
-        Content.Themes.switch options.Theme.Value
-        Content.Noteskins.switch options.Noteskin.Value
-
     let save() =
         try
             JSON.ToFile(configPath, true) config
             JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)
+
+    let getCurrentRuleset() = Content.Rulesets.current

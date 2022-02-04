@@ -23,19 +23,19 @@ module OptionsMenuRoot =
         {
             Content = fun add ->
                 row [
-                    BigButton(localiseOption "System", Icons.system, fun () -> add ( "System", System.page () ))
+                    BigButton( N"system", Icons.system, fun () -> add ( N"system", System.page () ))
                     |> positionWidget(-790.0f, 0.5f, -150.0f, 0.5f, -490.0f, 0.5f, 150.0f, 0.5f);
 
-                    BigButton(localiseOption "Themes", Icons.themes, fun () -> add ( "Themes", Themes.page () ))
+                    BigButton( N"themes", Icons.themes, fun () -> add ( N"themes", Themes.page () ))
                     |> positionWidget(-470.0f, 0.5f, -150.0f, 0.5f, -170.0f, 0.5f, 150.0f, 0.5f);
 
-                    BigButton(localiseOption "Gameplay", Icons.gameplay, fun () -> add ( "Gameplay", Gameplay.page () ))
+                    BigButton( N"gameplay", Icons.gameplay, fun () -> add ( N"gameplay", Gameplay.page () ))
                     |> positionWidget(-150.0f, 0.5f, -150.0f, 0.5f, 150.0f, 0.5f, 150.0f, 0.5f);
 
-                    BigButton(localiseOption "Keybinds", Icons.binds, fun () -> add ( "Keybinds", Keybinds.page () ))
+                    BigButton( N"keybinds", Icons.binds, fun () -> add ( N"keybinds", Keybinds.page () ))
                     |> positionWidget(170.0f, 0.5f, -150.0f, 0.5f, 470.0f, 0.5f, 150.0f, 0.5f);
 
-                    BigButton(localiseOption "Debug", Icons.debug, fun () -> add ( "Debug", Debug.page () ))
+                    BigButton( N"debug", Icons.debug, fun () -> add ( N"debug", Debug.page () ))
                     |> positionWidget(490.0f, 0.5f, -150.0f, 0.5f, 790.0f, 0.5f, 150.0f, 0.5f);
                 ] :> Selectable
             Callback = fun () -> LevelSelect.refresh <- true

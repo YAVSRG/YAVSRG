@@ -65,7 +65,7 @@ module MarkdownReader =
             }
 
         let text (str: string) (col: Color * Color) (size: float32) =
-            let width = (Text.measure(Content.font(), str)) * size
+            let width = (Text.measure(Content.font, str)) * size
             make <| TextBox(K str, K col, 0.0f) <| (width, size / 0.6f)
 
         let sym str = text str (Color.Silver, Color.Red) 25.0f
