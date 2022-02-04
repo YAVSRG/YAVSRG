@@ -40,9 +40,9 @@ type Screen() as this =
         Screen.change Screen.Type.LevelSelect Screen.TransitionFlag.UnderLogo
 
     //todo: localise these buttons
-    let play = MenuButton (playFunc, "Play")
-    let options = MenuButton (OptionsMenuRoot.show, "Options")
-    let quit = MenuButton ((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), "Quit")
+    let play = MenuButton (playFunc, L"menu.play")
+    let options = MenuButton (OptionsMenuRoot.show, L"menu.options")
+    let quit = MenuButton ((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), L"menu.quit")
 
     let newSplash =
         randomSplash "MenuSplashes.txt"
@@ -60,7 +60,7 @@ type Screen() as this =
         this.Animation.Add splashSubAnim
 
     override this.OnEnter prev =
-        if Utils.AutoUpdate.updateAvailable then Notification.add (Localisation.localise "notification.UpdateAvailable", NotificationType.System)
+        if AutoUpdate.updateAvailable then Notification.add (L"notification.update.available", NotificationType.System)
         if prev = Screen.Type.SplashScreen && Options.firstLaunch then MarkdownReader.help()
         splashText <- newSplash()
         Logo.moveMenu()

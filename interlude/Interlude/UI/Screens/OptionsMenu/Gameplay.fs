@@ -1,7 +1,7 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
-open Prelude.Scoring.Metrics
 open Prelude.Common
+open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Controls
@@ -31,12 +31,12 @@ module Gameplay =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("PacemakerType",
+                    PrettySetting("gameplay.pacemaker.type",
                         refreshChoice
                             [|"ACCURACY"; "LAMP"|]
                             [|
-                                [| PrettySetting("PacemakerAccuracy", Slider(accuracy, 0.01f)).Position(300.0f) |]
-                                [| PrettySetting("PacemakerLamp", Selector.FromEnum lamp).Position(300.0f) |] // broken
+                                [| PrettySetting("gameplay.pacemaker.accuracy", Slider(accuracy, 0.01f)).Position(300.0f) |]
+                                [| PrettySetting("gameplay.pacemaker.lamp", Selector.FromEnum lamp).Position(300.0f) |] // broken
                             |] utype
                     ).Position(200.0f)
                 ] :> Selectable
@@ -57,7 +57,7 @@ module Gameplay =
                                 Interlude.Content.Rulesets.list()
                                 |> Seq.map (fun (key, value) -> (key, value), WatcherSelection.contains key options.Rulesets.Value)
                             )
-                    PrettySetting("Rulesets",
+                    PrettySetting("gameplay.rulesets",
                         CardSelect.Selector(
                             setting,
                             { CardSelect.Config.Default with
@@ -78,20 +78,20 @@ module Gameplay =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("ScrollSpeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Position(200.0f)
-                    PrettySetting("HitPosition", Slider(options.HitPosition, 0.005f)).Position(280.0f)
-                    PrettySetting("Upscroll", Selector.FromBool options.Upscroll).Position(360.0f)
-                    PrettySetting("BackgroundDim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Position(440.0f)
-                    PrettyButton("ScreenCover", 
+                    PrettySetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Position(200.0f)
+                    PrettySetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Position(280.0f)
+                    PrettySetting("gameplay.upscroll", Selector.FromBool options.Upscroll).Position(360.0f)
+                    PrettySetting("gameplay.backgrounddim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Position(440.0f)
+                    PrettyButton("gameplay.screencover", 
                         fun() ->
-                            add("ScreenCover",
+                            add( N"gameplay.screencover",
                                 {
                                     Content = fun add ->
                                         column [
-                                            PrettySetting("ScreenCoverEnabled", Selector.FromBool options.ScreenCover.Enabled).Position(200.0f)
-                                            PrettySetting("ScreenCoverHidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Position(350.0f)
-                                            PrettySetting("ScreenCoverSudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Position(450.0f)
-                                            PrettySetting("ScreenCoverFadeLength", Slider(options.ScreenCover.FadeLength, 0.01f)).Position(550.0f)
+                                            PrettySetting("gameplay.screencover.enabled", Selector.FromBool options.ScreenCover.Enabled).Position(200.0f)
+                                            PrettySetting("gameplay.screencover.hidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Position(350.0f)
+                                            PrettySetting("gameplay.screencover.sudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Position(450.0f)
+                                            PrettySetting("gameplay.screencover.fadelength", Slider(options.ScreenCover.FadeLength, 0.01f)).Position(550.0f)
                                             Themes.NoteskinPreview 0.35f
                                         ] :> Selectable
                                     Callback = ignore
@@ -99,7 +99,7 @@ module Gameplay =
                             )
                     ).Position(520.0f)
                     //PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Position(670.0f)
-                    PrettyButton("Rulesets", fun () -> add("Rulesets", rulesets())).Position(750.0f)
+                    PrettyButton("gameplay.rulesets", fun () -> add(N"gameplay.rulesets", rulesets())).Position(750.0f)
                 ] :> Selectable
             Callback = ignore
         }

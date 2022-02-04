@@ -14,17 +14,17 @@ module Debug =
             Content = fun add ->
                 column [
                     PrettyButton.Once(
-                        "RebuildCache",
+                        "debug.rebuildcache",
                         (fun () -> BackgroundTask.Create TaskFlags.LONGRUNNING "Rebuilding Cache" Library.rebuildTask |> ignore),
-                        Localisation.localiseWith ["Rebuilding Cache"] "notification.TaskStarted", Task
+                        Localisation.localiseWith ["Rebuilding Cache"] "notification.taskstarted", Task
                     ).Position(200.0f)
                     PrettyButton.Once(
-                        "DownloadUpdate",
+                        "debug.downloadupdate",
                         ( fun () ->
                             if AutoUpdate.updateAvailable then
-                                AutoUpdate.applyUpdate(fun () -> Notification.add (Localisation.localise "notification.UpdateInstalled", System))
+                                AutoUpdate.applyUpdate(fun () -> Notification.add (L"notification.update.installed", System))
                         ),
-                        Localisation.localise "notification.UpdateInstalling", System,
+                        L"notification.update.installing", System,
                         Enabled = AutoUpdate.updateAvailable
                     ).Position(300.0f)
                     

@@ -23,9 +23,6 @@ type SelectionPage =
 
 [<AutoOpen>]
 module Helpers =
-    let localiseOption s = Localisation.localise("options.name." + s)
-    let localiseTooltip s = Localisation.localise("options.tooltip." + s)
-
     let row xs =
         let r = ListSelectable(true)
         List.iter r.Add xs; r
@@ -43,6 +40,10 @@ module Helpers =
                 r.Add(cons i n)
         refresh()
         r, refresh
+
+    let N (s: string) = L ("options." + s + ".name")
+    let T (s: string) = L ("options." + s + ".tooltip")
+    let E (name: string) = Localisation.localiseWith [name] "misc.edit"
 
     let refreshChoice (options: string array) (widgets: Widget array array) (setting: Setting<int>) =
         let rec newSetting =
@@ -83,11 +84,11 @@ type PrettySetting(name, widget: Selectable) as this =
         |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        TextBox(K (localiseOption name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+        TextBox(K (N name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
         |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
         |> this.Add
 
-        TooltipRegion(localiseTooltip name) |> this.Add
+        TooltipRegion(T name) |> this.Add
     
     member this.Position(y, width, height) =
         this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
@@ -117,7 +118,7 @@ type PrettyButton(name, action) as this =
 
     do
         TextBox(
-            K (localiseOption name + "  >"),
+            K (N name + "  >"),
             ( 
                 fun () -> 
                     if this.Enabled then
@@ -128,7 +129,7 @@ type PrettyButton(name, action) as this =
         )
         |> this.Add
         Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
-        TooltipRegion(localiseTooltip name) |> this.Add
+        TooltipRegion(T name) |> this.Add
     override this.OnSelect() =
         if this.Enabled then action()
         this.Selected <- false
@@ -175,7 +176,7 @@ type SelectionMenu(topLevel: SelectionPage) as this =
     
     let rec add (label, page) =
         let n = List.length namestack
-        namestack <- localiseOption label :: namestack
+        namestack <- label :: namestack
         name <- String.Join(" > ", List.rev namestack)
         let w = wrapper (page.Content add)
         match stack.[n] with
@@ -200,7 +201,7 @@ type SelectionMenu(topLevel: SelectionPage) as this =
         TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
         |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
         |> this.Add
-        add ("Options", topLevel)
+        add (L"options.name", topLevel)
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

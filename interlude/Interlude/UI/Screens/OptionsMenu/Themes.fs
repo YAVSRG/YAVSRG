@@ -87,19 +87,19 @@ module Themes =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("NoteskinName", TextField name).Position(200.0f)
-                    PrettySetting("HoldNoteTrim", Slider(holdNoteTrim, 0.05f)).Position(300.0f)
-                    PrettySetting("Keymode",
+                    PrettySetting("themes.editnoteskin.noteskinname", TextField name).Position(200.0f)
+                    PrettySetting("themes.editnoteskin.holdnotetrim", Slider(holdNoteTrim, 0.05f)).Position(300.0f)
+                    PrettySetting("generic.keymode",
                         Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> refreshColors))
                     ).Position(450.0f)
-                    PrettySetting("ColorStyle",
+                    PrettySetting("themes.editnoteskin.colorstyle",
                         Selector.FromEnum(
                             Setting.make
                                 (fun v -> noteColors <- { noteColors with Style = v })
                                 (fun () -> noteColors.Style)
                             |> Setting.trigger (ignore >> refreshColors))
                     ).Position(550.0f)
-                    PrettySetting("NoteColors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
+                    PrettySetting("themes.editnoteskin.notecolors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
                 ]
             Callback = fun () ->
                 Noteskins.Current.changeConfig
@@ -118,7 +118,7 @@ module Themes =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("ThemeName", TextField name).Position(200.0f)
+                    PrettySetting("themes.edittheme.themename", TextField name).Position(200.0f)
                 ]
             Callback = fun () ->
                 Themes.Current.changeConfig
@@ -132,7 +132,7 @@ module Themes =
 
         let preview = NoteskinPreview 0.5f
 
-        let noteskins = PrettySetting("Noteskin", Selectable())
+        let noteskins = PrettySetting("themes.noteskin", Selectable())
         let refreshNoteskins() =
             options.Noteskin.Value <- Noteskins.Current.id
             let ids, names = Noteskins.list() |> Array.unzip
@@ -141,7 +141,7 @@ module Themes =
             preview.Refresh()
         refreshNoteskins()
 
-        let themes = PrettySetting("Theme", Selectable())
+        let themes = PrettySetting("themes.theme", Selectable())
         let refreshThemes() =
             options.Theme.Value <- Themes.Current.id
             let ids, names = Themes.list() |> Array.unzip
@@ -163,7 +163,7 @@ module Themes =
                     sprintf "'%s' is an embedded default skin. Extract a copy and edit?" ns.Config.Name,
                     fun () -> Noteskins.extractCurrent(); refreshNoteskins()
                 ).Show()
-            | Folder _ -> add ( "EditNoteskin", editNoteskin refreshNoteskins ns.Config )
+            | Folder _ -> add ( E ns.Config.Name, editNoteskin refreshNoteskins ns.Config )
 
         let tryEditTheme add =
             let theme = Themes.Current.instance
@@ -173,21 +173,21 @@ module Themes =
                     sprintf "'%s' is the default theme. Extract a copy and edit?" theme.Config.Name,
                     fun () -> Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes()
                 ).Show()
-            | Folder _ -> add ( "EditTheme", editTheme refreshThemes theme.Config )
+            | Folder _ -> add ( E theme.Config.Name, editTheme refreshThemes theme.Config )
             | Zip (_, Some file) -> failwith "User themes with zip storage not supported"
 
         {
             Content = fun add ->
                 column [
                     themes.Position(200.0f)
-                    PrettyButton("EditTheme", fun () -> tryEditTheme add).Position(300.0f)
-                    PrettyButton("OpenThemeFolder", fun () -> openDirectory (getDataPath "Themes")).Position(400.0f)
+                    PrettyButton("themes.edittheme", fun () -> tryEditTheme add).Position(300.0f)
+                    PrettyButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes")).Position(400.0f)
 
                     Divider().Position(550.0f)
 
                     noteskins.Position(600.0f)
-                    PrettyButton("EditNoteskin", fun () -> tryEditNoteskin add).Position(700.0f)
-                    PrettyButton("OpenNoteskinFolder", fun () -> openDirectory (getDataPath "Noteskins")).Position(800.0f)
+                    PrettyButton("themes.editnoteskin", fun () -> tryEditNoteskin add).Position(700.0f)
+                    PrettyButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins")).Position(800.0f)
                     preview
                 ] :> Selectable
             Callback = ignore

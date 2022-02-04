@@ -2,7 +2,6 @@
 
 open System
 open System.IO
-open System.Drawing
 open System.Net
 open System.Net.Security
 open Percyqaz.Json
@@ -13,7 +12,6 @@ open Prelude.Web
 open Interlude
 open Interlude.Utils
 open Interlude.Graphics
-open Interlude.Input
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect
@@ -68,7 +66,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
     let mutable downloaded = false //todo: maybe check if pack is already installed?
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        Notification.add (Localisation.localiseWith [data.name] "notification.PackDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
             (BackgroundTask.Chain
                 [
@@ -103,7 +101,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let mutable downloaded = false
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
-        Notification.add (Localisation.localiseWith [data.title] "notification.SongDownloading", NotificationType.Task)
+        Notification.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
                 [

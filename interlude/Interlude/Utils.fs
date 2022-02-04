@@ -23,6 +23,8 @@ module Utils =
 
     let F (f: 'T -> unit) (g: 'T -> unit) = fun t -> f t; g t
 
+    let L = Localisation.localise
+
     let getInterludeLocation() = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
 
     let getResourceStream name =

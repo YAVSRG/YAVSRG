@@ -80,7 +80,7 @@ module CardSelect =
                     Interlude.Icons.edit,
                     fun () -> 
                         let page = config.EditFunc.Value item
-                        add("EditItem", { page with Callback = fun () -> page.Callback(); config.Refresh() })
+                        add( E (config.NameFunc item), { page with Callback = fun () -> page.Callback(); config.Refresh() })
                     )
                 |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
                 |> addButton

@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
-open System.Drawing
 open Prelude.Common
 open Interlude.Graphics
 open Interlude.Options
@@ -8,7 +7,6 @@ open Interlude.Input
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Containers
 open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
@@ -74,9 +72,9 @@ module Keybinds =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("Keymode", Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Position(200.0f)
-                    PrettySetting("GameplayBinds", binds).Position(280.0f, Render.vwidth - 200.0f)
-                    PrettyButton("Hotkeys", ignore, Enabled = false).Position(400.0f)
+                    PrettySetting("generic.keymode", Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Position(200.0f)
+                    PrettySetting("keybinds.gameplay", binds).Position(280.0f, Render.vwidth - 200.0f)
+                    PrettyButton("keybinds.hotkeys", ignore, Enabled = false).Position(400.0f)
                 ] :> Selectable
             Callback = ignore
         }
