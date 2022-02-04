@@ -52,7 +52,7 @@ module Audio =
 
     let audioDuration() = nowplaying.Duration
 
-    let time() = rate * (float32 timer.ElapsedMilliseconds * 1.0f<ms>) + timerStart
+    let time() = rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms>) + timerStart
 
     let timeWithOffset() = time() + localOffset + globalOffset * rate
 

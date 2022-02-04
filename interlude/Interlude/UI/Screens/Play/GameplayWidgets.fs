@@ -190,6 +190,7 @@ module GameplayWidgets =
             base.Update(elapsedTime, bounds)
             if helper.CurrentChartTime() < -Audio.LEADIN_TIME * 2.5f then
                 if options.Hotkeys.Skip.Value.Tapped() then
+                    Audio.pause()
                     Audio.playFrom(firstNote - Audio.LEADIN_TIME)
             else this.Destroy()
 
