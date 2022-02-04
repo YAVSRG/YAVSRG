@@ -11,9 +11,7 @@ You will need:
 - Un4seen bass libraries for your platform
 - Some fonts and other stuff that aren't in the repo
 
-MacOS build is held off by needing to update the render engine to GL core 3.1 or above (it otherwise builds, just black screen)
-
-Linux build is held off by lack of testing
+MacOS/Linux build should work in theory, so with enough requests I can properly start doing cross-platform support/releases
 
 Go [here](https://github.com/percyqaz/YAVSRG/releases) for pre-built versions (works out of box on Windows)
 You also need [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1/runtime) installed
