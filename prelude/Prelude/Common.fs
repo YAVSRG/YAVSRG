@@ -182,7 +182,7 @@ module Common =
             if mapping.ContainsKey str then mapping.[str]
             else
                 mapping.Add (str, str)
-                if loadedPath <> "" then File.AppendAllText (loadedPath, "\n"+str+"="+str)
+                //if loadedPath <> "" then File.AppendAllText (loadedPath, "\n"+str+"="+str)
                 str
 
         let localiseWith xs str =
