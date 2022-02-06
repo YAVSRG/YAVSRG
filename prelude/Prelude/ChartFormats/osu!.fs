@@ -574,18 +574,18 @@ module ``osu!`` =
             (clean beatmap.Metadata.Creator)
             (clean beatmap.Metadata.Version)
 
-    let eventsToString events = "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events);
+    let eventsToString events = "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events)
 
     let beatmapToString beatmap = 
         String.concat "\n\n" [
-            "osu file format v14";
-            beatmap.General |> writeGeneral |> formatHeader;
-            beatmap.Editor |> writeEditor |> formatHeader;
-            beatmap.Metadata |> writeMetadata |> formatHeader;
-            beatmap.Difficulty |> writeDifficulty |> formatHeader;
-            beatmap.Events |> eventsToString;
-            "[TimingPoints]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Timing);
-            "[HitObjects]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Objects);
+            "osu file format v14"
+            beatmap.General |> writeGeneral |> formatHeader
+            beatmap.Editor |> writeEditor |> formatHeader
+            beatmap.Metadata |> writeMetadata |> formatHeader
+            beatmap.Difficulty |> writeDifficulty |> formatHeader
+            beatmap.Events |> eventsToString
+            "[TimingPoints]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Timing)
+            "[HitObjects]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) beatmap.Objects)
         ]
 
     let parseBeatmap =

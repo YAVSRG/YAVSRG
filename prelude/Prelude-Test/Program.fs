@@ -23,7 +23,8 @@ let main argv =
 
     //Generic.main()
     //Imports.main()
-    Metrics.main()
+    //Metrics.main()
+    Trendy.main()
 
     Logging.Info "Test track complete, showing reports ..."
 

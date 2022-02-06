@@ -20,7 +20,7 @@ module Metrics =
 
         Logging.Info "Replay round trip was a success."
 
-        let metric = ScoreClassifierPlus(4, false, VibeGauge(), chart.Keys, perfectPlayProvider, chart.Notes, 1.0f)
+        let metric = Metrics.createDummyMetric chart
          
         metric.Update Time.infinity
 

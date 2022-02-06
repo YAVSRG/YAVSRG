@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="Tests\Trendy.fs" />
     <Compile Include="Tests\Generic.fs" />
     <Compile Include="Tests\Imports.fs" />
     <Compile Include="Tests\Metrics.fs" />
@@ -19,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="5.0.1" />
+    <PackageReference Update="FSharp.Core" Version="6.0.1" />
   </ItemGroup>
 
 </Project>
