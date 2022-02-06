@@ -18,7 +18,6 @@ open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
-open Interlude.UI.Screens.LevelSelect.Globals
 
 module private InfoPanel =
 
@@ -70,7 +69,7 @@ module private InfoPanel =
             this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
 
         override this.Draw() =
-            Draw.rect this.Bounds (Style.accentShade(int (127.0f * fade.Value), 0.8f, 0.0f)) Sprite.Default
+            Draw.rect this.Bounds (Style.accentShade(int (100.0f * fade.Value), 0.5f, 0.0f)) Sprite.Default
             base.Draw()
         member this.Data = data
 

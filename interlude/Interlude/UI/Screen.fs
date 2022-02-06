@@ -152,7 +152,7 @@ module Screen =
                     else true)
                 background
 
-        let draw (bounds, color, depth) =
+        let drawq (q: Quad, color: Color, depth: float32) =
             List.iter
                 (fun (bg, (fade: AnimationFade), isDefault) ->
                     let color = Color.FromArgb(fade.Value * 255.0f |> int, color)
@@ -162,7 +162,6 @@ module Screen =
                     let y = -parallaxY.Value * parallaxZ.Value * depth
                     let screenaspect = pwidth / pheight
                     let bgaspect = float32 bg.Width / float32 bg.Height
-                    let q = Quad.ofRect bounds
                     Draw.quad q (Quad.colorOf color)
                         (bg.WithUV(
                             Sprite.tilingUV(
@@ -177,6 +176,8 @@ module Screen =
                                 ) bg q))
                 )
                 background
+
+        let draw (bounds: Rect, color, depth) = drawq (Quad.ofRect bounds, color, depth)
 
     module Transitions =
     

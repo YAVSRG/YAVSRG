@@ -40,7 +40,7 @@ module private ModSelect =
 type ModSelect() as this =
     inherit Widget()
 
-    do StylishButton ((fun () -> SelectionMenu(ModSelect.page()).Show()), K "Mods", (fun () -> Style.accentShade(100, 0.8f, 0.2f)), options.Hotkeys.Mods) |> this.Add
+    do StylishButton ((fun () -> SelectionMenu(N"mods", ModSelect.page()).Show()), K "Mods", (fun () -> Style.accentShade(100, 0.8f, 0.2f)), options.Hotkeys.Mods) |> this.Add
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

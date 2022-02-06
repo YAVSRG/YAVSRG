@@ -27,16 +27,16 @@ module Mounts =
         {
             Content = fun _ ->
                 column [
-                    PrettySetting("ImportOnStartup", Selector.FromBool importOnStartup).Position(200.0f)
+                    PrettySetting("mount.importatstartup", Selector.FromBool importOnStartup).Position(200.0f)
                     PrettyButton.Once(
-                        "ImportNow",
+                        "mount.import",
                         (fun () -> import <- true),
-                        Localisation.localiseWith ["Import new songs"] "notification.TaskStarted", Task
+                        Localisation.localiseWith ["Import new songs"] "notification.taskstarted", Task
                     ).Position(400.0f)
                     PrettyButton.Once(
-                        "ImportAllNow",
+                        "mount.importall",
                         (fun () -> import <- true; mount.LastImported <- System.DateTime.UnixEpoch),
-                        Localisation.localiseWith ["Import all songs"] "notification.TaskStarted", Task
+                        Localisation.localiseWith ["Import all songs"] "notification.taskstarted", Task
                     ).Position(500.0f)
                 ] :> Selectable
             Callback = fun () ->
@@ -111,7 +111,7 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
     let mutable refresh = ignore
 
     let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), Interlude.Icons.add)
-    let editButton = Button((fun () -> SelectionMenu(Mounts.editor setting).Show()), Interlude.Icons.edit)
+    let editButton = Button((fun () -> SelectionMenu(N"mount", Mounts.editor setting).Show()), Interlude.Icons.edit)
     let deleteButton = Button((fun () -> setting.Value <- None; refresh()), Interlude.Icons.remove)
 
     do
