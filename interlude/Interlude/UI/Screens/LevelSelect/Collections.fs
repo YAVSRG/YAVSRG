@@ -107,7 +107,7 @@ type CollectionManager() as this =
                     | Goals gs -> gs.Add (selectedChart, GoalData.Make selectedMods.Value rate.Value Goal.None); true
                 then
                     if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
-                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Added", Info)
+                    Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.added", Info)
 
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
                 if fst Collections.selected <> snd Collections.contextIndex then // Remove from collection that isn't in this context
@@ -124,7 +124,7 @@ type CollectionManager() as this =
                             else false
                     then
                         if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
-                        Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)
+                        Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.removed", Info)
                 else // Remove from this context collection
                     if
                         match snd Collections.selected with
@@ -134,7 +134,7 @@ type CollectionManager() as this =
                     then
                         LevelSelect.refresh <- true
                         Collections.notifyChangeChart LevelSelectContext.None rate selectedMods
-                        Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.Removed", Info)
+                        Notification.add (Localisation.localiseWith [currentCachedChart.Value.Title; fst Collections.selected] "collections.removed", Info)
 
             elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
                 if Collections.reorder false then LevelSelect.refresh <- true
