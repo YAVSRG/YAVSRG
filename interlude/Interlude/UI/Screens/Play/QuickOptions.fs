@@ -30,4 +30,4 @@ module QuickOptions =
             Callback = Audio.playLeadIn
         }
 
-    let show() = { new SelectionMenu(page()) with override this.OnClose() = base.OnClose(); Audio.playLeadIn() }.Show()
+    let show() = { new SelectionMenu(N"quick", page()) with override this.OnClose() = base.OnClose(); Audio.playLeadIn() }.Show()

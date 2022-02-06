@@ -167,8 +167,8 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 let header = Rect.sliceLeft 200.0f box
                 let body = Rect.trimLeft 200.0f box
                 Draw.rect box (Color.FromArgb(80, color)) Sprite.Default
-                Draw.rect (Rect.sliceBottom 35.0f header) (Color.FromArgb(120, color)) Sprite.Default
-                Draw.rect (Rect.sliceBottom 5.0f body) (Color.FromArgb(120, color)) Sprite.Default
+                Draw.rect (Rect.sliceBottom 35.0f header) (Color.FromArgb(80, color)) Sprite.Default
+                Draw.rect (Rect.sliceBottom 5.0f body) (Color.FromArgb(80, color)) Sprite.Default
                 Text.drawFillB(font, label, Rect.trimBottom 40.0f header, (Color.White, Color.Black), 0.5f)
                 Text.drawFillB(font, text, body |> Rect.trimLeft 10.0f |> Rect.trimBottom 25.0f, (color, Color.Black), 0.0f)
                 Text.drawFillB(font, hint, body |> Rect.trimLeft 10.0f |> Rect.sliceBottom 35.0f |> Rect.trimBottom 5.0f, (Color.White, Color.Black), 0.0f)
@@ -218,7 +218,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         do
             let panel = Rect.create (left + 20.0f) (top + 190.0f) (left + 650.0f) (bottom - 290.0f)
             Draw.rect (Rect.expand (5.0f, 0.0f) panel) (Color.FromArgb(127, Color.White)) Sprite.Default
-            Screen.Background.draw (panel, (Color.FromArgb(50, 50, 50)), 2.0f)
+            Screen.Background.draw (panel, (Color.FromArgb(80, 80, 80)), 2.0f)
 
             let title = Rect.sliceTop 100.0f panel |> Rect.expand (-20.0f, -20.0f)
             Draw.rect title (Color.FromArgb(127, Color.Black)) Sprite.Default
@@ -254,7 +254,6 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         // bottom banner
         Draw.rect (Rect.sliceBottom 290.0f this.Bounds) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
         Draw.rect (Rect.create left (bottom - 295.0f) right (bottom - 290.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
-
 
         // right diamond
         do

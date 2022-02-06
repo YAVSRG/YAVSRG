@@ -148,7 +148,7 @@ type PrettyButton(name, action) as this =
                 base.Enabled <- false
         }
 
-type SelectionMenu(topLevel: SelectionPage) as this =
+type SelectionMenu(title: string, topLevel: SelectionPage) as this =
     inherit Dialog()
     
     let stack: (Selectable * (unit -> unit)) option array = Array.create 12 None
@@ -201,7 +201,7 @@ type SelectionMenu(topLevel: SelectionPage) as this =
         TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
         |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
         |> this.Add
-        add (L"options.name", topLevel)
+        add (title, topLevel)
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

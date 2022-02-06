@@ -41,4 +41,4 @@ module OptionsMenuRoot =
             Callback = fun () -> LevelSelect.refresh <- true
         }
 
-    let show() = SelectionMenu(page()).Show()
+    let show() = SelectionMenu(L"options.name", page()).Show()
