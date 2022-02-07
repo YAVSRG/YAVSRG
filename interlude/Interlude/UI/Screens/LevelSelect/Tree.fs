@@ -153,12 +153,12 @@ type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectC
                 let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
                 Tooltip.callback (
                     options.Hotkeys.Delete.Value,
-                    Localisation.localiseWith [chartName] "misc.Delete",
+                    Localisation.localiseWith [chartName] "misc.delete",
                     Warning,
                     fun () -> 
                         Library.delete cc
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [chartName] "notification.Deleted", Info)
+                        Notification.add (Localisation.localiseWith [chartName] "notification.deleted", Info)
                 )
         else hover.Target <- 0.0f
         hover.Update(elapsedTime) |> ignore
@@ -203,12 +203,12 @@ type private GroupItem(name: string, items: ChartItem list) =
                 let groupName = sprintf "%s (%i charts)" name (items.Count())
                 Tooltip.callback (
                     options.Hotkeys.Delete.Value,
-                    Localisation.localiseWith [groupName] "misc.Delete",
+                    Localisation.localiseWith [groupName] "misc.delete",
                     Warning,
                     fun () ->
                         items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [groupName] "notification.Deleted", Info)
+                        Notification.add (Localisation.localiseWith [groupName] "notification.deleted", Info)
                 )
 
     override this.Update(top, topEdge, elapsedTime) =
