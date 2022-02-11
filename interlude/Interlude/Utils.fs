@@ -166,7 +166,7 @@ module Icons =
     let goal = Feather.flag
     let playlist = Feather.list
 
-    let system = Feather.cast
+    let system = Feather.airplay
     let themes = Feather.image
     let gameplay = Feather.sliders
     let binds = Feather.link
