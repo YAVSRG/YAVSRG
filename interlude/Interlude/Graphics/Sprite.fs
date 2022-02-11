@@ -22,6 +22,7 @@ module Sprite =
 
     let MAX_TEXTURE_UNITS = GL.GetInteger GetPName.MaxTextureImageUnits
     let TOTAL_TEXTURE_UNITS = GL.GetInteger GetPName.MaxCombinedTextureImageUnits
+    let MAX_TEXTURE_SIZE = GL.GetInteger GetPName.MaxTextureSize
 
     // element 0 cannot be used, used for uncached sprites instead
     let texUnit_cache : int array = Array.zeroCreate MAX_TEXTURE_UNITS

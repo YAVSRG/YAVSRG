@@ -45,6 +45,7 @@
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
+    <Compile Include="FeatherIcons.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="Audio.fs" />
     <Compile Include="Graphics\Buffers.fs" />

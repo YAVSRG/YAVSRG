@@ -12,7 +12,7 @@ module Fonts =
 
     open System.IO
 
-    let SCALE = 100f
+    let SCALE = 60f
 
     type private GlyphInfo =
         {
@@ -51,7 +51,7 @@ module Fonts =
             let mutable highSurrogate : char = ' '
             let glyphs =
                 seq {
-                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n•∞⭐⌛⬅" do
+                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n•∞" + Interlude.Feather.CONCAT do
                         if Char.IsHighSurrogate c then
                             highSurrogate <- c
                         else
