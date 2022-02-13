@@ -72,7 +72,10 @@ type private SMImportCard(data: EOPackAttrs) as this =
                 [
                     downloadFile(data.download, target)
                     (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notification.add (Localisation.localiseWith [data.name] "notification.PackInstalled", NotificationType.Task); File.Delete target))
+                        |> BackgroundTask.Callback( fun b -> 
+                            LevelSelect.refresh <- LevelSelect.refresh || b
+                            Notification.add (Localisation.localiseWith [data.name] "notification.install.pack", NotificationType.Task)
+                            File.Delete target ))
                 ]) |> ignore
         downloaded <- true
     do
@@ -107,7 +110,10 @@ type private BeatmapImportCard(data: BeatmapData) as this =
                 [
                     downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
                     (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b; Notification.add (Localisation.localiseWith [data.title] "notification.SongInstalled", NotificationType.Task); File.Delete target))
+                    |> BackgroundTask.Callback( fun b -> 
+                        LevelSelect.refresh <- LevelSelect.refresh || b
+                        Notification.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
+                        File.Delete target ))
                 ]) |> ignore
         downloaded <- true
     do

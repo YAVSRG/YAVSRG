@@ -174,3 +174,4 @@ module Icons =
 
     let info = Feather.info
     let alert = Feather.alert_circle
+    let system_notification = Feather.alert_octagon
