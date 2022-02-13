@@ -26,8 +26,8 @@ let main argv =
         Logging.Info("Launching " + Utils.version + ", " + DateTime.Now.ToString())
         let game =
             try
-                Audio.init()
                 Options.load()
+                Audio.init(Options.config.AudioDevice.Value)
                 Some (new Game(Options.config))
             with err -> Logging.Critical("Game failed to launch", err); crashSplash(); None
         if (game.IsSome) then

@@ -48,7 +48,7 @@ module Render =
         bounds <- Rect.create 0.0f 0.0f vwidth vheight |> Rect.expand (1.0f, 1.0f)
 
     let init(width, height) =
-        Logging.Debug(sprintf "GL Version: %s | %s" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer))
+        Logging.Debug(sprintf "GL Version: %s | %s | U:%i T:%i" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer) Sprite.MAX_TEXTURE_UNITS Sprite.MAX_TEXTURE_SIZE)
 
         GL.Disable(EnableCap.CullFace)
         GL.Enable(EnableCap.Blend)

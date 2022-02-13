@@ -90,7 +90,7 @@ module Themes =
                     PrettySetting("themes.editnoteskin.noteskinname", TextField name).Position(200.0f)
                     PrettySetting("themes.editnoteskin.holdnotetrim", Slider(holdNoteTrim, 0.05f)).Position(300.0f)
                     PrettySetting("generic.keymode",
-                        Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> refreshColors))
+                        Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors))
                     ).Position(450.0f)
                     PrettySetting("themes.editnoteskin.colorstyle",
                         Selector.FromEnum(
@@ -135,8 +135,7 @@ module Themes =
         let noteskins = PrettySetting("themes.noteskin", Selectable())
         let refreshNoteskins() =
             options.Noteskin.Value <- Noteskins.Current.id
-            let ids, names = Noteskins.list() |> Array.unzip
-            Selector.FromArray(names, ids, options.Noteskin |> Setting.trigger (fun id -> Noteskins.Current.switch id; preview.Refresh()))
+            Selector(Noteskins.list(), options.Noteskin |> Setting.trigger (fun id -> Noteskins.Current.switch id; preview.Refresh()))
             |> noteskins.Refresh
             preview.Refresh()
         refreshNoteskins()
@@ -144,8 +143,7 @@ module Themes =
         let themes = PrettySetting("themes.theme", Selectable())
         let refreshThemes() =
             options.Theme.Value <- Themes.Current.id
-            let ids, names = Themes.list() |> Array.unzip
-            Selector.FromArray(names, ids, options.Theme |> Setting.trigger (fun id -> Themes.Current.switch id; preview.Refresh()))
+            Selector(Themes.list(), options.Theme |> Setting.trigger (fun id -> Themes.Current.switch id; preview.Refresh()))
             |> themes.Refresh
             preview.Refresh()
         refreshThemes()

@@ -36,7 +36,7 @@ module private Collections =
             Content = fun add ->
                 column [
                     PrettySetting("collections.edit.collectionname", TextField name).Position(200.0f)
-                    PrettySetting("collections.edit.type", Selector.FromArray ([|"Collection"; "Playlist"; "Goals"|], [|"Collection"; "Playlist"; "Goals"|], ctype)).Position(300.0f)
+                    PrettySetting("collections.edit.type", Selector([|"Collection", "Collection"; "Playlist", "Playlist"; "Goals", "Goals"|], ctype)).Position(300.0f)
                 ] :> Selectable
             Callback = fun () ->
                 if name.Value <> originalName then

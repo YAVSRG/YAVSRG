@@ -27,7 +27,7 @@ module Mounts =
         {
             Content = fun _ ->
                 column [
-                    PrettySetting("mount.importatstartup", Selector.FromBool importOnStartup).Position(200.0f)
+                    PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup).Position(200.0f)
                     PrettyButton.Once(
                         "mount.import",
                         (fun () -> import <- true),

@@ -139,6 +139,28 @@ module Audio =
         changeRate rate
         isDifferentFile
 
-    let init() =
-        Bass.Init() |> bassError
+    let mutable defaultDevice = -1
+    let mutable devices = [||]
+
+    let private getDevices() =
+        devices <-
+            seq {
+                for i in 1 .. Bass.DeviceCount - 1 do
+                    let ok, info = Bass.GetDeviceInfo i
+                    if ok then 
+                        if info.IsDefault then defaultDevice <- i
+                        yield i, info.Name
+            } |> Array.ofSeq
+
+    let changeDevice(id: int) =
+        try 
+            Bass.CurrentDevice <- id
+            Bass.ChannelSetDevice(nowplaying.ID, id) |> bassError
+        with err -> Logging.Error(sprintf "Error switching to audio output %i" id, err)
+
+    let init(deviceId: int) =
+        getDevices()
+        for (i, name) in devices do
+            Bass.Init i |> bassError
+        changeDevice deviceId
         Bass.GlobalStreamVolume <- 0

@@ -56,7 +56,7 @@ module Helpers =
                 Get = setting.Get
                 Config = setting.Config
             }
-        and selector : Selector = new Selector(options, newSetting)
+        and selector : Selector<int> = Selector(Array.indexed options, newSetting)
         selector.Synchronized(fun () -> newSetting.Value <- newSetting.Value)
         selector
 

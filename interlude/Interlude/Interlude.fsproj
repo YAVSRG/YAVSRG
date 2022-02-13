@@ -5,8 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/percyqaz/YAVSRG</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.5.9.0</AssemblyVersion>
-    <FileVersion>0.5.9.0</FileVersion>
+    <AssemblyVersion>0.5.10.0</AssemblyVersion>
+    <FileVersion>0.5.10.0</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -45,6 +45,7 @@
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
+    <Compile Include="FeatherIcons.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="Audio.fs" />
     <Compile Include="Graphics\Buffers.fs" />

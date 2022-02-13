@@ -239,16 +239,16 @@ type InfoPanel() as this =
             | None -> 0.0f<ms>
             |> fun x -> x / rate.Value
             |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
-            |> fun (x, y) -> sprintf "%s%i:%02i" Interlude.Icons.time x y
+            |> fun (x, y) -> sprintf "%s %i:%02i" Interlude.Icons.time x y
         bpm <-
             match currentCachedChart with
             | Some cc -> cc.BPM
             | None -> (500.0f<ms/beat>, 500.0f<ms/beat>)
             |> fun (b, a) -> (60000.0f<ms> / a * rate.Value |> int, 60000.0f<ms> / b * rate.Value |> int)
             |> fun (a, b) ->
-                if a > 9000 || b < 0 then sprintf "%s∞" Interlude.Icons.bpm
-                elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "%s%i" Interlude.Icons.bpm a
-                else sprintf "%s%i-%i" Interlude.Icons.bpm a b
+                if a > 9000 || b < 0 then sprintf "%s ∞" Interlude.Icons.bpm
+                elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "%s %i" Interlude.Icons.bpm a
+                else sprintf "%s %i-%i" Interlude.Icons.bpm a b
         notecount <-
             match currentChart with
             | Some c ->

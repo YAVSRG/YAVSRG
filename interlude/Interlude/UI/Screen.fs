@@ -27,7 +27,8 @@ module Screen =
         | Import = 2
         | LevelSelect = 3
         | Play = 4
-        | Score = 5
+        | Replay = 5
+        | Score = 6
         
     [<AbstractClass>]
     type T() =
@@ -72,7 +73,7 @@ module Screen =
                         current.OnExit screenType
                         s.OnEnter currentType
                         match currentType with
-                        | Type.Play | Type.Score -> current.Dispose()
+                        | Type.Play | Type.Replay | Type.Score -> current.Dispose()
                         | _ -> ()
                         currentType <- screenType
                         current <- s
@@ -90,8 +91,9 @@ module Screen =
         | Type.LevelSelect -> change Type.MainMenu flags
         | Type.Import
         | Type.Play
+        | Type.Replay
         | Type.Score -> change Type.LevelSelect flags
-        | _ -> ()
+        | _ -> Logging.Critical (sprintf "No back-behaviour defined for %A" currentType)
 
     module Background =
 

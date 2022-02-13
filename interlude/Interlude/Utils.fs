@@ -123,7 +123,7 @@ module Utils =
 
         let checkForUpdates() =
             BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"
-                (fun output -> downloadJson("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", fun (d: GithubRelease) -> handleUpdate d))
+                (fun output -> downloadJson("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease) -> handleUpdate d))
             |> ignore
 
             let path = getInterludeLocation()
@@ -151,26 +151,27 @@ module Utils =
             |> ignore
 
 module Icons = 
-    let star = "⭐"
-    let back = "👈"
-    let bpm = "♬"
-    let time = "⌛"
-    let sparkle = "✨"
+    let star = Feather.star
+    let back = Feather.arrow_left
+    let bpm = Feather.music
+    let time = Feather.clock
+    let sparkle = Feather.award
 
-    let edit = "✏"
-    let add = "✚"
-    let remove = "❌"
-    let selected = "◆"
-    let unselected = "◇"
+    let edit = Feather.edit_2
+    let add = Feather.plus_circle
+    let remove = Feather.trash
+    let selected = Feather.check_circle
+    let unselected = Feather.circle
 
-    let goal = "🏁"
-    let playlist = "📃"
+    let goal = Feather.flag
+    let playlist = Feather.list
 
-    let system = "※"
-    let themes = "🎨"
-    let gameplay = "☔"
-    let binds = "🎮"
-    let debug = "🔧"
+    let system = Feather.airplay
+    let themes = Feather.image
+    let gameplay = Feather.sliders
+    let binds = Feather.link
+    let debug = Feather.terminal
 
-    let info = "ℹ"
-    let alert = "⚠"
+    let info = Feather.info
+    let alert = Feather.alert_circle
+    let system_notification = Feather.alert_octagon

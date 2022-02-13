@@ -15,12 +15,24 @@ open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 
 
-type Selector(items: string array, setting: Setting<int>) as this =
+type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
     inherit NavigateSelectable()
-    let fd() = setting.Value <- (setting.Value + 1) % items.Length
-    let bk() = setting.Value <- (setting.Value + items.Length - 1) % items.Length
+
+    let mutable index = 
+        items
+        |> Array.tryFindIndex (fun (v, _) -> Object.Equals(v, setting.Value))
+        |> Option.defaultValue 0
+
+    let fd() = 
+        index <- (index + 1) % items.Length
+        setting.Value <- fst items.[index]
+
+    let bk() =
+        index <- (index + + items.Length - 1) % items.Length
+        setting.Value <- fst items.[index]
+
     do
-        this.Add(new TextBox((fun () -> items.[setting.Value]), K (Color.White, Color.Black), 0.0f))
+        this.Add(new TextBox((fun () -> snd items.[index]), K (Color.White, Color.Black), 0.0f))
         this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
         this.Add(new Clickable((fun () -> (if not this.Selected then this.Selected <- true); fd()), fun b -> if b then this.Hover <- true))
 
@@ -29,24 +41,13 @@ type Selector(items: string array, setting: Setting<int>) as this =
     override this.Up() = fd()
     override this.Right() = fd()
 
-    static member FromArray<'T>(names: string array, values: 'T array, setting: Setting<'T>) =
-        new Selector(names,
-            Setting.map
-                (fun e -> Array.IndexOf(values, e))
-                (fun i -> values.[i])
-                setting)
-
-    static member FromEnum<'T>(setting: Setting<'T>) =
+    static member FromEnum(setting: Setting<'T>) =
         let names = Enum.GetNames(typeof<'T>)
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
-        Selector.FromArray(names, values, setting)
+        Selector(Array.zip values names, setting)
 
     static member FromBool(setting: Setting<bool>) =
-        new Selector([|Icons.unselected ; Icons.selected|],
-            Setting.map
-                (fun b -> if b then 1 else 0)
-                (fun i -> i > 0)
-                setting)
+        new Selector<bool>([|false, Icons.unselected; true, Icons.selected|], setting)
 
 type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
     inherit NavigateSelectable()

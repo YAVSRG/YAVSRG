@@ -35,7 +35,7 @@ type Toolbar() as this =
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
-        Button(( fun () -> if Screen.currentType <> Screen.Type.Play then OptionsMenuRoot.show() ), L"menu.options", Options.options.Hotkeys.Options)
+        Button(( fun () -> if Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ), L"menu.options", Options.options.Hotkeys.Options)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 

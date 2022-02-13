@@ -17,10 +17,22 @@ module Options =
         | Windowed = 0
         | Borderless = 1
         | Fullscreen = 2
+        | ``Borderless Fullscreen`` = 3
 
     type WindowResolution =
         | Preset of index:int
         | Custom of width:int * height:int
+        static member Presets : (int * int) array =
+                [|(800, 600); (1024, 768); (1280, 800); (1280, 1024); (1366, 768); (1600, 900);
+                    (1600, 1024); (1680, 1050); (1920, 1080); (2715, 1527)|]
+        member this.Dimensions : int * int * bool =
+            match this with
+            | Custom (w, h) -> w, h, true
+            | Preset i ->
+                let resolutions = WindowResolution.Presets
+                let i = System.Math.Clamp(i, 0, Array.length resolutions - 1)
+                let w, h = resolutions.[i]
+                w, h, false
 
     type FrameLimit =
         | ``30`` = 0
@@ -38,6 +50,8 @@ module Options =
             WindowMode: Setting<WindowType>
             Resolution: Setting<WindowResolution>
             FrameLimit: Setting<FrameLimit>
+            Display: Setting<int>
+            AudioDevice: Setting<int>
         }
         static member Default = 
             {
@@ -45,7 +59,9 @@ module Options =
                 Locale = "en_GB.txt"
                 WindowMode = Setting.simple WindowType.Borderless
                 Resolution = Setting.simple (Custom (1024, 768))
-                FrameLimit = Setting.simple FrameLimit.``240``
+                FrameLimit = Setting.simple FrameLimit.``480 (Recommended)``
+                Display = Setting.simple 0
+                AudioDevice = Setting.simple -1
             }
 
     type Hotkeys =
@@ -284,17 +300,6 @@ module Options =
 
     //forward ref for applying game config options. it is initialised in the constructor of Game
     let mutable applyOptions: unit -> unit = ignore
-
-    let resolutions: (struct (int * int)) array =
-        [|struct (800, 600); struct (1024, 768); struct (1280, 800); struct (1280, 1024); struct (1366, 768); struct (1600, 900);
-            struct (1600, 1024); struct (1680, 1050); struct (1920, 1080); struct (2715, 1527)|]
-
-    let getResolution res =
-        match res with
-        | Custom (w, h) -> (true, struct (w, h))
-        | Preset i ->
-            let i = System.Math.Clamp(i, 0, Array.length resolutions - 1)
-            (false, resolutions.[i])
 
     let mutable internal config = GameConfig.Default
     let mutable internal options = GameOptions.Default

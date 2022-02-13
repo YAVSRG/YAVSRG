@@ -24,8 +24,7 @@ module QuickOptions =
                     ).Position(200.0f)
                     PrettySetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Position(280.0f)
                     PrettySetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Position(360.0f)
-                    PrettySetting("gameplay.upscroll", Selector.FromBool options.Upscroll).Position(440.0f)
-                    //PrettySetting("gameplay.backgrounddim", Slider(options.BackgroundDim :?> FloatSetting, 0.01f)).Position(440.0f)
+                    PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Position(440.0f)
                 ] :> Selectable
             Callback = Audio.playLeadIn
         }
