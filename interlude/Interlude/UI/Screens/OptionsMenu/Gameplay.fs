@@ -80,7 +80,7 @@ module Gameplay =
                 column [
                     PrettySetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Position(200.0f)
                     PrettySetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Position(280.0f)
-                    PrettySetting("gameplay.upscroll", Selector.FromBool options.Upscroll).Position(360.0f)
+                    PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Position(360.0f)
                     PrettySetting("gameplay.backgrounddim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Position(440.0f)
                     PrettyButton("gameplay.screencover", 
                         fun() ->
@@ -88,7 +88,7 @@ module Gameplay =
                                 {
                                     Content = fun add ->
                                         column [
-                                            PrettySetting("gameplay.screencover.enabled", Selector.FromBool options.ScreenCover.Enabled).Position(200.0f)
+                                            PrettySetting("gameplay.screencover.enabled", Selector<_>.FromBool options.ScreenCover.Enabled).Position(200.0f)
                                             PrettySetting("gameplay.screencover.hidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Position(350.0f)
                                             PrettySetting("gameplay.screencover.sudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Position(450.0f)
                                             PrettySetting("gameplay.screencover.fadelength", Slider(options.ScreenCover.FadeLength, 0.01f)).Position(550.0f)

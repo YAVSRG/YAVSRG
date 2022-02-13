@@ -72,7 +72,7 @@ module Keybinds =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("generic.keymode", Selector.FromEnum<Keymode>(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Position(200.0f)
+                    PrettySetting("generic.keymode", Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Position(200.0f)
                     PrettySetting("keybinds.gameplay", binds).Position(280.0f, Render.vwidth - 200.0f)
                     PrettyButton("keybinds.hotkeys", ignore, Enabled = false).Position(400.0f)
                 ] :> Selectable

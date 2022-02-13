@@ -23,6 +23,14 @@ type Game(config: GameConfig) as this =
         base.UpdateFrequency <- 120.0
 
     member this.ApplyConfig(config: GameConfig) =
+
+        let monitor =
+            match Monitors.TryGetMonitorInfo(config.Display.Value) with
+            | true, info -> info
+            | false, _ -> 
+                Logging.Error (sprintf "Failed to get display info for monitor %i" config.Display.Value)
+                let _, info = Monitors.TryGetMonitorInfo(base.FindMonitor()) in info
+
         base.RenderFrequency <- 
             match config.FrameLimit.Value with
             | FrameLimit.``30`` -> 30.0
@@ -36,18 +44,29 @@ type Game(config: GameConfig) as this =
         base.VSync <- if config.FrameLimit.Value = FrameLimit.Vsync then VSyncMode.On else VSyncMode.Off
 
         match config.WindowMode.Value with
+
         | WindowType.Windowed ->
             base.WindowState <- WindowState.Normal
-            let (resizable, struct (width, height)) = getResolution config.Resolution.Value
+            let width, height, resizable = config.Resolution.Value.Dimensions
             base.WindowBorder <- if resizable then WindowBorder.Resizable else WindowBorder.Fixed
-            base.ClientRectangle <- new Box2i(0, 0, width, height)
+            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min.X, monitor.ClientArea.Min.Y, width, height)
             base.CenterWindow()
+
         | WindowType.Borderless ->
+            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
             base.WindowBorder <- WindowBorder.Hidden
             base.WindowState <- WindowState.Maximized
+
         | WindowType.Fullscreen ->
+            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
             base.WindowState <- WindowState.Fullscreen
-        | _ -> Logging.Error "Invalid window state. How did we get here?"
+
+        | WindowType.``Borderless Fullscreen`` ->
+            base.WindowBorder <- WindowBorder.Hidden
+            base.WindowState <- WindowState.Normal
+            base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
+
+        | _ -> Logging.Error "Tried to change to invalid window mode"
 
     override this.OnResize e =
         base.OnResize e
@@ -72,6 +91,7 @@ type Game(config: GameConfig) as this =
         base.OnUpdateFrame e
         Input.update()
         if Render.rheight > 0 then screens.Update(e.Time * 1000.0, Render.bounds)
+        elif Screen.currentType = Screen.Type.SplashScreen then screens.Update(e.Time * 1000.0, Rect.one)
         Input.absorbAll()
         Audio.update()
         if Screen.exit then base.Close()
