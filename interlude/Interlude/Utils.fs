@@ -123,7 +123,7 @@ module Utils =
 
         let checkForUpdates() =
             BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"
-                (fun output -> downloadJson("https://api.github.com/repos/percyqaz/YAVSRG/releases/latest", fun (d: GithubRelease) -> handleUpdate d))
+                (fun output -> downloadJson("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease) -> handleUpdate d))
             |> ignore
 
             let path = getInterludeLocation()
