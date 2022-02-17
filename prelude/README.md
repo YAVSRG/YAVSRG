@@ -1,9 +1,11 @@
-# What's this?
+# Prelude
 
-This is the rhythm game framework Interlude runs off.
-It implements the core elements of the game as a class library but no game engine features like rendering/playing sound/getting keyboard input.
+This is the rhythm game framework [Interlude](https://github.com/YAVSRG/Interlude) runs on.
+It provides the core elements of the game as a class library but no game engine features like rendering/playing sound/getting keyboard input.
 
-The purpose of this framework is to provide a very easy set of tools for working with Interlude and the format it stores data in, but I have designed large parts of it with general purpose rhythm game tooling/reusability in mind.
+The framework has been made separate from the game to:
+- Provide a very easy set of tools for working with Interlude and the format it stores data in
+- Reuse large parts of it as general purpose rhythm game tooling
 
 ## Features
 - Reading, writing and conversion of .sm, .osu and .yav file formats for charts
@@ -18,7 +20,7 @@ The purpose of this framework is to provide a very easy set of tools for working
 
 ## Future Features
 - A wiki full of examples on how to use Prelude to perform tasks such as editing an osu file or calculating Wife% for a score
-- Support for more chart file formats
+- Support for more chart file formats (.qua is top of the list)
 - Any new Interlude-related features that it would be useful to do outside of Interlude itself
 - Interlude -> Stepmania conversion and writing to file
 - Web tools/communication with score servers
