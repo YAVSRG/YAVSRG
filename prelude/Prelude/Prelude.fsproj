@@ -8,8 +8,8 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>Percyqaz</Authors>
     <Product>Prelude</Product>
-    <PackageProjectUrl>https://github.com/percyqaz/Prelude</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/percyqaz/Prelude</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/YAVSRG/Prelude</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/YAVSRG/Prelude</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
