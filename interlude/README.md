@@ -1,16 +1,22 @@
 # **YAVSRG: Interlude**
-### Yet Another Vertical Scrolling Rhythm Game
+Yet Another Vertical Scrolling Rhythm Game
+----
 
-Read about what this is [on the fancy Github page](https://yavsrg.github.io/Interlude)
+New? click [here to read more info about this project](https://yavsrg.github.io/Interlude)
+----
 
-### Build instructions
+## 👌 How to play:
 
-Coming soon (mainly for Mac and Linux users)
+Go [here](https://github.com/YAVSRG/Interlude/releases) for pre-built versions (works out of box on Windows)
 
-Go [here](https://github.com/YAVSRG/Interlude/releases) for pre-built versions (with game assets)
-You also need [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1/runtime) installed
+**MAKE SURE [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1/runtime) is installed!** (Or it won't open)
 
-### Licenses and stuff
+## 🤖 Building it yourself
 
-Interlude is licensed under the GPLv3 License.
-The audio library used is [BASS](http://www.un4seen.com/bass.html) and requires a license for commercial use (just so you know).
+Instructions coming soon (once I have a build for each platform)
+
+You will need:
+- Un4seen BASS libraries for your platform
+- To make sure you recursively clone the Prelude submodule
+
+MacOS/Linux build should work in theory, so with enough requests I can properly start doing cross-platform support/releases
