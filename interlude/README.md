@@ -1,6 +1,5 @@
 # **YAVSRG: Interlude**
 Yet Another Vertical Scrolling Rhythm Game
-----
 
 New? click [here to read more info about this project](https://yavsrg.github.io/Interlude)
 ----
