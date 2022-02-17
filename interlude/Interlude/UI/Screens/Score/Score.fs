@@ -156,6 +156,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         let struct (left, top, right, bottom) = this.Bounds
 
         let halfh = (bottom + top) * 0.5f
+        let xadjust = 50.0f
 
         // accuracy - lamp - clear bars
         do
@@ -262,33 +263,33 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             let size = (bottom - top)
             Draw.quad
                 ( Quad.createv
-                    (right - halfh, top + padding)
-                    (right - padding, halfh)
-                    (right - halfh, bottom - padding)
-                    (right - size + padding, halfh)
+                    (right - halfh + xadjust, top + padding)
+                    (right - padding + xadjust, halfh)
+                    (right - halfh + xadjust, bottom - padding)
+                    (right - size + padding + xadjust, halfh)
                 )
                 (Quad.colorOf (scoreData.Ruleset.GradeColor gradeAchieved.Grade))
                 Sprite.DefaultQuad
             Screen.Background.drawq ( 
                 ( Quad.createv
-                    (right - halfh, top + padding2)
-                    (right - padding2, halfh)
-                    (right - halfh, bottom - padding2)
-                    (right - size + padding2, halfh)
+                    (right - halfh + xadjust, top + padding2)
+                    (right - padding2 + xadjust, halfh)
+                    (right - halfh + xadjust, bottom - padding2)
+                    (right - size + padding2 + xadjust, halfh)
                 ), Color.FromArgb(60, 60, 60), 2.0f
             )
             Draw.quad
                 ( Quad.createv
-                    (right - halfh, top + padding2)
-                    (right - padding2, halfh)
-                    (right - halfh, bottom - padding2)
-                    (right - size + padding2, halfh)
+                    (right - halfh + xadjust, top + padding2)
+                    (right - padding2 + xadjust, halfh)
+                    (right - halfh + xadjust, bottom - padding2)
+                    (right - size + padding2 + xadjust, halfh)
                 )
                 (Quad.colorOf (Color.FromArgb(40, (scoreData.Ruleset.GradeColor gradeAchieved.Grade))))
                 Sprite.DefaultQuad
 
         // grade stuff
-        let gradeBounds = Rect.createWH (right - halfh - 270.0f) (halfh - 305.0f) 540.0f 540.0f
+        let gradeBounds = Rect.createWH (right - halfh + xadjust - 270.0f) (halfh - 305.0f) 540.0f 540.0f
         Text.drawFill(font, scoreData.Ruleset.GradeName gradeAchieved.Grade, Rect.expand (-100.0f, -100.0f) gradeBounds, scoreData.Ruleset.GradeColor gradeAchieved.Grade, 0.5f)
         Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (gradeAchieved.Grade, 0) <| getTexture "grade-base")
         if lampAchieved.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (lampAchieved.Lamp, 0) <| getTexture "grade-lamp-overlay")
