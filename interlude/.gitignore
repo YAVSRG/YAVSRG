@@ -15,6 +15,7 @@
 .vs
 .fake
 .ionide
+.editorconfig
 /Interlude/Resources/default
 /Interlude/Resources/defaultOrb
 /Interlude/Resources/defaultBar
