@@ -41,11 +41,11 @@ module Logo =
                     (Quad.colorOf(Color.Aqua))
                     Sprite.DefaultQuad
                 Draw.quad
-                    (Quad.create(new Vector2(l + 0.1f * w, t + 0.3f * w)) (new Vector2(l + 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
+                    (Quad.create(new Vector2(l + 0.1f * w, t + 0.3f * w)) (new Vector2(l + 0.2075f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.77f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
                     (Quad.colorOf(Color.Aqua))
                     Sprite.DefaultQuad
                 Draw.quad
-                    (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.7875f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
+                    (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2075f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.77f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
                     (Quad.colorOf(Color.Aqua))
                     Sprite.DefaultQuad
                 Draw.rect this.Bounds Color.White (Content.getTexture "logo")
