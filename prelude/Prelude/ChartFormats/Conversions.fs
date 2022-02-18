@@ -69,20 +69,34 @@ module Conversions =
                 s
 
             let note k time snaps =
-                if holds.[k] <> -1.0f<ms> then failwithf "Note appears inside a hold note at %f" time
+                if holds.[k] <> -1.0f<ms> then
+                    Logging.Debug(sprintf "Skipping stacked note (inside LN) at %f" time)
+                    snaps
+                else
+
                 match snaps with
                 | (t: Time, nr: NoteRow) :: ss ->
                     if t = time then 
-                        if nr.[k] <> NoteType.NOTHING then failwithf "Cannot place note because there is something here (stacked note) at %f" time
-                        nr.[k] <- NoteType.NORMAL
+                        if nr.[k] <> NoteType.NOTHING then 
+                            Logging.Debug(sprintf "Skipping stacked note at %f" time)
+                        else nr.[k] <- NoteType.NORMAL
                         snaps
                     else (time, let row = createRow() in row.[k] <- NoteType.NORMAL; row) :: snaps
                 | [] -> (time, let row = createRow() in row.[k] <- NoteType.NORMAL; row) :: snaps
 
             let hold (k: int) (time: Time) (release: Time) snaps =
-                if holds.[k] <> -1.0f<ms> then failwithf "Hold note began inside another hold note at %f" time
-                if release <= time then failwithf "Hold note ends before/as it begins at %f" time
-                holds.[k] <- release;
+                if holds.[k] <> -1.0f<ms> then 
+                    Logging.Debug(sprintf "Skipping stacked LN (inside LN) at %f" time)
+                    snaps
+                elif release < time then 
+                    Logging.Debug(sprintf "Skipping LN that ends at %f but starts at %f" release time)
+                    snaps
+                elif release = time then
+                    Logging.Debug(sprintf "Treating LN that ends & starts at %f as a note" time)
+                    note k time snaps
+                else
+
+                holds.[k] <- release
                 match snaps with
                 | (t: Time, nr: NoteRow) :: ss ->
                     if t = time then nr.[k] <- NoteType.HOLDHEAD; snaps
@@ -174,8 +188,8 @@ module Conversions =
             let mutable bpms = bpms
             let meter = 4<beat>
             let fmeter = float32 meter * 1.0f<beat>
-            let states = new List<(Time * NoteRow)>()
-            let points = new List<(Time * BPM)>()
+            let states = new List<Time * NoteRow>()
+            let points = new List<Time * BPM>()
             let mutable ln: Bitmap = 0us
             let mutable now = start
             let (_, b) = List.head bpms in points.Add(start, (meter, 60000.0f<ms/minute> / b))

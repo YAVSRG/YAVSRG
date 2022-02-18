@@ -506,7 +506,7 @@ module Themes =
         member this.GetRulesets() =
             seq {
                 for config in this.GetFiles "Rulesets" do
-                    if Path.GetExtension(config).ToLower() = ".irs" then
+                    if Path.GetExtension(config).ToLower() = ".ruleset" then
                         match this.TryGetJson<Ruleset>(true, "Rulesets", config) with
                         | Some data -> yield Path.GetFileNameWithoutExtension config, data.Validate
                         | None -> () // Error has already been logged when this happens
