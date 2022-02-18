@@ -100,6 +100,14 @@ module NoteColors =
                 Colors = Array.init 11 (fun i -> Array.init 10 byte)
                 UseGlobalColors = true
             }
+        member this.Validate =
+            { this with
+                Colors =
+                    if Array.forall (fun (x: ColorData) -> x.Length = 10) this.Colors && this.Colors.Length = 11 then this.Colors
+                    else
+                        Logging.Error("Problem with noteskin: Colors should be an 11x10 array - Please use the ingame editor")
+                        ColorConfig.Default.Colors
+            }
 
     let getColoredChart (config: ColorConfig) (chart: ModChart) : ColorizedChart =
             let index = if config.UseGlobalColors then 0 else chart.Keys - 2

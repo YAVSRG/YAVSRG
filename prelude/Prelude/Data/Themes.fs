@@ -39,6 +39,14 @@ module Themes =
                 OverrideAccentColor = false
                 CursorSize = 50.0f
             }
+        member this.Validate : ThemeConfig =
+            { this with
+                PBColors = 
+                    if this.PBColors.Length <> 4 then
+                        Logging.Debug ("Problem with theme: PBColors should have exactly 4 colors")
+                        ThemeConfig.Default.PBColors
+                    else this.PBColors
+            }
 
     type TextureConfig =
         {
@@ -282,7 +290,6 @@ module Themes =
         //song info
         //mod info
         //current real time
-        //current song time, as bms falling dot
         //judgement counts
         //pacemaker
         
@@ -343,6 +350,10 @@ module Themes =
                 Explosions = WidgetConfig.Explosions.Default
                 NoteColors = ColorConfig.Default
             }
+        member this.Validate =
+            { this with
+                NoteColors = this.NoteColors.Validate
+            }
 
     (*
         Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
@@ -397,40 +408,54 @@ module Themes =
                 Directory.CreateDirectory target |> ignore
                 Directory.EnumerateDirectories target |> Seq.map Path.GetFileName
 
-        member this.GetJson<'T> (createNew: bool, [<ParamArray>] path: string array) : 'T * bool =
-            let defaultValue() = JSON.Default<'T>(), match storage with Folder f -> false | _ -> true
-            try
-                let mutable rewrite = createNew
-                let json, success =
-                    match this.TryReadFile path with
-                    | Some stream ->
-                        use tr = new StreamReader(stream)
-                        let json, success =
-                            tr.ReadToEnd()
-                            |> JSON.FromString<'T>
-                            |> function Ok v -> (v, true) | _ -> defaultValue()
-                        stream.Dispose()
-                        rewrite <- true
-                        json, success
-                    | None -> defaultValue()
-                if createNew then this.WriteJson (json, path)
-                json, success
-            with err ->
-                Logging.Error (
-                    sprintf "Couldn't load json '%s' in '%s'"
-                        (String.concat "/" path)
-                        (
-                            match storage with
-                            | Zip (_, source) -> match source with Some s -> Path.GetFileName s | None -> "EMBEDDED ASSETS"
-                            | Folder f -> Path.GetFileName f
-                        ),
-                    err
-                )
-                defaultValue()
+        /// Gets the specified JSON file, or returns None
+        /// None is returned with silent fail if the file did not exist
+        /// None is returned with an error logged if something goes wrong while reading the file
+        member this.TryGetJson<'T> (writeBack: bool, [<ParamArray>] path: string array) : 'T option =
+            let json =
+                match this.TryReadFile path with
+                | Some stream ->
+                    use tr = new StreamReader(stream)
+                    let result =
+                        tr.ReadToEnd()
+                        |> JSON.FromString<'T>
+                        |> 
+                            function
+                            | Ok v -> Some v
+                            | Error err -> 
+                                Logging.Error (sprintf "Failed to load %s in user data" (String.concat "/" path), err)
+                                None
+                    stream.Dispose()
+                    result
+                | None -> None
+            if writeBack && json.IsSome then this.WriteJson (json.Value, path)
+            json
+
+        /// Gets the specified JSON file, or returns the default instance
+        /// File is not written back if there was a problem with an existing file
+        member this.GetJsonOrDefault<'T> (writeBack: bool, [<ParamArray>] path: string array) : 'T =
+            let json, faultInFile =
+                match this.TryReadFile path with
+                | Some stream ->
+                    use tr = new StreamReader(stream)
+                    let result =
+                        tr.ReadToEnd()
+                        |> JSON.FromString<'T>
+                        |> 
+                            function
+                            | Ok v -> v, false
+                            | Error err -> 
+                                Logging.Error (sprintf "Error loading %s in user data (Will use default values)" (String.concat "/" path), err)
+                                JSON.Default<'T>(), true
+                    stream.Dispose()
+                    result
+                | None -> JSON.Default<'T>(), false
+            if writeBack && not faultInFile then this.WriteJson (json, path)
+            json
 
         member this.WriteJson<'T> (data: 'T, [<ParamArray>] path: string array) =
             match storage with
-            | Zip _ -> () // Cannot write data to zip archives
+            | Zip _ -> () // Zip archive is read-only
             | Folder f ->
                 let target = Path.Combine (f, Path.Combine path)
                 target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
@@ -447,7 +472,10 @@ module Themes =
         inherit StorageAccess(storage)
 
         let mutable config : ThemeConfig = ThemeConfig.Default
-        do config <- this.GetJson (true, "theme.json") |> fst
+        do config <- 
+            match this.TryGetJson<ThemeConfig> (true, "theme.json") with
+            | Some data -> data.Validate
+            | None -> failwith "theme.json was missing or didn't load properly"
 
         member this.Config
             with set conf = config <- conf; this.WriteJson (config, "theme.json")
@@ -457,7 +485,7 @@ module Themes =
             match this.TryReadFile ("Textures", name + ".png") with
             | Some stream ->
                 let img = Bitmap.load stream
-                let info : TextureConfig = this.GetJson<TextureConfig> (false, "Textures", name + ".json") |> fst
+                let info : TextureConfig = this.GetJsonOrDefault<TextureConfig> (false, "Textures", name + ".json")
                 stream.Dispose()
                 Some (img, info)
             | None -> None
@@ -466,7 +494,7 @@ module Themes =
             match this.TryReadFile ("Rulesets", name + ".png") with
             | Some stream ->
                 let img = Bitmap.load stream
-                let info : TextureConfig = this.GetJson<TextureConfig> (false, "Rulesets", name + ".json") |> fst
+                let info : TextureConfig = this.GetJsonOrDefault<TextureConfig> (false, "Rulesets", name + ".json")
                 stream.Dispose()
                 img, info
             | None -> new Bitmap(1, 1), TextureConfig.Default
@@ -475,8 +503,9 @@ module Themes =
             seq {
                 for config in this.GetFiles "Rulesets" do
                     if Path.GetExtension(config).ToLower() = ".irs" then
-                        let v, success = this.GetJson<Ruleset>(true, "Rulesets", config)
-                        if success then yield Path.GetFileNameWithoutExtension config, v
+                        match this.TryGetJson<Ruleset>(true, "Rulesets", config) with
+                        | Some data -> yield Path.GetFileNameWithoutExtension config, data.Validate
+                        | None -> () // Error has already been logged when this happens
             }
 
         member this.GetFonts() =
@@ -495,7 +524,7 @@ module Themes =
                     | _ -> ()
             }
 
-        member this.GetGameplayConfig<'T> (name: string) = this.GetJson<'T> (true, "Interface", "Gameplay", name + ".json")
+        member this.GetGameplayConfig<'T> (name: string) = this.GetJsonOrDefault<'T> (true, "Interface", "Gameplay", name + ".json")
         
         static member FromZipFile (file: string) = 
             let stream = File.OpenRead file
@@ -507,7 +536,10 @@ module Themes =
         inherit StorageAccess(storage)
         
         let mutable config : NoteskinConfig = NoteskinConfig.Default
-        do config <- this.GetJson (true, "noteskin.json") |> fst
+        do config <-
+            match this.TryGetJson<NoteskinConfig> (true, "noteskin.json") with
+            | Some data -> data.Validate
+            | None -> failwith "noteskin.json was missing or didn't load properly"
         
         member this.Config
             with set conf = config <- conf; this.WriteJson (config, "noteskin.json")
@@ -517,7 +549,7 @@ module Themes =
             match this.TryReadFile (name + ".png") with
             | Some stream ->
                 let img = Bitmap.load stream
-                let info : TextureConfig = this.GetJson<TextureConfig> (false, name + ".json") |> fst
+                let info : TextureConfig = this.GetJsonOrDefault<TextureConfig> (false, name + ".json")
                 stream.Dispose()
                 Some (img, info)
             | None -> None

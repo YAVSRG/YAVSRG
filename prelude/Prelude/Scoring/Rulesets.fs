@@ -20,6 +20,12 @@ type Judgement =
 type AccuracyPoints =
     | WifeCurve of judge: int
     | Weights of maxweight: float * weights: float array
+    member this.Validate jcount =
+        match this with
+        | Weights (_, w) ->
+            if w.Length <> jcount then Logging.Error (sprintf "Problem with ruleset: %i accuracy weights given for %i judgements" w.Length jcount)
+            this
+        | _ -> this
 
 /// Behaviour for hold notes
 [<RequireQualifiedAccess>]
@@ -29,6 +35,23 @@ type HoldNoteBehaviour =
     | Normal of {| JudgementIfDropped: JudgementId; JudgementIfOverheld: JudgementId |}
     | JudgeReleases of {| Timegates: (Time * JudgementId) list |}
     | OnlyJudgeReleases // uses base timegates
+    member this.Validate jcount =
+        match this with
+        | Normal d ->
+            if d.JudgementIfDropped >= jcount || d.JudgementIfDropped < 0 then
+                Logging.Error (sprintf "Problem with ruleset: JudgementIfDropped is not a valid judgement")
+            if d.JudgementIfOverheld >= jcount || d.JudgementIfOverheld < 0 then
+                Logging.Error (sprintf "Problem with ruleset: JudgementIfOverheld is not a valid judgement")
+            Normal d
+        | JudgeReleases d ->
+            let mutable lastTime = -Time.infinity
+            for (time, j) in d.Timegates do
+                if time <= lastTime then 
+                    Logging.Error (sprintf "Problem with ruleset: Release timegates are in the wrong order")
+                if j >= jcount || j < 0 then Logging.Error (sprintf "Problem with ruleset: Release timegates judgement is not valid")
+                lastTime <- time
+            JudgeReleases d
+        | _ -> this
 
 /// Grades are awarded at the end of a score as a summarising "rank" of how well you did
 /// They typically follow lettering systems similar to academic exam grades
@@ -55,6 +78,7 @@ type GradingConfig =
         Grades: Grade array
         Lamps: Lamp array
     }
+    member this.Validate jcount = this //nyi, could check lamps
 
 type HealthBarConfig =
     {
@@ -63,6 +87,13 @@ type HealthBarConfig =
         ClearThreshold: float
         Points: float array
     }
+    member this.Validate jcount =
+        { this with
+            Points = 
+                if this.Points.Length <> jcount then
+                    Logging.Error (sprintf "Problem with ruleset: %i hp weights given for %i judgements" this.Points.Length jcount)
+                this.Points
+        }
 
 type AccuracyConfig =
     {
@@ -72,6 +103,19 @@ type AccuracyConfig =
         Points: AccuracyPoints
         HoldNoteBehaviour: HoldNoteBehaviour
     }
+    member this.Validate jcount =
+        { this with
+            Timegates =
+                let mutable lastTime = -Time.infinity
+                for (time, j) in this.Timegates do
+                    if time <= lastTime then 
+                        Logging.Error (sprintf "Problem with ruleset: Timegates are in the wrong order")
+                    if j >= jcount || j < 0 then Logging.Error (sprintf "Problem with ruleset: Timegates judgement is not valid")
+                    lastTime <- time
+                this.Timegates
+            Points = this.Points.Validate jcount
+            HoldNoteBehaviour = this.HoldNoteBehaviour.Validate jcount
+        }
 
 type Ruleset =
     {
@@ -90,6 +134,13 @@ type Ruleset =
     member this.LampColor i = if i < 0 then Color.White else this.Grading.Lamps.[i].Color
     member this.JudgementName i = this.Judgements.[i].Name
     member this.JudgementColor i = this.Judgements.[i].Color
+
+    member this.Validate =
+        { this with
+            Accuracy = this.Accuracy.Validate this.Judgements.Length
+            Health = this.Health.Validate this.Judgements.Length
+            Grading = this.Grading.Validate this.Judgements.Length
+        }
 
 module Ruleset =
 
