@@ -122,7 +122,7 @@ type Screen() as this =
 [<RequireQualifiedAccess>]
 type ReplayMode =
     | Auto
-    | Replay of ReplayData
+    | Replay of rate: float32 * ReplayData
 
 type ReplayScreen(mode: ReplayMode) as this =
     inherit Screen.T()
@@ -130,13 +130,13 @@ type ReplayScreen(mode: ReplayMode) as this =
     let chart = Gameplay.modifiedChart.Value
     let firstNote = offsetOf chart.Notes.First.Value
 
-    let keypressData, auto =
+    let keypressData, auto, rate =
         match mode with
-        | ReplayMode.Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true
-        | ReplayMode.Replay data -> StoredReplayProvider(data) :> IReplayProvider, false
+        | ReplayMode.Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, Gameplay.rate.Value
+        | ReplayMode.Replay (rate, data) -> StoredReplayProvider(data) :> IReplayProvider, false, rate
 
     let scoringConfig = getCurrentRuleset()
-    let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes Gameplay.rate.Value
+    let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes rate
     let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper =
         {
@@ -183,7 +183,8 @@ type ReplayScreen(mode: ReplayMode) as this =
     override this.OnEnter(prev) =
         Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
         Screen.toolbar <- true
-        Audio.changeRate Gameplay.rate.Value
+        Gameplay.rate.Value <- rate
+        Audio.changeRate rate
         Audio.changeGlobalOffset (toTime options.AudioOffset.Value)
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
         Audio.playLeadIn()

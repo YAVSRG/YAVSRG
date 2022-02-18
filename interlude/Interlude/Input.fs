@@ -196,7 +196,10 @@ module Input =
         | InputMethod.Text (s, _) ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
-            elif consumeOne(bigDelete, InputEvType.Press).IsSome then s.Value <- ""
+            elif consumeOne(bigDelete, InputEvType.Press).IsSome then
+                s.Value <-
+                    let parts = s.Value.Split(" ")
+                    Array.take (parts.Length - 1) parts |> String.concat " "
             //todo: clipboard support
             if inputmethod_mousedist > 200f then removeInputMethod()
         | InputMethod.Bind cb ->

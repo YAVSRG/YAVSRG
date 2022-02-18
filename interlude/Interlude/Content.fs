@@ -107,7 +107,7 @@ module Content =
                 let private add<'T>() =
                     let id = typeof<'T>.Name
                     cache.Remove(id) |> ignore
-                    cache.Add(id, fst (instance.GetGameplayConfig<'T> id))
+                    cache.Add(id, instance.GetGameplayConfig<'T> id)
 
                 let reload() =
                     add<AccuracyMeter>()
@@ -179,7 +179,7 @@ module Content =
         let createNew (id: string) =
              let id = Text.RegularExpressions.Regex("[^a-zA-Z0-9_-]").Replace(id, "")
              let target = Path.Combine(getDataPath "Themes", id)
-             if id <> "" && not (Directory.Exists target) then defaultTheme.CopyTo(Path.Combine(getDataPath "Themes", id))
+             if id <> "" && not (Directory.Exists target) then defaultTheme.ExtractToFolder(Path.Combine(getDataPath "Themes", id))
              load()
              Current.switch id
              Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
@@ -257,7 +257,7 @@ module Content =
 
         let extractCurrent() =
             let id = Guid.NewGuid().ToString()
-            Current.instance.CopyTo(Path.Combine(getDataPath "Noteskins", id))
+            Current.instance.ExtractToFolder(Path.Combine(getDataPath "Noteskins", id))
             load()
             Current.switch id
             Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }

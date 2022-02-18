@@ -66,8 +66,8 @@ module Themes =
     let editNoteskin refreshNoteskins (data: NoteskinConfig) : SelectionPage =
 
         let name = Setting.simple data.Name
-        let keycount = Setting.simple options.KeymodePreference.Value
         let holdNoteTrim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
+        let keycount = Setting.simple options.KeymodePreference.Value
         let mutable noteColors = data.NoteColors
         
         let g keycount i =
