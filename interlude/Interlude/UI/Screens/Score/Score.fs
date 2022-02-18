@@ -27,7 +27,7 @@ type EventCounts =
 
 module Helpers =
 
-    let mutable watchReplay : ReplayData -> unit = ignore
+    let mutable watchReplay : float32 * ReplayData -> unit = ignore
 
     let countEvents(events: HitEvent<HitEventGuts> seq) : EventCounts =
         let inc (x: int ref) = x.Value <- x.Value + 1
@@ -148,7 +148,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         new Button(ignore, "Graph settings")
         |> positionWidget(-420.0f, 1.0f, -65.0f, 1.0f, -220.0f, 1.0f, -15.0f, 1.0f)
         |> this.Add
-        new Button((fun () -> Helpers.watchReplay scoreData.ReplayData), "Watch replay")
+        new Button((fun () -> Helpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)), "Watch replay")
         |> positionWidget(-220.0f, 1.0f, -65.0f, 1.0f, -20.0f, 1.0f, -15.0f, 1.0f)
         |> this.Add
 
