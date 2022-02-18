@@ -461,12 +461,16 @@ module Themes =
                 target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
                 JSON.ToFile(target, true) data
 
-        member this.CopyTo targetPath =
+        member this.ExtractToFolder targetPath =
             Directory.CreateDirectory targetPath |> ignore
             match storage with
             | Zip (z, _) -> z.ExtractToDirectory targetPath
-            | Folder f -> failwith "NYI, do this manually for now"
-
+            | Folder f -> failwith "can only extract zip to folder"
+            
+        member this.CompressToZip target =
+            match storage with
+            | Zip (z, _) -> failwith "nyi"
+            | Folder f -> ZipFile.CreateFromDirectory(f, target)
 
     type Theme(storage) as this =
         inherit StorageAccess(storage)
