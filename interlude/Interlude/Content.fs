@@ -69,7 +69,8 @@ module Content =
             _theme <- theme
             loaded.Clear()
             for name, rs in defaultTheme.GetRulesets() do loaded.Add("*" + name, rs)
-            for name, rs in _theme.GetRulesets() do loaded.Add(name, rs)
+            if _theme <> defaultTheme then
+                for name, rs in _theme.GetRulesets() do loaded.Add(name, rs)
             switch id true
 
         let exists = loaded.ContainsKey
