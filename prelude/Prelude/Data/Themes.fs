@@ -534,7 +534,8 @@ module Themes =
             let stream = File.OpenRead file
             new Theme(Zip (new ZipArchive(stream), Some file))
         static member FromZipStream (stream: Stream) = new Theme(Zip (new ZipArchive(stream), None))
-        static member FromFolderName (name: string) = new Theme(Folder <| getDataPath (Path.Combine ("Themes", name)))
+        static member FromPath (path: string) = new Theme(Folder path)
+        static member FromFolderName (name: string) = Theme.FromPath(getDataPath (Path.Combine ("Themes", name)))
 
     type Noteskin(storage) as this =
         inherit StorageAccess(storage)

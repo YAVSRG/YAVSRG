@@ -20,10 +20,10 @@ type Judgement =
 type AccuracyPoints =
     | WifeCurve of judge: int
     | Weights of maxweight: float * weights: float array
-    member this.Validate jcount =
+    member this.Validate name jcount =
         match this with
         | Weights (_, w) ->
-            if w.Length <> jcount then Logging.Error (sprintf "Problem with ruleset: %i accuracy weights given for %i judgements" w.Length jcount)
+            if w.Length <> jcount then Logging.Error (sprintf "Problem with ruleset '%s': %i accuracy weights given for %i judgements" name w.Length jcount)
             this
         | _ -> this
 
@@ -35,20 +35,20 @@ type HoldNoteBehaviour =
     | Normal of {| JudgementIfDropped: JudgementId; JudgementIfOverheld: JudgementId |}
     | JudgeReleases of {| Timegates: (Time * JudgementId) list |}
     | OnlyJudgeReleases // uses base timegates
-    member this.Validate jcount =
+    member this.Validate name jcount =
         match this with
         | Normal d ->
             if d.JudgementIfDropped >= jcount || d.JudgementIfDropped < 0 then
-                Logging.Error (sprintf "Problem with ruleset: JudgementIfDropped is not a valid judgement")
+                Logging.Error (sprintf "Problem with ruleset '%s': JudgementIfDropped is not a valid judgement" name)
             if d.JudgementIfOverheld >= jcount || d.JudgementIfOverheld < 0 then
-                Logging.Error (sprintf "Problem with ruleset: JudgementIfOverheld is not a valid judgement")
+                Logging.Error (sprintf "Problem with ruleset '%s': JudgementIfOverheld is not a valid judgement" name)
             Normal d
         | JudgeReleases d ->
             let mutable lastTime = -Time.infinity
             for (time, j) in d.Timegates do
                 if time <= lastTime then 
-                    Logging.Error (sprintf "Problem with ruleset: Release timegates are in the wrong order")
-                if j >= jcount || j < 0 then Logging.Error (sprintf "Problem with ruleset: Release timegates judgement is not valid")
+                    Logging.Error (sprintf "Problem with ruleset '%s': Release timegates are in the wrong order" name)
+                if j >= jcount || j < 0 then Logging.Error (sprintf "Problem with ruleset '%s': Release timegates judgement is not valid" name)
                 lastTime <- time
             JudgeReleases d
         | _ -> this
@@ -87,11 +87,11 @@ type HealthBarConfig =
         ClearThreshold: float
         Points: float array
     }
-    member this.Validate jcount =
+    member this.Validate name jcount =
         { this with
             Points = 
                 if this.Points.Length <> jcount then
-                    Logging.Error (sprintf "Problem with ruleset: %i hp weights given for %i judgements" this.Points.Length jcount)
+                    Logging.Error (sprintf "Problem with ruleset '%s': %i hp weights given for %i judgements" name this.Points.Length jcount)
                 this.Points
         }
 
@@ -103,18 +103,18 @@ type AccuracyConfig =
         Points: AccuracyPoints
         HoldNoteBehaviour: HoldNoteBehaviour
     }
-    member this.Validate jcount =
+    member this.Validate name jcount =
         { this with
             Timegates =
                 let mutable lastTime = -Time.infinity
                 for (time, j) in this.Timegates do
                     if time <= lastTime then 
-                        Logging.Error (sprintf "Problem with ruleset: Timegates are in the wrong order")
-                    if j >= jcount || j < 0 then Logging.Error (sprintf "Problem with ruleset: Timegates judgement is not valid")
+                        Logging.Error (sprintf "Problem with ruleset '%s': Timegates are in the wrong order" name)
+                    if j >= jcount || j < 0 then Logging.Error (sprintf "Problem with ruleset '%s': Timegates judgement is not valid" name)
                     lastTime <- time
                 this.Timegates
-            Points = this.Points.Validate jcount
-            HoldNoteBehaviour = this.HoldNoteBehaviour.Validate jcount
+            Points = this.Points.Validate name jcount
+            HoldNoteBehaviour = this.HoldNoteBehaviour.Validate name jcount
         }
 
 type Ruleset =
@@ -137,8 +137,8 @@ type Ruleset =
 
     member this.Validate =
         { this with
-            Accuracy = this.Accuracy.Validate this.Judgements.Length
-            Health = this.Health.Validate this.Judgements.Length
+            Accuracy = this.Accuracy.Validate this.Name this.Judgements.Length
+            Health = this.Health.Validate this.Name this.Judgements.Length
             Grading = this.Grading.Validate this.Judgements.Length
         }
 
@@ -522,7 +522,7 @@ module Rulesets =
                         StartingHealth = 0.5
                         OnlyFailAtEnd = false
                         ClearThreshold = 0.0
-                        Points = [|0.008; 0.008; 0.004; 0.0; -0.04; -0.08|]
+                        Points = [|0.008; 0.004; 0.0; -0.08|]
                     }
                 Grading = 
                     {
