@@ -5,12 +5,18 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Tailcalls>True</Tailcalls>
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
+    <Compile Include="Utils.fs" />
+    <None Include="Features\zip_assets.bat" />
+    <None Include="Features\zip_build.bat" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Features\" />
-  </ItemGroup>
+  <ItemGroup />
 
 </Project>
