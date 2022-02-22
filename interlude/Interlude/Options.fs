@@ -61,7 +61,7 @@ module Options =
                 Resolution = Setting.simple (Custom (1024, 768))
                 FrameLimit = Setting.simple FrameLimit.``480 (Recommended)``
                 Display = Setting.simple 0
-                AudioDevice = Setting.simple -1
+                AudioDevice = Setting.simple 1
             }
 
     type Hotkeys =
