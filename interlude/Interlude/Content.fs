@@ -38,22 +38,8 @@ module Content =
     module Rulesets =
 
         let DEFAULT = "*sc-j4"
-        
-        let private defaultRulesets =
-            List.map
-                (fun od -> (sprintf "osu-od-%.0f" od, Rulesets.Osu.create od))
-                [0.0f; 1.0f; 2.0f; 3.0f; 4.0f; 5.0f; 6.0f; 7.0f; 8.0f; 9.0f; 10.0f]
-            @ List.map
-                (fun j -> (sprintf "sc-j%i" j, Rulesets.SC.create j))
-                [1; 2; 3; 4; 5; 6; 7; 8; 9]
-            @ List.map
-                (fun j -> (sprintf "wife-j%i" j, Rulesets.Wife.create j))
-                [1; 2; 3; 4; 5; 6; 7; 8; 9]
-            @ List.map
-                (fun (d: Rulesets.Ex_Score.Type) -> (sprintf "xs-%s" (d.Name.ToLower()), Rulesets.Ex_Score.create d))
-                [Rulesets.Ex_Score.sdvx]
-
-        let private loaded = let x = Dictionary<string, Ruleset>() in (for name, rs in defaultRulesets do x.Add("*" + name, rs)); x
+       
+        let private loaded = let x = Dictionary<string, Ruleset>() in (for name, rs in defaultTheme.GetRulesets() do x.Add("*" + name, rs)); x
         let mutable private _theme : Theme = Unchecked.defaultof<_>
         let mutable private id = DEFAULT
         let mutable current = loaded.[DEFAULT]
@@ -82,7 +68,7 @@ module Content =
         let load_from_theme (theme: Theme) =
             _theme <- theme
             loaded.Clear()
-            for name, rs in defaultRulesets do loaded.Add("*" + name, rs)
+            for name, rs in defaultTheme.GetRulesets() do loaded.Add("*" + name, rs)
             for name, rs in _theme.GetRulesets() do loaded.Add(name, rs)
             switch id true
 

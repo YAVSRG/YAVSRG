@@ -12,11 +12,13 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <None Include="Features\zip_assets.bat" />
+    <Compile Include="Features\Bundle_Assets.fs" />
     <None Include="Features\zip_build.bat" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\Prelude\Prelude\Prelude.fsproj" />
+  </ItemGroup>
 
 </Project>
