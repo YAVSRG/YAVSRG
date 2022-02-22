@@ -77,7 +77,6 @@ module Fonts =
 
             if int w > Sprite.MAX_TEXTURE_SIZE then
                 Logging.Critical (sprintf "Font atlas width of %f exceeds max texture size of %i!" w Sprite.MAX_TEXTURE_SIZE)
-            else Logging.Debug (sprintf "Font atlas width: %f" w)
 
             use img = new Bitmap(int w, int h)
             for i, row in List.indexed glyphs do
