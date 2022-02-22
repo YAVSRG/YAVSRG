@@ -12,7 +12,7 @@ module Fonts =
 
     open System.IO
 
-    let SCALE = 60f
+    let SCALE = 80f
 
     type private GlyphInfo =
         {
@@ -47,13 +47,16 @@ module Fonts =
             fontLookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.gridUV (0, 0))
 
         let genAtlas() =
-            let mutable w = 0.0f
-            let mutable highSurrogate : char = ' '
-            let glyphs =
+            let rowspacing = SCALE * 1.5f
+
+            let getRowGlyphs chars =
+                let mutable w = 0.0f
+                let mutable highSurrogate : char = ' '
                 seq {
-                    for c in "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\"\r\n•∞" + Interlude.Feather.CONCAT do
+                    for c in chars do
                         if Char.IsHighSurrogate c then
                             highSurrogate <- c
+                            printfn "hs"
                         else
                             let code = if Char.IsLowSurrogate c then Char.ConvertToUtf32(highSurrogate, c) else int32 c
                             let size = TextMeasurer.Measure(codepointToString code, renderOptions)
@@ -61,24 +64,38 @@ module Fonts =
                             yield { Code = code; Size = size; Offset = w - size.Width - 1.0f }
                 } |> List.ofSeq
 
-            let h = List.map (fun (info: GlyphInfo) -> info.Height) glyphs |> List.max
+            let chunks = 
+                "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
+                + Interlude.Feather.CONCAT
+                |> Seq.chunkBySize 30
+                |> Seq.map (String)
+
+            let glyphs = Seq.map getRowGlyphs chunks |> List.ofSeq
+
+            let h = float32 glyphs.Length * rowspacing
+            let w = glyphs |> List.map (fun x -> let l = List.last x in l.Offset + l.Size.Width + 2.0f) |> List.max
+
+            if int w > Sprite.MAX_TEXTURE_SIZE then
+                Logging.Critical (sprintf "Font atlas width of %f exceeds max texture size of %i!" w Sprite.MAX_TEXTURE_SIZE)
 
             use img = new Bitmap(int w, int h)
-            for glyph in glyphs do
-                img.Mutate<PixelFormats.Rgba32>(
-                    fun img ->
-                        img.DrawText(drawOptions, codepointToString glyph.Code, font, SixLabors.ImageSharp.Color.White, new PointF(glyph.Offset, 0f))
-                        |> ignore
-                )
-            let sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT"
-            for glyph in glyphs do
-                fontLookup.Add
-                    ( glyph.Code,
-                        struct (
-                            { sprite with Height = int glyph.Height; Width = int glyph.Width },
-                            (Rect.createWH (glyph.Offset / w) 0.0f (glyph.Width / w) (glyph.Height / h) |> Quad.ofRect)
-                        )
+            for i, row in List.indexed glyphs do
+                for glyph in row do
+                    img.Mutate<PixelFormats.Rgba32>(
+                        fun img ->
+                            img.DrawText(drawOptions, codepointToString glyph.Code, font, SixLabors.ImageSharp.Color.White, new PointF(glyph.Offset, rowspacing * float32 i))
+                            |> ignore
                     )
+            let sprite = Sprite.upload (img, 1, 1, true) |> Sprite.cache "FONT"
+            for i, row in List.indexed glyphs do
+                for glyph in row do
+                    fontLookup.Add
+                        ( glyph.Code,
+                            struct (
+                                { sprite with Height = int glyph.Height; Width = int glyph.Width },
+                                (Rect.createWH (glyph.Offset / w) ((rowspacing * float32 i) / h) (glyph.Width / w) (glyph.Height / h) |> Quad.ofRect)
+                            )
+                        )
 
         do genAtlas()
         member this.Char(c: int32) =
@@ -91,17 +108,6 @@ module Fonts =
     let collection = new FontCollection()
 
     let add (stream: Stream) = collection.Install stream |> ignore
-
-    //let init() =
-    //    //todo: load interlude as embedded font
-    //    let fontdir = Path.Combine(Interlude.Utils.getInterludeLocation(), "Fonts")
-    //    Directory.CreateDirectory fontdir |> ignore
-    //    for file in Directory.EnumerateFiles fontdir do
-    //        match Path.GetExtension file with
-    //        | ".ttf" | ".otf" ->
-    //            collection.Install file |> ignore
-    //        | _ -> ()
-    //    Logging.Info (sprintf "Loaded %i external fonts" (Seq.length collection.Families))
 
     let create (name: string) =
         let found, family = collection.TryFind name
