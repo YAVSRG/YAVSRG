@@ -2,6 +2,8 @@
 :: (I edit them extracted as a folder and zip them right before building)
 :: before first use, extract the zips into the same directory (under same names) for editing
 
+cd "C:\Users\percy\Desktop\Source\YAVSRG\Interlude\Resources\"
+
 del default.zip
 "C:\Program Files\7-Zip\7z" a -tzip default.zip ..\..\..\Interlude.Assets\default\*
 del defaultBar.isk
