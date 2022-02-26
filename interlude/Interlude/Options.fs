@@ -97,6 +97,7 @@ module Options =
             Options: Setting<Bind>
             Help: Setting<Bind>
             Tasks: Setting<Bind>
+            Console: Setting<Bind>
 
             UpRate: Setting<Bind>
             DownRate: Setting<Bind>
@@ -136,6 +137,7 @@ module Options =
             Options = Setting.simple(ctrl Keys.O)
             Help = Setting.simple(ctrl Keys.H)
             Tasks = Setting.simple(mk Keys.F8)
+            Console = Setting.simple(mk Keys.GraveAccent)
 
             UpRate = Setting.simple(mk Keys.Equal)
             DownRate = Setting.simple(mk Keys.Minus)

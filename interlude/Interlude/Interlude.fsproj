@@ -99,10 +99,12 @@
     <Compile Include="UI\Screens\OptionsMenu\OptionsMenu.fs" />
     <Compile Include="UI\Screens\MainMenu\LoadingScreen.fs" />
     <Compile Include="UI\Screens\MainMenu\MainMenu.fs" />
+    <Compile Include="UI\Toolbar\Terminal.fs" />
     <Compile Include="UI\Toolbar\TaskDisplay.fs" />
     <Compile Include="UI\Toolbar\Jukebox.fs" />
     <Compile Include="UI\Toolbar\Toolbar.fs" />
     <Compile Include="UI\Startup.fs" />
+    <Compile Include="Printerlude.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
@@ -111,6 +113,7 @@
     <PackageReference Include="ManagedBass" Version="3.1.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.1.0" />
     <PackageReference Include="OpenTK" Version="4.6.7" />
+    <PackageReference Include="Percyqaz.Shell" Version="0.1.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -108,6 +108,7 @@ type Game(config: GameConfig) as this =
         Content.init options.Theme.Value options.Noteskin.Value
         Input.init this
         Gameplay.init()
+        Printerlude.init()
         base.IsVisible <- true
 
     override this.OnUnload() =

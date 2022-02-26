@@ -46,7 +46,7 @@ module Screen =
 
     let backgroundDim = AnimationFade 1.0f
 
-    let private globalAnimation = Animation.Fork(parallaxX, parallaxY, parallaxZ, backgroundDim, Style.accentColor)
+    let globalAnimation = Animation.Fork(parallaxX, parallaxY, parallaxZ, backgroundDim, Style.accentColor)
 
     let logo = Logo.display
     
