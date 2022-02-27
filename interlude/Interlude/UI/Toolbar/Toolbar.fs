@@ -47,7 +47,7 @@ type Toolbar() as this =
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Dialog.add (TaskDisplay.Dialog())), L"menu.tasks", Options.options.Hotkeys.Tasks)
+        Button((fun () -> TaskDisplay.Dialog().Show()), L"menu.tasks", Options.options.Hotkeys.Tasks)
         |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
@@ -66,9 +66,11 @@ type Toolbar() as this =
                 Draw.rect(Rect.create (l + float32 i * s + 2.0f) (t - HEIGHT) (l + (float32 i + 1.0f) * s - 2.0f) (t - HEIGHT + level)) (Style.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
                 Draw.rect(Rect.create (r - (float32 i + 1.0f) * s + 2.0f) (b + HEIGHT - level) (r - float32 i * s - 2.0f) (b + HEIGHT)) (Style.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
         base.Draw()
+        Terminal.draw()
 
     override this.Update(elapsedTime, bounds) =
         if (not Screen.toolbar) && Options.options.Hotkeys.Toolbar.Value.Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
+        Terminal.update()
         base.Update(elapsedTime, Rect.expand (0.0f, -HEIGHT * if Screen.toolbar then 0.0f else barSlider.Value) bounds)

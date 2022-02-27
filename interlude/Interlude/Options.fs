@@ -97,6 +97,7 @@ module Options =
             Options: Setting<Bind>
             Help: Setting<Bind>
             Tasks: Setting<Bind>
+            Console: Setting<Bind>
 
             UpRate: Setting<Bind>
             DownRate: Setting<Bind>
@@ -136,6 +137,7 @@ module Options =
             Options = Setting.simple(ctrl Keys.O)
             Help = Setting.simple(ctrl Keys.H)
             Tasks = Setting.simple(mk Keys.F8)
+            Console = Setting.simple(mk Keys.GraveAccent)
 
             UpRate = Setting.simple(mk Keys.Equal)
             DownRate = Setting.simple(mk Keys.Minus)
@@ -231,6 +233,7 @@ module Options =
             ScoreSortMode: Setting<int>
             GameplayBinds: (Bind array) array
 
+            EnableConsole: Setting<bool>
             Hotkeys: Hotkeys
         }
         static member Default = {
@@ -284,6 +287,7 @@ module Options =
 
             ChartSortMode = Setting.simple "Title"
             ChartGroupMode = Setting.simple "Pack"
+            EnableConsole = Setting.simple false
             ScoreSortMode = Setting.simple 0
             Hotkeys = Hotkeys.Default
             GameplayBinds = [|

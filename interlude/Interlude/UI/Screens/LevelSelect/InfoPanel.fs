@@ -258,6 +258,6 @@ type InfoPanel() as this =
                     for n in nr do
                         if n = NoteType.NORMAL then notes <- notes + 1
                         elif n = NoteType.HOLDHEAD then notes <- notes + 1; lnotes <- lnotes + 1
-                sprintf "%i Notes | %.0f%% Holds" notes (100.0f * float32 lnotes / float32 notes)
+                sprintf "%iK | %i Notes | %.0f%% Holds" c.Keys notes (100.0f * float32 lnotes / float32 notes)
             | None -> ""
         scores.Refresh()

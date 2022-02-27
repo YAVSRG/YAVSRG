@@ -46,7 +46,7 @@ module Screen =
 
     let backgroundDim = AnimationFade 1.0f
 
-    let private globalAnimation = Animation.Fork(parallaxX, parallaxY, parallaxZ, backgroundDim, Style.accentColor)
+    let globalAnimation = Animation.Fork(parallaxX, parallaxY, parallaxZ, backgroundDim, Style.accentColor)
 
     let logo = Logo.display
     
@@ -62,7 +62,7 @@ module Screen =
     let mutable transitionFlags = TransitionFlag.Default
 
     let changeNew (thunk: unit -> T) (screenType: Type) (flags: TransitionFlag) =
-        if screenTransition.Complete && screenType <> currentType then
+        if screenTransition.Complete && (screenType <> currentType || screenType = Type.Play) then
             transitionFlags <- flags
             globalAnimation.Add screenTransition
             screenTransition.Add transitionIn
