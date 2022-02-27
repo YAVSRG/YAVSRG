@@ -94,11 +94,11 @@ type Screen() as this =
                 liveplay.Add(time, inputKeyState) )
             scoring.Update chartTime
 
-        if now <= -missWindow && options.Hotkeys.Options.Value.Pressed() then
+        if options.Hotkeys.Options.Value.Pressed() then
             Audio.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
-            QuickOptions.show()
+            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default)
         
         if scoring.Finished && not (liveplay :> IReplayProvider).Finished then
             liveplay.Finish()
@@ -146,7 +146,6 @@ type ReplayScreen(mode: ReplayMode) as this =
             OnHit = onHit.Publish
             CurrentChartTime = fun () -> Audio.timeWithOffset() - firstNote
         }
-    let missWindow = scoring.ScaledMissWindow
 
     do
         let noteRenderer = NoteRenderer scoring
@@ -192,7 +191,7 @@ type ReplayScreen(mode: ReplayMode) as this =
 
     override this.OnExit next =
         Screen.backgroundDim.Target <- 0.7f
-        if next <> Screen.Type.Score then Screen.toolbar <- false
+        Screen.toolbar <- false
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -201,8 +200,7 @@ type ReplayScreen(mode: ReplayMode) as this =
 
         if not keypressData.Finished then scoring.Update chartTime
 
-        if now <= -missWindow && options.Hotkeys.Options.Value.Pressed() then
-            Audio.pause()
-            QuickOptions.show()
+        if options.Hotkeys.Options.Value.Pressed() then
+            QuickOptions.show(scoring, ignore)
         
         if keypressData.Finished then Screen.back Screen.TransitionFlag.Default
