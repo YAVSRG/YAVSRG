@@ -275,7 +275,7 @@ module Scores =
             let a, ap = PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
             let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
             let c, cp = PersonalBests.update (not score.HP.Failed, score.ScoreInfo.rate) existing.Clear
-            d.Bests.[score.Scoring.Name] <-
+            d.Bests.[rulesetId] <-
                 {
                     Lamp = l
                     Accuracy = a

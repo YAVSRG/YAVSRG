@@ -78,7 +78,7 @@ module PersonalBests =
 
     let create (value: 'T, rate: float32) : PersonalBests<'T> = { Best = value, rate; Fastest = value, rate }
 
-    let update (value: 'T, rate: float32) ({ Best = bestA, rateA; Fastest = bestR, rateR }: PersonalBests<'T>)  =
+    let update (value: 'T, rate: float32) ({ Best = bestA, rateA; Fastest = bestR, rateR }: PersonalBests<'T>) =
         let r, rv =
             if rate > rateR then (value, rate), PersonalBestType.Faster
             elif rate = rateR then
