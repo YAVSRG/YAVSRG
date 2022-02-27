@@ -47,7 +47,7 @@ module Fonts =
             fontLookup.Add(c, Sprite.upload (img, 1, 1, true) |> Sprite.gridUV (0, 0))
 
         let genAtlas() =
-            let rowspacing = SCALE * 1.5f
+            let rowspacing = SCALE * 1.6f
 
             let getRowGlyphs chars =
                 let mutable w = 0.0f
