@@ -233,6 +233,7 @@ module Options =
             ScoreSortMode: Setting<int>
             GameplayBinds: (Bind array) array
 
+            EnableConsole: Setting<bool>
             Hotkeys: Hotkeys
         }
         static member Default = {
@@ -286,6 +287,7 @@ module Options =
 
             ChartSortMode = Setting.simple "Title"
             ChartGroupMode = Setting.simple "Pack"
+            EnableConsole = Setting.simple false
             ScoreSortMode = Setting.simple 0
             Hotkeys = Hotkeys.Default
             GameplayBinds = [|

@@ -49,7 +49,7 @@ module Terminal =
 
     let update() =
         if shown && Options.options.Hotkeys.Exit.Value.Tapped() then hide()
-        if not shown && Options.options.Hotkeys.Console.Value.Tapped() then show()
+        if Options.options.EnableConsole.Value && not shown && Options.options.Hotkeys.Console.Value.Tapped() then show()
 
         if not shown then ()
         else
