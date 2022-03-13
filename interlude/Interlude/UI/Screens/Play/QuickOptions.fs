@@ -35,7 +35,7 @@ module QuickOptions =
         {
             Content = fun add ->
                 column [
-                    PrettySetting("quick.localoffset", Slider(offset, 0.01f)).Position(200f)
+                    PrettySetting("quick.localoffset", Slider(offset, 0.0025f)).Position(200f)
                     TextBox(
                         K (sprintf "Suggested: %.0f" recommendedOffset),
                         K (Color.White, Color.Black),

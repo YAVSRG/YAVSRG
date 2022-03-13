@@ -56,7 +56,7 @@ module Screen =
         for i = 0 to 3 do screens.[i] <- _screens.[i]
         current <- screens.[0]
     let mutable exit = false
-    let mutable toolbar = false
+    let mutable hideToolbar = false
     let mutable currentType = Type.SplashScreen
     
     let mutable transitionFlags = TransitionFlag.Default

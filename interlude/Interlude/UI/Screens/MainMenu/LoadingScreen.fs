@@ -21,7 +21,7 @@ type LoadingScreen() as this =
     override this.OnEnter (prev: Screen.Type) =
         fade.Value <- 0.0f
         Logo.moveCentre ()
-        Screen.toolbar <- true
+        Screen.hideToolbar <- true
         match prev with
         | Screen.Type.MainMenu ->
             closing <- true

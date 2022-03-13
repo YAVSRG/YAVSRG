@@ -316,9 +316,9 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             refresh()
 
     override this.OnEnter prev =
-        Screen.toolbar <- true
+        Screen.hideToolbar <- true
 
     override this.OnExit next =
         Options.options.Rulesets.Value <- originalRulesets
         scoreData.Ruleset <- Options.getCurrentRuleset()
-        Screen.toolbar <- false
+        Screen.hideToolbar <- false
