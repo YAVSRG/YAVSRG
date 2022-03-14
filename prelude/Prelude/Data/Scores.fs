@@ -236,6 +236,25 @@ type BestFlags =
             Clear = PersonalBestType.None
         }
 
+module Bests =
+
+    let update (score: ScoreInfoProvider) (existing: Bests) : Bests * BestFlags =
+        let l, lp = PersonalBests.update (score.Lamp, score.ScoreInfo.rate) existing.Lamp
+        let a, ap = PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
+        let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
+        let c, cp = PersonalBests.update (not score.HP.Failed, score.ScoreInfo.rate) existing.Clear
+        
+        { Lamp = l; Accuracy = a; Grade = g; Clear = c },
+        { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp }
+
+    let create (score: ScoreInfoProvider) : Bests =
+        {
+            Lamp = PersonalBests.create (score.Lamp, score.ScoreInfo.rate)
+            Accuracy = PersonalBests.create (score.Scoring.Value, score.ScoreInfo.rate)
+            Grade = PersonalBests.create (score.Grade, score.ScoreInfo.rate)
+            Clear = PersonalBests.create (not score.HP.Failed, score.ScoreInfo.rate)
+        }
+
 module Scores =
 
     type Data =
@@ -270,29 +289,9 @@ module Scores =
         save()
         // update pbs
         if d.Bests.ContainsKey rulesetId then
-            let existing = d.Bests.[rulesetId]
-            let l, lp = PersonalBests.update (score.Lamp, score.ScoreInfo.rate) existing.Lamp
-            let a, ap = PersonalBests.update (score.Scoring.Value, score.ScoreInfo.rate) existing.Accuracy
-            let g, gp = PersonalBests.update (score.Grade, score.ScoreInfo.rate) existing.Grade
-            let c, cp = PersonalBests.update (not score.HP.Failed, score.ScoreInfo.rate) existing.Clear
-            d.Bests.[rulesetId] <-
-                {
-                    Lamp = l
-                    Accuracy = a
-                    Grade = g
-                    Clear = c
-                }
-            { Lamp = lp; Accuracy = ap; Grade = gp; Clear = cp }
+            let newBests, flags = Bests.update score d.Bests.[rulesetId]
+            d.Bests.[rulesetId] <- newBests
+            flags
         else
-            d.Bests.Add(
-                rulesetId,
-                {
-                    Lamp = PersonalBests.create (score.Lamp, score.ScoreInfo.rate)
-                    Accuracy = PersonalBests.create (score.Scoring.Value, score.ScoreInfo.rate)
-                    Grade = PersonalBests.create (score.Grade, score.ScoreInfo.rate)
-                    Clear = PersonalBests.create (not score.HP.Failed, score.ScoreInfo.rate)
-                }
-            )
+            d.Bests.Add(rulesetId, Bests.create score)
             { Lamp = PersonalBestType.Faster; Accuracy = PersonalBestType.Faster; Grade = PersonalBestType.Faster; Clear = PersonalBestType.Faster }
-
-    //todo: background tasks to reprocess buckets from score database
