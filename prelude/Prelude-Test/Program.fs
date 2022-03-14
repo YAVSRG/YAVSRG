@@ -24,7 +24,7 @@ let main argv =
     //Generic.main()
     //Imports.main()
     //Metrics.main()
-    Trendy.main()
+    Sail.main()
 
     Logging.Info "Test track complete, showing reports ..."
 

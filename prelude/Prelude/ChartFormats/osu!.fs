@@ -27,6 +27,7 @@ module ``osu!`` =
         "[" + title + "]\n" + (String.concat "\n" (List.map f entries))
 
     type TimingEffect =
+        | None = 0
         | Kiai = 1
         | OmitFirstBarline = 8
 
