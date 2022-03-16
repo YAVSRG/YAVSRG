@@ -159,7 +159,7 @@ module GameplayWidgets =
         inherit Widget()
 
         let duration = 
-            let chart = Gameplay.getColoredChart()
+            let chart = Gameplay.Chart.colored()
             offsetOf chart.Notes.Last.Value - offsetOf chart.Notes.First.Value
 
         let pulse = new AnimationCounter(1000.0)
@@ -183,7 +183,7 @@ module GameplayWidgets =
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
         inherit Widget()
         
-        let firstNote = offsetOf (Gameplay.getColoredChart().Notes.First.Value)
+        let firstNote = offsetOf (Gameplay.Chart.colored().Notes.First.Value)
         do this.Add(TextBox(sprintf "Press %O to skip" options.Hotkeys.Skip.Value |> Utils.K, Utils.K Color.White, 0.5f))
 
         override this.Update(elapsedTime, bounds) =

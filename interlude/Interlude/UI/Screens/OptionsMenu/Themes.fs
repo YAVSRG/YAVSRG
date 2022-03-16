@@ -22,7 +22,7 @@ module Themes =
         let fbo = FBO.create()
 
         let createRenderer() =
-            match Gameplay.currentChart with
+            match Gameplay.Chart.current with
             | Some chart -> 
                 let nr = Screens.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
                 nr.Add(Screens.Play.GameplayWidgets.ScreenCover())
@@ -44,7 +44,7 @@ module Themes =
             this.Reposition(-50.0f - w, 1.0f, -h * 0.5f, 0.5f, -50.0f, 1.0f, h * 0.5f, 0.5f)
 
         member this.Refresh() =
-            Gameplay.recolorChart()
+            Gameplay.Chart.recolor()
             renderer.Dispose()
             renderer <- createRenderer()
 

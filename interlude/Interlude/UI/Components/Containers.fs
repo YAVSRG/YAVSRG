@@ -20,7 +20,7 @@ type FlowContainer() =
     member this.Sort with set (comp: Comparison<Widget>) = sort <- Some comp; this.Children.Sort comp
 
     member this.Spacing with set(value) = spacing <- value
-    //todo: margin doesn't work correctly
+    // todo: margin doesn't work correctly
     member this.Margin with set (x, y) = margin <- (-x, -y)
 
     override this.Add (c: Widget) =
@@ -64,14 +64,14 @@ type FlowContainer() =
                 if t < bottom && b > top then c.Draw()
         Stencil.finish()
 
-    //scrolls so that w becomes visible. w is (mostly) expected to be a child of the container but sometimes is used for sneaky workarounds
+    /// Scrolls so that w becomes visible. w is (mostly) expected to be a child of the container but sometimes is used for sneaky workarounds
     member this.ScrollTo(w: Widget) =
         let struct (_, top, _, bottom) = this.Bounds
         let struct (_, ctop, _, cbottom) = w.Bounds
         if cbottom > bottom then scrollPos <- scrollPos + (cbottom - bottom)
         elif ctop < top then scrollPos <- scrollPos - (top - ctop)
 
-//provide the first tab when constructing
+// provide the first tab when constructing
 type TabContainer(name: string, widget: Widget) as this =
     inherit Widget()
     let mutable selectedItem = widget

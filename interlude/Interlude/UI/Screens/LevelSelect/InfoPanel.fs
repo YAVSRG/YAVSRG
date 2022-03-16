@@ -82,7 +82,7 @@ module private InfoPanel =
                     Localisation.localiseWith [scoreName] "misc.delete",
                     Warning,
                     fun () ->
-                        chartSaveData.Value.Scores.Remove data.ScoreInfo |> ignore
+                        Chart.saveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
                         Notification.add (Localisation.localiseWith [scoreName] "notification.deleted", Info)
                 )
@@ -95,7 +95,6 @@ module private InfoPanel =
         let mutable chart = ""
         let mutable scoring = ""
         let ls = new ListSelectable(true)
-
 
         let filter = Setting.simple ScoreboardFilter.All
         let sort = Setting.map enum int options.ScoreSortMode
@@ -117,17 +116,20 @@ module private InfoPanel =
         let flowContainer = new FlowContainer(Sort = sorter(), Filter = filterer())
 
         let scoreLoader =
-            let future = BackgroundTask.futureSeq<ScoreboardItem> "Scoreboard loader" (fun item -> flowContainer.Synchronized(fun () -> flowContainer.Add item))
+            let future =
+                BackgroundTask.futureSeq<ScoreboardItem> "Scoreboard loader"
+                    (fun item -> flowContainer.Synchronized(fun () -> flowContainer.Add item))
+                    (fun () -> ())
             fun () ->
                 future
                     (fun () ->
                         flowContainer.Synchronized(flowContainer.Clear)
-                        match chartSaveData with
+                        match Chart.saveData with
                         | None -> Seq.empty
                         | Some d ->
                             seq { 
                                 for score in d.Scores do
-                                    yield ScoreInfoProvider(score, currentChart.Value, getCurrentRuleset())
+                                    yield ScoreInfoProvider(score, Chart.current.Value, getCurrentRuleset())
                                     |> ScoreboardItem
                             }
                     )
@@ -175,10 +177,10 @@ module private InfoPanel =
             |> this.Add
 
         member this.Refresh() =
-            let h = match currentCachedChart with Some c -> c.Hash | None -> ""
-            if (match chartSaveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
+            let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""
+            if (match Chart.saveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
                 chart <- h
-                scoreLoader()
+                scoreLoader() |> ignore
             elif scoring <> rulesetId then
                 let s = getCurrentRuleset()
                 for c in flowContainer.Children do (c :?> ScoreboardItem).Data.Ruleset <- s
@@ -205,14 +207,14 @@ type InfoPanel() as this =
         |> this.Add
 
         new TextBox(
-            (fun () -> sprintf "%.2f%s" (match difficultyRating with None -> 0.0 | Some d -> d.Physical) Interlude.Icons.star),
-            (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
+            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Interlude.Icons.star),
+            (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -190.0f, 1.0f, 0.0f, 0.5f, -120.0f, 1.0f)
         |> this.Add
 
         new TextBox(
-            (fun () -> sprintf "%.2f%s" (match difficultyRating with None -> 0.0 | Some d -> d.Technical) Interlude.Icons.star),
-            (fun () -> Color.White, match difficultyRating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
+            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Interlude.Icons.star),
+            (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -120.0f, 1.0f, 0.0f, 0.5f, -50.0f, 1.0f)
         |> this.Add
 
@@ -234,14 +236,14 @@ type InfoPanel() as this =
 
     member this.Refresh() =
         length <-
-            match currentCachedChart with
+            match Chart.cacheInfo with
             | Some cc -> cc.Length
             | None -> 0.0f<ms>
             |> fun x -> x / rate.Value
             |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
             |> fun (x, y) -> sprintf "%s %i:%02i" Interlude.Icons.time x y
         bpm <-
-            match currentCachedChart with
+            match Chart.cacheInfo with
             | Some cc -> cc.BPM
             | None -> (500.0f<ms/beat>, 500.0f<ms/beat>)
             |> fun (b, a) -> (60000.0f<ms> / a * rate.Value |> int, 60000.0f<ms> / b * rate.Value |> int)
@@ -250,7 +252,7 @@ type InfoPanel() as this =
                 elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "%s %i" Interlude.Icons.bpm a
                 else sprintf "%s %i-%i" Interlude.Icons.bpm a b
         notecount <-
-            match currentChart with
+            match Chart.current with
             | Some c ->
                 let mutable notes = 0
                 let mutable lnotes = 0

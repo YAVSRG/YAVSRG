@@ -23,14 +23,14 @@ module QuickOptions =
             | _ -> ()
         let mean = sum / count * Gameplay.rate.Value
 
-        let firstNote = Gameplay.currentChart.Value.FirstNote
+        let firstNote = Gameplay.Chart.current.Value.FirstNote
         let offset = 
             Setting.make
-                (fun v -> Gameplay.chartSaveData.Value.Offset <- toTime v + firstNote; Audio.changeLocalOffset(toTime v))
-                (fun () -> float (Gameplay.chartSaveData.Value.Offset - firstNote))
+                (fun v -> Gameplay.Chart.saveData.Value.Offset <- toTime v + firstNote; Audio.changeLocalOffset(toTime v))
+                (fun () -> float (Gameplay.Chart.saveData.Value.Offset - firstNote))
             |> Setting.bound -200.0 200.0
             |> Setting.round 0
-        let recommendedOffset = float (Gameplay.chartSaveData.Value.Offset - firstNote - mean)
+        let recommendedOffset = float (Gameplay.Chart.saveData.Value.Offset - firstNote - mean)
 
         {
             Content = fun add ->

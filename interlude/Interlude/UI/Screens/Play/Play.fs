@@ -17,7 +17,7 @@ open Interlude.UI.Screens.Play.GameplayWidgets
 type Screen() as this =
     inherit Screen.T()
     
-    let chart = Gameplay.modifiedChart.Value
+    let chart = Gameplay.Chart.withMods.Value
     let firstNote = offsetOf chart.Notes.First.Value
 
     let liveplay = LiveReplayProvider firstNote
@@ -107,10 +107,10 @@ type Screen() as this =
                     let sd =
                         ScoreInfoProvider (
                             Gameplay.makeScore((liveplay :> IReplayProvider).GetFullReplay(), chart.Keys),
-                            Gameplay.currentChart.Value,
+                            Gameplay.Chart.current.Value,
                             scoringConfig,
-                            ModChart = Gameplay.modifiedChart.Value,
-                            Difficulty = Gameplay.difficultyRating.Value
+                            ModChart = Gameplay.Chart.withMods.Value,
+                            Difficulty = Gameplay.Chart.rating.Value
                         )
                     (sd, Gameplay.setScore sd)
                     |> Screens.Score.Screen
@@ -127,7 +127,7 @@ type ReplayMode =
 type ReplayScreen(mode: ReplayMode) as this =
     inherit Screen.T()
     
-    let chart = Gameplay.modifiedChart.Value
+    let chart = Gameplay.Chart.withMods.Value
     let firstNote = offsetOf chart.Notes.First.Value
 
     let keypressData, auto, rate =
