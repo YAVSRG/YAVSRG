@@ -41,7 +41,6 @@ module private Globals =
     (*
          functionality wishlist:
          - hotkeys to navigate by pack/close and open quickly
-         - display of keycount for charts
          - "random chart" hotkey
          - cropping of text that is too long
         

@@ -72,9 +72,7 @@ module Gameplay =
         let mutable withColors : ColorizedChart option = None
     
         let mutable rating : RatingReport option = None
-    
         let mutable saveData : ChartSaveData option = None
-        let mutable bests : Bests option = None
 
         let private _rate = Setting.rate 1.0f
         let private _selectedMods = Setting.simple Map.empty
@@ -102,7 +100,9 @@ module Gameplay =
                     Collections.notifyChangeMods mods
                     update() )
         
-        let mutable onChange = ignore
+        let chartChangeEvent = Event<unit>()
+        let onChange = chartChangeEvent.Publish
+
         let change(cache, context, c) =
             cacheInfo <- Some cache
             current <- Some c
@@ -113,7 +113,7 @@ module Gameplay =
                 Audio.playFrom c.Header.PreviewTime
             options.CurrentChart.Value <- cache.FilePath
             update()
-            onChange()
+            chartChangeEvent.Trigger()
 
         let colored() =
             match withMods with

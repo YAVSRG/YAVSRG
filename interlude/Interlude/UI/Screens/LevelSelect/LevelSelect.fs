@@ -30,7 +30,7 @@ type Screen() as this =
     let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
     let searchText = Setting.simple ""
-    let infoPanel = new InfoPanel()
+    let infoPanel = new ChartInfo()
 
     let refresh() =
         ruleset <- getCurrentRuleset()
@@ -118,7 +118,7 @@ type Screen() as this =
         |> positionWidget(10.0f, 0.0f, 180.0f, 0.0f, -10.0f, 0.4f, 0.0f, 1.0f)
         |> this.Add
 
-        Chart.onChange <- infoPanel.Refresh
+        Chart.onChange.Add infoPanel.Refresh
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
