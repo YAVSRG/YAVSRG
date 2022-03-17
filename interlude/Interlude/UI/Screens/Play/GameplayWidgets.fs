@@ -258,7 +258,7 @@ module GameplayWidgets =
                         sprite
             Array.iteri f sliders
 
-    type Explosions(keys, config: WidgetConfig.Explosions, helper) as this =
+    type Explosions(keys, config: Prelude.Data.Themes.Explosions, helper) as this =
         inherit Widget()
         let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
         let mem = Array.zeroCreate keys
