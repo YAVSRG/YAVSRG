@@ -268,17 +268,18 @@ module Common =
                 id <- id + 1
                 ignore <| Create TaskFlags.HIDDEN name (starter id cons)
 
-        let futureSeq<'T> (name: string) (callback: 'T -> unit) =
+        let futureSeq<'T> (name: string) (itemCallback: 'T -> unit) (completeCallback: unit -> unit) =
             let mutable id = 0
             let starter i cons: StatusTask =
                 fun output -> async {
                     for v in cons() do
-                        if id = i then callback v
+                        if id = i then itemCallback v
+                    if id = i then completeCallback()
                     return id = i
                 }
             fun (cons: unit -> 'T seq) ->
                 id <- id + 1
-                ignore <| Create TaskFlags.HIDDEN name (starter id cons)
+                Create TaskFlags.HIDDEN name (starter id cons) |> ignore
     
     let JSON =
         let j = new JsonEncoder()
