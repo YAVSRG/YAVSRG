@@ -3,7 +3,7 @@
 open System.IO
 open Prelude.Common
 
-module SkinConversions =
+module Conversions =
 
     //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
     module OsuSkin =
