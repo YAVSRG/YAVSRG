@@ -52,7 +52,7 @@ module Content =
 
         let reload() =
             let sourceTheme = if id.StartsWith('*') then defaultTheme else _theme
-            for id in rulesetTextures do
+            for id in Storage.rulesetTextures do
                 let fileid = current.TextureNamePrefix + id 
                 let img, config = sourceTheme.GetRulesetTexture fileid
                 Sprite.upload(img, config.Rows, config.Columns, true)
@@ -124,7 +124,7 @@ module Content =
                 if font <> null then font.Dispose()
                 font <- Fonts.create config.Font
 
-                for id in themeTextures do
+                for id in Storage.themeTextures do
                     match instance.GetTexture id with
                     | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
                     | None ->
@@ -175,7 +175,7 @@ module Content =
 
     module Noteskins =
         
-        open Prelude.Data.SkinConversions
+        open Prelude.Data.Conversions
 
         let loaded : Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()
 
@@ -197,7 +197,7 @@ module Content =
                 config <- instance.Config
 
             let reload() =
-                for id in noteskinTextures do
+                for id in Storage.noteskinTextures do
                     match instance.GetTexture id with
                     | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
                     | None ->
@@ -225,7 +225,7 @@ module Content =
             let add (source: string) (isZip: bool) =
                 let id = Path.GetFileName source
                 try 
-                    let ns = if isZip then Noteskin.FromZipFile source else Noteskin.FromFolder source
+                    let ns = if isZip then Noteskin.FromZipFile source else Noteskin.FromPath source
                     loaded.Add(id, ns)
                     Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
                 with err -> Logging.Error("  Failed to load noteskin '" + id + "'", err)

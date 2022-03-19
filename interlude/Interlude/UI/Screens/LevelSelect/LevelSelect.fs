@@ -30,7 +30,7 @@ type Screen() as this =
     let mutable filter: Filter = []
     let scrollPos = new AnimationFade(300.0f)
     let searchText = Setting.simple ""
-    let infoPanel = new InfoPanel()
+    let infoPanel = new ChartInfo()
 
     let refresh() =
         ruleset <- getCurrentRuleset()
@@ -47,7 +47,7 @@ type Screen() as this =
                 let cc, context = groups.[g].[0]
                 if cc.FilePath <> selectedChart then
                     match Library.load cc with
-                    | Some c -> changeChart(cc, context, c)
+                    | Some c -> Chart.change(cc, context, c)
                     | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
         lastItem <- None
         colorVersionGlobal <- 0
@@ -58,7 +58,7 @@ type Screen() as this =
                 (fun (sortIndex, groupName) ->
                     groups.[(sortIndex, groupName)]
                     |> Seq.map (fun (cc, context) ->
-                        match currentCachedChart with
+                        match Chart.cacheInfo with
                         | None -> ()
                         | Some c -> if c.FilePath = cc.FilePath && context.Id = Collections.contextIndex then selectedChart <- c.FilePath; selectedGroup <- groupName
                         lastItem <- Some (groupName, cc, context)
@@ -77,11 +77,11 @@ type Screen() as this =
         this.Animation.Add scrollPos
         scrollBy <- fun (amt: float32) -> scrollPos.Target <- scrollPos.Target + amt
 
-        new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
+        new TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
         |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 100.0f, 0.0f)
         |> this.Add
 
-        new TextBox((fun () -> match currentCachedChart with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
+        new TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
         |> positionWidget(0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.4f, 160.0f, 0.0f)
         |> this.Add
 
@@ -118,7 +118,7 @@ type Screen() as this =
         |> positionWidget(10.0f, 0.0f, 180.0f, 0.0f, -10.0f, 0.4f, 0.0f, 1.0f)
         |> this.Add
 
-        onChartChange <- infoPanel.Refresh
+        Chart.onChange.Add infoPanel.Refresh
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -176,7 +176,7 @@ type Screen() as this =
         base.Draw()
 
     override this.OnEnter prev =
-        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Action (fun () -> Audio.playFrom currentChart.Value.Header.PreviewTime)
+        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Action (fun () -> Audio.playFrom Chart.current.Value.Header.PreviewTime)
         refresh()
 
     override this.OnExit next = Input.removeInputMethod()

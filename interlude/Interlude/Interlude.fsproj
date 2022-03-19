@@ -5,8 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/Interlude</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.5.12.0</AssemblyVersion>
-    <FileVersion>0.5.12.0</FileVersion>
+    <AssemblyVersion>0.5.13.0</AssemblyVersion>
+    <FileVersion>0.5.13.0</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -86,7 +86,8 @@
     <Compile Include="UI\Screens\LevelSelect\Globals.fs" />
     <Compile Include="UI\Screens\LevelSelect\Collections.fs" />
     <Compile Include="UI\Screens\LevelSelect\ModSelect.fs" />
-    <Compile Include="UI\Screens\LevelSelect\InfoPanel.fs" />
+    <Compile Include="UI\Screens\LevelSelect\Scoreboard.fs" />
+    <Compile Include="UI\Screens\LevelSelect\ChartInfo.fs" />
     <Compile Include="UI\Screens\LevelSelect\Tree.fs" />
     <Compile Include="UI\Screens\LevelSelect\LevelSelect.fs" />
     <Compile Include="UI\Screens\Import\Mounts.fs" />

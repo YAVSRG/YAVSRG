@@ -22,7 +22,7 @@ module Themes =
         let fbo = FBO.create()
 
         let createRenderer() =
-            match Gameplay.currentChart with
+            match Gameplay.Chart.current with
             | Some chart -> 
                 let nr = Screens.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
                 nr.Add(Screens.Play.GameplayWidgets.ScreenCover())
@@ -44,7 +44,7 @@ module Themes =
             this.Reposition(-50.0f - w, 1.0f, -h * 0.5f, 0.5f, -50.0f, 1.0f, h * 0.5f, 0.5f)
 
         member this.Refresh() =
-            Gameplay.recolorChart()
+            Gameplay.Chart.recolor()
             renderer.Dispose()
             renderer <- createRenderer()
 
@@ -150,7 +150,7 @@ module Themes =
 
         let tryEditNoteskin add =
             let ns = Noteskins.Current.instance
-            match ns.StorageType with
+            match ns.Source with
             | Zip (_, Some file) -> 
                 ConfirmDialog(
                     sprintf "'%s' cannot be edited because it is zipped. Extract and edit?" ns.Config.Name,
@@ -165,7 +165,7 @@ module Themes =
 
         let tryEditTheme add =
             let theme = Themes.Current.instance
-            match theme.StorageType with
+            match theme.Source with
             | Zip (_, None) ->
                 ConfirmDialog(
                     sprintf "'%s' is the default theme. Extract a copy and edit?" theme.Config.Name,

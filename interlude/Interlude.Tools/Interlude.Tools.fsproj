@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="Features\Asset_Script.fs" />
     <Compile Include="Features\Bundle_Assets.fs" />
     <None Include="Features\zip_build.bat" />
     <Compile Include="Program.fs" />

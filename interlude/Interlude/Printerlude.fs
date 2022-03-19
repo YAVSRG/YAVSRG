@@ -13,7 +13,7 @@ module Printerlude =
 
     type Commands =
         static member Chart() : string =
-            match Gameplay.currentCachedChart with
+            match Gameplay.Chart.cacheInfo with
             | Some c -> c.Hash
             | None -> failwith "No current chart."
 

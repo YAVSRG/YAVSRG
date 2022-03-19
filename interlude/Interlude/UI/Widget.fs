@@ -123,15 +123,13 @@ type Widget() =
         | None -> Logging.Error "Tried to remove this widget from a container it isn't in one"
         | Some p -> if p = c then parent <- None else Logging.Error "Tried to remove this widget from a container when it is in another"
 
-    /// Often we want to add/remove child widgets during an update method
-    ///   But, we are in the middle of iterating through the children collection so we cannot modify it
-    /// This trick queues up the action to take place immediately before the next update loop, making it loop-safe
-    ///   The animations are thread-safe too - So when updating widgets from a background task use this.
+    /// Queues up the action to take place immediately before the next update loop, making it thread/loop-safe
+    ///   When updating widgets from a background task, use this.
     member this.Synchronized(action) =
         animation.Add(new AnimationAction(action))
 
     /// Destroys a widget by removing it from its parent, then disposing it (will be garbage collected)
-    /// Note that this is safe to call inside an update/draw method
+    /// Note that this is safe to call inside an update/draw method OR from another thread
     member this.Destroy() =
         match this.Parent with
         | Some parent -> parent.Synchronized(fun () -> (parent.Remove this; this.Dispose()))

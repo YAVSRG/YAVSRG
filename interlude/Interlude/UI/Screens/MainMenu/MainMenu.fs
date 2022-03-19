@@ -65,7 +65,7 @@ type Screen() as this =
         splashText <- newSplash()
         Logo.moveMenu()
         Screen.backgroundDim.Target <- 0.0f
-        Screen.toolbar <- false
+        Screen.hideToolbar <- false
         Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Loop
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()

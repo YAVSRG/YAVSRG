@@ -41,7 +41,6 @@ module private Globals =
     (*
          functionality wishlist:
          - hotkeys to navigate by pack/close and open quickly
-         - display of keycount for charts
          - "random chart" hotkey
          - cropping of text that is too long
         
@@ -84,7 +83,7 @@ module private Globals =
     let switchCurrentChart(cc, context, groupName) =
         match Library.load cc with
         | Some c ->
-            changeChart(cc, context, c)
+            Chart.change(cc, context, c)
             selectedChart <- cc.FilePath
             expandedGroup <- groupName
             selectedGroup <- groupName
@@ -92,13 +91,11 @@ module private Globals =
         | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
     
     let playCurrentChart() =
-        if currentChart.IsSome then
-            chartSaveData.Value.LastPlayed <- System.DateTime.Now
+        match Chart.saveData with
+        | Some data ->
+            data.LastPlayed <- System.DateTime.Now
             Screen.changeNew
-                ( fun () ->
-                    if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T
-                    else Screen()
-                )
+                ( fun () -> if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T else Screen() )
                 ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
                 Screen.TransitionFlag.Default
-        else Logging.Warn "Tried to play selected chart; There is no chart selected"
+        | None -> Logging.Warn "Tried to play selected chart; There is no chart selected"

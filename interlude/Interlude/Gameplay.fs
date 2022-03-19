@@ -58,76 +58,81 @@ module Gameplay =
                     true
                 | _ -> false
 
-    let mutable internal currentChart: Chart option = None
-    let mutable internal currentCachedChart: CachedChart option = None
-    let mutable internal chartSaveData = None
-    let mutable modifiedChart: ModChart option = None
-    let mutable private coloredChart: ColorizedChart option = None
-    let mutable difficultyRating: RatingReport option = None
-
     let mutable autoplay = false
 
     let mutable ruleset : Ruleset = getCurrentRuleset()
     let mutable rulesetId = Ruleset.hash ruleset
 
-    let private _rate = Setting.rate 1.0f
-    let private _selectedMods = Setting.simple Map.empty
-    let updateChart() =
-        match currentChart with
-        | None -> ()
-        | Some c ->
-            modifiedChart <- Some <| getModChart _selectedMods.Value c
-            coloredChart <- None
-            difficultyRating <-
-                let mc = modifiedChart.Value in
-                Some <| RatingReport(mc.Notes, _rate.Value, options.Playstyles.[mc.Keys - 3], mc.Keys)
+    
+    module Chart =
+    
+        let mutable cacheInfo : CachedChart option = None
+        let mutable current : Chart option = None
+        let mutable withMods : ModChart option = None
+        let mutable withColors : ColorizedChart option = None
+    
+        let mutable rating : RatingReport option = None
+        let mutable saveData : ChartSaveData option = None
 
-    let rate : Setting.Bounded<float32> = 
-        _rate
-        |> Setting.trigger (
-            fun v ->
-                Collections.notifyChangeRate v
-                Audio.changeRate v
-                updateChart()
-        )
+        let private _rate = Setting.rate 1.0f
+        let private _selectedMods = Setting.simple Map.empty
 
-    let selectedMods : Setting<ModState> = 
-        _selectedMods
-        |> Setting.trigger (
-            fun mods ->
-                Collections.notifyChangeMods mods
-                updateChart()
-        )
+        let update() =
+            match current with
+            | None -> ()
+            | Some c ->
+                let modChart = getModChart _selectedMods.Value c
+                withMods <- Some modChart
+                rating <- 
+                    RatingReport(modChart.Notes, _rate.Value, options.Playstyles.[modChart.Keys - 3], modChart.Keys)
+                    |> Some
+                withColors <- None
+
+        let rate : Setting.Bounded<float32> = 
+            _rate
+            |> Setting.trigger ( fun v ->
+                    Collections.notifyChangeRate v
+                    Audio.changeRate v
+                    update() )
+        let selectedMods : Setting<ModState> = 
+            _selectedMods
+            |> Setting.trigger ( fun mods ->
+                    Collections.notifyChangeMods mods
+                    update() )
         
-    let mutable onChartChange = ignore
+        let chartChangeEvent = Event<unit>()
+        let onChange = chartChangeEvent.Publish
 
-    let changeChart (cachedChart, context, chart) =
-        currentCachedChart <- Some cachedChart
-        currentChart <- Some chart
-        chartSaveData <- Some <| Scores.getOrCreateScoreData chart
-        Collections.notifyChangeChart context rate selectedMods
-        Screen.Background.load chart.BackgroundPath
-        if Audio.changeTrack (chart.AudioPath, chartSaveData.Value.Offset - chart.FirstNote, rate.Value) then
-            Audio.playFrom chart.Header.PreviewTime
-        options.CurrentChart.Value <- cachedChart.FilePath
-        updateChart()
-        onChartChange()
+        let change(cache, context, c) =
+            cacheInfo <- Some cache
+            current <- Some c
+            saveData <- Some (Scores.getOrCreateScoreData c)
+            Collections.notifyChangeChart context rate selectedMods
+            Screen.Background.load c.BackgroundPath
+            if Audio.changeTrack (c.AudioPath, saveData.Value.Offset - c.FirstNote, rate.Value) then
+                Audio.playFrom c.Header.PreviewTime
+            options.CurrentChart.Value <- cache.FilePath
+            update()
+            chartChangeEvent.Trigger()
 
-    let getColoredChart() =
-        match modifiedChart with
-        | None -> failwith "Tried to get coloredChart when no modifiedChart exists"
-        | Some mc ->
-            coloredChart <- Option.defaultWith (fun () -> getColoredChart (Content.noteskinConfig().NoteColors) mc) coloredChart |> Some
-            coloredChart.Value
+        let colored() =
+            match withMods with
+            | None -> failwith "Tried to get coloredChart when no modifiedChart exists"
+            | Some mc ->
+                withColors <- Option.defaultWith (fun () -> getColoredChart (Content.noteskinConfig().NoteColors) mc) withColors |> Some
+                withColors.Value
 
-    let recolorChart() = coloredChart <- None
+        let recolor() = withColors <- None
+
+    let rate = Chart.rate
+    let selectedMods = Chart.selectedMods
 
     let makeScore (replayData, keys) : Score =
         {
             time = DateTime.Now
             replay = Replay.compress replayData
             rate = rate.Value
-            selectedMods = selectedMods.Value |> ModChart.filter modifiedChart.Value
+            selectedMods = selectedMods.Value |> ModChart.filter Chart.withMods.Value
             layout = options.Playstyles.[keys - 3]
             keycount = keys
         }
@@ -145,7 +150,7 @@ module Gameplay =
             | _ -> true
         then
             // todo: score uploading goes here when implemented
-            Scores.saveScore chartSaveData.Value rulesetId data
+            Scores.saveScore Chart.saveData.Value rulesetId data
         else BestFlags.Default
 
     let save() =
@@ -169,7 +174,7 @@ module Gameplay =
                     Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
                     |> fun d -> fst d.[(0, "All")].[0]
                     |> fun c -> c, Library.load(c).Value
-            changeChart(c, LevelSelectContext.None, ch)
+            Chart.change(c, LevelSelectContext.None, ch)
         with err ->
             Logging.Debug("Tried to auto select a chart but none exist", err)
             Screen.Background.load ""

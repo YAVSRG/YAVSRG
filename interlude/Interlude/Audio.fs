@@ -68,7 +68,7 @@ module Audio =
                 Logging.Debug(sprintf "Discrepancy seek to pos: %f actual time: %f" time actualTime)
             Bass.ChannelPlay(nowplaying.ID) |> bassError
         else if channelPlaying then
-            Bass.ChannelPause(nowplaying.ID) |> bassError
+            Bass.ChannelStop(nowplaying.ID) |> bassError
             channelPlaying <- false
         timer.Restart()
 

@@ -97,8 +97,8 @@ type PrettySetting(name, widget: Selectable) as this =
     member this.Position(y) = this.Position(y, PRETTYWIDTH)
 
     override this.Draw() =
-        if this.Selected then Draw.rect this.Bounds (Color.FromArgb(180, 0, 0, 0)) Sprite.Default
-        elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 0, 0, 0)) Sprite.Default
+        if this.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f)) Sprite.Default
+        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f)) Sprite.Default
         base.Draw()
     
     override this.Update(elapsedTime, bounds) =
@@ -134,7 +134,7 @@ type PrettyButton(name, action) as this =
         if this.Enabled then action()
         this.Selected <- false
     override this.Draw() =
-        if this.Hover then Draw.rect this.Bounds (Color.FromArgb(120, 0, 0, 0)) Sprite.Default
+        if this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f)) Sprite.Default
         base.Draw()
     member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
 

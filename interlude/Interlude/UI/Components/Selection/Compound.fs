@@ -105,7 +105,8 @@ module CardSelect =
                 if index = 0 then this.HoverChild <- None
                 else this.HoverChild <- Some (buttons.[index - 1])
             | None ->
-                this.HoverChild <- Some (buttons.[buttons.Length - 1])
+                if buttons.Length > 0 then
+                    this.HoverChild <- Some (buttons.[buttons.Length - 1])
 
         override this.Right() =
             match this.HoverChild with
@@ -114,7 +115,8 @@ module CardSelect =
                 if index = buttons.Length - 1 then this.HoverChild <- None
                 else this.HoverChild <- Some (buttons.[index + 1])
             | None ->
-                this.HoverChild <- Some (buttons.[0])
+                if buttons.Length > 0 then
+                    this.HoverChild <- Some (buttons.[0])
                 
         override this.Update(elapsedTime, bounds) =
             if this.Selected && this.HoverChild = None && options.Hotkeys.Select.Value.Tapped() then onSelect()

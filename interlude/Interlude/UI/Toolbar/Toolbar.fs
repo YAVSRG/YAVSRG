@@ -17,6 +17,8 @@ type Toolbar() as this =
     let barSlider = new AnimationFade 1.0f
     let notifSlider = new AnimationFade 0.0f
 
+    let shown() = not Screen.hideToolbar
+
     let mutable userCollapse = false
     
     do
@@ -31,23 +33,38 @@ type Toolbar() as this =
         |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
         |> this.Add
 
-        Button((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), sprintf "%s %s  " Icons.back (L"menu.back"), Options.options.Hotkeys.Exit)
+        Button(
+            (fun () -> Screen.back Screen.TransitionFlag.UnderLogo),
+            sprintf "%s %s  " Icons.back (L"menu.back"),
+            Options.options.Hotkeys.Exit)
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
-        Button(( fun () -> if Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ), L"menu.options", Options.options.Hotkeys.Options)
+        Button(
+            ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
+            L"menu.options",
+            Options.options.Hotkeys.Options)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> Screen.change Screen.Type.Import Screen.TransitionFlag.Default), L"menu.import", Options.options.Hotkeys.Import)
+        Button(
+            ( fun () -> if shown() then Screen.change Screen.Type.Import Screen.TransitionFlag.Default ),
+            L"menu.import",
+            Options.options.Hotkeys.Import)
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button(MarkdownReader.help, L"menu.help", Options.options.Hotkeys.Help)
+        Button(
+            ( fun () -> if shown() then MarkdownReader.help() ),
+            L"menu.help",
+            Options.options.Hotkeys.Help)
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
-        Button((fun () -> TaskDisplay.Dialog().Show()), L"menu.tasks", Options.options.Hotkeys.Tasks)
+        Button(
+            ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
+            L"menu.tasks",
+            Options.options.Hotkeys.Tasks)
         |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
@@ -69,8 +86,8 @@ type Toolbar() as this =
         Terminal.draw()
 
     override this.Update(elapsedTime, bounds) =
-        if (not Screen.toolbar) && Options.options.Hotkeys.Toolbar.Value.Tapped() then
+        if shown() && Options.options.Hotkeys.Toolbar.Value.Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
         Terminal.update()
-        base.Update(elapsedTime, Rect.expand (0.0f, -HEIGHT * if Screen.toolbar then 0.0f else barSlider.Value) bounds)
+        base.Update(elapsedTime, Rect.expand (0.0f, -HEIGHT * if Screen.hideToolbar then 0.0f else barSlider.Value) bounds)
