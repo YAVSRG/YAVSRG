@@ -94,16 +94,12 @@ type Noteskin(storage) as this =
         and get () = config
             
     member this.GetTexture (name: string) : (Bitmap * TextureConfig) option =
-        match this.TryReadFile (name + ".png") with
-        | Some stream ->
-            let img = Bitmap.load stream
-            let info : TextureConfig = this.GetJsonOrDefault<TextureConfig> (false, name + ".json")
-            stream.Dispose()
-            Some (img, info)
-        | None -> None
+        match this.LoadTexture name with
+        | Ok res -> res
+        | Error err -> Logging.Error(sprintf "Error loading noteskin texture '%s': %s" name err.Message); None
         
     static member FromZipFile (file: string) = 
         let stream = File.OpenRead file
         new Noteskin(Zip (new ZipArchive(stream), Some file))
     static member FromZipStream (stream: Stream) = new Noteskin(Zip (new ZipArchive(stream), None))
-    static member FromFolder (path: string) = new Noteskin(Folder path)
+    static member FromPath (path: string) = new Noteskin(Folder path)

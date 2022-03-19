@@ -39,7 +39,7 @@ type ThemeConfig =
         { this with
             PBColors = 
                 if this.PBColors.Length <> 4 then
-                    Logging.Debug ("Problem with theme: PBColors should have exactly 4 colors")
+                    Logging.Debug "Problem with theme: PBColors should have exactly 4 colors"
                     ThemeConfig.Default.PBColors
                 else this.PBColors
         }
@@ -263,22 +263,14 @@ type Theme(storage) as this =
         and get () = config
         
     member this.GetTexture (name: string) : (Bitmap * TextureConfig) option =
-        match this.TryReadFile ("Textures", name + ".png") with
-        | Some stream ->
-            let img = Bitmap.load stream
-            let info : TextureConfig = this.GetJsonOrDefault<TextureConfig> (false, "Textures", name + ".json")
-            stream.Dispose()
-            Some (img, info)
-        | None -> None
+        match this.LoadTexture (name, "Textures") with
+        | Ok res -> res
+        | Error err -> Logging.Error(sprintf "Error loading theme texture '%s': %s" name err.Message); None
             
     member this.GetRulesetTexture (name: string) : (Bitmap * TextureConfig) =
-        match this.TryReadFile ("Rulesets", name + ".png") with
-        | Some stream ->
-            let img = Bitmap.load stream
-            let info : TextureConfig = this.GetJsonOrDefault<TextureConfig> (false, "Rulesets", name + ".json")
-            stream.Dispose()
-            img, info
-        | None -> new Bitmap(1, 1), TextureConfig.Default
+        match this.LoadTexture (name, "Rulesets") with
+        | Ok (Some res) -> res
+        | _ -> new Bitmap(1, 1), TextureConfig.Default // swallow error or missing file
 
     member this.GetRulesets() =
         seq {

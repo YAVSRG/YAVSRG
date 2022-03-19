@@ -3,32 +3,28 @@
 open System
 open System.IO
 open System.IO.Compression
+open SixLabors.ImageSharp
+open SixLabors.ImageSharp.Processing
 open Prelude.Common
 
 (*
     Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
 *)
 
-type TextureConfig =
-    {
-        Columns: int
-        Rows: int
-        Tiling: bool
-    }   
-    static member Default =
-        {
-            Columns = 1
-            Rows = 1
-            Tiling = true
-        }
+type TextureFileMode = Grid | Loose
+type TextureConfig = 
+    { Columns: int; Rows: int; Mode: TextureFileMode }   
+    static member Default = { Columns = 1; Rows = 1; Mode = Grid }
 
 type StorageType = Zip of ZipArchive * source: string option | Folder of string
 
 type Storage(storage: StorageType) =
 
-    member this.StorageType = storage
+    member this.Source = storage
 
-    member this.TryReadFile ([<ParamArray>] path: string array) =
+    /// Returns stream for requested file, or None if that file doesn't exist
+    /// Can throw exceptions for other IO errors
+    member this.TryReadFile ([<ParamArray>] path: string array) : Stream option =
         let p = Path.Combine(path)
         try
             match storage with
@@ -41,6 +37,7 @@ type Storage(storage: StorageType) =
         | :? NullReferenceException -> None // File doesnt exist in zip storage
         | _ -> reraise()
     
+    /// Returns string names of files in the requested folder
     member this.GetFiles ([<ParamArray>] path: string array) =
         let p = Path.Combine(path)
         match storage with
@@ -54,7 +51,8 @@ type Storage(storage: StorageType) =
             let target = Path.Combine(f, p)
             Directory.CreateDirectory target |> ignore
             Directory.EnumerateFiles target |> Seq.map Path.GetFileName
-
+            
+    /// Returns string names of folders in the requested folder
     member this.GetFolders ([<ParamArray>] path: string array) =
         let p = Path.Combine path
         match storage with
@@ -70,6 +68,57 @@ type Storage(storage: StorageType) =
             let target = Path.Combine(f, p)
             Directory.CreateDirectory target |> ignore
             Directory.EnumerateDirectories target |> Seq.map Path.GetFileName
+
+    // Texture loading
+
+    member private this.LoadGridTexture (config: TextureConfig, name: string, path: string array) : Bitmap option =
+        if config.Columns < 1 then failwith "Columns must be a positive number"
+        elif config.Rows < 1 then failwith "Rows must be a positive number"
+
+        match this.TryReadFile (Array.append path [|name + ".png"|]) with
+        | Some stream ->
+            let img = Bitmap.load stream
+            stream.Dispose()
+            Some img
+        | None -> None
+
+    member private this.LoadLooseTextures (config: TextureConfig, name: string, path: string array) : Bitmap option =
+        if config.Columns < 1 then failwith "Columns must be a positive number"
+        elif config.Rows < 1 then failwith "Rows must be a positive number"
+
+        let load_img row column =
+            match this.TryReadFile (Array.append path [|sprintf "%s-%i-%i.png" name row column|]) with
+            | Some stream -> let i = Bitmap.load stream in stream.Dispose(); i
+            | None -> failwithf "Couldn't load texture file (%i,%i)" row column
+        
+        let base_img = load_img 0 0
+        if base_img.Height <> base_img.Width then failwith "Textures must be square"
+        let atlas = new Bitmap(base_img.Width * config.Columns, base_img.Height * config.Rows)
+
+        for row in 0 .. config.Rows - 1 do
+            for col in 0 .. config.Columns - 1 do
+                use img = if (row, col) = (0, 0) then base_img else load_img row col
+                if img.Height <> base_img.Height || img.Width <> base_img.Width then failwithf "All images must be the same dimensions, (%i, %i) doesn't match (0, 0)" row col
+                atlas.Mutate<PixelFormats.Rgba32>( fun context ->
+                    context.DrawImage(img, Point(col * base_img.Width, row * base_img.Height), 1.0f)
+                    |> ignore )
+        Some atlas
+
+    member internal this.LoadTexture (name: string, [<ParamArray>] path: string array) : Result<(Bitmap * TextureConfig) option, exn> =
+        let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
+        match info.Mode with
+        | Grid -> 
+            try
+                match this.LoadGridTexture (info, name, path) with
+                | Some img -> Ok (Some (img, info))
+                | None -> Ok None
+            with err -> Error err
+        | Loose ->
+            try 
+                match this.LoadLooseTextures (info, name, path)with
+                | Some img -> Ok (Some (img, info))
+                | None -> Ok None
+            with err -> Error err
 
     /// Gets the specified JSON file, or returns None
     /// None is returned with silent fail if the file did not exist
@@ -91,7 +140,7 @@ type Storage(storage: StorageType) =
                 stream.Dispose()
                 result
             | None -> None
-        if writeBack && json.IsSome then this.WriteJson (json.Value, path)
+        if writeBack && json.IsSome then this.WriteJson<'T> (json.Value, path)
         json
 
     /// Gets the specified JSON file, or returns the default instance
@@ -124,11 +173,46 @@ type Storage(storage: StorageType) =
             target |> Path.GetDirectoryName |> Directory.CreateDirectory |> ignore
             JSON.ToFile(target, true) data
 
+    member this.SplitTexture (name: string, [<ParamArray>] path: string array) =
+        match storage with
+        | Zip _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+            let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
+            match info.Mode with
+            | Grid -> 
+                let img = Option.get (this.LoadGridTexture (info, name, path))
+                let w = img.Width / info.Columns
+                let h = img.Height / info.Rows
+                for row in 0 .. info.Rows - 1 do
+                    for col in 0 .. info.Columns - 1 do
+                        use tex = new Bitmap(w, h)
+                        tex.Mutate<PixelFormats.Rgba32> ( fun context ->
+                            context.DrawImage(img, Point(-col * w, -row * h), 1.0f) |> ignore )
+                        tex.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+                File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
+                this.WriteJson({ info with Mode = Loose }, Array.append path [|name + ".json"|])
+            | Loose -> failwithf "Texture '%s' is already split" name
+
+    member this.StitchTexture (name: string, [<ParamArray>] path: string array) =
+        match storage with
+        | Zip _ -> failwith "Not supported for zipped content"
+        | Folder f ->
+            let info : TextureConfig = this.GetJsonOrDefault (false, Array.append path [|name + ".json"|])
+            match info.Mode with
+            | Loose -> 
+                let img = Option.get (this.LoadLooseTextures(info, name, path))
+                img.SaveAsPng(Path.Combine(f, Path.Combine path, sprintf "%s.png" name))
+                for row in 0 .. info.Rows - 1 do
+                    for col in 0 .. info.Columns - 1 do
+                        File.Delete(Path.Combine(f, Path.Combine path, sprintf "%s-%i-%i.png" name row col))
+                this.WriteJson({ info with Mode = Grid }, Array.append path [|name + ".json"|])
+            | Grid -> failwithf "Texture '%s' is already stitched" name
+
     member this.ExtractToFolder targetPath =
         Directory.CreateDirectory targetPath |> ignore
         match storage with
         | Zip (z, _) -> z.ExtractToDirectory targetPath
-        | Folder f -> failwith "can only extract zip to folder"
+        | Folder f -> failwith "Can only extract zip to folder"
         
     member this.CompressToZip target =
         match storage with
