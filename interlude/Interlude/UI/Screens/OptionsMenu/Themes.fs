@@ -150,7 +150,7 @@ module Themes =
 
         let tryEditNoteskin add =
             let ns = Noteskins.Current.instance
-            match ns.StorageType with
+            match ns.Source with
             | Zip (_, Some file) -> 
                 ConfirmDialog(
                     sprintf "'%s' cannot be edited because it is zipped. Extract and edit?" ns.Config.Name,
@@ -165,7 +165,7 @@ module Themes =
 
         let tryEditTheme add =
             let theme = Themes.Current.instance
-            match theme.StorageType with
+            match theme.Source with
             | Zip (_, None) ->
                 ConfirmDialog(
                     sprintf "'%s' is the default theme. Extract a copy and edit?" theme.Config.Name,

@@ -225,7 +225,7 @@ module Content =
             let add (source: string) (isZip: bool) =
                 let id = Path.GetFileName source
                 try 
-                    let ns = if isZip then Noteskin.FromZipFile source else Noteskin.FromFolder source
+                    let ns = if isZip then Noteskin.FromZipFile source else Noteskin.FromPath source
                     loaded.Add(id, ns)
                     Logging.Debug(sprintf "  Loaded noteskin '%s' (%s)" ns.Config.Name id)
                 with err -> Logging.Error("  Failed to load noteskin '" + id + "'", err)
