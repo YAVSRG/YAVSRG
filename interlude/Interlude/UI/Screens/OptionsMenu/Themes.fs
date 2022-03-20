@@ -92,14 +92,21 @@ module Themes =
                     PrettySetting("generic.keymode",
                         Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors))
                     ).Position(450.0f)
+                    PrettySetting("themes.editnoteskin.globalcolors",
+                        Selector<_>.FromBool(
+                            Setting.make
+                                (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
+                                (fun () -> noteColors.UseGlobalColors)
+                            |> Setting.trigger (ignore >> refreshColors))
+                    ).Position(530.0f)
                     PrettySetting("themes.editnoteskin.colorstyle",
                         Selector.FromEnum(
                             Setting.make
                                 (fun v -> noteColors <- { noteColors with Style = v })
                                 (fun () -> noteColors.Style)
                             |> Setting.trigger (ignore >> refreshColors))
-                    ).Position(550.0f)
-                    PrettySetting("themes.editnoteskin.notecolors", colors).Position(650.0f, Render.vwidth - 200.0f, 120.0f)
+                    ).Position(610.0f)
+                    PrettySetting("themes.editnoteskin.notecolors", colors).Position(690.0f, Render.vwidth - 200.0f, 120.0f)
                 ]
             Callback = fun () ->
                 Noteskins.Current.changeConfig

@@ -22,23 +22,10 @@ open Interlude.UI.Animation
 *)
 
 module NoteRenderer =
-    
-    let rotations = 
-        // short term solution until noteskins can set these as settings
-        [|
-            [|90.0; 0.0; 270.0|]
-            [|90.0; 0.0; 180.0; 270.0|]
-            [|0.0; 0.0; 0.0; 0.0; 0.0|] // pump it up has like 10 trillion standard ways to rotate arrows
-            [|90.0; 135.0; 0.0; 180.0; 225.0; 270.0|]
-            [|135.0; 90.0; 45.0; 0.0; 315.0; 270.0; 225.0|]
-            [|90.0; 0.0; 180.0; 270.0; 90.0; 0.0; 180.0; 270.0|]
-            [|0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0|]
-            [|0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0|]
-        |]
 
-    let noteRotation keys k =
-        if Content.noteskinConfig().UseRotation then rotations.[keys - 3].[k]
-        else 0.0
+    let noteRotation keys =
+        let rotations = if Content.noteskinConfig().UseRotation then Content.noteskinConfig().Rotations.[keys - 3] else Array.zeroCreate keys
+        fun k -> Quad.rotateDeg (rotations.[k])
 
 type NoteRenderer(scoring: IScoreMetric) as this =
     inherit Widget()
@@ -72,7 +59,6 @@ type NoteRenderer(scoring: IScoreMetric) as this =
 
     let scrollDirectionPos bottom = if options.Upscroll.Value then id else fun (struct (l, t, r, b): Rect) -> struct (l, bottom - b, r, bottom - t)
     let scrollDirectionFlip = fun q -> if not (Content.noteskinConfig().FlipHoldTail) || options.Upscroll.Value then q else Quad.flip q
-    let noteRotation = fun k -> Quad.rotateDeg (NoteRenderer.noteRotation keys k)
 
     do
         let width = Array.mapi (fun i n -> n + columnWidths.[i]) columnPositions |> Array.max
@@ -115,7 +101,12 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                     (nr.[k] = NoteType.HOLDHEAD || nr.[k] = NoteType.HOLDBODY)
                 else false
             Draw.quad // receptor
-                (Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight) |> scrollDirectionPos bottom |> Quad.ofRect |> noteRotation k)
+                (
+                    Rect.create (left + columnPositions.[k]) hitposition (left + columnPositions.[k] + columnWidths.[k]) (hitposition + noteHeight)
+                    |> scrollDirectionPos bottom
+                    |> Quad.ofRect
+                    |> NoteRenderer.noteRotation keys k
+                )
                 (Color.White |> Quad.colorOf)
                 (Sprite.gridUV (animation.Loops, if (scoring.KeyState |> Bitmap.hasBit k) then 1 else 0) (Content.getTexture "receptor"))
 
@@ -142,7 +133,16 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                 min <- Math.Min(column_pos.[k], min)
                 if nd.[k] = NoteType.NORMAL then
                     Draw.quad // normal note
-                        (Quad.ofRect (Rect.create(left + columnPositions.[k]) column_pos.[k] (left + columnPositions.[k] + columnWidths.[k]) (column_pos.[k] + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
+                        (
+                            Quad.ofRect ( Rect.create
+                                (left + columnPositions.[k])
+                                column_pos.[k]
+                                (left + columnPositions.[k] + columnWidths.[k])
+                                (column_pos.[k] + noteHeight)
+                                |> scrollDirectionPos bottom
+                            )
+                            |> NoteRenderer.noteRotation keys k
+                        )
                         (Quad.colorOf Color.White)
                         (Sprite.gridUV (animation.Loops, int color.[k]) (Content.getTexture "note"))
                 elif nd.[k] = NoteType.HOLDHEAD then
@@ -164,7 +164,16 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                             (Quad.colorOf tint)
                             (Sprite.gridUV (animation.Loops, int color.[k]) tailsprite |> fun struct (s, q) -> struct (s, scrollDirectionFlip q))
                     Draw.quad // head of ln
-                        (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
+                        (
+                            Quad.ofRect ( Rect.create
+                                (left + columnPositions.[k])
+                                headpos
+                                (left + columnPositions.[k] + columnWidths.[k])
+                                (headpos + noteHeight)
+                                |> scrollDirectionPos bottom
+                            )
+                            |> NoteRenderer.noteRotation keys k
+                        )
                         (Quad.colorOf tint)
                         (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
                     hold_presence.[k] <- false
@@ -174,11 +183,28 @@ type NoteRenderer(scoring: IScoreMetric) as this =
             if hold_presence.[k] then
                 let headpos = hold_pos.[k]
                 Draw.quad // body of ln, tail is offscreen
-                    (Quad.ofRect (Rect.create(left + columnPositions.[k]) (headpos + noteHeight * 0.5f) (left + columnPositions.[k] + columnWidths.[k]) bottom |> scrollDirectionPos bottom))
+                    (
+                        Quad.ofRect ( Rect.create
+                            (left + columnPositions.[k])
+                            (headpos + noteHeight * 0.5f)
+                            (left + columnPositions.[k] + columnWidths.[k])
+                            bottom
+                            |> scrollDirectionPos bottom
+                        )
+                    )
                     (Quad.colorOf Color.White)
                     (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdbody"))
                 Draw.quad // head of ln, tail is offscreen
-                    (Quad.ofRect (Rect.create(left + columnPositions.[k]) headpos (left + columnPositions.[k] + columnWidths.[k]) (headpos + noteHeight) |> scrollDirectionPos bottom) |> noteRotation k)
+                    (
+                        Quad.ofRect ( Rect.create
+                            (left + columnPositions.[k])
+                            headpos
+                            (left + columnPositions.[k] + columnWidths.[k])
+                            (headpos + noteHeight)
+                            |> scrollDirectionPos bottom
+                        )
+                        |> NoteRenderer.noteRotation keys k
+                    )
                     (Quad.colorOf Color.White)
                     (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
 

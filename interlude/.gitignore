@@ -16,10 +16,6 @@
 .fake
 .ionide
 .editorconfig
-/Interlude/Resources/default
-/Interlude/Resources/defaultOrb
-/Interlude/Resources/defaultBar
-/Interlude/Resources/defaultArrow
 /Interlude/Resources/FSharp.Formatting.Markdown.dll
 /Interlude/Resources/FSharp.Formatting.Common.dll
 /Interlude.Tools/obj
