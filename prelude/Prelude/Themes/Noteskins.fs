@@ -28,8 +28,6 @@ type NoteskinConfig =
         Author: string
         Version: string
 
-        /// Enables rotation for notes. Set this to true if your notes are arrows/should rotate depending on which column they are in
-        UseRotation: bool
         /// Contains settings for the color scheme of notes
         NoteColors: ColorConfig
 
@@ -56,28 +54,52 @@ type NoteskinConfig =
         AnimationFrameTime: float
         /// Config for explosion animations
         Explosions: Explosions
+
+        /// Enables rotation for notes. Set this to true if your notes are arrows/should rotate depending on which column they are in
+        /// Applies to receptors, notes and if UseHoldTailTexture is false it applies to tails too.
+        UseRotation: bool
+
+        /// Stores rotation infomation for notes. Only applied when UseRotation is true
+        Rotations: float array array
+
     }
     static member Default =
         {
             Name = "Unnamed Noteskin"
             Author = "Unknown"
             Version = "1.0.0"
-            UseRotation = false
             FlipHoldTail = true
             UseHoldTailTexture = true
             HoldNoteTrim = 0.0f
             PlayfieldColor = Color.FromArgb(120, 0, 0, 0)
             PlayfieldAlignment = 0.5f, 0.5f
-            DroppedHoldColor = Color.FromArgb(180, 180, 180, 180)
+            DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
             ColumnWidth = 150.0f
             ColumnLightTime = 0.4f
             AnimationFrameTime = 200.0
             Explosions = Explosions.Default
             NoteColors = ColorConfig.Default
+            UseRotation = false
+            Rotations = [|
+                [|90.0; 0.0; 270.0|]
+                [|90.0; 0.0; 180.0; 270.0|]
+                [|45.0; 135.0; 0.0; 225.0; 315.0|]
+                [|90.0; 135.0; 0.0; 180.0; 225.0; 270.0|]
+                [|135.0; 90.0; 45.0; 0.0; 315.0; 270.0; 225.0|]
+                [|90.0; 0.0; 180.0; 270.0; 90.0; 0.0; 180.0; 270.0|]
+                // todo: agree on rotations for 9b (popn doesn't have any so maybe all 0s is standard)
+                [|0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0; 0.0|]
+                [|45.0; 135.0; 0.0; 225.0; 315.0; 45.0; 135.0; 0.0; 225.0; 315.0|]
+            |]
         }
     member this.Validate =
         { this with
             NoteColors = this.NoteColors.Validate
+            Rotations =
+                if this.Rotations.Length = 8 && Array.indexed this.Rotations |> Array.forall (fun (i, a) -> a.Length = 3 + i) then this.Rotations
+                else
+                    Logging.Error("Problem with noteskin: Rotations are not in the right format - Please use the ingame editor")
+                    NoteskinConfig.Default.Rotations
         }
 
 type Noteskin(storage) as this =
