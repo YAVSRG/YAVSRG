@@ -9,11 +9,11 @@ module Asset_Script =
 
     let main() =
         let theme = Theme.FromPath(Path.Combine(Utils.ASSETS_PATH, "default"))
-        theme.SplitTexture("sc-grade-base", "Rulesets")
-        theme.SplitTexture("sc-grade-lamp-overlay", "Rulesets")
-        theme.SplitTexture("sc-grade-overlay", "Rulesets")
+        theme.StitchTexture("sc-grade-base", "Rulesets")
+        theme.StitchTexture("sc-grade-lamp-overlay", "Rulesets")
+        theme.StitchTexture("sc-grade-overlay", "Rulesets")
 
         
         let dbar = Noteskin.FromPath(Path.Combine(Utils.ASSETS_PATH, "defaultBar"))
         for t in Storage.noteskinTextures do
-            dbar.SplitTexture(t)
+            dbar.StitchTexture(t)

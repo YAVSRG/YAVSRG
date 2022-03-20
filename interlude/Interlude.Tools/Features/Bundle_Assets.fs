@@ -38,7 +38,7 @@ module Bundle_Assets =
         printfn "Making zip: %s" target_zip
         if File.Exists target_zip then File.Delete target_zip
         ZipFile.CreateFromDirectory(source, target_zip)
-
+        
     let main() =
         copy_rulesets()
         make_zip 
