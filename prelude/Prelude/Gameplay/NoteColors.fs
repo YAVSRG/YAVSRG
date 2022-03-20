@@ -18,7 +18,6 @@ module NoteColors =
         | Column = 0
         | Chord = 1
         | DDR = 2
-        | Jackhammer = 3
 
     module ColorScheme =
         let count (keycount: int) (scheme: ColorScheme) =
@@ -26,7 +25,6 @@ module NoteColors =
             | ColorScheme.Column -> keycount
             | ColorScheme.Chord -> keycount
             | ColorScheme.DDR -> Array.length DDRValues + 1
-            | ColorScheme.Jackhammer -> Array.length DDRValues
             | _ -> keycount
 
     type ColorData = byte array
