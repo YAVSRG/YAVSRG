@@ -311,7 +311,7 @@ module GameplayWidgets =
                     | Hit e ->
                         let color = match e.Judgement with Some j -> int j | None -> 0
                         Draw.quad
-                            (box |> Quad.ofRect |> Quad.rotateDeg (NoteRenderer.noteRotation keys k))
+                            (box |> Quad.ofRect |> NoteRenderer.noteRotation keys k)
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
                             (Sprite.gridUV (animation.Loops, color) (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                     | _ -> ()

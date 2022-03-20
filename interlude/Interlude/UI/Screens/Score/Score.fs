@@ -291,9 +291,9 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         // grade stuff
         let gradeBounds = Rect.createWH (right - halfh + xadjust - 270.0f) (halfh - 305.0f) 540.0f 540.0f
         Text.drawFill(font, scoreData.Ruleset.GradeName gradeAchieved.Grade, Rect.expand (-100.0f, -100.0f) gradeBounds, scoreData.Ruleset.GradeColor gradeAchieved.Grade, 0.5f)
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (gradeAchieved.Grade, 0) <| getTexture "grade-base")
-        if lampAchieved.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (lampAchieved.Lamp, 0) <| getTexture "grade-lamp-overlay")
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (gradeAchieved.Grade, 0) <| getTexture "grade-overlay")
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-base")
+        if lampAchieved.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, lampAchieved.Lamp) <| getTexture "grade-lamp-overlay")
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-overlay")
 
         // graph stuff
         Draw.rect (graph.Bounds |> Rect.expand (5.0f, 5.0f)) Color.White Sprite.Default

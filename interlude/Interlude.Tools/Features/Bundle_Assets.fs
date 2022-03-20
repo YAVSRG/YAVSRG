@@ -35,9 +35,10 @@ module Bundle_Assets =
                 theme.WriteJson(rs, "Rulesets", "More", name + ".ruleset")
 
     let make_zip (source: string) (target_zip: string) =
+        printfn "Making zip: %s" target_zip
         if File.Exists target_zip then File.Delete target_zip
         ZipFile.CreateFromDirectory(source, target_zip)
-
+        
     let main() =
         copy_rulesets()
         make_zip 

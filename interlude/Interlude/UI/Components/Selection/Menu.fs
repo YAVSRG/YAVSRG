@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Components.Selection.Menu
 
 open System
-open System.Drawing
 open OpenTK
 open Prelude.Common
 open Interlude
