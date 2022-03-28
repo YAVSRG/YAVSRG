@@ -107,7 +107,7 @@ module Fonts =
             
     let collection = new FontCollection()
 
-    let add (stream: Stream) = collection.Install stream |> ignore
+    let add (stream: Stream) = let family = collection.Install stream in ()
 
     let create (name: string) =
         let found, family = collection.TryFind name
