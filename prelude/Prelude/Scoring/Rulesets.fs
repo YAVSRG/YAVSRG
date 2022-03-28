@@ -493,7 +493,7 @@ module Rulesets =
         let sdvx : Type =
             {
                 Name = "SDVX"
-                Critical = 50.0f<ms>
+                Critical = 45.0f<ms>
                 Near = 150.0f<ms>
                 MissWindow = 150.0f<ms>
             }
@@ -537,12 +537,15 @@ module Rulesets =
                                 { Name = "AAA"; Accuracy = 0.97; Color = Color.FromArgb(237, 205, 140) }
                                 { Name = "AAA+"; Accuracy = 0.98; Color = Color.FromArgb(246, 234, 128) }
                                 { Name = "S"; Accuracy = 0.99; Color = Color.FromArgb(235, 200, 220) }
+                                { Name = "S+"; Accuracy = 0.995; Color = Color.FromArgb(209, 156, 255) }
                             |]
                         Lamps =
                             [|
+                                { Name = "SDCB"; Judgement = -1; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
+                                { Name = "1BREAK"; Judgement = -1; JudgementThreshold = 1; Color = Color.FromArgb(180, 180, 180) }
                                 { Name = "FC"; Judgement = -1; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 80) }
                                 { Name = "SDN"; Judgement = 1; JudgementThreshold = 9; Color = Color.FromArgb(255, 255, 160) }
-                                { Name = "1P"; Judgement = 1; JudgementThreshold = 1; Color = Color.FromArgb(255, 255, 200) }
+                                { Name = "1N"; Judgement = 1; JudgementThreshold = 1; Color = Color.FromArgb(255, 255, 200) }
                                 { Name = "PFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
                             |]
                     }
