@@ -106,17 +106,28 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     let mutable gradeAchieved = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
     let mutable lampAchieved = Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
     let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
+    let mutable existingBests = 
+        if Gameplay.Chart.saveData.Value.Bests.ContainsKey Gameplay.rulesetId then 
+            Some Gameplay.Chart.saveData.Value.Bests.[Gameplay.rulesetId]
+        else None
     let graph = new ScoreGraph(scoreData)
 
     let originalRulesets = Options.options.Rulesets.Value
-    let mutable rulesets = originalRulesets
 
     let refresh() =
-        eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
+        pbs <- BestFlags.Default
         gradeAchieved <- Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
         lampAchieved <- Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
-        pbs <- BestFlags.Default
+        eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
+        existingBests <- None
         graph.Refresh()
+
+    let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (textFunc: 'T -> string) =
+        let rate = scoreData.ScoreInfo.rate
+        if rate > r2 then sprintf "%s (%.2fx)" (textFunc p2) r2
+        elif rate = r2 then textFunc p2
+        elif rate <> r1 then sprintf "%s (%.2fx)" (textFunc p1) r1
+        else textFunc p1
 
     do
         // banner text
@@ -163,7 +174,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             let barh = (halfh - 195.0f) / 3.0f
             let bartop = top + 190.0f + 5.0f
 
-            let infobar t color label text pb hint = 
+            let infobar t color label text pb hint existingPb = 
                 let box = Rect.create (left + 650.0f) t (right - halfh) (t + barh)
                 let header = Rect.sliceLeft 200.0f box
                 let body = Rect.trimLeft 200.0f box
@@ -174,7 +185,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 Text.drawFillB(font, text, body |> Rect.trimLeft 10.0f |> Rect.trimBottom 25.0f, (color, Color.Black), 0.0f)
                 Text.drawFillB(font, hint, body |> Rect.trimLeft 10.0f |> Rect.sliceBottom 35.0f |> Rect.trimBottom 5.0f, (Color.White, Color.Black), 0.0f)
                 if pb = PersonalBestType.None then
-                    Text.drawFillB(font, "Best: --", Rect.sliceBottom 35.0f header, (Color.FromArgb(127, 200, 200, 200), Color.Black), 0.5f)
+                    Text.drawFillB(font, existingPb, Rect.sliceBottom 35.0f header, (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
                 else
                     Text.drawFillB(font, Icons.sparkle + " New record! ", Rect.sliceBottom 35.0f header, (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
 
@@ -191,6 +202,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                         sprintf "+%.2f%% for %s grade" (v * 100.0 + 0.004) nextgrade
                     | None -> ""
                 )
+                (
+                    match existingBests with
+                    | Some b -> getPb b.Accuracy (fun x -> sprintf "%.2f%%" (x * 100.0))
+                    | None -> "--"
+                )
 
             infobar
                 (bartop + barh)
@@ -206,6 +222,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                         sprintf "-%i %s for %s" i.LessNeeded judgement nextlamp
                     | None -> ""
                 )
+                (
+                    match existingBests with
+                    | Some b -> getPb b.Lamp scoreData.Ruleset.LampName
+                    | None -> "--"
+                )
 
             infobar
                 (bartop + barh * 2.0f)
@@ -214,6 +235,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 (if scoreData.HP.Failed then "FAIL" else "CLEAR")
                 pbs.Clear
                 ""
+                (
+                    match existingBests with
+                    | Some b -> getPb b.Clear (fun x -> if x then "CLEAR" else "FAIL")
+                    | None -> "--"
+                )
 
         // side panel
         do
@@ -305,13 +331,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         base.Update(elapsedTime, bounds)
 
         if Options.options.Hotkeys.Next.Value.Tapped() then
-            rulesets <- Options.WatcherSelection.cycleForward rulesets
-            Options.options.Rulesets.Value <- rulesets
+            Setting.app Options.WatcherSelection.cycleForward Options.options.Rulesets
             scoreData.Ruleset <- Options.getCurrentRuleset()
             refresh()
         elif Options.options.Hotkeys.Previous.Value.Tapped() then
-            rulesets <- Options.WatcherSelection.cycleBackward rulesets
-            Options.options.Rulesets.Value <- rulesets
+            Setting.app Options.WatcherSelection.cycleBackward Options.options.Rulesets
             scoreData.Ruleset <- Options.getCurrentRuleset()
             refresh()
 
