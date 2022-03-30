@@ -208,9 +208,8 @@ type IScoreMetric
                 elif status.[k] = HitStatus.RELEASE_REQUIRED then
                     let overhold =
                         match internalHoldStates.[k] with
-                        | Dropped, i | Holding, i when i <= noteSeekPassive -> true
+                        | Dropped, i | Holding, i when i <= noteSeekPassive -> Bitmap.hasBit k this.KeyState
                         | _ -> false
-                        && Bitmap.hasBit k this.KeyState
                     let dropped =
                         match internalHoldStates.[k] with
                         | Dropped, _
@@ -383,8 +382,8 @@ type CustomScoring(config: Ruleset, keys, replay, notes, rate) =
 
                     | HoldNoteBehaviour.Normal rules ->
                         let judgement =
-                            if missed || dropped then max headJudgement rules.JudgementIfDropped
-                            elif overhold then max headJudgement rules.JudgementIfOverheld
+                            if overhold && not dropped then max headJudgement rules.JudgementIfOverheld
+                            elif missed || dropped then max headJudgement rules.JudgementIfDropped
                             else headJudgement
                         this.State.Add(point_func delta judgement, 1.0, judgement)
                         if config.Judgements.[judgement].BreaksCombo then this.State.BreakCombo true else this.State.IncrCombo()
