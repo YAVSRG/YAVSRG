@@ -35,9 +35,11 @@
     <Compile Include="Themes\Themes.fs" />
     <Compile Include="Themes\Noteskins.fs" />
     <Compile Include="Themes\Conversions.fs" />
+    <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Scores.fs" />
     <Compile Include="Data\Charts.fs" />
-    <Compile Include="Data\Web.fs" />
+    <Compile Include="Data\Tables.fs" />
+    <Compile Include="Data\Library.fs" />
   </ItemGroup>
 
   <ItemGroup>
