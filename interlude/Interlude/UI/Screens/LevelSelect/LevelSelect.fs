@@ -86,31 +86,31 @@ type Screen() as this =
         |> this.Add
 
         new SearchBox(searchText, fun f -> filter <- f; refresh())
-        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Search")
+        |> TooltipRegion.Create (Localisation.localise "levelselect.search.tooltip")
         |> positionWidget(-600.0f, 1.0f, 30.0f, 0.0f, -50.0f, 1.0f, 90.0f, 0.0f)
         |> this.Add
 
         new ModSelect()
-        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Mods")
+        |> TooltipRegion.Create (Localisation.localise "levelselect.mods.tooltip")
         |> positionWidget(25.0f, 0.4f, 120.0f, 0.0f, -25.0f, 0.55f, 170.0f, 0.0f)
         |> this.Add
 
         new CollectionManager()
-        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.Collections")
+        |> TooltipRegion.Create (Localisation.localise "levelselect.collections.tooltip")
         |> positionWidget(0.0f, 0.55f, 120.0f, 0.0f, -25.0f, 0.7f, 170.0f, 0.0f)
         |> this.Add
 
         let sorts = sortBy.Keys |> Array.ofSeq
         new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Value),
             (fun i -> options.ChartSortMode.Value <- sorts.[i]; refresh()), "Sort", 50.0f, fun () -> Style.accentShade(100, 0.4f, 0.6f))
-        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.SortBy")
+        |> TooltipRegion.Create (Localisation.localise "levelselect.sortby.tooltip")
         |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 400.0f, 0.0f)
         |> this.Add
 
         let groups = groupBy.Keys |> Array.ofSeq
         new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Value),
             (fun i -> options.ChartGroupMode.Value <- groups.[i]; refresh()), "Group", 50.0f, fun () -> Style.accentShade(100, 0.2f, 0.8f))
-        |> TooltipRegion.Create (Localisation.localise "levelselect.tooltip.GroupBy")
+        |> TooltipRegion.Create (Localisation.localise "levelselect.groupby.tooltip")
         |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 400.0f, 0.0f)
         |> this.Add
 

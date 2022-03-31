@@ -86,10 +86,10 @@ module Scoreboard =
                 )
 
     module Loader =
-        
-        let mutable bests : Bests option = None
 
         let reload (container: FlowContainer) =
+            let mutable rsid = ""
+            let mutable rs = Unchecked.defaultof<_>
             let mutable calculateBests : Bests option = None
             let future =
                 BackgroundTask.futureSeq<ScoreInfoProvider> "Scoreboard loader"
@@ -102,20 +102,21 @@ module Scoreboard =
                         container.Synchronized(fun () -> container.Add sc)
                     )
                     ( fun () -> 
-                        bests <- calculateBests
-                        match bests with
+                        match calculateBests with
                         | None -> ()
                         | Some b ->
                             container.Synchronized( fun () -> 
-                                if not (Chart.saveData.Value.Bests.ContainsKey rulesetId) || b <> Chart.saveData.Value.Bests[rulesetId] then
+                                if not (Chart.saveData.Value.Bests.ContainsKey rsid) || b <> Chart.saveData.Value.Bests[rsid] then
                                     Globals.colorVersionGlobal <- Globals.colorVersionGlobal + 1
-                                Chart.saveData.Value.Bests[rulesetId] <- b
+                                Chart.saveData.Value.Bests[rsid] <- b
                             )
                     )
             fun () ->
                 future
-                    (fun () ->
-                        bests <- None
+                    ( fun () ->
+                        // capture current ruleset, avoids race conditions
+                        rs <- ruleset
+                        rsid <- rulesetId
                         calculateBests <- None
                         container.Synchronized(container.Clear)
                         match Chart.saveData with
@@ -123,7 +124,7 @@ module Scoreboard =
                         | Some d ->
                             seq { 
                                 for score in d.Scores do
-                                    yield ScoreInfoProvider(score, Chart.current.Value, getCurrentRuleset())
+                                    yield ScoreInfoProvider(score, Chart.current.Value, rs)
                             }
                     )
 
@@ -164,10 +165,10 @@ type Scoreboard() as this =
         let future =
             BackgroundTask.futureSeq<ScoreCard> "Scoreboard loader"
                 (fun item -> flowContainer.Synchronized(fun () -> flowContainer.Add item))
-                (fun () -> ())
+                ignore
         fun () ->
             future
-                (fun () ->
+                ( fun () ->
                     flowContainer.Synchronized(flowContainer.Clear)
                     match Chart.saveData with
                     | None -> Seq.empty

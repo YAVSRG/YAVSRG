@@ -3,6 +3,7 @@
 open System.IO
 open Percyqaz.Shell.Tree
 open Percyqaz.Shell.Library
+open Prelude.Common
 open Interlude.UI.Toolbar
 
 module Printerlude =
@@ -40,7 +41,7 @@ module Printerlude =
             ms.Position <- msPos
             Terminal.add_message (context_output.ReadToEnd())
         | ParseFail err -> Terminal.add_message err
-        | TypeFail errs -> for l in (Percyqaz.Shell.Check.Err.format errs) do Terminal.add_message l
+        | TypeFail err -> Terminal.add_message err.Message
         | RunFail err -> Terminal.add_message err.Message
 
     let init() =

@@ -261,6 +261,7 @@ module GameplayWidgets =
     type Explosions(keys, config: Prelude.Data.Themes.Explosions, helper) as this =
         inherit Widget()
         let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
+        let timers = Array.zeroCreate keys
         let mem = Array.zeroCreate keys
         let holding = Array.create keys false
         let explodeTime = Math.Min(0.99f, config.FadeTime)
@@ -271,10 +272,12 @@ module GameplayWidgets =
             | Hit e when (config.ExplodeOnMiss || not e.Missed) ->
                 sliders.[ev.Column].Target <- 1.0f
                 sliders.[ev.Column].Value <- 1.0f
+                timers.[ev.Column] <- ev.Time
                 holding.[ev.Column] <- true
                 mem.[ev.Column] <- ev.Guts
             | Hit e when (config.ExplodeOnMiss || not e.Missed) ->
                 sliders.[ev.Column].Value <- 1.0f
+                timers.[ev.Column] <- ev.Time
                 mem.[ev.Column] <- ev.Guts
             | _ -> ()
 
@@ -310,10 +313,11 @@ module GameplayWidgets =
                     match mem.[k] with
                     | Hit e ->
                         let color = match e.Judgement with Some j -> int j | None -> 0
+                        let frame = (helper.CurrentChartTime() - timers.[k]) / toTime config.AnimationFrameTime |> int
                         Draw.quad
                             (box |> Quad.ofRect |> NoteRenderer.noteRotation keys k)
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))
-                            (Sprite.gridUV (animation.Loops, color) (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
+                            (Sprite.gridUV (frame, color) (Content.getTexture (if e.IsHold then "holdexplosion" else "noteexplosion")))
                     | _ -> ()
             Array.iteri f sliders
 

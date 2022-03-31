@@ -3,8 +3,10 @@
 open Prelude.Common
 open Prelude.Data.Charts
 open Interlude.Utils
+open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components.Selection
+open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
 module Debug =
@@ -27,6 +29,7 @@ module Debug =
                         L"notification.update.installing", System,
                         Enabled = AutoUpdate.updateAvailable
                     ).Position(300.0f)
+                    PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole).Position(400.0f)
                     
                 ] :> Selectable
             Callback = ignore

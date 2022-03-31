@@ -62,7 +62,6 @@ module Gameplay =
 
     let mutable ruleset : Ruleset = getCurrentRuleset()
     let mutable rulesetId = Ruleset.hash ruleset
-
     
     module Chart =
     
