@@ -3,7 +3,7 @@
 open Percyqaz.Shell
 open Interlude.Tools
 
-module Versioning =
+module Releases =
 
     open System.IO
     open System.Diagnostics
@@ -41,6 +41,9 @@ module Versioning =
     let build() =
         Process.Start("Features/build.bat", current_version).WaitForExit()
 
+    let debug() =
+        Process.Start("Features/debug.bat").WaitForExit()
+
     let register(ctx: Context) : Context =
         ctx.WithCommand(
             "version",
@@ -48,4 +51,7 @@ module Versioning =
         ).WithCommand(
             "build",
             Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build)
+        ).WithCommand(
+            "debug",
+            Command.create "Build & debug Interlude" [] (Impl.Create debug)
         )

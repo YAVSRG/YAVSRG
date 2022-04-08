@@ -4,9 +4,8 @@ open Interlude.Tools.Features
 
 let ctx =
     Context.Empty
-    |> Asset_Script.register
-    |> Bundle_Assets.register
-    |> Versioning.register
+    |> Assets.register
+    |> Releases.register
 
 [<EntryPoint>]
 let main argv =
