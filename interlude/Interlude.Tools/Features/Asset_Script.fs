@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Tools.Features
 
+open Percyqaz.Shell
 open Prelude.Data.Themes
 open Interlude.Tools
 
@@ -17,3 +18,9 @@ module Asset_Script =
         let dbar = Noteskin.FromPath(Path.Combine(Utils.ASSETS_PATH, "defaultBar"))
         for t in Storage.noteskinTextures do
             dbar.StitchTexture(t)
+
+    let register(ctx: Context) : Context =
+        ctx.WithCommand (
+            "asset_script",
+            Command.create "debug asset script" [] (Impl.Create main)
+        )

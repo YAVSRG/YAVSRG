@@ -1,13 +1,15 @@
-﻿open System
+﻿open Percyqaz.Shell
 open Interlude.Tools
+open Interlude.Tools.Features
+
+let ctx =
+    Context.Empty
+    |> Asset_Script.register
+    |> Bundle_Assets.register
+    |> Versioning.register
 
 [<EntryPoint>]
 let main argv =
     printfn "%s" Utils.YAVSRG_PATH
-
-    printfn "Press enter to run scripts"
-    Console.ReadLine() |> ignore
-    //Features.Asset_Script.main()
-    Features.Bundle_Assets.main()
-
+    Shell.basic_repl ctx
     0

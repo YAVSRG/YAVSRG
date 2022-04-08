@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Tools.Features
 
+open Percyqaz.Shell
 open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude.Tools
@@ -54,3 +55,9 @@ module Bundle_Assets =
         make_zip 
         <| Path.Combine(Utils.ASSETS_PATH, "defaultOrb")
         <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "defaultOrb.isk")
+
+    let register(ctx: Context) : Context =
+        ctx.WithCommand (
+            "bundle",
+            Command.create "Bundle all assets for build pipeline" [] (Impl.Create main)
+        )
