@@ -25,86 +25,62 @@ type Level =
     {
         /// Display name ingame
         Name: string
-        Charts: TableChart list
+        Charts: ResizeArray<TableChart>
     }
 
 type Table =
     {
         Name: string
-        Levels: Level list
-        Changelog: (TableChange * DateTime) list
+        Levels: ResizeArray<Level>
+        Changelog: ResizeArray<TableChange * DateTime>
     }
+    member private this.Log(c: TableChange) =
+        this.Changelog.Add (c, DateTime.UtcNow)
 
-module Table =
-    
-    let private log (ev: TableChange) (table: Table) =
-        { table with
-            Changelog = (ev, DateTime.UtcNow) :: table.Changelog
-        }
+    // Levels
 
-    let pop_level (name: string) (table: Table) : Level * Level list =
-        match table.Levels |> List.tryFind (fun level -> level.Name = name) with
-        | Some level -> level, table.Levels |> List.except [level]
-        | None -> failwithf "No level with name '%s'" name
+    member private this.Level(id: string) : Level = this.Levels.Find(fun l -> l.Name = id)
 
-    // Level editing
+    member this.CreateLevel(id: string) : Level =
+        let l = { Name = id; Charts = ResizeArray() }
+        this.Levels.Add l
+        this.Log(AddLevel id); l
 
-    let add_level (name: string) (table: Table) =
-        match table.Levels |> List.tryFind (fun level -> level.Name = name) with
-        | Some level -> failwithf "Level '%s' already exists" name
-        | None ->
+    member this.RemoveLevel(id: string) =
+        this.Levels.Remove(this.Level id) |> ignore
+        this.Log(RemoveLevel id)
 
-        { table with
-            Levels =
-                { Name = name; Charts = [] } :: table.Levels }
-        |> log (AddLevel name)
+    member this.RenameLevel(id: string, new_id: string) =
+        this.Log(RenameLevel (id, new_id))
+        let l = this.Level id
+        this.Levels.Remove l |> ignore
+        this.Levels.Add { l with Name = new_id }
 
-    let remove_level (name: string) (table: Table) =
-        let level, other_levels = pop_level name table
-        { table with
-            Levels = other_levels }
-        |> log (RemoveLevel level.Name)
+    // Charts
 
-    let order_levels (names: string list) (table: Table) =
-        let mutable table = table
-        for name in List.rev names do
-            let level, other_levels = pop_level name table
-            table <- { table with Levels = level :: other_levels }
-        table
+    member this.AddChart(level: string, cid: string, chart: CachedChart) =
+        for l in this.Levels do
+            for c in l.Charts do
+                if c.Id = cid then failwith "A table entry with this id already exists"
 
-    let rename_level (oldname: string) (newname: string) (table: Table) =
-        let level, other_levels = pop_level oldname table
-        { table with
-            Levels = { level with Name = newname } :: other_levels }
-        |> log (RenameLevel (level.Name, newname))
-
-    // Chart editing
-
-    let add_chart (chart: CachedChart) (id: string) (level_name: string) (table: Table) =
-        let level, other_levels = pop_level level_name table
+        let l = this.Level level
+        if l.Charts.TrueForAll (fun c -> c.Hash <> chart.Hash) then
+            l.Charts.Add { Id = cid; Hash = chart.Hash }
+            this.Log(AddChart (cid, l.Name))
+        else failwith "Chart already added to this level"
         
-        match level.Charts |> List.tryFind (fun c -> c.Hash = chart.Hash) with
-        | Some c -> failwithf "Chart '%s' already in this level" chart.Title
-        | None ->
+    member this.RemoveChart(cid: string) =
+        for l in this.Levels do
+            match Seq.tryFind (fun c -> c.Id = cid) l.Charts with
+            | Some c -> l.Charts.Remove c |> ignore; this.Log(RemoveChart (cid, l.Name))
+            | None -> ()
 
-        { table with 
-            Levels = { level with Charts = { Id = id; Hash = chart.Hash } :: level.Charts } :: other_levels }
-        |> log (AddChart (id, level.Name))
-
-    let remove_chart (chart: CachedChart) (table: Table) =
-        
-        let mutable found_level = None
-        let mutable found_chart = None
-        for level in table.Levels do
-            for ch in level.Charts do
-                if ch.Hash = chart.Hash then
-                    found_level <- Some level
-                    found_chart <- Some ch
-        
-        if found_level.IsNone then failwith "Chart doesn't appear in the table"
-
-        let level, other_levels = pop_level found_level.Value.Name table
-
-        { table with 
-            Levels = { level with Charts = List.except [found_chart.Value] level.Charts } :: other_levels }
-        |> log (RemoveChart (found_chart.Value.Id, level.Name))
+    member this.MoveChart(cid: string, new_level: string) =
+        for l in this.Levels do
+            if l.Name <> new_level then
+                match Seq.tryFind (fun c -> c.Id = cid) l.Charts with
+                | Some c ->
+                    l.Charts.Remove c |> ignore
+                    (this.Level new_level).Charts.Add c
+                    this.Log(MoveChart (cid, l.Name, new_level))
+                | None -> ()

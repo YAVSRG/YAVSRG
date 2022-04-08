@@ -1,10 +1,7 @@
 ﻿namespace Prelude.Data.Charts
 
 open System
-open System.IO
-open System.IO.Compression
 open System.Collections.Generic
-open System.Collections.Concurrent
 open Percyqaz.Json
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
