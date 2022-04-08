@@ -98,6 +98,7 @@ module Utils =
             assets: GithubAsset list
         } with static member Default = { name = ""; url = ""; tag_name = ""; published_at = ""; body = ""; assets = [] }
 
+        let mutable latestVersionName = "<Unknown because you or the server is offline>"
         let mutable latestRelease = None
         let mutable updateAvailable = false
 
@@ -110,12 +111,10 @@ module Utils =
 
             let current = smallVersion
             let incoming = release.tag_name.Substring(1)
+            latestVersionName <- incoming
 
             let pcurrent = parseVer current
             let pincoming = parseVer incoming
-
-            // if parseVer crashes because of some not-well-formed version, so be it. this is not inside the main thread and that error will get logged
-            // parseVer ensures 0.4.10 > 0.4.9 where string comparison gives the wrong answer
 
             if pincoming > pcurrent then Logging.Info(sprintf "Update available (%s)!" incoming); updateAvailable <- true
             elif pincoming < pcurrent then Logging.Debug(sprintf "Current build (%s) is ahead of update stream (%s)." current incoming)
@@ -130,8 +129,9 @@ module Utils =
             let folderPath = Path.Combine(path, "update")
             if Directory.Exists folderPath then Directory.Delete(folderPath, true)
 
-        // call this only if updateAvailable = true
         let applyUpdate(callback) =
+            if not updateAvailable then failwith "No update available to install"
+
             let download_url = latestRelease.Value.assets.Head.browser_download_url
             let path = getInterludeLocation()
             let zipPath = Path.Combine(path, "update.zip")

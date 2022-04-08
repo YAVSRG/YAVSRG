@@ -40,6 +40,10 @@ module Terminal =
             pos <- 0
             visible <- log
 
+        let clear() =
+            log <- []
+            home()
+
     let add_message(s: string) = Log.add s
 
     let private line = Setting.simple ""
@@ -74,7 +78,7 @@ module Terminal =
         let rec addInput() = Input.setTextInput (line, fun () -> if shown then Screen.globalAnimation.Add(Animation.AnimationAction(addInput)))
         addInput()
 
-    let font = lazy ( Fonts.create "Courier Prime Sans" )
+    let font = lazy ( Fonts.create "Courier Prime Sans" |> fun x -> x.SpaceWidth <- 0.5f; x )
 
     let draw() =
         if not shown then ()

@@ -104,6 +104,10 @@ module Fonts =
         member this.Dispose() =
             fontLookup.Values
             |> Seq.iter (fun struct (s, _) -> Sprite.destroy s)
+
+        member val CharSpacing = -0.04f with get, set
+        member val SpaceWidth = 0.25f with get, set
+        member val ShadowDepth = 0.09f with get, set
             
     let collection = new FontCollection()
 
@@ -126,18 +130,15 @@ open Fonts
 module Text =
 
     let private FONTSCALE = SCALE
-    let private WHITESPACE = 0.25f
-    let private SPACING = -0.04f
-    let private SHADOW = 0.09f
 
     let measure (font: SpriteFont, text: string) : float32 =
-        let mutable width = -SPACING
+        let mutable width = -font.CharSpacing
         let mutable highSurrogate = ' '
         let mutable i = 0
         while i < text.Length do
             let thisChar = text.[i]
             if thisChar = ' ' then
-                width <- width + WHITESPACE
+                width <- width + font.SpaceWidth
             elif Char.IsHighSurrogate thisChar then
                 highSurrogate <- thisChar
             else
@@ -145,20 +146,20 @@ module Text =
                     if Char.IsLowSurrogate thisChar then Char.ConvertToUtf32(highSurrogate, thisChar)
                     else int32 thisChar
                 let struct (s, _) = font.Char code
-                width <- width + (float32 s.Width) / FONTSCALE + SPACING
+                width <- width + (float32 s.Width) / FONTSCALE + font.CharSpacing
             i <- i + 1
         width
 
     let drawB (font: SpriteFont, text: string, scale, x, y, (fg, bg)) =
         let scale2 = scale / FONTSCALE
-        let shadowAdjust = SHADOW * scale
+        let shadowAdjust = font.ShadowDepth * scale
         let mutable x = x
         let mutable highSurrogate = ' '
         let mutable i = 0
         while i < text.Length do
             let thisChar = text.[i]
             if thisChar = ' ' then
-                x <- x + WHITESPACE * scale
+                x <- x + font.SpaceWidth * scale
             elif Char.IsHighSurrogate thisChar then
                 highSurrogate <- thisChar
             else
@@ -172,7 +173,7 @@ module Text =
                 if (bg: Color).A <> 0uy then
                     Draw.quad (Quad.ofRect (Rect.translate(shadowAdjust, shadowAdjust) r)) (Quad.colorOf bg) struct (s, q)
                 Draw.quad (Quad.ofRect r) (Quad.colorOf fg) struct (s, q)
-                x <- x + w + SPACING * scale
+                x <- x + w + font.CharSpacing * scale
             i <- i + 1
 
     let draw (font, text, scale, x, y, color) = drawB(font, text, scale, x, y, (color, Color.Transparent))
