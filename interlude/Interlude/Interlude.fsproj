@@ -114,7 +114,7 @@
     <PackageReference Include="ManagedBass" Version="3.1.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.1.0" />
     <PackageReference Include="OpenTK" Version="4.6.7" />
-    <PackageReference Include="Percyqaz.Shell" Version="0.1.1" />
+    <PackageReference Include="Percyqaz.Shell" Version="0.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -122,7 +122,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.1" />
+    <PackageReference Update="FSharp.Core" Version="6.0.3" />
   </ItemGroup>
 
   <ItemGroup>
