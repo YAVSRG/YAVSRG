@@ -41,10 +41,12 @@ type Table =
 
     member private this.Level(id: string) : Level = this.Levels.Find(fun l -> l.Name = id)
 
-    member this.CreateLevel(id: string) : Level =
+    member this.CreateLevel(id: string) =
+        for l in this.Levels do
+            if l.Name = id then failwith "A level with this id already exists"
         let l = { Name = id; Charts = ResizeArray() }
         this.Levels.Add l
-        this.Log(AddLevel id); l
+        this.Log(AddLevel id)
 
     member this.RemoveLevel(id: string) =
         this.Levels.Remove(this.Level id) |> ignore

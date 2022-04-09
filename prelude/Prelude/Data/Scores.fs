@@ -49,6 +49,7 @@ type ChartSaveData =
         Scores: List<Score>
         Bests: Dictionary<string, Bests>
         mutable LastPlayed: DateTime
+        mutable Comment: string
     }
     static member FromChart(c: Chart) =
         {
@@ -56,6 +57,7 @@ type ChartSaveData =
             Scores = List<Score>()
             Bests = Dictionary<string, Bests>()
             LastPlayed = DateTime.UnixEpoch
+            Comment = ""
         }
     static member Default =
         {
@@ -63,6 +65,7 @@ type ChartSaveData =
             Scores = null
             Bests = Dictionary<string, Bests>()
             LastPlayed = DateTime.UnixEpoch
+            Comment = ""
         }
 
 (*
