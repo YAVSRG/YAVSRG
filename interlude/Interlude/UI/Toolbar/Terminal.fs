@@ -14,31 +14,47 @@ module Terminal =
 
     module Log = 
         let mutable private pos = 0
-        let mutable private log : string list = []
+        let mutable private log : ResizeArray<string> = ResizeArray()
         let upKey = Bind.mk Keys.PageUp
         let downKey = Bind.mk Keys.PageDown
         let homeKey = Bind.mk Keys.End
 
-        let mutable visible : string list = []
+        let mutable visible : string seq = []
+
+        let LINEWIDTH = 120
 
         let add(s: string) =
-            match s.Split('\n', StringSplitOptions.RemoveEmptyEntries) |> List.ofArray with
-            | [] -> ()
-            | xs -> log <- List.rev xs @ log; visible <- List.skip pos log
+            for line in s.Split('\n', StringSplitOptions.RemoveEmptyEntries) do
+                let mutable line = line
+                while line.Length > LINEWIDTH do
+                    let split =
+                        match line.Substring(0, LINEWIDTH).LastIndexOf(' ') with
+                        | -1 -> LINEWIDTH
+                        | n -> n
+                    log.Insert(0, line.Substring(0, split))
+                    line <- line.Substring(split)
+
+                log.Insert(0, line)
+
+            visible <- Seq.skip pos log
 
         let up() =
-            if log.Length - 15 > pos then
+            if log.Count - 15 > pos then
                 pos <- pos + 5
-                visible <- List.skip pos log
+                visible <- Seq.skip pos log
 
         let down() =
             if pos - 5 >= 0 then
                 pos <- pos - 5
-                visible <- List.skip pos log
+                visible <- Seq.skip pos log
 
         let home() =
             pos <- 0
             visible <- log
+
+        let clear() =
+            log.Clear()
+            home()
 
     let add_message(s: string) = Log.add s
 
@@ -74,7 +90,7 @@ module Terminal =
         let rec addInput() = Input.setTextInput (line, fun () -> if shown then Screen.globalAnimation.Add(Animation.AnimationAction(addInput)))
         addInput()
 
-    let font = lazy ( Fonts.create "Courier Prime Sans" )
+    let font = lazy ( Fonts.create "Courier Prime Sans" |> fun x -> x.SpaceWidth <- 0.5f; x )
 
     let draw() =
         if not shown then ()
@@ -88,7 +104,7 @@ module Terminal =
         Draw.rect (bounds |> Rect.sliceBottom 65.0f) (Color.FromArgb(255, 0, 0, 0)) Sprite.Default
         Text.drawB(font.Value, ">  " + line.Value, 30.0f, l + 20.0f, b - 50.0f, (Color.White, Color.Black))
 
-        for i, line in List.indexed Log.visible do
+        for i, line in Seq.indexed Log.visible do
             if i < 19 then
                 Text.drawB(font.Value, line, 20.0f, l + 20.0f, b - 60.0f - 60.0f - 40f * float32 i, (Color.White, Color.Black))
 

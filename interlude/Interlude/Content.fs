@@ -15,7 +15,7 @@ module Content =
     let mutable accentColor = ThemeConfig.Default.DefaultAccentColor
     let mutable font : Fonts.SpriteFont = null
 
-    let mutable private first_init = true
+    let mutable first_init = true
 
     module Sprites =
         

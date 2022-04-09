@@ -8,6 +8,7 @@ open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.Charts
+open Prelude.Data.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
@@ -123,6 +124,30 @@ module Gameplay =
 
         let recolor() = withColors <- None
 
+    module Table =
+
+        open System.IO
+        
+        let mutable current : Table option = None
+        let mutable currentFile = ""
+
+        let save() =
+            match current with
+            | Some t -> JSON.ToFile(Path.Combine(getDataPath "Data", "Tables", currentFile), true) t
+            | None -> ()
+
+        let load(fileid: string) =
+            save()
+            currentFile <- fileid + ".table"
+            current <- Path.Combine(getDataPath "Data", "Tables", currentFile) |> JSON.FromFile |> function Ok t -> Some t | Result.Error e -> raise e
+
+        let create(name: string, fileid: string) =
+            save()
+            if Path.Combine(getDataPath "Data", "Tables", currentFile) |> File.Exists then failwith "Table already exists"
+            currentFile <- fileid + ".table"
+            current <- Some { Name = name; Levels = ResizeArray(); Changelog = ResizeArray() }
+            save()
+
     let rate = Chart.rate
     let selectedMods = Chart.selectedMods
 
@@ -153,6 +178,7 @@ module Gameplay =
         else BestFlags.Default
 
     let save() =
+        Table.save()
         Scores.save()
         Library.save()
 

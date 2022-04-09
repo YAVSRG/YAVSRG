@@ -12,14 +12,27 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <Compile Include="Features\Asset_Script.fs" />
-    <Compile Include="Features\Bundle_Assets.fs" />
-    <None Include="Features\zip_build.bat" />
+    <Compile Include="Features\Releases.fs" />
+    <Compile Include="Features\Assets.fs" />
+    <None Include="Features\debug.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Features\build.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Percyqaz.Shell" Version="0.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Prelude\Prelude\Prelude.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.3" />
   </ItemGroup>
 
 </Project>

@@ -1,12 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/Interlude</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.5.14.0</AssemblyVersion>
-    <FileVersion>0.5.14.0</FileVersion>
+    <AssemblyVersion>0.5.15</AssemblyVersion>
+    <FileVersion>0.5.15</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -114,7 +114,7 @@
     <PackageReference Include="ManagedBass" Version="3.1.0" />
     <PackageReference Include="ManagedBass.Fx" Version="3.1.0" />
     <PackageReference Include="OpenTK" Version="4.6.7" />
-    <PackageReference Include="Percyqaz.Shell" Version="0.1.1" />
+    <PackageReference Include="Percyqaz.Shell" Version="0.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -122,7 +122,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.1" />
+    <PackageReference Update="FSharp.Core" Version="6.0.3" />
   </ItemGroup>
 
   <ItemGroup>
