@@ -266,7 +266,8 @@ module Options =
                 Setting.simple [Content.Rulesets.DEFAULT]
                 |> Setting.map
                     id
-                    ( fun xs -> 
+                    ( fun xs ->
+                        if Content.first_init then xs else
                         let filtered = 
                             List.filter 
                                 ( fun x -> 
