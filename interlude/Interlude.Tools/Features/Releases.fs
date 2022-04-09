@@ -18,6 +18,7 @@ module Releases =
         f.Substring(i, j - i).Substring("<AssemblyVersion>".Length)
 
     let version (v: string) =
+        printfn "Version: %s -> %s" current_version v
         let file = Path.Combine(Utils.INTERLUDE, "Interlude.fsproj")
         let mutable f = File.ReadAllText file
 
@@ -35,7 +36,6 @@ module Releases =
 
         File.WriteAllText(file, f)
 
-        printfn "Version: %s -> %s" current_version v
         current_version <- v
 
     let build() =
