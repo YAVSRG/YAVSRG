@@ -13,7 +13,29 @@ module Printerlude =
 
     module Tables = 
         
-        let register_commands ctx = ctx
+        let register_commands (ctx: Context) =
+            ctx
+                .WithCommand("table_load", Command.create "Loads a table from file" ["filename"]
+                    ( Impl.Create(Types.str, Gameplay.Table.load) ))
+
+                .WithCommand("table_save", Command.create "Creates a new table" []
+                    ( Impl.Create Gameplay.Table.save ))
+
+                .WithCommand("table_create", Command.create "Creates a new table" ["name"; "filename"]
+                    ( Impl.Create(Types.str, Types.str, fun name filename -> Gameplay.Table.create(name, filename)) ))
+
+                .WithCommand("table_create_level", Command.create "Creates a new level in the current table" ["level_name"]
+                    ( Impl.Create(Types.str, fun levelid -> Gameplay.Table.current.Value.CreateLevel levelid) ))
+
+                .WithCommand("table_remove_level", Command.create "Deletes a level in the current table" ["level_name"]
+                    ( Impl.Create(Types.str, fun levelid -> Gameplay.Table.current.Value.RemoveLevel levelid) ))
+                    
+                .WithCommand("table_rename_level", Command.create "Renames a level in the current table" ["old_level_name"; "new_level_name"]
+                    ( Impl.Create(Types.str, Types.str, fun oldname newname -> Gameplay.Table.current.Value.RenameLevel(oldname, newname)) ))
+
+                .WithCommand("table_add_chart", Command.create "Adds the current chart to the current table" ["level_name"; "chart_id"]
+                    ( Impl.Create(Types.str, Types.str, 
+                        fun levelid chartid -> Gameplay.Table.current.Value.AddChart(levelid, chartid, Gameplay.Chart.cacheInfo.Value)) ))
 
     module Utils =
 
@@ -22,7 +44,8 @@ module Printerlude =
             ctx.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
         
         let register_commands (ctx: Context) = 
-            ctx.WithCommand("version", Command.create "Shows info about the current game version" [] (Impl.Create show_version))
+            ctx
+                .WithCommand("version", Command.create "Shows info about the current game version" [] (Impl.Create show_version))
                 .WithCommand("exit", Command.create "Exits the game" [] (Impl.Create (fun () -> UI.Screen.exit <- true)))
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
 
