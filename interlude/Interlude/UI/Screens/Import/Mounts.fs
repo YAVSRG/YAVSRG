@@ -31,12 +31,12 @@ module Mounts =
                     PrettyButton.Once(
                         "mount.import",
                         (fun () -> import <- true),
-                        Localisation.localiseWith ["Import new songs"] "notification.taskstarted", Task
+                        Localisation.localiseWith ["Import new songs"] "notification.taskstarted", NotificationType.Task
                     ).Position(400.0f)
                     PrettyButton.Once(
                         "mount.importall",
                         (fun () -> import <- true; mount.LastImported <- System.DateTime.UnixEpoch),
-                        Localisation.localiseWith ["Import all songs"] "notification.taskstarted", Task
+                        Localisation.localiseWith ["Import all songs"] "notification.taskstarted", NotificationType.Task
                     ).Position(500.0f)
                 ] :> Selectable
             Callback = fun () ->

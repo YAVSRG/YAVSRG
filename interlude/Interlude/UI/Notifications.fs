@@ -7,6 +7,7 @@ open Interlude
 open Interlude.Input
 open Interlude.UI.Animation
 
+[<RequireQualifiedAccess>]
 type NotificationType =
     | Info
     | Warning
@@ -57,11 +58,11 @@ module Tooltip =
                 let bounds = Rect.create (left + 100.0f) y (right - 100.0f) (y + h)
                 let c, icon =
                     match i.Type with
-                    | Info -> Color.FromArgb(0, 120, 190), Icons.info
-                    | Warning -> Color.FromArgb(180, 150, 0), Icons.alert
-                    | Error -> Color.FromArgb(190, 0, 0), Icons.alert
-                    | System -> Color.FromArgb(0, 190, 120), Icons.system_notification
-                    | Task -> Color.FromArgb(120, 0, 190), Icons.system_notification
+                    | NotificationType.Info -> Color.FromArgb(0, 120, 190), Icons.info
+                    | NotificationType.Warning -> Color.FromArgb(180, 150, 0), Icons.alert
+                    | NotificationType.Error -> Color.FromArgb(190, 0, 0), Icons.alert
+                    | NotificationType.System -> Color.FromArgb(0, 190, 120), Icons.system_notification
+                    | NotificationType.Task -> Color.FromArgb(120, 0, 190), Icons.system_notification
                 let a = i.Fade.Value * 255.0f |> int
                 Draw.rect (Rect.sliceTop 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
                 Draw.rect (Rect.sliceBottom 5.0f bounds) (Color.FromArgb(a, c)) Sprite.Default
@@ -99,7 +100,7 @@ module Tooltip =
                 Duration = infinity
                 Fade = AnimationFade(0.0f, Target = 1.0f)
                 Callback = ignore
-                Type = Info
+                Type = NotificationType.Info
             }
         display.Synchronized(fun () -> items.Add t)
 

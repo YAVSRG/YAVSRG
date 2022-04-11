@@ -168,7 +168,7 @@ module Tree =
                     d.Grade
                     ruleset.GradeName
                     (fun _ -> let (_, _, c) = getPb d.Grade ruleset.GradeColor in c)
-                    450.0f
+                    425.0f
                 disp
                     d.Lamp
                     ruleset.LampName
@@ -178,7 +178,7 @@ module Tree =
                     d.Clear
                     (fun x -> if x then "CLEAR" else "FAILED")
                     Themes.clearToColor
-                    150.0f
+                    175.0f
             | None -> ()
 
             // draw text
@@ -219,11 +219,11 @@ module Tree =
                     Tooltip.callback (
                         options.Hotkeys.Delete.Value,
                         Localisation.localiseWith [chartName] "misc.delete",
-                        Warning,
+                        NotificationType.Warning,
                         fun () -> 
                             Library.delete cc
                             LevelSelect.refresh <- true
-                            Notification.add (Localisation.localiseWith [chartName] "notification.deleted", Info)
+                            Notification.add (Localisation.localiseWith [chartName] "notification.deleted", NotificationType.Info)
                     )
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
@@ -260,7 +260,7 @@ module Tree =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
             if this.Expanded then
                 let b2 = List.fold (fun t (i: ChartItem) -> i.Draw(t, origin, originB)) b items
-                if b < origin && b2 > origin then Text.drawJustB(font, name, 20.0f, Render.vwidth - 5f, origin + 15.0f, (Color.White, Color.Black), 1.0f)
+                if b < origin && b2 > origin then Text.drawJustB(font, name, 20.0f, Render.vwidth - 20f, origin + 10.0f, (Color.White, Color.Black), 1.0f)
                 b2
             else b
 
@@ -273,11 +273,11 @@ module Tree =
                     Tooltip.callback (
                         options.Hotkeys.Delete.Value,
                         Localisation.localiseWith [groupName] "misc.delete",
-                        Warning,
+                        NotificationType.Warning,
                         fun () ->
                             items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                             LevelSelect.refresh <- true
-                            Notification.add (Localisation.localiseWith [groupName] "notification.deleted", Info)
+                            Notification.add (Localisation.localiseWith [groupName] "notification.deleted", NotificationType.Info)
                     )
 
         member this.Update(top, origin, originB, elapsedTime) =
@@ -302,15 +302,13 @@ module Tree =
         cacheFlag <- cacheFlag + 1
 
     let refresh() =
-        cacheFlag <- 0
-        expandedGroup <- selectedGroup
-        scrollTo <- ScrollTo.Chart
         // fetch groups
         let library_groups =
             let ctx : GroupContext = { Rate = rate.Value; RulesetId = rulesetId; Ruleset = ruleset }
             if options.ChartGroupMode.Value <> "Collections" then
                 Library.getGroups ctx groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
             else Library.getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
+        // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()
             if library_groups.[g].Count = 1 then
@@ -325,7 +323,8 @@ module Tree =
             |> Seq.map
                 (fun (sortIndex, groupName) ->
                     library_groups.[(sortIndex, groupName)]
-                    |> Seq.map ( fun (cc, context) ->
+                    |> Seq.map
+                        ( fun (cc, context) ->
                             match Chart.cacheInfo with
                             | None -> ()
                             | Some c -> if c.FilePath = cc.FilePath && context.Id = Collections.contextIndex then selectedChart <- c.FilePath; selectedGroup <- groupName
@@ -336,6 +335,9 @@ module Tree =
                     |> List.ofSeq
                     |> fun l -> GroupItem(groupName, l))
             |> List.ofSeq
+        cacheFlag <- 0
+        expandedGroup <- selectedGroup
+        scrollTo <- ScrollTo.Chart
 
     let previous() =
         match lastItem with
@@ -415,5 +417,5 @@ module Tree =
         let tree_height = bottomEdge - scrollPos.Value
         let lb = total_height - tree_height - origin
         let ub = 20.0f + origin
-        let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * total_height
+        let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * (total_height - 40.0f)
         Draw.rect (Rect.create (Render.vwidth - 10.0f) (origin + 10.0f + scrollPos) (Render.vwidth - 5.0f) (origin + 30.0f + scrollPos)) Color.White Sprite.Default

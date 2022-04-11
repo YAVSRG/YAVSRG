@@ -99,7 +99,7 @@ type CollectionManager() as this =
                     | Goals gs -> gs.Add (selectedChart, GoalData.Make selectedMods.Value rate.Value Goal.None); true
                 then
                     if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
-                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.added", Info)
+                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.added", NotificationType.Info)
 
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
                 if fst selected <> snd contextIndex then // Remove from collection that isn't in this context
@@ -116,7 +116,7 @@ type CollectionManager() as this =
                             else false
                     then
                         if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", Info)
+                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", NotificationType.Info)
                 else // Remove from this context collection
                     if
                         match snd selected with
@@ -126,7 +126,7 @@ type CollectionManager() as this =
                     then
                         LevelSelect.refresh <- true
                         notifyChangeChart LevelSelectContext.None rate selectedMods
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", Info)
+                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", NotificationType.Info)
 
             elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
                 if reorder false then LevelSelect.refresh <- true

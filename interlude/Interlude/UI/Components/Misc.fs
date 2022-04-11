@@ -92,16 +92,18 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
     override this.Dispose() =
         if active then Input.removeInputMethod()
 
-type SearchBox(s: Setting<string>, callback: Filter -> unit) as this =
+type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit Widget()
     let searchTimer = new Diagnostics.Stopwatch()
     do
         TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some options.Hotkeys.Search, "search" )
         |> this.Add
 
+    new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, fun () -> callback(Filter.parse s.Value))
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback(Filter.parse s.Value)
+        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback()
 
 type TextInputDialog(bounds: Rect, prompt, callback) as this =
     inherit Dialog()
