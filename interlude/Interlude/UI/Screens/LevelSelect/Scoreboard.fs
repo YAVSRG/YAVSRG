@@ -107,7 +107,7 @@ module Scoreboard =
                         | Some b ->
                             container.Synchronized( fun () -> 
                                 if not (Chart.saveData.Value.Bests.ContainsKey rsid) || b <> Chart.saveData.Value.Bests[rsid] then
-                                    Globals.colorVersionGlobal <- Globals.colorVersionGlobal + 1
+                                    Tree.updateDisplay()
                                 Chart.saveData.Value.Bests[rsid] <- b
                             )
                     )

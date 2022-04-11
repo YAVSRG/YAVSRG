@@ -20,6 +20,21 @@ open Interlude.Utils
 module Gameplay =
 
     module Collections =
+    
+        open Prelude.Data.Charts.Library
+
+        let mutable selected =
+            // todo: load from settings
+            let favourites = Localisation.localise "collections.favourites"
+            let c = 
+                match Collections.get favourites with
+                | Some c -> c
+                | None ->
+                    let n = Collection.Blank
+                    Collections.create (favourites, n) |> ignore
+                    n
+            favourites, c
+
         let mutable internal currentChartContext : LevelSelectContext = LevelSelectContext.None
         let mutable contextIndex = -1, ""
 

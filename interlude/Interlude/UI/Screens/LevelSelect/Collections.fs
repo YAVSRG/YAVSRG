@@ -11,22 +11,10 @@ open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 open Interlude.UI.Components.Selection.Compound
 open Interlude.Gameplay
+open Interlude.Gameplay.Collections
 open Interlude.Options
-open Globals
 
 module private Collections =
-
-    let mutable selected =
-        // todo: load from settings
-        let favourites = Localisation.localise "collections.favourites"
-        let c = 
-            match Collections.get favourites with
-            | Some c -> c
-            | None ->
-                let n = Collection.Blank
-                Collections.create (favourites, n) |> ignore
-                n
-        favourites, c
 
     let private editCollection ((originalName, data): string * Collection) =
         let name = Setting.simple originalName |> Setting.alphaNum
@@ -72,7 +60,7 @@ module private Collections =
                                 setting,
                                 { CardSelect.Config.Default with
                                     NameFunc = fst
-                                    MarkFunc = (fun (x, m) -> if m then colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
+                                    MarkFunc = (fun (x, m) -> if m then Tree.updateDisplay(); selected <- x)
                                     EditFunc = Some editCollection
                                     CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
                                     DeleteFunc = Some
@@ -97,22 +85,26 @@ type CollectionManager() as this =
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
+
+
         if Chart.cacheInfo.IsSome then
 
-            if options.Hotkeys.AddToCollection.Value.Tapped() && fst Collections.selected <> snd Collections.contextIndex then
+            let selectedChart = Chart.cacheInfo.Value.FilePath
+
+            if options.Hotkeys.AddToCollection.Value.Tapped() && fst selected <> snd contextIndex then
                 if
-                    match snd Collections.selected with
+                    match snd selected with
                     | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
                     | Playlist ps -> ps.Add (selectedChart, PlaylistData.Make selectedMods.Value rate.Value); true
                     | Goals gs -> gs.Add (selectedChart, GoalData.Make selectedMods.Value rate.Value Goal.None); true
                 then
-                    if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
-                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst Collections.selected] "collections.added", Info)
+                    if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
+                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.added", Info)
 
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
-                if fst Collections.selected <> snd Collections.contextIndex then // Remove from collection that isn't in this context
+                if fst selected <> snd contextIndex then // Remove from collection that isn't in this context
                     if
-                        match snd Collections.selected with
+                        match snd selected with
                         | Collection ccs -> ccs.Remove selectedChart
                         | Playlist ps -> 
                             if ps.FindAll(fun (id, _) -> id = selectedChart).Count = 1 then 
@@ -123,21 +115,21 @@ type CollectionManager() as this =
                                 gs.RemoveAll(fun (id, _) -> id = selectedChart) > 0
                             else false
                     then
-                        if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst Collections.selected] "collections.removed", Info)
+                        if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
+                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", Info)
                 else // Remove from this context collection
                     if
-                        match snd Collections.selected with
+                        match snd selected with
                         | Collection ccs -> ccs.Remove selectedChart
-                        | Playlist ps -> ps.RemoveAt(fst Collections.contextIndex); true
-                        | Goals gs -> gs.RemoveAt(fst Collections.contextIndex); true
+                        | Playlist ps -> ps.RemoveAt(fst contextIndex); true
+                        | Goals gs -> gs.RemoveAt(fst contextIndex); true
                     then
                         LevelSelect.refresh <- true
-                        Collections.notifyChangeChart LevelSelectContext.None rate selectedMods
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst Collections.selected] "collections.removed", Info)
+                        notifyChangeChart LevelSelectContext.None rate selectedMods
+                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", Info)
 
             elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
-                if Collections.reorder false then LevelSelect.refresh <- true
+                if reorder false then LevelSelect.refresh <- true
 
             elif options.Hotkeys.ReorderCollectionUp.Value.Tapped() then
-                if Collections.reorder true then LevelSelect.refresh <- true
+                if reorder true then LevelSelect.refresh <- true
