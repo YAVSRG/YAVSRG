@@ -70,6 +70,8 @@ module Options =
             Select: Setting<Bind>
             Previous: Setting<Bind>
             Next: Setting<Bind>
+            PreviousGroup: Setting<Bind>
+            NextGroup: Setting<Bind>
             Up: Setting<Bind>
             Down: Setting<Bind>
             Start: Setting<Bind>
@@ -117,6 +119,8 @@ module Options =
             Volume = Setting.simple(mk Keys.LeftAlt)
             Previous = Setting.simple(mk Keys.Left)
             Next = Setting.simple(mk Keys.Right)
+            PreviousGroup = Setting.simple(mk Keys.PageUp)
+            NextGroup = Setting.simple(mk Keys.PageDown)
             Up = Setting.simple(mk Keys.Up)
             Down = Setting.simple(mk Keys.Down)
             Start = Setting.simple(mk Keys.Home)

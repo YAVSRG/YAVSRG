@@ -95,6 +95,10 @@ type Screen() as this =
 
         elif options.Hotkeys.Next.Value.Tapped() then Tree.next()
         elif options.Hotkeys.Previous.Value.Tapped() then Tree.previous()
+        elif options.Hotkeys.NextGroup.Value.Tapped() then Tree.nextGroup()
+        elif options.Hotkeys.PreviousGroup.Value.Tapped() then Tree.previousGroup()
+        elif options.Hotkeys.Start.Value.Tapped() then Tree.beginGroup()
+        elif options.Hotkeys.End.Value.Tapped() then Tree.endGroup()
         
         let struct (left, top, right, bottom) = this.Bounds
         Tree.update(top + 170.0f, bottom, elapsedTime)

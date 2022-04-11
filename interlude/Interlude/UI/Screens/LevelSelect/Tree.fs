@@ -318,6 +318,7 @@ module Tree =
                 if cc.FilePath <> selectedChart then
                     switchChart(cc, context, snd g)
         // build groups ui
+        lastItem <- None
         groups <-
             library_groups.Keys
             |> Seq.sort
