@@ -33,6 +33,7 @@ type Score =
             keycount = 4
         }
 
+[<Json.AllRequired>]
 type Bests =
     {
         Lamp: PersonalBests<int>
@@ -40,6 +41,7 @@ type Bests =
         Grade: PersonalBests<int>
         Clear: PersonalBests<bool>
     }
+    static member Default = { Lamp = PersonalBests<int>.Default; Accuracy = PersonalBests<float>.Default; Grade = PersonalBests<int>.Default; Clear = PersonalBests<bool>.Default }
 
 type ChartSaveData =
     {

@@ -67,6 +67,7 @@ module Grade =
         (calculateWithTarget grades state).Grade
 
 type PersonalBests<'T> = { Best: 'T * float32; Fastest: 'T * float32 }
+    with static member Default = { Best = (Unchecked.defaultof<'T>, 0.0f); Fastest = (Unchecked.defaultof<'T>, 0.0f)}
 
 type PersonalBestType =
     | FasterBetter = 3
