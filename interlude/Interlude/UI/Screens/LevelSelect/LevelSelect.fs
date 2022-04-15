@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
-open System
 open OpenTK.Mathematics
 open Prelude.Common
 open Prelude.Scoring
@@ -13,8 +12,18 @@ open Interlude.Graphics
 open Interlude.Input
 open Interlude.Gameplay
 open Interlude.Options
-open Interlude.UI.Animation
 open Interlude.UI.Components
+
+type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color) as this =
+    inherit StylishButton(
+            ( fun () -> 
+                Dropdown.create_selector items id (fun g -> setting.Set g)
+                |> positionWidget(5.0f, 0.0f, 60.0f, 0.0f, -5.0f, 1.0f, 60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE, 0.0f)
+                |> this.Add
+            ),
+            ( fun () -> sprintf "%s: %s" label setting.Value ),
+            colorFunc
+        )
 
 type Screen() as this =
     inherit Screen.T()
@@ -60,18 +69,20 @@ type Screen() as this =
         |> positionWidget(0.0f, 0.55f, 120.0f, 0.0f, -25.0f, 0.7f, 170.0f, 0.0f)
         |> this.Add
 
-        let sorts = sortBy.Keys |> Array.ofSeq
-        new Dropdown(sorts, Array.IndexOf(sorts, options.ChartSortMode.Value),
-            (fun i -> options.ChartSortMode.Value <- sorts.[i]; refresh()), "Sort", 50.0f, fun () -> Style.accentShade(100, 0.4f, 0.6f))
+        LevelSelectDropdown(sortBy.Keys, "Sort",
+            options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
+            fun () -> Style.accentShade(100, 0.4f, 0.6f)
+        )
         |> TooltipRegion.Create (Localisation.localise "levelselect.sortby.tooltip")
-        |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 400.0f, 0.0f)
+        |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 170.0f, 0.0f)
         |> this.Add
 
-        let groups = groupBy.Keys |> Array.ofSeq
-        new Dropdown(groups, Array.IndexOf(groups, options.ChartGroupMode.Value),
-            (fun i -> options.ChartGroupMode.Value <- groups.[i]; refresh()), "Group", 50.0f, fun () -> Style.accentShade(100, 0.2f, 0.8f))
+        LevelSelectDropdown(groupBy.Keys, "Group",
+            options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
+            fun () -> Style.accentShade(100, 0.2f, 0.8f)
+        )
         |> TooltipRegion.Create (Localisation.localise "levelselect.groupby.tooltip")
-        |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 400.0f, 0.0f)
+        |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 170.0f, 0.0f)
         |> this.Add
 
         infoPanel

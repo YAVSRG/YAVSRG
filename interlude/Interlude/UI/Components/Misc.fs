@@ -5,6 +5,7 @@ open OpenTK
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude
+open Interlude.Utils
 open Interlude.UI
 open Interlude.Input
 open Interlude.Graphics
@@ -20,33 +21,6 @@ type TooltipRegion(localisedText) =
             Tooltip.tooltip (options.Hotkeys.Tooltip.Value, localisedText)
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
-
-type Dropdown(options: string array, index, callback: int -> unit, label, buttonSize, colorFunc) as this =
-    inherit Widget()
-
-    let color = AnimationFade 0.5f
-    let mutable index = index
-
-    do
-        this.Animation.Add color
-        let fr = new Frame(Enabled = false)
-        StylishButton (
-            (fun () -> fr.Enabled <- not fr.Enabled),
-            (fun () -> label + ": " + options.[index]),
-            colorFunc )
-        |> position (WPos.topSlice buttonSize)
-        |> this.Add
-        this.Add(
-            let fc = FlowContainer(Spacing = 0.0f)
-            fr.Add fc
-            Array.iteri
-                ( fun i (o: string) ->
-                    Button((fun () -> index <- i; callback i), o)
-                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)
-                    |> fc.Add
-                )
-                options
-            fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
 
 type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) as this =
     inherit Widget()
@@ -143,3 +117,45 @@ type SlideDialog(direction: SlideDialog.Direction, distance: float32) as this =
         else this.Move(0.0f, 0.0f, 0.0f, distance)
 
     override this.OnClose() = ()
+
+module Dropdown =
+
+    let ITEMSIZE = 60.0f
+    let WIDTH = 300.0f
+    
+    type Item(label: string, onclick: unit -> unit) as this =
+        inherit Widget()
+
+        let mutable hover = false
+
+        do
+            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, ITEMSIZE, 0.0f)
+            this.Add(Clickable(onclick, (fun b -> hover <- b), Float = true))
+            this.Add(
+                TextBox(K label, (fun () -> if hover then Style.accentShade(255, 1.0f, 0.5f), Color.Black else Color.White, Color.Black), 0.0f)
+                |> positionWidget(10.0f, 0.0f, 5.0f, 0.0f, -10.0f, 1.0f, -5.0f, 1.0f)
+            )
+
+        override this.Draw() =
+            if hover then Draw.rect this.Bounds (Color.FromArgb(100, 100, 100, 100)) Sprite.Default
+            base.Draw()
+
+    type Container(items: (string * (unit -> unit)) seq) as this =
+        inherit Frame(Color.FromArgb(180, 0, 0, 0), Color.FromArgb(100, 255, 255, 255))
+
+        do
+            let fc = FlowContainer(Spacing = 0.0f)
+            let items = Seq.map (fun (label, action) -> Item(label, fun () -> action(); this.Destroy())) items |> Array.ofSeq
+
+            for i in items do fc.Add i
+            this.Add fc
+
+        override this.Update(elapsedTime, bounds) =
+            base.Update(elapsedTime, bounds)
+            if options.Hotkeys.Exit.Value.Tapped() || Mouse.Click(Windowing.GraphicsLibraryFramework.MouseButton.Left) then this.Destroy()
+
+    let create (items: (string * (unit -> unit)) seq) =
+        Container(items)
+
+    let create_selector (items: 'T seq) (labelFunc: 'T -> string) (selectFunc: 'T -> unit) =
+        create (Seq.map (fun item -> (labelFunc item, fun () -> selectFunc item)) items)

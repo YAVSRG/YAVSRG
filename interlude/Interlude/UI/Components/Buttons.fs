@@ -57,6 +57,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Setting<
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
         Text.drawFillB(Content.font, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.accentShade(255, 0.4f, color.Value)), 0.5f)
+        base.Draw()
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =
         let names = Enum.GetNames(typeof<'T>)
