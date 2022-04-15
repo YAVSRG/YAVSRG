@@ -64,6 +64,50 @@ module Options =
                 AudioDevice = Setting.simple 1
             }
 
+    //type Hotkey =
+    //    // All-purpose/menus
+    //    | Exit = 0
+    //    | Select = 1
+    //    | Previous = 2
+    //    | Next = 3 
+    //    | PreviousGroup = 4
+    //    | NextGroup = 5
+    //    | Up = 6
+    //    | Down = 7
+    //    | Start = 8
+    //    | End = 9
+    //    | Search = 10
+    //    | Toolbar = 11
+    //    | Tooltip = 12
+    //    | Delete = 13
+    //    | Screenshot = 13
+    //    | Volume = 15
+
+    //    // Shortcuts
+    //    | Import = 16
+    //    | Options = 17
+    //    | Help = 18
+    //    | Tasks = 19
+    //    | Console = 20
+
+    //    // Level select
+    //    | UpRate = 21
+    //    | UpRateHalf = 22
+    //    | UpRateSmall = 23
+    //    | DownRate = 24
+    //    | DownRateHalf = 25
+    //    | DownRateSmall = 26
+    //    | Collections = 27
+    //    | AddToCollection = 28
+    //    | RemoveFromCollection = 29
+    //    | MoveDownInCollection = 30
+    //    | MoveUpInCollection = 31
+    //    | Mods = 32
+    //    | Autoplay = 33
+
+    //    // Gameplay
+    //    | Skip = 34
+
     type Hotkeys =
         {
             Exit: Setting<Bind>
@@ -93,7 +137,6 @@ module Options =
 
             Mods: Setting<Bind>
             Autoplay: Setting<Bind>
-            ChartInfo: Setting<Bind>
 
             Import: Setting<Bind>
             Options: Setting<Bind>
@@ -135,7 +178,6 @@ module Options =
 
             Mods = Setting.simple(mk Keys.M)
             Autoplay = Setting.simple(ctrl Keys.A)
-            ChartInfo = Setting.simple(mk Keys.Period)
 
             Import = Setting.simple(ctrl Keys.I)
             Options = Setting.simple(ctrl Keys.O)
