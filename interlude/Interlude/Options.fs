@@ -104,9 +104,11 @@ module Options =
     //    | MoveUpInCollection = 31
     //    | Mods = 32
     //    | Autoplay = 33
+    //    | SortMode = 34
+    //    | GroupMode = 35
 
     //    // Gameplay
-    //    | Skip = 34
+    //    | Skip = 35
 
     type Hotkeys =
         {
@@ -134,6 +136,8 @@ module Options =
             RemoveFromCollection: Setting<Bind>
             ReorderCollectionDown: Setting<Bind>
             ReorderCollectionUp: Setting<Bind>
+            SortMode: Setting<Bind>
+            GroupMode: Setting<Bind>
 
             Mods: Setting<Bind>
             Autoplay: Setting<Bind>
@@ -175,6 +179,8 @@ module Options =
             RemoveFromCollection = Setting.simple(mk Keys.LeftBracket)
             ReorderCollectionDown = Setting.simple(ctrl Keys.RightBracket)
             ReorderCollectionUp = Setting.simple(ctrl Keys.LeftBracket)
+            SortMode = Setting.simple(mk Keys.Comma)
+            GroupMode = Setting.simple(mk Keys.Period)
 
             Mods = Setting.simple(mk Keys.M)
             Autoplay = Setting.simple(ctrl Keys.A)

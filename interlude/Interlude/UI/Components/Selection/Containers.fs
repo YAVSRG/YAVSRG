@@ -27,11 +27,11 @@ type NavigateSelectable() =
         base.Update(elapsedTime, bounds)
         if not disposed && this.Selected && this.SelectedChild.IsNone then
             if options.Hotkeys.Previous.Value.Tapped() then this.Left()
-            elif options.Hotkeys.Up.Value.Tapped() then this.Up()
-            elif options.Hotkeys.Next.Value.Tapped() then this.Right()
-            elif options.Hotkeys.Down.Value.Tapped() then this.Down()
-            elif options.Hotkeys.Select.Value.Tapped() then this.SelectedChild <- this.HoverChild
-            elif options.Hotkeys.Exit.Value.Tapped() then this.Selected <- false
+            if options.Hotkeys.Up.Value.Tapped() then this.Up()
+            if options.Hotkeys.Next.Value.Tapped() then this.Right()
+            if options.Hotkeys.Down.Value.Tapped() then this.Down()
+            if options.Hotkeys.Select.Value.Tapped() then this.SelectedChild <- this.HoverChild
+            if options.Hotkeys.Exit.Value.Tapped() then this.Selected <- false
 
     override this.Dispose() = base.Dispose(); disposed <- true
 
@@ -107,6 +107,3 @@ type FlowSelectable(height, spacing) as this =
     override this.OnSelect() = base.OnSelect(); ls.Selected <- true
 
     override this.Clear() = ls.Clear()
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
