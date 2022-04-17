@@ -1,8 +1,10 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open Prelude.Common
+open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
+open Interlude
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
@@ -14,7 +16,7 @@ open Interlude.Gameplay
 open Interlude.Gameplay.Collections
 open Interlude.Options
 
-module Collections =
+module CollectionManager =
 
     let private editCollection ((originalName, data): string * Collection) =
         let name = Setting.simple originalName |> Setting.alphaNum
@@ -60,7 +62,7 @@ module Collections =
                                 setting,
                                 { CardSelect.Config.Default with
                                     NameFunc = fst
-                                    MarkFunc = (fun (x, m) -> if m then Tree.updateDisplay(); select(fst x))
+                                    MarkFunc = (fun (x, m) -> if m then LevelSelect.minorRefresh <- true; select(fst x))
                                     EditFunc = Some editCollection
                                     CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
                                     DeleteFunc = Some
@@ -77,31 +79,46 @@ module Collections =
                     ] :> Selectable
             Callback = ignore
         }
+
+    let addChart(cc: CachedChart, context: LevelSelectContext) =
+        if selectedName <> context.InCollection then
+            let success = addChart(cc, rate.Value, selectedMods.Value)
+            if success then
+                if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+                Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.added", NotificationType.Info)
+
+    let removeChart(cc: CachedChart, context: LevelSelectContext) =
+        let success = removeChart(cc, Chart.context)
+        if success then
+            if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.removed", NotificationType.Info)
+            if context = Chart.context then Chart.context <- LevelSelectContext.None
+
+    let dropdownMenuOptions(cc: CachedChart, context: LevelSelectContext) =
+        let canRemove =
+            context.InCollection = selectedName ||
+            match selectedCollection with
+            | Collection ccs -> ccs.Contains cc.FilePath
+            | Playlist ps -> ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
+            | Goals gs -> gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
+        [
+            if not canRemove then sprintf "%s Add to '%s'" Icons.add selectedName, fun () -> addChart(cc, context)
+            else sprintf "%s Remove from '%s'" Icons.remove selectedName, fun () -> removeChart(cc, context)
+        ]
     
 type CollectionManager() as this =
     inherit Widget()
 
-    do StylishButton ((fun () -> SelectionMenu(N"collections", Collections.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), options.Hotkeys.Collections) |> this.Add
+    do StylishButton ((fun () -> SelectionMenu(N"collections", CollectionManager.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), options.Hotkeys.Collections) |> this.Add
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
 
-
         if Chart.cacheInfo.IsSome then
 
-            if options.Hotkeys.AddToCollection.Value.Tapped() && selectedName <> Chart.context.InCollection then
-                if addChart(Chart.cacheInfo.Value, rate.Value, selectedMods.Value) then
-                    if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
-                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.added", NotificationType.Info)
-
-            elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
-                if removeChart(Chart.cacheInfo.Value, Chart.context) then
-                    if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
-                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.removed", NotificationType.Info)
-                    Chart.context <- LevelSelectContext.None
-
+            if options.Hotkeys.AddToCollection.Value.Tapped() then CollectionManager.addChart(Chart.cacheInfo.Value, Chart.context)
+            elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then CollectionManager.removeChart(Chart.cacheInfo.Value, Chart.context)
             elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
                 if reorder false then LevelSelect.refresh <- true
-
             elif options.Hotkeys.ReorderCollectionUp.Value.Tapped() then
                 if reorder true then LevelSelect.refresh <- true

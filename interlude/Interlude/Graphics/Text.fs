@@ -66,7 +66,7 @@ module Fonts =
 
             let chunks = 
                 "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890!\"£$%^&*()-=_+[]{};:'@#~,.<>/?¬`\\|\r\n•∞"
-                + Interlude.Feather.CONCAT
+                + Interlude.UI.Feather.CONCAT
                 |> Seq.chunkBySize 30
                 |> Seq.map (String)
 

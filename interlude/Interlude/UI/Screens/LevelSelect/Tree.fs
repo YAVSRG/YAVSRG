@@ -80,18 +80,16 @@ module Tree =
 
     let mutable private dropdownMenu : Dropdown.Container option = None
 
-    let private showDropdown(cc: CachedChart) (tree_x, tree_y) =
+    let private showDropdown(cc: CachedChart) (context: LevelSelectContext) (tree_x, tree_y) =
         if dropdownMenu.IsSome then dropdownMenu.Value.Destroy()
         let d = 
-            Dropdown.create
+            Dropdown.create (
+                CollectionManager.dropdownMenuOptions(cc, context) @
                 [
-                    "Add to favourites", ignore
-                    "Add to collection", ignore
-                    "Add to table", ignore
-                    "Delete", ignore
-                    "Edit note", ignore
-                ]
-                (fun () -> dropdownMenu <- None)
+                    sprintf "%s Add to table" Icons.sparkle, ignore
+                    sprintf "%s Delete" Icons.delete, ignore
+                    sprintf "%s Edit note" Icons.tag, ignore
+                ] ) (fun () -> dropdownMenu <- None)
         dropdownMenu <- Some d
         d.Reposition(tree_x, 0.0f, tree_y, 0.0f, tree_x + 400.0f, 0.0f, tree_y + Dropdown.ITEMSIZE * 5.0f, 0.0f)
 
@@ -218,9 +216,9 @@ module Tree =
                 collectionIcon <-
                     if options.ChartGroupMode.Value <> "Collections" then
                         match Collections.selectedCollection with
-                        | Collection ccs -> if ccs.Contains cc.FilePath then Interlude.Icons.star else ""
-                        | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.playlist else ""
-                        | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.goal else ""
+                        | Collection ccs -> if ccs.Contains cc.FilePath then Icons.star else ""
+                        | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Icons.playlist else ""
+                        | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Icons.goal else ""
                     else ""
             if Mouse.Hover bounds then
                 hover.Target <- 1.0f
@@ -229,7 +227,7 @@ module Tree =
                     else this.Select()
                 elif Mouse.Click MouseButton.Right then
                     let struct (l, t, r, b) = bounds
-                    showDropdown this.Chart (min (Render.vwidth - 405f) (Mouse.X()), Mouse.Y() - scrollPos.Value - origin)
+                    showDropdown cc context (min (Render.vwidth - 405f) (Mouse.X()), Mouse.Y() - scrollPos.Value - origin)
                 elif options.Hotkeys.Delete.Value.Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
                     Tooltip.callback (
@@ -402,6 +400,7 @@ module Tree =
             if g.Selected then g.SelectLast()
 
     let update(origin: float32, originB: float32, elapsedTime: float) =
+        if LevelSelect.minorRefresh then LevelSelect.minorRefresh <- false; updateDisplay()
         scrollPos.Update(elapsedTime) |> ignore
         
         if dropdownMenu.IsSome then dropdownMenu.Value.Update(elapsedTime, Rect.create 0.0f (origin + scrollPos.Value) Render.vwidth (originB + scrollPos.Value))

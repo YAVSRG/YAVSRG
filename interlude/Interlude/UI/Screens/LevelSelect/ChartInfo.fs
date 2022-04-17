@@ -25,13 +25,13 @@ type ChartInfo() as this =
         |> this.Add
 
         new TextBox(
-            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Interlude.Icons.star),
+            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Icons.star),
             (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -190.0f, 1.0f, 0.0f, 0.5f, -120.0f, 1.0f)
         |> this.Add
 
         new TextBox(
-            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Interlude.Icons.star),
+            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Icons.star),
             (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
         |> positionWidget(10.0f, 0.0f, -120.0f, 1.0f, 0.0f, 0.5f, -50.0f, 1.0f)
         |> this.Add
@@ -59,16 +59,16 @@ type ChartInfo() as this =
             | None -> 0.0f<ms>
             |> fun x -> x / rate.Value
             |> fun x -> (x / 1000.0f / 60.0f |> int, (x / 1000f |> int) % 60)
-            |> fun (x, y) -> sprintf "%s %i:%02i" Interlude.Icons.time x y
+            |> fun (x, y) -> sprintf "%s %i:%02i" Icons.time x y
         bpm <-
             match Chart.cacheInfo with
             | Some cc -> cc.BPM
             | None -> (500.0f<ms/beat>, 500.0f<ms/beat>)
             |> fun (b, a) -> (60000.0f<ms> / a * rate.Value |> int, 60000.0f<ms> / b * rate.Value |> int)
             |> fun (a, b) ->
-                if a > 9000 || b < 0 then sprintf "%s ∞" Interlude.Icons.bpm
-                elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "%s %i" Interlude.Icons.bpm a
-                else sprintf "%s %i-%i" Interlude.Icons.bpm a b
+                if a > 9000 || b < 0 then sprintf "%s ∞" Icons.bpm
+                elif Math.Abs(a - b) < 5 || b > 9000 then sprintf "%s %i" Icons.bpm a
+                else sprintf "%s %i-%i" Icons.bpm a b
         notecount <-
             match Chart.current with
             | Some c ->
