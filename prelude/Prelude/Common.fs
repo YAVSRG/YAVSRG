@@ -31,7 +31,7 @@ module Common =
         let infinity = infinityf * 1.0f<ms>
 
 (*
-    Settings - Store an (ideally immutably typed) value that can be get and set
+    Settings - Store an (ideally immutable) value that can be get and set
     Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
     (Auto generation will be done with reflection)
 *)
@@ -108,7 +108,7 @@ module Common =
             }
 
         let alphaNum (setting: Setting<string, 'Config>) =
-            let regex = Regex("[^a-zA-Z0-9_-]")
+            let regex = Regex("[^\sa-zA-Z0-9_-]")
             map id (fun s -> regex.Replace(s, "")) setting
 
         let inline bounded x min max =
