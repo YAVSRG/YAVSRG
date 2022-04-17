@@ -13,7 +13,7 @@ open Interlude.Input
 open Interlude.Gameplay
 open Interlude.Options
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection.Compound
+open Interlude.UI.Components.Selection.Controls
 
 type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Setting<Bind>) as this =
     inherit StylishButton(
@@ -21,7 +21,7 @@ type LevelSelectDropdown(items: string seq, label: string, setting: Setting<stri
                 match this.Dropdown with
                 | Some d when d.Parent <> None -> d.Destroy()
                 | _ ->
-                    let d = Dropdown.create_selector items id (fun g -> setting.Set g)
+                    let d = Dropdown.create_selector items id (fun g -> setting.Set g) ignore
                     this.Dropdown <- Some d
                     d
                     |> positionWidget(5.0f, 0.0f, 60.0f, 0.0f, -5.0f, 1.0f, 60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE, 0.0f)

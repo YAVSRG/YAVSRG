@@ -14,7 +14,7 @@ open Interlude.Gameplay
 open Interlude.Gameplay.Collections
 open Interlude.Options
 
-module private Collections =
+module Collections =
 
     let private editCollection ((originalName, data): string * Collection) =
         let name = Setting.simple originalName |> Setting.alphaNum
@@ -52,7 +52,7 @@ module private Collections =
             Content = fun add ->
                 let setting =
                     Setting.make ignore
-                        (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), fst selected = n))
+                        (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), selectedName = n))
                 column
                     [
                         PrettySetting("collections",
@@ -60,12 +60,12 @@ module private Collections =
                                 setting,
                                 { CardSelect.Config.Default with
                                     NameFunc = fst
-                                    MarkFunc = (fun (x, m) -> if m then Tree.updateDisplay(); selected <- x)
+                                    MarkFunc = (fun (x, m) -> if m then Tree.updateDisplay(); select(fst x))
                                     EditFunc = Some editCollection
                                     CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
                                     DeleteFunc = Some
                                         ( fun (name, data) ->
-                                            if fst selected <> name then
+                                            if selectedName <> name then
                                                 if data.IsEmpty() then Collections.delete name |> ignore
                                                 else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
                                         )
@@ -89,44 +89,16 @@ type CollectionManager() as this =
 
         if Chart.cacheInfo.IsSome then
 
-            let selectedChart = Chart.cacheInfo.Value.FilePath
-
-            if options.Hotkeys.AddToCollection.Value.Tapped() && fst selected <> snd contextIndex then
-                if
-                    match snd selected with
-                    | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
-                    | Playlist ps -> ps.Add (selectedChart, PlaylistData.Make selectedMods.Value rate.Value); true
-                    | Goals gs -> gs.Add (selectedChart, GoalData.Make selectedMods.Value rate.Value Goal.None); true
-                then
+            if options.Hotkeys.AddToCollection.Value.Tapped() && selectedName <> Chart.context.InCollection then
+                if addChart(Chart.cacheInfo.Value, rate.Value, selectedMods.Value) then
                     if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
-                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.added", NotificationType.Info)
+                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.added", NotificationType.Info)
 
             elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
-                if fst selected <> snd contextIndex then // Remove from collection that isn't in this context
-                    if
-                        match snd selected with
-                        | Collection ccs -> ccs.Remove selectedChart
-                        | Playlist ps -> 
-                            if ps.FindAll(fun (id, _) -> id = selectedChart).Count = 1 then 
-                                ps.RemoveAll(fun (id, _) -> id = selectedChart) > 0
-                            else false
-                        | Goals gs ->
-                            if gs.FindAll(fun (id, _) -> id = selectedChart).Count = 1 then 
-                                gs.RemoveAll(fun (id, _) -> id = selectedChart) > 0
-                            else false
-                    then
-                        if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", NotificationType.Info)
-                else // Remove from this context collection
-                    if
-                        match snd selected with
-                        | Collection ccs -> ccs.Remove selectedChart
-                        | Playlist ps -> ps.RemoveAt(fst contextIndex); true
-                        | Goals gs -> gs.RemoveAt(fst contextIndex); true
-                    then
-                        LevelSelect.refresh <- true
-                        notifyChangeChart LevelSelectContext.None rate selectedMods
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst selected] "collections.removed", NotificationType.Info)
+                if removeChart(Chart.cacheInfo.Value, Chart.context) then
+                    if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else Tree.updateDisplay()
+                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.removed", NotificationType.Info)
+                    Chart.context <- LevelSelectContext.None
 
             elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
                 if reorder false then LevelSelect.refresh <- true

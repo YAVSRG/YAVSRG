@@ -19,61 +19,6 @@ open Interlude.Utils
 
 module Gameplay =
 
-    module Collections =
-    
-        open Prelude.Data.Charts.Library
-
-        let mutable selected =
-            // todo: load from settings
-            let favourites = Localisation.localise "collections.favourites"
-            let c = 
-                match Collections.get favourites with
-                | Some c -> c
-                | None ->
-                    let n = Collection.Blank
-                    Collections.create (favourites, n) |> ignore
-                    n
-            favourites, c
-
-        let mutable internal currentChartContext : LevelSelectContext = LevelSelectContext.None
-        let mutable contextIndex = -1, ""
-
-        let notifyChangeRate v =
-            match currentChartContext with
-            | LevelSelectContext.None -> ()
-            | LevelSelectContext.Playlist (_, _, d) -> d.Rate.Value <- v
-            | LevelSelectContext.Goal (_, _, d) -> d.Rate.Value <- v
-
-        let notifyChangeMods mods =
-            match currentChartContext with
-            | LevelSelectContext.None -> ()
-            | LevelSelectContext.Playlist (_, _, d) -> d.Mods.Value <- mods
-            | LevelSelectContext.Goal (_, _, d) -> d.Mods.Value <- mods
-
-        let notifyChangeChart context (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
-            currentChartContext <- context
-            match currentChartContext with
-            | LevelSelectContext.None -> ()
-            | LevelSelectContext.Playlist (_, _, d) -> 
-                rate.Value <- d.Rate.Value
-                mods.Value <- d.Mods.Value
-            | LevelSelectContext.Goal (_, _, d) ->
-                rate.Value <- d.Rate.Value
-                mods.Value <- d.Mods.Value
-            contextIndex <- currentChartContext.Id
-
-        let reorder (up: bool) : bool =
-            match currentChartContext with
-            | LevelSelectContext.None
-            | LevelSelectContext.Goal _ -> false
-            | LevelSelectContext.Playlist (index, id, d) ->
-                match Library.Collections.reorderPlaylist id index up with
-                | Some newIndex when newIndex <> index ->
-                    currentChartContext <- LevelSelectContext.Playlist (newIndex, id, d)
-                    contextIndex <- currentChartContext.Id
-                    true
-                | _ -> false
-
     let mutable autoplay = false
 
     let mutable ruleset : Ruleset = getCurrentRuleset()
@@ -83,14 +28,15 @@ module Gameplay =
     
         let mutable cacheInfo : CachedChart option = None
         let mutable current : Chart option = None
+        let mutable context : LevelSelectContext = LevelSelectContext.None
         let mutable withMods : ModChart option = None
         let mutable withColors : ColorizedChart option = None
     
         let mutable rating : RatingReport option = None
         let mutable saveData : ChartSaveData option = None
 
-        let private _rate = Setting.rate 1.0f
-        let private _selectedMods = Setting.simple Map.empty
+        let  _rate = Setting.rate 1.0f
+        let _selectedMods = Setting.simple Map.empty
 
         let update() =
             match current with
@@ -102,29 +48,17 @@ module Gameplay =
                     RatingReport(modChart.Notes, _rate.Value, options.Playstyles.[modChart.Keys - 3], modChart.Keys)
                     |> Some
                 withColors <- None
-
-        let rate : Setting.Bounded<float32> = 
-            _rate
-            |> Setting.trigger ( fun v ->
-                    Collections.notifyChangeRate v
-                    Audio.changeRate v
-                    update() )
-        let selectedMods : Setting<ModState> = 
-            _selectedMods
-            |> Setting.trigger ( fun mods ->
-                    Collections.notifyChangeMods mods
-                    update() )
         
         let chartChangeEvent = Event<unit>()
         let onChange = chartChangeEvent.Publish
 
-        let change(cache, context, c) =
+        let change(cache, ctx, c) =
             cacheInfo <- Some cache
             current <- Some c
+            context <- ctx
             saveData <- Some (Scores.getOrCreateScoreData c)
-            Collections.notifyChangeChart context rate selectedMods
             Screen.Background.load c.BackgroundPath
-            if Audio.changeTrack (c.AudioPath, saveData.Value.Offset - c.FirstNote, rate.Value) then
+            if Audio.changeTrack (c.AudioPath, saveData.Value.Offset - c.FirstNote, _rate.Value) then
                 Audio.playFrom c.Header.PreviewTime
             options.CurrentChart.Value <- cache.FilePath
             update()
@@ -138,6 +72,82 @@ module Gameplay =
                 withColors.Value
 
         let recolor() = withColors <- None
+    
+    module Collections =
+        
+        open Prelude.Data.Charts.Library
+    
+        let mutable selectedName = Localisation.localise "collections.favourites" // todo: load from settings
+        let mutable selectedCollection = 
+            match Collections.get selectedName with
+            | Some c -> c
+            | None ->
+                let n = Collection.Blank
+                Collections.create (selectedName, n) |> ignore
+                n
+    
+        let notifyChangeRate v =
+            match Chart.context with
+            | LevelSelectContext.Playlist (_, _, d) -> d.Rate.Value <- v
+            | LevelSelectContext.Goal (_, _, d) -> d.Rate.Value <- v
+            | _ -> ()
+    
+        let notifyChangeMods mods =
+            match Chart.context with
+            | LevelSelectContext.Playlist (_, _, d) -> d.Mods.Value <- mods
+            | LevelSelectContext.Goal (_, _, d) -> d.Mods.Value <- mods
+            | _ -> ()
+    
+        let notifyChangeChart context (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
+            match Chart.context with
+            | LevelSelectContext.Playlist (_, _, d) -> 
+                rate.Value <- d.Rate.Value
+                mods.Value <- d.Mods.Value
+            | LevelSelectContext.Goal (_, _, d) ->
+                rate.Value <- d.Rate.Value
+                mods.Value <- d.Mods.Value
+            | _ -> ()
+    
+        let select(name: string) =
+            match Collections.get name with
+            | Some c -> selectedName <- name; selectedCollection <- c
+            | None -> Logging.Error (sprintf "No such collection with name '%s'" name)
+    
+        let reorder (up: bool) : bool =
+            match Chart.context with
+            | LevelSelectContext.Playlist (index, id, d) ->
+                match Collections.reorderPlaylist id index up with
+                | Some newIndex when newIndex <> index ->
+                    Chart.context <- LevelSelectContext.Playlist (newIndex, id, d)
+                    true
+                | _ -> false
+            | _ -> false
+    
+        let removeChart (cc: CachedChart, ctx: LevelSelectContext) =
+            if ctx.InCollection <> selectedName then
+                // Remove a chart from the selected collection, you are not viewing it inside the collection
+                match selectedCollection with
+                | Collection ccs -> ccs.Remove cc.FilePath
+                | Playlist ps -> 
+                    if ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1 then 
+                        ps.RemoveAll(fun (id, _) -> id = cc.FilePath) > 0
+                    else false
+                | Goals gs ->
+                    if gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1 then 
+                        gs.RemoveAll(fun (id, _) -> id = cc.FilePath) > 0
+                    else false
+            else
+                // Remove a chart from the selected collection, while looking at the collection in the UI
+                match selectedCollection with
+                | Collection ccs -> ccs.Remove cc.FilePath
+                | Playlist ps -> ps.RemoveAt ctx.PositionInCollection; true
+                | Goals gs -> gs.RemoveAt ctx.PositionInCollection; true
+    
+        let addChart (cc: CachedChart, rate, mods) =
+            match selectedCollection with
+            | Collection ccs -> if ccs.Contains cc.FilePath then false else ccs.Add cc.FilePath; true
+            | Playlist ps -> ps.Add (cc.FilePath, PlaylistData.Make mods rate); true
+            | Goals gs -> gs.Add (cc.FilePath, GoalData.Make mods rate Goal.None); true
 
     module Table =
 
@@ -163,8 +173,19 @@ module Gameplay =
             current <- Some { Name = name; Levels = ResizeArray(); Changelog = ResizeArray() }
             save()
 
-    let rate = Chart.rate
-    let selectedMods = Chart.selectedMods
+    let rate =
+        Chart._rate
+        |> Setting.trigger ( fun v ->
+                Collections.notifyChangeRate v
+                Audio.changeRate v
+                Chart.update() )
+    let selectedMods =
+        Chart._selectedMods
+        |> Setting.trigger ( fun mods ->
+                Collections.notifyChangeMods mods
+                Chart.update() )
+
+    do Chart.onChange.Add ( fun () -> Collections.notifyChangeChart Chart.context rate selectedMods)
 
     let makeScore (replayData, keys) : Score =
         {

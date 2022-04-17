@@ -19,6 +19,7 @@ open Interlude.Options
 open Interlude.Gameplay
 open Interlude.UI.Animation
 open Interlude.UI.Screens.Play
+open Interlude.UI.Components.Selection.Controls
 
 [<RequireQualifiedAccess>]
 type Navigation =
@@ -44,7 +45,6 @@ module Tree =
     
     (*
          functionality wishlist:
-         - hotkeys to navigate by pack/close and open quickly
          - "random chart" hotkey
          - cropping of text that is too long
         
@@ -78,11 +78,28 @@ module Tree =
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable private scrollTo = ScrollTo.Nothing
 
-    let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
+    let mutable private dropdownMenu : Dropdown.Container option = None
+
+    let private showDropdown(cc: CachedChart) (tree_x, tree_y) =
+        if dropdownMenu.IsSome then dropdownMenu.Value.Destroy()
+        let d = 
+            Dropdown.create
+                [
+                    "Add to favourites", ignore
+                    "Add to collection", ignore
+                    "Add to table", ignore
+                    "Delete", ignore
+                    "Edit note", ignore
+                ]
+                (fun () -> dropdownMenu <- None)
+        dropdownMenu <- Some d
+        d.Reposition(tree_x, 0.0f, tree_y, 0.0f, tree_x + 400.0f, 0.0f, tree_y + Dropdown.ITEMSIZE * 5.0f, 0.0f)
+
+    let private getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
         if r1 < rate.Value then ( p2, r2, if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2 )
         else ( p1, r1, colorFunc p1 )
     
-    let switchChart(cc, context, groupName) =
+    let private switchChart(cc, context, groupName) =
         match Library.load cc with
         | Some c ->
             Chart.change(cc, context, c)
@@ -122,12 +139,11 @@ module Tree =
         let mutable chartData = None
         let mutable pbData: Bests option = None
         let mutable collectionIcon = ""
-        let collectionIndex = context.Id
 
         override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
-        override this.Selected = selectedChart = cc.FilePath && collectionIndex = Collections.contextIndex
+        override this.Selected = selectedChart = cc.FilePath && Chart.context = context
         member this.Chart = cc
-        member this.GroupName = groupName
+        member this.Context = context
 
         member this.Select() = switchChart(cc, context, groupName)
 
@@ -190,7 +206,7 @@ module Tree =
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
-        member private this.OnUpdate(bounds, elapsedTime) =
+        member private this.OnUpdate(bounds, elapsedTime, origin) =
             if localCacheFlag < cacheFlag then
                 localCacheFlag <- cacheFlag
                 if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
@@ -201,7 +217,7 @@ module Tree =
                 color <- colorFunc pbData
                 collectionIcon <-
                     if options.ChartGroupMode.Value <> "Collections" then
-                        match snd Collections.selected with
+                        match Collections.selectedCollection with
                         | Collection ccs -> if ccs.Contains cc.FilePath then Interlude.Icons.star else ""
                         | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.playlist else ""
                         | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Interlude.Icons.goal else ""
@@ -211,9 +227,9 @@ module Tree =
                 if Mouse.Click MouseButton.Left then
                     if this.Selected then play()
                     else this.Select()
-                elif Mouse.Click MouseButton.Right then // todo: right click menu?
-                    expandedGroup <- ""
-                    scrollTo <- ScrollTo.Pack groupName
+                elif Mouse.Click MouseButton.Right then
+                    let struct (l, t, r, b) = bounds
+                    showDropdown this.Chart (min (Render.vwidth - 405f) (Mouse.X()), Mouse.Y() - scrollPos.Value - origin)
                 elif options.Hotkeys.Delete.Value.Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
                     Tooltip.callback (
@@ -232,7 +248,7 @@ module Tree =
             if scrollTo = ScrollTo.Chart && groupName = selectedGroup && this.Selected then
                 scroll(-top + 500.0f)
                 scrollTo <- ScrollTo.Nothing
-            this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(b, elapsedTime))
+            this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(b, elapsedTime, origin))
 
     type private GroupItem(name: string, items: ChartItem list) =
         inherit TreeItem()
@@ -327,7 +343,7 @@ module Tree =
                         ( fun (cc, context) ->
                             match Chart.cacheInfo with
                             | None -> ()
-                            | Some c -> if c.FilePath = cc.FilePath && context.Id = Collections.contextIndex then selectedChart <- c.FilePath; selectedGroup <- groupName
+                            | Some c -> if c.FilePath = cc.FilePath && context = Chart.context then selectedChart <- c.FilePath; selectedGroup <- groupName
                             let i = ChartItem(groupName, cc, context)
                             lastItem <- Some i
                             i
@@ -387,7 +403,8 @@ module Tree =
 
     let update(origin: float32, originB: float32, elapsedTime: float) =
         scrollPos.Update(elapsedTime) |> ignore
-
+        
+        if dropdownMenu.IsSome then dropdownMenu.Value.Update(elapsedTime, Rect.create 0.0f (origin + scrollPos.Value) Render.vwidth (originB + scrollPos.Value))
         let bottomEdge =
             List.fold 
                 (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsedTime))
@@ -397,7 +414,10 @@ module Tree =
         let total_height = originB - origin
         let tree_height = bottomEdge - scrollPos.Value
         if Mouse.Click MouseButton.Right then right_click_scrolling <- true
-        if Mouse.Held MouseButton.Right |> not then right_click_scrolling <- false
+        if not (Mouse.Held MouseButton.Right) then right_click_scrolling <- false
+        if options.Hotkeys.Up.Value.Tapped() && expandedGroup <> "" then
+            scrollTo <- ScrollTo.Pack expandedGroup
+            expandedGroup <- ""
         if right_click_scrolling then scrollPos.Target <- -(Mouse.Y() - origin) / total_height * tree_height
 
         scrollPos.Target <- Math.Min (Math.Max (scrollPos.Target + Mouse.Scroll() * 100.0f, total_height - tree_height - origin), 20.0f + origin)
@@ -411,6 +431,7 @@ module Tree =
                 (fun t (i: GroupItem) -> i.Draw (t, origin, originB))
                 scrollPos.Value
                 groups
+        if dropdownMenu.IsSome then dropdownMenu.Value.Draw()
         Stencil.finish()
 
         let total_height = originB - origin

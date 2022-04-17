@@ -109,7 +109,7 @@ type Widget() =
     default this.OnAddedTo(c: Widget) =
         match parent with
         | None -> parent <- Some c
-        | Some _ -> Logging.Error "Tried to add this widget to a container when it is already in one"
+        | Some parent -> Logging.Debug (sprintf "Tried to add this (%O) to a parent (%O) when parent is already (%O)" this c parent)
         
     /// Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
     abstract member Remove: Widget -> unit
@@ -120,8 +120,10 @@ type Widget() =
 
     member private this.OnRemovedFrom(c: Widget) =
         match parent with
-        | None -> Logging.Error "Tried to remove this widget from a container it isn't in one"
-        | Some p -> if p = c then parent <- None else Logging.Error "Tried to remove this widget from a container when it is in another"
+        | None -> Logging.Debug (sprintf "Tried to remove this (%O) from parent (%O) but it has no parent" this c)
+        | Some p ->
+            if p = c then parent <- None
+            else Logging.Debug (sprintf "Tried to remove this (%O) from parent (%O) but parent is actually (%O)" this c p)
 
     /// Queues up the action to take place immediately before the next update loop, making it thread/loop-safe
     ///   When updating widgets from a background task, use this.
