@@ -120,15 +120,31 @@ module Collections =
         static member Blank = Collection (ResizeArray<_>())
 
     [<RequireQualifiedAccess>]
+    [<CustomEquality>]
+    [<NoComparison>]
     type LevelSelectContext =
         | None
+        | Collection of index: int * id: string
         | Playlist of index: int * id: string * data: PlaylistData
         | Goal of index: int * id: string * data: GoalData
-        member this.Id =
+        member this.InCollection =
             match this with
-            | None -> -1, ""
-            | Playlist (i, id, _)
-            | Goal (i, id, _) -> i, id
+            | None -> ""
+            | Collection (_, id)
+            | Playlist (_, id, _)
+            | Goal (_, id, _) -> id
+        member this.PositionInCollection =
+            match this with
+            | None -> -1
+            | Collection (i, _)
+            | Playlist (i, _, _)
+            | Goal (i, _, _) -> i
+        override this.Equals(other: obj) =
+            match other with
+            | :? LevelSelectContext as other ->
+                (this.InCollection = other.InCollection) && (this.PositionInCollection = other.PositionInCollection)
+            | _ -> false
+        override this.GetHashCode() = (this.InCollection, this.PositionInCollection).GetHashCode()
 
 module Sorting =
 

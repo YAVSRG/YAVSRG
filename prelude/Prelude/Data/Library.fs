@@ -148,9 +148,12 @@ module Library =
             let charts, orderMatters = 
                 match c with
                 | Collection ids -> 
-                    Seq.choose 
-                        (lookup >> Option.map (fun x -> x, LevelSelectContext.None))
-                        ids,
+                    Seq.choose
+                        ( fun (index, id) ->
+                            lookup id
+                            |> Option.map (fun x -> x, LevelSelectContext.Collection (index, name))
+                        )
+                        (Seq.indexed ids),
                     false
                 | Playlist ps ->
                     Seq.choose
