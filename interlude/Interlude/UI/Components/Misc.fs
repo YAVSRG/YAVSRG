@@ -5,7 +5,6 @@ open OpenTK
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude
-open Interlude.Utils
 open Interlude.UI
 open Interlude.Input
 open Interlude.Graphics

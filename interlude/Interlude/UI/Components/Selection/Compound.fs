@@ -4,7 +4,6 @@ open Prelude.Common
 open Interlude.Utils
 open Interlude.Graphics
 open Interlude.Options
-open Interlude.Input
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection

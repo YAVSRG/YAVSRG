@@ -4,7 +4,6 @@ open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
-open Interlude
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components

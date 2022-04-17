@@ -2,7 +2,6 @@
 
 open System
 open SixLabors.ImageSharp
-open System.Drawing
 open Prelude.Common
 open Interlude
 open Interlude.Utils

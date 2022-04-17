@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Components
 
 open System
-open System.Drawing
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude

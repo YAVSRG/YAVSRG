@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
 open Prelude.Common
-open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Controls

@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Screens.Play
 open OpenTK
 open System
-open System.Drawing
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring

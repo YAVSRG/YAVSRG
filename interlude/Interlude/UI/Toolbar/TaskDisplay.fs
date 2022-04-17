@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Toolbar
 
 open System
-open System.Drawing
 open System.Threading.Tasks
 open Prelude.Common
 open Interlude.Graphics
