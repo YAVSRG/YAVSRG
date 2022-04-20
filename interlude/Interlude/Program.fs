@@ -40,6 +40,7 @@ let main argv =
             Options.save()
             game.Dispose()
             if crashed then ignore(Console.ReadLine())
+        Logging.Wait()
         m.ReleaseMutex()
     else
         //todo: code that sends data to the running process to reappear if hidden
