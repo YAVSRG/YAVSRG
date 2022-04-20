@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open Prelude.Common
+open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
 open Interlude.Utils
@@ -11,22 +12,10 @@ open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 open Interlude.UI.Components.Selection.Compound
 open Interlude.Gameplay
+open Interlude.Gameplay.Collections
 open Interlude.Options
-open Globals
 
-module private Collections =
-
-    let mutable selected =
-        // todo: load from settings
-        let favourites = Localisation.localise "collections.favourites"
-        let c = 
-            match Collections.get favourites with
-            | Some c -> c
-            | None ->
-                let n = Collection.Blank
-                Collections.create (favourites, n) |> ignore
-                n
-        favourites, c
+module CollectionManager =
 
     let private editCollection ((originalName, data): string * Collection) =
         let name = Setting.simple originalName |> Setting.alphaNum
@@ -64,7 +53,7 @@ module private Collections =
             Content = fun add ->
                 let setting =
                     Setting.make ignore
-                        (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), fst selected = n))
+                        (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), selectedName = n))
                 column
                     [
                         PrettySetting("collections",
@@ -72,12 +61,12 @@ module private Collections =
                                 setting,
                                 { CardSelect.Config.Default with
                                     NameFunc = fst
-                                    MarkFunc = (fun (x, m) -> if m then colorVersionGlobal <- colorVersionGlobal + 1; selected <- x)
+                                    MarkFunc = (fun (x, m) -> if m then LevelSelect.minorRefresh <- true; select(fst x))
                                     EditFunc = Some editCollection
                                     CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
                                     DeleteFunc = Some
                                         ( fun (name, data) ->
-                                            if fst selected <> name then
+                                            if selectedName <> name then
                                                 if data.IsEmpty() then Collections.delete name |> ignore
                                                 else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
                                         )
@@ -89,55 +78,46 @@ module private Collections =
                     ] :> Selectable
             Callback = ignore
         }
+
+    let addChart(cc: CachedChart, context: LevelSelectContext) =
+        if selectedName <> context.InCollection then
+            let success = addChart(cc, rate.Value, selectedMods.Value)
+            if success then
+                if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+                Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.added", NotificationType.Info)
+
+    let removeChart(cc: CachedChart, context: LevelSelectContext) =
+        let success = removeChart(cc, Chart.context)
+        if success then
+            if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.removed", NotificationType.Info)
+            if context = Chart.context then Chart.context <- LevelSelectContext.None
+
+    let dropdownMenuOptions(cc: CachedChart, context: LevelSelectContext) =
+        let canRemove =
+            context.InCollection = selectedName ||
+            match selectedCollection with
+            | Collection ccs -> ccs.Contains cc.FilePath
+            | Playlist ps -> ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
+            | Goals gs -> gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
+        [
+            if not canRemove then sprintf "%s Add to '%s'" Icons.add selectedName, fun () -> addChart(cc, context)
+            else sprintf "%s Remove from '%s'" Icons.remove selectedName, fun () -> removeChart(cc, context)
+        ]
     
 type CollectionManager() as this =
     inherit Widget()
 
-    do StylishButton ((fun () -> SelectionMenu(N"collections", Collections.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), options.Hotkeys.Collections) |> this.Add
+    do StylishButton ((fun () -> SelectionMenu(N"collections", CollectionManager.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), options.Hotkeys.Collections) |> this.Add
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
+
         if Chart.cacheInfo.IsSome then
 
-            if options.Hotkeys.AddToCollection.Value.Tapped() && fst Collections.selected <> snd Collections.contextIndex then
-                if
-                    match snd Collections.selected with
-                    | Collection ccs -> if ccs.Contains selectedChart then false else ccs.Add selectedChart; true
-                    | Playlist ps -> ps.Add (selectedChart, PlaylistData.Make selectedMods.Value rate.Value); true
-                    | Goals gs -> gs.Add (selectedChart, GoalData.Make selectedMods.Value rate.Value Goal.None); true
-                then
-                    if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
-                    Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst Collections.selected] "collections.added", Info)
-
-            elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then
-                if fst Collections.selected <> snd Collections.contextIndex then // Remove from collection that isn't in this context
-                    if
-                        match snd Collections.selected with
-                        | Collection ccs -> ccs.Remove selectedChart
-                        | Playlist ps -> 
-                            if ps.FindAll(fun (id, _) -> id = selectedChart).Count = 1 then 
-                                ps.RemoveAll(fun (id, _) -> id = selectedChart) > 0
-                            else false
-                        | Goals gs ->
-                            if gs.FindAll(fun (id, _) -> id = selectedChart).Count = 1 then 
-                                gs.RemoveAll(fun (id, _) -> id = selectedChart) > 0
-                            else false
-                    then
-                        if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else colorVersionGlobal <- colorVersionGlobal + 1
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst Collections.selected] "collections.removed", Info)
-                else // Remove from this context collection
-                    if
-                        match snd Collections.selected with
-                        | Collection ccs -> ccs.Remove selectedChart
-                        | Playlist ps -> ps.RemoveAt(fst Collections.contextIndex); true
-                        | Goals gs -> gs.RemoveAt(fst Collections.contextIndex); true
-                    then
-                        LevelSelect.refresh <- true
-                        Collections.notifyChangeChart LevelSelectContext.None rate selectedMods
-                        Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; fst Collections.selected] "collections.removed", Info)
-
+            if options.Hotkeys.AddToCollection.Value.Tapped() then CollectionManager.addChart(Chart.cacheInfo.Value, Chart.context)
+            elif options.Hotkeys.RemoveFromCollection.Value.Tapped() then CollectionManager.removeChart(Chart.cacheInfo.Value, Chart.context)
             elif options.Hotkeys.ReorderCollectionDown.Value.Tapped() then
-                if Collections.reorder false then LevelSelect.refresh <- true
-
+                if reorder false then LevelSelect.refresh <- true
             elif options.Hotkeys.ReorderCollectionUp.Value.Tapped() then
-                if Collections.reorder true then LevelSelect.refresh <- true
+                if reorder true then LevelSelect.refresh <- true

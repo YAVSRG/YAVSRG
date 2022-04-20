@@ -78,11 +78,11 @@ module Scoreboard =
                 Tooltip.callback (
                     options.Hotkeys.Delete.Value,
                     Localisation.localiseWith [scoreName] "misc.delete",
-                    Warning,
+                    NotificationType.Warning,
                     fun () ->
                         Chart.saveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [scoreName] "notification.deleted", Info)
+                        Notification.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
                 )
 
     module Loader =
@@ -107,7 +107,7 @@ module Scoreboard =
                         | Some b ->
                             container.Synchronized( fun () -> 
                                 if not (Chart.saveData.Value.Bests.ContainsKey rsid) || b <> Chart.saveData.Value.Bests[rsid] then
-                                    Globals.colorVersionGlobal <- Globals.colorVersionGlobal + 1
+                                    Tree.updateDisplay()
                                 Chart.saveData.Value.Bests[rsid] <- b
                             )
                     )

@@ -155,7 +155,7 @@ type private SearchContainer(populate, handleFilter) as this =
     let populate = populate flowContainer
     let handleFilter = handleFilter flowContainer
     do
-        this.Add(new SearchBox(Setting.simple "", fun f -> handleFilter f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f))
+        this.Add(new SearchBox(Setting.simple "", fun (f: Filter) -> handleFilter f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f))
         this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 70.0f, 0.0f, -0.0f, 1.0f, 0.0f, 1.0f))
         flowContainer.Add(new SearchContainerLoader(populate))
 

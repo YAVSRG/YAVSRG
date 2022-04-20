@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Components
 
 open System
-open System.Drawing
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude
@@ -35,10 +34,12 @@ type Clickable (onClick, onHover) =
 
     let mutable hover = false
 
+    member val Float = false with get, set
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let oh = hover
-        hover <- Mouse.Hover this.VisibleBounds
+        hover <- Mouse.Hover (if this.Float then this.Bounds else this.VisibleBounds)
         if oh && not hover then onHover false
         elif not oh && hover && Mouse.Moved() then onHover true
         elif hover && Mouse.Click MouseButton.Left then onClick()

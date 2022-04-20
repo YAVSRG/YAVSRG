@@ -6,6 +6,8 @@ open System.Collections.Generic
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data.Themes
+open Prelude.Data
+open Prelude.Data.Noteskin
 open Interlude.Graphics
 
 module Content =
@@ -175,8 +177,6 @@ module Content =
 
     module Noteskins =
         
-        open Prelude.Data.Conversions
-
         let loaded : Dictionary<string, Noteskin> = new Dictionary<string, Noteskin>()
 
         let private defaults =
@@ -254,7 +254,7 @@ module Content =
             | OsuSkinFolder ->
                 let id = Guid.NewGuid().ToString()
                 try
-                    //OsuSkin.Converter(path).ToNoteskin(Path.Combine(getDataPath "Noteskins", id)) 4
+                    OsuSkin.Converter.convert path (Path.Combine(getDataPath "Noteskins", id)) [4; 7]
                     load()
                     true
                 with err -> Logging.Error("Something went wrong converting this skin!", err); true

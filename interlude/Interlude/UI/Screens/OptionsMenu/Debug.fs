@@ -18,15 +18,15 @@ module Debug =
                     PrettyButton.Once(
                         "debug.rebuildcache",
                         (fun () -> BackgroundTask.Create TaskFlags.LONGRUNNING "Rebuilding Cache" Library.rebuildTask |> ignore),
-                        Localisation.localiseWith ["Rebuilding Cache"] "notification.taskstarted", Task
+                        Localisation.localiseWith ["Rebuilding Cache"] "notification.taskstarted", NotificationType.Task
                     ).Position(200.0f)
                     PrettyButton.Once(
                         "debug.downloadupdate",
                         ( fun () ->
                             if AutoUpdate.updateAvailable then
-                                AutoUpdate.applyUpdate(fun () -> Notification.add (L"notification.update.installed", System))
+                                AutoUpdate.applyUpdate(fun () -> Notification.add (L"notification.update.installed", NotificationType.System))
                         ),
-                        L"notification.update.installing", System,
+                        L"notification.update.installing", NotificationType.System,
                         Enabled = AutoUpdate.updateAvailable
                     ).Position(300.0f)
                     PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole).Position(400.0f)

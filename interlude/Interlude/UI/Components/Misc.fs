@@ -21,33 +21,6 @@ type TooltipRegion(localisedText) =
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
 
-type Dropdown(options: string array, index, callback: int -> unit, label, buttonSize, colorFunc) as this =
-    inherit Widget()
-
-    let color = AnimationFade 0.5f
-    let mutable index = index
-
-    do
-        this.Animation.Add color
-        let fr = new Frame(Enabled = false)
-        StylishButton (
-            (fun () -> fr.Enabled <- not fr.Enabled),
-            (fun () -> label + ": " + options.[index]),
-            colorFunc )
-        |> position (WPos.topSlice buttonSize)
-        |> this.Add
-        this.Add(
-            let fc = FlowContainer(Spacing = 0.0f)
-            fr.Add fc
-            Array.iteri
-                ( fun i (o: string) ->
-                    Button((fun () -> index <- i; callback i), o)
-                    |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 40.0f, 0.0f)
-                    |> fc.Add
-                )
-                options
-            fr |> positionWidgetA(0.0f, buttonSize, 0.0f, 0.0f))
-
 type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) as this =
     inherit Widget()
 
@@ -92,16 +65,18 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
     override this.Dispose() =
         if active then Input.removeInputMethod()
 
-type SearchBox(s: Setting<string>, callback: Filter -> unit) as this =
+type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit Widget()
     let searchTimer = new Diagnostics.Stopwatch()
     do
         TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some options.Hotkeys.Search, "search" )
         |> this.Add
 
+    new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, fun () -> callback(Filter.parse s.Value))
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback(Filter.parse s.Value)
+        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback()
 
 type TextInputDialog(bounds: Rect, prompt, callback) as this =
     inherit Dialog()

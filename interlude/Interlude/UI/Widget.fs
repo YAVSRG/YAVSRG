@@ -109,7 +109,7 @@ type Widget() =
     default this.OnAddedTo(c: Widget) =
         match parent with
         | None -> parent <- Some c
-        | Some _ -> Logging.Error "Tried to add this widget to a container when it is already in one"
+        | Some parent -> Logging.Debug (sprintf "Tried to add this (%O) to a parent (%O) when parent is already (%O)" this c parent)
         
     /// Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
     abstract member Remove: Widget -> unit
@@ -120,8 +120,10 @@ type Widget() =
 
     member private this.OnRemovedFrom(c: Widget) =
         match parent with
-        | None -> Logging.Error "Tried to remove this widget from a container it isn't in one"
-        | Some p -> if p = c then parent <- None else Logging.Error "Tried to remove this widget from a container when it is in another"
+        | None -> Logging.Debug (sprintf "Tried to remove this (%O) from parent (%O) but it has no parent" this c)
+        | Some p ->
+            if p = c then parent <- None
+            else Logging.Debug (sprintf "Tried to remove this (%O) from parent (%O) but parent is actually (%O)" this c p)
 
     /// Queues up the action to take place immediately before the next update loop, making it thread/loop-safe
     ///   When updating widgets from a background task, use this.
@@ -190,3 +192,31 @@ type Widget() =
 module WPosHelpers =
     
     let position (p: WPos) (w: Widget) = w.Position <- p; w
+
+module Icons = 
+    let star = Feather.star
+    let back = Feather.arrow_left
+    let bpm = Feather.music
+    let time = Feather.clock
+    let sparkle = Feather.award
+
+    let edit = Feather.edit_2
+    let add = Feather.plus_circle
+    let remove = Feather.minus_circle
+    let delete = Feather.trash
+    let selected = Feather.check_circle
+    let unselected = Feather.circle
+
+    let goal = Feather.flag
+    let playlist = Feather.list
+    let tag = Feather.tag
+
+    let system = Feather.airplay
+    let themes = Feather.image
+    let gameplay = Feather.sliders
+    let binds = Feather.link
+    let debug = Feather.terminal
+
+    let info = Feather.info
+    let alert = Feather.alert_circle
+    let system_notification = Feather.alert_octagon

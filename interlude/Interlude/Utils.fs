@@ -149,29 +149,3 @@ module Utils =
                             callback()
                     ))
             |> ignore
-
-module Icons = 
-    let star = Feather.star
-    let back = Feather.arrow_left
-    let bpm = Feather.music
-    let time = Feather.clock
-    let sparkle = Feather.award
-
-    let edit = Feather.edit_2
-    let add = Feather.plus_circle
-    let remove = Feather.trash
-    let selected = Feather.check_circle
-    let unselected = Feather.circle
-
-    let goal = Feather.flag
-    let playlist = Feather.list
-
-    let system = Feather.airplay
-    let themes = Feather.image
-    let gameplay = Feather.sliders
-    let binds = Feather.link
-    let debug = Feather.terminal
-
-    let info = Feather.info
-    let alert = Feather.alert_circle
-    let system_notification = Feather.alert_octagon

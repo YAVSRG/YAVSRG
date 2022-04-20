@@ -1,4 +1,4 @@
-﻿namespace Interlude
+﻿namespace Interlude.UI
 
 module Feather =
     let alert_octagon = "\uE81B"

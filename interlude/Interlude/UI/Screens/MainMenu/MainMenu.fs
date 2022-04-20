@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Screens.MainMenu
 
 open System
-open System.Drawing
 open Prelude.Common
 open Interlude
 open Interlude.Utils
