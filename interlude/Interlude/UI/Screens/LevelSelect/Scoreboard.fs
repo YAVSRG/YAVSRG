@@ -73,10 +73,10 @@ module Scoreboard =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if Mouse.Hover this.Bounds && options.Hotkeys.Delete.Value.Tapped() then
+            if Mouse.Hover this.Bounds && (!|Hotkey.Delete).Tapped() then
                 let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
                 Tooltip.callback (
-                    options.Hotkeys.Delete.Value,
+                    (!|Hotkey.Delete),
                     Localisation.localiseWith [scoreName] "misc.delete",
                     NotificationType.Warning,
                     fun () ->

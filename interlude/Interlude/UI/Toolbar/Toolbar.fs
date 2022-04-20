@@ -2,6 +2,7 @@
 
 open System.Drawing
 open Interlude
+open Interlude.Options
 open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Animation
@@ -36,35 +37,35 @@ type Toolbar() as this =
         Button(
             (fun () -> Screen.back Screen.TransitionFlag.UnderLogo),
             sprintf "%s %s  " Icons.back (L"menu.back"),
-            Options.options.Hotkeys.Exit)
+            Hotkey.Exit)
         |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
         |> this.Add
         
         Button(
             ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
             L"menu.options",
-            Options.options.Hotkeys.Options)
+            Hotkey.Options)
         |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
         Button(
             ( fun () -> if shown() then Screen.change Screen.Type.Import Screen.TransitionFlag.Default ),
             L"menu.import",
-            Options.options.Hotkeys.Import)
+            Hotkey.Import)
         |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
         Button(
             ( fun () -> if shown() then MarkdownReader.help() ),
             L"menu.help",
-            Options.options.Hotkeys.Help)
+            Hotkey.Help)
         |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
         Button(
             ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
             L"menu.tasks",
-            Options.options.Hotkeys.Tasks)
+            Hotkey.Tasks)
         |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
         |> this.Add
 
@@ -86,7 +87,7 @@ type Toolbar() as this =
         Terminal.draw()
 
     override this.Update(elapsedTime, bounds) =
-        if shown() && Options.options.Hotkeys.Toolbar.Value.Tapped() then
+        if shown() && (!|Hotkey.Toolbar).Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
         Terminal.update()

@@ -119,7 +119,7 @@ module CardSelect =
                     this.HoverChild <- Some (buttons.[0])
                 
         override this.Update(elapsedTime, bounds) =
-            if this.Selected && this.HoverChild = None && options.Hotkeys.Select.Value.Tapped() then onSelect()
+            if this.Selected && this.HoverChild = None && (!|Hotkey.Select).Tapped() then onSelect()
             base.Update(elapsedTime, bounds)
     
         override this.Draw() =

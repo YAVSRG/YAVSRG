@@ -3,6 +3,7 @@
 open System
 open Prelude.Common
 open Interlude
+open Interlude.Options
 open Interlude.Utils
 open Interlude.Graphics
 open Interlude.UI
@@ -60,7 +61,7 @@ type Screen() as this =
 
     override this.OnEnter prev =
         if AutoUpdate.updateAvailable then Notification.add (L"notification.update.available", NotificationType.System)
-        if prev = Screen.Type.SplashScreen && Options.firstLaunch then MarkdownReader.help()
+        if prev = Screen.Type.SplashScreen && firstLaunch then MarkdownReader.help()
         splashText <- newSplash()
         Logo.moveMenu()
         Screen.backgroundDim.Target <- 0.0f
@@ -87,4 +88,4 @@ type Screen() as this =
     override this.Update (elapsedTime, bounds) =
         base.Update (elapsedTime, bounds)
         splashSubAnim.Target <- if Mouse.Hover (bounds |> Rect.expand (-400.0f, 0.0f) |> Rect.sliceTop 100.0f) then 1.0f else 0.0f
-        if Options.options.Hotkeys.Select.Value.Tapped() then playFunc()
+        if (!|Hotkey.Select).Tapped() then playFunc()

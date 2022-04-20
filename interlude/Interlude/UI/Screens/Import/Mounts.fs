@@ -1,9 +1,9 @@
 ﻿namespace Interlude.UI.Screens.Import
 
-open System.Drawing
 open Prelude.Common
 open Prelude.ChartFormats.Conversions
 open Prelude.Data.Charts.Library.Imports
+open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
@@ -99,7 +99,7 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Interlude.Options.options.Hotkeys.Exit.Value.Tapped() then this.BeginClose()
+        if (!|Hotkey.Exit).Tapped() then this.BeginClose()
 
     override this.OnClose() = 
         Mounts.dropFunc <- None

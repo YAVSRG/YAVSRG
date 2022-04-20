@@ -4,6 +4,7 @@ open System.Drawing
 open System.Diagnostics
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Interlude
+open Interlude.Options
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Input
@@ -173,7 +174,7 @@ module MarkdownReader =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if Mouse.Click MouseButton.Left || Options.options.Hotkeys.Exit.Value.Tapped() then
+            if Mouse.Click MouseButton.Left || (!|Hotkey.Exit).Tapped() then
                 this.BeginClose()
                 frame.Move(-WIDTH * 0.5f, Render.vheight, WIDTH * 0.5f, Render.vheight - 200.0f)
         override this.OnClose() = ()

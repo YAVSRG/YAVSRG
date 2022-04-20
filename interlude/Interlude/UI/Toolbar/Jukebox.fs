@@ -2,6 +2,7 @@
 
 open Prelude.Common
 open Interlude
+open Interlude.Options
 open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Animation
@@ -18,11 +19,11 @@ type Jukebox() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Options.options.Hotkeys.Volume.Value.Pressed() then
+        if (!|Hotkey.Volume).Pressed() then
             fade.Target <- 1.0f
-            Setting.app ((+) (float (Mouse.Scroll()) * 0.02)) Options.options.AudioVolume
-            Audio.changeVolume Options.options.AudioVolume.Value
-            slider.Target <- float32 Options.options.AudioVolume.Value
+            Setting.app ((+) (float (Mouse.Scroll()) * 0.02)) options.AudioVolume
+            Audio.changeVolume options.AudioVolume.Value
+            slider.Target <- float32 options.AudioVolume.Value
         else fade.Target <- 0.0f
 
     override this.Draw() =

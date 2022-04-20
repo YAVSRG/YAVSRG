@@ -4,6 +4,7 @@ open System
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude
+open Interlude.Options
 open Interlude.Graphics
 open Interlude.Input
 open Interlude.UI
@@ -109,12 +110,12 @@ module Terminal =
                 Text.drawB(font.Value, line, 20.0f, l + 20.0f, b - 60.0f - 60.0f - 40f * float32 i, (Color.White, Color.Black))
 
     let update() =
-        if shown && Options.options.Hotkeys.Exit.Value.Tapped() then hide()
+        if shown && (!|Hotkey.Exit).Tapped() then hide()
         if 
-            Options.options.EnableConsole.Value
+            options.EnableConsole.Value
             && not shown
             && Screen.currentType <> Screen.Type.Play
-            && Options.options.Hotkeys.Console.Value.Tapped()
+            && (!|Hotkey.Console).Tapped()
         then show()
 
         if not shown then ()
