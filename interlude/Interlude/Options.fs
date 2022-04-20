@@ -143,35 +143,35 @@ module Options =
         | Toolbar = 11
         | Tooltip = 12
         | Delete = 13
-        | Screenshot = 13
+        | Screenshot = 14
         | Volume = 15
         
         // Shortcuts
-        | Import = 16
-        | Options = 17
-        | Help = 18
-        | Tasks = 19
-        | Console = 20
+        | Import = 100
+        | Options = 101
+        | Help = 102
+        | Tasks = 103
+        | Console = 104
         
         // Level select
-        | UpRate = 21
-        | UpRateHalf = 22
-        | UpRateSmall = 23
-        | DownRate = 24
-        | DownRateHalf = 25
-        | DownRateSmall = 26
-        | Collections = 27
-        | AddToCollection = 28
-        | RemoveFromCollection = 29
-        | MoveDownInCollection = 30
-        | MoveUpInCollection = 31
-        | Mods = 32
-        | Autoplay = 33
-        | SortMode = 34
-        | GroupMode = 35
+        | UpRate = 200
+        | UpRateHalf = 201
+        | UpRateSmall = 202
+        | DownRate = 203
+        | DownRateHalf = 204
+        | DownRateSmall = 205
+        | Collections = 206
+        | AddToCollection = 207
+        | RemoveFromCollection = 208
+        | MoveDownInCollection = 209
+        | MoveUpInCollection = 210
+        | Mods = 211
+        | Autoplay = 212
+        | SortMode = 213
+        | GroupMode = 214
         
         // Gameplay
-        | Skip = 35
+        | Skip = 300
 
     type GameOptions =
         {
@@ -336,12 +336,12 @@ module Options =
         let debug() =
             for v in System.Enum.GetValues typeof<Hotkey> do
                 if not(defaultHotkeys.ContainsKey (v :?> Hotkey)) then
-                    printfn "Missing a default bind for: %A" v
+                    failwithf "Missing a default bind for: %A" v
 
         let init(d: Dictionary<Hotkey, Bind>) =
             for (key, value) in defaultHotkeys |> Map.toSeq do
-                if not (d.ContainsKey key) then
-                    d.Add(key, value)
+                if not (d.ContainsKey key) || key = Hotkey.NONE then
+                    d.[key] <- value
 
     let (!|) (hotkey: Hotkey) = options.Hotkeys.[hotkey]
 
@@ -354,6 +354,7 @@ module Options =
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
         Hotkeys.init(options.Hotkeys)
+        Hotkeys.debug()
 
     let save() =
         try

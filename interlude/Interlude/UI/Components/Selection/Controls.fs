@@ -231,30 +231,3 @@ type NoteColorPicker(color: Setting<byte>) as this =
     override this.Up() = fd()
     override this.Right() = fd()
     override this.Down() = bk()
-
-// for hotkey purposes, NOT for gameplay
-type KeyBinder(setting: Setting<Bind>, allowModifiers) as this =
-    inherit Selectable()
-    do
-        this.Add(new TextBox((fun () -> setting.Value.ToString()), (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.5f) |> positionWidgetA(0.0f, 40.0f, 0.0f, -40.0f))
-        this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
-
-    override this.Draw() =
-        if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-        Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
-        base.Draw()
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        if this.Selected then
-            match Input.consumeAny InputEvType.Press with
-            | ValueNone -> ()
-            | ValueSome b ->
-                match b with
-                | Key (k, (ctrl, _, shift)) ->
-                    if k = Keys.Escape then if allowModifiers then setting.Value <- Dummy
-                    elif allowModifiers then setting.Value <- Key (k, (ctrl, false, shift))
-                    else setting.Value <- Key (k, (false, false, false))
-                    this.Selected <- false
-                | _ -> ()
