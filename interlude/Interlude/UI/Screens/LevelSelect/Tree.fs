@@ -228,10 +228,10 @@ module Tree =
                 elif Mouse.Click MouseButton.Right then
                     let struct (l, t, r, b) = bounds
                     showDropdown cc context (min (Render.vwidth - 405f) (Mouse.X()), Mouse.Y() - scrollPos.Value - origin)
-                elif options.Hotkeys.Delete.Value.Tapped() then
+                elif (!|Hotkey.Delete).Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
                     Tooltip.callback (
-                        options.Hotkeys.Delete.Value,
+                        (!|Hotkey.Delete),
                         Localisation.localiseWith [chartName] "misc.delete",
                         NotificationType.Warning,
                         fun () -> 
@@ -282,10 +282,10 @@ module Tree =
             if Mouse.Hover(bounds) then
                 if Mouse.Click(MouseButton.Left) then
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
-                elif options.Hotkeys.Delete.Value.Tapped() then
+                elif (!|Hotkey.Delete).Tapped() then
                     let groupName = sprintf "%s (%i charts)" name (items.Count())
                     Tooltip.callback (
-                        options.Hotkeys.Delete.Value,
+                        (!|Hotkey.Delete),
                         Localisation.localiseWith [groupName] "misc.delete",
                         NotificationType.Warning,
                         fun () ->
@@ -414,7 +414,7 @@ module Tree =
         let tree_height = bottomEdge - scrollPos.Value
         if Mouse.Click MouseButton.Right then right_click_scrolling <- true
         if not (Mouse.Held MouseButton.Right) then right_click_scrolling <- false
-        if options.Hotkeys.Up.Value.Tapped() && expandedGroup <> "" then
+        if (!|Hotkey.Up).Tapped() && expandedGroup <> "" then
             scrollTo <- ScrollTo.Pack expandedGroup
             expandedGroup <- ""
         if right_click_scrolling then scrollPos.Target <- -(Mouse.Y() - origin) / total_height * tree_height

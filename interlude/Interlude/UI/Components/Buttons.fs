@@ -4,13 +4,14 @@ open System
 open OpenTK.Mathematics
 open Prelude.Common
 open Interlude
+open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.Input
 open Interlude.Graphics
 open Interlude.UI.Animation
 
-type Button(onClick, labelFunc: unit -> string, bind: Setting<Bind>) as this =
+type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
     inherit Widget()
 
     let color = AnimationFade 0.3f
@@ -20,16 +21,16 @@ type Button(onClick, labelFunc: unit -> string, bind: Setting<Bind>) as this =
         this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
         this.Add(new Bindable(bind, onClick))
 
-    new(onClick, labelFunc: unit -> string) = Button(onClick, labelFunc, Bind.DummyBind)
+    new(onClick, labelFunc: unit -> string) = Button(onClick, labelFunc, Hotkey.NONE)
     new(onClick, label: string) = Button(onClick, K label)
-    new(onClick, label: string, bind: Setting<Bind>) = Button(onClick, K label, bind)
+    new(onClick, label: string, bind: Hotkey) = Button(onClick, K label, bind)
 
     override this.Draw() =
         Draw.rect this.Bounds (Style.accentShade(80, 0.5f, color.Value)) Sprite.Default
         Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
         Text.drawFillB(Content.font, labelFunc(), Rect.trimBottom 10.0f this.Bounds, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
 
-type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Setting<Bind>) as this =
+type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
     inherit Widget()
     
     let color = AnimationFade 0.3f
@@ -39,7 +40,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Setting<
         this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
         this.Add(new Bindable(bind, onClick))
     
-    new(onClick, labelFunc, colorFunc) = StylishButton(onClick, labelFunc, colorFunc, Bind.DummyBind)
+    new(onClick, labelFunc, colorFunc) = StylishButton(onClick, labelFunc, colorFunc, Hotkey.NONE)
 
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
@@ -70,7 +71,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Setting<
 
 module CardButton =
     
-    type Base(onClick, bind: Setting<Bind>) as this =
+    type Base(onClick, bind: Hotkey) as this =
         inherit Widget()
 
         let mutable hover = false
@@ -79,7 +80,7 @@ module CardButton =
             this.Add(new Clickable(onClick, fun b -> hover <- b))
             this.Add(new Bindable(bind, onClick))
 
-    let Basic(label, onClick, bind: Setting<Bind>) =
+    let Basic(label, onClick, bind: Hotkey) =
         let b = Base(onClick, bind)
         TextBox(K label, Style.text, 0.5f) |> b.Add
         b

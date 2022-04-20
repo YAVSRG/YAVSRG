@@ -16,12 +16,12 @@ type TooltipRegion(localisedText) =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Mouse.Hover this.Bounds && options.Hotkeys.Tooltip.Value.Tapped() then
-            Tooltip.tooltip (options.Hotkeys.Tooltip.Value, localisedText)
+        if Mouse.Hover this.Bounds && (!|Hotkey.Tooltip).Tapped() then
+            Tooltip.tooltip ((!|Hotkey.Tooltip), localisedText)
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
 
-type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) as this =
+type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this =
     inherit Widget()
 
     let color = AnimationFade(0.5f)
@@ -49,7 +49,7 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
                 match bind with
                 | Some b ->
                     match s.Value with
-                    | "" -> Localisation.localiseWith [b.Value.ToString(); prompt] "misc.search"
+                    | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
                     | text -> text
                 | None -> match s.Value with "" -> prompt | text -> text),
             (fun () -> Style.highlightF 255 color.Value), 0.0f)
@@ -59,7 +59,7 @@ type TextEntry(s: Setting<string>, bind: Setting<Bind> option, prompt: string) a
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         match bind with
-        | Some b -> if b.Value.Tapped() then toggle()
+        | Some b -> if (!|b).Tapped() then toggle()
         | None -> if active = false then toggle()
 
     override this.Dispose() =
@@ -69,7 +69,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit Widget()
     let searchTimer = new Diagnostics.Stopwatch()
     do
-        TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some options.Hotkeys.Search, "search" )
+        TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some Hotkey.Search, "search" )
         |> this.Add
 
     new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, fun () -> callback(Filter.parse s.Value))
@@ -87,7 +87,7 @@ type TextInputDialog(bounds: Rect, prompt, callback) as this =
         this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if options.Hotkeys.Select.Value.Tapped() || options.Hotkeys.Exit.Value.Tapped() then tb.Dispose(); this.BeginClose()
+        if (!|Hotkey.Select).Tapped() || (!|Hotkey.Exit).Tapped() then tb.Dispose(); this.BeginClose()
     override this.OnClose() = callback buf.Value
 
 module SlideDialog =
@@ -107,7 +107,7 @@ type SlideDialog(direction: SlideDialog.Direction, distance: float32) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if options.Hotkeys.Exit.Value.Tapped() then this.BeginClose()
+        if (!|Hotkey.Exit).Tapped() then this.BeginClose()
 
     override this.BeginClose() =
         base.BeginClose()

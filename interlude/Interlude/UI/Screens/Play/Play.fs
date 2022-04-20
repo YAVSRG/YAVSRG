@@ -94,7 +94,7 @@ type Screen() as this =
                 liveplay.Add(time, inputKeyState) )
             scoring.Update chartTime
 
-        if options.Hotkeys.Options.Value.Pressed() then
+        if (!|Hotkey.Options).Pressed() then
             Audio.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
@@ -200,7 +200,7 @@ type ReplayScreen(mode: ReplayMode) as this =
 
         if not keypressData.Finished then scoring.Update chartTime
 
-        if options.Hotkeys.Options.Value.Pressed() then
+        if (!|Hotkey.Options).Pressed() then
             QuickOptions.show(scoring, ignore)
         
         if keypressData.Finished then Screen.back Screen.TransitionFlag.Default

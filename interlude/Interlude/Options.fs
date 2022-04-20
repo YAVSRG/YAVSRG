@@ -1,10 +1,9 @@
 ﻿namespace Interlude
 
-open System
 open System.IO
+open System.Collections.Generic
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
-open Prelude.Scoring
 open Prelude.Gameplay.Layout
 open Prelude.Data.Charts.Library.Imports
 open Interlude
@@ -12,6 +11,11 @@ open Interlude.Input
 open Interlude.Input.Bind
 
 module Options =
+
+    (*
+        Core game config
+        This stuff is always stored with the .exe, not the game data folder
+    *)
 
     type WindowType =
         | Windowed = 0
@@ -64,140 +68,9 @@ module Options =
                 AudioDevice = Setting.simple 1
             }
 
-    //type Hotkey =
-    //    // All-purpose/menus
-    //    | Exit = 0
-    //    | Select = 1
-    //    | Previous = 2
-    //    | Next = 3 
-    //    | PreviousGroup = 4
-    //    | NextGroup = 5
-    //    | Up = 6
-    //    | Down = 7
-    //    | Start = 8
-    //    | End = 9
-    //    | Search = 10
-    //    | Toolbar = 11
-    //    | Tooltip = 12
-    //    | Delete = 13
-    //    | Screenshot = 13
-    //    | Volume = 15
-
-    //    // Shortcuts
-    //    | Import = 16
-    //    | Options = 17
-    //    | Help = 18
-    //    | Tasks = 19
-    //    | Console = 20
-
-    //    // Level select
-    //    | UpRate = 21
-    //    | UpRateHalf = 22
-    //    | UpRateSmall = 23
-    //    | DownRate = 24
-    //    | DownRateHalf = 25
-    //    | DownRateSmall = 26
-    //    | Collections = 27
-    //    | AddToCollection = 28
-    //    | RemoveFromCollection = 29
-    //    | MoveDownInCollection = 30
-    //    | MoveUpInCollection = 31
-    //    | Mods = 32
-    //    | Autoplay = 33
-    //    | SortMode = 34
-    //    | GroupMode = 35
-
-    //    // Gameplay
-    //    | Skip = 35
-
-    type Hotkeys =
-        {
-            Exit: Setting<Bind>
-            Select: Setting<Bind>
-            Previous: Setting<Bind>
-            Next: Setting<Bind>
-            PreviousGroup: Setting<Bind>
-            NextGroup: Setting<Bind>
-            Up: Setting<Bind>
-            Down: Setting<Bind>
-            Start: Setting<Bind>
-            End: Setting<Bind>
-
-            Skip: Setting<Bind>
-            Search: Setting<Bind>
-            Toolbar: Setting<Bind>
-            Tooltip: Setting<Bind>
-            Delete: Setting<Bind>
-            Screenshot: Setting<Bind>
-            Volume: Setting<Bind>
-
-            Collections: Setting<Bind>
-            AddToCollection: Setting<Bind>
-            RemoveFromCollection: Setting<Bind>
-            ReorderCollectionDown: Setting<Bind>
-            ReorderCollectionUp: Setting<Bind>
-            SortMode: Setting<Bind>
-            GroupMode: Setting<Bind>
-
-            Mods: Setting<Bind>
-            Autoplay: Setting<Bind>
-
-            Import: Setting<Bind>
-            Options: Setting<Bind>
-            Help: Setting<Bind>
-            Tasks: Setting<Bind>
-            Console: Setting<Bind>
-
-            UpRate: Setting<Bind>
-            DownRate: Setting<Bind>
-            UpRateHalf: Setting<Bind>
-            DownRateHalf: Setting<Bind>
-            UpRateSmall: Setting<Bind>
-            DownRateSmall: Setting<Bind>
-        }
-        static member Default = {
-            Exit = Setting.simple(mk Keys.Escape)
-            Select = Setting.simple(mk Keys.Enter)
-            Search = Setting.simple(mk Keys.Tab)
-            Toolbar = Setting.simple(ctrl Keys.T)
-            Tooltip = Setting.simple(mk Keys.Slash)
-            Delete = Setting.simple(mk Keys.Delete)
-            Screenshot = Setting.simple(mk Keys.F12)
-            Volume = Setting.simple(mk Keys.LeftAlt)
-            Previous = Setting.simple(mk Keys.Left)
-            Next = Setting.simple(mk Keys.Right)
-            PreviousGroup = Setting.simple(mk Keys.PageUp)
-            NextGroup = Setting.simple(mk Keys.PageDown)
-            Up = Setting.simple(mk Keys.Up)
-            Down = Setting.simple(mk Keys.Down)
-            Start = Setting.simple(mk Keys.Home)
-            End = Setting.simple(mk Keys.End)
-            Skip = Setting.simple(mk Keys.Space)
-
-            Collections = Setting.simple(mk Keys.N)
-            AddToCollection = Setting.simple(mk Keys.RightBracket)
-            RemoveFromCollection = Setting.simple(mk Keys.LeftBracket)
-            ReorderCollectionDown = Setting.simple(ctrl Keys.RightBracket)
-            ReorderCollectionUp = Setting.simple(ctrl Keys.LeftBracket)
-            SortMode = Setting.simple(mk Keys.Comma)
-            GroupMode = Setting.simple(mk Keys.Period)
-
-            Mods = Setting.simple(mk Keys.M)
-            Autoplay = Setting.simple(ctrl Keys.A)
-
-            Import = Setting.simple(ctrl Keys.I)
-            Options = Setting.simple(ctrl Keys.O)
-            Help = Setting.simple(ctrl Keys.H)
-            Tasks = Setting.simple(mk Keys.F8)
-            Console = Setting.simple(mk Keys.GraveAccent)
-
-            UpRate = Setting.simple(mk Keys.Equal)
-            DownRate = Setting.simple(mk Keys.Minus)
-            UpRateHalf = Setting.simple(ctrl Keys.Equal)
-            DownRateHalf = Setting.simple(ctrl Keys.Minus)
-            UpRateSmall = Setting.simple(shift Keys.Equal)
-            DownRateSmall = Setting.simple(shift Keys.Minus)
-        }
+    (*
+        User settings
+    *)
 
     type Keymode =
         | ``3K`` = 3
@@ -222,6 +95,7 @@ module Options =
         | Instant = 0
         | EndOfSong = 1
 
+    // todo: change name, this is from the old codebase
     type WatcherSelection<'T> = 'T list
     module WatcherSelection =
         let cycleForward xs =
@@ -249,6 +123,55 @@ module Options =
             FadeLength: Setting.Bounded<int>
             Color: Setting<Color>
         }
+
+    type Hotkey =
+
+        | NONE = -1
+
+        // All-purpose/menus
+        | Exit = 0
+        | Select = 1
+        | Previous = 2
+        | Next = 3 
+        | PreviousGroup = 4
+        | NextGroup = 5
+        | Up = 6
+        | Down = 7
+        | Start = 8
+        | End = 9
+        | Search = 10
+        | Toolbar = 11
+        | Tooltip = 12
+        | Delete = 13
+        | Screenshot = 13
+        | Volume = 15
+        
+        // Shortcuts
+        | Import = 16
+        | Options = 17
+        | Help = 18
+        | Tasks = 19
+        | Console = 20
+        
+        // Level select
+        | UpRate = 21
+        | UpRateHalf = 22
+        | UpRateSmall = 23
+        | DownRate = 24
+        | DownRateHalf = 25
+        | DownRateSmall = 26
+        | Collections = 27
+        | AddToCollection = 28
+        | RemoveFromCollection = 29
+        | MoveDownInCollection = 30
+        | MoveUpInCollection = 31
+        | Mods = 32
+        | Autoplay = 33
+        | SortMode = 34
+        | GroupMode = 35
+        
+        // Gameplay
+        | Skip = 35
 
     type GameOptions =
         {
@@ -286,7 +209,7 @@ module Options =
             GameplayBinds: (Bind array) array
 
             EnableConsole: Setting<bool>
-            Hotkeys: Hotkeys
+            Hotkeys: Dictionary<Hotkey, Bind>
         }
         static member Default = {
             VisualOffset = Setting.bounded 0.0 -500.0 500.0 |> Setting.round 0
@@ -342,7 +265,7 @@ module Options =
             ChartGroupMode = Setting.simple "Pack"
             EnableConsole = Setting.simple false
             ScoreSortMode = Setting.simple 0
-            Hotkeys = Hotkeys.Default
+            Hotkeys = Dictionary<Hotkey, Bind>()
             GameplayBinds = [|
                 [|mk Keys.Left; mk Keys.Down; mk Keys.Right|];
                 [|mk Keys.Z; mk Keys.X; mk Keys.Period; mk Keys.Slash|];
@@ -355,12 +278,74 @@ module Options =
             |]
         }
 
-    //forward ref for applying game config options. it is initialised in the constructor of Game
+    // forward ref for applying game config options. it is initialised in the constructor of Game
     let mutable applyOptions: unit -> unit = ignore
 
     let mutable internal config = GameConfig.Default
-    let mutable internal options = GameOptions.Default
-    let internal configPath = Path.GetFullPath "config.json"
+    let mutable options = GameOptions.Default
+
+    module Hotkeys =
+
+        let defaultHotkeys = 
+            Map.ofList [
+                Hotkey.NONE, Dummy
+
+                Hotkey.Exit, mk Keys.Escape
+                Hotkey.Select, mk Keys.Enter
+                Hotkey.Search, mk Keys.Tab
+                Hotkey.Toolbar, ctrl Keys.T
+                Hotkey.Tooltip, mk Keys.Slash
+                Hotkey.Delete, mk Keys.Delete
+                Hotkey.Screenshot, mk Keys.F12
+                Hotkey.Volume, mk Keys.LeftAlt
+                Hotkey.Previous, mk Keys.Left
+                Hotkey.Next, mk Keys.Right
+                Hotkey.PreviousGroup, mk Keys.PageUp
+                Hotkey.NextGroup, mk Keys.PageDown
+                Hotkey.Up, mk Keys.Up
+                Hotkey.Down, mk Keys.Down
+                Hotkey.Start, mk Keys.Home
+                Hotkey.End, mk Keys.End
+                Hotkey.Skip, mk Keys.Space
+
+                Hotkey.Collections, mk Keys.N
+                Hotkey.AddToCollection, mk Keys.RightBracket
+                Hotkey.RemoveFromCollection, mk Keys.LeftBracket
+                Hotkey.MoveDownInCollection, ctrl Keys.RightBracket
+                Hotkey.MoveUpInCollection, ctrl Keys.LeftBracket
+                Hotkey.SortMode, mk Keys.Comma
+                Hotkey.GroupMode, mk Keys.Period
+
+                Hotkey.Mods, mk Keys.M
+                Hotkey.Autoplay, ctrl Keys.A
+
+                Hotkey.Import, ctrl Keys.I
+                Hotkey.Options, ctrl Keys.O
+                Hotkey.Help, ctrl Keys.H
+                Hotkey.Tasks, mk Keys.F8
+                Hotkey.Console, mk Keys.GraveAccent
+
+                Hotkey.UpRate, mk Keys.Equal
+                Hotkey.DownRate, mk Keys.Minus
+                Hotkey.UpRateHalf, ctrl Keys.Equal
+                Hotkey.DownRateHalf, ctrl Keys.Minus
+                Hotkey.UpRateSmall, shift Keys.Equal
+                Hotkey.DownRateSmall, shift Keys.Minus
+            ]
+
+        let debug() =
+            for v in System.Enum.GetValues typeof<Hotkey> do
+                if not(defaultHotkeys.ContainsKey (v :?> Hotkey)) then
+                    printfn "Missing a default bind for: %A" v
+
+        let init(d: Dictionary<Hotkey, Bind>) =
+            for (key, value) in defaultHotkeys |> Map.toSeq do
+                if not (d.ContainsKey key) then
+                    d.Add(key, value)
+
+    let (!|) (hotkey: Hotkey) = options.Hotkeys.[hotkey]
+
+    let private configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
 
     let load() =
@@ -368,6 +353,7 @@ module Options =
         Localisation.loadFile config.Locale
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
+        Hotkeys.init(options.Hotkeys)
 
     let save() =
         try

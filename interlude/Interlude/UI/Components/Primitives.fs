@@ -4,6 +4,7 @@ open System
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Prelude.Common
 open Interlude
+open Interlude.Options
 open Interlude.Utils
 open Interlude.Input
 open Interlude.Graphics
@@ -44,12 +45,12 @@ type Clickable (onClick, onHover) =
         elif not oh && hover && Mouse.Moved() then onHover true
         elif hover && Mouse.Click MouseButton.Left then onClick()
 
-type Bindable (bind: Setting<Bind>, onPress) =
+type Bindable (bind: Hotkey, onPress) =
     inherit Widget()
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if bind.Value.Tapped() then onPress()
+        if (!|bind).Tapped() then onPress()
         
         
 type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =

@@ -26,12 +26,12 @@ type NavigateSelectable() =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if not disposed && this.Selected && this.SelectedChild.IsNone then
-            if options.Hotkeys.Previous.Value.Tapped() then this.Left()
-            if options.Hotkeys.Up.Value.Tapped() then this.Up()
-            if options.Hotkeys.Next.Value.Tapped() then this.Right()
-            if options.Hotkeys.Down.Value.Tapped() then this.Down()
-            if options.Hotkeys.Select.Value.Tapped() then this.SelectedChild <- this.HoverChild
-            if options.Hotkeys.Exit.Value.Tapped() then this.Selected <- false
+            if (!|Hotkey.Previous).Tapped() then this.Left()
+            if (!|Hotkey.Up).Tapped() then this.Up()
+            if (!|Hotkey.Next).Tapped() then this.Right()
+            if (!|Hotkey.Down).Tapped() then this.Down()
+            if (!|Hotkey.Select).Tapped() then this.SelectedChild <- this.HoverChild
+            if (!|Hotkey.Exit).Tapped() then this.Selected <- false
 
     override this.Dispose() = base.Dispose(); disposed <- true
 

@@ -15,7 +15,7 @@ open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection.Controls
 
-type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Setting<Bind>) as this =
+type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) as this =
     inherit StylishButton(
             ( fun () -> 
                 match this.Dropdown with
@@ -81,7 +81,7 @@ type Screen() as this =
         LevelSelectDropdown(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.accentShade(100, 0.4f, 0.6f)),
-            options.Hotkeys.SortMode
+            Hotkey.SortMode
         )
         |> TooltipRegion.Create (Localisation.localise "levelselect.sortby.tooltip")
         |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 170.0f, 0.0f)
@@ -90,7 +90,7 @@ type Screen() as this =
         LevelSelectDropdown(groupBy.Keys, "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.accentShade(100, 0.2f, 0.8f)),
-            options.Hotkeys.GroupMode
+            Hotkey.GroupMode
         )
         |> TooltipRegion.Create (Localisation.localise "levelselect.groupby.tooltip")
         |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 170.0f, 0.0f)
@@ -106,21 +106,21 @@ type Screen() as this =
         base.Update(elapsedTime, bounds)
         if LevelSelect.refresh then refresh(); LevelSelect.refresh <- false
 
-        if options.Hotkeys.Select.Value.Tapped() then Tree.play()
+        if (!|Hotkey.Select).Tapped() then Tree.play()
 
-        elif options.Hotkeys.UpRateSmall.Value.Tapped() then changeRate(0.01f)
-        elif options.Hotkeys.UpRateHalf.Value.Tapped() then changeRate(0.05f)
-        elif options.Hotkeys.UpRate.Value.Tapped() then changeRate(0.1f)
-        elif options.Hotkeys.DownRateSmall.Value.Tapped() then changeRate(-0.01f)
-        elif options.Hotkeys.DownRateHalf.Value.Tapped() then changeRate(-0.05f)
-        elif options.Hotkeys.DownRate.Value.Tapped() then changeRate(-0.1f)
+        elif (!|Hotkey.UpRateSmall).Tapped() then changeRate(0.01f)
+        elif (!|Hotkey.UpRateHalf).Tapped() then changeRate(0.05f)
+        elif (!|Hotkey.UpRate).Tapped() then changeRate(0.1f)
+        elif (!|Hotkey.DownRateSmall).Tapped() then changeRate(-0.01f)
+        elif (!|Hotkey.DownRateHalf).Tapped() then changeRate(-0.05f)
+        elif (!|Hotkey.DownRate).Tapped() then changeRate(-0.1f)
 
-        elif options.Hotkeys.Next.Value.Tapped() then Tree.next()
-        elif options.Hotkeys.Previous.Value.Tapped() then Tree.previous()
-        elif options.Hotkeys.NextGroup.Value.Tapped() then Tree.nextGroup()
-        elif options.Hotkeys.PreviousGroup.Value.Tapped() then Tree.previousGroup()
-        elif options.Hotkeys.Start.Value.Tapped() then Tree.beginGroup()
-        elif options.Hotkeys.End.Value.Tapped() then Tree.endGroup()
+        elif (!|Hotkey.Next).Tapped() then Tree.next()
+        elif (!|Hotkey.Previous).Tapped() then Tree.previous()
+        elif (!|Hotkey.NextGroup).Tapped() then Tree.nextGroup()
+        elif (!|Hotkey.PreviousGroup).Tapped() then Tree.previousGroup()
+        elif (!|Hotkey.Start).Tapped() then Tree.beginGroup()
+        elif (!|Hotkey.End).Tapped() then Tree.endGroup()
         
         let struct (left, top, right, bottom) = this.Bounds
         Tree.update(top + 170.0f, bottom, elapsedTime)

@@ -5,6 +5,7 @@ open Prelude.Scoring
 open Prelude.Scoring.Grading
 open Prelude.Data.Scores
 open Interlude
+open Interlude.Options
 open Interlude.Utils
 open Interlude.Content
 open Interlude.Graphics
@@ -330,13 +331,13 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
 
-        if Options.options.Hotkeys.Next.Value.Tapped() then
-            Setting.app Options.WatcherSelection.cycleForward Options.options.Rulesets
-            scoreData.Ruleset <- Options.getCurrentRuleset()
+        if (!|Hotkey.Next).Tapped() then
+            Setting.app WatcherSelection.cycleForward options.Rulesets
+            scoreData.Ruleset <- getCurrentRuleset()
             refresh()
-        elif Options.options.Hotkeys.Previous.Value.Tapped() then
-            Setting.app Options.WatcherSelection.cycleBackward Options.options.Rulesets
-            scoreData.Ruleset <- Options.getCurrentRuleset()
+        elif (!|Hotkey.Previous).Tapped() then
+            Setting.app WatcherSelection.cycleBackward options.Rulesets
+            scoreData.Ruleset <- getCurrentRuleset()
             refresh()
 
     override this.OnEnter prev =
