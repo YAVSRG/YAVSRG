@@ -9,6 +9,7 @@ open Percyqaz.Json
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.ChartFormats.Conversions
+open Prelude.Data.Tables
 
 open Sorting
 open Collections
@@ -46,8 +47,12 @@ module Library =
     let count() = charts.Count
 
     let lookup (id: string) : CachedChart option =
-        let t, c = charts.TryGetValue id
-        if t then Some c else None
+        let success, c = charts.TryGetValue id
+        if success then Some c else None
+
+    // todo: optimise!
+    let lookupHash(id: string) : CachedChart option =
+        Seq.tryFind (fun cc -> cc.Hash = id) charts.Values
 
     let load (cc: CachedChart) : Chart Option =
         cc.FilePath |> Chart.fromFile
@@ -104,6 +109,8 @@ module Library =
                 collections.Add (newId, collections.[id])
                 collections.Remove id
 
+        let exists (id: string) : bool = collections.ContainsKey id
+
         let get (id: string) : Collection option = if collections.ContainsKey id then Some collections.[id] else None
 
         let update (id: string, data: Collection) =
@@ -141,7 +148,7 @@ module Library =
             g.Sort sorting
         groups
 
-    let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups  =
+    let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
         for name in collections.Keys do
             let c = collections.[name]
@@ -176,6 +183,25 @@ module Library =
             |> ResizeArray<CachedChart * LevelSelectContext>
             |> if orderMatters then id else fun x -> x.Sort sorting; x
             |> fun x -> if x.Count > 0 then groups.Add((0, name), x)
+        groups
+
+    let getTableGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+        let groups = new Dictionary<int * string, Group>()
+        match Table.current with
+        | Some table ->
+            for level_no, level in Seq.indexed table.Levels do
+                let charts =
+                    Seq.choose
+                        ( fun (c: TableChart) ->
+                            lookupHash c.Hash
+                            |> Option.map (fun x -> x, LevelSelectContext.Table)
+                        ) level.Charts
+                charts
+                |> Filter.applyf filter
+                |> ResizeArray<CachedChart * LevelSelectContext>
+                |> fun x -> x.Sort sorting; x
+                |> fun x -> if x.Count > 0 then groups.Add((level_no, level.Name), x)
+        | None -> ()
         groups
 
     // ---- Importing charts to library ----

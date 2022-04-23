@@ -86,3 +86,28 @@ type Table =
                     (this.Level new_level).Charts.Add c
                     this.Log(MoveChart (cid, l.Name, new_level))
                 | None -> ()
+
+module Table =
+
+    open Prelude.Common
+    open System.IO
+        
+    let mutable current : Table option = None
+    let mutable currentFile = ""
+
+    let save() =
+        match current with
+        | Some t -> JSON.ToFile(Path.Combine(getDataPath "Data", "Tables", currentFile), true) t
+        | None -> ()
+
+    let load(fileid: string) =
+        save()
+        currentFile <- fileid + ".table"
+        current <- Path.Combine(getDataPath "Data", "Tables", currentFile) |> JSON.FromFile |> function Ok t -> Some t | Result.Error e -> raise e
+
+    let create(name: string, fileid: string) =
+        save()
+        if Path.Combine(getDataPath "Data", "Tables", currentFile) |> File.Exists then failwith "Table already exists"
+        currentFile <- fileid + ".table"
+        current <- Some { Name = name; Levels = ResizeArray(); Changelog = ResizeArray() }
+        save()

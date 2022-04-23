@@ -124,18 +124,21 @@ module Collections =
     [<NoComparison>]
     type LevelSelectContext =
         | None
+        | Table
         | Collection of index: int * id: string
         | Playlist of index: int * id: string * data: PlaylistData
         | Goal of index: int * id: string * data: GoalData
         member this.InCollection =
             match this with
-            | None -> ""
+            | None
+            | Table -> ""
             | Collection (_, id)
             | Playlist (_, id, _)
             | Goal (_, id, _) -> id
         member this.PositionInCollection =
             match this with
-            | None -> -1
+            | None
+            | Table -> -1
             | Collection (i, _)
             | Playlist (i, _, _)
             | Goal (i, _, _) -> i
@@ -205,7 +208,9 @@ module Sorting =
             "Artist", fun (c, _) -> 0, firstCharacter c.Artist
             "Creator", fun (c, _) -> 0, firstCharacter c.Creator
             "Keymode", fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
+            // todo: separate these out properly
             "Collections", fun _ -> 0, "" // Placeholder for UI purposes, UI is hard coded to call collection grouping behaviour when this is chosen
+            "Table", fun _ -> 0, "" // Placeholder for UI purposes, UI is hard coded to call table grouping behaviour when this is chosen
         ]
 
     let private compareBy (f: CachedChart -> IComparable) = fun a b -> f(fst a).CompareTo <| f(fst b)
@@ -217,6 +222,7 @@ module Sorting =
     let sortBy : IDictionary<string, SortMethod> = dict[
             "Physical", Comparison(compareBy (fun x -> x.Physical))
             "Technical", Comparison(compareBy (fun x -> x.Technical))
+            "BPM", Comparison(compareBy (fun x -> let (a, b) = x.BPM in (1f/a, 1f/b)) |> thenCompareBy (fun x -> x.Physical))
             "Title", Comparison(compareBy (fun x -> x.Title) |> thenCompareBy (fun x -> x.Physical))
             "Artist", Comparison(compareBy (fun x -> x.Artist) |> thenCompareBy (fun x -> x.Physical))
             "Creator", Comparison(compareBy (fun x -> x.Creator) |> thenCompareBy (fun x -> x.Physical))
