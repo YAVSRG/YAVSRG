@@ -141,7 +141,6 @@ module Tree =
         override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
         override this.Selected = selectedChart = cc.FilePath && Chart.context = context
         member this.Chart = cc
-        member this.Context = context
 
         member this.Select() = switchChart(cc, context, groupName)
 
@@ -319,9 +318,10 @@ module Tree =
         // fetch groups
         let library_groups =
             let ctx : GroupContext = { Rate = rate.Value; RulesetId = rulesetId; Ruleset = ruleset }
-            if options.ChartGroupMode.Value <> "Collections" then
-                Library.getGroups ctx groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
-            else Library.getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
+            match options.ChartGroupMode.Value with
+            | "Collections" -> Library.getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
+            | "Table" -> Library.getTableGroups sortBy.[options.ChartSortMode.Value] filter
+            | grouping -> Library.getGroups ctx groupBy.[grouping] sortBy.[options.ChartSortMode.Value] filter
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()
@@ -334,6 +334,7 @@ module Tree =
         groups <-
             library_groups.Keys
             |> Seq.sort
+            |> if options.ChartGroupReverse.Value then Seq.rev else id
             |> Seq.map
                 (fun (sortIndex, groupName) ->
                     library_groups.[(sortIndex, groupName)]
@@ -346,6 +347,7 @@ module Tree =
                             lastItem <- Some i
                             i
                         )
+                    |> if options.ChartSortReverse.Value then Seq.rev else id
                     |> List.ofSeq
                     |> fun l -> GroupItem(groupName, l))
             |> List.ofSeq

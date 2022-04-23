@@ -210,6 +210,8 @@ module Icons =
     let goal = Feather.flag
     let playlist = Feather.list
     let tag = Feather.tag
+    let order_ascending = Feather.trending_down
+    let order_descending = Feather.trending_up
 
     let system = Feather.airplay
     let themes = Feather.image
