@@ -334,6 +334,7 @@ module Tree =
         groups <-
             library_groups.Keys
             |> Seq.sort
+            |> if options.ChartGroupReverse.Value then Seq.rev else id
             |> Seq.map
                 (fun (sortIndex, groupName) ->
                     library_groups.[(sortIndex, groupName)]
@@ -346,6 +347,7 @@ module Tree =
                             lastItem <- Some i
                             i
                         )
+                    |> if options.ChartSortReverse.Value then Seq.rev else id
                     |> List.ofSeq
                     |> fun l -> GroupItem(groupName, l))
             |> List.ofSeq

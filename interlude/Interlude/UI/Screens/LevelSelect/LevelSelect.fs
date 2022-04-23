@@ -78,13 +78,29 @@ type Screen() as this =
         |> positionWidget(0.0f, 0.55f, 120.0f, 0.0f, -25.0f, 0.7f, 170.0f, 0.0f)
         |> this.Add
 
+        StylishButton(
+            (fun () -> Setting.app not options.ChartSortReverse; LevelSelect.refresh <- true),
+            (fun () -> if options.ChartSortReverse.Value then Icons.order_descending else Icons.order_ascending),
+            (fun () -> Style.accentShade(150, 0.4f, 0.6f))
+        )
+        |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, 35.0f, 0.7f, 170.0f, 0.0f)
+        |> this.Add
+
         LevelSelectDropdown(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.accentShade(100, 0.4f, 0.6f)),
             Hotkey.SortMode
         )
         |> TooltipRegion.Create (Localisation.localise "levelselect.sortby.tooltip")
-        |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 170.0f, 0.0f)
+        |> positionWidget(60.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 170.0f, 0.0f)
+        |> this.Add
+        
+        StylishButton(
+            (fun () -> Setting.app not options.ChartGroupReverse; LevelSelect.refresh <- true),
+            (fun () -> if options.ChartGroupReverse.Value then Icons.order_descending else Icons.order_ascending),
+            (fun () -> Style.accentShade(150, 0.2f, 0.8f))
+        )
+        |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 35.0f, 0.85f, 170.0f, 0.0f)
         |> this.Add
 
         LevelSelectDropdown(groupBy.Keys, "Group",
@@ -93,7 +109,7 @@ type Screen() as this =
             Hotkey.GroupMode
         )
         |> TooltipRegion.Create (Localisation.localise "levelselect.groupby.tooltip")
-        |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 170.0f, 0.0f)
+        |> positionWidget(60.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 170.0f, 0.0f)
         |> this.Add
 
         infoPanel
