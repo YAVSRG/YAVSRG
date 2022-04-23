@@ -87,7 +87,7 @@ module CollectionManager =
                 Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.added", NotificationType.Info)
 
     let removeChart(cc: CachedChart, context: LevelSelectContext) =
-        let success = removeChart(cc, Chart.context)
+        let success = removeChart(cc, context)
         if success then
             if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
             Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; selectedName] "collections.removed", NotificationType.Info)

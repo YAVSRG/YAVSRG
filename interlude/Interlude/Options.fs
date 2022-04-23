@@ -203,9 +203,13 @@ module Options =
             EtternaMount: Setting<MountedChartSource option>
 
             ChartSortMode: Setting<string>
+            ChartSortReverse: Setting<bool>
             ChartGroupMode: Setting<string>
-            //ChartColorMode: Setting<string>
+            ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
+
+            SelectedCollection: Setting<string>
+            SelectedTable: Setting<string>
             GameplayBinds: (Bind array) array
 
             EnableConsole: Setting<bool>
@@ -262,9 +266,15 @@ module Options =
             EtternaMount = Setting.simple None
 
             ChartSortMode = Setting.simple "Title"
+            ChartSortReverse = Setting.simple false
             ChartGroupMode = Setting.simple "Pack"
-            EnableConsole = Setting.simple false
+            ChartGroupReverse = Setting.simple false
             ScoreSortMode = Setting.simple 0
+
+            SelectedCollection = Setting.simple ""
+            SelectedTable = Setting.simple ""
+
+            EnableConsole = Setting.simple false
             Hotkeys = Dictionary<Hotkey, Bind>()
             GameplayBinds = [|
                 [|mk Keys.Left; mk Keys.Down; mk Keys.Right|];

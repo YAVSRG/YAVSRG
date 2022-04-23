@@ -77,7 +77,7 @@ module Gameplay =
         
         open Prelude.Data.Charts.Library
     
-        let mutable selectedName = Localisation.localise "collections.favourites" // todo: load from settings
+        let mutable selectedName = Localisation.localise "collections.favourites"
         let mutable selectedCollection = 
             match Collections.get selectedName with
             | Some c -> c
@@ -110,7 +110,10 @@ module Gameplay =
     
         let select(name: string) =
             match Collections.get name with
-            | Some c -> selectedName <- name; selectedCollection <- c
+            | Some c -> 
+                options.SelectedCollection.Set name
+                selectedName <- name
+                selectedCollection <- c
             | None -> Logging.Error (sprintf "No such collection with name '%s'" name)
     
         let reorder (up: bool) : bool =
@@ -148,30 +151,6 @@ module Gameplay =
             | Collection ccs -> if ccs.Contains cc.FilePath then false else ccs.Add cc.FilePath; true
             | Playlist ps -> ps.Add (cc.FilePath, PlaylistData.Make mods rate); true
             | Goals gs -> gs.Add (cc.FilePath, GoalData.Make mods rate Goal.None); true
-
-    module Table =
-
-        open System.IO
-        
-        let mutable current : Table option = None
-        let mutable currentFile = ""
-
-        let save() =
-            match current with
-            | Some t -> JSON.ToFile(Path.Combine(getDataPath "Data", "Tables", currentFile), true) t
-            | None -> ()
-
-        let load(fileid: string) =
-            save()
-            currentFile <- fileid + ".table"
-            current <- Path.Combine(getDataPath "Data", "Tables", currentFile) |> JSON.FromFile |> function Ok t -> Some t | Result.Error e -> raise e
-
-        let create(name: string, fileid: string) =
-            save()
-            if Path.Combine(getDataPath "Data", "Tables", currentFile) |> File.Exists then failwith "Table already exists"
-            currentFile <- fileid + ".table"
-            current <- Some { Name = name; Levels = ResizeArray(); Changelog = ResizeArray() }
-            save()
 
     let rate =
         Chart._rate
@@ -213,12 +192,21 @@ module Gameplay =
             Scores.saveScore Chart.saveData.Value rulesetId data
         else BestFlags.Default
 
+    // todo: a temporary measure until the table module has a better interface
+    let selectTable(id: string) =
+        try 
+            Table.load id
+            options.SelectedTable.Set id
+        with err -> Logging.Error (sprintf "Error loading table '%s'" id, err)
+
     let save() =
         Table.save()
         Scores.save()
         Library.save()
 
     let init() =
+        match options.SelectedCollection.Value with "" -> () | v -> Collections.select v
+        match options.SelectedTable.Value with "" -> () | v -> selectTable v
         try
             let c, ch =
                 match Library.lookup options.CurrentChart.Value with
