@@ -172,6 +172,7 @@ module Options =
         
         // Gameplay
         | Skip = 300
+        | Retry = 301
 
     type GameOptions =
         {
@@ -316,7 +317,6 @@ module Options =
                 Hotkey.Down, mk Keys.Down
                 Hotkey.Start, mk Keys.Home
                 Hotkey.End, mk Keys.End
-                Hotkey.Skip, mk Keys.Space
 
                 Hotkey.Collections, mk Keys.N
                 Hotkey.AddToCollection, mk Keys.RightBracket
@@ -341,6 +341,9 @@ module Options =
                 Hotkey.DownRateHalf, ctrl Keys.Minus
                 Hotkey.UpRateSmall, shift Keys.Equal
                 Hotkey.DownRateSmall, shift Keys.Minus
+
+                Hotkey.Skip, mk Keys.Space
+                Hotkey.Retry, ctrl Keys.R
             ]
 
         let debug() =

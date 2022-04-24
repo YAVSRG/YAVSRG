@@ -99,6 +99,9 @@ type Screen() as this =
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
             QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default)
+
+        if (!|Hotkey.Retry).Pressed() then
+            Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default
         
         if scoring.Finished && not (liveplay :> IReplayProvider).Finished then
             liveplay.Finish()
