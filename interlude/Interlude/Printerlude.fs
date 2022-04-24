@@ -38,6 +38,22 @@ module Printerlude =
                     ( Impl.Create(Types.str, Types.str, 
                         fun levelid chartid -> Table.current.Value.AddChart(levelid, chartid, Gameplay.Chart.cacheInfo.Value)) ))
 
+    module Themes =
+
+        let register_commands (ctx: Context) =
+            ctx
+                .WithCommand("themes_reload", Command.create "Reload the current theme and noteskin" []
+                    ( Impl.Create(fun () -> Content.Themes.load(); Content.Noteskins.load()) ))
+
+                .WithCommand("noteskin_stitch", Command.create "Stitch a noteskin texture" ["id"]
+                    ( Impl.Create(Types.str, fun id -> Content.Noteskins.Current.instance.StitchTexture id) ))
+
+                .WithCommand("noteskin_split", Command.create "Split a noteskin texture" ["id"]
+                    ( Impl.Create(Types.str, fun id -> Content.Noteskins.Current.instance.SplitTexture id) ))
+                    
+                .WithCommand("import_noteskin", Command.create "Import a noteskin from an existing source" ["path"; "keymodes"]
+                    ( Impl.Create(Types.str, (Types.list Types.int), fun path keymodes -> if not (Content.Noteskins.tryImport path keymodes) then ctx.WriteLine("Nothing found to import")) ))
+
     module Utils =
 
         let show_version() =
@@ -57,6 +73,7 @@ module Printerlude =
     ctx <-
         { Context.Empty with IO = { In = stdin; Out = context_writer } }
         |> Tables.register_commands
+        |> Themes.register_commands
         |> Utils.register_commands
 
     let exec(s: string) =

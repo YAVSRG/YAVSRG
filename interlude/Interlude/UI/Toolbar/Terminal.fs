@@ -59,7 +59,7 @@ module Terminal =
 
     let add_message(s: string) = Log.add s
 
-    let private line = Setting.simple ""
+    let private currentLine = Setting.simple ""
     let private sendKey = Bind.mk Keys.Enter
 
     module private History =
@@ -71,16 +71,16 @@ module Terminal =
         let up() = 
             if history.Length - 1 > pos then
                 pos <- pos + 1
-                line.Value <- history.[pos]
+                currentLine.Value <- history.[pos]
         let down() = 
             if pos > 0 then
                 pos <- pos - 1
-                line.Value <- history.[pos]
+                currentLine.Value <- history.[pos]
         let add(l) =
             history <- l :: history
             pos <- -1
 
-    let mutable private shown = false
+    let mutable shown = false
 
     let private hide() = 
         shown <- false
@@ -88,8 +88,15 @@ module Terminal =
 
     let private show() =
         shown <- true
-        let rec addInput() = Input.setTextInput (line, fun () -> if shown then Screen.globalAnimation.Add(Animation.AnimationAction(addInput)))
+        let rec addInput() = Input.setTextInput (currentLine, fun () -> if shown then Screen.globalAnimation.Add(Animation.AnimationAction(addInput)))
         addInput()
+
+    let dropfile(path: string) =
+        let path = path.Replace("""\""", """\\""")
+        let v = currentLine.Value
+        if v.Length = 0 || Char.IsWhiteSpace(v.[v.Length - 1]) then
+            currentLine.Set (sprintf "%s\"%s\"" v path)
+        else currentLine.Set (sprintf "%s \"%s\"" v path)
 
     let font = lazy ( Fonts.create "Courier Prime Sans" |> fun x -> x.SpaceWidth <- 0.5f; x )
 
@@ -103,7 +110,7 @@ module Terminal =
         Draw.rect (bounds |> Rect.expand (5.0f, 5.0f)) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
         Draw.rect (bounds |> Rect.trimBottom 70.0f) (Color.FromArgb(200, 0, 0, 0)) Sprite.Default
         Draw.rect (bounds |> Rect.sliceBottom 65.0f) (Color.FromArgb(255, 0, 0, 0)) Sprite.Default
-        Text.drawB(font.Value, ">  " + line.Value, 30.0f, l + 20.0f, b - 50.0f, (Color.White, Color.Black))
+        Text.drawB(font.Value, ">  " + currentLine.Value, 30.0f, l + 20.0f, b - 50.0f, (Color.White, Color.Black))
 
         for i, line in Seq.indexed Log.visible do
             if i < 19 then
@@ -121,11 +128,11 @@ module Terminal =
         if not shown then ()
         else
 
-        if sendKey.Tapped() && line.Value <> "" then
-            exec_command line.Value
-            History.add line.Value
+        if sendKey.Tapped() && currentLine.Value <> "" then
+            exec_command currentLine.Value
+            History.add currentLine.Value
             Log.home()
-            line.Value <- ""
+            currentLine.Value <- ""
         elif History.upKey.Tapped() then History.up()
         elif History.downKey.Tapped() then History.down()
         elif Log.upKey.Tapped() then Log.up()

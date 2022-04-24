@@ -75,9 +75,11 @@ type Game(config: GameConfig) as this =
 
     override this.OnFileDrop e =
         let handle path =
-            if Content.Noteskins.tryImport path |> not then
-                if Screens.Import.FileDropHandling.tryImport path |> not then
-                    Logging.Warn "The file you dropped didn't look like a skin, chart or otherwise importable thing"
+            if Toolbar.Terminal.shown then
+                Toolbar.Terminal.dropfile path
+            elif Content.Noteskins.tryImport path [4; 7] then ()
+            elif Screens.Import.FileDropHandling.tryImport path then ()
+            else Logging.Warn "The file you dropped didn't look like a skin, chart or otherwise importable thing"
         e.FileNames |> Array.iter handle
 
     override this.OnRenderFrame e =
