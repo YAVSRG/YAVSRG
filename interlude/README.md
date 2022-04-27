@@ -10,9 +10,9 @@ Click [here to read more info about this project](https://yavsrg.github.io/Inter
 
 ## 🎮 Play it for yourself:
 
-Go [here](https://github.com/YAVSRG/Interlude/releases) for pre-built versions (works out of box on Windows)
+Go [here](https://github.com/YAVSRG/Interlude/releases) for pre-built versions (download and extract the zip, run the exe)
 
-**MAKE SURE [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1/runtime) is installed!** (Or it won't open)
+If the game doesn't launch, **MAKE SURE [.NET Core 3.1](https://dotnet.microsoft.com/download/dotnet/3.1/runtime) is installed!**
 
 ## 🤝 Contributing
 
