@@ -18,7 +18,7 @@ let generate_preview(ns: Noteskin, target_file: string) =
     let gen_tex (u, v) (bmp : Bitmap, config : TextureConfig) =
         let new_img = new Bitmap(bmp.Width / config.Columns, bmp.Height / config.Rows)
         let u = u % config.Columns
-        let v = v % config.Columns
+        let v = v % config.Rows
         new_img.Mutate
             ( fun i ->
                 i.DrawImage(bmp, Point(new_img.Width * -u, new_img.Height * -v), 1.0f) |> ignore
