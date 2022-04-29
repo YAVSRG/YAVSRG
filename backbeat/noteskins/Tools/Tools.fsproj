@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="YAVSRG.Prelude" Version="1.0.0" />
+    <PackageReference Include="YAVSRG.Prelude" Version="2022.4.29.1311" />
   </ItemGroup>
 
   <ItemGroup>
