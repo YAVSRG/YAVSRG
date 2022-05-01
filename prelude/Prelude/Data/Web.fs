@@ -7,6 +7,7 @@ open System.Net.Http
 open System.Threading.Tasks
 open Prelude.Common
 
+// todo: apparently this is deprecated so i shouldnt be using it
 let wClient() =
     let w = new WebClient()
     w.Headers.Add("User-Agent", "Interlude")
@@ -34,7 +35,15 @@ let downloadJson<'T> (url, callback) =
         fun s ->
             match JSON.FromString<'T> s with
             | Ok s -> callback s
-            | Error err -> Logging.Error("Failed to parse json data from "+ url, err))
+            | Error err -> Logging.Error("Failed to parse json data from " + url, err))
+
+let downloadImage(url: string) : Async<Bitmap> =
+    async {
+        use w = client()
+        use! stream = Async.AwaitTask (w.GetStreamAsync(url))
+        use! img = Async.AwaitTask (Bitmap.LoadAsync stream)
+        return img.CloneAs<SixLabors.ImageSharp.PixelFormats.Rgba32>()
+    }
 
 let downloadFile (url: string, target: string) : StatusTask =
     fun output ->

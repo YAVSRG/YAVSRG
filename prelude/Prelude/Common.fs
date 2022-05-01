@@ -31,9 +31,8 @@ module Common =
         let infinity = infinityf * 1.0f<ms>
 
 (*
-    Settings - Store an (ideally immutable) value that can be get and set
-    Aims to provide extension to add restrictions and a consistent format so that it is easy to auto-generate UI components that edit settings
-    (Auto generation will be done with reflection)
+    Settings - Store an (ideally immutable) value that can be get and set, basically like a reference cell
+    Extensible to add restrictions and triggers when settings are changed
 *)
 
     type Setting<'T, 'Config> =
@@ -259,31 +258,110 @@ module Common =
             lock TaskList (fun () -> TaskList.Add mt)
             evt.Trigger mt
             mt
+                
+(*
+    Async tools v2
+*)
+    
+    module Async =
+    
+        /// Allows you to request some asynchronous work to be done, with a callback when it completes
+        /// If you use a higher level of concurrency, Results may not come back in the order they were requested
+        [<AbstractClass>]
+        type ManyWorker<'Request, 'Reply>(concurrency_level: int) as this =
+            let worker = 
+                MailboxProcessor<'Request>.Start
+                    ( fun box -> 
+                        let rec loop () = async {
+                            let! request = box.Receive()
+                            let res = this.Handle request
+                            this.Callback res
+                            return! loop ()
+                        }
+                        if concurrency_level > 1 then
+                            Async.Parallel(seq { for i in 1 .. concurrency_level -> loop () }, concurrency_level)
+                            |> Async.Ignore
+                        else loop ()
+                    )
+        
+            abstract member Handle: 'Request -> 'Reply
+        
+            abstract member Callback: 'Reply -> unit
+        
+            member this.Request(req: 'Request) : unit =
+                worker.Post req
 
-        let future<'T> (name: string) (callback: 'T -> unit) =
-            let mutable id = 0
-            let starter i cons: StatusTask =
-                fun output -> async {
-                    let v = cons()
-                    if id = i then callback v; return true
-                    else return false
-                }
-            fun (cons: unit -> 'T) ->
-                id <- id + 1
-                ignore <| Create TaskFlags.HIDDEN name (starter id cons)
+        type Job<'T> = int * 'T
+        
 
-        let futureSeq<'T> (name: string) (itemCallback: 'T -> unit) (completeCallback: unit -> unit) =
-            let mutable id = 0
-            let starter i cons: StatusTask =
-                fun output -> async {
-                    for v in cons() do
-                        if id = i then itemCallback v
-                    if id = i then completeCallback()
-                    return id = i
-                }
-            fun (cons: unit -> 'T seq) ->
-                id <- id + 1
-                Create TaskFlags.HIDDEN name (starter id cons) |> ignore
+        /// Allows you to request some asynchronous work to be done
+        ///  If another job is requested before the first completes, the result of the outdated job is swallowed
+        /// This allows easy reasoning about background jobs and how their results join with the main update loop
+        [<AbstractClass>]
+        type SingletonWorker<'Request, 'Reply>(concurrency_level: int) as this =
+            let mutable job_number = 0
+            let lockObj = obj()
+
+            let worker = 
+                MailboxProcessor<Job<'Request>>.Start
+                    ( fun box -> 
+                        let rec loop () = async {
+                            let! id, request = box.Receive()
+                            let processed = this.Handle request
+                            lock lockObj ( fun () -> if id = job_number then this.Callback(processed) )
+                            return! loop ()
+                        }
+                        if concurrency_level > 1 then
+                            Async.Parallel(seq { for i in 1 .. concurrency_level -> loop () }, concurrency_level)
+                            |> Async.Ignore
+                        else loop ()
+                    )
+
+            abstract member Handle: 'Request -> 'Reply
+
+            abstract member Callback: 'Reply -> unit
+
+            member this.Request(req: 'Request) : unit =
+                lock lockObj ( fun () -> 
+                    job_number <- job_number + 1
+                    worker.Post(job_number, req)
+                )
+                
+        /// Allows you to request some asynchronous work to be done
+        /// This version processes a sequence of items and runs a callback as each is completed
+        ///  If another job is requested before the first completes, the results of the outdated job are swallowed
+        /// This allows easy reasoning about background jobs and how their results join with the main update loop
+        [<AbstractClass>]
+        type SingletonWorkerSeq<'Request, 'Reply>() as this =
+            let mutable job_number = 0
+            let lockObj = obj()
+
+            let worker = 
+                MailboxProcessor<Job<'Request>>.Start
+                    ( fun box -> 
+                        let rec loop () = async {
+                            let! id, request = box.Receive()
+                            for processed in this.Handle request do
+                                lock lockObj ( fun () -> if id = job_number then this.Callback(processed) )
+                            lock lockObj ( fun () -> if id = job_number then this.JobCompleted(request) )
+                            return! loop ()
+                        }
+                        loop ()
+                    )
+
+            abstract member Handle: 'Request -> 'Reply seq
+
+            abstract member Callback: 'Reply -> unit
+
+            abstract member JobCompleted: 'Request -> unit
+
+            member this.Request(req: 'Request) : unit =
+                lock lockObj ( fun () -> job_number <- job_number + 1 )
+                worker.Post(job_number, req)
+
+(*
+    Misc helpers (mostly data storage)
+*)
     
     let JSON =
         let j = new JsonEncoder()
@@ -303,9 +381,6 @@ module Common =
         let load (stream: Stream) : Bitmap = Bitmap.Load<PixelFormats.Rgba32> stream
     type Color = Drawing.Color
 
-(*
-    Misc helper functions (mostly data storage)
-*)
 
     let getDataPath name =
         let p = Path.Combine(Directory.GetCurrentDirectory(), name)
