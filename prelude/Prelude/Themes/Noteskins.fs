@@ -125,3 +125,27 @@ type Noteskin(storage) as this =
         new Noteskin(Zip (new ZipArchive(stream), Some file))
     static member FromZipStream (stream: Stream) = new Noteskin(Zip (new ZipArchive(stream), None))
     static member FromPath (path: string) = new Noteskin(Folder path)
+
+module Noteskin =
+    
+    let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|Unknown|) (path: string) =
+        if Directory.Exists path then
+            if File.Exists (Path.Combine(path, "skin.ini")) then OsuSkinFolder else Unknown
+        else
+            let s = Path.GetExtension(path).ToLower()
+            match s with
+            | ".isk" -> InterludeSkinArchive
+            | ".osk" -> OsuSkinArchive
+            | _ -> Unknown
+
+    type RepoEntry =
+        {
+            Name: string
+            Preview: string
+            Download: string
+        }
+
+    type Repo =
+        {
+            Noteskins: RepoEntry list
+        }

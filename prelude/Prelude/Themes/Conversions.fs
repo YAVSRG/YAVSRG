@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data
+﻿namespace Prelude.Data.Themes
 
 open System.IO
 open SixLabors.ImageSharp
@@ -551,15 +551,3 @@ module OsuSkin =
                 }
 
             JSON.ToFile (Path.Combine(target, "noteskin.json"), false) config
-
-module Noteskin =
-    
-    let (|OsuSkinArchive|OsuSkinFolder|InterludeSkinArchive|Unknown|) (path: string) =
-        if Directory.Exists path then
-            if File.Exists (Path.Combine(path, "skin.ini")) then OsuSkinFolder else Unknown
-        else
-            let s = Path.GetExtension(path).ToLower()
-            match s with
-            | ".isk" -> InterludeSkinArchive
-            | ".osk" -> OsuSkinArchive
-            | _ -> Unknown
