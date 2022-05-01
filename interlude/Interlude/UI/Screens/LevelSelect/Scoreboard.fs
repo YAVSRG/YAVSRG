@@ -87,46 +87,54 @@ module Scoreboard =
 
     module Loader =
 
+        type private T =
+            {
+                RulesetId: string
+                Ruleset: Ruleset
+                CurrentChart: Chart
+                ChartSaveData: ChartSaveData option
+                mutable NewBests: Bests option
+            }
+
         let reload (container: FlowContainer) =
-            let mutable rsid = ""
-            let mutable rs = Unchecked.defaultof<_>
-            let mutable calculateBests : Bests option = None
-            let future =
-                BackgroundTask.futureSeq<ScoreInfoProvider> "Scoreboard loader"
-                    ( fun score ->
-                        calculateBests <- Some (
-                            match calculateBests with
-                            | None -> Bests.create score
-                            | Some b -> fst(Bests.update score b))
+            let worker =
+                { new Async.WorkerSeq<T, ScoreInfoProvider>() with
+                    member this.Handle(req: T) =
+                        match req.ChartSaveData with
+                        | None -> Seq.empty
+                        | Some d ->
+                            container.Synchronized(container.Clear)
+                            seq { 
+                                for score in d.Scores do
+                                    let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
+                                    req.NewBests <- Some (
+                                        match req.NewBests with
+                                        | None -> Bests.create s
+                                        | Some b -> fst(Bests.update s b))
+                                    yield s
+                            }
+                    member this.Callback(score: ScoreInfoProvider) =
                         let sc = ScoreCard score
                         container.Synchronized(fun () -> container.Add sc)
-                    )
-                    ( fun () -> 
-                        match calculateBests with
+                    member this.JobCompleted(req: T) =
+                        match req.NewBests with
                         | None -> ()
                         | Some b ->
                             container.Synchronized( fun () -> 
-                                if not (Chart.saveData.Value.Bests.ContainsKey rsid) || b <> Chart.saveData.Value.Bests[rsid] then
+                                if not (req.ChartSaveData.Value.Bests.ContainsKey req.RulesetId) || b <> req.ChartSaveData.Value.Bests[req.RulesetId] then
                                     Tree.updateDisplay()
-                                Chart.saveData.Value.Bests[rsid] <- b
+                                req.ChartSaveData.Value.Bests[req.RulesetId] <- b
                             )
-                    )
+                }
             fun () ->
-                future
-                    ( fun () ->
-                        // capture current ruleset, avoids race conditions
-                        rs <- ruleset
-                        rsid <- rulesetId
-                        calculateBests <- None
-                        container.Synchronized(container.Clear)
-                        match Chart.saveData with
-                        | None -> Seq.empty
-                        | Some d ->
-                            seq { 
-                                for score in d.Scores do
-                                    yield ScoreInfoProvider(score, Chart.current.Value, rs)
-                            }
-                    )
+                worker.Request
+                    {
+                        RulesetId = rulesetId
+                        Ruleset = ruleset
+                        CurrentChart = Chart.current.Value
+                        ChartSaveData = Chart.saveData
+                        NewBests = None
+                    }
 
 open Scoreboard
 
@@ -160,25 +168,6 @@ type Scoreboard() as this =
     let flowContainer = new FlowContainer(Sort = sorter(), Filter = filterer())
 
     let loader = Loader.reload flowContainer
-
-    let scoreLoader =
-        let future =
-            BackgroundTask.futureSeq<ScoreCard> "Scoreboard loader"
-                (fun item -> flowContainer.Synchronized(fun () -> flowContainer.Add item))
-                ignore
-        fun () ->
-            future
-                ( fun () ->
-                    flowContainer.Synchronized(flowContainer.Clear)
-                    match Chart.saveData with
-                    | None -> Seq.empty
-                    | Some d ->
-                        seq { 
-                            for score in d.Scores do
-                                yield ScoreInfoProvider(score, Chart.current.Value, getCurrentRuleset())
-                                |> ScoreCard
-                        }
-                )
 
     do
         flowContainer

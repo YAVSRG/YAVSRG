@@ -99,9 +99,15 @@ module Screen =
         let mutable private background: (Sprite * AnimationFade * bool) list = []
 
         let load =
-            let future = 
-                BackgroundTask.future<Image<PixelFormats.Rgba32> option> "Background Loader"
-                    (fun sprite ->
+            let worker = 
+                { new Async.Worker<string, Bitmap option>(1) with
+                    member this.Handle(file: string) =
+                        match System.IO.Path.GetExtension(file).ToLower() with
+                        | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
+                            try Some (Image.Load file)
+                            with err -> Logging.Warn("Failed to load background image: " + file, err); None
+                        | ext -> None
+                    member this.Callback(sprite: Bitmap option) =
                         match sprite with
                         | Some bmp ->
                             let col =
@@ -116,7 +122,7 @@ module Screen =
                                     |> Seq.maxBy vibrance
                                     |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
                             globalAnimation.Add(
-                                AnimationAction(fun () ->
+                                AnimationAction( fun () ->
                                     let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
                                     bmp.Dispose()
                                     Content.accentColor <- col
@@ -130,17 +136,10 @@ module Screen =
                                     Content.accentColor <- Content.themeConfig().DefaultAccentColor
                                 )
                             )
-                    )
-            let imageLoader (file: string) : unit -> Image<PixelFormats.Rgba32> option =
-                fun () -> 
-                    match System.IO.Path.GetExtension(file).ToLower() with
-                    | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
-                        try Some (Image.Load file)
-                        with err -> Logging.Warn("Failed to load background image: " + file, err); None
-                    | ext -> None
+                }
             fun path ->
                 List.iter (fun (_, fade: AnimationFade, _) -> fade.Target <- 0.0f) background
-                future (imageLoader path)
+                worker.Request path
 
         let update elapsedTime =
             background <-

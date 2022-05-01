@@ -5,9 +5,9 @@ open System.IO
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.Scoring
-open Prelude.Data.Themes
 open Prelude.Data
-open Prelude.Data.Noteskin
+open Prelude.Data.Themes
+open Prelude.Data.Themes.Noteskin
 open Interlude.Graphics
 
 module Content =
