@@ -1,7 +1,8 @@
-# Prelude
+# YAVSRG :: Prelude
 
 This is the rhythm game framework [Interlude](https://github.com/YAVSRG/Interlude) runs on.
 It provides the core elements of the game as a class library but no game engine features like rendering/playing sound/getting keyboard input.
+In the future, this will also provide the core elements needed for a full rhythm game chart editor.
 
 The framework has been made separate from the game to:
 - Provide a very easy set of tools for working with Interlude and the format it stores data in
