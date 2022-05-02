@@ -46,13 +46,13 @@ module Mounts =
 
     let handleStartupImports() =
         Logging.Debug("Checking for new songs in other games to import..")
-        match Interlude.Options.options.OsuMount.Value with
+        match options.OsuMount.Value with
         | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new osu! songs" (importMountedSource mount) |> ignore
         | None -> ()
-        match Interlude.Options.options.StepmaniaMount.Value with
+        match options.StepmaniaMount.Value with
         | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new StepMania songs" (importMountedSource mount) |> ignore
         | None -> ()
-        match Interlude.Options.options.EtternaMount.Value with
+        match options.EtternaMount.Value with
         | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new Etterna songs" (importMountedSource mount) |> ignore
         | None -> ()
 

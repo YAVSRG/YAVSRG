@@ -188,11 +188,11 @@ module Gameplay =
             | ScoreSaving.Always
             | _ -> true
         then
-            // todo: score uploading goes here when implemented
+            // todo: score uploading goes here?
             Scores.saveScore Chart.saveData.Value rulesetId data
         else BestFlags.Default
 
-    // todo: a temporary measure until the table module has a better interface
+    // todo: this is a temporary measure until the table module has a better interface
     let selectTable(id: string) =
         try 
             Table.load id

@@ -1,0 +1,107 @@
+﻿namespace Interlude.UI.Screens.Import
+
+open System.IO
+open System.Net
+open System.Net.Security
+open Prelude.Common
+open Prelude.Data.Charts
+open Prelude.Data.Charts.Sorting
+open Prelude.Web
+open Interlude
+open Interlude.Utils
+open Interlude.UI
+open Interlude.UI.Components
+open Interlude.UI.Screens.LevelSelect
+
+module FileDropHandling =
+    let tryImport(path: string) : bool =
+        match Mounts.dropFunc with
+        | Some f -> f path; true
+        | None ->
+            BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
+                (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
+            |> ignore
+            true
+
+type private SearchContainer(populate, handleFilter) as this =
+    inherit Widget()
+    let flowContainer = new FlowContainer(Spacing = 15.0f)
+    let populate = populate flowContainer
+    let handleFilter = handleFilter flowContainer
+    do
+        this.Add(new SearchBox(Setting.simple "", fun (f: Filter) -> handleFilter f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f))
+        this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 70.0f, 0.0f, -0.0f, 1.0f, 0.0f, 1.0f))
+        flowContainer.Add(new SearchContainerLoader(populate))
+
+type Screen() as this =
+    inherit Screen.T()
+    do
+        (*
+            Online downloaders
+        *)
+
+        // EtternaOnline's certificate keeps expiring!! Rop get on it
+        // This hack force-trusts EO's SSL certificate even though it has expired (this was for 18th march 2021, there's a new working certificate currently)
+        ServicePointManager.ServerCertificateValidationCallback <-
+            RemoteCertificateValidationCallback(
+                fun _ cert _ sslPolicyErrors ->
+                    if sslPolicyErrors = SslPolicyErrors.None then true
+                    else cert.GetCertHashString().ToLower() = "a4deab1b3cbd43ac7d21c9d17b80d97df09e67ee" )
+
+        let eoDownloads = 
+            SearchContainer(
+                (fun flowContainer _ output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> flowContainer.Synchronized(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
+                (fun flowContainer filter -> flowContainer.Filter <- SMImportCard.Filter filter) )
+        let osuDownloads =
+            SearchContainer(
+                (Beatmap.search [] 0),
+                (fun flowContainer filter -> flowContainer.Clear(); flowContainer.Add(new SearchContainerLoader(Beatmap.search filter 0 flowContainer))) )
+        let noteskins = 
+            SearchContainer(
+                (fun flowContainer _ output -> 
+                    downloadJson(Noteskins.source, 
+                        (fun (d: Prelude.Data.Themes.Noteskin.Repo) -> 
+                            flowContainer.Synchronized( fun () -> 
+                                for ns in d.Noteskins do
+                                    let nc = NoteskinCard ns
+                                    Noteskins.image_loader.Request(ns.Preview, nc)
+                                    flowContainer.Add nc
+                            )
+                        )
+                    )
+                ),
+                (fun flowContainer filter -> flowContainer.Filter <- NoteskinCard.Filter filter) )
+        let tabs = new TabContainer("Etterna Packs", eoDownloads)
+        tabs.AddTab("osu! Songs", osuDownloads)
+        tabs.AddTab("Noteskins", noteskins)
+
+        tabs
+        |> positionWidget(600.0f, 0.0f, 50.0f, 0.0f, -100.0f, 1.0f, -80.0f, 1.0f)
+        |> this.Add
+
+        new TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
+        |> positionWidget(600.0f, 0.0f, -90.0f, 1.0f, -100.0f, 1.0f, -30.0f, 1.0f)
+        |> this.Add
+
+        (*
+            Offline importers from other games
+        *)
+
+        MountControl(Mounts.Types.Osu, Options.options.OsuMount)
+        |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 360.0f, 0.0f, 260.0f, 0.0f)
+        |> this.Add
+
+        MountControl(Mounts.Types.Stepmania, Options.options.StepmaniaMount)
+        |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 360.0f, 0.0f, 330.0f, 0.0f)
+        |> this.Add
+
+        MountControl(Mounts.Types.Etterna, Options.options.EtternaMount)
+        |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 360.0f, 0.0f, 400.0f, 0.0f)
+        |> this.Add
+
+        new TextBox(K "Import from game", K (Color.White, Color.Black), 0.5f )
+        |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f)
+        |> this.Add
+
+    override this.OnEnter _ = ()
+    override this.OnExit _ = ()
