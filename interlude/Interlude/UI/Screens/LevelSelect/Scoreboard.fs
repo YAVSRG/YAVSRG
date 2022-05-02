@@ -98,7 +98,7 @@ module Scoreboard =
 
         let reload (container: FlowContainer) =
             let worker =
-                { new Async.WorkerSeq<T, ScoreInfoProvider>() with
+                { new Async.SingletonWorkerSeq<T, ScoreInfoProvider>() with
                     member this.Handle(req: T) =
                         match req.ChartSaveData with
                         | None -> Seq.empty

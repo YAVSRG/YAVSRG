@@ -90,8 +90,11 @@
     <Compile Include="UI\Screens\LevelSelect\Scoreboard.fs" />
     <Compile Include="UI\Screens\LevelSelect\ChartInfo.fs" />
     <Compile Include="UI\Screens\LevelSelect\LevelSelect.fs" />
+    <Compile Include="UI\Screens\Import\EtternaPacks.fs" />
+    <Compile Include="UI\Screens\Import\Beatmaps.fs" />
+    <Compile Include="UI\Screens\Import\Noteskins.fs" />
     <Compile Include="UI\Screens\Import\Mounts.fs" />
-    <Compile Include="UI\Screens\Import\ImportMenu.fs" />
+    <Compile Include="UI\Screens\Import\Import.fs" />
     <Compile Include="UI\Screens\OptionsMenu\System.fs" />
     <Compile Include="UI\Screens\OptionsMenu\Themes.fs" />
     <Compile Include="UI\Screens\OptionsMenu\Gameplay.fs" />

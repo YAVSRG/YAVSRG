@@ -240,6 +240,7 @@ module Content =
             
             Current.switch Current.id
 
+        /// Returns id * Display name pairs
         let list () = loaded |> Seq.map (fun kvp -> (kvp.Key, kvp.Value.Config.Name)) |> Array.ofSeq
 
         let extractCurrent() =

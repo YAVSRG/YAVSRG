@@ -100,7 +100,7 @@ module Screen =
 
         let load =
             let worker = 
-                { new Async.Worker<string, Bitmap option>(1) with
+                { new Async.SingletonWorker<string, Bitmap option>() with
                     member this.Handle(file: string) =
                         match System.IO.Path.GetExtension(file).ToLower() with
                         | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
@@ -137,7 +137,7 @@ module Screen =
                                 )
                             )
                 }
-            fun path ->
+            fun (path: string) ->
                 List.iter (fun (_, fade: AnimationFade, _) -> fade.Target <- 0.0f) background
                 worker.Request path
 
