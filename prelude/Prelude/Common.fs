@@ -268,25 +268,22 @@ module Common =
         /// Allows you to request some asynchronous work to be done, with a callback when it completes
         /// If you use a higher level of concurrency, Results may not come back in the order they were requested
         [<AbstractClass>]
-        type ManyWorker<'Request, 'Reply>(concurrency_level: int) as this =
+        type ManyWorker<'Request, 'Reply>() as this =
             let worker = 
                 MailboxProcessor<'Request>.Start
                     ( fun box -> 
                         let rec loop () = async {
                             let! request = box.Receive()
                             let res = this.Handle request
-                            this.Callback res
+                            this.Callback(request, res)
                             return! loop ()
                         }
-                        if concurrency_level > 1 then
-                            Async.Parallel(seq { for i in 1 .. concurrency_level -> loop () }, concurrency_level)
-                            |> Async.Ignore
-                        else loop ()
+                        loop ()
                     )
         
             abstract member Handle: 'Request -> 'Reply
         
-            abstract member Callback: 'Reply -> unit
+            abstract member Callback: 'Request * 'Reply -> unit
         
             member this.Request(req: 'Request) : unit =
                 worker.Post req
@@ -298,7 +295,7 @@ module Common =
         ///  If another job is requested before the first completes, the result of the outdated job is swallowed
         /// This allows easy reasoning about background jobs and how their results join with the main update loop
         [<AbstractClass>]
-        type SingletonWorker<'Request, 'Reply>(concurrency_level: int) as this =
+        type SingletonWorker<'Request, 'Reply>() as this =
             let mutable job_number = 0
             let lockObj = obj()
 
@@ -311,10 +308,7 @@ module Common =
                             lock lockObj ( fun () -> if id = job_number then this.Callback(processed) )
                             return! loop ()
                         }
-                        if concurrency_level > 1 then
-                            Async.Parallel(seq { for i in 1 .. concurrency_level -> loop () }, concurrency_level)
-                            |> Async.Ignore
-                        else loop ()
+                        loop ()
                     )
 
             abstract member Handle: 'Request -> 'Reply
