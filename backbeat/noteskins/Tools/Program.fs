@@ -143,4 +143,6 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) d
     printfn "==========================="
 
 printfn "Generating index.json ..."
+let repo : Noteskin.Repo = { Noteskins = List.ofSeq skins }
+JSON.ToFile (Path.Combine(root, "index.json"), true) repo
 printfn "Generating index.md ..."
