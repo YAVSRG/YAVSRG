@@ -53,6 +53,7 @@ type Game(config: GameConfig) as this =
             base.CenterWindow()
 
         | WindowType.Borderless ->
+            base.WindowState <- WindowState.Normal
             base.ClientRectangle <- new Box2i(monitor.ClientArea.Min - Vector2i(1, 1), monitor.ClientArea.Max + Vector2i(1, 1))
             base.WindowBorder <- WindowBorder.Hidden
             base.WindowState <- WindowState.Maximized
