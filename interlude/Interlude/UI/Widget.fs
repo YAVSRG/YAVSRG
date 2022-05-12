@@ -6,7 +6,7 @@ open Interlude.Graphics
 open Interlude.UI.Animation
 
 (*
-    Anchorpoints calculate the position of a widget's edge relative to its parent
+    AnchorPoints calculate the position of a widget's edge relative to its parent
     They are parameterised by an anchor and an offset
 
      To calculate the position of an edge (for example the value v for the left edge when given the left and right edges of the parent)
@@ -31,39 +31,65 @@ type AnchorPoint(offset, anchor) =
 
     member this.Snap() = this.Value <- this.Target
 
-type WPosFragment = float32 * float32
-module WPosFragment =
-    
-    let inline move x (a, b) = a + x, b
+type Position =
+    {
+        Left: float32 * float32
+        Top: float32 * float32
+        Right: float32 * float32
+        Bottom: float32 * float32
+    }
 
-    let min = 0.0f, 0.0f
-    let max = 0.0f, 1.0f
-    let percent x = 0.0f, x
+[<AutoOpen>]
+module PositionOperators =
+    let (%+) percentage offset = (offset, percentage)
+    let (%-) percentage offset =  (-offset, percentage)
+    let (^+) (percentage, x) offset = (x + offset, percentage)
+    let (^-) (percentage, x) offset = (x - offset, percentage)
 
-type WPos = WPosFragment * WPosFragment * WPosFragment * WPosFragment
-module WPos =
-    
-    let fill : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, WPosFragment.max
+module Position =
+    let min = 0.0f %+ 0.0f
+    let max = 1.0f %+ 0.0f
 
-    let shrink x (l, t, r, b) : WPos = WPosFragment.move x l, WPosFragment.move x t, WPosFragment.move -x r, WPosFragment.move -x b
-    let moveX x (l, t, r, b) : WPos = WPosFragment.move x l, t, WPosFragment.move x r, b
-    let moveY x (l, t, r, b) : WPos = l, WPosFragment.move x t, r, WPosFragment.move x b
-
-    let topLeft x y w h : WPos = (x, 0.0f), (y, 0.0f), (x + w, 0.0f), (y + h, 0.0f)
-    let topRight x y w h : WPos = (x - w, 1.0f), (y, 0.0f), (x, 1.0f), (y + h, 0.0f)
-    let bottomLeft x y w h : WPos = (x, 0.0f), (y - h, 1.0f), (x + w, 0.0f), (y, 1.0f)
-    let bottomRight x y w h : WPos = (x - w, 1.0f), (y - h, 1.0f), (x, 1.0f), (y, 1.0f)
-    
-    let leftCentre x y w h : WPos = (x, 0.0f), (y - h * 0.5f, 0.5f), (x + w, 0.0f), (y + h * 0.5f, 0.5f)
-    let topCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y, 0.0f), (x + w * 0.5f, 0.5f), (y + h, 0.0f)
-    let rightCentre x y w h : WPos = (x - w, 1.0f), (y - h * 0.5f, 0.5f), (x, 1.0f), (y + h * 0.5f, 0.5f)
-    let bottomCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y - h, 1.0f), (x + w * 0.5f, 0.5f), (y, 1.0f)
-
-    let leftSlice w : WPos = WPosFragment.min, WPosFragment.min, (w, 0.0f), WPosFragment.max
-    let topSlice h : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, (h, 0.0f)
-    let rightSlice w : WPos = (-w, 1.0f), WPosFragment.min, WPosFragment.max, WPosFragment.max
-    let bottomSlice h : WPos = WPosFragment.min, (-h, 1.0f), WPosFragment.max, WPosFragment.max
-
+type Position with
+    static member Default =
+        { 
+            Left = Position.min
+            Top = Position.min
+            Right = Position.max
+            Bottom = Position.max
+        }
+    static member Margin amount =
+        { 
+            Left = 0.0f %+ amount
+            Top = 0.0f %+ amount
+            Right = 1.0f %- amount
+            Bottom = 1.0f %- amount
+        }
+    static member SliceLeft amount = { Position.Default with Right = 0.0f %+ amount }
+    static member SliceTop amount = { Position.Default with Bottom = 0.0f %+ amount }
+    static member SliceRight amount = { Position.Default with Left = 1.0f %- amount }
+    static member SliceBottom amount = { Position.Default with Top = 1.0f %- amount }
+    static member Row y height =
+        {
+            Left = Position.min
+            Top = 0.0f %+ y
+            Right = Position.max
+            Bottom = 0.0f %+ (y + height)
+        }
+    static member Box (anchorx, anchory, x, y, width, height) =
+        {
+            Left = anchorx %+ x
+            Top = anchory %+ y
+            Right = anchorx %+ (x + width)
+            Bottom = anchory %+ (y + height)
+        }
+    static member Box (anchorx, anchory, width, height) =
+        {
+            Left = anchorx %+ 0.0f
+            Top = anchory %+ 0.0f
+            Right = anchorx %+ width
+            Bottom = anchory %+ height
+        }
 
 (*
     Widgets are the atomic components of the UI system.
@@ -169,16 +195,16 @@ type Widget() =
         right.Reposition (r, ra)
         bottom.Reposition (b, ba)
 
-    member this.Position
-        with set (((l, la), (t, ta), (r, ra), (b, ba)): WPos) =
-            left.Reposition (l, la)
-            top.Reposition (t, ta)
-            right.Reposition (r, ra)
-            bottom.Reposition (b, ba)
+    member this.Position (pos: Position) : Widget =
+        left.Reposition pos.Left
+        top.Reposition pos.Top
+        right.Reposition pos.Right
+        bottom.Reposition pos.Bottom
+        this
     
     member this.Reposition(l, t, r, b) = this.Reposition (l, 0.0f, t, 0.0f, r, 1.0f, b, 1.0f)
 
-    member this.Move(l, t, r, b) =
+    member this.Move(l: float32, t: float32, r: float32, b: float32) =
         left.Target <- l
         top.Target <- t
         right.Target <- r
@@ -187,11 +213,6 @@ type Widget() =
     // Dispose is called when a widget is going out of scope/about to be garbage collected and allows it to release any resources
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
-
-[<AutoOpen>]
-module WPosHelpers =
-    
-    let position (p: WPos) (w: Widget) = w.Position <- p; w
 
 module Icons = 
     let star = Feather.star

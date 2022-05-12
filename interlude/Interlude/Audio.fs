@@ -13,19 +13,19 @@ module Audio =
     type Track =
         {
             Path: string
-            ID: int //id used by Bass
-            Frequency: int //frequency the file is encoded in, so it knows how to up and downrate the audio correctly
-            Duration: float32<ms> //duration of the song so it doesn't have to be tediously recalculated in case of mp3 and stuff
+            ID: int
+            Frequency: int // in hz
+            Duration: float32<ms>
         }
         static member Default = { Path = ""; ID = 0; Frequency = 1; Duration = 1000.0f<ms> }
         static member FromFile(file: string) =
             //let ID = Bass.CreateStream(file, int64 0, int64 0, BassFlags.Decode); //loads file
-            let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan) //loads file
+            let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan)
             if ID = 0 then 
                 Logging.Error("Couldn't load audio track from " + file, Bass.LastError)
                 Track.Default
             else
-                let d = Bass.ChannelGetInfo(ID) //asks bass for info about the track
+                let d = Bass.ChannelGetInfo(ID)
                 let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength(ID)) * 1000.0
                 let Frequency = d.Frequency
                 //let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
@@ -66,21 +66,20 @@ module Audio =
             let actualTime = float32 (Bass.ChannelBytes2Seconds(nowplaying.ID, Bass.ChannelGetPosition nowplaying.ID) * 1000.0) * 1.0f<ms>
             if actualTime - time > 0.5f<ms> then
                 Logging.Debug(sprintf "Discrepancy seek to pos: %f actual time: %f" time actualTime)
-            Bass.ChannelPlay(nowplaying.ID) |> bassError
+            Bass.ChannelPlay nowplaying.ID |> bassError
         else if channelPlaying then
-            Bass.ChannelStop(nowplaying.ID) |> bassError
+            Bass.ChannelStop nowplaying.ID |> bassError
             channelPlaying <- false
         timer.Restart()
 
     let playLeadIn() = playFrom(-LEADIN_TIME * rate)
 
     let pause() =
-        Bass.ChannelPause(nowplaying.ID) |> bassError
+        Bass.ChannelPause nowplaying.ID |> bassError
         timer.Stop()
 
     let resume() =
-        //possible todo: should seek to where timer thinks we are to reduce drift
-        Bass.ChannelPlay(nowplaying.ID) |> bassError
+        Bass.ChannelPlay nowplaying.ID |> bassError
         timer.Start()
 
     let private updateWaveform() =
@@ -89,7 +88,7 @@ module Audio =
             //algorithm adapted from here
             //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
             let mutable b0 = 0
-            for i in 0..255 do
+            for i in 0 .. 255 do
                 let mutable peak = 0.0f
                 let mutable b1 = Math.Min(Math.Pow(2.0, float i * 10.0 / 255.0) |> int, 1023)
                 if (b1 <= b0) then b1 <- b0 + 1
@@ -99,7 +98,7 @@ module Audio =
                 let y = Math.Clamp(Math.Sqrt(float peak) * 3.0 * 255.0 - 4.0, 0.0, 255.0) |> float32
                 waveForm.[i] <- waveForm.[i] * 0.9f + y * 0.1f
         else
-            for i in 0..255 do waveForm.[i] <- waveForm.[i] * 0.9f
+            for i in 0 .. 255 do waveForm.[i] <- waveForm.[i] * 0.9f
 
     let update() =
         updateWaveform()
@@ -108,11 +107,11 @@ module Audio =
         if (t > 0.0f<ms> && t < nowplaying.Duration && not channelPlaying) then
             channelPlaying <- true
             Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| t / 1000.0f<ms>)) |> bassError
-            Bass.ChannelPlay(nowplaying.ID) |> bassError
+            Bass.ChannelPlay nowplaying.ID |> bassError
         elif t > nowplaying.Duration then
             channelPlaying <- false
             match trackFinishBehaviour with
-            | Loop -> playFrom(0.0f<ms>)
+            | Loop -> playFrom 0.0f<ms>
             | Wait -> ()
             | Action f -> f()
 

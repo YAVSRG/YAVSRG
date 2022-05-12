@@ -84,7 +84,7 @@ type PrettySetting(name, widget: Selectable) as this =
         |> this.Add
 
         TextBox(K (N name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
-        |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
+            .Position (Position.Box (0.0f, 0.0f, PRETTYWIDTH, PRETTYHEIGHT))
         |> this.Add
 
         TooltipRegion(T name) |> this.Add
@@ -217,10 +217,14 @@ type ConfirmDialog(prompt, callback: unit -> unit) as this =
 
     let options =
         row [ 
-            LittleButton(K "Yes", fun () ->  this.BeginClose(); confirm <- true)
-            |> position (WPos.leftSlice 200.0f);
-            LittleButton(K "No", this.BeginClose)
-            |> position (WPos.rightSlice 200.0f)
+            LittleButton(
+                K "Yes",
+                fun () ->  this.BeginClose(); confirm <- true
+            ).Position(Position.SliceLeft 200.0f)
+            LittleButton(
+                K "No", 
+                this.BeginClose
+            ).Position(Position.SliceRight 200.0f)
         ]
 
     do

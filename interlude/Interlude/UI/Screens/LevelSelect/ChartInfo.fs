@@ -30,26 +30,26 @@ type ChartInfo() as this =
         |> positionWidget(10.0f, 0.0f, -190.0f, 1.0f, 0.0f, 0.5f, -120.0f, 1.0f)
         |> this.Add
 
-        new TextBox(
+        TextBox(
             (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Icons.star),
             (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
-        |> positionWidget(10.0f, 0.0f, -120.0f, 1.0f, 0.0f, 0.5f, -50.0f, 1.0f)
+            .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %+ -120.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ -50.0f }
         |> this.Add
 
-        new TextBox((fun () -> bpm), K (Color.White, Color.Black), 1.0f)
-        |> positionWidget(0.0f, 0.5f, -190.0f, 1.0f, -10.0f, 1.0f, -120.0f, 1.0f)
+        TextBox((fun () -> bpm), K (Color.White, Color.Black), 1.0f)
+            .Position { Left = 0.5f %+ 0.0f; Top = 1.0f %+ -190.0f; Right = 1.0f %+ -10.0f; Bottom = 1.0f %+ -120.0f }
         |> this.Add
 
-        new TextBox((fun () -> length), K (Color.White, Color.Black), 1.0f)
-        |> positionWidget(0.0f, 0.5f, -120.0f, 1.0f, -10.0f, 1.0f, -50.0f, 1.0f)
+        TextBox((fun () -> length), K (Color.White, Color.Black), 1.0f)
+            .Position { Left = 0.5f %+ 0.0f; Top = 1.0f %+ -120.0f; Right = 1.0f %+ -10.0f; Bottom = 1.0f %+ -50.0f }
         |> this.Add
 
-        new TextBox((fun () -> notecount), K (Color.White, Color.Black), 1.0f)
-        |> positionWidget(10.0f, 0.0f, -50.0f, 1.0f, -17.0f, 1.0f, -10.0f, 1.0f)
+        TextBox((fun () -> notecount), K (Color.White, Color.Black), 1.0f)
+            .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %+ -50.0f; Right = 1.0f %+ -17.0f; Bottom = 1.0f %+ -10.0f }
         |> this.Add
 
-        new TextBox((fun () -> getModString(rate.Value, selectedMods.Value, autoplay)), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(17.0f, 0.0f, -50.0f, 1.0f, -10.0f, 1.0f, -10.0f, 1.0f)
+        TextBox((fun () -> getModString(rate.Value, selectedMods.Value, autoplay)), K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 17.0f; Top = 1.0f %+ -50.0f; Right = 1.0f %+ -10.0f; Bottom = 1.0f %+ -10.0f }
         |> this.Add
 
     member this.Refresh() =
