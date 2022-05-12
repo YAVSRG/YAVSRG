@@ -26,7 +26,7 @@ module Dropdown =
             this.Add(Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true), Float = true))
             this.Add(
                 TextBox(K label, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(10.0f, 0.0f, 5.0f, 0.0f, -10.0f, 1.0f, -5.0f, 1.0f)
+                    .Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 5.0f; Right = 1.0f %+ -10.0f; Bottom = 1.0f %+ -5.0f }
             )
 
         override this.Draw() =
@@ -117,16 +117,13 @@ type DropdownSelector<'T>(items: 'T array, labelFunc: 'T -> string, setting: Set
         this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
     override this.OnSelect() =
-        assert(dropdown.IsNone)
         let d = Dropdown.create_selector items labelFunc setting.Set (fun () -> this.Selected <- false)
         dropdown <- Some d
-        d
-        |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, Dropdown.ITEMSIZE * float32 (min 3 items.Length), 1.0f)
+        d.Position { Left = 0.0f %+ 0.0f; Top = 1.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ (Dropdown.ITEMSIZE * float32 (min 3 items.Length)) }
         |> this.Add
         base.OnSelect()
 
     override this.OnDeselect() =
-        assert(dropdown.IsSome)
         dropdown.Value.Destroy()
         dropdown <- None
         base.OnDeselect()
@@ -155,10 +152,10 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
     let chPercent v = setPercent (getPercent setting + v) setting
     do
         this.Animation.Add color
-        new TextBox((fun () -> this.Format setting.Value), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f)
+        TextBox((fun () -> this.Format setting.Value), K (Color.White, Color.Black), 0.0f)
+            .Position { Position.Default with Right = 0.0f %+ TEXTWIDTH }
         |> this.Add
-        this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        this.Position { Position.Default with Right = 0.0f %+ 100.0f } |> ignore
         this.Add(new Clickable((fun () -> this.Selected <- true; dragging <- true), fun b -> color.Target <- if b && not this.Hover then this.Hover <- true; 0.8f else 0.5f))
 
     member val Format = (fun x -> x.ToString()) with get, set

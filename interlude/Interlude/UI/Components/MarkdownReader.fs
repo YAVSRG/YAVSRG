@@ -34,8 +34,7 @@ module MarkdownReader =
         let addTo (parent: W) (child: W) =
             let childTotalHeight = child.Height + child.LHeight
             parent.LHeight <- max parent.LHeight childTotalHeight
-            child.Body
-            |> positionWidget(parent.LWidth, 0.0f, parent.Height, 0.0f, parent.LWidth + child.Width, 0.0f, parent.Height + childTotalHeight, 0.0f)
+            child.Body.Position ( Position.Box (parent.LWidth, parent.Height, child.Width, childTotalHeight) )
             |> parent.Body.Add
             parent.LWidth <- parent.LWidth + child.Width
             parent.Width <- max parent.LWidth parent.Width
@@ -154,7 +153,7 @@ module MarkdownReader =
     let buildDocWidget (doc: MarkdownDocument) =
         doc.Paragraphs
         |> List.fold addParagraph (W.empty())
-        |> fun wb -> wb.Body |> positionWidget(10.0f, 0.0f, 10.0f, 0.0f, -10.0f, 1.0f, wb.Height + wb.LHeight, 0.0f)
+        |> fun wb -> wb.Body.Position { Position.Margin 10.0f with Bottom = 0.0f %+ (wb.Height + wb.LHeight) }
 
     type MarkdownViewDialog(doc) as this =
         inherit Dialog()
@@ -167,8 +166,13 @@ module MarkdownReader =
             f
 
         do
-            frame
-            |> positionWidget(-WIDTH * 0.5f, 0.5f, Render.vheight, 0.0f, WIDTH * 0.5f, 0.5f, Render.vheight - 200.0f, 1.0f)
+            frame.Position 
+                { 
+                    Left = 0.5f %+ (-WIDTH * 0.5f)
+                    Top = 0.0f %+ Render.vheight
+                    Right = 0.5f %+ (WIDTH * 0.5f)
+                    Bottom = 1.0f %+ (Render.vheight - 200.0f)
+                }
             |> this.Add
             frame.Move(-WIDTH * 0.5f, 100.0f, WIDTH * 0.5f, -100.0f)
 

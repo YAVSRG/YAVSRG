@@ -18,8 +18,8 @@ type private MenuButton(onClick, label) as this =
     let color = AnimationFade 0.3f
     do
         this.Animation.Add color
-        this.Add (new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
-        this.Add (new TextBox(K label, K (Color.White, Color.Black), 0.5f) |> positionWidget(0.0f, 0.7f, 10.0f, 0.0f, 0.0f, 1.0f, -20.0f, 1.0f))
+        this.Add (Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
+        this.Add (TextBox(K label, K (Color.White, Color.Black), 0.5f).Position { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ -20.0f })
 
     override this.Draw() =
         Draw.quad (Quad.parallelogram 0.5f (Rect.expand (5.0f, 5.0f) this.Bounds)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad
@@ -39,7 +39,6 @@ type Screen() as this =
         Logo.moveOffscreen()
         Screen.change Screen.Type.LevelSelect Screen.TransitionFlag.UnderLogo
 
-    //todo: localise these buttons
     let play = MenuButton (playFunc, L"menu.play")
     let options = MenuButton (OptionsMenuRoot.show, L"menu.options")
     let quit = MenuButton ((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), L"menu.quit")
@@ -53,12 +52,13 @@ type Screen() as this =
     let splashSubAnim = AnimationFade 0.0f
 
     do
-        this.Add(play |> positionWidget (-100.0f, 0.0f, -200.0f, 0.5f, 1200.0f, 0.0f, -100.0f, 0.5f))
-        this.Add(options |> positionWidget (-100.0f, 0.0f, -50.0f, 0.5f, 1130.0f, 0.0f, 50.0f, 0.5f))
-        this.Add(quit |> positionWidget (-100.0f, 0.0f, 100.0f, 0.5f, 1060.0f, 0.0f, 200.0f, 0.5f))
-        this.Animation.Add splashAnim
-        this.Animation.Add splashSubAnim
-
+        this
+        |-+ play.Position( Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f) )
+        |-+ options.Position( Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f) )
+        |-+ quit.Position( Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f) )
+        |-* splashAnim
+        |=* splashSubAnim
+        
     override this.OnEnter prev =
         if AutoUpdate.updateAvailable then Notification.add (L"notification.update.available", NotificationType.System)
         if prev = Screen.Type.SplashScreen && firstLaunch then MarkdownReader.help()

@@ -4,6 +4,7 @@ open Prelude.Common
 open Interlude
 open Interlude.Utils
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Controls
@@ -40,7 +41,7 @@ module QuickOptions =
                         K (sprintf "Suggested: %.0f" recommendedOffset),
                         K (Color.White, Color.Black),
                         1.0f
-                    ) |> positionWidget(-600.0f, 1.0f, 200.0f, 0.0f, -50.0f, 1.0f, 200.0f + PRETTYHEIGHT, 0.0f)
+                    ).Position( Position.Box(1.0f, 0.0f, -600.0f, 200.0f, 550.0f, PRETTYHEIGHT) )
                     PrettyButton("quick.applyoffset", fun () -> offset.Value <- recommendedOffset).Position(280f)
 
                     PrettySetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Position(380.0f)

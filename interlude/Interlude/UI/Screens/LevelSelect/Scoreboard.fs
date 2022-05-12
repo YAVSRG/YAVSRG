@@ -42,19 +42,19 @@ module Scoreboard =
             let colfun = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
             
             TextBox((fun() -> data.Scoring.FormatAccuracy()), colfun, 0.0f)
-            |> positionWidget(5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.5f, 0.0f, 0.6f)
+                .Position { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 0.6f %+ 0.0f }
             |> this.Add
 
             TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
-            |> positionWidget(5.0f, 0.0f, 0.0f, 0.6f, 0.0f, 0.5f, 0.0f, 1.0f)
+                .Position { Left = 0.0f %+ 5.0f; Top = 0.6f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
             |> this.Add
 
             TextBox(K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)), colfun, 1.0f)
-            |> positionWidget(0.0f, 0.5f, 0.0f, 0.6f, -5.0f, 1.0f, 0.0f, 1.0f)
+                .Position { Left = 0.5f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %+ -5.0f; Bottom = 1.0f %+ 0.0f }
             |> this.Add
 
             TextBox(K data.Mods, colfun, 1.0f)
-            |> positionWidget(0.0f, 0.5f, 0.0f, 0.0f, -5.0f, 1.0f, 0.0f, 0.6f)
+                .Position { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ -5.0f; Bottom = 0.6f %+ 0.0f }
             |> this.Add
 
             Clickable((fun () -> Screen.changeNew (fun () -> new Screens.Score.Screen(data, BestFlags.Default) :> Screen.T) Screen.Type.Score Screen.TransitionFlag.Default), ignore)
@@ -177,38 +177,38 @@ type Scoreboard() as this =
         StylishButton.FromEnum("Sort",
             sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
             Style.main 100, TiltLeft = false )
-        |> TooltipRegion.Create (L"levelselect.scoreboard.sort.tooltip")
-        |> positionWidget(0.0f, 0.0f, -45.0f, 1.0f, -15.0f, 0.25f, -5.0f, 1.0f)
+            .Tooltip(L"levelselect.scoreboard.sort.tooltip")
+            .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %+ -45.0f; Right = 0.25f %+ -15.0f; Bottom = 1.0f %+ -5.0f }
         |> ls.Add
 
         StylishButton.FromEnum("Filter",
             filter |> Setting.trigger (fun _ -> this.Refresh()),
             Style.main 90 )
-        |> TooltipRegion.Create (L"levelselect.scoreboard.filter.tooltip")
-        |> positionWidget(10.0f, 0.25f, -45.0f, 1.0f, -15.0f, 0.5f, -5.0f, 1.0f)
+            .Tooltip(L"levelselect.scoreboard.filter.tooltip")
+            .Position { Left = 0.25f %+ 10.0f; Top = 1.0f %+ -45.0f; Right = 0.5f %+ -15.0f; Bottom = 1.0f %+ -5.0f }
         |> ls.Add
 
         StylishButton(
             (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
             (fun () -> ruleset.Name),
             Style.main 80 )
-        |> TooltipRegion.Create (L"levelselect.scoreboard.ruleset.tooltip")
-        |> positionWidget(10.0f, 0.5f, -45.0f, 1.0f, -15.0f, 0.75f, -5.0f, 1.0f)
+            .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
+            .Position { Left = 0.5f %+ 10.0f; Top = 1.0f %+ -45.0f; Right = 0.75f %+ -15.0f; Bottom = 1.0f %+ -5.0f }
         |> ls.Add
 
         StylishButton(
             this.Refresh,
             K <| Localisation.localise "levelselect.scoreboard.storage.local",
             Style.main 70, TiltRight = false ) //nyi
-        |> TooltipRegion.Create (L"levelselect.scoreboard.storage.tooltip")
-        |> positionWidget(10.0f, 0.75f, -45.0f, 1.0f, -15.0f, 1.0f, -5.0f, 1.0f)
+            .Tooltip(L"levelselect.scoreboard.storage.tooltip")
+            .Position { Left = 0.75f %+ 10.0f; Top = 1.0f %+ -45.0f; Right = 1.0f %+ -15.0f; Bottom = 1.0f %+ -5.0f }
         |> ls.Add
 
         ls |> this.Add
 
         let noLocalScores = Localisation.localise "levelselect.scoreboard.empty"
         TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
-        |> positionWidget(50.0f, 0.0f, 0.0f, 0.3f, -50.0f, 1.0f, 0.0f, 0.5f)
+            .Position { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %+ -50.0f; Bottom = 0.5f %+ 0.0f }
         |> this.Add
 
     member this.Refresh() =

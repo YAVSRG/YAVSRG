@@ -24,10 +24,10 @@ type ChartInfo() as this =
         |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f)
         |> this.Add
 
-        new TextBox(
+        TextBox(
             (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Icons.star),
             (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
-        |> positionWidget(10.0f, 0.0f, -190.0f, 1.0f, 0.0f, 0.5f, -120.0f, 1.0f)
+            .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %+ -190.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ -120.0f }
         |> this.Add
 
         TextBox(

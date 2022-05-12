@@ -44,9 +44,9 @@ module GameplayWidgets =
 
         do
             this.Animation.Add(color)
-            this.Add(new TextBox(helper.Scoring.FormatAccuracy, (fun () -> color.GetColor()), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.7f))
+            this.Add(TextBox(helper.Scoring.FormatAccuracy, (fun () -> color.GetColor()), 0.5f).Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.7f %+ 0.0f })
             if conf.ShowName then
-                this.Add(new TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+                this.Add(TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f).Position { Left = 0.0f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
         
         override this.Dispose() =
             if isNull listener then () else listener.Dispose()

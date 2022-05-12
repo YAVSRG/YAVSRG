@@ -92,7 +92,7 @@ type FlowSelectable(height, spacing) as this =
     override this.Add(c) =
         if c = (fc :> Widget) then base.Add c
         else
-            c |> positionWidget(0.0f, 0.0f, h, 0.0f, 0.0f, 1.0f, h + height, 0.0f) |> ls.Add
+            c.Position( Position.Row h height ) |> ls.Add
             h <- h + height + spacing
             ls.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f)
 

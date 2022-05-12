@@ -27,46 +27,46 @@ type Toolbar() as this =
         this.Animation.Add notifSlider
 
         TextBox(K version, K (Color.White, Color.Black), 1.0f)
-        |> positionWidget(-300.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, HEIGHT * 0.5f, 1.0f)
+            .Position (Position.Box (1.0f, 1.0f, -305.0f, 0.0f, 300.0f, HEIGHT * 0.5f))
         |> this.Add
 
         TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f)
-        |> positionWidget(-300.0f, 1.0f, HEIGHT * 0.5f, 1.0f, 0.0f, 1.0f, HEIGHT, 1.0f)
+            .Position (Position.Box (1.0f, 1.0f, -305.0f, HEIGHT * 0.5f, 300.0f, HEIGHT * 0.5f))
         |> this.Add
 
         Button(
             (fun () -> Screen.back Screen.TransitionFlag.UnderLogo),
             sprintf "%s %s  " Icons.back (L"menu.back"),
-            Hotkey.Exit)
-        |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 200.0f, 0.0f, HEIGHT, 1.0f)
+            Hotkey.Exit
+        ).Position (Position.Box (0.0f, 1.0f, 200.0f, HEIGHT))
         |> this.Add
         
         Button(
             ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
             L"menu.options",
-            Hotkey.Options)
-        |> positionWidget(0.0f, 0.0f, -HEIGHT, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f)
+            Hotkey.Options
+        ).Position (Position.Box(0.0f, 0.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT))
         |> this.Add
 
         Button(
             ( fun () -> if shown() then Screen.change Screen.Type.Import Screen.TransitionFlag.Default ),
             L"menu.import",
-            Hotkey.Import)
-        |> positionWidget(200.0f, 0.0f, -HEIGHT, 0.0f, 400.0f, 0.0f, 0.0f, 0.0f)
+            Hotkey.Import
+        ).Position (Position.Box(0.0f, 0.0f, 200.0f, -HEIGHT, 200.0f, HEIGHT))
         |> this.Add
 
         Button(
             ( fun () -> if shown() then MarkdownReader.help() ),
             L"menu.help",
-            Hotkey.Help)
-        |> positionWidget(400.0f, 0.0f, -HEIGHT, 0.0f, 600.0f, 0.0f, 0.0f, 0.0f)
+            Hotkey.Help
+        ).Position (Position.Box(0.0f, 0.0f, 400.0f, -HEIGHT, 200.0f, HEIGHT))
         |> this.Add
 
         Button(
             ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
             L"menu.tasks",
-            Hotkey.Tasks)
-        |> positionWidget(600.0f, 0.0f, -HEIGHT, 0.0f, 800.0f, 0.0f, 0.0f, 0.0f)
+            Hotkey.Tasks
+        ).Position (Position.Box(0.0f, 0.0f, 600.0f, -HEIGHT, 200.0f, HEIGHT))
         |> this.Add
 
         Jukebox() |> this.Add

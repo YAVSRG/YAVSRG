@@ -53,9 +53,7 @@ type Screen() as this =
             let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
-                config
-                |> constructor
-                |> positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
+                (constructor config).Position { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
                 |> if pos.Float then this.Add else noteRenderer.Add
 
         f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
@@ -166,9 +164,8 @@ type ReplayScreen(mode: ReplayMode) as this =
             let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
-                config
-                |> constructor
-                |> positionWidget(pos.Left, pos.LeftA, pos.Top, pos.TopA, pos.Right, pos.RightA, pos.Bottom, pos.BottomA)
+                (constructor config)
+                    .Position { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
                 |> if pos.Float then this.Add else noteRenderer.Add
 
         if not auto then

@@ -17,10 +17,6 @@ module Position =
         w.Reposition(l, t, r, b)
         w
 
-    let positionWidget(l, la, t, ta, r, ra, b, ba) (w: Widget) : Widget =
-        w.Reposition(l, la, t, ta, r, ra, b, ba)
-        w
-
 type TextBox(textFunc, color, just) =
     inherit Widget()
 

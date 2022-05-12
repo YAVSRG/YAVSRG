@@ -21,6 +21,11 @@ type TooltipRegion(localisedText) =
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
 
+[<AutoOpen>]
+module Tooltip =
+    type Widget with
+        member this.Tooltip(localisedText) = TooltipRegion.Create localisedText this
+
 type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this =
     inherit Widget()
 
@@ -84,7 +89,7 @@ type TextInputDialog(bounds: Rect, prompt, callback) as this =
     let tb = TextEntry(buf, None, prompt)
     do
         let struct (l, t, r, b) = bounds
-        this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
+        this.Add(tb.Position { Left = 0.0f %+ l; Top = 0.0f %+ t; Right = 0.0f %+ r; Bottom = 0.0f %+ b })
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if (!|Hotkey.Select).Tapped() || (!|Hotkey.Exit).Tapped() then tb.Dispose(); this.BeginClose()

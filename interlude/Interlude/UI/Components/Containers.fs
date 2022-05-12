@@ -7,6 +7,7 @@ open Interlude.Input
 open Interlude.Utils
 open Interlude.Graphics
 
+// TODO: flow container should be completely in charge of item positionings
 type FlowContainer() =
     inherit Widget()
     let mutable spacing = 10.0f
@@ -85,7 +86,7 @@ type TabContainer(name: string, widget: Widget) as this =
 
     member this.AddTab(name, widget) =
         { new Button((fun () -> selected <- name; selectedItem <- widget), name) with member this.Dispose() = base.Dispose(); widget.Dispose() }
-        |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count + 1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f)
+            .Position (Position.Box(0.0f, 0.0f, count * TABWIDTH, TABHEIGHT))
         |> this.Add
         count <- count + 1.0f
 

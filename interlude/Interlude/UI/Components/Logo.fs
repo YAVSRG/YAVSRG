@@ -77,7 +77,7 @@ module Logo =
                 Stencil.finish()
                 Draw.rect this.Bounds Color.White (Content.getTexture "logo")
 
-    let display = Display() |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
+    let display = Display().Position { Left = 0.5f %+ -300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f }
 
     let moveCentre () = display.Move (-400.0f, -400.0f, 400.0f, 400.0f)
 

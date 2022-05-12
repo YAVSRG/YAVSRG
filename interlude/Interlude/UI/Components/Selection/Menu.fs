@@ -67,7 +67,7 @@ type Divider() =
     inherit Widget()
 
     member this.Position(y) =
-        this |> positionWidget(100.0f, 0.0f, y - 5.0f, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + 5.0f, 0.0f)
+        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYHEIGHT, 10.0f) )
 
     override this.Draw() =
         base.Draw()
@@ -90,7 +90,7 @@ type PrettySetting(name, widget: Selectable) as this =
         TooltipRegion(T name) |> this.Add
     
     member this.Position(y, width, height) =
-        this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
+        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, width, height) )
     
     member this.Position(y, width) = this.Position(y, width, PRETTYHEIGHT)
     member this.Position(y) = this.Position(y, PRETTYWIDTH)
@@ -135,7 +135,8 @@ type PrettyButton(name, action) as this =
     override this.Draw() =
         if this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f)) Sprite.Default
         base.Draw()
-    member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
+    member this.Position(y) = 
+        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, PRETTYHEIGHT) )
 
     member val Enabled = true with get, set
 
@@ -198,7 +199,7 @@ type SelectionMenu(title: string, topLevel: SelectionPage) as this =
     do
         this.Add body
         TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 20.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f }
         |> this.Add
         add (title, topLevel)
     
@@ -229,11 +230,10 @@ type ConfirmDialog(prompt, callback: unit -> unit) as this =
 
     do
         TextBox(K prompt, K (Color.White, Color.Black), 0.5f)
-        |> positionWidget(200.0f, 0.0f, -200.0f, 0.5f, -200.0f, 1.0f, -50.0f, 0.5f)
+            .Position { Left = 0.0f %+ 200.0f; Top = 0.5f %+ -200.0f; Right = 1.0f %+ -200.0f; Bottom = 0.5f %+ -50.0f }
         |> this.Add
         options.OnSelect()
-        options
-        |> positionWidget(-300.0f, 0.5f, 0.0f, 0.5f, 300.0f, 0.5f, 100.0f, 0.5f)
+        options.Position { Left = 0.5f %+ -300.0f; Top = 0.5f %+ 0.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 100.0f }
         |> this.Add
 
     override this.Update(elapsedTime, bounds) =

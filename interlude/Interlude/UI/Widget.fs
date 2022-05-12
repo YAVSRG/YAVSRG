@@ -76,6 +76,13 @@ type Position with
             Right = Position.max
             Bottom = 0.0f %+ (y + height)
         }
+    static member Column x width =
+        {
+            Left = 0.0f %+ x
+            Top = Position.min
+            Right = 0.0f %+ (x + width)
+            Bottom = Position.max
+        }
     static member Box (anchorx, anchory, x, y, width, height) =
         {
             Left = anchorx %+ x
@@ -213,6 +220,11 @@ type Widget() =
     // Dispose is called when a widget is going out of scope/about to be garbage collected and allows it to release any resources
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
+
+    static member (|-+) (parent: #Widget, child: #Widget) = parent.Add child; parent
+    static member (|-*) (parent: #Widget, anim: #Animation) = parent.Animation.Add anim; parent
+    static member (|=+) (parent: #Widget, child: #Widget) = parent.Add child
+    static member (|=*) (parent: #Widget, anim: #Animation) = parent.Animation.Add anim
 
 module Icons = 
     let star = Feather.star
