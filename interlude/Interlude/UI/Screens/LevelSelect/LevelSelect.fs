@@ -27,7 +27,7 @@ type LevelSelectDropdown(items: string seq, label: string, setting: Setting<stri
                         {
                             Left = 0.0f %+ 5.0f
                             Top = 0.0f %+ 60.0f
-                            Right = 1.0f %+ -5.0f
+                            Right = 1.0f %- 5.0f
                             Bottom = 0.0f %+ (60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE)
                         }
                     |> this.Add
@@ -70,17 +70,17 @@ type Screen() as this =
 
         SearchBox(searchText, fun f -> Tree.filter <- f; refresh())
             .Tooltip(L"levelselect.search.tooltip")
-            .Position { Left = 1.0f %+ -600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %+ -50.0f; Bottom = 0.0f %+ 90.0f }
+            .Position { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f }
         |> this.Add
 
         ModSelect()
             .Tooltip(L"levelselect.mods.tooltip")
-            .Position { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %+ -25.0f; Bottom = 0.0f %+ 170.0f }
+            .Position { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
         CollectionManager()
             .Tooltip(L"levelselect.collections.tooltip")
-            .Position { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %+ -25.0f; Bottom = 0.0f %+ 170.0f }
+            .Position { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
         StylishButton(
@@ -95,7 +95,7 @@ type Screen() as this =
             (fun () -> Style.accentShade(100, 0.4f, 0.6f)),
             Hotkey.SortMode)
             .Tooltip(L"levelselect.sortby.tooltip")
-            .Position { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %+ -25.0f; Bottom = 0.0f %+ 170.0f }
+            .Position { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
         
         StylishButton(
@@ -113,7 +113,7 @@ type Screen() as this =
             .Position { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
-        infoPanel.Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 180.0f; Right = 0.4f %+ -10.0f; Bottom = 1.0f %+ 0.0f }
+        infoPanel.Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 180.0f; Right = 0.4f %- 10.0f; Bottom = 1.0f %+ 0.0f }
         |> this.Add
 
         Chart.onChange.Add infoPanel.Refresh

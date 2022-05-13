@@ -67,7 +67,7 @@ type Divider() =
     inherit Widget()
 
     member this.Position(y) =
-        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYHEIGHT, 10.0f) )
+        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYWIDTH, 10.0f) )
 
     override this.Draw() =
         base.Draw()
@@ -79,15 +79,11 @@ type PrettySetting(name, widget: Selectable) as this =
     let mutable widget = widget
 
     do
-        widget
-        |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
-        |> this.Add
-
-        TextBox(K (N name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
-            .Position (Position.Box (0.0f, 0.0f, PRETTYWIDTH, PRETTYHEIGHT))
-        |> this.Add
-
-        TooltipRegion(T name) |> this.Add
+        this
+        |-+ widget.Position { Position.Default with Left = 0.0f %+ PRETTYTEXTWIDTH }
+        |-+ TextBox(K (N name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+            .Position (Position.Box (0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT))
+        |=+ TooltipRegion(T name)
     
     member this.Position(y, width, height) =
         this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, width, height) )
@@ -110,13 +106,14 @@ type PrettySetting(name, widget: Selectable) as this =
     member this.Refresh(w: Selectable) =
         widget.Destroy()
         widget <- w
-        this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
+        this |=+ widget.Position { Position.Default with Left = 0.0f %+ PRETTYTEXTWIDTH }
 
 type PrettyButton(name, action) as this =
     inherit Selectable()
 
     do
-        TextBox(
+        this
+        |-+ TextBox(
             K (N name + "  >"),
             ( 
                 fun () -> 
@@ -124,11 +121,10 @@ type PrettyButton(name, action) as this =
                         ( (if this.Hover then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black )
                     else (Color.Gray, Color.Black)
             ),
-            0.0f
-        )
-        |> this.Add
-        Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
-        TooltipRegion(T name) |> this.Add
+            0.0f )
+        |-+ Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true))
+        |=+ TooltipRegion(T name)
+
     override this.OnSelect() =
         if this.Enabled then action()
         this.Selected <- false
@@ -230,10 +226,10 @@ type ConfirmDialog(prompt, callback: unit -> unit) as this =
 
     do
         TextBox(K prompt, K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.0f %+ 200.0f; Top = 0.5f %+ -200.0f; Right = 1.0f %+ -200.0f; Bottom = 0.5f %+ -50.0f }
+            .Position { Left = 0.0f %+ 200.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 200.0f; Bottom = 0.5f %- 50.0f }
         |> this.Add
         options.OnSelect()
-        options.Position { Left = 0.5f %+ -300.0f; Top = 0.5f %+ 0.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 100.0f }
+        options.Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 0.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 100.0f }
         |> this.Add
 
     override this.Update(elapsedTime, bounds) =

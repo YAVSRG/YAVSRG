@@ -142,25 +142,25 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 180.0f }
         |> this.Add
         TextBox(K <| scoreData.ScoreInfo.time.ToString(), K (Color.White, Color.Black), 1.0f)
-            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %+ -20.0f; Bottom = 0.0f %+ 150.0f }
+            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f }
         |> this.Add
 
         // graph & under graph
-        graph.Position { Left = 0.0f %+ 20.0f; Top = 1.0f %+ -270.0f; Right = 1.0f %+ -20.0f; Bottom = 1.0f %+ -70.0f }
+        graph.Position { Left = 0.0f %+ 20.0f; Top = 1.0f %- 270.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 70.0f }
         |> this.Add
 
         TextBox((fun () -> sprintf "Mean: %.1fms (%.1f - %.1fms)" eventCounts.Mean eventCounts.EarlyMean eventCounts.LateMean), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 20.0f; Top = 1.0f %+ -65.0f; Right = 0.0f %+ 620.0f; Bottom = 1.0f %+ -15.0f }
+            .Position { Left = 0.0f %+ 20.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 620.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
         TextBox((fun () -> sprintf "Stdev: %.1fms" eventCounts.StandardDeviation), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 620.0f; Top = 1.0f %+ -65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %+ -15.0f }
+            .Position { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
 
         Button(ignore, "Graph settings")
-            .Position { Left = 1.0f %+ -420.0f; Top = 1.0f %+ -65.0f; Right = 1.0f %+ -220.0f; Bottom = 1.0f %+ -15.0f }
+            .Position { Left = 1.0f %- 420.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 220.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
         Button((fun () -> Helpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)), "Watch replay")
-            .Position { Left = 1.0f %+ -220.0f; Top = 1.0f %+ -65.0f; Right = 1.0f %+ -20.0f; Bottom = 1.0f %+ -15.0f }
+            .Position { Left = 1.0f %- 220.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
 
     override this.Draw() =

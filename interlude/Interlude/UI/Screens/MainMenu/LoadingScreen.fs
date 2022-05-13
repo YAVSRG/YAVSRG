@@ -15,8 +15,7 @@ type LoadingScreen() as this =
 
     let mutable closing = false
     let fade = new AnimationFade 1.0f
-    do
-        this.Animation.Add fade
+    do this.Animation.Add fade
 
     override this.OnEnter (prev: Screen.Type) =
         fade.Value <- 0.0f

@@ -17,9 +17,11 @@ type private MenuButton(onClick, label) as this =
 
     let color = AnimationFade 0.3f
     do
-        this.Animation.Add color
-        this.Add (Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
-        this.Add (TextBox(K label, K (Color.White, Color.Black), 0.5f).Position { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ -20.0f })
+        this
+        |-+ Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f)
+        |-+ TextBox(K label, K (Color.White, Color.Black), 0.5f)
+            .Position { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 20.0f }
+        |=* color
 
     override this.Draw() =
         Draw.quad (Quad.parallelogram 0.5f (Rect.expand (5.0f, 5.0f) this.Bounds)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad

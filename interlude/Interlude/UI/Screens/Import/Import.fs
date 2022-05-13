@@ -30,7 +30,7 @@ type private SearchContainer(populate, handleFilter) as this =
     let handleFilter = handleFilter flowContainer
     do
         this.Add(SearchBox(Setting.simple "", fun (f: Filter) -> handleFilter f).Position( Position.SliceTop 60.0f ))
-        this.Add(flowContainer.Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 70.0f; Right = 1.0f %+ -0.0f; Bottom = 1.0f %+ 0.0f })
+        this.Add(flowContainer.Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 70.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %+ 0.0f })
         flowContainer.Add(new SearchContainerLoader(populate))
 
 type Screen() as this =
@@ -75,11 +75,11 @@ type Screen() as this =
         tabs.AddTab("osu! Songs", osuDownloads)
         tabs.AddTab("Noteskins", noteskins)
 
-        tabs.Position { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %+ -100.0f; Bottom = 1.0f %+ -80.0f }
+        tabs.Position { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 80.0f }
         |> this.Add
 
         TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.0f %+ 600.0f; Top = 1.0f %+ -90.0f; Right = 1.0f %+ -100.0f; Bottom = 1.0f %+ -30.0f }
+            .Position { Left = 0.0f %+ 600.0f; Top = 1.0f %- 90.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 30.0f }
         |> this.Add
 
         (*

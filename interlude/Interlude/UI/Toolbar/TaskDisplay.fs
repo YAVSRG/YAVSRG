@@ -81,7 +81,7 @@ module TaskDisplay =
 
             if not closing && task.Status = TaskStatus.RanToCompletion then close()
 
-    let private taskBoxes = FlowContainer().Position { Left = 0.5f %+ -300.0f; Top = 1.0f %+ -900.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %+ -100.0f }
+    let private taskBoxes = FlowContainer().Position { Left = 0.5f %- 300.0f; Top = 1.0f %- 900.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %- 100.0f }
 
     let init () = BackgroundTask.Subscribe(fun t -> if t.Visible then taskBoxes.Add(TaskBox t))
 
@@ -90,7 +90,7 @@ module TaskDisplay =
         do 
             this.Add taskBoxes
             TextBox(K "Background tasks", K (Color.White, Color.Black), 0.5f)
-                .Position { Left = 0.5f %+ -300.0f; Top = 1.0f %- 980.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %- 900.0f }
+                .Position { Left = 0.5f %- 300.0f; Top = 1.0f %- 980.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %- 900.0f }
             |> this.Add
 
         override this.Draw() =

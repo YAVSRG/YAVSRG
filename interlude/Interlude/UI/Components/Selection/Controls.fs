@@ -26,7 +26,7 @@ module Dropdown =
             this.Add(Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true), Float = true))
             this.Add(
                 TextBox(K label, K (Color.White, Color.Black), 0.0f)
-                    .Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 5.0f; Right = 1.0f %+ -10.0f; Bottom = 1.0f %+ -5.0f }
+                    .Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 5.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 5.0f }
             )
 
         override this.Draw() =
