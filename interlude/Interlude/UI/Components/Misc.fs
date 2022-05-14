@@ -42,24 +42,21 @@ type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this 
             Input.removeInputMethod()
 
     do
-        this.Animation.Add(color)
-        if Option.isNone bind then toggle() else this.Add(new Clickable(toggle, ignore))
-        Frame(
-            Style.main 100,
-            fun () -> Style.highlightF 100 color.Value
-        )
-        |> this.Add
-        TextBox(
-            (fun () ->
-                match bind with
-                | Some b ->
-                    match s.Value with
-                    | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
-                    | text -> text
-                | None -> match s.Value with "" -> prompt | text -> text),
-            (fun () -> Style.highlightF 255 color.Value), 0.0f)
-        |> positionWidgetA(10.0f, 0.0f, -10.0f, 0.0f)
-        |> this.Add
+        this
+        |-* color
+        |-+ Frame(Style.main 100, fun () -> Style.highlightF 100 color.Value)
+        |-+ TextBox(
+                (fun () ->
+                    match bind with
+                    | Some b ->
+                        match s.Value with
+                        | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
+                        | text -> text
+                    | None -> match s.Value with "" -> prompt | text -> text),
+                (fun () -> Style.highlightF 255 color.Value),
+                0.0f
+            ).Position( Position.Margin(10.0f, 0.0f) )
+        |> fun this -> if Option.isNone bind then toggle() else this.Add(new Clickable(toggle, ignore))
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

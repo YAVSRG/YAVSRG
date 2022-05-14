@@ -170,46 +170,38 @@ type Scoreboard() as this =
     let loader = Loader.reload flowContainer
 
     do
-        flowContainer
-        |> positionWidgetA(0.0f, 10.0f, 0.0f, -50.0f)
-        |> this.Add
-
-        StylishButton.FromEnum("Sort",
-            sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
-            Style.main 100, TiltLeft = false )
-            .Tooltip(L"levelselect.scoreboard.sort.tooltip")
-            .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 45.0f; Right = 0.25f %- 15.0f; Bottom = 1.0f %- 5.0f }
-        |> ls.Add
-
-        StylishButton.FromEnum("Filter",
-            filter |> Setting.trigger (fun _ -> this.Refresh()),
-            Style.main 90 )
-            .Tooltip(L"levelselect.scoreboard.filter.tooltip")
-            .Position { Left = 0.25f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.5f %- 15.0f; Bottom = 1.0f %- 5.0f }
-        |> ls.Add
-
-        StylishButton(
-            (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
-            (fun () -> ruleset.Name),
-            Style.main 80 )
-            .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
-            .Position { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f }
-        |> ls.Add
-
-        StylishButton(
-            this.Refresh,
-            K <| Localisation.localise "levelselect.scoreboard.storage.local",
-            Style.main 70, TiltRight = false ) //nyi
-            .Tooltip(L"levelselect.scoreboard.storage.tooltip")
-            .Position { Left = 0.75f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 1.0f %- 15.0f; Bottom = 1.0f %- 5.0f }
-        |> ls.Add
-
-        ls |> this.Add
-
-        let noLocalScores = Localisation.localise "levelselect.scoreboard.empty"
-        TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f }
-        |> this.Add
+        this
+        |-+ flowContainer.Position( Position.TrimTop(10.0f).TrimBottom(50.0f) )
+        |-+ (
+                ls
+                |-+ StylishButton.FromEnum("Sort",
+                        sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
+                        Style.main 100, TiltLeft = false )
+                    .Tooltip(L"levelselect.scoreboard.sort.tooltip")
+                    .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 45.0f; Right = 0.25f %- 15.0f; Bottom = 1.0f %- 5.0f }
+                |-+ StylishButton.FromEnum("Filter",
+                        filter |> Setting.trigger (fun _ -> this.Refresh()),
+                        Style.main 90 )
+                    .Tooltip(L"levelselect.scoreboard.filter.tooltip")
+                    .Position { Left = 0.25f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.5f %- 15.0f; Bottom = 1.0f %- 5.0f }
+                |-+ StylishButton(
+                        (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
+                        (fun () -> ruleset.Name),
+                        Style.main 80 )
+                    .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
+                    .Position { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f }
+                |-+ StylishButton(
+                        this.Refresh,
+                        K <| Localisation.localise "levelselect.scoreboard.storage.local",
+                        Style.main 70, TiltRight = false ) //nyi
+                    .Tooltip(L"levelselect.scoreboard.storage.tooltip")
+                    .Position { Left = 0.75f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 1.0f %- 15.0f; Bottom = 1.0f %- 5.0f }
+            )
+        |=+ (
+                let noLocalScores = L"levelselect.scoreboard.empty"
+                TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
+                    .Position { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f }
+            )
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""

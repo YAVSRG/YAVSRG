@@ -127,23 +127,16 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
                     deleteButton.Enabled <- false
         refresh()
 
-        TextBox(
-            match mountType with
-            | Mounts.Types.Osu -> "osu!mania"
-            | Mounts.Types.Stepmania -> "Stepmania"
-            | Mounts.Types.Etterna -> "Etterna"
-            | _ -> failwith "impossible"
-            |> K,
-            K (Color.White, Color.Black),
-            0.5f)
-        |> positionWidgetA(0.0f, 0.0f, -120.0f, 0.0f)
-        |> this.Add
-
-        createButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
-        |> this.Add
-
-        editButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
-        |> this.Add
-
-        deleteButton.Position { Left = 1.0f %- 60.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
-        |> this.Add
+        this
+        |-+ createButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
+        |-+ editButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
+        |-+ deleteButton.Position { Left = 1.0f %- 60.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
+        |=+ TextBox(
+                match mountType with
+                | Mounts.Types.Osu -> "osu!mania"
+                | Mounts.Types.Stepmania -> "Stepmania"
+                | Mounts.Types.Etterna -> "Etterna"
+                | _ -> failwith "impossible"
+                |> K,
+                K (Color.White, Color.Black), 0.5f )
+            .Position( Position.TrimRight 120.0f )

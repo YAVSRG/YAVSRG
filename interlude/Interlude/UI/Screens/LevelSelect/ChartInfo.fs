@@ -20,37 +20,24 @@ type ChartInfo() as this =
     let mutable notecount = ""
 
     do
-        scores
-        |> positionWidgetA(0.0f, 0.0f, 0.0f, -200.0f)
-        |> this.Add
-
-        TextBox(
-            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Icons.star),
-            (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
+        this
+        |-+ scores.Position( Position.TrimBottom 200.0f )
+        |-+ TextBox(
+                (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Icons.star),
+                (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
             .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %- 190.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 120.0f }
-        |> this.Add
-
-        TextBox(
-            (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Icons.star),
-            (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
+        |-+ TextBox(
+                (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Icons.star),
+                (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
             .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %- 120.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 50.0f }
-        |> this.Add
-
-        TextBox((fun () -> bpm), K (Color.White, Color.Black), 1.0f)
+        |-+ TextBox((fun () -> bpm), K (Color.White, Color.Black), 1.0f)
             .Position { Left = 0.5f %+ 0.0f; Top = 1.0f %- 190.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 120.0f }
-        |> this.Add
-
-        TextBox((fun () -> length), K (Color.White, Color.Black), 1.0f)
+        |-+ TextBox((fun () -> length), K (Color.White, Color.Black), 1.0f)
             .Position { Left = 0.5f %+ 0.0f; Top = 1.0f %- 120.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 50.0f }
-        |> this.Add
-
-        TextBox((fun () -> notecount), K (Color.White, Color.Black), 1.0f)
+        |-+ TextBox((fun () -> notecount), K (Color.White, Color.Black), 1.0f)
             .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 17.0f; Bottom = 1.0f %- 10.0f }
-        |> this.Add
-
-        TextBox((fun () -> getModString(rate.Value, selectedMods.Value, autoplay)), K (Color.White, Color.Black), 0.0f)
+        |=+ TextBox((fun () -> getModString(rate.Value, selectedMods.Value, autoplay)), K (Color.White, Color.Black), 0.0f)
             .Position { Left = 0.0f %+ 17.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 10.0f }
-        |> this.Add
 
     member this.Refresh() =
         length <-
