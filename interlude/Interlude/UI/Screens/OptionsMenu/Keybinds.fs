@@ -79,7 +79,7 @@ module Keybinds =
         override this.Draw() =
             if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f)) Sprite.Default
             elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+            Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
             base.Draw()
     
         override this.Update(elapsedTime, bounds) =

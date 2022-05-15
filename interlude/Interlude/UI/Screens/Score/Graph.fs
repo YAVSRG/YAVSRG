@@ -19,13 +19,12 @@ type ScoreGraph(data: ScoreInfoProvider) =
 
     member private this.Redraw() =
         refresh <- false
-        let width = Rect.width this.Bounds
-        let h = 0.5f * Rect.height this.Bounds
-        let struct (left, top, right, bottom) = this.Bounds
+        let width = this.Bounds.Width
+        let h = 0.5f * this.Bounds.Height
         fbo.Bind true
 
         Draw.rect this.Bounds (Color.FromArgb(160, 0, 0, 0)) Sprite.Default
-        Draw.rect (Rect.create left (top + h - 2.5f) right (top + h + 2.5f)) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
+        Draw.rect (Rect.Create(this.Bounds.Left, (this.Bounds.Top + h - 2.5f), this.Bounds.Right, (this.Bounds.Top + h + 2.5f))) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
         
         // todo: graph stuff like hp/accuracy over time
         // todo: let you filter to just release timing
@@ -46,10 +45,10 @@ type ScoreGraph(data: ScoreInfoProvider) =
                     | Some judgement -> h - 0.5f * evData.Delta / data.Scoring.MissWindow * h, Color.FromArgb(127, data.Ruleset.JudgementColor judgement)
                     | None -> 0.0f, Color.Transparent
             if col.A > 0uy then
-                let x = left + 5.0f + ev.Time * hscale
-                Draw.rect(Rect.create (x - 2.5f) (top + y - 2.5f) (x + 2.5f) (top + y + 2.5f)) col Sprite.Default
-        Text.draw(Content.font, "Early", 18.0f, left + 5.0f, bottom - 35.0f, Color.FromArgb(127, Color.White))
-        Text.draw(Content.font, "Late", 18.0f, left + 5.0f, top + 5.0f, Color.FromArgb(127, Color.White))
+                let x = this.Bounds.Left + 5.0f + ev.Time * hscale
+                Draw.rect(Rect.Box(x - 2.5f, this.Bounds.Top + y - 2.5f, 5f, 5f)) col Sprite.Default
+        Text.draw(Content.font, "Early", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 35.0f, Color.FromArgb(127, Color.White))
+        Text.draw(Content.font, "Late", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 5.0f, Color.FromArgb(127, Color.White))
 
         fbo.Unbind()
 

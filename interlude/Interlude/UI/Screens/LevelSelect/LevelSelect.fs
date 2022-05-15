@@ -138,22 +138,21 @@ type Screen() as this =
         elif (!|Hotkey.Start).Tapped() then Tree.beginGroup()
         elif (!|Hotkey.End).Tapped() then Tree.endGroup()
         
-        let struct (left, top, right, bottom) = this.Bounds
-        Tree.update(top + 170.0f, bottom, elapsedTime)
+        Tree.update(this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsedTime)
 
     override this.Draw() =
-        let struct (left, top, right, bottom) = this.Bounds
 
-        Tree.draw(top + 170.0f, bottom)
+        Tree.draw(this.Bounds.Top + 170.0f, this.Bounds.Bottom)
 
-        let w = (right - left) * 0.4f
+        let w = this.Bounds.Width * 0.4f
+        let { Rect.Left = left; Top = top; Right = right } = this.Bounds
         Draw.quad
             ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
             (Quad.colorOf (Style.accentShade (120, 0.6f, 0.0f))) Sprite.DefaultQuad
         Draw.quad
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
             (Quad.colorOf (Style.accentShade (120, 0.1f, 0.0f))) Sprite.DefaultQuad
-        Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 
     override this.OnEnter prev =

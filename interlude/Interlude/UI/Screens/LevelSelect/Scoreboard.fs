@@ -39,32 +39,26 @@ module Scoreboard =
             data.Physical |> ignore
             data.Lamp |> ignore
 
-            let colfun = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
-            
-            TextBox((fun() -> data.Scoring.FormatAccuracy()), colfun, 0.0f)
+            let color = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
+
+            this.Position( Position.SliceTop 75.0f )
+            |-+ TextBox((fun() -> data.Scoring.FormatAccuracy()), color, 0.0f)
                 .Position { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 0.6f %+ 0.0f }
-            |> this.Add
-
-            TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical), colfun, 0.0f)
+            |-+ TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical), color, 0.0f)
                 .Position { Left = 0.0f %+ 5.0f; Top = 0.6f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
-            |> this.Add
-
-            TextBox(K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)), colfun, 1.0f)
+            |-+ TextBox(K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)), color, 1.0f)
                 .Position { Left = 0.5f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %+ 0.0f }
-            |> this.Add
-
-            TextBox(K data.Mods, colfun, 1.0f)
+            |-+ TextBox(K data.Mods, color, 1.0f)
                 .Position { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f }
-            |> this.Add
-
-            Clickable((fun () -> Screen.changeNew (fun () -> new Screens.Score.Screen(data, BestFlags.Default) :> Screen.T) Screen.Type.Score Screen.TransitionFlag.Default), ignore)
-            |> this.Add
-
-            this.Animation.Add fade
-            Animation.Serial(AnimationTimer 150.0, AnimationAction (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f))
-            |> this.Animation.Add
-
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 75.0f, 0.0f)
+            |-+ Clickable(
+                    ( fun () -> 
+                        Screen.changeNew 
+                            (fun () -> new Screens.Score.Screen(data, BestFlags.Default) :> Screen.T)
+                            Screen.Type.Score
+                            Screen.TransitionFlag.Default
+                    ), ignore )
+            |-* fade
+            |=* Animation.Serial(AnimationTimer 150.0, AnimationAction (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f))
 
         override this.Draw() =
             Draw.rect this.Bounds (Style.accentShade(int (100.0f * fade.Value), 0.5f, 0.0f)) Sprite.Default

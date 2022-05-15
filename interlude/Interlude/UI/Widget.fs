@@ -124,8 +124,8 @@ type Widget() =
     let children = new List<Widget>()
     let mutable parent = None
 
-    let mutable bounds = Rect.zero
-    let mutable visibleBounds = Rect.zero
+    let mutable bounds = Rect.ZERO
+    let mutable visibleBounds = Rect.ZERO
     let left = AnchorPoint (0.0f, 0.0f)
     let top = AnchorPoint (0.0f, 0.0f)
     let right = AnchorPoint (0.0f, 1.0f)
@@ -197,10 +197,18 @@ type Widget() =
     abstract member Draw: unit -> unit
     default this.Draw() = for c in children do if c.Initialised && c.Enabled then c.Draw()
 
-    member this.UpdateBounds(struct (l, t, r, b): Rect) =
+    member this.UpdateBounds(parentBounds: Rect) =
         initialised <- true
-        bounds <- Rect.create <| left.Position (l, r) <| top.Position (t, b) <| right.Position (l, r) <| bottom.Position (t, b)
-        visibleBounds <- Rect.intersect bounds (match this.Parent with None -> bounds | Some (p: Widget) -> p.VisibleBounds)
+        bounds <- Rect.Create(
+                left.Position (parentBounds.Left, parentBounds.Right),
+                top.Position (parentBounds.Top, parentBounds.Bottom),
+                right.Position (parentBounds.Left, parentBounds.Right),
+                bottom.Position (parentBounds.Top, parentBounds.Bottom)
+            )
+        visibleBounds <- 
+            match this.Parent with 
+            | None -> bounds
+            | Some (p: Widget) -> bounds.Intersect p.VisibleBounds
 
     /// Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit

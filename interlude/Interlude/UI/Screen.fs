@@ -281,5 +281,5 @@ module Screen =
                 if (transitionFlags &&& TransitionFlag.UnderLogo = TransitionFlag.UnderLogo) then logo.Draw()
             Dialog.draw()
             if currentType <> Type.Play || Dialog.any() then 
-                Draw.rect(Rect.createWH (Mouse.X()) (Mouse.Y()) (Content.themeConfig().CursorSize) (Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
+                Draw.rect (Rect.Box(Mouse.X(), Mouse.Y(), Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
                 Tooltip.display.Draw()

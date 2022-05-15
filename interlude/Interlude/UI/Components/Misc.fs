@@ -85,8 +85,7 @@ type TextInputDialog(bounds: Rect, prompt, callback) as this =
     let buf = Setting.simple ""
     let tb = TextEntry(buf, None, prompt)
     do
-        let struct (l, t, r, b) = bounds
-        this.Add(tb.Position { Left = 0.0f %+ l; Top = 0.0f %+ t; Right = 0.0f %+ r; Bottom = 0.0f %+ b })
+        this.Add(tb.Position { Left = 0.0f %+ bounds.Left; Top = 0.0f %+ bounds.Top; Right = 0.0f %+ bounds.Right; Bottom = 0.0f %+ bounds.Bottom })
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if (!|Hotkey.Select).Tapped() || (!|Hotkey.Exit).Tapped() then tb.Dispose(); this.BeginClose()

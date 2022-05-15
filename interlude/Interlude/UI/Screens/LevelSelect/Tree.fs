@@ -124,9 +124,8 @@ module Tree =
 
         member this.CheckBounds(top: float32, origin: float32, originB: float32, if_visible: Rect -> unit) =
             let bounds = this.Bounds top
-            let struct (_, _, _, bottom) = bounds
-            if bottom > origin && top < originB then if_visible bounds
-            top + Rect.height bounds + 15.0f
+            if bounds.Bottom > origin && top < originB then if_visible bounds
+            top + bounds.Height + 15.0f
 
     type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectContext) =
         inherit TreeItem()
@@ -138,14 +137,14 @@ module Tree =
         let mutable pbData: Bests option = None
         let mutable collectionIcon = ""
 
-        override this.Bounds(top) = Rect.create (Render.vwidth * 0.4f) top Render.vwidth (top + 90.0f)
+        override this.Bounds(top) = Rect.Create(Render.vwidth * 0.4f, top, Render.vwidth, top + 90.0f)
         override this.Selected = selectedChart = cc.FilePath && Chart.context = context
         member this.Chart = cc
 
         member this.Select() = switchChart(cc, context, groupName)
 
-        member private this.OnDraw(bounds) =
-            let struct (left, top, right, bottom) = bounds
+        member private this.OnDraw(bounds: Rect) =
+            let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = bounds
 
             // draw base
             let accent = Style.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
@@ -156,14 +155,14 @@ module Tree =
                 (struct(accent, Color.Transparent, Color.Transparent, accent))
                 Sprite.DefaultQuad
 
-            let border = Rect.expand(5.0f, 5.0f) bounds
-            let border2 = Rect.expand(5.0f, 0.0f) bounds
+            let border = bounds.Expand(5.0f)
+            let border2 = bounds.Expand(5.0f, 0.0f)
             let borderColor = if this.Selected then Style.accentShade(180, 1.0f, 0.5f) else color
             if borderColor.A > 0uy then
-                Draw.rect(Rect.sliceLeft 5.0f border2) borderColor Sprite.Default
-                Draw.rect(Rect.sliceTop 5.0f border) borderColor Sprite.Default
-                Draw.rect(Rect.sliceRight 5.0f border2) borderColor Sprite.Default
-                Draw.rect(Rect.sliceBottom 5.0f border) borderColor Sprite.Default
+                Draw.rect (border2.SliceLeft 5.0f) borderColor Sprite.Default
+                Draw.rect (border.SliceTop 5.0f) borderColor Sprite.Default
+                Draw.rect (border2.SliceRight 5.0f) borderColor Sprite.Default
+                Draw.rect (border.SliceBottom 5.0f) borderColor Sprite.Default
 
             // draw pbs
             let disp (pb: PersonalBests<'T>) (format: 'T -> string) (colorFunc: 'T -> Color) (pos: float32) =
@@ -171,7 +170,7 @@ module Tree =
                 let formatted = format value
                 let rateLabel = sprintf "(%.2fx)" rate
                 if color.A > 0uy then
-                    Draw.rect(Rect.create (right - pos - 40.0f) top (right - pos + 40.0f) bottom) accent Sprite.Default
+                    Draw.rect( Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom) ) accent Sprite.Default
                     Text.drawJustB(font, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
                     Text.drawJustB(font, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
         
@@ -195,7 +194,7 @@ module Tree =
             | None -> ()
 
             // draw text
-            Draw.rect(Rect.sliceBottom 25.0f bounds) (Color.FromArgb(60, 0, 0, 0)) Sprite.Default
+            Draw.rect (bounds.SliceBottom 25.0f) (Color.FromArgb(60, 0, 0, 0)) Sprite.Default
             Text.drawB(font, cc.Title, 23.0f, left + 5f, top, (Color.White, Color.Black))
             Text.drawB(font, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, (Color.White, Color.Black))
             Text.drawB(font, cc.DiffName, 15.0f, left + 5f, top + 65.0f, (Color.White, Color.Black))
@@ -225,7 +224,6 @@ module Tree =
                     if this.Selected then play()
                     else this.Select()
                 elif Mouse.Click MouseButton.Right then
-                    let struct (l, t, r, b) = bounds
                     showDropdown cc context (min (Render.vwidth - 405f) (Mouse.X()), Mouse.Y() - scrollPos.Value - origin)
                 elif (!|Hotkey.Delete).Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
@@ -250,7 +248,7 @@ module Tree =
     type private GroupItem(name: string, items: ChartItem list) =
         inherit TreeItem()
 
-        override this.Bounds(top) = Rect.create (Render.vwidth * 0.5f) top (Render.vwidth - 15.0f) (top + 65.0f)
+        override this.Bounds(top) = Rect.Create(Render.vwidth * 0.5f, top, Render.vwidth - 15.0f, top + 65.0f)
         override this.Selected = selectedGroup = name
 
         member this.Items = items
@@ -259,15 +257,15 @@ module Tree =
         member this.SelectFirst() = items.First().Select()
         member this.SelectLast() = items.Last().Select()
 
-        member private this.OnDraw(bounds) =
-            let borderb = Rect.expand(5.0f, 5.0f) bounds
+        member private this.OnDraw(bounds: Rect) =
+            let borderb = bounds.Expand(5.0f)
             let colorb = if this.Selected then Style.accentShade(200, 1.0f, 0.5f) else Style.accentShade(100, 0.7f, 0.0f)
-            Draw.rect (Rect.sliceLeft 5.0f borderb) colorb Sprite.Default
-            Draw.rect (Rect.sliceRight 5.0f borderb) colorb Sprite.Default
-            Draw.rect (Rect.sliceTop 5.0f borderb) colorb Sprite.Default
-            Draw.rect (Rect.sliceBottom 5.0f borderb) colorb Sprite.Default
+            Draw.rect (borderb.SliceLeft 5.0f) colorb Sprite.Default
+            Draw.rect (borderb.SliceRight 5.0f) colorb Sprite.Default
+            Draw.rect (borderb.SliceTop 5.0f) colorb Sprite.Default
+            Draw.rect (borderb.SliceBottom 5.0f) colorb Sprite.Default
             Draw.rect bounds (if this.Selected then Style.accentShade(127, 1.0f, 0.2f) else Style.accentShade(127, 0.3f, 0.0f)) Sprite.Default
-            Text.drawFillB(font, name, bounds |> Rect.expand(-5.0f, -5.0f), (Color.White, Color.Black), 0.5f)
+            Text.drawFillB(font, name, bounds.Shrink 5.0f, (Color.White, Color.Black), 0.5f)
 
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
@@ -405,7 +403,7 @@ module Tree =
         if LevelSelect.minorRefresh then LevelSelect.minorRefresh <- false; updateDisplay()
         scrollPos.Update(elapsedTime) |> ignore
         
-        if dropdownMenu.IsSome then dropdownMenu.Value.Update(elapsedTime, Rect.create 0.0f (origin + scrollPos.Value) Render.vwidth (originB + scrollPos.Value))
+        if dropdownMenu.IsSome then dropdownMenu.Value.Update(elapsedTime, Rect.Create(0.0f, origin + scrollPos.Value, Render.vwidth, originB + scrollPos.Value))
         let bottomEdge =
             List.fold 
                 (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsedTime))
@@ -425,7 +423,7 @@ module Tree =
 
     let draw(origin: float32, originB: float32) =
         Stencil.create(false)
-        Draw.rect (Rect.create 0.0f origin Render.vwidth originB) Color.Transparent Sprite.Default
+        Draw.rect (Rect.Create(0.0f, origin, Render.vwidth, originB)) Color.Transparent Sprite.Default
         Stencil.draw()
         let bottomEdge =
             List.fold 
@@ -440,4 +438,4 @@ module Tree =
         let lb = total_height - tree_height - origin
         let ub = 20.0f + origin
         let scrollPos = -(scrollPos.Value - ub) / (ub - lb) * (total_height - 40.0f)
-        Draw.rect (Rect.create (Render.vwidth - 10.0f) (origin + 10.0f + scrollPos) (Render.vwidth - 5.0f) (origin + 30.0f + scrollPos)) Color.White Sprite.Default
+        Draw.rect ( Rect.Create(Render.vwidth - 10.0f, origin + 10.0f + scrollPos, Render.vwidth - 5.0f, origin + 30.0f + scrollPos) ) Color.White Sprite.Default

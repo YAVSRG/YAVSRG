@@ -17,8 +17,8 @@ module Logo =
 
         override this.Draw() =
             base.Draw()
-            let w = Rect.width this.Bounds
-            let struct (l, t, r, b) = this.Bounds
+            let w = this.Bounds.Width
+            let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds
 
             if r > 2.0f then
 

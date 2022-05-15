@@ -41,5 +41,5 @@ type LoadingScreen() as this =
         Audio.changeVolume (Options.options.AudioVolume.Value * float (if closing then 1.0f - fade.Value else fade.Value))
         
     override this.Draw() =
-        let (x, y) = Rect.center this.Bounds
+        let (x, y) = this.Bounds.Center
         Text.drawJust (Content.font, (if closing then "Bye o/" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)

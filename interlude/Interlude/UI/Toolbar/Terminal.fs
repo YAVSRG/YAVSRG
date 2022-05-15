@@ -104,17 +104,16 @@ module Terminal =
         if not shown then ()
         else
 
-        let bounds = Rect.expand (-100.0f, -100.0f) Render.bounds
-        let struct (l, t, r, b) = bounds
+        let bounds = Render.bounds.Shrink(100.0f)
 
-        Draw.rect (bounds |> Rect.expand (5.0f, 5.0f)) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
-        Draw.rect (bounds |> Rect.trimBottom 70.0f) (Color.FromArgb(200, 0, 0, 0)) Sprite.Default
-        Draw.rect (bounds |> Rect.sliceBottom 65.0f) (Color.FromArgb(255, 0, 0, 0)) Sprite.Default
-        Text.drawB(font.Value, ">  " + currentLine.Value, 30.0f, l + 20.0f, b - 50.0f, (Color.White, Color.Black))
+        Draw.rect (bounds.Expand 5.0f) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
+        Draw.rect (bounds.TrimBottom 70.0f) (Color.FromArgb(200, 0, 0, 0)) Sprite.Default
+        Draw.rect (bounds.SliceBottom 65.0f) (Color.FromArgb(255, 0, 0, 0)) Sprite.Default
+        Text.drawB(font.Value, ">  " + currentLine.Value, 30.0f, bounds.Left + 20.0f, bounds.Bottom - 50.0f, (Color.White, Color.Black))
 
         for i, line in Seq.indexed Log.visible do
             if i < 19 then
-                Text.drawB(font.Value, line, 20.0f, l + 20.0f, b - 60.0f - 60.0f - 40f * float32 i, (Color.White, Color.Black))
+                Text.drawB(font.Value, line, 20.0f, bounds.Left + 20.0f, bounds.Bottom - 60.0f - 60.0f - 40f * float32 i, (Color.White, Color.Black))
 
     let update() =
         if shown && (!|Hotkey.Exit).Tapped() then hide()

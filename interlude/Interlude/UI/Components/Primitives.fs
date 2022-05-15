@@ -58,12 +58,12 @@ type Frame (fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
     override this.Draw() =
         if frame then
             let c = frameColor()
-            let r = Rect.expand(BORDERWIDTH, BORDERWIDTH) this.Bounds
-            Draw.rect (Rect.sliceLeft BORDERWIDTH r) c Sprite.Default
-            Draw.rect (Rect.sliceRight BORDERWIDTH r) c Sprite.Default
-            let r = Rect.expand(0.0f, BORDERWIDTH) this.Bounds
-            Draw.rect (Rect.sliceTop BORDERWIDTH r) c Sprite.Default
-            Draw.rect (Rect.sliceBottom BORDERWIDTH r) c Sprite.Default
+            let r = this.Bounds.Expand BORDERWIDTH
+            Draw.rect (r.SliceLeft BORDERWIDTH) c Sprite.Default
+            Draw.rect (r.SliceRight BORDERWIDTH) c Sprite.Default
+            let r = this.Bounds.Expand(0.0f, BORDERWIDTH)
+            Draw.rect (r.SliceTop BORDERWIDTH) c Sprite.Default
+            Draw.rect (r.SliceBottom BORDERWIDTH) c Sprite.Default
         
         if fill then Draw.rect base.Bounds (fillColor()) Sprite.Default
         base.Draw()

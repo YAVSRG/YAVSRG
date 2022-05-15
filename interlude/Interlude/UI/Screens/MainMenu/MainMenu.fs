@@ -24,7 +24,7 @@ type private MenuButton(onClick, label) as this =
         |=* color
 
     override this.Draw() =
-        Draw.quad (Quad.parallelogram 0.5f (Rect.expand (5.0f, 5.0f) this.Bounds)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad
         Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Style.main 80 ())) Sprite.DefaultQuad
         base.Draw()
 
@@ -78,16 +78,15 @@ type Screen() as this =
         Screen.backgroundDim.Target <- 0.7f
 
     override this.Draw() =
-        let struct (left, top, right, bottom) = this.Bounds
-        let c = (right + left) * 0.5f
+        let c = this.Bounds.CenterX
         let (s, ss) = splashText
         let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
         let a2 = splashAnim.Value * 255.0f |> int
-        Text.drawJustB (Content.font, ss, 20.0f, c, top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Style.accentShade (a1, 0.5f, 0.0f)), 0.5f)
-        Text.drawJustB (Content.font, s, 40.0f, c, top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Style.accentShade (a2, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Content.font, ss, 20.0f, c, this.Bounds.Top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Style.accentShade (a1, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Content.font, s, 40.0f, c, this.Bounds.Top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Style.accentShade (a2, 0.5f, 0.0f)), 0.5f)
         base.Draw()
 
     override this.Update (elapsedTime, bounds) =
         base.Update (elapsedTime, bounds)
-        splashSubAnim.Target <- if Mouse.Hover (bounds |> Rect.expand (-400.0f, 0.0f) |> Rect.sliceTop 100.0f) then 1.0f else 0.0f
+        splashSubAnim.Target <- if Mouse.Hover (bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then 1.0f else 0.0f
         if (!|Hotkey.Select).Tapped() then playFunc()

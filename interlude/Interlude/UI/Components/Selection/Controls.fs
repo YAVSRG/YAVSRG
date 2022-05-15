@@ -164,12 +164,12 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
+        let bounds = this.Bounds.TrimLeft TEXTWIDTH
         if this.Selected || Mouse.Hover this.Bounds then
             chPercent(incr * Mouse.Scroll())
         if this.Selected then
             if (Mouse.Held MouseButton.Left && dragging) then
-                let l, r = if Input.shift then 0.0f, Render.vwidth else l, r
+                let l, r = if Input.shift then 0.0f, Render.vwidth else bounds.Left, bounds.Right
                 let amt = (Mouse.X() - l) / (r - l)
                 setPercent amt setting
             else dragging <- false
@@ -181,10 +181,10 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
 
     override this.Draw() =
         let v = getPercent setting
-        let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
-        let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
-        let m = (b + t) * 0.5f
-        Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
+        let bounds = this.Bounds.TrimLeft TEXTWIDTH
+        let cursor = Rect.Create(bounds.Left + bounds.Width * v, bounds.Top, bounds.Left + bounds.Width * v, bounds.Bottom).Expand(10.0f, -10.0f)
+        let m = bounds.CenterY
+        Draw.rect (Rect.Create(bounds.Left, (m - 10.0f), bounds.Right, (m + 10.0f))) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
         Draw.rect cursor (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
         base.Draw()
 

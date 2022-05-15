@@ -49,18 +49,18 @@ module TaskDisplay =
             let a = 255.0f * fade.Value |> int
             let col = color.GetColor a
             
-            Draw.rect (Rect.sliceTop 5.0f this.Bounds) col Sprite.Default
-            Draw.rect (Rect.sliceBottom 5.0f this.Bounds) col Sprite.Default
-            Draw.rect (Rect.sliceLeft 5.0f this.Bounds) col Sprite.Default
-            Draw.rect (Rect.sliceRight 5.0f this.Bounds) col Sprite.Default
+            Draw.rect (this.Bounds.SliceTop 5.0f) col Sprite.Default
+            Draw.rect (this.Bounds.SliceBottom 5.0f) col Sprite.Default
+            Draw.rect (this.Bounds.SliceLeft 5.0f) col Sprite.Default
+            Draw.rect (this.Bounds.SliceRight 5.0f) col Sprite.Default
 
-            let inner = Rect.expand (-5.0f, -5.0f) this.Bounds
+            let inner = this.Bounds.Shrink 5.0f
             
             Draw.rect inner (Color.FromArgb(a / 4 * 3, Color.Black)) Sprite.Default
             Draw.rect inner (Color.FromArgb(a / 2, col)) Sprite.Default
 
-            Text.drawFillB(Interlude.Content.font, task.Name, inner |> Rect.sliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
-            Text.drawFillB(Interlude.Content.font, task.Info, inner |> Rect.sliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
+            Text.drawFillB(Interlude.Content.font, task.Name, inner.SliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
+            Text.drawFillB(Interlude.Content.font, task.Info, inner.SliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
 
         override this.Update(elapsedTime, bounds) =
 

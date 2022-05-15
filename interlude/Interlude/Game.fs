@@ -81,7 +81,7 @@ type Game(config: GameConfig) as this =
             elif Content.Noteskins.tryImport path [4; 7] then ()
             elif Screens.Import.FileDropHandling.tryImport path then ()
             else Logging.Warn "The file you dropped didn't look like a skin, chart or otherwise importable thing"
-        e.FileNames |> Array.iter handle
+        Array.iter handle e.FileNames
 
     override this.OnRenderFrame e =
         base.OnRenderFrame e
@@ -94,7 +94,7 @@ type Game(config: GameConfig) as this =
         base.OnUpdateFrame e
         Input.update()
         if Render.rheight > 0 then screens.Update(e.Time * 1000.0, Render.bounds)
-        elif Screen.currentType = Screen.Type.SplashScreen then screens.Update(e.Time * 1000.0, Rect.one)
+        elif Screen.currentType = Screen.Type.SplashScreen then screens.Update(e.Time * 1000.0, Rect.ONE)
         Input.absorbAll()
         Audio.update()
         if Screen.exit then base.Close()
