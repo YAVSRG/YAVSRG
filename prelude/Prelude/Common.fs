@@ -289,7 +289,6 @@ module Common =
                 worker.Post req
 
         type Job<'T> = int * 'T
-        
 
         /// Allows you to request some asynchronous work to be done
         ///  If another job is requested before the first completes, the result of the outdated job is swallowed
