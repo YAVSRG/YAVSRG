@@ -10,14 +10,7 @@ open Interlude.Input
 open Interlude.Graphics
 open Interlude.UI
 
-[<AutoOpen>]
-module Position =
-    
-    let positionWidgetA(l, t, r, b) (w: Widget) : Widget =
-        w.Reposition(l, t, r, b)
-        w
-
-type TextBox(textFunc, color, just) =
+type TextBox (textFunc, color, just) =
     inherit Widget()
 
     new(textFunc, scolor, just) = TextBox(textFunc, (fun () -> scolor(), Color.Transparent), just)
@@ -49,7 +42,7 @@ type Bindable (bind: Hotkey, onPress) =
         if (!|bind).Tapped() then onPress()
         
         
-type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
+type Frame (fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
     inherit Widget()
         
     let BORDERWIDTH = 5.0f
@@ -76,6 +69,4 @@ type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
         base.Draw()
         
     static member Create(w: Widget) =
-        let f = Frame()
-        f.Add(w)
-        f
+        Frame() |-+ w
