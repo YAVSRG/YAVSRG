@@ -54,7 +54,7 @@ module Tooltip =
         override this.Draw() =
             let height i = HEIGHT + TEXTHEIGHT * float32 (i.Message.Length - 1)
             let draw i y h =
-                let bounds = this.Bounds.Shrink(100.0f, 0.0f).SliceTop(h)
+                let bounds = this.Bounds.Shrink(100.0f, 0.0f).SliceTop(h).Translate(0.0f, y)
                 let c, icon =
                     match i.Type with
                     | NotificationType.Info -> Color.FromArgb(0, 120, 190), Icons.info
