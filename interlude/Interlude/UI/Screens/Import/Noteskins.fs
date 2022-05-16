@@ -35,7 +35,7 @@ type NoteskinCard(data: RepoEntry) as this =
 
     override this.Draw() =
         base.Draw()
-        Draw.rect ( Rect.Box(this.Bounds.Left, this.Bounds.Right, 320.0f, 240.0f) ) Color.White preview
+        Draw.rect ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) Color.White preview
 
     member this.LoadPreview(img: Bitmap) =
         preview <- Sprite.upload(img, 1, 1, true)

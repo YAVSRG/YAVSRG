@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Graphics
 
 open System
-open System.Runtime.CompilerServices
 open System.Drawing
 open OpenTK.Mathematics
 
@@ -10,7 +9,7 @@ open OpenTK.Mathematics
     Preferred over left, top, width, height for a handful of reasons
 *)
 
-type Rect = 
+type [<Struct>] Rect = 
     { Left: float32; Top: float32; Right: float32; Bottom: float32 }
     static member Create(l, t, r, b) = { Left = l; Top = t; Right = r; Bottom = b }
     static member Box(l, t, w, h) = { Left = l; Top = t; Right = l + w; Bottom = t + h }
