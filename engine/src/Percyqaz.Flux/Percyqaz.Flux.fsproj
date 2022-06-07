@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Utils.fs" />
+    <EmbeddedResource Include="Resources\CourierPrimeSans.ttf" />
+    <Compile Include="Resources\Feather.fs" />
+    <EmbeddedResource Include="Resources\shader.frag" />
+    <EmbeddedResource Include="Resources\shader.vert" />
+    <Compile Include="Graphics\Buffers.fs" />
+    <Compile Include="Graphics\Shader.fs" />
+    <Compile Include="Graphics\Math.fs" />
+    <Compile Include="Graphics\Sprite.fs" />
+    <Compile Include="Graphics\Batch.fs" />
+    <Compile Include="Graphics\Render.fs" />
+    <Compile Include="Graphics\Text.fs" />
+    <Compile Include="Audio\Audio.fs" />
+    <Compile Include="Input\Input.fs" />
+    <Compile Include="UI\Animation.fs" />
+    <Compile Include="UI\Position.fs" />
+    <Compile Include="UI\Widget.fs" />
+    <Compile Include="UI\Style.fs" />
+    <Compile Include="UI\Components\Primitives.fs" />
+    <Compile Include="UI\Components\Containers.fs" />
+    <Compile Include="UI\Root.fs" />
+    <Compile Include="Windowing\Config.fs" />
+    <Compile Include="Windowing\Window.fs" />
+  </ItemGroup>
+
+  <ItemGroup />
+
+  <ItemGroup>
+    <PackageReference Include="ManagedBass" Version="3.1.1" />
+    <PackageReference Include="OpenTK" Version="4.7.2" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
+	<PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Percyqaz.Common\Percyqaz.Common.fsproj" />
+  </ItemGroup>
+
+</Project>
