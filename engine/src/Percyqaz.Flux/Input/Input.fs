@@ -28,8 +28,8 @@ type Bind =
 
     static member DummyBind = Setting.simple Dummy
 
-
 module Bind =
+
     let inline mk k = Key (k, (false, false, false))
     let inline ctrl k = Key (k, (true, false, false))
     let inline alt k = Key (k, (false, true, false))
@@ -51,23 +51,35 @@ type InputMethod =
 
 module Input =
     
-    let mutable internal evts: InputEv list = []
+    let mutable internal events_buffer: InputEv list = []
+    let mutable internal events_this_frame: InputEv list = []
     
-    let mutable internal mousex = 0.0f
-    let mutable internal mousey = 0.0f
-    let mutable internal mousez = 0.0f
-    let mutable internal oldmousex = 0.0f
-    let mutable internal oldmousey = 0.0f
-    let mutable internal oldmousez = 0.0f
-    let mutable internal ctrl = false
-    let mutable internal shift = false
-    let mutable internal alt = false
+    module internal ThisFrame =
+        let mutable mx = 0.0f
+        let mutable my = 0.0f
+        let mutable mz = 0.0f
 
-    let mutable internal gw : GameWindow = null
+        let mutable ctrl = false
+        let mutable shift = false
+        let mutable alt = false
+
+        let mutable kb = null
+        let mutable mouse = null
+
+        let mutable finished = false
+
+    module internal LastFrame = 
+        let mutable mx = 0.0f
+        let mutable my = 0.0f
+        let mutable mz = 0.0f
+
+        let mutable kb = null
+        let mutable mouse = null
+
+    let mutable internal gw : NativeWindow = null
 
     let mutable internal inputmethod : InputMethod = InputMethod.None
     let mutable internal inputmethod_mousedist = 0f
-    let mutable internal absorbed = false
     let mutable internal typed = false
     
     let removeInputMethod() =
@@ -86,14 +98,6 @@ module Input =
         removeInputMethod()
         inputmethod <- InputMethod.Bind callback
 
-    let absorbAll() =
-        oldmousez <- mousez
-        inputmethod_mousedist <- inputmethod_mousedist + abs(mousey - oldmousey) + abs (mousex - oldmousex)
-        oldmousey <- mousey
-        oldmousex <- mousex
-        absorbed <- true
-        evts <- []
-
     let consumeOne (b: Bind, t: InputEvType) =
         let mutable out = ValueNone
         let rec f evs =
@@ -101,7 +105,7 @@ module Input =
             | [] -> []
             | struct (B, T, time) :: xs when B = b && T = t -> out <- ValueSome time; xs
             | x :: xs -> x :: (f xs)
-        evts <- f evts
+        events_this_frame <- f events_this_frame
         out
 
     let consumeGameplay (binds: Bind array, callback: int -> Time -> bool -> unit) =
@@ -120,7 +124,7 @@ module Input =
                     if bmatch binds.[i] b then callback i time (t <> InputEvType.Press); matched <- true
                     i <- i + 1
                 if matched then f xs else struct (b, t, time) :: (f xs)
-        evts <- f evts
+        events_this_frame <- f events_this_frame
 
     let consumeAny (t: InputEvType) =
         let mutable out = ValueNone
@@ -129,32 +133,55 @@ module Input =
             | [] -> []
             | struct (b, T, time) :: xs when T = t -> out <- ValueSome b; xs
             | x :: xs -> x :: (f xs)
-        evts <- f evts
+        events_this_frame <- f events_this_frame
         out
 
     let held (b: Bind) =
-        if absorbed then false
+        if ThisFrame.finished then false
         else
         match b with
-        | Key (Keys.LeftControl, _) -> ctrl
-        | Key (Keys.RightControl, _) -> ctrl
-        | Key (Keys.LeftAlt, _) -> alt
-        | Key (Keys.RightAlt, _) -> alt
-        | Key (Keys.LeftShift, _) -> shift
-        | Key (Keys.RightShift, _) -> shift
-        | Key (k, m) -> gw.KeyboardState.[k] && m = (ctrl, alt, shift)
+        | Key (Keys.LeftControl, _) -> ThisFrame.ctrl
+        | Key (Keys.RightControl, _) -> ThisFrame.ctrl
+        | Key (Keys.LeftAlt, _) -> ThisFrame.alt
+        | Key (Keys.RightAlt, _) -> ThisFrame.alt
+        | Key (Keys.LeftShift, _) -> ThisFrame.shift
+        | Key (Keys.RightShift, _) -> ThisFrame.shift
+        | Key (k, m) -> gw.KeyboardState.[k] && m = (ThisFrame.ctrl, ThisFrame.alt, ThisFrame.shift)
         | Mouse m -> gw.MouseState.[m]
         | Dummy -> false
         | Joystick _ -> false
 
-    let poll() =
-        printfn "polling"
-        let add x = evts <- List.append evts [x]
+    let private lockObj = Object()
+
+    let private fetch() =
+        lock lockObj (fun () -> 
+            events_this_frame <- events_buffer
+            events_buffer <- []
+            ThisFrame.mouse <- gw.MouseState
+            ThisFrame.kb <- gw.KeyboardState
+        )
+        ThisFrame.finished <- false
+        ThisFrame.ctrl <- ThisFrame.kb.IsKeyDown Keys.LeftControl || ThisFrame.kb.IsKeyDown Keys.RightControl
+        ThisFrame.shift <- ThisFrame.kb.IsKeyDown Keys.LeftShift || ThisFrame.kb.IsKeyDown Keys.RightShift
+        ThisFrame.alt <- ThisFrame.kb.IsKeyDown Keys.LeftAlt || ThisFrame.kb.IsKeyDown Keys.RightAlt
+
+    let finish_frame_events() =
+        inputmethod_mousedist <- inputmethod_mousedist + abs(ThisFrame.mx - LastFrame.mx) + abs (ThisFrame.my - LastFrame.my)
+        LastFrame.mouse <- ThisFrame.mouse
+        LastFrame.kb <- ThisFrame.kb
+        LastFrame.mx <- ThisFrame.mx
+        LastFrame.my <- ThisFrame.my
+        LastFrame.mz <- ThisFrame.mz
+        ThisFrame.finished <- true
+        events_this_frame <- []
+
+    let private poll() =
+        let add x = lock lockObj (fun () -> events_buffer <- List.append events_buffer [x])
         let now = Track.timeWithOffset()
 
-        ctrl <- gw.KeyboardState.IsKeyDown Keys.LeftControl || gw.KeyboardState.IsKeyDown Keys.RightControl
-        shift <- gw.KeyboardState.IsKeyDown Keys.LeftShift || gw.KeyboardState.IsKeyDown Keys.RightShift
-        alt <- gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
+        let ctrl = gw.KeyboardState.IsKeyDown Keys.LeftControl || gw.KeyboardState.IsKeyDown Keys.RightControl
+        let shift = gw.KeyboardState.IsKeyDown Keys.LeftShift || gw.KeyboardState.IsKeyDown Keys.RightShift
+        let alt = gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
 
         // keyboard input handler
         // todo: way of remembering modifier combo for hold/release?
@@ -175,24 +202,33 @@ module Input =
                 struct(enum b |> Mouse, InputEvType.Release, now) |> add
 
         // joystick stuff NYI
+
+    let background_thread() =
+        let waitTime = TimeSpan.FromMilliseconds(0.5)
+        while gw.Exists do
+            gw.ProcessInputEvents()
+            poll()
+            Threading.Thread.Sleep(waitTime)
     
-    let init (win: GameWindow) =
+    let init (win: NativeWindow) =
         gw <- win
-        gw.add_MouseWheel(fun e -> mousez <- mousez + e.OffsetY)
+        gw.add_MouseWheel(fun e -> ThisFrame.mz <- ThisFrame.mz + e.OffsetY)
         gw.add_MouseMove(
             fun e ->
-                mousex <- Math.Clamp(Render.vwidth / float32 Render.rwidth * float32 e.X, 0.0f, Render.vwidth)
-                mousey <- Math.Clamp(Render.vheight / float32 Render.rheight * float32 e.Y, 0.0f, Render.vheight))
+                ThisFrame.mx <- Math.Clamp(Render.vwidth / float32 Render.rwidth * float32 e.X, 0.0f, Render.vwidth)
+                ThisFrame.my <- Math.Clamp(Render.vheight / float32 Render.rheight * float32 e.Y, 0.0f, Render.vheight))
         gw.add_TextInput(fun e ->
             match inputmethod with
             | InputMethod.Text (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
             | InputMethod.Bind _
             | InputMethod.None -> ())
+        Logging.Debug "Starting input thread"
+        Threading.Thread(background_thread).Start()
 
     let update() =
         let delete = Bind.mk Keys.Backspace
         let bigDelete = Bind.ctrl Keys.Backspace
-        absorbed <- false
+        fetch()
         match inputmethod with
         | InputMethod.Text (s, _) ->
             if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
@@ -208,7 +244,7 @@ module Input =
             | ValueSome x -> removeInputMethod(); cb x; 
             | ValueNone -> ()
         | InputMethod.None -> ()
-        if typed then absorbAll()
+        if typed then finish_frame_events()
         typed <- false
 
 module Mouse =
@@ -216,8 +252,8 @@ module Mouse =
     let LEFT = MouseButton.Left
     let RIGHT = MouseButton.Right
 
-    let pos() = (Input.mousex, Input.mousey)
-    let scroll() = let v = Input.mousez - Input.oldmousez in Input.oldmousez <- Input.mousez; v
+    let pos() = (Input.ThisFrame.mx, Input.ThisFrame.my)
+    let scroll() = let v = Input.ThisFrame.mz - Input.LastFrame.mz in Input.LastFrame.mz <- Input.ThisFrame.mz; v
 
     let private click b = Input.consumeOne(Mouse b, InputEvType.Press).IsSome
     let leftClick () = click LEFT
@@ -225,7 +261,7 @@ module Mouse =
 
     let held b = Input.held (Mouse b)
     let released b = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
-    let moved() = Input.mousex <> Input.oldmousex || Input.mousey <> Input.oldmousey
+    let moved() = Input.ThisFrame.mx <> Input.LastFrame.mx || Input.ThisFrame.my <> Input.LastFrame.my
 
     let hover (r: Rect) = r.Contains(pos())
 
