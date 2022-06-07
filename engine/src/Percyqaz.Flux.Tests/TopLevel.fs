@@ -11,7 +11,7 @@ type TopLevel() =
 
     let fc = FlowContainer.Vertical(30.0f)
     let comp = 
-        for t in List.init 100 (sprintf "Hello %i!!") do
+        for t in List.init 100 (sprintf "%s Hello %i!!" Percyqaz.Flux.Resources.Feather.activity) do
             fc.Add( Text t )
         ScrollContainer.Flow(fc, Position = Position.Box(0.4f, 0.4f, 200.0f, 500.0f))
 

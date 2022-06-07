@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <EmbeddedResource Include="Resources\CourierPrimeSans.ttf" />
+    <EmbeddedResource Include="Resources\Inconsolata.ttf" />
+    <EmbeddedResource Include="Resources\feather.ttf" />
     <Compile Include="Resources\Feather.fs" />
     <EmbeddedResource Include="Resources\shader.frag" />
     <EmbeddedResource Include="Resources\shader.vert" />
@@ -29,8 +30,6 @@
     <Compile Include="Windowing\Config.fs" />
     <Compile Include="Windowing\Window.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="ManagedBass" Version="3.1.1" />

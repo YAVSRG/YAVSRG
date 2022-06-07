@@ -119,11 +119,13 @@ module Fonts =
         let found, family = collection.TryFind name
         let family = 
             if found then family
-            else Logging.Error (sprintf "Couldn't find font '%s', defaulting" name); collection.Find "Courier Prime Sans"
+            else Logging.Error (sprintf "Couldn't find font '%s', defaulting" name); collection.Find "Inconsolata"
         let font = family.CreateFont(SCALE * 4.0f / 3.0f)
-        new SpriteFont(font, [collection.Find "Courier Prime Sans"]) // todo: feather icons
+        new SpriteFont(font, [collection.Find "feather"])
 
-    do add (getResourceStream "CourierPrimeSans.ttf")
+    do 
+        add (getResourceStream "feather.ttf")
+        add (getResourceStream "Inconsolata.ttf")
 
 (*
     Font rendering
