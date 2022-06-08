@@ -23,7 +23,6 @@ type RenderThread(window: NativeWindow, root: Root) =
 
     member this.OnResize(newSize: Vector2i) =
         Render.resize(newSize.X, newSize.Y)
-        root.Bounds <- Render.bounds
         resized <- true
 
     member private this.Loop() =
@@ -38,13 +37,15 @@ type RenderThread(window: NativeWindow, root: Root) =
         Thread(this.Loop).Start()
         
     member this.DispatchFrame() =
-        let between_frames = between_frame_timer.Elapsed.TotalSeconds
+
+        let between_frames = between_frame_timer.Elapsed.TotalMilliseconds
         let frameTime = if renderFrequency = 0.0 then 0.0 else 1.0 / renderFrequency
         current_frame_timer.Restart()
         
         // Update
         Input.update()
-        if Render.rheight > 0 then root.Update(between_frames * 1000.0, resized)
+        root.Animation.Update between_frames |> ignore
+        root.Update (between_frames, resized)
         resized <- false
         Input.finish_frame_events()
         Track.update()
@@ -52,7 +53,7 @@ type RenderThread(window: NativeWindow, root: Root) =
         
         // Draw
         Render.start()
-        if Render.rheight > 0 then root.Draw()
+        if Viewport.rheight > 0 then root.Draw()
         Render.finish()
         window.Context.SwapBuffers()
         
@@ -62,4 +63,5 @@ type RenderThread(window: NativeWindow, root: Root) =
 
     member this.Init() =
         Render.init()
+        Render.resize(window.ClientSize.X, window.ClientSize.Y)
         root.Init()

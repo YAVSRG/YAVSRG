@@ -46,9 +46,9 @@ type Window(config: Config, title: string, root: Root) as this =
 
         let monitor =
             let monitors = Monitors.GetMonitors()
-            match Seq.tryFind (fun (x: MonitorInfo) -> x.Handle.Pointer = config.Display.Value) monitors with
-            | Some m -> m
-            | None ->
+            try
+                monitors.[config.Display.Value]
+            with err ->
                 Logging.Error (sprintf "Failed to get display info for monitor %i" config.Display.Value)
                 Monitors.GetMonitorFromWindow(this)
 
@@ -83,7 +83,7 @@ type Window(config: Config, title: string, root: Root) as this =
 
     override this.OnResize e =
         base.OnResize e
-        root.Sync ( fun () -> renderThread.OnResize(this.ClientSize); FBO.init() )
+        root.Sync ( fun () -> renderThread.OnResize this.ClientSize )
 
     override this.OnFileDrop e =
         Array.iter WindowEvents.onFileDrop.Trigger e.FileNames

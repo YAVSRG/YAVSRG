@@ -208,8 +208,8 @@ module Input =
         gw.add_MouseWheel(fun e -> ThisFrame.mz <- ThisFrame.mz + e.OffsetY)
         gw.add_MouseMove(
             fun e ->
-                ThisFrame.mx <- Math.Clamp(Render.vwidth / float32 Render.rwidth * float32 e.X, 0.0f, Render.vwidth)
-                ThisFrame.my <- Math.Clamp(Render.vheight / float32 Render.rheight * float32 e.Y, 0.0f, Render.vheight))
+                ThisFrame.mx <- Math.Clamp(Viewport.vwidth / float32 Viewport.rwidth * float32 e.X, 0.0f, Viewport.vwidth)
+                ThisFrame.my <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 e.Y, 0.0f, Viewport.vheight))
         gw.add_TextInput(fun e ->
             match inputmethod with
             | InputMethod.Text (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
