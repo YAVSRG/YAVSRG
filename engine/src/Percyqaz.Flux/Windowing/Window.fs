@@ -2,7 +2,6 @@
 
 open System
 open System.Threading
-open System.Diagnostics
 open OpenTK
 open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
@@ -34,10 +33,7 @@ module Window =
 type Window(config: Config, title: string, root: Root) as this =
     inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = 24))
 
-    let mutable resized = false
-    let mutable renderFrequency = 0.0
-    let between_frame_timer = Stopwatch()
-    let current_frame_timer = Stopwatch()
+    let renderThread = RenderThread(this, root)
 
     do
         Devices.init config.AudioDevice.Value
@@ -56,7 +52,7 @@ type Window(config: Config, title: string, root: Root) as this =
                 Logging.Error (sprintf "Failed to get display info for monitor %i" config.Display.Value)
                 Monitors.GetMonitorFromWindow(this)
 
-        renderFrequency <- float config.FrameLimit.Value
+        renderThread.RenderFrequency <- float config.FrameLimit.Value
         base.VSync <- VSyncMode.Off
 
         match config.WindowMode.Value with
@@ -87,61 +83,30 @@ type Window(config: Config, title: string, root: Root) as this =
 
     override this.OnResize e =
         base.OnResize e
-        Render.resize(base.ClientSize.X, base.ClientSize.Y)
-        root.Bounds <- Render.bounds
-        resized <- true
-        WindowEvents.onResize.Trigger()
-        FBO.init()
+        root.Sync ( fun () -> renderThread.OnResize(this.ClientSize); FBO.init() )
 
     override this.OnFileDrop e =
         Array.iter WindowEvents.onFileDrop.Trigger e.FileNames
 
     member this.Run() =
-        this.Context.MakeCurrent()
         this.OnLoad()
         this.OnResize(ResizeEventArgs(this.Size))
-        Logging.Debug "Starting window main loop"
 
-        between_frame_timer.Start()
+        Logging.Debug "Starting window main thread"
+        
+        this.Context.MakeNoneCurrent()
+        renderThread.Start()
+
         while not (GLFW.WindowShouldClose this.WindowPtr) do
-            let timeUntilNextFrame = this.DispatchFrame()
-            if timeUntilNextFrame > 0.0 then Thread.Sleep(Math.Floor(timeUntilNextFrame * 1000.0) |> int)
-
-    member this.ProcessWindowEvents() =
-        GLFW.PollEvents()
-        // callback thingy?
-
-    member this.DispatchFrame() =
-        let between_frames = between_frame_timer.Elapsed.TotalSeconds
-        let frameTime = if renderFrequency = 0.0 then 0.0 else 1.0 / renderFrequency
-        current_frame_timer.Restart()
-
-        // Update
-        this.ProcessWindowEvents()
-        Input.update()
-        if Render.rheight > 0 then root.Update(between_frames * 1000.0, resized)
-        resized <- false
-        Input.finish_frame_events()
-        Track.update()
-        if root.ShouldExit then this.Close()
-
-        // Draw
-        Render.start()
-        if Render.rheight > 0 then root.Draw()
-        Render.finish()
-        this.Context.SwapBuffers()
-
-        // Timing
-        between_frame_timer.Restart()
-        if renderFrequency = 0.0 then 0.0 else frameTime - current_frame_timer.Elapsed.TotalSeconds
+            this.ProcessInputEvents()
+            GLFW.PollEvents()
+            Input.poll(this.KeyboardState, this.MouseState)
+            Thread.Sleep(TimeSpan.FromMilliseconds(0.5))
     
     member this.OnLoad() =
         this.ApplyConfig config
-        Render.init(base.ClientSize.X, base.ClientSize.Y)
-        FBO.init()
-        Input.init this
         WindowEvents.onLoad.Trigger()
-        root.Init()
+        Input.init this
         base.IsVisible <- true
 
     member this.OnUnload() =

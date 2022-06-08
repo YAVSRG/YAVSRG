@@ -1,6 +1,4 @@
-﻿// Learn more about F# at http://fsharp.org
-
-open System
+﻿open System
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Windowing

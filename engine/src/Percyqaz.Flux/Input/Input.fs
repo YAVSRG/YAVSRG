@@ -63,8 +63,8 @@ module Input =
         let mutable shift = false
         let mutable alt = false
 
-        let mutable kb = null
-        let mutable mouse = null
+        let mutable kb : KeyboardState = null
+        let mutable mouse : MouseState = null
 
         let mutable finished = false
 
@@ -146,8 +146,8 @@ module Input =
         | Key (Keys.RightAlt, _) -> ThisFrame.alt
         | Key (Keys.LeftShift, _) -> ThisFrame.shift
         | Key (Keys.RightShift, _) -> ThisFrame.shift
-        | Key (k, m) -> gw.KeyboardState.[k] && m = (ThisFrame.ctrl, ThisFrame.alt, ThisFrame.shift)
-        | Mouse m -> gw.MouseState.[m]
+        | Key (k, m) -> ThisFrame.kb.[k] && m = (ThisFrame.ctrl, ThisFrame.alt, ThisFrame.shift)
+        | Mouse m -> ThisFrame.mouse.[m]
         | Dummy -> false
         | Joystick _ -> false
 
@@ -157,8 +157,8 @@ module Input =
         lock lockObj (fun () -> 
             events_this_frame <- events_buffer
             events_buffer <- []
-            ThisFrame.mouse <- gw.MouseState
-            ThisFrame.kb <- gw.KeyboardState
+            ThisFrame.mouse <- gw.MouseState.GetSnapshot()
+            ThisFrame.kb <- gw.KeyboardState.GetSnapshot()
         )
         ThisFrame.finished <- false
         ThisFrame.ctrl <- ThisFrame.kb.IsKeyDown Keys.LeftControl || ThisFrame.kb.IsKeyDown Keys.RightControl
@@ -175,40 +175,33 @@ module Input =
         ThisFrame.finished <- true
         events_this_frame <- []
 
-    let private poll() =
+    let poll(keyboard: KeyboardState, mouse: MouseState) =
         let add x = lock lockObj (fun () -> events_buffer <- List.append events_buffer [x])
         let now = Track.timeWithOffset()
 
-        let ctrl = gw.KeyboardState.IsKeyDown Keys.LeftControl || gw.KeyboardState.IsKeyDown Keys.RightControl
-        let shift = gw.KeyboardState.IsKeyDown Keys.LeftShift || gw.KeyboardState.IsKeyDown Keys.RightShift
-        let alt = gw.KeyboardState.IsKeyDown Keys.LeftAlt || gw.KeyboardState.IsKeyDown Keys.RightAlt
+        let ctrl = keyboard.IsKeyDown Keys.LeftControl || keyboard.IsKeyDown Keys.RightControl
+        let shift = keyboard.IsKeyDown Keys.LeftShift || keyboard.IsKeyDown Keys.RightShift
+        let alt = keyboard.IsKeyDown Keys.LeftAlt || keyboard.IsKeyDown Keys.RightAlt
 
         // keyboard input handler
         // todo: way of remembering modifier combo for hold/release?
         for k in 0 .. int Keys.LastKey do
             //if k < 340 || k > 347 then
-                if gw.KeyboardState.IsKeyDown(enum k) then
-                    if gw.KeyboardState.WasKeyDown(enum k) |> not then
+                if keyboard.IsKeyDown(enum k) then
+                    if keyboard.WasKeyDown(enum k) |> not then
                         struct((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Press, now) |> add
-                elif gw.KeyboardState.WasKeyDown(enum k) then
+                elif keyboard.WasKeyDown(enum k) then
                     struct((enum k, (false, false, false)) |> Key, InputEvType.Release, now) |> add
 
         // mouse input handler
         for b in 0 .. int MouseButton.Last do
-            if gw.MouseState.IsButtonDown(enum b) then
-                if gw.MouseState.WasButtonDown(enum b) |> not then
+            if mouse.IsButtonDown(enum b) then
+                if mouse.WasButtonDown(enum b) |> not then
                     struct(enum b |> Mouse, InputEvType.Press, now) |> add
-            elif gw.MouseState.WasButtonDown(enum b) then
+            elif mouse.WasButtonDown(enum b) then
                 struct(enum b |> Mouse, InputEvType.Release, now) |> add
 
         // joystick stuff NYI
-
-    let background_thread() =
-        let waitTime = TimeSpan.FromMilliseconds(0.5)
-        while gw.Exists do
-            gw.ProcessInputEvents()
-            poll()
-            Threading.Thread.Sleep(waitTime)
     
     let init (win: NativeWindow) =
         gw <- win
@@ -222,8 +215,6 @@ module Input =
             | InputMethod.Text (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
             | InputMethod.Bind _
             | InputMethod.None -> ())
-        Logging.Debug "Starting input thread"
-        Threading.Thread(background_thread).Start()
 
     let update() =
         let delete = Bind.mk Keys.Backspace

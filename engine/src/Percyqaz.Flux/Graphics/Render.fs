@@ -47,7 +47,7 @@ module Render =
 
         bounds <- Rect.Box(0.0f, 0.0f, vwidth, vheight).Expand(1.0f)
 
-    let init(width, height) =
+    let init() =
         Logging.Debug(sprintf "GL Version: %s | %s | U:%i T:%i" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer) Sprite.MAX_TEXTURE_UNITS Sprite.MAX_TEXTURE_SIZE)
 
         GL.Disable(EnableCap.CullFace)
@@ -61,8 +61,6 @@ module Render =
         //for i = 0 to 15 do
         //    let loc = sprintf "samplers[%i]" i
         //    Shader.setUniformInt (loc, i) Shader.main
-
-        resize(width, height)
 
 module FBO =
 
