@@ -17,8 +17,7 @@ type RenderThread(window: NativeWindow, root: Root) =
     
     let mutable resized = false
     let mutable renderFrequency = 0.0
-    let between_frame_timer = Stopwatch()
-    let current_frame_timer = Stopwatch()
+    let frame_timer = Stopwatch()
     member val RenderFrequency = 0.0 with get, set
 
     member this.OnResize(newSize: Vector2i) =
@@ -28,7 +27,6 @@ type RenderThread(window: NativeWindow, root: Root) =
     member private this.Loop() =
         window.Context.MakeCurrent()
         this.Init()
-        between_frame_timer.Start()
         while not (GLFW.WindowShouldClose window.WindowPtr) do
             let timeUntilNextFrame = this.DispatchFrame()
             if timeUntilNextFrame > 0.0 then Thread.Sleep(Math.Floor(timeUntilNextFrame * 1000.0) |> int)
@@ -38,14 +36,14 @@ type RenderThread(window: NativeWindow, root: Root) =
         
     member this.DispatchFrame() =
 
-        let between_frames = between_frame_timer.Elapsed.TotalMilliseconds
         let frameTime = if renderFrequency = 0.0 then 0.0 else 1.0 / renderFrequency
-        current_frame_timer.Restart()
+        let elapsedTime = frame_timer.Elapsed.TotalMilliseconds
+        frame_timer.Restart()
         
         // Update
         Input.update()
-        root.Animation.Update between_frames |> ignore
-        root.Update (between_frames, resized)
+        root.Animation.Update elapsedTime |> ignore
+        root.Update (elapsedTime, resized)
         resized <- false
         Input.finish_frame_events()
         Track.update()
@@ -58,8 +56,7 @@ type RenderThread(window: NativeWindow, root: Root) =
         window.Context.SwapBuffers()
         
         // Timing
-        between_frame_timer.Restart()
-        if renderFrequency = 0.0 then 0.0 else frameTime - current_frame_timer.Elapsed.TotalSeconds
+        if renderFrequency = 0.0 then 0.0 else frameTime - frame_timer.Elapsed.TotalSeconds
 
     member this.Init() =
         Render.init()

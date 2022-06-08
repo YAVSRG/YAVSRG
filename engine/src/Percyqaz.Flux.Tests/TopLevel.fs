@@ -21,7 +21,7 @@ type TopLevel() =
         Text.draw(Style.baseFont, "Hello world", 30.0f, 100.0f, 100.0f, System.Drawing.Color.White)
         comp.Draw()
 
-        let x = 600.0f + 200.0f * (System.Math.Cos time |> float32)
+        let x = 600.0f + 200.0f * (System.Math.Cos(time / 500.0) |> float32)
         Draw.rect (Rect.Box(x, 600.0f, 100.0f, 100.0f)) System.Drawing.Color.Yellow Sprite.Default
 
         let x, y = Mouse.pos()
@@ -30,7 +30,7 @@ type TopLevel() =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         comp.Update(elapsedTime, moved)
-        time <- time + 0.002
+        time <- time + elapsedTime
         if bind.Tapped() then
             fc.Spacing <- System.Random().NextDouble() * 20.0 |> float32
             time <- time + 5000.0
