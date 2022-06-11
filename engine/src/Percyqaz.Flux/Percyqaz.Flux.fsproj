@@ -22,6 +22,7 @@
     <Compile Include="Input\Input.fs" />
     <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Position.fs" />
+    <Compile Include="UI\Selection.fs" />
     <Compile Include="UI\Widget.fs" />
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Components\Primitives.fs" />

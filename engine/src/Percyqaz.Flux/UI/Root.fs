@@ -10,6 +10,8 @@ type Root() =
     member val ShouldExit = false with get, set
     member val Animation = Animation.Group() with get
 
+    override this.SelectionPath = []
+
     override this.Init(parent: Widget) = failwith "Root should not have a parent"
     abstract member Init : unit -> unit
     default this.Init() =

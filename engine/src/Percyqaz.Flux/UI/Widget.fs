@@ -3,10 +3,16 @@
 open Percyqaz.Flux.Graphics
 
 [<AbstractClass>]
-type Widget() =
+type Widget(nodeType) =
+    inherit ISelection(nodeType)
 
     let mutable parent = None
+    let mutable focused = false
+    let mutable selected = false
     member this.Parent = parent.Value
+
+    member this.Selected = selected
+    member this.Focused = focused
 
     member val Initialised = false with get, set
     member val Bounds = Rect.ZERO with get, set
@@ -18,21 +24,33 @@ type Widget() =
 
     abstract member Draw : unit -> unit
 
-    // Container is responsible for initialising before calling Draw or Update
+    // The container must call this before calling Draw or Update
     abstract member Init : Widget -> unit
     default this.Init(p: Widget) =
         if this.Initialised then failwithf "This widget %O has already been initialised" this
         this.Initialised <- true
         parent <- Some p
 
+    override this.FocusTree : ISelection list = 
+        if not this.NodeType._IsNone then this :: this.Parent.FocusTree
+        else this.Parent.FocusTree
+
+    override this.Focus() = if not this.NodeType._IsNone then Selection.select this
+    override this.OnFocus() = focused <- true
+    override this.OnUnfocus() = focused <- false
+
+    override this.Select() = if this.NodeType._IsLeaf then Selection.select this
+    override this.OnSelected() = assert focused; selected <- true
+    override this.OnDeselected() = assert focused; selected <- false
+
     override this.ToString() =
         if parent.IsNone then "*" else parent.Value.ToString()
         + " > "
-        + this.GetType().ToString().Replace("Percyqaz.Flux.UI.", "")
+        + this.GetType().Name
 
 [<AbstractClass>]
-type StaticWidget() =
-    inherit Widget()
+type StaticWidget(nodeType) =
+    inherit Widget(nodeType)
 
     let mutable pos = Position.Default
 
@@ -49,8 +67,8 @@ type StaticWidget() =
         base.Init parent
         this.UpdateBounds()
 
-type StaticContainer() =
-    inherit StaticWidget()
+type StaticContainer(nodeType) =
+    inherit StaticWidget(nodeType)
 
     let children = ResizeArray<Widget>()
 
@@ -124,8 +142,8 @@ type private DynamicPosition(pos: Position) =
             anim.Update(elapsedTime) |> ignore
 
 [<AbstractClass>]
-type DynamicContainer() =
-    inherit Widget()
+type DynamicContainer(nodeType) =
+    inherit Widget(nodeType)
 
     let pos = DynamicPosition(Position.Default)
     let children = ResizeArray<Widget>()

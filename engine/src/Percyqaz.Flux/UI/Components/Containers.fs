@@ -15,8 +15,8 @@ module FlowContainer =
         }
 
     [<AbstractClass>]
-    type Base<'T when 'T :> Widget>(item_size: float32) = 
-        inherit StaticWidget()
+    type Base<'T when 'T :> Widget>(item_size: float32) as this = 
+        inherit StaticWidget(NodeType.Switch this.FocusChild)
 
         let mutable filter : 'T -> bool = K true
         let mutable sort : ('T -> 'T -> int) option = None
@@ -24,6 +24,15 @@ module FlowContainer =
         let mutable item_size = item_size
         let mutable refresh = true
         let children = ResizeArray<FlowItem<'T>>()
+
+        let mutable focusChild = None
+
+        member private this.FocusChild() : ISelection =
+            focusChild |> Option.defaultWith (fun () -> children.[0].Widget)
+
+        override this.Select() = this.Focus()
+
+        abstract member Navigate : unit -> unit
 
         member this.Filter 
             with set value = 
@@ -62,6 +71,8 @@ module FlowContainer =
                     this.FlowContent children
                     true
                 else moved
+
+            if this.Focused then this.Navigate()
 
             for { Widget = c; Visible = visible } in children do
                 if visible && (moved || c.VisibleBounds.Visible) then
@@ -120,7 +131,7 @@ module FlowContainer =
 
 [<Sealed>]
 type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
-    inherit StaticWidget()
+    inherit StaticWidget(NodeType.Switch (K child))
 
     static let SENSITIVITY = 50.0f
 
@@ -131,6 +142,7 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         let moved = 
+            //todo: detect if heightFunc() changes
             if Mouse.hover this.Bounds then
                 let ms = Mouse.scroll()
                 if ms <> 0.0f then
