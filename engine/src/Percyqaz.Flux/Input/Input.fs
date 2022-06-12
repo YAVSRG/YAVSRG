@@ -216,25 +216,37 @@ module Input =
             | InputMethod.Bind _
             | InputMethod.None -> ())
 
-    let update() =
-        let delete = Bind.mk Keys.Backspace
-        let bigDelete = Bind.ctrl Keys.Backspace
-        fetch()
+    let updateIM() =
+        
+        let deleteChar = Bind.mk Keys.Backspace
+        let deleteWord = Bind.ctrl Keys.Backspace
+        let copy = Bind.ctrl Keys.C
+        let paste = Bind.ctrl Keys.V
+
         match inputmethod with
         | InputMethod.Text (s, _) ->
-            if consumeOne(delete, InputEvType.Press).IsSome && s.Value.Length > 0 then
+            if consumeOne(deleteChar, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
-            elif consumeOne(bigDelete, InputEvType.Press).IsSome then
+            elif consumeOne(deleteWord, InputEvType.Press).IsSome then
                 s.Value <-
                     let parts = s.Value.Split(" ")
                     Array.take (parts.Length - 1) parts |> String.concat " "
-            //todo: clipboard support
+            elif consumeOne(copy, InputEvType.Press).IsSome then
+                gw.ClipboardString <- s.Value
+            elif consumeOne(paste, InputEvType.Press).IsSome then
+                s.Value <- s.Value + gw.ClipboardString
             if inputmethod_mousedist > 200f then removeInputMethod()
         | InputMethod.Bind cb ->
             match consumeAny InputEvType.Press with
             | ValueSome x -> removeInputMethod(); cb x; 
             | ValueNone -> ()
         | InputMethod.None -> ()
+
+    let update() =
+
+        fetch()
+        updateIM()
+
         if typed then finish_frame_events()
         typed <- false
 

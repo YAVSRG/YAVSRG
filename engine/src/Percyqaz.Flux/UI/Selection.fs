@@ -27,7 +27,6 @@ and [<RequireQualifiedAccess>] NodeType =
         | None -> true
         | _ -> false
 
-
 module Selection =
 
     let mutable private focusTree : ISelection list = []
@@ -86,6 +85,7 @@ module Selection =
         | NodeType.Leaf -> select_tree item.FocusTree
         | NodeType.Switch f -> select_tree (f().FocusTree)
 
+    // Is this even a thing? Maybe the container should be responsible for being moved up to
     let rec up() =
         match focusTree with
         | [] -> failwith "Tried to navigate up selection tree; Nothing selected"
