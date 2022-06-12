@@ -39,7 +39,6 @@ module Selection =
         let mutable difference_found = false
         while not (difference_found || xs.IsEmpty || ys.IsEmpty) do
             if xs.Head = ys.Head then
-                printfn "Skipping shared %O" xs.Head
                 xs <- List.tail xs
                 ys <- List.tail ys
             else
@@ -67,7 +66,7 @@ module Selection =
 
         diff (List.rev focusTree) (List.rev tree)
             
-        if tree <> focusTree then
+        if tree <> focusTree || not selected then
             match List.tryHead tree with
             | Some w -> w.OnSelected()
             | None -> ()

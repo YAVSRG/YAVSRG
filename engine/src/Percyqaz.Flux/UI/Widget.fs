@@ -35,7 +35,7 @@ type Widget(nodeType) =
         if not this.NodeType._IsNone then this :: this.Parent.FocusTree
         else this.Parent.FocusTree
 
-    override this.Focus() = if not this.NodeType._IsNone then Selection.select this
+    override this.Focus() = if not this.NodeType._IsNone then Selection.focus this
     override this.OnFocus() = focused <- true
     override this.OnUnfocus() = focused <- false
 

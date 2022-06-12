@@ -16,7 +16,7 @@ module FlowContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>(item_size: float32) as this = 
-        inherit StaticWidget(NodeType.Switch this.FocusChild)
+        inherit StaticWidget(NodeType.Switch (fun () -> this.FocusChild))
 
         let mutable filter : 'T -> bool = K true
         let mutable sort : ('T -> 'T -> int) option = None
@@ -25,10 +25,13 @@ module FlowContainer =
         let mutable refresh = true
         let children = ResizeArray<FlowItem<'T>>()
 
-        let mutable focusChild = None
+        let mutable focusChild : ISelection option = None
 
-        member private this.FocusChild() : ISelection =
-            focusChild |> Option.defaultWith (fun () -> children.[0].Widget)
+        member this.FocusChild
+            with get() = 
+                if focusChild.IsNone then focusChild <- Some children.[0].Widget
+                focusChild.Value
+            and set(value) = focusChild <- Some value
 
         override this.Select() = this.Focus()
 
@@ -116,6 +119,9 @@ module FlowContainer =
                     b <- t + this.ItemSize
             content_height <- b
 
+        // Todo: arrow key logic
+        override this.Navigate() = ()
+
     [<Sealed>]
     type LeftToRight<'T when 'T :> Widget>(item_width: float32) =
         inherit Base<'T>(item_width)
@@ -128,6 +134,8 @@ module FlowContainer =
                     c.Position <- Position.Column (l, this.ItemSize)
                     l <- l + this.ItemSize + this.Spacing
                     r <- l + this.ItemSize
+
+        override this.Navigate() = ()
 
 [<Sealed>]
 type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
