@@ -3,10 +3,13 @@
 open System
 open System.Drawing
 open System.Collections.Generic
+open Percyqaz.Flux.Utils
 
 [<AbstractClass>]
 type Animation() =
     // Returning true means the animation is complete (for sequential animations)
+
+    // Todo: return unit and split completeness into its own member
     abstract member Update: float -> bool
 
 module Animation =
@@ -20,7 +23,7 @@ module Animation =
         member this.Value with get() = value and set(v) = value <- v
         member this.Target with get() = target and set(t) = target <- t
         member this.Snap() = value <- target
-        override this.Update(_) = value <- value * 0.95f + target * 0.05f; false
+        override this.Update(elapsedTime) = value <- lerp (MathF.Pow(0.994f, float32 elapsedTime)) target value; false
 
     type Color(color : Drawing.Color) =
         inherit Animation()

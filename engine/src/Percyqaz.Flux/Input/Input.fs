@@ -80,7 +80,7 @@ module Input =
 
     let mutable internal inputmethod : InputMethod = InputMethod.None
     let mutable internal inputmethod_mousedist = 0f
-    let mutable internal typed = false
+    let mutable internal typedChar = false
     
     let removeInputMethod() =
         match inputmethod with
@@ -212,7 +212,7 @@ module Input =
                 ThisFrame.my <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 e.Y, 0.0f, Viewport.vheight))
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | InputMethod.Text (s, c) -> Setting.app (fun x -> x + e.AsString) s; typed <- true
+            | InputMethod.Text (s, _) -> s.Value <- s.Value + e.AsString; typedChar <- true
             | InputMethod.Bind _
             | InputMethod.None -> ())
 
@@ -225,6 +225,7 @@ module Input =
 
         match inputmethod with
         | InputMethod.Text (s, _) ->
+
             if consumeOne(deleteChar, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
             elif consumeOne(deleteWord, InputEvType.Press).IsSome then
@@ -234,21 +235,25 @@ module Input =
             elif consumeOne(copy, InputEvType.Press).IsSome then
                 gw.ClipboardString <- s.Value
             elif consumeOne(paste, InputEvType.Press).IsSome then
-                s.Value <- s.Value + gw.ClipboardString
+                s.Value <- s.Value + try gw.ClipboardString with _ -> ""
+
             if inputmethod_mousedist > 200f then removeInputMethod()
-        | InputMethod.Bind cb ->
+
+        | InputMethod.Bind callback ->
             match consumeAny InputEvType.Press with
-            | ValueSome x -> removeInputMethod(); cb x; 
+            | ValueSome x -> removeInputMethod(); callback x
             | ValueNone -> ()
+
         | InputMethod.None -> ()
 
     let update() =
 
         fetch()
         updateIM()
-
-        if typed then finish_frame_events()
-        typed <- false
+        
+        if typedChar then
+            finish_frame_events()
+            typedChar <- false
 
 module Mouse =
 

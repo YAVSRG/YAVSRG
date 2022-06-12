@@ -1,5 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open System.Drawing
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 
@@ -7,12 +8,16 @@ type TextEntry(setting: Setting<string>, bind) as this =
     inherit StaticContainer(NodeType.Leaf)
 
     let color = Animation.Fade(0.5f)
+    let ticker = Animation.Counter(600.0)
 
     let toggle() = if this.Selected then this.Focus() else this.Select()
 
     do
         this
-        |+ Text(setting.Get, Align = Alignment.LEFT, Color = fun () -> (Style.color(255, 1.0f, color.Value), System.Drawing.Color.Black))
+        |+ Text(
+            (fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else ""),
+            Align = Alignment.LEFT, 
+            Color = fun () -> (Style.highlight(255, color.Value), Color.Black))
         |+ Clickable(this.Select)
         |* HotkeyAction(bind, toggle)
 
@@ -29,4 +34,5 @@ type TextEntry(setting: Setting<string>, bind) as this =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         color.Update(elapsedTime) |> ignore
+        ticker.Update(elapsedTime) |> ignore
 

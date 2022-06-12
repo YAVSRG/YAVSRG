@@ -28,6 +28,8 @@ module Style =
             int ((g + gd) * brightness) |> min 255,
             int ((b + bd) * brightness) |> min 255)
 
+    let highlight (alpha, white) = color (alpha, 1.0f, white)
+
 type Style() =
     
     static member Color (alpha, brightness, white) =
