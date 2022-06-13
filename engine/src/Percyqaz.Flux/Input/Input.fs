@@ -254,13 +254,7 @@ module Input =
     let update() =
 
         fetch()
-
-        let were_events = events_this_frame <> []
-        if typed_this_frame <> "" && were_events then printfn "BOTH ."
-
         updateIM()
-
-        if typed_this_frame <> "" then printfn "Now events have been absorbed" elif were_events then printfn "No events absorbed"
 
 module Mouse =
 

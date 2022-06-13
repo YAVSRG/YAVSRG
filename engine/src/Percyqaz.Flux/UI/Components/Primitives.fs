@@ -48,12 +48,12 @@ type Clickable(onLeftClick) =
     override this.Draw() = ()
     
 [<Sealed>]
-type HotkeyAction(hotkey: unit -> Bind, action) =
+type HotkeyAction(hotkey: Hotkey, action) =
     inherit StaticWidget(NodeType.None)
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
-        if hotkey().Tapped() then action()
+        if (!|hotkey).Tapped() then action()
 
     override this.Draw() = ()
 

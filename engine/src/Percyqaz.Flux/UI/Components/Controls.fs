@@ -4,7 +4,7 @@ open System.Drawing
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 
-type TextEntry(setting: Setting<string>, bind) as this =
+type TextEntry(setting: Setting<string>, bind: Hotkey) as this =
     inherit StaticContainer(NodeType.Leaf)
 
     let color = Animation.Fade(0.5f)

@@ -16,7 +16,7 @@ module FlowContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>(item_size: float32) as this = 
-        inherit StaticWidget(NodeType.Switch (fun () -> this.FocusChild))
+        inherit StaticWidget(NodeType.Switch (fun () -> this.WhoShouldFocus))
 
         let mutable filter : 'T -> bool = K true
         let mutable sort : ('T -> 'T -> int) option = None
@@ -25,13 +25,29 @@ module FlowContainer =
         let mutable refresh = true
         let children = ResizeArray<FlowItem<'T>>()
 
-        let mutable focusChild : ISelection option = None
+        member this.WhoIsFocused : int option = Seq.tryFindIndex (fun c -> c.Widget.Focused) children
+        member this.WhoShouldFocus = children.[0].Widget
+        member this.Next() =
+            match this.WhoIsFocused with
+            | Some i ->
+                let mutable index = (i + children.Count - 1) % children.Count
+                while index <> i && not children.[index].Visible do
+                    index <- (index + children.Count - 1) % children.Count
+                children.[index].Widget.Focus()
+            | None -> ()
+        member this.Previous() =
+            match this.WhoIsFocused with
+            | Some i ->
+                let mutable index = (i + 1) % children.Count
+                while index <> i && not children.[index].Visible do
+                    index <- (index + 1) % children.Count
+                children.[index].Widget.Focus()
+            | None -> ()
+        member this.SelectFocused() =
+            match this.WhoIsFocused with
+            | Some i -> children.[i].Widget.Select()
+            | None -> ()
 
-        member this.FocusChild
-            with get() = 
-                if focusChild.IsNone then focusChild <- Some children.[0].Widget
-                focusChild.Value
-            and set(value) = focusChild <- Some value
 
         override this.Select() = this.Focus()
 
@@ -119,8 +135,11 @@ module FlowContainer =
                     b <- t + this.ItemSize
             content_height <- b
 
-        // Todo: arrow key logic
-        override this.Navigate() = ()
+        override this.Navigate() =
+            if (!|"exit").Tapped() then Selection.up()
+            elif (!|"up").Tapped() then this.Previous()
+            elif (!|"down").Tapped() then this.Next()
+            elif (!|"select").Tapped() then this.SelectFocused()
 
     [<Sealed>]
     type LeftToRight<'T when 'T :> Widget>(item_width: float32) =
@@ -134,8 +153,12 @@ module FlowContainer =
                     c.Position <- Position.Column (l, this.ItemSize)
                     l <- l + this.ItemSize + this.Spacing
                     r <- l + this.ItemSize
-
-        override this.Navigate() = ()
+                    
+        override this.Navigate() =
+            if (!|"exit").Tapped() then Selection.up()
+            elif (!|"left").Tapped() then this.Previous()
+            elif (!|"right").Tapped() then this.Next()
+            elif (!|"select").Tapped() then this.SelectFocused()
 
 [<Sealed>]
 type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
@@ -150,7 +173,7 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         let moved = 
-            //todo: detect if heightFunc() changes
+            // todo: detect if heightFunc() changes
             if Mouse.hover this.Bounds then
                 let ms = Mouse.scroll()
                 if ms <> 0.0f then
