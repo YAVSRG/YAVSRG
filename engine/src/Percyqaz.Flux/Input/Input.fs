@@ -51,8 +51,10 @@ type InputMethod =
 
 module Input =
     
-    let mutable internal events_buffer: InputEv list = []
-    let mutable internal events_this_frame: InputEv list = []
+    let mutable internal events_buffer : InputEv list = []
+    let mutable internal typed_buffer : string = ""
+    let mutable internal events_this_frame : InputEv list = []
+    let mutable internal typed_this_frame : string = ""
     
     module internal ThisFrame =
         let mutable mx = 0.0f
@@ -80,7 +82,6 @@ module Input =
 
     let mutable internal inputmethod : InputMethod = InputMethod.None
     let mutable internal inputmethod_mousedist = 0f
-    let mutable internal typedChar = false
     
     let removeInputMethod() =
         match inputmethod with
@@ -157,6 +158,8 @@ module Input =
         lock lockObj (fun () -> 
             events_this_frame <- events_buffer
             events_buffer <- []
+            typed_this_frame <- typed_buffer
+            typed_buffer <- ""
             ThisFrame.mouse <- gw.MouseState.GetSnapshot()
             ThisFrame.kb <- gw.KeyboardState.GetSnapshot()
         )
@@ -212,7 +215,7 @@ module Input =
                 ThisFrame.my <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 e.Y, 0.0f, Viewport.vheight))
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | InputMethod.Text (s, _) -> s.Value <- s.Value + e.AsString; typedChar <- true
+            | InputMethod.Text _ -> lock lockObj (fun () -> typed_buffer <- typed_buffer + e.AsString)
             | InputMethod.Bind _
             | InputMethod.None -> ())
 
@@ -225,6 +228,8 @@ module Input =
 
         match inputmethod with
         | InputMethod.Text (s, _) ->
+
+            if typed_this_frame <> "" then s.Value <- s.Value + typed_this_frame; finish_frame_events()
 
             if consumeOne(deleteChar, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
@@ -249,11 +254,13 @@ module Input =
     let update() =
 
         fetch()
+
+        let were_events = events_this_frame <> []
+        if typed_this_frame <> "" && were_events then printfn "BOTH ."
+
         updateIM()
-        
-        if typedChar then
-            finish_frame_events()
-            typedChar <- false
+
+        if typed_this_frame <> "" then printfn "Now events have been absorbed" elif were_events then printfn "No events absorbed"
 
 module Mouse =
 
