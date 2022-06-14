@@ -1,16 +1,17 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
 
 [<AbstractClass>]
 type Root() =
     inherit Widget(NodeType.None)
 
-    override this.Position with set(value) = failwith "Position should not be set for the UI root"
+    override this.Position with set(value) = failwith "root position is tied to the bounds of the screen"
     member val ShouldExit = false with get, set
     member val Animation = Animation.Group() with get
 
-    override this.Init(parent: Widget) = failwith "Root should not have a parent"
+    override this.Init(parent: Widget) = failwith "call .Init() instead"
     abstract member Init : unit -> unit
     default this.Init() =
         this.Bounds <- Viewport.bounds
@@ -22,5 +23,6 @@ type Root() =
         if moved then
             this.Bounds <- Viewport.bounds
             this.VisibleBounds <- Viewport.bounds
+        if (!|"exit").Tapped() then Selection.up()
 
     member this.Sync action = this.Animation.Add(Animation.Action(action))

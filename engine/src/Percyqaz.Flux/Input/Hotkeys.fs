@@ -9,7 +9,7 @@ type Hotkey = string
 module Hotkeys =
 
     let private defaults = Dictionary<string, Bind>()
-    let private hotkeys = Dictionary<string, Bind>()
+    let hotkeys = Dictionary<string, Bind>()
 
     let register (id: string) (value: Bind) =
         defaults.Add(id, value)
@@ -21,6 +21,7 @@ module Hotkeys =
         hotkeys.[id] <- defaults.[id]
 
     let init() =
+        register "none" Dummy
         register "exit" (mk Keys.Escape)
         register "select" (mk Keys.Enter)
         register "up" (mk Keys.Up)

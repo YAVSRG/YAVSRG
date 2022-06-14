@@ -27,7 +27,7 @@ module FlowContainer =
 
         member this.WhoIsFocused : int option = Seq.tryFindIndex (fun c -> c.Widget.Focused) children
         member this.WhoShouldFocus = children.[0].Widget
-        member this.Next() =
+        member this.Previous() =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + children.Count - 1) % children.Count
@@ -35,7 +35,7 @@ module FlowContainer =
                     index <- (index + children.Count - 1) % children.Count
                 children.[index].Widget.Focus()
             | None -> ()
-        member this.Previous() =
+        member this.Next() =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + 1) % children.Count
@@ -136,8 +136,7 @@ module FlowContainer =
             content_height <- b
 
         override this.Navigate() =
-            if (!|"exit").Tapped() then Selection.up()
-            elif (!|"up").Tapped() then this.Previous()
+            if (!|"up").Tapped() then this.Previous()
             elif (!|"down").Tapped() then this.Next()
             elif (!|"select").Tapped() then this.SelectFocused()
 
@@ -155,8 +154,7 @@ module FlowContainer =
                     r <- l + this.ItemSize
                     
         override this.Navigate() =
-            if (!|"exit").Tapped() then Selection.up()
-            elif (!|"left").Tapped() then this.Previous()
+            if (!|"left").Tapped() then this.Previous()
             elif (!|"right").Tapped() then this.Next()
             elif (!|"select").Tapped() then this.SelectFocused()
 

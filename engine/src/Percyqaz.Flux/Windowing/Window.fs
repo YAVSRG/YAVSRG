@@ -107,6 +107,7 @@ type Window(config: Config, title: string, root: Root) as this =
         this.ApplyConfig config
         WindowEvents.onLoad.Trigger()
         Input.init this
+        Hotkeys.init()
         base.IsVisible <- true
 
     member this.OnUnload() =

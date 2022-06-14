@@ -87,19 +87,19 @@ module Selection =
 
     // Is this even a thing? Maybe the container should be responsible for being moved up to
     let rec up() =
-        match focusTree with
-        | [] -> failwith "Tried to navigate up selection tree; Nothing selected"
-        | head :: rest ->
-            if selected then head.OnDeselected()
-            selected <- false
-            head.OnUnfocus()
-            selected <- false
-            focusTree <- rest
+        if selected then
+            focus_tree focusTree
+        else
+            match focusTree with
+            | [] -> ()
+            | head :: rest ->
+                head.OnUnfocus()
+                focusTree <- rest
 
-            match List.tryHead rest with
-            | Some h ->
-                match h.NodeType with
-                | NodeType.None -> up()
-                | NodeType.Leaf -> ()
-                | NodeType.Switch _ -> up()
-            | None -> ()
+                match List.tryHead rest with
+                | Some h ->
+                    match h.NodeType with
+                    | NodeType.None -> up()
+                    | NodeType.Leaf -> ()
+                    | NodeType.Switch _ -> up()
+                | None -> ()
