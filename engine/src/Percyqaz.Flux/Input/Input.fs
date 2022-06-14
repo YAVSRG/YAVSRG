@@ -55,6 +55,8 @@ module Input =
     let mutable internal typed_buffer : string = ""
     let mutable internal events_this_frame : InputEv list = []
     let mutable internal typed_this_frame : string = ""
+
+    let private sinceLastTyped = Diagnostics.Stopwatch.StartNew()
     
     module internal ThisFrame =
         let mutable mx = 0.0f
@@ -179,7 +181,7 @@ module Input =
         events_this_frame <- []
 
     let poll(keyboard: KeyboardState, mouse: MouseState) =
-        let add x = lock lockObj (fun () -> events_buffer <- List.append events_buffer [x])
+        let add x = if sinceLastTyped.ElapsedMilliseconds > 50l then lock lockObj (fun () -> events_buffer <- List.append events_buffer [x])
         let now = Track.timeWithOffset()
 
         let ctrl = keyboard.IsKeyDown Keys.LeftControl || keyboard.IsKeyDown Keys.RightControl
@@ -215,7 +217,7 @@ module Input =
                 ThisFrame.my <- Math.Clamp(Viewport.vheight / float32 Viewport.rheight * float32 e.Y, 0.0f, Viewport.vheight))
         gw.add_TextInput(fun e ->
             match inputmethod with
-            | InputMethod.Text _ -> lock lockObj (fun () -> typed_buffer <- typed_buffer + e.AsString)
+            | InputMethod.Text _ -> sinceLastTyped.Restart(); lock lockObj (fun () -> typed_buffer <- typed_buffer + e.AsString)
             | InputMethod.Bind _
             | InputMethod.None -> ())
 
@@ -229,7 +231,7 @@ module Input =
         match inputmethod with
         | InputMethod.Text (s, _) ->
 
-            if typed_this_frame <> "" then s.Value <- s.Value + typed_this_frame; finish_frame_events()
+            if typed_this_frame <> "" then s.Value <- s.Value + typed_this_frame
 
             if consumeOne(deleteChar, InputEvType.Press).IsSome && s.Value.Length > 0 then
                 Setting.app (fun (x: string) -> x.Substring (0, x.Length - 1)) s
