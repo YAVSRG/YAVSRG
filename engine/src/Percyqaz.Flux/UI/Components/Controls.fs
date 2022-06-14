@@ -33,6 +33,6 @@ type TextEntry(setting: Setting<string>, bind: Hotkey) as this =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
-        color.Update(elapsedTime) |> ignore
-        ticker.Update(elapsedTime) |> ignore
+        color.Update(elapsedTime)
+        ticker.Update(elapsedTime)
 

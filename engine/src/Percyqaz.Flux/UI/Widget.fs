@@ -108,11 +108,12 @@ type private DynamicPosition(pos: Position) =
     let bottom_anchor = Animation.Fade(snd pos.Bottom)
 
     let anim =
-        Animation.Fork(
-            left_offset, left_anchor,
-            top_offset, top_anchor,
-            right_offset, right_anchor,
-            bottom_offset, bottom_anchor )
+        Animation.fork [
+            left_offset; left_anchor
+            top_offset; top_anchor
+            right_offset; right_anchor
+            bottom_offset; bottom_anchor
+        ]
 
     member this.Moving = frames > 0
 
@@ -139,7 +140,7 @@ type private DynamicPosition(pos: Position) =
     member this.Update(elapsedTime) =
         if frames > 0 then 
             frames <- frames - 1
-            anim.Update(elapsedTime) |> ignore
+            anim.Update(elapsedTime)
 
 [<AbstractClass>]
 type DynamicContainer(nodeType) =

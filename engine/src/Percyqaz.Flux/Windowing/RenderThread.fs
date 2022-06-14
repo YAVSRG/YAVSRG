@@ -42,7 +42,7 @@ type RenderThread(window: NativeWindow, root: Root) =
         
         // Update
         Input.update()
-        root.Animation.Update elapsedTime |> ignore
+        root.Animation.Update elapsedTime
         root.Update (elapsedTime, resized)
         resized <- false
         Input.finish_frame_events()

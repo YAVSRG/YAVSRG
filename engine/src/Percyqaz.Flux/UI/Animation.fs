@@ -7,10 +7,11 @@ open Percyqaz.Flux.Utils
 
 [<AbstractClass>]
 type Animation() =
-    // Returning true means the animation is complete (for sequential animations)
-
-    // Todo: return unit and split completeness into its own member
-    abstract member Update: float -> bool
+    /// Called to update the animation each frame
+    abstract member Update: float -> unit
+    /// Called directly after the animation is updated (if at all)
+    /// True => it doesn't need to run any more and can be disposed of
+    abstract member Complete: bool
 
 module Animation =
 
@@ -20,10 +21,24 @@ module Animation =
         inherit Animation()
         let mutable value = value
         let mutable target = value
-        member this.Value with get() = value and set(v) = value <- v
-        member this.Target with get() = target and set(t) = target <- t
-        member this.Snap() = value <- target
-        override this.Update(elapsedTime) = value <- lerp (MathF.Pow(0.994f, float32 elapsedTime)) target value; false
+        let mutable time = 0.0
+
+        member this.Value 
+            with get() = if time > 0.0 then value else target
+            and set(v) = value <- v; time <- 2000.0
+
+        member this.Target 
+            with get() = target
+            and set(t) = target <- t; time <- 2000.0
+
+        override this.Update(elapsedTime) = 
+            if time > 0.0 then
+                value <- lerp (MathF.Pow(0.994f, float32 elapsedTime)) target value
+                time <- time - elapsedTime
+
+        override this.Complete = time <= 0.0
+
+        member this.Snap() = value <- target; time <- 0.0
 
     type Color(color : Drawing.Color) =
         inherit Animation()
@@ -38,10 +53,9 @@ module Animation =
         member this.GetColor() = Color.FromArgb(255, int r.Value, int g.Value, int b.Value)    
 
         override this.Update(t) =
-            r.Update t |> ignore
-            g.Update t |> ignore
-            b.Update t |> ignore
-            false
+            r.Update t; g.Update t; b.Update t
+
+        override this.Complete = false
     
     type Counter(milliseconds) =
         inherit Animation()
@@ -52,7 +66,7 @@ module Animation =
             while elapsed >= milliseconds do
                 elapsed <- elapsed - milliseconds
                 loops <- loops + 1
-            false
+        override this.Complete = false
         member this.Time = elapsed
         member this.Loops = loops
 
@@ -60,20 +74,20 @@ module Animation =
 
     type Action(action) =
         inherit Animation()
-        override this.Update(_) = action(); true
+        override this.Update(_) = action()
+        override this.Complete = true
 
     type Delay(milliseconds) =
         inherit Animation()
         let mutable elapsed = 0.0
-        let mutable milliseconds = milliseconds
         let mutable frameskip = false
         member this.Elapsed = elapsed
         member this.FrameSkip() = frameskip <- true
-        member this.ChangeLength(ms) = milliseconds <- ms
         member this.Reset() = elapsed <- 0.0
         override this.Update(elapsedMillis) =
             if frameskip then frameskip <- false else elapsed <- elapsed + elapsedMillis
-            elapsed >= milliseconds
+        
+        override this.Complete = elapsed >= milliseconds
 
     // COMPOSING ANIMATIONS
 
@@ -81,35 +95,29 @@ module Animation =
         inherit Animation()
         let mutable animations = []
         member this.Add(a: Animation) = lock(this) (fun () -> animations <- a :: animations)
-        member this.Complete = animations.IsEmpty
+        override this.Complete = animations.IsEmpty
         override this.Update(elapsed) =
-            let rec filterBackwards (pred: 'T -> bool) (xs: 'T list) =
+            let rec loop (xs: Animation list) =
                 match xs with
                 | [] -> []
-                | x :: xs ->
-                    let f = filterBackwards pred xs
-                    if pred x then x :: f else f
-            if this.Complete then true
-            else lock(this) (fun () -> animations <- filterBackwards (fun (a: Animation) -> a.Update(elapsed) |> not) animations); this.Complete
+                | x :: xs -> let f = loop xs in x.Update elapsed; if x.Complete then f else x :: f
+            if not this.Complete then
+                lock(this) (fun () -> animations <- loop animations)
         
     type Sequence() =
         inherit Animation()
         let animations: Queue<Animation> = new Queue<Animation>()
         member this.Add(a: Animation) = animations.Enqueue(a)
-        member this.Complete = animations.Count = 0
+        override this.Complete = animations.Count = 0
         override this.Update(elapsed) =
             if animations.Count > 0 then
                 let a = animations.Peek()
-                if a.Update(elapsed) then animations.Dequeue() |> ignore
-            this.Complete
+                a.Update elapsed
+                if a.Complete then animations.Dequeue() |> ignore
 
-type Animation with
-    static member Fork([<ParamArray>] xs: Animation array) =
-        let g = Animation.Group()
-        for a in xs do g.Add(a)
+    let fork xs = 
+        let g = Group()
+        for a in xs do g.Add a
         g
 
-    static member Serial([<ParamArray>] xs: Animation array) =
-        let s = Animation.Sequence()
-        for a in xs do s.Add(a)
-        s
+    // todo: serial computation expression
