@@ -19,7 +19,8 @@ type TopLevel() =
         ScrollContainer.Flow(fc, Position = Position.Box(0.4f, 0.4f, 200.0f, 500.0f))
 
     override this.Draw() =
-        Text.draw(Style.baseFont, "Hello world", 30.0f, 100.0f, 100.0f, System.Drawing.Color.White)
+        let (frames, ticks) = Render.FPS
+        Text.draw(Style.baseFont, sprintf "FPS: %i in %.3f seconds" frames (float ticks / 10_000_000.0), 30.0f, 100.0f, 100.0f, System.Drawing.Color.White)
         comp.Draw()
 
         let x = 600.0f + 200.0f * (System.Math.Cos(time / 500.0) |> float32)

@@ -95,6 +95,9 @@ module FBO =
 
 module Render =
 
+    /// Frames drawn * Ticks taken to draw them (10 million ticks = 1 second)
+    let mutable FPS : int * int64 = (0, 0L)
+
     let start() = 
         GL.Clear(ClearBufferMask.ColorBufferBit)
         Batch.start()

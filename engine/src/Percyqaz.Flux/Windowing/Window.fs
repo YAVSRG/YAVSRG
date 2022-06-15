@@ -9,7 +9,6 @@ open OpenTK.Windowing.Common
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 

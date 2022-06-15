@@ -16,7 +16,7 @@ let main argv =
     Logging.Info("Launching flux-tests, " + DateTime.Now.ToString())
     let window =
         try
-            Some (new Window({ Config.Default with WindowMode = Setting.simple WindowType.Windowed }, "Percyqaz.Flux.Tests", TopLevel()))
+            Some (new Window({ Config.Default with WindowMode = Setting.simple WindowType.Windowed; FrameLimit = Setting.simple FrameLimit.Unlimited }, "Percyqaz.Flux.Tests", TopLevel()))
         with err -> Logging.Critical("Flux failed to launch", err); Console.ReadLine() |> ignore; None
     if (window.IsSome) then
         let mutable crashed = false

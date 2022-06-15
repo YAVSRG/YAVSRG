@@ -16,7 +16,8 @@ open Percyqaz.Flux.UI
 type RenderThread(window: NativeWindow, root: Root) =
     
     let mutable resized = false
-    let mutable renderFrequency = 0.0
+    let mutable fps_count = 0
+    let fps_timer = Stopwatch()
     let frame_timer = Stopwatch()
     member val RenderFrequency = 0.0 with get, set
 
@@ -27,6 +28,7 @@ type RenderThread(window: NativeWindow, root: Root) =
     member private this.Loop() =
         window.Context.MakeCurrent()
         this.Init()
+        fps_timer.Start()
         while not (GLFW.WindowShouldClose window.WindowPtr) do
             let timeUntilNextFrame = this.DispatchFrame()
             if timeUntilNextFrame > 0.0 then Thread.Sleep(Math.Floor(timeUntilNextFrame * 1000.0) |> int)
@@ -36,7 +38,7 @@ type RenderThread(window: NativeWindow, root: Root) =
         
     member this.DispatchFrame() =
 
-        let frameTime = if renderFrequency = 0.0 then 0.0 else 1.0 / renderFrequency
+        let frameTime = if this.RenderFrequency = 0.0 then 0.0 else 1.0 / this.RenderFrequency
         let elapsedTime = frame_timer.Elapsed.TotalMilliseconds
         frame_timer.Restart()
         
@@ -56,7 +58,14 @@ type RenderThread(window: NativeWindow, root: Root) =
         window.Context.SwapBuffers()
         
         // Timing
-        if renderFrequency = 0.0 then 0.0 else frameTime - frame_timer.Elapsed.TotalSeconds
+        fps_count <- fps_count + 1
+        let time = fps_timer.ElapsedTicks
+        if time > 10_000_000L then
+            Render.FPS <- (fps_count, time)
+            fps_timer.Restart()
+            fps_count <- 0
+
+        if this.RenderFrequency = 0.0 then 0.0 else frameTime - frame_timer.Elapsed.TotalSeconds
 
     member this.Init() =
         Render.init()
