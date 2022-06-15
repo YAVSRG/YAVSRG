@@ -19,7 +19,6 @@ type Widget(nodeType) =
     member val VisibleBounds = Rect.ZERO with get, set
 
     abstract member Position : Position with set
-
     abstract member Update : float * bool -> unit
 
     abstract member Draw : unit -> unit

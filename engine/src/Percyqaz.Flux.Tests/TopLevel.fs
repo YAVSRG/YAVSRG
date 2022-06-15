@@ -23,10 +23,10 @@ type TopLevel() =
         comp.Draw()
 
         let x = 600.0f + 200.0f * (System.Math.Cos(time / 500.0) |> float32)
-        Draw.rect (Rect.Box(x, 600.0f, 100.0f, 100.0f)) System.Drawing.Color.Yellow Sprite.Default
+        Draw.rect (Rect.Box(x, 600.0f, 100.0f, 100.0f)) System.Drawing.Color.Yellow
 
         let x, y = Mouse.pos()
-        Draw.rect (Rect.Box(x, y, 5.0f, 5.0f)) System.Drawing.Color.White Sprite.Default 
+        Draw.rect (Rect.Box(x, y, 5.0f, 5.0f)) System.Drawing.Color.White
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)

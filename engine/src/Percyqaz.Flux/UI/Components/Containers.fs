@@ -185,7 +185,7 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
 
     override this.Draw() = 
         Stencil.create(false)
-        Draw.rect this.Bounds Color.Transparent Sprite.Default
+        Draw.rect this.Bounds Color.Transparent
         Stencil.draw()
         child.Draw()
         Stencil.finish()

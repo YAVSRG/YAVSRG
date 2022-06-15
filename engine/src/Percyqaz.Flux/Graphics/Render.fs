@@ -159,4 +159,6 @@ module Draw =
         Batch.vertex p3 u3 c3 s.TextureUnit
         Batch.vertex p4 u4 c4 s.TextureUnit
         
-    let rect (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.gridUV(0, 0) s
+    let sprite (r: Rect) (c: Color) (s: Sprite) = quad <| Quad.ofRect r <| Quad.colorOf c <| Sprite.gridUV(0, 0) s
+
+    let rect (r: Rect) (c: Color) = sprite r c Sprite.Default

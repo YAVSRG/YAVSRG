@@ -63,4 +63,27 @@ type Image(sprite: Sprite) =
     
     member val Sprite = sprite with get, set
 
-    override this.Draw() = Draw.rect this.Bounds Color.White this.Sprite
+    override this.Draw() = Draw.sprite this.Bounds Color.White this.Sprite
+
+type Frame(nodeType) =
+    inherit StaticContainer(nodeType)
+
+    member val Fill = fun () -> Style.color(200, 0.5f, 0.3f) with get, set
+    member val Border = fun () -> Style.color(200, 0.5f, 0.3f) with get, set
+
+    override this.Draw() =
+        let border = this.Border()
+        if border.A > 0uy then
+
+            let r = this.Bounds.Expand Style.padding
+            Draw.rect (r.SliceLeft Style.padding) border
+            Draw.rect (r.SliceRight Style.padding) border
+
+            let r = this.Bounds.Expand (0.0f, Style.padding)
+            Draw.rect (r.SliceTop Style.padding) border
+            Draw.rect (r.SliceBottom Style.padding) border
+
+        let fill = this.Fill()
+        if fill.A > 0uy then
+            
+            Draw.rect base.Bounds fill

@@ -264,6 +264,7 @@ module Mouse =
     let RIGHT = MouseButton.Right
 
     let pos() = (Input.ThisFrame.mx, Input.ThisFrame.my)
+    let x() = fst (pos())
     let scroll() = let v = Input.ThisFrame.mz - Input.LastFrame.mz in Input.LastFrame.mz <- Input.ThisFrame.mz; v
 
     let private click b = Input.consumeOne(Mouse b, InputEvType.Press).IsSome
