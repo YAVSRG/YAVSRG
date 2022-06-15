@@ -10,7 +10,7 @@ module Style =
 
     let mutable padding = 5.0f
     let mutable baseFont = Unchecked.defaultof<SpriteFont>
-    let private accentColor = Animation.Color Color.Blue
+    let accentColor = Animation.Color Color.Blue
     let changePrimaryColor col = accentColor.SetColor col
 
     let text : unit -> Color * Color = K (Color.White, Color.Black)
@@ -30,13 +30,33 @@ module Style =
 
     let highlight (alpha, white) = color (alpha, 1.0f, white)
 
-type Style() =
-    
-    static member Color (alpha, brightness, white) =
-        fun () -> Style.color (alpha, brightness, white)
+type PaletteColor =
+    {
+        Alpha: int
+        Brightness: float32
+        White: float32
+    }
 
-    static member Color ((alpha, brightness, white), (alpha2, brightness2, white2), bind: Animation.Fade) =
-        fun () -> Style.color (
-            (lerp bind.Value alpha alpha2) * 255.0f |> int,
-            lerp bind.Value brightness brightness2,
-            lerp bind.Value white white2 )
+module Palette =
+    
+    let BLACK = { Alpha = 255; Brightness = 0f; White = 0f }
+    let WHITE = { Alpha = 255; Brightness = 0f; White = 1f }
+
+    let DARKER = { Alpha = 255; Brightness = 0.25f; White = 0.15f }
+    let DARK = { Alpha = 255; Brightness = 0.5f; White = 0.2f }
+    let BASE = { Alpha = 255; Brightness = 0.8f; White = 0.25f }
+    let LIGHT = { Alpha = 255; Brightness = 1.0f; White = 0.45f }
+    let LIGHTER = { Alpha = 255; Brightness = 1.0f; White = 0.7f }
+
+[<AutoOpen>]
+module PaletteOperators =
+
+    let (!%) (p: PaletteColor) =
+        if p = Palette.BLACK then K Color.Black
+        elif p = Palette.WHITE then K Color.White
+        else fun () -> Style.color (p.Alpha, p.Brightness, p.White)
+    
+    let (!*) (p: PaletteColor) =
+        if p = Palette.BLACK then Color.Black
+        elif p = Palette.WHITE then Color.White
+        else Style.color (p.Alpha, p.Brightness, p.White)

@@ -20,6 +20,7 @@ type Root() =
     override this.FocusTree = []
 
     override this.Update(elapsedTime, moved) =
+        Style.accentColor.Update(elapsedTime)
         if moved then
             this.Bounds <- Viewport.bounds
             this.VisibleBounds <- Viewport.bounds

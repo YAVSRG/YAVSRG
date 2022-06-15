@@ -26,6 +26,18 @@ type TopLevel() =
         let x = 600.0f + 200.0f * (System.Math.Cos(time / 500.0) |> float32)
         Draw.rect (Rect.Box(x, 600.0f, 100.0f, 100.0f)) System.Drawing.Color.Yellow
 
+        let cols = [Palette.DARKER; Palette.DARK; Palette.BASE; Palette.LIGHT; Palette.LIGHTER]
+        let mutable r = Rect.Box(100.0f, 100.0f, 200.0f, 200.0f)
+        for p,q in List.pairwise cols do
+            Draw.rect r !*p
+            Draw.rect (r.Shrink 10.0f) !*q
+            r <- r.Translate(200.0f, 0.0f)
+        let mutable r = Rect.Box(100.0f, 300.0f, 200.0f, 200.0f)
+        for p,q in List.pairwise (List.rev cols) do
+            Draw.rect r !*p
+            Draw.rect (r.Shrink 10.0f) !*q
+            r <- r.Translate(200.0f, 0.0f)
+
         let x, y = Mouse.pos()
         Draw.rect (Rect.Box(x, y, 5.0f, 5.0f)) System.Drawing.Color.White
 
@@ -42,4 +54,5 @@ type TopLevel() =
         base.Init()
         Style.baseFont <- Fonts.create "Inconsolata"
         Style.baseFont.SpaceWidth <- Style.baseFont.SpaceWidth * 2.0f
+        Style.changePrimaryColor (System.Drawing.Color.Maroon)
         comp.Init this
