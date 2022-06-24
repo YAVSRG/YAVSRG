@@ -49,5 +49,5 @@ type Config =
             Resolution = Setting.simple (Custom (1024, 768))
             FrameLimit = Setting.simple FrameLimit.``480``
             Display = Setting.simple 0
-            AudioDevice = Setting.simple 1
+            AudioDevice = Setting.simple -1
         }

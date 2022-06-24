@@ -144,12 +144,12 @@ module Devices =
         updateWaveform()
         Track.update()
 
-    let mutable defaultDevice = -1
-    let mutable devices = [||]
+    let mutable private defaultDevice = -1
+    let mutable private devices = [||]
 
     let changeVolume(newVolume) = Bass.GlobalStreamVolume <- int (newVolume * 8000.0) |> max 0
 
-    let private getDevices() =
+    let private get() =
         devices <-
             seq {
                 for i in 1 .. Bass.DeviceCount - 1 do
@@ -159,15 +159,22 @@ module Devices =
                         yield i, info.Name
             } |> Array.ofSeq
 
-    let changeDevice(id: int) =
+    let list() =
+        seq {
+            yield -1, "Default"
+            yield! devices
+        }
+
+    let change(index: int) =
+        let id = if index = -1 then defaultDevice else fst devices.[index]
         try 
             Bass.CurrentDevice <- id
             Bass.ChannelSetDevice(Track.nowplaying.ID, id) |> bassError
-        with err -> Logging.Error(sprintf "Error switching to audio output %i" id, err)
+        with err -> Logging.Error(sprintf "Error switching to audio output %i (id %i)" index id, err)
 
-    let init(deviceId: int) =
-        getDevices()
+    let init(device_index: int) =
+        get()
         for (i, name) in devices do
             Bass.Init i |> bassError
-        changeDevice deviceId
+        change device_index
         Bass.GlobalStreamVolume <- 0
