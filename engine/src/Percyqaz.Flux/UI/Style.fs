@@ -36,17 +36,33 @@ type PaletteColor =
         Brightness: float32
         White: float32
     }
+    member this.Lerp (other: PaletteColor) (amount: float32) =
+        { 
+            Alpha = lerp amount (float32 this.Alpha) (float32 other.Alpha) |> int
+            Brightness = lerp amount this.Brightness other.Brightness
+            White = lerp amount this.White other.White
+        }
 
 module Palette =
     
     let BLACK = { Alpha = 255; Brightness = 0f; White = 0f }
-    let WHITE = { Alpha = 255; Brightness = 0f; White = 1f }
+    let WHITE = { Alpha = 255; Brightness = 1f; White = 1f }
 
     let DARKER = { Alpha = 255; Brightness = 0.25f; White = 0.15f }
     let DARK = { Alpha = 255; Brightness = 0.5f; White = 0.2f }
     let BASE = { Alpha = 255; Brightness = 0.8f; White = 0.25f }
     let LIGHT = { Alpha = 255; Brightness = 1.0f; White = 0.45f }
     let LIGHTER = { Alpha = 255; Brightness = 1.0f; White = 0.7f }
+
+    let transition (f: Animation.Fade) (a: PaletteColor) (b: PaletteColor) =
+        fun () -> 
+            let p = a.Lerp b f.Value
+            Style.color (p.Alpha, p.Brightness, p.White)
+
+    let text_transition (f: Animation.Fade) (a: PaletteColor) (b: PaletteColor) =
+        fun () -> 
+            let p = a.Lerp b f.Value
+            Style.color (p.Alpha, p.Brightness, p.White), Color.Black
 
 [<AutoOpen>]
 module PaletteOperators =
@@ -60,3 +76,6 @@ module PaletteOperators =
         if p = Palette.BLACK then Color.Black
         elif p = Palette.WHITE then Color.White
         else Style.color (p.Alpha, p.Brightness, p.White)
+    
+    let (!^) (p: PaletteColor) =
+        fun () -> Style.color (p.Alpha, p.Brightness, p.White), Color.Black

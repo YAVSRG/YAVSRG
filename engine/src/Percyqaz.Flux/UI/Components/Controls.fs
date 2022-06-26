@@ -10,8 +10,9 @@ open Percyqaz.Flux.Input
 type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
     inherit StaticContainer(NodeType.Leaf)
 
-    let color = Animation.Fade(0.5f)
+    let color = Animation.Fade(0.0f)
     let ticker = Animation.Counter(600.0)
+    let colorFunc = Palette.text_transition color Palette.LIGHT Palette.WHITE
 
     let toggle() = if this.Selected then this.Focus() else this.Select()
 
@@ -20,7 +21,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
         |+ Text(
             (fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else ""),
             Align = Alignment.LEFT, 
-            Color = fun () -> (Style.highlight(255, color.Value), Color.Black))
+            Color = colorFunc)
         |+ Clickable(this.Select, OnHover = fun b -> if b && not this.Focused then this.Focus())
         |* HotkeyAction(hotkey, toggle)
 
@@ -31,12 +32,12 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
 
     override this.OnDeselected() =
         base.OnDeselected()
-        color.Target <- 0.8f
+        color.Target <- 0.5f
         Input.removeInputMethod()
     
-    override this.OnFocus() = base.OnFocus(); color.Target <- 0.8f
+    override this.OnFocus() = base.OnFocus(); color.Target <- 0.5f
 
-    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.5f
+    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.0f
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
@@ -47,7 +48,8 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
     inherit StaticContainer(NodeType.Leaf)
 
     let TEXTWIDTH = 130.0f
-    let color = Animation.Fade 0.5f
+    let color = Animation.Fade 0.0f
+    let colorFunc = Palette.transition color Palette.LIGHT Palette.LIGHTER
     let mutable dragging = false
         
     let get_percent () =
@@ -59,14 +61,13 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
     let set_percent (v: float32) =
         let (Setting.Bounds (lo, hi)) = setting.Config
         let (lo, hi) = (Convert.ToSingle lo, Convert.ToSingle hi)
-        setting.Value <- Convert.ChangeType((hi - lo) * v + lo, typeof<'T>) :?> 'T
+        setting.Value <- Convert.ChangeType(MathF.Round((hi - lo) * v + lo, 2), typeof<'T>) :?> 'T
 
     let add_percent v = set_percent (get_percent () + v)
     do
         this
         |+ Text(
             (fun () -> this.Format setting.Value),
-            Color = K (Color.White, Color.Black),
             Align = Alignment.LEFT,
             Position = { Position.Default with Right = 0.0f %+ TEXTWIDTH })
         |* Clickable(
@@ -78,10 +79,10 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
 
     static member Percent(setting, incr) = Slider<float>(setting, incr, Format = fun x -> sprintf "%.0f%%" (x * 100.0))
 
-    override this.OnSelected() = base.OnSelected(); color.Target <- 0.9f
-    override this.OnDeselected() = base.OnDeselected(); color.Target <- 0.8f
-    override this.OnFocus() = base.OnFocus(); color.Target <- 0.8f
-    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.5f
+    override this.OnSelected() = base.OnSelected(); color.Target <- 1.0f
+    override this.OnDeselected() = base.OnDeselected(); color.Target <- 0.5f
+    override this.OnFocus() = base.OnFocus(); color.Target <- 0.5f
+    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.0f
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -106,11 +107,10 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
         let bounds = this.Bounds.TrimLeft TEXTWIDTH
 
         let cursor_x = bounds.Left + bounds.Width * v
-        let cursor = Rect.Create(cursor_x, bounds.Top, cursor_x, bounds.Bottom).Expand(10.0f, -10.0f)
-        let m = bounds.CenterY
-        Draw.rect (Rect.Create(cursor_x, (m - 10.0f), bounds.Right, (m + 10.0f))) (Style.color(100, 1.0f, 0.0f))
-        Draw.rect (Rect.Create(bounds.Left, (m - 10.0f), cursor_x, (m + 10.0f))) (Style.color(255, 1.0f, color.Value))
-        Draw.rect cursor (Style.color(255, 1.0f, color.Value))
+        let cursor = Rect.Create(cursor_x, bounds.Top, cursor_x, bounds.Bottom).Expand(10.0f, 5.0f)
+        Draw.rect (Rect.Create(cursor_x, (bounds.Top + 10.0f), bounds.Right, (bounds.Bottom - 10.0f))) (!*Palette.BASE)
+        Draw.rect (Rect.Create(bounds.Left, (bounds.Top + 10.0f), cursor_x, (bounds.Bottom - 10.0f))) (colorFunc())
+        Draw.rect cursor (!*Palette.LIGHTER)
         base.Draw()
 
 type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =

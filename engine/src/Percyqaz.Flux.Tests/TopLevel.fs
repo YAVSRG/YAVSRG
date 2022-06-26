@@ -12,16 +12,20 @@ type TopLevel() =
 
     let bind = Bind.mk OpenTK.Windowing.GraphicsLibraryFramework.Keys.A
 
+    let setting = Setting.bounded 5f 0f 10f
+
     let fc = FlowContainer.Vertical(30.0f)
     let comp = 
         for t in List.init 100 (sprintf "%s Hello %i" Percyqaz.Flux.Resources.Feather.award) do
             fc.Add( TextEntry (Setting.simple t, "none") )
         ScrollContainer.Flow(fc, Position = Position.Box(0.4f, 0.4f, 200.0f, 500.0f))
+    let slider = Slider<float32>(setting, 0.1f, Position = Position.Box(0.3f, 0.8f, 300.0f, 60.0f))
 
     override this.Draw() =
         let (frames, ticks) = Render.FPS
         Text.draw(Style.baseFont, sprintf "FPS: %i in %.3f seconds" frames (float ticks / 10_000_000.0), 30.0f, 100.0f, 100.0f, System.Drawing.Color.White)
         comp.Draw()
+        slider.Draw()
 
         let x = 600.0f + 200.0f * (System.Math.Cos(time / 500.0) |> float32)
         Draw.rect (Rect.Box(x, 600.0f, 100.0f, 100.0f)) System.Drawing.Color.Yellow
@@ -43,6 +47,7 @@ type TopLevel() =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
+        slider.Update(elapsedTime, moved)
         comp.Update(elapsedTime, moved)
         time <- time + elapsedTime
         if bind.Tapped() then
@@ -56,3 +61,4 @@ type TopLevel() =
         Style.baseFont.SpaceWidth <- Style.baseFont.SpaceWidth * 2.0f
         Style.changePrimaryColor (System.Drawing.Color.Maroon)
         comp.Init this
+        slider.Init this
