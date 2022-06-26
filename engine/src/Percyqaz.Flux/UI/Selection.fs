@@ -1,5 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
+open Percyqaz.Flux.Input
+
 [<AbstractClass>]
 type ISelection(nt: NodeType) =
 
@@ -85,7 +87,6 @@ module Selection =
         | NodeType.Leaf -> select_tree item.FocusTree
         | NodeType.Switch f -> select_tree (f().FocusTree)
 
-    // Is this even a thing? Maybe the container should be responsible for being moved up to
     let rec up() =
         if selected then
             focus_tree focusTree
@@ -103,3 +104,64 @@ module Selection =
                     | NodeType.Leaf -> ()
                     | NodeType.Switch _ -> up()
                 | None -> ()
+
+type DragAndDropEvent<'T> =
+    {
+        Origin: float32 * float32
+        Target: float32 * float32
+        Payload: 'T
+    }
+
+type IDropzone<'T> =
+    abstract member Drop : DragAndDropEvent<'T> -> unit
+
+type DragAndDropAction<'T>(payload: 'T) =
+    let origin = Mouse.pos()
+
+    let mutable _acceptor : IDropzone<'T> option = None
+
+    member this.Accept(acceptor: IDropzone<'T>) =
+        _acceptor <- Some acceptor
+
+    member this.Unaccept(acceptor: IDropzone<'T>) =
+        if _acceptor.IsSome && _acceptor.Value = acceptor then _acceptor <- None
+
+    member this.Drop() =
+        match _acceptor with
+        | Some a ->
+            let target = Mouse.pos() 
+            a.Drop { Origin = origin; Target = target; Payload = payload }
+        | None -> ()
+
+module DragAndDrop =
+    
+    let mutable private ref : DragAndDropAction<obj> option = None
+    let mutable private ty : System.Type = null
+
+    let drag(payload: 'T) =
+        match ref with
+        | Some r -> ()
+        | None -> 
+            let action = DragAndDropAction payload
+            ref <- Some(unbox action : DragAndDropAction<obj>)
+            ty <- typeof<'T>
+
+    let drop() =
+        match ref with
+        | Some r -> r.Drop()
+        | None -> ()
+
+    let accept<'T>(zone: IDropzone<'T>) =
+        match ref with
+        | Some r when typeof<'T> = ty -> (unbox r : DragAndDropAction<'T>).Accept(zone)
+        | _ -> ()
+
+    let unaccept<'T>(zone: IDropzone<'T>) =
+        match ref with
+        | Some r when typeof<'T> = ty -> (unbox r : DragAndDropAction<'T>).Unaccept(zone)
+        | _ -> ()
+
+    let current<'T>() =
+        match ref with
+        | Some r when typeof<'T> = ty -> Some(unbox r : DragAndDropAction<'T>)
+        | _ -> None

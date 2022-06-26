@@ -121,7 +121,7 @@ module Render =
 
         Shader.setUniformMat4 ("uProjection", createProjection true) Shader.main
 
-        bounds <- Rect.Box(0.0f, 0.0f, vwidth, vheight).Expand(1.0f)
+        bounds <- Rect.Box(0.0f, 0.0f, vwidth, vheight)
 
         FBO.init()
 

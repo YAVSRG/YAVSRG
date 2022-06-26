@@ -90,8 +90,6 @@ type Window(config: Config, title: string, root: Root) as this =
     member this.Run() =
         this.OnLoad()
         this.OnResize(ResizeEventArgs(this.Size))
-
-        Logging.Debug "Starting window main thread"
         
         this.Context.MakeNoneCurrent()
         renderThread.Start()

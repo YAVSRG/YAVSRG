@@ -48,7 +48,7 @@ type RenderThread(window: NativeWindow, root: Root) =
         root.Update (elapsedTime, resized)
         resized <- false
         Input.finish_frame_events()
-        Track.update()
+        Song.update()
         if root.ShouldExit then window.Close()
         
         // Draw

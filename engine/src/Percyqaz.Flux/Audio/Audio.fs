@@ -9,7 +9,7 @@ open Percyqaz.Common
 module private Helpers =
     let bassError b = () //if b then () else Logging.Debug("Bass Error: " + Bass.LastError.ToString()) System.Environment.StackTrace
 
-type Track =
+type Song =
     {
         Path: string
         ID: int
@@ -22,7 +22,7 @@ type Track =
         let ID = Bass.CreateStream(file, 0L, 0L, BassFlags.Prescan)
         if ID = 0 then 
             Logging.Error("Couldn't load audio track from " + file, Bass.LastError)
-            Track.Default
+            Song.Default
         else
             let d = Bass.ChannelGetInfo ID
             let Duration = Bass.ChannelBytes2Seconds(ID, Bass.ChannelGetLength ID) * 1000.0
@@ -32,23 +32,24 @@ type Track =
     member this.Dispose() = Bass.StreamFree this.ID |> bassError
 
 [<RequireQualifiedAccess>]
-type TrackFinishAction =
+type SongFinishAction =
     | Loop
     | Wait
+    | Stop
     | Callback of (unit -> unit)
 
-module Track = 
+module Song = 
 
     let LEADIN_TIME = 2000.0f<ms>
     
-    let mutable nowplaying: Track = Track.Default
+    let mutable nowplaying : Song = Song.Default
     let private timer = new Stopwatch()
     let mutable private timerStart = 0.0f<ms>
     let mutable private channelPlaying = false
     let mutable private rate = 1.0f
     let mutable private localOffset = 0.0f<ms>
     let mutable private globalOffset = 0.0f<ms>
-    let mutable onFinish = TrackFinishAction.Wait
+    let mutable onFinish = SongFinishAction.Wait
 
     let audioDuration() = nowplaying.Duration
 
@@ -60,17 +61,22 @@ module Track =
 
     let playFrom(time) =
         timerStart <- time
-        if (time > 0.0f<ms> && time < audioDuration()) then
+        if (time >= 0.0f<ms> && time < audioDuration()) then
             channelPlaying <- true
             Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
-            let actualTime = float32 (Bass.ChannelBytes2Seconds(nowplaying.ID, Bass.ChannelGetPosition nowplaying.ID) * 1000.0) * 1.0f<ms>
-            if actualTime - time > 0.5f<ms> then
-                Logging.Debug(sprintf "Discrepancy seek to pos: %f actual time: %f" time actualTime)
             Bass.ChannelPlay nowplaying.ID |> bassError
         else if channelPlaying then
             Bass.ChannelStop nowplaying.ID |> bassError
             channelPlaying <- false
         timer.Restart()
+
+    let seek(time) =
+        if (time >= 0.0f<ms> && time < audioDuration()) then
+            if playing() then playFrom time
+            else
+                Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
+                timer.Reset()
+                timerStart <- time
 
     let playLeadIn() = playFrom(-LEADIN_TIME * rate)
 
@@ -98,7 +104,7 @@ module Track =
             if nowplaying.ID <> 0 then
                 nowplaying.Dispose()
             channelPlaying <- false
-            nowplaying <- Track.FromFile path
+            nowplaying <- Song.FromFile path
         changeLocalOffset offset
         changeRate rate
         isDifferentFile
@@ -106,16 +112,17 @@ module Track =
     let update() =
 
         let t = time()
-        if (t > 0.0f<ms> && t < nowplaying.Duration && not channelPlaying) then
+        if (t >= 0.0f<ms> && t < nowplaying.Duration && not channelPlaying) then
             channelPlaying <- true
             Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| t / 1000.0f<ms>)) |> bassError
             Bass.ChannelPlay nowplaying.ID |> bassError
         elif t > nowplaying.Duration then
             channelPlaying <- false
             match onFinish with
-            | TrackFinishAction.Loop -> playFrom 0.0f<ms>
-            | TrackFinishAction.Wait -> ()
-            | TrackFinishAction.Callback f -> f()
+            | SongFinishAction.Loop -> playFrom 0.0f<ms>
+            | SongFinishAction.Wait -> ()
+            | SongFinishAction.Stop -> pause()
+            | SongFinishAction.Callback f -> f()
 
 module Devices =
 
@@ -123,8 +130,8 @@ module Devices =
     let waveForm: float32 array = Array.zeroCreate 256
 
     let private updateWaveform() =
-        if Track.playing() then
-            Bass.ChannelGetData(Track.nowplaying.ID, fft, int DataFlags.FFT2048) |> ignore
+        if Song.playing() then
+            Bass.ChannelGetData(Song.nowplaying.ID, fft, int DataFlags.FFT2048) |> ignore
             //algorithm adapted from here
             //https://www.codeproject.com/Articles/797537/Making-an-Audio-Spectrum-analyzer-with-Bass-dll-Cs
             let mutable b0 = 0
@@ -142,7 +149,7 @@ module Devices =
 
     let update() =
         updateWaveform()
-        Track.update()
+        Song.update()
 
     let mutable private defaultDevice = -1
     let mutable private devices = [||]
@@ -169,7 +176,7 @@ module Devices =
         let id = if index = -1 then defaultDevice else fst devices.[index]
         try 
             Bass.CurrentDevice <- id
-            Bass.ChannelSetDevice(Track.nowplaying.ID, id) |> bassError
+            Bass.ChannelSetDevice(Song.nowplaying.ID, id) |> bassError
         with err -> Logging.Error(sprintf "Error switching to audio output %i (id %i)" index id, err)
 
     let init(device_index: int) =

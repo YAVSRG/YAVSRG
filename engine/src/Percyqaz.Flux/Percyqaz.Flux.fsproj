@@ -29,10 +29,12 @@
     <Compile Include="UI\Components\Primitives.fs" />
     <Compile Include="UI\Components\Containers.fs" />
     <Compile Include="UI\Components\Controls.fs" />
+    <Compile Include="UI\Components\Buttons.fs" />
     <Compile Include="UI\Root.fs" />
     <Compile Include="Windowing\Config.fs" />
     <Compile Include="Windowing\RenderThread.fs" />
     <Compile Include="Windowing\Window.fs" />
+    <Compile Include="Launch.fs" />
   </ItemGroup>
 
   <ItemGroup>

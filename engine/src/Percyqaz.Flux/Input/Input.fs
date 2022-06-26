@@ -182,7 +182,7 @@ module Input =
 
     let poll(keyboard: KeyboardState, mouse: MouseState) =
         let add x = if sinceLastTyped.ElapsedMilliseconds > 50l then lock lockObj (fun () -> events_buffer <- List.append events_buffer [x])
-        let now = Track.timeWithOffset()
+        let now = Song.timeWithOffset()
 
         let ctrl = keyboard.IsKeyDown Keys.LeftControl || keyboard.IsKeyDown Keys.RightControl
         let shift = keyboard.IsKeyDown Keys.LeftShift || keyboard.IsKeyDown Keys.RightShift

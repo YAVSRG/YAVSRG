@@ -7,7 +7,7 @@ open Percyqaz.Flux.Resources
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 
-type TextEntry(setting: Setting<string>, bind: Hotkey) as this =
+type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
     inherit StaticContainer(NodeType.Leaf)
 
     let color = Animation.Fade(0.5f)
@@ -22,7 +22,7 @@ type TextEntry(setting: Setting<string>, bind: Hotkey) as this =
             Align = Alignment.LEFT, 
             Color = fun () -> (Style.highlight(255, color.Value), Color.Black))
         |+ Clickable(this.Select, OnHover = fun b -> if b && not this.Focused then this.Focus())
-        |* HotkeyAction(bind, toggle)
+        |* HotkeyAction(hotkey, toggle)
 
     override this.OnSelected() =
         base.OnSelected()
