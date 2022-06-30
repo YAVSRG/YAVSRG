@@ -371,7 +371,7 @@ type CustomScoring(config: Ruleset, keys, replay, notes, rate) =
                         Release {| Judgement = Some judgement; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
 
                     | HoldNoteBehaviour.JustBreakCombo ->
-                        if missed || dropped then this.State.BreakCombo true else this.State.IncrCombo()
+                        if (not overhold) && (missed || dropped) then this.State.BreakCombo true else this.State.IncrCombo()
                         Release {| Judgement = None; Missed = missed; Delta = delta; Overhold = overhold; Dropped = dropped |}
 
                     | HoldNoteBehaviour.JudgeReleases d -> 
