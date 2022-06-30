@@ -73,7 +73,7 @@ module Sprite =
         upload (img, 1, 1, false)
         |> cache "BLANK"
 
-    let DefaultQuad : SpriteQuad = struct (Default, Quad.ofRect Rect.one)
+    let DefaultQuad : SpriteQuad = struct (Default, Quad.ofRect Rect.ONE)
 
     let destroy (sprite: Sprite) =
         texUnit_inUse.[sprite.TextureUnit] <- false
@@ -82,9 +82,9 @@ module Sprite =
     let gridUV (x, y) (sprite: Sprite) =
         let x = float32 x
         let y = float32 y
-        let sx = 1.f / float32 sprite.Columns
-        let sy = 1.f / float32 sprite.Rows
-        Rect.create <| x * sx <| y * sy <| (x + 1.f) * sx <| (y + 1.f) * sy
+        let sx = 1.0f / float32 sprite.Columns
+        let sy = 1.0f / float32 sprite.Rows
+        Rect.Create( x * sx, y * sy, (x + 1.f) * sx, (y + 1.f) * sy )
         |> Quad.ofRect
         |> sprite.WithUV
 
@@ -98,4 +98,4 @@ module Sprite =
         let height = float32 sprite.Height / float32 sprite.Width * width * yMult
         let left = xOrigin - xOffset * width
         let top = yOrigin - yOffset * height
-        Rect.create left top (left + width) (top + height)
+        Rect.Box(left, top, width, height)

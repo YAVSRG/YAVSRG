@@ -35,7 +35,7 @@ module Themes =
             fbo.Unbind()
 
             TextBox(K "PREVIEW", K (Color.White, Color.Black), 0.5f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 50.0f, 1.0f)
+                .Position { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 1.0f %+ 50.0f }
             |> this.Add
 
             let w = Render.vwidth * scale
@@ -82,8 +82,9 @@ module Themes =
                 (fun i k ->
                     let x = -60.0f * float32 k
                     let n = float32 i
-                    NoteColorPicker(g keycount.Value i)
-                    |> positionWidget(x + 120.0f * n, 0.5f, 0.0f, 0.0f, x + 120.0f * n + 120.0f, 0.5f, 0.0f, 1.0f))
+                    NoteColorPicker(g keycount.Value i).Position
+                        { Position.Default with Left = 0.5f %+ (x + 120.0f * n); Right = 0.5f %+ (x + 120.0f * n + 120.0f) }
+                )
         {
             Content = fun add ->
                 column [

@@ -10,18 +10,7 @@ open Interlude.Input
 open Interlude.Graphics
 open Interlude.UI
 
-[<AutoOpen>]
-module Position =
-    
-    let positionWidgetA(l, t, r, b) (w: Widget) : Widget =
-        w.Reposition(l, t, r, b)
-        w
-
-    let positionWidget(l, la, t, ta, r, ra, b, ba) (w: Widget) : Widget =
-        w.Reposition(l, la, t, ta, r, ra, b, ba)
-        w
-
-type TextBox(textFunc, color, just) =
+type TextBox (textFunc, color, just) =
     inherit Widget()
 
     new(textFunc, scolor, just) = TextBox(textFunc, (fun () -> scolor(), Color.Transparent), just)
@@ -53,7 +42,7 @@ type Bindable (bind: Hotkey, onPress) =
         if (!|bind).Tapped() then onPress()
         
         
-type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
+type Frame (fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
     inherit Widget()
         
     let BORDERWIDTH = 5.0f
@@ -69,17 +58,15 @@ type Frame(fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
     override this.Draw() =
         if frame then
             let c = frameColor()
-            let r = Rect.expand(BORDERWIDTH, BORDERWIDTH) this.Bounds
-            Draw.rect (Rect.sliceLeft BORDERWIDTH r) c Sprite.Default
-            Draw.rect (Rect.sliceRight BORDERWIDTH r) c Sprite.Default
-            let r = Rect.expand(0.0f, BORDERWIDTH) this.Bounds
-            Draw.rect (Rect.sliceTop BORDERWIDTH r) c Sprite.Default
-            Draw.rect (Rect.sliceBottom BORDERWIDTH r) c Sprite.Default
+            let r = this.Bounds.Expand BORDERWIDTH
+            Draw.rect (r.SliceLeft BORDERWIDTH) c Sprite.Default
+            Draw.rect (r.SliceRight BORDERWIDTH) c Sprite.Default
+            let r = this.Bounds.Expand(0.0f, BORDERWIDTH)
+            Draw.rect (r.SliceTop BORDERWIDTH) c Sprite.Default
+            Draw.rect (r.SliceBottom BORDERWIDTH) c Sprite.Default
         
         if fill then Draw.rect base.Bounds (fillColor()) Sprite.Default
         base.Draw()
         
     static member Create(w: Widget) =
-        let f = Frame()
-        f.Add(w)
-        f
+        Frame() |-+ w

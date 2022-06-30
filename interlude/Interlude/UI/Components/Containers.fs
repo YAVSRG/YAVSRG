@@ -7,6 +7,7 @@ open Interlude.Input
 open Interlude.Utils
 open Interlude.Graphics
 
+// TODO: flow container should be completely in charge of item positionings
 type FlowContainer() =
     inherit Widget()
     let mutable spacing = 10.0f
@@ -28,22 +29,28 @@ type FlowContainer() =
         c.Enabled <- filter c
         Option.iter (fun (comp: Comparison<Widget>) -> this.Children.Sort comp) sort
 
-    member private this.FlowContent(thisBounds) =
-        let mutable vBounds = thisBounds |> Rect.expand margin |> Rect.translate(0.0f, -scrollPos)
-        let struct (left, top, right, bottom) = thisBounds
-        let struct (_, t1, _, _) = vBounds
+    member private this.FlowContent(thisBounds: Rect) =
+        let mutable vBounds = thisBounds.Translate(0.0f, -scrollPos) // todo: margin
+        let t1 = vBounds.Top
         for c in this.Children do
             if c.Enabled then
                 let (la, ta, ra, ba) = c.Anchors
-                let struct (l, t, r, b) = vBounds
-                let struct (lb, tb, rb, bb) =
-                    if c.Initialised then Rect.createWH l t (Rect.width c.Bounds) (Rect.height c.Bounds)
-                    else Rect.create (la.Position(l, r)) (ta.Position(t, b)) (ra.Position(l, r)) (ba.Position(t, b))
+                let wBounds =
+                    if c.Initialised then Rect.Box(vBounds.Left, vBounds.Top, c.Bounds.Width, c.Bounds.Height)
+                    else Rect.Create(
+                            la.Position(vBounds.Left, vBounds.Right),
+                            ta.Position(vBounds.Top, vBounds.Bottom),
+                            ra.Position(vBounds.Left, vBounds.Right),
+                            ba.Position(vBounds.Top, vBounds.Bottom)
+                         )
+
                 let pos (a: AnchorPoint) = if c.Initialised then a.MoveRelative else a.RepositionRelative
-                pos la (left, right, lb); pos ta (top, bottom, tb); pos ra (left, right, rb); pos ba (top, bottom, bb)
-                vBounds <- Rect.translate(0.0f, bb - tb + spacing) vBounds
-        let struct (_, t2, _, _) = vBounds
-        contentSize <- t2 - t1
+                pos la (thisBounds.Left, thisBounds.Right, wBounds.Left)
+                pos ta (thisBounds.Top, thisBounds.Bottom, wBounds.Top)
+                pos ra (thisBounds.Left, thisBounds.Right, wBounds.Right)
+                pos ba (thisBounds.Top, thisBounds.Bottom, wBounds.Bottom)
+                vBounds <- vBounds.Translate(0.0f, wBounds.Height + spacing)
+        contentSize <- vBounds.Top - t1
 
     override this.Update(elapsedTime, bounds) =
         this.Animation.Update elapsedTime |> ignore
@@ -51,25 +58,21 @@ type FlowContainer() =
         this.FlowContent this.Bounds
         for c in this.Children do if c.Enabled then c.Update (elapsedTime, this.Bounds)
         if Mouse.Hover this.Bounds then scrollPos <- scrollPos - Mouse.Scroll() * 100.0f
-        scrollPos <- Math.Max(0.0f, Math.Min(scrollPos, contentSize - Rect.height this.Bounds))
+        scrollPos <- Math.Max(0.0f, Math.Min(scrollPos, contentSize - this.Bounds.Height))
 
     override this.Draw() =
         Stencil.create(false)
         Draw.rect this.Bounds Color.Transparent Sprite.Default
         Stencil.draw()
-        let struct (_, top, _, bottom) = this.Bounds
         for c in this.Children do
             if c.Initialised && c.Enabled then
-                let struct (_, t, _, b) = c.Bounds
-                if t < bottom && b > top then c.Draw()
+                if c.Bounds.Top < this.Bounds.Bottom && c.Bounds.Bottom > this.Bounds.Top then c.Draw()
         Stencil.finish()
 
     /// Scrolls so that w becomes visible. w is (mostly) expected to be a child of the container but sometimes is used for sneaky workarounds
     member this.ScrollTo(w: Widget) =
-        let struct (_, top, _, bottom) = this.Bounds
-        let struct (_, ctop, _, cbottom) = w.Bounds
-        if cbottom > bottom then scrollPos <- scrollPos + (cbottom - bottom)
-        elif ctop < top then scrollPos <- scrollPos - (top - ctop)
+        if w.Bounds.Bottom > this.Bounds.Bottom then scrollPos <- scrollPos + (w.Bounds.Bottom - this.Bounds.Bottom)
+        elif w.Bounds.Top < this.Bounds.Top then scrollPos <- scrollPos - (this.Bounds.Top - w.Bounds.Top)
 
 // provide the first tab when constructing
 type TabContainer(name: string, widget: Widget) as this =
@@ -85,7 +88,7 @@ type TabContainer(name: string, widget: Widget) as this =
 
     member this.AddTab(name, widget) =
         { new Button((fun () -> selected <- name; selectedItem <- widget), name) with member this.Dispose() = base.Dispose(); widget.Dispose() }
-        |> positionWidget(count * TABWIDTH, 0.0f, 0.0f, 0.0f, (count + 1.0f) * TABWIDTH, 0.0f, TABHEIGHT, 0.0f)
+            .Position (Position.Box(0.0f, 0.0f, count * TABWIDTH, 0.0f, TABWIDTH, TABHEIGHT))
         |> this.Add
         count <- count + 1.0f
 
@@ -95,4 +98,4 @@ type TabContainer(name: string, widget: Widget) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        selectedItem.Update(elapsedTime, Rect.trimTop TABHEIGHT this.Bounds)
+        selectedItem.Update(elapsedTime, this.Bounds.TrimTop TABHEIGHT)

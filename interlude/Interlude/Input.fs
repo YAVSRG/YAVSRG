@@ -220,7 +220,7 @@ module Mouse =
     let Released b = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
     let Moved() = Input.mousex <> Input.oldmousex || Input.mousey <> Input.oldmousey
 
-    let Hover(struct (l, t, r, b): Rect) = let x, y = X(), Y() in x > l && x < r && y > t && y < b
+    let Hover (r: Rect) = r.Contains(X(), Y())
 
 type Bind with
     member this.Pressed() =

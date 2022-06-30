@@ -113,7 +113,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         else None
     let graph = new ScoreGraph(scoreData)
 
-    let originalRulesets = Options.options.Rulesets.Value
+    let originalRulesets = options.Rulesets.Value
 
     let refresh() =
         pbs <- BestFlags.Default
@@ -132,63 +132,60 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
     do
         // banner text
-        new TextBox(K <| scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title, K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(20.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        TextBox(K <| scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title, K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f }
         |> this.Add
-        new TextBox(K <| scoreData.Chart.Header.DiffName, K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(20.0f, 0.0f, 90.0f, 0.0f, 0.0f, 1.0f, 145.0f, 0.0f)
+        TextBox(K <| scoreData.Chart.Header.DiffName, K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 145.0f }
         |> this.Add
-        new TextBox(K <| sprintf "From %s" scoreData.Chart.Header.SourcePack, K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(20.0f, 0.0f, 140.0f, 0.0f, 0.0f, 1.0f, 180.0f, 0.0f)
+        TextBox(K <| sprintf "From %s" scoreData.Chart.Header.SourcePack, K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 180.0f }
         |> this.Add
-        new TextBox(K <| scoreData.ScoreInfo.time.ToString(), K (Color.White, Color.Black), 1.0f)
-        |> positionWidget(0.0f, 0.0f, 90.0f, 0.0f, -20.0f, 1.0f, 150.0f, 0.0f)
+        TextBox(K <| scoreData.ScoreInfo.time.ToString(), K (Color.White, Color.Black), 1.0f)
+            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f }
         |> this.Add
 
         // graph & under graph
-        graph
-        |> positionWidget(20.0f, 0.0f, -270.0f, 1.0f, -20.0f, 1.0f, -70.0f, 1.0f)
+        graph.Position { Left = 0.0f %+ 20.0f; Top = 1.0f %- 270.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 70.0f }
         |> this.Add
 
-        new TextBox((fun () -> sprintf "Mean: %.1fms (%.1f - %.1fms)" eventCounts.Mean eventCounts.EarlyMean eventCounts.LateMean), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(20.0f, 0.0f, -65.0f, 1.0f, 620.0f, 0.0f, -15.0f, 1.0f)
+        TextBox((fun () -> sprintf "Mean: %.1fms (%.1f - %.1fms)" eventCounts.Mean eventCounts.EarlyMean eventCounts.LateMean), K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 20.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 620.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
-        new TextBox((fun () -> sprintf "Stdev: %.1fms" eventCounts.StandardDeviation), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(620.0f, 0.0f, -65.0f, 1.0f, 920.0f, 0.0f, -15.0f, 1.0f)
+        TextBox((fun () -> sprintf "Stdev: %.1fms" eventCounts.StandardDeviation), K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
 
-        new Button(ignore, "Graph settings")
-        |> positionWidget(-420.0f, 1.0f, -65.0f, 1.0f, -220.0f, 1.0f, -15.0f, 1.0f)
+        Button(ignore, "Graph settings")
+            .Position { Left = 1.0f %- 420.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 220.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
-        new Button((fun () -> Helpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)), "Watch replay")
-        |> positionWidget(-220.0f, 1.0f, -65.0f, 1.0f, -20.0f, 1.0f, -15.0f, 1.0f)
+        Button((fun () -> Helpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)), "Watch replay")
+            .Position { Left = 1.0f %- 220.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
 
     override this.Draw() =
-        let struct (left, top, right, bottom) = this.Bounds
-
-        let halfh = (bottom + top) * 0.5f
+        let halfh = this.Bounds.CenterY
         let xadjust = 50.0f
 
         // accuracy - lamp - clear bars
         do
             let barh = (halfh - 195.0f) / 3.0f
-            let bartop = top + 190.0f + 5.0f
+            let bartop = this.Bounds.Top + 190.0f + 5.0f
 
             let infobar t color label text pb hint existingPb = 
-                let box = Rect.create (left + 650.0f) t (right - halfh) (t + barh)
-                let header = Rect.sliceLeft 200.0f box
-                let body = Rect.trimLeft 200.0f box
+                let box = Rect.Create(this.Bounds.Left + 650.0f, t, this.Bounds.Right - halfh, t + barh)
+                let header = box.SliceLeft 200.0f
+                let body = box.TrimLeft 200.0f
                 Draw.rect box (Color.FromArgb(80, color)) Sprite.Default
-                Draw.rect (Rect.sliceBottom 35.0f header) (Color.FromArgb(80, color)) Sprite.Default
-                Draw.rect (Rect.sliceBottom 5.0f body) (Color.FromArgb(80, color)) Sprite.Default
-                Text.drawFillB(font, label, Rect.trimBottom 40.0f header, (Color.White, Color.Black), 0.5f)
-                Text.drawFillB(font, text, body |> Rect.trimLeft 10.0f |> Rect.trimBottom 25.0f, (color, Color.Black), 0.0f)
-                Text.drawFillB(font, hint, body |> Rect.trimLeft 10.0f |> Rect.sliceBottom 35.0f |> Rect.trimBottom 5.0f, (Color.White, Color.Black), 0.0f)
+                Draw.rect (header.SliceBottom 35.0f) (Color.FromArgb(80, color)) Sprite.Default
+                Draw.rect (body.SliceBottom 5.0f) (Color.FromArgb(80, color)) Sprite.Default
+                Text.drawFillB(font, label, header.TrimBottom 40.0f, (Color.White, Color.Black), 0.5f)
+                Text.drawFillB(font, text, body.TrimLeft(10.0f).TrimBottom(25.0f), (color, Color.Black), 0.0f)
+                Text.drawFillB(font, hint, body.TrimLeft(10.0f).SliceBottom(35.0f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
                 if pb = PersonalBestType.None then
-                    Text.drawFillB(font, existingPb, Rect.sliceBottom 35.0f header, (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
+                    Text.drawFillB(font, existingPb, header.SliceBottom(35.0f), (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
                 else
-                    Text.drawFillB(font, Icons.sparkle + " New record! ", Rect.sliceBottom 35.0f header, (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
+                    Text.drawFillB(font, Icons.sparkle + " New record! ", header.SliceBottom(35.0f), (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
 
             infobar
                 bartop 
@@ -244,28 +241,27 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
         // side panel
         do
-            let panel = Rect.create (left + 20.0f) (top + 190.0f) (left + 650.0f) (bottom - 290.0f)
-            Draw.rect (Rect.expand (5.0f, 0.0f) panel) (Color.FromArgb(127, Color.White)) Sprite.Default
+            let panel = Rect.Create(this.Bounds.Left + 20.0f, this.Bounds.Top + 190.0f, this.Bounds.Left + 650.0f, this.Bounds.Bottom - 290.0f)
+            Draw.rect (panel.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
             Screen.Background.draw (panel, (Color.FromArgb(80, 80, 80)), 2.0f)
 
-            let title = Rect.sliceTop 100.0f panel |> Rect.expand (-20.0f, -20.0f)
+            let title = panel.SliceTop(100.0f).Shrink(20.0f)
             Draw.rect title (Color.FromArgb(127, Color.Black)) Sprite.Default
             Text.drawFillB(font, sprintf "%iK Results  •  %s" scoreData.Chart.Keys scoreData.Ruleset.Name, title, (Color.White, Color.Black), 0.5f)
 
             // accuracy info
-            let counters = Rect.trimTop 70.0f panel |> Rect.expand (-20.0f, -20.0f) |> Rect.trimBottom 120.0f
-            let struct (l, t, r, b) = counters
+            let counters = panel.TrimTop(70.0f).Shrink(20.0f).TrimBottom(120.0f)
             Draw.rect counters (Color.FromArgb(127, Color.Black)) Sprite.Default
 
             let judgeCounts = scoreData.Scoring.State.Judgements
             let judgements = scoreData.Ruleset.Judgements |> Array.indexed
-            let h = ((Rect.height counters) - 20.0f) / float32 judgements.Length
-            let mutable y = t + 10.0f
+            let h = (counters.Height - 20.0f) / float32 judgements.Length
+            let mutable y = counters.Top + 10.0f
             for i, j in judgements do
-                let b = Rect.create (l + 10.0f) y (r - 10.0f) (y + h)
+                let b = Rect.Create(counters.Left + 10.0f, y, counters.Right - 10.0f, y + h)
                 Draw.rect b (Color.FromArgb(40, j.Color)) Sprite.Default
-                Draw.rect (b |> Rect.sliceLeft ((r - l - 20.0f) * (float32 judgeCounts.[i] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, j.Color)) Sprite.Default
-                Text.drawFill(font, sprintf "%s: %i" j.Name judgeCounts.[i], Rect.expand(-5.0f, -2.0f) b, Color.White, 0.0f)
+                Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, j.Color)) Sprite.Default
+                Text.drawFill(font, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Color.White, 0.0f)
                 y <- y + h
 
             // stats
@@ -273,57 +269,57 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             let hhit, htotal = eventCounts.Holds
             let rhit, rtotal = eventCounts.Releases
             let data = sprintf "Notes: %i/%i  •  Holds: %i/%i  •  Releases: %i/%i  •  Combo: %ix" nhit ntotal hhit htotal rhit rtotal scoreData.Scoring.State.BestCombo
-            Text.drawFillB(font, data, panel |> Rect.sliceBottom 130.0f |> Rect.trimBottom 80.0f |> Rect.expand(-20.0f, -5.0f), (Color.White, Color.Black), 0.5f)
-            Text.drawFillB(font, scoreData.Mods, panel |> Rect.sliceBottom 100.0f |> Rect.expand(-20.0f, -20.0f), (Color.White, Color.Black), 0.5f)
+            Text.drawFillB(font, data, panel.SliceBottom(130.0f).TrimBottom(80.0f).Shrink(20.0f, 5.0f), (Color.White, Color.Black), 0.5f)
+            Text.drawFillB(font, scoreData.Mods, panel.SliceBottom(100.0f).Shrink(20.0f), (Color.White, Color.Black), 0.5f)
 
         // top banner
-        Draw.rect (Rect.sliceTop 190.0f this.Bounds) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (top + 190.0f) right (top + 195.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
+        Draw.rect (this.Bounds.SliceTop 190.0f) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
+        Draw.rect (this.Bounds.SliceTop(195.0f).SliceBottom(5.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
         // bottom banner
-        Draw.rect (Rect.sliceBottom 290.0f this.Bounds) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.create left (bottom - 295.0f) right (bottom - 290.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
+        Draw.rect (this.Bounds.SliceBottom 290.0f) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
+        Draw.rect (this.Bounds.SliceBottom(295.0f).SliceTop(5.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
 
         // right diamond
         do
             let padding = 110.0f
             let padding2 = 125.0f
-            let size = (bottom - top)
+            let size = this.Bounds.Height
             Draw.quad
                 ( Quad.createv
-                    (right - halfh + xadjust, top + padding)
-                    (right - padding + xadjust, halfh)
-                    (right - halfh + xadjust, bottom - padding)
-                    (right - size + padding + xadjust, halfh)
+                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Top + padding)
+                    (this.Bounds.Right - padding + xadjust, halfh)
+                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding)
+                    (this.Bounds.Right - size + padding + xadjust, halfh)
                 )
                 (Quad.colorOf (scoreData.Ruleset.GradeColor gradeAchieved.Grade))
                 Sprite.DefaultQuad
             Screen.Background.drawq ( 
                 ( Quad.createv
-                    (right - halfh + xadjust, top + padding2)
-                    (right - padding2 + xadjust, halfh)
-                    (right - halfh + xadjust, bottom - padding2)
-                    (right - size + padding2 + xadjust, halfh)
+                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Top + padding2)
+                    (this.Bounds.Right - padding2 + xadjust, halfh)
+                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding2)
+                    (this.Bounds.Right - size + padding2 + xadjust, halfh)
                 ), Color.FromArgb(60, 60, 60), 2.0f
             )
             Draw.quad
                 ( Quad.createv
-                    (right - halfh + xadjust, top + padding2)
-                    (right - padding2 + xadjust, halfh)
-                    (right - halfh + xadjust, bottom - padding2)
-                    (right - size + padding2 + xadjust, halfh)
+                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Top + padding2)
+                    (this.Bounds.Right - padding2 + xadjust, halfh)
+                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding2)
+                    (this.Bounds.Right - size + padding2 + xadjust, halfh)
                 )
                 (Quad.colorOf (Color.FromArgb(40, (scoreData.Ruleset.GradeColor gradeAchieved.Grade))))
                 Sprite.DefaultQuad
 
         // grade stuff
-        let gradeBounds = Rect.createWH (right - halfh + xadjust - 270.0f) (halfh - 305.0f) 540.0f 540.0f
-        Text.drawFill(font, scoreData.Ruleset.GradeName gradeAchieved.Grade, Rect.expand (-100.0f, -100.0f) gradeBounds, scoreData.Ruleset.GradeColor gradeAchieved.Grade, 0.5f)
+        let gradeBounds = Rect.Box(this.Bounds.Right - halfh + xadjust - 270.0f, halfh - 305.0f, 540.0f, 540.0f)
+        Text.drawFill(font, scoreData.Ruleset.GradeName gradeAchieved.Grade, gradeBounds.Shrink 100.0f, scoreData.Ruleset.GradeColor gradeAchieved.Grade, 0.5f)
         Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-base")
         if lampAchieved.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, lampAchieved.Lamp) <| getTexture "grade-lamp-overlay")
         Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-overlay")
 
         // graph stuff
-        Draw.rect (graph.Bounds |> Rect.expand (5.0f, 5.0f)) Color.White Sprite.Default
+        Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White Sprite.Default
         Screen.Background.draw (graph.Bounds, Color.FromArgb(127, 127, 127), 3.0f)
 
         base.Draw()
@@ -344,6 +340,6 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         Screen.hideToolbar <- true
 
     override this.OnExit next =
-        Options.options.Rulesets.Value <- originalRulesets
-        scoreData.Ruleset <- Options.getCurrentRuleset()
+        options.Rulesets.Value <- originalRulesets
+        scoreData.Ruleset <- getCurrentRuleset()
         Screen.hideToolbar <- false

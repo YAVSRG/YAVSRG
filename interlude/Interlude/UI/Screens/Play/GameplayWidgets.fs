@@ -44,9 +44,9 @@ module GameplayWidgets =
 
         do
             this.Animation.Add(color)
-            this.Add(new TextBox(helper.Scoring.FormatAccuracy, (fun () -> color.GetColor()), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.7f))
+            this.Add(TextBox(helper.Scoring.FormatAccuracy, (fun () -> color.GetColor()), 0.5f).Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.7f %+ 0.0f })
             if conf.ShowName then
-                this.Add(new TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.6f, 0.0f, 1.0f, 0.0f, 1.0f))
+                this.Add(TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f).Position { Left = 0.0f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
         
         override this.Dispose() =
             if isNull listener then () else listener.Dispose()
@@ -66,24 +66,23 @@ module GameplayWidgets =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if w = 0.0f then w <- Rect.width this.Bounds
+            if w = 0.0f then w <- this.Bounds.Width
             let now = helper.CurrentChartTime()
             while hits.Count > 0 && let struct (time, _, _) = (hits.[0]) in time + conf.AnimationTime * 1.0f<ms> < now do
                 hits.RemoveAt(0)
 
         override this.Draw() =
             base.Draw()
-            let struct (left, top, right, bottom) = this.Bounds
-            let centre = (right + left) * 0.5f
+            let centre = this.Bounds.CenterX
             if conf.ShowGuide then
                 Draw.rect
-                    (Rect.create (centre - conf.Thickness) top (centre + conf.Thickness) bottom)
+                    (Rect.Create(centre - conf.Thickness, this.Bounds.Top, centre + conf.Thickness, this.Bounds.Bottom))
                     Color.White
                     Sprite.Default
             let now = helper.CurrentChartTime()
             for struct (time, pos, j) in hits do
                 Draw.rect
-                    (Rect.create (centre + pos - conf.Thickness) top (centre + pos + conf.Thickness) bottom)
+                    (Rect.Create(centre + pos - conf.Thickness, this.Bounds.Top, centre + pos + conf.Thickness, this.Bounds.Bottom))
                     (let c = helper.ScoringConfig.JudgementColor j in
                         Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), c))
                     Sprite.Default
@@ -150,7 +149,7 @@ module GameplayWidgets =
             base.Draw()
             let combo = helper.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
-            Text.drawFill(Content.font, combo.ToString(), Rect.expand(amt, amt)this.Bounds, color.GetColor(), 0.5f)
+            Text.drawFill(Content.font, combo.ToString(), this.Bounds.Expand amt, color.GetColor(), 0.5f)
 
         override this.Dispose() =
             listener.Dispose()
@@ -170,15 +169,13 @@ module GameplayWidgets =
         override this.Draw() =
             base.Draw()
 
-            let struct (l, t, r, b) = this.Bounds
-            let height = b - t - conf.BarHeight
+            let height = this.Bounds.Height - conf.BarHeight
             let pc = helper.CurrentChartTime() / duration
 
-            let bar = Rect.createWH l (t + height * pc) (r - l) conf.BarHeight
+            let bar = Rect.Box(this.Bounds.Left, (this.Bounds.Top + height * pc), this.Bounds.Width, conf.BarHeight)
             let glowA = (float conf.GlowColor.A) * pulse.Time / 1000.0 |> int
-            Draw.rect (Rect.expand (conf.GlowSize, conf.GlowSize) bar) (Color.FromArgb(glowA, conf.GlowColor)) Sprite.Default
+            Draw.rect (bar.Expand(conf.GlowSize)) (Color.FromArgb(glowA, conf.GlowColor)) Sprite.Default
             Draw.rect bar conf.BarColor Sprite.Default
-
 
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
         inherit Widget()
@@ -210,15 +207,15 @@ module GameplayWidgets =
             base.Update(elapsedTime, bounds)
 
         override this.Draw() =
-            let w, h = Rect.width this.Bounds, Rect.height this.Bounds
+            let w, h = this.Bounds.Width, this.Bounds.Height
             if conf.Horizontal then
-                let b = this.Bounds |> Rect.sliceLeft (w * float32 helper.HP.State.Health)
+                let b = this.Bounds.SliceLeft(w * float32 helper.HP.State.Health)
                 Draw.rect b (color.GetColor 255) Sprite.Default
-                Draw.rect (b |> Rect.sliceRight h) conf.EndColor Sprite.Default
+                Draw.rect (b.SliceRight h) conf.EndColor Sprite.Default
             else
-                let b = this.Bounds |> Rect.sliceBottom (h * float32 helper.HP.State.Health)
+                let b = this.Bounds.SliceBottom(h * float32 helper.HP.State.Health)
                 Draw.rect b (color.GetColor 255) Sprite.Default
-                Draw.rect (b |> Rect.sliceTop w) conf.EndColor Sprite.Default
+                Draw.rect (b.SliceTop w) conf.EndColor Sprite.Default
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)
@@ -241,8 +238,7 @@ module GameplayWidgets =
 
         override this.Draw() =
             base.Draw()
-            let struct (l, t, r, b) = this.Bounds
-            let columnwidth = (r - l) / (float32 keys)
+            let columnwidth = this.Bounds.Width / (float32 keys)
             let threshold = 1.0f - lightTime
             let f k (s: AnimationFade) =
                 if s.Value > threshold then
@@ -251,8 +247,8 @@ module GameplayWidgets =
                     Draw.rect
                         (
                             if options.Upscroll.Value then
-                                Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), t, 0.5f, 1.0f, columnwidth * p, -1.0f / p) sprite
-                            else Sprite.alignedBoxX(l + columnwidth * (float32 k + 0.5f), b, 0.5f, 1.0f, columnwidth * p, 1.0f / p) sprite
+                                Sprite.alignedBoxX(this.Bounds.Left + columnwidth * (float32 k + 0.5f), this.Bounds.Top, 0.5f, 1.0f, columnwidth * p, -1.0f / p) sprite
+                            else Sprite.alignedBoxX(this.Bounds.Left + columnwidth * (float32 k + 0.5f), this.Bounds.Bottom, 0.5f, 1.0f, columnwidth * p, 1.0f / p) sprite
                         )
                         (Color.FromArgb(a, Color.White))
                         sprite
@@ -297,8 +293,7 @@ module GameplayWidgets =
 
         override this.Draw() =
             base.Draw()
-            let struct (l, t, r, b) = this.Bounds
-            let columnwidth = (r - l) / (float32 keys)
+            let columnwidth = this.Bounds.Width / (float32 keys)
             let threshold = 1.0f - explodeTime
             let f k (s: AnimationFade) =
                 if s.Value > threshold then
@@ -306,10 +301,12 @@ module GameplayWidgets =
                     let a = 255.0f * p |> int
                     
                     let box =
-                        if options.Upscroll.Value then Rect.createWH (l + columnwidth * float32 k) t columnwidth columnwidth
-                        else Rect.createWH (l + columnwidth * float32 k) (b - columnwidth) columnwidth columnwidth
-                        |> Rect.expand((config.Scale - 1.0f) * columnwidth, (config.Scale - 1.0f) * columnwidth)
-                        |> Rect.expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
+                        (
+                            if options.Upscroll.Value then Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Top, columnwidth, columnwidth)
+                            else Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Bottom - columnwidth, columnwidth, columnwidth)
+                        )
+                            .Expand((config.Scale - 1.0f) * columnwidth, (config.Scale - 1.0f) * columnwidth)
+                            .Expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
                     | Hit e ->
                         let color = match e.Judgement with Some j -> int j | None -> 0
@@ -330,22 +327,22 @@ module GameplayWidgets =
             
             if options.ScreenCover.Enabled.Value then
 
-                let bounds = Rect.expand (0.0f, 2.0f) this.Bounds
+                let bounds = this.Bounds.Expand(0.0f, 2.0f)
                 let fadeLength = float32 options.ScreenCover.FadeLength.Value
                 let upper (amount: float32) =
-                    Draw.rect (bounds |> Rect.sliceTop (amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.rect (bounds.SliceTop(amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
                     Draw.quad
-                        (bounds |> Rect.sliceTop amount |> Rect.sliceBottom fadeLength |> Quad.ofRect)
+                        (bounds.SliceTop(amount).SliceBottom(fadeLength) |> Quad.ofRect)
                         struct (options.ScreenCover.Color.Value, options.ScreenCover.Color.Value, Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value))
                         Sprite.DefaultQuad
                 let lower (amount: float32) =
-                    Draw.rect (bounds |> Rect.sliceBottom (amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.rect (bounds.SliceBottom(amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
                     Draw.quad
-                        (bounds |> Rect.sliceBottom amount |> Rect.sliceTop fadeLength |> Quad.ofRect)
+                        (bounds.SliceBottom(amount).SliceTop(fadeLength) |> Quad.ofRect)
                         struct (Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value), options.ScreenCover.Color.Value, options.ScreenCover.Color.Value)
                         Sprite.DefaultQuad
 
-                let height = Rect.height bounds
+                let height = bounds.Height
 
                 let sudden = float32 options.ScreenCover.Sudden.Value * height
                 let hidden = float32 options.ScreenCover.Hidden.Value * height

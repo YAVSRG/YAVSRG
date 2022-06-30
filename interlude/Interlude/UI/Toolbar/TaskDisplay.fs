@@ -49,18 +49,18 @@ module TaskDisplay =
             let a = 255.0f * fade.Value |> int
             let col = color.GetColor a
             
-            Draw.rect (Rect.sliceTop 5.0f this.Bounds) col Sprite.Default
-            Draw.rect (Rect.sliceBottom 5.0f this.Bounds) col Sprite.Default
-            Draw.rect (Rect.sliceLeft 5.0f this.Bounds) col Sprite.Default
-            Draw.rect (Rect.sliceRight 5.0f this.Bounds) col Sprite.Default
+            Draw.rect (this.Bounds.SliceTop 5.0f) col Sprite.Default
+            Draw.rect (this.Bounds.SliceBottom 5.0f) col Sprite.Default
+            Draw.rect (this.Bounds.SliceLeft 5.0f) col Sprite.Default
+            Draw.rect (this.Bounds.SliceRight 5.0f) col Sprite.Default
 
-            let inner = Rect.expand (-5.0f, -5.0f) this.Bounds
+            let inner = this.Bounds.Shrink 5.0f
             
             Draw.rect inner (Color.FromArgb(a / 4 * 3, Color.Black)) Sprite.Default
             Draw.rect inner (Color.FromArgb(a / 2, col)) Sprite.Default
 
-            Text.drawFillB(Interlude.Content.font, task.Name, inner |> Rect.sliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
-            Text.drawFillB(Interlude.Content.font, task.Info, inner |> Rect.sliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
+            Text.drawFillB(Interlude.Content.font, task.Name, inner.SliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
+            Text.drawFillB(Interlude.Content.font, task.Info, inner.SliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
 
         override this.Update(elapsedTime, bounds) =
 
@@ -81,7 +81,7 @@ module TaskDisplay =
 
             if not closing && task.Status = TaskStatus.RanToCompletion then close()
 
-    let private taskBoxes = FlowContainer() |> positionWidget(-300.0f, 0.5f, -900.0f, 1.0f, 300.0f, 0.5f, -100.0f, 1.0f)
+    let private taskBoxes = FlowContainer().Position { Left = 0.5f %- 300.0f; Top = 1.0f %- 900.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %- 100.0f }
 
     let init () = BackgroundTask.Subscribe(fun t -> if t.Visible then taskBoxes.Add(TaskBox t))
 
@@ -90,7 +90,7 @@ module TaskDisplay =
         do 
             this.Add taskBoxes
             TextBox(K "Background tasks", K (Color.White, Color.Black), 0.5f)
-            |> positionWidget(-300.0f, 0.5f, -980.0f, 1.0f, 300.0f, 0.5f, -900.0f, 1.0f)
+                .Position { Left = 0.5f %- 300.0f; Top = 1.0f %- 980.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %- 900.0f }
             |> this.Add
 
         override this.Draw() =

@@ -58,40 +58,40 @@ module CardSelect =
             new Clickable((fun () -> onSelect()), fun b -> if b then this.Hover <- true)
             |> this.Add
     
-            new TextBox((fun () -> config.NameFunc item), K (Color.White, Color.Black), 0.0f)
-            |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
+            TextBox((fun () -> config.NameFunc item), K (Color.White, Color.Black), 0.0f)
+                .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
             |> this.Add
     
             let mutable x = -h
     
-            new TextBox((fun () -> if marked then Icons.selected else Icons.unselected), K (Color.White, Color.Black), 0.5f)
-            |> positionWidget(x, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
+            TextBox((fun () -> if marked then Icons.selected else Icons.unselected), K (Color.White, Color.Black), 0.5f)
+                .Position { Left = 1.0f %+ x; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
             |> this.Add
     
             if Option.isSome config.DeleteFunc then
                 x <- x - h
-                new IconButton(Icons.delete, fun () -> config.DeleteFunc.Value item; config.Refresh())
-                |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
+                IconButton(Icons.delete, fun () -> config.DeleteFunc.Value item; config.Refresh())
+                    .Position { Position.Default with Left = 1.0f %+ x; Right = 1.0f %+ (x + h) }
                 |> addButton
     
             if Option.isSome config.EditFunc then
                 x <- x - h
-                new IconButton(
+                IconButton(
                     Icons.edit,
                     fun () -> 
                         let page = config.EditFunc.Value item
                         add( E (config.NameFunc item), { page with Callback = fun () -> page.Callback(); config.Refresh() })
                     )
-                |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
+                    .Position { Position.Default with Left = 1.0f %+ x; Right = 1.0f %+ (x + h) }
                 |> addButton
     
             if Option.isSome config.DuplicateFunc then
                 x <- x - h
-                new IconButton(Icons.add, fun () -> config.DuplicateFunc.Value item; config.Refresh())
-                |> positionWidget(x, 1.0f, 0.0f, 0.0f, x + h, 1.0f, 0.0f, 1.0f)
+                IconButton(Icons.add, fun () -> config.DuplicateFunc.Value item; config.Refresh())
+                    .Position { Position.Default with Left = 1.0f %+ x; Right = 1.0f %+ (x + h) }
                 |> addButton
     
-            this |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, h, 0.0f) |> ignore
+            this.Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ h } |> ignore
 
         override this.SParent = Some (parent :> Selectable)
     
@@ -143,7 +143,7 @@ module CardSelect =
             if config.CreateFunc.IsSome then
                 { new IconButton(Icons.add, fun () -> config.CreateFunc.Value (); config.Refresh())
                     with override _.SParent = Some this }
-                |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, h, 0.0f, h, 0.0f)
+                    .Position( Position.Box(0.0f, 0.0f, h, h) )
                 |> fc.Add
 
             let index = if index >= Seq.length items || index < 0 then 0 else index

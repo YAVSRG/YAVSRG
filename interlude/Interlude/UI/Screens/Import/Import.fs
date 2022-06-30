@@ -29,8 +29,8 @@ type private SearchContainer(populate, handleFilter) as this =
     let populate = populate flowContainer
     let handleFilter = handleFilter flowContainer
     do
-        this.Add(new SearchBox(Setting.simple "", fun (f: Filter) -> handleFilter f) |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 60.0f, 0.0f))
-        this.Add(flowContainer |> positionWidget(0.0f, 0.0f, 70.0f, 0.0f, -0.0f, 1.0f, 0.0f, 1.0f))
+        this.Add(SearchBox(Setting.simple "", fun (f: Filter) -> handleFilter f).Position( Position.SliceTop 60.0f ))
+        this.Add(flowContainer.Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 70.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %+ 0.0f })
         flowContainer.Add(new SearchContainerLoader(populate))
 
 type Screen() as this =
@@ -75,33 +75,24 @@ type Screen() as this =
         tabs.AddTab("osu! Songs", osuDownloads)
         tabs.AddTab("Noteskins", noteskins)
 
-        tabs
-        |> positionWidget(600.0f, 0.0f, 50.0f, 0.0f, -100.0f, 1.0f, -80.0f, 1.0f)
-        |> this.Add
-
-        new TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
-        |> positionWidget(600.0f, 0.0f, -90.0f, 1.0f, -100.0f, 1.0f, -30.0f, 1.0f)
-        |> this.Add
+        this
+        |-+ tabs.Position { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 80.0f }
+        |=+ TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
+            .Position { Left = 0.0f %+ 600.0f; Top = 1.0f %- 90.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 30.0f }
 
         (*
             Offline importers from other games
         *)
 
-        MountControl(Mounts.Types.Osu, Options.options.OsuMount)
-        |> positionWidget(0.0f, 0.0f, 200.0f, 0.0f, 360.0f, 0.0f, 260.0f, 0.0f)
-        |> this.Add
-
-        MountControl(Mounts.Types.Stepmania, Options.options.StepmaniaMount)
-        |> positionWidget(0.0f, 0.0f, 270.0f, 0.0f, 360.0f, 0.0f, 330.0f, 0.0f)
-        |> this.Add
-
-        MountControl(Mounts.Types.Etterna, Options.options.EtternaMount)
-        |> positionWidget(0.0f, 0.0f, 340.0f, 0.0f, 360.0f, 0.0f, 400.0f, 0.0f)
-        |> this.Add
-
-        new TextBox(K "Import from game", K (Color.White, Color.Black), 0.5f )
-        |> positionWidget(0.0f, 0.0f, 150.0f, 0.0f, 250.0f, 0.0f, 200.0f, 0.0f)
-        |> this.Add
+        this
+        |-+ MountControl(Mounts.Types.Osu, Options.options.OsuMount)
+            .Position( Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
+        |-+ MountControl(Mounts.Types.Stepmania, Options.options.StepmaniaMount)
+            .Position( Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
+        |-+ MountControl(Mounts.Types.Etterna, Options.options.EtternaMount)
+            .Position( Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
+        |=+ TextBox(K "Import from game", K (Color.White, Color.Black), 0.5f )
+            .Position( Position.Box(0.0f, 0.0f, 0.0f, 150.0f, 250.0f, 50.0f) )
 
     override this.OnEnter _ = ()
     override this.OnExit _ = ()

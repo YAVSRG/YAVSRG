@@ -69,18 +69,17 @@ module Keybinds =
     type KeyBinder(hotkey: Hotkey) as this =
         inherit Selectable()
         do
-            TextBox((fun () -> (!|hotkey).ToString()), (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.0f)
-            |> positionWidgetA(20.0f, 0.0f, 0.0f, 0.0f)
-            |> this.Add
-            Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true)
-            |> this.Add
+            this
+            |-+ TextBox((fun () -> (!|hotkey).ToString()), (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.0f)
+                .Position( Position.TrimLeft(20.0f) )
+            |=+ Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true)
 
         let set = fun v -> options.Hotkeys.[hotkey] <- v
     
         override this.Draw() =
             if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f)) Sprite.Default
             elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-            Draw.rect (Rect.expand(0.0f, -40.0f) this.Bounds) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+            Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
             base.Draw()
     
         override this.Update(elapsedTime, bounds) =

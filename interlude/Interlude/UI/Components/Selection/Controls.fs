@@ -26,7 +26,7 @@ module Dropdown =
             this.Add(Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true), Float = true))
             this.Add(
                 TextBox(K label, K (Color.White, Color.Black), 0.0f)
-                |> positionWidget(10.0f, 0.0f, 5.0f, 0.0f, -10.0f, 1.0f, -5.0f, 1.0f)
+                    .Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 5.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 5.0f }
             )
 
         override this.Draw() =
@@ -117,16 +117,13 @@ type DropdownSelector<'T>(items: 'T array, labelFunc: 'T -> string, setting: Set
         this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
     override this.OnSelect() =
-        assert(dropdown.IsNone)
         let d = Dropdown.create_selector items labelFunc setting.Set (fun () -> this.Selected <- false)
         dropdown <- Some d
-        d
-        |> positionWidget(0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, Dropdown.ITEMSIZE * float32 (min 3 items.Length), 1.0f)
+        d.Position { Left = 0.0f %+ 0.0f; Top = 1.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ (Dropdown.ITEMSIZE * float32 (min 3 items.Length)) }
         |> this.Add
         base.OnSelect()
 
     override this.OnDeselect() =
-        assert(dropdown.IsSome)
         dropdown.Value.Destroy()
         dropdown <- None
         base.OnDeselect()
@@ -155,10 +152,10 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
     let chPercent v = setPercent (getPercent setting + v) setting
     do
         this.Animation.Add color
-        new TextBox((fun () -> this.Format setting.Value), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, TEXTWIDTH, 0.0f, 0.0f, 1.0f)
+        TextBox((fun () -> this.Format setting.Value), K (Color.White, Color.Black), 0.0f)
+            .Position { Position.Default with Right = 0.0f %+ TEXTWIDTH }
         |> this.Add
-        this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+        this.Position { Position.Default with Right = 0.0f %+ 100.0f } |> ignore
         this.Add(new Clickable((fun () -> this.Selected <- true; dragging <- true), fun b -> color.Target <- if b && not this.Hover then this.Hover <- true; 0.8f else 0.5f))
 
     member val Format = (fun x -> x.ToString()) with get, set
@@ -167,12 +164,12 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
+        let bounds = this.Bounds.TrimLeft TEXTWIDTH
         if this.Selected || Mouse.Hover this.Bounds then
             chPercent(incr * Mouse.Scroll())
         if this.Selected then
             if (Mouse.Held MouseButton.Left && dragging) then
-                let l, r = if Input.shift then 0.0f, Render.vwidth else l, r
+                let l, r = if Input.shift then 0.0f, Render.vwidth else bounds.Left, bounds.Right
                 let amt = (Mouse.X() - l) / (r - l)
                 setPercent amt setting
             else dragging <- false
@@ -184,10 +181,10 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
 
     override this.Draw() =
         let v = getPercent setting
-        let struct (l, t, r, b) = Rect.trimLeft TEXTWIDTH this.Bounds
-        let cursor = Rect.create (l + (r - l) * v) t (l + (r - l) * v) b |> Rect.expand(10.0f, -10.0f)
-        let m = (b + t) * 0.5f
-        Draw.rect (Rect.create l (m - 10.0f) r (m + 10.0f)) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
+        let bounds = this.Bounds.TrimLeft TEXTWIDTH
+        let cursor = Rect.Create(bounds.Left + bounds.Width * v, bounds.Top, bounds.Left + bounds.Width * v, bounds.Bottom).Expand(10.0f, -10.0f)
+        let m = bounds.CenterY
+        Draw.rect (Rect.Create(bounds.Left, (m - 10.0f), bounds.Right, (m + 10.0f))) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
         Draw.rect cursor (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
         base.Draw()
 

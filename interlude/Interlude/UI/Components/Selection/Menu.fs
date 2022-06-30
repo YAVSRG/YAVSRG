@@ -67,7 +67,7 @@ type Divider() =
     inherit Widget()
 
     member this.Position(y) =
-        this |> positionWidget(100.0f, 0.0f, y - 5.0f, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + 5.0f, 0.0f)
+        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYWIDTH, 10.0f) )
 
     override this.Draw() =
         base.Draw()
@@ -79,18 +79,14 @@ type PrettySetting(name, widget: Selectable) as this =
     let mutable widget = widget
 
     do
-        widget
-        |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f)
-        |> this.Add
-
-        TextBox(K (N name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
-        |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, PRETTYTEXTWIDTH, 0.0f, PRETTYHEIGHT, 0.0f)
-        |> this.Add
-
-        TooltipRegion(T name) |> this.Add
+        this
+        |-+ widget.Position { Position.Default with Left = 0.0f %+ PRETTYTEXTWIDTH }
+        |-+ TextBox(K (N name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
+            .Position (Position.Box (0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT))
+        |=+ TooltipRegion(T name)
     
     member this.Position(y, width, height) =
-        this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + width, 0.0f, y + height, 0.0f)
+        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, width, height) )
     
     member this.Position(y, width) = this.Position(y, width, PRETTYHEIGHT)
     member this.Position(y) = this.Position(y, PRETTYWIDTH)
@@ -110,13 +106,14 @@ type PrettySetting(name, widget: Selectable) as this =
     member this.Refresh(w: Selectable) =
         widget.Destroy()
         widget <- w
-        this.Add(widget |> positionWidgetA(PRETTYTEXTWIDTH, 0.0f, 0.0f, 0.0f))
+        this |=+ widget.Position { Position.Default with Left = 0.0f %+ PRETTYTEXTWIDTH }
 
 type PrettyButton(name, action) as this =
     inherit Selectable()
 
     do
-        TextBox(
+        this
+        |-+ TextBox(
             K (N name + "  >"),
             ( 
                 fun () -> 
@@ -124,18 +121,18 @@ type PrettyButton(name, action) as this =
                         ( (if this.Hover then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black )
                     else (Color.Gray, Color.Black)
             ),
-            0.0f
-        )
-        |> this.Add
-        Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true)) |> this.Add
-        TooltipRegion(T name) |> this.Add
+            0.0f )
+        |-+ Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true))
+        |=+ TooltipRegion(T name)
+
     override this.OnSelect() =
         if this.Enabled then action()
         this.Selected <- false
     override this.Draw() =
         if this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f)) Sprite.Default
         base.Draw()
-    member this.Position(y) = this |> positionWidget(100.0f, 0.0f, y, 0.0f, 100.0f + PRETTYWIDTH, 0.0f, y + PRETTYHEIGHT, 0.0f)
+    member this.Position(y) = 
+        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, PRETTYHEIGHT) )
 
     member val Enabled = true with get, set
 
@@ -198,7 +195,7 @@ type SelectionMenu(title: string, topLevel: SelectionPage) as this =
     do
         this.Add body
         TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
-        |> positionWidget(20.0f, 0.0f, 20.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
+            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 20.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f }
         |> this.Add
         add (title, topLevel)
     
@@ -217,19 +214,22 @@ type ConfirmDialog(prompt, callback: unit -> unit) as this =
 
     let options =
         row [ 
-            LittleButton(K "Yes", fun () ->  this.BeginClose(); confirm <- true)
-            |> position (WPos.leftSlice 200.0f);
-            LittleButton(K "No", this.BeginClose)
-            |> position (WPos.rightSlice 200.0f)
+            LittleButton(
+                K "Yes",
+                fun () ->  this.BeginClose(); confirm <- true
+            ).Position(Position.SliceLeft 200.0f)
+            LittleButton(
+                K "No", 
+                this.BeginClose
+            ).Position(Position.SliceRight 200.0f)
         ]
 
     do
         TextBox(K prompt, K (Color.White, Color.Black), 0.5f)
-        |> positionWidget(200.0f, 0.0f, -200.0f, 0.5f, -200.0f, 1.0f, -50.0f, 0.5f)
+            .Position { Left = 0.0f %+ 200.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 200.0f; Bottom = 0.5f %- 50.0f }
         |> this.Add
         options.OnSelect()
-        options
-        |> positionWidget(-300.0f, 0.5f, 0.0f, 0.5f, 300.0f, 0.5f, 100.0f, 0.5f)
+        options.Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 0.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 100.0f }
         |> this.Add
 
     override this.Update(elapsedTime, bounds) =

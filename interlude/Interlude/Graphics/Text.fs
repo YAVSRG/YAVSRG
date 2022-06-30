@@ -93,7 +93,7 @@ module Fonts =
                         ( glyph.Code,
                             struct (
                                 { sprite with Height = int glyph.Height; Width = int glyph.Width },
-                                (Rect.createWH (glyph.Offset / w) ((rowspacing * float32 i) / h) (glyph.Width / w) (glyph.Height / h) |> Quad.ofRect)
+                                (Rect.Box(glyph.Offset / w, (rowspacing * float32 i) / h, glyph.Width / w, glyph.Height / h) |> Quad.ofRect)
                             )
                         )
 
@@ -169,9 +169,9 @@ module Text =
                 let struct (s, q) = font.Char code
                 let w = float32 s.Width * scale2
                 let h = float32 s.Height * scale2
-                let r = Rect.create x y (x + w) (y + h)
+                let r = Rect.Box(x, y, w, h)
                 if (bg: Color).A <> 0uy then
-                    Draw.quad (Quad.ofRect (Rect.translate(shadowAdjust, shadowAdjust) r)) (Quad.colorOf bg) struct (s, q)
+                    Draw.quad (Quad.ofRect (r.Translate(shadowAdjust, shadowAdjust))) (Quad.colorOf bg) struct (s, q)
                 Draw.quad (Quad.ofRect r) (Quad.colorOf fg) struct (s, q)
                 x <- x + w + font.CharSpacing * scale
             i <- i + 1
@@ -181,10 +181,9 @@ module Text =
     let drawJust (font: SpriteFont, text, scale, x, y, color, just: float32) = draw(font, text, scale, x - measure(font, text) * scale * just, y, color)
     let drawJustB (font: SpriteFont, text, scale, x, y, color, just: float32) = drawB(font, text, scale, x - measure(font, text) * scale * just, y, color)
 
-    let drawFillB (font: SpriteFont, text, bounds, color, just: float32) =
+    let drawFillB (font: SpriteFont, text: string, bounds: Rect, color: Color * Color, just: float32) =
         let w = measure(font, text)
-        let scale = Math.Min(Rect.height bounds * 0.6f, (Rect.width bounds / w))
-        let struct (l, _, r, _) = bounds
-        let x = (1.0f - just) * (l + scale * w * 0.5f) + just * (r - scale * w * 0.5f) - w * scale * 0.5f
-        drawB(font, text, scale, x, Rect.centerY bounds - scale * 0.75f, color)
+        let scale = Math.Min(bounds.Height * 0.6f, (bounds.Width / w))
+        let x = (1.0f - just) * (bounds.Left + scale * w * 0.5f) + just * (bounds.Right - scale * w * 0.5f) - w * scale * 0.5f
+        drawB(font, text, scale, x, bounds.CenterY - scale * 0.75f, color)
     let drawFill(font, text, bounds, color, just) = drawFillB(font, text, bounds, (color, Color.Transparent), just)

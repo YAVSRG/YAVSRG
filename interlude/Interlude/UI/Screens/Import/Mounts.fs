@@ -82,7 +82,7 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
             |> K,
             K (Color.White, Color.Black),
             0.5f)
-        |> positionWidget(100.0f, 0.0f, -200.0f, 0.5f, -100.0f, 1.0f, 200.0f, 0.5f)
+            .Position { Left = 0.0f %+ 100.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 100.0f; Bottom = 0.5f %+ 200.0f }
         |> this.Add
 
         Button(
@@ -94,7 +94,7 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
                 | _ -> failwith "impossible"
                 |> Mounts.dropFunc.Value),
             "Or try to auto detect it")
-        |> positionWidget(-150.0f, 0.5f, 200.0f, 0.5f, 150.0f, 0.5f, 260.0f, 0.5f)
+            .Position { Left = 0.5f %- 150.0f; Top = 0.5f %+ 200.0f; Right = 0.5f %+ 150.0f; Bottom = 0.5f %+ 260.0f }
         |> this.Add
 
     override this.Update(elapsedTime, bounds) =
@@ -127,26 +127,16 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
                     deleteButton.Enabled <- false
         refresh()
 
-        TextBox(
-            match mountType with
-            | Mounts.Types.Osu -> "osu!mania"
-            | Mounts.Types.Stepmania -> "Stepmania"
-            | Mounts.Types.Etterna -> "Etterna"
-            | _ -> failwith "impossible"
-            |> K,
-            K (Color.White, Color.Black),
-            0.5f)
-        |> positionWidgetA(0.0f, 0.0f, -120.0f, 0.0f)
-        |> this.Add
-
-        createButton
-        |> positionWidget(-120.0f, 1.0f, 0.0f, 0.0f, -60.0f, 1.0f, 0.0f, 1.0f)
-        |> this.Add
-
-        editButton
-        |> positionWidget(-120.0f, 1.0f, 0.0f, 0.0f, -60.0f, 1.0f, 0.0f, 1.0f)
-        |> this.Add
-
-        deleteButton
-        |> positionWidget(-60.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f)
-        |> this.Add
+        this
+        |-+ createButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
+        |-+ editButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
+        |-+ deleteButton.Position { Left = 1.0f %- 60.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
+        |=+ TextBox(
+                match mountType with
+                | Mounts.Types.Osu -> "osu!mania"
+                | Mounts.Types.Stepmania -> "Stepmania"
+                | Mounts.Types.Etterna -> "Etterna"
+                | _ -> failwith "impossible"
+                |> K,
+                K (Color.White, Color.Black), 0.5f )
+            .Position( Position.TrimRight 120.0f )

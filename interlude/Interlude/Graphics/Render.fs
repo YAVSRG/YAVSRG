@@ -14,7 +14,7 @@ module Render =
 
     let mutable (rwidth, rheight) = (1, 1)
     let mutable (vwidth, vheight) = (1.0f, 1.0f)
-    let mutable bounds = Rect.zero
+    let mutable bounds = Rect.ZERO
 
     let start() = 
         GL.Clear(ClearBufferMask.ColorBufferBit)
@@ -45,7 +45,7 @@ module Render =
 
         Shader.setUniformMat4 ("uProjection", createProjection true) Shader.main
 
-        bounds <- Rect.create 0.0f 0.0f vwidth vheight |> Rect.expand (1.0f, 1.0f)
+        bounds <- Rect.Box(0.0f, 0.0f, vwidth, vheight).Expand(1.0f)
 
     let init(width, height) =
         Logging.Debug(sprintf "GL Version: %s | %s | U:%i T:%i" (GL.GetString StringName.Version) (GL.GetString StringName.Renderer) Sprite.MAX_TEXTURE_UNITS Sprite.MAX_TEXTURE_SIZE)

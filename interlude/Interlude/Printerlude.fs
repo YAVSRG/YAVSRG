@@ -3,6 +3,7 @@
 open System.IO
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
+open Prelude.Common
 open Prelude.Data.Tables
 open Interlude.UI.Toolbar
 
@@ -56,15 +57,41 @@ module Printerlude =
 
     module Utils =
 
+        open Prelude.ChartFormats
+        open System.IO.Compression
+
         let show_version() =
             ctx.WriteLine(sprintf "You are running %s" Utils.version)
             ctx.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
+
+        let export_osz() =
+            match Gameplay.Chart.current with
+            | None -> failwith "No chart to export"
+            | Some c ->
+                let beatmap = Conversions.``Interlude to osu!``.convert c
+                let exportName = ``osu!``.getBeatmapFilename beatmap
+                let path = getDataPath "Exports"
+                let beatmapFile = Path.Combine(path, exportName)
+                ``osu!``.saveBeatmapFile beatmapFile beatmap
+                let audioFile = Path.Combine(path, Path.GetFileName c.AudioPath)
+                let bgFile = Path.Combine(path, Path.GetFileName c.BackgroundPath)
+                try
+                    File.Copy (c.AudioPath, audioFile)
+                    File.Copy (c.BackgroundPath, bgFile)
+                with err -> printfn "%O" err
+                use fs = File.Create(Path.Combine(path, Path.ChangeExtension(exportName, ".osz")))
+                use archive = new ZipArchive(fs, ZipArchiveMode.Create, true)
+                archive.CreateEntryFromFile(beatmapFile, Path.GetFileName beatmapFile) |> ignore
+                archive.CreateEntryFromFile(audioFile, Path.GetFileName audioFile) |> ignore
+                archive.CreateEntryFromFile(bgFile, Path.GetFileName bgFile) |> ignore
+                Logging.Info "Exported."
         
         let register_commands (ctx: Context) = 
             ctx
                 .WithCommand("version", Command.create "Shows info about the current game version" [] (Impl.Create show_version))
                 .WithCommand("exit", Command.create "Exits the game" [] (Impl.Create (fun () -> UI.Screen.exit <- true)))
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
+                .WithCommand("export_osz", Command.create "Export current file as osz" [] (Impl.Create export_osz))
 
     let ms = new MemoryStream()
     let context_output = new StreamReader(ms)

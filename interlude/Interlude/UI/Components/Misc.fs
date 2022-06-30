@@ -21,6 +21,11 @@ type TooltipRegion(localisedText) =
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
 
+[<AutoOpen>]
+module Tooltip =
+    type Widget with
+        member this.Tooltip(localisedText) = TooltipRegion.Create localisedText this
+
 type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this =
     inherit Widget()
 
@@ -37,24 +42,21 @@ type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this 
             Input.removeInputMethod()
 
     do
-        this.Animation.Add(color)
-        if Option.isNone bind then toggle() else this.Add(new Clickable(toggle, ignore))
-        Frame(
-            Style.main 100,
-            fun () -> Style.highlightF 100 color.Value
-        )
-        |> this.Add
-        TextBox(
-            (fun () ->
-                match bind with
-                | Some b ->
-                    match s.Value with
-                    | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
-                    | text -> text
-                | None -> match s.Value with "" -> prompt | text -> text),
-            (fun () -> Style.highlightF 255 color.Value), 0.0f)
-        |> positionWidgetA(10.0f, 0.0f, -10.0f, 0.0f)
-        |> this.Add
+        this
+        |-* color
+        |-+ Frame(Style.main 100, fun () -> Style.highlightF 100 color.Value)
+        |-+ TextBox(
+                (fun () ->
+                    match bind with
+                    | Some b ->
+                        match s.Value with
+                        | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
+                        | text -> text
+                    | None -> match s.Value with "" -> prompt | text -> text),
+                (fun () -> Style.highlightF 255 color.Value),
+                0.0f
+            ).Position( Position.Margin(10.0f, 0.0f) )
+        |> fun this -> if Option.isNone bind then toggle() else this.Add(new Clickable(toggle, ignore))
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -83,8 +85,7 @@ type TextInputDialog(bounds: Rect, prompt, callback) as this =
     let buf = Setting.simple ""
     let tb = TextEntry(buf, None, prompt)
     do
-        let struct (l, t, r, b) = bounds
-        this.Add(tb |> positionWidget(l, 0.0f, t, 0.0f, r, 0.0f, b, 0.0f))
+        this.Add(tb.Position { Left = 0.0f %+ bounds.Left; Top = 0.0f %+ bounds.Top; Right = 0.0f %+ bounds.Right; Bottom = 0.0f %+ bounds.Bottom })
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if (!|Hotkey.Select).Tapped() || (!|Hotkey.Exit).Tapped() then tb.Dispose(); this.BeginClose()

@@ -27,6 +27,6 @@ type Jukebox() as this =
         else fade.Target <- 0.0f
 
     override this.Draw() =
-        let r = Rect.sliceBottom 5.0f this.Bounds
+        let r = this.Bounds.SliceBottom 5.0f
         Draw.rect r (Style.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f)) Sprite.Default
-        Draw.rect (Rect.sliceLeft(slider.Value * Rect.width r) r) (Style.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default
+        Draw.rect (r.SliceLeft(slider.Value * r.Width)) (Style.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f)) Sprite.Default

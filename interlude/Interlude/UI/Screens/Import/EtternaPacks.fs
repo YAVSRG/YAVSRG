@@ -47,27 +47,22 @@ type private SMImportCard(data: EOPackAttrs) as this =
                 ]) |> ignore
         downloaded <- true
     do
-        TextBox(K data.name, K (Color.White, Color.Black), 0.0f)
-        |> positionWidgetA(5.0f, 0.0f, -400.0f, -30.0f)
-        |> this.Add
-        TextBox(
-            K (sprintf "%.1fMB" (float data.size / 1000000.0)),
-            K (Color.White, Color.Black), 1.0f )
-        |> positionWidgetA(5.0f, 0.0f, -5.0f, -30.0f)
-        |> this.Add
-        TextBox(
-            (fun () -> if downloaded then "Downloaded" else ""),
-            K (Color.Aqua, Color.Black), 1.0f )
-        |> positionWidgetA(5.0f, 50.0f, -5.0f, 0.0f)
-        |> this.Add
-        TextBox(
-            K (sprintf "Average difficulty (MSD): %.2f" data.average),
-            K (Color.White, Color.Black), 0.0f )
-        |> positionWidgetA(5.0f, 50.0f, -400.0f, 0.0f)
-        |> this.Add
-
-        this.Add(new Clickable((fun () -> if not downloaded then download()), ignore))
-        this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f)
+        this.Position( Position.SliceTop 80.0f )
+        |-+ TextBox(K data.name, K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f }
+        |-+ TextBox(
+                K (sprintf "%.1fMB" (float data.size / 1000000.0)),
+                K (Color.White, Color.Black), 1.0f )
+            .Position { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 30.0f }
+        |-+ TextBox(
+                (fun () -> if downloaded then "Downloaded" else ""),
+                K (Color.Aqua, Color.Black), 1.0f )
+            .Position { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 5.0f; Bottom = Position.max }
+        |-+ TextBox(
+                K (sprintf "Average difficulty (MSD): %.2f" data.average),
+                K (Color.White, Color.Black), 0.0f )
+            .Position { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 400.0f; Bottom = Position.max }
+        |=+ Clickable((fun () -> if not downloaded then download()), ignore)
 
     member this.Downloaded = downloaded
 

@@ -23,8 +23,13 @@ type LevelSelectDropdown(items: string seq, label: string, setting: Setting<stri
                 | _ ->
                     let d = Dropdown.create_selector items id (fun g -> setting.Set g) ignore
                     this.Dropdown <- Some d
-                    d
-                    |> positionWidget(5.0f, 0.0f, 60.0f, 0.0f, -5.0f, 1.0f, 60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE, 0.0f)
+                    d.Position
+                        {
+                            Left = 0.0f %+ 5.0f
+                            Top = 0.0f %+ 60.0f
+                            Right = 1.0f %- 5.0f
+                            Bottom = 0.0f %+ (60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE)
+                        }
                     |> this.Add
             ),
             ( fun () -> sprintf "%s: %s" label setting.Value ),
@@ -55,65 +60,60 @@ type Screen() as this =
         Setting.app (fun s -> if sortBy.ContainsKey s then s else "Title") options.ChartSortMode
         Setting.app (fun s -> if groupBy.ContainsKey s then s else "Pack") options.ChartGroupMode
 
-        new TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
-        |> positionWidget(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.4f, 100.0f, 0.0f)
+        TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
+            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 100.0f }
         |> this.Add
 
-        new TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
-        |> positionWidget(0.0f, 0.0f, 100.0f, 0.0f, 0.0f, 0.4f, 160.0f, 0.0f)
+        TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
+            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 100.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 160.0f }
         |> this.Add
 
-        new SearchBox(searchText, fun f -> Tree.filter <- f; refresh())
-        |> TooltipRegion.Create (Localisation.localise "levelselect.search.tooltip")
-        |> positionWidget(-600.0f, 1.0f, 30.0f, 0.0f, -50.0f, 1.0f, 90.0f, 0.0f)
+        SearchBox(searchText, fun f -> Tree.filter <- f; refresh())
+            .Tooltip(L"levelselect.search.tooltip")
+            .Position { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f }
         |> this.Add
 
-        new ModSelect()
-        |> TooltipRegion.Create (Localisation.localise "levelselect.mods.tooltip")
-        |> positionWidget(25.0f, 0.4f, 120.0f, 0.0f, -25.0f, 0.55f, 170.0f, 0.0f)
+        ModSelect()
+            .Tooltip(L"levelselect.mods.tooltip")
+            .Position { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
-        new CollectionManager()
-        |> TooltipRegion.Create (Localisation.localise "levelselect.collections.tooltip")
-        |> positionWidget(0.0f, 0.55f, 120.0f, 0.0f, -25.0f, 0.7f, 170.0f, 0.0f)
+        CollectionManager()
+            .Tooltip(L"levelselect.collections.tooltip")
+            .Position { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
         StylishButton(
             (fun () -> Setting.app not options.ChartSortReverse; LevelSelect.refresh <- true),
             (fun () -> if options.ChartSortReverse.Value then Icons.order_descending else Icons.order_ascending),
             (fun () -> Style.accentShade(150, 0.4f, 0.6f))
-        )
-        |> positionWidget(0.0f, 0.7f, 120.0f, 0.0f, 35.0f, 0.7f, 170.0f, 0.0f)
+        ).Position { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %+ 35.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
         LevelSelectDropdown(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.accentShade(100, 0.4f, 0.6f)),
-            Hotkey.SortMode
-        )
-        |> TooltipRegion.Create (Localisation.localise "levelselect.sortby.tooltip")
-        |> positionWidget(60.0f, 0.7f, 120.0f, 0.0f, -25.0f, 0.85f, 170.0f, 0.0f)
+            Hotkey.SortMode)
+            .Tooltip(L"levelselect.sortby.tooltip")
+            .Position { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
         
         StylishButton(
             (fun () -> Setting.app not options.ChartGroupReverse; LevelSelect.refresh <- true),
             (fun () -> if options.ChartGroupReverse.Value then Icons.order_descending else Icons.order_ascending),
-            (fun () -> Style.accentShade(150, 0.2f, 0.8f))
-        )
-        |> positionWidget(0.0f, 0.85f, 120.0f, 0.0f, 35.0f, 0.85f, 170.0f, 0.0f)
+            (fun () -> Style.accentShade(150, 0.2f, 0.8f)))
+            .Position { Left = 0.85f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %+ 35.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
         LevelSelectDropdown(groupBy.Keys, "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.accentShade(100, 0.2f, 0.8f)),
-            Hotkey.GroupMode
-        )
-        |> TooltipRegion.Create (Localisation.localise "levelselect.groupby.tooltip")
-        |> positionWidget(60.0f, 0.85f, 120.0f, 0.0f, 0.0f, 1.0f, 170.0f, 0.0f)
+            Hotkey.GroupMode)
+            .Tooltip(L"levelselect.groupby.tooltip")
+            .Position { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
-        infoPanel
-        |> positionWidget(10.0f, 0.0f, 180.0f, 0.0f, -10.0f, 0.4f, 0.0f, 1.0f)
+        infoPanel.Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 180.0f; Right = 0.4f %- 10.0f; Bottom = 1.0f %+ 0.0f }
         |> this.Add
 
         Chart.onChange.Add infoPanel.Refresh
@@ -138,22 +138,21 @@ type Screen() as this =
         elif (!|Hotkey.Start).Tapped() then Tree.beginGroup()
         elif (!|Hotkey.End).Tapped() then Tree.endGroup()
         
-        let struct (left, top, right, bottom) = this.Bounds
-        Tree.update(top + 170.0f, bottom, elapsedTime)
+        Tree.update(this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsedTime)
 
     override this.Draw() =
-        let struct (left, top, right, bottom) = this.Bounds
 
-        Tree.draw(top + 170.0f, bottom)
+        Tree.draw(this.Bounds.Top + 170.0f, this.Bounds.Bottom)
 
-        let w = (right - left) * 0.4f
+        let w = this.Bounds.Width * 0.4f
+        let { Rect.Left = left; Top = top; Right = right } = this.Bounds
         Draw.quad
             ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
             (Quad.colorOf (Style.accentShade (120, 0.6f, 0.0f))) Sprite.DefaultQuad
         Draw.quad
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
             (Quad.colorOf (Style.accentShade (120, 0.1f, 0.0f))) Sprite.DefaultQuad
-        Draw.rect (Rect.create left (top + 170.0f) right (top + 175.0f)) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
         base.Draw()
 
     override this.OnEnter prev =

@@ -17,8 +17,8 @@ module Logo =
 
         override this.Draw() =
             base.Draw()
-            let w = Rect.width this.Bounds
-            let struct (l, t, r, b) = this.Bounds
+            let w = this.Bounds.Width
+            let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds
 
             if r > 2.0f then
 
@@ -77,7 +77,7 @@ module Logo =
                 Stencil.finish()
                 Draw.rect this.Bounds Color.White (Content.getTexture "logo")
 
-    let display = Display() |> positionWidget(-300.0f, 0.5f, 1000.0f, 0.5f, 300.0f, 0.5f, 1600.0f, 0.5f)
+    let display = Display().Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f }
 
     let moveCentre () = display.Move (-400.0f, -400.0f, 400.0f, 400.0f)
 

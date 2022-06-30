@@ -24,22 +24,18 @@ type NoteskinCard(data: RepoEntry) as this =
 
     let mutable preview = Sprite.Default
     do
-        TextBox(K data.Name, K (Color.White, Color.Black), 0.0f)
-        |> positionWidgetA(5.0f, 240.0f, -150.0f, 0.0f)
-        |> this.Add
-        TextBox(
-            (fun () -> if downloaded then "Downloaded" else ""),
-            K (Color.Aqua, Color.Black), 1.0f )
-        |> positionWidgetA(5.0f, 240.0f, -5.0f, 0.0f)
-        |> this.Add
-        
-        this.Add(new Clickable((fun () -> if not downloaded then download()), ignore))
-        this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 300.0f, 0.0f)
+        this.Position( Position.SliceTop 300.0f )
+        |-+ TextBox(K data.Name, K (Color.White, Color.Black), 0.0f)
+            .Position( Position.Margin(5.0f, 0.0f).TrimTop(240.0f) )
+        |-+ TextBox(
+                (fun () -> if downloaded then "Downloaded" else ""),
+                K (Color.Aqua, Color.Black), 1.0f )
+            .Position( Position.Margin(5.0f, 0.0f).TrimTop(240.0f) )
+        |=+ Clickable((fun () -> if not downloaded then download()), ignore)
 
     override this.Draw() =
         base.Draw()
-        let struct (l, t, r, b) = this.Bounds
-        Draw.rect (Rect.create l t (l + 320.0f) (t + 240.0f)) Color.White preview
+        Draw.rect ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) Color.White preview
 
     member this.LoadPreview(img: Bitmap) =
         preview <- Sprite.upload(img, 1, 1, true)

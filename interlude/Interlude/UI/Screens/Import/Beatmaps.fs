@@ -61,15 +61,16 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             | -1 -> Color.White //wip
             | -2 //graveyard
             | _ -> Color.Gray
-        this.Add(new Frame(Color.FromArgb(120, c), Color.FromArgb(200, c)))
-        this.Add(new TextBox(K (data.artist + " - " + data.title), K (Color.White, Color.Black), 0.0f)
-            |> positionWidgetA(5.0f, 0.0f, -400.0f, -30.0f))
-        this.Add(new TextBox(K ("Created by " + data.mapper), K (Color.White, Color.Black), 0.0f)
-            |> positionWidgetA(5.0f, 40.0f, 0.0f, 0.0f))
-        this.Add(new TextBox(K (sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs)), K (Color.White, Color.Black), 1.0f)
-            |> positionWidgetA(0.0f, 20.0f, -5.0f, -20.0f))
-        this.Add(new Clickable((fun () -> if not downloaded then download()), ignore))
-        this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 80.0f, 0.0f)
+
+        this.Position( Position.SliceTop 80.0f )
+        |-+ Frame(Color.FromArgb(120, c), Color.FromArgb(200, c))
+        |-+ TextBox(K (data.artist + " - " + data.title), K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f }
+        |-+ TextBox(K ("Created by " + data.mapper), K (Color.White, Color.Black), 0.0f)
+            .Position { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 40.0f; Right = Position.max; Bottom = Position.max }
+        |-+ TextBox(K (sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs)), K (Color.White, Color.Black), 1.0f)
+            .Position { Left = Position.min; Top = 0.0f %+ 20.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 20.0f }
+        |=+ Clickable((fun () -> if not downloaded then download()), ignore)
 
 type private SearchContainerLoader(t) as this =
     inherit Widget()

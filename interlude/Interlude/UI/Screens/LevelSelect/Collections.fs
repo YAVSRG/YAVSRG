@@ -72,9 +72,9 @@ module CollectionManager =
                                         )
                                 }, add)).Position(200.0f, 1200.0f, 600.0f)
                         TextBox(K <| Localisation.localiseWith [(!|Hotkey.AddToCollection).ToString()] "collections.addhint", K (Color.White, Color.Black), 0.5f)
-                        |> positionWidget(0.0f, 0.0f, -190.0f, 1.0f, 0.0f, 1.0f, -120.0f, 1.0f)
+                            .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 190.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 120.0f }
                         TextBox(K <| Localisation.localiseWith [(!|Hotkey.RemoveFromCollection).ToString()] "collections.removehint", K (Color.White, Color.Black), 0.5f)
-                        |> positionWidget(0.0f, 0.0f, -120.0f, 1.0f, 0.0f, 1.0f, -50.0f, 1.0f)
+                            .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 120.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 50.0f }
                     ] :> Selectable
             Callback = ignore
         }

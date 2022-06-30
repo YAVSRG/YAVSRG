@@ -7,7 +7,6 @@ open Interlude
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
-open Interlude.Input
 open Interlude.Graphics
 open Interlude.UI.Animation
 
@@ -27,8 +26,8 @@ type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
 
     override this.Draw() =
         Draw.rect this.Bounds (Style.accentShade(80, 0.5f, color.Value)) Sprite.Default
-        Draw.rect (Rect.sliceBottom 10.0f this.Bounds) (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
-        Text.drawFillB(Content.font, labelFunc(), Rect.trimBottom 10.0f this.Bounds, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
+        Draw.rect (this.Bounds.SliceBottom 10.0f) (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
+        Text.drawFillB(Content.font, labelFunc(), this.Bounds.TrimBottom 10.0f, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
     inherit Widget()
@@ -46,14 +45,13 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
     member val TiltRight = true with get, set
 
     override this.Draw() =
-        let struct (left, top, right, bottom) = this.Bounds
-        let h = bottom - top
+        let h = this.Bounds.Height
         Draw.quad
             ( Quad.create
-                <| Vector2(left, top)
-                <| Vector2(right + (if this.TiltRight then h * 0.5f else 0.0f), top)
-                <| Vector2(right, bottom)
-                <| Vector2(left - (if this.TiltLeft then h * 0.5f else 0.0f), bottom)
+                <| Vector2(this.Bounds.Left, this.Bounds.Top)
+                <| Vector2(this.Bounds.Right + (if this.TiltRight then h * 0.5f else 0.0f), this.Bounds.Top)
+                <| Vector2(this.Bounds.Right, this.Bounds.Bottom)
+                <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom)
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
         Text.drawFillB(Content.font, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.accentShade(255, 0.4f, color.Value)), 0.5f)

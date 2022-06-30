@@ -6,7 +6,7 @@ open Interlude.Graphics
 open Interlude.UI.Animation
 
 (*
-    Anchorpoints calculate the position of a widget's edge relative to its parent
+    AnchorPoints calculate the position of a widget's edge relative to its parent
     They are parameterised by an anchor and an offset
 
      To calculate the position of an edge (for example the value v for the left edge when given the left and right edges of the parent)
@@ -31,39 +31,87 @@ type AnchorPoint(offset, anchor) =
 
     member this.Snap() = this.Value <- this.Target
 
-type WPosFragment = float32 * float32
-module WPosFragment =
+type Position =
+    {
+        Left: float32 * float32
+        Top: float32 * float32
+        Right: float32 * float32
+        Bottom: float32 * float32
+    }
+
+[<AutoOpen>]
+module PositionOperators =
+    let (%+) (percentage : float32) (offset: float32) = (offset, percentage)
+    let (%-) (percentage : float32) (offset: float32) =  (-offset, percentage)
+    let (^+) (x, percentage) offset = (x + offset, percentage)
+    let (^-) (x, percentage) offset = (x - offset, percentage)
+
+module Position =
+    let min = 0.0f %+ 0.0f
+    let max = 1.0f %+ 0.0f
+
+type Position with
+    static member Default =
+        { 
+            Left = Position.min
+            Top = Position.min
+            Right = Position.max
+            Bottom = Position.max
+        }
+
+    member this.Margin (x, y) =
+        { this with Left = this.Left ^+ x; Top = this.Top ^+ y; Right = this.Right ^- x; Bottom = this.Bottom ^- y }
+    member this.Margin amount = this.Margin(amount, amount)
+    static member Margin (x, y) = Position.Default.Margin(x, y)
+    static member Margin amount = Position.Margin (amount, amount)
+
+    member this.SliceLeft amount = { this with Right = this.Left ^+ amount }
+    static member SliceLeft amount = Position.Default.SliceLeft amount
+
+    member this.SliceTop amount = { this with Bottom = this.Top ^+ amount }
+    static member SliceTop amount = Position.Default.SliceTop amount
+
+    member this.SliceRight amount = { this with Left = this.Right ^- amount }
+    static member SliceRight amount = Position.Default.SliceRight amount
+
+    member this.SliceBottom amount = { this with Top = this.Bottom ^- amount }
+    static member SliceBottom amount = Position.Default.SliceBottom amount
+
+    member this.TrimLeft amount = { this with Left = this.Left ^+ amount }
+    static member TrimLeft amount = Position.Default.TrimLeft amount
     
-    let inline move x (a, b) = a + x, b
-
-    let min = 0.0f, 0.0f
-    let max = 0.0f, 1.0f
-    let percent x = 0.0f, x
-
-type WPos = WPosFragment * WPosFragment * WPosFragment * WPosFragment
-module WPos =
+    member this.TrimTop amount = { this with Top = this.Top ^+ amount }
+    static member TrimTop amount = Position.Default.TrimTop amount
     
-    let fill : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, WPosFragment.max
-
-    let shrink x (l, t, r, b) : WPos = WPosFragment.move x l, WPosFragment.move x t, WPosFragment.move -x r, WPosFragment.move -x b
-    let moveX x (l, t, r, b) : WPos = WPosFragment.move x l, t, WPosFragment.move x r, b
-    let moveY x (l, t, r, b) : WPos = l, WPosFragment.move x t, r, WPosFragment.move x b
-
-    let topLeft x y w h : WPos = (x, 0.0f), (y, 0.0f), (x + w, 0.0f), (y + h, 0.0f)
-    let topRight x y w h : WPos = (x - w, 1.0f), (y, 0.0f), (x, 1.0f), (y + h, 0.0f)
-    let bottomLeft x y w h : WPos = (x, 0.0f), (y - h, 1.0f), (x + w, 0.0f), (y, 1.0f)
-    let bottomRight x y w h : WPos = (x - w, 1.0f), (y - h, 1.0f), (x, 1.0f), (y, 1.0f)
+    member this.TrimRight amount = { this with Right = this.Right ^- amount }
+    static member TrimRight amount = Position.Default.TrimRight amount
     
-    let leftCentre x y w h : WPos = (x, 0.0f), (y - h * 0.5f, 0.5f), (x + w, 0.0f), (y + h * 0.5f, 0.5f)
-    let topCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y, 0.0f), (x + w * 0.5f, 0.5f), (y + h, 0.0f)
-    let rightCentre x y w h : WPos = (x - w, 1.0f), (y - h * 0.5f, 0.5f), (x, 1.0f), (y + h * 0.5f, 0.5f)
-    let bottomCentre x y w h : WPos = (x - w * 0.5f, 0.5f), (y - h, 1.0f), (x + w * 0.5f, 0.5f), (y, 1.0f)
+    member this.TrimBottom amount = { this with Bottom = this.Bottom ^- amount }
+    static member TrimBottom amount = Position.Default.TrimBottom amount
 
-    let leftSlice w : WPos = WPosFragment.min, WPosFragment.min, (w, 0.0f), WPosFragment.max
-    let topSlice h : WPos = WPosFragment.min, WPosFragment.min, WPosFragment.max, (h, 0.0f)
-    let rightSlice w : WPos = (-w, 1.0f), WPosFragment.min, WPosFragment.max, WPosFragment.max
-    let bottomSlice h : WPos = WPosFragment.min, (-h, 1.0f), WPosFragment.max, WPosFragment.max
+    static member Row (y, height) =
+        { Left = Position.min; Top = 0.0f %+ y; Right = Position.max; Bottom = 0.0f %+ (y + height) }
 
+    static member Column (x, width) =
+        { Left = 0.0f %+ x; Top = Position.min; Right = 0.0f %+ (x + width); Bottom = Position.max }
+
+    static member Grid (l, t, r, b) =
+        { Left = l %+ 0.0f; Top = t %+ 0.0f; Right = r %+ 0.0f; Bottom = b %+ 0.0f }
+
+    static member Box (anchorx, anchory, x, y, width, height) =
+        {
+            Left = anchorx %+ x
+            Top = anchory %+ y
+            Right = anchorx %+ (x + width)
+            Bottom = anchory %+ (y + height)
+        }
+    static member Box (anchorx, anchory, width, height) =
+        {
+            Left = anchorx %+ 0.0f
+            Top = anchory %+ 0.0f
+            Right = anchorx %+ width
+            Bottom = anchory %+ height
+        }
 
 (*
     Widgets are the atomic components of the UI system.
@@ -76,8 +124,8 @@ type Widget() =
     let children = new List<Widget>()
     let mutable parent = None
 
-    let mutable bounds = Rect.zero
-    let mutable visibleBounds = Rect.zero
+    let mutable bounds = Rect.ZERO
+    let mutable visibleBounds = Rect.ZERO
     let left = AnchorPoint (0.0f, 0.0f)
     let top = AnchorPoint (0.0f, 0.0f)
     let right = AnchorPoint (0.0f, 1.0f)
@@ -149,10 +197,18 @@ type Widget() =
     abstract member Draw: unit -> unit
     default this.Draw() = for c in children do if c.Initialised && c.Enabled then c.Draw()
 
-    member this.UpdateBounds(struct (l, t, r, b): Rect) =
+    member this.UpdateBounds(parentBounds: Rect) =
         initialised <- true
-        bounds <- Rect.create <| left.Position (l, r) <| top.Position (t, b) <| right.Position (l, r) <| bottom.Position (t, b)
-        visibleBounds <- Rect.intersect bounds (match this.Parent with None -> bounds | Some (p: Widget) -> p.VisibleBounds)
+        bounds <- Rect.Create(
+                left.Position (parentBounds.Left, parentBounds.Right),
+                top.Position (parentBounds.Top, parentBounds.Bottom),
+                right.Position (parentBounds.Left, parentBounds.Right),
+                bottom.Position (parentBounds.Top, parentBounds.Bottom)
+            )
+        visibleBounds <- 
+            match this.Parent with 
+            | None -> bounds
+            | Some (p: Widget) -> bounds.Intersect p.VisibleBounds
 
     /// Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit
@@ -169,16 +225,16 @@ type Widget() =
         right.Reposition (r, ra)
         bottom.Reposition (b, ba)
 
-    member this.Position
-        with set (((l, la), (t, ta), (r, ra), (b, ba)): WPos) =
-            left.Reposition (l, la)
-            top.Reposition (t, ta)
-            right.Reposition (r, ra)
-            bottom.Reposition (b, ba)
+    member this.Position (pos: Position) : Widget =
+        left.Reposition pos.Left
+        top.Reposition pos.Top
+        right.Reposition pos.Right
+        bottom.Reposition pos.Bottom
+        this
     
     member this.Reposition(l, t, r, b) = this.Reposition (l, 0.0f, t, 0.0f, r, 1.0f, b, 1.0f)
 
-    member this.Move(l, t, r, b) =
+    member this.Move(l: float32, t: float32, r: float32, b: float32) =
         left.Target <- l
         top.Target <- t
         right.Target <- r
@@ -188,10 +244,10 @@ type Widget() =
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
 
-[<AutoOpen>]
-module WPosHelpers =
-    
-    let position (p: WPos) (w: Widget) = w.Position <- p; w
+    static member (|-+) (parent: #Widget, child: #Widget) = parent.Add child; parent
+    static member (|-*) (parent: #Widget, anim: #Animation) = parent.Animation.Add anim; parent
+    static member (|=+) (parent: #Widget, child: #Widget) = parent.Add child
+    static member (|=*) (parent: #Widget, anim: #Animation) = parent.Animation.Add anim
 
 module Icons = 
     let star = Feather.star
