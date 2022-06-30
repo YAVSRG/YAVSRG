@@ -49,7 +49,7 @@ module Releases =
             "version",
             Command.create "Renames Interlude's version" ["new_version"] (Impl.Create (Types.str, version))
         ).WithCommand(
-            "build",
+            "release",
             Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build)
         ).WithCommand(
             "debug",
