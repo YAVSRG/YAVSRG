@@ -2,5 +2,5 @@
 	path = Prelude
 	url = https://github.com/YAVSRG/Prelude.git
 [submodule "Interlude.Assets"]
-	path = Interlude.Assets
+	path = assets
 	url = https://github.com/YAVSRG/Interlude.Assets.git
