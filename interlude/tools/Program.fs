@@ -9,6 +9,6 @@ let ctx =
 
 [<EntryPoint>]
 let main argv =
-    printfn "%s" Utils.YAVSRG_PATH
+    printfn "Path: %s" Utils.YAVSRG_PATH
     Shell.basic_repl ctx
     0

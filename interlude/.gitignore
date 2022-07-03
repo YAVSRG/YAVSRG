@@ -4,8 +4,6 @@
 
 /publish
 /packages
-/Retrolude/bin
-/Retrolude/obj
 /Interlude/bin
 /Interlude/obj
 /Prelude/Prelude/bin
@@ -18,7 +16,7 @@
 .editorconfig
 /Interlude/Resources/FSharp.Formatting.Markdown.dll
 /Interlude/Resources/FSharp.Formatting.Common.dll
-/Interlude.Tools/obj
-/Interlude.Tools/bin/Debug/netcoreapp3.1
-/Interlude.Tools/bin/Release/netcoreapp3.1
+/tools/obj
+/tools/bin/Debug/netcoreapp3.1
+/tools/bin/Release/netcoreapp3.1
 /nuget
