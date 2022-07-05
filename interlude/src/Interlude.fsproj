@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -11,7 +11,7 @@
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon></PackageIcon>
-    <Win32Resource>C:\Users\percy\Desktop\Source\YAVSRG\Interlude\Resources\icon.res</Win32Resource>
+    <Win32Resource>C:\Users\percy\Desktop\Source\YAVSRG\Interlude\src\Resources\icon.res</Win32Resource>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
@@ -117,11 +117,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Prelude\Prelude\Prelude.fsproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.3" />
+    <PackageReference Update="FSharp.Core" Version="6.0.5" />
   </ItemGroup>
 
   <ItemGroup>
@@ -133,6 +129,10 @@
 
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

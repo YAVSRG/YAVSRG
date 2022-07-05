@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Prelude\Prelude\Prelude.fsproj" />
+    <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
   </ItemGroup>
 
   <ItemGroup>
