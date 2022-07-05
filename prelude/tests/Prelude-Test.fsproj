@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Prelude_Test</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Tests\Sail.fs" />
+    <Compile Include="Utils.fs" />
+    <Compile Include="Tests\Trendy.fs" />
+    <Compile Include="Tests\Generic.fs" />
+    <Compile Include="Tests\Imports.fs" />
+    <Compile Include="Tests\Metrics.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\Prelude.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.3" />
+  </ItemGroup>
+
+</Project>
