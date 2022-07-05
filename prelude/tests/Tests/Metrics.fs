@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Test
 
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Scoring
 

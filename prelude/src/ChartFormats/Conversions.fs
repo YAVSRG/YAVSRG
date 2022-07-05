@@ -5,6 +5,7 @@ open System.Text.RegularExpressions
 open System.IO
 open System.Collections.Generic
 open System.Linq
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.ChartFormats.``osu!``
 open Prelude.ChartFormats.Interlude

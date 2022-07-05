@@ -1,8 +1,8 @@
 ﻿namespace Prelude.Test
 
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
-open Prelude.ChartFormats.Conversions
 open Prelude.Data.Charts
 
 module Imports =

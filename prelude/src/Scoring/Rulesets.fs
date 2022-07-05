@@ -1,6 +1,7 @@
 ﻿namespace Prelude.Scoring
 
 open System
+open Percyqaz.Common
 open Prelude.Common
 
 type JudgementId = int

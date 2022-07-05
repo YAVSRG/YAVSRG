@@ -4,6 +4,7 @@ open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Json
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring

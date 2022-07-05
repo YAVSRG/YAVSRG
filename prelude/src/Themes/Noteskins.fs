@@ -2,6 +2,7 @@
 
 open System.IO
 open System.IO.Compression
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Gameplay.NoteColors
 

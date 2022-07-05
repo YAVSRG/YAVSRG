@@ -1,9 +1,10 @@
 ﻿namespace Prelude.Gameplay
 
 open System
+open Percyqaz.Common
+open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Gameplay.Mods
-open Prelude.Common
 
 // This is the final stage of preprocessing chart data before it is played by the user.
 // Colorings are an assignment of a color id for each note. These ids are then used by skins to display differences in textures

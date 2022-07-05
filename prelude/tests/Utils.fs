@@ -1,6 +1,6 @@
 ﻿namespace Prelude.Test
 
-open Prelude.Common
+open Percyqaz.Common
 
 module Reports =
 

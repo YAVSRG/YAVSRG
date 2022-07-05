@@ -6,6 +6,7 @@ open System.IO.Compression
 open System.Collections.Generic
 open System.Collections.Concurrent
 open Percyqaz.Json
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.ChartFormats.Conversions

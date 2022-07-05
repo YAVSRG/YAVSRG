@@ -50,7 +50,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.3" />
+    <ProjectReference Include="..\..\Percyqaz.Common\src\Percyqaz.Common.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="FSharp.Core" Version="6.0.5" />
   </ItemGroup>
 
 	<Target Name="NugetPackAutoVersioning" AfterTargets="Build">
