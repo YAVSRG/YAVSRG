@@ -6,6 +6,7 @@ open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open SixLabors.ImageSharp.Drawing.Processing
 open System.Collections.Generic
+open Percyqaz.Common
 open Prelude.Common
 
 module Fonts =

@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
 open Prelude.Gameplay.NoteColors
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Data.Themes
 open Interlude

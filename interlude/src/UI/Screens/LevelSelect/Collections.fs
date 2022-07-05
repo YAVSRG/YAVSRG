@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library

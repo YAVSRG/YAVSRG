@@ -3,6 +3,7 @@
 open System.IO
 open System.Collections.Generic
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Gameplay.Layout
 open Prelude.Data.Charts.Library.Imports

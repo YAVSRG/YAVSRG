@@ -2,7 +2,7 @@
 
 open OpenTK.Graphics.OpenGL
 open OpenTK.Mathematics
-open Prelude.Common
+open Percyqaz.Common
 open Interlude.Utils
 
 type Shader = int

@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI.Components.Selection.Compound
 
+open Percyqaz.Common
 open Prelude.Common
 open Interlude.Utils
 open Interlude.Graphics

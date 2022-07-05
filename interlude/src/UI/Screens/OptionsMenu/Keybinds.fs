@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Common
 open Prelude.Common
 open Interlude.Graphics
 open Interlude.Options

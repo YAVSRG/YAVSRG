@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open OpenTK.Mathematics
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data.Charts.Sorting

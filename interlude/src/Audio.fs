@@ -4,6 +4,7 @@ open System
 open System.Diagnostics
 open ManagedBass
 open ManagedBass.Fx
+open Percyqaz.Common
 open Prelude.Common
 
 module Audio = 

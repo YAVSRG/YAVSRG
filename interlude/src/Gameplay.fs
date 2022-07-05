@@ -1,6 +1,7 @@
 ﻿namespace Interlude
 
 open System
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Gameplay.Mods

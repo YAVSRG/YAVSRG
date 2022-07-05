@@ -1,7 +1,7 @@
 ﻿namespace Interlude.UI
 
 open System.Collections.Generic
-open Prelude.Common
+open Percyqaz.Common
 open Interlude.Graphics
 open Interlude.UI.Animation
 

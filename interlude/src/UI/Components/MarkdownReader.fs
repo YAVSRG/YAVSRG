@@ -3,6 +3,7 @@
 open System.Drawing
 open System.Diagnostics
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Common
 open Interlude
 open Interlude.Options
 open Interlude.UI
@@ -27,7 +28,7 @@ module MarkdownReader =
             Body: Widget
             mutable LHeight: float32
             mutable LWidth: float32
-            mutable Height: float32 //not including last line
+            mutable Height: float32 // not including last line
             mutable Width: float32
         }
     module W =
@@ -84,7 +85,7 @@ module MarkdownReader =
 
     let openlink (str: string) =
         try Process.Start (ProcessStartInfo (str, UseShellExecute=true)) |> ignore
-        with err -> Prelude.Common.Logging.Debug ("Failed to open link: " + str, err)
+        with err -> Logging.Debug ("Failed to open link: " + str, err)
 
     let rec span (settings: SpanSettings) (sp: MarkdownSpan) : W =
         match sp with

@@ -2,7 +2,7 @@
 open System.Threading
 open System.Diagnostics
 open System.IO
-open Prelude.Common
+open Percyqaz.Common
 open Interlude
 
 [<EntryPoint>]

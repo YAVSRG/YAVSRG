@@ -4,6 +4,7 @@ open System
 open System.Reflection
 open System.Diagnostics
 open System.IO
+open Percyqaz.Common
 open Prelude.Common
 
 module Utils =

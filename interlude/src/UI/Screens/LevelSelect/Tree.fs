@@ -4,6 +4,7 @@ open System
 open System.Linq
 open OpenTK.Mathematics
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Scoring.Grading
 open Prelude.Data.Scores

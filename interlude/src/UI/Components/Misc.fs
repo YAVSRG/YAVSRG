@@ -2,6 +2,7 @@
 
 open System
 open OpenTK
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude

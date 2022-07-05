@@ -3,7 +3,7 @@
 open SixLabors.ImageSharp
 open OpenTK.Mathematics
 open OpenTK.Graphics.OpenGL
-open Prelude.Common
+open Percyqaz.Common
 
 (*
     Sprites and content uploading

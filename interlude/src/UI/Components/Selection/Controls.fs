@@ -3,6 +3,7 @@
 open System
 open OpenTK
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Common
 open Prelude.Common
 open Interlude
 open Interlude.Options

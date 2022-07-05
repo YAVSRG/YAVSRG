@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI.Screens.Score
 
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Scoring.Grading

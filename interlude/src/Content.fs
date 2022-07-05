@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Collections.Generic
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data
