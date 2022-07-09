@@ -11,21 +11,23 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect
 
-[<Json.AllRequired>]
-type EOPackAttrs = {
-    name: string
-    average: float
-    download: string
-    mirror: string
-    size: int64
-} with static member Default = { name = ""; average = 0.0; download = ""; mirror = ""; size = 0L }
+[<Json.AutoCodec>]
+type EOPackAttrs =
+    {
+        name: string
+        average: float
+        download: string
+        mirror: string
+        size: int64
+    }
 
-[<Json.AllRequired>]
-type EOPack = {
-    ``type``: string
-    id: int
-    attributes: EOPackAttrs
-} with static member Default = {``type`` = "pack"; id = 0; attributes = EOPackAttrs.Default }
+[<Json.AutoCodec>]
+type EOPack =
+    {
+        ``type``: string
+        id: int
+        attributes: EOPackAttrs
+    }
 
 type private SMImportCard(data: EOPackAttrs) as this =
     inherit Frame((fun () -> Style.accentShade(120, (if this.Downloaded then 0.7f else 0.5f), 0.0f)), (fun () -> Style.accentShade(200, 0.7f, 0.2f)))

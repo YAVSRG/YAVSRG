@@ -83,21 +83,23 @@ module Utils =
                     copyFolder d targetd
                 )
 
-        [<Json.AllRequired>]
-        type GithubAsset = {
-            name: string
-            browser_download_url: string
-        } with static member Default = { name = ""; browser_download_url = "" }
+        [<Json.AutoCodec>]
+        type GithubAsset = 
+            {
+                name: string
+                browser_download_url: string
+            }
         
-        [<Json.AllRequired>]
-        type GithubRelease = {
-            url: string
-            tag_name: string
-            name: string
-            published_at: string
-            body: string
-            assets: GithubAsset list
-        } with static member Default = { name = ""; url = ""; tag_name = ""; published_at = ""; body = ""; assets = [] }
+        [<Json.AutoCodec>]
+        type GithubRelease =
+            {
+                url: string
+                tag_name: string
+                name: string
+                published_at: string
+                body: string
+                assets: GithubAsset list
+            }
 
         let mutable latestVersionName = "<Unknown because you or the server is offline>"
         let mutable latestRelease = None

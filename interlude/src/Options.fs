@@ -4,6 +4,7 @@ open System.IO
 open System.Collections.Generic
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
+open Percyqaz.Json
 open Prelude.Common
 open Prelude.Gameplay.Layout
 open Prelude.Data.Charts.Library.Imports
@@ -24,6 +25,7 @@ module Options =
         | Fullscreen = 2
         | ``Borderless Fullscreen`` = 3
 
+    [<Json.AutoCodec>]
     type WindowResolution =
         | Preset of index:int
         | Custom of width:int * height:int
@@ -48,6 +50,7 @@ module Options =
         | Unlimited = 5
         | Vsync = 6
 
+    [<Json.AutoCodec>]
     type GameConfig = 
         {
             WorkingDirectory: string
@@ -88,6 +91,7 @@ module Options =
         | Pacemaker = 1
         | PersonalBest = 2
 
+    [<Json.AutoCodec>]
     type Pacemaker =
         | Accuracy of float
         | Lamp of int
@@ -116,6 +120,7 @@ module Options =
 
         let add x xs = x :: xs
 
+    [<Json.AutoCodec>]
     type ScreenCoverOptions =
         {
             Enabled: Setting<bool>
@@ -175,6 +180,7 @@ module Options =
         | Skip = 300
         | Retry = 301
 
+    [<Json.AutoCodec(false)>]
     type GameOptions =
         {
             VisualOffset: Setting.Bounded<float>
@@ -363,11 +369,11 @@ module Options =
     let firstLaunch = not (File.Exists configPath)
 
     let load() =
-        config <- loadImportantJsonFile "Config" configPath config true
+        config <- loadImportantJsonFile "Config" configPath true
         Localisation.loadFile config.Locale
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
-        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) options true
-        Hotkeys.init(options.Hotkeys)
+        options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
+        Hotkeys.init options.Hotkeys
         Hotkeys.debug()
 
     let save() =

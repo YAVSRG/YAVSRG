@@ -14,24 +14,26 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect
 
-[<Json.AllRequired>]
-type BeatmapData = {
-    difficulty_cs: float //key count
-    difficulty: float
-    bpm: int
-    play_length: int
-    mapper: string
-    artist: string
-    title: string
-    beatmapset_id: int
-    beatmap_status: int
-} with static member Default = { difficulty = 0.0; difficulty_cs = 0.0; bpm = 0; play_length = 0; mapper = ""; artist = ""; title = ""; beatmapset_id = 0; beatmap_status = 0 }
+[<Json.AutoCodec>]
+type BeatmapData =
+    {
+        difficulty_cs: float //key count
+        difficulty: float
+        bpm: int
+        play_length: int
+        mapper: string
+        artist: string
+        title: string
+        beatmapset_id: int
+        beatmap_status: int
+    }
     
-[<Json.AllRequired>]
-type BeatmapSearch = {
-    result_count: int
-    beatmaps: ResizeArray<BeatmapData>
-} with static member Default = { result_count = -1; beatmaps = null }
+[<Json.AutoCodec>]
+type BeatmapSearch =
+    {
+        result_count: int
+        beatmaps: ResizeArray<BeatmapData>
+    }
 
 type private BeatmapImportCard(data: BeatmapData) as this =
     inherit Widget()

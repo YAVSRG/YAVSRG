@@ -5,10 +5,12 @@ open OpenTK
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
+open Percyqaz.Json
 open Prelude.Common
 open Interlude
 open Interlude.Graphics
 
+[<Json.AutoCodec>]
 type Bind =
     | Dummy
     | Key of Keys * modifiers: (bool * bool * bool)
