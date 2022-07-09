@@ -29,14 +29,43 @@ module Common =
 
         let infinity = infinityf * 1.0f<ms>
 
-    type Setting<'T, 'Config> with
-        static member JsonCodec(cache, settings, rules) : Json.Mapping.JsonCodec<Setting<'T, 'Config>> =
-            let tP = Json.Mapping.getCodec<'T>(cache, settings, rules)
-            {
-                Encode = fun o -> tP.Encode o.Value
-                Decode = fun o json -> o.Value <- tP.Decode o.Value json; o
-                Default = fun () -> failwith "Default instance should be provided for settings"
-            }
+    type SettingCodec<'T, 'Config>() =
+        inherit Json.Codec<Setting<'T, 'Config>>()
+        override this.To (ctx: Json.Context) =
+            let cdc = ctx.GetCodec<'T>()
+            fun o -> cdc.To o.Value
+        override this.From (ctx: Json.Context) =
+            let cdc = ctx.GetCodec<'T>()
+            fun o json -> o.Value <- cdc.From o.Value json; o
+        override this.Default (ctx: Json.Context) =
+            let cdc = ctx.GetCodec<'T>()
+            fun () ->
+                let v = cdc.Default()
+                { Set = ignore; Get = K v; Config = Unchecked.defaultof<_> }
+
+    type ColorCodec() =
+        inherit Json.Codec<Color>()
+        override this.To (ctx: Json.Context) =
+            let cdc = ctx.GetCodec<byte * byte * byte * byte>()
+            fun col -> cdc.To (col.A, col.R, col.G, col.B)
+        override this.From (ctx: Json.Context) =
+            let cdc = ctx.GetCodec<byte * byte * byte * byte>()
+            fun _ json -> 
+                let (a, r, g, b) = cdc.FromDefault json
+                Color.FromArgb(int a, int r, int g, int b)
+        override this.Default (ctx: Json.Context) =
+            fun () -> Color.White
+
+    type ConcurrentDictionaryCodec<'K, 'V when 'K : equality>() =
+        inherit Json.Codec<Collections.Concurrent.ConcurrentDictionary<'K, 'V>>()
+        override this.To (ctx: Json.Context) =
+            let cdc = ctx.GetCodec<Dictionary<'K, 'V>>()
+            fun cd -> cdc.To (Dictionary cd)
+        override this.From (ctx: Json.Context) =
+            let cdc = ctx.GetCodec<Dictionary<'K, 'V>>()
+            fun _ json -> Collections.Concurrent.ConcurrentDictionary(cdc.FromDefault json)
+        override this.Default (ctx: Json.Context) =
+            fun () -> Collections.Concurrent.ConcurrentDictionary()
 
 (*
     Localisation
@@ -141,17 +170,11 @@ module Common =
 *)
     
     let JSON =
-        let j = new JsonEncoder()
-            
-        fun (cache, settings, rules) -> 
-            Json.Mapping.getCodec<byte * byte * byte * byte>(cache, settings, rules)
-            |> Json.Mapping.Codec.map
-                (fun (c: Color) -> (c.A, c.R, c.G, c.B))
-                (fun (a, r, g, b) -> Color.FromArgb(int a, int r, int g, int b))
-        |> Json.Mapping.Rules.typeRule<Color>
-        |> j.AddRule
-
-        j
+        Json(Json.Settings.Default)
+            .WithDefaults()
+            .WithCodec<SettingCodec<_,_>>()
+            .WithCodec<ColorCodec>()
+            .WithCodec<ConcurrentDictionaryCodec<_,_>>()
 
     type Bitmap = Image<PixelFormats.Rgba32>
     module Bitmap =
@@ -164,7 +187,7 @@ module Common =
         Directory.CreateDirectory p |> ignore
         p
 
-    let loadImportantJsonFile<'T> name path (defaultData: 'T) prompt =
+    let loadImportantJsonFile<'T> name path prompt =
         if File.Exists path then
             match JSON.FromFile path with
             | Ok data -> data
@@ -175,10 +198,10 @@ module Common =
                     Console.WriteLine "If you would like to try and fix the problem youself, CLOSE THIS WINDOW NOW."
                     Console.ReadLine() |> ignore
                     Logging.Critical "User has chosen to launch game with default data."
-                defaultData
+                JSON.Default<'T>()
         else
             Logging.Info (sprintf "No %s file found, creating it." name)
-            defaultData
+            JSON.Default<'T>()
 
     let saveImportantJsonFile<'T> path (data: 'T) =
         let write = Path.ChangeExtension (path, ".new")

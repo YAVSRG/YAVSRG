@@ -3,6 +3,7 @@ namespace Prelude.Data.Themes
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
+open Percyqaz.Json
 open Prelude.Common
 open Prelude.Scoring
 
@@ -10,6 +11,7 @@ open Prelude.Scoring
     Default config values for themes, textures, noteskins, widget layouts
 *)
 
+[<Json.AutoCodec(false)>]
 type ThemeConfig = 
     {
         Name: string
@@ -45,6 +47,7 @@ type ThemeConfig =
                 else this.PBColors
         }
 
+[<Json.AutoCodec(false)>]
 type WidgetConfig =
     {
         Enabled: bool; Float: bool
@@ -63,6 +66,8 @@ type WidgetConfig =
         }
 
 module WidgetConfig =
+
+    [<Json.AutoCodec(false)>]
     type AccuracyMeter = 
         { 
             Position: WidgetConfig
@@ -87,7 +92,8 @@ module WidgetConfig =
                 GradeColors = true
                 ShowName = true
             }
-
+    
+    [<Json.AutoCodec(false)>]
     type HitMeter =
         {
             Position: WidgetConfig
@@ -115,6 +121,7 @@ module WidgetConfig =
                 ShowGuide = true
             }
 
+    [<Json.AutoCodec(false)>]
     type LifeMeter =
         {
             Position: WidgetConfig
@@ -144,6 +151,7 @@ module WidgetConfig =
                 EmptyColor = Color.Red
             }
 
+    [<Json.AutoCodec(false)>]
     type Combo =
         {
             Position: WidgetConfig
@@ -171,6 +179,7 @@ module WidgetConfig =
                 LampColors = true
             }
 
+    [<Json.AutoCodec(false)>]
     type SkipButton =
         { Position: WidgetConfig }
         static member Default =
@@ -190,6 +199,7 @@ module WidgetConfig =
                     }
             }
 
+    [<Json.AutoCodec(false)>]
     type JudgementMeter =
         {
             Position: WidgetConfig
@@ -215,6 +225,7 @@ module WidgetConfig =
                 ShowRDMA = true
             }
 
+    [<Json.AutoCodec(false)>]
     type ProgressMeter =
         { 
             Position: WidgetConfig

@@ -249,16 +249,19 @@ module Interlude =
     (*
         Overall Interlude chart storage format
     *)
-
+    
+    [<Json.AutoCodec>]
     type MediaPath =
         | Relative of string
         | Absolute of string
 
+    [<Json.AutoCodec>]
     type ChartSource =
         | Osu of beatmapsetid: int * beatmapid: int
         | Stepmania of packid: int
         | Unknown
 
+    [<Json.AutoCodec(false)>]
     type ChartHeader =
         { 
             Title: string
@@ -323,7 +326,7 @@ module Interlude =
                 use br = new BinaryReader(fs)
                 let keys = br.ReadByte() |> int
 
-                let header = JSON.FromString (br.ReadString()) |> JsonResult.expect
+                let header = match JSON.FromString (br.ReadString()) with Ok v -> v | Error err -> Logging.Error(sprintf "%O" err); raise err
                 let notes = readSection br (NoteRow.read keys)
                 let bpms = readSection br (fun r -> BPM(r.ReadInt32() * 1<beat>, r.ReadSingle() * 1.0f<ms/beat>))
                 let sv = MultiTimeData(keys)
@@ -331,7 +334,7 @@ module Interlude =
                     sv.SetChannelData(i - 1, readSection br (fun r -> r.ReadSingle()))
 
                 Some (Chart (keys, header, notes, bpms, sv, filepath))
-            with err -> Logging.Error ("Could not load chart from " + filepath, err); None
+            with err -> Logging.Error (sprintf "Could not load chart from %s: %O" filepath err, err); None
 
         let toFile (chart: Chart) filepath =
             use fs = new FileStream(filepath, FileMode.Create)

@@ -14,7 +14,7 @@ open Prelude.Gameplay.Difficulty
 
 module Caching =
 
-    [<Json.AllRequired>]
+    [<Json.AutoCodec>]
     type CachedChart =
         {
             FilePath: string
@@ -30,21 +30,6 @@ module Caching =
             Physical: float
             Technical: float
         }
-        static member Default =
-            {
-                FilePath = ""
-                Title = ""
-                Artist = ""
-                Creator = ""
-                Pack = ""
-                Hash = ""
-                Keys = 4
-                Length = 0.0f<ms>
-                BPM = (500.0f<ms/beat>, 500.0f<ms/beat>)
-                DiffName = ""
-                Physical = 0.0
-                Technical = 0.0
-            }
 
     let cacheChart (chart: Chart) : CachedChart =
         let lastNote = chart.LastNote
@@ -68,20 +53,22 @@ module Caching =
 module Collections =
 
     [<RequireQualifiedAccess>]
+    [<Json.AutoCodec>]
     type Goal =
     | None
     | Clear of rulesetId: string
     | Lamp of rulesetId: string * lamp: int
     | Accuracy of rulesetId: string * float
-
+    
+    [<Json.AutoCodec>]
     type PlaylistData = { Mods: Setting<ModState>; Rate: Setting.Bounded<float32> } with
         static member Make mods rate = { Mods = Setting.simple mods; Rate = Setting.rate rate }
-        static member Default = { Mods = Setting.simple Map.empty; Rate = Setting.rate 1.0f }
 
+    [<Json.AutoCodec>]
     type GoalData = { Mods: Setting<ModState>; Rate: Setting.Bounded<float32>; Goal: Setting<Goal> } with
         static member Make mods rate goal = { Mods = Setting.simple mods; Rate = Setting.rate rate; Goal = Setting.simple goal }
-        static member Default = { Mods = Setting.simple Map.empty; Rate = Setting.rate 1.0f; Goal = Setting.simple Goal.None }
-
+    
+    [<Json.AutoCodec>]
     type Collection =
     | Collection of List<string> // duplicates not allowed
     | Playlist of List<string * PlaylistData> // order of list matters

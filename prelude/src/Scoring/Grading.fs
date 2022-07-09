@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Scoring.Grading
 
+open Percyqaz.Json
 open Prelude.Scoring
 
 module Lamp =
@@ -66,8 +67,9 @@ module Grade =
     let calculate (grades: Grade array) (state: AccuracySystemState) =
         (calculateWithTarget grades state).Grade
 
+
+[<Json.AutoCodec>]
 type PersonalBests<'T> = { Best: 'T * float32; Fastest: 'T * float32 }
-    with static member Default = { Best = (Unchecked.defaultof<'T>, 0.0f); Fastest = (Unchecked.defaultof<'T>, 0.0f)}
 
 type PersonalBestType =
     | FasterBetter = 3

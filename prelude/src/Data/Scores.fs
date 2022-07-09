@@ -13,7 +13,7 @@ open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.Layout
 
-[<Json.AllRequired>]
+[<Json.AutoCodec>]
 type Score =
     {
         time: DateTime
@@ -23,18 +23,8 @@ type Score =
         layout: Layout
         keycount: int
     }
-    //only used for Percyqaz.Json performance
-    static member Default =
-        { 
-            time = DateTime.Now
-            replay = ""
-            rate = 1.0f
-            selectedMods = Map.empty
-            layout = Layout.Spread
-            keycount = 4
-        }
 
-[<Json.AllRequired>]
+[<Json.AutoCodec>]
 type Bests =
     {
         Lamp: PersonalBests<int>
@@ -42,8 +32,8 @@ type Bests =
         Grade: PersonalBests<int>
         Clear: PersonalBests<bool>
     }
-    static member Default = { Lamp = PersonalBests<int>.Default; Accuracy = PersonalBests<float>.Default; Grade = PersonalBests<int>.Default; Clear = PersonalBests<bool>.Default }
 
+[<Json.AutoCodec(false)>]
 type ChartSaveData =
     {
         [<Json.Required>]
@@ -58,14 +48,6 @@ type ChartSaveData =
         {
             Offset = c.FirstNote
             Scores = List<Score>()
-            Bests = Dictionary<string, Bests>()
-            LastPlayed = DateTime.UnixEpoch
-            Comment = ""
-        }
-    static member Default =
-        {
-            Offset = 0.0f<ms>
-            Scores = null
             Bests = Dictionary<string, Bests>()
             LastPlayed = DateTime.UnixEpoch
             Comment = ""
@@ -158,6 +140,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
 *)
 
 [<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
 type ScoreFilter =
     | Keymode of int
     | Playstyle of Layout
@@ -166,10 +149,12 @@ type ScoreFilter =
     // pattern stuff
     
 [<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
 type ScoreSort =
     | Physical
     // pattern stuff
-
+    
+[<Json.AutoCodec>]
 type TopScore =
     {
         Hash: string
@@ -178,6 +163,7 @@ type TopScore =
         // other stuff for sorting in future
     }
 
+[<Json.AutoCodec>]
 type ScoreBucket =
     {
         Filters: ScoreFilter list
@@ -226,6 +212,7 @@ module Bucket =
                 bucket.Scores.Sort sort
                 if bucket.Scores.Count > bucket.Size then bucket.Scores.RemoveAt bucket.Size
 
+[<Json.AutoCodec>]
 type BestFlags =
     {
         // future: marker of if you beat a bucket score/goals achieved etc
@@ -263,6 +250,7 @@ module Bests =
 
 module Scores =
 
+    [<Json.AutoCodec(false)>]
     type Data =
         {
             Entries: Dictionary<string, ChartSaveData>
@@ -275,7 +263,7 @@ module Scores =
             }
 
     let data: Data =
-        loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) Data.Default true
+        loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) true
         |> fun d -> Logging.Info (sprintf "Scores loaded, %i chart entries and %i buckets." d.Entries.Keys.Count d.Buckets.Keys.Count); d
 
     let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "scores.json")) data

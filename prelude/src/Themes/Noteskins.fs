@@ -3,9 +3,11 @@
 open System.IO
 open System.IO.Compression
 open Percyqaz.Common
+open Percyqaz.Json
 open Prelude.Common
 open Prelude.Gameplay.NoteColors
 
+[<Json.AutoCodec(false)>]
 type Explosions =
     {
         Scale: float32
@@ -23,6 +25,7 @@ type Explosions =
             AnimationFrameTime = 50.0
         }
 
+[<Json.AutoCodec(false)>]
 type NoteskinConfig =
     {
         Name: string
@@ -139,6 +142,7 @@ module Noteskin =
             | ".osk" -> OsuSkinArchive
             | _ -> Unknown
 
+    [<Json.AutoCodec>]
     type RepoEntry =
         {
             Name: string
@@ -146,6 +150,7 @@ module Noteskin =
             Download: string
         }
 
+    [<Json.AutoCodec>]
     type Repo =
         {
             Noteskins: RepoEntry list

@@ -1,8 +1,10 @@
 ﻿namespace Prelude.Data.Tables
 
 open System
+open Percyqaz.Json
 open Prelude.Data.Charts.Caching
 
+[<Json.AutoCodec>]
 type TableChart =
     {   
         /// (Human-friendly) unique identifier for this particular chart
@@ -11,7 +13,8 @@ type TableChart =
         /// In future, when you don't have the chart this hash will be used to look up song name and download information
         Hash: string
     }
-
+    
+[<Json.AutoCodec>]
 type TableChange =
     | MoveChart of id: string * before_level: string * after_level: string
     | AddChart of id: string * level: string
@@ -21,6 +24,7 @@ type TableChange =
     | RemoveLevel of name: string
     | RenameLevel of oldname: string * newname: string
 
+[<Json.AutoCodec>]
 type Level =
     {
         /// Display name ingame
@@ -28,6 +32,7 @@ type Level =
         Charts: ResizeArray<TableChart>
     }
 
+[<Json.AutoCodec>]
 type Table =
     {
         Name: string

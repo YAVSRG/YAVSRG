@@ -18,24 +18,15 @@ open Caching
 
 module Library =
 
-    do
-        fun (cache, settings, rules) ->
-            Json.Mapping.getCodec<Dictionary<string, CachedChart>>(cache, settings, rules)
-            |> Json.Mapping.Codec.map
-                (fun (d: ConcurrentDictionary<string, CachedChart>) -> Dictionary d)
-                (fun (d: Dictionary<string, CachedChart>) -> ConcurrentDictionary d)
-        |> Json.Mapping.Rules.typeRule<ConcurrentDictionary<string, CachedChart>>
-        |> JSON.AddRule
-
+    [<Json.AutoCodec(false)>]
     type Data =
         {
             Charts: ConcurrentDictionary<string, CachedChart>
             Collections: Dictionary<string, Collection>
         }
-        static member Default = { Charts = new ConcurrentDictionary<string, CachedChart>(); Collections = new Dictionary<string, Collection>() }
 
     let data =
-        loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) Data.Default false
+        loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) false
         |> fun d -> Logging.Info (sprintf "Cache loaded, %i charts and %i collections." d.Charts.Keys.Count d.Collections.Keys.Count); d
     let charts, collections = data.Charts, data.Collections
 
@@ -212,10 +203,13 @@ module Library =
         let osuSongFolder = Path.Combine (Environment.GetFolderPath Environment.SpecialFolder.LocalApplicationData, "osu!", "Songs")
         let stepmaniaPackFolder = Path.Combine (Path.GetPathRoot Environment.CurrentDirectory, "Games", "Stepmania 5", "Songs")
         let etternaPackFolder = Path.Combine (Path.GetPathRoot Environment.CurrentDirectory, "Games", "Etterna", "Songs")
-
+        
+        [<Json.AutoCodec>]
         type MountedChartSourceType =
             | Pack of name: string
             | Library
+        
+        [<Json.AutoCodec>]
         type MountedChartSource =
             {
                 SourceFolder: string

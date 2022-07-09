@@ -6,13 +6,17 @@ open System.IO.Compression
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
 open Percyqaz.Common
+open Percyqaz.Json
 open Prelude.Common
 
 (*
     Basic theme I/O stuff. Additional implementation in Interlude for texture-specific things that depend on Interlude
 *)
 
+[<Json.AutoCodec>]
 type TextureFileMode = Grid | Loose
+
+[<Json.AutoCodec(false)>]
 type TextureConfig = 
     { Columns: int; Rows: int; Mode: TextureFileMode }   
     static member Default = { Columns = 1; Rows = 1; Mode = Grid }

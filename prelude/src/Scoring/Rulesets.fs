@@ -2,11 +2,13 @@
 
 open System
 open Percyqaz.Common
+open Percyqaz.Json
 open Prelude.Common
 
 type JudgementId = int
 /// Judgements are an indicator of how good a hit was, like "Perfect!" or "Nearly!"
 /// Scores are commonly measured by how many of each judgement you get (for example a good score might be getting all "Perfect!" judgements)
+[<Json.AutoCodec>]
 type Judgement =
     {
         Name: string
@@ -18,6 +20,7 @@ type Judgement =
 /// Your total points are the sum of the points for each note you hit
 /// Your % accuracy is number of points you get / max points possible
 [<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
 type AccuracyPoints =
     | WifeCurve of judge: int
     | Weights of maxweight: float * weights: float array
@@ -30,6 +33,7 @@ type AccuracyPoints =
 
 /// Behaviour for hold notes
 [<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
 type HoldNoteBehaviour =
     | Osu of od: float32
     | JustBreakCombo
@@ -56,6 +60,7 @@ type HoldNoteBehaviour =
 
 /// Grades are awarded at the end of a score as a summarising "rank" of how well you did
 /// They typically follow lettering systems similar to academic exam grades
+[<Json.AutoCodec>]
 type Grade =
     {
         Name: string
@@ -66,6 +71,7 @@ type Grade =
 /// Lamps are awarded at the end of the score as a summarising "tag" to indicate certain accomplishments
 /// Examples: You didn't miss a single note, so you get a "Full Combo" tag, you only got "Perfect" judgements, so you get a "Perfect Full Combo" tag
 /// These provide alternative accomplishments to grades that can provide different challenge
+[<Json.AutoCodec>]
 type Lamp =
     {
         Name: string
@@ -74,13 +80,15 @@ type Lamp =
         Color: Color
     }
 
+[<Json.AutoCodec>]
 type GradingConfig =
     {
         Grades: Grade array
         Lamps: Lamp array
     }
     member this.Validate jcount = this //nyi, could check lamps
-
+    
+[<Json.AutoCodec>]
 type HealthBarConfig =
     {
         StartingHealth: float
@@ -96,6 +104,7 @@ type HealthBarConfig =
                 this.Points
         }
 
+[<Json.AutoCodec>]
 type AccuracyConfig =
     {
         MissWindow: Time
@@ -118,6 +127,7 @@ type AccuracyConfig =
             HoldNoteBehaviour = this.HoldNoteBehaviour.Validate name jcount
         }
 
+[<Json.AutoCodec>]
 type Ruleset =
     {
         Name: string

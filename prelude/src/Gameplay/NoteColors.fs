@@ -2,6 +2,7 @@
 
 open System
 open Percyqaz.Common
+open Percyqaz.Json
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Gameplay.Mods
@@ -87,6 +88,7 @@ module NoteColors =
         | _ -> ((), fun _ _ -> (), Array.zeroCreate keys) |> colorize mc
         |> fun output -> { Keys = keys; Notes = output; BPM = bpm; SV = sv; ModsUsed = m }
 
+    [<Json.AutoCodec(false)>]
     type ColorConfig = 
         {
             Style: ColorScheme
