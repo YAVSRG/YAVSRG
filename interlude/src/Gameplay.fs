@@ -2,6 +2,7 @@
 
 open System
 open Percyqaz.Common
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Gameplay.Mods
@@ -59,8 +60,8 @@ module Gameplay =
             context <- ctx
             saveData <- Some (Scores.getOrCreateScoreData c)
             Screen.Background.load c.BackgroundPath
-            if Audio.changeTrack (c.AudioPath, saveData.Value.Offset - c.FirstNote, _rate.Value) then
-                Audio.playFrom c.Header.PreviewTime
+            if Song.change (c.AudioPath, saveData.Value.Offset - c.FirstNote, _rate.Value) then
+                Song.playFrom c.Header.PreviewTime
             options.CurrentChart.Value <- cache.FilePath
             update()
             chartChangeEvent.Trigger()
@@ -157,7 +158,7 @@ module Gameplay =
         Chart._rate
         |> Setting.trigger ( fun v ->
                 Collections.notifyChangeRate v
-                Audio.changeRate v
+                Song.changeRate v
                 Chart.update() )
     let selectedMods =
         Chart._selectedMods

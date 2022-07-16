@@ -2,8 +2,8 @@
 
 open System
 open System.Threading.Tasks
+open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -49,15 +49,15 @@ module TaskDisplay =
             let a = 255.0f * fade.Value |> int
             let col = color.GetColor a
             
-            Draw.rect (this.Bounds.SliceTop 5.0f) col Sprite.Default
-            Draw.rect (this.Bounds.SliceBottom 5.0f) col Sprite.Default
-            Draw.rect (this.Bounds.SliceLeft 5.0f) col Sprite.Default
-            Draw.rect (this.Bounds.SliceRight 5.0f) col Sprite.Default
+            Draw.rect (this.Bounds.SliceTop 5.0f) col
+            Draw.rect (this.Bounds.SliceBottom 5.0f) col
+            Draw.rect (this.Bounds.SliceLeft 5.0f) col
+            Draw.rect (this.Bounds.SliceRight 5.0f) col
 
             let inner = this.Bounds.Shrink 5.0f
             
-            Draw.rect inner (Color.FromArgb(a / 4 * 3, Color.Black)) Sprite.Default
-            Draw.rect inner (Color.FromArgb(a / 2, col)) Sprite.Default
+            Draw.rect inner (Color.FromArgb(a / 4 * 3, Color.Black))
+            Draw.rect inner (Color.FromArgb(a / 2, col))
 
             Text.drawFillB(Interlude.Content.font, task.Name, inner.SliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
             Text.drawFillB(Interlude.Content.font, task.Info, inner.SliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
@@ -86,7 +86,7 @@ module TaskDisplay =
     let init () = BackgroundTask.Subscribe(fun t -> if t.Visible then taskBoxes.Add(TaskBox t))
 
     type Dialog() as this = 
-        inherit SlideDialog(SlideDialog.Direction.Up, Render.vheight)
+        inherit SlideDialog(SlideDialog.Direction.Up, Viewport.vheight)
         do 
             this.Add taskBoxes
             TextBox(K "Background tasks", K (Color.White, Color.Black), 0.5f)
@@ -94,7 +94,7 @@ module TaskDisplay =
             |> this.Add
 
         override this.Draw() =
-            Draw.rect taskBoxes.Bounds (Style.accentShade(200, 0.6f, 0.1f)) Sprite.Default
+            Draw.rect taskBoxes.Bounds (Style.accentShade(200, 0.6f, 0.1f))
             base.Draw()
 
         override this.OnClose() = this.Remove taskBoxes

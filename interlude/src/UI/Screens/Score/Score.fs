@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.Score
 
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Scoring.Grading
@@ -9,7 +10,6 @@ open Interlude
 open Interlude.Options
 open Interlude.Utils
 open Interlude.Content
-open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Components
 
@@ -177,9 +177,9 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 let box = Rect.Create(this.Bounds.Left + 650.0f, t, this.Bounds.Right - halfh, t + barh)
                 let header = box.SliceLeft 200.0f
                 let body = box.TrimLeft 200.0f
-                Draw.rect box (Color.FromArgb(80, color)) Sprite.Default
-                Draw.rect (header.SliceBottom 35.0f) (Color.FromArgb(80, color)) Sprite.Default
-                Draw.rect (body.SliceBottom 5.0f) (Color.FromArgb(80, color)) Sprite.Default
+                Draw.rect box (Color.FromArgb(80, color))
+                Draw.rect (header.SliceBottom 35.0f) (Color.FromArgb(80, color))
+                Draw.rect (body.SliceBottom 5.0f) (Color.FromArgb(80, color))
                 Text.drawFillB(font, label, header.TrimBottom 40.0f, (Color.White, Color.Black), 0.5f)
                 Text.drawFillB(font, text, body.TrimLeft(10.0f).TrimBottom(25.0f), (color, Color.Black), 0.0f)
                 Text.drawFillB(font, hint, body.TrimLeft(10.0f).SliceBottom(35.0f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
@@ -243,16 +243,16 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         // side panel
         do
             let panel = Rect.Create(this.Bounds.Left + 20.0f, this.Bounds.Top + 190.0f, this.Bounds.Left + 650.0f, this.Bounds.Bottom - 290.0f)
-            Draw.rect (panel.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
+            Draw.rect (panel.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White))
             Screen.Background.draw (panel, (Color.FromArgb(80, 80, 80)), 2.0f)
 
             let title = panel.SliceTop(100.0f).Shrink(20.0f)
-            Draw.rect title (Color.FromArgb(127, Color.Black)) Sprite.Default
+            Draw.rect title (Color.FromArgb(127, Color.Black))
             Text.drawFillB(font, sprintf "%iK Results  •  %s" scoreData.Chart.Keys scoreData.Ruleset.Name, title, (Color.White, Color.Black), 0.5f)
 
             // accuracy info
             let counters = panel.TrimTop(70.0f).Shrink(20.0f).TrimBottom(120.0f)
-            Draw.rect counters (Color.FromArgb(127, Color.Black)) Sprite.Default
+            Draw.rect counters (Color.FromArgb(127, Color.Black))
 
             let judgeCounts = scoreData.Scoring.State.Judgements
             let judgements = scoreData.Ruleset.Judgements |> Array.indexed
@@ -260,8 +260,8 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             let mutable y = counters.Top + 10.0f
             for i, j in judgements do
                 let b = Rect.Create(counters.Left + 10.0f, y, counters.Right - 10.0f, y + h)
-                Draw.rect b (Color.FromArgb(40, j.Color)) Sprite.Default
-                Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, j.Color)) Sprite.Default
+                Draw.rect b (Color.FromArgb(40, j.Color))
+                Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, j.Color))
                 Text.drawFill(font, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Color.White, 0.0f)
                 y <- y + h
 
@@ -274,11 +274,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             Text.drawFillB(font, scoreData.Mods, panel.SliceBottom(100.0f).Shrink(20.0f), (Color.White, Color.Black), 0.5f)
 
         // top banner
-        Draw.rect (this.Bounds.SliceTop 190.0f) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-        Draw.rect (this.Bounds.SliceTop(195.0f).SliceBottom(5.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
+        Draw.rect (this.Bounds.SliceTop 190.0f) (Style.accentShade(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.SliceTop(195.0f).SliceBottom(5.0f)) (Color.FromArgb(127, Color.White))
         // bottom banner
-        Draw.rect (this.Bounds.SliceBottom 290.0f) (Style.accentShade(127, 0.5f, 0.0f)) Sprite.Default
-        Draw.rect (this.Bounds.SliceBottom(295.0f).SliceTop(5.0f)) (Color.FromArgb(127, Color.White)) Sprite.Default
+        Draw.rect (this.Bounds.SliceBottom 290.0f) (Style.accentShade(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.SliceBottom(295.0f).SliceTop(5.0f)) (Color.FromArgb(127, Color.White))
 
         // right diamond
         do
@@ -320,7 +320,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-overlay")
 
         // graph stuff
-        Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White Sprite.Default
+        Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White
         Screen.Background.draw (graph.Bounds, Color.FromArgb(127, 127, 127), 3.0f)
 
         base.Draw()

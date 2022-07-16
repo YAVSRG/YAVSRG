@@ -2,14 +2,13 @@
 
 open System.Drawing
 open System.Diagnostics
-open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.Utils
-open Interlude.Input
-open Interlude.Graphics
 open Interlude.UI.Components
 
 module MarkdownReader =
@@ -167,18 +166,18 @@ module MarkdownReader =
             frame.Position 
                 { 
                     Left = 0.5f %+ (-WIDTH * 0.5f)
-                    Top = 0.0f %+ Render.vheight
+                    Top = 0.0f %+ Viewport.vheight
                     Right = 0.5f %+ (WIDTH * 0.5f)
-                    Bottom = 1.0f %+ (Render.vheight - 200.0f)
+                    Bottom = 1.0f %+ (Viewport.vheight - 200.0f)
                 }
             |> this.Add
             frame.Move(-WIDTH * 0.5f, 100.0f, WIDTH * 0.5f, -100.0f)
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if Mouse.Click MouseButton.Left || (!|Hotkey.Exit).Tapped() then
+            if Mouse.leftClick() || (!|Hotkey.Exit).Tapped() then
                 this.BeginClose()
-                frame.Move(-WIDTH * 0.5f, Render.vheight, WIDTH * 0.5f, Render.vheight - 200.0f)
+                frame.Move(-WIDTH * 0.5f, Viewport.vheight, WIDTH * 0.5f, Viewport.vheight - 200.0f)
         override this.OnClose() = ()
 
     let help() = Dialog.add (MarkdownViewDialog doc)

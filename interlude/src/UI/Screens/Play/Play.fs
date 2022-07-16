@@ -1,6 +1,8 @@
 ﻿namespace Interlude.UI.Screens.Play
 
 open OpenTK
+open Percyqaz.Flux.Audio
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
@@ -8,7 +10,6 @@ open Prelude.Scoring.Metrics
 open Prelude.Data.Themes
 open Prelude.Data.Scores
 open Interlude
-open Interlude.Input
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
@@ -30,7 +31,7 @@ type Screen() as this =
             Scoring = scoring
             HP = scoring.HP
             OnHit = onHit.Publish
-            CurrentChartTime = fun () -> Audio.timeWithOffset() - firstNote
+            CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
         }
     let binds = options.GameplayBinds.[chart.Keys - 3]
     let missWindow = scoring.ScaledMissWindow
@@ -69,11 +70,11 @@ type Screen() as this =
     override this.OnEnter(prev) =
         Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
         Screen.hideToolbar <- true
-        Audio.changeRate Gameplay.rate.Value
-        Audio.changeGlobalOffset (toTime options.AudioOffset.Value)
-        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
-        Audio.playLeadIn()
-        Input.absorbAll()
+        Song.changeRate Gameplay.rate.Value
+        Song.changeGlobalOffset (toTime options.AudioOffset.Value)
+        Song.onFinish <- SongFinishAction.Wait
+        Song.playLeadIn()
+        Input.finish_frame_events()
 
     override this.OnExit next =
         Screen.backgroundDim.Target <- 0.7f
@@ -81,7 +82,7 @@ type Screen() as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        let now = Audio.timeWithOffset()
+        let now = Song.timeWithOffset()
         let chartTime = now - firstNote
 
         if not (liveplay :> IReplayProvider).Finished then
@@ -93,7 +94,7 @@ type Screen() as this =
             scoring.Update chartTime
 
         if (!|Hotkey.Options).Pressed() then
-            Audio.pause()
+            Song.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
             QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default)
@@ -145,7 +146,7 @@ type ReplayScreen(mode: ReplayMode) as this =
             Scoring = scoring
             HP = scoring.HP
             OnHit = onHit.Publish
-            CurrentChartTime = fun () -> Audio.timeWithOffset() - firstNote
+            CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
         }
 
     do
@@ -183,11 +184,11 @@ type ReplayScreen(mode: ReplayMode) as this =
         Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
         Screen.hideToolbar <- true
         Gameplay.rate.Value <- rate
-        Audio.changeRate rate
-        Audio.changeGlobalOffset (toTime options.AudioOffset.Value)
-        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Wait
-        Audio.playLeadIn()
-        Input.absorbAll()
+        Song.changeRate rate
+        Song.changeGlobalOffset (toTime options.AudioOffset.Value)
+        Song.onFinish <- SongFinishAction.Wait
+        Song.playLeadIn()
+        Input.finish_frame_events()
 
     override this.OnExit next =
         Screen.backgroundDim.Target <- 0.7f
@@ -195,7 +196,7 @@ type ReplayScreen(mode: ReplayMode) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        let now = Audio.timeWithOffset()
+        let now = Song.timeWithOffset()
         let chartTime = now - firstNote
 
         if not keypressData.Finished then scoring.Update chartTime

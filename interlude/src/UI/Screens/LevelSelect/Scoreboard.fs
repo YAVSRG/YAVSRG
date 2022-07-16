@@ -2,6 +2,8 @@
 
 open System
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
@@ -9,8 +11,6 @@ open Prelude.Scoring
 open Prelude.ChartFormats.Interlude
 open Interlude.UI
 open Interlude.Utils
-open Interlude.Graphics
-open Interlude.Input
 open Interlude.Gameplay
 open Interlude.Options
 open Interlude.UI.Animation
@@ -62,13 +62,13 @@ module Scoreboard =
             |=* Animation.Serial(AnimationTimer 150.0, AnimationAction (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f))
 
         override this.Draw() =
-            Draw.rect this.Bounds (Style.accentShade(int (100.0f * fade.Value), 0.5f, 0.0f)) Sprite.Default
+            Draw.rect this.Bounds (Style.accentShade(int (100.0f * fade.Value), 0.5f, 0.0f))
             base.Draw()
         member this.Data = data
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if Mouse.Hover this.Bounds && (!|Hotkey.Delete).Tapped() then
+            if Mouse.hover this.Bounds && (!|Hotkey.Delete).Tapped() then
                 let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
                 Tooltip.callback (
                     (!|Hotkey.Delete),

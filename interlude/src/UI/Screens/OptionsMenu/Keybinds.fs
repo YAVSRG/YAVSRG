@@ -2,10 +2,10 @@
 
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Interlude.Graphics
 open Interlude.Options
-open Interlude.Input
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
@@ -78,9 +78,9 @@ module Keybinds =
         let set = fun v -> options.Hotkeys.[hotkey] <- v
     
         override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f)) Sprite.Default
-            Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.accentShade(127, 0.8f, 0.0f)) Sprite.Default
+            if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f))
+            elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
+            Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.accentShade(127, 0.8f, 0.0f))
             base.Draw()
     
         override this.Update(elapsedTime, bounds) =
@@ -117,7 +117,7 @@ module Keybinds =
             Content = fun add ->
                 column [
                     PrettySetting("generic.keymode", Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Position(200.0f)
-                    PrettySetting("keybinds.gameplay", binds).Position(280.0f, Render.vwidth - 200.0f)
+                    PrettySetting("keybinds.gameplay", binds).Position(280.0f, Viewport.vwidth - 200.0f)
                     PrettyButton("keybinds.hotkeys", (fun () -> add (N"keybinds.hotkeys", hotkeysPage()))).Position(400.0f)
                 ]
             Callback = ignore

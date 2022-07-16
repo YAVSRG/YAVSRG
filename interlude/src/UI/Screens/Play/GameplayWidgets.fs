@@ -2,13 +2,14 @@
 
 open OpenTK
 open System
+open Percyqaz.Flux.Audio
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Grading
 open Prelude.Data.Themes
 open Interlude
-open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
@@ -78,14 +79,12 @@ module GameplayWidgets =
                 Draw.rect
                     (Rect.Create(centre - conf.Thickness, this.Bounds.Top, centre + conf.Thickness, this.Bounds.Bottom))
                     Color.White
-                    Sprite.Default
             let now = helper.CurrentChartTime()
             for struct (time, pos, j) in hits do
                 Draw.rect
                     (Rect.Create(centre + pos - conf.Thickness, this.Bounds.Top, centre + pos + conf.Thickness, this.Bounds.Bottom))
                     (let c = helper.ScoringConfig.JudgementColor j in
                         Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), c))
-                    Sprite.Default
 
         override this.Dispose() =
             listener.Dispose()
@@ -174,8 +173,8 @@ module GameplayWidgets =
 
             let bar = Rect.Box(this.Bounds.Left, (this.Bounds.Top + height * pc), this.Bounds.Width, conf.BarHeight)
             let glowA = (float conf.GlowColor.A) * pulse.Time / 1000.0 |> int
-            Draw.rect (bar.Expand(conf.GlowSize)) (Color.FromArgb(glowA, conf.GlowColor)) Sprite.Default
-            Draw.rect bar conf.BarColor Sprite.Default
+            Draw.rect (bar.Expand(conf.GlowSize)) (Color.FromArgb(glowA, conf.GlowColor))
+            Draw.rect bar conf.BarColor
 
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
         inherit Widget()
@@ -185,10 +184,10 @@ module GameplayWidgets =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if helper.CurrentChartTime() < -Audio.LEADIN_TIME * 2.5f then
+            if helper.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
                 if (!|Hotkey.Skip).Tapped() then
-                    Audio.pause()
-                    Audio.playFrom(firstNote - Audio.LEADIN_TIME)
+                    Song.pause()
+                    Song.playFrom(firstNote - Song.LEADIN_TIME)
             else this.Destroy()
 
     type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) as this =
@@ -210,12 +209,12 @@ module GameplayWidgets =
             let w, h = this.Bounds.Width, this.Bounds.Height
             if conf.Horizontal then
                 let b = this.Bounds.SliceLeft(w * float32 helper.HP.State.Health)
-                Draw.rect b (color.GetColor 255) Sprite.Default
-                Draw.rect (b.SliceRight h) conf.EndColor Sprite.Default
+                Draw.rect b (color.GetColor 255)
+                Draw.rect (b.SliceRight h) conf.EndColor
             else
                 let b = this.Bounds.SliceBottom(h * float32 helper.HP.State.Health)
-                Draw.rect b (color.GetColor 255) Sprite.Default
-                Draw.rect (b.SliceTop w) conf.EndColor Sprite.Default
+                Draw.rect b (color.GetColor 255)
+                Draw.rect (b.SliceTop w) conf.EndColor
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)
@@ -244,7 +243,7 @@ module GameplayWidgets =
                 if s.Value > threshold then
                     let p = (s.Value - threshold) / lightTime
                     let a = 255.0f * p |> int
-                    Draw.rect
+                    Draw.sprite
                         (
                             if options.Upscroll.Value then
                                 Sprite.alignedBoxX(this.Bounds.Left + columnwidth * (float32 k + 0.5f), this.Bounds.Top, 0.5f, 1.0f, columnwidth * p, -1.0f / p) sprite
@@ -330,13 +329,13 @@ module GameplayWidgets =
                 let bounds = this.Bounds.Expand(0.0f, 2.0f)
                 let fadeLength = float32 options.ScreenCover.FadeLength.Value
                 let upper (amount: float32) =
-                    Draw.rect (bounds.SliceTop(amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.rect (bounds.SliceTop(amount - fadeLength)) options.ScreenCover.Color.Value
                     Draw.quad
                         (bounds.SliceTop(amount).SliceBottom(fadeLength) |> Quad.ofRect)
                         struct (options.ScreenCover.Color.Value, options.ScreenCover.Color.Value, Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value))
                         Sprite.DefaultQuad
                 let lower (amount: float32) =
-                    Draw.rect (bounds.SliceBottom(amount - fadeLength)) options.ScreenCover.Color.Value Sprite.Default
+                    Draw.rect (bounds.SliceBottom(amount - fadeLength)) options.ScreenCover.Color.Value
                     Draw.quad
                         (bounds.SliceBottom(amount).SliceTop(fadeLength) |> Quad.ofRect)
                         struct (Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value), options.ScreenCover.Color.Value, options.ScreenCover.Color.Value)

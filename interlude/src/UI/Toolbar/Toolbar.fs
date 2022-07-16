@@ -1,9 +1,9 @@
 ﻿namespace Interlude.UI.Toolbar
 
 open System.Drawing
-open Interlude
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Interlude.Options
-open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -61,14 +61,14 @@ type Toolbar() as this =
 
     override this.Draw() = 
         let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds
-        Draw.rect (Rect.Create(l, t - HEIGHT, r, t)) (Style.main 100 ()) Sprite.Default
-        Draw.rect (Rect.Create(l, b, r, b + HEIGHT)) (Style.main 100 ()) Sprite.Default
+        Draw.rect (Rect.Create(l, t - HEIGHT, r, t)) (Style.main 100 ())
+        Draw.rect (Rect.Create(l, b, r, b + HEIGHT)) (Style.main 100 ())
         if barSlider.Value > 0.01f then
             let s = this.Bounds.Width / 48.0f
             for i in 0 .. 47 do
-                let level = System.Math.Min((Audio.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, HEIGHT)
-                Draw.rect (Rect.Create(l + float32 i * s + 2.0f, t - HEIGHT, l + (float32 i + 1.0f) * s - 2.0f, t - HEIGHT + level)) (Style.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
-                Draw.rect (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b + HEIGHT - level, r - float32 i * s - 2.0f, b + HEIGHT)) (Style.accentShade(int level, 1.0f, 0.5f)) Sprite.Default
+                let level = System.Math.Min((Devices.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, HEIGHT)
+                Draw.rect (Rect.Create(l + float32 i * s + 2.0f, t - HEIGHT, l + (float32 i + 1.0f) * s - 2.0f, t - HEIGHT + level)) (Style.accentShade(int level, 1.0f, 0.5f))
+                Draw.rect (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b + HEIGHT - level, r - float32 i * s - 2.0f, b + HEIGHT)) (Style.accentShade(int level, 1.0f, 0.5f))
         base.Draw()
         Terminal.draw()
 

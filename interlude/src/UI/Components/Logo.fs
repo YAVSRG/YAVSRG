@@ -2,7 +2,8 @@
 
 open System.Drawing
 open OpenTK.Mathematics
-open Interlude.Graphics
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Interlude
 open Interlude.UI
 open Interlude.UI.Animation
@@ -48,11 +49,11 @@ module Logo =
                     (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2075f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.77f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
                     (Quad.colorOf(Color.Aqua))
                     Sprite.DefaultQuad
-                Draw.rect this.Bounds Color.White (Content.getTexture "logo")
+                Draw.sprite this.Bounds Color.White (Content.getTexture "logo")
 
                 Stencil.draw()
                 //chart background
-                Draw.rect this.Bounds Color.Aqua Sprite.Default
+                Draw.rect this.Bounds Color.Aqua
                 let rain = Content.getTexture "rain"
                 let v = float32 counter.Time
                 let q = Quad.ofRect this.Bounds
@@ -65,7 +66,7 @@ module Logo =
                 for i in 0 .. 31 do
                     let level =
                         (seq { (i * 8) .. (i * 8 + 7) }
-                        |> Seq.map (fun x -> Audio.waveForm.[x])
+                        |> Seq.map (fun x -> Devices.waveForm.[x])
                         |> Seq.sum) * 0.1f
                     let i = float32 i
                     Draw.quad
@@ -75,12 +76,12 @@ module Logo =
                     prev <- level
 
                 Stencil.finish()
-                Draw.rect this.Bounds Color.White (Content.getTexture "logo")
+                Draw.sprite this.Bounds Color.White (Content.getTexture "logo")
 
     let display = Display().Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f }
 
     let moveCentre () = display.Move (-400.0f, -400.0f, 400.0f, 400.0f)
 
-    let moveOffscreen () = display.Move (-Render.vwidth * 0.5f - 600.0f, -300.0f, -Render.vwidth * 0.5f, 300.0f)
+    let moveOffscreen () = display.Move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
 
-    let moveMenu () = display.Move (-Render.vwidth * 0.5f, -400.0f, 800.0f - Render.vwidth * 0.5f, 400.0f)
+    let moveMenu () = display.Move (-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)

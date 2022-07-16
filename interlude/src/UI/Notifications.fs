@@ -2,9 +2,9 @@
 
 open System
 open System.Drawing
-open Interlude.Graphics
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Interlude
-open Interlude.Input
 open Interlude.UI.Animation
 
 [<RequireQualifiedAccess>]
@@ -49,7 +49,7 @@ module Tooltip =
                 elif i.Fade.Value < 0.01f then this.Synchronized(fun () -> items.Remove i |> ignore)
             base.Update(elapsedTime, bounds)
             if items.Count = 0 then
-                up <- Mouse.Y() > this.Bounds.CenterY
+                up <- Mouse.y() > this.Bounds.CenterY
 
         override this.Draw() =
             let height i = HEIGHT + TEXTHEIGHT * float32 (i.Message.Length - 1)
@@ -63,13 +63,13 @@ module Tooltip =
                     | NotificationType.System -> Color.FromArgb(0, 190, 120), Icons.system_notification
                     | NotificationType.Task -> Color.FromArgb(120, 0, 190), Icons.system_notification
                 let a = i.Fade.Value * 255.0f |> int
-                Draw.rect (bounds.SliceLeft 5.0f) (Color.FromArgb(a, c)) Sprite.Default
-                Draw.rect (bounds.SliceTop 5.0f) (Color.FromArgb(a, c)) Sprite.Default
-                Draw.rect (bounds.SliceRight 5.0f) (Color.FromArgb(a, c)) Sprite.Default
-                Draw.rect (bounds.SliceBottom 5.0f) (Color.FromArgb(a, c)) Sprite.Default
+                Draw.rect (bounds.SliceLeft 5.0f) (Color.FromArgb(a, c))
+                Draw.rect (bounds.SliceTop 5.0f) (Color.FromArgb(a, c))
+                Draw.rect (bounds.SliceRight 5.0f) (Color.FromArgb(a, c))
+                Draw.rect (bounds.SliceBottom 5.0f) (Color.FromArgb(a, c))
                 
-                Draw.rect (bounds.Shrink 5.0f) (Color.FromArgb(a / 4 * 3, Color.Black)) Sprite.Default
-                Draw.rect (bounds.Shrink 5.0f) (Color.FromArgb(a / 2, c)) Sprite.Default
+                Draw.rect (bounds.Shrink 5.0f) (Color.FromArgb(a / 4 * 3, Color.Black))
+                Draw.rect (bounds.Shrink 5.0f) (Color.FromArgb(a / 2, c))
                 
                 Text.drawB (Content.font, icon, 50.0f, this.Bounds.Left + 130.0f, y - 1.0f + TEXTHEIGHT * 0.5f * float32 i.Message.Length, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
                 for x = 0 to i.Message.Length - 1 do

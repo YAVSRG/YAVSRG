@@ -1,12 +1,14 @@
 ﻿namespace Interlude.UI.Screens.Play
+
 open OpenTK
 open System
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude
-open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Animation
@@ -73,7 +75,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
         let hitposition = float32 options.HitPosition.Value
 
         let playfieldHeight = bottom - top + columnWidths.[0] * Content.noteskinConfig().HoldNoteTrim
-        let now = Audio.timeWithOffset() + visualOffset
+        let now = Song.timeWithOffset() + visualOffset
 
         // seek to appropriate sv and note locations in data.
         // bit of a mess here. see comments on the variables for more on whats going on
@@ -90,7 +92,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
             sv_value.[i] <- if sv_seek.[i] > 0 then snd sv.[i].[sv_seek.[i] - 1] else 1.0f
 
         for k in 0 .. (keys - 1) do
-            Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + columnWidths.[k], bottom)) playfieldColor Sprite.Default
+            Draw.rect (Rect.Create(left + columnPositions.[k], top, left + columnPositions.[k] + columnWidths.[k], bottom)) playfieldColor
             sv_time.[k] <- now
             column_pos.[k] <- hitposition
             hold_pos.[k] <- hitposition

@@ -2,12 +2,12 @@
 
 open System
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude
 open Interlude.Options
 open Interlude.Utils
-open Interlude.Input
-open Interlude.Graphics
 open Interlude.UI
 
 type TextBox (textFunc, color, just) =
@@ -29,10 +29,10 @@ type Clickable (onClick, onHover) =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let oh = hover
-        hover <- Mouse.Hover (if this.Float then this.Bounds else this.VisibleBounds)
+        hover <- Mouse.hover (if this.Float then this.Bounds else this.VisibleBounds)
         if oh && not hover then onHover false
-        elif not oh && hover && Mouse.Moved() then onHover true
-        elif hover && Mouse.Click MouseButton.Left then onClick()
+        elif not oh && hover && Mouse.moved() then onHover true
+        elif hover && Mouse.leftClick() then onClick()
 
 type Bindable (bind: Hotkey, onPress) =
     inherit Widget()
@@ -59,13 +59,13 @@ type Frame (fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
         if frame then
             let c = frameColor()
             let r = this.Bounds.Expand BORDERWIDTH
-            Draw.rect (r.SliceLeft BORDERWIDTH) c Sprite.Default
-            Draw.rect (r.SliceRight BORDERWIDTH) c Sprite.Default
+            Draw.rect (r.SliceLeft BORDERWIDTH) c
+            Draw.rect (r.SliceRight BORDERWIDTH) c
             let r = this.Bounds.Expand(0.0f, BORDERWIDTH)
-            Draw.rect (r.SliceTop BORDERWIDTH) c Sprite.Default
-            Draw.rect (r.SliceBottom BORDERWIDTH) c Sprite.Default
+            Draw.rect (r.SliceTop BORDERWIDTH) c
+            Draw.rect (r.SliceBottom BORDERWIDTH) c
         
-        if fill then Draw.rect base.Bounds (fillColor()) Sprite.Default
+        if fill then Draw.rect base.Bounds (fillColor())
         base.Draw()
         
     static member Create(w: Widget) =

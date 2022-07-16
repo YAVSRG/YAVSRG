@@ -2,7 +2,7 @@
 
 open System.Collections.Generic
 open Percyqaz.Common
-open Interlude.Graphics
+open Percyqaz.Flux.Graphics
 open Interlude.UI.Animation
 
 (*
@@ -250,6 +250,9 @@ type Widget() =
     static member (|=*) (parent: #Widget, anim: #Animation) = parent.Animation.Add anim
 
 module Icons = 
+    
+    open Percyqaz.Flux.Resources
+
     let star = Feather.star
     let back = Feather.arrow_left
     let bpm = Feather.music

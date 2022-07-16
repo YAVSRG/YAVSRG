@@ -3,11 +3,11 @@
 open System
 open OpenTK
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude
 open Interlude.Utils
-open Interlude.Graphics
-open Interlude.Input
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
@@ -93,8 +93,8 @@ type PrettySetting(name, widget: Selectable) as this =
     member this.Position(y) = this.Position(y, PRETTYWIDTH)
 
     override this.Draw() =
-        if this.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f)) Sprite.Default
-        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f)) Sprite.Default
+        if this.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
+        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f))
         base.Draw()
     
     override this.Update(elapsedTime, bounds) =
@@ -130,7 +130,7 @@ type PrettyButton(name, action) as this =
         if this.Enabled then action()
         this.Selected <- false
     override this.Draw() =
-        if this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f)) Sprite.Default
+        if this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
         base.Draw()
     member this.Position(y) = 
         this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, PRETTYHEIGHT) )
@@ -162,7 +162,7 @@ type SelectionMenu(title: string, topLevel: SelectionPage) as this =
                     if disposed then this.HoverChild <- None
                     base.Update(elapsedTime, bounds)
                     if not disposed then
-                        Input.absorbAll()
+                        Input.finish_frame_events()
 
                 override this.VisibleBounds = this.Bounds
                 override this.Dispose() = base.Dispose(); disposed <- true
@@ -182,8 +182,8 @@ type SelectionMenu(title: string, topLevel: SelectionPage) as this =
         stack.[n] <- Some (w, page.Callback)
         body.Add w
         let n = float32 n + 1.0f
-        w.Reposition(0.0f, Render.vheight * n, 0.0f, Render.vheight * n)
-        body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
+        w.Reposition(0.0f, Viewport.vheight * n, 0.0f, Viewport.vheight * n)
+        body.Move(0.0f, -Viewport.vheight * n, 0.0f, -Viewport.vheight * n)
     
     let back() =
         namestack <- List.tail namestack
@@ -191,7 +191,7 @@ type SelectionMenu(title: string, topLevel: SelectionPage) as this =
         let n = List.length namestack
         let (w, callback) = stack.[n].Value in w.Dispose(); callback()
         let n = float32 n
-        body.Move(0.0f, -Render.vheight * n, 0.0f, -Render.vheight * n)
+        body.Move(0.0f, -Viewport.vheight * n, 0.0f, -Viewport.vheight * n)
     
     do
         this.Add body

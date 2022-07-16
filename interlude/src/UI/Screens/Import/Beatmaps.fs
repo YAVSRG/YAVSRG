@@ -3,16 +3,24 @@
 open System
 open System.IO
 open Percyqaz.Json
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Web
 open Interlude
 open Interlude.Utils
-open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Screens.LevelSelect
+
+type BeatmapStatus =
+    | PENDING = 0
+    | RANKED = 1
+    | QUALIFIED = 3
+    | LOVED = 4
+    | WORK_IN_PROGRESS = -1
+    | GRAVEYARD = -2
 
 [<Json.AutoCodec>]
 type BeatmapData =
@@ -25,7 +33,7 @@ type BeatmapData =
         artist: string
         title: string
         beatmapset_id: int
-        beatmap_status: int
+        beatmap_status: BeatmapStatus
     }
     
 [<Json.AutoCodec>]
@@ -40,7 +48,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             
     let mutable downloaded = false
     let download() =
-        let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".osz")
+        let target = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".osz")
         Notification.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
@@ -56,12 +64,12 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     do
         let c =
             match data.beatmap_status with
-            | 1 -> Color.Aqua //ranked
-            | 3 -> Color.Lime //qualified
-            | 4 -> Color.HotPink //loved
-            | 0 -> Color.LightGoldenrodYellow //pending
-            | -1 -> Color.White //wip
-            | -2 //graveyard
+            | BeatmapStatus.RANKED -> Color.Aqua
+            | BeatmapStatus.QUALIFIED -> Color.Lime
+            | BeatmapStatus.LOVED -> Color.HotPink
+            | BeatmapStatus.PENDING -> Color.LightGoldenrodYellow
+            | BeatmapStatus.WORK_IN_PROGRESS -> Color.White
+            | BeatmapStatus.GRAVEYARD
             | _ -> Color.Gray
 
         this.Position( Position.SliceTop 80.0f )

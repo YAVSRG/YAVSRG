@@ -3,9 +3,9 @@
 open System
 open System.Drawing
 open Interlude.UI
-open Interlude.Input
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Interlude.Utils
-open Interlude.Graphics
 
 // TODO: flow container should be completely in charge of item positionings
 type FlowContainer() =
@@ -57,12 +57,12 @@ type FlowContainer() =
         this.UpdateBounds bounds
         this.FlowContent this.Bounds
         for c in this.Children do if c.Enabled then c.Update (elapsedTime, this.Bounds)
-        if Mouse.Hover this.Bounds then scrollPos <- scrollPos - Mouse.Scroll() * 100.0f
+        if Mouse.hover this.Bounds then scrollPos <- scrollPos - Mouse.scroll() * 100.0f
         scrollPos <- Math.Max(0.0f, Math.Min(scrollPos, contentSize - this.Bounds.Height))
 
     override this.Draw() =
         Stencil.create(false)
-        Draw.rect this.Bounds Color.Transparent Sprite.Default
+        Draw.rect this.Bounds Color.Transparent
         Stencil.draw()
         for c in this.Children do
             if c.Initialised && c.Enabled then

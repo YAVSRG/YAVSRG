@@ -1,9 +1,9 @@
 ﻿namespace Interlude.UI.Components.Selection.Compound
 
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude.Utils
-open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
@@ -124,9 +124,9 @@ module CardSelect =
             base.Update(elapsedTime, bounds)
     
         override this.Draw() =
-            if marked then Draw.rect this.Bounds (Style.accentShade(80, 1.0f, 0.0f)) Sprite.Default
-            if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255)) Sprite.Default
-            elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255)) Sprite.Default
+            if marked then Draw.rect this.Bounds (Style.accentShade(80, 1.0f, 0.0f))
+            if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255))
+            elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255))
             base.Draw()
     
     type Selector<'T>(source: Setting<('T * bool) seq>, config: Config<'T>, add: string * SelectionPage -> unit) as this =

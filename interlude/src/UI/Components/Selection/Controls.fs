@@ -2,14 +2,13 @@
 
 open System
 open OpenTK
-open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude
 open Interlude.Options
 open Interlude.Utils
-open Interlude.Graphics
-open Interlude.Input
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -31,7 +30,7 @@ module Dropdown =
             )
 
         override this.Draw() =
-            if this.Hover then Draw.rect this.Bounds (Style.accentShade(127, 1.0f, 0.4f)) Sprite.Default
+            if this.Hover then Draw.rect this.Bounds (Style.accentShade(127, 1.0f, 0.4f))
             base.Draw()
 
         override this.Update(elapsedTime, bounds) =
@@ -59,8 +58,8 @@ module Dropdown =
             base.Update(elapsedTime, bounds)
             if 
                 this.HoverChild.IsNone
-                || Mouse.Click MouseButton.Left
-                || Mouse.Click MouseButton.Right
+                || Mouse.leftClick()
+                || Mouse.rightClick()
             then this.Close()
 
         member this.Close() =
@@ -166,12 +165,12 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let bounds = this.Bounds.TrimLeft TEXTWIDTH
-        if this.Selected || Mouse.Hover this.Bounds then
-            chPercent(incr * Mouse.Scroll())
+        if this.Selected || Mouse.hover this.Bounds then
+            chPercent(incr * Mouse.scroll())
         if this.Selected then
-            if (Mouse.Held MouseButton.Left && dragging) then
-                let l, r = if Input.shift then 0.0f, Render.vwidth else bounds.Left, bounds.Right
-                let amt = (Mouse.X() - l) / (r - l)
+            if (Mouse.held Mouse.LEFT && dragging) then
+                let l, r = if Input.ThisFrame.shift then 0.0f, Viewport.vwidth else bounds.Left, bounds.Right
+                let amt = (Mouse.x() - l) / (r - l)
                 setPercent amt setting
             else dragging <- false
 
@@ -185,8 +184,8 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
         let bounds = this.Bounds.TrimLeft TEXTWIDTH
         let cursor = Rect.Create(bounds.Left + bounds.Width * v, bounds.Top, bounds.Left + bounds.Width * v, bounds.Bottom).Expand(10.0f, -10.0f)
         let m = bounds.CenterY
-        Draw.rect (Rect.Create(bounds.Left, (m - 10.0f), bounds.Right, (m + 10.0f))) (Style.accentShade(255, 1.0f, 0.0f)) Sprite.Default
-        Draw.rect cursor (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
+        Draw.rect (Rect.Create(bounds.Left, (m - 10.0f), bounds.Right, (m + 10.0f))) (Style.accentShade(255, 1.0f, 0.0f))
+        Draw.rect cursor (Style.accentShade(255, 1.0f, color.Value))
         base.Draw()
 
 type TextField(setting: Setting<string>) as this =
@@ -221,8 +220,8 @@ type NoteColorPicker(color: Setting<byte>) as this =
 
     override this.Draw() =
         base.Draw()
-        if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f)) Sprite.Default
-        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f)) Sprite.Default
+        if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f))
+        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
         Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
 
     override this.Left() = bk()

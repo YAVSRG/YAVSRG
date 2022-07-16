@@ -3,8 +3,8 @@
 open System
 open Percyqaz.Common
 open Prelude.Common
+open Percyqaz.Flux.Graphics
 open Interlude.Utils
-open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection

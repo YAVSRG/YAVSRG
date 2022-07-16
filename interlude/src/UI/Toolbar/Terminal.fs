@@ -3,11 +3,11 @@
 open System
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude
 open Interlude.Options
-open Interlude.Graphics
-open Interlude.Input
 open Interlude.UI
 
 module Terminal =
@@ -105,11 +105,11 @@ module Terminal =
         if not shown then ()
         else
 
-        let bounds = Render.bounds.Shrink(100.0f)
+        let bounds = Viewport.bounds.Shrink(100.0f)
 
-        Draw.rect (bounds.Expand 5.0f) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
-        Draw.rect (bounds.TrimBottom 70.0f) (Color.FromArgb(200, 0, 0, 0)) Sprite.Default
-        Draw.rect (bounds.SliceBottom 65.0f) (Color.FromArgb(255, 0, 0, 0)) Sprite.Default
+        Draw.rect (bounds.Expand 5.0f) (Color.FromArgb(127, 255, 255, 255))
+        Draw.rect (bounds.TrimBottom 70.0f) (Color.FromArgb(200, 0, 0, 0))
+        Draw.rect (bounds.SliceBottom 65.0f) (Color.FromArgb(255, 0, 0, 0))
         Text.drawB(font.Value, ">  " + currentLine.Value, 30.0f, bounds.Left + 20.0f, bounds.Bottom - 50.0f, (Color.White, Color.Black))
 
         for i, line in Seq.indexed Log.visible do

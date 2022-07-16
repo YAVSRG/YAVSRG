@@ -1,8 +1,8 @@
 ﻿namespace Interlude.UI
 
 open System.Drawing
-open Interlude.Graphics
-open Interlude.Input
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 
 module rec Dialog =
 
@@ -25,7 +25,7 @@ module rec Dialog =
         abstract member OnClose: unit -> unit
     
         override this.Draw() =
-            Draw.rect this.Bounds (Color.FromArgb(int (200.0f * fade.Value), 0, 0, 0)) Sprite.Default
+            Draw.rect this.Bounds (Color.FromArgb(int (200.0f * fade.Value), 0, 0, 0))
             base.Draw()
     
         override this.Update(elapsedTime, bounds) =
@@ -46,7 +46,7 @@ module rec Dialog =
             if not dialogs.[dialogs.Count - 1].Enabled then
                 dialogs.[dialogs.Count - 1].Dispose()
                 dialogs.RemoveAt(dialogs.Count - 1)
-            Input.absorbAll()
+            Input.finish_frame_events()
 
     let draw () = for d in dialogs do d.Draw()
 

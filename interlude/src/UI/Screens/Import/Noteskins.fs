@@ -2,6 +2,7 @@
 
 open System.IO
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Themes.Noteskin
 open Prelude.Web
@@ -10,7 +11,6 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Content
-open Interlude.Graphics
 
 type NoteskinCard(data: RepoEntry) as this =
     inherit Frame((fun () -> Style.accentShade(120, (if this.Downloaded then 0.7f else 0.5f), 0.0f)), (fun () -> Style.accentShade(200, 0.7f, 0.2f)))
@@ -36,7 +36,7 @@ type NoteskinCard(data: RepoEntry) as this =
 
     override this.Draw() =
         base.Draw()
-        Draw.rect ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) Color.White preview
+        Draw.sprite ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) Color.White preview
 
     member this.LoadPreview(img: Bitmap) =
         preview <- Sprite.upload(img, 1, 1, true)

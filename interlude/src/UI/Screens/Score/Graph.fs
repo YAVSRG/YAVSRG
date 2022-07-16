@@ -1,10 +1,10 @@
 ﻿namespace Interlude.UI.Screens.Score
 
 open System.Drawing
+open Percyqaz.Flux.Graphics
 open Prelude.Scoring
 open Prelude.Data.Scores
 open Interlude
-open Interlude.Graphics
 open Interlude.UI
 
 type ScoreGraph(data: ScoreInfoProvider) =
@@ -23,8 +23,8 @@ type ScoreGraph(data: ScoreInfoProvider) =
         let h = 0.5f * this.Bounds.Height
         fbo.Bind true
 
-        Draw.rect this.Bounds (Color.FromArgb(160, 0, 0, 0)) Sprite.Default
-        Draw.rect (Rect.Create(this.Bounds.Left, (this.Bounds.Top + h - 2.5f), this.Bounds.Right, (this.Bounds.Top + h + 2.5f))) (Color.FromArgb(127, 255, 255, 255)) Sprite.Default
+        Draw.rect this.Bounds (Color.FromArgb(160, 0, 0, 0))
+        Draw.rect (Rect.Create(this.Bounds.Left, (this.Bounds.Top + h - 2.5f), this.Bounds.Right, (this.Bounds.Top + h + 2.5f))) (Color.FromArgb(127, 255, 255, 255))
         
         // todo: graph stuff like hp/accuracy over time
         // todo: let you filter to just release timing
@@ -46,7 +46,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
                     | None -> 0.0f, Color.Transparent
             if col.A > 0uy then
                 let x = this.Bounds.Left + 5.0f + ev.Time * hscale
-                Draw.rect(Rect.Box(x - 2.5f, this.Bounds.Top + y - 2.5f, 5f, 5f)) col Sprite.Default
+                Draw.rect(Rect.Box(x - 2.5f, this.Bounds.Top + y - 2.5f, 5f, 5f)) col
         Text.draw(Content.font, "Early", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 35.0f, Color.FromArgb(127, Color.White))
         Text.draw(Content.font, "Late", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 5.0f, Color.FromArgb(127, Color.White))
 
@@ -54,7 +54,7 @@ type ScoreGraph(data: ScoreInfoProvider) =
 
     override this.Draw() =
         if refresh then this.Redraw()
-        Draw.rect Render.bounds Color.White fbo.sprite
+        Draw.sprite Viewport.bounds Color.White fbo.sprite
 
     override this.Dispose() =
         base.Dispose()

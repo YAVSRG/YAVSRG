@@ -46,16 +46,6 @@
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
     <Compile Include="Utils.fs" />
-    <Compile Include="Audio.fs" />
-    <Compile Include="FeatherIcons.fs" />
-    <Compile Include="Graphics\Buffers.fs" />
-    <Compile Include="Graphics\Shader.fs" />
-    <Compile Include="Graphics\Math.fs" />
-    <Compile Include="Graphics\Sprite.fs" />
-    <Compile Include="Graphics\Batch.fs" />
-    <Compile Include="Graphics\Render.fs" />
-    <Compile Include="Graphics\Text.fs" />
-    <Compile Include="Input.fs" />
     <Compile Include="Content.fs" />
     <Compile Include="Options.fs" />
     <Compile Include="UI\Animation.fs" />
@@ -109,14 +99,10 @@
     <Compile Include="UI\Toolbar\Toolbar.fs" />
     <Compile Include="UI\Startup.fs" />
     <Compile Include="Printerlude.fs" />
-    <Compile Include="Game.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ManagedBass" Version="3.1.0" />
-    <PackageReference Include="ManagedBass.Fx" Version="3.1.0" />
-    <PackageReference Include="OpenTK" Version="4.6.7" />
     <PackageReference Include="Percyqaz.Shell" Version="0.2.0" />
   </ItemGroup>
 
@@ -132,6 +118,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Percyqaz.Flux\src\Percyqaz.Flux.fsproj" />
     <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
   </ItemGroup>
 

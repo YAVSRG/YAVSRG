@@ -3,11 +3,11 @@
 open System
 open SixLabors.ImageSharp
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude
 open Interlude.Utils
-open Interlude.Graphics
-open Interlude.Input
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open OpenTK.Mathematics
@@ -157,8 +157,8 @@ module Screen =
             List.iter
                 (fun (bg, (fade: AnimationFade), isDefault) ->
                     let color = Color.FromArgb(fade.Value * 255.0f |> int, color)
-                    let pwidth = Render.vwidth + parallaxZ.Value * depth
-                    let pheight = Render.vheight + parallaxZ.Value * depth
+                    let pwidth = Viewport.vwidth + parallaxZ.Value * depth
+                    let pheight = Viewport.vheight + parallaxZ.Value * depth
                     let x = -parallaxX.Value * parallaxZ.Value * depth
                     let y = -parallaxY.Value * parallaxZ.Value * depth
                     let screenaspect = pwidth / pheight
@@ -195,7 +195,7 @@ module Screen =
                     (Quad.colorOf col)
                     Sprite.DefaultQuad
     
-        let private cwedge = wedge <| new Vector2(Render.vwidth * 0.5f, Render.vheight * 0.5f)
+        let private cwedge = wedge <| new Vector2(Viewport.vwidth * 0.5f, Viewport.vheight * 0.5f)
     
         let private bubble (x, y) (r1: float32) (r2: float32) (col: Color) (lo: float32) (hi: float32) (amount: float32) =
             let pos = Math.Clamp((amount - lo) / (hi - lo), 0.0f, 1.0f) |> float
@@ -230,15 +230,15 @@ module Screen =
         let private diamondWipe inbound amount bounds =
             let s = 150.0f
             let size x =
-                let f = Math.Clamp(((if inbound then amount else 1.0f - amount) - (x - 2.0f * s) / Render.vwidth) / (4.0f * s / Render.vwidth), 0.0f, 1.0f)
+                let f = Math.Clamp(((if inbound then amount else 1.0f - amount) - (x - 2.0f * s) / Viewport.vwidth) / (4.0f * s / Viewport.vwidth), 0.0f, 1.0f)
                 if inbound then f * s * 0.5f else (1.0f - f) * s * 0.5f
             let diamond x y =
                 let r = size x
                 Draw.quad(Quad.create <| new Vector2(x - r, y) <| new Vector2(x, y - r) <| new Vector2(x + r, y) <| new Vector2(x, y + r)) (Quad.colorOf Color.Transparent) Sprite.DefaultQuad
                 
             Stencil.create false
-            for x in 0 .. (Render.vwidth / s |> float |> Math.Ceiling |> int) do
-                for y in 0 .. (Render.vheight / s |> float |> Math.Ceiling |> int) do
+            for x in 0 .. (Viewport.vwidth / s |> float |> Math.Ceiling |> int) do
+                for y in 0 .. (Viewport.vheight / s |> float |> Math.Ceiling |> int) do
                     diamond (s * float32 x) (s * float32 y)
                     diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
             Stencil.draw()
@@ -247,7 +247,7 @@ module Screen =
     
         let drawTransition flags inbound amount bounds =
             diamondWipe inbound amount bounds
-            //fancyTransition inbound amount bounds
+            // fancyTransition inbound amount bounds
 
     type Container(toolbar: Widget) as this =
         inherit Widget()
@@ -262,9 +262,10 @@ module Screen =
         override this.Update(elapsedTime, bounds) =
             Background.update elapsedTime
             if currentType <> Type.Play || Dialog.any() then Tooltip.display.Update(elapsedTime, bounds)
-            if Render.vwidth > 0.0f then
-                parallaxX.Target <- Mouse.X() / Render.vwidth
-                parallaxY.Target <- Mouse.Y() / Render.vheight
+            if Viewport.vwidth > 0.0f then
+                let x, y = Mouse.pos()
+                parallaxX.Target <- x / Viewport.vwidth
+                parallaxY.Target <- y / Viewport.vheight
             Style.accentColor.SetColor Content.accentColor
             Dialog.update(elapsedTime, bounds)
             base.Update(elapsedTime, bounds)
@@ -272,7 +273,7 @@ module Screen =
     
         override this.Draw() =
             Background.draw (this.Bounds, Color.White, 1.0f)
-            Draw.rect this.Bounds (Color.FromArgb (backgroundDim.Value * 255.0f |> int, 0, 0, 0)) Sprite.Default
+            Draw.rect this.Bounds (Color.FromArgb (backgroundDim.Value * 255.0f |> int, 0, 0, 0))
             current.Draw()
             base.Draw()
             if not screenTransition.Complete then
@@ -282,5 +283,6 @@ module Screen =
                 if (transitionFlags &&& TransitionFlag.UnderLogo = TransitionFlag.UnderLogo) then logo.Draw()
             Dialog.draw()
             if currentType <> Type.Play || Dialog.any() then 
-                Draw.rect (Rect.Box(Mouse.X(), Mouse.Y(), Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
+                let x, y = Mouse.pos()
+                Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
                 Tooltip.display.Draw()

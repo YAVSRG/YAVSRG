@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.Play
 
 open Percyqaz.Common
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Interlude
 open Interlude.Utils
@@ -28,7 +29,7 @@ module QuickOptions =
         let firstNote = Gameplay.Chart.current.Value.FirstNote
         let offset = 
             Setting.make
-                (fun v -> Gameplay.Chart.saveData.Value.Offset <- toTime v + firstNote; Audio.changeLocalOffset(toTime v))
+                (fun v -> Gameplay.Chart.saveData.Value.Offset <- toTime v + firstNote; Song.changeLocalOffset(toTime v))
                 (fun () -> float (Gameplay.Chart.saveData.Value.Offset - firstNote))
             |> Setting.bound -200.0 200.0
             |> Setting.round 0

@@ -4,12 +4,12 @@ open System
 open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data
 open Prelude.Data.Themes
 open Prelude.Data.Themes.Noteskin
-open Interlude.Graphics
 
 module Content =
 

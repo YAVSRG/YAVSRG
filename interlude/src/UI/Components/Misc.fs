@@ -3,12 +3,12 @@
 open System
 open OpenTK
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude
 open Interlude.UI
-open Interlude.Input
-open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI.Animation
 
@@ -17,7 +17,7 @@ type TooltipRegion(localisedText) =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Mouse.Hover this.Bounds && (!|Hotkey.Tooltip).Tapped() then
+        if Mouse.hover this.Bounds && (!|Hotkey.Tooltip).Tapped() then
             Tooltip.tooltip ((!|Hotkey.Tooltip), localisedText)
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t

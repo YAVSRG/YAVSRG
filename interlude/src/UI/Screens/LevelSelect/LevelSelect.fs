@@ -2,6 +2,9 @@
 
 open OpenTK.Mathematics
 open Percyqaz.Common
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data.Charts.Sorting
@@ -9,8 +12,6 @@ open Prelude.Data.Charts.Caching
 open Interlude
 open Interlude.UI
 open Interlude.Utils
-open Interlude.Graphics
-open Interlude.Input
 open Interlude.Gameplay
 open Interlude.Options
 open Interlude.UI.Components
@@ -153,11 +154,11 @@ type Screen() as this =
         Draw.quad
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
             (Quad.colorOf (Style.accentShade (120, 0.1f, 0.0f))) Sprite.DefaultQuad
-        Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.accentShade (255, 0.8f, 0.0f)) Sprite.Default
+        Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.accentShade (255, 0.8f, 0.0f))
         base.Draw()
 
     override this.OnEnter prev =
-        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Action (fun () -> Audio.playFrom Chart.current.Value.Header.PreviewTime)
+        Song.onFinish <- SongFinishAction.Callback (fun () -> Song.playFrom Chart.current.Value.Header.PreviewTime)
         refresh()
 
     override this.OnExit next = Input.removeInputMethod()

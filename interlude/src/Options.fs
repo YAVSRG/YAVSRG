@@ -5,72 +5,14 @@ open System.Collections.Generic
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Json
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Input.Bind
 open Prelude.Common
 open Prelude.Gameplay.Layout
 open Prelude.Data.Charts.Library.Imports
 open Interlude
-open Interlude.Input
-open Interlude.Input.Bind
 
 module Options =
-
-    (*
-        Core game config
-        This stuff is always stored with the .exe, not the game data folder
-    *)
-
-    type WindowType =
-        | Windowed = 0
-        | Borderless = 1
-        | Fullscreen = 2
-        | ``Borderless Fullscreen`` = 3
-
-    [<Json.AutoCodec>]
-    type WindowResolution =
-        | Preset of index:int
-        | Custom of width:int * height:int
-        static member Presets : (int * int) array =
-                [|(800, 600); (1024, 768); (1280, 800); (1280, 1024); (1366, 768); (1600, 900);
-                    (1600, 1024); (1680, 1050); (1920, 1080); (2715, 1527)|]
-        member this.Dimensions : int * int * bool =
-            match this with
-            | Custom (w, h) -> w, h, true
-            | Preset i ->
-                let resolutions = WindowResolution.Presets
-                let i = System.Math.Clamp(i, 0, Array.length resolutions - 1)
-                let w, h = resolutions.[i]
-                w, h, false
-
-    type FrameLimit =
-        | ``30`` = 0
-        | ``60`` = 1
-        | ``120`` = 2
-        | ``240`` = 3
-        | ``480 (Recommended)`` = 4
-        | Unlimited = 5
-        | Vsync = 6
-
-    [<Json.AutoCodec>]
-    type GameConfig = 
-        {
-            WorkingDirectory: string
-            Locale: string
-            WindowMode: Setting<WindowType>
-            Resolution: Setting<WindowResolution>
-            FrameLimit: Setting<FrameLimit>
-            Display: Setting<int>
-            AudioDevice: Setting<int>
-        }
-        static member Default = 
-            {
-                WorkingDirectory = ""
-                Locale = "en_GB.txt"
-                WindowMode = Setting.simple WindowType.Borderless
-                Resolution = Setting.simple (Custom (1024, 768))
-                FrameLimit = Setting.simple FrameLimit.``480 (Recommended)``
-                Display = Setting.simple 0
-                AudioDevice = Setting.simple 1
-            }
 
     (*
         User settings
@@ -129,56 +71,6 @@ module Options =
             FadeLength: Setting.Bounded<int>
             Color: Setting<Color>
         }
-
-    type Hotkey =
-
-        | NONE = -1
-
-        // All-purpose/menus
-        | Exit = 0
-        | Select = 1
-        | Previous = 2
-        | Next = 3 
-        | PreviousGroup = 4
-        | NextGroup = 5
-        | Up = 6
-        | Down = 7
-        | Start = 8
-        | End = 9
-        | Search = 10
-        | Toolbar = 11
-        | Tooltip = 12
-        | Delete = 13
-        | Screenshot = 14
-        | Volume = 15
-        
-        // Shortcuts
-        | Import = 100
-        | Options = 101
-        | Help = 102
-        | Tasks = 103
-        | Console = 104
-        
-        // Level select
-        | UpRate = 200
-        | UpRateHalf = 201
-        | UpRateSmall = 202
-        | DownRate = 203
-        | DownRateHalf = 204
-        | DownRateSmall = 205
-        | Collections = 206
-        | AddToCollection = 207
-        | RemoveFromCollection = 208
-        | MoveDownInCollection = 209
-        | MoveUpInCollection = 210
-        | Mods = 211
-        | Autoplay = 212
-        | SortMode = 213
-        | GroupMode = 214
-        
-        // Gameplay
-        | Skip = 300
-        | Retry = 301
 
     [<Json.AutoCodec(false)>]
     type GameOptions =
@@ -299,71 +191,86 @@ module Options =
     // forward ref for applying game config options. it is initialised in the constructor of Game
     let mutable applyOptions: unit -> unit = ignore
 
-    let mutable internal config = GameConfig.Default
+    let mutable internal config = Percyqaz.Flux.Windowing.Config.Default
+
+    type ConfigCodec() =
+        inherit Json.Codec<Percyqaz.Flux.Windowing.Config>()
+        let mutable cdc = Unchecked.defaultof<_>
+        override this.To(ctx: Json.Context) =
+            cdc <- Json.AutoCodecs.record<Percyqaz.Flux.Windowing.Config> ctx false
+            cdc.To
+        override this.From(ctx: Json.Context) = cdc.From
+        override this.Default(ctx: Json.Context) = cdc.Default
+        
+    type WindowResolutionCodec() =
+        inherit Json.Codec<Percyqaz.Flux.Windowing.WindowResolution>()
+        let mutable cdc = Unchecked.defaultof<_>
+        override this.To(ctx: Json.Context) =
+            cdc <- Json.AutoCodecs.union<Percyqaz.Flux.Windowing.WindowResolution> ctx
+            cdc.To
+        override this.From(ctx: Json.Context) = cdc.From
+        override this.Default(ctx: Json.Context) = cdc.Default
+        
+    type BindCodec() =
+        inherit Json.Codec<Percyqaz.Flux.Input.Bind>()
+        let mutable cdc = Unchecked.defaultof<_>
+        override this.To(ctx: Json.Context) =
+            cdc <- Json.AutoCodecs.union<Percyqaz.Flux.Input.Bind> ctx
+            cdc.To
+        override this.From(ctx: Json.Context) = cdc.From
+        override this.Default(ctx: Json.Context) = cdc.Default
+
+    do 
+        JSON.WithCodec<ConfigCodec>()
+            .WithCodec<WindowResolutionCodec>()
+            .WithCodec<BindCodec>() |> ignore
+
     let mutable options = GameOptions.Default
 
     module Hotkeys =
 
-        let defaultHotkeys = 
-            Map.ofList [
-                Hotkey.NONE, Dummy
-
-                Hotkey.Exit, mk Keys.Escape
-                Hotkey.Select, mk Keys.Enter
-                Hotkey.Search, mk Keys.Tab
-                Hotkey.Toolbar, ctrl Keys.T
-                Hotkey.Tooltip, mk Keys.Slash
-                Hotkey.Delete, mk Keys.Delete
-                Hotkey.Screenshot, mk Keys.F12
-                Hotkey.Volume, mk Keys.LeftAlt
-                Hotkey.Previous, mk Keys.Left
-                Hotkey.Next, mk Keys.Right
-                Hotkey.PreviousGroup, mk Keys.PageUp
-                Hotkey.NextGroup, mk Keys.PageDown
-                Hotkey.Up, mk Keys.Up
-                Hotkey.Down, mk Keys.Down
-                Hotkey.Start, mk Keys.Home
-                Hotkey.End, mk Keys.End
-
-                Hotkey.Collections, mk Keys.N
-                Hotkey.AddToCollection, mk Keys.RightBracket
-                Hotkey.RemoveFromCollection, mk Keys.LeftBracket
-                Hotkey.MoveDownInCollection, ctrl Keys.RightBracket
-                Hotkey.MoveUpInCollection, ctrl Keys.LeftBracket
-                Hotkey.SortMode, mk Keys.Comma
-                Hotkey.GroupMode, mk Keys.Period
-
-                Hotkey.Mods, mk Keys.M
-                Hotkey.Autoplay, ctrl Keys.A
-
-                Hotkey.Import, ctrl Keys.I
-                Hotkey.Options, ctrl Keys.O
-                Hotkey.Help, ctrl Keys.H
-                Hotkey.Tasks, mk Keys.F8
-                Hotkey.Console, mk Keys.GraveAccent
-
-                Hotkey.UpRate, mk Keys.Equal
-                Hotkey.DownRate, mk Keys.Minus
-                Hotkey.UpRateHalf, ctrl Keys.Equal
-                Hotkey.DownRateHalf, ctrl Keys.Minus
-                Hotkey.UpRateSmall, shift Keys.Equal
-                Hotkey.DownRateSmall, shift Keys.Minus
-
-                Hotkey.Skip, mk Keys.Space
-                Hotkey.Retry, ctrl Keys.R
-            ]
-
-        let debug() =
-            for v in System.Enum.GetValues typeof<Hotkey> do
-                if not(defaultHotkeys.ContainsKey (v :?> Hotkey)) then
-                    failwithf "Missing a default bind for: %A" v
-
         let init(d: Dictionary<Hotkey, Bind>) =
-            for (key, value) in defaultHotkeys |> Map.toSeq do
-                if not (d.ContainsKey key) || key = Hotkey.NONE then
-                    d.[key] <- value
+            Hotkeys.register "search" (mk Keys.Tab)
+            Hotkeys.register "toolbar" (ctrl Keys.T)
+            Hotkeys.register "tooltip" (mk Keys.Slash)
+            Hotkeys.register "delete" (mk Keys.Delete)
+            Hotkeys.register "screenshot" (mk Keys.F12)
+            Hotkeys.register "volume" (mk Keys.LeftAlt)
+            Hotkeys.register "previous" (mk Keys.Left)
+            Hotkeys.register "next" (mk Keys.Right)
+            Hotkeys.register "previous_group" (mk Keys.PageUp)
+            Hotkeys.register "next_group" (mk Keys.PageDown)
+            Hotkeys.register "start" (mk Keys.Home)
+            Hotkeys.register "end" (mk Keys.End)
 
-    let (!|) (hotkey: Hotkey) = options.Hotkeys.[hotkey]
+            Hotkeys.register "collections" (mk Keys.N)
+            Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
+            Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
+            Hotkeys.register "movedown_in_collection" (ctrl Keys.RightBracket)
+            Hotkeys.register "moveup_in_collection" (ctrl Keys.LeftBracket)
+            Hotkeys.register "sort_mode" (mk Keys.Comma)
+            Hotkeys.register "group_mode" (mk Keys.Period)
+
+            Hotkeys.register "mods" (mk Keys.M)
+            Hotkeys.register "autoplay" (ctrl Keys.A)
+
+            Hotkeys.register "import" (ctrl Keys.I)
+            Hotkeys.register "options" (ctrl Keys.O)
+            Hotkeys.register "help" (ctrl Keys.H)
+            Hotkeys.register "tasks" (mk Keys.F8)
+            Hotkeys.register "console" (mk Keys.GraveAccent)
+
+            Hotkeys.register "uprate" (mk Keys.Equal)
+            Hotkeys.register "downrate" (mk Keys.Minus)
+            Hotkeys.register "uprate_half" (ctrl Keys.Equal)
+            Hotkeys.register "downrate_half" (ctrl Keys.Minus)
+            Hotkeys.register "uprate_small" (shift Keys.Equal)
+            Hotkeys.register "downrate_small" (shift Keys.Minus)
+
+            Hotkeys.register "skip" (mk Keys.Space)
+            Hotkeys.register "retry" (ctrl Keys.R)
+
+            Hotkeys.import d
 
     let private configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
@@ -374,9 +281,9 @@ module Options =
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
         Hotkeys.init options.Hotkeys
-        Hotkeys.debug()
 
     let save() =
+        Hotkeys.export options.Hotkeys
         try
             JSON.ToFile(configPath, true) config
             JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options

@@ -5,12 +5,13 @@ open Prelude.Common
 open Interlude
 open Interlude.Options
 open Interlude.Utils
-open Interlude.Graphics
+open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.OptionsMenu
-open Interlude.Input
 
 type private MenuButton(onClick, label) as this =
     inherit Widget()
@@ -30,7 +31,7 @@ type private MenuButton(onClick, label) as this =
 
     member this.Pop() =
         let (_, _, r, _) = this.Anchors
-        r.Value <- -Render.vwidth
+        r.Value <- -Viewport.vwidth
 
 // Menu screen
 
@@ -68,7 +69,7 @@ type Screen() as this =
         Logo.moveMenu()
         Screen.backgroundDim.Target <- 0.0f
         Screen.hideToolbar <- false
-        Audio.trackFinishBehaviour <- Audio.TrackFinishBehaviour.Loop
+        Song.onFinish <- SongFinishAction.Loop
         splashAnim.Target <- 1.0f
         play.Pop(); options.Pop(); quit.Pop()
 
@@ -88,5 +89,5 @@ type Screen() as this =
 
     override this.Update (elapsedTime, bounds) =
         base.Update (elapsedTime, bounds)
-        splashSubAnim.Target <- if Mouse.Hover (bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then 1.0f else 0.0f
-        if (!|Hotkey.Select).Tapped() then playFunc()
+        splashSubAnim.Target <- if Mouse.hover (bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then 1.0f else 0.0f
+        if (!|"select").Tapped() then playFunc()

@@ -3,12 +3,12 @@
 open System
 open OpenTK.Mathematics
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
-open Interlude.Graphics
 open Interlude.UI.Animation
 
 type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
@@ -26,8 +26,8 @@ type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
     new(onClick, label: string, bind: Hotkey) = Button(onClick, K label, bind)
 
     override this.Draw() =
-        Draw.rect this.Bounds (Style.accentShade(80, 0.5f, color.Value)) Sprite.Default
-        Draw.rect (this.Bounds.SliceBottom 10.0f) (Style.accentShade(255, 1.0f, color.Value)) Sprite.Default
+        Draw.rect this.Bounds (Style.accentShade(80, 0.5f, color.Value))
+        Draw.rect (this.Bounds.SliceBottom 10.0f) (Style.accentShade(255, 1.0f, color.Value))
         Text.drawFillB(Content.font, labelFunc(), this.Bounds.TrimBottom 10.0f, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =

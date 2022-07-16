@@ -2,12 +2,12 @@
 
 open Prelude.Gameplay.NoteColors
 open Percyqaz.Common
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Themes
 open Interlude
 open Interlude.Content
 open Interlude.Utils
-open Interlude.Graphics
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
@@ -39,8 +39,8 @@ module Themes =
                 .Position { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 1.0f %+ 50.0f }
             |> this.Add
 
-            let w = Render.vwidth * scale
-            let h = Render.vheight * scale
+            let w = Viewport.vwidth * scale
+            let h = Viewport.vheight * scale
 
             this.Reposition(-50.0f - w, 1.0f, -h * 0.5f, 0.5f, -50.0f, 1.0f, h * 0.5f, 0.5f)
 
@@ -57,7 +57,7 @@ module Themes =
             fbo.Bind true
             renderer.Draw()
             fbo.Unbind()
-            Draw.rect this.Bounds Color.White fbo.sprite
+            Draw.sprite this.Bounds Color.White fbo.sprite
             base.Draw()
 
         override this.Dispose() =
@@ -108,7 +108,7 @@ module Themes =
                                 (fun () -> noteColors.Style)
                             |> Setting.trigger (ignore >> refreshColors))
                     ).Position(610.0f)
-                    PrettySetting("themes.editnoteskin.notecolors", colors).Position(690.0f, Render.vwidth - 200.0f, 120.0f)
+                    PrettySetting("themes.editnoteskin.notecolors", colors).Position(690.0f, Viewport.vwidth - 200.0f, 120.0f)
                 ]
             Callback = fun () ->
                 Noteskins.Current.changeConfig

@@ -2,8 +2,9 @@
 
 open System
 open System.Drawing
+open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Audio
 open Interlude
-open Interlude.Graphics
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -38,7 +39,7 @@ type LoadingScreen() as this =
 
     override this.Update (elapsedTime, bounds) =
         base.Update (elapsedTime, bounds)
-        Audio.changeVolume (Options.options.AudioVolume.Value * float (if closing then 1.0f - fade.Value else fade.Value))
+        Devices.changeVolume (Options.options.AudioVolume.Value * float (if closing then 1.0f - fade.Value else fade.Value))
         
     override this.Draw() =
         let (x, y) = this.Bounds.Center
