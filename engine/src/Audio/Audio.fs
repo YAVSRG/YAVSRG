@@ -173,11 +173,11 @@ module Devices =
         }
 
     let change(index: int) =
-        let id = if index = -1 then defaultDevice else fst devices.[index]
         try 
+            let id = if index = -1 then defaultDevice else fst devices.[index]
             Bass.CurrentDevice <- id
             Bass.ChannelSetDevice(Song.nowplaying.ID, id) |> bassError
-        with err -> Logging.Error(sprintf "Error switching to audio output %i (id %i)" index id, err)
+        with err -> Logging.Error(sprintf "Error switching to audio output %i" index, err)
 
     let init(device_index: int) =
         get()

@@ -25,8 +25,8 @@ module FlowContainer =
         let mutable refresh = true
         let children = ResizeArray<FlowItem<'T>>()
 
-        member this.WhoIsFocused : int option = Seq.tryFindIndex (fun c -> c.Widget.Focused) children
-        member this.WhoShouldFocus = children.[0].Widget
+        member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun c -> c.Widget.Focused) children
+        member private this.WhoShouldFocus = children.[0].Widget
         member this.Previous() =
             match this.WhoIsFocused with
             | Some i ->

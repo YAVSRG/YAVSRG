@@ -58,7 +58,7 @@ module Input =
 
     let private sinceLastTyped = Diagnostics.Stopwatch.StartNew()
     
-    module internal ThisFrame =
+    module ThisFrame =
         let mutable mx = 0.0f
         let mutable my = 0.0f
         let mutable mz = 0.0f
@@ -72,7 +72,7 @@ module Input =
 
         let mutable finished = false
 
-    module internal LastFrame = 
+    module LastFrame = 
         let mutable mx = 0.0f
         let mutable my = 0.0f
         let mutable mz = 0.0f
@@ -265,6 +265,7 @@ module Mouse =
 
     let pos() = (Input.ThisFrame.mx, Input.ThisFrame.my)
     let x() = fst (pos())
+    let y() = snd (pos())
     let scroll() = let v = Input.ThisFrame.mz - Input.LastFrame.mz in Input.LastFrame.mz <- Input.ThisFrame.mz; v
 
     let private click b = Input.consumeOne(Mouse b, InputEvType.Press).IsSome

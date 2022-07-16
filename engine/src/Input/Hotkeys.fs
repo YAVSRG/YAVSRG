@@ -29,6 +29,16 @@ module Hotkeys =
         register "left" (mk Keys.Left)
         register "right" (mk Keys.Right)
 
+    let import(d: Dictionary<string, Bind>) =
+        for k in d.Keys do
+            ignore (hotkeys.Remove k)
+            hotkeys.Add (k, d.[k])
+
+    let export(d: Dictionary<string, Bind>) =
+        d.Clear()
+        for k in hotkeys.Keys do
+            d.Add (k, hotkeys.[k])
+
 [<AutoOpen>]
 module Helpers =
     

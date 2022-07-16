@@ -26,7 +26,8 @@ module Window =
     let onFileDrop = WindowEvents.onFileDrop.Publish
     let onResize = WindowEvents.onResize.Publish
 
-    let mutable apply_config = ignore
+    let mutable apply_config = None
+    let mutable monitors = [||]
 
 [<Sealed>]
 type Window(config: Config, title: string, root: Root) as this =
@@ -36,23 +37,28 @@ type Window(config: Config, title: string, root: Root) as this =
 
     do
         Devices.init config.AudioDevice.Value
-        Window.apply_config <- this.ApplyConfig
         base.Title <- title
         base.VSync <- VSyncMode.Off
         base.CursorState <- CursorState.Hidden
 
     member this.ApplyConfig(config: Config) =
 
+        let monitor_list = Monitors.GetMonitors()
+
+        Window.monitors <-
+            monitor_list
+            |> Seq.indexed
+            |> Seq.map (fun (i, m) -> i, sprintf "%i: %s" (i + 1) m.Name)
+            |> Array.ofSeq
+
         let monitor =
-            let monitors = Monitors.GetMonitors()
             try
-                monitors.[config.Display.Value]
+                monitor_list.[config.Display.Value]
             with err ->
                 Logging.Error (sprintf "Failed to get display info for monitor %i" config.Display.Value)
                 Monitors.GetMonitorFromWindow(this)
 
         renderThread.RenderFrequency <- float config.FrameLimit.Value
-        base.VSync <- VSyncMode.Off
 
         match config.WindowMode.Value with
 
@@ -95,6 +101,9 @@ type Window(config: Config, title: string, root: Root) as this =
         renderThread.Start()
 
         while not (GLFW.WindowShouldClose this.WindowPtr) do
+            if Window.apply_config.IsSome then
+                this.ApplyConfig Window.apply_config.Value
+                Window.apply_config <- None
             this.ProcessInputEvents()
             GLFW.PollEvents()
             Input.poll(this.KeyboardState, this.MouseState)
@@ -102,9 +111,9 @@ type Window(config: Config, title: string, root: Root) as this =
     
     member this.OnLoad() =
         this.ApplyConfig config
-        WindowEvents.onLoad.Trigger()
         Input.init this
         Hotkeys.init()
+        WindowEvents.onLoad.Trigger()
         base.IsVisible <- true
 
     member this.OnUnload() =
