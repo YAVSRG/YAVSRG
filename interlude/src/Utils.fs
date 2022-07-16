@@ -101,7 +101,7 @@ module Utils =
                 assets: GithubAsset list
             }
 
-        let mutable latestVersionName = "<Unknown because you or the server is offline>"
+        let mutable latestVersionName = "<Unknown, server could not be reached>"
         let mutable latestRelease = None
         let mutable updateAvailable = false
 

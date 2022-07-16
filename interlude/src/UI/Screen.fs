@@ -250,33 +250,33 @@ module Screen =
             diamondWipe inbound amount bounds
             // fancyTransition inbound amount bounds
 
-    type Container(toolbar: Widget1) as this =
-        inherit Widget1()
+    type Container(toolbar: Widget1) =
+        inherit Overlay(NodeType.None)
     
         do
-            this.Add logo
-            this.Add toolbar
-            this.Animation.Add screenTransition
-            this.Animation.Add globalAnimation
             current.OnEnter Type.SplashScreen
     
-        override this.Update(elapsedTime, bounds) =
+        override this.Update(elapsedTime, moved) =
             Background.update elapsedTime
-            if currentType <> Type.Play || Dialog.any() then Tooltip.display.Update(elapsedTime, bounds)
+            if currentType <> Type.Play || Dialog.any() then Tooltip.display.Update (elapsedTime, moved)
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos()
                 parallaxX.Target <- x / Viewport.vwidth
                 parallaxY.Target <- y / Viewport.vheight
             Style.accentColor.SetColor Content.accentColor
-            Dialog.update(elapsedTime, bounds)
-            base.Update(elapsedTime, bounds)
-            current.Update(elapsedTime, toolbar.Bounds)
+            Dialog.update (elapsedTime, this.Bounds)
+
+            globalAnimation.Update elapsedTime
+            toolbar.Update (elapsedTime, this.Bounds)
+            logo.Update (elapsedTime, this.Bounds)
+            current.Update (elapsedTime, toolbar.Bounds)
     
         override this.Draw() =
             Background.draw (this.Bounds, Color.White, 1.0f)
             Draw.rect this.Bounds (Color.FromArgb (backgroundDim.Value * 255.0f |> int, 0, 0, 0))
             current.Draw()
-            base.Draw()
+            logo.Draw()
+            toolbar.Draw()
             if not screenTransition.Complete then
                 let inbound = transitionIn.Elapsed < TRANSITIONTIME
                 let amount = Math.Clamp((if inbound then transitionIn.Elapsed / TRANSITIONTIME else 1.0 - (transitionOut.Elapsed / TRANSITIONTIME)), 0.0, 1.0) |> float32
@@ -287,3 +287,7 @@ module Screen =
                 let x, y = Mouse.pos()
                 Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
                 Tooltip.display.Draw()
+
+        override this.Init(parent: Widget) =
+            base.Init parent
+            Tooltip.display.Init this

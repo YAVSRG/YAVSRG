@@ -57,7 +57,7 @@ type Toolbar() as this =
             .Position( Position.Box(0.0f, 0.0f, 600.0f, -HEIGHT, 200.0f, HEIGHT) )
         |=+ Jukebox()
 
-    override this.VisibleBounds = this.Parent.Value.VisibleBounds
+    override this.VisibleBounds = Viewport.bounds
 
     override this.Draw() = 
         let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds

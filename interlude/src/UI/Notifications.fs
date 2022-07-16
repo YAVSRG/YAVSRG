@@ -35,9 +35,9 @@ module Tooltip =
     let mutable up = false
 
     type Display() =
-        inherit Widget1()
+        inherit Overlay(NodeType.None)
 
-        override this.Update(elapsedTime, bounds) =
+        override this.Update(elapsedTime, moved) =
             for i in items do
                 i.Duration <- i.Duration - elapsedTime
                 i.Fade.Update elapsedTime |> ignore
@@ -47,8 +47,7 @@ module Tooltip =
                         i.Callback()
                     elif i.Bind.IsSome && not (i.Bind.Value.Pressed()) then
                         i.Fade.Target <- 0.0f
-                elif i.Fade.Value < 0.01f then this.Synchronized(fun () -> items.Remove i |> ignore)
-            base.Update(elapsedTime, bounds)
+                elif i.Fade.Value < 0.01f then sync (fun () -> items.Remove i |> ignore)
             if items.Count = 0 then
                 up <- Mouse.y() > this.Bounds.CenterY
 
@@ -88,7 +87,6 @@ module Tooltip =
                     let h = height i
                     y <- y - h * i.Fade.Value
                     draw i y h
-            base.Draw()
 
     let display = Display()
 
@@ -102,7 +100,7 @@ module Tooltip =
                 Callback = ignore
                 Type = NotificationType.Info
             }
-        display.Synchronized(fun () -> items.Add t)
+        sync (fun () -> items.Add t)
 
     let notif (str: string, t: NotificationType) =
         let t: T =
@@ -114,7 +112,7 @@ module Tooltip =
                 Callback = ignore
                 Type = t
             }
-        display.Synchronized(fun () -> items.Add t)
+        sync (fun () -> items.Add t)
 
     let callback (b: Bind, str: string, t: NotificationType, cb: unit -> unit) =
         let t: T =
@@ -126,7 +124,7 @@ module Tooltip =
                 Callback = cb
                 Type = t
             }
-        display.Synchronized(fun () -> items.Add t)
+        sync (fun () -> items.Add t)
 
 module Notification =
 

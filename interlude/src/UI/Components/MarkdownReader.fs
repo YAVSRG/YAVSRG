@@ -70,7 +70,7 @@ module MarkdownReader =
 
         let sym str = text str (Color.Silver, Color.Red) 25.0f
 
-        let empty() = make (Widget()) (0.0f, 0.0f)
+        let empty() = make (Widget1()) (0.0f, 0.0f)
 
 
     type SpanSettings =

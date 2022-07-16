@@ -30,5 +30,9 @@ module Startup =
         override this.Draw() = container.Draw()
 
         override this.Update(elapsedTime, moved) =
-            container.Update(elapsedTime, Viewport.bounds)
+            container.Update(elapsedTime, moved)
             if Screen.exit then this.ShouldExit <- true
+
+        override this.Init() =
+            base.Init()
+            container.Init(this)

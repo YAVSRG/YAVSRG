@@ -151,7 +151,7 @@ type SelectionMenu(title: string, topLevel: SelectionPage) as this =
     let stack: (Selectable * (unit -> unit)) option array = Array.create 12 None
     let mutable namestack = []
     let mutable name = ""
-    let body = Widget()
+    let body = Widget1()
 
     let wrapper main =
         let mutable disposed = false
