@@ -3,13 +3,18 @@
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 
+[<AutoOpen>]
+module Root =
+    let internal animation = Animation.Group()
+
+    let sync (action: unit -> unit) = animation.Add(Animation.Action action)
+
 [<AbstractClass>]
 type Root() =
     inherit Widget(NodeType.None)
 
     override this.Position with set(value) = failwith "root position is tied to the bounds of the screen"
     member val ShouldExit = false with get, set
-    member val Animation = Animation.Group() with get
 
     override this.Init(parent: Widget) = failwith "call .Init() instead"
     abstract member Init : unit -> unit
@@ -25,5 +30,3 @@ type Root() =
             this.Bounds <- Viewport.bounds
             this.VisibleBounds <- Viewport.bounds
         if (!|"exit").Tapped() then Selection.up()
-
-    member this.Sync action = this.Animation.Add(Animation.Action(action))

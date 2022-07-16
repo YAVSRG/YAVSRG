@@ -44,11 +44,11 @@ type RenderThread(window: NativeWindow, root: Root) =
         
         // Update
         Input.update()
-        root.Animation.Update elapsedTime
+        animation.Update elapsedTime
         root.Update (elapsedTime, resized)
         resized <- false
         Input.finish_frame_events()
-        Song.update()
+        Devices.update(elapsedTime)
         if root.ShouldExit then window.Close()
         
         // Draw

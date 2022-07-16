@@ -1,7 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System
-open System.Drawing
 open System.Collections.Generic
 open Percyqaz.Flux.Utils
 
@@ -36,7 +35,7 @@ module Animation =
                 value <- lerp (MathF.Pow(0.994f, float32 elapsedTime)) target value
                 time <- time - elapsedTime
 
-        override this.Complete = time <= 0.0
+        override this.Complete = false
 
         member this.Snap() = value <- target; time <- 0.0
 
@@ -120,4 +119,7 @@ module Animation =
         for a in xs do g.Add a
         g
 
-    // todo: serial computation expression
+    let seq xs =
+        let s = Sequence()
+        for a in xs do s.Add a
+        s

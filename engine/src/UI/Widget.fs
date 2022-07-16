@@ -178,3 +178,13 @@ type DynamicContainer(nodeType) =
 
     static member (|+) (parent: #DynamicContainer, child: #Widget) = parent.Add child; parent
     static member (|*) (parent: #DynamicContainer, child: #Widget) = parent.Add child
+
+[<AbstractClass>]
+type Overlay(nodeType: NodeType) =
+    inherit Widget(nodeType)
+
+    override this.Position with set _ = failwith "Position can not be set for overlay components"
+
+    override this.Init(parent: Widget) =
+        base.Init parent
+        this.Bounds <- Viewport.bounds

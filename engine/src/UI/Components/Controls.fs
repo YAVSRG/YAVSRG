@@ -1,7 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System
-open System.Drawing
 open Percyqaz.Common
 open Percyqaz.Flux.Resources
 open Percyqaz.Flux.Graphics

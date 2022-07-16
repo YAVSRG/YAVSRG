@@ -129,7 +129,8 @@ module Devices =
     let private fft: float32 array = Array.zeroCreate 1024
     let waveForm: float32 array = Array.zeroCreate 256
 
-    let private updateWaveform() =
+    let private updateWaveform(elapsedTime) =
+        let lerp_amount = MathF.Pow(0.988f, float32 elapsedTime)
         if Song.playing() then
             Bass.ChannelGetData(Song.nowplaying.ID, fft, int DataFlags.FFT2048) |> ignore
             //algorithm adapted from here
@@ -143,12 +144,12 @@ module Devices =
                     if (peak < fft.[1 + b0]) then peak <- fft.[1 + b0]
                     b0 <- b0 + 1
                 let y = Math.Clamp(Math.Sqrt(float peak) * 3.0 * 255.0 - 4.0, 0.0, 255.0) |> float32
-                waveForm.[i] <- waveForm.[i] * 0.9f + y * 0.1f
+                waveForm.[i] <- Percyqaz.Flux.Utils.lerp lerp_amount y waveForm.[i]
         else
-            for i in 0 .. 255 do waveForm.[i] <- waveForm.[i] * 0.9f
+            for i in 0 .. 255 do waveForm.[i] <- waveForm.[i] * lerp_amount
 
-    let update() =
-        updateWaveform()
+    let update(elapsedTime: float) =
+        updateWaveform elapsedTime
         Song.update()
 
     let mutable private defaultDevice = -1
@@ -170,7 +171,7 @@ module Devices =
         seq {
             yield -1, "Default"
             yield! devices
-        }
+        } |> Array.ofSeq
 
     let change(index: int) =
         try 
