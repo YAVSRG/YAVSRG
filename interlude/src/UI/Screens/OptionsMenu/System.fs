@@ -3,6 +3,7 @@
 open OpenTK
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.Windowing
 open Prelude.Common
 open Interlude.Options
 open Interlude.UI.Components.Selection
@@ -10,12 +11,6 @@ open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
 module System =
-
-    let monitors() =
-        seq {
-            for i, m in Seq.indexed (Windowing.Desktop.Monitors.GetMonitors()) do
-                yield i, sprintf "%i: %s" (i + 1) m.Name
-        } |> Array.ofSeq
     
     let page() : SelectionPage =
         {
@@ -36,7 +31,7 @@ module System =
                     PrettySetting("system.windowmode", Selector.FromEnum config.WindowMode).Position(560.0f)
                     // todo: way to edit resolution settings?
                     PrettySetting("system.framelimit", Selector.FromEnum config.FrameLimit).Position(640.0f)
-                    PrettySetting("system.monitor", Selector(monitors(), config.Display)).Position(720.0f)
+                    PrettySetting("system.monitor", Selector(Window.monitors, config.Display)).Position(720.0f)
                 ] :> Selectable
-            Callback = applyOptions
+            Callback = fun () -> Window.apply_config <- Some config
         }

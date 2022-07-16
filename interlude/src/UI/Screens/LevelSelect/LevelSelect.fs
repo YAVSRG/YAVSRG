@@ -9,7 +9,6 @@ open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
-open Interlude
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Gameplay
@@ -95,7 +94,7 @@ type Screen() as this =
         LevelSelectDropdown(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.accentShade(100, 0.4f, 0.6f)),
-            Hotkey.SortMode)
+            "sort_mode")
             .Tooltip(L"levelselect.sortby.tooltip")
             .Position { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
@@ -110,7 +109,7 @@ type Screen() as this =
         LevelSelectDropdown(groupBy.Keys, "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.accentShade(100, 0.2f, 0.8f)),
-            Hotkey.GroupMode)
+            "group_mode")
             .Tooltip(L"levelselect.groupby.tooltip")
             .Position { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
@@ -124,21 +123,21 @@ type Screen() as this =
         base.Update(elapsedTime, bounds)
         if LevelSelect.refresh then refresh(); LevelSelect.refresh <- false
 
-        if (!|Hotkey.Select).Tapped() then Tree.play()
+        if (!|"select").Tapped() then Tree.play()
 
-        elif (!|Hotkey.UpRateSmall).Tapped() then changeRate(0.01f)
-        elif (!|Hotkey.UpRateHalf).Tapped() then changeRate(0.05f)
-        elif (!|Hotkey.UpRate).Tapped() then changeRate(0.1f)
-        elif (!|Hotkey.DownRateSmall).Tapped() then changeRate(-0.01f)
-        elif (!|Hotkey.DownRateHalf).Tapped() then changeRate(-0.05f)
-        elif (!|Hotkey.DownRate).Tapped() then changeRate(-0.1f)
+        elif (!|"uprate_small").Tapped() then changeRate(0.01f)
+        elif (!|"uprate_half").Tapped() then changeRate(0.05f)
+        elif (!|"uprate").Tapped() then changeRate(0.1f)
+        elif (!|"downrate_small").Tapped() then changeRate(-0.01f)
+        elif (!|"downrate_half").Tapped() then changeRate(-0.05f)
+        elif (!|"downrate").Tapped() then changeRate(-0.1f)
 
-        elif (!|Hotkey.Next).Tapped() then Tree.next()
-        elif (!|Hotkey.Previous).Tapped() then Tree.previous()
-        elif (!|Hotkey.NextGroup).Tapped() then Tree.nextGroup()
-        elif (!|Hotkey.PreviousGroup).Tapped() then Tree.previousGroup()
-        elif (!|Hotkey.Start).Tapped() then Tree.beginGroup()
-        elif (!|Hotkey.End).Tapped() then Tree.endGroup()
+        elif (!|"next").Tapped() then Tree.next()
+        elif (!|"previous").Tapped() then Tree.previous()
+        elif (!|"next_group").Tapped() then Tree.nextGroup()
+        elif (!|"previous_group").Tapped() then Tree.previousGroup()
+        elif (!|"start").Tapped() then Tree.beginGroup()
+        elif (!|"end").Tapped() then Tree.endGroup()
         
         Tree.update(this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsedTime)
 

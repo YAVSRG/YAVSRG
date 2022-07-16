@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open Percyqaz.Common
+open Percyqaz.Flux.Input
 open Prelude.Gameplay.Mods
 open Interlude.UI
 open Interlude.UI.Components
@@ -10,7 +11,6 @@ open Interlude.UI.Components.Selection.Buttons
 open Interlude.UI.Components.Selection.Menu
 open Interlude.Utils
 open Interlude.Gameplay
-open Interlude.Options
 
 module private ModSelect =
 
@@ -40,9 +40,9 @@ module private ModSelect =
 type ModSelect() as this =
     inherit Widget()
 
-    do StylishButton ((fun () -> SelectionMenu(N"mods", ModSelect.page()).Show()), K "Mods", (fun () -> Style.accentShade(100, 0.8f, 0.2f)), Hotkey.Mods) |> this.Add
+    do StylishButton ((fun () -> SelectionMenu(N"mods", ModSelect.page()).Show()), K "Mods", (fun () -> Style.accentShade(100, 0.8f, 0.2f)), "mods") |> this.Add
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if (!|Hotkey.Autoplay).Tapped() then
+        if (!|"autoplay").Tapped() then
             autoplay <- not autoplay

@@ -117,12 +117,12 @@ module Terminal =
                 Text.drawB(font.Value, line, 20.0f, bounds.Left + 20.0f, bounds.Bottom - 60.0f - 60.0f - 40f * float32 i, (Color.White, Color.Black))
 
     let update() =
-        if shown && (!|Hotkey.Exit).Tapped() then hide()
+        if shown && (!|"exit").Tapped() then hide()
         if 
             options.EnableConsole.Value
             && not shown
             && Screen.currentType <> Screen.Type.Play
-            && (!|Hotkey.Console).Tapped()
+            && (!|"console").Tapped()
         then show()
 
         if not shown then ()

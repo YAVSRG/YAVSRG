@@ -188,9 +188,6 @@ module Options =
             |]
         }
 
-    // forward ref for applying game config options. it is initialised in the constructor of Game
-    let mutable applyOptions: unit -> unit = ignore
-
     let mutable internal config = Percyqaz.Flux.Windowing.Config.Default
 
     type ConfigCodec() =
@@ -246,8 +243,8 @@ module Options =
             Hotkeys.register "collections" (mk Keys.N)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
             Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
-            Hotkeys.register "movedown_in_collection" (ctrl Keys.RightBracket)
-            Hotkeys.register "moveup_in_collection" (ctrl Keys.LeftBracket)
+            Hotkeys.register "move_down_in_collection" (ctrl Keys.RightBracket)
+            Hotkeys.register "move_up_in_collection" (ctrl Keys.LeftBracket)
             Hotkeys.register "sort_mode" (mk Keys.Comma)
             Hotkeys.register "group_mode" (mk Keys.Period)
 
@@ -280,7 +277,6 @@ module Options =
         Localisation.loadFile config.Locale
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
-        Hotkeys.init options.Hotkeys
 
     let save() =
         Hotkeys.export options.Hotkeys

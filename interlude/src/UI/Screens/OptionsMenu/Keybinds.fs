@@ -100,7 +100,7 @@ module Keybinds =
         let container = FlowSelectable(80.0f, 10.0f)
         for o in System.Enum.GetValues typeof<Hotkey> do
             let h = o :?> Hotkey
-            if h <> Hotkey.NONE then
+            if h <> "none" then
                 container.Add( PrettySetting("hotkeys." + h.ToString().ToLower(), KeyBinder h) )
         container.Reposition(100.0f, 200.0f, -100.0f, 0.0f)
         {

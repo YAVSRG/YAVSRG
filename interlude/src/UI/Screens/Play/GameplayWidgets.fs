@@ -4,6 +4,7 @@ open OpenTK
 open System
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
@@ -180,12 +181,12 @@ module GameplayWidgets =
         inherit Widget()
         
         let firstNote = offsetOf (Gameplay.Chart.colored().Notes.First.Value)
-        do this.Add(TextBox(sprintf "Press %O to skip" (!|Hotkey.Skip) |> Utils.K, Utils.K Color.White, 0.5f))
+        do this.Add(TextBox(sprintf "Press %O to skip" (!|"skip") |> Utils.K, Utils.K Color.White, 0.5f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             if helper.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
-                if (!|Hotkey.Skip).Tapped() then
+                if (!|"skip").Tapped() then
                     Song.pause()
                     Song.playFrom(firstNote - Song.LEADIN_TIME)
             else this.Destroy()

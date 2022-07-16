@@ -31,3 +31,4 @@ module Startup =
 
         override this.Update(elapsedTime, moved) =
             container.Update(elapsedTime, Viewport.bounds)
+            if Screen.exit then this.ShouldExit <- true

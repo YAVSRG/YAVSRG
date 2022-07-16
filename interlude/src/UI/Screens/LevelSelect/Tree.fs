@@ -227,10 +227,10 @@ module Tree =
                 elif Mouse.rightClick() then
                     let x, y = Mouse.pos()
                     showDropdown cc context (min (Viewport.vwidth - 405f) x, y - scrollPos.Value - origin)
-                elif (!|Hotkey.Delete).Tapped() then
+                elif (!|"delete").Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
                     Tooltip.callback (
-                        (!|Hotkey.Delete),
+                        (!|"delete"),
                         Localisation.localiseWith [chartName] "misc.delete",
                         NotificationType.Warning,
                         fun () -> 
@@ -281,10 +281,10 @@ module Tree =
             if Mouse.hover bounds then
                 if Mouse.leftClick() then
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
-                elif (!|Hotkey.Delete).Tapped() then
+                elif (!|"delete").Tapped() then
                     let groupName = sprintf "%s (%i charts)" name (items.Count())
                     Tooltip.callback (
-                        (!|Hotkey.Delete),
+                        (!|"delete"),
                         Localisation.localiseWith [groupName] "misc.delete",
                         NotificationType.Warning,
                         fun () ->
@@ -416,7 +416,7 @@ module Tree =
         let tree_height = bottomEdge - scrollPos.Value
         if Mouse.rightClick() then right_click_scrolling <- true
         if not (Mouse.held Mouse.RIGHT) then right_click_scrolling <- false
-        if (!|Hotkey.Up).Tapped() && expandedGroup <> "" then
+        if (!|"up").Tapped() && expandedGroup <> "" then
             scrollTo <- ScrollTo.Pack expandedGroup
             expandedGroup <- ""
         if right_click_scrolling then scrollPos.Target <- -(Mouse.y() - origin) / total_height * tree_height

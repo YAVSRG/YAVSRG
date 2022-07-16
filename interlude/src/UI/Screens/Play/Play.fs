@@ -93,13 +93,13 @@ type Screen() as this =
                 liveplay.Add(time, inputKeyState) )
             scoring.Update chartTime
 
-        if (!|Hotkey.Options).Pressed() then
+        if (!|"options").Pressed() then
             Song.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
             QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default)
 
-        if (!|Hotkey.Retry).Pressed() then
+        if (!|"retry").Pressed() then
             Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default
         
         if scoring.Finished && not (liveplay :> IReplayProvider).Finished then
@@ -201,7 +201,7 @@ type ReplayScreen(mode: ReplayMode) as this =
 
         if not keypressData.Finished then scoring.Update chartTime
 
-        if (!|Hotkey.Options).Pressed() then
+        if (!|"options").Pressed() then
             QuickOptions.show(scoring, ignore)
         
         if keypressData.Finished then Screen.back Screen.TransitionFlag.Default

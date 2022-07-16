@@ -3,7 +3,7 @@
 open System.Drawing
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
-open Interlude.Options
+open Percyqaz.Flux.Input
 open Interlude.UI
 open Interlude.UI.Animation
 open Interlude.UI.Components
@@ -33,27 +33,27 @@ type Toolbar() as this =
         |-+ Button(
                 (fun () -> Screen.back Screen.TransitionFlag.UnderLogo),
                 sprintf "%s %s  " Icons.back (L"menu.back"),
-                Hotkey.Exit )
+                "exit" )
             .Position( Position.Box (0.0f, 1.0f, 200.0f, HEIGHT) )
         |-+ Button(
                 ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
                 L"menu.options",
-                Hotkey.Options )
+                "options" )
             .Position( Position.Box(0.0f, 0.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT) )
         |-+ Button(
                 ( fun () -> if shown() then Screen.change Screen.Type.Import Screen.TransitionFlag.Default ),
                 L"menu.import",
-                Hotkey.Import )
+                "import" )
             .Position( Position.Box(0.0f, 0.0f, 200.0f, -HEIGHT, 200.0f, HEIGHT) )
         |-+ Button(
                 ( fun () -> if shown() then MarkdownReader.help() ),
                 L"menu.help",
-                Hotkey.Help )
+                "help" )
             .Position( Position.Box(0.0f, 0.0f, 400.0f, -HEIGHT, 200.0f, HEIGHT) )
         |-+ Button(
                 ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
                 L"menu.tasks",
-                Hotkey.Tasks )
+                "tasks" )
             .Position( Position.Box(0.0f, 0.0f, 600.0f, -HEIGHT, 200.0f, HEIGHT) )
         |=+ Jukebox()
 
@@ -73,7 +73,7 @@ type Toolbar() as this =
         Terminal.draw()
 
     override this.Update(elapsedTime, bounds) =
-        if shown() && (!|Hotkey.Toolbar).Tapped() then
+        if shown() && (!|"toolbar").Tapped() then
             userCollapse <- not userCollapse
             barSlider.Target <- if userCollapse then 0.0f else 1.0f
         Terminal.update()

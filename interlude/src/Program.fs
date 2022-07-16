@@ -3,6 +3,7 @@ open System.Threading
 open System.Diagnostics
 open Percyqaz.Common
 open Percyqaz.Flux
+open Percyqaz.Flux.Windowing
 open Interlude
 open Interlude.UI
 
@@ -19,6 +20,13 @@ let main argv =
         try
             Options.load()
         with err -> Logging.Critical("Fatal error loading game config", err); crashSplash(); Console.ReadLine() |> ignore
+        
+        Window.onLoad.Add(fun () -> 
+            Content.init Options.options.Theme.Value Options.options.Noteskin.Value
+            Gameplay.init()
+            Options.Hotkeys.init Options.options.Hotkeys
+            Printerlude.init()
+        )
 
         Launch.entryPoint
             (
@@ -26,6 +34,8 @@ let main argv =
                 "Interlude",
                 Startup.Root()
             )
+
+        Options.save()
 
         m.ReleaseMutex()
     else

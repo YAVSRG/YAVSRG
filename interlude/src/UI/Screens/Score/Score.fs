@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Scoring.Grading
@@ -328,11 +329,11 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
 
-        if (!|Hotkey.Next).Tapped() then
+        if (!|"next").Tapped() then
             Setting.app WatcherSelection.cycleForward options.Rulesets
             scoreData.Ruleset <- getCurrentRuleset()
             refresh()
-        elif (!|Hotkey.Previous).Tapped() then
+        elif (!|"previous").Tapped() then
             Setting.app WatcherSelection.cycleBackward options.Rulesets
             scoreData.Ruleset <- getCurrentRuleset()
             refresh()

@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.Import
 
 open Percyqaz.Common
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.ChartFormats.Conversions
 open Prelude.Data.Charts.Library.Imports
@@ -100,7 +101,7 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if (!|Hotkey.Exit).Tapped() then this.BeginClose()
+        if (!|"exit").Tapped() then this.BeginClose()
 
     override this.OnClose() = 
         Mounts.dropFunc <- None

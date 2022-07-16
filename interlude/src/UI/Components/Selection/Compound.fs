@@ -2,9 +2,9 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.Utils
-open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
@@ -120,7 +120,7 @@ module CardSelect =
                     this.HoverChild <- Some (buttons.[0])
                 
         override this.Update(elapsedTime, bounds) =
-            if this.Selected && this.HoverChild = None && (!|Hotkey.Select).Tapped() then onSelect()
+            if this.Selected && this.HoverChild = None && (!|"select").Tapped() then onSelect()
             base.Update(elapsedTime, bounds)
     
         override this.Draw() =

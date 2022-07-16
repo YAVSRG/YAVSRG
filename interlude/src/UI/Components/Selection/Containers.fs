@@ -1,7 +1,7 @@
 ﻿namespace Interlude.UI.Components.Selection.Containers
 
 open Percyqaz.Common
-open Interlude.Options
+open Percyqaz.Flux.Input
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
@@ -26,12 +26,12 @@ type NavigateSelectable() =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if not disposed && this.Selected && this.SelectedChild.IsNone then
-            if (!|Hotkey.Previous).Tapped() then this.Left()
-            if (!|Hotkey.Up).Tapped() then this.Up()
-            if (!|Hotkey.Next).Tapped() then this.Right()
-            if (!|Hotkey.Down).Tapped() then this.Down()
-            if (!|Hotkey.Select).Tapped() then this.SelectedChild <- this.HoverChild
-            if (!|Hotkey.Exit).Tapped() then this.Selected <- false
+            if (!|"previous").Tapped() then this.Left()
+            if (!|"up").Tapped() then this.Up()
+            if (!|"next").Tapped() then this.Right()
+            if (!|"down").Tapped() then this.Down()
+            if (!|"select").Tapped() then this.SelectedChild <- this.HoverChild
+            if (!|"exit").Tapped() then this.Selected <- false
 
     override this.Dispose() = base.Dispose(); disposed <- true
 

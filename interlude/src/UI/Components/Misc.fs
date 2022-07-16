@@ -7,9 +7,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
-open Interlude
 open Interlude.UI
-open Interlude.Options
 open Interlude.UI.Animation
 
 type TooltipRegion(localisedText) =
@@ -17,8 +15,8 @@ type TooltipRegion(localisedText) =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Mouse.hover this.Bounds && (!|Hotkey.Tooltip).Tapped() then
-            Tooltip.tooltip ((!|Hotkey.Tooltip), localisedText)
+        if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
+            Tooltip.tooltip ((!|"tooltip"), localisedText)
 
     static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
 
@@ -72,7 +70,7 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     inherit Widget()
     let searchTimer = new Diagnostics.Stopwatch()
     do
-        TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some Hotkey.Search, "search" )
+        TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some "search", "search" )
         |> this.Add
 
     new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, fun () -> callback(Filter.parse s.Value))
@@ -89,7 +87,7 @@ type TextInputDialog(bounds: Rect, prompt, callback) as this =
         this.Add(tb.Position { Left = 0.0f %+ bounds.Left; Top = 0.0f %+ bounds.Top; Right = 0.0f %+ bounds.Right; Bottom = 0.0f %+ bounds.Bottom })
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if (!|Hotkey.Select).Tapped() || (!|Hotkey.Exit).Tapped() then tb.Dispose(); this.BeginClose()
+        if (!|"select").Tapped() || (!|"exit").Tapped() then tb.Dispose(); this.BeginClose()
     override this.OnClose() = callback buf.Value
 
 module SlideDialog =
@@ -109,7 +107,7 @@ type SlideDialog(direction: SlideDialog.Direction, distance: float32) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if (!|Hotkey.Exit).Tapped() then this.BeginClose()
+        if (!|"exit").Tapped() then this.BeginClose()
 
     override this.BeginClose() =
         base.BeginClose()

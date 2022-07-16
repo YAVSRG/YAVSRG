@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open Percyqaz.Common
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
@@ -72,9 +73,9 @@ module CollectionManager =
                                                 else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
                                         )
                                 }, add)).Position(200.0f, 1200.0f, 600.0f)
-                        TextBox(K <| Localisation.localiseWith [(!|Hotkey.AddToCollection).ToString()] "collections.addhint", K (Color.White, Color.Black), 0.5f)
+                        TextBox(K <| Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint", K (Color.White, Color.Black), 0.5f)
                             .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 190.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 120.0f }
-                        TextBox(K <| Localisation.localiseWith [(!|Hotkey.RemoveFromCollection).ToString()] "collections.removehint", K (Color.White, Color.Black), 0.5f)
+                        TextBox(K <| Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint", K (Color.White, Color.Black), 0.5f)
                             .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 120.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 50.0f }
                     ] :> Selectable
             Callback = ignore
@@ -109,16 +110,16 @@ module CollectionManager =
 type CollectionManager() as this =
     inherit Widget()
 
-    do StylishButton ((fun () -> SelectionMenu(N"collections", CollectionManager.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), Hotkey.Collections) |> this.Add
+    do StylishButton ((fun () -> SelectionMenu(N"collections", CollectionManager.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), "collections") |> this.Add
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
 
         if Chart.cacheInfo.IsSome then
 
-            if (!|Hotkey.AddToCollection).Tapped() then CollectionManager.addChart(Chart.cacheInfo.Value, Chart.context)
-            elif (!|Hotkey.RemoveFromCollection).Tapped() then CollectionManager.removeChart(Chart.cacheInfo.Value, Chart.context)
-            elif (!|Hotkey.MoveDownInCollection).Tapped() then
+            if (!|"add_to_collection").Tapped() then CollectionManager.addChart(Chart.cacheInfo.Value, Chart.context)
+            elif (!|"remove_from_collection").Tapped() then CollectionManager.removeChart(Chart.cacheInfo.Value, Chart.context)
+            elif (!|"move_down_in_collection").Tapped() then
                 if reorder false then LevelSelect.refresh <- true
-            elif (!|Hotkey.MoveUpInCollection).Tapped() then
+            elif (!|"move_up_in_collection").Tapped() then
                 if reorder true then LevelSelect.refresh <- true

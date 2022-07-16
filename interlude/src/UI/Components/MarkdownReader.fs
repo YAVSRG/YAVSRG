@@ -175,7 +175,7 @@ module MarkdownReader =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if Mouse.leftClick() || (!|Hotkey.Exit).Tapped() then
+            if Mouse.leftClick() || (!|"exit").Tapped() then
                 this.BeginClose()
                 frame.Move(-WIDTH * 0.5f, Viewport.vheight, WIDTH * 0.5f, Viewport.vheight - 200.0f)
         override this.OnClose() = ()

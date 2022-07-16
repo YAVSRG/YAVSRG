@@ -4,9 +4,9 @@ open System
 open OpenTK.Mathematics
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude
-open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Animation
@@ -21,7 +21,7 @@ type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
         this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
         this.Add(new Bindable(bind, onClick))
 
-    new(onClick, labelFunc: unit -> string) = Button(onClick, labelFunc, Hotkey.NONE)
+    new(onClick, labelFunc: unit -> string) = Button(onClick, labelFunc, "none")
     new(onClick, label: string) = Button(onClick, K label)
     new(onClick, label: string, bind: Hotkey) = Button(onClick, K label, bind)
 
@@ -40,7 +40,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
         this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
         this.Add(new Bindable(bind, onClick))
     
-    new(onClick, labelFunc, colorFunc) = StylishButton(onClick, labelFunc, colorFunc, Hotkey.NONE)
+    new(onClick, labelFunc, colorFunc) = StylishButton(onClick, labelFunc, colorFunc, "none")
 
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set

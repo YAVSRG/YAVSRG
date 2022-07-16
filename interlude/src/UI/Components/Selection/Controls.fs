@@ -34,7 +34,7 @@ module Dropdown =
             base.Draw()
 
         override this.Update(elapsedTime, bounds) =
-            if this.Hover && (!|Hotkey.Select).Tapped() then this.Selected <- true
+            if this.Hover && (!|"select").Tapped() then this.Selected <- true
             base.Update(elapsedTime, bounds)
 
         override this.OnSelect() =
@@ -207,7 +207,7 @@ type TextField(setting: Setting<string>) as this =
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if this.Selected && (!|Hotkey.Exit).Tapped() then
+        if this.Selected && (!|"exit").Tapped() then
             Input.removeInputMethod()
 
 type NoteColorPicker(color: Setting<byte>) as this =
