@@ -33,7 +33,7 @@ module Screen =
         
     [<AbstractClass>]
     type T() =
-        inherit Widget()
+        inherit Widget1()
         abstract member OnEnter: Type -> unit
         abstract member OnExit: Type -> unit
 
@@ -250,8 +250,8 @@ module Screen =
             diamondWipe inbound amount bounds
             // fancyTransition inbound amount bounds
 
-    type Container(toolbar: Widget) as this =
-        inherit Widget()
+    type Container(toolbar: Widget1) as this =
+        inherit Widget1()
     
         do
             this.Add logo

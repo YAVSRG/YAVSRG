@@ -7,7 +7,7 @@ open Interlude.UI
 *)
 
 type Selectable() =
-    inherit Widget()
+    inherit Widget1()
 
     (*
         - There is only one item hovered per widget

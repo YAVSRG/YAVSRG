@@ -45,7 +45,7 @@ module Helpers =
     let T (s: string) = L ("options." + s + ".tooltip")
     let E (name: string) = Localisation.localiseWith [name] "misc.edit"
 
-    let refreshChoice (options: string array) (widgets: Widget array array) (setting: Setting<int>) =
+    let refreshChoice (options: string array) (widgets: Widget1 array array) (setting: Setting<int>) =
         let rec newSetting =
             {
                 Set =
@@ -65,7 +65,7 @@ module Helpers =
     let PRETTYWIDTH = 1200.0f
 
 type Divider() =
-    inherit Widget()
+    inherit Widget1()
 
     member this.Position(y) =
         this.Position( Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYWIDTH, 10.0f) )

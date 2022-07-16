@@ -38,7 +38,7 @@ module private ModSelect =
         }
     
 type ModSelect() as this =
-    inherit Widget()
+    inherit Widget1()
 
     do StylishButton ((fun () -> SelectionMenu(N"mods", ModSelect.page()).Show()), K "Mods", (fun () -> Style.accentShade(100, 0.8f, 0.2f)), "mods") |> this.Add
 

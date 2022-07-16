@@ -44,7 +44,7 @@ type BeatmapSearch =
     }
 
 type private BeatmapImportCard(data: BeatmapData) as this =
-    inherit Widget()
+    inherit Widget1()
             
     let mutable downloaded = false
     let download() =
@@ -83,7 +83,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
         |=+ Clickable((fun () -> if not downloaded then download()), ignore)
 
 type private SearchContainerLoader(t) as this =
-    inherit Widget()
+    inherit Widget1()
     let t = t this
     let mutable task = None
     do this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 30.0f, 0.0f)

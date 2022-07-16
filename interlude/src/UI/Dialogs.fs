@@ -10,7 +10,7 @@ module rec Dialog =
 
     [<AbstractClass>]
     type T() as this =
-        inherit Widget()
+        inherit Widget1()
     
         let fade = Animation.Fade 0.0f
     

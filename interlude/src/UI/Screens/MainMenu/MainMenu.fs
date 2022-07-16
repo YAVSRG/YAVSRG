@@ -14,7 +14,7 @@ open Interlude.UI.Components
 open Interlude.UI.OptionsMenu
 
 type private MenuButton(onClick, label) as this =
-    inherit Widget()
+    inherit Widget1()
 
     let color = Animation.Fade 0.3f
     do

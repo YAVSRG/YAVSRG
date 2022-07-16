@@ -32,7 +32,7 @@ module Scoreboard =
     | CurrentMods = 3
 
     type ScoreCard(data: ScoreInfoProvider) as this =
-        inherit Widget()
+        inherit Widget1()
 
         let fade = Animation.Fade 0.0f
 
@@ -145,14 +145,14 @@ type Scoreboard() as this =
     let filter = Setting.simple Filter.All
     let sort = Setting.map enum int options.ScoreSortMode
 
-    let sorter() : Comparison<Widget> =
+    let sorter() : Comparison<Widget1> =
         match sort.Value with
         | Sort.Accuracy -> Comparison(fun b a -> (a :?> ScoreCard).Data.Scoring.Value.CompareTo((b :?> ScoreCard).Data.Scoring.Value))
         | Sort.Performance -> Comparison(fun b a -> (a :?> ScoreCard).Data.Physical.CompareTo((b :?> ScoreCard).Data.Physical))
         | Sort.Time
         | _ -> Comparison(fun b a -> (a :?> ScoreCard).Data.ScoreInfo.time.CompareTo((b :?> ScoreCard).Data.ScoreInfo.time))
 
-    let filterer() : Widget -> bool =
+    let filterer() : Widget1 -> bool =
         match filter.Value with
         | Filter.CurrentRate -> (fun a -> (a :?> ScoreCard).Data.ScoreInfo.rate = rate.Value)
         | Filter.CurrentPlaystyle -> (fun a -> (a :?> ScoreCard).Data.ScoreInfo.layout = options.Playstyles.[(a :?> ScoreCard).Data.ScoreInfo.keycount - 3])

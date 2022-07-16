@@ -121,9 +121,9 @@ type Position with
       What widgets do with their child widgets can be up to implementation, by default all are drawn and updated with the parent.
 *)
 
-type Widget() =
+type Widget1() =
 
-    let children = new List<Widget>()
+    let children = new List<Widget1>()
     let mutable parent = None
 
     let mutable bounds = Rect.ZERO
@@ -150,25 +150,25 @@ type Widget() =
     member this.Enabled with get() = enable and set(value) = enable <- value
     member this.Initialised = initialised
 
-    abstract member Add: Widget -> unit
-    default this.Add(c: Widget) =
+    abstract member Add: Widget1 -> unit
+    default this.Add(c: Widget1) =
         children.Add c
         c.OnAddedTo this
 
-    abstract member OnAddedTo: Widget -> unit
-    default this.OnAddedTo(c: Widget) =
+    abstract member OnAddedTo: Widget1 -> unit
+    default this.OnAddedTo(c: Widget1) =
         match parent with
         | None -> parent <- Some c
         | Some parent -> Logging.Debug (sprintf "Tried to add this (%O) to a parent (%O) when parent is already (%O)" this c parent)
         
     /// Removes a child from this widget - Dispose method of the child is not called (sometimes the child will be reused)
-    abstract member Remove: Widget -> unit
-    default this.Remove(c: Widget) =
+    abstract member Remove: Widget1 -> unit
+    default this.Remove(c: Widget1) =
         if children.Remove c then
             c.OnRemovedFrom this
         else Logging.Error "Tried to remove widget that was not in this container"
 
-    member private this.OnRemovedFrom(c: Widget) =
+    member private this.OnRemovedFrom(c: Widget1) =
         match parent with
         | None -> Logging.Debug (sprintf "Tried to remove this (%O) from parent (%O) but it has no parent" this c)
         | Some p ->
@@ -210,7 +210,7 @@ type Widget() =
         visibleBounds <- 
             match this.Parent with 
             | None -> bounds
-            | Some (p: Widget) -> bounds.Intersect p.VisibleBounds
+            | Some (p: Widget1) -> bounds.Intersect p.VisibleBounds
 
     /// Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit
@@ -227,7 +227,7 @@ type Widget() =
         right.Reposition (r, ra)
         bottom.Reposition (b, ba)
 
-    member this.Position (pos: Position) : Widget =
+    member this.Position (pos: Position) : Widget1 =
         left.Reposition pos.Left
         top.Reposition pos.Top
         right.Reposition pos.Right
@@ -246,10 +246,10 @@ type Widget() =
     abstract member Dispose: unit -> unit
     default this.Dispose() = for c in children do c.Dispose()
 
-    static member (|-+) (parent: #Widget, child: #Widget) = parent.Add child; parent
-    static member (|-*) (parent: #Widget, anim: #Animation) = parent.Animation.Add anim; parent
-    static member (|=+) (parent: #Widget, child: #Widget) = parent.Add child
-    static member (|=*) (parent: #Widget, anim: #Animation) = parent.Animation.Add anim
+    static member (|-+) (parent: #Widget1, child: #Widget1) = parent.Add child; parent
+    static member (|-*) (parent: #Widget1, anim: #Animation) = parent.Animation.Add anim; parent
+    static member (|=+) (parent: #Widget1, child: #Widget1) = parent.Add child
+    static member (|=*) (parent: #Widget1, anim: #Animation) = parent.Animation.Add anim
 
 module Icons = 
     

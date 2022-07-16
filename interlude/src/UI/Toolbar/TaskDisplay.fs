@@ -12,7 +12,7 @@ open Interlude.Utils
 module TaskDisplay =
 
     type TaskBox(task: BackgroundTask.ManagedTask) as this =
-        inherit Widget()
+        inherit Widget1()
 
         let fade = Animation.Fade(0.0f, Target = 1.0f)
         let color = Animation.Color Color.White

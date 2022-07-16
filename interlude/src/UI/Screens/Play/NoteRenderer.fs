@@ -28,7 +28,7 @@ module NoteRenderer =
         fun k -> Quad.rotateDeg (rotations.[k])
 
 type NoteRenderer(scoring: IScoreMetric) as this =
-    inherit Widget()
+    inherit Widget1()
 
     //constants
     let chart = Gameplay.Chart.colored()

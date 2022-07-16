@@ -11,7 +11,7 @@ open Interlude.UI
 module Logo =
     
     type Display() as this =
-        inherit Widget()
+        inherit Widget1()
 
         let counter = Animation.Counter(10000000.0)
         do this.Animation.Add counter

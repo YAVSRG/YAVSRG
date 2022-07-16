@@ -108,7 +108,7 @@ module CollectionManager =
         ]
     
 type CollectionManager() as this =
-    inherit Widget()
+    inherit Widget1()
 
     do StylishButton ((fun () -> SelectionMenu(N"collections", CollectionManager.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), "collections") |> this.Add
     

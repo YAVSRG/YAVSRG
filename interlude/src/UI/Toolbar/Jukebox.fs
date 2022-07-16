@@ -9,7 +9,7 @@ open Percyqaz.Flux.UI
 open Interlude.UI
 
 type Jukebox() as this =
-    inherit Widget()
+    inherit Widget1()
     // todo: right click to seek/tools to pause and play music
     let fade = Animation.Fade 0.0f
     let slider = Animation.Fade 0.0f

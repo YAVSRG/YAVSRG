@@ -12,22 +12,22 @@ open Interlude.UI
 open Interlude.UI.Components
 
 type TooltipRegion(localisedText) =
-    inherit Widget()
+    inherit Widget1()
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
             Tooltip.tooltip ((!|"tooltip"), localisedText)
 
-    static member Create(localisedText) = fun (w: #Widget) -> let t = TooltipRegion localisedText in t.Add w; t
+    static member Create(localisedText) = fun (w: #Widget1) -> let t = TooltipRegion localisedText in t.Add w; t
 
 [<AutoOpen>]
 module Tooltip =
-    type Widget with
+    type Widget1 with
         member this.Tooltip(localisedText) = TooltipRegion.Create localisedText this
 
 type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this =
-    inherit Widget()
+    inherit Widget1()
 
     let color = Animation.Fade 0.5f
 
@@ -68,7 +68,7 @@ type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this 
         if active then Input.removeInputMethod()
 
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
-    inherit Widget()
+    inherit Widget1()
     let searchTimer = new Diagnostics.Stopwatch()
     do
         TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some "search", "search" )

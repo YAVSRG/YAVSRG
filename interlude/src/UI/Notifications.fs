@@ -35,7 +35,7 @@ module Tooltip =
     let mutable up = false
 
     type Display() =
-        inherit Widget()
+        inherit Widget1()
 
         override this.Update(elapsedTime, bounds) =
             for i in items do

@@ -31,7 +31,7 @@ module GameplayWidgets =
     }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
-        inherit Widget()
+        inherit Widget1()
 
         let grades = helper.ScoringConfig.Grading.Grades
         let color = Animation.Color (if conf.GradeColors then Array.last(grades).Color else Color.White)
@@ -53,7 +53,7 @@ module GameplayWidgets =
             if isNull listener then () else listener.Dispose()
 
     type HitMeter(conf: WidgetConfig.HitMeter, helper) =
-        inherit Widget()
+        inherit Widget1()
         let hits = ResizeArray<struct (Time * float32 * int)>()
         let mutable w = 0.0f
         let listener =
@@ -91,7 +91,7 @@ module GameplayWidgets =
 
     // disabled for now
     type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
-        inherit Widget()
+        inherit Widget1()
         let atime = conf.AnimationTime * 1.0f<ms>
         let mutable tier = 0
         let mutable late = 0
@@ -126,7 +126,7 @@ module GameplayWidgets =
             listener.Dispose()
 
     type ComboMeter(conf: WidgetConfig.Combo, helper) as this =
-        inherit Widget()
+        inherit Widget1()
         let popAnimation = Animation.Fade(0.0f)
         let color = Animation.Color(Color.White)
         let mutable hits = 0
@@ -154,7 +154,7 @@ module GameplayWidgets =
             listener.Dispose()
 
     type ProgressMeter(conf: WidgetConfig.ProgressMeter, helper) as this =
-        inherit Widget()
+        inherit Widget1()
 
         let duration = 
             let chart = Gameplay.Chart.colored()
@@ -177,7 +177,7 @@ module GameplayWidgets =
             Draw.rect bar conf.BarColor
 
     type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
-        inherit Widget()
+        inherit Widget1()
         
         let firstNote = offsetOf (Gameplay.Chart.colored().Notes.First.Value)
         do this.Add(TextBox(sprintf "Press %O to skip" (!|"skip") |> Utils.K, Utils.K Color.White, 0.5f))
@@ -191,7 +191,7 @@ module GameplayWidgets =
             else this.Destroy()
 
     type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) as this =
-        inherit Widget()
+        inherit Widget1()
 
         let color = Animation.Color conf.FullColor
         let slider = Animation.Fade(float32 helper.HP.State.Health)
@@ -221,7 +221,7 @@ module GameplayWidgets =
     *)
 
     type ColumnLighting(keys, lightTime, helper) as this =
-        inherit Widget()
+        inherit Widget1()
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let sprite = Content.getTexture "receptorlighting"
         let lightTime = Math.Min(0.99f, lightTime)
@@ -254,7 +254,7 @@ module GameplayWidgets =
             Array.iteri f sliders
 
     type Explosions(keys, config: Prelude.Data.Themes.Explosions, helper) as this =
-        inherit Widget()
+        inherit Widget1()
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let timers = Array.zeroCreate keys
         let mem = Array.zeroCreate keys
@@ -320,7 +320,7 @@ module GameplayWidgets =
     // Screencover is controlled by game settings, not theme or noteskin
 
     type ScreenCover() =
-        inherit Widget()
+        inherit Widget1()
 
         override this.Draw() =
             

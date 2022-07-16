@@ -108,7 +108,7 @@ type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSou
         callback setting.Value.IsSome
 
 type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource option>) as this =
-    inherit Widget()
+    inherit Widget1()
 
     let mutable refresh = ignore
 

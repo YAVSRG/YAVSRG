@@ -71,7 +71,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
     member this.Data = data
 
     static member Filter(filter: Filter) =
-        fun (c: Widget) ->
+        fun (c: Widget1) ->
             match c with
             | :? SMImportCard as c ->
                 List.forall (

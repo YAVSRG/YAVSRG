@@ -12,7 +12,7 @@ open Interlude.Gameplay
 open Interlude.UI.Components
 
 type ChartInfo() as this =
-    inherit Widget()
+    inherit Widget1()
 
     let scores = Scoreboard()
     let mutable length = ""

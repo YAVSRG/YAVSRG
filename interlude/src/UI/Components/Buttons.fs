@@ -13,7 +13,7 @@ open Interlude.UI
 open Interlude.UI.Components
 
 type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
-    inherit Widget()
+    inherit Widget1()
 
     let color = Animation.Fade 0.3f
 
@@ -32,7 +32,7 @@ type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
         Text.drawFillB(Content.font, labelFunc(), this.Bounds.TrimBottom 10.0f, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
-    inherit Widget()
+    inherit Widget1()
     
     let color = Animation.Fade 0.3f
 
@@ -72,7 +72,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
 module CardButton =
     
     type Base(onClick, bind: Hotkey) as this =
-        inherit Widget()
+        inherit Widget1()
 
         let mutable hover = false
         do

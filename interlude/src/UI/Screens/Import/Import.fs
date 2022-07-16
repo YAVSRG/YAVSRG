@@ -25,7 +25,7 @@ module FileDropHandling =
             true
 
 type private SearchContainer(populate, handleFilter) as this =
-    inherit Widget()
+    inherit Widget1()
     let flowContainer = new FlowContainer(Spacing = 15.0f)
     let populate = populate flowContainer
     let handleFilter = handleFilter flowContainer

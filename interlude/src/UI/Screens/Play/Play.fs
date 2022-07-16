@@ -48,20 +48,20 @@ type Screen() as this =
 
         noteRenderer.Add(ScreenCover())
 
-        let inline f name (constructor: 'T -> Widget) = 
+        let inline f name (constructor: 'T -> Widget1) = 
             let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 (constructor config).Position { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
                 |> if pos.Float then this.Add else noteRenderer.Add
 
-        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
-        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
-        f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget)
-        f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
+        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget1)
+        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget1)
+        f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget1)
+        f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget1)
         //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
-        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget)
+        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget1)
+        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget1)
 
         scoring.SetHitCallback onHit.Trigger
 
@@ -159,7 +159,7 @@ type ReplayScreen(mode: ReplayMode) as this =
 
         noteRenderer.Add(ScreenCover())
 
-        let inline f name (constructor: 'T -> Widget) = 
+        let inline f name (constructor: 'T -> Widget1) = 
             let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
@@ -168,13 +168,13 @@ type ReplayScreen(mode: ReplayMode) as this =
                 |> if pos.Float then this.Add else noteRenderer.Add
 
         if not auto then
-            f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget)
-            f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget)
-            f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget)
-            f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget)
+            f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget1)
+            f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget1)
+            f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget1)
+            f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget1)
             //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget)
-        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget)
+        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget1)
+        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget1)
 
         scoring.SetHitCallback onHit.Trigger
 

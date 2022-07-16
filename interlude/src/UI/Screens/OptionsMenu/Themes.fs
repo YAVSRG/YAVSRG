@@ -18,7 +18,7 @@ open Interlude.UI.Components.Selection.Menu
 module Themes =
 
     type NoteskinPreview(scale: float32) as this =
-        inherit Widget()
+        inherit Widget1()
 
         let fbo = FBO.create()
 
@@ -27,8 +27,8 @@ module Themes =
             | Some chart -> 
                 let nr = Screens.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
                 nr.Add(Screens.Play.GameplayWidgets.ScreenCover())
-                nr :> Widget
-            | None -> new Widget()
+                nr :> Widget1
+            | None -> new Widget1()
 
         let mutable renderer = createRenderer()
 

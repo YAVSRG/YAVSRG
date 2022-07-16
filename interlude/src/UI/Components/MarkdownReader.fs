@@ -24,7 +24,7 @@ module MarkdownReader =
 
     type W =
         {
-            Body: Widget
+            Body: Widget1
             mutable LHeight: float32
             mutable LWidth: float32
             mutable Height: float32 // not including last line
@@ -55,7 +55,7 @@ module MarkdownReader =
             
         // constructors
 
-        let make (w: Widget) (width: float32, height: float32) =
+        let make (w: Widget1) (width: float32, height: float32) =
             {
                 Body = w
                 LHeight = height

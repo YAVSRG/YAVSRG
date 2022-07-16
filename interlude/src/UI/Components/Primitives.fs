@@ -11,7 +11,7 @@ open Interlude.Utils
 open Interlude.UI
 
 type TextBox (textFunc, color, just) =
-    inherit Widget()
+    inherit Widget1()
 
     new(textFunc, scolor, just) = TextBox(textFunc, (fun () -> scolor(), Color.Transparent), just)
 
@@ -20,7 +20,7 @@ type TextBox (textFunc, color, just) =
         base.Draw()
 
 type Clickable (onClick, onHover) =
-    inherit Widget()
+    inherit Widget1()
 
     let mutable hover = false
 
@@ -35,7 +35,7 @@ type Clickable (onClick, onHover) =
         elif hover && Mouse.leftClick() then onClick()
 
 type Bindable (bind: Hotkey, onPress) =
-    inherit Widget()
+    inherit Widget1()
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
@@ -43,7 +43,7 @@ type Bindable (bind: Hotkey, onPress) =
         
         
 type Frame (fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
-    inherit Widget()
+    inherit Widget1()
         
     let BORDERWIDTH = 5.0f
         
@@ -68,5 +68,5 @@ type Frame (fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
         if fill then Draw.rect base.Bounds (fillColor())
         base.Draw()
         
-    static member Create(w: Widget) =
+    static member Create(w: Widget1) =
         Frame() |-+ w

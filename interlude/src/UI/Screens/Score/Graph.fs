@@ -8,7 +8,7 @@ open Interlude
 open Interlude.UI
 
 type ScoreGraph(data: ScoreInfoProvider) =
-    inherit Widget()
+    inherit Widget1()
 
     let fbo = FBO.create()
     let mutable refresh = true

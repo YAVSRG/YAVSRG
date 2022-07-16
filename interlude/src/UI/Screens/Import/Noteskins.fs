@@ -48,7 +48,7 @@ type NoteskinCard(data: RepoEntry) as this =
     member this.Downloaded = downloaded
 
     static member Filter(filter: Filter) =
-        fun (c: Widget) ->
+        fun (c: Widget1) ->
             match c with
             | :? NoteskinCard as c ->
                 List.forall (

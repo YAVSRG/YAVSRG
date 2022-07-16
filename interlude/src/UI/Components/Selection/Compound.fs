@@ -51,7 +51,7 @@ module CardSelect =
 
         do
 
-            let addButton (b: Widget) =
+            let addButton (b: Widget1) =
                 let b = (b :?> Selectable)
                 buttons <- b :: buttons
                 this.Add b

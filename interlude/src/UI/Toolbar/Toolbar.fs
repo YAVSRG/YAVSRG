@@ -11,7 +11,7 @@ open Interlude.UI.OptionsMenu
 open Interlude.Utils
 
 type Toolbar() as this =
-    inherit Widget()
+    inherit Widget1()
 
     let HEIGHT = 70.0f
 

@@ -9,7 +9,7 @@ open Interlude.Utils
 
 // TODO: flow container should be completely in charge of item positionings
 type FlowContainer() =
-    inherit Widget()
+    inherit Widget1()
     let mutable spacing = 10.0f
     let mutable margin = (0.0f, 0.0f)
     let mutable contentSize = 0.0f
@@ -18,16 +18,16 @@ type FlowContainer() =
     let mutable filter = K true
     let mutable sort = None
     member this.Filter with set value = filter <- value; for c in this.Children do c.Enabled <- filter c
-    member this.Sort with set (comp: Comparison<Widget>) = sort <- Some comp; this.Children.Sort comp
+    member this.Sort with set (comp: Comparison<Widget1>) = sort <- Some comp; this.Children.Sort comp
 
     member this.Spacing with set(value) = spacing <- value
     // todo: margin doesn't work correctly
     member this.Margin with set (x, y) = margin <- (-x, -y)
 
-    override this.Add (c: Widget) =
+    override this.Add (c: Widget1) =
         base.Add c
         c.Enabled <- filter c
-        Option.iter (fun (comp: Comparison<Widget>) -> this.Children.Sort comp) sort
+        Option.iter (fun (comp: Comparison<Widget1>) -> this.Children.Sort comp) sort
 
     member private this.FlowContent(thisBounds: Rect) =
         let mutable vBounds = thisBounds.Translate(0.0f, -scrollPos) // todo: margin
@@ -70,13 +70,13 @@ type FlowContainer() =
         Stencil.finish()
 
     /// Scrolls so that w becomes visible. w is (mostly) expected to be a child of the container but sometimes is used for sneaky workarounds
-    member this.ScrollTo(w: Widget) =
+    member this.ScrollTo(w: Widget1) =
         if w.Bounds.Bottom > this.Bounds.Bottom then scrollPos <- scrollPos + (w.Bounds.Bottom - this.Bounds.Bottom)
         elif w.Bounds.Top < this.Bounds.Top then scrollPos <- scrollPos - (this.Bounds.Top - w.Bounds.Top)
 
 // provide the first tab when constructing
-type TabContainer(name: string, widget: Widget) as this =
-    inherit Widget()
+type TabContainer(name: string, widget: Widget1) as this =
+    inherit Widget1()
     let mutable selectedItem = widget
     let mutable selected = name
     let mutable count = 0.0f
