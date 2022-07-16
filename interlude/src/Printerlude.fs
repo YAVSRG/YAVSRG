@@ -4,13 +4,14 @@ open System.IO
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Tables
 open Interlude.UI.Toolbar
 
 module Printerlude =
 
-    let synchronise (f: unit -> unit) = UI.Screen.globalAnimation.Add(UI.Animation.AnimationAction(f))
+    let sync (f: unit -> unit) = UI.Screen.globalAnimation.Add(Animation.Action f)
 
     let mutable private ctx : Context = Unchecked.defaultof<_>
 

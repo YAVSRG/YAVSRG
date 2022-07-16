@@ -1,10 +1,10 @@
 ﻿namespace Interlude.UI.Screens.Play
 
-open OpenTK
 open System
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
@@ -14,7 +14,6 @@ open Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Animation
 
 (*
     Handful of widgets that directly pertain to gameplay
@@ -35,7 +34,7 @@ module GameplayWidgets =
         inherit Widget()
 
         let grades = helper.ScoringConfig.Grading.Grades
-        let color = new AnimationColorMixer(if conf.GradeColors then Array.last(grades).Color else Color.White)
+        let color = Animation.Color (if conf.GradeColors then Array.last(grades).Color else Color.White)
         let listener =
             if conf.GradeColors then
                 helper.OnHit.Subscribe
@@ -128,8 +127,8 @@ module GameplayWidgets =
 
     type ComboMeter(conf: WidgetConfig.Combo, helper) as this =
         inherit Widget()
-        let popAnimation = new AnimationFade(0.0f)
-        let color = new AnimationColorMixer(Color.White)
+        let popAnimation = Animation.Fade(0.0f)
+        let color = Animation.Color(Color.White)
         let mutable hits = 0
         let listener =
             helper.OnHit.Subscribe(
@@ -161,7 +160,7 @@ module GameplayWidgets =
             let chart = Gameplay.Chart.colored()
             offsetOf chart.Notes.Last.Value - offsetOf chart.Notes.First.Value
 
-        let pulse = new AnimationCounter(1000.0)
+        let pulse = Animation.Counter(1000.0)
 
         do
             this.Animation.Add pulse
@@ -194,8 +193,8 @@ module GameplayWidgets =
     type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) as this =
         inherit Widget()
 
-        let color = AnimationColorMixer(conf.FullColor)
-        let slider = AnimationFade(float32 helper.HP.State.Health)
+        let color = Animation.Color conf.FullColor
+        let slider = Animation.Fade(float32 helper.HP.State.Health)
 
         do
             this.Animation.Add color
@@ -223,7 +222,7 @@ module GameplayWidgets =
 
     type ColumnLighting(keys, lightTime, helper) as this =
         inherit Widget()
-        let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
+        let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let sprite = Content.getTexture "receptorlighting"
         let lightTime = Math.Min(0.99f, lightTime)
 
@@ -234,13 +233,13 @@ module GameplayWidgets =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            Array.iteri (fun k (s: AnimationFade) -> if helper.Scoring.KeyState |> Bitmap.hasBit k then s.Value <- 1.0f) sliders
+            Array.iteri (fun k (s: Animation.Fade) -> if helper.Scoring.KeyState |> Bitmap.hasBit k then s.Value <- 1.0f) sliders
 
         override this.Draw() =
             base.Draw()
             let columnwidth = this.Bounds.Width / (float32 keys)
             let threshold = 1.0f - lightTime
-            let f k (s: AnimationFade) =
+            let f k (s: Animation.Fade) =
                 if s.Value > threshold then
                     let p = (s.Value - threshold) / lightTime
                     let a = 255.0f * p |> int
@@ -256,12 +255,12 @@ module GameplayWidgets =
 
     type Explosions(keys, config: Prelude.Data.Themes.Explosions, helper) as this =
         inherit Widget()
-        let sliders = Array.init keys (fun _ -> new AnimationFade(0.0f))
+        let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let timers = Array.zeroCreate keys
         let mem = Array.zeroCreate keys
         let holding = Array.create keys false
         let explodeTime = Math.Min(0.99f, config.FadeTime)
-        let animation = new AnimationCounter(config.AnimationFrameTime)
+        let animation = Animation.Counter config.AnimationFrameTime
 
         let handleEvent (ev: HitEvent<HitEventGuts>) =
             match ev.Guts with
@@ -295,7 +294,7 @@ module GameplayWidgets =
             base.Draw()
             let columnwidth = this.Bounds.Width / (float32 keys)
             let threshold = 1.0f - explodeTime
-            let f k (s: AnimationFade) =
+            let f k (s: Animation.Fade) =
                 if s.Value > threshold then
                     let p = (s.Value - threshold) / explodeTime
                     let a = 255.0f * p |> int

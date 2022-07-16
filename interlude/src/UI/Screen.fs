@@ -5,10 +5,11 @@ open SixLabors.ImageSharp
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude
 open Interlude.Utils
-open Interlude.UI.Animation
+open Interlude.UI
 open Interlude.UI.Components
 open OpenTK.Mathematics
 
@@ -36,17 +37,17 @@ module Screen =
         abstract member OnEnter: Type -> unit
         abstract member OnExit: Type -> unit
 
-    let private parallaxX = AnimationFade 0.0f
-    let private parallaxY = AnimationFade 0.0f
-    let private parallaxZ = AnimationFade 40.0f
+    let private parallaxX = Animation.Fade 0.0f
+    let private parallaxY = Animation.Fade 0.0f
+    let private parallaxZ = Animation.Fade 40.0f
 
-    let private screenTransition = new AnimationSequence()
-    let private transitionIn = AnimationTimer TRANSITIONTIME
-    let private transitionOut = AnimationTimer TRANSITIONTIME
+    let private screenTransition = Animation.Sequence()
+    let private transitionIn = Animation.Delay TRANSITIONTIME
+    let private transitionOut = Animation.Delay TRANSITIONTIME
 
-    let backgroundDim = AnimationFade 1.0f
+    let backgroundDim = Animation.Fade 1.0f
 
-    let globalAnimation = Animation.Fork(parallaxX, parallaxY, parallaxZ, backgroundDim, Style.accentColor)
+    let globalAnimation = Animation.fork [parallaxX :> Animation; parallaxY; parallaxZ; backgroundDim; Style.accentColor]
 
     let logo = Logo.display
     
@@ -67,7 +68,7 @@ module Screen =
             globalAnimation.Add screenTransition
             screenTransition.Add transitionIn
             screenTransition.Add(
-                new AnimationAction(
+                Animation.Action(
                     fun () ->
                         let s = thunk()
                         current.OnExit screenType
@@ -80,7 +81,7 @@ module Screen =
                         transitionOut.FrameSkip() //ignore frame lag spike when initialising screen
                     ))
             screenTransition.Add transitionOut
-            screenTransition.Add (new AnimationAction(fun () -> transitionIn.Reset(); transitionOut.Reset()))
+            screenTransition.Add (Animation.Action(fun () -> transitionIn.Reset(); transitionOut.Reset()))
 
     let change (screenType: Type) (flags: TransitionFlag) = changeNew (K screens.[int screenType]) screenType flags
 
@@ -97,7 +98,7 @@ module Screen =
 
     module Background =
 
-        let mutable private background: (Sprite * AnimationFade * bool) list = []
+        let mutable private background: (Sprite * Animation.Fade * bool) list = []
 
         let load =
             let worker = 
@@ -123,23 +124,23 @@ module Screen =
                                     |> Seq.maxBy vibrance
                                     |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
                             globalAnimation.Add(
-                                AnimationAction( fun () ->
+                                Animation.Action( fun () ->
                                     let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
                                     bmp.Dispose()
                                     Content.accentColor <- col
-                                    background <- (sprite, AnimationFade(0.0f, Target = 1.0f), false) :: background
+                                    background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
                                 )
                             )
                         | None ->
                             globalAnimation.Add(
-                                AnimationAction(fun () ->
-                                    background <- (Content.getTexture "background", AnimationFade(0.0f, Target = 1.0f), true) :: background
+                                Animation.Action(fun () ->
+                                    background <- (Content.getTexture "background", Animation.Fade(0.0f, Target = 1.0f), true) :: background
                                     Content.accentColor <- Content.themeConfig().DefaultAccentColor
                                 )
                             )
                 }
             fun (path: string) ->
-                List.iter (fun (_, fade: AnimationFade, _) -> fade.Target <- 0.0f) background
+                List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
                 worker.Request path
 
         let update elapsedTime =
@@ -155,7 +156,7 @@ module Screen =
 
         let drawq (q: Quad, color: Color, depth: float32) =
             List.iter
-                (fun (bg, (fade: AnimationFade), isDefault) ->
+                (fun (bg, (fade: Animation.Fade), isDefault) ->
                     let color = Color.FromArgb(fade.Value * 255.0f |> int, color)
                     let pwidth = Viewport.vwidth + parallaxZ.Value * depth
                     let pheight = Viewport.vheight + parallaxZ.Value * depth

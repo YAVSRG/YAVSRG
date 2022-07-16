@@ -5,16 +5,17 @@ open OpenTK.Mathematics
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Animation
+open Interlude.UI.Components
 
 type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
     inherit Widget()
 
-    let color = AnimationFade 0.3f
+    let color = Animation.Fade 0.3f
 
     do
         this.Animation.Add color
@@ -33,7 +34,7 @@ type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
     inherit Widget()
     
-    let color = AnimationFade 0.3f
+    let color = Animation.Fade 0.3f
 
     do
         this.Animation.Add color

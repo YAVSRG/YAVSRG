@@ -4,17 +4,17 @@ open System.Drawing
 open OpenTK.Mathematics
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.UI
 open Interlude
 open Interlude.UI
-open Interlude.UI.Animation
 
 module Logo =
     
     type Display() as this =
         inherit Widget()
 
-        let counter = AnimationCounter(10000000.0)
-        do this.Animation.Add(counter)
+        let counter = Animation.Counter(10000000.0)
+        do this.Animation.Add counter
 
         override this.Draw() =
             base.Draw()

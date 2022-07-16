@@ -1,13 +1,13 @@
 ﻿namespace Interlude.UI
 
 open System.Drawing
+open Percyqaz.Flux.UI
 open Interlude
 open Interlude.Utils
-open Interlude.UI.Animation
 
 module Style =
 
-    let accentColor = AnimationColorMixer Content.accentColor
+    let accentColor = Animation.Color Content.accentColor
 
     let accentShade (alpha, brightness, white) =
         let accentColor = accentColor.GetColor()
@@ -26,7 +26,7 @@ module Style =
     type private ColorFuncF = float32 -> Color
 
     let alpha a (c: 'T -> Color) = fun x -> Color.FromArgb(a, c x)
-    let alphaF (a: AnimationFade) (c: ColorFunc) = fun () -> Color.FromArgb(int (a.Value * 255.0f), c ())
+    let alphaF (a: Animation.Fade) (c: ColorFunc) = fun () -> Color.FromArgb(int (a.Value * 255.0f), c ())
 
     let white a : ColorFunc = K <| Color.FromArgb(a, Color.White)
     let black a : ColorFunc = K <| Color.FromArgb(a, Color.Black)

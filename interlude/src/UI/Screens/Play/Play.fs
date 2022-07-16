@@ -12,7 +12,6 @@ open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.UI.Screens.Play.GameplayWidgets
 
 type Screen() as this =
@@ -34,7 +33,6 @@ type Screen() as this =
             CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
         }
     let binds = options.GameplayBinds.[chart.Keys - 3]
-    let missWindow = scoring.ScaledMissWindow
 
     let mutable inputKeyState = 0us
 

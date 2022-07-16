@@ -4,9 +4,9 @@ open System
 open System.Drawing
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.UI
 open Interlude
 open Interlude.UI
-open Interlude.UI.Animation
 open Interlude.UI.Components
 
 // Loading screen
@@ -15,7 +15,7 @@ type LoadingScreen() as this =
     inherit Screen.T()
 
     let mutable closing = false
-    let fade = new AnimationFade 1.0f
+    let fade = Animation.Fade 1.0f
     do this.Animation.Add fade
 
     override this.OnEnter (prev: Screen.Type) =
@@ -25,14 +25,14 @@ type LoadingScreen() as this =
         match prev with
         | Screen.Type.MainMenu ->
             closing <- true
-            let s = AnimationSequence()
-            s.Add (AnimationTimer 1500.0)
-            s.Add (AnimationAction (fun () -> Screen.back Screen.TransitionFlag.Default))
+            let s = Animation.Sequence()
+            s.Add (Animation.Delay 1500.0)
+            s.Add (Animation.Action (fun () -> Screen.back Screen.TransitionFlag.Default))
             this.Animation.Add s
         | _ -> 
-            let s = AnimationSequence()
-            s.Add (AnimationTimer 1500.0)
-            s.Add (AnimationAction(fun () -> Screen.change Screen.Type.MainMenu Screen.TransitionFlag.UnderLogo))
+            let s = Animation.Sequence()
+            s.Add (Animation.Delay 1500.0)
+            s.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Screen.TransitionFlag.UnderLogo))
             this.Animation.Add s
 
     override this.OnExit _ = ()

@@ -4,8 +4,9 @@ open System
 open System.Drawing
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Interlude
-open Interlude.UI.Animation
+open Interlude.UI
 
 [<RequireQualifiedAccess>]
 type NotificationType =
@@ -24,7 +25,7 @@ module Tooltip =
             Type: NotificationType
             Callback: unit -> unit
             mutable Duration: float
-            Fade: AnimationFade
+            Fade: Animation.Fade
         }
 
     let private items = ResizeArray<T>()
@@ -97,7 +98,7 @@ module Tooltip =
                 Bind = Some b
                 Message = str.Split "\n"
                 Duration = infinity
-                Fade = AnimationFade(0.0f, Target = 1.0f)
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
                 Callback = ignore
                 Type = NotificationType.Info
             }
@@ -109,7 +110,7 @@ module Tooltip =
                 Bind = None
                 Message = str.Split "\n"
                 Duration = 2000.0
-                Fade = AnimationFade(0.0f, Target = 1.0f)
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
                 Callback = ignore
                 Type = t
             }
@@ -121,7 +122,7 @@ module Tooltip =
                 Bind = Some b
                 Message = str.Split "\n"
                 Duration = 2000.0
-                Fade = AnimationFade(0.0f, Target = 1.0f)
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
                 Callback = cb
                 Type = t
             }

@@ -4,6 +4,7 @@ open OpenTK
 open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring
@@ -11,7 +12,6 @@ open Prelude.Data.Themes
 open Interlude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Animation
 
 // TODO LIST
 //  COLUMN INDEPENDENT SV
@@ -40,7 +40,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     let playfieldColor = Content.noteskinConfig().PlayfieldColor
 
     let tailsprite = Content.getTexture(if Content.noteskinConfig().UseHoldTailTexture then "holdtail" else "holdhead")
-    let animation = new AnimationCounter(Content.noteskinConfig().AnimationFrameTime)
+    let animation = Animation.Counter (Content.noteskinConfig().AnimationFrameTime)
     let visualOffset = float32 options.VisualOffset.Value * 1.0f<ms>
 
     // arrays of stuff that are reused/changed every frame. the data from the previous frame is not used, but making new arrays causes garbage collection

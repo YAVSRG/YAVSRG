@@ -3,7 +3,7 @@
 open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
-open Interlude.UI.Animation
+open Percyqaz.Flux.UI
 
 (*
     AnchorPoints calculate the position of a widget's edge relative to its parent
@@ -19,7 +19,7 @@ open Interlude.UI.Animation
 *)
 
 type AnchorPoint(offset, anchor) =
-    inherit AnimationFade(offset)
+    inherit Animation.Fade(offset)
     let mutable anchor_ = anchor
     //calculates the position given lower and upper bounds from the parent
     member this.Position(min, max) = min + base.Value + (max - min) * anchor_
@@ -28,6 +28,8 @@ type AnchorPoint(offset, anchor) =
 
     member this.MoveRelative(min, max, value) = this.Target <- value - min - (max - min) * anchor_
     member this.RepositionRelative(min, max, value) = this.MoveRelative(min, max, value); this.Value <- this.Target
+
+    override this.Complete = false
 
     member this.Snap() = this.Value <- this.Target
 
@@ -131,7 +133,7 @@ type Widget() =
     let right = AnchorPoint (0.0f, 1.0f)
     let bottom = AnchorPoint (0.0f, 1.0f)
 
-    let animation = Animation.Fork (left, top, right, bottom)
+    let animation = Animation.fork [left; top; right; bottom]
     let mutable enable = true
     let mutable initialised = false
 
@@ -176,7 +178,7 @@ type Widget() =
     /// Queues up the action to take place immediately before the next update loop, making it thread/loop-safe
     ///   When updating widgets from a background task, use this.
     member this.Synchronized(action) =
-        animation.Add(new AnimationAction(action))
+        animation.Add(Animation.Action action)
 
     /// Destroys a widget by removing it from its parent, then disposing it (will be garbage collected)
     /// Note that this is safe to call inside an update/draw method OR from another thread
@@ -213,7 +215,7 @@ type Widget() =
     /// Update is called at a fixed framerate (120Hz) and should be where the widget handles input and other time-based logic
     abstract member Update: float * Rect -> unit
     default this.Update(elapsedTime, bounds: Rect) =
-        animation.Update elapsedTime |> ignore
+        animation.Update elapsedTime
         this.UpdateBounds bounds
         for i in children.Count - 1 .. -1 .. 0 do
             if children.[i].Enabled then children.[i].Update (elapsedTime, this.Bounds)

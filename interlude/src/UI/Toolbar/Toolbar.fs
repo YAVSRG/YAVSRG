@@ -4,8 +4,8 @@ open System.Drawing
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Interlude.UI
-open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.OptionsMenu
 open Interlude.Utils
@@ -15,8 +15,8 @@ type Toolbar() as this =
 
     let HEIGHT = 70.0f
 
-    let barSlider = new AnimationFade 1.0f
-    let notifSlider = new AnimationFade 0.0f
+    let barSlider = Animation.Fade 1.0f
+    let notifSlider = Animation.Fade 0.0f
 
     let shown() = not Screen.hideToolbar
 

@@ -3,9 +3,9 @@
 open System
 open System.Threading.Tasks
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.UI
-open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.Utils
 
@@ -14,19 +14,19 @@ module TaskDisplay =
     type TaskBox(task: BackgroundTask.ManagedTask) as this =
         inherit Widget()
 
-        let fade = AnimationFade(0.0f, Target = 1.0f)
-        let color = AnimationColorMixer(Color.White)
+        let fade = Animation.Fade(0.0f, Target = 1.0f)
+        let color = Animation.Color Color.White
 
         let mutable closing = false
 
         let close() =
             closing <- true
-            Animation.Serial(
-                AnimationTimer 2000.0,
-                AnimationAction (fun () -> fade.Target <- 0.0f),
-                AnimationTimer 800.0,
-                AnimationAction this.Destroy
-            ) |> this.Animation.Add
+            Animation.seq [
+                Animation.Delay 2000.0 :> Animation;
+                Animation.Action (fun () -> fade.Target <- 0.0f);
+                Animation.Delay 800.0;
+                Animation.Action this.Destroy
+            ] |> this.Animation.Add
 
         do
             this.Animation.Add fade

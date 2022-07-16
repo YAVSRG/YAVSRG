@@ -3,10 +3,10 @@
 open System
 open System.Linq
 open OpenTK.Mathematics
-open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Scoring.Grading
 open Prelude.Data.Scores
@@ -18,7 +18,6 @@ open Interlude.UI
 open Interlude.Content
 open Interlude.Options
 open Interlude.Gameplay
-open Interlude.UI.Animation
 open Interlude.UI.Screens.Play
 open Interlude.UI.Components.Selection.Controls
 
@@ -61,7 +60,7 @@ module Tree =
     /// Only one group can be expanded at a time, and it is independent of the "selected" group
     let mutable private expandedGroup = ""
     
-    let private scrollPos = new AnimationFade(300.0f)
+    let private scrollPos = Animation.Fade 300.0f
     let private scroll(amount: float32) = scrollPos.Target <- scrollPos.Target + amount
     let mutable private right_click_scrolling = false
 
@@ -131,7 +130,7 @@ module Tree =
     type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectContext) =
         inherit TreeItem()
 
-        let hover = new AnimationFade(0.0f)
+        let hover = Animation.Fade 0.0f
         let mutable localCacheFlag = -1
         let mutable color = Color.Transparent
         let mutable chartData = None

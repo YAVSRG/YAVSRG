@@ -5,8 +5,8 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
-open Interlude
 open Interlude.Options
 open Interlude.UI
 
@@ -89,7 +89,7 @@ module Terminal =
 
     let private show() =
         shown <- true
-        let rec addInput() = Input.setTextInput (currentLine, fun () -> if shown then Screen.globalAnimation.Add(Animation.AnimationAction(addInput)))
+        let rec addInput() = Input.setTextInput (currentLine, fun () -> if shown then Screen.globalAnimation.Add(Animation.Action addInput))
         addInput()
 
     let dropfile(path: string) =

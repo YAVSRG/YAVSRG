@@ -48,7 +48,6 @@
     <Compile Include="Utils.fs" />
     <Compile Include="Content.fs" />
     <Compile Include="Options.fs" />
-    <Compile Include="UI\Animation.fs" />
     <Compile Include="UI\Widget.fs" />
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Notifications.fs" />

@@ -3,6 +3,8 @@
 open System.Drawing
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
+open Interlude.UI
 
 module rec Dialog =
 
@@ -10,7 +12,7 @@ module rec Dialog =
     type T() as this =
         inherit Widget()
     
-        let fade = new Animation.AnimationFade 0.0f
+        let fade = Animation.Fade 0.0f
     
         do
             this.Animation.Add(fade)

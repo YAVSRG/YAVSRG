@@ -53,7 +53,7 @@ type FlowContainer() =
         contentSize <- vBounds.Top - t1
 
     override this.Update(elapsedTime, bounds) =
-        this.Animation.Update elapsedTime |> ignore
+        this.Animation.Update elapsedTime
         this.UpdateBounds bounds
         this.FlowContent this.Bounds
         for c in this.Children do if c.Enabled then c.Update (elapsedTime, this.Bounds)

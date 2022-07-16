@@ -8,15 +8,15 @@ open Interlude.Utils
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.UI
 open Interlude.UI
-open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.OptionsMenu
 
 type private MenuButton(onClick, label) as this =
     inherit Widget()
 
-    let color = AnimationFade 0.3f
+    let color = Animation.Fade 0.3f
     do
         this
         |-+ Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f)
@@ -51,8 +51,8 @@ type Screen() as this =
         >> fun s -> s.Split '¬'
         >> fun l -> if l.Length > 1 then l.[0], l.[1] else l.[0], ""
     let mutable splashText = "", ""
-    let splashAnim = AnimationFade 0.0f
-    let splashSubAnim = AnimationFade 0.0f
+    let splashAnim = Animation.Fade 0.0f
+    let splashSubAnim = Animation.Fade 0.0f
 
     do
         this

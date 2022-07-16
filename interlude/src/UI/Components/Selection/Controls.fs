@@ -5,12 +5,11 @@ open OpenTK
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude
-open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
@@ -135,7 +134,7 @@ type DropdownSelector<'T>(items: 'T array, labelFunc: 'T -> string, setting: Set
 type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
     inherit NavigateSelectable()
     let TEXTWIDTH = 130.0f
-    let color = AnimationFade 0.5f
+    let color = Animation.Fade 0.5f
     let mutable dragging = false
         
     let getPercent (setting: Setting.Bounded<'T>) =
@@ -190,7 +189,7 @@ type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
 
 type TextField(setting: Setting<string>) as this =
     inherit Selectable()
-    let color = AnimationFade 0.5f
+    let color = Animation.Fade 0.5f
     do
         this.Animation.Add color
         this.Add(new TextBox(setting.Get, (fun () -> Style.accentShade(int (color.Value * 255.0f), 1.0f, color.Value), Color.Black), 0.0f))

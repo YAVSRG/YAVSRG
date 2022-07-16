@@ -190,37 +190,11 @@ module Options =
 
     let mutable internal config = Percyqaz.Flux.Windowing.Config.Default
 
-    type ConfigCodec() =
-        inherit Json.Codec<Percyqaz.Flux.Windowing.Config>()
-        let mutable cdc = Unchecked.defaultof<_>
-        override this.To(ctx: Json.Context) =
-            cdc <- Json.AutoCodecs.record<Percyqaz.Flux.Windowing.Config> ctx false
-            cdc.To
-        override this.From(ctx: Json.Context) = cdc.From
-        override this.Default(ctx: Json.Context) = cdc.Default
-        
-    type WindowResolutionCodec() =
-        inherit Json.Codec<Percyqaz.Flux.Windowing.WindowResolution>()
-        let mutable cdc = Unchecked.defaultof<_>
-        override this.To(ctx: Json.Context) =
-            cdc <- Json.AutoCodecs.union<Percyqaz.Flux.Windowing.WindowResolution> ctx
-            cdc.To
-        override this.From(ctx: Json.Context) = cdc.From
-        override this.Default(ctx: Json.Context) = cdc.Default
-        
-    type BindCodec() =
-        inherit Json.Codec<Percyqaz.Flux.Input.Bind>()
-        let mutable cdc = Unchecked.defaultof<_>
-        override this.To(ctx: Json.Context) =
-            cdc <- Json.AutoCodecs.union<Percyqaz.Flux.Input.Bind> ctx
-            cdc.To
-        override this.From(ctx: Json.Context) = cdc.From
-        override this.Default(ctx: Json.Context) = cdc.Default
-
     do 
-        JSON.WithCodec<ConfigCodec>()
-            .WithCodec<WindowResolutionCodec>()
-            .WithCodec<BindCodec>() |> ignore
+        // Register decoding rules for Percyqaz.Flux config
+        JSON.WithAutoCodec<Percyqaz.Flux.Windowing.Config>(false)
+            .WithAutoCodec<Percyqaz.Flux.Windowing.WindowResolution>()
+            .WithAutoCodec<Percyqaz.Flux.Input.Bind>() |> ignore
 
     let mutable options = GameOptions.Default
 

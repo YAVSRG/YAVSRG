@@ -5,10 +5,11 @@ open OpenTK
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
-open Interlude.UI.Animation
+open Interlude.UI.Components
 
 type TooltipRegion(localisedText) =
     inherit Widget()
@@ -28,7 +29,7 @@ module Tooltip =
 type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this =
     inherit Widget()
 
-    let color = AnimationFade(0.5f)
+    let color = Animation.Fade 0.5f
 
     let mutable active = false
     let toggle() =

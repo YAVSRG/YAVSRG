@@ -4,6 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
@@ -13,7 +14,6 @@ open Interlude.UI
 open Interlude.Utils
 open Interlude.Gameplay
 open Interlude.Options
-open Interlude.UI.Animation
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
@@ -34,7 +34,7 @@ module Scoreboard =
     type ScoreCard(data: ScoreInfoProvider) as this =
         inherit Widget()
 
-        let fade = AnimationFade 0.0f
+        let fade = Animation.Fade 0.0f
 
         do
             data.Physical |> ignore
@@ -59,7 +59,7 @@ module Scoreboard =
                             Screen.TransitionFlag.Default
                     ), ignore )
             |-* fade
-            |=* Animation.Serial(AnimationTimer 150.0, AnimationAction (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f))
+            |=* Animation.seq [Animation.Delay 150.0 :> Animation; Animation.Action (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f)]
 
         override this.Draw() =
             Draw.rect this.Bounds (Style.accentShade(int (100.0f * fade.Value), 0.5f, 0.0f))
