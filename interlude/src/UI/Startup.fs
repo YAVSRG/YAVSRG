@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI
 
 open Percyqaz.Common
-open Percyqaz.Flux.Graphics
 open Interlude
 open Interlude.UI.Screens
 open Interlude.UI.Toolbar
@@ -35,4 +34,5 @@ module Startup =
 
         override this.Init() =
             base.Init()
+            Gameplay.init()
             container.Init(this)

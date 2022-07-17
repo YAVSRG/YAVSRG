@@ -23,7 +23,6 @@ let main argv =
         
         Window.onLoad.Add(fun () -> 
             Content.init Options.options.Theme.Value Options.options.Noteskin.Value
-            Gameplay.init()
             Options.Hotkeys.init Options.options.Hotkeys
             Printerlude.init()
         )
