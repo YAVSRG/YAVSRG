@@ -8,7 +8,6 @@ open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.Common
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
-open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 
@@ -33,10 +32,9 @@ module Window =
 type Window(config: Config, title: string, root: Root) as this =
     inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = 24))
 
-    let renderThread = RenderThread(this, root)
+    let renderThread = RenderThread(this, config.AudioDevice.Value, root)
 
     do
-        Devices.init config.AudioDevice.Value
         base.Title <- title
         base.VSync <- VSyncMode.Off
         base.CursorState <- CursorState.Hidden

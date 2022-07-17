@@ -160,7 +160,7 @@ module Devices =
     let private get() =
         devices <-
             seq {
-                for i in 1 .. Bass.DeviceCount - 1 do
+                for i = 1 to Bass.DeviceCount do
                     let ok, info = Bass.GetDeviceInfo i
                     if ok then 
                         if info.IsDefault then defaultDevice <- i
@@ -175,14 +175,14 @@ module Devices =
 
     let change(index: int) =
         try 
-            let id = if index = -1 then defaultDevice else fst devices.[index]
+            let id = if index = -1 then defaultDevice else fst devices.[index - 1]
             Bass.CurrentDevice <- id
-            Bass.ChannelSetDevice(Song.nowplaying.ID, id) |> bassError
+            if Song.nowplaying.ID <> 0 then Bass.ChannelSetDevice(Song.nowplaying.ID, id) |> bassError
         with err -> Logging.Error(sprintf "Error switching to audio output %i" index, err)
 
-    let init(device_index: int) =
+    let init(device: int) =
         get()
         for (i, name) in devices do
             Bass.Init i |> bassError
-        change device_index
+        change device
         Bass.GlobalStreamVolume <- 0
