@@ -20,3 +20,4 @@
 /tools/bin/Debug/netcoreapp3.1
 /tools/bin/Release/netcoreapp3.1
 /nuget
+/bin/Release

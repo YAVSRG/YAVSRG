@@ -2,11 +2,11 @@
 :: just adjust output directory to where it gets built
 
 @echo off
-set build="C:\Users\percy\Desktop\Source\YAVSRG\Interlude\Interlude.fsproj"
+set build="C:\Users\percy\Desktop\Source\YAVSRG\Interlude\src\Interlude.fsproj"
 echo -- BUILDING --
 dotnet build -c Release "%build%"
 echo -- BUILT --
-set output="C:\Users\percy\Desktop\Source\YAVSRG\Interlude\bin\Release\netcoreapp3.1\"
+set output="C:\Users\percy\Desktop\Source\YAVSRG\Interlude\src\bin\Release\netcoreapp3.1\"
 rmdir /Q /S "%output%../Clean"
 xcopy /I "%output%*.dll" "%output%../Clean"
 xcopy /I "%output%*.so" "%output%../Clean"
