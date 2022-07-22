@@ -21,6 +21,7 @@ module Startup =
 
         Screen.Container(Toolbar())
 
+    // Eventually the screen container will replace this
     type Root() =
         inherit Percyqaz.Flux.UI.Root()
 

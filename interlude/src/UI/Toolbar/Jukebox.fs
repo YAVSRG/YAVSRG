@@ -28,5 +28,5 @@ type Jukebox() as this =
 
     override this.Draw() =
         let r = this.Bounds.SliceBottom 5.0f
-        Draw.rect r (Style.accentShade(int (255.0f * fade.Value), 0.4f, 0.0f))
-        Draw.rect (r.SliceLeft(slider.Value * r.Width)) (Style.accentShade(int (255.0f * fade.Value), 1.0f, 0.0f))
+        Draw.rect r (Style.accentShade(fade.Alpha, 0.4f, 0.0f))
+        Draw.rect (r.SliceLeft(slider.Value * r.Width)) (Style.accentShade(fade.Alpha, 1.0f, 0.0f))

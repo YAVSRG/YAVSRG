@@ -192,7 +192,7 @@ type TextField(setting: Setting<string>) as this =
     let color = Animation.Fade 0.5f
     do
         this.Animation.Add color
-        this.Add(new TextBox(setting.Get, (fun () -> Style.accentShade(int (color.Value * 255.0f), 1.0f, color.Value), Color.Black), 0.0f))
+        this.Add(new TextBox(setting.Get, (fun () -> Style.accentShade(color.Alpha, 1.0f, color.Value), Color.Black), 0.0f))
         this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
 
     override this.OnSelect() =

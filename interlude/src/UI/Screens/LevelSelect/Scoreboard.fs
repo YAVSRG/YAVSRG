@@ -40,7 +40,7 @@ module Scoreboard =
             data.Physical |> ignore
             data.Lamp |> ignore
 
-            let color = fun () -> let a = int (255.0f * fade.Value) in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
+            let color = fun () -> let a = fade.Alpha in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
 
             this.Position( Position.SliceTop 75.0f )
             |-+ TextBox((fun() -> data.Scoring.FormatAccuracy()), color, 0.0f)

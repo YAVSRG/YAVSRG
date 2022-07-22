@@ -157,7 +157,7 @@ module Screen =
         let drawq (q: Quad, color: Color, depth: float32) =
             List.iter
                 (fun (bg, (fade: Animation.Fade), isDefault) ->
-                    let color = Color.FromArgb(fade.Value * 255.0f |> int, color)
+                    let color = Color.FromArgb(fade.Alpha, color)
                     let pwidth = Viewport.vwidth + parallaxZ.Value * depth
                     let pheight = Viewport.vheight + parallaxZ.Value * depth
                     let x = -parallaxX.Value * parallaxZ.Value * depth
@@ -264,7 +264,8 @@ module Screen =
                 parallaxX.Target <- x / Viewport.vwidth
                 parallaxY.Target <- y / Viewport.vheight
             Style.accentColor.SetColor Content.accentColor
-            Dialog.update (elapsedTime, this.Bounds)
+            Dialog.display.Update(elapsedTime, moved)
+            Dialog.update (elapsedTime, this.Bounds) // old
 
             globalAnimation.Update elapsedTime
             toolbar.Update (elapsedTime, this.Bounds)
@@ -273,7 +274,7 @@ module Screen =
     
         override this.Draw() =
             Background.draw (this.Bounds, Color.White, 1.0f)
-            Draw.rect this.Bounds (Color.FromArgb (backgroundDim.Value * 255.0f |> int, 0, 0, 0))
+            Draw.rect this.Bounds (Color.FromArgb (backgroundDim.Alpha, 0, 0, 0))
             current.Draw()
             logo.Draw()
             toolbar.Draw()
@@ -282,7 +283,8 @@ module Screen =
                 let amount = Math.Clamp((if inbound then transitionIn.Elapsed / TRANSITIONTIME else 1.0 - (transitionOut.Elapsed / TRANSITIONTIME)), 0.0, 1.0) |> float32
                 Transitions.drawTransition transitionFlags inbound amount this.Bounds
                 if (transitionFlags &&& TransitionFlag.UnderLogo = TransitionFlag.UnderLogo) then logo.Draw()
-            Dialog.draw()
+            Dialog.draw() // old
+            Dialog.display.Draw()
             if currentType <> Type.Play || Dialog.any() then 
                 let x, y = Mouse.pos()
                 Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
@@ -291,3 +293,4 @@ module Screen =
         override this.Init(parent: Widget) =
             base.Init parent
             Tooltip.display.Init this
+            Dialog.display.Init this

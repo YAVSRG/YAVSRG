@@ -62,7 +62,7 @@ module Tooltip =
                     | NotificationType.Error -> Color.FromArgb(190, 0, 0), Icons.alert
                     | NotificationType.System -> Color.FromArgb(0, 190, 120), Icons.system_notification
                     | NotificationType.Task -> Color.FromArgb(120, 0, 190), Icons.system_notification
-                let a = i.Fade.Value * 255.0f |> int
+                let a = i.Fade.Alpha
                 Draw.rect (bounds.SliceLeft 5.0f) (Color.FromArgb(a, c))
                 Draw.rect (bounds.SliceTop 5.0f) (Color.FromArgb(a, c))
                 Draw.rect (bounds.SliceRight 5.0f) (Color.FromArgb(a, c))

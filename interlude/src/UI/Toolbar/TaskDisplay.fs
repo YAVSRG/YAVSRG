@@ -46,7 +46,7 @@ module TaskDisplay =
 
         override this.Draw() =
 
-            let a = 255.0f * fade.Value |> int
+            let a = fade.Alpha
             let col = color.GetColor a
             
             Draw.rect (this.Bounds.SliceTop 5.0f) col
