@@ -1,5 +1,6 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
 open Interlude.Utils
@@ -13,14 +14,14 @@ module Debug =
         inherit Page(m)
 
         do
-            this |*
-                page_content m [
-                    PrettyButton.Once(
+            this.Content(
+                column()
+                |+ PrettyButton.Once(
                         "debug.rebuildcache",
                         (fun () -> BackgroundTask.Create TaskFlags.LONGRUNNING "Rebuilding Cache" Library.rebuildTask |> ignore),
                         Localisation.localiseWith ["Rebuilding Cache"] "notification.taskstarted", NotificationType.Task
                     ).Pos(200.0f)
-                    PrettyButton.Once(
+                |+ PrettyButton.Once(
                         "debug.downloadupdate",
                         ( fun () ->
                             if AutoUpdate.updateAvailable then
@@ -29,8 +30,7 @@ module Debug =
                         L"notification.update.installing", NotificationType.System,
                         Enabled = AutoUpdate.updateAvailable
                     ).Pos(300.0f)
-                    PrettySetting("debug.enableconsole", Percyqaz.Flux.UI.Selector<_>.FromBool options.EnableConsole).Pos(400.0f)
-                ]
-
+                |+ PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole).Pos(400.0f)
+            )
         override this.Title = N"debug"
         override this.OnClose() = ()

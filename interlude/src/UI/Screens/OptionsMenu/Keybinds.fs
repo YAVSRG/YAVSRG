@@ -41,10 +41,10 @@ module Keybinds =
 
         do
             this
-            |+ Percyqaz.Flux.UI.Text((fun () -> text),
+            |+ Text((fun () -> text),
                 Color = (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black),
                 Align = Alignment.LEFT)
-            |* Percyqaz.Flux.UI.Clickable((fun () -> if not this.Selected then this.Select()),
+            |* Clickable((fun () -> if not this.Selected then this.Select()),
                 OnHover = fun b -> if b then this.Focus())
 
         override this.OnSelected() =
@@ -65,11 +65,11 @@ module Keybinds =
 
         do
             this
-            |+ Percyqaz.Flux.UI.Text((fun () -> (!|hotkey).ToString()),
+            |+ Text((fun () -> (!|hotkey).ToString()),
                 Color = (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black),
                 Align = Alignment.LEFT,
                 Position = Position.TrimLeft 20.0f)
-            |* Percyqaz.Flux.UI.Clickable((fun () -> if not this.Selected then this.Select()), 
+            |* Clickable((fun () -> if not this.Selected then this.Select()), 
                 OnHover = fun b -> if b then this.Focus())
 
         // todo: ensure this updates the live binds properly
@@ -105,7 +105,7 @@ module Keybinds =
             for hk in Hotkeys.hotkeys.Keys do
                 if hk <> "none" then
                     container.Add( PrettySetting("hotkeys." + hk.ToLower(), Keybinder hk) )
-            this |* scrollContainer
+            this.Content scrollContainer
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
@@ -121,12 +121,11 @@ module Keybinds =
         let binds = GameplayKeybinder(keycount)
 
         do
-            this |*
-                page_content m [
-                    PrettySetting("generic.keymode", Percyqaz.Flux.UI.Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Pos(200.0f)
-                    PrettySetting("keybinds.gameplay", binds).Pos(280.0f, Viewport.vwidth - 200.0f)
-                    PrettyButton("keybinds.hotkeys", (fun () -> m.ChangePage HotkeysPage)).Pos(400.0f)
-                ]
-
+            this.Content(
+                column()
+                |+ PrettySetting("generic.keymode", Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Pos(200.0f)
+                |+ PrettySetting("keybinds.gameplay", binds).Pos(280.0f, Viewport.vwidth - 200.0f)
+                |+ PrettyButton("keybinds.hotkeys", (fun () -> m.ChangePage HotkeysPage)).Pos(400.0f)
+            )
         override this.Title = N"keybinds"
         override this.OnClose() = ()

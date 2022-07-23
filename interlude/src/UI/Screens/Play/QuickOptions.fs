@@ -34,20 +34,20 @@ module QuickOptions =
                 |> Setting.round 0
             let recommendedOffset = float (Gameplay.Chart.saveData.Value.Offset - firstNote - mean)
 
-            this |*
-                page_content m [
-                    PrettySetting("quick.localoffset", Slider(offset, 0.0025f)).Pos(200f)
-                    Text(
+            this.Content(
+                column()
+                |+ PrettySetting("quick.localoffset", Slider(offset, 0.0025f)).Pos(200f)
+                |+ Text(
                         sprintf "Suggested: %.0f" recommendedOffset,
                         Align = Alignment.RIGHT,
                         Position = Position.Box(1.0f, 0.0f, -600.0f, 200.0f, 550.0f, PRETTYHEIGHT)
                     )
-                    PrettyButton("quick.applyoffset", fun () -> offset.Value <- recommendedOffset).Pos(280f)
+                |+ PrettyButton("quick.applyoffset", fun () -> offset.Value <- recommendedOffset).Pos(280f)
 
-                    PrettySetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(380.0f)
-                    PrettySetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Pos(460.0f)
-                    PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(540.0f)
-                ]
+                |+ PrettySetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(380.0f)
+                |+ PrettySetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Pos(460.0f)
+                |+ PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(540.0f)
+            )
 
         override this.Title = N"quick"
         override this.OnClose() = callback()

@@ -35,7 +35,7 @@ module Themes =
             fbo.Unbind()
 
             this
-            |* Text("PREVIEW", Position = { Percyqaz.Flux.UI.Position.Default with Top = 1.0f %+ 0.0f; Bottom = 1.0f %+ 50.0f } )
+            |* Text("PREVIEW", Position = { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 1.0f %+ 50.0f } )
 
             let w = Viewport.vwidth * scale
             let h = Viewport.vheight * scale
@@ -89,33 +89,33 @@ module Themes =
                 (fun i k ->
                     let x = -60.0f * float32 k
                     let n = float32 i
-                    NoteColorPicker(g keycount.Value i, Position = { Percyqaz.Flux.UI.Position.Default with Left = 0.5f %+ (x + 120.0f * n); Right = 0.5f %+ (x + 120.0f * n + 120.0f) })
+                    NoteColorPicker(g keycount.Value i, Position = { Position.Default with Left = 0.5f %+ (x + 120.0f * n); Right = 0.5f %+ (x + 120.0f * n + 120.0f) })
                 )
 
         do
-            this |*
-                page_content m [
-                    PrettySetting("themes.editnoteskin.noteskinname", Percyqaz.Flux.UI.TextEntry(name, "none")).Pos(200.0f)
-                    PrettySetting("themes.editnoteskin.holdnotetrim", Percyqaz.Flux.UI.Slider(holdNoteTrim, 0.05f)).Pos(300.0f)
-                    PrettySetting("generic.keymode",
-                        Percyqaz.Flux.UI.Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors))
+            this.Content(
+                column()
+                |+ PrettySetting("themes.editnoteskin.noteskinname", TextEntry(name, "none")).Pos(200.0f)
+                |+ PrettySetting("themes.editnoteskin.holdnotetrim", Slider(holdNoteTrim, 0.05f)).Pos(300.0f)
+                |+ PrettySetting("generic.keymode",
+                        Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors))
                     ).Pos(450.0f)
-                    PrettySetting("themes.editnoteskin.globalcolors",
-                        Percyqaz.Flux.UI.Selector<_>.FromBool(
+                |+ PrettySetting("themes.editnoteskin.globalcolors",
+                        Selector<_>.FromBool(
                             Setting.make
                                 (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
                                 (fun () -> noteColors.UseGlobalColors)
                             |> Setting.trigger (ignore >> refreshColors))
                     ).Pos(530.0f)
-                    PrettySetting("themes.editnoteskin.colorstyle",
-                        Percyqaz.Flux.UI.Selector.FromEnum(
+                |+ PrettySetting("themes.editnoteskin.colorstyle",
+                        Selector.FromEnum(
                             Setting.make
                                 (fun v -> noteColors <- { noteColors with Style = v })
                                 (fun () -> noteColors.Style)
                             |> Setting.trigger (ignore >> refreshColors))
                     ).Pos(610.0f)
-                    PrettySetting("themes.editnoteskin.notecolors", colors).Pos(690.0f, Viewport.vwidth - 200.0f, 120.0f)
-                ]
+                |+ PrettySetting("themes.editnoteskin.notecolors", colors).Pos(690.0f, Viewport.vwidth - 200.0f, 120.0f)
+            )
 
         override this.Title = data.Name
         override this.OnClose() =
@@ -135,10 +135,9 @@ module Themes =
         let name = Setting.simple data.Name
 
         do
-            this |*
-                page_content m [
-                    PrettySetting("themes.edittheme.themename", Percyqaz.Flux.UI.TextEntry(name, "none")).Pos(200.0f)
-                ]
+            this.Content(
+                    PrettySetting("themes.edittheme.themename", TextEntry(name, "none")).Pos(200.0f)
+                )
 
         override this.Title = data.Name
         override this.OnClose() =
@@ -153,18 +152,18 @@ module Themes =
 
         let preview = NoteskinPreview 0.5f
 
-        let noteskins = PrettySetting("themes.noteskin", Percyqaz.Flux.UI.Text("")) // todo: better placeholders
+        let noteskins = PrettySetting("themes.noteskin", Text("")) // todo: better placeholders
         let refreshNoteskins() =
             options.Noteskin.Value <- Noteskins.Current.id
             noteskins.Child <- 
-                Percyqaz.Flux.UI.Selector(Noteskins.list(), options.Noteskin |> Setting.trigger (fun id -> Noteskins.Current.switch id; preview.Refresh()))
+                Selector(Noteskins.list(), options.Noteskin |> Setting.trigger (fun id -> Noteskins.Current.switch id; preview.Refresh()))
             preview.Refresh()
 
-        let themes = PrettySetting("themes.theme", Percyqaz.Flux.UI.Text(""))
+        let themes = PrettySetting("themes.theme", Text(""))
         let refreshThemes() =
             options.Theme.Value <- Themes.Current.id
             themes.Child <-
-                Percyqaz.Flux.UI.Selector(Themes.list(), options.Theme |> Setting.trigger (fun id -> Themes.Current.switch id; preview.Refresh()))
+                Selector(Themes.list(), options.Theme |> Setting.trigger (fun id -> Themes.Current.switch id; preview.Refresh()))
             preview.Refresh()
 
         let tryEditNoteskin() =
@@ -196,21 +195,21 @@ module Themes =
         do
             refreshNoteskins()
             refreshThemes()
+            
+            this.Content(
+                column()
+                |+ themes.Pos(200.0f)
+                |+ PrettyButton("themes.edittheme", tryEditTheme).Pos(300.0f)
+                |+ PrettyButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes")).Pos(400.0f)
 
-            this |*
-                page_content m [
-                    themes.Pos(200.0f)
-                    PrettyButton("themes.edittheme", tryEditTheme).Pos(300.0f)
-                    PrettyButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes")).Pos(400.0f)
+                |+ Divider().Pos(550.0f)
 
-                    Divider().Pos(550.0f)
-
-                    noteskins.Pos(600.0f)
-                    PrettyButton("themes.editnoteskin", tryEditNoteskin).Pos(700.0f)
-                    PrettyButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins")).Pos(800.0f)
-                    preview
-                ]
+                |+ noteskins.Pos(600.0f)
+                |+ PrettyButton("themes.editnoteskin", tryEditNoteskin).Pos(700.0f)
+                |+ PrettyButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins")).Pos(800.0f)
+                |+ preview
+            )
 
         override this.OnClose() = ()
         override this.OnDestroy() = preview.Destroy()
-        override this.Title = ""
+        override this.Title = N"themes"

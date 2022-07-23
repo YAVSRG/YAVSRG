@@ -15,6 +15,9 @@ type IMenu =
 and [<AbstractClass>] Page(p: IMenu) =
     inherit DynamicContainer(NodeType.None)
 
+    let mutable isCurrent = false
+    let mutable content = None
+
     member this.Parent = p
 
     abstract member Title : string
@@ -22,29 +25,38 @@ and [<AbstractClass>] Page(p: IMenu) =
     abstract member OnDestroy : unit -> unit
     default this.OnDestroy() = ()
 
+    member this.Content(w: Widget) =
+        this.Add(w)
+        content <- Some w
+
+    override this.Update(elapsedTime, moved) =
+        if isCurrent && not content.Value.Focused then p.Back()
+        base.Update(elapsedTime, moved)
+
     member this.View() =
         this.Position <- Position.Default
+        content.Value.Focus()
+        isCurrent <- true
 
-    member this.Forward() =
+    member this.MoveDown() =
         this.Position <- { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 2.0f %+ 0.0f }
+        isCurrent <- false
 
-    member this.Back() =
+    member this.MoveUp() =
         this.Position <- { Position.Default with Top = -1.0f %+ 0.0f; Bottom = 0.0f %+ 0.0f }
+        isCurrent <- false
 
     override this.Init(parent: Widget) =
-        this.Back()
+        if content.IsNone then failwithf "Call Content() to provide page content"
+        this.MoveUp()
         base.Init parent
         this.View()
 
 [<AutoOpen>]
 module Helpers =
 
-    let page_content (menu: IMenu) (xs: Widget list) =
-        let c = 
-            { new SwitchContainer.Column<Widget>() with 
-                override this.OnUnfocus() = base.OnUnfocus(); menu.Back() 
-                override this.Init(p) = base.Init(p); this.Focus() }
-        List.iter c.Add xs; c
+    let column() = SwitchContainer.Column<Widget>()
+    let row() = SwitchContainer.Row<Widget>()
 
     let refreshRow number cons =
         let r = SwitchContainer.Row()
@@ -98,27 +110,32 @@ type PrettySetting(name, widget: Widget) as this =
     let mutable widget = widget
 
     do
-        widget.Position <- Percyqaz.Flux.UI.Position.TrimLeft PRETTYTEXTWIDTH
         this
         |+ Text(
             K (N name + ":"),
             Color = (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)),
             Align = Alignment.LEFT,
-            Position = Percyqaz.Flux.UI.Position.SliceLeft PRETTYTEXTWIDTH)
+            Position = Position.SliceLeft PRETTYTEXTWIDTH)
         |* TooltipRegion2(T name)
 
     member this.Child
         with get() = widget
         and set(w: Widget) =
             widget <- w
-            w.Position <- Percyqaz.Flux.UI.Position.TrimLeft PRETTYTEXTWIDTH
+            w.Position <- Position.TrimLeft PRETTYTEXTWIDTH
+            if this.Initialised then w.Init this
     
     member this.Pos(y, width, height) =
-        this.Position <- Percyqaz.Flux.UI.Position.Box(0.0f, 0.0f, 100.0f, y, width, height) 
+        this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height) 
         this
     
     member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
     member this.Pos(y) = this.Pos(y, PRETTYWIDTH)
+
+    override this.Init(parent) =
+        base.Init parent
+        widget.Position <- Position.TrimLeft PRETTYTEXTWIDTH
+        widget.Init this
 
     override this.Draw() =
         if this.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
@@ -184,6 +201,7 @@ type Menu(topLevel: IMenu -> Page) as this =
     let add (page: IMenu -> #Page) =
 
         let page = page (this :> IMenu) :> Page
+        page.Init this
 
         let n = List.length namestack
         namestack <- page.Title :: namestack
@@ -194,7 +212,7 @@ type Menu(topLevel: IMenu -> Page) as this =
         | Some page -> page.OnDestroy()
 
         stack.[n] <- Some page
-        if n > 0 then stack.[n - 1].Value.Forward()
+        if n > 0 then stack.[n - 1].Value.MoveDown()
     
     let back() =
         namestack <- List.tail namestack
@@ -202,16 +220,17 @@ type Menu(topLevel: IMenu -> Page) as this =
         let n = List.length namestack
         let page = stack.[n].Value
         page.OnClose()
-        page.Back()
+        page.MoveUp()
         if n > 0 then stack.[n - 1].Value.View()
-    
-    do add topLevel
+
+    override this.Init(parent) =
+        base.Init(parent)
+        add topLevel
 
     override this.Draw() =
         let mutable i = 0
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
             stack.[i].Value.Draw()
-            printfn "drew page %i" i
             i <- i + 1
         Text.drawFillB(Style.baseFont, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Style.text(), 0.0f)
     

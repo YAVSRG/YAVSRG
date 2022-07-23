@@ -54,8 +54,8 @@ module Gameplay =
         inherit Page(m)
 
         do
-            this |*
-                page_content m [
+            this.Content(
+                column()
                     //let setting =
                     //    Setting.make ignore
                     //        ( fun () ->
@@ -75,7 +75,7 @@ module Gameplay =
                     //        add
                     //    )
                     //).Pos(200.0f, PRETTYWIDTH, 800.0f)
-                ]
+                )
 
         override this.Title = N"gameplay.rulesets"
         override this.OnClose() = ()
@@ -84,14 +84,14 @@ module Gameplay =
         inherit Page(m)
 
         do
-            this |*
-                page_content m [
-                    PrettySetting("gameplay.screencover.enabled", Percyqaz.Flux.UI.Selector<_>.FromBool options.ScreenCover.Enabled).Pos(200.0f)
-                    PrettySetting("gameplay.screencover.hidden", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Pos(350.0f)
-                    PrettySetting("gameplay.screencover.sudden", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Pos(450.0f)
-                    PrettySetting("gameplay.screencover.fadelength", Percyqaz.Flux.UI.Slider(options.ScreenCover.FadeLength, 0.01f)).Pos(550.0f)
-                    Themes.NoteskinPreview 0.35f
-                ]
+            this.Content(
+                column()
+                |+ PrettySetting("gameplay.screencover.enabled", Percyqaz.Flux.UI.Selector<_>.FromBool options.ScreenCover.Enabled).Pos(200.0f)
+                |+ PrettySetting("gameplay.screencover.hidden", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Pos(350.0f)
+                |+ PrettySetting("gameplay.screencover.sudden", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Pos(450.0f)
+                |+ PrettySetting("gameplay.screencover.fadelength", Percyqaz.Flux.UI.Slider(options.ScreenCover.FadeLength, 0.01f)).Pos(550.0f)
+                |+ Themes.NoteskinPreview 0.35f
+            )
         override this.Title = N"gameplay.screencover"
         override this.OnClose() = ()
 
@@ -99,15 +99,15 @@ module Gameplay =
         inherit Page(m)
 
         do
-            this |*
-                page_content m [
-                    PrettySetting("gameplay.scrollspeed", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(200.0f)
-                    PrettySetting("gameplay.hitposition", Percyqaz.Flux.UI.Slider(options.HitPosition, 0.005f)).Pos(280.0f)
-                    PrettySetting("gameplay.upscroll", Percyqaz.Flux.UI.Selector<_>.FromBool options.Upscroll).Pos(360.0f)
-                    PrettySetting("gameplay.backgrounddim", Percyqaz.Flux.UI.Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
-                    PrettyButton("gameplay.screencover", fun() -> m.ChangePage ScreencoverPage).Pos(520.0f)
-                    //PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Pos(670.0f)
-                    PrettyButton("gameplay.rulesets", fun () -> m.ChangePage RulesetsPage).Pos(750.0f)
-                ]
+            this.Content(
+                column()
+                |+ PrettySetting("gameplay.scrollspeed", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(200.0f)
+                |+ PrettySetting("gameplay.hitposition", Percyqaz.Flux.UI.Slider(options.HitPosition, 0.005f)).Pos(280.0f)
+                |+ PrettySetting("gameplay.upscroll", Percyqaz.Flux.UI.Selector<_>.FromBool options.Upscroll).Pos(360.0f)
+                |+ PrettySetting("gameplay.backgrounddim", Percyqaz.Flux.UI.Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
+                |+ PrettyButton("gameplay.screencover", fun() -> m.ChangePage ScreencoverPage).Pos(520.0f)
+                //|+ PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Pos(670.0f)
+                |+ PrettyButton("gameplay.rulesets", fun () -> m.ChangePage RulesetsPage).Pos(750.0f)
+            )
         override this.Title = N"gameplay"
         override this.OnClose() = ()

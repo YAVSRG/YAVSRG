@@ -31,20 +31,20 @@ module Mounts =
         let mutable import = false
 
         do
-            this |*
-                page_content m [
-                    PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup).Pos(200.0f)
-                    PrettyButton.Once(
+            this.Content(
+                column()
+                |+ PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup).Pos(200.0f)
+                |+ PrettyButton.Once(
                         "mount.import",
                         (fun () -> import <- true),
                         Localisation.localiseWith ["Import new songs"] "notification.taskstarted", NotificationType.Task
                     ).Pos(400.0f)
-                    PrettyButton.Once(
+                |+ PrettyButton.Once(
                         "mount.importall",
                         (fun () -> import <- true; mount.LastImported <- System.DateTime.UnixEpoch),
                         Localisation.localiseWith ["Import all songs"] "notification.taskstarted", NotificationType.Task
                     ).Pos(500.0f)
-                ]
+            )
 
         override this.Title = N"mount"
         override this.OnClose() =
