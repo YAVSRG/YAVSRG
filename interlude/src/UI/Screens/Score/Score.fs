@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Scoring.Grading

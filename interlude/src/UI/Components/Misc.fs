@@ -21,6 +21,16 @@ type TooltipRegion(localisedText) =
 
     static member Create(localisedText) = fun (w: #Widget1) -> let t = TooltipRegion localisedText in t.Add w; t
 
+type TooltipRegion2(localisedText) =
+    inherit StaticWidget(NodeType.None)
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
+            Tooltip.tooltip ((!|"tooltip"), localisedText)
+
+    override this.Draw() = ()
+
 [<AutoOpen>]
 module Tooltip =
     type Widget1 with

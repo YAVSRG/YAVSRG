@@ -35,8 +35,8 @@ module TaskDisplay =
             Clickable(
                 ( fun () ->
                     if not closing then
-                        if task.Status <> TaskStatus.RanToCompletion then
-                            Selection.Menu.ConfirmDialog("Cancel this task?", F task.Cancel close).Show()
+                        if task.Status <> TaskStatus.RanToCompletion then ()
+                            //Selection.Menu.ConfirmDialog("Cancel this task?", F task.Cancel close).Show()
                         else close()
                 ),
                 ignore

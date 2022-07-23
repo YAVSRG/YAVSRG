@@ -4,6 +4,7 @@ open System.IO
 open System.Net
 open System.Net.Security
 open Percyqaz.Common
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting

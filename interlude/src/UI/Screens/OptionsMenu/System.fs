@@ -11,27 +11,30 @@ open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
 module System =
-    
-    let page() : SelectionPage =
-        {
-            Content = fun add ->
-                column [
-                    PrettySetting("system.visualoffset", new Slider<float>(options.VisualOffset, 0.01f)).Position(200.0f)
+
+    type SystemPage(m) as this =
+        inherit Page(m)
+
+        do
+            this |*
+                page_content m [
+                    PrettySetting("system.visualoffset", Percyqaz.Flux.UI.Slider<float>(options.VisualOffset, 0.01f)).Pos(200.0f)
 
                     PrettySetting("system.audiooffset",
-                        { new Slider<float>(options.AudioOffset, 0.01f)
-                            with override this.OnDeselect() = Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>) }
-                    ).Position(280.0f)
+                        { new Percyqaz.Flux.UI.Slider<float>(options.AudioOffset, 0.01f)
+                            with override this.OnDeselected() = base.OnDeselected(); Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>) }
+                    ).Pos(280.0f)
 
                     PrettySetting("system.audiovolume",
-                        Slider<_>.Percent(options.AudioVolume |> Setting.trigger Devices.changeVolume, 0.01f)
-                    ).Position(380.0f)
-                    PrettySetting("system.audiodevice", Selector(Array.ofSeq(Devices.list()), Setting.trigger Devices.change config.AudioDevice)).Position(460.0f, 1700.0f)
+                        Percyqaz.Flux.UI.Slider<_>.Percent(options.AudioVolume |> Setting.trigger Devices.changeVolume, 0.01f)
+                    ).Pos(380.0f)
+                    PrettySetting("system.audiodevice", Percyqaz.Flux.UI.Selector(Array.ofSeq(Devices.list()), Setting.trigger Devices.change config.AudioDevice)).Pos(460.0f, 1700.0f)
 
-                    PrettySetting("system.windowmode", Selector.FromEnum config.WindowMode).Position(560.0f)
+                    PrettySetting("system.windowmode", Percyqaz.Flux.UI.Selector.FromEnum config.WindowMode).Pos(560.0f)
                     // todo: way to edit resolution settings?
-                    PrettySetting("system.framelimit", Selector.FromEnum config.FrameLimit).Position(640.0f)
-                    PrettySetting("system.monitor", Selector(Window.monitors, config.Display)).Position(720.0f)
-                ] :> Selectable
-            Callback = fun () -> Window.apply_config <- Some config
-        }
+                    PrettySetting("system.framelimit", Percyqaz.Flux.UI.Selector.FromEnum config.FrameLimit).Pos(640.0f)
+                    PrettySetting("system.monitor", Percyqaz.Flux.UI.Selector(Window.monitors, config.Display)).Pos(720.0f)
+                ]
+
+        override this.OnClose() = Window.apply_config <- Some config
+        override this.Title = N"system"

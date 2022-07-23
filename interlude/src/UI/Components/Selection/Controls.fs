@@ -71,7 +71,7 @@ module Dropdown =
     let create_selector (items: 'T seq) (labelFunc: 'T -> string) (selectFunc: 'T -> unit) (onclose: unit -> unit) =
         create (Seq.map (fun item -> (labelFunc item, fun () -> selectFunc item)) items) onclose
 
-type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
+type Selector1<'T>(items: ('T * string) array, setting: Setting<'T>) as this =
     inherit NavigateSelectable()
 
     let mutable index = 
@@ -131,7 +131,7 @@ type DropdownSelector<'T>(items: 'T array, labelFunc: 'T -> string, setting: Set
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         DropdownSelector(values, (fun x -> Enum.GetName(typeof<'T>, x)), setting)
 
-type Slider<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
+type Slider1<'T>(setting: Setting.Bounded<'T>, incr: float32) as this =
     inherit NavigateSelectable()
     let TEXTWIDTH = 130.0f
     let color = Animation.Fade 0.5f
@@ -210,20 +210,29 @@ type TextField(setting: Setting<string>) as this =
             Input.removeInputMethod()
 
 type NoteColorPicker(color: Setting<byte>) as this =
-    inherit NavigateSelectable()
+    inherit StaticContainer(NodeType.Leaf)
+
     let sprite = Content.getTexture "note"
     let n = byte sprite.Rows
+
     let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color
     let bk() = Setting.app (fun x -> (x + 1uy) % n) color
-    do this.Add(new Clickable((fun () -> (if not this.Selected then this.Selected <- true); fd ()), fun b -> if b then this.Hover <- true))
+
+    do 
+        this
+        |* Percyqaz.Flux.UI.Clickable((fun () -> (if not this.Selected then this.Select()); fd ()), OnHover = fun b -> if b then this.Focus())
 
     override this.Draw() =
         base.Draw()
         if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f))
-        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
+        elif this.Focused then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
         Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
 
-    override this.Left() = bk()
-    override this.Up() = fd()
-    override this.Right() = fd()
-    override this.Down() = bk()
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        
+        if this.Selected then
+            if (!|"up").Tapped() then fd()
+            elif (!|"down").Tapped() then bk()
+            elif (!|"left").Tapped() then bk()
+            elif (!|"right").Tapped() then fd()

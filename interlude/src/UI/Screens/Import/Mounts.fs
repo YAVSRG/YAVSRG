@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.ChartFormats.Conversions
 open Prelude.Data.Charts.Library.Imports
@@ -22,29 +23,33 @@ module Mounts =
         | Stepmania = 1
         | Etterna = 2
 
-    let editor (setting: Setting<MountedChartSource option>) =
+    type EditorPage(setting: Setting<MountedChartSource option>, m) as this =
+        inherit Page(m)
+
         let mount = setting.Value.Value
         let importOnStartup = Setting.simple mount.ImportOnStartup
         let mutable import = false
-        {
-            Content = fun _ ->
-                column [
-                    PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup).Position(200.0f)
+
+        do
+            this |*
+                page_content m [
+                    PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup).Pos(200.0f)
                     PrettyButton.Once(
                         "mount.import",
                         (fun () -> import <- true),
                         Localisation.localiseWith ["Import new songs"] "notification.taskstarted", NotificationType.Task
-                    ).Position(400.0f)
+                    ).Pos(400.0f)
                     PrettyButton.Once(
                         "mount.importall",
                         (fun () -> import <- true; mount.LastImported <- System.DateTime.UnixEpoch),
                         Localisation.localiseWith ["Import all songs"] "notification.taskstarted", NotificationType.Task
-                    ).Position(500.0f)
-                ] :> Selectable
-            Callback = fun () ->
-                setting.Value <- Some { mount with ImportOnStartup = importOnStartup.Value }
-                if import then BackgroundTask.Create TaskFlags.NONE "Import from mounted source" (importMountedSource setting.Value.Value) |> ignore
-        }
+                    ).Pos(500.0f)
+                ]
+
+        override this.Title = N"mount"
+        override this.OnClose() =
+            setting.Value <- Some { mount with ImportOnStartup = importOnStartup.Value }
+            if import then BackgroundTask.Create TaskFlags.NONE "Import from mounted source" (importMountedSource setting.Value.Value) |> ignore
 
     let handleStartupImports() =
         Logging.Debug("Checking for new songs in other games to import..")
@@ -113,7 +118,7 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
     let mutable refresh = ignore
 
     let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), Icons.add)
-    let editButton = Button((fun () -> SelectionMenu(N"mount", Mounts.editor setting).Show()), Icons.edit)
+    let editButton = Button((fun () -> Menu(fun m -> Mounts.EditorPage(setting, m)).Show()), Icons.edit)
     let deleteButton = Button((fun () -> setting.Value <- None; refresh()), Icons.delete)
 
     do

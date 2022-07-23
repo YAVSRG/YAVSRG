@@ -126,6 +126,8 @@ module Content =
                     Fonts.add font
                 if font <> null then font.Dispose()
                 font <- Fonts.create config.Font
+                // todo: relocate
+                Percyqaz.Flux.UI.Style.baseFont <- font
 
                 for id in Storage.themeTextures do
                     match instance.GetTexture id with

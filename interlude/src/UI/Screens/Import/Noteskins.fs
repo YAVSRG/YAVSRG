@@ -3,6 +3,7 @@
 open System.IO
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Themes.Noteskin
 open Prelude.Web

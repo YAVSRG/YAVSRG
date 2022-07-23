@@ -3,6 +3,7 @@
 open OpenTK
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
 open Prelude.Scoring

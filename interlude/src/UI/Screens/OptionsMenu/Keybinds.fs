@@ -4,19 +4,16 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Components
-open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Containers
-open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
 module Keybinds = 
 
     type GameplayKeybinder(keymode: Setting<Keymode>) as this =
-        inherit Selectable()
+        inherit StaticContainer(NodeType.Leaf)
 
         let mutable progress = 0
 
@@ -37,49 +34,50 @@ module Keybinds =
             | Key (k, _) ->
                 binds.[progress] <- Key (k, (false, false, false))
                 progress <- progress + 1
-                if progress = int keymode.Value then this.Selected <- false
+                if progress = int keymode.Value then this.Focus()
                 else Input.grabNextEvent inputCallback
                 refreshText()
             | _ -> Input.grabNextEvent inputCallback
 
         do
-            TextBox(
-                (fun () -> text),
-                (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black),
-                0.0f)
-            |> this.Add
+            this
+            |+ Percyqaz.Flux.UI.Text((fun () -> text),
+                Color = (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black),
+                Align = Alignment.LEFT)
+            |* Percyqaz.Flux.UI.Clickable((fun () -> if not this.Selected then this.Select()),
+                OnHover = fun b -> if b then this.Focus())
 
-            Clickable(
-                (fun () -> if not this.Selected then this.Selected <- true),
-                fun b -> if b then this.Hover <- true)
-            |> this.Add
-
-        override this.OnSelect() =
-            base.OnSelect()
+        override this.OnSelected() =
+            base.OnSelected()
             progress <- 0
             refreshText()
             Input.grabNextEvent inputCallback
 
-        override this.OnDeselect() =
-            base.OnDeselect()
+        override this.OnDeselected() =
+            base.OnDeselected()
             Input.removeInputMethod()
             text <- options.GameplayBinds.[int keymode.Value - 3] |> Seq.map (sprintf "%O") |> String.concat ",  "
 
         member this.OnKeymodeChanged() = refreshText()
 
-    type KeyBinder(hotkey: Hotkey) as this =
-        inherit Selectable()
+    type Keybinder(hotkey: Hotkey) as this =
+        inherit StaticContainer(NodeType.Leaf)
+
         do
             this
-            |-+ TextBox((fun () -> (!|hotkey).ToString()), (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black), 0.0f)
-                .Position( Position.TrimLeft(20.0f) )
-            |=+ Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true)
+            |+ Percyqaz.Flux.UI.Text((fun () -> (!|hotkey).ToString()),
+                Color = (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black),
+                Align = Alignment.LEFT,
+                Position = Position.TrimLeft 20.0f)
+            |* Percyqaz.Flux.UI.Clickable((fun () -> if not this.Selected then this.Select()), 
+                OnHover = fun b -> if b then this.Focus())
 
+        // todo: ensure this updates the live binds properly
         let set = fun v -> options.Hotkeys.[hotkey] <- v
     
         override this.Draw() =
             if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f))
-            elif this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
+            elif this.Focused then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
             Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.accentShade(127, 0.8f, 0.0f))
             base.Draw()
     
@@ -93,32 +91,42 @@ module Keybinds =
                     | Key (k, (ctrl, _, shift)) ->
                         if k = Keys.Escape then set Dummy
                         else set (Key (k, (ctrl, false, shift)))
-                        this.Selected <- false
+                        this.Focus()
                     | _ -> ()
 
-    let hotkeysPage() : SelectionPage =
-        let container = FlowSelectable(80.0f, 10.0f)
-        for o in System.Enum.GetValues typeof<Hotkey> do
-            let h = o :?> Hotkey
-            if h <> "none" then
-                container.Add( PrettySetting("hotkeys." + h.ToString().ToLower(), KeyBinder h) )
-        container.Reposition(100.0f, 200.0f, -100.0f, 0.0f)
-        {
-            Content = fun add -> container
-            Callback = ignore
-        }
-        
-    let page() : SelectionPage = 
-        let keycount = Setting.simple options.KeymodePreference.Value
+    type HotkeysPage(m) as this =
+        inherit Page(m)
 
+        let container =
+            FlowContainer.Vertical<PrettySetting>(PRETTYHEIGHT)
+        let scrollContainer = ScrollContainer.Flow(container)
+
+        do
+            for hk in Hotkeys.hotkeys.Keys do
+                if hk <> "none" then
+                    container.Add( PrettySetting("hotkeys." + hk.ToLower(), Keybinder hk) )
+            this |* scrollContainer
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            if not (scrollContainer.Focused) then m.Back()
+
+        override this.Title = N"keybinds.hotkeys"
+        override this.OnClose() = ()
+
+    type KeybindsPage(m) as this =
+        inherit Page(m)
+        
+        let keycount = Setting.simple options.KeymodePreference.Value
         let binds = GameplayKeybinder(keycount)
-                    
-        {
-            Content = fun add ->
-                column [
-                    PrettySetting("generic.keymode", Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Position(200.0f)
-                    PrettySetting("keybinds.gameplay", binds).Position(280.0f, Viewport.vwidth - 200.0f)
-                    PrettyButton("keybinds.hotkeys", (fun () -> add (N"keybinds.hotkeys", hotkeysPage()))).Position(400.0f)
+
+        do
+            this |*
+                page_content m [
+                    PrettySetting("generic.keymode", Percyqaz.Flux.UI.Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Pos(200.0f)
+                    PrettySetting("keybinds.gameplay", binds).Pos(280.0f, Viewport.vwidth - 200.0f)
+                    PrettyButton("keybinds.hotkeys", (fun () -> m.ChangePage HotkeysPage)).Pos(400.0f)
                 ]
-            Callback = ignore
-        }
+
+        override this.Title = N"keybinds"
+        override this.OnClose() = ()

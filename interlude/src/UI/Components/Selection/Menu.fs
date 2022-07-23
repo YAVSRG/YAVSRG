@@ -1,38 +1,53 @@
 ﻿namespace Interlude.UI.Components.Selection.Menu
 
 open System
-open OpenTK
-open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
-open Interlude
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Containers
-open Interlude.UI.Components.Selection.Controls
-open Interlude.UI.Components.Selection.Buttons
 
-type SelectionPage =
-    {
-        Content: (string * SelectionPage -> unit) -> Selectable
-        Callback: unit -> unit
-    }
+type IMenu =
+    abstract member ChangePage: (IMenu -> #Page) -> unit
+    abstract member Back: unit -> unit
+
+and [<AbstractClass>] Page(p: IMenu) =
+    inherit DynamicContainer(NodeType.None)
+
+    member this.Parent = p
+
+    abstract member Title : string
+    abstract member OnClose : unit -> unit
+    abstract member OnDestroy : unit -> unit
+    default this.OnDestroy() = ()
+
+    member this.View() =
+        this.Position <- Position.Default
+
+    member this.Forward() =
+        this.Position <- { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 2.0f %+ 0.0f }
+
+    member this.Back() =
+        this.Position <- { Position.Default with Top = -1.0f %+ 0.0f; Bottom = 0.0f %+ 0.0f }
+
+    override this.Init(parent: Widget) =
+        this.Back()
+        base.Init parent
+        this.View()
 
 [<AutoOpen>]
 module Helpers =
-    let row xs =
-        let r = ListSelectable(true)
-        List.iter r.Add xs; r
 
-    let column xs =
-        let c = ListSelectable(false)
+    let page_content (menu: IMenu) (xs: Widget list) =
+        let c = 
+            { new SwitchContainer.Column<Widget>() with 
+                override this.OnUnfocus() = base.OnUnfocus(); menu.Back() 
+                override this.Init(p) = base.Init(p); this.Focus() }
         List.iter c.Add xs; c
 
     let refreshRow number cons =
-        let r = ListSelectable(true)
+        let r = SwitchContainer.Row()
         let refresh() =
             r.Clear()
             let n = number()
@@ -41,200 +56,209 @@ module Helpers =
         refresh()
         r, refresh
 
+    /// N for Name -- Shorthand for getting localised name of a setting `s`
     let N (s: string) = L ("options." + s + ".name")
+    /// T for Tooltip -- Shorthand for getting localised tooltip of a setting `s`
     let T (s: string) = L ("options." + s + ".tooltip")
+    /// E for Editing -- Shorthand for getting localised title of page when editing object named `name`
     let E (name: string) = Localisation.localiseWith [name] "misc.edit"
 
-    let refreshChoice (options: string array) (widgets: Widget1 array array) (setting: Setting<int>) =
-        let rec newSetting =
-            {
-                Set =
-                    fun x ->
-                        for w in widgets.[setting.Value] do if w.Parent.IsSome then selector.SParent.Value.SParent.Value.Remove w
-                        for w in widgets.[x] do selector.SParent.Value.SParent.Value.Add w
-                        setting.Value <- x
-                Get = setting.Get
-                Config = setting.Config
-            }
-        and selector : Selector<int> = Selector(Array.indexed options, newSetting)
-        selector.Synchronized(fun () -> newSetting.Value <- newSetting.Value)
-        selector
+    //let refreshChoice (options: string array) (widgets: Widget1 array array) (setting: Setting<int>) =
+    //    let rec newSetting =
+    //        {
+    //            Set =
+    //                fun x ->
+    //                    for w in widgets.[setting.Value] do if w.Parent.IsSome then selector.SParent.Value.SParent.Value.Remove w
+    //                    for w in widgets.[x] do selector.SParent.Value.SParent.Value.Add w
+    //                    setting.Value <- x
+    //            Get = setting.Get
+    //            Config = setting.Config
+    //        }
+    //    and selector : Percyqaz.Flux.UI.Selector<int> = Percyqaz.Flux.UI.Selector(Array.indexed options, newSetting)
+    //    selector.Synchronized(fun () -> newSetting.Value <- newSetting.Value)
+    //    selector
 
     let PRETTYTEXTWIDTH = 500.0f
     let PRETTYHEIGHT = 80.0f
     let PRETTYWIDTH = 1200.0f
 
 type Divider() =
-    inherit Widget1()
+    inherit StaticWidget(NodeType.None)
 
-    member this.Position(y) =
-        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYWIDTH, 10.0f) )
+    member this.Pos(y) =
+        this.Position <- Percyqaz.Flux.UI.Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYWIDTH, 10.0f)
+        this
 
     override this.Draw() =
-        base.Draw()
         Draw.quad (Quad.ofRect this.Bounds) (struct(Color.White, Color.FromArgb(0, 255, 255, 255), Color.FromArgb(0, 255, 255, 255), Color.White)) Sprite.DefaultQuad
 
-type PrettySetting(name, widget: Selectable) as this =
-    inherit Selectable()
+type PrettySetting(name, widget: Widget) as this =
+    inherit StaticContainer(NodeType.Switch (fun _ -> this.Child))
 
     let mutable widget = widget
 
     do
+        widget.Position <- Percyqaz.Flux.UI.Position.TrimLeft PRETTYTEXTWIDTH
         this
-        |-+ widget.Position { Position.Default with Left = 0.0f %+ PRETTYTEXTWIDTH }
-        |-+ TextBox(K (N name + ":"), (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)), 0.0f)
-            .Position (Position.Box (0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT))
-        |=+ TooltipRegion(T name)
+        |+ Text(
+            K (N name + ":"),
+            Color = (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)),
+            Align = Alignment.LEFT,
+            Position = Percyqaz.Flux.UI.Position.SliceLeft PRETTYTEXTWIDTH)
+        |* TooltipRegion2(T name)
+
+    member this.Child
+        with get() = widget
+        and set(w: Widget) =
+            widget <- w
+            w.Position <- Percyqaz.Flux.UI.Position.TrimLeft PRETTYTEXTWIDTH
     
-    member this.Position(y, width, height) =
-        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, width, height) )
+    member this.Pos(y, width, height) =
+        this.Position <- Percyqaz.Flux.UI.Position.Box(0.0f, 0.0f, 100.0f, y, width, height) 
+        this
     
-    member this.Position(y, width) = this.Position(y, width, PRETTYHEIGHT)
-    member this.Position(y) = this.Position(y, PRETTYWIDTH)
+    member this.Pos(y, width) = this.Pos(y, width, PRETTYHEIGHT)
+    member this.Pos(y) = this.Pos(y, PRETTYWIDTH)
 
     override this.Draw() =
         if this.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
-        elif this.Hover then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f))
+        elif this.Focused then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f))
         base.Draw()
+        widget.Draw()
     
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        if widget.Hover && not widget.Selected && this.Selected then this.HoverChild <- None; this.Hover <- true
-        
-    override this.OnSelect() = if not widget.Hover then widget.Selected <- true
-    override this.OnDehover() = base.OnDehover(); widget.OnDehover()
-
-    member this.Refresh(w: Selectable) =
-        widget.Destroy()
-        widget <- w
-        this |=+ widget.Position { Position.Default with Left = 0.0f %+ PRETTYTEXTWIDTH }
+    override this.Update(elapsedTime, moved) =
+        widget.Update(elapsedTime, moved)
+        base.Update(elapsedTime, moved)
 
 type PrettyButton(name, action) as this =
-    inherit Selectable()
+    inherit StaticContainer(NodeType.Leaf)
 
     do
         this
-        |-+ TextBox(
+        |+ Text(
             K (N name + "  >"),
-            ( 
+            Color = ( 
                 fun () -> 
                     if this.Enabled then
-                        ( (if this.Hover then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black )
+                        ( (if this.Focused then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black )
                     else (Color.Gray, Color.Black)
             ),
-            0.0f )
-        |-+ Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true))
-        |=+ TooltipRegion(T name)
+            Align = Alignment.LEFT )
+        |+ Percyqaz.Flux.UI.Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
+        |* TooltipRegion2(T name)
 
-    override this.OnSelect() =
+    override this.OnSelected() =
+        base.OnSelected()
         if this.Enabled then action()
-        this.Selected <- false
+        this.Focus()
     override this.Draw() =
-        if this.Hover then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
+        if this.Focused then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
         base.Draw()
-    member this.Position(y) = 
-        this.Position( Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, PRETTYHEIGHT) )
+    member this.Pos(y) = 
+        this.Position <- Percyqaz.Flux.UI.Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, PRETTYHEIGHT)
+        this
 
     member val Enabled = true with get, set
 
     static member Once(name, action, notifText, notifType) =
         { new PrettyButton(name, action) with
-            override this.OnSelect() =
-                base.OnSelect()
+            override this.OnSelected() =
+                base.OnSelected()
                 if base.Enabled then Notification.add (notifText, notifType)
                 base.Enabled <- false
         }
 
-type SelectionMenu(title: string, topLevel: SelectionPage) as this =
-    inherit Dialog()
+type Menu(topLevel: IMenu -> Page) as this =
+    inherit Percyqaz.Flux.UI.Dialog()
+
+    let MAX_PAGE_DEPTH = 12
     
-    let stack: (Selectable * (unit -> unit)) option array = Array.create 12 None
+    // Everything left of the current page is Some
+    // Everything past the current page could be Some from an old backed out page
+    let stack: Page option array = Array.create MAX_PAGE_DEPTH None
     let mutable namestack = []
     let mutable name = ""
-    let body = Widget1()
 
-    let wrapper main =
-        let mutable disposed = false
-        let w = 
-            { new Selectable() with
-
-                override this.Update(elapsedTime, bounds) =
-                    if disposed then this.HoverChild <- None
-                    base.Update(elapsedTime, bounds)
-                    if not disposed then
-                        Input.finish_frame_events()
-
-                override this.VisibleBounds = this.Bounds
-                override this.Dispose() = base.Dispose(); disposed <- true
-            }
-        w.Add main
-        w.SelectedChild <- Some main
-        w
+    // todo: add a back button
     
-    let rec add (label, page) =
+    let add (page: IMenu -> #Page) =
+
+        let page = page (this :> IMenu) :> Page
+
         let n = List.length namestack
-        namestack <- label :: namestack
+        namestack <- page.Title :: namestack
         name <- String.Join(" > ", List.rev namestack)
-        let w = wrapper (page.Content add)
+
         match stack.[n] with
         | None -> ()
-        | Some (x, _) -> x.Destroy()
-        stack.[n] <- Some (w, page.Callback)
-        body.Add w
-        let n = float32 n + 1.0f
-        w.Reposition(0.0f, Viewport.vheight * n, 0.0f, Viewport.vheight * n)
-        body.Move(0.0f, -Viewport.vheight * n, 0.0f, -Viewport.vheight * n)
+        | Some page -> page.OnDestroy()
+
+        stack.[n] <- Some page
+        if n > 0 then stack.[n - 1].Value.Forward()
     
     let back() =
         namestack <- List.tail namestack
         name <- String.Join(" > ", List.rev namestack)
         let n = List.length namestack
-        let (w, callback) = stack.[n].Value in w.Dispose(); callback()
-        let n = float32 n
-        body.Move(0.0f, -Viewport.vheight * n, 0.0f, -Viewport.vheight * n)
+        let page = stack.[n].Value
+        page.OnClose()
+        page.Back()
+        if n > 0 then stack.[n - 1].Value.View()
     
-    do
-        this.Add body
-        TextBox((fun () -> name), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 20.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f }
-        |> this.Add
-        add (title, topLevel)
+    do add topLevel
+
+    override this.Draw() =
+        let mutable i = 0
+        while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
+            stack.[i].Value.Draw()
+            printfn "drew page %i" i
+            i <- i + 1
+        Text.drawFillB(Style.baseFont, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Style.text(), 0.0f)
     
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        match List.length namestack with
-        | 0 -> this.BeginClose()
-        | n -> if (fst stack.[n - 1].Value).SelectedChild.IsNone then back()
-    
-    override this.OnClose() = ()
+    override this.Update(elapsedTime, moved) =
+        let mutable i = 0
+        while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
+            stack.[i].Value.Update(elapsedTime, moved)
+            i <- i + 1
 
-type ConfirmDialog(prompt, callback: unit -> unit) as this =
-    inherit Dialog()
+        if List.isEmpty namestack then
+            let mutable i = 0
+            while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
+                stack.[i].Value.OnDestroy()
+                i <- i + 1
+            this.Close()
 
-    let mutable confirm = false
+    interface IMenu with
+        member this.ChangePage(p: IMenu -> #Page) = add p
+        member this.Back() = back()
 
-    let options =
-        row [ 
-            LittleButton(
-                K "Yes",
-                fun () ->  this.BeginClose(); confirm <- true
-            ).Position(Position.SliceLeft 200.0f)
-            LittleButton(
-                K "No", 
-                this.BeginClose
-            ).Position(Position.SliceRight 200.0f)
-        ]
+//type ConfirmDialog(prompt, callback: unit -> unit) as this =
+//    inherit Dialog()
 
-    do
-        TextBox(K prompt, K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.0f %+ 200.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 200.0f; Bottom = 0.5f %- 50.0f }
-        |> this.Add
-        options.OnSelect()
-        options.Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 0.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 100.0f }
-        |> this.Add
+//    let mutable confirm = false
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        if not options.Selected then this.BeginClose()
+//    let options =
+//        row [ 
+//            LittleButton(
+//                K "Yes",
+//                fun () -> this.BeginClose(); confirm <- true
+//            ).Position(Position.SliceLeft 200.0f)
+//            LittleButton(
+//                K "No", 
+//                this.BeginClose
+//            ).Position(Position.SliceRight 200.0f)
+//        ]
 
-    override this.OnClose() = if confirm then callback()
+//    do
+//        TextBox(K prompt, K (Color.White, Color.Black), 0.5f)
+//            .Position { Left = 0.0f %+ 200.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 200.0f; Bottom = 0.5f %- 50.0f }
+//        |> this.Add
+//        options.OnSelect()
+//        options.Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 0.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 100.0f }
+//        |> this.Add
+
+//    override this.Update(elapsedTime, bounds) =
+//        base.Update(elapsedTime, bounds)
+//        if not options.Selected then this.BeginClose()
+
+//    override this.OnClose() = if confirm then callback()

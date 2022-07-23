@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection

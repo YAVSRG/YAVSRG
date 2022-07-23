@@ -2,9 +2,10 @@
 
 open System
 open System.Drawing
-open Interlude.UI
+open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Interlude.UI
 open Interlude.Utils
 
 // TODO: flow container should be completely in charge of item positionings
@@ -87,7 +88,7 @@ type TabContainer(name: string, widget: Widget1) as this =
     do this.AddTab(name, widget)
 
     member this.AddTab(name, widget) =
-        { new Button((fun () -> selected <- name; selectedItem <- widget), name) with member this.Dispose() = base.Dispose(); widget.Dispose() }
+        { new Components.Button((fun () -> selected <- name; selectedItem <- widget), name) with member this.Dispose() = base.Dispose(); widget.Dispose() }
             .Position (Position.Box(0.0f, 0.0f, count * TABWIDTH, 0.0f, TABWIDTH, TABHEIGHT))
         |> this.Add
         count <- count + 1.0f

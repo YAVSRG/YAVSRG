@@ -2,6 +2,7 @@
 
 open System.IO
 open Percyqaz.Json
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting

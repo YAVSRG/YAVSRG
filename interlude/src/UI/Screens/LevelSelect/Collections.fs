@@ -2,6 +2,7 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
@@ -19,67 +20,67 @@ open Interlude.Options
 
 module CollectionManager =
 
-    let private editCollection ((originalName, data): string * Collection) =
-        let name = Setting.simple originalName |> Setting.alphaNum
-        let originalType = match data with Collection _ -> "Collection" | Playlist _ -> "Playlist" | Goals _ -> "Goals"
-        let ctype = Setting.simple originalType
-        {
-            Content = fun add ->
-                column [
-                    PrettySetting("collections.edit.collectionname", TextField name).Position(200.0f)
-                    PrettySetting("collections.edit.type", Selector([|"Collection", "Collection"; "Playlist", "Playlist"; "Goals", "Goals"|], ctype)).Position(300.0f)
-                ] :> Selectable
-            Callback = fun () ->
-                if name.Value <> originalName then
-                    Logging.Debug (sprintf "Renaming collection '%s' to '%s'" originalName name.Value)
-                    if (Collections.get name.Value).IsSome then
-                        Logging.Debug "Rename failed, target collection already exists."
-                        name.Value <- originalName
-                    else
-                        Collections.rename (originalName, name.Value) |> ignore
+    //let private editCollection ((originalName, data): string * Collection) =
+    //    let name = Setting.simple originalName |> Setting.alphaNum
+    //    let originalType = match data with Collection _ -> "Collection" | Playlist _ -> "Playlist" | Goals _ -> "Goals"
+    //    let ctype = Setting.simple originalType
+    //    {
+    //        Content = fun add ->
+    //            column [
+    //                PrettySetting("collections.edit.collectionname", TextField name).Position(200.0f)
+    //                PrettySetting("collections.edit.type", Selector([|"Collection", "Collection"; "Playlist", "Playlist"; "Goals", "Goals"|], ctype)).Position(300.0f)
+    //            ] :> Selectable
+    //        Callback = fun () ->
+    //            if name.Value <> originalName then
+    //                Logging.Debug (sprintf "Renaming collection '%s' to '%s'" originalName name.Value)
+    //                if (Collections.get name.Value).IsSome then
+    //                    Logging.Debug "Rename failed, target collection already exists."
+    //                    name.Value <- originalName
+    //                else
+    //                    Collections.rename (originalName, name.Value) |> ignore
 
-                let data =
-                    if originalType <> ctype.Value then
-                        Logging.Debug (sprintf "Changing type of collection to %s" ctype.Value)
-                        match ctype.Value with
-                        | "Collection" -> data.ToCollection()
-                        | "Playlist" -> data.ToPlaylist(selectedMods.Value, rate.Value)
-                        | "Goals" -> data.ToGoals(selectedMods.Value, rate.Value)
-                        | _ -> failwith "impossible"
-                    else data
-                Collections.update (name.Value, data)
-        }
+    //            let data =
+    //                if originalType <> ctype.Value then
+    //                    Logging.Debug (sprintf "Changing type of collection to %s" ctype.Value)
+    //                    match ctype.Value with
+    //                    | "Collection" -> data.ToCollection()
+    //                    | "Playlist" -> data.ToPlaylist(selectedMods.Value, rate.Value)
+    //                    | "Goals" -> data.ToGoals(selectedMods.Value, rate.Value)
+    //                    | _ -> failwith "impossible"
+    //                else data
+    //            Collections.update (name.Value, data)
+    //    }
 
-    let page() =
-        {
-            Content = fun add ->
-                let setting =
-                    Setting.make ignore
-                        (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), selectedName = n))
-                column
-                    [
-                        PrettySetting("collections",
-                            CardSelect.Selector(
-                                setting,
-                                { CardSelect.Config.Default with
-                                    NameFunc = fst
-                                    MarkFunc = (fun (x, m) -> if m then LevelSelect.minorRefresh <- true; select(fst x))
-                                    EditFunc = Some editCollection
-                                    CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
-                                    DeleteFunc = Some
-                                        ( fun (name, data) ->
-                                            if selectedName <> name then
-                                                if data.IsEmpty() then Collections.delete name |> ignore
-                                                else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
-                                        )
-                                }, add)).Position(200.0f, 1200.0f, 600.0f)
-                        TextBox(K <| Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint", K (Color.White, Color.Black), 0.5f)
-                            .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 190.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 120.0f }
-                        TextBox(K <| Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint", K (Color.White, Color.Black), 0.5f)
-                            .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 120.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 50.0f }
-                    ] :> Selectable
-            Callback = ignore
-        }
+    //let page() =
+    //    {
+    //        Content = fun add ->
+    //            let setting =
+    //                Setting.make ignore
+    //                    (fun () -> Collections.enumerate() |> Seq.map (fun n -> (n, n |> Collections.get |> Option.get), selectedName = n))
+    //            column
+    //                [
+    //                    PrettySetting("collections",
+    //                        CardSelect.Selector(
+    //                            setting,
+    //                            { CardSelect.Config.Default with
+    //                                NameFunc = fst
+    //                                MarkFunc = (fun (x, m) -> if m then LevelSelect.minorRefresh <- true; select(fst x))
+    //                                EditFunc = Some editCollection
+    //                                CreateFunc = Some (fun () -> Collections.create (Collections.getNewName(), (Collection.Blank)) |> ignore)
+    //                                DeleteFunc = Some
+    //                                    ( fun (name, data) ->
+    //                                        if selectedName <> name then
+    //                                            if data.IsEmpty() then Collections.delete name |> ignore
+    //                                            else ConfirmDialog(sprintf "Really delete collection '%s'?" name, fun () -> Collections.delete name |> ignore).Show()
+    //                                    )
+    //                            }, add)).Position(200.0f, 1200.0f, 600.0f)
+    //                    TextBox(K <| Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint", K (Color.White, Color.Black), 0.5f)
+    //                        .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 190.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 120.0f }
+    //                    TextBox(K <| Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint", K (Color.White, Color.Black), 0.5f)
+    //                        .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 120.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 50.0f }
+    //                ] :> Selectable
+    //        Callback = ignore
+    //    }
 
     let addChart(cc: CachedChart, context: LevelSelectContext) =
         if selectedName <> context.InCollection then
@@ -107,10 +108,10 @@ module CollectionManager =
             else sprintf "%s Remove from '%s'" Icons.remove selectedName, fun () -> removeChart(cc, context)
         ]
     
-type CollectionManager() as this =
+type CollectionManager() =
     inherit Widget1()
 
-    do StylishButton ((fun () -> SelectionMenu(N"collections", CollectionManager.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), "collections") |> this.Add
+    //do StylishButton ((fun () -> SelectionMenu(N"collections", CollectionManager.page()).Show()), K "Collections", (fun () -> Style.accentShade(100, 0.6f, 0.4f)), "collections") |> this.Add
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

@@ -1,6 +1,7 @@
 ﻿namespace Interlude.UI.Screens.LevelSelect
 
 open System
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Gameplay.Mods

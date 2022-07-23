@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data.Charts.Sorting

@@ -4,6 +4,7 @@ open System
 open Percyqaz.Common
 open Prelude.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components

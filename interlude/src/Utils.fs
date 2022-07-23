@@ -8,9 +8,13 @@ open Percyqaz.Common
 open Prelude.Common
 
 module Utils =
+
+    /// Numeric version e.g. "0.5.16"
     let smallVersion =
         let v = Assembly.GetExecutingAssembly().GetName()
         if v.Version.Revision <> 0 then v.Version.ToString(4) else v.Version.ToString(3)
+
+    /// Full version string e.g. "Interlude 0.5.16 (20220722)"
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
         let v2 = Assembly.GetExecutingAssembly().Location |> FileVersionInfo.GetVersionInfo
@@ -20,10 +24,14 @@ module Utils =
         sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
         #endif
 
+    /// K for Konst/Kestrel -- K x is shorthand for a function that ignores its input and returns x
+    /// Named after the FP combinator
     let K x _ = x
 
+    /// F for Fork -- Combinator to fork two actions. Returns a function that executes them both on the input
     let F (f: 'T -> unit) (g: 'T -> unit) = fun t -> f t; g t
 
+    /// L for localise -- Shorthand to get the localised text from a locale string id
     let L = Localisation.localise
 
     let getInterludeLocation() = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
@@ -65,7 +73,7 @@ module Utils =
         open Prelude.Web
 
         // this doesn't just copy a folder to a destination, but renames any existing/duplicates of the same name to .old
-        let rec copyFolder source dest =
+        let rec private copyFolder source dest =
             Directory.EnumerateFiles source
             |> Seq.iter
                 (fun s ->
@@ -105,7 +113,7 @@ module Utils =
         let mutable latestRelease = None
         let mutable updateAvailable = false
 
-        let handleUpdate(release: GithubRelease) =
+        let private handleUpdate(release: GithubRelease) =
             latestRelease <- Some release
 
             let parseVer (s: string) =
