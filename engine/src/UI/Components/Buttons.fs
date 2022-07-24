@@ -1,10 +1,9 @@
 ﻿namespace Percyqaz.Flux.UI
 
-open System.Drawing
 open Percyqaz.Flux.Input
 
 type Button(text: string, onClick: unit -> unit, hotkey: Hotkey) as this =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit StaticContainer(NodeType.Button onClick)
     
     let color = Animation.Fade(0.0f)
     let colorFunc = Palette.text_transition color Palette.LIGHT Palette.WHITE
@@ -17,10 +16,6 @@ type Button(text: string, onClick: unit -> unit, hotkey: Hotkey) as this =
             Color = colorFunc)
         |+ Clickable(this.Select, OnHover = fun b -> if b && not this.Focused then this.Focus())
         |* HotkeyAction(hotkey, onClick)
-    
-    override this.OnSelected() =
-        base.OnSelected()
-        onClick()
 
     override this.OnFocus() =
         base.OnFocus()

@@ -48,7 +48,6 @@ module FlowContainer =
             | Some i -> children.[i].Widget.Select()
             | None -> ()
 
-
         override this.Select() = this.Focus()
 
         abstract member Navigate : unit -> unit
@@ -193,3 +192,82 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
     override this.Init(parent: Widget) =
         base.Init parent
         child.Init this
+
+module SwitchContainer =
+
+    [<AbstractClass>]
+    type Base<'T when 'T :> Widget>() as this = 
+        inherit StaticWidget(NodeType.Switch (fun () -> this.WhoShouldFocus))
+
+        let children = ResizeArray<'T>()
+
+        member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
+        member private this.WhoShouldFocus = if children.Count = 0 then failwithf "Tried to focus this %O with no children" this else children.[0]
+
+        member this.Previous() =
+            match this.WhoIsFocused with
+            | Some i ->
+                let mutable index = (i + children.Count - 1) % children.Count
+                while index <> i && not children.[index].Focusable do
+                    index <- (index + children.Count - 1) % children.Count
+                children.[index].Focus()
+            | None -> ()
+
+        member this.Next() =
+            match this.WhoIsFocused with
+            | Some i ->
+                let mutable index = (i + 1) % children.Count
+                while index <> i && not children.[index].Focusable do
+                    index <- (index + 1) % children.Count
+                children.[index].Focus()
+            | None -> ()
+
+        member this.SelectFocused() =
+            match this.WhoIsFocused with
+            | Some i -> children.[i].Select()
+            | None -> ()
+
+        override this.Select() = this.Focus()
+
+        abstract member Navigate : unit -> unit
+    
+        override this.Draw() =
+            for c in children do c.Draw()
+    
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            if this.Focused then this.Navigate()
+            for c in children do c.Update(elapsedTime, moved)
+    
+        member this.Add(child: 'T) =
+            children.Add child
+            if this.Initialised then 
+                child.Init this
+    
+        override this.Init(parent: Widget) =
+            base.Init parent
+            for c in children do
+                c.Init this
+    
+        member this.Clear() = children.Clear()
+
+        static member (|+) (parent: #Base<'T>, child: 'T) = parent.Add child; parent
+        static member (|*) (parent: #Base<'T>, child: 'T) = parent.Add child
+        
+    [<Sealed>]
+    type Column<'T when 'T :> Widget>() =
+        inherit Base<'T>()
+
+        override this.Navigate() =
+            if (!|"up").Tapped() then this.Previous()
+            elif (!|"down").Tapped() then this.Next()
+            elif (!|"select").Tapped() then this.SelectFocused()
+
+    [<Sealed>]
+    type Row<'T when 'T :> Widget>() =
+        inherit Base<'T>()
+
+        override this.Navigate() =
+            if (!|"left").Tapped() then this.Previous()
+            elif (!|"right").Tapped() then this.Next()
+            elif (!|"select").Tapped() then this.SelectFocused()

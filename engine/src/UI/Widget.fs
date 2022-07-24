@@ -9,7 +9,7 @@ type Widget(nodeType) =
     let mutable parent = None
     let mutable focused = false
     let mutable selected = false
-    member this.Parent = parent.Value
+    member this.Parent = match parent with Some p -> p | None -> failwithf "%O has no parent (probably due to not calling init)" this
 
     member this.Selected = selected
     member this.Focused = focused
@@ -33,14 +33,16 @@ type Widget(nodeType) =
     override this.FocusTree : ISelection list = 
         if not this.NodeType._IsNone then this :: this.Parent.FocusTree
         else this.Parent.FocusTree
+    // todo: this property has only one external use that should be internal elsewhere so should be removed
+    member this.Focusable = match nodeType with NodeType.None -> false | _ -> true
 
     override this.Focus() = if not this.NodeType._IsNone then Selection.focus this
-    override this.OnFocus() = focused <- true
-    override this.OnUnfocus() = focused <- false
+    override this.OnFocus() = printfn "FOCUS %O" this; assert not selected; focused <- true
+    override this.OnUnfocus() = printfn "UNFOCUS %O" this; assert not selected; focused <- false
 
-    override this.Select() = if this.NodeType._IsLeaf then Selection.select this
-    override this.OnSelected() = assert focused; selected <- true
-    override this.OnDeselected() = assert focused; selected <- false
+    override this.Select() = if not this.NodeType._IsNone then Selection.select this
+    override this.OnSelected() = printfn "SELECT %O" this; assert focused; selected <- true
+    override this.OnDeselected() = printfn "DESELECT %O" this; assert focused; selected <- false
 
     override this.ToString() =
         if parent.IsNone then "*" else parent.Value.ToString()
@@ -78,6 +80,8 @@ type StaticContainer(nodeType) =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
 
+        // children are updated in reverse order
+        // ensures the visually topmost children have priority for events like being clicked on
         for i = children.Count - 1 downto 0 do
             children.[i].Update(elapsedTime, moved)
 
@@ -95,7 +99,6 @@ type StaticContainer(nodeType) =
 
 type private DynamicPosition(pos: Position) =
     let mutable pos = pos
-    let mutable frames = 0
 
     let left_offset = Animation.Fade(fst pos.Left)
     let left_anchor = Animation.Fade(snd pos.Left)
@@ -114,11 +117,11 @@ type private DynamicPosition(pos: Position) =
             bottom_offset; bottom_anchor
         ]
 
-    member this.Moving = frames > 0
+    member this.Moving = left_offset.Moving
 
     member this.Position
         with get() = 
-            if frames > 1 then
+            if this.Moving then
                 { 
                     Left = (left_offset.Value, left_anchor.Value)
                     Top = (top_offset.Value, top_anchor.Value)
@@ -128,7 +131,14 @@ type private DynamicPosition(pos: Position) =
             else pos
         and set(value) = 
             pos <- value
-            frames <- 180
+            left_offset.Target <- fst pos.Left
+            left_anchor.Target <- snd pos.Left
+            top_offset.Target <- fst pos.Top
+            top_anchor.Target <- snd pos.Top
+            right_offset.Target <- fst pos.Right
+            right_anchor.Target <- snd pos.Right
+            bottom_offset.Target <- fst pos.Bottom
+            bottom_anchor.Target <- snd pos.Bottom
 
     member this.Snap() =
         left_offset.Snap(); left_anchor.Snap()
@@ -137,9 +147,7 @@ type private DynamicPosition(pos: Position) =
         bottom_offset.Snap(); bottom_anchor.Snap()
 
     member this.Update(elapsedTime) =
-        if frames > 0 then 
-            frames <- frames - 1
-            anim.Update(elapsedTime)
+        if this.Moving then anim.Update elapsedTime
 
 [<AbstractClass>]
 type DynamicContainer(nodeType) =

@@ -5,10 +5,9 @@ open Percyqaz.Flux.Input
 
 [<AutoOpen>]
 module Root =
-    let internal animation = Animation.Group()
+    let internal ROOT_ANIMATION = Animation.Group()
 
-    let sync (action: unit -> unit) = animation.Add(Animation.Action action)
-
+    let sync (action: unit -> unit) = ROOT_ANIMATION.Add(Animation.Action action)
 [<AbstractClass>]
 type Root() =
     inherit Widget(NodeType.None)

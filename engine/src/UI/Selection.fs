@@ -20,6 +20,7 @@ and [<RequireQualifiedAccess>] NodeType =
     | None
     | Leaf
     | Switch of (unit -> ISelection)
+    | Button of (unit -> unit)
     member this._IsLeaf =
         match this with
         | Leaf -> true
@@ -33,6 +34,14 @@ module Selection =
 
     let mutable private focusTree : ISelection list = []
     let mutable private selected : bool = false
+    let mutable private clampTree : ISelection list = []
+
+    // Test if a proposed tree is rooted under the required parent
+    let private check_clamp (tree: ISelection list) =
+        if clampTree.IsEmpty then true
+        else
+            let l = clampTree.Length
+            tree.Length >= l && List.skip (tree.Length - l) tree = clampTree
 
     let private diff (xs: ISelection list) (ys: ISelection list) =
         let mutable xs = xs
@@ -44,10 +53,13 @@ module Selection =
                 ys <- List.tail ys
             else
                 difference_found <- true
-        for x in xs do x.OnUnfocus()
+        for x in List.rev xs do x.OnUnfocus()
         for y in ys do y.OnFocus()
 
-    let focus_tree(tree: ISelection list) =
+    let rec private focus_tree(tree: ISelection list) =
+
+        if not (check_clamp tree) then ()
+        else
 
         if selected then
             match List.tryHead focusTree with
@@ -57,8 +69,10 @@ module Selection =
 
         diff (List.rev focusTree) (List.rev tree)
         focusTree <- tree
-    
-    let select_tree(tree: ISelection list) =
+
+    let rec private select_tree(tree: ISelection list) =
+        if not (check_clamp tree) then ()
+        else
 
         if tree <> focusTree && selected then
             match List.tryHead focusTree with
@@ -75,17 +89,24 @@ module Selection =
         selected <- true
         focusTree <- tree
 
-    let focus(item: ISelection) =
+    let rec focus(item: ISelection) =
         match item.NodeType with
         | NodeType.None -> focus_tree []
         | NodeType.Leaf -> focus_tree item.FocusTree
-        | NodeType.Switch f -> focus_tree (f().FocusTree)
+        | NodeType.Switch f -> focus (f())
+        | NodeType.Button a -> focus_tree item.FocusTree
 
-    let select(item: ISelection) =
+    let rec select(item: ISelection) =
         match item.NodeType with
         | NodeType.None -> select_tree []
         | NodeType.Leaf -> select_tree item.FocusTree
-        | NodeType.Switch f -> select_tree (f().FocusTree)
+        | NodeType.Switch f -> select (f())
+        | NodeType.Button a -> focus_tree item.FocusTree; a()
+
+    let rec clamp (item: ISelection) =
+        clampTree <- item.FocusTree
+
+    let unclamp() = clampTree <- []
 
     let rec up() =
         if selected then
@@ -103,6 +124,7 @@ module Selection =
                     | NodeType.None -> up()
                     | NodeType.Leaf -> ()
                     | NodeType.Switch _ -> up()
+                    | NodeType.Button _ -> ()
                 | None -> ()
 
 type DragAndDropEvent<'T> =

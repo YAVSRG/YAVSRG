@@ -87,3 +87,5 @@ type Frame(nodeType) =
         if fill.A > 0uy then
             
             Draw.rect base.Bounds fill
+
+        base.Draw()
