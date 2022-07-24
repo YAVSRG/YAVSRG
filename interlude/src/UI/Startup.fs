@@ -31,6 +31,7 @@ module Startup =
 
         override this.Update(elapsedTime, moved) =
             container.Update(elapsedTime, moved)
+            base.Update(elapsedTime, moved)
             if Screen.exit then this.ShouldExit <- true
 
         override this.Init() =

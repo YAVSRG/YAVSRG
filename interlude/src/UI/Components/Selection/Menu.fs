@@ -3,6 +3,7 @@
 open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
@@ -12,11 +13,13 @@ type IMenu =
     abstract member ChangePage: (IMenu -> #Page) -> unit
     abstract member Back: unit -> unit
 
-and [<AbstractClass>] Page(p: IMenu) =
-    inherit DynamicContainer(NodeType.None)
+and [<AbstractClass>] Page(p: IMenu) as this =
+    inherit DynamicContainer(NodeType.Switch(fun _ -> this._content))
 
     let mutable isCurrent = false
     let mutable content = None
+
+    member private this._content = content.Value
 
     member this.Parent = p
 
@@ -35,6 +38,7 @@ and [<AbstractClass>] Page(p: IMenu) =
 
     member this.View() =
         this.Position <- Position.Default
+        Selection.clamp this
         content.Value.Focus()
         isCurrent <- true
 
@@ -48,7 +52,7 @@ and [<AbstractClass>] Page(p: IMenu) =
 
     override this.Init(parent: Widget) =
         if content.IsNone then failwithf "Call Content() to provide page content"
-        this.MoveUp()
+        this.MoveDown()
         base.Init parent
         this.View()
 
@@ -98,7 +102,7 @@ type Divider() =
     inherit StaticWidget(NodeType.None)
 
     member this.Pos(y) =
-        this.Position <- Percyqaz.Flux.UI.Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYWIDTH, 10.0f)
+        this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y - 5.0f, PRETTYWIDTH, 10.0f)
         this
 
     override this.Draw() =
@@ -121,9 +125,12 @@ type PrettySetting(name, widget: Widget) as this =
     member this.Child
         with get() = widget
         and set(w: Widget) =
+            let old_widget = widget
             widget <- w
             w.Position <- Position.TrimLeft PRETTYTEXTWIDTH
-            if this.Initialised then w.Init this
+            if this.Initialised then 
+                w.Init this
+                if old_widget.Focused then w.Focus()
     
     member this.Pos(y, width, height) =
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height) 
@@ -138,8 +145,8 @@ type PrettySetting(name, widget: Widget) as this =
         widget.Init this
 
     override this.Draw() =
-        if this.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
-        elif this.Focused then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f))
+        if widget.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
+        elif widget.Focused then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f))
         base.Draw()
         widget.Draw()
     
@@ -148,7 +155,7 @@ type PrettySetting(name, widget: Widget) as this =
         base.Update(elapsedTime, moved)
 
 type PrettyButton(name, action) as this =
-    inherit StaticContainer(NodeType.Leaf)
+    inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then action()))
 
     do
         this
@@ -164,26 +171,24 @@ type PrettyButton(name, action) as this =
         |+ Percyqaz.Flux.UI.Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
         |* TooltipRegion2(T name)
 
-    override this.OnSelected() =
-        base.OnSelected()
-        if this.Enabled then action()
-        this.Focus()
     override this.Draw() =
         if this.Focused then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
         base.Draw()
+
     member this.Pos(y) = 
-        this.Position <- Percyqaz.Flux.UI.Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, PRETTYHEIGHT)
+        this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, PRETTYWIDTH, PRETTYHEIGHT)
         this
 
     member val Enabled = true with get, set
 
     static member Once(name, action, notifText, notifType) =
-        { new PrettyButton(name, action) with
-            override this.OnSelected() =
-                base.OnSelected()
-                if base.Enabled then Notification.add (notifText, notifType)
-                base.Enabled <- false
-        }
+        let mutable ref = Unchecked.defaultof<PrettyButton>
+        let button = PrettyButton(name, fun () ->
+                if ref.Enabled then action(); Notification.add (notifText, notifType)
+                ref.Enabled <- false
+            )
+        ref <- button
+        button
 
 type Menu(topLevel: IMenu -> Page) as this =
     inherit Percyqaz.Flux.UI.Dialog()
@@ -212,7 +217,7 @@ type Menu(topLevel: IMenu -> Page) as this =
         | Some page -> page.OnDestroy()
 
         stack.[n] <- Some page
-        if n > 0 then stack.[n - 1].Value.MoveDown()
+        if n > 0 then stack.[n - 1].Value.MoveUp()
     
     let back() =
         namestack <- List.tail namestack
@@ -220,7 +225,7 @@ type Menu(topLevel: IMenu -> Page) as this =
         let n = List.length namestack
         let page = stack.[n].Value
         page.OnClose()
-        page.MoveUp()
+        page.MoveDown()
         if n > 0 then stack.[n - 1].Value.View()
 
     override this.Init(parent) =
@@ -235,6 +240,7 @@ type Menu(topLevel: IMenu -> Page) as this =
         Text.drawFillB(Style.baseFont, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Style.text(), 0.0f)
     
     override this.Update(elapsedTime, moved) =
+        if (!|"exit").Tapped() then Selection.up()
         let mutable i = 0
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
             stack.[i].Value.Update(elapsedTime, moved)
@@ -246,6 +252,8 @@ type Menu(topLevel: IMenu -> Page) as this =
                 stack.[i].Value.OnDestroy()
                 i <- i + 1
             this.Close()
+
+    override this.Close() = base.Close(); Selection.unclamp()
 
     interface IMenu with
         member this.ChangePage(p: IMenu -> #Page) = add p

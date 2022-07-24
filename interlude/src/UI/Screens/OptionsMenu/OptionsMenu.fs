@@ -11,22 +11,15 @@ open Interlude.UI.Components.Selection.Menu
 module OptionsMenuRoot =
 
     type private BigButton(label: string, icon: string, onClick) as this =
-        inherit Frame(NodeType.Leaf)
+        inherit Frame(NodeType.Button onClick)
 
         do
             this.Fill <- fun () -> Style.accentShade(180, 0.9f, 0.0f)
             this.Border <- fun () -> if this.Focused then Color.White else Color.Transparent
             this
             |+ Text(icon, Position = { Left = Position.min; Top = 0.05f %+ 0.0f; Right = Position.max; Bottom = 0.7f %+ 0.0f })
-            |* Text(label, Position = { Left = Position.min; Top = 0.65f %+ 0.0f; Right = Position.max; Bottom = 0.9f %+ 0.0f })
-        
-        override this.OnSelected() =
-            base.OnSelected()
-            onClick()
-
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            if this.Selected then this.Focus()
+            |+ Text(label, Position = { Left = Position.min; Top = 0.65f %+ 0.0f; Right = Position.max; Bottom = 0.9f %+ 0.0f })
+            |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
 
     type OptionsPage(m) as this =
         inherit Page(m)
