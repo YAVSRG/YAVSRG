@@ -1,19 +1,16 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
-open OpenTK
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Windowing
 open Prelude.Common
 open Interlude.Options
-open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
 module System =
 
-    type SystemPage(m) as this =
-        inherit Page(m)
+    type SystemPage() as this =
+        inherit Page()
 
         do
             this.Content(

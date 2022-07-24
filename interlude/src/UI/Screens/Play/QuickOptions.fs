@@ -11,8 +11,8 @@ open Interlude.UI.Components.Selection.Menu
 
 module QuickOptions =
 
-    type QuickOptionsPage(scoring: IScoreMetric, callback, m) as this =
-        inherit Page(m)
+    type QuickOptionsPage(scoring: IScoreMetric, callback) as this =
+        inherit Page()
 
         do
             let mutable sum = 0.0f<ms>
@@ -52,4 +52,4 @@ module QuickOptions =
         override this.Title = N"quick"
         override this.OnClose() = callback()
 
-    let show(scoring, callback) = Menu(fun m -> QuickOptionsPage(scoring, callback, m)).Show()
+    let show(scoring, callback) = Menu.ShowPage(QuickOptionsPage(scoring, callback))

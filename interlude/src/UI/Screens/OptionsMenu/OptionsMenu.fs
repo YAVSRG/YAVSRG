@@ -21,24 +21,24 @@ module OptionsMenuRoot =
             |+ Text(label, Position = { Left = Position.min; Top = 0.65f %+ 0.0f; Right = Position.max; Bottom = 0.9f %+ 0.0f })
             |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
 
-    type OptionsPage(m) as this =
-        inherit Page(m)
+    type OptionsPage() as this =
+        inherit Page()
 
         do
             this.Content(
                 row()
-                |+ BigButton( N"system", Icons.system, (fun () -> m.ChangePage System.SystemPage),
+                |+ BigButton( N"system", Icons.system, (fun () -> Menu.ShowPage System.SystemPage),
                         Position = Percyqaz.Flux.UI.Position.Box(0.5f, 0.5f, -790.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"themes", Icons.themes, (fun () -> m.ChangePage Themes.ThemesPage),
+                |+ BigButton( N"themes", Icons.themes, (fun () -> Menu.ShowPage Themes.ThemesPage),
                         Position = Percyqaz.Flux.UI.Position.Box(0.5f, 0.5f, -470.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"gameplay", Icons.gameplay, (fun () -> m.ChangePage Gameplay.GameplayPage),
+                |+ BigButton( N"gameplay", Icons.gameplay, (fun () -> Menu.ShowPage Gameplay.GameplayPage),
                         Position = Percyqaz.Flux.UI.Position.Box(0.5f, 0.5f, -150.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"keybinds", Icons.binds, (fun () -> m.ChangePage Keybinds.KeybindsPage),
+                |+ BigButton( N"keybinds", Icons.binds, (fun () -> Menu.ShowPage Keybinds.KeybindsPage),
                         Position = Percyqaz.Flux.UI.Position.Box(0.5f, 0.5f, 170.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"debug", Icons.debug, (fun () -> m.ChangePage Debug.DebugPage),
+                |+ BigButton( N"debug", Icons.debug, (fun () -> Menu.ShowPage Debug.DebugPage),
                         Position = Percyqaz.Flux.UI.Position.Box(0.5f, 0.5f, 490.0f, -150.0f, 300.0f, 300.0f) )
             )
         override this.Title = L"options.name"
         override this.OnClose() = LevelSelect.refresh <- true
 
-    let show() = Menu(fun m -> OptionsPage(m)).Show()
+    let show() = Menu.ShowPage OptionsPage

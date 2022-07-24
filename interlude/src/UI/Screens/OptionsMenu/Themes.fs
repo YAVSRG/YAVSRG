@@ -67,8 +67,8 @@ module Themes =
         member this.Destroy() =
             fbo.Dispose()
 
-    type EditNoteskinPage(m, refreshNoteskins) as this =
-        inherit Page(m)
+    type EditNoteskinPage(refreshNoteskins) as this =
+        inherit Page()
 
         let data = Noteskins.Current.config
         
@@ -127,8 +127,8 @@ module Themes =
                 }
             refreshNoteskins()
 
-    type EditThemePage(m, refreshThemes) as this =
-        inherit Page(m)
+    type EditThemePage(refreshThemes) as this =
+        inherit Page()
 
         let data = Themes.Current.config
         
@@ -147,8 +147,8 @@ module Themes =
                 }
             refreshThemes()
 
-    type ThemesPage(m) as this =
-        inherit Page(m)
+    type ThemesPage() as this =
+        inherit Page()
 
         let preview = NoteskinPreview 0.5f
 
@@ -179,7 +179,7 @@ module Themes =
                 //    sprintf "'%s' is an embedded default skin. Extract a copy and edit?" ns.Config.Name,
                 //    fun () -> Noteskins.extractCurrent(); refreshNoteskins()
                 //).Show()
-            | Folder _ -> m.ChangePage( fun m -> EditNoteskinPage(m, refreshNoteskins) )
+            | Folder _ -> Menu.ShowPage( EditNoteskinPage refreshNoteskins )
 
         let tryEditTheme() =
             let theme = Themes.Current.instance
@@ -189,7 +189,7 @@ module Themes =
                 //    sprintf "'%s' is the default theme. Extract a copy and edit?" theme.Config.Name,
                 //    fun () -> Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes()
                 //).Show()
-            | Folder _ -> m.ChangePage( fun m -> EditThemePage(m, refreshThemes) )
+            | Folder _ -> Menu.ShowPage( EditThemePage refreshThemes )
             | Zip (_, Some file) -> failwith "User themes with zip storage not supported"
 
         do

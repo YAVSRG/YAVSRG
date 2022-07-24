@@ -94,8 +94,8 @@ module Keybinds =
                         this.Focus()
                     | _ -> ()
 
-    type HotkeysPage(m) as this =
-        inherit Page(m)
+    type HotkeysPage() as this =
+        inherit Page()
 
         let container =
             FlowContainer.Vertical<PrettySetting>(PRETTYHEIGHT)
@@ -107,15 +107,11 @@ module Keybinds =
                     container.Add( PrettySetting("hotkeys." + hk.ToLower(), Keybinder hk) )
             this.Content scrollContainer
 
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            if not (scrollContainer.Focused) then m.Back()
-
         override this.Title = N"keybinds.hotkeys"
         override this.OnClose() = ()
 
-    type KeybindsPage(m) as this =
-        inherit Page(m)
+    type KeybindsPage() as this =
+        inherit Page()
         
         let keycount = Setting.simple options.KeymodePreference.Value
         let binds = GameplayKeybinder(keycount)
@@ -125,7 +121,7 @@ module Keybinds =
                 column()
                 |+ PrettySetting("generic.keymode", Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Pos(200.0f)
                 |+ PrettySetting("keybinds.gameplay", binds).Pos(280.0f, Viewport.vwidth - 200.0f)
-                |+ PrettyButton("keybinds.hotkeys", (fun () -> m.ChangePage HotkeysPage)).Pos(400.0f)
+                |+ PrettyButton("keybinds.hotkeys", (fun () -> Menu.ShowPage HotkeysPage)).Pos(400.0f)
             )
         override this.Title = N"keybinds"
         override this.OnClose() = ()

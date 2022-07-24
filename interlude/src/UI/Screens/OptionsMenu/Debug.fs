@@ -10,8 +10,8 @@ open Interlude.UI.Components.Selection.Menu
 
 module Debug =
 
-    type DebugPage(m) as this =
-        inherit Page(m)
+    type DebugPage() as this =
+        inherit Page()
 
         do
             this.Content(

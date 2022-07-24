@@ -10,8 +10,6 @@ open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
 module Mounts =
@@ -23,8 +21,8 @@ module Mounts =
         | Stepmania = 1
         | Etterna = 2
 
-    type EditorPage(setting: Setting<MountedChartSource option>, m) as this =
-        inherit Page(m)
+    type EditorPage(setting: Setting<MountedChartSource option>) as this =
+        inherit Page()
 
         let mount = setting.Value.Value
         let importOnStartup = Setting.simple mount.ImportOnStartup
@@ -118,7 +116,7 @@ type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource o
     let mutable refresh = ignore
 
     let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), Icons.add)
-    let editButton = Button((fun () -> Menu(fun m -> Mounts.EditorPage(setting, m)).Show()), Icons.edit)
+    let editButton = Button((fun () -> Menu.ShowPage(Mounts.EditorPage setting)), Icons.edit)
     let deleteButton = Button((fun () -> setting.Value <- None; refresh()), Icons.delete)
 
     do

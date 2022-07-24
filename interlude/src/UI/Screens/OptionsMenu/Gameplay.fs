@@ -50,8 +50,8 @@ module Gameplay =
     //        | 1 -> options.Pacemaker.Value <- Lamp lamp.Value
     //        | _ -> failwith "impossible"
 
-    type RulesetsPage(m) as this =
-        inherit Page(m)
+    type RulesetsPage() as this =
+        inherit Page()
 
         do
             this.Content(
@@ -80,8 +80,8 @@ module Gameplay =
         override this.Title = N"gameplay.rulesets"
         override this.OnClose() = ()
 
-    type ScreencoverPage(m) as this =
-        inherit Page(m)
+    type ScreencoverPage() as this =
+        inherit Page()
 
         do
             this.Content(
@@ -95,8 +95,8 @@ module Gameplay =
         override this.Title = N"gameplay.screencover"
         override this.OnClose() = ()
 
-    type GameplayPage(m) as this =
-        inherit Page(m)
+    type GameplayPage() as this =
+        inherit Page()
 
         do
             this.Content(
@@ -105,9 +105,9 @@ module Gameplay =
                 |+ PrettySetting("gameplay.hitposition", Percyqaz.Flux.UI.Slider(options.HitPosition, 0.005f)).Pos(280.0f)
                 |+ PrettySetting("gameplay.upscroll", Percyqaz.Flux.UI.Selector<_>.FromBool options.Upscroll).Pos(360.0f)
                 |+ PrettySetting("gameplay.backgrounddim", Percyqaz.Flux.UI.Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
-                |+ PrettyButton("gameplay.screencover", fun() -> m.ChangePage ScreencoverPage).Pos(520.0f)
+                |+ PrettyButton("gameplay.screencover", fun() -> Menu.ShowPage ScreencoverPage).Pos(520.0f)
                 //|+ PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Pos(670.0f)
-                |+ PrettyButton("gameplay.rulesets", fun () -> m.ChangePage RulesetsPage).Pos(750.0f)
+                //|+ PrettyButton("gameplay.rulesets", fun () -> Menu.ChangePage RulesetsPage).Pos(750.0f)
             )
         override this.Title = N"gameplay"
         override this.OnClose() = ()

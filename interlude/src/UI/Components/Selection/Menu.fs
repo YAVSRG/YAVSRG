@@ -9,19 +9,13 @@ open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 
-type IMenu =
-    abstract member ChangePage: (IMenu -> #Page) -> unit
-    abstract member Back: unit -> unit
-
-and [<AbstractClass>] Page(p: IMenu) as this =
+type [<AbstractClass>] Page() as this =
     inherit DynamicContainer(NodeType.Switch(fun _ -> this._content))
 
     let mutable isCurrent = false
     let mutable content = None
 
     member private this._content = content.Value
-
-    member this.Parent = p
 
     abstract member Title : string
     abstract member OnClose : unit -> unit
@@ -33,7 +27,7 @@ and [<AbstractClass>] Page(p: IMenu) as this =
         content <- Some w
 
     override this.Update(elapsedTime, moved) =
-        if isCurrent && not content.Value.Focused then p.Back()
+        if isCurrent && not content.Value.Focused then Menu.Back()
         base.Update(elapsedTime, moved)
 
     member this.View() =
@@ -55,6 +49,88 @@ and [<AbstractClass>] Page(p: IMenu) as this =
         this.MoveDown()
         base.Init parent
         this.View()
+
+and Menu(topLevel: Page) as this =
+    inherit Percyqaz.Flux.UI.Dialog()
+
+    let MAX_PAGE_DEPTH = 12
+    
+    // Everything left of the current page is Some
+    // Everything past the current page could be Some from an old backed out page
+    let stack: Page option array = Array.create MAX_PAGE_DEPTH None
+    let mutable namestack = []
+    let mutable name = ""
+
+    // todo: add a back button
+
+    static let mutable _instance = None
+    do _instance <- Some this
+
+    static member ShowPage(page: Page) =
+        match _instance with
+        | None -> Menu(page).Show()
+        | Some instance -> instance.ShowPage page
+        
+    static member ShowPage(page: unit -> #Page) =
+        match _instance with
+        | None -> Menu(page()).Show()
+        | Some instance -> instance.ShowPage (page())
+    
+    member private this.ShowPage(page: Page) =
+
+        page.Init this
+
+        let n = List.length namestack
+        namestack <- page.Title :: namestack
+        name <- String.Join(" > ", List.rev namestack)
+
+        match stack.[n] with
+        | None -> ()
+        | Some page -> page.OnDestroy()
+
+        stack.[n] <- Some page
+        if n > 0 then stack.[n - 1].Value.MoveUp()
+
+    static member Back() =
+        match _instance with
+        | None -> failwith "No instance of menu/pages to back out of"
+        | Some instance -> instance.Back()
+    
+    member private this.Back() =
+        namestack <- List.tail namestack
+        name <- String.Join(" > ", List.rev namestack)
+        let n = List.length namestack
+        let page = stack.[n].Value
+        page.OnClose()
+        page.MoveDown()
+        if n > 0 then stack.[n - 1].Value.View()
+
+    override this.Init(parent) =
+        base.Init parent
+        this.ShowPage topLevel
+
+    override this.Draw() =
+        let mutable i = 0
+        while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
+            stack.[i].Value.Draw()
+            i <- i + 1
+        Text.drawFillB(Style.baseFont, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Style.text(), 0.0f)
+    
+    override this.Update(elapsedTime, moved) =
+        if (!|"exit").Tapped() then Selection.up()
+        let mutable i = 0
+        while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
+            stack.[i].Value.Update(elapsedTime, moved)
+            i <- i + 1
+
+        if List.isEmpty namestack then
+            let mutable i = 0
+            while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
+                stack.[i].Value.OnDestroy()
+                i <- i + 1
+            this.Close()
+
+    override this.Close() = base.Close(); Selection.unclamp(); _instance <- None
 
 [<AutoOpen>]
 module Helpers =
@@ -189,75 +265,6 @@ type PrettyButton(name, action) as this =
             )
         ref <- button
         button
-
-type Menu(topLevel: IMenu -> Page) as this =
-    inherit Percyqaz.Flux.UI.Dialog()
-
-    let MAX_PAGE_DEPTH = 12
-    
-    // Everything left of the current page is Some
-    // Everything past the current page could be Some from an old backed out page
-    let stack: Page option array = Array.create MAX_PAGE_DEPTH None
-    let mutable namestack = []
-    let mutable name = ""
-
-    // todo: add a back button
-    
-    let add (page: IMenu -> #Page) =
-
-        let page = page (this :> IMenu) :> Page
-        page.Init this
-
-        let n = List.length namestack
-        namestack <- page.Title :: namestack
-        name <- String.Join(" > ", List.rev namestack)
-
-        match stack.[n] with
-        | None -> ()
-        | Some page -> page.OnDestroy()
-
-        stack.[n] <- Some page
-        if n > 0 then stack.[n - 1].Value.MoveUp()
-    
-    let back() =
-        namestack <- List.tail namestack
-        name <- String.Join(" > ", List.rev namestack)
-        let n = List.length namestack
-        let page = stack.[n].Value
-        page.OnClose()
-        page.MoveDown()
-        if n > 0 then stack.[n - 1].Value.View()
-
-    override this.Init(parent) =
-        base.Init(parent)
-        add topLevel
-
-    override this.Draw() =
-        let mutable i = 0
-        while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-            stack.[i].Value.Draw()
-            i <- i + 1
-        Text.drawFillB(Style.baseFont, name, this.Bounds.SliceTop(100.0f).Shrink(20.0f), Style.text(), 0.0f)
-    
-    override this.Update(elapsedTime, moved) =
-        if (!|"exit").Tapped() then Selection.up()
-        let mutable i = 0
-        while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-            stack.[i].Value.Update(elapsedTime, moved)
-            i <- i + 1
-
-        if List.isEmpty namestack then
-            let mutable i = 0
-            while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
-                stack.[i].Value.OnDestroy()
-                i <- i + 1
-            this.Close()
-
-    override this.Close() = base.Close(); Selection.unclamp()
-
-    interface IMenu with
-        member this.ChangePage(p: IMenu -> #Page) = add p
-        member this.Back() = back()
 
 //type ConfirmDialog(prompt, callback: unit -> unit) as this =
 //    inherit Dialog()
