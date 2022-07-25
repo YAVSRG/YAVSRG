@@ -243,7 +243,7 @@ module Screen =
                     diamond (s * float32 x) (s * float32 y)
                     diamond (0.5f * s + s * float32 x) (0.5f * s + s * float32 y)
             Stencil.draw()
-            Background.draw (bounds, Style.accentShade (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+            Background.draw (bounds, Style.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
             Stencil.finish()
     
         let drawTransition flags inbound amount bounds =
@@ -287,7 +287,7 @@ module Screen =
             Dialog.display.Draw()
             if currentType <> Type.Play || Dialog.any() then 
                 let x, y = Mouse.pos()
-                Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.accentShade(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
+                Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.color(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
                 Tooltip.display.Draw()
 
         override this.Init(parent: Widget) =

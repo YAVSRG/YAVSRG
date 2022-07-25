@@ -27,9 +27,9 @@ type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
     new(onClick, label: string, bind: Hotkey) = Button(onClick, K label, bind)
 
     override this.Draw() =
-        Draw.rect this.Bounds (Style.accentShade(80, 0.5f, color.Value))
-        Draw.rect (this.Bounds.SliceBottom 10.0f) (Style.accentShade(255, 1.0f, color.Value))
-        Text.drawFillB(Content.font, labelFunc(), this.Bounds.TrimBottom 10.0f, (Style.accentShade(255, 1.0f, color.Value), Style.accentShade(255, 0.4f, color.Value)), 0.5f)
+        Draw.rect this.Bounds (Style.color(80, 0.5f, color.Value))
+        Draw.rect (this.Bounds.SliceBottom 10.0f) (Style.color(255, 1.0f, color.Value))
+        Text.drawFillB(Content.font, labelFunc(), this.Bounds.TrimBottom 10.0f, (Style.color(255, 1.0f, color.Value), Style.color(255, 0.4f, color.Value)), 0.5f)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
     inherit Widget1()
@@ -56,7 +56,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
                 <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom)
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
-        Text.drawFillB(Content.font, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.accentShade(255, 0.4f, color.Value)), 0.5f)
+        Text.drawFillB(Content.font, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.color(255, 0.4f, color.Value)), 0.5f)
         base.Draw()
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =

@@ -94,7 +94,7 @@ module TaskDisplay =
             |> this.Add
 
         override this.Draw() =
-            Draw.rect taskBoxes.Bounds (Style.accentShade(200, 0.6f, 0.1f))
+            Draw.rect taskBoxes.Bounds (Style.color(200, 0.6f, 0.1f))
             base.Draw()
 
         override this.OnClose() = this.Remove taskBoxes

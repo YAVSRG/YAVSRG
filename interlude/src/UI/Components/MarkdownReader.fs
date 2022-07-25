@@ -90,7 +90,7 @@ module MarkdownReader =
         match sp with
         | Literal (text, _) ->
             W.text text
-                ((if settings.Bold then Style.accentShade(255, 1.0f, 0.3f) else Color.White),
+                ((if settings.Bold then Style.color(255, 1.0f, 0.3f) else Color.White),
                     if settings.Italic then Color.Gray 
                     elif settings.HasLink then Color.Blue
                     else Color.Black)
@@ -159,7 +159,7 @@ module MarkdownReader =
         inherit Dialog()
 
         let frame =
-            Frame((fun () -> Style.accentShade(200, 0.1f, 0.0f)), (fun () -> Style.accentShade(255, 1.0f, 0.0f)))
+            Frame((fun () -> Style.color(200, 0.1f, 0.0f)), (fun () -> Style.color(255, 1.0f, 0.0f)))
             |-+ (FlowContainer() |-+ (buildDocWidget doc)).Position( Position.Margin(15.0f, 0.0f) )
 
         do

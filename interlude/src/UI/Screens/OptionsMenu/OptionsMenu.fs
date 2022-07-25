@@ -14,7 +14,7 @@ module OptionsMenuRoot =
         inherit Frame(NodeType.Button onClick)
 
         do
-            this.Fill <- fun () -> Style.accentShade(180, 0.9f, 0.0f)
+            this.Fill <- fun () -> Style.color(180, 0.9f, 0.0f)
             this.Border <- fun () -> if this.Focused then Color.White else Color.Transparent
             this
             |+ Text(icon, Position = { Left = Position.min; Top = 0.05f %+ 0.0f; Right = Position.max; Bottom = 0.7f %+ 0.0f })

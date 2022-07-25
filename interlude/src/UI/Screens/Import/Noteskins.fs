@@ -14,7 +14,7 @@ open Interlude.UI.Components
 open Interlude.Content
 
 type NoteskinCard(data: RepoEntry) as this =
-    inherit Frame((fun () -> Style.accentShade(120, (if this.Downloaded then 0.7f else 0.5f), 0.0f)), (fun () -> Style.accentShade(200, 0.7f, 0.2f)))
+    inherit Frame((fun () -> Style.color(120, (if this.Downloaded then 0.7f else 0.5f), 0.0f)), (fun () -> Style.color(200, 0.7f, 0.2f)))
             
     let mutable downloaded = Noteskins.list() |> Array.map snd |> Array.contains data.Name
     let download() =

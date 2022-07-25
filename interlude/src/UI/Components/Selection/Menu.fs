@@ -193,7 +193,7 @@ type PrettySetting(name, widget: Widget) as this =
         this
         |+ Text(
             K (N name + ":"),
-            Color = (fun () -> ((if this.Selected then Style.accentShade(255, 1.0f, 0.2f) else Color.White), Color.Black)),
+            Color = (fun () -> ((if this.Selected then Style.color(255, 1.0f, 0.2f) else Color.White), Color.Black)),
             Align = Alignment.LEFT,
             Position = Position.SliceLeft PRETTYTEXTWIDTH)
         |* TooltipRegion2(T name)
@@ -221,8 +221,8 @@ type PrettySetting(name, widget: Widget) as this =
         widget.Init this
 
     override this.Draw() =
-        if widget.Selected then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
-        elif widget.Focused then Draw.rect this.Bounds (Style.accentShade(100, 0.4f, 0.0f))
+        if widget.Selected then Draw.rect this.Bounds (Style.color(120, 0.4f, 0.0f))
+        elif widget.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
         base.Draw()
         widget.Draw()
     
@@ -240,7 +240,7 @@ type PrettyButton(name, action) as this =
             Color = ( 
                 fun () -> 
                     if this.Enabled then
-                        ( (if this.Focused then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black )
+                        ( (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black )
                     else (Color.Gray, Color.Black)
             ),
             Align = Alignment.LEFT )
@@ -248,7 +248,7 @@ type PrettyButton(name, action) as this =
         |* TooltipRegion2(T name)
 
     override this.Draw() =
-        if this.Focused then Draw.rect this.Bounds (Style.accentShade(120, 0.4f, 0.0f))
+        if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
         base.Draw()
 
     member this.Pos(y) = 

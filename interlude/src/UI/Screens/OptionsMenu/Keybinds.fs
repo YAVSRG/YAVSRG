@@ -42,7 +42,7 @@ module Keybinds =
         do
             this
             |+ Text((fun () -> text),
-                Color = (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.5f) else Color.White), Color.Black),
+                Color = (fun () -> (if this.Selected then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black),
                 Align = Alignment.LEFT)
             |* Clickable((fun () -> if not this.Selected then this.Select()),
                 OnHover = fun b -> if b then this.Focus())
@@ -66,7 +66,7 @@ module Keybinds =
         do
             this
             |+ Text((fun () -> (!|hotkey).ToString()),
-                Color = (fun () -> (if this.Selected then Style.accentShade(255, 1.0f, 0.0f) else Color.White), Color.Black),
+                Color = (fun () -> (if this.Selected then Style.color(255, 1.0f, 0.0f) else Color.White), Color.Black),
                 Align = Alignment.LEFT,
                 Position = Position.TrimLeft 20.0f)
             |* Clickable((fun () -> if not this.Selected then this.Select()), 
@@ -76,9 +76,9 @@ module Keybinds =
         let set = fun v -> options.Hotkeys.[hotkey] <- v
     
         override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f))
-            elif this.Focused then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
-            Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.accentShade(127, 0.8f, 0.0f))
+            if this.Selected then Draw.rect this.Bounds (Style.color(180, 1.0f, 0.5f))
+            elif this.Focused then Draw.rect this.Bounds (Style.color(120, 1.0f, 0.8f))
+            Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.color(127, 0.8f, 0.0f))
             base.Draw()
     
         override this.Update(elapsedTime, bounds) =

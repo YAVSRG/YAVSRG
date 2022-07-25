@@ -88,13 +88,13 @@ type Screen() as this =
         StylishButton(
             (fun () -> Setting.app not options.ChartSortReverse; LevelSelect.refresh <- true),
             (fun () -> if options.ChartSortReverse.Value then Icons.order_descending else Icons.order_ascending),
-            (fun () -> Style.accentShade(150, 0.4f, 0.6f))
+            (fun () -> Style.color(150, 0.4f, 0.6f))
         ).Position { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %+ 35.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
         LevelSelectDropdown(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
-            (fun () -> Style.accentShade(100, 0.4f, 0.6f)),
+            (fun () -> Style.color(100, 0.4f, 0.6f)),
             "sort_mode")
             .Tooltip(L"levelselect.sortby.tooltip")
             .Position { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f }
@@ -103,13 +103,13 @@ type Screen() as this =
         StylishButton(
             (fun () -> Setting.app not options.ChartGroupReverse; LevelSelect.refresh <- true),
             (fun () -> if options.ChartGroupReverse.Value then Icons.order_descending else Icons.order_ascending),
-            (fun () -> Style.accentShade(150, 0.2f, 0.8f)))
+            (fun () -> Style.color(150, 0.2f, 0.8f)))
             .Position { Left = 0.85f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %+ 35.0f; Bottom = 0.0f %+ 170.0f }
         |> this.Add
 
         LevelSelectDropdown(groupBy.Keys, "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
-            (fun () -> Style.accentShade(100, 0.2f, 0.8f)),
+            (fun () -> Style.color(100, 0.2f, 0.8f)),
             "group_mode")
             .Tooltip(L"levelselect.groupby.tooltip")
             .Position { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
@@ -150,11 +150,11 @@ type Screen() as this =
         let { Rect.Left = left; Top = top; Right = right } = this.Bounds
         Draw.quad
             ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
-            (Quad.colorOf (Style.accentShade (120, 0.6f, 0.0f))) Sprite.DefaultQuad
+            (Quad.colorOf (Style.color (120, 0.6f, 0.0f))) Sprite.DefaultQuad
         Draw.quad
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
-            (Quad.colorOf (Style.accentShade (120, 0.1f, 0.0f))) Sprite.DefaultQuad
-        Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.accentShade (255, 0.8f, 0.0f))
+            (Quad.colorOf (Style.color (120, 0.1f, 0.0f))) Sprite.DefaultQuad
+        Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.color (255, 0.8f, 0.0f))
         base.Draw()
 
     override this.OnEnter prev =

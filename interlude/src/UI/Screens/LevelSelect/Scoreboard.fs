@@ -62,7 +62,7 @@ module Scoreboard =
             |=* Animation.seq [Animation.Delay 150.0 :> Animation; Animation.Action (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f)]
 
         override this.Draw() =
-            Draw.rect this.Bounds (Style.accentShade(int (100.0f * fade.Value), 0.5f, 0.0f))
+            Draw.rect this.Bounds (Style.color(int (100.0f * fade.Value), 0.5f, 0.0f))
             base.Draw()
         member this.Data = data
 

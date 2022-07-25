@@ -276,10 +276,10 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             Text.drawFillB(font, scoreData.Mods, panel.SliceBottom(100.0f).Shrink(20.0f), (Color.White, Color.Black), 0.5f)
 
         // top banner
-        Draw.rect (this.Bounds.SliceTop 190.0f) (Style.accentShade(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.SliceTop 190.0f) (Style.color(127, 0.5f, 0.0f))
         Draw.rect (this.Bounds.SliceTop(195.0f).SliceBottom(5.0f)) (Color.FromArgb(127, Color.White))
         // bottom banner
-        Draw.rect (this.Bounds.SliceBottom 290.0f) (Style.accentShade(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.SliceBottom 290.0f) (Style.color(127, 0.5f, 0.0f))
         Draw.rect (this.Bounds.SliceBottom(295.0f).SliceTop(5.0f)) (Color.FromArgb(127, Color.White))
 
         // right diamond

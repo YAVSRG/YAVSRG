@@ -1,12 +1,11 @@
 ﻿namespace Interlude.UI.Components
 
 open System
-open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude
-open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 
@@ -47,7 +46,7 @@ type Frame (fillColor: unit -> Color, frameColor: unit -> Color, fill, frame) =
         
     let BORDERWIDTH = 5.0f
         
-    new() = Frame ((fun () -> Style.accentShade(200, 0.5f, 0.3f)), (fun () -> Style.accentShade(80, 0.5f, 0.0f)), true, true)
+    new() = Frame ((fun () -> Style.color(200, 0.5f, 0.3f)), (fun () -> Style.color(80, 0.5f, 0.0f)), true, true)
     new((), frame) = Frame (K Color.Transparent, K frame, false, true)
     new((), frame) = Frame (K Color.Transparent, frame, false, true)
     new(fill, ()) = Frame (K fill, K Color.Transparent, true, false)

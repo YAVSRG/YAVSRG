@@ -147,7 +147,7 @@ module Tree =
             let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = bounds
 
             // draw base
-            let accent = Style.accentShade(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
+            let accent = Style.color(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
             Draw.rect bounds (if this.Selected then Style.main 80 () else Style.black 80 ())
             let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
@@ -157,7 +157,7 @@ module Tree =
 
             let border = bounds.Expand(5.0f)
             let border2 = bounds.Expand(5.0f, 0.0f)
-            let borderColor = if this.Selected then Style.accentShade(180, 1.0f, 0.5f) else color
+            let borderColor = if this.Selected then Style.color(180, 1.0f, 0.5f) else color
             if borderColor.A > 0uy then
                 Draw.rect (border2.SliceLeft 5.0f) borderColor
                 Draw.rect (border.SliceTop 5.0f) borderColor
@@ -260,12 +260,12 @@ module Tree =
 
         member private this.OnDraw(bounds: Rect) =
             let borderb = bounds.Expand(5.0f)
-            let colorb = if this.Selected then Style.accentShade(200, 1.0f, 0.5f) else Style.accentShade(100, 0.7f, 0.0f)
+            let colorb = if this.Selected then Style.color(200, 1.0f, 0.5f) else Style.color(100, 0.7f, 0.0f)
             Draw.rect (borderb.SliceLeft 5.0f) colorb
             Draw.rect (borderb.SliceRight 5.0f) colorb
             Draw.rect (borderb.SliceTop 5.0f) colorb
             Draw.rect (borderb.SliceBottom 5.0f) colorb
-            Draw.rect bounds (if this.Selected then Style.accentShade(127, 1.0f, 0.2f) else Style.accentShade(127, 0.3f, 0.0f))
+            Draw.rect bounds (if this.Selected then Style.color(127, 1.0f, 0.2f) else Style.color(127, 0.3f, 0.0f))
             Text.drawFillB(font, name, bounds.Shrink 5.0f, (Color.White, Color.Black), 0.5f)
 
         member this.Draw(top, origin, originB) =

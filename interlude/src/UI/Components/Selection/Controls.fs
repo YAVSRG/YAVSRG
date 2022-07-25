@@ -29,7 +29,7 @@ module Dropdown =
             )
 
         override this.Draw() =
-            if this.Hover then Draw.rect this.Bounds (Style.accentShade(127, 1.0f, 0.4f))
+            if this.Hover then Draw.rect this.Bounds (Style.color(127, 1.0f, 0.4f))
             base.Draw()
 
         override this.Update(elapsedTime, bounds) =
@@ -112,8 +112,8 @@ type NoteColorPicker(color: Setting<byte>) as this =
 
     override this.Draw() =
         base.Draw()
-        if this.Selected then Draw.rect this.Bounds (Style.accentShade(180, 1.0f, 0.5f))
-        elif this.Focused then Draw.rect this.Bounds (Style.accentShade(120, 1.0f, 0.8f))
+        if this.Selected then Draw.rect this.Bounds (Style.color(180, 1.0f, 0.5f))
+        elif this.Focused then Draw.rect this.Bounds (Style.color(120, 1.0f, 0.8f))
         Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
 
     override this.Update(elapsedTime, moved) =

@@ -23,7 +23,7 @@ type LittleButton(label, onClick) as this =
     inherit ButtonBase(onClick)
     do
         this.Add(Frame(Color.FromArgb(80, 255, 255, 255), ()))
-        this.Add(TextBox(label, (fun () -> ((if this.Hover then Style.accentShade(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
+        this.Add(TextBox(label, (fun () -> ((if this.Hover then Style.color(255, 1.0f, 0.7f) else Color.White), Color.Black)), 0.5f))
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, onClick) =
         let names = Enum.GetNames(typeof<'T>)
@@ -34,7 +34,7 @@ type LittleButton(label, onClick) as this =
 
 type IconButton(icon, onClick) as this =
     inherit ButtonBase(onClick)
-    do TextBox(K icon, (fun () -> (if this.Hover then Style.accentShade(255, 1.0f, 0.4f) else Color.White), Color.Black), 0.5f) |> this.Add
+    do TextBox(K icon, (fun () -> (if this.Hover then Style.color(255, 1.0f, 0.4f) else Color.White), Color.Black), 0.5f) |> this.Add
 
 type CardButton(title, subtitle, highlight, onClick, colorFunc) as this =
     inherit Selectable()
@@ -55,7 +55,7 @@ type CardButton(title, subtitle, highlight, onClick, colorFunc) as this =
             (fun b -> if b && this.SParent.Value.Selected then this.Hover <- true))
         |> this.Add
 
-    new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Style.accentShade(255, 1.0f, 0.0f))
+    new(title, subtitle, highlight, onClick) = CardButton(title, subtitle, highlight, onClick, fun () -> Style.color(255, 1.0f, 0.0f))
 
     override this.Draw() =
         let hi = colorFunc()

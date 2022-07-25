@@ -122,7 +122,7 @@ module CardSelect =
             base.Update(elapsedTime, bounds)
     
         override this.Draw() =
-            if marked then Draw.rect this.Bounds (Style.accentShade(80, 1.0f, 0.0f))
+            if marked then Draw.rect this.Bounds (Style.color(80, 1.0f, 0.0f))
             if this.Selected then Draw.rect this.Bounds (Color.FromArgb(120, 255, 255, 255))
             elif this.Hover then Draw.rect this.Bounds (Color.FromArgb(80, 255, 255, 255))
             base.Draw()
@@ -169,3 +169,55 @@ module CardSelect =
         override this.OnSelect() =
             base.OnSelect()
             this.HoverChild <- Some (fc.Children.[0] :?> Selectable)
+
+module CardView =
+    
+    let HEIGHT = 80.0f
+
+    type Selection<'T> = { IsSelected: 'T -> bool; Select: ('T * bool) -> unit }
+    type Action<'T> = { Icon: string; Act: 'T -> unit; Enabled: 'T -> bool }
+    type Column<'T> = { Text: 'T -> string } // todo: add headers to columns ?
+    type Config<'T> =
+        {
+            Columns: Column<'T> list
+            Actions: Action<'T> list
+            Selection: Selection<'T> option
+            New: 'T -> unit option
+        }
+
+    type SelectionButton<'T>(item: 'T, selected: bool, config: Config<'T>) =
+        inherit StaticWidget(NodeType.Button(fun () -> config.Selection.Value.Select(item, not selected)))
+
+        override this.Draw() = Text.drawFillB(Style.baseFont, (if selected then Icons.selected else Icons.unselected), this.Bounds, Style.text(), Alignment.CENTER)
+
+    type ActionButton<'T>(item: 'T, action: Action<'T>) as this =
+        inherit StaticWidget(NodeType.Button(this.Action))
+
+        let enabled = action.Enabled item
+
+        member private this.Action() = if enabled then action.Act item
+
+        override this.Draw() = 
+            if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+            Text.drawFillB(Style.baseFont, action.Icon, this.Bounds, (if enabled then Style.text() else (Color.Gray, Color.Black)), Alignment.CENTER)
+
+    type Card<'T>(item: 'T, config: Config<'T>) as this =
+        inherit StaticContainer(NodeType.Switch(this._container))
+
+        let container = FlowContainer.RightToLeft<StaticWidget>(HEIGHT)
+        let select_button =
+            match config.Selection with
+            | Some sel -> SelectionButton(item, sel.IsSelected item, config) |> Some
+            | None -> None
+
+        do
+            if select_button.IsSome then container.Add select_button.Value
+            for action in config.Actions do
+                container.Add(ActionButton(item, action))
+            this |* container
+
+        override this.Draw() =
+            if select_button.IsSome && select_button.Value.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+            base.Draw()
+
+        member private this._container() = container

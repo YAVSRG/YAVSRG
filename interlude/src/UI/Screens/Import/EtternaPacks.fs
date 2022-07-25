@@ -31,7 +31,7 @@ type EOPack =
     }
 
 type private SMImportCard(data: EOPackAttrs) as this =
-    inherit Frame((fun () -> Style.accentShade(120, (if this.Downloaded then 0.7f else 0.5f), 0.0f)), (fun () -> Style.accentShade(200, 0.7f, 0.2f)))
+    inherit Frame((fun () -> Style.color(120, (if this.Downloaded then 0.7f else 0.5f), 0.0f)), (fun () -> Style.color(200, 0.7f, 0.2f)))
     let mutable downloaded = 
         let path = Path.Combine(getDataPath "Songs", data.name)
         Directory.Exists path && not ( Seq.isEmpty (Directory.EnumerateDirectories path) )
