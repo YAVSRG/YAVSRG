@@ -195,7 +195,7 @@ type PrettySetting(name, widget: Widget) as this =
             K (N name + ":"),
             Color = (fun () -> ((if this.Selected then Style.color(255, 1.0f, 0.2f) else Color.White), Color.Black)),
             Align = Alignment.LEFT,
-            Position = Position.SliceLeft PRETTYTEXTWIDTH)
+            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT))
         |* TooltipRegion2(T name)
 
     member this.Child

@@ -1,6 +1,8 @@
 ﻿namespace Interlude.UI.OptionsMenu
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
+open Prelude.Scoring
 open Interlude.Options
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Controls
@@ -53,28 +55,21 @@ module Gameplay =
     type RulesetsPage() as this =
         inherit Page()
 
-        do
+        do 
             this.Content(
                 column()
-                    //let setting =
-                    //    Setting.make ignore
-                    //        ( fun () ->
-                    //            Interlude.Content.Rulesets.list()
-                    //            |> Seq.map (fun (key, value) -> (key, value), WatcherSelection.contains key options.Rulesets.Value)
-                    //        )
-                    //PrettySetting("gameplay.rulesets",
-                    //    CardSelect.Selector(
-                    //        setting,
-                    //        { CardSelect.Config.Default with
-                    //            NameFunc = fun s -> (snd s).Name
-                    //            MarkFunc = 
-                    //                fun (s, b) -> 
-                    //                    if b then Setting.app (WatcherSelection.add (fst s)) options.Rulesets
-                    //                    else Setting.app (WatcherSelection.delete (fst s)) options.Rulesets
-                    //        },
-                    //        add
-                    //    )
-                    //).Pos(200.0f, PRETTYWIDTH, 800.0f)
+                |+ PrettySetting("gameplay.rulesets",
+                        Grid.create Interlude.Content.Rulesets.list (
+                            Grid.Config.Default
+                                .WithColumn(fun (_, rs: Prelude.Scoring.Ruleset) -> rs.Name)
+                                .WithSelection(
+                                    (fun (id, _) -> WatcherSelection.contains id options.Rulesets.Value),
+                                    (fun ((id, rs), selected) ->
+                                        if selected then Setting.app (WatcherSelection.add id) options.Rulesets
+                                        else Setting.app (WatcherSelection.delete id) options.Rulesets
+                                    ))
+                        )
+                    ).Pos(200.0f, PRETTYWIDTH, 800.0f)
                 )
 
         override this.Title = N"gameplay.rulesets"
@@ -86,10 +81,10 @@ module Gameplay =
         do
             this.Content(
                 column()
-                |+ PrettySetting("gameplay.screencover.enabled", Percyqaz.Flux.UI.Selector<_>.FromBool options.ScreenCover.Enabled).Pos(200.0f)
-                |+ PrettySetting("gameplay.screencover.hidden", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Pos(350.0f)
-                |+ PrettySetting("gameplay.screencover.sudden", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Pos(450.0f)
-                |+ PrettySetting("gameplay.screencover.fadelength", Percyqaz.Flux.UI.Slider(options.ScreenCover.FadeLength, 0.01f)).Pos(550.0f)
+                |+ PrettySetting("gameplay.screencover.enabled", Selector<_>.FromBool options.ScreenCover.Enabled).Pos(200.0f)
+                |+ PrettySetting("gameplay.screencover.hidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Pos(350.0f)
+                |+ PrettySetting("gameplay.screencover.sudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Pos(450.0f)
+                |+ PrettySetting("gameplay.screencover.fadelength", Slider(options.ScreenCover.FadeLength, 0.01f)).Pos(550.0f)
                 |+ Themes.NoteskinPreview 0.35f
             )
         override this.Title = N"gameplay.screencover"
@@ -101,13 +96,13 @@ module Gameplay =
         do
             this.Content(
                 column()
-                |+ PrettySetting("gameplay.scrollspeed", Percyqaz.Flux.UI.Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(200.0f)
-                |+ PrettySetting("gameplay.hitposition", Percyqaz.Flux.UI.Slider(options.HitPosition, 0.005f)).Pos(280.0f)
-                |+ PrettySetting("gameplay.upscroll", Percyqaz.Flux.UI.Selector<_>.FromBool options.Upscroll).Pos(360.0f)
-                |+ PrettySetting("gameplay.backgrounddim", Percyqaz.Flux.UI.Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
+                |+ PrettySetting("gameplay.scrollspeed", Slider<_>.Percent(options.ScrollSpeed, 0.0025f)).Pos(200.0f)
+                |+ PrettySetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Pos(280.0f)
+                |+ PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(360.0f)
+                |+ PrettySetting("gameplay.backgrounddim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
                 |+ PrettyButton("gameplay.screencover", fun() -> Menu.ShowPage ScreencoverPage).Pos(520.0f)
                 //|+ PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Pos(670.0f)
-                //|+ PrettyButton("gameplay.rulesets", fun () -> Menu.ChangePage RulesetsPage).Pos(750.0f)
+                |+ PrettyButton("gameplay.rulesets", fun () -> Menu.ShowPage RulesetsPage).Pos(750.0f)
             )
         override this.Title = N"gameplay"
         override this.OnClose() = ()
