@@ -46,6 +46,9 @@ type Clickable(onLeftClick) =
             if Mouse.rightClick() then this.OnRightClick()
 
     override this.Draw() = ()
+
+    static member Focus(w: Widget) =
+        Clickable(w.Select, OnHover = fun b -> if b && not w.Focused then w.Focus())
     
 [<Sealed>]
 type HotkeyAction(hotkey: Hotkey, action) =

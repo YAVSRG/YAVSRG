@@ -37,12 +37,12 @@ type Widget(nodeType) =
     member this.Focusable = match nodeType with NodeType.None -> false | _ -> true
 
     override this.Focus() = if not this.NodeType._IsNone then Selection.focus this
-    override this.OnFocus() = printfn "FOCUS %O" this; assert not selected; focused <- true
-    override this.OnUnfocus() = printfn "UNFOCUS %O" this; assert not selected; focused <- false
+    override this.OnFocus() = focused <- true
+    override this.OnUnfocus() = focused <- false
 
     override this.Select() = if not this.NodeType._IsNone then Selection.select this
-    override this.OnSelected() = printfn "SELECT %O" this; assert focused; selected <- true
-    override this.OnDeselected() = printfn "DESELECT %O" this; assert focused; selected <- false
+    override this.OnSelected() = selected <- true
+    override this.OnDeselected() = selected <- false
 
     override this.ToString() =
         if parent.IsNone then "*" else parent.Value.ToString()
@@ -196,3 +196,4 @@ type Overlay(nodeType: NodeType) =
     override this.Init(parent: Widget) =
         base.Init parent
         this.Bounds <- Viewport.bounds
+        this.VisibleBounds <- Viewport.bounds

@@ -14,7 +14,7 @@ type Button(text: string, onClick: unit -> unit, hotkey: Hotkey) as this =
             text,
             Align = Alignment.CENTER,
             Color = colorFunc)
-        |+ Clickable(this.Select, OnHover = fun b -> if b && not this.Focused then this.Focus())
+        |+ Clickable.Focus this
         |* HotkeyAction(hotkey, onClick)
 
     override this.OnFocus() =

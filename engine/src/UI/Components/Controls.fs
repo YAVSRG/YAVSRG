@@ -21,7 +21,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
             (fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else ""),
             Align = Alignment.LEFT, 
             Color = colorFunc)
-        |+ Clickable(this.Select, OnHover = fun b -> if b && not this.Focused then this.Focus())
+        |+ Clickable.Focus this
         |* HotkeyAction(hotkey, toggle)
 
     override this.OnSelected() =
@@ -106,10 +106,8 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
         let bounds = this.Bounds.TrimLeft TEXTWIDTH
 
         let cursor_x = bounds.Left + bounds.Width * v
-        let cursor = Rect.Create(cursor_x, bounds.Top, cursor_x, bounds.Bottom).Expand(10.0f, 5.0f)
         Draw.rect (Rect.Create(cursor_x, (bounds.Top + 10.0f), bounds.Right, (bounds.Bottom - 10.0f))) (!*Palette.BASE)
         Draw.rect (Rect.Create(bounds.Left, (bounds.Top + 10.0f), cursor_x, (bounds.Bottom - 10.0f))) (colorFunc())
-        Draw.rect cursor (!*Palette.LIGHTER)
         base.Draw()
 
 type Selector<'T>(items: ('T * string) array, setting: Setting<'T>) as this =

@@ -16,7 +16,7 @@ module FlowContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>(item_size: float32) as this = 
-        inherit StaticWidget(NodeType.Switch (fun () -> this.WhoShouldFocus))
+        inherit StaticWidget(NodeType.Switch (fun _ -> this.WhoShouldFocus))
 
         let mutable filter : 'T -> bool = K true
         let mutable sort : ('T -> 'T -> int) option = None
@@ -75,7 +75,9 @@ module FlowContainer =
             and set(value) =
                 item_size <- value
                 refresh <- true
-        
+                
+        member this.Clear() = children.Clear()
+
         override this.Draw() =
             for { Widget = c; Visible = visible } in children do
                 if visible && c.VisibleBounds.Visible then c.Draw()
@@ -90,11 +92,11 @@ module FlowContainer =
                     true
                 else moved
 
-            if this.Focused then this.Navigate()
-
             for { Widget = c; Visible = visible } in children do
                 if visible && (moved || c.VisibleBounds.Visible) then
                     c.Update(elapsedTime, moved)
+
+            if this.Focused then this.Navigate()
 
         abstract member FlowContent : ResizeArray<FlowItem<'T>> -> unit
         
@@ -121,7 +123,6 @@ module FlowContainer =
         inherit Base<'T>(item_height)
 
         let mutable content_height = 0.0f
-
         member this.ContentHeight = content_height
 
         override this.FlowContent children =
@@ -142,6 +143,9 @@ module FlowContainer =
     [<Sealed>]
     type LeftToRight<'T when 'T :> Widget>(item_width: float32) =
         inherit Base<'T>(item_width)
+        
+        let mutable content_width = 0.0f
+        member this.ContentHeight = content_width
 
         override this.FlowContent children =
             let mutable l = 0.0f
@@ -151,10 +155,34 @@ module FlowContainer =
                     c.Position <- Position.Column (l, this.ItemSize)
                     l <- l + this.ItemSize + this.Spacing
                     r <- l + this.ItemSize
+            content_width <- r
                     
         override this.Navigate() =
             if (!|"left").Tapped() then this.Previous()
             elif (!|"right").Tapped() then this.Next()
+            elif (!|"select").Tapped() then this.SelectFocused()
+
+    [<Sealed>]
+    type RightToLeft<'T when 'T :> Widget>(item_width: float32) =
+        inherit Base<'T>(item_width)
+
+        let mutable content_width = 0.0f
+        member this.ContentHeight = content_width
+
+        override this.FlowContent children =
+            let mutable r = 0.0f
+            let mutable l = 0.0f
+            for { Widget = c; Visible = visible } in children do
+                if visible then
+                    c.Position <- 
+                        { Left = 1.0f %- (r + this.ItemSize) ; Top = Position.min; Right = 1.0f %- r; Bottom = Position.max }
+                    r <- r + this.ItemSize + this.Spacing
+                    l <- r + this.ItemSize
+            content_width <- l
+                    
+        override this.Navigate() =
+            if (!|"left").Tapped() then this.Next()
+            elif (!|"right").Tapped() then this.Previous()
             elif (!|"select").Tapped() then this.SelectFocused()
 
 [<Sealed>]
@@ -167,6 +195,8 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
 
     static member Flow(child: FlowContainer.Vertical<'T>) = ScrollContainer(child, fun () -> child.ContentHeight)
 
+    member val Margin = 0.0f with get, set
+
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         let moved = 
@@ -176,7 +206,7 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
                 if ms <> 0.0f then
                     scroll <- scroll - ms * SENSITIVITY
                     scroll <- Math.Max(0.0f, Math.Min(scroll, heightFunc() - this.Bounds.Height))
-                    child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll)
+                    child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin, 0.0f)
                     true
                 else moved
             else moved
@@ -192,12 +222,13 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
     override this.Init(parent: Widget) =
         base.Init parent
         child.Init this
+        child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin, 0.0f)
 
 module SwitchContainer =
 
     [<AbstractClass>]
     type Base<'T when 'T :> Widget>() as this = 
-        inherit StaticWidget(NodeType.Switch (fun () -> this.WhoShouldFocus))
+        inherit StaticWidget(NodeType.Switch (fun _ -> this.WhoShouldFocus))
 
         let children = ResizeArray<'T>()
 
@@ -236,8 +267,8 @@ module SwitchContainer =
     
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
-            if this.Focused then this.Navigate()
             for c in children do c.Update(elapsedTime, moved)
+            if this.Focused then this.Navigate()
     
         member this.Add(child: 'T) =
             children.Add child
