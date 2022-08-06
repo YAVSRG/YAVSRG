@@ -257,6 +257,7 @@ module Screen =
             current.OnEnter Type.SplashScreen
     
         override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
             Background.update elapsedTime
             if currentType <> Type.Play || Dialog.any() then Tooltip.display.Update (elapsedTime, moved)
             if Viewport.vwidth > 0.0f then

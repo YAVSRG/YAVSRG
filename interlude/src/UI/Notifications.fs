@@ -38,6 +38,7 @@ module Tooltip =
         inherit Overlay(NodeType.None)
 
         override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
             for i in items do
                 i.Duration <- i.Duration - elapsedTime
                 i.Fade.Update elapsedTime |> ignore
