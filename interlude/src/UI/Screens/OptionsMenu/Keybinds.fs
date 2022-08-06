@@ -63,6 +63,8 @@ module Keybinds =
     type Keybinder(hotkey: Hotkey) as this =
         inherit StaticContainer(NodeType.Leaf)
 
+        let mutable blocked = true
+
         do
             this
             |+ Text((fun () -> (!|hotkey).ToString()),
@@ -72,19 +74,19 @@ module Keybinds =
             |* Clickable((fun () -> if not this.Selected then this.Select()), 
                 OnHover = fun b -> if b then this.Focus())
 
-        // todo: ensure this updates the live binds properly
-        let set = fun v -> options.Hotkeys.[hotkey] <- v
+        let set = fun v -> Hotkeys.set hotkey v; options.Hotkeys.[hotkey] <- v
     
         override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (Style.color(180, 1.0f, 0.5f))
-            elif this.Focused then Draw.rect this.Bounds (Style.color(120, 1.0f, 0.8f))
-            Draw.rect (this.Bounds.Shrink(0.0f, 40.0f)) (Style.color(127, 0.8f, 0.0f))
+            if this.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)
+            elif this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
             base.Draw()
+
+        override this.OnSelected() = base.OnSelected(); blocked <- true
     
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if this.Selected then
-                match Input.consumeAny InputEvType.Press with
+            if this.Selected && not blocked then
+                match Input.consumeAny InputEvType.Release with
                 | ValueNone -> ()
                 | ValueSome b ->
                     match b with
@@ -93,13 +95,13 @@ module Keybinds =
                         else set (Key (k, (ctrl, false, shift)))
                         this.Focus()
                     | _ -> ()
+            if this.Selected && blocked && not ((!|"select").Pressed()) then blocked <- false
 
     type HotkeysPage() as this =
         inherit Page()
 
-        let container =
-            FlowContainer.Vertical<PrettySetting>(PRETTYHEIGHT)
-        let scrollContainer = ScrollContainer.Flow(container)
+        let container = FlowContainer.Vertical<PrettySetting>(PRETTYHEIGHT)
+        let scrollContainer = ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f))
 
         do
             for hk in Hotkeys.hotkeys.Keys do

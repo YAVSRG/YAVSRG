@@ -228,8 +228,8 @@ type PrettySetting(name, widget: Widget) as this =
         widget.Draw()
     
     override this.Update(elapsedTime, moved) =
-        widget.Update(elapsedTime, moved)
         base.Update(elapsedTime, moved)
+        widget.Update(elapsedTime, moved)
 
 type PrettyButton(name, action) as this =
     inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then action()))
