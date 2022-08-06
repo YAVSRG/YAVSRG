@@ -95,31 +95,3 @@ type DropdownSelector<'T>(items: 'T array, labelFunc: 'T -> string, setting: Set
     static member FromEnum(setting: Setting<'T>) =
         let values = Enum.GetValues(typeof<'T>) :?> 'T array
         DropdownSelector(values, (fun x -> Enum.GetName(typeof<'T>, x)), setting)
-
-type NoteColorPicker(color: Setting<byte>) as this =
-    inherit StaticContainer(NodeType.Leaf)
-
-    let sprite = Content.getTexture "note"
-    let n = byte sprite.Rows
-
-    let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color
-    let bk() = Setting.app (fun x -> (x + 1uy) % n) color
-
-    do 
-        this
-        |* Percyqaz.Flux.UI.Clickable((fun () -> (if not this.Selected then this.Select()); fd ()), OnHover = fun b -> if b then this.Focus())
-
-    override this.Draw() =
-        base.Draw()
-        if this.Selected then Draw.rect this.Bounds (Style.color(180, 1.0f, 0.5f))
-        elif this.Focused then Draw.rect this.Bounds (Style.color(120, 1.0f, 0.8f))
-        Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
-
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        
-        if this.Selected then
-            if (!|"up").Tapped() then fd()
-            elif (!|"down").Tapped() then bk()
-            elif (!|"left").Tapped() then bk()
-            elif (!|"right").Tapped() then fd()

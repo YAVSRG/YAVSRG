@@ -4,6 +4,7 @@ open Prelude.Gameplay.NoteColors
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Data.Themes
 open Interlude
@@ -11,10 +12,37 @@ open Interlude.Content
 open Interlude.Utils
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Menu
 
 module Themes =
+
+    type NoteColorPicker(color: Setting<byte>) as this =
+        inherit StaticContainer(NodeType.Leaf)
+    
+        let sprite = Content.getTexture "note"
+        let n = byte sprite.Rows
+    
+        let fd() = Setting.app (fun x -> (x + n - 1uy) % n) color
+        let bk() = Setting.app (fun x -> (x + 1uy) % n) color
+    
+        do 
+            this
+            |* Percyqaz.Flux.UI.Clickable((fun () -> (if not this.Selected then this.Select()); fd ()), OnHover = fun b -> if b && not this.Focused then this.Focus())
+    
+        override this.Draw() =
+            base.Draw()
+            if this.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)
+            elif this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf Color.White) (Sprite.gridUV (3, int color.Value) sprite)
+    
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            
+            if this.Selected then
+                if (!|"up").Tapped() then fd()
+                elif (!|"down").Tapped() then bk()
+                elif (!|"left").Tapped() then bk()
+                elif (!|"right").Tapped() then fd()
 
     type NoteskinPreview(scale: float32) as this =
         inherit StaticContainer(NodeType.None)
@@ -169,12 +197,14 @@ module Themes =
         let tryEditNoteskin() =
             let ns = Noteskins.Current.instance
             match ns.Source with
-            | Zip (_, Some file) -> ()
+            | Zip (_, Some file) ->
+                Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractzip", F Noteskins.extractCurrent refreshNoteskins) )
                 //ConfirmDialog(
                 //    sprintf "'%s' cannot be edited because it is zipped. Extract and edit?" ns.Config.Name,
                 //    fun () -> Noteskins.extractCurrent(); refreshNoteskins()
                 //).Show()
-            | Zip (_, None) -> ()
+            | Zip (_, None) ->
+                Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractdefault", F Noteskins.extractCurrent refreshNoteskins) )
                 //ConfirmDialog(
                 //    sprintf "'%s' is an embedded default skin. Extract a copy and edit?" ns.Config.Name,
                 //    fun () -> Noteskins.extractCurrent(); refreshNoteskins()
@@ -184,13 +214,15 @@ module Themes =
         let tryEditTheme() =
             let theme = Themes.Current.instance
             match theme.Source with
-            | Zip (_, None) -> ()
-                //ConfirmDialog(
-                //    sprintf "'%s' is the default theme. Extract a copy and edit?" theme.Config.Name,
-                //    fun () -> Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes()
-                //).Show()
+            | Zip (_, None) ->
+                Menu.ShowPage (
+                    ConfirmPage(
+                        Localisation.localiseWith [theme.Config.Name] "options.themes.confirmextractdefault",
+                        (fun () -> Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes())
+                    )
+                )
             | Folder _ -> Menu.ShowPage( EditThemePage refreshThemes )
-            | Zip (_, Some file) -> failwith "User themes with zip storage not supported"
+            | Zip (_, Some file) -> failwith "impossible as user themes are always folders"
 
         do
             refreshNoteskins()

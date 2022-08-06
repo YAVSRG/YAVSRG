@@ -222,7 +222,7 @@ type PrettySetting(name, widget: Widget) as this =
         widget.Init this
 
     override this.Draw() =
-        if widget.Selected then Draw.rect this.Bounds (Style.color(120, 0.4f, 0.0f))
+        if widget.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)
         elif widget.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
         base.Draw()
         widget.Draw()
@@ -257,6 +257,15 @@ type PrettyButton(name, action) as this =
         this
 
     member val Enabled = true with get, set
+    
+    static member Once(name, action) =
+        let mutable ref = Unchecked.defaultof<PrettyButton>
+        let button = PrettyButton(name, fun () ->
+                if ref.Enabled then action()
+                ref.Enabled <- false
+            )
+        ref <- button
+        button
 
     static member Once(name, action, notifText, notifType) =
         let mutable ref = Unchecked.defaultof<PrettyButton>
@@ -267,33 +276,15 @@ type PrettyButton(name, action) as this =
         ref <- button
         button
 
-//type ConfirmDialog(prompt, callback: unit -> unit) as this =
-//    inherit Dialog()
+type ConfirmPage(prompt: string, yes: unit -> unit) as this =
+    inherit Page()
 
-//    let mutable confirm = false
-
-//    let options =
-//        row [ 
-//            LittleButton(
-//                K "Yes",
-//                fun () -> this.BeginClose(); confirm <- true
-//            ).Position(Position.SliceLeft 200.0f)
-//            LittleButton(
-//                K "No", 
-//                this.BeginClose
-//            ).Position(Position.SliceRight 200.0f)
-//        ]
-
-//    do
-//        TextBox(K prompt, K (Color.White, Color.Black), 0.5f)
-//            .Position { Left = 0.0f %+ 200.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 200.0f; Bottom = 0.5f %- 50.0f }
-//        |> this.Add
-//        options.OnSelect()
-//        options.Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 0.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 100.0f }
-//        |> this.Add
-
-//    override this.Update(elapsedTime, bounds) =
-//        base.Update(elapsedTime, bounds)
-//        if not options.Selected then this.BeginClose()
-
-//    override this.OnClose() = if confirm then callback()
+    do
+        this.Content(
+            column()
+            |+ PrettyButton.Once( "confirm.yes", F yes Menu.Back ).Pos(300.0f)
+            |+ PrettyButton.Once( "confirm.no", Menu.Back ).Pos(400.0f)
+            |+ Text(prompt, Position = Position.Row(100.0f, PRETTYHEIGHT))
+        )
+    override this.Title = L"options.confirm"
+    override this.OnClose() = ()
