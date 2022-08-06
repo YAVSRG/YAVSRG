@@ -46,7 +46,7 @@ type InputEv = (struct (Bind * InputEvType * float32<ms>))
 [<RequireQualifiedAccess>]
 type InputMethod =
     | Text of setting: Setting<string> * callback: (unit -> unit)
-    | Bind of callback: (Bind -> unit)
+    | Bind of callback: (Bind -> unit) // todo: remove this. Can be replaced with other logic
     | None
 
 module Input =
@@ -196,7 +196,7 @@ module Input =
                     if keyboard.WasKeyDown(enum k) |> not then
                         struct((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Press, now) |> add
                 elif keyboard.WasKeyDown(enum k) then
-                    struct((enum k, (false, false, false)) |> Key, InputEvType.Release, now) |> add
+                    struct((enum k, (ctrl, alt, shift)) |> Key, InputEvType.Release, now) |> add
 
         // mouse input handler
         for b in 0 .. int MouseButton.Last do

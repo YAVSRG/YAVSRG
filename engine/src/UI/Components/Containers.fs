@@ -23,10 +23,15 @@ module FlowContainer =
         let mutable spacing = 0.0f
         let mutable item_size = item_size
         let mutable refresh = true
+        let mutable last_selected = 0
         let children = ResizeArray<FlowItem<'T>>()
 
         member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun c -> c.Widget.Focused) children
-        member private this.WhoShouldFocus = children.[0].Widget
+        member private this.WhoShouldFocus =
+            if children.Count = 0 then failwithf "Tried to focus this %O with no children" this
+            if last_selected >= children.Count then last_selected <- 0
+            children.[last_selected].Widget
+
         member this.Previous() =
             match this.WhoIsFocused with
             | Some i ->
@@ -35,6 +40,7 @@ module FlowContainer =
                     index <- (index + children.Count - 1) % children.Count
                 children.[index].Widget.Focus()
             | None -> ()
+
         member this.Next() =
             match this.WhoIsFocused with
             | Some i ->
@@ -43,12 +49,15 @@ module FlowContainer =
                     index <- (index + 1) % children.Count
                 children.[index].Widget.Focus()
             | None -> ()
-        member this.SelectFocused() =
+
+        member this.SelectFocusedChild() =
             match this.WhoIsFocused with
-            | Some i -> children.[i].Widget.Select()
+            | Some i -> last_selected <- i; children.[i].Widget.Select()
             | None -> ()
 
-        override this.Select() = this.Focus()
+        override this.OnUnfocus() =
+            match this.WhoIsFocused with Some i -> last_selected <- i | None -> ()
+            base.OnUnfocus()
 
         abstract member Navigate : unit -> unit
 
@@ -138,7 +147,7 @@ module FlowContainer =
         override this.Navigate() =
             if (!|"up").Tapped() then this.Previous()
             elif (!|"down").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocused()
+            elif (!|"select").Tapped() then this.SelectFocusedChild()
 
     [<Sealed>]
     type LeftToRight<'T when 'T :> Widget>(item_width: float32) =
@@ -160,7 +169,7 @@ module FlowContainer =
         override this.Navigate() =
             if (!|"left").Tapped() then this.Previous()
             elif (!|"right").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocused()
+            elif (!|"select").Tapped() then this.SelectFocusedChild()
 
     [<Sealed>]
     type RightToLeft<'T when 'T :> Widget>(item_width: float32) =
@@ -183,7 +192,7 @@ module FlowContainer =
         override this.Navigate() =
             if (!|"left").Tapped() then this.Next()
             elif (!|"right").Tapped() then this.Previous()
-            elif (!|"select").Tapped() then this.SelectFocused()
+            elif (!|"select").Tapped() then this.SelectFocusedChild()
 
 [<Sealed>]
 type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
@@ -199,17 +208,25 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
+
+        let mutable scrollby = 0.0f
+        if Mouse.hover this.Bounds then scrollby <- -Mouse.scroll() * SENSITIVITY
+        if this.Focused then
+            let selected_bounds = (Selection.get_focused_element().Value :?> Widget).Bounds
+            if selected_bounds.Bottom > this.Bounds.Bottom then
+                scrollby <- scrollby + selected_bounds.Bottom - this.Bounds.Bottom
+            elif this.Bounds.Top > selected_bounds.Top then
+                scrollby <- scrollby - this.Bounds.Top + selected_bounds.Top
+        
+        // todo: detect if heightFunc() changes
+
         let moved = 
-            // todo: detect if heightFunc() changes
-            if Mouse.hover this.Bounds then
-                let ms = Mouse.scroll()
-                if ms <> 0.0f then
-                    scroll <- scroll - ms * SENSITIVITY
-                    scroll <- Math.Max(0.0f, Math.Min(scroll, heightFunc() - this.Bounds.Height))
-                    child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin, 0.0f)
-                    true
-                else moved
+            if scrollby <> 0.0f then
+                scroll <- Math.Max(0.0f, Math.Min(scroll + scrollby, heightFunc() - this.Bounds.Height))
+                child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin, 0.0f)
+                true
             else moved
+
         child.Update(elapsedTime, moved)
 
     override this.Draw() = 
@@ -231,9 +248,13 @@ module SwitchContainer =
         inherit StaticWidget(NodeType.Switch (fun _ -> this.WhoShouldFocus))
 
         let children = ResizeArray<'T>()
+        let mutable last_selected = 0
 
         member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
-        member private this.WhoShouldFocus = if children.Count = 0 then failwithf "Tried to focus this %O with no children" this else children.[0]
+        member private this.WhoShouldFocus =
+            if children.Count = 0 then failwithf "Tried to focus this %O with no children" this
+            if last_selected >= children.Count then last_selected <- 0
+            children.[last_selected]
 
         member this.Previous() =
             match this.WhoIsFocused with
@@ -253,12 +274,10 @@ module SwitchContainer =
                 children.[index].Focus()
             | None -> ()
 
-        member this.SelectFocused() =
+        member this.SelectFocusedChild() =
             match this.WhoIsFocused with
-            | Some i -> children.[i].Select()
+            | Some i -> last_selected <- i; children.[i].Select()
             | None -> ()
-
-        override this.Select() = this.Focus()
 
         abstract member Navigate : unit -> unit
     
@@ -292,7 +311,7 @@ module SwitchContainer =
         override this.Navigate() =
             if (!|"up").Tapped() then this.Previous()
             elif (!|"down").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocused()
+            elif (!|"select").Tapped() then this.SelectFocusedChild()
 
     [<Sealed>]
     type Row<'T when 'T :> Widget>() =
@@ -301,4 +320,4 @@ module SwitchContainer =
         override this.Navigate() =
             if (!|"left").Tapped() then this.Previous()
             elif (!|"right").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocused()
+            elif (!|"select").Tapped() then this.SelectFocusedChild()

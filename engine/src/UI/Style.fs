@@ -55,6 +55,7 @@ module Palette =
     let LIGHTER = { Alpha = 255; Brightness = 1.0f; White = 0.7f }
 
     let HOVER = { LIGHT with Alpha = 127 }
+    let SELECTED = { LIGHTER with Alpha = 127 }
 
     let transition (f: Animation.Fade) (a: PaletteColor) (b: PaletteColor) =
         fun () -> 

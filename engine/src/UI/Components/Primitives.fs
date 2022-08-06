@@ -10,8 +10,7 @@ module Alignment =
     let CENTER = 0.5f
     let RIGHT = 1.0f
 
-[<Sealed>]
-type Text(textFunc) =
+type [<Sealed>] Text(textFunc) =
     inherit StaticWidget(NodeType.None)
 
     new(text: string) = Text(K text)
@@ -24,8 +23,7 @@ type Text(textFunc) =
     override this.Init(parent) =
         base.Init parent
 
-[<Sealed>]
-type Clickable(onLeftClick) =
+type [<Sealed>] Clickable(onLeftClick) =
     inherit StaticWidget(NodeType.None)
 
     let mutable hover = false
@@ -50,8 +48,7 @@ type Clickable(onLeftClick) =
     static member Focus(w: Widget) =
         Clickable(w.Select, OnHover = fun b -> if b && not w.Focused then w.Focus())
     
-[<Sealed>]
-type HotkeyAction(hotkey: Hotkey, action) =
+type [<Sealed>] HotkeyAction(hotkey: Hotkey, action) =
     inherit StaticWidget(NodeType.None)
 
     override this.Update(elapsedTime, moved) =
@@ -60,8 +57,7 @@ type HotkeyAction(hotkey: Hotkey, action) =
 
     override this.Draw() = ()
 
-[<Sealed>]
-type Image(sprite: Sprite) =
+type [<Sealed>] Image(sprite: Sprite) =
     inherit StaticWidget(NodeType.None)
     
     member val Sprite = sprite with get, set

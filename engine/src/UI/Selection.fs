@@ -36,6 +36,8 @@ module Selection =
     let mutable private selected : bool = false
     let mutable private clampTree : ISelection list = []
 
+    let get_focused_element() = List.tryHead focusTree
+
     // Test if a proposed tree is rooted under the required parent
     let private check_clamp (tree: ISelection list) =
         if clampTree.IsEmpty then true

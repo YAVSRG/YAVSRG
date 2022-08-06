@@ -17,6 +17,8 @@ module Hotkeys =
 
     let inline get (id: string) = hotkeys.[id]
 
+    let inline set (id: string) (value: Bind) = hotkeys.[id] <- value
+
     let reset (id: string) =
         hotkeys.[id] <- defaults.[id]
 
