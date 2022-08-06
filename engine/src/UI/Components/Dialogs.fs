@@ -32,6 +32,7 @@ module Dialog =
                 | None -> ()
 
         override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
             fade.Update elapsedTime
             match current with
             | Some d ->

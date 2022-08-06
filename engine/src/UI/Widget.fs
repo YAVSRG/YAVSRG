@@ -197,3 +197,8 @@ type Overlay(nodeType: NodeType) =
         base.Init parent
         this.Bounds <- Viewport.bounds
         this.VisibleBounds <- Viewport.bounds
+
+    override this.Update(elapsedTime, moved) =
+        if moved then
+            this.Bounds <- Viewport.bounds
+            this.VisibleBounds <- Viewport.bounds
