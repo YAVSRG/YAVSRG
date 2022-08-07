@@ -38,6 +38,7 @@ module FlowContainer =
                 let mutable index = (i + children.Count - 1) % children.Count
                 while index <> i && not children.[index].Visible do
                     index <- (index + children.Count - 1) % children.Count
+                last_selected <- index
                 children.[index].Widget.Focus()
             | None -> ()
 
@@ -47,6 +48,7 @@ module FlowContainer =
                 let mutable index = (i + 1) % children.Count
                 while index <> i && not children.[index].Visible do
                     index <- (index + 1) % children.Count
+                last_selected <- index
                 children.[index].Widget.Focus()
             | None -> ()
 
@@ -262,6 +264,7 @@ module SwitchContainer =
                 let mutable index = (i + children.Count - 1) % children.Count
                 while index <> i && not children.[index].Focusable do
                     index <- (index + children.Count - 1) % children.Count
+                last_selected <- index
                 children.[index].Focus()
             | None -> ()
 
@@ -271,6 +274,7 @@ module SwitchContainer =
                 let mutable index = (i + 1) % children.Count
                 while index <> i && not children.[index].Focusable do
                     index <- (index + 1) % children.Count
+                last_selected <- index
                 children.[index].Focus()
             | None -> ()
 

@@ -35,6 +35,7 @@ module Hotkeys =
         for k in d.Keys do
             ignore (hotkeys.Remove k)
             hotkeys.Add (k, d.[k])
+        hotkeys
 
     let export(d: Dictionary<string, Bind>) =
         d.Clear()
