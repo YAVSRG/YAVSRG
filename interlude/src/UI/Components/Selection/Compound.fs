@@ -39,13 +39,13 @@ module Grid =
         override this.Draw() = Text.drawFillB(Style.baseFont, (if selected then Icons.selected else Icons.unselected), this.Bounds, Style.text(), Alignment.CENTER)
 
     type ActionButton<'T>(item: 'T, action: Action<'T>, main: IGrid) as this =
-        inherit StaticContainer(NodeType.Button(this.Action))
+        inherit StaticContainer(NodeType.Button(fun () -> this.Action()))
 
         let enabled = action.Enabled item
 
         do
             this 
-            |+ Text(Icons.add, Color = if enabled then Style.text else K (Color.Gray, Color.Black))
+            |+ Text(action.Icon, Color = if enabled then Style.text else K (Color.Gray, Color.Black))
             |* Clickable.Focus this
 
         member private this.Action() = 

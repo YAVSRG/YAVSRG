@@ -235,3 +235,7 @@ options.themes.showthemesfolder.name=Open Themes Folder
 options.themes.showthemesfolder.tooltip=Opens the directory where themes are stored.
 options.themes.theme.name=Theme
 options.themes.theme.tooltip=Select the current theme here.
+options.gameplay.pacemaker.tooltip=Edit pacemaker settings here (under construction).
+options.gameplay.pacemaker.accuracy.tooltip=
+options.gameplay.pacemaker.type.tooltip=
+collections.confirmdelete=Really delete collection '%0'?

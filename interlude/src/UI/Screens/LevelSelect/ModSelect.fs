@@ -35,9 +35,8 @@ type private ModSelectPage() as this =
         let container = FlowContainer.Vertical<ModCard>(80.0f, Spacing = 5.0f, Position = Position.Margin(100.0f, 200.0f))
         container.Add(ModCard "auto")
         for id in modList.Keys do container.Add(ModCard id)
-        this.Content(
-            container
-        )
+        this.Content container
+
     override this.Title = N"mods"
     override this.OnClose() = ()
     
