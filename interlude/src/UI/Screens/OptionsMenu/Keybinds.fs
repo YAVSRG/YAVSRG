@@ -74,7 +74,7 @@ module Keybinds =
             |* Clickable((fun () -> if not this.Selected then this.Select()), 
                 OnHover = fun b -> if b then this.Focus())
 
-        let set = fun v -> Hotkeys.set hotkey v; options.Hotkeys.[hotkey] <- v
+        let set = fun v -> Hotkeys.set hotkey v
     
         override this.Draw() =
             if this.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)

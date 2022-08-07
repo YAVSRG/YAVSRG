@@ -196,7 +196,7 @@ type PrettySetting(name, widget: Widget) as this =
             K (N name + ":"),
             Color = (fun () -> ((if this.Selected then Style.color(255, 1.0f, 0.2f) else Color.White), Color.Black)),
             Align = Alignment.LEFT,
-            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT))
+            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT).Margin(Style.padding))
         |* TooltipRegion2(T name)
 
     member this.Child
@@ -204,7 +204,7 @@ type PrettySetting(name, widget: Widget) as this =
         and set(w: Widget) =
             let old_widget = widget
             widget <- w
-            w.Position <- Position.TrimLeft PRETTYTEXTWIDTH
+            w.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.padding)
             if this.Initialised then 
                 w.Init this
                 if old_widget.Focused then w.Focus()
@@ -218,7 +218,7 @@ type PrettySetting(name, widget: Widget) as this =
 
     override this.Init(parent) =
         base.Init parent
-        widget.Position <- Position.TrimLeft PRETTYTEXTWIDTH
+        widget.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.padding)
         widget.Init this
 
     override this.Draw() =
@@ -244,7 +244,8 @@ type PrettyButton(name, action) as this =
                         ( (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black )
                     else (Color.Gray, Color.Black)
             ),
-            Align = Alignment.LEFT )
+            Align = Alignment.LEFT,
+            Position = Position.Margin(Style.padding))
         |+ Percyqaz.Flux.UI.Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
         |* TooltipRegion2(T name)
 

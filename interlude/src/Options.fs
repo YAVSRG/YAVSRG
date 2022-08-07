@@ -241,7 +241,7 @@ module Options =
             Hotkeys.register "skip" (mk Keys.Space)
             Hotkeys.register "retry" (ctrl Keys.R)
 
-            Hotkeys.import d
+            options <- { options with Hotkeys = Hotkeys.import d }
 
     let private configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
@@ -253,7 +253,6 @@ module Options =
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
 
     let save() =
-        Hotkeys.export options.Hotkeys
         try
             JSON.ToFile(configPath, true) config
             JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options

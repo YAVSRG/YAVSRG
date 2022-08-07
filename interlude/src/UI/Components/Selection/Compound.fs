@@ -127,6 +127,7 @@ module Grid =
             if this.Focused && refresh_on_next_update then
                  refresh_on_next_update <- false
                  this.RefreshInternal()
+                 this.Focus()
 
         member private this._container() = container
             
