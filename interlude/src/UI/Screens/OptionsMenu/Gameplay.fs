@@ -5,52 +5,48 @@ open Percyqaz.Flux.UI
 open Prelude.Scoring
 open Interlude.Options
 open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Controls
 open Interlude.UI.Components.Selection.Compound
 open Interlude.UI.Components.Selection.Menu
 
 module Gameplay = 
 
-    //type PacemakerPage(m) as this =
-    //    inherit Page(m)
+    type PacemakerPage() as this =
+        inherit Page()
 
-    //    let utype =
-    //        match options.Pacemaker.Value with
-    //        | Accuracy _ -> 0
-    //        | Lamp _ -> 1
-    //        |> Setting.simple
-    //    let accuracy =
-    //        match options.Pacemaker.Value with
-    //        | Accuracy a -> a
-    //        | Lamp _ -> 0.95
-    //        |> Setting.simple
-    //        |> Setting.bound 0.0 1.0
-    //        |> Setting.round 3
-    //    let lamp =
-    //        match options.Pacemaker.Value with
-    //        | Accuracy _ -> 0
-    //        | Lamp l -> l
-    //        |> Setting.simple
+        let utype =
+            match options.Pacemaker.Value with
+            | Accuracy _ -> 0
+            | Lamp _ -> 1
+            |> Setting.simple
+        let accuracy =
+            match options.Pacemaker.Value with
+            | Accuracy a -> a
+            | Lamp _ -> 0.95
+            |> Setting.simple
+            |> Setting.bound 0.0 1.0
+            |> Setting.round 3
+        let lamp =
+            match options.Pacemaker.Value with
+            | Accuracy _ -> 0
+            | Lamp l -> l
+            |> Setting.simple
 
-    //    do 
-    //        this |*
-    //            page_content m [
-    //                PrettySetting("gameplay.pacemaker.type",
-    //                    refreshChoice
-    //                        [|"ACCURACY"; "LAMP"|]
-    //                        [|
-    //                            [| PrettySetting("gameplay.pacemaker.accuracy", Slider(accuracy, 0.01f)).Position(300.0f) |]
-    //                            [| PrettySetting("gameplay.pacemaker.lamp", Selector.FromEnum lamp).Position(300.0f) |] // broken
-    //                        |] utype
-    //                ).Pos(200.0f)
-    //            ]
+        do 
+            this.Content(
+                CaseSelector("gameplay.pacemaker.type", 
+                    [|"ACCURACY"; "LAMP"|],
+                    [|
+                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider(accuracy, 0.01f)).Pos(300.0f) |]
+                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider(accuracy, 0.01f)).Pos(350.0f) |] // todo: this is broken
+                    |], utype)
+                )
 
-    //    override this.Title = N"gameplay.pacemaker"
-    //    override this.OnClose() = 
-    //        match utype.Value with
-    //        | 0 -> options.Pacemaker.Value <- Accuracy accuracy.Value
-    //        | 1 -> options.Pacemaker.Value <- Lamp lamp.Value
-    //        | _ -> failwith "impossible"
+        override this.Title = N"gameplay.pacemaker"
+        override this.OnClose() = 
+            match utype.Value with
+            | 0 -> options.Pacemaker.Value <- Accuracy accuracy.Value
+            | 1 -> options.Pacemaker.Value <- Lamp lamp.Value
+            | _ -> failwith "impossible"
 
     type RulesetsPage() as this =
         inherit Page()
@@ -101,7 +97,7 @@ module Gameplay =
                 |+ PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(360.0f)
                 |+ PrettySetting("gameplay.backgrounddim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
                 |+ PrettyButton("gameplay.screencover", fun() -> Menu.ShowPage ScreencoverPage).Pos(520.0f)
-                //|+ PrettyButton("Pacemaker", fun () -> add("Pacemaker", pacemaker())).Pos(670.0f)
+                |+ PrettyButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage).Pos(670.0f)
                 |+ PrettyButton("gameplay.rulesets", fun () -> Menu.ShowPage RulesetsPage).Pos(750.0f)
             )
         override this.Title = N"gameplay"

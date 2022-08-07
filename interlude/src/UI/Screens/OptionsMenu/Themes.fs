@@ -27,7 +27,7 @@ module Themes =
     
         do 
             this
-            |* Percyqaz.Flux.UI.Clickable((fun () -> (if not this.Selected then this.Select()); fd ()), OnHover = fun b -> if b && not this.Focused then this.Focus())
+            |* Clickable((fun () -> (if not this.Selected then this.Select()); fd ()), OnHover = fun b -> if b && not this.Focused then this.Focus())
     
         override this.Draw() =
             base.Draw()
@@ -199,16 +199,8 @@ module Themes =
             match ns.Source with
             | Zip (_, Some file) ->
                 Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractzip", F Noteskins.extractCurrent refreshNoteskins) )
-                //ConfirmDialog(
-                //    sprintf "'%s' cannot be edited because it is zipped. Extract and edit?" ns.Config.Name,
-                //    fun () -> Noteskins.extractCurrent(); refreshNoteskins()
-                //).Show()
             | Zip (_, None) ->
                 Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractdefault", F Noteskins.extractCurrent refreshNoteskins) )
-                //ConfirmDialog(
-                //    sprintf "'%s' is an embedded default skin. Extract a copy and edit?" ns.Config.Name,
-                //    fun () -> Noteskins.extractCurrent(); refreshNoteskins()
-                //).Show()
             | Folder _ -> Menu.ShowPage( EditNoteskinPage refreshNoteskins )
 
         let tryEditTheme() =

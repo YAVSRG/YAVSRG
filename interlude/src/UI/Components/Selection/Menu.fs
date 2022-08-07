@@ -156,21 +156,6 @@ module Helpers =
     /// E for Editing -- Shorthand for getting localised title of page when editing object named `name`
     let E (name: string) = Localisation.localiseWith [name] "misc.edit"
 
-    //let refreshChoice (options: string array) (widgets: Widget1 array array) (setting: Setting<int>) =
-    //    let rec newSetting =
-    //        {
-    //            Set =
-    //                fun x ->
-    //                    for w in widgets.[setting.Value] do if w.Parent.IsSome then selector.SParent.Value.SParent.Value.Remove w
-    //                    for w in widgets.[x] do selector.SParent.Value.SParent.Value.Add w
-    //                    setting.Value <- x
-    //            Get = setting.Get
-    //            Config = setting.Config
-    //        }
-    //    and selector : Percyqaz.Flux.UI.Selector<int> = Percyqaz.Flux.UI.Selector(Array.indexed options, newSetting)
-    //    selector.Synchronized(fun () -> newSetting.Value <- newSetting.Value)
-    //    selector
-
     let PRETTYTEXTWIDTH = 500.0f
     let PRETTYHEIGHT = 80.0f
     let PRETTYWIDTH = 1200.0f

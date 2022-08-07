@@ -1,10 +1,13 @@
 ﻿namespace Interlude.UI.Components.Selection.Compound
 
+open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Components.Selection.Menu
 
 module Grid =
     
@@ -137,3 +140,69 @@ module Grid =
 
     let create (source: unit -> 'T seq) (config: Config<'T>) = View<'T>(source, config)
 
+type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
+    inherit StaticWidget(NodeType.Switch(fun _ -> this._selector()))
+    
+    let selector = PrettySetting(name, Selector<int>(Array.indexed cases, setting)).Pos(200.0f)
+
+    member this._selector() = selector
+
+     member private this.WhoIsFocused : int option =
+        if selector.Focused then Some -1
+        else Seq.tryFindIndex (fun (c: Widget) -> c.Focused) controls.[setting.Value]
+
+    member this.Previous() =
+        match this.WhoIsFocused with
+        | Some n ->
+            let current_controls = controls.[setting.Value]
+            if n = -1 then
+                current_controls.[current_controls.Length - 1].Focus()
+            elif n = 0 then selector.Focus()
+            else current_controls.[n - 1].Focus()
+        | None -> ()
+
+    member this.Next() =
+        match this.WhoIsFocused with
+        | Some n ->
+            let current_controls = controls.[setting.Value]
+            if n = -1 then
+                current_controls.[0].Focus()
+            elif n = current_controls.Length - 1 then selector.Focus()
+            else current_controls.[n + 1].Focus()
+        | None -> ()
+
+    member this.SelectFocusedChild() =
+        match this.WhoIsFocused with
+        | Some -1 -> selector.Select()
+        | Some n -> controls.[setting.Value].[n].Select()
+        | None -> ()
+
+    override this.Draw() =
+        let current_controls = controls.[setting.Value]
+        selector.Draw()
+        for c in current_controls do
+            c.Draw()
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        if moved then
+            selector.Update(elapsedTime, true)
+            for case in controls do
+                for control in case do
+                    control.Update(elapsedTime, true)
+        else
+            selector.Update(elapsedTime, false)
+            for control in controls.[setting.Value] do
+                control.Update(elapsedTime, false)
+
+        if this.Focused then
+            if (!|"up").Tapped() then this.Previous()
+            elif (!|"down").Tapped() then this.Next()
+            elif (!|"select").Tapped() then this.SelectFocusedChild()
+
+    override this.Init(parent: Widget) =
+        base.Init parent
+        selector.Init this
+        for case in controls do
+            for control in case do
+                 control.Init this
