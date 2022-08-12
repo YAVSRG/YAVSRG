@@ -67,7 +67,7 @@ type Screen() as this =
         scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
-        Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
+        Background.dim (float32 options.BackgroundDim.Value)
         Screen.hideToolbar <- true
         Song.changeRate Gameplay.rate.Value
         Song.changeGlobalOffset (toTime options.AudioOffset.Value)
@@ -76,7 +76,7 @@ type Screen() as this =
         Input.finish_frame_events()
 
     override this.OnExit next =
-        Screen.backgroundDim.Target <- 0.7f
+        Background.dim 0.7f
         if next <> Screen.Type.Score then Screen.hideToolbar <- false
 
     override this.Update(elapsedTime, bounds) =
@@ -180,7 +180,7 @@ type ReplayScreen(mode: ReplayMode) as this =
         scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
-        Screen.backgroundDim.Target <- float32 options.BackgroundDim.Value
+        Background.dim (float32 options.BackgroundDim.Value)
         Screen.hideToolbar <- true
         Gameplay.rate.Value <- rate
         Song.changeRate rate
@@ -190,7 +190,7 @@ type ReplayScreen(mode: ReplayMode) as this =
         Input.finish_frame_events()
 
     override this.OnExit next =
-        Screen.backgroundDim.Target <- 0.7f
+        Background.dim 0.7f
         Screen.hideToolbar <- false
 
     override this.Update(elapsedTime, bounds) =

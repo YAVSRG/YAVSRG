@@ -63,6 +63,7 @@
     <Compile Include="UI\Components\Selection\Menu.fs" />
     <Compile Include="UI\Components\Selection\Compound.fs" />
     <Compile Include="UI\Components\Logo.fs" />
+    <Compile Include="UI\Background.fs" />
     <Compile Include="UI\Screen.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Components\MarkdownReader.fs" />

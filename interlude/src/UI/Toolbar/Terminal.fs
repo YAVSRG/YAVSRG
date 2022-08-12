@@ -96,7 +96,7 @@ module Terminal =
 
     let private show() =
         shown <- true
-        let rec addInput() = Input.setTextInput (currentLine, fun () -> if shown then Screen.globalAnimation.Add(Animation.Action addInput))
+        let rec addInput() = Input.setTextInput (currentLine, fun () -> if shown then sync addInput)
         addInput()
 
     let dropfile(path: string) =

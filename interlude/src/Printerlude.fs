@@ -11,8 +11,6 @@ open Interlude.UI.Toolbar
 
 module Printerlude =
 
-    let sync (f: unit -> unit) = UI.Screen.globalAnimation.Add(Animation.Action f)
-
     let mutable private ctx : Context = Unchecked.defaultof<_>
 
     module Tables = 

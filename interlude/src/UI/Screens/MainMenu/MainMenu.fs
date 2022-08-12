@@ -67,7 +67,7 @@ type Screen() as this =
         if prev = Screen.Type.SplashScreen && firstLaunch then MarkdownReader.help()
         splashText <- newSplash()
         Logo.moveMenu()
-        Screen.backgroundDim.Target <- 0.0f
+        Background.dim 0.0f
         Screen.hideToolbar <- false
         Song.onFinish <- SongFinishAction.Loop
         splashAnim.Target <- 1.0f
@@ -76,7 +76,7 @@ type Screen() as this =
     override this.OnExit next =
         Logo.moveOffscreen()
         splashAnim.Target <- 0.0f
-        Screen.backgroundDim.Target <- 0.7f
+        Background.dim 0.7f
 
     override this.Draw() =
         let c = this.Bounds.CenterX

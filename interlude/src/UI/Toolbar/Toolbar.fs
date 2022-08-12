@@ -16,7 +16,6 @@ type Toolbar() as this =
     let HEIGHT = 70.0f
 
     let barSlider = Animation.Fade 1.0f
-    let notifSlider = Animation.Fade 0.0f
 
     let shown() = not Screen.hideToolbar
 
@@ -25,7 +24,6 @@ type Toolbar() as this =
     do
         this
         |-* barSlider
-        |-* notifSlider
         |-+ TextBox(K version, K (Color.White, Color.Black), 1.0f)
             .Position (Position.Box (1.0f, 1.0f, -305.0f, 0.0f, 300.0f, HEIGHT * 0.5f))
         |-+ TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f)

@@ -246,7 +246,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         do
             let panel = Rect.Create(this.Bounds.Left + 20.0f, this.Bounds.Top + 190.0f, this.Bounds.Left + 650.0f, this.Bounds.Bottom - 290.0f)
             Draw.rect (panel.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White))
-            Screen.Background.draw (panel, (Color.FromArgb(80, 80, 80)), 2.0f)
+            Background.draw (panel, (Color.FromArgb(80, 80, 80)), 2.0f)
 
             let title = panel.SliceTop(100.0f).Shrink(20.0f)
             Draw.rect title (Color.FromArgb(127, Color.Black))
@@ -296,7 +296,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 )
                 (Quad.colorOf (scoreData.Ruleset.GradeColor gradeAchieved.Grade))
                 Sprite.DefaultQuad
-            Screen.Background.drawq ( 
+            Background.drawq ( 
                 ( Quad.createv
                     (this.Bounds.Right - halfh + xadjust, this.Bounds.Top + padding2)
                     (this.Bounds.Right - padding2 + xadjust, halfh)
@@ -323,7 +323,7 @@ type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
         // graph stuff
         Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White
-        Screen.Background.draw (graph.Bounds, Color.FromArgb(127, 127, 127), 3.0f)
+        Background.draw (graph.Bounds, Color.FromArgb(127, 127, 127), 3.0f)
 
         base.Draw()
 

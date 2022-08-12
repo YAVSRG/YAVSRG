@@ -59,7 +59,7 @@ module Gameplay =
             current <- Some c
             context <- ctx
             saveData <- Some (Scores.getOrCreateScoreData c)
-            Screen.Background.load c.BackgroundPath
+            Background.load c.BackgroundPath
             if Song.change (c.AudioPath, saveData.Value.Offset - c.FirstNote, _rate.Value) then
                 Song.playFrom c.Header.PreviewTime
             options.CurrentChart.Value <- cache.FilePath
@@ -228,4 +228,4 @@ module Gameplay =
             Chart.change(c, LevelSelectContext.None, ch)
         with err ->
             Logging.Debug("Tried to auto select a chart but none exist", err)
-            Screen.Background.load ""
+            Background.load ""
