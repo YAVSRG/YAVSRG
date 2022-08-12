@@ -40,11 +40,11 @@ type Screen() as this =
 
     let playFunc() =
         Logo.moveOffscreen()
-        Screen.change Screen.Type.LevelSelect Screen.TransitionFlag.UnderLogo
+        Screen.change Screen.Type.LevelSelect Screen.TransitionFlags.UnderLogo
 
     let play = MenuButton (playFunc, L"menu.play")
     let options = MenuButton (OptionsMenuRoot.show, L"menu.options")
-    let quit = MenuButton ((fun () -> Screen.back Screen.TransitionFlag.UnderLogo), L"menu.quit")
+    let quit = MenuButton ((fun () -> Screen.back Screen.TransitionFlags.UnderLogo), L"menu.quit")
 
     let newSplash =
         randomSplash "MenuSplashes.txt"
@@ -64,7 +64,7 @@ type Screen() as this =
         
     override this.OnEnter prev =
         if AutoUpdate.updateAvailable then Notification.add (L"notification.update.available", NotificationType.System)
-        if prev = Screen.Type.SplashScreen && firstLaunch then MarkdownReader.help()
+        if prev = Screen.Type.SplashScreen && firstLaunch then QuickStartGuide.help()
         splashText <- newSplash()
         Logo.moveMenu()
         Background.dim 0.0f

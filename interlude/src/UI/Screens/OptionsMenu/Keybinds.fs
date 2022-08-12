@@ -91,7 +91,7 @@ module Keybinds =
                 | ValueSome b ->
                     match b with
                     | Key (k, (ctrl, _, shift)) ->
-                        if k = Keys.Escape then set Dummy
+                        if k = Keys.Escape then set Bind.Dummy
                         else set (Key (k, (ctrl, false, shift)))
                         this.Focus()
                     | _ -> ()

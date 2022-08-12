@@ -96,10 +96,10 @@ type Screen() as this =
             Song.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
-            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default)
+            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlags.Default)
 
         if (!|"retry").Pressed() then
-            Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlag.Default
+            Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlags.Default
         
         if scoring.Finished && not (liveplay :> IReplayProvider).Finished then
             liveplay.Finish()
@@ -118,7 +118,7 @@ type Screen() as this =
                     :> Screen.T
                 )
                 Screen.Type.Score
-                Screen.TransitionFlag.Default
+                Screen.TransitionFlags.Default
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
@@ -203,4 +203,4 @@ type ReplayScreen(mode: ReplayMode) as this =
         if (!|"options").Pressed() then
             QuickOptions.show(scoring, ignore)
         
-        if keypressData.Finished then Screen.back Screen.TransitionFlag.Default
+        if keypressData.Finished then Screen.back Screen.TransitionFlags.Default

@@ -114,7 +114,7 @@ module Tree =
             Screen.changeNew
                 ( fun () -> if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T else Screen() )
                 ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
-                Screen.TransitionFlag.Default
+                Screen.TransitionFlags.Default
         | None -> Logging.Warn "There is no chart selected"
 
     [<AbstractClass>]

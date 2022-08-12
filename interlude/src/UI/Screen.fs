@@ -17,10 +17,9 @@ module Screen =
 
     let private TRANSITIONTIME = 500.0
 
-    type TransitionFlag =
+    type TransitionFlags =
         | Default = 0
         | UnderLogo = 1
-        //more transition animations go here
     
     type Type =
         | SplashScreen = 0
@@ -54,9 +53,9 @@ module Screen =
     let mutable hideToolbar = false
     let mutable currentType = Type.SplashScreen
     
-    let mutable transitionFlags = TransitionFlag.Default
+    let mutable transitionFlags = TransitionFlags.Default
 
-    let changeNew (thunk: unit -> T) (screenType: Type) (flags: TransitionFlag) =
+    let changeNew (thunk: unit -> T) (screenType: Type) (flags: TransitionFlags) =
         if screenTransition.Complete && (screenType <> currentType || screenType = Type.Play) then
             transitionFlags <- flags
             globalAnimation.Add screenTransition
@@ -77,9 +76,9 @@ module Screen =
             screenTransition.Add transitionOut
             screenTransition.Add (Animation.Action(fun () -> transitionIn.Reset(); transitionOut.Reset()))
 
-    let change (screenType: Type) (flags: TransitionFlag) = changeNew (K screens.[int screenType]) screenType flags
+    let change (screenType: Type) (flags: TransitionFlags) = changeNew (K screens.[int screenType]) screenType flags
 
-    let back (flags: TransitionFlag) =
+    let back (flags: TransitionFlags) =
         match currentType with
         | Type.SplashScreen -> exit <- true
         | Type.MainMenu -> change Type.SplashScreen flags
@@ -90,7 +89,7 @@ module Screen =
         | Type.Score -> change Type.LevelSelect flags
         | _ -> Logging.Critical (sprintf "No back-behaviour defined for %A" currentType)
 
-    module Transitions =
+    module private Transitions =
     
         let private wedge (centre: Vector2) (r1: float32) (r2: float32) (a1: float) (a2: float) (col: Color) =
             let segments = int ((a2 - a1) / 0.10)
@@ -155,9 +154,8 @@ module Screen =
             Background.draw (bounds, Style.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
             Stencil.finish()
     
-        let drawTransition flags inbound amount bounds =
+        let draw flags inbound amount bounds =
             diamondWipe inbound amount bounds
-            // fancyTransition inbound amount bounds
 
     type Container(toolbar: Widget1) =
         inherit Overlay(NodeType.None)
@@ -189,8 +187,8 @@ module Screen =
             if not screenTransition.Complete then
                 let inbound = transitionIn.Elapsed < TRANSITIONTIME
                 let amount = Math.Clamp((if inbound then transitionIn.Elapsed / TRANSITIONTIME else 1.0 - (transitionOut.Elapsed / TRANSITIONTIME)), 0.0, 1.0) |> float32
-                Transitions.drawTransition transitionFlags inbound amount this.Bounds
-                if (transitionFlags &&& TransitionFlag.UnderLogo = TransitionFlag.UnderLogo) then logo.Draw()
+                Transitions.draw transitionFlags inbound amount this.Bounds
+                if (transitionFlags &&& TransitionFlags.UnderLogo = TransitionFlags.UnderLogo) then logo.Draw()
             Dialog.draw() // old
             Dialog.display.Draw()
             if currentType <> Type.Play || Dialog.any() then 

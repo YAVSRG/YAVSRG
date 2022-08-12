@@ -15,7 +15,7 @@ type Toolbar() as this =
 
     let HEIGHT = 70.0f
 
-    let barSlider = Animation.Fade 1.0f
+    let height = Animation.Fade 1.0f
 
     let shown() = not Screen.hideToolbar
 
@@ -23,13 +23,13 @@ type Toolbar() as this =
     
     do
         this
-        |-* barSlider
+        |-* height
         |-+ TextBox(K version, K (Color.White, Color.Black), 1.0f)
             .Position (Position.Box (1.0f, 1.0f, -305.0f, 0.0f, 300.0f, HEIGHT * 0.5f))
         |-+ TextBox((fun () -> System.DateTime.Now.ToString()), K (Color.White, Color.Black), 1.0f)
             .Position( Position.Box (1.0f, 1.0f, -305.0f, HEIGHT * 0.5f, 300.0f, HEIGHT * 0.5f) )
         |-+ Button(
-                (fun () -> Screen.back Screen.TransitionFlag.UnderLogo),
+                (fun () -> Screen.back Screen.TransitionFlags.UnderLogo),
                 sprintf "%s %s  " Icons.back (L"menu.back"),
                 "exit" )
             .Position( Position.Box (0.0f, 1.0f, 200.0f, HEIGHT) )
@@ -39,12 +39,12 @@ type Toolbar() as this =
                 "options" )
             .Position( Position.Box(0.0f, 0.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT) )
         |-+ Button(
-                ( fun () -> if shown() then Screen.change Screen.Type.Import Screen.TransitionFlag.Default ),
+                ( fun () -> if shown() then Screen.change Screen.Type.Import Screen.TransitionFlags.Default ),
                 L"menu.import",
                 "import" )
             .Position( Position.Box(0.0f, 0.0f, 200.0f, -HEIGHT, 200.0f, HEIGHT) )
         |-+ Button(
-                ( fun () -> if shown() then MarkdownReader.help() ),
+                ( fun () -> if shown() then QuickStartGuide.help() ),
                 L"menu.help",
                 "help" )
             .Position( Position.Box(0.0f, 0.0f, 400.0f, -HEIGHT, 200.0f, HEIGHT) )
@@ -61,10 +61,10 @@ type Toolbar() as this =
         let { Rect.Left = l; Top = t; Right = r; Bottom = b } = this.Bounds
         Draw.rect (Rect.Create(l, t - HEIGHT, r, t)) (Style.main 100 ())
         Draw.rect (Rect.Create(l, b, r, b + HEIGHT)) (Style.main 100 ())
-        if barSlider.Value > 0.01f then
+        if height.Value > 0.01f then
             let s = this.Bounds.Width / 48.0f
             for i in 0 .. 47 do
-                let level = System.Math.Min((Devices.waveForm.[i] + 0.01f) * barSlider.Value * 0.4f, HEIGHT)
+                let level = System.Math.Min((Devices.waveForm.[i] + 0.01f) * height.Value * 0.4f, HEIGHT)
                 Draw.rect (Rect.Create(l + float32 i * s + 2.0f, t - HEIGHT, l + (float32 i + 1.0f) * s - 2.0f, t - HEIGHT + level)) (Style.color(int level, 1.0f, 0.5f))
                 Draw.rect (Rect.Create(r - (float32 i + 1.0f) * s + 2.0f, b + HEIGHT - level, r - float32 i * s - 2.0f, b + HEIGHT)) (Style.color(int level, 1.0f, 0.5f))
         base.Draw()
@@ -73,6 +73,6 @@ type Toolbar() as this =
     override this.Update(elapsedTime, bounds) =
         if shown() && (!|"toolbar").Tapped() then
             userCollapse <- not userCollapse
-            barSlider.Target <- if userCollapse then 0.0f else 1.0f
+            height.Target <- if userCollapse then 0.0f else 1.0f
         Terminal.update()
-        base.Update(elapsedTime, bounds.Expand (0.0f, -HEIGHT * if Screen.hideToolbar then 0.0f else barSlider.Value))
+        base.Update(elapsedTime, bounds.Expand (0.0f, -HEIGHT * if Screen.hideToolbar then 0.0f else height.Value))
