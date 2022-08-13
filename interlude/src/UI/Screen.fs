@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI
 
 open System
-open SixLabors.ImageSharp
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
@@ -39,8 +38,16 @@ module Screen =
     let private screenTransition = Animation.Sequence()
     let private transitionIn = Animation.Delay TRANSITIONTIME
     let private transitionOut = Animation.Delay TRANSITIONTIME
+    
+    module Toolbar =
+        let HEIGHT = 70.0f
+        let expandAmount = Animation.Fade 1.0f
+        let mutable hidden = false
 
-    let globalAnimation = Animation.fork [Style.accentColor]
+        let hide() = hidden <- true
+        let show() = hidden <- false
+
+    let globalAnimation = Animation.fork [Style.accentColor; Toolbar.expandAmount]
 
     let logo = Logo.display
     
@@ -50,7 +57,6 @@ module Screen =
         for i = 0 to 3 do screens.[i] <- _screens.[i]
         current <- screens.[0]
     let mutable exit = false
-    let mutable hideToolbar = false
     let mutable currentType = Type.SplashScreen
     
     let mutable transitionFlags = TransitionFlags.Default
@@ -157,11 +163,10 @@ module Screen =
         let draw flags inbound amount bounds =
             diamondWipe inbound amount bounds
 
-    type Container(toolbar: Widget1) =
+    type Container(toolbar: Widget) =
         inherit Overlay(NodeType.None)
     
-        do
-            current.OnEnter Type.SplashScreen
+        do current.OnEnter Type.SplashScreen
     
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
@@ -175,9 +180,10 @@ module Screen =
             Dialog.update (elapsedTime, this.Bounds) // old
 
             globalAnimation.Update elapsedTime
-            toolbar.Update (elapsedTime, this.Bounds)
+            toolbar.Update (elapsedTime, moved)
             logo.Update (elapsedTime, this.Bounds)
-            current.Update (elapsedTime, toolbar.Bounds)
+            let screenBounds = if Toolbar.hidden then this.Bounds else this.Bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
+            current.Update (elapsedTime, screenBounds)
     
         override this.Draw() =
             Background.drawWithDim (this.Bounds, Color.White, 1.0f)
@@ -198,5 +204,6 @@ module Screen =
 
         override this.Init(parent: Widget) =
             base.Init parent
+            toolbar.Init this
             Tooltip.display.Init this
             Dialog.display.Init this

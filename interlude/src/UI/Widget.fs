@@ -192,6 +192,12 @@ module Icons =
     let order_ascending = Feather.trending_down
     let order_descending = Feather.trending_up
 
+    let options = Feather.settings
+    let import = Feather.download
+    let wiki = Feather.book
+    let wiki2 = Feather.book_open
+    let tasks = Feather.sidebar
+
     let system = Feather.airplay
     let themes = Feather.image
     let gameplay = Feather.sliders
