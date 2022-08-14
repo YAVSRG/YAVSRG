@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.OptionsMenu
+﻿namespace Interlude.Features.OptionsMenu
 
 open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common

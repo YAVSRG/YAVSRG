@@ -1,4 +1,4 @@
-﻿namespace Interlude
+﻿namespace Interlude.Features.Printerlude
 
 open System.IO
 open Percyqaz.Shell
@@ -6,13 +6,14 @@ open Percyqaz.Shell.Shell
 open Percyqaz.Common
 open Prelude.Common
 open Prelude.Data.Tables
-open Interlude.UI.Toolbar
+open Interlude
+open Interlude.Features
 
 module Printerlude =
 
     let mutable private ctx : Context = Unchecked.defaultof<_>
 
-    module Tables = 
+    module private Tables = 
         
         let register_commands (ctx: Context) =
             ctx
@@ -38,7 +39,7 @@ module Printerlude =
                     ( Impl.Create(Types.str, Types.str, 
                         fun levelid chartid -> Table.current.Value.AddChart(levelid, chartid, Gameplay.Chart.cacheInfo.Value)) ))
 
-    module Themes =
+    module private Themes =
 
         let register_commands (ctx: Context) =
             ctx
@@ -54,7 +55,7 @@ module Printerlude =
                 .WithCommand("import_noteskin", Command.create "Import a noteskin from an existing source" ["path"; "keymodes"]
                     ( Impl.Create(Types.str, (Types.list Types.int), fun path keymodes -> if not (Content.Noteskins.tryImport path keymodes) then ctx.WriteLine("Nothing found to import")) ))
 
-    module Utils =
+    module private Utils =
 
         open Prelude.ChartFormats
         open System.IO.Compression
@@ -92,9 +93,9 @@ module Printerlude =
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
                 .WithCommand("export_osz", Command.create "Export current file as osz" [] (Impl.Create export_osz))
 
-    let ms = new MemoryStream()
-    let context_output = new StreamReader(ms)
-    let context_writer = new StreamWriter(ms)
+    let private ms = new MemoryStream()
+    let private context_output = new StreamReader(ms)
+    let private context_writer = new StreamWriter(ms)
 
     ctx <-
         { Context.Empty with IO = { In = stdin; Out = context_writer } }
@@ -113,5 +114,4 @@ module Printerlude =
         | ParseFail err -> Terminal.add_message (err.ToString())
         | RunFail err -> Terminal.add_message err.Message
 
-    let init() =
-        Terminal.exec_command <- exec
+    let init() = Terminal.exec_command <- exec

@@ -1,12 +1,11 @@
-﻿namespace Interlude.UI.OptionsMenu
+﻿namespace Interlude.Features.OptionsMenu
 
 open System.Drawing
 open Percyqaz.Flux.UI
-open Interlude
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Features.LevelSelect
 open Interlude.UI.Components.Selection.Menu
+open Interlude.Features.LevelSelect
 
 module OptionsMenuRoot =
 

@@ -1,4 +1,4 @@
-﻿namespace Interlude
+﻿namespace Interlude.Features
 
 open System
 open Percyqaz.Common

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.Score
+﻿namespace Interlude.Features.Score
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -8,12 +8,12 @@ open Prelude.Common
 open Prelude.Scoring
 open Prelude.Scoring.Grading
 open Prelude.Data.Scores
-open Interlude
 open Interlude.Options
 open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Components
+open Interlude.Features
 
 type EventCounts =
     {
@@ -29,7 +29,7 @@ type EventCounts =
         JudgementCount: int
     }
 
-module Helpers =
+module ScoreScreenHelpers =
 
     let mutable watchReplay : float32 * ReplayData -> unit = ignore
 
@@ -109,7 +109,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     let mutable pbs = pbs
     let mutable gradeAchieved = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
     let mutable lampAchieved = Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
-    let mutable eventCounts = Helpers.countEvents scoreData.Scoring.HitEvents
+    let mutable eventCounts = ScoreScreenHelpers.countEvents scoreData.Scoring.HitEvents
     let mutable existingBests = 
         if Gameplay.Chart.saveData.Value.Bests.ContainsKey Gameplay.rulesetId then 
             Some Gameplay.Chart.saveData.Value.Bests.[Gameplay.rulesetId]
@@ -122,7 +122,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         pbs <- BestFlags.Default
         gradeAchieved <- Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
         lampAchieved <- Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
-        eventCounts <- Helpers.countEvents scoreData.Scoring.HitEvents
+        eventCounts <- ScoreScreenHelpers.countEvents scoreData.Scoring.HitEvents
         existingBests <- None
         graph.Refresh()
 
@@ -162,7 +162,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         Button(ignore, "Graph settings")
             .Position { Left = 1.0f %- 420.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 220.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
-        Button((fun () -> Helpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)), "Watch replay")
+        Button((fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)), "Watch replay")
             .Position { Left = 1.0f %- 220.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f }
         |> this.Add
 

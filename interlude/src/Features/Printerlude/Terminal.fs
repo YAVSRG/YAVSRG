@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Toolbar
+﻿namespace Interlude.Features.Printerlude
 
 open System
 open OpenTK.Windowing.GraphicsLibraryFramework
@@ -10,7 +10,6 @@ open Prelude.Common
 open Interlude.Options
 open Interlude.UI
 
-// todo: probably does not belong in toolbar folder
 module Terminal =
 
     let private lockObj = obj()

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.LevelSelect
+﻿namespace Interlude.Features.LevelSelect
 
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -12,7 +12,7 @@ open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Menu
 open Interlude.UI.Components.Selection.Compound
-open Interlude.Gameplay
+open Interlude.Features.Gameplay
 open Interlude.Options
 
 module CollectionManager =

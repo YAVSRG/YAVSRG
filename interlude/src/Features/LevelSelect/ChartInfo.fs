@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.LevelSelect
+﻿namespace Interlude.Features.LevelSelect
 
 open System
 open Percyqaz.Flux.UI
@@ -9,8 +9,8 @@ open Prelude.Gameplay.Difficulty
 open Prelude.ChartFormats.Interlude
 open Interlude.UI
 open Interlude.Utils
-open Interlude.Gameplay
 open Interlude.UI.Components
+open Interlude.Features.Gameplay
 
 type ChartInfo() as this =
     inherit Widget1()

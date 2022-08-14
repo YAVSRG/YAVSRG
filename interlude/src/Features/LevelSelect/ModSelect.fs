@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.LevelSelect
+﻿namespace Interlude.Features.LevelSelect
 
 open System.Drawing
 open Percyqaz.Common
@@ -10,7 +10,7 @@ open Interlude.UI.Components
 open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Menu
 open Interlude.Utils
-open Interlude.Gameplay
+open Interlude.Features.Gameplay
 
 type private ModCard(id) as this =
     inherit Percyqaz.Flux.UI.Frame(

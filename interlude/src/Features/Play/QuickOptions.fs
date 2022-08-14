@@ -1,11 +1,11 @@
-﻿namespace Interlude.UI.Features.Play
+﻿namespace Interlude.Features.Play
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Scoring
-open Interlude
+open Interlude.Features
 open Interlude.Options
 open Interlude.UI.Components.Selection.Menu
 

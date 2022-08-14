@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.Play
+﻿namespace Interlude.Features.Play
 
 open System
 open Percyqaz.Flux.Audio
@@ -14,6 +14,7 @@ open Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
+open Interlude.Features
 
 (*
     Handful of widgets that directly pertain to gameplay

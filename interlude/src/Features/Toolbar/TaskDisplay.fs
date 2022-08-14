@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Toolbar
+﻿namespace Interlude.Features.Toolbar
 
 open System
 open System.Threading.Tasks

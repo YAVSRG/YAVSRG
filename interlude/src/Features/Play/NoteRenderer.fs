@@ -1,6 +1,5 @@
-﻿namespace Interlude.UI.Features.Play
+﻿namespace Interlude.Features.Play
 
-open OpenTK
 open System
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
@@ -12,6 +11,7 @@ open Prelude.Data.Themes
 open Interlude
 open Interlude.Options
 open Interlude.UI
+open Interlude.Features
 
 // TODO LIST
 //  COLUMN INDEPENDENT SV

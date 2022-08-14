@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.LevelSelect
+﻿namespace Interlude.Features.LevelSelect
 
 open OpenTK.Mathematics
 open Percyqaz.Common
@@ -12,7 +12,7 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
 open Interlude.UI
 open Interlude.Utils
-open Interlude.Gameplay
+open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Components.Selection.Controls

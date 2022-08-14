@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.MainMenu
+﻿namespace Interlude.Features.MainMenu
 
 open System
 open Prelude.Common
@@ -12,7 +12,7 @@ open Percyqaz.Flux.UI
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Features.Wiki
-open Interlude.UI.OptionsMenu
+open Interlude.Features.OptionsMenu
 
 type private MenuButton(onClick, label) as this =
     inherit Widget1()

@@ -2,18 +2,24 @@
 
 open Percyqaz.Common
 open Interlude
-open Interlude.UI.Features
-open Interlude.UI.Toolbar
+open Interlude.Features
+open Interlude.Features.MainMenu
+open Interlude.Features.Import
+open Interlude.Features.Score
+open Interlude.Features.Play
+open Interlude.Features.LevelSelect
+open Interlude.Features.Printerlude
+open Interlude.Features.Toolbar
 
 module Startup =
 
     let init() =
-        Screen.init [|MainMenu.LoadingScreen(); MainMenu.MainMenuScreen(); Import.ImportScreen(); LevelSelect.LevelSelectScreen()|]
+        Screen.init [|LoadingScreen(); MainMenuScreen(); ImportScreen(); LevelSelectScreen()|]
         
-        Score.Helpers.watchReplay <- fun (rate, data) -> Screen.changeNew (fun () -> Play.ReplayScreen(Play.ReplayMode.Replay (rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
+        ScoreScreenHelpers.watchReplay <- fun (rate, data) -> Screen.changeNew (fun () -> ReplayScreen(ReplayMode.Replay (rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
         TaskDisplay.init()
         Utils.AutoUpdate.checkForUpdates()
-        Import.Mounts.handleStartupImports()
+        Mounts.handleStartupImports()
         
         Logging.Subscribe
             ( fun (level, main, details) ->

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.LevelSelect
+﻿namespace Interlude.Features.LevelSelect
 
 module LevelSelect =
 

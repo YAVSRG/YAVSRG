@@ -6,6 +6,7 @@ open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
 open Interlude
 open Interlude.UI
+open Interlude.Features.Printerlude
 
 [<EntryPoint>]
 let main argv =

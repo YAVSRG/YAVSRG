@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.OptionsMenu
+﻿namespace Interlude.Features.OptionsMenu
 
 open Prelude.Gameplay.NoteColors
 open Percyqaz.Common
@@ -13,6 +13,7 @@ open Interlude.Utils
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components.Selection.Menu
+open Interlude.Features
 
 module Themes =
 

@@ -1,14 +1,15 @@
-﻿namespace Interlude.UI.Toolbar
+﻿namespace Interlude.Features.Toolbar
 
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Interlude.UI
-open Interlude.Features.Wiki
-open Interlude.UI.OptionsMenu
 open Interlude.Utils
 open Interlude.UI.Screen.Toolbar
+open Interlude.Features.Wiki
+open Interlude.Features.OptionsMenu
+open Interlude.Features.Printerlude
 
 type Toolbar() =
     inherit Widget(NodeType.None)

@@ -99,7 +99,7 @@
     <Compile Include="Features\Toolbar\TaskDisplay.fs" />
     <Compile Include="Features\Toolbar\Jukebox.fs" />
     <Compile Include="Features\Toolbar\Toolbar.fs" />
-    <Compile Include="UI\Startup.fs" />
+    <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

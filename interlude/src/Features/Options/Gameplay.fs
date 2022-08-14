@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.OptionsMenu
+﻿namespace Interlude.Features.OptionsMenu
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI

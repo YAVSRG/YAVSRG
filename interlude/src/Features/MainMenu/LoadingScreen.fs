@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.MainMenu
+﻿namespace Interlude.Features.MainMenu
 
 open System
 open System.Drawing
@@ -7,7 +7,6 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude
 open Interlude.UI
-open Interlude.UI.Components
 
 // Loading screen
 

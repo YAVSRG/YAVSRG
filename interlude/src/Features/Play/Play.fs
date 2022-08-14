@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.Play
+﻿namespace Interlude.Features.Play
 
 open OpenTK
 open Percyqaz.Flux.Audio
@@ -13,7 +13,8 @@ open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Features.Play.GameplayWidgets
+open Interlude.Features
+open Interlude.Features.Play.GameplayWidgets
 
 type PlayScreen() as this =
     inherit Screen.T()
@@ -119,6 +120,8 @@ type PlayScreen() as this =
                 )
                 Screen.Type.Score
                 Transitions.Flags.Default
+
+// todo: move to own file and extract common function
 
 [<RequireQualifiedAccess>]
 type ReplayMode =

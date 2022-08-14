@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Features.LevelSelect
+﻿namespace Interlude.Features.LevelSelect
 
 open System
 open System.Linq
@@ -17,29 +17,29 @@ open Prelude.Data.Charts.Collections
 open Interlude.UI
 open Interlude.Content
 open Interlude.Options
-open Interlude.Gameplay
-open Interlude.UI.Features.Play
 open Interlude.UI.Components.Selection.Controls
+open Interlude.Features.Gameplay
+open Interlude.Features.Play
 
 [<RequireQualifiedAccess>]
 type Navigation =
-| Nothing
-| Backward of string * CachedChart * Collections.LevelSelectContext
-/// Forward false is consumed by the selected chart, and replaced with Forward true
-/// Forward true is consumed by any other chart, and switched to instantly
-/// Combined effect is navigating forward by one chart
-| Forward of bool
-| ForwardGroup of bool
-| BackwardGroup of string
-| StartGroup
-| EndGroup
+    | Nothing
+    | Backward of string * CachedChart * Collections.LevelSelectContext
+    /// Forward false is consumed by the selected chart, and replaced with Forward true
+    /// Forward true is consumed by any other chart, and switched to instantly
+    /// Combined effect is navigating forward by one chart
+    | Forward of bool
+    | ForwardGroup of bool
+    | BackwardGroup of string
+    | StartGroup
+    | EndGroup
 
 [<Struct>]
 [<RequireQualifiedAccess>]
 type ScrollTo =
-| Nothing
-| Chart
-| Pack of string
+    | Nothing
+    | Chart
+    | Pack of string
 
 module Tree = 
     
