@@ -5,7 +5,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Interlude.UI
-open Interlude.UI.Components
+open Interlude.Features.Wiki
 open Interlude.UI.OptionsMenu
 open Interlude.Utils
 open Interlude.UI.Screen.Toolbar
@@ -42,7 +42,7 @@ type Toolbar() =
                 "import")
             |+ IconButton(L"menu.help",
                 Icons.wiki, HEIGHT,
-                ( fun () -> if shown() then QuickStartGuide.help() ),
+                ( fun () -> if shown() then QuickStartGuide.show_help() ),
                 "help",
                 HoverIcon = Icons.wiki2)
             |+ IconButton(L"menu.tasks",

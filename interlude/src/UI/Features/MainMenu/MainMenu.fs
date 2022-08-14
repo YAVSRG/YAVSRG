@@ -11,6 +11,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude.UI
 open Interlude.UI.Components
+open Interlude.Features.Wiki
 open Interlude.UI.OptionsMenu
 
 type private MenuButton(onClick, label) as this =
@@ -64,7 +65,7 @@ type MainMenuScreen() as this =
         
     override this.OnEnter prev =
         if AutoUpdate.updateAvailable then Notification.add (L"notification.update.available", NotificationType.System)
-        if prev = Screen.Type.SplashScreen && firstLaunch then QuickStartGuide.help()
+        if prev = Screen.Type.SplashScreen && firstLaunch then QuickStartGuide.show_help()
         splashText <- newSplash()
         Logo.moveMenu()
         Background.dim 0.0f

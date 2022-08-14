@@ -1,31 +1,21 @@
-﻿namespace Interlude.UI.Components
+﻿namespace Interlude.Features.Wiki
 
 open System.Drawing
 open System.Diagnostics
 open Percyqaz.Common
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Interlude
 open Interlude.UI
 open Interlude.Utils
+open FSharp.Formatting.Markdown
 
-// todo: this is not a component
-// todo: split into a folder of parts (markdown, wiki logic etc(
-// todo: make this read from/integrate with the online wiki
-
-module QuickStartGuide =
-
-    open FSharp.Formatting.Markdown
+module MarkdownUI =
 
     let SIZE = 25.0f
     let WIDTH = 1200.0f
 
-    let doc = 
-        getResourceText "QuickStart.md"
-        |> Markdown.Parse
-
-    type MarkdownUI =
+    type Fragment =
         {
             Body: StaticContainer
             mutable LHeight: float32
@@ -33,8 +23,8 @@ module QuickStartGuide =
             mutable Height: float32 // not including last line
             mutable Width: float32
         }
-    module MarkdownUI =
-        let addTo (parent: MarkdownUI) (child: MarkdownUI) =
+    module Fragment =
+        let addTo (parent: Fragment) (child: Fragment) =
             let childTotalHeight = child.Height + child.LHeight
             parent.LHeight <- max parent.LHeight childTotalHeight
             child.Body.Position <- Position.Box (0.0f, 0.0f, parent.LWidth, parent.Height, child.Width, childTotalHeight)
@@ -43,15 +33,15 @@ module QuickStartGuide =
             parent.Width <- max parent.LWidth parent.Width
             parent
 
-        let newline (w: MarkdownUI) =
+        let newline (w: Fragment) =
             w.Height <- w.Height + w.LHeight
             w.LWidth <- 0.0f
             w.LHeight <- 0.0f
             w
 
-        let addToNL (parent: MarkdownUI) (child: MarkdownUI) = addTo parent child |> newline
+        let addToNL (parent: Fragment) (child: Fragment) = addTo parent child |> newline
 
-        let pad (x, y) (w: MarkdownUI) =
+        let pad (x, y) (w: Fragment) =
             w.LWidth <- w.LWidth + x
             w.Height <- w.Height + y
             w
@@ -73,7 +63,6 @@ module QuickStartGuide =
 
         let empty() = make (Dummy()) (0.0f, 0.0f)
 
-
     type SpanSettings =
         {
             Size: float32
@@ -87,59 +76,59 @@ module QuickStartGuide =
         try Process.Start (ProcessStartInfo (str, UseShellExecute=true)) |> ignore
         with err -> Logging.Debug ("Failed to open link: " + str, err)
 
-    let rec span (settings: SpanSettings) (sp: MarkdownSpan) : MarkdownUI =
+    let rec span (settings: SpanSettings) (sp: MarkdownSpan) : Fragment =
         match sp with
         | Literal (text, _) ->
-            MarkdownUI.text text
+            Fragment.text text
                 ((if settings.Bold then Style.color(255, 1.0f, 0.3f) else Color.White),
                     if settings.Italic then Color.Gray 
                     elif settings.HasLink then Color.Blue
                     else Color.Black)
                 settings.Size
-        | InlineCode (code, _) -> MarkdownUI.text code (Color.Silver, Color.Gray) settings.Size
+        | InlineCode (code, _) -> Fragment.text code (Color.Silver, Color.Gray) settings.Size
         | Strong (body, _) -> spans { settings with Bold = true } body
         | Emphasis (body, _) -> spans { settings with Italic = true } body
-        | AnchorLink (link, _) -> MarkdownUI.sym "anchorLink"
+        | AnchorLink (link, _) -> Fragment.sym "anchorLink"
         | DirectLink (body, link, title, _) ->
             let r = spans { settings with HasLink = true } body
             r.Body.Add (Percyqaz.Flux.UI.Clickable(fun () -> openlink link))
             r
-        | IndirectLink (body, link, title, _) -> MarkdownUI.sym "ilink"
-        | DirectImage (body, link, title, _) -> MarkdownUI.sym "dimg"
-        | IndirectImage (body, link, title, _) -> MarkdownUI.sym "iimg"
-        | HardLineBreak _ -> MarkdownUI.sym "linebreak"
+        | IndirectLink (body, link, title, _) -> Fragment.sym "ilink"
+        | DirectImage (body, link, title, _) -> Fragment.sym "dimg"
+        | IndirectImage (body, link, title, _) -> Fragment.sym "iimg"
+        | HardLineBreak _ -> Fragment.sym "linebreak"
         | EmbedSpans _
         | LatexDisplayMath _
-        | LatexInlineMath _ -> MarkdownUI.empty()
+        | LatexInlineMath _ -> Fragment.empty()
 
-    and spans settings (sps: MarkdownSpans) : MarkdownUI =
-        let block = MarkdownUI.empty()
+    and spans settings (sps: MarkdownSpans) : Fragment =
+        let block = Fragment.empty()
         List.map (span settings) sps
-        |> List.fold MarkdownUI.addTo block
+        |> List.fold Fragment.addTo block
 
-    and addParagraph (body: MarkdownUI) (p: MarkdownParagraph) =
+    and addParagraph (body: Fragment) (p: MarkdownParagraph) =
         match p with
         | Heading (size, body, _) -> 
-            let b = MarkdownUI.empty() |> MarkdownUI.pad (0.0f, 15.0f)
-            MarkdownUI.addTo b (spans { SpanSettings.Default with Size = (SIZE + 5.0f * (4.0f - float32 size)) } body)
-            |> MarkdownUI.pad (0.0f, 15.0f)
+            let b = Fragment.empty() |> Fragment.pad (0.0f, 15.0f)
+            Fragment.addTo b (spans { SpanSettings.Default with Size = (SIZE + 5.0f * (4.0f - float32 size)) } body)
+            |> Fragment.pad (0.0f, 15.0f)
         | Paragraph (body, _) -> spans SpanSettings.Default body
         | Span (body, _) -> spans SpanSettings.Default body
         | ListBlock (kind, items, _) ->
-            let list = MarkdownUI.empty()
+            let list = Fragment.empty()
             let bullet() = 
-                let b = MarkdownUI.empty() |> MarkdownUI.pad(20.0f, 0.0f)
-                MarkdownUI.addTo b (MarkdownUI.text "•" (Color.White, Color.Transparent) SIZE)
-                |> MarkdownUI.pad(10.0f, 0.0f)
+                let b = Fragment.empty() |> Fragment.pad(20.0f, 0.0f)
+                Fragment.addTo b (Fragment.text "•" (Color.White, Color.Transparent) SIZE)
+                |> Fragment.pad(10.0f, 0.0f)
             items
             |> List.map 
                 ( 
                     fun i -> 
                         let block = bullet()
-                        MarkdownUI.addTo block (i |> List.fold addParagraph (MarkdownUI.empty()))
+                        Fragment.addTo block (i |> List.fold addParagraph (Fragment.empty()))
                 )
-            |> List.fold MarkdownUI.addToNL list
-        | HorizontalRule (char, _) -> MarkdownUI.sym "rule"
+            |> List.fold Fragment.addToNL list
+        | HorizontalRule (char, _) -> Fragment.sym "rule"
         | YamlFrontmatter _
         | TableBlock _
         | OutputBlock _
@@ -148,29 +137,9 @@ module QuickStartGuide =
         | QuotedBlock _
         | CodeBlock _
         | EmbedParagraphs _
-        | InlineHtmlBlock _ -> MarkdownUI.empty()
-        |> MarkdownUI.addToNL body
+        | InlineHtmlBlock _ -> Fragment.empty()
+        |> Fragment.addToNL body
 
-    let buildMarkdownUI (doc: MarkdownDocument) =
+    let build (doc: MarkdownDocument) : Fragment =
         doc.Paragraphs
-        |> List.fold addParagraph (MarkdownUI.empty())
-
-    type MarkdownViewDialog(doc) =
-        inherit Percyqaz.Flux.UI.Dialog()
-
-        let markdown = buildMarkdownUI doc
-        let flow = ScrollContainer(markdown.Body, K (markdown.Height + markdown.LHeight), Position = Position.Margin(400.0f, 100.0f))
-
-        override this.Init(parent: Widget) =
-            base.Init parent
-            flow.Init this
-
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            flow.Update(elapsedTime, moved)
-            if Mouse.leftClick() || (!|"exit").Tapped() then
-                this.Close()
-
-        override this.Draw() = flow.Draw()
-
-    let help() = (MarkdownViewDialog doc).Show()
+        |> List.fold addParagraph (Fragment.empty())
