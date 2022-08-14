@@ -56,7 +56,7 @@ module Scoreboard =
                         Screen.changeNew 
                             (fun () -> new Features.Score.ScoreScreen(data, BestFlags.Default) :> Screen.T)
                             Screen.Type.Score
-                            Screen.TransitionFlags.Default
+                            Transitions.Flags.Default
                     ), ignore )
             |-* fade
             |=* Animation.seq [Animation.Delay 150.0 :> Animation; Animation.Action (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f)]

@@ -64,6 +64,7 @@
     <Compile Include="UI\Components\QuickStartGuide.fs" />
     <Compile Include="UI\Screen\Logo.fs" />
     <Compile Include="UI\Screen\Background.fs" />
+    <Compile Include="UI\Screen\Transitions.fs" />
     <Compile Include="UI\Screen\Screen.fs" />
     <Compile Include="Gameplay.fs" />
     <Compile Include="UI\Features\Score\Graph.fs" />

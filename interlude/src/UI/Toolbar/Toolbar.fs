@@ -27,7 +27,7 @@ type Toolbar() =
             Position = Position.Box (1.0f, 1.0f, -305.0f, -HEIGHT * 0.5f, 300.0f, HEIGHT * 0.5f))
         |+ IconButton(L"menu.back",
             Icons.back, HEIGHT,
-            (fun () -> Screen.back Screen.TransitionFlags.UnderLogo),
+            (fun () -> Screen.back Transitions.Flags.UnderLogo),
             "exit",
             Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT - 10.0f))
         |+ (
@@ -38,7 +38,7 @@ type Toolbar() =
                 "options")
             |+ IconButton(L"menu.import",
                 Icons.import, HEIGHT,
-                ( fun () -> if shown() then Screen.change Screen.Type.Import Screen.TransitionFlags.Default ),
+                ( fun () -> if shown() then Screen.change Screen.Type.Import Transitions.Flags.Default ),
                 "import")
             |+ IconButton(L"menu.help",
                 Icons.wiki, HEIGHT,

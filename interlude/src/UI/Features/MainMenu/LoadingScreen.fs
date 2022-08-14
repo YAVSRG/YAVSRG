@@ -27,12 +27,12 @@ type LoadingScreen() as this =
             closing <- true
             let s = Animation.Sequence()
             s.Add (Animation.Delay 1500.0)
-            s.Add (Animation.Action (fun () -> Screen.back Screen.TransitionFlags.Default))
+            s.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
             this.Animation.Add s
         | _ -> 
             let s = Animation.Sequence()
             s.Add (Animation.Delay 1500.0)
-            s.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Screen.TransitionFlags.UnderLogo))
+            s.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
             this.Animation.Add s
 
     override this.OnExit _ = ()

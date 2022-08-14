@@ -40,11 +40,11 @@ type MainMenuScreen() as this =
 
     let playFunc() =
         Logo.moveOffscreen()
-        Screen.change Screen.Type.LevelSelect Screen.TransitionFlags.UnderLogo
+        Screen.change Screen.Type.LevelSelect Transitions.Flags.UnderLogo
 
     let play = MenuButton (playFunc, L"menu.play")
     let options = MenuButton (OptionsMenuRoot.show, L"menu.options")
-    let quit = MenuButton ((fun () -> Screen.back Screen.TransitionFlags.UnderLogo), L"menu.quit")
+    let quit = MenuButton ((fun () -> Screen.back Transitions.Flags.UnderLogo), L"menu.quit")
 
     let newSplash =
         randomSplash "MenuSplashes.txt"

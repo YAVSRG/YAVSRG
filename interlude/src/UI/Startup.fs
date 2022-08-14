@@ -10,7 +10,7 @@ module Startup =
     let init() =
         Screen.init [|MainMenu.LoadingScreen(); MainMenu.MainMenuScreen(); Import.ImportScreen(); LevelSelect.LevelSelectScreen()|]
         
-        Score.Helpers.watchReplay <- fun (rate, data) -> Screen.changeNew (fun () -> Play.ReplayScreen(Play.ReplayMode.Replay (rate, data)) :> Screen.T) Screen.Type.Play Screen.TransitionFlags.Default
+        Score.Helpers.watchReplay <- fun (rate, data) -> Screen.changeNew (fun () -> Play.ReplayScreen(Play.ReplayMode.Replay (rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
         TaskDisplay.init()
         Utils.AutoUpdate.checkForUpdates()
         Import.Mounts.handleStartupImports()
