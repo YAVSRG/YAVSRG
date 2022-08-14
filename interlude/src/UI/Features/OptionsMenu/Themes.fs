@@ -52,8 +52,8 @@ module Themes =
         let createRenderer() =
             match Gameplay.Chart.current with
             | Some chart -> 
-                let nr = Screens.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
-                nr.Add(Screens.Play.GameplayWidgets.ScreenCover())
+                let nr = Features.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
+                nr.Add(Features.Play.GameplayWidgets.ScreenCover())
                 nr :> Widget1
             | None -> new Widget1()
 

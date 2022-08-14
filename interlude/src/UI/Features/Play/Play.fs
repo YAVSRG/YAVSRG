@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.Play
+﻿namespace Interlude.UI.Features.Play
 
 open OpenTK
 open Percyqaz.Flux.Audio
@@ -13,9 +13,9 @@ open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Screens.Play.GameplayWidgets
+open Interlude.UI.Features.Play.GameplayWidgets
 
-type Screen() as this =
+type PlayScreen() as this =
     inherit Screen.T()
     
     let chart = Gameplay.Chart.withMods.Value
@@ -96,10 +96,10 @@ type Screen() as this =
             Song.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
-            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlags.Default)
+            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> PlayScreen() :> Screen.T) Screen.Type.Play Screen.TransitionFlags.Default)
 
         if (!|"retry").Pressed() then
-            Screen.changeNew (fun () -> Screen() :> Screen.T) Screen.Type.Play Screen.TransitionFlags.Default
+            Screen.changeNew (fun () -> PlayScreen() :> Screen.T) Screen.Type.Play Screen.TransitionFlags.Default
         
         if scoring.Finished && not (liveplay :> IReplayProvider).Finished then
             liveplay.Finish()
@@ -114,7 +114,7 @@ type Screen() as this =
                             Difficulty = Gameplay.Chart.rating.Value
                         )
                     (sd, Gameplay.setScore sd)
-                    |> Screens.Score.Screen
+                    |> Features.Score.ScoreScreen
                     :> Screen.T
                 )
                 Screen.Type.Score

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.Score
+﻿namespace Interlude.UI.Features.Score
 
 open System.Drawing
 open Percyqaz.Flux.Graphics

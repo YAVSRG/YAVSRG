@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.Import
+﻿namespace Interlude.UI.Features.Import
 
 open System.IO
 open Percyqaz.Json
@@ -10,7 +10,7 @@ open Prelude.Web
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Screens.LevelSelect
+open Interlude.UI.Features.LevelSelect
 
 [<Json.AutoCodec>]
 type EOPackAttrs =

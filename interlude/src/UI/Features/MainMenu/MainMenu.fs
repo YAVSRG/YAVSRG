@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.MainMenu
+﻿namespace Interlude.UI.Features.MainMenu
 
 open System
 open Prelude.Common
@@ -35,7 +35,7 @@ type private MenuButton(onClick, label) as this =
 
 // Menu screen
 
-type Screen() as this =
+type MainMenuScreen() as this =
     inherit Screen.T()
 
     let playFunc() =

@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.Import
+﻿namespace Interlude.UI.Features.Import
 
 open System.IO
 open System.Net
@@ -12,7 +12,7 @@ open Prelude.Web
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Screens.LevelSelect
+open Interlude.UI.Features.LevelSelect
 
 module FileDropHandling =
     let tryImport(path: string) : bool =
@@ -34,7 +34,7 @@ type private SearchContainer(populate, handleFilter) as this =
         this.Add(flowContainer.Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 70.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %+ 0.0f })
         flowContainer.Add(new SearchContainerLoader(populate))
 
-type Screen() as this =
+type ImportScreen() as this =
     inherit Screen.T()
     do
         (*

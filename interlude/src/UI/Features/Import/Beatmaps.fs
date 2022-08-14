@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.Import
+﻿namespace Interlude.UI.Features.Import
 
 open System
 open System.IO
@@ -13,7 +13,7 @@ open Interlude
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Screens.LevelSelect
+open Interlude.UI.Features.LevelSelect
 
 type BeatmapStatus =
     | PENDING = 0

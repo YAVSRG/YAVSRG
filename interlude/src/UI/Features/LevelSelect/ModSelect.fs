@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.LevelSelect
+﻿namespace Interlude.UI.Features.LevelSelect
 
 open System.Drawing
 open Percyqaz.Common

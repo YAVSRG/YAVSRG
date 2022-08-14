@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.Play
+﻿namespace Interlude.UI.Features.Play
 
 open Percyqaz.Common
 open Percyqaz.Flux.Audio

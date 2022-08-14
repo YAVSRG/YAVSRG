@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.Score
+﻿namespace Interlude.UI.Features.Score
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
@@ -103,7 +103,7 @@ module Helpers =
         }
 
 
-type Screen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
+type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     inherit Screen.T()
 
     let mutable pbs = pbs

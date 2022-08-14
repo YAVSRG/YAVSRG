@@ -5,7 +5,7 @@ open Percyqaz.Flux.UI
 open Interlude
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Screens.LevelSelect
+open Interlude.UI.Features.LevelSelect
 open Interlude.UI.Components.Selection.Menu
 
 module OptionsMenuRoot =

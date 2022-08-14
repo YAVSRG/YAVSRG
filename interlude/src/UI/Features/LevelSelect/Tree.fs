@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.LevelSelect
+﻿namespace Interlude.UI.Features.LevelSelect
 
 open System
 open System.Linq
@@ -18,7 +18,7 @@ open Interlude.UI
 open Interlude.Content
 open Interlude.Options
 open Interlude.Gameplay
-open Interlude.UI.Screens.Play
+open Interlude.UI.Features.Play
 open Interlude.UI.Components.Selection.Controls
 
 [<RequireQualifiedAccess>]
@@ -112,7 +112,7 @@ module Tree =
         | Some data ->
             data.LastPlayed <- DateTime.Now
             Screen.changeNew
-                ( fun () -> if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T else Screen() )
+                ( fun () -> if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T else PlayScreen() )
                 ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
                 Screen.TransitionFlags.Default
         | None -> Logging.Warn "There is no chart selected"

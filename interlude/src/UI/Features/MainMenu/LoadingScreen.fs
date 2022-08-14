@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.MainMenu
+﻿namespace Interlude.UI.Features.MainMenu
 
 open System
 open System.Drawing

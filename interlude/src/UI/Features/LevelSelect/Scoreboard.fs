@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.LevelSelect
+﻿namespace Interlude.UI.Features.LevelSelect
 
 open System
 open Percyqaz.Common
@@ -54,7 +54,7 @@ module Scoreboard =
             |-+ Clickable(
                     ( fun () -> 
                         Screen.changeNew 
-                            (fun () -> new Screens.Score.Screen(data, BestFlags.Default) :> Screen.T)
+                            (fun () -> new Features.Score.ScoreScreen(data, BestFlags.Default) :> Screen.T)
                             Screen.Type.Score
                             Screen.TransitionFlags.Default
                     ), ignore )

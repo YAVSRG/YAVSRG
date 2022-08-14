@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Screens.LevelSelect
+﻿namespace Interlude.UI.Features.LevelSelect
 
 open OpenTK.Mathematics
 open Percyqaz.Common
@@ -41,7 +41,7 @@ type LevelSelectDropdown(items: string seq, label: string, setting: Setting<stri
 
     member val Dropdown : Dropdown.Container option = None with get, set
 
-type Screen() as this =
+type LevelSelectScreen() as this =
     inherit Screen.T()
 
     let searchText = Setting.simple ""
