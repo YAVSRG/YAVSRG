@@ -51,7 +51,6 @@
     <Compile Include="UI\Widget.fs" />
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Notifications.fs" />
-    <Compile Include="UI\Dialogs.fs" />
     <Compile Include="UI\Components\Primitives.fs" />
     <Compile Include="UI\Components\Buttons.fs" />
     <Compile Include="UI\Components\Containers.fs" />

@@ -171,13 +171,12 @@ module Screen =
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
             Background.update elapsedTime
-            if currentType <> Type.Play || Dialog.any() then Tooltip.display.Update (elapsedTime, moved)
+            if currentType <> Type.Play || Dialog.exists() then Tooltip.display.Update (elapsedTime, moved)
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos()
                 Background.setParallaxPos(x / Viewport.vwidth, y / Viewport.vheight)
             Style.accentColor.SetColor Content.accentColor
             Dialog.display.Update(elapsedTime, moved)
-            Dialog.update (elapsedTime, this.Bounds) // old
 
             globalAnimation.Update elapsedTime
             toolbar.Update (elapsedTime, moved)
@@ -195,9 +194,8 @@ module Screen =
                 let amount = Math.Clamp((if inbound then transitionIn.Elapsed / TRANSITIONTIME else 1.0 - (transitionOut.Elapsed / TRANSITIONTIME)), 0.0, 1.0) |> float32
                 Transitions.draw transitionFlags inbound amount this.Bounds
                 if (transitionFlags &&& TransitionFlags.UnderLogo = TransitionFlags.UnderLogo) then logo.Draw()
-            Dialog.draw() // old
             Dialog.display.Draw()
-            if currentType <> Type.Play || Dialog.any() then 
+            if currentType <> Type.Play || Dialog.exists() then 
                 let x, y = Mouse.pos()
                 Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.color(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
                 Tooltip.display.Draw()

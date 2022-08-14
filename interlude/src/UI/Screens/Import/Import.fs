@@ -9,7 +9,6 @@ open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Web
-open Interlude
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
@@ -43,7 +42,7 @@ type Screen() as this =
         *)
 
         // EtternaOnline's certificate keeps expiring!! Rop get on it
-        // This hack force-trusts EO's SSL certificate even though it has expired (this was for 18th march 2021, there's a new working certificate currently)
+        // todo: set up automated test that pings eo for certificate expiry
         ServicePointManager.ServerCertificateValidationCallback <-
             RemoteCertificateValidationCallback(
                 fun _ cert _ sslPolicyErrors ->
@@ -87,12 +86,12 @@ type Screen() as this =
         *)
 
         this
-        |-+ MountControl(Mounts.Types.Osu, Options.options.OsuMount)
-            .Position( Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
-        |-+ MountControl(Mounts.Types.Stepmania, Options.options.StepmaniaMount)
-            .Position( Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
-        |-+ MountControl(Mounts.Types.Etterna, Options.options.EtternaMount)
-            .Position( Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
+        //|-+ MountControl(Mounts.Game.Osu, Options.options.OsuMount)
+        //    .Position( Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
+        //|-+ MountControl(Mounts.Game.Stepmania, Options.options.StepmaniaMount)
+        //    .Position( Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
+        //|-+ MountControl(Mounts.Game.Etterna, Options.options.EtternaMount)
+        //    .Position( Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
         |=+ TextBox(K "Import from game", K (Color.White, Color.Black), 0.5f )
             .Position( Position.Box(0.0f, 0.0f, 0.0f, 150.0f, 250.0f, 50.0f) )
 

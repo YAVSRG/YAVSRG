@@ -4,7 +4,6 @@ open System
 open OpenTK
 open Percyqaz.Common
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
@@ -30,6 +29,8 @@ type TooltipRegion2(localisedText) =
             Tooltip.tooltip ((!|"tooltip"), localisedText)
 
     override this.Draw() = ()
+
+// todo: TooltipContainer that contains both a region and another widget
 
 [<AutoOpen>]
 module Tooltip =
@@ -89,41 +90,3 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback()
-
-type TextInputDialog(bounds: Rect, prompt, callback) as this =
-    inherit Dialog()
-    let buf = Setting.simple ""
-    let tb = TextEntry(buf, None, prompt)
-    do
-        this.Add(tb.Position { Left = 0.0f %+ bounds.Left; Top = 0.0f %+ bounds.Top; Right = 0.0f %+ bounds.Right; Bottom = 0.0f %+ bounds.Bottom })
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        if (!|"select").Tapped() || (!|"exit").Tapped() then tb.Dispose(); this.BeginClose()
-    override this.OnClose() = callback buf.Value
-
-module SlideDialog =
-
-    type Direction =
-        | Left = 0
-        | Up = 1
-
-type SlideDialog(direction: SlideDialog.Direction, distance: float32) as this =
-    inherit Dialog()
-
-    do
-        if direction = SlideDialog.Direction.Left then
-            this.Reposition(0.0f, 0.0f, distance, 0.0f)
-        else this.Reposition(0.0f, 0.0f, 0.0f, distance)
-        this.Move(0.0f, 0.0f, 0.0f, 0.0f)
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        if (!|"exit").Tapped() then this.BeginClose()
-
-    override this.BeginClose() =
-        base.BeginClose()
-        if direction = SlideDialog.Direction.Left then
-            this.Move(0.0f, 0.0f, distance, 0.0f)
-        else this.Move(0.0f, 0.0f, 0.0f, distance)
-
-    override this.OnClose() = ()

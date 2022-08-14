@@ -7,16 +7,14 @@ open Prelude.Common
 open Prelude.ChartFormats.Conversions
 open Prelude.Data.Charts.Library.Imports
 open Interlude.Options
-open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.UI.Components.Selection.Menu
 
 module Mounts =
     
     let mutable dropFunc : (string -> unit) option = None
 
-    type Types =
+    type Game =
         | Osu = 0
         | Stepmania = 1
         | Etterna = 2
@@ -61,87 +59,114 @@ module Mounts =
         | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new Etterna songs" (importMountedSource mount) |> ignore
         | None -> ()
 
-type CreateMountDialog(mountType: Mounts.Types, setting: Setting<MountedChartSource option>, callback: bool -> unit) as this =
+type CreateMountDialog(mountType: Mounts.Game, setting: Setting<MountedChartSource option>) as this =
     inherit Dialog()
+
+    let text = 
+        Text(
+            match mountType with
+            | Mounts.Game.Osu -> "Drag your osu! Songs folder onto this window."
+            | Mounts.Game.Stepmania -> "Drag your Stepmania packs folder onto this window."
+            | Mounts.Game.Etterna -> "Drag your Etterna packs folder onto this window."
+            | _ -> failwith "impossible"
+            ,
+            Align = Alignment.CENTER,
+            Position = { Left = 0.0f %+ 100.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 100.0f; Bottom = 0.5f %+ 200.0f })
+
+    let button =
+        Button(
+            "Try to auto detect it",
+            (fun () ->
+                match mountType with
+                | Mounts.Game.Osu -> osuSongFolder
+                | Mounts.Game.Stepmania -> stepmaniaPackFolder
+                | Mounts.Game.Etterna -> etternaPackFolder
+                | _ -> failwith "impossible"
+                |> Mounts.dropFunc.Value),
+            "none",
+            Position = { Left = 0.5f %- 150.0f; Top = 0.5f %+ 200.0f; Right = 0.5f %+ 150.0f; Bottom = 0.5f %+ 260.0f })
 
     do
         Mounts.dropFunc <-
             fun path ->
                 match mountType, path with
-                | Mounts.Types.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack ("osu!", path) |> Some
-                | Mounts.Types.Osu, _ -> Notification.add ("Should be the osu! Songs folder itself - This doesn't look like it.", NotificationType.Error)
-                | Mounts.Types.Stepmania, FolderOfPacks
-                | Mounts.Types.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
-                | Mounts.Types.Stepmania, _
-                | Mounts.Types.Etterna, _ -> Notification.add ("Should be a Stepmania pack library - This doesn't look like one.", NotificationType.Error)
+                | Mounts.Game.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack ("osu!", path) |> Some
+                | Mounts.Game.Osu, _ -> Notification.add ("Should be the osu! 'Songs' folder itself - This doesn't look like it.", NotificationType.Error)
+                | Mounts.Game.Stepmania, FolderOfPacks
+                | Mounts.Game.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
+                | Mounts.Game.Stepmania, _
+                | Mounts.Game.Etterna, _ -> Notification.add ("Should be a Stepmania 'Songs' folder/pack library - This doesn't look like one.", NotificationType.Error)
                 | _ -> failwith "impossible"
-                if setting.Value.IsSome then this.BeginClose()
+                if setting.Value.IsSome then this.Close()
             |> Some
-
-        TextBox(
-            match mountType with
-            | Mounts.Types.Osu -> "Drag your osu! Songs folder onto this window."
-            | Mounts.Types.Stepmania -> "Drag your Stepmania packs folder onto this window."
-            | Mounts.Types.Etterna -> "Drag your Etterna packs folder onto this window."
-            | _ -> failwith "impossible"
-            |> K,
-            K (Color.White, Color.Black),
-            0.5f)
-            .Position { Left = 0.0f %+ 100.0f; Top = 0.5f %- 200.0f; Right = 1.0f %- 100.0f; Bottom = 0.5f %+ 200.0f }
-        |> this.Add
-
-        Button(
-            (fun () ->
-                match mountType with
-                | Mounts.Types.Osu -> osuSongFolder
-                | Mounts.Types.Stepmania -> stepmaniaPackFolder
-                | Mounts.Types.Etterna -> etternaPackFolder
-                | _ -> failwith "impossible"
-                |> Mounts.dropFunc.Value),
-            "Or try to auto detect it")
-            .Position { Left = 0.5f %- 150.0f; Top = 0.5f %+ 200.0f; Right = 0.5f %+ 150.0f; Bottom = 0.5f %+ 260.0f }
-        |> this.Add
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if (!|"exit").Tapped() then this.BeginClose()
+        text.Update(elapsedTime, bounds)
+        button.Update(elapsedTime, bounds)
+        if (!|"exit").Tapped() then this.Close()
 
-    override this.OnClose() = 
+    override this.Draw() =
+        text.Draw()
+        button.Draw()
+
+    override this.Close() = 
         Mounts.dropFunc <- None
-        callback setting.Value.IsSome
+        base.Close()
 
-type MountControl(mountType: Mounts.Types, setting: Setting<MountedChartSource option>) as this =
-    inherit Widget1()
+    override this.Init(parent: Widget) =
+        base.Init parent
+        text.Init this
+        button.Init this
 
-    let mutable refresh = ignore
+type MountControl(mountType: Mounts.Game, setting: Setting<MountedChartSource option>) =
+    inherit StaticWidget(NodeType.None)
 
-    let createButton = Button((fun () -> CreateMountDialog(mountType, setting, fun b -> if b then refresh()).Show()), Icons.add)
-    let editButton = Button((fun () -> Menu.ShowPage(Mounts.EditorPage setting)), Icons.edit)
-    let deleteButton = Button((fun () -> setting.Value <- None; refresh()), Icons.delete)
+    let createButton = 
+        Button(Icons.add,
+            (fun () -> CreateMountDialog(mountType, setting).Show()),
+            "none",
+            Position = { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f })
+    let editButton = 
+        Button(Icons.edit,
+            (fun () -> Menu.ShowPage(Mounts.EditorPage setting)),
+            "none",
+            Position = { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f })
+    let deleteButton = 
+        Button(Icons.delete,
+            (fun () -> setting.Value <- None),
+            "none",
+            Position = { Left = 1.0f %- 60.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
+    let text = 
+        Text(
+            match mountType with
+            | Mounts.Game.Osu -> "osu!mania"
+            | Mounts.Game.Stepmania -> "Stepmania"
+            | Mounts.Game.Etterna -> "Etterna"
+            | _ -> failwith "impossible"
+            ,
+            Position = Position.TrimRight 120.0f
+        )
 
-    do
-        refresh <-
-            fun () ->
-                if setting.Value.IsSome then
-                    createButton.Enabled <- false
-                    editButton.Enabled <- true
-                    deleteButton.Enabled <- true
-                else
-                    createButton.Enabled <- true
-                    editButton.Enabled <- false
-                    deleteButton.Enabled <- false
-        refresh()
+    override this.Init(parent: Widget) =
+        base.Init parent
+        createButton.Init this
+        editButton.Init this
+        deleteButton.Init this
+        text.Init this
 
-        this
-        |-+ createButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
-        |-+ editButton.Position { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f }
-        |-+ deleteButton.Position { Left = 1.0f %- 60.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
-        |=+ TextBox(
-                match mountType with
-                | Mounts.Types.Osu -> "osu!mania"
-                | Mounts.Types.Stepmania -> "Stepmania"
-                | Mounts.Types.Etterna -> "Etterna"
-                | _ -> failwith "impossible"
-                |> K,
-                K (Color.White, Color.Black), 0.5f )
-            .Position( Position.TrimRight 120.0f )
+    override this.Update(elapsedTime, moved) =
+        if setting.Value.IsSome then
+            editButton.Update(elapsedTime, moved)
+            deleteButton.Update(elapsedTime, moved)
+        else
+            createButton.Update(elapsedTime, moved)
+        text.Update(elapsedTime, moved)
+
+    override this.Draw() =
+        if setting.Value.IsSome then
+            editButton.Draw()
+            deleteButton.Draw()
+        else
+            createButton.Draw()
+        text.Draw()
