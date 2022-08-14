@@ -6,15 +6,13 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude
-open Interlude.UI
 
 module Logo =
     
-    type Display() as this =
-        inherit Widget1()
+    type Display() =
+        inherit DynamicContainer(NodeType.None)
 
         let counter = Animation.Counter(10000000.0)
-        do this.Animation.Add counter
 
         override this.Draw() =
             base.Draw()
@@ -78,10 +76,16 @@ module Logo =
                 Stencil.finish()
                 Draw.sprite this.Bounds Color.White (Content.getTexture "logo")
 
-    let display = Display().Position { Left = 0.5f %- 300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f }
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            counter.Update elapsedTime
 
-    let moveCentre () = display.Move (-400.0f, -400.0f, 400.0f, 400.0f)
+    let display = Display(Position = { Left = 0.5f %- 300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f })
 
-    let moveOffscreen () = display.Move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
+    let private move (l, t, r, b) = display.Position <- { Left = 0.5f %+ l; Top = 0.5f %+ t; Right = 0.5f %+ r; Bottom = 0.5f %+ b }
 
-    let moveMenu () = display.Move (-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)
+    let moveCentre () = move (-400.0f, -400.0f, 400.0f, 400.0f)
+
+    let moveOffscreen () = move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
+
+    let moveMenu () = move (-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)

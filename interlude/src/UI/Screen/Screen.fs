@@ -77,8 +77,6 @@ module Screen =
     type Container(toolbar: Widget) =
         inherit Overlay(NodeType.None)
     
-        do current.OnEnter Type.SplashScreen
-    
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
             Background.update elapsedTime
@@ -91,7 +89,7 @@ module Screen =
 
             globalAnimation.Update elapsedTime
             toolbar.Update (elapsedTime, moved)
-            logo.Update (elapsedTime, this.Bounds)
+            logo.Update (elapsedTime, moved)
             let screenBounds = if Toolbar.hidden then this.Bounds else this.Bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
             current.Update (elapsedTime, screenBounds)
     
@@ -111,6 +109,8 @@ module Screen =
 
         override this.Init(parent: Widget) =
             base.Init parent
+            Logo.display.Init this
             toolbar.Init this
             Tooltip.display.Init this
             Dialog.display.Init this
+            current.OnEnter Type.SplashScreen
