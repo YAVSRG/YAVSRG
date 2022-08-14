@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Components
+﻿namespace Interlude.UI
 
 open System.Drawing
 open OpenTK.Mathematics

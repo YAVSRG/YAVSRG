@@ -4,7 +4,6 @@ open System.IO
 open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Common
-open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Tables
 open Interlude.UI.Toolbar
