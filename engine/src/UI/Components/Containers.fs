@@ -225,7 +225,7 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
         let moved = 
             if scrollby <> 0.0f then
                 scroll <- Math.Max(0.0f, Math.Min(scroll + scrollby, heightFunc() - this.Bounds.Height))
-                child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin, 0.0f)
+                child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin)
                 true
             else moved
 
@@ -241,7 +241,7 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
     override this.Init(parent: Widget) =
         base.Init parent
         child.Init this
-        child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin, 0.0f)
+        child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin)
 
 module SwitchContainer =
 

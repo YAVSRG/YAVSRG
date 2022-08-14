@@ -10,6 +10,10 @@ module Alignment =
     let CENTER = 0.5f
     let RIGHT = 1.0f
 
+type [<Sealed>] Dummy() =
+    inherit StaticWidget(NodeType.None)
+    override this.Draw() = ()
+
 type [<Sealed>] Text(textFunc) =
     inherit StaticWidget(NodeType.None)
 

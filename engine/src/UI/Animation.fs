@@ -118,12 +118,12 @@ module Animation =
                 a.Update elapsed
                 if a.Complete then animations.Dequeue() |> ignore
 
-    let fork xs = 
+    let fork (xs: Animation seq) = 
         let g = Group()
         for a in xs do g.Add a
         g
 
-    let seq xs =
+    let seq (xs: Animation seq) =
         let s = Sequence()
         for a in xs do s.Add a
         s

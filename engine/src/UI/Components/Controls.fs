@@ -11,7 +11,7 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
 
     let color = Animation.Fade(0.0f)
     let ticker = Animation.Counter(600.0)
-    let colorFunc = Palette.text_transition color Palette.LIGHT Palette.WHITE
+    let colorFunc = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER)
 
     let toggle() = if this.Selected then this.Focus() else this.Select()
 

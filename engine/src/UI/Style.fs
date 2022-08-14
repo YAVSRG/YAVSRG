@@ -67,6 +67,8 @@ module Palette =
             let p = a.Lerp b f.Value
             Style.color (p.Alpha, p.Brightness, p.White), Color.Black
 
+    let text (a: unit -> Color) (b: unit -> Color) = fun () -> (a(), b())
+
 [<AutoOpen>]
 module PaletteOperators =
 
