@@ -4,63 +4,30 @@ open System
 open System.Threading.Tasks
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Utils
 
+// todo: basically redo this whole thing when tasks are redesigned
+// todo: does not belong in toolbar folder
 module TaskDisplay =
 
     type TaskBox(task: BackgroundTask.ManagedTask) as this =
-        inherit Widget1()
+        inherit Frame(NodeType.Leaf, Border = (fun () -> this.Color), Fill = fun () -> Color.FromArgb(127, this.Color))
 
         let fade = Animation.Fade(0.0f, Target = 1.0f)
         let color = Animation.Color Color.White
 
-        let mutable closing = false
-
-        let close() =
-            closing <- true
-            Animation.seq [
-                Animation.Delay 2000.0 :> Animation;
-                Animation.Action (fun () -> fade.Target <- 0.0f);
-                Animation.Delay 800.0;
-                Animation.Action this.Destroy
-            ] |> this.Animation.Add
-
         do
-            this.Animation.Add fade
-            this.Animation.Add color
+            let textFunc = fun () ->
+                let a = fade.Alpha
+                (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
+            this
+            |+ Text(task.Name, Align = Alignment.LEFT, Color = textFunc, Position = Position.SliceTop 60.0f)
+            |* Text(task.get_Info, Align = Alignment.LEFT, Color = textFunc, Position = Position.SliceBottom 40.0f)
 
-            Clickable(
-                ( fun () ->
-                    if not closing then
-                        if task.Status <> TaskStatus.RanToCompletion then ()
-                            //Selection.Menu.ConfirmDialog("Cancel this task?", F task.Cancel close).Show()
-                        else close()
-                ),
-                ignore
-            ) |> this.Add
-
-            this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-
-        override this.Draw() =
-
-            let a = fade.Alpha
-            let col = color.GetColor a
-            
-            Draw.rect (this.Bounds.SliceTop 5.0f) col
-            Draw.rect (this.Bounds.SliceBottom 5.0f) col
-            Draw.rect (this.Bounds.SliceLeft 5.0f) col
-            Draw.rect (this.Bounds.SliceRight 5.0f) col
-
-            let inner = this.Bounds.Shrink 5.0f
-            
-            Draw.rect inner (Color.FromArgb(a / 4 * 3, Color.Black))
-            Draw.rect inner (Color.FromArgb(a / 2, col))
-
-            Text.drawFillB(Interlude.Content.font, task.Name, inner.SliceTop 60.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
-            Text.drawFillB(Interlude.Content.font, task.Info, inner.SliceBottom 40.0f, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)), 0.0f)
+        member private this.Color = color.GetColor fade.Alpha
 
         override this.Update(elapsedTime, bounds) =
 
@@ -79,22 +46,32 @@ module TaskDisplay =
                 | _ -> Color.Gray
             )
 
-            if not closing && task.Status = TaskStatus.RanToCompletion then close()
+            color.Update(elapsedTime)
+            fade.Update(elapsedTime)
 
-    let private taskBoxes = FlowContainer().Position { Left = 0.5f %- 300.0f; Top = 1.0f %- 900.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %- 100.0f }
+    let private tasks = ResizeArray<BackgroundTask.ManagedTask>()
 
-    let init () = BackgroundTask.Subscribe(fun t -> if t.Visible then taskBoxes.Add(TaskBox t))
+    let init () = BackgroundTask.Subscribe(fun t -> if t.Visible then tasks.Add t)
 
-    type Dialog() as this = 
-        inherit SlideDialog(SlideDialog.Direction.Up, Viewport.vheight)
-        do 
-            this.Add taskBoxes
-            TextBox(K "Background tasks", K (Color.White, Color.Black), 0.5f)
-                .Position { Left = 0.5f %- 300.0f; Top = 1.0f %- 980.0f; Right = 0.5f %+ 300.0f; Bottom = 1.0f %- 900.0f }
-            |> this.Add
+    type Dialog() = 
+        inherit Percyqaz.Flux.UI.Dialog()
+
+        let flow = FlowContainer.Vertical<TaskBox>(100.0f)
+        let scroll = ScrollContainer.Flow(flow, Margin = Style.padding, Position = Position.Margin(400.0f, 200.0f))
+
+        do for task in tasks do flow.Add( TaskBox task )
 
         override this.Draw() =
-            Draw.rect taskBoxes.Bounds (Style.color(200, 0.6f, 0.1f))
-            base.Draw()
+            Draw.rect scroll.Bounds (Style.color(200, 0.6f, 0.1f))
+            Text.drawFillB(Style.baseFont, L"menu.tasks", this.Bounds.SliceTop(180.0f).SliceBottom(80.0f), Style.text(), Alignment.CENTER)
+            scroll.Draw()
 
-        override this.OnClose() = this.Remove taskBoxes
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            scroll.Update(elapsedTime, moved)
+            if Mouse.leftClick() || (!|"exit").Tapped() then
+                this.Close()
+
+        override this.Init(parent: Widget) =
+            base.Init parent
+            scroll.Init this
