@@ -27,15 +27,15 @@ module OptionsMenuRoot =
             this.Content(
                 row()
                 |+ BigButton( N"system", Icons.system, (fun () -> Menu.ShowPage System.SystemPage),
-                        Position = Position.Box(0.5f, 0.5f, -790.0f, -150.0f, 300.0f, 300.0f) )
+                    Position = Position.Box(0.5f, 0.5f, -790.0f, -150.0f, 300.0f, 300.0f) )
                 |+ BigButton( N"themes", Icons.themes, (fun () -> Menu.ShowPage Themes.ThemesPage),
-                        Position = Position.Box(0.5f, 0.5f, -470.0f, -150.0f, 300.0f, 300.0f) )
+                    Position = Position.Box(0.5f, 0.5f, -470.0f, -150.0f, 300.0f, 300.0f) )
                 |+ BigButton( N"gameplay", Icons.gameplay, (fun () -> Menu.ShowPage Gameplay.GameplayPage),
-                        Position = Position.Box(0.5f, 0.5f, -150.0f, -150.0f, 300.0f, 300.0f) )
+                    Position = Position.Box(0.5f, 0.5f, -150.0f, -150.0f, 300.0f, 300.0f) )
                 |+ BigButton( N"keybinds", Icons.binds, (fun () -> Menu.ShowPage Keybinds.KeybindsPage),
-                        Position = Position.Box(0.5f, 0.5f, 170.0f, -150.0f, 300.0f, 300.0f) )
+                    Position = Position.Box(0.5f, 0.5f, 170.0f, -150.0f, 300.0f, 300.0f) )
                 |+ BigButton( N"debug", Icons.debug, (fun () -> Menu.ShowPage Debug.DebugPage),
-                        Position = Position.Box(0.5f, 0.5f, 490.0f, -150.0f, 300.0f, 300.0f) )
+                    Position = Position.Box(0.5f, 0.5f, 490.0f, -150.0f, 300.0f, 300.0f) )
             )
         override this.Title = L"options.name"
         override this.OnClose() = LevelSelect.refresh <- true

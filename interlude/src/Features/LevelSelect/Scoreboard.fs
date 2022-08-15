@@ -14,7 +14,6 @@ open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection
 open Interlude.UI.Components.Selection.Containers
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
@@ -33,9 +32,9 @@ module Scoreboard =
     | CurrentMods = 3
 
     type ScoreCard(data: ScoreInfoProvider) as this =
-        inherit Widget1()
+        inherit StaticContainer(NodeType.None) // todo: make selectable with options for watching replay
 
-        let fade = Animation.Fade 0.0f
+        let fade = Animation.Fade(0.0f, Target = 1.0f)
 
         do
             data.Physical |> ignore
@@ -43,24 +42,38 @@ module Scoreboard =
 
             let color = fun () -> let a = fade.Alpha in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
 
-            this.Position( Position.SliceTop 75.0f )
-            |-+ TextBox((fun() -> data.Scoring.FormatAccuracy()), color, 0.0f)
-                .Position { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 0.6f %+ 0.0f }
-            |-+ TextBox((fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical), color, 0.0f)
-                .Position { Left = 0.0f %+ 5.0f; Top = 0.6f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ 0.0f }
-            |-+ TextBox(K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)), color, 1.0f)
-                .Position { Left = 0.5f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %+ 0.0f }
-            |-+ TextBox(K data.Mods, color, 1.0f)
-                .Position { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f }
-            |-+ Clickable(
-                    ( fun () -> 
-                        Screen.changeNew 
-                            (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen.T)
-                            Screen.Type.Score
-                            Transitions.Flags.Default
-                    ), ignore )
-            |-* fade
-            |=* Animation.seq [Animation.Delay 150.0 :> Animation; Animation.Action (fun () -> let (l, t, r, b) = this.Anchors in l.Snap(); t.Snap(); r.Snap(); b.Snap(); fade.Target <- 1.0f)]
+            this
+            |+ Text(
+                fun () -> data.Scoring.FormatAccuracy()
+                ,
+                Color = color,
+                Align = Alignment.LEFT,
+                Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 0.6f %+ 0.0f })
+
+            |+ Text(
+                fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical
+                ,
+                Color = color,
+                Align = Alignment.LEFT,
+                Position = { Left = 0.0f %+ 5.0f; Top = 0.6f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
+
+            |+ Text(
+                K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)),
+                Color = color,
+                Align = Alignment.RIGHT,
+                Position = { Left = 0.5f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %+ 0.0f })
+
+            |+ Text(
+                K data.Mods,
+                Color = color,
+                Align = Alignment.RIGHT,
+                Position = { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f })
+
+            |* Percyqaz.Flux.UI.Clickable(fun () -> 
+                Screen.changeNew 
+                    (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen.T)
+                    Screen.Type.Score
+                    Transitions.Flags.Default)
 
         override this.Draw() =
             Draw.rect this.Bounds (Style.color(int (100.0f * fade.Value), 0.5f, 0.0f))
@@ -69,6 +82,7 @@ module Scoreboard =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
+            fade.Update elapsedTime
             if Mouse.hover this.Bounds && (!|"delete").Tapped() then
                 let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
                 Tooltip.callback (
@@ -92,14 +106,14 @@ module Scoreboard =
                 mutable NewBests: Bests option
             }
 
-        let reload (container: FlowContainer) =
+        let reload (container: FlowContainer.Vertical<ScoreCard>) =
             let worker =
                 { new Async.SingletonWorkerSeq<T, ScoreInfoProvider>() with
                     member this.Handle(req: T) =
                         match req.ChartSaveData with
                         | None -> Seq.empty
                         | Some d ->
-                            container.Synchronized(container.Clear)
+                            sync container.Clear
                             seq { 
                                 for score in d.Scores do
                                     let s = ScoreInfoProvider(score, req.CurrentChart, req.Ruleset)
@@ -111,12 +125,12 @@ module Scoreboard =
                             }
                     member this.Callback(score: ScoreInfoProvider) =
                         let sc = ScoreCard score
-                        container.Synchronized(fun () -> container.Add sc)
+                        sync(fun () -> container.Add sc)
                     member this.JobCompleted(req: T) =
                         match req.NewBests with
                         | None -> ()
                         | Some b ->
-                            container.Synchronized( fun () -> 
+                            sync( fun () -> 
                                 if not (req.ChartSaveData.Value.Bests.ContainsKey req.RulesetId) || b <> req.ChartSaveData.Value.Bests[req.RulesetId] then
                                     Tree.updateDisplay()
                                 req.ChartSaveData.Value.Bests[req.RulesetId] <- b
@@ -135,69 +149,75 @@ module Scoreboard =
 open Scoreboard
 
 type Scoreboard() as this =
-    inherit Selectable()
+    inherit StaticContainer(NodeType.None)
 
     let mutable count = -1
 
     let mutable chart = ""
     let mutable scoring = ""
-    let ls = new ListSelectable(true)
+    let buttons = SwitchContainer.Row()
 
     let filter = Setting.simple Filter.All
     let sort = Setting.map enum int options.ScoreSortMode
 
-    let sorter() : Comparison<Widget1> =
+    let sorter() : ScoreCard -> ScoreCard -> int =
         match sort.Value with
-        | Sort.Accuracy -> Comparison(fun b a -> (a :?> ScoreCard).Data.Scoring.Value.CompareTo((b :?> ScoreCard).Data.Scoring.Value))
-        | Sort.Performance -> Comparison(fun b a -> (a :?> ScoreCard).Data.Physical.CompareTo((b :?> ScoreCard).Data.Physical))
+        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Value.CompareTo(b.Data.Scoring.Value)
+        | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo(b.Data.Physical)
         | Sort.Time
-        | _ -> Comparison(fun b a -> (a :?> ScoreCard).Data.ScoreInfo.time.CompareTo((b :?> ScoreCard).Data.ScoreInfo.time))
+        | _ -> fun b a -> a.Data.ScoreInfo.time.CompareTo(b.Data.ScoreInfo.time)
 
-    let filterer() : Widget1 -> bool =
+    let filterer() : ScoreCard -> bool =
         match filter.Value with
-        | Filter.CurrentRate -> (fun a -> (a :?> ScoreCard).Data.ScoreInfo.rate = rate.Value)
-        | Filter.CurrentPlaystyle -> (fun a -> (a :?> ScoreCard).Data.ScoreInfo.layout = options.Playstyles.[(a :?> ScoreCard).Data.ScoreInfo.keycount - 3])
-        | Filter.CurrentMods -> (fun a -> (a :?> ScoreCard).Data.ScoreInfo.selectedMods = selectedMods.Value)
+        | Filter.CurrentRate -> (fun a -> a.Data.ScoreInfo.rate = rate.Value)
+        | Filter.CurrentPlaystyle -> (fun a -> a.Data.ScoreInfo.layout = options.Playstyles.[a.Data.ScoreInfo.keycount - 3])
+        | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
         | _ -> K true
 
 
-    let flowContainer = new FlowContainer(Sort = sorter(), Filter = filterer())
+    let flowContainer =  FlowContainer.Vertical(75.0f, Sort = sorter(), Filter = filterer())
+    let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.padding, Position = Position.TrimTop(10.0f).TrimBottom(50.0f))
 
     let loader = Loader.reload flowContainer
 
     do
         this
-        |-+ flowContainer.Position( Position.TrimTop(10.0f).TrimBottom(50.0f) )
-        |-+ (
-                ls
-                |-+ StylishButton.FromEnum("Sort",
-                        sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
-                        Style.main 100, TiltLeft = false )
-                    .Tooltip(L"levelselect.scoreboard.sort.tooltip")
-                    .Position { Left = 0.0f %+ 0.0f; Top = 1.0f %- 45.0f; Right = 0.25f %- 15.0f; Bottom = 1.0f %- 5.0f }
-                |-+ StylishButton.FromEnum("Filter",
-                        filter |> Setting.trigger (fun _ -> this.Refresh()),
-                        Style.main 90 )
-                    .Tooltip(L"levelselect.scoreboard.filter.tooltip")
-                    .Position { Left = 0.25f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.5f %- 15.0f; Bottom = 1.0f %- 5.0f }
-                |-+ StylishButton(
-                        (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
-                        (fun () -> ruleset.Name),
-                        Style.main 80 )
-                    .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
-                    .Position { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f }
-                |-+ StylishButton(
-                        this.Refresh,
-                        K <| Localisation.localise "levelselect.scoreboard.storage.local",
-                        Style.main 70, TiltRight = false ) //nyi
-                    .Tooltip(L"levelselect.scoreboard.storage.tooltip")
-                    .Position { Left = 0.75f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 1.0f %- 15.0f; Bottom = 1.0f %- 5.0f }
-            )
-        |=+ (
+        |+ scrollContainer
+        |+ (
+                buttons
+                |+ StylishButton.FromEnum(
+                    "Sort",
+                    sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
+                    Style.main 100,
+                    TiltLeft = false,
+                    Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 45.0f; Right = 0.25f %- 15.0f; Bottom = 1.0f %- 5.0f })
+                    //.Tooltip(L"levelselect.scoreboard.sort.tooltip")
+                |+ StylishButton.FromEnum(
+                    "Filter",
+                    filter |> Setting.trigger (fun _ -> this.Refresh()),
+                    Style.main 90,
+                    Position = { Left = 0.25f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.5f %- 15.0f; Bottom = 1.0f %- 5.0f })
+                    //.Tooltip(L"levelselect.scoreboard.filter.tooltip")
+                |+ StylishButton(
+                    (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
+                    (fun () -> ruleset.Name),
+                    Style.main 80,
+                    Position = { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f })
+                    //.Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
+                |+ StylishButton(
+                    this.Refresh,
+                    K <| Localisation.localise "levelselect.scoreboard.storage.local",
+                    Style.main 70,
+                    TiltRight = false,
+                    Position = { Left = 0.75f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 1.0f %- 15.0f; Bottom = 1.0f %- 5.0f })
+                    //.Tooltip(L"levelselect.scoreboard.storage.tooltip")
+           )
+        |* (
                 let noLocalScores = L"levelselect.scoreboard.empty"
-                TextBox((fun () -> if count = 0 then noLocalScores else ""), K (Color.White, Color.Black), 0.5f)
-                    .Position { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f }
-            )
+                Text((fun () -> if count = 0 then noLocalScores else ""),
+                    Align = Alignment.CENTER,
+                    Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f })
+           )
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""
@@ -206,10 +226,6 @@ type Scoreboard() as this =
             loader() |> ignore
         elif scoring <> rulesetId then
             let s = getCurrentRuleset()
-            for c in flowContainer.Children do (c :?> ScoreCard).Data.Ruleset <- s
+            flowContainer.Iter(fun score -> score.Data.Ruleset <- s)
             scoring <- rulesetId
         flowContainer.Filter <- filterer()
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        this.HoverChild <- None

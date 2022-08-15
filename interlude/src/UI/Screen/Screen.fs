@@ -47,11 +47,14 @@ module Screen =
     let mutable exit = false
     let mutable currentType = Type.SplashScreen
 
+    let mutable private container : Widget = Dummy()
+
     let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
         if (screenType <> currentType || screenType = Type.Play) then
             Transitions.tryStart((fun () -> 
                 let s = thunk()
                 current.OnExit screenType
+                if not s.Initialised then s.Init container
                 s.OnEnter currentType
                 currentType <- screenType
                 current <- s
@@ -88,6 +91,7 @@ module Screen =
             toolbar.Update (elapsedTime, moved)
             logo.Update (elapsedTime, moved)
             let screenBounds = if Toolbar.hidden then this.Bounds else this.Bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
+            // todo
             current.Update (elapsedTime, moved)
     
         override this.Draw() =
@@ -110,6 +114,8 @@ module Screen =
             toolbar.Init this
             Tooltip.display.Init this
             Dialog.display.Init this
+            container <- this
+            current.Init this
             current.OnEnter Type.SplashScreen
 
 type Screen = Screen.T

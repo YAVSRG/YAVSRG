@@ -8,37 +8,53 @@ open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.ChartFormats.Interlude
 open Interlude.UI
-open Interlude.Utils
-open Interlude.UI.Components
 open Interlude.Features.Gameplay
 
 type ChartInfo() as this =
-    inherit Widget1()
+    inherit StaticContainer(NodeType.None)
 
-    let scores = Scoreboard()
+    let scores = Scoreboard(Position = Position.TrimBottom 200.0f)
     let mutable length = ""
     let mutable bpm = ""
     let mutable notecount = ""
 
     do
         this
-        |-+ scores.Position( Position.TrimBottom 200.0f )
-        |-+ TextBox(
-                (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Icons.star),
-                (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical), 0.0f)
-            .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %- 190.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 120.0f }
-        |-+ TextBox(
-                (fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Icons.star),
-                (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical), 0.0f)
-            .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %- 120.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 50.0f }
-        |-+ TextBox((fun () -> bpm), K (Color.White, Color.Black), 1.0f)
-            .Position { Left = 0.5f %+ 0.0f; Top = 1.0f %- 190.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 120.0f }
-        |-+ TextBox((fun () -> length), K (Color.White, Color.Black), 1.0f)
-            .Position { Left = 0.5f %+ 0.0f; Top = 1.0f %- 120.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 50.0f }
-        |-+ TextBox((fun () -> notecount), K (Color.White, Color.Black), 1.0f)
-            .Position { Left = 0.0f %+ 10.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 17.0f; Bottom = 1.0f %- 10.0f }
-        |=+ TextBox((fun () -> getModString(rate.Value, selectedMods.Value, autoplay)), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 17.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 10.0f }
+        |+ scores
+
+        |+ Text(
+            fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Icons.star
+            ,
+            Color = (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical),
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 190.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 120.0f })
+
+        |+ Text(
+            fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Icons.star
+            ,
+            Color = (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical),
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 120.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 50.0f })
+
+        |+ Text(
+            (fun () -> bpm),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.5f %+ 0.0f; Top = 1.0f %- 190.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 120.0f })
+
+        |+ Text(
+            (fun () -> length),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.5f %+ 0.0f; Top = 1.0f %- 120.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 50.0f })
+
+        |+ Text(
+            (fun () -> notecount),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 17.0f; Bottom = 1.0f %- 10.0f })
+
+        |* Text(
+            (fun () -> getModString(rate.Value, selectedMods.Value, autoplay)),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.0f %+ 17.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 10.0f })
 
     member this.Refresh() =
         length <-

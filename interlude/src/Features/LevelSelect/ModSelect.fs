@@ -40,10 +40,8 @@ type private ModSelectPage() as this =
     override this.Title = N"mods"
     override this.OnClose() = ()
     
-type ModSelect() as this =
-    inherit Widget1()
-
-    do StylishButton((fun () -> Menu.ShowPage ModSelectPage), K "Mods", (fun () -> Style.color(100, 0.8f, 0.2f)), "mods") |> this.Add
+type ModSelect() =
+    inherit StylishButton((fun () -> Menu.ShowPage ModSelectPage), K "Mods", (fun () -> Style.color(100, 0.8f, 0.2f)), "mods")
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

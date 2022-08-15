@@ -32,19 +32,24 @@ type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
         Text.drawFillB(Content.font, labelFunc(), this.Bounds.TrimBottom 10.0f, (Style.color(255, 1.0f, color.Value), Style.color(255, 0.4f, color.Value)), 0.5f)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
-    inherit Widget1()
+    inherit StaticContainer(NodeType.Button onClick)
     
     let color = Animation.Fade 0.3f
 
     do
-        this.Animation.Add color
-        this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
-        this.Add(new Bindable(bind, onClick))
+        this
+        |+ Clickable.Focus this
+        |* HotkeyAction(bind, onClick) // todo: create this at init-time and make hotkey optional
     
+    // todo: remove this and make hotkey optional
     new(onClick, labelFunc, colorFunc) = StylishButton(onClick, labelFunc, colorFunc, "none")
 
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        color.Update elapsedTime
 
     override this.Draw() =
         let h = this.Bounds.Height

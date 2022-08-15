@@ -11,7 +11,6 @@ open Prelude.Scoring
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
 open Interlude.UI
-open Interlude.Utils
 open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI.Components
@@ -32,7 +31,8 @@ type LevelSelectDropdown(items: string seq, label: string, setting: Setting<stri
                             Right = 1.0f %- 5.0f
                             Bottom = 0.0f %+ (60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE)
                         }
-                    |> this.Add
+                        // todo: bring back functionality
+                    |> ignore//this.Add
             ),
             ( fun () -> sprintf "%s: %s" label setting.Value ),
             colorFunc,
@@ -42,10 +42,10 @@ type LevelSelectDropdown(items: string seq, label: string, setting: Setting<stri
     member val Dropdown : Dropdown.Container option = None with get, set
 
 type LevelSelectScreen() as this =
-    inherit Screen.T()
+    inherit Screen()
 
     let searchText = Setting.simple ""
-    let infoPanel = new ChartInfo()
+    let infoPanel = ChartInfo(Position = { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 180.0f; Right = 0.4f %- 10.0f; Bottom = 1.0f %+ 0.0f })
 
     let refresh() =
         ruleset <- getCurrentRuleset()
@@ -62,61 +62,54 @@ type LevelSelectScreen() as this =
         Setting.app (fun s -> if sortBy.ContainsKey s then s else "Title") options.ChartSortMode
         Setting.app (fun s -> if groupBy.ContainsKey s then s else "Pack") options.ChartGroupMode
 
-        TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.Title), K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 100.0f }
-        |> this.Add
+        this
+        |+ Text(
+            (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.Title),
+            Align = Alignment.CENTER,
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 100.0f })
 
-        TextBox((fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DiffName), K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 100.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 160.0f }
-        |> this.Add
+        |+ Text(
+            (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DiffName),
+            Align = Alignment.CENTER,
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 100.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 160.0f })
 
-        SearchBox(searchText, fun f -> Tree.filter <- f; refresh())
-            .Tooltip(L"levelselect.search.tooltip")
-            .Position { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f }
-        |> this.Add
+        |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()),
+            Position = { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f })
+            //.Tooltip(L"levelselect.search.tooltip")
 
-        ModSelect()
-            .Tooltip(L"levelselect.mods.tooltip")
-            .Position { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %- 25.0f; Bottom = 0.0f %+ 170.0f }
-        |> this.Add
+        |+ ModSelect(Position = { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %- 25.0f; Bottom = 0.0f %+ 170.0f })
+            //.Tooltip(L"levelselect.mods.tooltip")
 
-        CollectionManager()
-            .Tooltip(L"levelselect.collections.tooltip")
-            .Position { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %- 25.0f; Bottom = 0.0f %+ 170.0f }
-        |> this.Add
+        |+ CollectionManager(Position = { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %- 25.0f; Bottom = 0.0f %+ 170.0f })
+            //.Tooltip(L"levelselect.collections.tooltip")
 
-        StylishButton(
+        |+ StylishButton(
             (fun () -> Setting.app not options.ChartSortReverse; LevelSelect.refresh <- true),
             (fun () -> if options.ChartSortReverse.Value then Icons.order_descending else Icons.order_ascending),
-            (fun () -> Style.color(150, 0.4f, 0.6f))
-        ).Position { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %+ 35.0f; Bottom = 0.0f %+ 170.0f }
-        |> this.Add
+            (fun () -> Style.color(150, 0.4f, 0.6f)),
+            Position = { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %+ 35.0f; Bottom = 0.0f %+ 170.0f })
 
-        LevelSelectDropdown(sortBy.Keys, "Sort",
+        |+ LevelSelectDropdown(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.color(100, 0.4f, 0.6f)),
-            "sort_mode")
-            .Tooltip(L"levelselect.sortby.tooltip")
-            .Position { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f }
-        |> this.Add
+            "sort_mode",
+            Position = { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f })
+            //.Tooltip(L"levelselect.sortby.tooltip")
         
-        StylishButton(
+        |+ StylishButton(
             (fun () -> Setting.app not options.ChartGroupReverse; LevelSelect.refresh <- true),
             (fun () -> if options.ChartGroupReverse.Value then Icons.order_descending else Icons.order_ascending),
-            (fun () -> Style.color(150, 0.2f, 0.8f)))
-            .Position { Left = 0.85f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %+ 35.0f; Bottom = 0.0f %+ 170.0f }
-        |> this.Add
+            (fun () -> Style.color(150, 0.2f, 0.8f)),
+            Position = { Left = 0.85f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %+ 35.0f; Bottom = 0.0f %+ 170.0f })
 
-        LevelSelectDropdown(groupBy.Keys, "Group",
+        |+ LevelSelectDropdown(groupBy.Keys, "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.color(100, 0.2f, 0.8f)),
-            "group_mode")
-            .Tooltip(L"levelselect.groupby.tooltip")
-            .Position { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
-        |> this.Add
+            "group_mode",
+            Position = { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f })
+            //.Tooltip(L"levelselect.groupby.tooltip")
 
-        infoPanel.Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 180.0f; Right = 0.4f %- 10.0f; Bottom = 1.0f %+ 0.0f }
-        |> this.Add
+        |* infoPanel
 
         Chart.onChange.Add infoPanel.Refresh
 
