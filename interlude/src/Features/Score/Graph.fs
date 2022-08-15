@@ -2,13 +2,13 @@
 
 open System.Drawing
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Scoring
 open Prelude.Data.Scores
 open Interlude
-open Interlude.UI
 
 type ScoreGraph(data: ScoreInfoProvider) =
-    inherit Widget1()
+    inherit StaticWidget(NodeType.None)
 
     let fbo = FBO.create()
     let mutable refresh = true
@@ -56,6 +56,4 @@ type ScoreGraph(data: ScoreInfoProvider) =
         if refresh then this.Redraw()
         Draw.sprite Viewport.bounds Color.White fbo.sprite
 
-    override this.Dispose() =
-        base.Dispose()
-        fbo.Dispose()
+    member this.Dispose() = fbo.Dispose()

@@ -10,9 +10,8 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Web
 open Interlude
-open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
+open Interlude.Utils
 open Interlude.Features.LevelSelect
 
 type BeatmapStatus =
@@ -45,7 +44,7 @@ type BeatmapSearch =
     }
 
 type private BeatmapImportCard(data: BeatmapData) as this =
-    inherit Widget1()
+    inherit StaticContainer(NodeType.None)
             
     let mutable downloaded = false
     let download() =
@@ -62,6 +61,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
                         File.Delete target ))
                 ]) |> ignore
         downloaded <- true
+
     do
         let c =
             match data.beatmap_status with
@@ -73,32 +73,34 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             | BeatmapStatus.GRAVEYARD
             | _ -> Color.Gray
 
-        this.Position( Position.SliceTop 80.0f )
-        |-+ Frame(Color.FromArgb(120, c), Color.FromArgb(200, c))
-        |-+ TextBox(K (data.artist + " - " + data.title), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f }
-        |-+ TextBox(K ("Created by " + data.mapper), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 40.0f; Right = Position.max; Bottom = Position.max }
-        |-+ TextBox(K (sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs)), K (Color.White, Color.Black), 1.0f)
-            .Position { Left = Position.min; Top = 0.0f %+ 20.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 20.0f }
-        |=+ Clickable((fun () -> if not downloaded then download()), ignore)
+        this
+        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(120, c)), Border = K (Color.FromArgb(200, c)))
+        |+ Text(data.artist + " - " + data.title,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f })
+        |+ Text("Created by " + data.mapper,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 40.0f; Right = Position.max; Bottom = Position.max })
+        |+ Text(sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs),
+            Align = Alignment.RIGHT,
+            Position = { Left = Position.min; Top = 0.0f %+ 20.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 20.0f })
+        |* Clickable((fun () -> if not downloaded then download()))
 
 type private SearchContainerLoader(t) as this =
-    inherit Widget1()
+    inherit StaticWidget(NodeType.None)
     let t = t this
     let mutable task = None
-    do this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 30.0f, 0.0f)
 
-    //loader is only drawn if it is visible on screen
+    // loader is only drawn if it is visible on screen
     override this.Draw() =
-        base.Draw()
-        //todo: improved loading indicator here
+        // todo: improved loading indicator here
         Text.drawFill(Content.font, "Loading...", this.Bounds, Color.White, 0.5f)
-        if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> if this.Parent.IsSome then this.Destroy()))
+        // todo: hide this when complete
+        if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" t// |> BackgroundTask.Callback(fun _ -> if this.Parent.IsSome then this.Destroy()))
 
 module private Beatmap =
     
-    let rec search (filter: Filter) (page: int) : FlowContainer -> SearchContainerLoader -> StatusTask =
+    let rec search (filter: Filter) (page: int) : FlowContainer.Base<_> -> SearchContainerLoader -> StatusTask =
         let mutable s = "https://osusearch.com/api/search?modes=Mania&key="
         let mutable invalid = false
         let mutable title = ""
@@ -118,14 +120,15 @@ module private Beatmap =
         ) filter
         s <- s + "&title=" + Uri.EscapeDataString title
         s <- s + "&offset=" + page.ToString()
-        fun (flowContainer: FlowContainer) (loader: SearchContainerLoader) output ->
+        fun (flowContainer: FlowContainer.Base<Widget>) (loader: SearchContainerLoader) output ->
             let callback(d: BeatmapSearch) =
-                if loader.Parent.IsSome then
-                    flowContainer.Synchronized(
+                // todo: this is busted. need to use AsyncManyWorker
+                //if loader.Parent.IsSome then
+                    sync(
                         fun () -> 
                             for p in d.beatmaps do flowContainer.Add(BeatmapImportCard p)
                             if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                                new SearchContainerLoader(search filter (page + 1) flowContainer)
+                                SearchContainerLoader(search filter (page + 1) flowContainer)
                                 |> flowContainer.Add
                     )
             downloadJson(s, callback)

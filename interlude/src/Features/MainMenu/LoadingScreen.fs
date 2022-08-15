@@ -10,12 +10,12 @@ open Interlude.UI
 
 // Loading screen
 
-type LoadingScreen() as this =
-    inherit Screen.T()
+type LoadingScreen() =
+    inherit Screen()
 
     let mutable closing = false
     let fade = Animation.Fade 1.0f
-    do this.Animation.Add fade
+    let animation = Animation.Sequence()
 
     override this.OnEnter (prev: Screen.Type) =
         fade.Value <- 0.0f
@@ -24,20 +24,18 @@ type LoadingScreen() as this =
         match prev with
         | Screen.Type.MainMenu ->
             closing <- true
-            let s = Animation.Sequence()
-            s.Add (Animation.Delay 1500.0)
-            s.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
-            this.Animation.Add s
+            animation.Add (Animation.Delay 1500.0)
+            animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
         | _ -> 
-            let s = Animation.Sequence()
-            s.Add (Animation.Delay 1500.0)
-            s.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
-            this.Animation.Add s
+            animation.Add (Animation.Delay 1500.0)
+            animation.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
 
     override this.OnExit _ = ()
 
     override this.Update (elapsedTime, bounds) =
         base.Update (elapsedTime, bounds)
+        fade.Update elapsedTime
+        animation.Update elapsedTime
         Devices.changeVolume (Options.options.AudioVolume.Value * float (if closing then 1.0f - fade.Value else fade.Value))
         
     override this.Draw() =

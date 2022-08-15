@@ -13,7 +13,6 @@ open Prelude.Data.Themes
 open Interlude
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Features
 
 (*
@@ -32,33 +31,42 @@ module GameplayWidgets =
     }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
-        inherit Widget1()
+        inherit StaticContainer(NodeType.None)
 
         let grades = helper.ScoringConfig.Grading.Grades
         let color = Animation.Color (if conf.GradeColors then Array.last(grades).Color else Color.White)
-        let listener =
+
+        do
             if conf.GradeColors then
-                helper.OnHit.Subscribe
+                helper.OnHit.Add
                     ( fun _ ->
                         Grade.calculate grades helper.Scoring.State |> helper.ScoringConfig.GradeColor |> color.SetColor
                     )
-            else null
 
-        do
-            this.Animation.Add(color)
-            this.Add(TextBox(helper.Scoring.FormatAccuracy, (fun () -> color.GetColor()), 0.5f).Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.7f %+ 0.0f })
+            this
+            |* Text(
+                helper.Scoring.FormatAccuracy,
+                Color = (fun () -> color.GetColor(), Color.Transparent),
+                Align = Alignment.CENTER,
+                Position = { Position.Default with Bottom = 0.7f %+ 0.0f })
             if conf.ShowName then
-                this.Add(TextBox(Utils.K helper.Scoring.Name, (Utils.K Color.White), 0.5f).Position { Left = 0.0f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
-        
-        override this.Dispose() =
-            if isNull listener then () else listener.Dispose()
+                this
+                |* Text(helper.Scoring.Name,
+                    Color = Utils.K (Color.White, Color.Transparent),
+                    Align = Alignment.CENTER,
+                    Position = { Position.Default with Top = 0.6f %+ 0.0f })
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            color.Update elapsedTime
 
     type HitMeter(conf: WidgetConfig.HitMeter, helper) =
-        inherit Widget1()
+        inherit StaticWidget(NodeType.None)
         let hits = ResizeArray<struct (Time * float32 * int)>()
         let mutable w = 0.0f
-        let listener =
-            helper.OnHit.Subscribe(fun ev ->
+
+        do
+            helper.OnHit.Add(fun ev ->
                 match ev.Guts with
                 | Hit e when e.Judgement.IsSome ->
                     hits.Add (struct (ev.Time, e.Delta / helper.Scoring.MissWindow * w * 0.5f, int e.Judgement.Value))
@@ -66,15 +74,14 @@ module GameplayWidgets =
                     hits.Add (struct (ev.Time, e.Delta / helper.Scoring.MissWindow * w * 0.5f, int e.Judgement.Value))
                 | _ -> ())
 
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
             if w = 0.0f then w <- this.Bounds.Width
             let now = helper.CurrentChartTime()
             while hits.Count > 0 && let struct (time, _, _) = (hits.[0]) in time + conf.AnimationTime * 1.0f<ms> < now do
                 hits.RemoveAt(0)
 
         override this.Draw() =
-            base.Draw()
             let centre = this.Bounds.CenterX
             if conf.ShowGuide then
                 Draw.rect
@@ -87,19 +94,17 @@ module GameplayWidgets =
                     (let c = helper.ScoringConfig.JudgementColor j in
                         Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), c))
 
-        override this.Dispose() =
-            listener.Dispose()
-
     // disabled for now
     type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
-        inherit Widget1()
+        inherit StaticWidget(NodeType.None)
         let atime = conf.AnimationTime * 1.0f<ms>
         let mutable tier = 0
         let mutable late = 0
         let mutable time = -Time.infinity
         let texture = Content.getTexture "judgement"
-        let listener =
-            helper.OnHit.Subscribe
+
+        do
+            helper.OnHit.Add
                 ( fun ev ->
                     let (judge, delta) =
                         match ev.Guts with
@@ -118,21 +123,20 @@ module GameplayWidgets =
                             time <- ev.Time
                             late <- if delta > 0.0f<ms> then 1 else 0
                 )
+
         override this.Draw() =
             if time > -Time.infinity then
                 let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
                 Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
 
-        override this.Dispose() =
-            listener.Dispose()
-
-    type ComboMeter(conf: WidgetConfig.Combo, helper) as this =
-        inherit Widget1()
+    type ComboMeter(conf: WidgetConfig.Combo, helper) =
+        inherit StaticWidget(NodeType.None)
         let popAnimation = Animation.Fade(0.0f)
         let color = Animation.Color(Color.White)
         let mutable hits = 0
-        let listener =
-            helper.OnHit.Subscribe(
+
+        do
+            helper.OnHit.Add(
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
@@ -141,34 +145,30 @@ module GameplayWidgets =
                         |> color.SetColor
                     popAnimation.Value <- conf.Pop)
 
-        do
-            this.Animation.Add(color)
-            this.Animation.Add(popAnimation)
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            color.Update elapsedTime
+            popAnimation.Update elapsedTime
 
         override this.Draw() =
-            base.Draw()
             let combo = helper.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
             Text.drawFill(Content.font, combo.ToString(), this.Bounds.Expand amt, color.GetColor(), 0.5f)
 
-        override this.Dispose() =
-            listener.Dispose()
-
-    type ProgressMeter(conf: WidgetConfig.ProgressMeter, helper) as this =
-        inherit Widget1()
+    type ProgressMeter(conf: WidgetConfig.ProgressMeter, helper) =
+        inherit StaticWidget(NodeType.None)
 
         let duration = 
             let chart = Gameplay.Chart.colored()
             offsetOf chart.Notes.Last.Value - offsetOf chart.Notes.First.Value
 
         let pulse = Animation.Counter(1000.0)
-
-        do
-            this.Animation.Add pulse
+        
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            pulse.Update elapsedTime
 
         override this.Draw() =
-            base.Draw()
-
             let height = this.Bounds.Height - conf.BarHeight
             let pc = helper.CurrentChartTime() / duration
 
@@ -177,34 +177,38 @@ module GameplayWidgets =
             Draw.rect (bar.Expand(conf.GlowSize)) (Color.FromArgb(glowA, conf.GlowColor))
             Draw.rect bar conf.BarColor
 
-    type SkipButton(conf: WidgetConfig.SkipButton, helper) as this =
-        inherit Widget1()
+    type SkipButton(conf: WidgetConfig.SkipButton, helper) =
+        inherit StaticWidget(NodeType.None)
+
+        // todo: localise
+        let text = sprintf "Press %O to skip" (!|"skip")
+        let mutable active = true
         
         let firstNote = offsetOf (Gameplay.Chart.colored().Notes.First.Value)
-        do this.Add(TextBox(sprintf "Press %O to skip" (!|"skip") |> Utils.K, Utils.K Color.White, 0.5f))
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if helper.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
+            if active && helper.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
                 if (!|"skip").Tapped() then
                     Song.pause()
                     Song.playFrom(firstNote - Song.LEADIN_TIME)
-            else this.Destroy()
+            else active <- false
 
-    type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) as this =
-        inherit Widget1()
+        override this.Draw() =
+            Text.drawFillB(Style.baseFont, text, this.Bounds, Style.text(), Alignment.CENTER)
+
+    type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) =
+        inherit StaticWidget(NodeType.None)
 
         let color = Animation.Color conf.FullColor
         let slider = Animation.Fade(float32 helper.HP.State.Health)
 
-        do
-            this.Animation.Add color
-            this.Animation.Add slider
-
-        override this.Update(elapsedTime, bounds) =
-            slider.Target <- float32 helper.HP.State.Health
+        override this.Update(elapsedTime, moved) =
             // todo: color nyi
-            base.Update(elapsedTime, bounds)
+            base.Update(elapsedTime, moved)
+            slider.Target <- float32 helper.HP.State.Health
+            color.Update elapsedTime
+            slider.Update elapsedTime
 
         override this.Draw() =
             let w, h = this.Bounds.Width, this.Bounds.Height
@@ -222,22 +226,21 @@ module GameplayWidgets =
     *)
 
     type ColumnLighting(keys, lightTime, helper) as this =
-        inherit Widget1()
+        inherit StaticWidget(NodeType.None)
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let sprite = Content.getTexture "receptorlighting"
         let lightTime = Math.Min(0.99f, lightTime)
 
         do
-            Array.iter this.Animation.Add sliders
             let hitpos = float32 options.HitPosition.Value
-            this.Reposition(0.0f, hitpos, 0.0f, -hitpos)
+            this.Position <- { Position.Default with Top = 0.0f %+ hitpos; Bottom = 1.0f %- hitpos }
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
+            sliders |> Array.iter (fun s -> s.Update elapsedTime)
             Array.iteri (fun k (s: Animation.Fade) -> if helper.Scoring.KeyState |> Bitmap.hasBit k then s.Value <- 1.0f) sliders
 
         override this.Draw() =
-            base.Draw()
             let columnwidth = this.Bounds.Width / (float32 keys)
             let threshold = 1.0f - lightTime
             let f k (s: Animation.Fade) =
@@ -255,7 +258,8 @@ module GameplayWidgets =
             Array.iteri f sliders
 
     type Explosions(keys, config: Prelude.Data.Themes.Explosions, helper) as this =
-        inherit Widget1()
+        inherit StaticWidget(NodeType.None)
+
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let timers = Array.zeroCreate keys
         let mem = Array.zeroCreate keys
@@ -278,21 +282,20 @@ module GameplayWidgets =
             | _ -> ()
 
         do
-            this.Animation.Add animation
-            Array.iter this.Animation.Add sliders
             let hitpos = float32 options.HitPosition.Value
-            this.Reposition(0.0f, hitpos, 0.0f, -hitpos)
+            this.Position <- { Position.Default with Top = 0.0f %+ hitpos; Bottom = 1.0f %- hitpos }
             helper.OnHit.Add handleEvent
 
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            animation.Update elapsedTime
+            sliders |> Array.iter (fun s -> s.Update elapsedTime)
             for k = 0 to (keys - 1) do
                 if holding.[k] && helper.Scoring.KeyState |> Bitmap.hasBit k |> not then
                     holding.[k] <- false
                     sliders.[k].Target <- 0.0f
 
         override this.Draw() =
-            base.Draw()
             let columnwidth = this.Bounds.Width / (float32 keys)
             let threshold = 1.0f - explodeTime
             let f k (s: Animation.Fade) =
@@ -321,7 +324,7 @@ module GameplayWidgets =
     // Screencover is controlled by game settings, not theme or noteskin
 
     type ScreenCover() =
-        inherit Widget1()
+        inherit StaticWidget(NodeType.None)
 
         override this.Draw() =
             

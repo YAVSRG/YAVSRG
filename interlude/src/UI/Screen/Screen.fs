@@ -9,7 +9,7 @@ open Interlude
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-
+        
 module Screen =
     
     type Type =
@@ -20,10 +20,10 @@ module Screen =
         | Play = 4
         | Replay = 5
         | Score = 6
-        
+
     [<AbstractClass>]
     type T() =
-        inherit Widget1()
+        inherit StaticContainer(NodeType.None)
         abstract member OnEnter: Type -> unit
         abstract member OnExit: Type -> unit
     
@@ -47,15 +47,12 @@ module Screen =
     let mutable exit = false
     let mutable currentType = Type.SplashScreen
 
-    let changeNew (thunk: unit -> T) (screenType: Type) (flags: Transitions.Flags) =
+    let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
         if (screenType <> currentType || screenType = Type.Play) then
             Transitions.tryStart((fun () -> 
                 let s = thunk()
                 current.OnExit screenType
                 s.OnEnter currentType
-                match currentType with
-                | Type.Play | Type.Replay | Type.Score -> current.Dispose()
-                | _ -> ()
                 currentType <- screenType
                 current <- s
             ), flags)
@@ -91,7 +88,7 @@ module Screen =
             toolbar.Update (elapsedTime, moved)
             logo.Update (elapsedTime, moved)
             let screenBounds = if Toolbar.hidden then this.Bounds else this.Bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
-            current.Update (elapsedTime, screenBounds)
+            current.Update (elapsedTime, moved)
     
         override this.Draw() =
             Background.drawWithDim (this.Bounds, Color.White, 1.0f)
@@ -114,3 +111,5 @@ module Screen =
             Tooltip.display.Init this
             Dialog.display.Init this
             current.OnEnter Type.SplashScreen
+
+type Screen = Screen.T

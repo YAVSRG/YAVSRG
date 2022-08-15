@@ -10,7 +10,6 @@ open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude
 open Interlude.Options
-open Interlude.UI
 open Interlude.Features
 
 // TODO LIST
@@ -28,7 +27,7 @@ module NoteRenderer =
         fun k -> Quad.rotateDeg (rotations.[k])
 
 type NoteRenderer(scoring: IScoreMetric) as this =
-    inherit Widget1()
+    inherit StaticContainer(NodeType.None)
 
     //constants
     let chart = Gameplay.Chart.colored()
@@ -65,8 +64,17 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     do
         let width = Array.mapi (fun i n -> n + columnWidths.[i]) columnPositions |> Array.max
         let (screenAlign, columnAlign) = Content.noteskinConfig().PlayfieldAlignment
-        this.Reposition(-width * columnAlign, screenAlign, 0.0f, 0.0f, width * (1.0f - columnAlign), screenAlign, 0.0f, 1.0f)
-        this.Animation.Add(animation)
+        this.Position <-
+            { 
+                Left = screenAlign %- (width * columnAlign)
+                Top = Position.min
+                Right = screenAlign %+ (width * (1.0f - columnAlign))
+                Bottom = Position.max
+            }
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        animation.Update elapsedTime
 
     override this.Draw() =
         let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = this.Bounds

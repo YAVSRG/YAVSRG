@@ -9,9 +9,10 @@ open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Web
-open Interlude.Utils
 open Interlude.UI
+open Interlude.Options
 open Interlude.UI.Components
+open Interlude.UI.Components.Selection.Compound
 open Interlude.Features.LevelSelect
 
 module FileDropHandling =
@@ -25,17 +26,19 @@ module FileDropHandling =
             true
 
 type private SearchContainer(populate, handleFilter) as this =
-    inherit Widget1()
-    let flowContainer = new FlowContainer(Spacing = 15.0f)
-    let populate = populate flowContainer
-    let handleFilter = handleFilter flowContainer
+    inherit StaticContainer(NodeType.None)
+    let flow = FlowContainer.Vertical<Widget>(80.0f, Spacing = 15.0f)
+    let scroll = ScrollContainer.Flow(flow, Margin = Style.padding, Position = Position.TrimTop 70.0f)
+    let populate = populate flow
+    let handleFilter = handleFilter flow
     do
-        this.Add(SearchBox(Setting.simple "", fun (f: Filter) -> handleFilter f).Position( Position.SliceTop 60.0f ))
-        this.Add(flowContainer.Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 70.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %+ 0.0f })
-        flowContainer.Add(new SearchContainerLoader(populate))
+        flow |* SearchContainerLoader populate
+        this
+        |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter f), Position = Position.SliceTop 60.0f ))
+        |* scroll
 
 type ImportScreen() as this =
-    inherit Screen.T()
+    inherit Screen()
     do
         (*
             Online downloaders
@@ -51,7 +54,7 @@ type ImportScreen() as this =
 
         let eoDownloads = 
             SearchContainer(
-                (fun flowContainer _ output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> flowContainer.Synchronized(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
+                (fun flowContainer _ output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> sync(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
                 (fun flowContainer filter -> flowContainer.Filter <- SMImportCard.Filter filter) )
         let osuDownloads =
             SearchContainer(
@@ -62,7 +65,7 @@ type ImportScreen() as this =
                 (fun flowContainer _ output -> 
                     downloadJson(Noteskins.source, 
                         (fun (d: Prelude.Data.Themes.Noteskin.Repo) -> 
-                            flowContainer.Synchronized( fun () -> 
+                            sync( fun () -> 
                                 for ns in d.Noteskins do
                                     let nc = NoteskinCard ns
                                     Noteskins.image_loader.Request(ns.Preview, nc)
@@ -72,28 +75,32 @@ type ImportScreen() as this =
                     )
                 ),
                 (fun flowContainer filter -> flowContainer.Filter <- NoteskinCard.Filter filter) )
-        let tabs = new TabContainer("Etterna Packs", eoDownloads)
-        tabs.AddTab("osu! Songs", osuDownloads)
-        tabs.AddTab("Noteskins", noteskins)
+
+        let tabs = 
+            Tabs.Container(Position = { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 80.0f })
+                .WithTab("Etterna Packs", eoDownloads)
+                .WithTab("osu! Songs", osuDownloads)
+                .WithTab("Noteskins", noteskins)
 
         this
-        |-+ tabs.Position { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 80.0f }
-        |=+ TextBox(K "(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)", K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.0f %+ 600.0f; Top = 1.0f %- 90.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 30.0f }
+        |+ tabs
+        |+ Text("(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)",
+            Align = Alignment.CENTER,
+            Position = { Left = 0.0f %+ 600.0f; Top = 1.0f %- 90.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 30.0f })
 
         (*
             Offline importers from other games
         *)
 
-        this
-        //|-+ MountControl(Mounts.Game.Osu, Options.options.OsuMount)
-        //    .Position( Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
-        //|-+ MountControl(Mounts.Game.Stepmania, Options.options.StepmaniaMount)
-        //    .Position( Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
-        //|-+ MountControl(Mounts.Game.Etterna, Options.options.EtternaMount)
-        //    .Position( Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
-        |=+ TextBox(K "Import from game", K (Color.White, Color.Black), 0.5f )
-            .Position( Position.Box(0.0f, 0.0f, 0.0f, 150.0f, 250.0f, 50.0f) )
+        |+ MountControl(Mounts.Game.Osu, options.OsuMount,
+            Position = Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
+        |+ MountControl(Mounts.Game.Stepmania, options.StepmaniaMount,
+            Position = Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
+        |+ MountControl(Mounts.Game.Etterna, options.EtternaMount,
+            Position = Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
+        |* Text("Import from game",
+            Align = Alignment.CENTER,
+            Position = Position.Box(0.0f, 0.0f, 0.0f, 150.0f, 250.0f, 50.0f))
 
     override this.OnEnter _ = ()
     override this.OnExit _ = ()

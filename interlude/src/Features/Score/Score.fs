@@ -9,11 +9,11 @@ open Prelude.Scoring
 open Prelude.Scoring.Grading
 open Prelude.Data.Scores
 open Interlude.Options
-open Interlude.Utils
 open Interlude.Content
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Features
+
+// todo: good lord this file should be split
 
 type EventCounts =
     {
@@ -104,7 +104,7 @@ module ScoreScreenHelpers =
 
 
 type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
-    inherit Screen.T()
+    inherit Screen()
 
     let mutable pbs = pbs
     let mutable gradeAchieved = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
@@ -114,7 +114,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         if Gameplay.Chart.saveData.Value.Bests.ContainsKey Gameplay.rulesetId then 
             Some Gameplay.Chart.saveData.Value.Bests.[Gameplay.rulesetId]
         else None
-    let graph = new ScoreGraph(scoreData)
+    let graph = new ScoreGraph(scoreData, Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f })
 
     let originalRulesets = options.Rulesets.Value
 
@@ -135,36 +135,36 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
     do
         // banner text
-        TextBox(K <| scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title, K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f }
-        |> this.Add
-        TextBox(K <| scoreData.Chart.Header.DiffName, K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 145.0f }
-        |> this.Add
-        TextBox(K <| sprintf "From %s" scoreData.Chart.Header.SourcePack, K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 180.0f }
-        |> this.Add
-        TextBox(K <| scoreData.ScoreInfo.time.ToString(), K (Color.White, Color.Black), 1.0f)
-            .Position { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f }
-        |> this.Add
+        this
+        |+ Text(scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f })
+        |+ Text(scoreData.Chart.Header.DiffName,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 145.0f })
+        |+ Text(sprintf "From %s" scoreData.Chart.Header.SourcePack,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 180.0f })
+        |+ Text(scoreData.ScoreInfo.time.ToString(),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f })
 
         // graph & under graph
-        graph.Position { Left = 0.0f %+ 20.0f; Top = 1.0f %- 270.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 70.0f }
-        |> this.Add
+        |+ graph
 
-        TextBox((fun () -> sprintf "Mean: %.1fms (%.1f - %.1fms)" eventCounts.Mean eventCounts.EarlyMean eventCounts.LateMean), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 20.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 620.0f; Bottom = 1.0f %- 15.0f }
-        |> this.Add
-        TextBox((fun () -> sprintf "Stdev: %.1fms" eventCounts.StandardDeviation), K (Color.White, Color.Black), 0.0f)
-            .Position { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f }
-        |> this.Add
+        |+ Text((fun () -> sprintf "Mean: %.1fms (%.1f - %.1fms)" eventCounts.Mean eventCounts.EarlyMean eventCounts.LateMean),
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 620.0f; Bottom = 1.0f %- 15.0f })
+        |+ Text((fun () -> sprintf "Stdev: %.1fms" eventCounts.StandardDeviation),
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f })
 
-        Button(ignore, "Graph settings")
-            .Position { Left = 1.0f %- 420.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 220.0f; Bottom = 1.0f %- 15.0f }
-        |> this.Add
-        Button((fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)), "Watch replay")
-            .Position { Left = 1.0f %- 220.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f }
-        |> this.Add
+        |+ Button("Graph settings", ignore, "none",
+            Position = { Left = 1.0f %- 420.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 220.0f; Bottom = 1.0f %- 15.0f })
+        |* Button("Watch replay",
+            (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)),
+            "none",
+            Position = { Left = 1.0f %- 220.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f })
 
     override this.Draw() =
         let halfh = this.Bounds.CenterY

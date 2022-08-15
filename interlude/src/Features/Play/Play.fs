@@ -15,9 +15,10 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Play.GameplayWidgets
+open Interlude.Features.Score
 
 type PlayScreen() as this =
-    inherit Screen.T()
+    inherit Screen()
     
     let chart = Gameplay.Chart.withMods.Value
     let firstNote = offsetOf chart.Notes.First.Value
@@ -50,20 +51,21 @@ type PlayScreen() as this =
 
         noteRenderer.Add(ScreenCover())
 
-        let inline f name (constructor: 'T -> Widget1) = 
+        let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
-                (constructor config).Position { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
-                |> if pos.Float then this.Add else noteRenderer.Add
+                let w = constructor config
+                w.Position <- { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
+                if pos.Float then this.Add w else noteRenderer.Add w
 
-        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget1)
-        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget1)
-        f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget1)
-        f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget1)
-        //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget1)
-        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget1)
+        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper))
+        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper))
+        f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper))
+        f "combo" (fun c -> new ComboMeter(c, widgetHelper))
+        //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper))
+        f "skipButton" (fun c -> new SkipButton(c, widgetHelper))
+        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper))
 
         scoring.SetHitCallback onHit.Trigger
 
@@ -115,8 +117,7 @@ type PlayScreen() as this =
                             Difficulty = Gameplay.Chart.rating.Value
                         )
                     (sd, Gameplay.setScore sd)
-                    |> Features.Score.ScoreScreen
-                    :> Screen.T
+                    |> ScoreScreen
                 )
                 Screen.Type.Score
                 Transitions.Flags.Default
@@ -129,7 +130,7 @@ type ReplayMode =
     | Replay of rate: float32 * ReplayData
 
 type ReplayScreen(mode: ReplayMode) as this =
-    inherit Screen.T()
+    inherit Screen()
     
     let chart = Gameplay.Chart.withMods.Value
     let firstNote = offsetOf chart.Notes.First.Value
@@ -163,22 +164,22 @@ type ReplayScreen(mode: ReplayMode) as this =
 
         noteRenderer.Add(ScreenCover())
 
-        let inline f name (constructor: 'T -> Widget1) = 
+        let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
-                (constructor config)
-                    .Position { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
-                |> if pos.Float then this.Add else noteRenderer.Add
+                let w = constructor config
+                w.Position <- { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
+                if pos.Float then this.Add w else noteRenderer.Add w
 
         if not auto then
-            f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper) :> Widget1)
-            f "hitMeter" (fun c -> new HitMeter(c, widgetHelper) :> Widget1)
-            f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper) :> Widget1)
-            f "combo" (fun c -> new ComboMeter(c, widgetHelper) :> Widget1)
-            //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper) :> Widget)
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper) :> Widget1)
-        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper) :> Widget1)
+            f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper))
+            f "hitMeter" (fun c -> new HitMeter(c, widgetHelper))
+            f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper))
+            f "combo" (fun c -> new ComboMeter(c, widgetHelper))
+            //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper))
+        f "skipButton" (fun c -> new SkipButton(c, widgetHelper))
+        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper))
 
         scoring.SetHitCallback onHit.Trigger
 

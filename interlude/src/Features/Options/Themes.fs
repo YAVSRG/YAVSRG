@@ -11,9 +11,9 @@ open Interlude
 open Interlude.Content
 open Interlude.Utils
 open Interlude.Options
-open Interlude.UI
 open Interlude.UI.Components.Selection.Menu
 open Interlude.Features
+open Interlude.Features.Play
 
 module Themes =
 
@@ -53,44 +53,39 @@ module Themes =
         let createRenderer() =
             match Gameplay.Chart.current with
             | Some chart -> 
-                let nr = Features.Play.NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
-                nr.Add(Features.Play.GameplayWidgets.ScreenCover())
-                nr :> Widget1
-            | None -> new Widget1()
+                let nr = NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
+                nr.Add(GameplayWidgets.ScreenCover())
+                nr :> Widget
+            | None -> new Dummy()
 
         let mutable renderer = createRenderer()
+
+
+        let w = Viewport.vwidth * scale
+        let h = Viewport.vheight * scale
+        let bounds_placeholder =
+            StaticContainer(NodeType.None,
+                Position = { Left = 1.0f %- (50.0f + w); Top = 0.5f %- (h * 0.5f); Right = 1.0f %- 50.0f; Bottom = 0.5f %+ (h * 0.5f) })
 
         do
             fbo.Unbind()
 
             this
-            |* Text("PREVIEW", Position = { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 1.0f %+ 50.0f } )
-
-            let w = Viewport.vwidth * scale
-            let h = Viewport.vheight * scale
-
-            this.Position <- 
-                { 
-                    Left = 1.0f %- (50.0f + w)
-                    Top = 0.5f %- (h * 0.5f)
-                    Right = 1.0f %- 50.0f
-                    Bottom = 0.5f %+ (h * 0.5f)
-                }
+            |* ( bounds_placeholder |+  Text("PREVIEW", Position = { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 1.0f %+ 50.0f } ) )
 
         member this.Refresh() =
             Gameplay.Chart.recolor()
-            renderer.Dispose()
             renderer <- createRenderer()
 
         override this.Update(elapsedTime, moved) =
-            renderer.Update(elapsedTime, Viewport.bounds)
+            renderer.Update(elapsedTime, moved)
             base.Update(elapsedTime, moved)
 
         override this.Draw() =
             fbo.Bind true
             renderer.Draw()
             fbo.Unbind()
-            Draw.sprite this.Bounds Color.White fbo.sprite
+            Draw.sprite bounds_placeholder.Bounds Color.White fbo.sprite
             base.Draw()
 
         member this.Destroy() =

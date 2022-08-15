@@ -74,29 +74,3 @@ type FlowContainer() =
     member this.ScrollTo(w: Widget1) =
         if w.Bounds.Bottom > this.Bounds.Bottom then scrollPos <- scrollPos + (w.Bounds.Bottom - this.Bounds.Bottom)
         elif w.Bounds.Top < this.Bounds.Top then scrollPos <- scrollPos - (this.Bounds.Top - w.Bounds.Top)
-
-// provide the first tab when constructing
-type TabContainer(name: string, widget: Widget1) as this =
-    inherit Widget1()
-    let mutable selectedItem = widget
-    let mutable selected = name
-    let mutable count = 0.0f
-
-    let TABHEIGHT = 60.0f
-    let TABWIDTH = 250.0f
-
-    do this.AddTab(name, widget)
-
-    member this.AddTab(name, widget) =
-        { new Components.Button((fun () -> selected <- name; selectedItem <- widget), name) with member this.Dispose() = base.Dispose(); widget.Dispose() }
-            .Position (Position.Box(0.0f, 0.0f, count * TABWIDTH, 0.0f, TABWIDTH, TABHEIGHT))
-        |> this.Add
-        count <- count + 1.0f
-
-    override this.Draw() =
-        base.Draw()
-        selectedItem.Draw()
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        selectedItem.Update(elapsedTime, this.Bounds.TrimTop TABHEIGHT)

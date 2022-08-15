@@ -8,7 +8,6 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
-open Interlude.UI.Components
 
 type TooltipRegion(localisedText) =
     inherit Widget1()
@@ -37,56 +36,42 @@ module Tooltip =
     type Widget1 with
         member this.Tooltip(localisedText) = TooltipRegion.Create localisedText this
 
-type TextEntry(s: Setting<string>, bind: Hotkey option, prompt: string) as this =
-    inherit Widget1()
+type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as this =
+    inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))
 
-    let color = Animation.Fade 0.5f
-
-    let mutable active = false
-    let toggle() =
-        active <- not active
-        if active then
-            color.Target <- 1.0f
-            Input.setTextInput(s, fun () -> active <- false; color.Target <- 0.5f)
-        else
-            color.Target <- 0.5f
-            Input.removeInputMethod()
+    let textEntry = TextEntry(setting, bind, Position = Position.Margin(10.0f, 0.0f))
 
     do
         this
-        |-* color
-        |-+ Frame(Style.main 100, fun () -> Style.highlightF 100 color.Value)
-        |-+ TextBox(
-                (fun () ->
+        |+ textEntry
+        |* Text(
+                fun () ->
                     match bind with
-                    | Some b ->
-                        match s.Value with
+                    | "none" -> match setting.Value with "" -> prompt | _ -> ""
+                    | b ->
+                        match setting.Value with
                         | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
-                        | text -> text
-                    | None -> match s.Value with "" -> prompt | text -> text),
-                (fun () -> Style.highlightF 255 color.Value),
-                0.0f
-            ).Position( Position.Margin(10.0f, 0.0f) )
-        |> fun this -> if Option.isNone bind then toggle() else this.Add(new Clickable(toggle, ignore))
+                        | _ -> ""
+                ,
+                Color = textEntry.TextColor,
+                Align = Alignment.LEFT,
+                Position = Position.Margin(10.0f, 0.0f))
+
+    member private this.TextEntry = textEntry
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        match bind with
-        | Some b -> if (!|b).Tapped() then toggle()
-        | None -> if active = false then toggle()
-
-    override this.Dispose() =
-        if active then Input.removeInputMethod()
 
 type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
-    inherit Widget1()
+    inherit TextEntryBox(s |> Setting.trigger(fun _ -> this.StartSearch()), "search", "search")
     let searchTimer = new Diagnostics.Stopwatch()
-    do
-        TextEntry ( Setting.trigger (fun s -> searchTimer.Restart()) s, Some "search", "search" )
-        |> this.Add
+
+    member val DebounceTime = 400L with get, set
 
     new(s: Setting<string>, callback: Filter -> unit) = SearchBox(s, fun () -> callback(Filter.parse s.Value))
 
+    member private this.StartSearch() = searchTimer.Restart()
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if searchTimer.ElapsedMilliseconds > 400L then searchTimer.Reset(); callback()
+        if searchTimer.ElapsedMilliseconds > this.DebounceTime then searchTimer.Reset(); callback()

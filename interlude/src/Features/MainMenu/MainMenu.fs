@@ -10,20 +10,29 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 
-type private MenuButton(onClick, label) as this =
-    inherit Widget1()
+type private MenuButton(onClick, label: string, pos) as this =
+    inherit DynamicContainer(NodeType.Button(onClick))
 
     let color = Animation.Fade 0.3f
+
     do
         this
-        |-+ Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f)
-        |-+ TextBox(K label, K (Color.White, Color.Black), 0.5f)
-            .Position { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 20.0f }
-        |=* color
+        |+ Clickable.Focus this
+        |* Text(label,
+            Align = Alignment.CENTER,
+            Position = { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 20.0f })
+        this.Position <- pos
+
+    override this.OnFocus() =
+        base.OnFocus()
+        color.Target <- 0.7f
+
+    override this.OnUnfocus() =
+        base.OnUnfocus()
+        color.Target <- 0.3f
 
     override this.Draw() =
         Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad
@@ -31,8 +40,9 @@ type private MenuButton(onClick, label) as this =
         base.Draw()
 
     member this.Pop() =
-        let (_, _, r, _) = this.Anchors
-        r.Value <- -Viewport.vwidth
+        this.Position <- { pos with Right = 0.0f %- -Viewport.vwidth }
+        this.SnapPosition()
+        this.Position <- pos
 
 // Menu screen
 
@@ -43,9 +53,9 @@ type MainMenuScreen() as this =
         Logo.moveOffscreen()
         Screen.change Screen.Type.LevelSelect Transitions.Flags.UnderLogo
 
-    let play = MenuButton (playFunc, L"menu.play")
-    let options = MenuButton (OptionsMenuRoot.show, L"menu.options")
-    let quit = MenuButton ((fun () -> Screen.back Transitions.Flags.UnderLogo), L"menu.quit")
+    let play = MenuButton (playFunc, L"menu.play", Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f))
+    let options = MenuButton (OptionsMenuRoot.show, L"menu.options", Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f))
+    let quit = MenuButton ((fun () -> Screen.back Transitions.Flags.UnderLogo), L"menu.quit", Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f))
 
     let newSplash =
         randomSplash "MenuSplashes.txt"
@@ -57,11 +67,9 @@ type MainMenuScreen() as this =
 
     do
         this
-        |-+ play.Position( Position.Box(0.0f, 0.5f, -100.0f, -200.0f, 1300.0f, 100.0f) )
-        |-+ options.Position( Position.Box(0.0f, 0.5f, -100.0f, -50.0f, 1230.0f, 100.0f) )
-        |-+ quit.Position( Position.Box(0.0f, 0.5f, -100.0f, 100.0f, 1160.0f, 100.0f) )
-        |-* splashAnim
-        |=* splashSubAnim
+        |+ play
+        |+ options
+        |* quit
         
     override this.OnEnter prev =
         if AutoUpdate.updateAvailable then Notification.add (L"notification.update.available", NotificationType.System)
@@ -88,7 +96,9 @@ type MainMenuScreen() as this =
         Text.drawJustB (Content.font, s, 40.0f, c, this.Bounds.Top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Style.color (a2, 0.5f, 0.0f)), 0.5f)
         base.Draw()
 
-    override this.Update (elapsedTime, bounds) =
-        base.Update (elapsedTime, bounds)
-        splashSubAnim.Target <- if Mouse.hover (bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then 1.0f else 0.0f
+    override this.Update (elapsedTime, moved) =
+        base.Update (elapsedTime, moved)
+        splashAnim.Update elapsedTime
+        splashSubAnim.Update elapsedTime
+        splashSubAnim.Target <- if Mouse.hover (this.Bounds.Expand(-400.0f, 0.0f).SliceTop(100.0f)) then 1.0f else 0.0f
         if (!|"select").Tapped() then playFunc()
