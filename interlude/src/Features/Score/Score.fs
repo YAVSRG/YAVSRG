@@ -114,7 +114,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         if Gameplay.Chart.saveData.Value.Bests.ContainsKey Gameplay.rulesetId then 
             Some Gameplay.Chart.saveData.Value.Bests.[Gameplay.rulesetId]
         else None
-    let graph = new ScoreGraph(scoreData, Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f })
+    let graph = new ScoreGraph(scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 1.0f %- 270.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 70.0f })
 
     let originalRulesets = options.Rulesets.Value
 

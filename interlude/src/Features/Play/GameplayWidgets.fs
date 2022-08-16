@@ -195,7 +195,7 @@ module GameplayWidgets =
             else active <- false
 
         override this.Draw() =
-            Text.drawFillB(Style.baseFont, text, this.Bounds, Style.text(), Alignment.CENTER)
+            if active then Text.drawFillB(Style.baseFont, text, this.Bounds, Style.text(), Alignment.CENTER)
 
     type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) =
         inherit StaticWidget(NodeType.None)

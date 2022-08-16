@@ -14,7 +14,6 @@ open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection.Containers
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
 

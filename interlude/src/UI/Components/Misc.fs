@@ -1,7 +1,6 @@
 ﻿namespace Interlude.UI.Components
 
 open System
-open OpenTK
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI

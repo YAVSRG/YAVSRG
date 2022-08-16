@@ -10,26 +10,6 @@ open Prelude.Common
 open Interlude
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
-
-type Button(onClick, labelFunc: unit -> string, bind: Hotkey) as this =
-    inherit Widget1()
-
-    let color = Animation.Fade 0.3f
-
-    do
-        this.Animation.Add color
-        this.Add(new Clickable(onClick, fun b -> color.Target <- if b then 0.7f else 0.3f))
-        this.Add(new Bindable(bind, onClick))
-
-    new(onClick, labelFunc: unit -> string) = Button(onClick, labelFunc, "none")
-    new(onClick, label: string) = Button(onClick, K label)
-    new(onClick, label: string, bind: Hotkey) = Button(onClick, K label, bind)
-
-    override this.Draw() =
-        Draw.rect this.Bounds (Style.color(80, 0.5f, color.Value))
-        Draw.rect (this.Bounds.SliceBottom 10.0f) (Style.color(255, 1.0f, color.Value))
-        Text.drawFillB(Content.font, labelFunc(), this.Bounds.TrimBottom 10.0f, (Style.color(255, 1.0f, color.Value), Style.color(255, 0.4f, color.Value)), 0.5f)
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
     inherit StaticContainer(NodeType.Button onClick)
@@ -50,6 +30,9 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         color.Update elapsedTime
+
+    override this.OnFocus() = base.OnFocus(); color.Target <- 0.7f
+    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.3f
 
     override this.Draw() =
         let h = this.Bounds.Height
@@ -73,19 +56,3 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
             (fun () -> sprintf "%s: %s" label names.[i]),
             colorFunc
         )
-
-module CardButton =
-    
-    type Base(onClick, bind: Hotkey) as this =
-        inherit Widget1()
-
-        let mutable hover = false
-        do
-            this.Add(Frame(Style.main 100, fun () -> if hover then Color.White else Style.highlightL 100 ()))
-            this.Add(new Clickable(onClick, fun b -> hover <- b))
-            this.Add(new Bindable(bind, onClick))
-
-    let Basic(label, onClick, bind: Hotkey) =
-        let b = Base(onClick, bind)
-        TextBox(K label, Style.text, 0.5f) |> b.Add
-        b

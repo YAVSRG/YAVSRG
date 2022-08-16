@@ -18,28 +18,29 @@ open Interlude.UI.Components.Selection.Controls
 
 type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) as this =
     inherit StylishButton(
-            ( fun () -> 
-                match this.Dropdown with
-                | Some d when d.Parent <> None -> d.Destroy()
-                | _ ->
-                    let d = Dropdown.create_selector items id (fun g -> setting.Set g) ignore
-                    this.Dropdown <- Some d
-                    d.Position
-                        {
-                            Left = 0.0f %+ 5.0f
-                            Top = 0.0f %+ 60.0f
-                            Right = 1.0f %- 5.0f
-                            Bottom = 0.0f %+ (60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE)
-                        }
                         // todo: bring back functionality
-                    |> ignore//this.Add
+            ( fun () -> 
+                ()
+                //match this.Dropdown with
+                //| Some d when d.Parent <> None -> d.Destroy()
+                //| _ ->
+                //    let d = Dropdown.create_selector items id (fun g -> setting.Set g) ignore
+                //    this.Dropdown <- Some d
+                //    d.Position
+                //        {
+                //            Left = 0.0f %+ 5.0f
+                //            Top = 0.0f %+ 60.0f
+                //            Right = 1.0f %- 5.0f
+                //            Bottom = 0.0f %+ (60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE)
+                //        }
+                //    |> this.Add
             ),
             ( fun () -> sprintf "%s: %s" label setting.Value ),
             colorFunc,
             bind
         )
 
-    member val Dropdown : Dropdown.Container option = None with get, set
+    //member val Dropdown : Dropdown.Container option = None with get, set
 
 type LevelSelectScreen() as this =
     inherit Screen()

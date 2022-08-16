@@ -78,20 +78,20 @@ module Tree =
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable private scrollTo = ScrollTo.Nothing
 
-    let mutable private dropdownMenu : Dropdown.Container option = None
+    //let mutable private dropdownMenu : Dropdown.Container option = None
 
-    let private showDropdown(cc: CachedChart) (context: LevelSelectContext) (tree_x, tree_y) =
-        if dropdownMenu.IsSome then dropdownMenu.Value.Destroy()
-        let d = 
-            Dropdown.create (
-                CollectionManager.dropdownMenuOptions(cc, context) @
-                [
-                    sprintf "%s Add to table" Icons.sparkle, ignore
-                    sprintf "%s Delete" Icons.delete, ignore
-                    sprintf "%s Edit note" Icons.tag, ignore
-                ] ) (fun () -> dropdownMenu <- None)
-        dropdownMenu <- Some d
-        d.Reposition(tree_x, 0.0f, tree_y, 0.0f, tree_x + 400.0f, 0.0f, tree_y + Dropdown.ITEMSIZE * 5.0f, 0.0f)
+    //let private showDropdown(cc: CachedChart) (context: LevelSelectContext) (tree_x, tree_y) =
+    //    if dropdownMenu.IsSome then dropdownMenu.Value.Destroy()
+    //    let d = 
+    //        Dropdown.create (
+    //            CollectionManager.dropdownMenuOptions(cc, context) @
+    //            [
+    //                sprintf "%s Add to table" Icons.sparkle, ignore
+    //                sprintf "%s Delete" Icons.delete, ignore
+    //                sprintf "%s Edit note" Icons.tag, ignore
+    //            ] ) (fun () -> dropdownMenu <- None)
+    //    dropdownMenu <- Some d
+    //    d.Reposition(tree_x, 0.0f, tree_y, 0.0f, tree_x + 400.0f, 0.0f, tree_y + Dropdown.ITEMSIZE * 5.0f, 0.0f)
 
     let private getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
         if r1 < rate.Value then ( p2, r2, if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2 )
@@ -225,7 +225,7 @@ module Tree =
                     else this.Select()
                 elif Mouse.rightClick() then
                     let x, y = Mouse.pos()
-                    showDropdown cc context (min (Viewport.vwidth - 405f) x, y - scrollPos.Value - origin)
+                    ()//showDropdown cc context (min (Viewport.vwidth - 405f) x, y - scrollPos.Value - origin)
                 elif (!|"delete").Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
                     Tooltip.callback (
@@ -404,7 +404,7 @@ module Tree =
         if LevelSelect.minorRefresh then LevelSelect.minorRefresh <- false; updateDisplay()
         scrollPos.Update(elapsedTime) |> ignore
         
-        if dropdownMenu.IsSome then dropdownMenu.Value.Update(elapsedTime, Rect.Create(0.0f, origin + scrollPos.Value, Viewport.vwidth, originB + scrollPos.Value))
+        //if dropdownMenu.IsSome then dropdownMenu.Value.Update(elapsedTime, Rect.Create(0.0f, origin + scrollPos.Value, Viewport.vwidth, originB + scrollPos.Value))
         let bottomEdge =
             List.fold 
                 (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsedTime))
@@ -431,7 +431,7 @@ module Tree =
                 (fun t (i: GroupItem) -> i.Draw (t, origin, originB))
                 scrollPos.Value
                 groups
-        if dropdownMenu.IsSome then dropdownMenu.Value.Draw()
+        //if dropdownMenu.IsSome then dropdownMenu.Value.Draw()
         Stencil.finish()
 
         let total_height = originB - origin
