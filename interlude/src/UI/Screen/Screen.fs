@@ -76,6 +76,8 @@ module Screen =
         inherit Root()
     
         override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+
             Background.update elapsedTime
             if currentType <> Type.Play || Dialog.exists() then Tooltip.display.Update (elapsedTime, moved)
             if Viewport.vwidth > 0.0f then
@@ -91,7 +93,7 @@ module Screen =
 
             if exit then this.ShouldExit <- true
     
-        override this.Draw() =
+        override this.Draw() = 
             Background.drawWithDim (this.Bounds, Color.White, 1.0f)
             screenContainer.Draw()
             logo.Draw()
@@ -120,7 +122,7 @@ module Screen =
             Transitions.tryStart((fun () -> 
                 let s = thunk()
                 current.OnExit screenType
-                if not s.Initialised then s.Init screenContainer
+                if not s.Initialised then s.Init screenContainer else s.Update(0.0, true)
                 s.OnEnter currentType
                 currentType <- screenType
                 current <- s

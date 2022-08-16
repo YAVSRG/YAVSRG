@@ -345,4 +345,5 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     override this.OnExit next =
         options.Rulesets.Value <- originalRulesets
         scoreData.Ruleset <- getCurrentRuleset()
+        graph.Dispose()
         Screen.Toolbar.show()

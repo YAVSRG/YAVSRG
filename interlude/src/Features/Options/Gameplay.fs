@@ -74,6 +74,8 @@ module Gameplay =
     type ScreencoverPage() as this =
         inherit Page()
 
+        let preview = Themes.NoteskinPreview 0.35f
+
         do
             this.Content(
                 column()
@@ -81,9 +83,10 @@ module Gameplay =
                 |+ PrettySetting("gameplay.screencover.hidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Pos(350.0f)
                 |+ PrettySetting("gameplay.screencover.sudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Pos(450.0f)
                 |+ PrettySetting("gameplay.screencover.fadelength", Slider(options.ScreenCover.FadeLength, 0.01f)).Pos(550.0f)
-                |+ Themes.NoteskinPreview 0.35f
+                |+ preview
             )
         override this.Title = N"gameplay.screencover"
+        override this.OnDestroy() = preview.Destroy()
         override this.OnClose() = ()
 
     type GameplayPage() as this =

@@ -52,6 +52,10 @@ type ScoreGraph(data: ScoreInfoProvider) =
 
         fbo.Unbind()
 
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        if moved then refresh <- true
+
     override this.Draw() =
         if refresh then this.Redraw()
         Draw.sprite Viewport.bounds Color.White fbo.sprite
