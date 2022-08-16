@@ -36,7 +36,7 @@ module Animation =
 
         override this.Update(elapsedTime) = 
             if time > 0.0 then
-                value <- lerp (MathF.Pow(0.994f, float32 elapsedTime)) target value
+                value <- lerp (float32 <| Math.Pow(0.994, elapsedTime)) target value
                 time <- time - elapsedTime
 
         override this.Complete = false

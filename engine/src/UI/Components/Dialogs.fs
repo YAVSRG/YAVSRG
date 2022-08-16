@@ -50,4 +50,6 @@ module Dialog =
         | Some existing -> failwithf "Already showing %O. Nested dialogs not supported" existing
         | None -> current <- Some d; d.Init display; fade.Target <- 1.0f
 
+    let exists() = current.IsSome
+
 type Dialog with member this.Show() = Dialog.show this

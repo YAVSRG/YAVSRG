@@ -106,6 +106,8 @@ type Window(config: Config, title: string, root: Root) as this =
             GLFW.PollEvents()
             Input.poll(this.KeyboardState, this.MouseState)
             Thread.Sleep(TimeSpan.FromMilliseconds(0.5))
+
+        this.OnUnload()
     
     member this.OnLoad() =
         this.ApplyConfig config

@@ -94,7 +94,7 @@ module FlowContainer =
                 if visible && c.VisibleBounds.Visible then c.Draw()
         
         override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
+            base.Update(elapsedTime, moved || refresh)
 
             let moved = 
                 if refresh then
@@ -125,6 +125,10 @@ module FlowContainer =
             this.FlowContent children
             for { Widget = c } in children do
                 c.Init this
+
+        member this.Iter(f: 'T -> unit) =
+            for { Widget = c } in children do
+                f c
         
         static member (|+) (parent: #Base<'T>, child: 'T) = parent.Add child; parent
         static member (|*) (parent: #Base<'T>, child: 'T) = parent.Add child
@@ -134,7 +138,8 @@ module FlowContainer =
         inherit Base<'T>(item_height)
 
         let mutable content_height = 0.0f
-        member this.ContentHeight = content_height
+        let contentChangeEvent = Event<float32>()
+        member this.ContentHeightChanged = contentChangeEvent.Publish
 
         override this.FlowContent children =
             let mutable t = 0.0f
@@ -144,7 +149,9 @@ module FlowContainer =
                     c.Position <- Position.Row (t, this.ItemSize)
                     t <- t + this.ItemSize + this.Spacing
                     b <- t + this.ItemSize
-            content_height <- b
+            if b <> content_height then
+                content_height <- b
+                contentChangeEvent.Trigger content_height
 
         override this.Navigate() =
             if (!|"up").Tapped() then this.Previous()
@@ -156,7 +163,8 @@ module FlowContainer =
         inherit Base<'T>(item_width)
         
         let mutable content_width = 0.0f
-        member this.ContentHeight = content_width
+        let contentChangeEvent = Event<float32>()
+        member this.ContentWidthChanged = contentChangeEvent.Publish
 
         override this.FlowContent children =
             let mutable l = 0.0f
@@ -166,7 +174,9 @@ module FlowContainer =
                     c.Position <- Position.Column (l, this.ItemSize)
                     l <- l + this.ItemSize + this.Spacing
                     r <- l + this.ItemSize
-            content_width <- r
+            if r <> content_width then
+                content_width <- r
+                contentChangeEvent.Trigger content_width
                     
         override this.Navigate() =
             if (!|"left").Tapped() then this.Previous()
@@ -178,7 +188,8 @@ module FlowContainer =
         inherit Base<'T>(item_width)
 
         let mutable content_width = 0.0f
-        member this.ContentHeight = content_width
+        let contentChangeEvent = Event<float32>()
+        member this.ContentWidthChanged = contentChangeEvent.Publish
 
         override this.FlowContent children =
             let mutable r = 0.0f
@@ -186,10 +197,12 @@ module FlowContainer =
             for { Widget = c; Visible = visible } in children do
                 if visible then
                     c.Position <- 
-                        { Left = 1.0f %- (r + this.ItemSize) ; Top = Position.min; Right = 1.0f %- r; Bottom = Position.max }
+                        { Left = 1.0f %- (r + this.ItemSize); Top = Position.min; Right = 1.0f %- r; Bottom = Position.max }
                     r <- r + this.ItemSize + this.Spacing
                     l <- r + this.ItemSize
-            content_width <- l
+                if l <> content_width then
+                    content_width <- l
+                    contentChangeEvent.Trigger content_width
                     
         override this.Navigate() =
             if (!|"left").Tapped() then this.Next()
@@ -197,38 +210,44 @@ module FlowContainer =
             elif (!|"select").Tapped() then this.SelectFocusedChild()
 
 [<Sealed>]
-type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
+type ScrollContainer(child: Widget, contentHeight: float32) =
     inherit StaticWidget(NodeType.Switch (K child))
 
-    static let SENSITIVITY = 50.0f
+    static let SENSITIVITY = 100.0f
 
-    let mutable scroll = 0.0f // amount in pixels to move content UP inside container
+    let mutable scroll_pos = Animation.Fade 0.0f // amount in pixels to move content UP inside container
+    let mutable contentHeight = contentHeight
+    let mutable refresh = false
 
-    static member Flow(child: FlowContainer.Vertical<'T>) = ScrollContainer(child, fun () -> child.ContentHeight)
+    static member Flow(child: FlowContainer.Vertical<'T>) =
+        let sc = ScrollContainer(child, 0.0f)
+        child.ContentHeightChanged.Add(sc.set_ContentHeight)
+        sc
 
     member val Margin = 0.0f with get, set
+    member this.ContentHeight with set(value) = contentHeight <- value; refresh <- true
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
+        scroll_pos.Update elapsedTime
 
         let mutable scrollby = 0.0f
         if Mouse.hover this.Bounds then scrollby <- -Mouse.scroll() * SENSITIVITY
         if this.Focused then
-            let selected_bounds = (Selection.get_focused_element().Value :?> Widget).Bounds
+            let selected_bounds = (Selection.get_focused_element().Value :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
             if selected_bounds.Bottom > this.Bounds.Bottom then
                 scrollby <- scrollby + selected_bounds.Bottom - this.Bounds.Bottom
             elif this.Bounds.Top > selected_bounds.Top then
                 scrollby <- scrollby - this.Bounds.Top + selected_bounds.Top
-        
-        // todo: detect if heightFunc() changes
 
         let moved = 
-            if scrollby <> 0.0f then
-                scroll <- Math.Max(0.0f, Math.Min(scroll + scrollby, heightFunc() - this.Bounds.Height))
-                child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin)
+            if scrollby <> 0.0f || refresh then
+                refresh <- false
+                scroll_pos.Target <- Math.Max(0.0f, Math.Min(scroll_pos.Target + scrollby, contentHeight - this.Bounds.Height))
                 true
-            else moved
+            else moved || scroll_pos.Moving
 
+        if moved then child.Position <- Position.SliceTop(contentHeight).Translate(0.0f, -scroll_pos.Value).Margin(this.Margin)
         child.Update(elapsedTime, moved)
 
     override this.Draw() = 
@@ -241,7 +260,7 @@ type ScrollContainer(child: Widget, heightFunc: unit -> float32) =
     override this.Init(parent: Widget) =
         base.Init parent
         child.Init this
-        child.Position <- Position.SliceTop(heightFunc()).Translate(0.0f, -scroll).Margin(this.Margin)
+        child.Position <- Position.SliceTop(contentHeight).Translate(0.0f, -scroll_pos.Value).Margin(this.Margin)
 
 module SwitchContainer =
 

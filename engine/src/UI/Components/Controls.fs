@@ -24,6 +24,8 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
         |+ Clickable.Focus this
         |* HotkeyAction(hotkey, toggle)
 
+    member this.TextColor = colorFunc
+
     override this.OnSelected() =
         base.OnSelected()
         color.Target <- 1.0f
