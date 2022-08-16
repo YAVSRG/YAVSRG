@@ -13,7 +13,7 @@ open Interlude.Features.Toolbar
 
 module Startup =
 
-    let init() =
+    let ui_entry_point() =
         Screen.init [|LoadingScreen(); MainMenuScreen(); ImportScreen(); LevelSelectScreen()|]
         
         ScoreScreenHelpers.watchReplay <- fun (rate, data) -> Screen.changeNew (fun () -> ReplayScreen(ReplayMode.Replay (rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
@@ -25,22 +25,5 @@ module Startup =
             ( fun (level, main, details) ->
                 sprintf "[%A] %s" level main |> Terminal.add_message )
 
-        Screen.Container(Toolbar())
-
-    // todo: replace this with screen container (?)
-    type Root() =
-        inherit Percyqaz.Flux.UI.Root()
-
-        let container = init()
-        
-        override this.Draw() = container.Draw()
-
-        override this.Update(elapsedTime, moved) =
-            container.Update(elapsedTime, moved)
-            base.Update(elapsedTime, moved)
-            if Screen.exit then this.ShouldExit <- true
-
-        override this.Init() =
-            base.Init()
-            Gameplay.init()
-            container.Init(this)
+        { new Screen.ScreenRoot(Toolbar())
+            with override this.Init() = Gameplay.init(); base.Init() }

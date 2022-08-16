@@ -32,7 +32,7 @@ let main argv =
             (
                 Options.config,
                 "Interlude",
-                Startup.Root()
+                Startup.ui_entry_point()
             )
 
         Options.save()

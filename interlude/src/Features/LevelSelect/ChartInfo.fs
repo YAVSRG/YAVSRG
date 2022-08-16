@@ -53,7 +53,7 @@ type ChartInfo() as this =
 
         |* Text(
             (fun () -> getModString(rate.Value, selectedMods.Value, autoplay)),
-            Align = Alignment.RIGHT,
+            Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 17.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 10.0f })
 
     member this.Refresh() =

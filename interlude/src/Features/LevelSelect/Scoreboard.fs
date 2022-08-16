@@ -35,6 +35,7 @@ module Scoreboard =
         inherit StaticContainer(NodeType.None) // todo: make selectable with options for watching replay
 
         let fade = Animation.Fade(0.0f, Target = 1.0f)
+        let animation = Animation.seq [Animation.Delay 150; fade]
 
         do
             data.Physical |> ignore
@@ -82,7 +83,7 @@ module Scoreboard =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            fade.Update elapsedTime
+            animation.Update elapsedTime
             if Mouse.hover this.Bounds && (!|"delete").Tapped() then
                 let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
                 Tooltip.callback (
@@ -175,7 +176,7 @@ type Scoreboard() as this =
         | _ -> K true
 
 
-    let flowContainer =  FlowContainer.Vertical(75.0f, Sort = sorter(), Filter = filterer())
+    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.padding, Sort = sorter(), Filter = filterer())
     let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.padding, Position = Position.TrimTop(10.0f).TrimBottom(50.0f))
 
     let loader = Loader.reload flowContainer

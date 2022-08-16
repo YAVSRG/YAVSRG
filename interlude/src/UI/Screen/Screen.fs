@@ -31,9 +31,12 @@ module Screen =
         let HEIGHT = 70.0f
         let expandAmount = Animation.Fade 1.0f
         let mutable hidden = false
+        let mutable wasHidden = false
 
         let hide() = hidden <- true
         let show() = hidden <- false
+
+        let moving() = wasHidden <> hidden || expandAmount.Moving
 
     let globalAnimation = Animation.fork [Style.accentColor; Toolbar.expandAmount]
 
@@ -47,56 +50,50 @@ module Screen =
     let mutable exit = false
     let mutable currentType = Type.SplashScreen
 
-    let mutable private container : Widget = Dummy()
+    type ScreenContainer() =
+        inherit Widget(NodeType.None)
+        
+        override this.Position with set _ = failwith "Not permitted"
 
-    let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
-        if (screenType <> currentType || screenType = Type.Play) then
-            Transitions.tryStart((fun () -> 
-                let s = thunk()
-                current.OnExit screenType
-                if not s.Initialised then s.Init container
-                s.OnEnter currentType
-                currentType <- screenType
-                current <- s
-            ), flags)
-            |> globalAnimation.Add
+        override this.Update(elapsedTime, moved) =
+            let moved = moved || Toolbar.moving()
+            if moved then
+                this.Bounds <- if Toolbar.hidden then Viewport.bounds else Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
+                this.VisibleBounds <- Viewport.bounds
+            current.Update(elapsedTime, moved)
 
-    let change (screenType: Type) (flags: Transitions.Flags) = changeNew (K screens.[int screenType]) screenType flags
+        override this.Init(parent: Widget) =
+            base.Init parent
+            this.Bounds <- if Toolbar.hidden then Viewport.bounds else Viewport.bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
+            this.VisibleBounds <- Viewport.bounds
+            current.Init this
 
-    let back (flags: Transitions.Flags) =
-        match currentType with
-        | Type.SplashScreen -> exit <- true
-        | Type.MainMenu -> change Type.SplashScreen flags
-        | Type.LevelSelect -> change Type.MainMenu flags
-        | Type.Import
-        | Type.Play
-        | Type.Replay
-        | Type.Score -> change Type.LevelSelect flags
-        | _ -> Logging.Critical (sprintf "No back-behaviour defined for %A" currentType)
+        override this.Draw() = current.Draw()
 
-    type Container(toolbar: Widget) =
-        inherit Overlay(NodeType.None)
+    let screenContainer = ScreenContainer()
+
+    type ScreenRoot(toolbar: Widget) =
+        inherit Root()
     
         override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
             Background.update elapsedTime
             if currentType <> Type.Play || Dialog.exists() then Tooltip.display.Update (elapsedTime, moved)
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos()
                 Background.setParallaxPos(x / Viewport.vwidth, y / Viewport.vheight)
             Style.accentColor.SetColor Content.accentColor
-            Dialog.display.Update(elapsedTime, moved)
+            Dialog.display.Update (elapsedTime, moved)
 
-            globalAnimation.Update elapsedTime
             toolbar.Update (elapsedTime, moved)
+            globalAnimation.Update elapsedTime
             logo.Update (elapsedTime, moved)
-            let screenBounds = if Toolbar.hidden then this.Bounds else this.Bounds.Shrink(0.0f, Toolbar.HEIGHT * Toolbar.expandAmount.Value)
-            // todo
-            current.Update (elapsedTime, moved)
+            screenContainer.Update (elapsedTime, moved)
+
+            if exit then this.ShouldExit <- true
     
         override this.Draw() =
             Background.drawWithDim (this.Bounds, Color.White, 1.0f)
-            current.Draw()
+            screenContainer.Draw()
             logo.Draw()
             toolbar.Draw()
             if Transitions.active then
@@ -108,14 +105,39 @@ module Screen =
                 Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.color(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
                 Tooltip.display.Draw()
 
-        override this.Init(parent: Widget) =
-            base.Init parent
+        override this.Init() =
+            base.Init()
+
             Logo.display.Init this
             toolbar.Init this
             Tooltip.display.Init this
             Dialog.display.Init this
-            container <- this
-            current.Init this
+            screenContainer.Init this
             current.OnEnter Type.SplashScreen
+    
+    let changeNew (thunk: unit -> #T) (screenType: Type) (flags: Transitions.Flags) =
+        if (screenType <> currentType || screenType = Type.Play) then
+            Transitions.tryStart((fun () -> 
+                let s = thunk()
+                current.OnExit screenType
+                if not s.Initialised then s.Init screenContainer
+                s.OnEnter currentType
+                currentType <- screenType
+                current <- s
+            ), flags)
+            |> globalAnimation.Add
+    
+    let change (screenType: Type) (flags: Transitions.Flags) = changeNew (K screens.[int screenType]) screenType flags
+    
+    let back (flags: Transitions.Flags) =
+        match currentType with
+        | Type.SplashScreen -> exit <- true
+        | Type.MainMenu -> change Type.SplashScreen flags
+        | Type.LevelSelect -> change Type.MainMenu flags
+        | Type.Import
+        | Type.Play
+        | Type.Replay
+        | Type.Score -> change Type.LevelSelect flags
+        | _ -> Logging.Critical (sprintf "No back-behaviour defined for %A" currentType)
 
 type Screen = Screen.T

@@ -16,7 +16,6 @@ type Toolbar() =
 
     let shown() = not hidden
     let mutable userCollapse = false
-    let mutable wasHidden = hidden
 
     let container = StaticContainer(NodeType.None)
 

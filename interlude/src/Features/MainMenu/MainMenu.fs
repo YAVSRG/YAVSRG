@@ -40,7 +40,7 @@ type private MenuButton(onClick, label: string, pos) as this =
         base.Draw()
 
     member this.Pop() =
-        this.Position <- { pos with Right = 0.0f %- -Viewport.vwidth }
+        this.Position <- { pos with Right = 0.0f %- Viewport.vwidth }
         this.SnapPosition()
         this.Position <- pos
 
