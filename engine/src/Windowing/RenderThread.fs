@@ -12,6 +12,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Common
 
 type RenderThread(window: NativeWindow, audioDevice: int, root: Root) =
     
@@ -29,9 +30,11 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root) =
         window.Context.MakeCurrent()
         this.Init()
         fps_timer.Start()
-        while not (GLFW.WindowShouldClose window.WindowPtr) do
-            let timeUntilNextFrame = this.DispatchFrame()
-            if timeUntilNextFrame > 0.0 then Thread.Sleep(Math.Floor(timeUntilNextFrame * 1000.0) |> int)
+        try
+            while not (GLFW.WindowShouldClose window.WindowPtr) do
+                let timeUntilNextFrame = this.DispatchFrame()
+                if timeUntilNextFrame > 0.0 then Thread.Sleep(Math.Floor(timeUntilNextFrame * 1000.0) |> int)
+        with fatal_err -> Logging.Critical("Fatal crash in UI thread", fatal_err); window.Close()
 
     member this.Start() =
         Thread(this.Loop).Start()

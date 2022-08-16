@@ -28,4 +28,3 @@ type Root() =
         if moved then
             this.Bounds <- Viewport.bounds
             this.VisibleBounds <- Viewport.bounds
-        if (!|"exit").Tapped() then Selection.up()
