@@ -18,21 +18,17 @@ open Caching
 
 module Library =
 
-    [<Json.AutoCodec(false)>]
-    type Data =
-        {
-            Charts: ConcurrentDictionary<string, CachedChart>
-            Collections: Dictionary<string, Collection>
-        }
-
-    let data =
-        loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) false
-        |> fun d -> Logging.Info (sprintf "Cache loaded, %i charts and %i collections." d.Charts.Keys.Count d.Collections.Keys.Count); d
-    let charts, collections = data.Charts, data.Collections
+    let charts : ConcurrentDictionary<string, CachedChart> = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) false
+    let collections = 
+        let cs : Dictionary<string, Collection> = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "collections.json")) false
+        Logging.Info (sprintf "Loaded chart library of %i charts, %i collections" charts.Keys.Count cs.Keys.Count)
+        cs
 
     // ---- Basic data layer stuff ----
 
-    let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "cache.json")) data
+    let save() = 
+        saveImportantJsonFile (Path.Combine(getDataPath "Data", "cache.json")) charts
+        saveImportantJsonFile (Path.Combine(getDataPath "Data", "collections.json")) collections
     
     let addOrUpdate (c: Chart) = charts.[c.FileIdentifier] <- cacheChart c
 
