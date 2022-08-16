@@ -3,8 +3,8 @@
 open Prelude.Gameplay.NoteColors
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Themes
 open Interlude
@@ -55,6 +55,7 @@ module Themes =
             | Some chart -> 
                 let nr = NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
                 nr.Add(GameplayWidgets.ScreenCover())
+                if this.Initialised then nr.Init this
                 nr :> Widget
             | None -> new Dummy()
 
@@ -87,6 +88,10 @@ module Themes =
             fbo.Unbind()
             Draw.sprite bounds_placeholder.Bounds Color.White fbo.sprite
             base.Draw()
+
+        override this.Init(parent: Widget) =
+            base.Init parent
+            renderer.Init this
 
         member this.Destroy() =
             fbo.Dispose()
@@ -176,14 +181,14 @@ module Themes =
 
         let preview = NoteskinPreview 0.5f
 
-        let noteskins = PrettySetting("themes.noteskin", Text("")) // todo: better placeholders
+        let noteskins = PrettySetting("themes.noteskin", Dummy())
         let refreshNoteskins() =
             options.Noteskin.Value <- Noteskins.Current.id
             noteskins.Child <- 
                 Selector(Noteskins.list(), options.Noteskin |> Setting.trigger (fun id -> Noteskins.Current.switch id; preview.Refresh()))
             preview.Refresh()
 
-        let themes = PrettySetting("themes.theme", Text(""))
+        let themes = PrettySetting("themes.theme", Dummy())
         let refreshThemes() =
             options.Theme.Value <- Themes.Current.id
             themes.Child <-

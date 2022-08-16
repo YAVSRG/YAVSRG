@@ -11,7 +11,7 @@ type QuickStartDialog(doc) =
     inherit Dialog()
 
     let markdown = MarkdownUI.build doc
-    let flow = ScrollContainer(markdown.Body, K (markdown.Height + markdown.LHeight), Position = Position.Margin(400.0f, 100.0f))
+    let flow = ScrollContainer(markdown.Body, markdown.Height + markdown.LHeight, Position = Position.Margin(400.0f, 100.0f))
 
     override this.Init(parent: Widget) =
         base.Init parent

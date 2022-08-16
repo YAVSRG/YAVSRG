@@ -25,14 +25,13 @@ type private MenuButton(onClick, label: string, pos) as this =
             Align = Alignment.CENTER,
             Position = { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 20.0f })
         this.Position <- pos
+        
+    override this.OnFocus() = base.OnFocus(); color.Target <- 0.7f
+    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.3f
 
-    override this.OnFocus() =
-        base.OnFocus()
-        color.Target <- 0.7f
-
-    override this.OnUnfocus() =
-        base.OnUnfocus()
-        color.Target <- 0.3f
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        color.Update elapsedTime
 
     override this.Draw() =
         Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad

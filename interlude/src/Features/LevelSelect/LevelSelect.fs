@@ -14,9 +14,8 @@ open Interlude.UI
 open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection.Controls
 
-type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) as this =
+type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) =
     inherit StylishButton(
                         // todo: bring back functionality
             ( fun () -> 
