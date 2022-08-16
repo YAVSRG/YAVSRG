@@ -153,7 +153,7 @@ module GameplayWidgets =
         override this.Draw() =
             let combo = helper.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
-            Text.drawFill(Content.font, combo.ToString(), this.Bounds.Expand amt, color.GetColor(), 0.5f)
+            Text.drawFill(Style.baseFont, combo.ToString(), this.Bounds.Expand amt, color.GetColor(), 0.5f)
 
     type ProgressMeter(conf: WidgetConfig.ProgressMeter, helper) =
         inherit StaticWidget(NodeType.None)

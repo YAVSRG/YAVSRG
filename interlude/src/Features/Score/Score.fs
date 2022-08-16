@@ -182,13 +182,13 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 Draw.rect box (Color.FromArgb(80, color))
                 Draw.rect (header.SliceBottom 35.0f) (Color.FromArgb(80, color))
                 Draw.rect (body.SliceBottom 5.0f) (Color.FromArgb(80, color))
-                Text.drawFillB(font, label, header.TrimBottom 40.0f, (Color.White, Color.Black), 0.5f)
-                Text.drawFillB(font, text, body.TrimLeft(10.0f).TrimBottom(25.0f), (color, Color.Black), 0.0f)
-                Text.drawFillB(font, hint, body.TrimLeft(10.0f).SliceBottom(35.0f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
+                Text.drawFillB(Style.baseFont, label, header.TrimBottom 40.0f, (Color.White, Color.Black), 0.5f)
+                Text.drawFillB(Style.baseFont, text, body.TrimLeft(10.0f).TrimBottom(25.0f), (color, Color.Black), 0.0f)
+                Text.drawFillB(Style.baseFont, hint, body.TrimLeft(10.0f).SliceBottom(35.0f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
                 if pb = PersonalBestType.None then
-                    Text.drawFillB(font, existingPb, header.SliceBottom(35.0f), (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
+                    Text.drawFillB(Style.baseFont, existingPb, header.SliceBottom(35.0f), (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
                 else
-                    Text.drawFillB(font, Icons.sparkle + " New record! ", header.SliceBottom(35.0f), (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
+                    Text.drawFillB(Style.baseFont, Icons.sparkle + " New record! ", header.SliceBottom(35.0f), (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
 
             infobar
                 bartop 
@@ -250,7 +250,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
             let title = panel.SliceTop(100.0f).Shrink(20.0f)
             Draw.rect title (Color.FromArgb(127, Color.Black))
-            Text.drawFillB(font, sprintf "%iK Results  •  %s" scoreData.Chart.Keys scoreData.Ruleset.Name, title, (Color.White, Color.Black), 0.5f)
+            Text.drawFillB(Style.baseFont, sprintf "%iK Results  •  %s" scoreData.Chart.Keys scoreData.Ruleset.Name, title, (Color.White, Color.Black), 0.5f)
 
             // accuracy info
             let counters = panel.TrimTop(70.0f).Shrink(20.0f).TrimBottom(120.0f)
@@ -264,7 +264,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 let b = Rect.Create(counters.Left + 10.0f, y, counters.Right - 10.0f, y + h)
                 Draw.rect b (Color.FromArgb(40, j.Color))
                 Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, j.Color))
-                Text.drawFill(font, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Color.White, 0.0f)
+                Text.drawFill(Style.baseFont, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Color.White, 0.0f)
                 y <- y + h
 
             // stats
@@ -272,8 +272,8 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             let hhit, htotal = eventCounts.Holds
             let rhit, rtotal = eventCounts.Releases
             let data = sprintf "Notes: %i/%i  •  Holds: %i/%i  •  Releases: %i/%i  •  Combo: %ix" nhit ntotal hhit htotal rhit rtotal scoreData.Scoring.State.BestCombo
-            Text.drawFillB(font, data, panel.SliceBottom(130.0f).TrimBottom(80.0f).Shrink(20.0f, 5.0f), (Color.White, Color.Black), 0.5f)
-            Text.drawFillB(font, scoreData.Mods, panel.SliceBottom(100.0f).Shrink(20.0f), (Color.White, Color.Black), 0.5f)
+            Text.drawFillB(Style.baseFont, data, panel.SliceBottom(130.0f).TrimBottom(80.0f).Shrink(20.0f, 5.0f), (Color.White, Color.Black), 0.5f)
+            Text.drawFillB(Style.baseFont, scoreData.Mods, panel.SliceBottom(100.0f).Shrink(20.0f), (Color.White, Color.Black), 0.5f)
 
         // top banner
         Draw.rect (this.Bounds.SliceTop 190.0f) (Style.color(127, 0.5f, 0.0f))
@@ -316,7 +316,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
         // grade stuff
         let gradeBounds = Rect.Box(this.Bounds.Right - halfh + xadjust - 270.0f, halfh - 305.0f, 540.0f, 540.0f)
-        Text.drawFill(font, scoreData.Ruleset.GradeName gradeAchieved.Grade, gradeBounds.Shrink 100.0f, scoreData.Ruleset.GradeColor gradeAchieved.Grade, 0.5f)
+        Text.drawFill(Style.baseFont, scoreData.Ruleset.GradeName gradeAchieved.Grade, gradeBounds.Shrink 100.0f, scoreData.Ruleset.GradeColor gradeAchieved.Grade, 0.5f)
         Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-base")
         if lampAchieved.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, lampAchieved.Lamp) <| getTexture "grade-lamp-overlay")
         Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-overlay")

@@ -47,8 +47,8 @@ type ScoreGraph(data: ScoreInfoProvider) =
             if col.A > 0uy then
                 let x = this.Bounds.Left + 5.0f + ev.Time * hscale
                 Draw.rect(Rect.Box(x - 2.5f, this.Bounds.Top + y - 2.5f, 5f, 5f)) col
-        Text.draw(Content.font, "Early", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 35.0f, Color.FromArgb(127, Color.White))
-        Text.draw(Content.font, "Late", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 5.0f, Color.FromArgb(127, Color.White))
+        Text.draw(Style.baseFont, "Early", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Bottom - 35.0f, Color.FromArgb(127, Color.White))
+        Text.draw(Style.baseFont, "Late", 18.0f, this.Bounds.Left + 5.0f, this.Bounds.Top + 5.0f, Color.FromArgb(127, Color.White))
 
         fbo.Unbind()
 

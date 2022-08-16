@@ -51,7 +51,7 @@ type [<AbstractClass>] Page() as this =
         this.View()
 
 and Menu(topLevel: Page) as this =
-    inherit Percyqaz.Flux.UI.Dialog()
+    inherit Dialog()
 
     let MAX_PAGE_DEPTH = 12
     
@@ -231,7 +231,7 @@ type PrettyButton(name, action) as this =
             ),
             Align = Alignment.LEFT,
             Position = Position.Margin(Style.padding))
-        |+ Percyqaz.Flux.UI.Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
+        |+ Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
         |* TooltipRegion2(T name)
 
     override this.Draw() =

@@ -91,8 +91,8 @@ type MainMenuScreen() as this =
         let (s, ss) = splashText
         let a1 = splashSubAnim.Value * splashAnim.Value * 255.0f |> int
         let a2 = splashAnim.Alpha
-        Text.drawJustB (Content.font, ss, 20.0f, c, this.Bounds.Top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Style.color (a1, 0.5f, 0.0f)), 0.5f)
-        Text.drawJustB (Content.font, s, 40.0f, c, this.Bounds.Top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Style.color (a2, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Style.baseFont, ss, 20.0f, c, this.Bounds.Top + 50.0f + 30.0f * splashSubAnim.Value, (Color.FromArgb (a1, Color.White), Style.color (a1, 0.5f, 0.0f)), 0.5f)
+        Text.drawJustB (Style.baseFont, s, 40.0f, c, this.Bounds.Top - 60.0f + 80.0f * splashAnim.Value, (Color.FromArgb (a2, Color.White), Style.color (a2, 0.5f, 0.0f)), 0.5f)
         base.Draw()
 
     override this.Update (elapsedTime, moved) =

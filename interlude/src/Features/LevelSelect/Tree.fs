@@ -171,8 +171,8 @@ module Tree =
                 let rateLabel = sprintf "(%.2fx)" rate
                 if color.A > 0uy then
                     Draw.rect( Rect.Create(right - pos - 40.0f, top, right - pos + 40.0f, bottom) ) accent
-                    Text.drawJustB(font, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
-                    Text.drawJustB(font, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
+                    Text.drawJustB(Style.baseFont, formatted, 20.0f, right - pos, top + 8.0f, (color, Color.Black), 0.5f)
+                    Text.drawJustB(Style.baseFont, rateLabel, 14.0f, right - pos, top + 35.0f, (color, Color.Black), 0.5f)
         
             match pbData with
             | Some d ->
@@ -195,10 +195,10 @@ module Tree =
 
             // draw text
             Draw.rect (bounds.SliceBottom 25.0f) (Color.FromArgb(60, 0, 0, 0))
-            Text.drawB(font, cc.Title, 23.0f, left + 5f, top, (Color.White, Color.Black))
-            Text.drawB(font, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, (Color.White, Color.Black))
-            Text.drawB(font, cc.DiffName, 15.0f, left + 5f, top + 65.0f, (Color.White, Color.Black))
-            Text.drawB(font, collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
+            Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, (Color.White, Color.Black))
+            Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, (Color.White, Color.Black))
+            Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, (Color.White, Color.Black))
+            Text.drawB(Style.baseFont, collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
@@ -266,13 +266,13 @@ module Tree =
             Draw.rect (borderb.SliceTop 5.0f) colorb
             Draw.rect (borderb.SliceBottom 5.0f) colorb
             Draw.rect bounds (if this.Selected then Style.color(127, 1.0f, 0.2f) else Style.color(127, 0.3f, 0.0f))
-            Text.drawFillB(font, name, bounds.Shrink 5.0f, (Color.White, Color.Black), 0.5f)
+            Text.drawFillB(Style.baseFont, name, bounds.Shrink 5.0f, (Color.White, Color.Black), 0.5f)
 
         member this.Draw(top, origin, originB) =
             let b = this.CheckBounds(top, origin, originB, this.OnDraw)
             if this.Expanded then
                 let b2 = List.fold (fun t (i: ChartItem) -> i.Draw(t, origin, originB)) b items
-                if b < origin && b2 > origin then Text.drawJustB(font, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, (Color.White, Color.Black), 1.0f)
+                if b < origin && b2 > origin then Text.drawJustB(Style.baseFont, name, 20.0f, Viewport.vwidth - 20f, origin + 10.0f, (Color.White, Color.Black), 1.0f)
                 b2
             else b
 

@@ -55,7 +55,7 @@ type private EditCollectionPage(originalName) as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("collections.edit.collectionname", Percyqaz.Flux.UI.TextEntry(name, "none")).Pos(200.0f)
+            |+ PrettySetting("collections.edit.collectionname", TextEntry(name, "none")).Pos(200.0f)
             |+ PrettySetting("collections.edit.type", Selector([|"Collection", "Collection"; "Playlist", "Playlist"; "Goals", "Goals"|], ctype)).Pos(300.0f)
         )
 

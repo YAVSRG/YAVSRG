@@ -13,7 +13,7 @@ open Interlude.Utils
 open Interlude.Features.Gameplay
 
 type private ModCard(id) as this =
-    inherit Percyqaz.Flux.UI.Frame(
+    inherit Frame(
         NodeType.Button(fun () -> this.ToggleMod()),
         Border = (fun () -> if this.ModEnabled then Color.White elif this.Focused then !*Palette.LIGHTER else Color.Transparent),
         Fill = fun () -> if this.Focused then !*Palette.BASE else !*Palette.DARK

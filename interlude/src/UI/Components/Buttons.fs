@@ -44,7 +44,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
                 <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom)
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
-        Text.drawFillB(Content.font, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.color(255, 0.4f, color.Value)), 0.5f)
+        Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.color(255, 0.4f, color.Value)), 0.5f)
         base.Draw()
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =

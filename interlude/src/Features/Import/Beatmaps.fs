@@ -94,7 +94,7 @@ type private SearchContainerLoader(t) as this =
     // loader is only drawn if it is visible on screen
     override this.Draw() =
         // todo: improved loading indicator here
-        Text.drawFill(Content.font, "Loading...", this.Bounds, Color.White, 0.5f)
+        Text.drawFill(Style.baseFont, "Loading...", this.Bounds, Color.White, 0.5f)
         // todo: hide this when complete
         if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" t// |> BackgroundTask.Callback(fun _ -> if this.Parent.IsSome then this.Destroy()))
 

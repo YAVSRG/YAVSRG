@@ -72,9 +72,9 @@ module Tooltip =
                 Draw.rect (bounds.Shrink 5.0f) (Color.FromArgb(a / 4 * 3, Color.Black))
                 Draw.rect (bounds.Shrink 5.0f) (Color.FromArgb(a / 2, c))
                 
-                Text.drawB (Content.font, icon, 50.0f, this.Bounds.Left + 130.0f, y - 1.0f + TEXTHEIGHT * 0.5f * float32 i.Message.Length, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
+                Text.drawB (Style.baseFont, icon, 50.0f, this.Bounds.Left + 130.0f, y - 1.0f + TEXTHEIGHT * 0.5f * float32 i.Message.Length, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
                 for x = 0 to i.Message.Length - 1 do
-                    Text.drawB (Content.font, i.Message.[x], 30.0f, this.Bounds.Left + 235.0f, y + 33.0f + TEXTHEIGHT * float32 x, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
+                    Text.drawB (Style.baseFont, i.Message.[x], 30.0f, this.Bounds.Left + 235.0f, y + 33.0f + TEXTHEIGHT * float32 x, (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black)))
 
             if up then
                 let mutable y = this.Bounds.Top + 200.0f

@@ -56,7 +56,7 @@ module MarkdownUI =
             }
 
         let text (str: string) (col: Color * Color) (size: float32) =
-            let width = (Text.measure(Content.font, str)) * size
+            let width = (Text.measure(Style.baseFont, str)) * size
             make <| Text(str, Color = K col, Align = Alignment.LEFT) <| (width, size / 0.6f)
 
         let sym str = text str (Color.Silver, Color.Red) 25.0f
@@ -91,7 +91,7 @@ module MarkdownUI =
         | AnchorLink (link, _) -> Fragment.sym "anchorLink"
         | DirectLink (body, link, title, _) ->
             let r = spans { settings with HasLink = true } body
-            r.Body.Add (Percyqaz.Flux.UI.Clickable(fun () -> openlink link))
+            r.Body.Add (Clickable(fun () -> openlink link))
             r
         | IndirectLink (body, link, title, _) -> Fragment.sym "ilink"
         | DirectImage (body, link, title, _) -> Fragment.sym "dimg"

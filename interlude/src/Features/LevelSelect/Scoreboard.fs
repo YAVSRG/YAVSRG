@@ -69,7 +69,7 @@ module Scoreboard =
                 Align = Alignment.RIGHT,
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f })
 
-            |* Percyqaz.Flux.UI.Clickable(fun () -> 
+            |* Clickable(fun () -> 
                 Screen.changeNew 
                     (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen.T)
                     Screen.Type.Score
