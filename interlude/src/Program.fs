@@ -6,6 +6,7 @@ open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
 open Interlude
 open Interlude.UI
+open Interlude.Features
 open Interlude.Features.Printerlude
 
 [<EntryPoint>]
@@ -27,6 +28,7 @@ let main argv =
             Options.Hotkeys.init Options.options.Hotkeys
             Printerlude.init()
         )
+        Window.onUnload.Add(Gameplay.save)
 
         Launch.entryPoint
             (
