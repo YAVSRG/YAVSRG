@@ -25,7 +25,7 @@ module Debug =
                         "debug.downloadupdate",
                         ( fun () ->
                             if AutoUpdate.updateAvailable then
-                                AutoUpdate.applyUpdate(fun () -> Notification.add (L"notification.update.installed", NotificationType.System))
+                                AutoUpdate.applyUpdate(fun () -> Notifications.add (L"notification.update.installed", NotificationType.System))
                         ),
                         L"notification.update.installing", NotificationType.System,
                         Enabled = AutoUpdate.updateAvailable

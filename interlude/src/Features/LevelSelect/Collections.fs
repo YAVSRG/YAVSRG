@@ -22,13 +22,13 @@ module CollectionManager =
             let success = Collections.addChart(cc, rate.Value, selectedMods.Value)
             if success then
                 if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
-                Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.added", NotificationType.Info)
+                Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.added", NotificationType.Info)
 
     let removeChart(cc: CachedChart, context: LevelSelectContext) =
         let success = Collections.removeChart(cc, context)
         if success then
             if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
-            Notification.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.removed", NotificationType.Info)
+            Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.removed", NotificationType.Info)
             if context = Chart.context then Chart.context <- LevelSelectContext.None
 
     let dropdownMenuOptions(cc: CachedChart, context: LevelSelectContext) =

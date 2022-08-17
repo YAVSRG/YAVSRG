@@ -10,7 +10,6 @@ open Interlude
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection
 
 //module Dropdown =
 

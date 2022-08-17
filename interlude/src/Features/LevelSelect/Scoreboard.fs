@@ -85,14 +85,14 @@ module Scoreboard =
             animation.Update elapsedTime
             if Mouse.hover this.Bounds && (!|"delete").Tapped() then
                 let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                Tooltip.callback (
+                Notifications.callback (
                     (!|"delete"),
                     Localisation.localiseWith [scoreName] "misc.delete",
                     NotificationType.Warning,
                     fun () ->
                         Chart.saveData.Value.Scores.Remove data.ScoreInfo |> ignore
                         LevelSelect.refresh <- true
-                        Notification.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
+                        Notifications.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
                 )
 
     module Loader =

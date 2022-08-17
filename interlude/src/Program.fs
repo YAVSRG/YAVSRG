@@ -19,8 +19,7 @@ let main argv =
     if m.WaitOne(TimeSpan.Zero, true) then
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
-        try
-            Options.load()
+        try Options.load()
         with err -> Logging.Critical("Fatal error loading game config", err); crashSplash(); Console.ReadLine() |> ignore
         
         Window.onLoad.Add(fun () -> 

@@ -5,7 +5,6 @@ open System.Drawing
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Interlude
 open Interlude.UI
 
 [<RequireQualifiedAccess>]
@@ -16,7 +15,7 @@ type NotificationType =
     | System
     | Task
 
-module Tooltip =
+module Notifications =
 
     type private T =
         {
@@ -127,7 +126,5 @@ module Tooltip =
             }
         sync (fun () -> items.Add t)
 
-module Notification =
-
     let add (str: string, t: NotificationType) =
-        Tooltip.notif (str, t)
+        notif (str, t)

@@ -49,7 +49,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let mutable downloaded = false
     let download() =
         let target = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".osz")
-        Notification.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
+        Notifications.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
             (BackgroundTask.Chain
                 [
@@ -57,7 +57,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
                     (Library.Imports.autoConvert target
                     |> BackgroundTask.Callback( fun b -> 
                         LevelSelect.refresh <- LevelSelect.refresh || b
-                        Notification.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
+                        Notifications.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
                         File.Delete target ))
                 ]) |> ignore
         downloaded <- true

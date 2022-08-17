@@ -17,7 +17,7 @@ type NoteskinCard(data: RepoEntry) as this =
     let mutable downloaded = Noteskins.list() |> Array.map snd |> Array.contains data.Name
     let download() =
         let target = Path.Combine(getDataPath("Noteskins"), System.Guid.NewGuid().ToString() + ".isk")
-        Notification.add (Localisation.localiseWith [data.Name] "notification.download.noteskin", NotificationType.Task)
+        Notifications.add (Localisation.localiseWith [data.Name] "notification.download.noteskin", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.Name)
             ( BackgroundTask.Callback(fun b -> Noteskins.load()) (downloadFile(data.Download, target)) ) |> ignore
         downloaded <- true

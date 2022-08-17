@@ -256,7 +256,7 @@ type PrettyButton(name, action) as this =
     static member Once(name, action, notifText, notifType) =
         let mutable ref = Unchecked.defaultof<PrettyButton>
         let button = PrettyButton(name, fun () ->
-                if ref.Enabled then action(); Notification.add (notifText, notifType)
+                if ref.Enabled then action(); Notifications.add (notifText, notifType)
                 ref.Enabled <- false
             )
         ref <- button

@@ -40,7 +40,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
 
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        Notification.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
+        Notifications.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
         BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
             (BackgroundTask.Chain
                 [
@@ -48,7 +48,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
                     (Library.Imports.autoConvert target
                         |> BackgroundTask.Callback( fun b -> 
                             LevelSelect.refresh <- LevelSelect.refresh || b
-                            Notification.add (Localisation.localiseWith [data.name] "notification.install.pack", NotificationType.Task)
+                            Notifications.add (Localisation.localiseWith [data.name] "notification.install.pack", NotificationType.Task)
                             File.Delete target ))
                 ]) |> ignore
         downloaded <- true

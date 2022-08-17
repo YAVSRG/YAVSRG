@@ -228,14 +228,14 @@ module Tree =
                     ()//showDropdown cc context (min (Viewport.vwidth - 405f) x, y - scrollPos.Value - origin)
                 elif (!|"delete").Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
-                    Tooltip.callback (
+                    Notifications.callback (
                         (!|"delete"),
                         Localisation.localiseWith [chartName] "misc.delete",
                         NotificationType.Warning,
                         fun () -> 
                             Library.delete cc
                             LevelSelect.refresh <- true
-                            Notification.add (Localisation.localiseWith [chartName] "notification.deleted", NotificationType.Info)
+                            Notifications.add (Localisation.localiseWith [chartName] "notification.deleted", NotificationType.Info)
                     )
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
@@ -282,14 +282,14 @@ module Tree =
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
                 elif (!|"delete").Tapped() then
                     let groupName = sprintf "%s (%i charts)" name (items.Count())
-                    Tooltip.callback (
+                    Notifications.callback (
                         (!|"delete"),
                         Localisation.localiseWith [groupName] "misc.delete",
                         NotificationType.Warning,
                         fun () ->
                             items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
                             LevelSelect.refresh <- true
-                            Notification.add (Localisation.localiseWith [groupName] "notification.deleted", NotificationType.Info)
+                            Notifications.add (Localisation.localiseWith [groupName] "notification.deleted", NotificationType.Info)
                     )
 
         member this.Update(top, origin, originB, elapsedTime) =

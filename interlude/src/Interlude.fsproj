@@ -48,12 +48,11 @@
     <Compile Include="Utils.fs" />
     <Compile Include="Content.fs" />
     <Compile Include="Options.fs" />
-    <Compile Include="UI\Widget.fs" />
+    <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Notifications.fs" />
     <Compile Include="UI\Components\Buttons.fs" />
     <Compile Include="UI\Components\Misc.fs" />
-    <Compile Include="UI\Components\Selection\Selection.fs" />
     <Compile Include="UI\Components\Selection\Controls.fs" />
     <Compile Include="UI\Components\Selection\Menu.fs" />
     <Compile Include="UI\Components\Selection\Compound.fs" />

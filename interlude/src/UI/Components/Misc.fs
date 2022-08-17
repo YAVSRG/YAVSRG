@@ -8,32 +8,17 @@ open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
 
-type TooltipRegion(localisedText) =
-    inherit Widget1()
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
-            Tooltip.tooltip ((!|"tooltip"), localisedText)
-
-    static member Create(localisedText) = fun (w: #Widget1) -> let t = TooltipRegion localisedText in t.Add w; t
-
 type TooltipRegion2(localisedText) =
     inherit StaticWidget(NodeType.None)
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
-            Tooltip.tooltip ((!|"tooltip"), localisedText)
+            Notifications.tooltip ((!|"tooltip"), localisedText)
 
     override this.Draw() = ()
 
 // todo: TooltipContainer that contains both a region and another widget
-
-[<AutoOpen>]
-module Tooltip =
-    type Widget1 with
-        member this.Tooltip(localisedText) = TooltipRegion.Create localisedText this
 
 type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as this =
     inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))

@@ -79,7 +79,7 @@ module Screen =
             base.Update(elapsedTime, moved)
 
             Background.update elapsedTime
-            if currentType <> Type.Play || Dialog.exists() then Tooltip.display.Update (elapsedTime, moved)
+            if currentType <> Type.Play || Dialog.exists() then Notifications.display.Update (elapsedTime, moved)
             if Viewport.vwidth > 0.0f then
                 let x, y = Mouse.pos()
                 Background.setParallaxPos(x / Viewport.vwidth, y / Viewport.vheight)
@@ -105,14 +105,14 @@ module Screen =
             if currentType <> Type.Play || Dialog.exists() then 
                 let x, y = Mouse.pos()
                 Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.color(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
-                Tooltip.display.Draw()
+                Notifications.display.Draw()
 
         override this.Init() =
             base.Init()
 
             Logo.display.Init this
             toolbar.Init this
-            Tooltip.display.Init this
+            Notifications.display.Init this
             Dialog.display.Init this
             screenContainer.Init this
             current.OnEnter Type.SplashScreen

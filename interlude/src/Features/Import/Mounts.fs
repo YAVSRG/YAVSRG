@@ -91,11 +91,11 @@ type CreateMountDialog(mountType: Mounts.Game, setting: Setting<MountedChartSour
             fun path ->
                 match mountType, path with
                 | Mounts.Game.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack ("osu!", path) |> Some
-                | Mounts.Game.Osu, _ -> Notification.add ("Should be the osu! 'Songs' folder itself - This doesn't look like it.", NotificationType.Error)
+                | Mounts.Game.Osu, _ -> Notifications.add ("Should be the osu! 'Songs' folder itself - This doesn't look like it.", NotificationType.Error)
                 | Mounts.Game.Stepmania, FolderOfPacks
                 | Mounts.Game.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
                 | Mounts.Game.Stepmania, _
-                | Mounts.Game.Etterna, _ -> Notification.add ("Should be a Stepmania 'Songs' folder/pack library - This doesn't look like one.", NotificationType.Error)
+                | Mounts.Game.Etterna, _ -> Notifications.add ("Should be a Stepmania 'Songs' folder/pack library - This doesn't look like one.", NotificationType.Error)
                 | _ -> failwith "impossible"
                 if setting.Value.IsSome then this.Close()
             |> Some

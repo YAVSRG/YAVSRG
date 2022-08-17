@@ -4,6 +4,7 @@ open System.Drawing
 open Percyqaz.Flux.UI
 open Interlude.Utils
 
+// todo: merge into Percyqaz.Flux
 module Style =
 
     open Percyqaz.Flux.UI.Style
