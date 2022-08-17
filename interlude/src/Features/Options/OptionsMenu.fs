@@ -4,7 +4,7 @@ open System.Drawing
 open Percyqaz.Flux.UI
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components.Selection.Menu
+open Interlude.UI.Menu
 open Interlude.Features.LevelSelect
 
 module OptionsMenuRoot =

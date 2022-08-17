@@ -9,9 +9,7 @@ open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Menu
-open Interlude.UI.Components.Selection.Compound
+open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Options
 

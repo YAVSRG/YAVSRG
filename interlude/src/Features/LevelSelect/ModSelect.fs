@@ -7,8 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Gameplay.Mods
 open Interlude.UI
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Menu
+open Interlude.UI.Menu
 open Interlude.Utils
 open Interlude.Features.Gameplay
 

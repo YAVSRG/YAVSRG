@@ -12,7 +12,6 @@ open Prelude.Web
 open Interlude.UI
 open Interlude.Options
 open Interlude.UI.Components
-open Interlude.UI.Components.Selection.Compound
 open Interlude.Features.LevelSelect
 
 module FileDropHandling =

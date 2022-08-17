@@ -8,7 +8,7 @@ open Prelude.ChartFormats.Conversions
 open Prelude.Data.Charts.Library.Imports
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Components.Selection.Menu
+open Interlude.UI.Menu
 
 module Mounts =
     

@@ -8,7 +8,7 @@ open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
 
-type TooltipRegion2(localisedText) =
+type TooltipRegion(localisedText) =
     inherit StaticWidget(NodeType.None)
 
     override this.Update(elapsedTime, bounds) =

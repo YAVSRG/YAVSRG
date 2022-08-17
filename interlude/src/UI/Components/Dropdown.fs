@@ -1,4 +1,4 @@
-﻿namespace Interlude.UI.Components.Selection.Controls
+﻿namespace Interlude.UI.Components
 
 open System
 open Percyqaz.Common

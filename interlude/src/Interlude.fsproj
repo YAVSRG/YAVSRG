@@ -53,9 +53,12 @@
     <Compile Include="UI\Notifications.fs" />
     <Compile Include="UI\Components\Buttons.fs" />
     <Compile Include="UI\Components\Misc.fs" />
-    <Compile Include="UI\Components\Selection\Controls.fs" />
-    <Compile Include="UI\Components\Selection\Menu.fs" />
-    <Compile Include="UI\Components\Selection\Compound.fs" />
+    <Compile Include="UI\Components\Tabs.fs" />
+    <Compile Include="UI\Components\Dropdown.fs" />
+    <Compile Include="UI\Menu\Helpers.fs" />
+    <Compile Include="UI\Menu\Controls.fs" />
+    <Compile Include="UI\Menu\Grid.fs" />
+    <Compile Include="UI\Menu\Menu.fs" />
     <Compile Include="UI\Screen\Logo.fs" />
     <Compile Include="UI\Screen\Background.fs" />
     <Compile Include="UI\Screen\Transitions.fs" />

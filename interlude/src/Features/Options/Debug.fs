@@ -6,7 +6,7 @@ open Prelude.Data.Charts
 open Interlude.Utils
 open Interlude.Options
 open Interlude.UI
-open Interlude.UI.Components.Selection.Menu
+open Interlude.UI.Menu
 
 module Debug =
 

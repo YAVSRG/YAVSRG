@@ -4,9 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Scoring
 open Interlude.Options
-open Interlude.UI.Components.Selection
-open Interlude.UI.Components.Selection.Compound
-open Interlude.UI.Components.Selection.Menu
+open Interlude.UI.Menu
 
 module Gameplay = 
 

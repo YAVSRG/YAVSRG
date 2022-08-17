@@ -1,13 +1,10 @@
-﻿namespace Interlude.UI.Components.Selection.Compound
+﻿namespace Interlude.UI.Menu
 
-open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components.Selection.Menu
 
 module Grid =
     
@@ -18,7 +15,7 @@ module Grid =
 
     type Selection<'T> = { IsSelected: 'T -> bool; Select: ('T * bool) -> unit }
     type Action<'T> = { Icon: string; Act: 'T -> unit; Enabled: 'T -> bool }
-    type Column<'T> = { Text: 'T -> string } // todo: add headers to columns ?
+    type Column<'T> = { Text: 'T -> string }
     type Config<'T> =
         {
             Columns: Column<'T> list
@@ -139,122 +136,3 @@ module Grid =
                 refresh_on_next_update <- true
 
     let create (source: unit -> 'T seq) (config: Config<'T>) = View<'T>(source, config)
-
-type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
-    inherit StaticWidget(NodeType.Switch(fun _ -> this._selector()))
-    
-    let selector = PrettySetting(name, Selector<int>(Array.indexed cases, setting)).Pos(200.0f)
-
-    member this._selector() = selector
-
-     member private this.WhoIsFocused : int option =
-        if selector.Focused then Some -1
-        else Seq.tryFindIndex (fun (c: Widget) -> c.Focused) controls.[setting.Value]
-
-    member this.Previous() =
-        match this.WhoIsFocused with
-        | Some n ->
-            let current_controls = controls.[setting.Value]
-            if n = -1 then
-                current_controls.[current_controls.Length - 1].Focus()
-            elif n = 0 then selector.Focus()
-            else current_controls.[n - 1].Focus()
-        | None -> ()
-
-    member this.Next() =
-        match this.WhoIsFocused with
-        | Some n ->
-            let current_controls = controls.[setting.Value]
-            if n = -1 then
-                current_controls.[0].Focus()
-            elif n = current_controls.Length - 1 then selector.Focus()
-            else current_controls.[n + 1].Focus()
-        | None -> ()
-
-    member this.SelectFocusedChild() =
-        match this.WhoIsFocused with
-        | Some -1 -> selector.Select()
-        | Some n -> controls.[setting.Value].[n].Select()
-        | None -> ()
-
-    override this.Draw() =
-        let current_controls = controls.[setting.Value]
-        selector.Draw()
-        for c in current_controls do
-            c.Draw()
-
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        if moved then
-            selector.Update(elapsedTime, true)
-            for case in controls do
-                for control in case do
-                    control.Update(elapsedTime, true)
-        else
-            selector.Update(elapsedTime, false)
-            for control in controls.[setting.Value] do
-                control.Update(elapsedTime, false)
-
-        if this.Focused then
-            if (!|"up").Tapped() then this.Previous()
-            elif (!|"down").Tapped() then this.Next()
-            elif (!|"select").Tapped() then this.SelectFocusedChild()
-
-    override this.Init(parent: Widget) =
-        base.Init parent
-        selector.Init this
-        for case in controls do
-            for control in case do
-                 control.Init this
-
-module Tabs =
-
-    type private TabButton(name, isOpen, onClick) =
-        inherit Button(name, onClick, "none")
-
-        override this.Draw() =
-            Draw.rect this.Bounds (if isOpen() then !*Palette.SELECTED else !*Palette.HOVER)
-            base.Draw()
-
-    type Container() as this =
-        inherit StaticWidget(NodeType.Switch(fun _ -> this.WhoIsSelected()))
-        let mutable selectedItem = None
-    
-        let TABHEIGHT = 60.0f
-        let TABWIDTH = 250.0f
-
-        let buttons = FlowContainer.LeftToRight(TABWIDTH, Position = Position.SliceTop TABHEIGHT)
-
-        let init_tabs = ResizeArray<Widget>()
-
-        member private this.WhoIsSelected() = selectedItem.Value
-    
-        member this.AddTab(name, widget: Widget) =
-            buttons
-            |* TabButton(name, (fun() -> match selectedItem with Some x -> x = widget | None -> false), fun () -> selectedItem <- Some widget)
-
-            match selectedItem with
-            | None -> selectedItem <- Some widget
-            | _ -> ()
-
-            widget.Position <- Position.TrimTop TABHEIGHT
-
-            if this.Initialised then widget.Init this
-            else init_tabs.Add widget
-    
-        member this.WithTab(name, widget) =
-            this.AddTab(name, widget); this
-    
-        override this.Draw() =
-            buttons.Draw()
-            selectedItem.Value.Draw()
-    
-        override this.Update(elapsedTime, moved) =
-            base.Update(elapsedTime, moved)
-            buttons.Update(elapsedTime, moved)
-            selectedItem.Value.Update(elapsedTime, moved)
-
-        override this.Init(parent: Widget) =
-            base.Init parent
-            buttons.Init this
-            for tab in init_tabs do tab.Init this

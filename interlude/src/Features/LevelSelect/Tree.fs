@@ -17,7 +17,6 @@ open Prelude.Data.Charts.Collections
 open Interlude.UI
 open Interlude.Content
 open Interlude.Options
-open Interlude.UI.Components.Selection.Controls
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 

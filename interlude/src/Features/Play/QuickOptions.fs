@@ -7,7 +7,7 @@ open Prelude.Common
 open Prelude.Scoring
 open Interlude.Features
 open Interlude.Options
-open Interlude.UI.Components.Selection.Menu
+open Interlude.UI.Menu
 
 module QuickOptions =
 
