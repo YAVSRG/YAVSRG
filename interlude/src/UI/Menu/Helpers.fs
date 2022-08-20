@@ -1,8 +1,10 @@
 ﻿namespace Interlude.UI.Menu
 
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.Utils
+open Interlude.UI
 
 [<AutoOpen>]
 module Helpers =
@@ -30,3 +32,27 @@ module Helpers =
     let PRETTYTEXTWIDTH = 500.0f
     let PRETTYHEIGHT = 80.0f
     let PRETTYWIDTH = 1200.0f
+
+type TooltipRegion(localisedText) =
+    inherit StaticWidget(NodeType.None)
+
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
+            Notifications.tooltip ((!|"tooltip"), localisedText)
+
+    override this.Draw() = ()
+
+type TooltipContainer(localisedText, child: Widget) =
+    inherit StaticContainer(NodeType.Switch(fun _ -> child))
+
+    override this.Init(parent: Widget) =
+        this
+        |+ TooltipRegion(localisedText)
+        |* child
+        base.Init parent
+
+[<AutoOpen>]
+module Tooltip =
+    type Widget with
+        member this.Tooltip(localisedText) = TooltipContainer(localisedText, this)

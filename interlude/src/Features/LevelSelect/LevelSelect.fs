@@ -15,31 +15,35 @@ open Interlude.Features.Gameplay
 open Interlude.Options
 open Interlude.UI.Components
 
-type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) =
+type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) as this =
     inherit StylishButton(
-                        // todo: bring back functionality
-            ( fun () -> 
-                ()
-                //match this.Dropdown with
-                //| Some d when d.Parent <> None -> d.Destroy()
-                //| _ ->
-                //    let d = Dropdown.create_selector items id (fun g -> setting.Set g) ignore
-                //    this.Dropdown <- Some d
-                //    d.Position
-                //        {
-                //            Left = 0.0f %+ 5.0f
-                //            Top = 0.0f %+ 60.0f
-                //            Right = 1.0f %- 5.0f
-                //            Bottom = 0.0f %+ (60.0f + float32 (Seq.length items) * Dropdown.ITEMSIZE)
-                //        }
-                //    |> this.Add
-            ),
+            ( fun () -> this.ToggleDropdown() ),
             ( fun () -> sprintf "%s: %s" label setting.Value ),
             colorFunc,
-            bind
-        )
+            bind )
 
-    //member val Dropdown : Dropdown.Container option = None with get, set
+    member this.ToggleDropdown() =
+        match this.Dropdown with
+        | Some d -> this.Dropdown <- None
+        | _ ->
+            let d = Dropdown.Selector items id (fun g -> setting.Set g) (fun () -> this.Dropdown <- None)
+            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
+            d.Init this
+            this.Dropdown <- Some d
+
+    member val Dropdown : Dropdown option = None with get, set
+
+    override this.Draw() =
+        base.Draw()
+        match this.Dropdown with
+        | Some d -> d.Draw()
+        | None -> ()
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        match this.Dropdown with
+        | Some d -> d.Update(elapsedTime, moved)
+        | None -> ()
 
 type LevelSelectScreen() as this =
     inherit Screen()

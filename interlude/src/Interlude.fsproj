@@ -51,8 +51,7 @@
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Notifications.fs" />
-    <Compile Include="UI\Components\Buttons.fs" />
-    <Compile Include="UI\Components\Misc.fs" />
+    <Compile Include="UI\Components\Controls.fs" />
     <Compile Include="UI\Components\Tabs.fs" />
     <Compile Include="UI\Components\Dropdown.fs" />
     <Compile Include="UI\Menu\Helpers.fs" />

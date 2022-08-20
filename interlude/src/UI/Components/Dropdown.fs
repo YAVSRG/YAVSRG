@@ -1,95 +1,59 @@
 ﻿namespace Interlude.UI.Components
 
-open System
-open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Prelude.Common
-open Interlude
-open Interlude.Utils
-open Interlude.UI
-open Interlude.UI.Components
 
-//module Dropdown =
+module private Dropdown =
 
-//    let ITEMSIZE = 60.0f
+    let ITEMSIZE = 60.0f
     
-//    type Item(label: string, onclick: unit -> unit) as this =
-//        inherit Selectable()
+    type Item(label: string, onclick: unit -> unit) as this =
+        inherit StaticContainer(NodeType.Button onclick)
 
-//        do
-//            this.Add(Clickable((fun () -> this.Selected <- true), (fun b -> if b then this.Hover <- true), Float = true))
-//            this.Add(
-//                TextBox(K label, K (Color.White, Color.Black), 0.0f)
-//                    .Position { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 5.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 5.0f }
-//            )
+        do
+            this
+            |+ Clickable.Focus this
+            |* Text(label,
+                Align = Alignment.LEFT,
+                Position = Position.Margin(10.0f, 5.0f))
 
-//        override this.Draw() =
-//            if this.Hover then Draw.rect this.Bounds (Style.color(127, 1.0f, 0.4f))
-//            base.Draw()
+        override this.Draw() =
+            if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+            base.Draw()
 
-//        override this.Update(elapsedTime, bounds) =
-//            if this.Hover && (!|"select").Tapped() then this.Selected <- true
-//            base.Update(elapsedTime, bounds)
+type Dropdown(items: (string * (unit -> unit)) seq, onclose: unit -> unit) as this =
+    inherit Frame(NodeType.Switch (fun _ -> this.Items),
+        Fill = !%Palette.DARK, Border = !%Palette.LIGHT)
 
-//        override this.OnSelect() =
-//            onclick()
-//            this.Selected <- false
+    let flow = FlowContainer.Vertical(Dropdown.ITEMSIZE)
 
-//    type Container(items: (string * (unit -> unit)) seq, onclose: unit -> unit) as this =
-//        inherit Selectable()
+    do
+        for (label, action) in items do
+            flow |* Dropdown.Item(label, fun () -> action(); this.Close())
+        this.Add flow
 
-//        let fc = FlowSelectable(ITEMSIZE, 0.0f)
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        this.VisibleBounds <- Viewport.bounds
+        if 
+            not this.Focused
+            || Mouse.leftClick()
+            || Mouse.rightClick()
+        then this.Close()
 
-//        do
-//            Frame(Color.FromArgb(180, 0, 0, 0), Color.FromArgb(100, 255, 255, 255))
-//            |> this.Add
-//            let items = Seq.map (fun (label, action) -> Item(label, fun () -> action(); this.Close())) items |> Array.ofSeq
-//            this.Add fc
-//            for i in items do fc.Add i
-//            fc.Selected <- true
+    override this.Init(parent: Widget) =
+        base.Init parent
+        this.VisibleBounds <- Viewport.bounds
+        this.Focus()
 
-//        override this.Update(elapsedTime, bounds) =
-//            base.Update(elapsedTime, bounds)
-//            if 
-//                this.HoverChild.IsNone
-//                || Mouse.leftClick()
-//                || Mouse.rightClick()
-//            then this.Close()
+    member this.Close() = onclose()
+    member private this.Items = flow
 
-//        member this.Close() =
-//            onclose()
-//            this.Destroy()
+    member this.Place (x, y, width) =
+        this.Position <- Position.Box(0.0f, 0.0f, x, y, width, this.Height)
 
-//    let create (items: (string * (unit -> unit)) seq) (onclose: unit -> unit) =
-//        Container(items, onclose)
+    member this.Height = float32 (Seq.length items) * Dropdown.ITEMSIZE
 
-//    let create_selector (items: 'T seq) (labelFunc: 'T -> string) (selectFunc: 'T -> unit) (onclose: unit -> unit) =
-//        create (Seq.map (fun item -> (labelFunc item, fun () -> selectFunc item)) items) onclose
-
-//type DropdownSelector<'T>(items: 'T array, labelFunc: 'T -> string, setting: Setting<'T>) as this =
-//    inherit Selectable()
-
-//    let mutable dropdown : Dropdown.Container option = None
-    
-//    do
-//        this.Add(new TextBox((fun () -> labelFunc setting.Value), K (Color.White, Color.Black), 0.0f))
-//        this.Reposition(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 100.0f, 0.0f)
-//        this.Add(new Clickable((fun () -> if not this.Selected then this.Selected <- true), fun b -> if b then this.Hover <- true))
-
-//    override this.OnSelect() =
-//        let d = Dropdown.create_selector items labelFunc setting.Set (fun () -> this.Selected <- false)
-//        dropdown <- Some d
-//        d.Position { Left = 0.0f %+ 0.0f; Top = 1.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ (Dropdown.ITEMSIZE * float32 (min 3 items.Length)) }
-//        |> this.Add
-//        base.OnSelect()
-
-//    override this.OnDeselect() =
-//        dropdown.Value.Destroy()
-//        dropdown <- None
-//        base.OnDeselect()
-
-//    static member FromEnum(setting: Setting<'T>) =
-//        let values = Enum.GetValues(typeof<'T>) :?> 'T array
-//        DropdownSelector(values, (fun x -> Enum.GetName(typeof<'T>, x)), setting)
+    static member Selector (items: 'T seq) (labelFunc: 'T -> string) (selectFunc: 'T -> unit) (onclose: unit -> unit) =
+        Dropdown(Seq.map (fun item -> (labelFunc item, fun () -> selectFunc item)) items, onclose)
