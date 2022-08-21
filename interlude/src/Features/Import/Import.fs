@@ -3,11 +3,9 @@
 open System.IO
 open System.Net
 open System.Net.Security
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
-open Prelude.Data.Charts.Sorting
 open Prelude.Web
 open Interlude.UI
 open Interlude.Options
@@ -23,18 +21,6 @@ module FileDropHandling =
                 (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
             |> ignore
             true
-
-type private SearchContainer(populate, handleFilter) as this =
-    inherit StaticContainer(NodeType.None)
-    let flow = FlowContainer.Vertical<Widget>(80.0f, Spacing = 15.0f)
-    let scroll = ScrollContainer.Flow(flow, Margin = Style.padding, Position = Position.TrimTop 70.0f)
-    let populate = populate flow
-    let handleFilter = handleFilter flow
-    do
-        flow |* SearchContainerLoader populate
-        this
-        |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter f), Position = Position.SliceTop 60.0f ))
-        |* scroll
 
 type ImportScreen() as this =
     inherit Screen()
@@ -73,7 +59,8 @@ type ImportScreen() as this =
                         )
                     )
                 ),
-                (fun flowContainer filter -> flowContainer.Filter <- NoteskinCard.Filter filter) )
+                (fun flowContainer filter -> flowContainer.Filter <- NoteskinCard.Filter filter),
+                300.0f)
 
         let tabs = 
             Tabs.Container(Position = { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 80.0f })

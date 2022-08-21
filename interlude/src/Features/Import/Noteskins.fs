@@ -40,8 +40,6 @@ type NoteskinCard(data: RepoEntry) as this =
 
     member this.LoadPreview(img: Bitmap) =
         preview <- Sprite.upload(img, 1, 1, true)
-        // todo: delete sprite when component deleted
-        printfn "preview of noteskin loaded"
 
     member this.Name = data.Name
     member this.Downloaded = downloaded

@@ -78,6 +78,7 @@
     <Compile Include="Features\LevelSelect\Scoreboard.fs" />
     <Compile Include="Features\LevelSelect\ChartInfo.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
+    <Compile Include="Features\Import\Shared.fs" />
     <Compile Include="Features\Import\EtternaPacks.fs" />
     <Compile Include="Features\Import\Beatmaps.fs" />
     <Compile Include="Features\Import\Noteskins.fs" />

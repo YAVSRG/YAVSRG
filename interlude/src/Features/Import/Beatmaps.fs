@@ -3,7 +3,6 @@
 open System
 open System.IO
 open Percyqaz.Json
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
@@ -85,18 +84,6 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             Align = Alignment.RIGHT,
             Position = { Left = Position.min; Top = 0.0f %+ 20.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 20.0f })
         |* Clickable((fun () -> if not downloaded then download()))
-
-type private SearchContainerLoader(t) as this =
-    inherit StaticWidget(NodeType.None)
-    let t = t this
-    let mutable task = None
-
-    // loader is only drawn if it is visible on screen
-    override this.Draw() =
-        // todo: improved loading indicator here
-        Text.drawFill(Style.baseFont, "Loading...", this.Bounds, Color.White, 0.5f)
-        // todo: hide this when complete
-        if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" t// |> BackgroundTask.Callback(fun _ -> if this.Parent.IsSome then this.Destroy()))
 
 module private Beatmap =
     
