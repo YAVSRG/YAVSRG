@@ -52,6 +52,8 @@ type TooltipContainer(localisedText, child: Widget) =
         |* child
         base.Init parent
 
+    member this.WithPosition(pos) = this.Position <- pos; this
+
 [<AutoOpen>]
 module Tooltip =
     type Widget with

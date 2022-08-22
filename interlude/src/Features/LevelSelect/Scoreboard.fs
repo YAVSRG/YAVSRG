@@ -14,6 +14,7 @@ open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Components
+open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
 
@@ -25,7 +26,7 @@ module Scoreboard =
     | Accuracy = 2
 
     type Filter =
-    | All = 0
+    | None = 0
     | CurrentRate = 1
     | CurrentPlaystyle = 2
     | CurrentMods = 3
@@ -155,7 +156,6 @@ type Scoreboard() as this =
 
     let mutable chart = ""
     let mutable scoring = ""
-    let buttons = SwitchContainer.Row()
 
     let filter = Setting.simple Filter.All
     let sort = Setting.map enum int options.ScoreSortMode
@@ -183,35 +183,32 @@ type Scoreboard() as this =
     do
         this
         |+ scrollContainer
-        |+ (
-                buttons
-                |+ StylishButton.FromEnum(
-                    "Sort",
-                    sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
-                    Style.main 100,
-                    TiltLeft = false,
-                    Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 45.0f; Right = 0.25f %- 15.0f; Bottom = 1.0f %- 5.0f })
-                    //.Tooltip(L"levelselect.scoreboard.sort.tooltip")
-                |+ StylishButton.FromEnum(
-                    "Filter",
-                    filter |> Setting.trigger (fun _ -> this.Refresh()),
-                    Style.main 90,
-                    Position = { Left = 0.25f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.5f %- 15.0f; Bottom = 1.0f %- 5.0f })
-                    //.Tooltip(L"levelselect.scoreboard.filter.tooltip")
-                |+ StylishButton(
-                    (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
-                    (fun () -> ruleset.Name),
-                    Style.main 80,
-                    Position = { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f })
-                    //.Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
-                |+ StylishButton(
-                    this.Refresh,
-                    K <| Localisation.localise "levelselect.scoreboard.storage.local",
-                    Style.main 70,
-                    TiltRight = false,
-                    Position = { Left = 0.75f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 1.0f %- 15.0f; Bottom = 1.0f %- 5.0f })
-                    //.Tooltip(L"levelselect.scoreboard.storage.tooltip")
-           )
+        |+ StylishButton.FromEnum(
+            "Sort",
+            sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
+            Style.main 100,
+            TiltLeft = false)
+            .Tooltip(L"levelselect.scoreboard.sort.tooltip")
+            .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 45.0f; Right = 0.25f %- 15.0f; Bottom = 1.0f %- 5.0f }
+        |+ StylishButton.FromEnum(
+            "Filter",
+            filter |> Setting.trigger (fun _ -> this.Refresh()),
+            Style.main 90)
+            .Tooltip(L"levelselect.scoreboard.filter.tooltip")
+            .WithPosition { Left = 0.25f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.5f %- 15.0f; Bottom = 1.0f %- 5.0f }
+        |+ StylishButton(
+            (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
+            (fun () -> ruleset.Name),
+            Style.main 80)
+            .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
+            .WithPosition { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f }
+        |+ StylishButton(
+            this.Refresh,
+            K <| Localisation.localise "levelselect.scoreboard.storage.local",
+            Style.main 70,
+            TiltRight = false)
+            .Tooltip(L"levelselect.scoreboard.storage.tooltip")
+            .WithPosition { Left = 0.75f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 1.0f %- 15.0f; Bottom = 1.0f %- 5.0f }
         |* (
                 let noLocalScores = L"levelselect.scoreboard.empty"
                 Text((fun () -> if count = 0 then noLocalScores else ""),

@@ -10,10 +10,12 @@ open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
-open Interlude.UI
-open Interlude.Features.Gameplay
 open Interlude.Options
+open Interlude.Utils
+open Interlude.Features.Gameplay
+open Interlude.UI
 open Interlude.UI.Components
+open Interlude.UI.Menu
 
 type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) as this =
     inherit StylishButton(
@@ -77,15 +79,17 @@ type LevelSelectScreen() as this =
             Align = Alignment.CENTER,
             Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 100.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 160.0f })
 
-        |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()),
-            Position = { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f })
-            //.Tooltip(L"levelselect.search.tooltip")
+        |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()))
+            .Tooltip(L"levelselect.search.tooltip")
+            .WithPosition { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f }
 
-        |+ ModSelect(Position = { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %- 25.0f; Bottom = 0.0f %+ 170.0f })
-            //.Tooltip(L"levelselect.mods.tooltip")
+        |+ ModSelect()
+            .Tooltip(L"levelselect.mods.tooltip")
+            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %- 25.0f; Bottom = 0.0f %+ 170.0f }
 
-        |+ CollectionManager(Position = { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %- 25.0f; Bottom = 0.0f %+ 170.0f })
-            //.Tooltip(L"levelselect.collections.tooltip")
+        |+ CollectionManager()
+            .Tooltip(L"levelselect.collections.tooltip")
+            .WithPosition { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %- 25.0f; Bottom = 0.0f %+ 170.0f }
 
         |+ StylishButton(
             (fun () -> Setting.app not options.ChartSortReverse; LevelSelect.refresh <- true),
@@ -96,9 +100,9 @@ type LevelSelectScreen() as this =
         |+ LevelSelectDropdown(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.color(100, 0.4f, 0.6f)),
-            "sort_mode",
-            Position = { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f })
-            //.Tooltip(L"levelselect.sortby.tooltip")
+            "sort_mode")
+            .Tooltip(L"levelselect.sortby.tooltip")
+            .WithPosition { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         
         |+ StylishButton(
             (fun () -> Setting.app not options.ChartGroupReverse; LevelSelect.refresh <- true),
@@ -109,9 +113,9 @@ type LevelSelectScreen() as this =
         |+ LevelSelectDropdown(groupBy.Keys, "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
             (fun () -> Style.color(100, 0.2f, 0.8f)),
-            "group_mode",
-            Position = { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f })
-            //.Tooltip(L"levelselect.groupby.tooltip")
+            "group_mode")
+            .Tooltip(L"levelselect.groupby.tooltip")
+            .WithPosition { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
 
         |* infoPanel
 

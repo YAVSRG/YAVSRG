@@ -5,7 +5,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Interlude.UI
-open Interlude.UI.Components
 open Interlude.Utils
 
 type [<AbstractClass>] Page() as this =
