@@ -46,7 +46,7 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root) =
         frame_timer.Restart()
         
         // Update
-        Input.update()
+        Input.begin_frame_events()
         ROOT_ANIMATION.Update elapsedTime
         root.Update (elapsedTime, resized)
         resized <- false

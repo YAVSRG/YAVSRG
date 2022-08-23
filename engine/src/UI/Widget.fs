@@ -33,8 +33,6 @@ type Widget(nodeType) =
     override this.FocusTree : ISelection list = 
         if not this.NodeType._IsNone then this :: this.Parent.FocusTree
         else this.Parent.FocusTree
-    // todo: this property has only one external use that should be internal elsewhere so should be removed
-    member this.Focusable = match nodeType with NodeType.None -> false | _ -> true
 
     override this.Focus() = if not this.NodeType._IsNone then Selection.focus this
     override this.OnFocus() = focused <- true

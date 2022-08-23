@@ -104,7 +104,7 @@ type Window(config: Config, title: string, root: Root) as this =
                 Window.apply_config <- None
             this.ProcessInputEvents()
             GLFW.PollEvents()
-            Input.poll(this.KeyboardState, this.MouseState)
+            InputThread.poll(this.KeyboardState, this.MouseState)
             Thread.Sleep(TimeSpan.FromMilliseconds(0.5))
 
         this.OnUnload()

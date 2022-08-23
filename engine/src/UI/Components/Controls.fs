@@ -93,7 +93,7 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
             add_percent(stepPercentage * Mouse.scroll())
         if this.Selected then
             if (Mouse.held Mouse.LEFT && dragging) then
-                let l, r = if Input.ThisFrame.shift then 0.0f, Viewport.vwidth else bounds.Left, bounds.Right
+                let l, r = if Input.this_frame.Shift then 0.0f, Viewport.vwidth else bounds.Left, bounds.Right
                 let amt = (Mouse.x() - l) / (r - l)
                 set_percent amt
             else dragging <- false

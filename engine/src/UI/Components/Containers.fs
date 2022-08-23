@@ -119,6 +119,13 @@ module FlowContainer =
             if this.Initialised then 
                 child.Init this
                 refresh <- true
+
+        member this.Remove(child: 'T) =
+            match Seq.tryFind (fun { Widget = c } -> Object.ReferenceEquals(c, child)) children with
+            | Some x ->
+                children.Remove x |> ignore
+                refresh <- true
+            | None -> Logging.Error(sprintf "%O is not in flow container %O, can't remove" child this)
         
         override this.Init(parent: Widget) =
             base.Init parent

@@ -71,8 +71,8 @@ type [<Sealed>] Image(sprite: Sprite) =
 type Frame(nodeType) =
     inherit StaticContainer(nodeType)
 
-    member val Fill = fun () -> Style.color(200, 0.5f, 0.3f) with get, set
-    member val Border = fun () -> Style.color(200, 0.5f, 0.3f) with get, set
+    member val Fill = !%Palette.DARK with get, set
+    member val Border = !%Palette.LIGHT with get, set
 
     override this.Draw() =
         let border = this.Border()

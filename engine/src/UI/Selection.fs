@@ -15,6 +15,8 @@ type ISelection(nt: NodeType) =
     abstract member OnUnfocus : unit -> unit
     abstract member OnSelected : unit -> unit
     abstract member OnDeselected : unit -> unit
+    
+    member this.Focusable = match nt with NodeType.None -> false | _ -> true
 
 and [<RequireQualifiedAccess>] NodeType =
     | None
@@ -128,6 +130,8 @@ module Selection =
                     | NodeType.Switch _ -> up()
                     | NodeType.Button _ -> ()
                 | None -> ()
+
+    let clear() = focus_tree []
 
 type DragAndDropEvent<'T> =
     {
