@@ -71,8 +71,8 @@ module Tree =
     // future todo: different color settings?
     let private colorFunc : Bests option -> Color = 
         function
-        | None -> Color.FromArgb(90, 150, 150, 150)
-        | Some b -> Color.FromArgb(80, Color.White)
+        | None -> Color.FromArgb(80, 150, 150, 150)
+        | Some b -> Color.FromArgb(100, Color.White)
     
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable private scrollTo = ScrollTo.Nothing
