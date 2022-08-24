@@ -5,8 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/Interlude</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.5.17</AssemblyVersion>
-    <FileVersion>0.5.17</FileVersion>
+    <AssemblyVersion>0.6.0</AssemblyVersion>
+    <FileVersion>0.6.0</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
@@ -48,56 +48,56 @@
     <Compile Include="Utils.fs" />
     <Compile Include="Content.fs" />
     <Compile Include="Options.fs" />
-    <Compile Include="UI\Widget.fs" />
+    <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Notifications.fs" />
-    <Compile Include="UI\Dialogs.fs" />
-    <Compile Include="UI\Components\Primitives.fs" />
-    <Compile Include="UI\Components\Buttons.fs" />
-    <Compile Include="UI\Components\Containers.fs" />
-    <Compile Include="UI\Components\Misc.fs" />
-    <Compile Include="UI\Components\Selection\Selection.fs" />
-    <Compile Include="UI\Components\Selection\Containers.fs" />
-    <Compile Include="UI\Components\Selection\Buttons.fs" />
-    <Compile Include="UI\Components\Selection\Controls.fs" />
-    <Compile Include="UI\Components\Selection\Menu.fs" />
-    <Compile Include="UI\Components\Selection\Compound.fs" />
-    <Compile Include="UI\Components\Logo.fs" />
-    <Compile Include="UI\Screen.fs" />
-    <Compile Include="Gameplay.fs" />
-    <Compile Include="UI\Components\MarkdownReader.fs" />
-    <Compile Include="UI\Screens\Score\Graph.fs" />
-    <Compile Include="UI\Screens\Score\Score.fs" />
-    <Compile Include="UI\Screens\Play\QuickOptions.fs" />
-    <Compile Include="UI\Screens\Play\NoteRenderer.fs" />
-    <Compile Include="UI\Screens\Play\GameplayWidgets.fs" />
-    <Compile Include="UI\Screens\Play\Play.fs" />
-    <Compile Include="UI\Screens\LevelSelect\Globals.fs" />
-    <Compile Include="UI\Screens\LevelSelect\Collections.fs" />
-    <Compile Include="UI\Screens\LevelSelect\Tree.fs" />
-    <Compile Include="UI\Screens\LevelSelect\ModSelect.fs" />
-    <Compile Include="UI\Screens\LevelSelect\Scoreboard.fs" />
-    <Compile Include="UI\Screens\LevelSelect\ChartInfo.fs" />
-    <Compile Include="UI\Screens\LevelSelect\LevelSelect.fs" />
-    <Compile Include="UI\Screens\Import\EtternaPacks.fs" />
-    <Compile Include="UI\Screens\Import\Beatmaps.fs" />
-    <Compile Include="UI\Screens\Import\Noteskins.fs" />
-    <Compile Include="UI\Screens\Import\Mounts.fs" />
-    <Compile Include="UI\Screens\Import\Import.fs" />
-    <Compile Include="UI\Screens\OptionsMenu\System.fs" />
-    <Compile Include="UI\Screens\OptionsMenu\Themes.fs" />
-    <Compile Include="UI\Screens\OptionsMenu\Gameplay.fs" />
-    <Compile Include="UI\Screens\OptionsMenu\Keybinds.fs" />
-    <Compile Include="UI\Screens\OptionsMenu\Debug.fs" />
-    <Compile Include="UI\Screens\OptionsMenu\OptionsMenu.fs" />
-    <Compile Include="UI\Screens\MainMenu\LoadingScreen.fs" />
-    <Compile Include="UI\Screens\MainMenu\MainMenu.fs" />
-    <Compile Include="UI\Toolbar\Terminal.fs" />
-    <Compile Include="UI\Toolbar\TaskDisplay.fs" />
-    <Compile Include="UI\Toolbar\Jukebox.fs" />
-    <Compile Include="UI\Toolbar\Toolbar.fs" />
-    <Compile Include="UI\Startup.fs" />
-    <Compile Include="Printerlude.fs" />
+    <Compile Include="UI\Components\Controls.fs" />
+    <Compile Include="UI\Components\Tabs.fs" />
+    <Compile Include="UI\Components\Dropdown.fs" />
+    <Compile Include="UI\Menu\Helpers.fs" />
+    <Compile Include="UI\Menu\Controls.fs" />
+    <Compile Include="UI\Menu\Grid.fs" />
+    <Compile Include="UI\Menu\Menu.fs" />
+    <Compile Include="UI\Screen\Logo.fs" />
+    <Compile Include="UI\Screen\Background.fs" />
+    <Compile Include="UI\Screen\Transitions.fs" />
+    <Compile Include="UI\Screen\Screen.fs" />
+    <Compile Include="Features\Wiki\MarkdownUI.fs" />
+    <Compile Include="Features\Wiki\QuickStartGuide.fs" />
+    <Compile Include="Features\Gameplay.fs" />
+    <Compile Include="Features\Score\Graph.fs" />
+    <Compile Include="Features\Score\Score.fs" />
+    <Compile Include="Features\Play\QuickOptions.fs" />
+    <Compile Include="Features\Play\NoteRenderer.fs" />
+    <Compile Include="Features\Play\GameplayWidgets.fs" />
+    <Compile Include="Features\Play\Play.fs" />
+    <Compile Include="Features\LevelSelect\Globals.fs" />
+    <Compile Include="Features\LevelSelect\Collections.fs" />
+    <Compile Include="Features\LevelSelect\Tree.fs" />
+    <Compile Include="Features\LevelSelect\ModSelect.fs" />
+    <Compile Include="Features\LevelSelect\Scoreboard.fs" />
+    <Compile Include="Features\LevelSelect\ChartInfo.fs" />
+    <Compile Include="Features\LevelSelect\LevelSelect.fs" />
+    <Compile Include="Features\Import\Shared.fs" />
+    <Compile Include="Features\Import\EtternaPacks.fs" />
+    <Compile Include="Features\Import\Beatmaps.fs" />
+    <Compile Include="Features\Import\Noteskins.fs" />
+    <Compile Include="Features\Import\Mounts.fs" />
+    <Compile Include="Features\Import\Import.fs" />
+    <Compile Include="Features\Options\System.fs" />
+    <Compile Include="Features\Options\Themes.fs" />
+    <Compile Include="Features\Options\Gameplay.fs" />
+    <Compile Include="Features\Options\Keybinds.fs" />
+    <Compile Include="Features\Options\Debug.fs" />
+    <Compile Include="Features\Options\OptionsMenu.fs" />
+    <Compile Include="Features\MainMenu\LoadingScreen.fs" />
+    <Compile Include="Features\MainMenu\MainMenu.fs" />
+    <Compile Include="Features\Printerlude\Terminal.fs" />
+    <Compile Include="Features\Printerlude\Printerlude.fs" />
+    <Compile Include="Features\Toolbar\TaskDisplay.fs" />
+    <Compile Include="Features\Toolbar\Jukebox.fs" />
+    <Compile Include="Features\Toolbar\Toolbar.fs" />
+    <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

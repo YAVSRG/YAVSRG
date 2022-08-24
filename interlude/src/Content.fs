@@ -5,6 +5,7 @@ open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data
@@ -16,7 +17,6 @@ module Content =
     let private defaultTheme = Theme.FromZipStream <| Utils.getResourceStream "default.zip"
 
     let mutable accentColor = ThemeConfig.Default.DefaultAccentColor
-    let mutable font : Fonts.SpriteFont = null
 
     let mutable first_init = true
 
@@ -124,10 +124,8 @@ module Content =
                     Fonts.add font
                 for font in instance.GetFonts() do
                     Fonts.add font
-                if font <> null then font.Dispose()
-                font <- Fonts.create config.Font
-                // todo: relocate
-                Percyqaz.Flux.UI.Style.baseFont <- font
+                if Style.baseFont <> null then Style.baseFont.Dispose()
+                Style.baseFont <- Fonts.create config.Font
 
                 for id in Storage.themeTextures do
                     match instance.GetTexture id with

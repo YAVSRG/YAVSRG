@@ -6,6 +6,8 @@ open Percyqaz.Flux
 open Percyqaz.Flux.Windowing
 open Interlude
 open Interlude.UI
+open Interlude.Features
+open Interlude.Features.Printerlude
 
 [<EntryPoint>]
 let main argv =
@@ -17,8 +19,7 @@ let main argv =
     if m.WaitOne(TimeSpan.Zero, true) then
         Process.GetCurrentProcess().PriorityClass <- ProcessPriorityClass.High
 
-        try
-            Options.load()
+        try Options.load()
         with err -> Logging.Critical("Fatal error loading game config", err); crashSplash(); Console.ReadLine() |> ignore
         
         Window.onLoad.Add(fun () -> 
@@ -26,12 +27,13 @@ let main argv =
             Options.Hotkeys.init Options.options.Hotkeys
             Printerlude.init()
         )
+        Window.onUnload.Add(Gameplay.save)
 
         Launch.entryPoint
             (
                 Options.config,
                 "Interlude",
-                Startup.Root()
+                Startup.ui_entry_point()
             )
 
         Options.save()
