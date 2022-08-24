@@ -17,19 +17,30 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 
-// todo: name this better + redesign as Clickable label with dropdown + Clickable display of selection that toggles order
-type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) as this =
-    inherit StylishButton(
+type OrganiseCharts(options: string seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
+    inherit StaticContainer(NodeType.None)
+
+    override this.Init(parent: Widget) =
+        this 
+        |+ StylishButton(
             ( fun () -> this.ToggleDropdown() ),
-            ( fun () -> sprintf "%s: %s" label setting.Value ),
-            colorFunc,
-            bind )
+            K (label + ":"),
+            ( fun () -> Style.color(100, 1.0f, 0.2f) ),
+            bind,
+            Position = Position.SliceLeft 120.0f)
+        |* StylishButton(
+            ( fun () -> reverse.Value <- not reverse.Value ),
+            ( fun () -> sprintf "%s %s" setting.Value (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
+            ( fun () -> Style.color(100, 0.5f, 0.0f) ),
+            "none", // todo: hotkey for this
+            Position = Position.TrimLeft 145.0f )
+        base.Init parent
 
     member this.ToggleDropdown() =
         match this.Dropdown with
         | Some d -> this.Dropdown <- None
         | _ ->
-            let d = Dropdown.Selector items id (fun g -> setting.Set g) (fun () -> this.Dropdown <- None)
+            let d = Dropdown.Selector options id (fun g -> setting.Set g) (fun () -> this.Dropdown <- None)
             d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
             d.Init this
             this.Dropdown <- Some d
@@ -86,37 +97,25 @@ type LevelSelectScreen() as this =
 
         |+ ModSelect()
             .Tooltip(L"levelselect.mods.tooltip")
-            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.55f %- 25.0f; Bottom = 0.0f %+ 170.0f }
+            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.5f %- 25.0f; Bottom = 0.0f %+ 170.0f }
 
         |+ CollectionManager()
             .Tooltip(L"levelselect.collections.tooltip")
-            .WithPosition { Left = 0.55f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %- 25.0f; Bottom = 0.0f %+ 170.0f }
+            .WithPosition { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f }
 
-        |+ StylishButton(
-            (fun () -> Setting.app not options.ChartSortReverse; LevelSelect.refresh <- true),
-            (fun () -> if options.ChartSortReverse.Value then Icons.order_descending else Icons.order_ascending),
-            (fun () -> Style.color(150, 0.4f, 0.6f)),
-            Position = { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.7f %+ 35.0f; Bottom = 0.0f %+ 170.0f })
-
-        |+ LevelSelectDropdown(sortBy.Keys, "Sort",
+        |+ OrganiseCharts(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
-            (fun () -> Style.color(100, 0.4f, 0.6f)),
+            options.ChartSortReverse |> Setting.trigger (fun _ -> refresh()),
             "sort_mode")
             .Tooltip(L"levelselect.sortby.tooltip")
-            .WithPosition { Left = 0.7f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %- 25.0f; Bottom = 0.0f %+ 170.0f }
-        
-        |+ StylishButton(
-            (fun () -> Setting.app not options.ChartGroupReverse; LevelSelect.refresh <- true),
-            (fun () -> if options.ChartGroupReverse.Value then Icons.order_descending else Icons.order_ascending),
-            (fun () -> Style.color(150, 0.2f, 0.8f)),
-            Position = { Left = 0.85f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.85f %+ 35.0f; Bottom = 0.0f %+ 170.0f })
+            .WithPosition { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f }
 
-        |+ LevelSelectDropdown(groupBy.Keys, "Group",
+        |+ OrganiseCharts(groupBy.Keys, "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
-            (fun () -> Style.color(100, 0.2f, 0.8f)),
+            options.ChartGroupReverse |> Setting.trigger (fun _ -> refresh()),
             "group_mode")
             .Tooltip(L"levelselect.groupby.tooltip")
-            .WithPosition { Left = 0.85f %+ 60.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
+            .WithPosition { Left = 0.8f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
 
         |* infoPanel
 

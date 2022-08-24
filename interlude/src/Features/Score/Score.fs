@@ -159,11 +159,10 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f })
 
-        |+ Button("Graph settings", ignore, "none",
+        |+ Button("Graph settings", ignore,
             Position = { Left = 1.0f %- 420.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 220.0f; Bottom = 1.0f %- 15.0f })
         |* Button("Watch replay",
             (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)),
-            "none",
             Position = { Left = 1.0f %- 220.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f })
 
     override this.Draw() =

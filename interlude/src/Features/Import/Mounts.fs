@@ -83,7 +83,6 @@ type CreateMountDialog(mountType: Mounts.Game, setting: Setting<MountedChartSour
                 | Mounts.Game.Etterna -> etternaPackFolder
                 | _ -> failwith "impossible"
                 |> Mounts.dropFunc.Value),
-            "none",
             Position = { Left = 0.5f %- 150.0f; Top = 0.5f %+ 200.0f; Right = 0.5f %+ 150.0f; Bottom = 0.5f %+ 260.0f })
 
     do
@@ -125,17 +124,14 @@ type MountControl(mountType: Mounts.Game, setting: Setting<MountedChartSource op
     let createButton = 
         Button(Icons.add,
             (fun () -> CreateMountDialog(mountType, setting).Show()),
-            "none",
             Position = { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f })
     let editButton = 
         Button(Icons.edit,
             (fun () -> Menu.ShowPage(Mounts.EditorPage setting)),
-            "none",
             Position = { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f })
     let deleteButton = 
         Button(Icons.delete,
             (fun () -> setting.Value <- None),
-            "none",
             Position = { Left = 1.0f %- 60.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
     let text = 
         Text(

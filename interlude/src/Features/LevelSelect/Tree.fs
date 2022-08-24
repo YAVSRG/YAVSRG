@@ -143,7 +143,7 @@ module Tree =
                 Sprite.DefaultQuad
 
             let border = bounds.Expand(5.0f, 0.0f)
-            let borderColor = if this.Selected then Style.color(180, 1.0f, 0.5f) else color
+            let borderColor = if this.Selected then !*Palette.LIGHT else color
             if borderColor.A > 0uy then
                 Draw.rect (border.SliceLeft 5.0f) borderColor
 

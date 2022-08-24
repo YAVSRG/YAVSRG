@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 module Tabs =
 
     type private TabButton(name, isOpen, onClick) =
-        inherit Button(name, onClick, "none")
+        inherit Button(name, onClick)
 
         override this.Draw() =
             Draw.rect this.Bounds (if isOpen() then !*Palette.SELECTED else !*Palette.HOVER)
