@@ -14,6 +14,7 @@ module Style =
     let changePrimaryColor col = accentColor.SetColor col
 
     let text : unit -> Color * Color = K (Color.White, Color.Black)
+    let text_subheading : unit -> Color * Color = K (Color.FromArgb(200, 230, 230, 230), Color.Black)
 
     let color (alpha, brightness, white) =
         let accentColor = accentColor.GetColor()
