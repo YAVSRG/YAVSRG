@@ -17,6 +17,7 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 
+// todo: name this better + redesign as Clickable label with dropdown + Clickable display of selection that toggles order
 type LevelSelectDropdown(items: string seq, label: string, setting: Setting<string>, colorFunc: unit -> Color, bind: Hotkey) as this =
     inherit StylishButton(
             ( fun () -> this.ToggleDropdown() ),

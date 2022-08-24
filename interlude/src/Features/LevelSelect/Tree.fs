@@ -77,21 +77,6 @@ module Tree =
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable private scrollTo = ScrollTo.Nothing
 
-    //let mutable private dropdownMenu : Dropdown.Container option = None
-
-    //let private showDropdown(cc: CachedChart) (context: LevelSelectContext) (tree_x, tree_y) =
-    //    if dropdownMenu.IsSome then dropdownMenu.Value.Destroy()
-    //    let d = 
-    //        Dropdown.create (
-    //            CollectionManager.dropdownMenuOptions(cc, context) @
-    //            [
-    //                sprintf "%s Add to table" Icons.sparkle, ignore
-    //                sprintf "%s Delete" Icons.delete, ignore
-    //                sprintf "%s Edit note" Icons.tag, ignore
-    //            ] ) (fun () -> dropdownMenu <- None)
-    //    dropdownMenu <- Some d
-    //    d.Reposition(tree_x, 0.0f, tree_y, 0.0f, tree_x + 400.0f, 0.0f, tree_y + Dropdown.ITEMSIZE * 5.0f, 0.0f)
-
     let private getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (colorFunc: 'T -> Color) =
         if r1 < rate.Value then ( p2, r2, if r2 < rate.Value then Color.FromArgb(127, Color.White) else colorFunc p2 )
         else ( p1, r1, colorFunc p1 )
@@ -100,6 +85,7 @@ module Tree =
         match Library.load cc with
         | Some c ->
             Chart.change(cc, context, c)
+            Selection.clear()
             selectedChart <- cc.FilePath
             expandedGroup <- groupName
             selectedGroup <- groupName
@@ -120,11 +106,12 @@ module Tree =
     type private TreeItem() =
         abstract member Bounds: float32 -> Rect
         abstract member Selected: bool
+        abstract member Spacing: float32
 
         member this.CheckBounds(top: float32, origin: float32, originB: float32, if_visible: Rect -> unit) =
-            let bounds = this.Bounds top
+            let bounds = this.Bounds (top + this.Spacing * 0.5f)
             if bounds.Bottom > origin && top < originB then if_visible bounds
-            top + bounds.Height + 15.0f
+            top + bounds.Height + this.Spacing
 
     type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectContext) =
         inherit TreeItem()
@@ -138,6 +125,7 @@ module Tree =
 
         override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + 90.0f)
         override this.Selected = selectedChart = cc.FilePath && Chart.context = context
+        override this.Spacing = 5.0f
         member this.Chart = cc
 
         member this.Select() = switchChart(cc, context, groupName)
@@ -146,22 +134,18 @@ module Tree =
             let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = bounds
 
             // draw base
-            let accent = Style.color(80 + int (hover.Value * 40.0f), 1.0f, 0.2f)
-            Draw.rect bounds (if this.Selected then Style.main 80 () else Style.black 80 ())
+            let accent = Style.color(80 + int (hover.Value * 40.0f), 1.0f, 0.5f)
+            Draw.rect bounds (if this.Selected then Style.main 80 () else Style.black 120 ())
             let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
                 (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
                 (struct(accent, Color.Transparent, Color.Transparent, accent))
                 Sprite.DefaultQuad
 
-            let border = bounds.Expand(5.0f)
-            let border2 = bounds.Expand(5.0f, 0.0f)
+            let border = bounds.Expand(5.0f, 0.0f)
             let borderColor = if this.Selected then Style.color(180, 1.0f, 0.5f) else color
             if borderColor.A > 0uy then
-                Draw.rect (border2.SliceLeft 5.0f) borderColor
-                Draw.rect (border.SliceTop 5.0f) borderColor
-                Draw.rect (border2.SliceRight 5.0f) borderColor
-                Draw.rect (border.SliceBottom 5.0f) borderColor
+                Draw.rect (border.SliceLeft 5.0f) borderColor
 
             // draw pbs
             let disp (pb: PersonalBests<'T>) (format: 'T -> string) (colorFunc: 'T -> Color) (pos: float32) =
@@ -194,10 +178,10 @@ module Tree =
 
             // draw text
             Draw.rect (bounds.SliceBottom 25.0f) (Color.FromArgb(60, 0, 0, 0))
-            Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, (Color.White, Color.Black))
-            Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, (Color.White, Color.Black))
-            Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, (Color.White, Color.Black))
-            Text.drawB(Style.baseFont, collectionIcon, 35.0f, right - 95.0f, top + 10.0f, (Color.White, Color.Black))
+            Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Style.text())
+            Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, Style.text_subheading())
+            Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, Style.text_subheading())
+            Text.drawB(Style.baseFont, collectionIcon, 35.0f, right - 95.0f, top + 10.0f, Style.text())
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
@@ -223,8 +207,7 @@ module Tree =
                     if this.Selected then play()
                     else this.Select()
                 elif Mouse.rightClick() then
-                    let x, y = Mouse.pos()
-                    ()//showDropdown cc context (min (Viewport.vwidth - 405f) x, y - scrollPos.Value - origin)
+                    () // todo: context menu when right clicked
                 elif (!|"delete").Tapped() then
                     let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
                     Notifications.callback (
@@ -250,6 +233,7 @@ module Tree =
 
         override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.5f, top, Viewport.vwidth - 15.0f, top + 65.0f)
         override this.Selected = selectedGroup = name
+        override this.Spacing = 20.0f
 
         member this.Items = items
         member this.Expanded = expandedGroup = name
@@ -403,9 +387,8 @@ module Tree =
         if LevelSelect.minorRefresh then LevelSelect.minorRefresh <- false; updateDisplay()
         scrollPos.Update(elapsedTime) |> ignore
         
-        //if dropdownMenu.IsSome then dropdownMenu.Value.Update(elapsedTime, Rect.Create(0.0f, origin + scrollPos.Value, Viewport.vwidth, originB + scrollPos.Value))
         let bottomEdge =
-            List.fold 
+            List.fold
                 (fun t (i: GroupItem) -> i.Update(t, origin, originB, elapsedTime))
                 scrollPos.Value
                 groups
@@ -422,7 +405,7 @@ module Tree =
         scrollPos.Target <- Math.Min (Math.Max (scrollPos.Target + Mouse.scroll() * 100.0f, total_height - tree_height - origin), 20.0f + origin)
 
     let draw(origin: float32, originB: float32) =
-        Stencil.create(false)
+        Stencil.create false
         Draw.rect (Rect.Create(0.0f, origin, Viewport.vwidth, originB)) Color.Transparent
         Stencil.draw()
         let bottomEdge =
@@ -430,7 +413,6 @@ module Tree =
                 (fun t (i: GroupItem) -> i.Draw (t, origin, originB))
                 scrollPos.Value
                 groups
-        //if dropdownMenu.IsSome then dropdownMenu.Value.Draw()
         Stencil.finish()
 
         let total_height = originB - origin

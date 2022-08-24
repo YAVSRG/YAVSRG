@@ -29,6 +29,7 @@ module CollectionManager =
             Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.removed", NotificationType.Info)
             if context = Chart.context then Chart.context <- LevelSelectContext.None
 
+    // todo: this is disabled until i make a better context menu design
     let dropdownMenuOptions(cc: CachedChart, context: LevelSelectContext) =
         let canRemove =
             context.InCollection = Collections.selectedName ||

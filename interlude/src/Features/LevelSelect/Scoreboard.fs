@@ -157,7 +157,7 @@ type Scoreboard() as this =
     let mutable chart = ""
     let mutable scoring = ""
 
-    let filter = Setting.simple Filter.All
+    let filter = Setting.simple Filter.None
     let sort = Setting.map enum int options.ScoreSortMode
 
     let sorter() : ScoreCard -> ScoreCard -> int =
