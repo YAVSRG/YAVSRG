@@ -105,7 +105,7 @@ type private CollectionsPage() as this =
     override this.OnClose() = ()
     
 type CollectionManager() =
-    inherit StylishButton ((fun () -> Menu.ShowPage CollectionsPage), K (sprintf "%s %s" Icons.collections (N"collections")), (fun () -> Style.color(100, 0.6f, 0.4f)), "collections")
+    inherit StylishButton ((fun () -> Menu.ShowPage CollectionsPage), K (sprintf "%s %s" Icons.collections (N"collections")), (fun () -> Style.color(100, 0.5f, 0.0f)), "collections")
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

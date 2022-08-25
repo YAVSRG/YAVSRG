@@ -94,13 +94,9 @@ type LevelSelectScreen() as this =
             .Tooltip(L"levelselect.search.tooltip")
             .WithPosition { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f }
 
-        |+ ModSelect()
-            .Tooltip(L"levelselect.mods.tooltip")
-            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.5f %- 25.0f; Bottom = 0.0f %+ 170.0f }
-
         |+ CollectionManager()
             .Tooltip(L"levelselect.collections.tooltip")
-            .WithPosition { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f }
+            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f }
 
         |+ OrganiseCharts(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),

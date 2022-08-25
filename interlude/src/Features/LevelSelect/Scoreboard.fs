@@ -204,19 +204,11 @@ type Scoreboard() as this =
             TiltRight = false)
             .Tooltip(L"levelselect.scoreboard.filter.tooltip")
             .WithPosition { Left = 0.66f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f }
-        |+ StylishButton(
-            (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
-            (fun () -> ruleset.Name),
-            Style.main 100)
-            .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
-            .WithPosition { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f }
         |+ scrollContainer
-        |* (
-                let noLocalScores = L"levelselect.scoreboard.empty"
-                Text((fun () -> if count = 0 then noLocalScores else ""),
-                    Align = Alignment.CENTER,
-                    Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f })
-           )
+        |* Text( (let noLocalScores = L"levelselect.scoreboard.empty" in (fun () -> if count = 0 then noLocalScores else "")),
+            Align = Alignment.CENTER,
+            Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f })
+           
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""

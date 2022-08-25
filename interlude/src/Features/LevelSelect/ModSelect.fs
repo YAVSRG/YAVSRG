@@ -40,7 +40,7 @@ type private ModSelectPage() as this =
     override this.OnClose() = ()
     
 type ModSelect() =
-    inherit StylishButton((fun () -> Menu.ShowPage ModSelectPage), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.8f, 0.2f)), "mods")
+    inherit StylishButton((fun () -> Menu.ShowPage ModSelectPage), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), "mods")
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
