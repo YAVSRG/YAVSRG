@@ -23,7 +23,11 @@ module Icons =
     let order_ascending = Feather.chevrons_up
     let order_descending = Feather.chevrons_down
     let collections = Feather.folder
+    let add_to_collection = Feather.folder_plus
+    let remove_from_collection = Feather.folder_minus
     let mods = Feather.zap
+    let sort = Feather.chevrons_up
+    let filter = Feather.filter
 
     let options = Feather.settings
     let import = Feather.download

@@ -29,7 +29,7 @@ module CollectionManager =
             Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.removed", NotificationType.Info)
             if context = Chart.context then Chart.context <- LevelSelectContext.None
 
-    // todo: this is disabled until i make a better context menu design
+    // todo: this is unused until i make a better context menu design
     let dropdownMenuOptions(cc: CachedChart, context: LevelSelectContext) =
         let canRemove =
             context.InCollection = Collections.selectedName ||
@@ -38,8 +38,8 @@ module CollectionManager =
             | Playlist ps -> ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
             | Goals gs -> gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
         [
-            if not canRemove then sprintf "%s Add to '%s'" Icons.add Collections.selectedName, fun () -> addChart(cc, context)
-            else sprintf "%s Remove from '%s'" Icons.remove Collections.selectedName, fun () -> removeChart(cc, context)
+            if not canRemove then sprintf "%s Add to '%s'" Icons.add_to_collection Collections.selectedName, fun () -> addChart(cc, context)
+            else sprintf "%s Remove from '%s'" Icons.remove_from_collection Collections.selectedName, fun () -> removeChart(cc, context)
         ]
 
 type private EditCollectionPage(originalName) as this =
@@ -105,7 +105,7 @@ type private CollectionsPage() as this =
     override this.OnClose() = ()
     
 type CollectionManager() =
-    inherit StylishButton ((fun () -> Menu.ShowPage CollectionsPage), K "Collections", (fun () -> Style.color(100, 0.6f, 0.4f)), "collections")
+    inherit StylishButton ((fun () -> Menu.ShowPage CollectionsPage), K (sprintf "%s %s" Icons.collections (N"collections")), (fun () -> Style.color(100, 0.6f, 0.4f)), "collections")
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

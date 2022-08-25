@@ -13,7 +13,8 @@ open Interlude.UI
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
     inherit StaticContainer(NodeType.Button onClick)
     
-    let color = Animation.Fade 0.3f
+    let color = Animation.Fade(0.0f)
+    let textColor = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER)
 
     do
         this
@@ -30,8 +31,8 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
         base.Update(elapsedTime, moved)
         color.Update elapsedTime
 
-    override this.OnFocus() = base.OnFocus(); color.Target <- 0.7f
-    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.3f
+    override this.OnFocus() = base.OnFocus(); color.Target <- 1.0f
+    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.0f
 
     override this.Draw() =
         let h = this.Bounds.Height
@@ -43,7 +44,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
                 <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom)
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
-        Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.color(255, 0.4f, color.Value)), 0.5f)
+        Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, textColor(), 0.5f)
         base.Draw()
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =
@@ -52,7 +53,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
         let mutable i = array.IndexOf(values, setting.Value)
         StylishButton(
             (fun () -> i <- (i + 1) % values.Length; setting.Value <- values.[i]), 
-            (fun () -> sprintf "%s: %s" label names.[i]),
+            (fun () -> sprintf "%s %s" label names.[i]),
             colorFunc
         )
 

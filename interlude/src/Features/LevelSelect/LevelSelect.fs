@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
-open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
@@ -63,7 +62,7 @@ type LevelSelectScreen() as this =
     inherit Screen()
 
     let searchText = Setting.simple ""
-    let infoPanel = ChartInfo(Position = { Left = 0.0f %+ 10.0f; Top = 0.0f %+ 180.0f; Right = 0.4f %- 10.0f; Bottom = 1.0f %+ 0.0f })
+    let infoPanel = ChartInfo(Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 175.0f; Right = 0.4f %- 10.0f; Bottom = 1.0f %+ 0.0f })
 
     let refresh() =
         ruleset <- getCurrentRuleset()
@@ -84,12 +83,12 @@ type LevelSelectScreen() as this =
         |+ Text(
             (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.Title),
             Align = Alignment.CENTER,
-            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 100.0f })
+            Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 20.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 100.0f })
 
         |+ Text(
             (fun () -> match Chart.cacheInfo with None -> "" | Some c -> c.DiffName),
             Align = Alignment.CENTER,
-            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 100.0f; Right = 0.4f %+ 0.0f; Bottom = 0.0f %+ 160.0f })
+            Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 90.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 140.0f })
 
         |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()))
             .Tooltip(L"levelselect.search.tooltip")
@@ -105,7 +104,7 @@ type LevelSelectScreen() as this =
 
         |+ OrganiseCharts(sortBy.Keys, "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
-            options.ChartSortReverse |> Setting.trigger (fun _ -> refresh()),
+            options.ChartSortReverse |> Setting.map not not |> Setting.trigger (fun _ -> refresh()),
             "sort_mode")
             .Tooltip(L"levelselect.sortby.tooltip")
             .WithPosition { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f }
@@ -152,6 +151,8 @@ type LevelSelectScreen() as this =
         Draw.quad
             ( Quad.create <| Vector2(left, top) <| Vector2(left + w + 85.0f, top) <| Vector2(left + w, top + 170.0f) <| Vector2(left, top + 170.0f) )
             (Quad.colorOf (Style.color (120, 0.6f, 0.0f))) Sprite.DefaultQuad
+        Draw.rect (this.Bounds.SliceTop(170.0f).SliceLeft(w).Shrink(20.0f)) (System.Drawing.Color.FromArgb(100, 0, 0, 0))
+
         Draw.quad
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
             (Quad.colorOf (Style.color (120, 0.1f, 0.0f))) Sprite.DefaultQuad
