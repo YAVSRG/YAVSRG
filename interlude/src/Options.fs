@@ -214,7 +214,7 @@ module Options =
             Hotkeys.register "start" (mk Keys.Home)
             Hotkeys.register "end" (mk Keys.End)
 
-            Hotkeys.register "collections" (mk Keys.N)
+            Hotkeys.register "collections" (mk Keys.C)
             Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
             Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
             Hotkeys.register "move_down_in_collection" (ctrl Keys.RightBracket)
@@ -224,6 +224,7 @@ module Options =
 
             Hotkeys.register "mods" (mk Keys.M)
             Hotkeys.register "autoplay" (ctrl Keys.A)
+            Hotkeys.register "preview" (mk Keys.Backslash)
 
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)

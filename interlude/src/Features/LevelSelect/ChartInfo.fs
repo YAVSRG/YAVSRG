@@ -60,18 +60,26 @@ type ChartInfo() as this =
             (fun () -> getModString(rate.Value, selectedMods.Value, autoplay)),
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 100.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 60.0f })
+            
+        |+ StylishButton(
+            (fun () -> Preview().Show()),
+            K (Icons.preview + " " + L"levelselect.preview"),
+            Style.main 100,
+            "preview",
+            TiltLeft = false)
+            .Tooltip(L"levelselect.preview.tooltip")
+            .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f }
 
         |+ ModSelect()
             .Tooltip(L"levelselect.mods.tooltip")
-            .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f }
+            .WithPosition { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f }
         
         |* StylishButton(
             (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
             (fun () -> ruleset.Name),
             Style.main 100,
             TiltRight = false)
-            // todo: move localisation string
-            .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
+            .Tooltip(L"levelselect.rulesets.tooltip")
             .WithPosition { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f }
 
     member this.Refresh() =

@@ -28,6 +28,7 @@ module Icons =
     let mods = Feather.zap
     let sort = Feather.chevrons_up
     let filter = Feather.filter
+    let preview = Feather.eye
 
     let options = Feather.settings
     let import = Feather.download
