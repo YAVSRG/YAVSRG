@@ -15,10 +15,39 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Interlude.UI
+open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
+
+type ChartContextMenu(cc: CachedChart, context: LevelSelectContext) as this =
+    inherit Page()
+
+    do
+        this.Content(
+            column()
+            |+ PrettyButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDeleteChart(cc, true)), Icon = Icons.delete).Pos(200.0f)
+            // out until there is a nice way to display what collection is being added to/removed from
+            //|+ (
+            //    if CollectionManager.isInCurrentCollection(cc, context) then 
+            //         PrettyButton("chart.removefromcollection", ignore, Icon = Icons.remove_from_collection).Pos(280.0f)
+            //    else PrettyButton("chart.addtocollection", ignore, Icon = Icons.add_to_collection).Pos(280.0f)
+            //   )
+            |+ PrettyButton("chart.editnote", ignore, Icon = Icons.note).Pos(280.0f)
+        )
+    override this.Title = cc.Title
+    override this.OnClose() = ()
+    
+    static member ConfirmDeleteChart(cc, is_submenu) =
+        let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
+        ConfirmPage(
+            Localisation.localiseWith [chartName] "misc.confirmdelete",
+            fun () ->
+                Library.delete cc
+                LevelSelect.refresh <- true
+                if is_submenu then Menu.Back()
+            ) |> Menu.ShowPage
 
 [<RequireQualifiedAccess>]
 type Navigation =
@@ -206,19 +235,8 @@ module Tree =
                 if Mouse.leftClick() then
                     if this.Selected then play()
                     else this.Select()
-                elif Mouse.rightClick() then
-                    () // todo: context menu when right clicked
-                elif (!|"delete").Tapped() then
-                    let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
-                    Notifications.callback (
-                        (!|"delete"),
-                        Localisation.localiseWith [chartName] "misc.delete",
-                        NotificationType.Warning,
-                        fun () -> 
-                            Library.delete cc
-                            LevelSelect.refresh <- true
-                            Notifications.add (Localisation.localiseWith [chartName] "notification.deleted", NotificationType.Info)
-                    )
+                elif Mouse.rightClick() then ChartContextMenu(cc, context) |> Menu.ShowPage
+                elif (!|"delete").Tapped() then ChartContextMenu.ConfirmDeleteChart(cc, false)
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
 
@@ -267,7 +285,7 @@ module Tree =
                     let groupName = sprintf "%s (%i charts)" name (items.Count())
                     Notifications.callback (
                         (!|"delete"),
-                        Localisation.localiseWith [groupName] "misc.delete",
+                        Localisation.localiseWith [groupName] "misc.confirmdelete",
                         NotificationType.Warning,
                         fun () ->
                             items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany

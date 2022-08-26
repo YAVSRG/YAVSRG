@@ -18,6 +18,29 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
 
+type ScoreContextMenu(score: ScoreInfoProvider) as this =
+    inherit Page()
+
+    do
+        this.Content(
+            column()
+            |+ PrettyButton("score.delete", (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)), Icon = Icons.delete).Pos(200.0f)
+            |+ PrettyButton("score.watchreplay", (fun () -> ScoreScreenHelpers.watchReplay(score.ScoreInfo.rate, score.ReplayData); Menu.Back()), Icon = Icons.preview).Pos(280.0f)
+        )
+    override this.Title = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+    override this.OnClose() = ()
+    
+    static member ConfirmDeleteScore(score, is_submenu) =
+        let scoreName = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+        ConfirmPage(
+            Localisation.localiseWith [scoreName] "misc.confirmdelete",
+            fun () ->
+                Chart.saveData.Value.Scores.Remove score.ScoreInfo |> ignore
+                LevelSelect.refresh <- true
+                Notifications.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
+                if is_submenu then Menu.Back()
+        ) |> Menu.ShowPage
+
 module Scoreboard =
 
     type Sort =
@@ -38,8 +61,8 @@ module Scoreboard =
         let animation = Animation.seq [Animation.Delay 150; fade]
 
         do
-            data.Physical |> ignore
-            data.Lamp |> ignore
+            ignore data.Physical
+            ignore data.Lamp
 
             let text_color = fun () -> let a = fade.Alpha in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
             let text_subcolor = fun () -> (Color.FromArgb(int (fade.Value * 200.0f), Color.FromArgb(230, 230, 230)), Color.FromArgb(fade.Alpha, Color.Black))
@@ -71,11 +94,12 @@ module Scoreboard =
                 Align = Alignment.RIGHT,
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f })
 
-            |* Clickable(fun () -> 
+            |* Clickable((fun () -> 
                 Screen.changeNew 
                     (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen)
                     Screen.Type.Score
-                    Transitions.Flags.Default)
+                    Transitions.Flags.Default),
+                OnRightClick = fun () -> ScoreContextMenu data |> Menu.ShowPage)
 
         override this.Draw() =
             Draw.rect this.Bounds (Style.color (int (150.0f * fade.Value), 0.5f, 0.2f))
@@ -86,17 +110,7 @@ module Scoreboard =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             animation.Update elapsedTime
-            if Mouse.hover this.Bounds && (!|"delete").Tapped() then
-                let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                Notifications.callback (
-                    (!|"delete"),
-                    Localisation.localiseWith [scoreName] "misc.delete",
-                    NotificationType.Warning,
-                    fun () ->
-                        Chart.saveData.Value.Scores.Remove data.ScoreInfo |> ignore
-                        LevelSelect.refresh <- true
-                        Notifications.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
-                )
+            if Mouse.hover this.Bounds && (!|"delete").Tapped() then ScoreContextMenu.ConfirmDeleteScore(data, false)
 
     module Loader =
 
@@ -164,10 +178,10 @@ type Scoreboard() as this =
 
     let sorter() : ScoreCard -> ScoreCard -> int =
         match sort.Value with
-        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Value.CompareTo(b.Data.Scoring.Value)
-        | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo(b.Data.Physical)
+        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Value.CompareTo b.Data.Scoring.Value
+        | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo b.Data.Physical
         | Sort.Time
-        | _ -> fun b a -> a.Data.ScoreInfo.time.CompareTo(b.Data.ScoreInfo.time)
+        | _ -> fun b a -> a.Data.ScoreInfo.time.CompareTo b.Data.ScoreInfo.time
 
     let filterer() : ScoreCard -> bool =
         match filter.Value with

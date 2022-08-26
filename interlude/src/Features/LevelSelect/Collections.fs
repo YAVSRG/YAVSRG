@@ -29,18 +29,12 @@ module CollectionManager =
             Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.removed", NotificationType.Info)
             if context = Chart.context then Chart.context <- LevelSelectContext.None
 
-    // todo: this is unused until i make a better context menu design
-    let dropdownMenuOptions(cc: CachedChart, context: LevelSelectContext) =
-        let canRemove =
-            context.InCollection = Collections.selectedName ||
-            match Collections.selectedCollection with
-            | Collection ccs -> ccs.Contains cc.FilePath
-            | Playlist ps -> ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
-            | Goals gs -> gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
-        [
-            if not canRemove then sprintf "%s Add to '%s'" Icons.add_to_collection Collections.selectedName, fun () -> addChart(cc, context)
-            else sprintf "%s Remove from '%s'" Icons.remove_from_collection Collections.selectedName, fun () -> removeChart(cc, context)
-        ]
+    let isInCurrentCollection(cc: CachedChart, context: LevelSelectContext) =
+        context.InCollection = Collections.selectedName ||
+        match Collections.selectedCollection with
+        | Collection ccs -> ccs.Contains cc.FilePath
+        | Playlist ps -> ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
+        | Goals gs -> gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
 
 type private EditCollectionPage(originalName) as this =
     inherit Page()
@@ -91,7 +85,7 @@ type private CollectionsPage() as this =
                         .WithColumn(id)
                         .WithAction(Icons.edit, fun c -> Menu.ShowPage (EditCollectionPage c))
                         .WithAction(Icons.delete, fun c -> 
-                            Menu.ShowPage (ConfirmPage(Localisation.localiseWith [c] "collections.confirmdelete", fun () -> Collections.delete c |> ignore)))
+                            Menu.ShowPage (ConfirmPage(Localisation.localiseWith [c] "misc.confirmdelete", fun () -> Collections.delete c |> ignore)))
                         .WithSelection((fun c -> Collections.selectedName = c), fun (c, b) -> if b then LevelSelect.minorRefresh <- true; Collections.select c)
                         .WithNew(fun () -> Collections.create (Collections.getNewName(), Collection.Blank) |> ignore)
                     )
