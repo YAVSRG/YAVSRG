@@ -65,7 +65,7 @@ type ChartInfo() as this =
             (fun () -> Preview().Show()),
             K (Icons.preview + " " + L"levelselect.preview"),
             Style.main 100,
-            "preview",
+            Hotkey = "preview",
             TiltLeft = false)
             .Tooltip(L"levelselect.preview.tooltip")
             .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f }

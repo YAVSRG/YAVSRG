@@ -10,20 +10,13 @@ open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
 
-type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
+type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
     inherit StaticContainer(NodeType.Button onClick)
     
     let color = Animation.Fade(0.0f)
     let textColor = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER)
 
-    do
-        this
-        |+ Clickable.Focus this
-        |* HotkeyAction(bind, onClick) // todo: create this at init-time and make hotkey optional
-    
-    // todo: remove this and make hotkey optional
-    new(onClick, labelFunc, colorFunc) = StylishButton(onClick, labelFunc, colorFunc, "none")
-
+    member val Hotkey : Hotkey = "none" with get, set
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
 
@@ -46,6 +39,12 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
             Sprite.DefaultQuad
         Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, textColor(), 0.5f)
         base.Draw()
+
+    override this.Init(parent: Widget) =
+        this
+        |+ Clickable.Focus this
+        |* HotkeyAction(this.Hotkey, onClick)
+        base.Init parent
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =
         let names = Enum.GetNames(typeof<'T>)

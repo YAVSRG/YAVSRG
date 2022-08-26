@@ -25,13 +25,13 @@ type OrganiseCharts(options: string seq, label: string, setting: Setting<string>
             ( fun () -> this.ToggleDropdown() ),
             K (label + ":"),
             ( fun () -> Style.color(100, 1.0f, 0.2f) ),
-            bind,
+            Hotkey = bind,
             Position = Position.SliceLeft 120.0f)
         |* StylishButton(
             ( fun () -> reverse.Value <- not reverse.Value ),
             ( fun () -> sprintf "%s %s" setting.Value (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
             ( fun () -> Style.color(100, 0.5f, 0.0f) ),
-            "none", // todo: hotkey for this
+            // todo: hotkey for this
             Position = Position.TrimLeft 145.0f )
         base.Init parent
 
