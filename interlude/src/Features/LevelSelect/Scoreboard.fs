@@ -18,6 +18,29 @@ open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Interlude.Features.Score
 
+type ScoreContextMenu(score: ScoreInfoProvider) as this =
+    inherit Page()
+
+    do
+        this.Content(
+            column()
+            |+ PrettyButton("score.delete", (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)), Icon = Icons.delete).Pos(200.0f)
+            |+ PrettyButton("score.watchreplay", (fun () -> ScoreScreenHelpers.watchReplay(score.ScoreInfo.rate, score.ReplayData); Menu.Back()), Icon = Icons.preview).Pos(280.0f)
+        )
+    override this.Title = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+    override this.OnClose() = ()
+    
+    static member ConfirmDeleteScore(score, is_submenu) =
+        let scoreName = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())
+        ConfirmPage(
+            Localisation.localiseWith [scoreName] "misc.confirmdelete",
+            fun () ->
+                Chart.saveData.Value.Scores.Remove score.ScoreInfo |> ignore
+                LevelSelect.refresh <- true
+                Notifications.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
+                if is_submenu then Menu.Back()
+        ) |> Menu.ShowPage
+
 module Scoreboard =
 
     type Sort =
@@ -38,63 +61,56 @@ module Scoreboard =
         let animation = Animation.seq [Animation.Delay 150; fade]
 
         do
-            data.Physical |> ignore
-            data.Lamp |> ignore
+            ignore data.Physical
+            ignore data.Lamp
 
-            let color = fun () -> let a = fade.Alpha in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
+            let text_color = fun () -> let a = fade.Alpha in (Color.FromArgb(a, Color.White), Color.FromArgb(a, Color.Black))
+            let text_subcolor = fun () -> (Color.FromArgb(int (fade.Value * 200.0f), Color.FromArgb(230, 230, 230)), Color.FromArgb(fade.Alpha, Color.Black))
 
             this
             |+ Text(
                 fun () -> data.Scoring.FormatAccuracy()
                 ,
-                Color = color,
+                Color = text_color,
                 Align = Alignment.LEFT,
                 Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 0.6f %+ 0.0f })
 
             |+ Text(
                 fun () -> sprintf "%s  •  %ix  •  %.2f" (data.Ruleset.LampName data.Lamp) data.Scoring.State.BestCombo data.Physical
                 ,
-                Color = color,
+                Color = text_subcolor,
                 Align = Alignment.LEFT,
                 Position = { Left = 0.0f %+ 5.0f; Top = 0.6f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
 
             |+ Text(
                 K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)),
-                Color = color,
+                Color = text_subcolor,
                 Align = Alignment.RIGHT,
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %+ 0.0f })
 
             |+ Text(
                 K data.Mods,
-                Color = color,
+                Color = text_color,
                 Align = Alignment.RIGHT,
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f })
 
-            |* Clickable(fun () -> 
+            |* Clickable((fun () -> 
                 Screen.changeNew 
-                    (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen.T)
+                    (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen)
                     Screen.Type.Score
-                    Transitions.Flags.Default)
+                    Transitions.Flags.Default),
+                OnRightClick = fun () -> ScoreContextMenu data |> Menu.ShowPage)
 
         override this.Draw() =
-            Draw.rect this.Bounds (Style.color(int (100.0f * fade.Value), 0.5f, 0.0f))
+            Draw.rect this.Bounds (Style.color (int (150.0f * fade.Value), 0.5f, 0.2f))
             base.Draw()
+
         member this.Data = data
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             animation.Update elapsedTime
-            if Mouse.hover this.Bounds && (!|"delete").Tapped() then
-                let scoreName = sprintf "%s | %s" (data.Scoring.FormatAccuracy()) (data.Lamp.ToString())
-                Notifications.callback (
-                    (!|"delete"),
-                    Localisation.localiseWith [scoreName] "misc.delete",
-                    NotificationType.Warning,
-                    fun () ->
-                        Chart.saveData.Value.Scores.Remove data.ScoreInfo |> ignore
-                        LevelSelect.refresh <- true
-                        Notifications.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
-                )
+            if Mouse.hover this.Bounds && (!|"delete").Tapped() then ScoreContextMenu.ConfirmDeleteScore(data, false)
 
     module Loader =
 
@@ -162,10 +178,10 @@ type Scoreboard() as this =
 
     let sorter() : ScoreCard -> ScoreCard -> int =
         match sort.Value with
-        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Value.CompareTo(b.Data.Scoring.Value)
-        | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo(b.Data.Physical)
+        | Sort.Accuracy -> fun b a -> a.Data.Scoring.Value.CompareTo b.Data.Scoring.Value
+        | Sort.Performance -> fun b a -> a.Data.Physical.CompareTo b.Data.Physical
         | Sort.Time
-        | _ -> fun b a -> a.Data.ScoreInfo.time.CompareTo(b.Data.ScoreInfo.time)
+        | _ -> fun b a -> a.Data.ScoreInfo.time.CompareTo b.Data.ScoreInfo.time
 
     let filterer() : ScoreCard -> bool =
         match filter.Value with
@@ -176,45 +192,37 @@ type Scoreboard() as this =
 
 
     let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.padding, Sort = sorter(), Filter = filterer())
-    let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.padding, Position = Position.TrimTop(10.0f).TrimBottom(50.0f))
+    let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.padding, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
     let loader = Loader.reload flowContainer
 
     do
         this
-        |+ scrollContainer
-        |+ StylishButton.FromEnum(
-            "Sort",
-            sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
-            Style.main 100,
-            TiltLeft = false)
-            .Tooltip(L"levelselect.scoreboard.sort.tooltip")
-            .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 45.0f; Right = 0.25f %- 15.0f; Bottom = 1.0f %- 5.0f }
-        |+ StylishButton.FromEnum(
-            "Filter",
-            filter |> Setting.trigger (fun _ -> this.Refresh()),
-            Style.main 90)
-            .Tooltip(L"levelselect.scoreboard.filter.tooltip")
-            .WithPosition { Left = 0.25f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.5f %- 15.0f; Bottom = 1.0f %- 5.0f }
-        |+ StylishButton(
-            (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
-            (fun () -> ruleset.Name),
-            Style.main 80)
-            .Tooltip(L"levelselect.scoreboard.ruleset.tooltip")
-            .WithPosition { Left = 0.5f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 0.75f %- 15.0f; Bottom = 1.0f %- 5.0f }
         |+ StylishButton(
             this.Refresh,
             K <| Localisation.localise "levelselect.scoreboard.storage.local",
-            Style.main 70,
-            TiltRight = false)
+            Style.main 100,
+            TiltLeft = false)
             .Tooltip(L"levelselect.scoreboard.storage.tooltip")
-            .WithPosition { Left = 0.75f %+ 10.0f; Top = 1.0f %- 45.0f; Right = 1.0f %- 15.0f; Bottom = 1.0f %- 5.0f }
-        |* (
-                let noLocalScores = L"levelselect.scoreboard.empty"
-                Text((fun () -> if count = 0 then noLocalScores else ""),
-                    Align = Alignment.CENTER,
-                    Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f })
-           )
+            .WithPosition { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.33f %- 25.0f; Bottom = 0.0f %+ 50.0f }
+        |+ StylishButton.FromEnum(
+            Icons.sort,
+            sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
+            Style.dark 100)
+            .Tooltip(L"levelselect.scoreboard.sort.tooltip")
+            .WithPosition { Left = 0.33f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.66f %- 25.0f; Bottom = 0.0f %+ 50.0f }
+        |+ StylishButton.FromEnum(
+            Icons.filter,
+            filter |> Setting.trigger (fun _ -> this.Refresh()),
+            Style.main 100,
+            TiltRight = false)
+            .Tooltip(L"levelselect.scoreboard.filter.tooltip")
+            .WithPosition { Left = 0.66f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f }
+        |+ scrollContainer
+        |* Text( (let noLocalScores = L"levelselect.scoreboard.empty" in (fun () -> if count = 0 then noLocalScores else "")),
+            Align = Alignment.CENTER,
+            Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f })
+           
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""

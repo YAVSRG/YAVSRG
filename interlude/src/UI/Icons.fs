@@ -19,9 +19,16 @@ module Icons =
 
     let goal = Feather.flag
     let playlist = Feather.list
-    let tag = Feather.tag
-    let order_ascending = Feather.trending_down
-    let order_descending = Feather.trending_up
+    let note = Feather.tag
+    let order_ascending = Feather.chevrons_up
+    let order_descending = Feather.chevrons_down
+    let collections = Feather.folder
+    let add_to_collection = Feather.folder_plus
+    let remove_from_collection = Feather.folder_minus
+    let mods = Feather.zap
+    let sort = Feather.chevrons_up
+    let filter = Feather.filter
+    let preview = Feather.eye
 
     let options = Feather.settings
     let import = Feather.download

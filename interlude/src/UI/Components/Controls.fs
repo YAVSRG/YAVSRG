@@ -10,19 +10,13 @@ open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
 
-type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) as this =
+type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
     inherit StaticContainer(NodeType.Button onClick)
     
-    let color = Animation.Fade 0.3f
+    let color = Animation.Fade(0.0f)
+    let textColor = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER)
 
-    do
-        this
-        |+ Clickable.Focus this
-        |* HotkeyAction(bind, onClick) // todo: create this at init-time and make hotkey optional
-    
-    // todo: remove this and make hotkey optional
-    new(onClick, labelFunc, colorFunc) = StylishButton(onClick, labelFunc, colorFunc, "none")
-
+    member val Hotkey : Hotkey = "none" with get, set
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
 
@@ -30,8 +24,8 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
         base.Update(elapsedTime, moved)
         color.Update elapsedTime
 
-    override this.OnFocus() = base.OnFocus(); color.Target <- 0.7f
-    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.3f
+    override this.OnFocus() = base.OnFocus(); color.Target <- 1.0f
+    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.0f
 
     override this.Draw() =
         let h = this.Bounds.Height
@@ -43,8 +37,14 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
                 <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom)
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
-        Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, (Style.highlightF 255 color.Value, Style.color(255, 0.4f, color.Value)), 0.5f)
+        Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, textColor(), 0.5f)
         base.Draw()
+
+    override this.Init(parent: Widget) =
+        this
+        |+ Clickable.Focus this
+        |* HotkeyAction(this.Hotkey, onClick)
+        base.Init parent
 
     static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =
         let names = Enum.GetNames(typeof<'T>)
@@ -52,7 +52,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc, bind: Hotkey) 
         let mutable i = array.IndexOf(values, setting.Value)
         StylishButton(
             (fun () -> i <- (i + 1) % values.Length; setting.Value <- values.[i]), 
-            (fun () -> sprintf "%s: %s" label names.[i]),
+            (fun () -> sprintf "%s %s" label names.[i]),
             colorFunc
         )
 

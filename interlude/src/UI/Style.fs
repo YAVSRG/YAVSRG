@@ -46,7 +46,7 @@ module Style =
     
     /// 0.25, 0.5
     let dark a : ColorFunc = fun () ->
-        color (a, 0.25f, 0.5f)
+        color (a, 0.5f, 0.2f)
     
     /// 0.25, 0.75
     let darkL a : ColorFunc = fun () ->

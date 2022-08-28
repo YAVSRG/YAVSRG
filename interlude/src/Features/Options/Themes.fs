@@ -6,6 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude
 open Interlude.Content
@@ -53,7 +54,7 @@ module Themes =
         let createRenderer() =
             match Gameplay.Chart.current with
             | Some chart -> 
-                let nr = NoteRenderer(Prelude.Scoring.Metrics.createDummyMetric chart)
+                let nr = NoteRenderer(Metrics.createDummyMetric chart)
                 nr.Add(GameplayWidgets.ScreenCover())
                 if this.Initialised then nr.Init this
                 nr :> Widget

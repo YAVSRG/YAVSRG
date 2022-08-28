@@ -69,10 +69,12 @@ type PrettySetting(name, widget: Widget) as this =
 type PrettyButton(name, action) as this =
     inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then action()))
 
-    do
+    member val Icon = "" with get, set
+
+    override this.Init(parent: Widget) =
         this
         |+ Text(
-            K (N name + "  >"),
+            K (if this.Icon <> "" then sprintf "%s %s  >" this.Icon (N name) else sprintf "%s  >" (N name)),
             Color = ( 
                 fun () -> 
                     if this.Enabled then
@@ -83,6 +85,7 @@ type PrettyButton(name, action) as this =
             Position = Position.Margin(Style.padding))
         |+ Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
         |* TooltipRegion(T name)
+        base.Init parent
 
     override this.Draw() =
         if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)

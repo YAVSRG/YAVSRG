@@ -28,27 +28,27 @@ type Toolbar() =
         |+ IconButton(L"menu.back",
             Icons.back, HEIGHT,
             (fun () -> Screen.back Transitions.Flags.UnderLogo),
-            "exit",
+            Hotkey = "exit",
             Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT - 10.0f))
         |+ (
             FlowContainer.LeftToRight(200.0f, Position = Position.SliceTop (HEIGHT - 10.0f))
             |+ IconButton(L"menu.options",
                 Icons.options, HEIGHT,
                 ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
-                "options")
+                Hotkey = "options")
             |+ IconButton(L"menu.import",
                 Icons.import, HEIGHT,
                 ( fun () -> if shown() then Screen.change Screen.Type.Import Transitions.Flags.Default ),
-                "import")
+                Hotkey = "import")
             |+ IconButton(L"menu.help",
                 Icons.wiki, HEIGHT,
                 ( fun () -> if shown() then QuickStartGuide.show_help() ),
-                "help",
+                Hotkey = "help",
                 HoverIcon = Icons.wiki2)
             |+ IconButton(L"menu.tasks",
                 Icons.tasks, HEIGHT,
                 ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
-                "tasks")
+                Hotkey = "tasks")
             )
         |* Jukebox(Position = Position.Margin(0.0f, HEIGHT))
 

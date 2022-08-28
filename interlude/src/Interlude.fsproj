@@ -71,6 +71,7 @@
     <Compile Include="Features\Play\NoteRenderer.fs" />
     <Compile Include="Features\Play\GameplayWidgets.fs" />
     <Compile Include="Features\Play\Play.fs" />
+    <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\Globals.fs" />
     <Compile Include="Features\LevelSelect\Collections.fs" />
     <Compile Include="Features\LevelSelect\Tree.fs" />

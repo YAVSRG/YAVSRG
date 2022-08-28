@@ -95,7 +95,7 @@ type PlayScreen() as this =
                 liveplay.Add(time, inputKeyState) )
             scoring.Update chartTime
 
-        if (!|"options").Pressed() then
+        if (!|"options").Tapped() then
             Song.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
@@ -204,7 +204,7 @@ type ReplayScreen(mode: ReplayMode) as this =
 
         if not keypressData.Finished then scoring.Update chartTime
 
-        if (!|"options").Pressed() then
+        if (!|"options").Tapped() then
             QuickOptions.show(scoring, ignore)
         
         if keypressData.Finished then Screen.back Transitions.Flags.Default
