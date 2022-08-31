@@ -225,6 +225,7 @@ module Options =
             Hotkeys.register "mods" (mk Keys.M)
             Hotkeys.register "autoplay" (ctrl Keys.A)
             Hotkeys.register "preview" (mk Keys.P)
+            Hotkeys.register "reload_themes" (Key (Keys.S, (true, true, true)))
 
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)

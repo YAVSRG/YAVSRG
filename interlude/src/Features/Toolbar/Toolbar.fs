@@ -1,9 +1,14 @@
 ﻿namespace Interlude.Features.Toolbar
 
+open System
+open System.IO
+open SixLabors.ImageSharp
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Prelude.Common
+open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.UI.Screen.Toolbar
@@ -50,6 +55,16 @@ type Toolbar() =
                 ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
                 Hotkey = "tasks")
             )
+        |+ HotkeyAction("screenshot", fun () ->
+            let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
+            let path = Path.Combine(getDataPath "Screenshots", id)
+            use img = Render.screenshot()
+            img.SaveAsPng(path) // todo: this is a performance bottleneck
+            Notifications.notif("Screenshot saved: " + id, NotificationType.Info) )
+        |+ HotkeyAction("reload_themes", fun () -> 
+            Noteskins.load()
+            Themes.load()
+            Notifications.notif("Reloaded themes & noteskins", NotificationType.Info) )
         |* Jukebox(Position = Position.Margin(0.0f, HEIGHT))
 
     override this.Draw() = 
@@ -73,13 +88,13 @@ type Toolbar() =
         Terminal.update()
         if moved then 
             this.Bounds <- if hidden then this.Parent.Bounds.Expand(0.0f, HEIGHT) else this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - expandAmount.Value))
-            this.VisibleBounds <- this.Parent.Bounds
-        container.Update(elapsedTime, moved || expandAmount.Moving)
+            this.VisibleBounds <- if hidden then this.Parent.Bounds else this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
+        container.Update(elapsedTime, moved)
 
     override this.Init(parent: Widget) =
         base.Init parent
         this.Bounds <- if hidden then this.Parent.Bounds.Expand(0.0f, HEIGHT) else this.Parent.Bounds.Expand(0.0f, HEIGHT * (1.0f - expandAmount.Value))
-        this.VisibleBounds <- this.Parent.Bounds
+        this.VisibleBounds <- if hidden then this.Parent.Bounds else this.Parent.Bounds.Expand(0.0f, HEIGHT * 2.0f)
         container.Init this
     
     override this.Position with set _ = failwith "Position can not be set for toolbar"
