@@ -39,10 +39,10 @@ type [<Sealed>] Clickable(onLeftClick) =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
-        let oh = hover
+        let was_hovering = hover
         hover <- Mouse.hover (if this.Floating then this.Bounds else this.VisibleBounds)
-        if oh && not hover then this.OnHover false
-        elif not oh && hover && Mouse.moved() then this.OnHover true
+        if was_hovering && not hover then this.OnHover false
+        elif not was_hovering && hover && ((not moved) || Mouse.moved()) then this.OnHover true
         elif hover then
             if Mouse.leftClick() then this.OnLeftClick()
             if Mouse.rightClick() then this.OnRightClick()

@@ -139,6 +139,16 @@ module Render =
         //for i = 0 to 15 do
         //    let loc = sprintf "samplers[%i]" i
         //    Shader.setUniformInt (loc, i) Shader.main
+        
+    open SixLabors.ImageSharp
+    open SixLabors.ImageSharp.Processing
+
+    let screenshot() =
+        let data = System.Runtime.InteropServices.Marshal.AllocHGlobal(rwidth * rheight * 4)
+        GL.ReadPixels(0, 0, rwidth, rheight, PixelFormat.Rgba, PixelType.UnsignedByte, data)
+        let image : Image<PixelFormats.Rgba32> = Image<PixelFormats.Rgba32>.LoadPixelData(new Span<byte>(data.ToPointer(), (rwidth * rheight * 4)), rwidth, rheight)
+        image.Mutate(fun i -> i.RotateFlip(RotateMode.Rotate180, FlipMode.Horizontal) |> ignore)
+        image
 
 (*
     Drawing methods to be used by UI components
