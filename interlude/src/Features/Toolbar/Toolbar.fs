@@ -36,7 +36,7 @@ type Toolbar() =
             Hotkey = "exit",
             Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT - 10.0f))
         |+ (
-            FlowContainer.LeftToRight(200.0f, Position = Position.SliceTop (HEIGHT - 10.0f))
+            FlowContainer.LeftToRight(200.0f, Navigation = false, Position = Position.SliceTop (HEIGHT - 10.0f))
             |+ IconButton(L"menu.options",
                 Icons.options, HEIGHT,
                 ( fun () -> if shown() && Screen.currentType <> Screen.Type.Play && Screen.currentType <> Screen.Type.Replay then OptionsMenuRoot.show() ),
