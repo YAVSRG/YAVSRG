@@ -197,7 +197,6 @@ module Difficulty =
             technicalComposite.[index, column] <- Math.Pow(jack.[index, column], 1.0 / OHTNERF)
 
         let snapDifficulty (strain: float array) mask =
-            //todo: optimise
             let mutable vals = []
             for k in Bitmap.toSeq mask do
                 vals <- strain.[k] :: vals

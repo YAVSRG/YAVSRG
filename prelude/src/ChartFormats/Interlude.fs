@@ -123,7 +123,6 @@ module Interlude =
 
     type BPM = int<beat> * float32<ms/beat>
 
-    // todo: struct this as optimisation?
     type TimeDataItem<'t> = Time * 't
     let offsetOf ((offset, _): TimeDataItem<'t>) = offset
 

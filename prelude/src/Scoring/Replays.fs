@@ -36,7 +36,6 @@ module InternalScore =
             let statuses = Array.create keys HitStatus.NOTHING 
 
             for k = 0 to (keys - 1) do
-                // todo: match NoteRow.[k] with ...
                 if nr.[k] = NoteType.NORMAL then
                     statuses.[k] <- HitStatus.HIT_REQUIRED
                 elif nr.[k] = NoteType.HOLDHEAD then
@@ -56,7 +55,6 @@ module InternalScore =
             let times = Array.zeroCreate keys
             let statuses = Array.create keys HitStatus.NOTHING 
             for k = 0 to (keys - 1) do
-                // todo: match NoteRow.[k] with ...
                 if nr.[k] = NoteType.NORMAL || nr.[k] = NoteType.HOLDHEAD then
                     statuses.[k] <- HitStatus.HIT_ACCEPTED
                 elif nr.[k] = NoteType.HOLDTAIL then

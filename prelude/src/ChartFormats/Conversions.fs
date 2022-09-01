@@ -351,7 +351,6 @@ module Conversions =
 
             let tps =
                 seq {
-                    //todo: can be refactored as recursion and might compile as faster code cause fsc is smart
                     let mutable bs = bpm.Data |> List.ofSeq
                     if List.isEmpty bs then ()
                     else
