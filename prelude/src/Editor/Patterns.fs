@@ -47,14 +47,15 @@ type P1 =
         Releasing: int
         Timestamp: Time
     }
-
+    
+[<RequireQualifiedAccess>]
 type RowTag =
-    | _None = 0
-    | _Stream = 1
-    | _Jack = 2
-    | _Chord = 3
-    | _Chords = 4
-    | _Only_Releases = 5
+    | None = 0
+    | Stream = 1
+    | Jack = 2
+    | Chord = 3
+    | Chords = 4
+    | Only_Releases = 5
 
 type RowInfo =
     {
@@ -71,7 +72,7 @@ type RowInfo =
     static member Blank =
         { 
             Notes = Array.empty
-            Tag = RowTag._None
+            Tag = RowTag.None
             Count = 0
             MCount = 0
             RCount = 0
@@ -130,9 +131,9 @@ module Analysis =
                     Timestamp = 0.0f<ms> //nyi
                 }
             match inf.Tag with
-            | RowTag._Stream -> e (Stream 1) // stair length nyi
-            | RowTag._Chord -> e (Chord (inf.Count, 1)) // spacing nyi
-            | RowTag._Only_Releases -> e Release
+            | RowTag.Stream -> e (Stream 1) // stair length nyi
+            | RowTag.Chord -> e (Chord (inf.Count, 1)) // spacing nyi
+            | RowTag.Only_Releases -> e Release
             | _ -> ()
 
         let buf = Buffer.create 10
@@ -146,9 +147,9 @@ module Analysis =
             lastTime <- time
             
             match newRow.Count with
-            | 0 -> newRow.Tag <- RowTag._Only_Releases
-            | 1 -> newRow.Tag <- RowTag._Stream
-            | _ -> newRow.Tag <- RowTag._Chord
+            | 0 -> newRow.Tag <- RowTag.Only_Releases
+            | 1 -> newRow.Tag <- RowTag.Stream
+            | _ -> newRow.Tag <- RowTag.Chord
 
             // jacks not yet
 
