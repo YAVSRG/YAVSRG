@@ -84,7 +84,7 @@ module Common =
                         let s: string[] = l.Split ([|'='|], 2)
                         mapping.Add (s.[0], s.[1].Replace("\\n","\n"))
                     ) lines
-                loadedPath <- path
+                loadedPath <- Path.GetFullPath path
             with err -> Logging.Error ("Failed to load localisation file: " + path, err)
 
         let localise str : string =
