@@ -180,7 +180,8 @@ module Gameplay =
 
     let setScore (data: ScoreInfoProvider) : BestFlags =
         if
-            data.ModStatus < ModStatus.Unstored &&
+            data.ModStatus < ModStatus.Unstored
+            &&
             match options.ScoreSaveCondition.Value with
             | ScoreSaving.Pacemaker ->
                 match options.Pacemaker.Value with
@@ -190,8 +191,12 @@ module Gameplay =
             | ScoreSaving.Always
             | _ -> true
         then
-            // todo: score uploading goes here?
-            Scores.saveScore Chart.saveData.Value rulesetId data
+            if data.ModStatus = ModStatus.Ranked then
+                // todo: score uploading goes here when online added
+                Scores.saveScoreWithPbs Chart.saveData.Value rulesetId data
+            else
+                Scores.saveScore Chart.saveData.Value data
+                BestFlags.Default
         else BestFlags.Default
 
     // todo: this is a temporary measure until the table module has a better interface
