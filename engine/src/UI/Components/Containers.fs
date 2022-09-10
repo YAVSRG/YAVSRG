@@ -6,6 +6,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 
+/// Container that automatically positions its contents stacked in Vertical/Horizontal arrangements
 module FlowContainer =
 
     type FlowItem<'T when 'T :> Widget> =
@@ -218,6 +219,8 @@ module FlowContainer =
             elif (!|"right").Tapped() then this.Previous()
             elif (!|"select").Tapped() then this.SelectFocusedChild()
 
+/// Container that wraps a child to allow vertical scrolling with the mouse wheel
+/// Also automatically scrolls to show the selected item when navigating
 [<Sealed>]
 type ScrollContainer(child: Widget, contentHeight: float32) =
     inherit StaticWidget(NodeType.Switch (K child))
@@ -271,6 +274,8 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
         child.Init this
         child.Position <- Position.SliceTop(contentHeight).Translate(0.0f, -scroll_pos.Value).Margin(this.Margin)
 
+/// Container that provides navigation and selection using arrow keys + enter
+/// Content is assumed to be positioned in a layout that fits the navigation
 module SwitchContainer =
 
     [<AbstractClass>]
@@ -353,3 +358,26 @@ module SwitchContainer =
             if (!|"left").Tapped() then this.Previous()
             elif (!|"right").Tapped() then this.Next()
             elif (!|"select").Tapped() then this.SelectFocusedChild()
+            
+/// Container whose content can be swapped for other widgets
+type SwapContainer() as this =
+    inherit StaticWidget(NodeType.Switch (fun () -> this.Current))
+
+    let mutable current : Widget = Unchecked.defaultof<_>
+    let mutable justSwapped = false
+
+    member this.Current
+        with get() = current
+        and set(v) =
+            current <- v
+            if not current.Initialised then current.Init this
+            else assert(current.Parent = this)
+            justSwapped <- true
+
+    override this.Draw() =
+        current.Draw()
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        let moved = if justSwapped then justSwapped <- false; true else moved
+        current.Update(elapsedTime, moved)
