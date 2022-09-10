@@ -17,6 +17,8 @@ module Interlude =
 
     type Bitmap = uint16
     module Bitmap = 
+        let empty = 0us
+
         let rec count (x : Bitmap) =
             match x with
             | 0us -> 0
