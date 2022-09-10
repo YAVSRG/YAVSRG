@@ -4,7 +4,8 @@ open System
 open System.Collections.Generic
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
-open Prelude.Editor.Filter
+open Prelude.Editing.Filter
+open Prelude.Editing
 
 module Mods = 
     (*
@@ -93,6 +94,12 @@ module Mods =
             Status = ModStatus.Unranked
             Check = fun _ mc -> not <| mc.SV.IsEmpty()
             Apply = fun _ mc -> { mc with SV = new MultiTimeData<float32>(mc.Keys) }
+        }
+
+    registerMod "inverse"
+        { defaultMod with
+            Status = ModStatus.Unranked
+            Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.Notes }
         }
 
     //todo: no ln (removes all lns)

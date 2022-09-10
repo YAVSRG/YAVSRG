@@ -276,12 +276,13 @@ module Scores =
     let getScoreData (hash: string) =
         if hash |> data.Entries.ContainsKey |> not then None else Some data.Entries.[hash]
 
-    let saveScore (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : BestFlags =
+    let saveScore (d: ChartSaveData) (score: ScoreInfoProvider) =
         d.Scores.Add score.ScoreInfo
-        // update score buckets
-        for b in data.Buckets.Values do Bucket.add score b
         save()
-        // update pbs
+
+    let saveScoreWithPbs (d: ChartSaveData) (rulesetId: string) (score: ScoreInfoProvider) : BestFlags =
+        saveScore d score
+
         if d.Bests.ContainsKey rulesetId then
             let newBests, flags = Bests.update score d.Bests.[rulesetId]
             d.Bests.[rulesetId] <- newBests

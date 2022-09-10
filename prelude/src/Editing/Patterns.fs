@@ -1,4 +1,4 @@
-﻿namespace Prelude.Editor.Patterns
+﻿namespace Prelude.Editing.Patterns
 
 open Prelude.Common
 open Prelude.ChartFormats.Interlude
