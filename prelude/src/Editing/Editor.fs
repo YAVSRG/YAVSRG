@@ -63,7 +63,7 @@ module Inverse =
                 printfn "%s ~ " (NoteRow.prettyPrint d1)
                 a <- a.Tail
             elif t1 > t2 then
-                printfn "     ~ %s" (NoteRow.prettyPrint d2)
+                printfn "        ~ %s" (NoteRow.prettyPrint d2)
                 b <- b.Tail
             else
                 printfn "%s ~ %s" (NoteRow.prettyPrint d1) (NoteRow.prettyPrint d2)
@@ -72,14 +72,25 @@ module Inverse =
         for (_, d1) in a do
             printfn "%s ~ " (NoteRow.prettyPrint d1)
         for (_, d2) in b do
-            printfn "     ~ %s" (NoteRow.prettyPrint d2)
+            printfn "        ~ %s" (NoteRow.prettyPrint d2)
 
-    let apply keycount (notes: TimeData<NoteRow>) : TimeData<NoteRow> =
+    let apply keycount (bpms: TimeData<BPM>) (notes: TimeData<NoteRow>) : TimeData<NoteRow> =
         let mutable holding = Bitmap.empty
         let mutable last_yielded_holding = Bitmap.empty
         let mutable memory : NoteRow = NoteRow.createEmpty keycount
         let mutable memory_time : Time = -Time.infinity
-        let mutable spacing = 100.0f<ms> // todo: base on bpm
+        let mutable spacing = 0.0f<ms>
+
+        let bpms = bpms.Data
+        let mutable bpm_index = -1
+
+        let update_spacing now = 
+            if bpm_index + 1 < bpms.Count then
+                let (time, (meter, msPerBeat)) = bpms.[bpm_index + 1]
+                if time < now then
+                    spacing <- msPerBeat * 0.5f<beat>
+                    bpm_index <- bpm_index + 1
+
         seq {
             
             // set up first row
@@ -93,6 +104,8 @@ module Inverse =
                     memory.[k] <- NoteType.HOLDHEAD
                     holding <- Bitmap.setBit k holding
                 | _ -> ()
+            
+            update_spacing time
 
             // for all other rows
             for (time, d) in Seq.skip 1 notes.Data do
@@ -115,25 +128,28 @@ module Inverse =
 
                 let time_since_last_row = time - memory_time
 
-                // RELEASES APPEAR AFTER PREVIOUS ROW
-                if time_since_last_row > spacing then
-                    yield (memory_time, memory)
-                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY memory ||| NoteRow.noteData NoteType.HOLDHEAD memory
-                    let releases_row = NoteRow.createEmpty keycount
-                    NoteRow.setNoteData NoteType.HOLDBODY releases_row last_yielded_holding
-                    NoteRow.setNoteData NoteType.HOLDTAIL releases_row (last_yielded_holding &&& check_for_releases)
-                    yield (time - spacing, releases_row)
-                    last_yielded_holding <- last_yielded_holding &&& ~~~check_for_releases
-
                 // RELEASES APPEAR IN LINE WITH PREVIOUS ROW
-                elif time_since_last_row = spacing then
+                if Time.Abs(time_since_last_row - spacing) < 5.0f<ms> then
                     for k in Bitmap.toSeq check_for_releases do
                         match memory.[k] with
                         | NoteType.HOLDHEAD -> memory.[k] <- NoteType.NORMAL
                         | NoteType.HOLDBODY -> memory.[k] <- NoteType.HOLDTAIL
                         | _ -> ()
                     yield (memory_time, memory)
-                    last_yielded_holding <- last_yielded_holding &&& ~~~check_for_releases
+                    //printfn "= %s" (NoteRow.prettyPrint memory)
+                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY memory ||| NoteRow.noteData NoteType.HOLDHEAD memory
+
+                // RELEASES APPEAR AFTER PREVIOUS ROW
+                elif time_since_last_row > spacing then
+                    yield (memory_time, memory)
+                    //printfn "+ %s" (NoteRow.prettyPrint memory)
+                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY memory ||| NoteRow.noteData NoteType.HOLDHEAD memory
+                    let releases_row = NoteRow.createEmpty keycount
+                    NoteRow.setNoteData NoteType.HOLDBODY releases_row last_yielded_holding
+                    NoteRow.setNoteData NoteType.HOLDTAIL releases_row (last_yielded_holding &&& check_for_releases)
+                    yield (time - spacing, releases_row)
+                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY releases_row
+                    //printfn "+ %s" (NoteRow.prettyPrint releases_row)
 
                 // RELEASES APPEAR BEFORE PREVIOUS ROW
                 else
@@ -145,9 +161,12 @@ module Inverse =
                             releases_row.[k] <- NoteType.HOLDTAIL
                             memory.[k] <- NoteType.NOTHING
                     yield (time - spacing, releases_row)
+                    //printfn "- %s %.2f" (NoteRow.prettyPrint releases_row) (time - spacing)
                     yield (memory_time, memory)
+                    //printfn "- %s %.2f" (NoteRow.prettyPrint memory) memory_time
                     last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY memory ||| NoteRow.noteData NoteType.HOLDHEAD memory
-
+                    
+                update_spacing time
                 memory_time <- time
                 memory <- currentRow
 
@@ -157,6 +176,8 @@ module Inverse =
                 if nt = NoteType.HOLDHEAD then memory.[k] <- NoteType.NORMAL
 
             yield (memory_time, memory)
+
         }
+        |> Seq.filter (snd >> NoteRow.isEmpty >> not)
         |> ResizeArray
         |> TimeData
