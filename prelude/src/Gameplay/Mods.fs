@@ -99,11 +99,10 @@ module Mods =
     registerMod "inverse"
         { defaultMod with
             Status = ModStatus.Unranked
-            Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.Notes }
+            Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes }
         }
 
     //todo: no ln (removes all lns)
-    //todo: inverse (exclusion with no ln)
     //todo: randomiser with seed
 
     (*
