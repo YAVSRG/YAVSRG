@@ -64,6 +64,13 @@ module Printerlude =
             ctx.WriteLine(sprintf "You are running %s" Utils.version)
             ctx.WriteLine(sprintf "The latest version online is %s" Utils.AutoUpdate.latestVersionName)
 
+        let fft() =
+            match Gameplay.Chart.current with
+            | Some c -> 
+                for (v, v2) in Prelude.Gameplay.FFT.ffts c.Notes do
+                    ctx.WriteLine(sprintf "%.2f :: %.3f" v v2)
+            | None -> ()
+
         let export_osz() =
             match Gameplay.Chart.current with
             | None -> failwith "No chart to export"
@@ -92,6 +99,7 @@ module Printerlude =
                 .WithCommand("exit", Command.create "Exits the game" [] (Impl.Create (fun () -> UI.Screen.exit <- true)))
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
                 .WithCommand("export_osz", Command.create "Export current file as osz" [] (Impl.Create export_osz))
+                .WithCommand("fft", Command.create "Experimental" [] (Impl.Create fft))
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)
