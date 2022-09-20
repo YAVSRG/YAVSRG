@@ -222,8 +222,8 @@ module Tree =
             Text.drawB(Style.baseFont, markers, 35.0f, right - 95.0f, top + 10.0f, Style.text())
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
-                Draw.rect bounds (Style.color(Comments.fade.Alpha / 2, 1.0f, 0.5f))
-                Text.drawFillB(Style.baseFont, chartData.Value.Comment, bounds.Shrink(20.0f, 10.0f), Style.text(), Alignment.LEFT)
+                Draw.rect bounds (Style.color(Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
+                Text.drawFillB(Style.baseFont, chartData.Value.Comment, bounds.Shrink(30.0f, 15.0f), (Color.FromArgb(Comments.fade.Alpha, Color.White), Color.FromArgb(Comments.fade.Alpha, Color.Black)), Alignment.CENTER)
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
