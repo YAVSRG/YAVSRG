@@ -123,7 +123,7 @@ module Fonts =
         let font = family.CreateFont(SCALE * 4.0f / 3.0f)
         new SpriteFont(font, [collection.Find "feather"])
 
-    do 
+    let init() = 
         add (getResourceStream "feather.ttf")
         add (getResourceStream "Inconsolata.ttf")
 
