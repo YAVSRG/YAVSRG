@@ -15,14 +15,17 @@ type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
 
     let toggle() = if this.Selected then this.Focus() else this.Select()
 
-    do
+    member val Clickable = true with get, set
+
+    override this.Init(parent) =
+        base.Init parent
         this
         |+ Text(
             (fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else ""),
             Align = Alignment.LEFT, 
             Color = colorFunc)
-        |+ Clickable.Focus this
         |* HotkeyAction(hotkey, toggle)
+        if this.Clickable then this.Add (Clickable.Focus this)
 
     member this.TextColor = colorFunc
 

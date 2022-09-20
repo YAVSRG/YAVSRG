@@ -10,6 +10,7 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 
 module private WindowEvents =
 
@@ -111,6 +112,7 @@ type Window(config: Config, title: string, root: Root) as this =
     
     member this.OnLoad() =
         this.ApplyConfig config
+        Fonts.init()
         Input.init this
         Hotkeys.init()
         WindowEvents.onLoad.Trigger()
