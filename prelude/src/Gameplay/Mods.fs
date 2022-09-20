@@ -96,11 +96,11 @@ module Mods =
             Apply = fun _ mc -> { mc with SV = new MultiTimeData<float32>(mc.Keys) }
         }
 
-    registerMod "inverse"
-        { defaultMod with
-            Status = ModStatus.Unranked
-            Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes }
-        }
+    //registerMod "inverse"
+    //    { defaultMod with
+    //        Status = ModStatus.Unranked
+    //        Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes }
+    //    }
 
     //todo: no ln (removes all lns)
     //todo: randomiser with seed
