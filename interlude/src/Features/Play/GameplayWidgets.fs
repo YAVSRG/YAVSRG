@@ -60,25 +60,28 @@ module GameplayWidgets =
             base.Update(elapsedTime, moved)
             color.Update elapsedTime
 
+    [<Struct>]
+    type private HitMeterHit = { Time: Time; Position: float32; IsRelease: bool; Judgement: JudgementId option }
+
     type HitMeter(conf: WidgetConfig.HitMeter, helper) =
         inherit StaticWidget(NodeType.None)
-        let hits = ResizeArray<struct (Time * float32 * int)>()
+        let hits = ResizeArray<HitMeterHit>()
         let mutable w = 0.0f
 
         do
             helper.OnHit.Add(fun ev ->
                 match ev.Guts with
-                | Hit e when e.Judgement.IsSome ->
-                    hits.Add (struct (ev.Time, e.Delta / helper.Scoring.MissWindow * w * 0.5f, int e.Judgement.Value))
-                | Release e when e.Judgement.IsSome ->
-                    hits.Add (struct (ev.Time, e.Delta / helper.Scoring.MissWindow * w * 0.5f, int e.Judgement.Value))
-                | _ -> ())
+                | Hit e ->
+                    hits.Add { Time = ev.Time; Position = e.Delta / helper.Scoring.MissWindow * w * 0.5f; IsRelease = false; Judgement = e.Judgement }
+                | Release e ->
+                    hits.Add { Time = ev.Time; Position = e.Delta / helper.Scoring.MissWindow * w * 0.5f; IsRelease = true; Judgement = e.Judgement }
+            )
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
             if w = 0.0f then w <- this.Bounds.Width
             let now = helper.CurrentChartTime()
-            while hits.Count > 0 && let struct (time, _, _) = (hits.[0]) in time + conf.AnimationTime * 1.0f<ms> < now do
+            while hits.Count > 0 && hits.[0].Time + conf.AnimationTime * 1.0f<ms> < now do
                 hits.RemoveAt(0)
 
         override this.Draw() =
@@ -88,11 +91,13 @@ module GameplayWidgets =
                     (Rect.Create(centre - conf.Thickness, this.Bounds.Top, centre + conf.Thickness, this.Bounds.Bottom))
                     Color.White
             let now = helper.CurrentChartTime()
-            for struct (time, pos, j) in hits do
-                Draw.rect
-                    (Rect.Create(centre + pos - conf.Thickness, this.Bounds.Top, centre + pos + conf.Thickness, this.Bounds.Bottom))
-                    (let c = helper.ScoringConfig.JudgementColor j in
-                        Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - time) / conf.AnimationTime), 0, 255), c))
+            for hit in hits do
+                let r = Rect.Create(centre + hit.Position - conf.Thickness, this.Bounds.Top, centre + hit.Position + conf.Thickness, this.Bounds.Bottom)
+                let c = 
+                    match hit.Judgement with
+                    | None -> Color.FromArgb(Math.Clamp(127 - int (127.0f * (now - hit.Time) / conf.AnimationTime), 0, 127), Color.Silver)
+                    | Some j -> Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - hit.Time) / conf.AnimationTime), 0, 255), helper.ScoringConfig.JudgementColor j)
+                Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
 
     // disabled for now
     type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
