@@ -58,7 +58,7 @@ type OrganiseCharts(options: string seq, label: string, setting: Setting<string>
         | Some d -> d.Update(elapsedTime, moved)
         | None -> ()
 
-type LevelSelectScreen() as this =
+type LevelSelectScreen() =
     inherit Screen()
 
     let searchText = Setting.simple ""
@@ -75,7 +75,9 @@ type LevelSelectScreen() as this =
         Tree.updateDisplay()
         infoPanel.Refresh()
 
-    do
+    override this.Init(parent: Widget) =
+        base.Init parent
+
         Setting.app (fun s -> if sortBy.ContainsKey s then s else "Title") options.ChartSortMode
         Setting.app (fun s -> if groupBy.ContainsKey s then s else "Pack") options.ChartGroupMode
 
@@ -115,9 +117,10 @@ type LevelSelectScreen() as this =
         |* infoPanel
 
         Chart.onChange.Add infoPanel.Refresh
+        Comments.init this
 
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
         if LevelSelect.refresh then refresh(); LevelSelect.refresh <- false
 
         if (!|"select").Tapped() then Tree.play()
@@ -137,6 +140,7 @@ type LevelSelectScreen() as this =
         elif (!|"end").Tapped() then Tree.endGroup()
         
         Tree.update(this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsedTime)
+        Comments.update(elapsedTime, moved)
 
     override this.Draw() =
 
@@ -153,7 +157,9 @@ type LevelSelectScreen() as this =
             ( Quad.create <| Vector2(left + w + 85.0f, top) <| Vector2(right, top) <| Vector2(right, top + 170.0f) <| Vector2(left + w, top + 170.0f) )
             (Quad.colorOf (Style.color (120, 0.1f, 0.0f))) Sprite.DefaultQuad
         Draw.rect ( this.Bounds.SliceTop(175.0f).SliceBottom(5.0f) ) (Style.color (255, 0.8f, 0.0f))
+
         base.Draw()
+        Comments.draw()
 
     override this.OnEnter prev =
         Song.onFinish <- SongFinishAction.Callback (fun () -> Song.playFrom Chart.current.Value.Header.PreviewTime)
