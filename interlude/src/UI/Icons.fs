@@ -19,7 +19,7 @@ module Icons =
 
     let goal = Feather.flag
     let playlist = Feather.list
-    let note = Feather.tag
+    let comment = Feather.message_square
     let order_ascending = Feather.chevrons_up
     let order_descending = Feather.chevrons_down
     let collections = Feather.folder

@@ -18,8 +18,6 @@ module Style =
     let white a : ColorFunc = K <| Color.FromArgb(a, Color.White)
     let black a : ColorFunc = K <| Color.FromArgb(a, Color.Black)
 
-    let text : unit -> Color * Color = K (Color.White, Color.Black)
-
     /// 1.0, 0.0
     let highlight a : ColorFunc = fun () ->
         color (a, 1.0f, 0.0f)

@@ -34,7 +34,6 @@ type ChartContextMenu(cc: CachedChart, context: LevelSelectContext) as this =
             //         PrettyButton("chart.removefromcollection", ignore, Icon = Icons.remove_from_collection).Pos(280.0f)
             //    else PrettyButton("chart.addtocollection", ignore, Icon = Icons.add_to_collection).Pos(280.0f)
             //   )
-            |+ PrettyButton("chart.editnote", ignore, Icon = Icons.note).Pos(280.0f)
         )
     override this.Title = cc.Title
     override this.OnClose() = ()
@@ -71,15 +70,6 @@ type ScrollTo =
 
 module Tree = 
     
-    (*
-         functionality wishlist:
-         - "random chart" hotkey
-         - cropping of text that is too long
-        
-         eventual todo:
-         - goals and playlists editor
-    *)
-    
     /// Group's name = this string => Selected chart is in this group
     let mutable private selectedGroup = ""
     /// Chart's filepath = this string && contextIndex match => It's the selected chart
@@ -92,9 +82,8 @@ module Tree =
     let private scroll(amount: float32) = scrollPos.Target <- scrollPos.Target + amount
     let mutable private right_click_scrolling = false
 
-    /// Flag that is cached by items in level select tree.
-    /// When the value increases by 1, update cache and recalculate certain things like color
-    /// Gets incremented whenever this needs to happen
+    /// Increment the flag to recalculate cached data on tree items
+    /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
     let mutable private cacheFlag = 0
 
     // future todo: different color settings?
@@ -150,7 +139,27 @@ module Tree =
         let mutable color = Color.Transparent
         let mutable chartData = None
         let mutable pbData: Bests option = None
-        let mutable collectionIcon = ""
+        let mutable markers = ""
+
+        let updateCachedInfo() =
+            localCacheFlag <- cacheFlag
+            if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
+            match chartData with
+            | Some d when d.Bests.ContainsKey rulesetId ->
+                pbData <- Some d.Bests.[rulesetId]
+            | _ -> ()
+            color <- colorFunc pbData
+            markers <-
+                if options.ChartGroupMode.Value <> "Collections" then
+                    match Collections.selectedCollection with
+                    | Collection ccs -> if ccs.Contains cc.FilePath then Icons.star + " " else ""
+                    | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Icons.playlist + " " else ""
+                    | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Icons.goal + " " else ""
+                else ""
+                +
+                match chartData with
+                | Some c when c.Comment <> "" -> Icons.comment
+                | _ -> ""
 
         override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + 90.0f)
         override this.Selected = selectedChart = cc.FilePath && Chart.context = context
@@ -210,26 +219,18 @@ module Tree =
             Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Style.text())
             Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, Style.text_subheading())
             Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, Style.text_subheading())
-            Text.drawB(Style.baseFont, collectionIcon, 35.0f, right - 95.0f, top + 10.0f, Style.text())
+            Text.drawB(Style.baseFont, markers, 35.0f, right - 95.0f, top + 10.0f, Style.text())
+
+            if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
+                Draw.rect bounds (Style.color(Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
+                Text.drawFillB(Style.baseFont, chartData.Value.Comment, bounds.Shrink(30.0f, 15.0f), (Color.FromArgb(Comments.fade.Alpha, Color.White), Color.FromArgb(Comments.fade.Alpha, Color.Black)), Alignment.CENTER)
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
         member private this.OnUpdate(bounds, elapsedTime, origin) =
-            if localCacheFlag < cacheFlag then
-                localCacheFlag <- cacheFlag
-                if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
-                match chartData with
-                | Some d when d.Bests.ContainsKey rulesetId ->
-                    pbData <- Some d.Bests.[rulesetId]
-                | _ -> ()
-                color <- colorFunc pbData
-                collectionIcon <-
-                    if options.ChartGroupMode.Value <> "Collections" then
-                        match Collections.selectedCollection with
-                        | Collection ccs -> if ccs.Contains cc.FilePath then Icons.star else ""
-                        | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Icons.playlist else ""
-                        | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Icons.goal else ""
-                    else ""
+
+            if localCacheFlag < cacheFlag then updateCachedInfo()
+
             if Mouse.hover bounds then
                 hover.Target <- 1.0f
                 if Mouse.leftClick() then
@@ -311,8 +312,7 @@ module Tree =
     let mutable private groups: GroupItem list = []
     let mutable private lastItem : ChartItem option = None
 
-    let updateDisplay() =
-        cacheFlag <- cacheFlag + 1
+    let updateDisplay() = cacheFlag <- cacheFlag + 1
 
     let refresh() =
         // fetch groups

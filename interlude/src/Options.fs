@@ -221,10 +221,12 @@ module Options =
             Hotkeys.register "move_up_in_collection" (ctrl Keys.LeftBracket)
             Hotkeys.register "sort_mode" (mk Keys.Comma)
             Hotkeys.register "group_mode" (mk Keys.Period)
+            Hotkeys.register "comment" (shift Keys.Semicolon)
 
             Hotkeys.register "mods" (mk Keys.M)
             Hotkeys.register "autoplay" (ctrl Keys.A)
             Hotkeys.register "preview" (mk Keys.P)
+            Hotkeys.register "reload_themes" (Key (Keys.S, (true, true, true)))
 
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)

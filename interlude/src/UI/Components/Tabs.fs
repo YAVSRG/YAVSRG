@@ -12,6 +12,7 @@ module Tabs =
             Draw.rect this.Bounds (if isOpen() then !*Palette.SELECTED else !*Palette.HOVER)
             base.Draw()
 
+    // todo: refactor to use SwapContainer
     type Container() as this =
         inherit StaticWidget(NodeType.Switch(fun _ -> this.WhoIsSelected()))
         let mutable selectedItem = None
