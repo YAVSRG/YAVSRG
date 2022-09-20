@@ -100,6 +100,8 @@ module WidgetConfig =
             AnimationTime: float32
             Thickness: float32
             ShowGuide: bool
+            ShowNonJudgements: bool
+            ReleasesExtraHeight: float32
         }
         static member Default = 
             {
@@ -109,7 +111,7 @@ module WidgetConfig =
                         Float = false
                         Left = -300.0f
                         LeftA = 0.5f
-                        Top = 0.0f
+                        Top = 10.0f
                         TopA = 0.5f
                         Right = 300.0f
                         RightA = 0.5f
@@ -119,6 +121,8 @@ module WidgetConfig =
                 AnimationTime = 1000.0f
                 Thickness = 5.0f
                 ShowGuide = true
+                ShowNonJudgements = true
+                ReleasesExtraHeight = 5.0f
             }
 
     [<Json.AutoCodec(false)>]
