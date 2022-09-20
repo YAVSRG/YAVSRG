@@ -40,6 +40,9 @@ module Releases =
 
     let build() =
         Process.Start("Features/build.bat", current_version).WaitForExit()
+        printfn "DID YOU REMBER BASS.DLL?"
+        printfn "(todo: proper build system with the dlls)"
+        printfn "DID YOU REMBER BASS.DLL?"
 
     let debug() =
         Process.Start("Features/debug.bat").WaitForExit()
