@@ -4,7 +4,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Prelude.ChartFormats.Conversions
+open Prelude.Charts.Formats.Conversions
 open Prelude.Data.Charts.Library.Imports
 open Interlude.Options
 open Interlude.UI

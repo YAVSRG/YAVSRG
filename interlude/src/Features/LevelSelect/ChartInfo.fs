@@ -7,7 +7,7 @@ open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI

@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Prelude.Gameplay.Mods
 open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
