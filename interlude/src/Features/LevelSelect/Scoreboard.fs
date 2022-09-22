@@ -9,7 +9,7 @@ open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Options

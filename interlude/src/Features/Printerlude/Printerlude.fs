@@ -57,7 +57,7 @@ module Printerlude =
 
     module private Utils =
 
-        open Prelude.ChartFormats
+        open Prelude.Charts.Formats
         open System.IO.Compression
 
         let show_version() =
