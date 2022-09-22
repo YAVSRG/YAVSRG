@@ -1,4 +1,4 @@
-﻿namespace Prelude.Data.Tables
+﻿namespace Prelude.Data.Charts.Tables
 
 open System
 open Percyqaz.Json

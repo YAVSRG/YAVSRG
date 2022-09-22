@@ -37,9 +37,12 @@
     <Compile Include="Themes\Conversions.fs" />
     <Compile Include="Data\Web.fs" />
     <Compile Include="Data\Scores.fs" />
-    <Compile Include="Data\Charts.fs" />
-    <Compile Include="Data\Tables.fs" />
-    <Compile Include="Data\Library.fs" />
+    <Compile Include="Data\Charts\Caching.fs" />
+    <Compile Include="Data\Charts\Collections.fs" />
+    <Compile Include="Data\Charts\Sorting.fs" />
+    <Compile Include="Data\Charts\Tables.fs" />
+    <Compile Include="Data\Charts\Library.fs" />
+    <Compile Include="Data\Charts\Suggestions.fs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,5 +59,7 @@
   <ItemGroup>
     <PackageReference Update="FSharp.Core" Version="6.0.5" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>
