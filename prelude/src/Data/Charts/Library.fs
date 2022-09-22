@@ -10,7 +10,7 @@ open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Formats.Conversions
-open Prelude.Data.Tables
+open Prelude.Data.Charts.Tables
 
 open Sorting
 open Collections
