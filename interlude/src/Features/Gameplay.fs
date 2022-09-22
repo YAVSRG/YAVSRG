@@ -10,7 +10,7 @@ open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.Charts
-open Prelude.Data.Tables
+open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
