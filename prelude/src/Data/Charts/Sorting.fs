@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open Prelude.Common
 open Prelude.Scoring
 
 module Sorting =
@@ -15,7 +16,7 @@ module Sorting =
         else "?"
 
     let dateLastPlayed (c: CachedChart, ctx) =
-        match Prelude.Data.Scores.Scores.getScoreData c.Hash with
+        match Prelude.Data.Scores.Scores.getData c.Hash with
         | Some d ->
             let daysAgo = (DateTime.Today - d.LastPlayed).TotalDays
             if daysAgo < 0 then 0, "Today"
@@ -33,7 +34,7 @@ module Sorting =
     type GroupContext = { Rate: float32; RulesetId: string; Ruleset: Ruleset }
 
     let gradeAchieved (c: CachedChart, ctx: GroupContext) =
-        match Prelude.Data.Scores.Scores.getScoreData c.Hash with
+        match Prelude.Data.Scores.Scores.getData c.Hash with
         | Some d ->
             if d.Bests.ContainsKey ctx.RulesetId then
                 match Grading.PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Grade with
@@ -43,7 +44,7 @@ module Sorting =
         | None -> -2, "No grade achieved"
 
     let lampAchieved (c: CachedChart, ctx: GroupContext) =
-        match Prelude.Data.Scores.Scores.getScoreData c.Hash with
+        match Prelude.Data.Scores.Scores.getData c.Hash with
         | Some d ->
             if d.Bests.ContainsKey ctx.RulesetId then
                 match Grading.PersonalBests.best_this_rate ctx.Rate d.Bests.[ctx.RulesetId].Lamp with
@@ -84,7 +85,9 @@ module Sorting =
         ]
 
     type FilterPart = 
-        | Criterion of string * string
+        | Equals of string * string
+        | LessThan of string * float
+        | MoreThan of string * float
         | String of string
         | Impossible
     type Filter = FilterPart list
@@ -94,46 +97,37 @@ module Sorting =
         let private string = " =:<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
         let private word = string |>> String
         let private pstring = between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy) |>> fun s -> String <| s.ToLower()
-        let private criterion = string .>>. (pchar '=' >>. string) |>> Criterion
-        let private filter = sepBy (attempt criterion <|> pstring <|> word) spaces1 .>> spaces
+        let private equals = string .>>. (pchar '=' >>. string) |>> Equals
+        let private less = string .>>. (pchar '<' >>. pfloat) |>> LessThan
+        let private more = string .>>. (pchar '>' >>. pfloat) |>> MoreThan
+        let private filter = sepBy (attempt equals <|> attempt less <|> attempt more <|> pstring <|> word) spaces1 .>> spaces
 
         let parse (str: string) =
             match run filter (str.Trim()) with
             | Success (x, _, _) -> x
             | Failure (f, _, _) -> [Impossible]
 
-        let apply (filter: Filter) (charts: CachedChart seq) =
-            seq {
-                for c in charts do
-                    let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DiffName + " " + c.Pack).ToLower()
-                    if List.forall
-                        (
-                            function
-                            | Impossible -> false
-                            | String str -> s.Contains str
-                            | Criterion ("k", n)
-                            | Criterion ("key", n)
-                            | Criterion ("keys", n) -> c.Keys.ToString() = n
-                            | _ -> true
-                        )
-                        filter
-                    then yield c
-            }
+        let private _f (filter: Filter) (c: CachedChart) : bool =
+            let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DiffName + " " + c.Pack).ToLower()
+            List.forall
+                (
+                    function
+                    | Impossible -> false
+                    | String str -> s.Contains str
+                    | Equals ("k", n)
+                    | Equals ("key", n)
+                    | Equals ("keys", n) -> c.Keys.ToString() = n
+                    | MoreThan ("d", d)
+                    | MoreThan ("diff", d) -> c.Physical > d
+                    | LessThan ("d", d)
+                    | LessThan ("diff", d) -> c.Physical < d
+                    | MoreThan ("l", l)
+                    | MoreThan ("length", l) -> float (c.Length / 1000.0f<ms>) > l
+                    | LessThan ("l", l)
+                    | LessThan ("length", l) -> float (c.Length / 1000.0f<ms>) < l
+                    | _ -> true
+                ) filter
 
-        let applyf (filter: Filter) (charts: (CachedChart * Collections.LevelSelectContext) seq) =
-               seq {
-                   for c, context in charts do
-                       let s = (c.Title + " " + c.Artist + " " + c.Creator + " " + c.DiffName + " " + c.Pack).ToLower()
-                       if List.forall
-                           (
-                               function
-                               | Impossible -> false
-                               | String str -> s.Contains str
-                               | Criterion ("k", n)
-                               | Criterion ("key", n)
-                               | Criterion ("keys", n) -> c.Keys.ToString() = n
-                               | _ -> true
-                           )
-                           filter
-                       then yield c, context
-               }
+        let apply (filter: Filter) (charts: CachedChart seq) = Seq.filter (_f filter) charts
+
+        let applyf (filter: Filter) (charts: (CachedChart * Collections.LevelSelectContext) seq) = Seq.filter (fun (c, _) -> _f filter c) charts

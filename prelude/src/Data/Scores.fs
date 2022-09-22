@@ -268,12 +268,12 @@ module Scores =
 
     let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "scores.json")) data
 
-    let getOrCreateScoreData (chart: Chart) =
+    let getOrCreateData (chart: Chart) =
         let hash = Chart.hash chart
         if hash |> data.Entries.ContainsKey |> not then data.Entries.Add(hash, ChartSaveData.FromChart chart)
         data.Entries.[hash]
 
-    let getScoreData (hash: string) =
+    let getData (hash: string) =
         if hash |> data.Entries.ContainsKey |> not then None else Some data.Entries.[hash]
 
     let saveScore (d: ChartSaveData) (score: ScoreInfoProvider) =
