@@ -15,7 +15,7 @@ levelselect.scoreboard.filter.tooltip=Selects how scores are filtered in the sco
 levelselect.scoreboard.sort.tooltip=Selects how scores are ordered in the scoreboard.
 levelselect.scoreboard.storage.local=Local scores
 levelselect.scoreboard.storage.tooltip=Online scores coming soon...\nFor now you can only show local scores.
-levelselect.search.tooltip=Type here to search for charts!\nPut text "in quotes" to search for exact text.\nSome useful filters:\n    key=4 will match only 4K charts\n    More coming soon...
+levelselect.search.tooltip=Type here to search for charts!\nPut text "in quotes" to search for exact text.\nSome useful filters:\n    key=4 will match only 4K charts\n    length>120 will match only charts longer than 2 minutes\n    diff>6 will match only charts harder than 6.00 rating
 levelselect.sortby.tooltip=Select how charts are ordered within groups.\nCurrently only supports ascending order.
 menu.back=Back
 menu.help=Help

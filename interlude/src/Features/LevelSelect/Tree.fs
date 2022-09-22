@@ -143,7 +143,7 @@ module Tree =
 
         let updateCachedInfo() =
             localCacheFlag <- cacheFlag
-            if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
+            if chartData.IsNone then chartData <- Scores.getData cc.Hash
             match chartData with
             | Some d when d.Bests.ContainsKey rulesetId ->
                 pbData <- Some d.Bests.[rulesetId]

@@ -58,7 +58,7 @@ module Gameplay =
             cacheInfo <- Some cache
             current <- Some c
             context <- ctx
-            saveData <- Some (Scores.getOrCreateScoreData c)
+            saveData <- Some (Scores.getOrCreateData c)
             Background.load c.BackgroundPath
             if Song.change (c.AudioPath, saveData.Value.Offset - c.FirstNote, _rate.Value) then
                 Song.playFrom c.Header.PreviewTime

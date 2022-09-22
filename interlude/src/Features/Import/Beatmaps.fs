@@ -96,13 +96,13 @@ module private Beatmap =
             | Impossible -> invalid <- true
             | String "-p" -> s <- s + "&premium_mappers=true"
             | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
-            | Criterion ("k", n)
-            | Criterion ("key", n)
-            | Criterion ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
-            | Criterion ("m", m)
-            | Criterion ("c", m)
-            | Criterion ("creator", m)
-            | Criterion ("mapper", m) -> s <- s + "&mapper=" + m
+            | Equals ("k", n)
+            | Equals ("key", n)
+            | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
+            | Equals ("m", m)
+            | Equals ("c", m)
+            | Equals ("creator", m)
+            | Equals ("mapper", m) -> s <- s + "&mapper=" + m
             | _ -> ()
         ) filter
         s <- s + "&title=" + Uri.EscapeDataString title
