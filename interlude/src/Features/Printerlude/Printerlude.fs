@@ -5,7 +5,7 @@ open Percyqaz.Shell
 open Percyqaz.Shell.Shell
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.Data.Tables
+open Prelude.Data.Charts.Tables
 open Interlude
 open Interlude.Features
 
