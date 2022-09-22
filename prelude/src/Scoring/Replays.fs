@@ -4,7 +4,7 @@ open System
 open System.IO
 open System.IO.Compression
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 
 // internally, a score is made up of flags on what a player has to do here
 

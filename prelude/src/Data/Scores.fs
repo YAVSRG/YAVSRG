@@ -6,7 +6,7 @@ open System.Collections.Generic
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Grading
 open Prelude.Gameplay.Mods

@@ -18,12 +18,12 @@
 
   <ItemGroup>
     <Compile Include="Common.fs" />
-    <Compile Include="ChartFormats\Interlude.fs" />
-    <Compile Include="ChartFormats\StepMania.fs" />
-    <Compile Include="ChartFormats\osu!.fs" />
-    <Compile Include="ChartFormats\Conversions.fs" />
-    <Compile Include="Editing\Patterns.fs" />
-    <Compile Include="Editing\Editor.fs" />
+    <Compile Include="Charts\Formats\Interlude.fs" />
+    <Compile Include="Charts\Formats\StepMania.fs" />
+    <Compile Include="Charts\Formats\osu!.fs" />
+    <Compile Include="Charts\Formats\Conversions.fs" />
+    <Compile Include="Charts\Tools\Patterns.fs" />
+    <Compile Include="Charts\Tools\Editor.fs" />
     <Compile Include="Scoring\Replays.fs" />
     <Compile Include="Scoring\Rulesets.fs" />
     <Compile Include="Scoring\Metrics.fs" />

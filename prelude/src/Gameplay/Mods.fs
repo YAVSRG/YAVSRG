@@ -3,9 +3,8 @@
 open System
 open System.Collections.Generic
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
-open Prelude.Editing.Filter
-open Prelude.Editing
+open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Tools.Filter
 
 module Mods = 
     (*

@@ -1,7 +1,7 @@
-﻿namespace Prelude.Editing.Patterns
+﻿namespace Prelude.Charts.Tools.Patterns
 
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 
 (*
     This file is a WIP, will change significantly before it is used
