@@ -5,8 +5,8 @@ open System.Collections.Generic
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
-open Prelude.ChartFormats.Conversions
+open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Formats.Conversions
 open Prelude.Scoring
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Layout

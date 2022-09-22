@@ -2,7 +2,7 @@
 
 open System
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 
 type HitEventGutsInternal =
     | Hit_ of

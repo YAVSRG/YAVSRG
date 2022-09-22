@@ -1,8 +1,8 @@
-﻿namespace Prelude.Editing
+﻿namespace Prelude.Charts.Tools
 
 open System
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 
 module Filter =
 

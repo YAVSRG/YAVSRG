@@ -8,8 +8,8 @@ open System.Collections.Concurrent
 open Percyqaz.Json
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
-open Prelude.ChartFormats.Conversions
+open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Formats.Conversions
 open Prelude.Data.Tables
 
 open Sorting

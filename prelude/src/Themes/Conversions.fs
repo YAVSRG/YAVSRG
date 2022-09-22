@@ -11,7 +11,7 @@ open Prelude.Data.Themes
 //https://osu.ppy.sh/wiki/no/Skinning/skin.ini#[mania]
 module OsuSkin =
     open FParsec
-    open Prelude.ChartFormats.``osu!``
+    open Prelude.Charts.Formats.``osu!``
 
     let parseBool = int >> fun x -> x <> 0
 

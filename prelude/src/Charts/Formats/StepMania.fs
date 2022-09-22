@@ -1,4 +1,4 @@
-﻿namespace Prelude.ChartFormats
+﻿namespace Prelude.Charts.Formats
 
 open FParsec
 open Prelude.Common

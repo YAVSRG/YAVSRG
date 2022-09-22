@@ -1,4 +1,4 @@
-namespace Prelude.ChartFormats
+namespace Prelude.Charts.Formats
 
 open System
 open System.Text.RegularExpressions
@@ -7,9 +7,9 @@ open System.Collections.Generic
 open System.Linq
 open Percyqaz.Common
 open Prelude.Common
-open Prelude.ChartFormats.``osu!``
-open Prelude.ChartFormats.Interlude
-open Prelude.ChartFormats.StepMania
+open Prelude.Charts.Formats.``osu!``
+open Prelude.Charts.Formats.Interlude
+open Prelude.Charts.Formats.StepMania
 
 module Conversions =
 

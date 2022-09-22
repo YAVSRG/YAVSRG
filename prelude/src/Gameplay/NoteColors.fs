@@ -4,7 +4,7 @@ open System
 open Percyqaz.Common
 open Percyqaz.Json
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Prelude.Gameplay.Mods
 
 // This is the final stage of preprocessing chart data before it is played by the user.
