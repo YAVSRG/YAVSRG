@@ -224,6 +224,7 @@ module Options =
             Hotkeys.register "comment" (shift Keys.Semicolon)
 
             Hotkeys.register "mods" (mk Keys.M)
+            Hotkeys.register "random_chart" (mk Keys.F2)
             Hotkeys.register "autoplay" (ctrl Keys.A)
             Hotkeys.register "preview" (mk Keys.P)
             Hotkeys.register "reload_themes" (Key (Keys.S, (true, true, true)))
