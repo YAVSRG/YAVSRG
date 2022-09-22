@@ -184,9 +184,10 @@ module Gameplay =
             &&
             match options.ScoreSaveCondition.Value with
             | ScoreSaving.Pacemaker ->
-                match options.Pacemaker.Value with
-                | Accuracy acc -> data.Scoring.Value >= acc
-                | Lamp l -> data.Lamp >= l
+                match options.Pacemakers.TryGetValue rulesetId with
+                | true, Accuracy acc -> data.Scoring.Value >= acc
+                | true, Lamp l -> data.Lamp >= l
+                | false, _ -> true
             | ScoreSaving.PersonalBest -> true // todo: nyi
             | ScoreSaving.Always
             | _ -> true

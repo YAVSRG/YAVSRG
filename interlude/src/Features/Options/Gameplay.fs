@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Scoring
+open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
 
@@ -11,39 +12,46 @@ module Gameplay =
     type PacemakerPage() as this =
         inherit Page()
 
+        let rulesetId = Ruleset.hash Rulesets.current
+        let existing = if options.Pacemakers.ContainsKey rulesetId then options.Pacemakers.[rulesetId] else Pacemaker.Default
+
         let utype =
-            match options.Pacemaker.Value with
+            match existing with
             | Accuracy _ -> 0
             | Lamp _ -> 1
             |> Setting.simple
         let accuracy =
-            match options.Pacemaker.Value with
+            match existing with
             | Accuracy a -> a
             | Lamp _ -> 0.95
             |> Setting.simple
             |> Setting.bound 0.0 1.0
             |> Setting.round 3
         let lamp =
-            match options.Pacemaker.Value with
+            match existing with
             | Accuracy _ -> 0
             | Lamp l -> l
             |> Setting.simple
 
         do 
+            let lamps = 
+                Rulesets.current.Grading.Lamps
+                |> Array.indexed
+                |> Array.map (fun (i, l) -> (i, l.Name))
             this.Content(
                 CaseSelector("gameplay.pacemaker.type", 
                     [|"ACCURACY"; "LAMP"|],
                     [|
-                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider(accuracy, 0.01f)).Pos(300.0f) |]
-                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider(accuracy, 0.01f)).Pos(350.0f) |] // todo: this is broken
+                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(300.0f) |]
+                        [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(300.0f) |]
                     |], utype)
                 )
 
         override this.Title = N"gameplay.pacemaker"
         override this.OnClose() = 
             match utype.Value with
-            | 0 -> options.Pacemaker.Value <- Accuracy accuracy.Value
-            | 1 -> options.Pacemaker.Value <- Lamp lamp.Value
+            | 0 -> options.Pacemakers.[rulesetId] <- Accuracy accuracy.Value
+            | 1 -> options.Pacemakers.[rulesetId] <- Lamp lamp.Value
             | _ -> failwith "impossible"
 
     type RulesetsPage() as this =
@@ -53,14 +61,14 @@ module Gameplay =
             this.Content(
                 column()
                 |+ PrettySetting("gameplay.rulesets",
-                        Grid.create Interlude.Content.Rulesets.list (
+                        Grid.create Rulesets.list (
                             Grid.Config.Default
                                 .WithColumn(fun (_, rs: Prelude.Scoring.Ruleset) -> rs.Name)
                                 .WithSelection(
-                                    (fun (id, _) -> WatcherSelection.contains id options.Rulesets.Value),
+                                    (fun (id, _) -> CycleList.contains id options.Rulesets.Value),
                                     (fun ((id, rs), selected) ->
-                                        if selected then Setting.app (WatcherSelection.add id) options.Rulesets
-                                        else Setting.app (WatcherSelection.delete id) options.Rulesets
+                                        if selected then Setting.app (CycleList.add id) options.Rulesets
+                                        else Setting.app (CycleList.delete id) options.Rulesets
                                     ))
                         )
                     ).Pos(200.0f, PRETTYWIDTH, 800.0f)

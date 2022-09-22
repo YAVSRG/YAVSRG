@@ -75,7 +75,7 @@ type ChartInfo() as this =
             .WithPosition { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f }
         
         |* StylishButton(
-            (fun () -> Setting.app WatcherSelection.cycleForward options.Rulesets; LevelSelect.refresh <- true),
+            (fun () -> Setting.app CycleList.forward options.Rulesets; LevelSelect.refresh <- true),
             (fun () -> ruleset.Name),
             Style.main 100,
             TiltRight = false)

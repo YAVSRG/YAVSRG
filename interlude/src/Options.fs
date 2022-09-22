@@ -37,24 +37,24 @@ module Options =
     type Pacemaker =
         | Accuracy of float
         | Lamp of int
+        static member Default = Accuracy 0.95
 
     type FailType =
         | Instant = 0
         | EndOfSong = 1
 
-    // todo: change name, this is from the old codebase
-    type WatcherSelection<'T> = 'T list
-    module WatcherSelection =
-        let cycleForward xs =
+    type CycleList<'T> = 'T list
+    module CycleList =
+        let forward xs =
             match xs with
             | x :: xs -> xs @ [x]
             | _ -> failwith "impossible"
 
-        let rec cycleBackward xs =
+        let rec back xs =
             match xs with
             | [] -> failwith "impossible"
             | x :: [] -> [x]
-            | x :: xs -> match cycleBackward xs with (y :: ys) -> (y :: x :: ys) | _ -> failwith "impossible by case 2"
+            | x :: xs -> match back xs with (y :: ys) -> (y :: x :: ys) | _ -> failwith "impossible by case 2"
 
         let contains x xs = xs |> List.exists (fun o -> o = x)
 
@@ -93,10 +93,10 @@ module Options =
             Noteskin: Setting<string>
 
             Playstyles: Layout array
-            Rulesets: Setting<WatcherSelection<string>>
+            Rulesets: Setting<CycleList<string>>
             ScoreSaveCondition: Setting<ScoreSaving>
             FailCondition: Setting<FailType>
-            Pacemaker: Setting<Pacemaker>
+            Pacemakers: Dictionary<string, Pacemaker>
 
             OsuMount: Setting<MountedChartSource option>
             StepmaniaMount: Setting<MountedChartSource option>
@@ -159,7 +159,7 @@ module Options =
                     )
             ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
-            Pacemaker = Setting.simple (Accuracy 0.95)
+            Pacemakers = Dictionary<string, Pacemaker>()
 
             OsuMount = Setting.simple None
             StepmaniaMount = Setting.simple None

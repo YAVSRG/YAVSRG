@@ -330,11 +330,11 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         base.Update(elapsedTime, bounds)
 
         if (!|"next").Tapped() then
-            Setting.app WatcherSelection.cycleForward options.Rulesets
+            Setting.app CycleList.forward options.Rulesets
             scoreData.Ruleset <- getCurrentRuleset()
             refresh()
         elif (!|"previous").Tapped() then
-            Setting.app WatcherSelection.cycleBackward options.Rulesets
+            Setting.app CycleList.back options.Rulesets
             scoreData.Ruleset <- getCurrentRuleset()
             refresh()
 
