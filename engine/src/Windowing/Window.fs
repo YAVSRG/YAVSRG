@@ -87,7 +87,8 @@ type Window(config: Config, title: string, root: Root) as this =
 
     override this.OnResize e =
         base.OnResize e
-        sync ( fun () -> renderThread.OnResize this.ClientSize )
+        if e.Height <> 0 then
+            sync ( fun () -> renderThread.OnResize this.ClientSize )
 
     override this.OnFileDrop e =
         Array.iter WindowEvents.onFileDrop.Trigger e.FileNames
