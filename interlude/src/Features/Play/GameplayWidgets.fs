@@ -234,7 +234,7 @@ module GameplayWidgets =
         inherit StaticWidget(NodeType.None)
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let sprite = Content.getTexture "receptorlighting"
-        let lightTime = Math.Min(0.99f, lightTime)
+        let lightTime = Math.Max(0.0f, Math.Min(0.99f, lightTime))
 
         do
             let hitpos = float32 options.HitPosition.Value

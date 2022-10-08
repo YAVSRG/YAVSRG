@@ -43,7 +43,7 @@ type PlayScreen() as this =
         let noteRenderer = NoteRenderer scoring
         this.Add noteRenderer
 
-        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
+        if Content.noteskinConfig().EnableColumnLight then
             noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
 
         if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
@@ -156,7 +156,7 @@ type ReplayScreen(mode: ReplayMode) as this =
         let noteRenderer = NoteRenderer scoring
         this.Add noteRenderer
 
-        if Content.noteskinConfig().ColumnLightTime >= 0.0f then
+        if Content.noteskinConfig().EnableColumnLight then
             noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
 
         if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
