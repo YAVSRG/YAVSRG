@@ -33,6 +33,11 @@ module Sorting =
 
     type GroupContext = { Rate: float32; RulesetId: string; Ruleset: Ruleset }
 
+    let has_comment (c: CachedChart, comment: string) =
+        match Prelude.Data.Scores.Scores.getData c.Hash with
+        | Some d -> d.Comment.Contains(comment, StringComparison.OrdinalIgnoreCase)
+        | None -> false
+
     let gradeAchieved (c: CachedChart, ctx: GroupContext) =
         match Prelude.Data.Scores.Scores.getData c.Hash with
         | Some d ->
@@ -95,12 +100,13 @@ module Sorting =
     module Filter =
 
         let private string = " =:<>\"" |> isNoneOf |> many1Satisfy |>> fun s -> s.ToLower()
+        let private quoted_string = between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy)
         let private word = string |>> String
-        let private pstring = between (pchar '"') (pchar '"') ("\"" |> isNoneOf |> many1Satisfy) |>> fun s -> String <| s.ToLower()
-        let private equals = string .>>. (pchar '=' >>. string) |>> Equals
+        let private quoted = quoted_string |>> fun s -> String <| s.ToLower()
+        let private equals = string .>>. (pchar '=' >>. (string <|> quoted_string)) |>> Equals
         let private less = string .>>. (pchar '<' >>. pfloat) |>> LessThan
         let private more = string .>>. (pchar '>' >>. pfloat) |>> MoreThan
-        let private filter = sepBy (attempt equals <|> attempt less <|> attempt more <|> pstring <|> word) spaces1 .>> spaces
+        let private filter = sepBy (attempt equals <|> attempt less <|> attempt more <|> quoted <|> word) spaces1 .>> spaces
 
         let parse (str: string) =
             match run filter (str.Trim()) with
@@ -117,6 +123,8 @@ module Sorting =
                     | Equals ("k", n)
                     | Equals ("key", n)
                     | Equals ("keys", n) -> c.Keys.ToString() = n
+                    | Equals ("c", str)
+                    | Equals ("comment", str) -> has_comment (c, str)
                     | MoreThan ("d", d)
                     | MoreThan ("diff", d) -> c.Physical > d
                     | LessThan ("d", d)
