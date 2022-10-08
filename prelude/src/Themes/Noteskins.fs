@@ -53,6 +53,8 @@ type NoteskinConfig =
         // todo: group every animation thing under an animations object
         /// ???
         ColumnLightTime: float32
+        /// Set to false to disable column lighting when keys are pressed
+        EnableColumnLight: bool
 
         /// ???
         AnimationFrameTime: float
@@ -80,6 +82,7 @@ type NoteskinConfig =
             DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
             ColumnWidth = 150.0f
             ColumnLightTime = 0.4f
+            EnableColumnLight = true
             AnimationFrameTime = 200.0
             Explosions = Explosions.Default
             NoteColors = ColorConfig.Default
