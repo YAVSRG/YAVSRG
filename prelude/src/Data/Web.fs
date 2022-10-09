@@ -19,7 +19,7 @@ let client() =
     w.DefaultRequestHeaders.Add("User-Agent", "Interlude")
     w
 
-let private downloadString (url: string, callback) =
+let downloadString (url: string, callback) =
     async {
         try
             use w = client()
