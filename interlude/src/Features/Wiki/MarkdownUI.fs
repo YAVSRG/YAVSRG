@@ -5,10 +5,33 @@ open System.Diagnostics
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
-open Interlude
 open Interlude.UI
 open Interlude.Utils
 open FSharp.Formatting.Markdown
+
+type LinkHandler =
+    {
+        Prefix: string
+        Action: string -> unit
+    }
+
+module LinkHandler =
+
+    let mutable private handlers : LinkHandler list = []
+
+    let add x = handlers <- x :: handlers
+
+    let handle (url: string) =
+        let mutable handled = false
+
+        for handler in handlers do
+            if not handled && url.StartsWith(handler.Prefix, System.StringComparison.InvariantCultureIgnoreCase) then
+                handler.Action url
+                handled <- true
+
+        if not handled then
+            try Process.Start (ProcessStartInfo (url, UseShellExecute=true)) |> ignore
+            with err -> Logging.Debug ("Failed to open link: " + url, err)
 
 module MarkdownUI =
 
@@ -72,10 +95,6 @@ module MarkdownUI =
         }
         static member Default = { Size = SIZE; Bold = false; Italic = false; HasLink = false }
 
-    let openlink (str: string) =
-        try Process.Start (ProcessStartInfo (str, UseShellExecute=true)) |> ignore
-        with err -> Logging.Debug ("Failed to open link: " + str, err)
-
     let rec span (settings: SpanSettings) (sp: MarkdownSpan) : Fragment =
         match sp with
         | Literal (text, _) ->
@@ -91,7 +110,7 @@ module MarkdownUI =
         | AnchorLink (link, _) -> Fragment.sym "anchorLink"
         | DirectLink (body, link, title, _) ->
             let r = spans { settings with HasLink = true } body
-            r.Body.Add (Clickable(fun () -> openlink link))
+            r.Body.Add (Clickable(fun () -> LinkHandler.handle link))
             r
         | IndirectLink (body, link, title, _) -> Fragment.sym "ilink"
         | DirectImage (body, link, title, _) -> Fragment.sym "dimg"

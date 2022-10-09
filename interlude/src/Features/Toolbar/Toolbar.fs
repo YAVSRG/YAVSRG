@@ -47,7 +47,7 @@ type Toolbar() =
                 Hotkey = "import")
             |+ IconButton(L"menu.help",
                 Icons.wiki, HEIGHT,
-                ( fun () -> if shown() then QuickStartGuide.show_help() ),
+                ( fun () -> if shown() then Help.show_quick_guide() ),
                 Hotkey = "help",
                 HoverIcon = Icons.wiki2)
             |+ IconButton(L"menu.tasks",
