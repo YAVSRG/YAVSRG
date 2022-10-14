@@ -1,6 +1,6 @@
 ﻿# **Welcome to YAVSRG: Interlude!**
 
-Never played before? Click [-here-](https://github.com/YAVSRG/Interlude/wiki/How-to-play) to learn how to play
+Never played before? Click [here](https://github.com/YAVSRG/Interlude/wiki/How-to-play) to learn how to play
 
 ### Useful wiki links:
 
@@ -14,8 +14,9 @@ Never played before? Click [-here-](https://github.com/YAVSRG/Interlude/wiki/How
 - [I am a Stepmania/Etterna player](https://github.com/YAVSRG/Interlude/wiki/Switching-from-other-games#stepmaniaetterna)
 - [I play another VSRG](https://github.com/YAVSRG/Interlude/wiki/Switching-from-other-games)
 
-Press and hold the `/` key to see tooltip information. 
+----
 
+Press and hold the `/` key to see tooltip information.  
 Soon there will be a tooltip for almost everything!
 
 **You can show this information again by clicking the "Help" button, or by pressing `CTRL-H`**

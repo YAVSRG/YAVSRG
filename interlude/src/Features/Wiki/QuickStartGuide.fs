@@ -47,8 +47,8 @@ module Wiki =
         
         member private this.UpdateContent() = 
             let content = Markdown.Parse content
-            let markdown = MarkdownUI.build content
-            flow <- ScrollContainer(markdown.Body, markdown.Height + markdown.LHeight, Position = Position.Margin(100.0f, 100.0f).TrimRight(300.0f))
+            let markdown = MarkdownUI.build (this.Bounds.Width - 500.0f) content
+            flow <- ScrollContainer(markdown, markdown.Height, Position = Position.Margin(100.0f, 100.0f).TrimRight(300.0f))
             flow.Init this
         
         override this.Init(parent: Widget) =
@@ -67,11 +67,12 @@ module Wiki =
 type QuickStartDialog(doc) =
     inherit Dialog()
 
-    let markdown = MarkdownUI.build doc
-    let flow = ScrollContainer(markdown.Body, markdown.Height + markdown.LHeight, Position = Position.Margin(400.0f, 100.0f))
+    let mutable flow : Widget = Unchecked.defaultof<_>
 
     override this.Init(parent: Widget) =
         base.Init parent
+        let markdown = MarkdownUI.build (this.Bounds.Width - 800.0f) doc
+        flow <- ScrollContainer(markdown, markdown.Height, Position = Position.Margin(400.0f, 100.0f))
         flow.Init this
 
     override this.Update(elapsedTime, moved) =
