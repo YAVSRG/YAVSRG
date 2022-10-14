@@ -58,7 +58,7 @@ module Suggestion =
 
             let score = 
                 if chart.Hash = cacheData.Hash then -1 else 
-                    bpm_similarity + recency_bonus * 2 + rand.Next(-2, 2)
+                    bpm_similarity + recency_bonus * 2 + rand.Next(-3, 3)
             if score > best_chart_points then
                 best_chart_points <- score
                 best_chart <- Some chart
