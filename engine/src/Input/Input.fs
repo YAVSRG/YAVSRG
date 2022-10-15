@@ -219,6 +219,7 @@ module Input =
         inputmethod_mousedist <- inputmethod_mousedist + abs(this_frame.MouseX - last_frame.MouseX) + abs(this_frame.MouseY - last_frame.MouseY)
         last_frame <- this_frame
         events_this_frame <- []
+        thisFrameFinished <- true
 
     let held (b: Bind) =
         if thisFrameFinished then false
@@ -276,6 +277,7 @@ module Input =
         InputThread.fetch(&events_this_frame, &this_frame)
         if Object.ReferenceEquals(null, last_frame) then last_frame <- this_frame
         scrolled_this_frame <- this_frame.MouseZ - last_frame.MouseZ
+        thisFrameFinished <- false
         updateIM()
 
 module Mouse =
@@ -299,7 +301,7 @@ module Mouse =
     let released b = Input.consumeOne(Mouse b, InputEvType.Release).IsSome
     let moved() = Input.this_frame.MouseX <> Input.last_frame.MouseX || Input.this_frame.MouseY <> Input.last_frame.MouseY
 
-    let hover (r: Rect) = r.Contains(pos())
+    let hover (r: Rect) = not Input.thisFrameFinished && r.Contains(pos())
 
 type Bind with
     member this.Pressed() =

@@ -1,7 +1,6 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Input
 
 [<AutoOpen>]
 module Root =

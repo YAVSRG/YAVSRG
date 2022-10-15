@@ -274,6 +274,9 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
         child.Init this
         child.Position <- Position.SliceTop(contentHeight).Translate(0.0f, -scroll_pos.Value).Margin(this.Margin)
 
+    member this.Scroll(amount: float32) =
+        scroll_pos.Target <- Math.Max(0.0f, Math.Min(scroll_pos.Target + amount, contentHeight - this.Bounds.Height))
+
 /// Container that provides navigation and selection using arrow keys + enter
 /// Content is assumed to be positioned in a layout that fits the navigation
 module SwitchContainer =
