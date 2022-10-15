@@ -62,8 +62,10 @@ type Toolbar() =
             img.SaveAsPng(path) // todo: this is a performance bottleneck
             Notifications.notif("Screenshot saved: " + id, NotificationType.Info) )
         |+ HotkeyAction("reload_themes", fun () -> 
+            first_init <- true
             Noteskins.load()
             Themes.load()
+            first_init <- false
             Notifications.notif("Reloaded themes & noteskins", NotificationType.Info) )
         |* Jukebox(Position = Position.Margin(0.0f, HEIGHT))
 
