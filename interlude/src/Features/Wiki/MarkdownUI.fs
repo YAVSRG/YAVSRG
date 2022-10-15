@@ -52,7 +52,11 @@ module private Span =
     let fragment (text: string, colors: Color * Color, background: Color option) =
         let t = Text(text, Color = K colors, Align = Alignment.LEFT)
         match background with
-        | Some b -> Frame(NodeType.None, Border = K b, Fill = K b) |+ t :> Widget
+        | Some b ->
+            StaticContainer(NodeType.None)
+            |+ Frame(NodeType.None, Border = K b, Fill = K b, Position = Position.Margin(0.0f, 5.0f))
+            |+ t
+            :> Widget
         | None -> t
 
     let link_fragment (text: string, link: string) =
@@ -260,7 +264,7 @@ module Heading =
 type private Heading(max_width, size, body: MarkdownSpan list) as this =
     inherit IParagraph()
 
-    let contents = Spans(max_width - Heading.MARGIN * 2.0f, body, { Span.Settings.Default with Size = Span.SIZE + 5.0f * (4.0f - float32 size) })
+    let contents = Spans(max_width - Heading.MARGIN * 2.0f, body, { Span.Settings.Default with Size = Span.SIZE + 2.0f * System.MathF.Pow(4.0f - float32 size, 2.0f) })
     let text = Heading.getText body
 
     do
@@ -317,7 +321,7 @@ module private Paragraph =
         | HorizontalRule (char, _) -> HorizontalRule(max_width)
         | CodeBlock (code, _, language, _, _) -> CodeBlock(max_width, code, language)
         | YamlFrontmatter _
-        | TableBlock _
+        | TableBlock _ // todo
         | OutputBlock _
         | OtherBlock _
         | LatexBlock _

@@ -34,7 +34,7 @@ type Toolbar() =
             Icons.back, HEIGHT,
             (fun () -> Screen.back Transitions.Flags.UnderLogo),
             Hotkey = "exit",
-            Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT - 10.0f))
+            Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 160.0f, HEIGHT - 10.0f))
         |+ (
             FlowContainer.LeftToRight(200.0f, Navigation = false, Position = Position.SliceTop (HEIGHT - 10.0f))
             |+ IconButton(L"menu.options",
@@ -45,10 +45,10 @@ type Toolbar() =
                 Icons.import, HEIGHT,
                 ( fun () -> if shown() then Screen.change Screen.Type.Import Transitions.Flags.Default ),
                 Hotkey = "import")
-            |+ IconButton(L"menu.help",
+            |+ IconButton(L"menu.wiki",
                 Icons.wiki, HEIGHT,
-                ( fun () -> if shown() then Help.show_quick_guide() ),
-                Hotkey = "help",
+                ( fun () -> if shown() then Wiki.show() ),
+                Hotkey = "wiki",
                 HoverIcon = Icons.wiki2)
             |+ IconButton(L"menu.tasks",
                 Icons.tasks, HEIGHT,

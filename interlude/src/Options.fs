@@ -231,7 +231,7 @@ module Options =
 
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)
-            Hotkeys.register "help" (ctrl Keys.H)
+            Hotkeys.register "wiki" (ctrl Keys.H)
             Hotkeys.register "tasks" (mk Keys.F8)
             Hotkeys.register "console" (mk Keys.GraveAccent)
 

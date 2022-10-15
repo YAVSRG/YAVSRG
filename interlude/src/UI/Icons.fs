@@ -5,7 +5,7 @@ module Icons =
     open Percyqaz.Flux.Resources
 
     let star = Feather.star
-    let back = Feather.arrow_left
+    let back = Feather.arrow_left_circle
     let bpm = Feather.music
     let time = Feather.clock
     let sparkle = Feather.award

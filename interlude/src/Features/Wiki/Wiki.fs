@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Wiki
 
+open System.Diagnostics
 open System.Net.Http
 open Percyqaz.Common
 open Percyqaz.Flux.Input
@@ -9,6 +10,8 @@ open FSharp.Formatting.Markdown
 
 module Wiki =
 
+    let mutable private page_history = []
+    let mutable private page_url = ""
     let mutable private content = ""
     let mutable private page_changed : unit -> unit = ignore
 
@@ -31,7 +34,15 @@ module Wiki =
                     sync(page_changed)
             }
 
-        let handle page = worker.Request page
+        let handle (page: string) =
+            page_history <- page :: page_history
+            page_url <- page
+            let page = 
+                if page.Contains('#') then
+                    Heading.scrollTo <- page.Substring(page.LastIndexOf '#' + 1).Replace('-', ' ')
+                    page.Substring(0, page.LastIndexOf '#')
+                else page
+            worker.Request page
 
     do
         LinkHandler.add { 
@@ -40,52 +51,48 @@ module Wiki =
         }
         PageLoader.handle "Home"
 
-    type Browser() =
+    type Browser() as this =
         inherit Dialog()
 
-        let mutable flow = Unchecked.defaultof<Widget>
+        let mutable flow = Unchecked.defaultof<ScrollContainer>
+
+        let buttons = 
+            SwitchContainer.Row(Position = Position.SliceTop(70.0f).Margin(250.0f, 10.0f))
+            |+ IconButton(L"menu.back", Interlude.UI.Icons.back, 50.0f,
+                fun () ->
+                    match page_history with
+                    | x :: y :: xs -> PageLoader.handle y; page_history <- y :: xs
+                    | _ -> this.Close()
+                ,
+                Position = Position.Column(0.0f, 200.0f))
+            |+ IconButton(L"wiki.openinbrowser", Interlude.UI.Icons.wiki2, 50.0f,
+                fun () -> 
+                    try Process.Start (ProcessStartInfo ("https://github.com/YAVSRG/Interlude/wiki/" + page_url, UseShellExecute=true)) |> ignore
+                    with err -> Logging.Debug ("Failed to open wiki page in browser: " + page_url, err)
+                ,
+                Position = Position.Column(200.0f, 300.0f))
+
+        do Heading.scrollHandler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
         
         member private this.UpdateContent() = 
             let content = Markdown.Parse content
             let markdown = MarkdownUI.build (this.Bounds.Width - 500.0f) content
-            flow <- ScrollContainer(markdown, markdown.Height, Position = Position.Margin(100.0f, 100.0f).TrimRight(300.0f))
+            flow <- ScrollContainer(markdown, markdown.Height, Position = Position.Margin(250.0f, 100.0f))
             flow.Init this
         
         override this.Init(parent: Widget) =
             base.Init parent
+            buttons.Init this
             this.UpdateContent()
             page_changed <- this.UpdateContent
         
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
+            buttons.Update(elapsedTime, moved)
             flow.Update(elapsedTime, moved)
             if Mouse.leftClick() || (!|"exit").Tapped() then
                 this.Close()
         
-        override this.Draw() = flow.Draw()
+        override this.Draw() = buttons.Draw(); flow.Draw()
 
-type QuickStartDialog(doc) =
-    inherit Dialog()
-
-    let mutable flow : Widget = Unchecked.defaultof<_>
-
-    override this.Init(parent: Widget) =
-        base.Init parent
-        let markdown = MarkdownUI.build (this.Bounds.Width - 800.0f) doc
-        flow <- ScrollContainer(markdown, markdown.Height, Position = Position.Margin(400.0f, 100.0f))
-        flow.Init this
-
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        flow.Update(elapsedTime, moved)
-        if Mouse.leftClick() || (!|"exit").Tapped() then
-            this.Close()
-
-    override this.Draw() = flow.Draw()
-
-module Help =
-
-    let quick_start_guide = getResourceText "QuickStart.md" |> Markdown.Parse
-    let show_quick_guide() = (QuickStartDialog quick_start_guide).Show()
-
-    let show_wiki() = (Wiki.Browser()).Show()
+    let show() = (Browser()).Show()
