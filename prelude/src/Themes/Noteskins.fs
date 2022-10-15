@@ -7,6 +7,12 @@ open Percyqaz.Json
 open Prelude.Common
 open Prelude.Gameplay.NoteColors
 
+[<RequireQualifiedAccess>]
+[<Json.AutoCodec>]
+type ExplosionColors =
+    | Column
+    | Judgement
+
 [<Json.AutoCodec(false)>]
 type Explosions =
     {
@@ -15,6 +21,7 @@ type Explosions =
         ExpandAmount: float32
         ExplodeOnMiss: bool
         AnimationFrameTime: float
+        Colors: ExplosionColors
     }
     static member Default =
         {
@@ -23,6 +30,7 @@ type Explosions =
             ExpandAmount = 0.15f
             ExplodeOnMiss = false
             AnimationFrameTime = 50.0
+            Colors = ExplosionColors.Column
         }
 
 [<Json.AutoCodec(false)>]
