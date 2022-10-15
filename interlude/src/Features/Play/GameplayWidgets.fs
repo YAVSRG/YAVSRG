@@ -317,7 +317,9 @@ module GameplayWidgets =
                             .Expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
                     | Hit e ->
-                        let color = match e.Judgement with Some j -> int j | None -> 0
+                        let color = 
+                            if config.Colors = ExplosionColors.Column then k
+                            else match e.Judgement with Some j -> int j | None -> 0
                         let frame = (helper.CurrentChartTime() - timers.[k]) / toTime config.AnimationFrameTime |> int
                         Draw.quad
                             (box |> Quad.ofRect |> NoteRenderer.noteRotation keys k)
