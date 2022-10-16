@@ -313,7 +313,7 @@ module GameplayWidgets =
                             if options.Upscroll.Value then Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Top, columnwidth, columnwidth)
                             else Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Bottom - columnwidth, columnwidth, columnwidth)
                         )
-                            .Expand((config.Scale - 1.0f) * columnwidth, (config.Scale - 1.0f) * columnwidth)
+                            .Expand((config.Scale - 1.0f) * columnwidth * 0.5f)
                             .Expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
                     | Hit e ->
