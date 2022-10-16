@@ -125,7 +125,7 @@ module Scoreboard =
 
         let reload (container: FlowContainer.Vertical<ScoreCard>) =
             let worker =
-                { new Async.SingletonWorkerSeq<T, ScoreInfoProvider>() with
+                { new Async.SwitchServiceSeq<T, ScoreInfoProvider>() with
                     member this.Handle(req: T) =
                         match req.ChartSaveData with
                         | None -> Seq.empty

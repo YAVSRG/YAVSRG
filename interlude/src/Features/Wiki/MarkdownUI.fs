@@ -38,11 +38,8 @@ module ImageLoader =
     open Prelude.Web
 
     let private image_loader =
-        { new Async.ManyWorker<(string * (Bitmap -> unit)), Bitmap>() with
-            member this.Handle( (url, _) ) =
-                 Async.RunSynchronously(downloadImage url)
-            member this.Callback((_, callback), img) =
-                sync(fun () -> callback img)
+        { new Async.Service<string, Bitmap>() with
+            member this.Handle(url) = downloadImage url
         }
 
     let load (url, callback) = image_loader.Request (url, callback)
@@ -144,7 +141,7 @@ type private Image(width, title, url) as this =
     let mutable sprite : Sprite option = None
 
     do 
-        ImageLoader.load (url, fun bmp -> sprite <- Some (Sprite.upload (bmp, 1, 1, false)))
+        ImageLoader.load (url, fun bmp -> sync(fun () -> sprite <- Some (Sprite.upload (bmp, 1, 1, false))))
         this |* Frame(NodeType.None, Border = K (Color.FromArgb(127, 255, 255, 255)), Fill = K Color.Transparent)
 
     override this.Width = width

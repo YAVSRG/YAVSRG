@@ -25,7 +25,7 @@ module Wiki =
             |> fun w -> w.DefaultRequestHeaders.Add("User-Agent", "Interlude"); w
 
         let private worker = 
-            { new Async.SingletonWorker<Request,Result>() with
+            { new Async.SwitchService<Request,Result>() with
                 override this.Handle(req) = 
                     let url = "https://raw.githubusercontent.com/wiki/YAVSRG/Interlude/" + req + ".md"
                     httpClient.GetStringAsync url |> Async.AwaitTask |> Async.RunSynchronously

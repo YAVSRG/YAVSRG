@@ -61,9 +61,6 @@ module Noteskins =
     let source = "https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json"
 
     let image_loader =
-        { new Async.ManyWorker<(string * NoteskinCard), Bitmap>() with
-            member this.Handle( (url, _) ) =
-                 Async.RunSynchronously(downloadImage url)
-            member this.Callback((_, card), img) =
-                sync(fun () -> card.LoadPreview img)
+        { new Async.Service<string, Bitmap>() with
+            member this.Handle(url) = downloadImage url
         }

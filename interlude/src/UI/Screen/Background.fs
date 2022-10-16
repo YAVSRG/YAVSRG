@@ -23,7 +23,7 @@ module Background =
 
     let load =
         let worker = 
-            { new Async.SingletonWorker<string, Bitmap option>() with
+            { new Async.SwitchService<string, Bitmap option>() with
                 member this.Handle(file: string) =
                     match System.IO.Path.GetExtension(file).ToLower() with
                     | ".png" | ".bmp" | ".jpg" | ".jpeg" ->

@@ -53,7 +53,7 @@ type ImportScreen() as this =
                             sync( fun () -> 
                                 for ns in d.Noteskins do
                                     let nc = NoteskinCard ns
-                                    Noteskins.image_loader.Request(ns.Preview, nc)
+                                    Noteskins.image_loader.Request(ns.Preview, fun img -> sync(fun () -> nc.LoadPreview img))
                                     flowContainer.Add nc
                             )
                         )
