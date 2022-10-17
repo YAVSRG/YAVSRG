@@ -46,25 +46,25 @@ module Library =
         cc.FilePath |> Chart.fromFile
         (*|> function | Some c -> addOrUpdate c; Some c | None -> None*)
 
-    let rebuildTask : StatusTask =
-        fun output ->
-            async {
-                charts.Clear()
-                for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
-                    for song in Directory.EnumerateDirectories pack do
-                        for file in Directory.EnumerateFiles song do
-                            match Path.GetExtension(file).ToLower() with
-                            | ".yav" ->
-                                match Chart.fromFile file with
-                                | Some c ->
-                                    output ("Caching " + Path.GetFileName file)
-                                    addOrUpdate c
-                                | None -> ()
-                            | _ -> ()
-                save()
-                output "Saved cache."
-                return true
-            }
+    let recache_service =
+        { new Async.Service<unit, unit>() with
+            override this.Handle(()) =
+                async {
+                    Logging.Debug("Rebuilding chart cache")
+                    charts.Clear()
+                    for pack in Directory.EnumerateDirectories(getDataPath "Songs") do
+                        for song in Directory.EnumerateDirectories pack do
+                            for file in Directory.EnumerateFiles song do
+                                match Path.GetExtension(file).ToLower() with
+                                | ".yav" ->
+                                    match Chart.fromFile file with
+                                    | Some c ->
+                                        addOrUpdate c
+                                    | None -> ()
+                                | _ -> ()
+                    save()
+                }
+        }
     
     let delete (c: CachedChart) =
         charts.TryRemove c.FilePath |> ignore
@@ -218,93 +218,91 @@ module Library =
             static member Library (path: string) =
                 { SourceFolder = path; LastImported = DateTime.UnixEpoch; Type = Library; ImportOnStartup = false }
 
-        let convertSongFolder (path: string) (config: ConversionActionConfig) : StatusTask =
-            fun output ->
-                async {
-                    for file in Directory.EnumerateFiles path do
-                        match file with
-                        | ChartFile _ ->
-                            output ("Converting " + Path.GetFileName file)
-                            try
-                                let action = { Config = config; Source = file; TargetDirectory = Path.Combine (getDataPath "Songs", config.PackName, Path.GetFileName path) }
-                                loadAndConvertFile action
-                                |> List.map (relocateChart action)
-                                |> fun charts -> List.iter addOrUpdate charts
-                            with err -> Logging.Error ("Failed to load/convert file: " + file, err)
-                        | _ -> ()
-                    return true
-                }
+        let convert_song_folder = 
+            { new Async.Service<string * ConversionActionConfig, unit>() with
+                override this.Handle((path, config)) =
+                    async {
+                        for file in Directory.EnumerateFiles path do
+                            match file with
+                            | ChartFile _ ->
+                                try
+                                    let action = { Config = config; Source = file; TargetDirectory = Path.Combine (getDataPath "Songs", config.PackName, Path.GetFileName path) }
+                                    loadAndConvertFile action
+                                    |> List.map (relocateChart action)
+                                    |> fun charts -> List.iter addOrUpdate charts
+                                with err -> Logging.Error ("Failed to load/convert file: " + file, err)
+                            | _ -> ()
+                    }
+            }
 
-        let convertPackFolder (path: string) (config: ConversionActionConfig) : StatusTask =
-            fun output ->
-                async {
-                    let! _ =
-                        Directory.EnumerateDirectories path
-                        |> match config.ChangedAfter with None -> id | Some timestamp -> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)
-                        |> Seq.map (fun song -> (convertSongFolder song config output))
-                        |> fun s -> Async.Parallel(s, 5)
-                    return true
-                }
+        let convert_pack_folder =
+            { new Async.Service<string * ConversionActionConfig, unit>() with
+                override this.Handle((path, config)) =
+                    async {
+                        for songFolder in
+                            Directory.EnumerateDirectories path
+                            |> match config.ChangedAfter with None -> id | Some timestamp -> Seq.filter (fun path -> Directory.GetLastWriteTime path >= timestamp)
+                            do
+                            do! convert_song_folder.RequestAsync(songFolder, config)
+                    }
+            }
 
-        let importMountedSource (source: MountedChartSource) : StatusTask =
-            fun output ->
-                async {
-                    match source.Type with
-                    | Pack packname ->
-                        let config = { ConversionActionConfig.Default with CopyMediaFiles = false; ChangedAfter = Some source.LastImported; PackName = packname }
-                        let! res = convertPackFolder source.SourceFolder config output
-                        if res then source.LastImported <- DateTime.Now
-                        return res
-                    | Library ->
-                        do! 
-                            Directory.EnumerateDirectories source.SourceFolder
-                            |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= source.LastImported)
-                            |> Seq.map (fun packFolder -> convertPackFolder packFolder { ConversionActionConfig.Default with CopyMediaFiles = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder } output)
-                            |> fun s -> Async.Parallel(s, 5)
-                            |> Async.Ignore
-                        source.LastImported <- DateTime.Now
-                        return true
-                }
+        let import_mounted_source =
+            
+            { new Async.Service<MountedChartSource, unit>() with
+                override this.Handle(source) =
+                    async {
+                        match source.Type with
+                        | Pack packname ->
+                            let config = { ConversionActionConfig.Default with CopyMediaFiles = false; ChangedAfter = Some source.LastImported; PackName = packname }
+                            do! convert_pack_folder.RequestAsync(source.SourceFolder, config)
+                            source.LastImported <- DateTime.Now
+                        | Library ->
+                            for packFolder in
+                                Directory.EnumerateDirectories source.SourceFolder
+                                |> Seq.filter (fun path -> Directory.GetLastWriteTime path >= source.LastImported)
+                                do
+                                do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with CopyMediaFiles = false; ChangedAfter = Some source.LastImported; PackName = Path.GetFileName packFolder })
+                            source.LastImported <- DateTime.Now
+                    }
+            }
 
-        let rec autoConvert path : StatusTask =
-            fun output ->
-                async {
-                    match File.GetAttributes path &&& FileAttributes.Directory |> int with
-                    | 0 ->
-                        match path with
-                        | ChartFile ext ->
-                            return!
-                                convertSongFolder (Path.GetDirectoryName path)
-                                    { ConversionActionConfig.Default with PackName = if ext = ".osu" then "osu!" else "Singles" }
-                                    output
-                        | ChartArchive ->
-                            output "Extracting..."
-                            let dir = Path.ChangeExtension(path, null)
-                            // Note that this method has built-in directory traversal protection
-                            ZipFile.ExtractToDirectory(path, dir)
-                            output ("Extracted! " + dir)
-                            return! 
-                                (
-                                    autoConvert dir
-                                    |> BackgroundTask.Callback(fun _ -> output "Deleting extracted directory."; Directory.Delete(dir, true))
-                                ) output
-                        | _ -> return failwith "Unrecognised file"
-                    | _ ->
-                        match path with
-                        | SongFolder ext ->
-                            return! convertSongFolder path { ConversionActionConfig.Default with PackName = if ext = ".osu" then "osu!" else "Singles" } output
-                        | PackFolder ->
-                            let packname =
-                                match Path.GetFileName path with
-                                | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
-                                | s -> s
-                            return! (convertPackFolder path { ConversionActionConfig.Default with PackName = packname }) output
-                        | FolderOfPacks ->
-                            do! 
-                                Directory.EnumerateDirectories path
-                                |> Seq.map (fun packFolder -> convertPackFolder packFolder { ConversionActionConfig.Default with PackName = Path.GetFileName packFolder } output)
-                                |> fun s -> Async.Parallel(s, 5)
-                                |> Async.Ignore
-                            return true
-                        | _ -> return failwith "No importable folder structure detected"
-                }
+        let auto_convert =
+            { new Async.Service<string, bool>() with
+                override this.Handle(path) =
+                    async {
+                        match File.GetAttributes path &&& FileAttributes.Directory |> int with
+                        | 0 ->
+                            match path with
+                            | ChartFile ext ->
+                                do! convert_song_folder.RequestAsync(
+                                    Path.GetDirectoryName path,
+                                    { ConversionActionConfig.Default with PackName = if ext = ".osu" then "osu!" else "Singles" })
+                                return true
+                            | ChartArchive ->
+                                let dir = Path.ChangeExtension(path, null)
+                                // This has built-in directory traversal protection
+                                ZipFile.ExtractToDirectory(path, dir)
+                                let! _ = this.RequestAsync dir
+                                Directory.Delete(dir, true)
+                                return true
+                            | _ -> Logging.Warn(sprintf "%s: Unrecognised file for import" path); return false
+                        | _ ->
+                            match path with
+                            | SongFolder ext ->
+                                do! convert_song_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = if ext = ".osu" then "osu!" else "Singles" })
+                                return true
+                            | PackFolder ->
+                                let packname =
+                                    match Path.GetFileName path with
+                                    | "Songs" -> if path |> Path.GetDirectoryName |> Path.GetFileName = "osu!" then "osu!" else "Songs"
+                                    | s -> s
+                                do! convert_pack_folder.RequestAsync(path, { ConversionActionConfig.Default with PackName = packname })
+                                return true
+                            | FolderOfPacks ->
+                                for packFolder in Directory.EnumerateDirectories path do
+                                    do! convert_pack_folder.RequestAsync(packFolder, { ConversionActionConfig.Default with PackName = Path.GetFileName packFolder })
+                                return true
+                            | _ -> Logging.Warn(sprintf "%s: No importable folder structure detected" path); return false
+                    }
+            }
