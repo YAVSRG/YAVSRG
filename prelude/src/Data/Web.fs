@@ -36,31 +36,15 @@ module WebServices =
         { new Async.Service<string * string, bool>() with
             override this.Handle((url: string, target: string)) : Async<bool> =
                 async {
-                    let tcs = new TaskCompletionSource<unit>(url)
-                    let completed =
-                        new AsyncCompletedEventHandler(fun cs ce ->
-                            if ce.UserState = (tcs :> obj) then
-                                if ce.Error <> null then tcs.TrySetException ce.Error |> ignore
-                                elif ce.Cancelled then tcs.TrySetCanceled() |> ignore
-                                else tcs.TrySetResult () |> ignore)
-                    //let prog = new DownloadProgressChangedEventHandler(fun _ e -> output(sprintf "Downloading.. %iMB/%iMB (%i%%)" (e.BytesReceived / 1000000L) (e.TotalBytesToReceive / 1000000L) e.ProgressPercentage))
-
-                    //output "Waiting for download..."
                     use w = new WebClient()
                     w.Headers.Add("User-Agent", "Interlude")
-                    w.DownloadFileCompleted.AddHandler completed
-                    //w.DownloadProgressChanged.AddHandler prog
-                    w.DownloadFileAsync(new Uri(url), target, tcs)
-                    let! _ = tcs.Task |> Async.AwaitTask
-                    w.DownloadFileCompleted.RemoveHandler completed
-                    //w.DownloadProgressChanged.RemoveHandler prog
-
-                    if isNull tcs.Task.Exception then
+                    try
+                        do! w.DownloadFileTaskAsync(url, target) |> Async.AwaitTask
                         return true
-                    else
-                        Logging.Error("Failed to download file from " + url, tcs.Task.Exception)
+                    with err -> 
+                        Logging.Error("Failed to download file from " + url, err)
                         return false
-                    }
+                }
         }
 
     let download_json<'T> (url: string, callback: 'T option -> unit) =

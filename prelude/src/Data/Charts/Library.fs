@@ -283,8 +283,7 @@ module Library =
                                 let dir = Path.ChangeExtension(path, null)
                                 // This has built-in directory traversal protection
                                 ZipFile.ExtractToDirectory(path, dir)
-                                let! _ = this.RequestAsync dir
-                                Directory.Delete(dir, true)
+                                this.Request(dir, fun _ -> Directory.Delete(dir, true))
                                 return true
                             | _ -> Logging.Warn(sprintf "%s: Unrecognised file for import" path); return false
                         | _ ->
