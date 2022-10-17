@@ -18,7 +18,7 @@ module Debug =
                 column()
                 |+ PrettyButton.Once(
                         "debug.rebuildcache",
-                        (fun () -> BackgroundTask.Create TaskFlags.LONGRUNNING "Rebuilding Cache" Library.rebuildTask |> ignore),
+                        (fun () -> Library.recache_service.Request((), ignore)),
                         Localisation.localiseWith ["Rebuilding Cache"] "notification.taskstarted", NotificationType.Task
                     ).Pos(200.0f)
                 |+ PrettyButton.Once(

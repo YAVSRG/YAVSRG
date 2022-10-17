@@ -5,6 +5,7 @@ open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Data
 open Interlude.UI
 open Interlude.Utils
 open FSharp.Formatting.Markdown
@@ -32,17 +33,6 @@ module LinkHandler =
         if not handled then
             try Process.Start (ProcessStartInfo (url, UseShellExecute=true)) |> ignore
             with err -> Logging.Debug ("Failed to open link: " + url, err)
-
-module ImageLoader =
-
-    open Prelude.Web
-
-    let private image_loader =
-        { new Async.Service<string, Bitmap>() with
-            member this.Handle(url) = downloadImage url
-        }
-
-    let load (url, callback) = image_loader.Request (url, callback)
 
 module private Span =
 
@@ -141,7 +131,7 @@ type private Image(width, title, url) as this =
     let mutable sprite : Sprite option = None
 
     do 
-        ImageLoader.load (url, fun bmp -> sync(fun () -> sprite <- Some (Sprite.upload (bmp, 1, 1, false))))
+        ImageServices.get_cached_image.Request(url, fun bmp -> sync(fun () -> sprite <- Some (Sprite.upload (bmp, 1, 1, false))))
         this |* Frame(NodeType.None, Border = K (Color.FromArgb(127, 255, 255, 255)), Fill = K Color.Transparent)
 
     override this.Width = width

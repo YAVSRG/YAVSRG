@@ -70,7 +70,7 @@ module Utils =
     module AutoUpdate =
         open System.IO.Compression
         open Percyqaz.Json
-        open Prelude.Web
+        open Prelude.Data
 
         // this doesn't just copy a folder to a destination, but renames any existing/duplicates of the same name to .old
         let rec private copyFolder source dest =
@@ -132,9 +132,7 @@ module Utils =
             else Logging.Info "Game is up to date."
 
         let checkForUpdates() =
-            BackgroundTask.Create TaskFlags.HIDDEN "Checking for updates"
-                (fun output -> downloadJson("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease) -> handleUpdate d))
-            |> ignore
+            WebServices.download_json("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease option) -> handleUpdate d.Value)
 
             let path = getInterludeLocation()
             let folderPath = Path.Combine(path, "update")
@@ -149,14 +147,11 @@ module Utils =
             let folderPath = Path.Combine(path, "update")
             File.Delete zipPath
             if Directory.Exists folderPath then Directory.Delete(folderPath, true)
-            BackgroundTask.Create TaskFlags.NONE ("Downloading update " + latestRelease.Value.tag_name)
-                (downloadFile (download_url, zipPath)
-                |> BackgroundTask.Callback
-                    (fun b ->
-                        if b then
-                            ZipFile.ExtractToDirectory(zipPath, folderPath)
-                            File.Delete zipPath
-                            copyFolder folderPath path
-                            callback()
-                    ))
-            |> ignore
+            WebServices.download_file.Request((download_url, zipPath),
+                fun success ->
+                    if success then
+                        ZipFile.ExtractToDirectory(zipPath, folderPath)
+                        File.Delete zipPath
+                        copyFolder folderPath path
+                        callback()
+            )

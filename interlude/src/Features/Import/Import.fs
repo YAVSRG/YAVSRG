@@ -6,7 +6,7 @@ open System.Net.Security
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
-open Prelude.Web
+open Prelude.Data
 open Interlude.UI
 open Interlude.Options
 open Interlude.UI.Components
@@ -16,10 +16,8 @@ module FileDropHandling =
     let tryImport(path: string) : bool =
         match Mounts.dropFunc with
         | Some f -> f path; true
-        | None ->
-            BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
-                (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
-            |> ignore
+        | None -> 
+            Library.Imports.auto_convert.Request(path, fun b -> LevelSelect.refresh <- LevelSelect.refresh || b)
             true
 
 type ImportScreen() as this =
@@ -39,27 +37,34 @@ type ImportScreen() as this =
 
         let eoDownloads = 
             SearchContainer(
-                (fun flowContainer _ output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> sync(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
-                (fun flowContainer filter -> flowContainer.Filter <- SMImportCard.Filter filter) )
+                (fun searchContainer callback -> 
+                    WebServices.download_json("https://api.etternaonline.com/v2/packs/",
+                        function
+                        | Some (d: {| data: ResizeArray<EOPack> |}) -> sync(fun () -> for p in d.data do searchContainer.Items.Add(SMImportCard p.attributes))
+                        | None -> ()
+                    )
+                ),
+                (fun searchContainer filter -> searchContainer.Items.Filter <- SMImportCard.Filter filter) )
         let osuDownloads =
             SearchContainer(
                 (Beatmap.search [] 0),
-                (fun flowContainer filter -> flowContainer.Clear(); flowContainer.Add(new SearchContainerLoader(Beatmap.search filter 0 flowContainer))) )
+                (fun searchContainer filter -> searchContainer.Items.Clear();  searchContainer.Items.Add(new SearchContainerLoader(Beatmap.search filter 0 searchContainer))) )
         let noteskins = 
             SearchContainer(
-                (fun flowContainer _ output -> 
-                    downloadJson(Noteskins.source, 
-                        (fun (d: Prelude.Data.Themes.Noteskin.Repo) -> 
+                (fun searchContainer callback -> 
+                    WebServices.download_json(Noteskins.source, 
+                        function
+                        | Some (d: Themes.Noteskin.Repo) -> 
                             sync( fun () -> 
                                 for ns in d.Noteskins do
                                     let nc = NoteskinCard ns
-                                    Noteskins.image_loader.Request(ns.Preview, fun img -> sync(fun () -> nc.LoadPreview img))
-                                    flowContainer.Add nc
+                                    ImageServices.get_cached_image.Request(ns.Preview, fun img -> sync(fun () -> nc.LoadPreview img))
+                                    searchContainer.Items.Add nc
                             )
-                        )
+                        | None -> ()
                     )
                 ),
-                (fun flowContainer filter -> flowContainer.Filter <- NoteskinCard.Filter filter),
+                (fun searchContainer filter -> searchContainer.Items.Filter <- NoteskinCard.Filter filter),
                 300.0f)
 
         let tabs = 

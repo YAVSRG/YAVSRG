@@ -7,7 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
-open Prelude.Web
+open Prelude.Data
 open Interlude
 open Interlude.UI
 open Interlude.Utils
@@ -49,16 +49,15 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     let download() =
         let target = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".osz")
         Notifications.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
-        BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
-            (BackgroundTask.Chain
-                [
-                    downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
-                    (Library.Imports.autoConvert target
-                    |> BackgroundTask.Callback( fun b -> 
+        WebServices.download_file.Request((sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target),
+            fun completed ->
+                if completed then Library.Imports.auto_convert.Request(target,
+                    fun b ->
                         LevelSelect.refresh <- LevelSelect.refresh || b
                         Notifications.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
-                        File.Delete target ))
-                ]) |> ignore
+                        File.Delete target
+                )
+            )
         downloaded <- true
 
     do
@@ -87,14 +86,14 @@ type private BeatmapImportCard(data: BeatmapData) as this =
 
 module private Beatmap =
     
-    let rec search (filter: Filter) (page: int) : FlowContainer.Base<_> -> SearchContainerLoader -> StatusTask =
+    let rec search (filter: Filter) (page: int) : PopulateFunc =
         let mutable s = "https://osusearch.com/api/search?modes=Mania&key="
         let mutable invalid = false
         let mutable title = ""
         List.iter(
             function
             | Impossible -> invalid <- true
-            | String "-p" -> s <- s + "&premium_mappers=true"
+            | String "#p" -> s <- s + "&premium_mappers=true"
             | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
             | Equals ("k", n)
             | Equals ("key", n)
@@ -107,15 +106,16 @@ module private Beatmap =
         ) filter
         s <- s + "&title=" + Uri.EscapeDataString title
         s <- s + "&offset=" + page.ToString()
-        fun (flowContainer: FlowContainer.Base<Widget>) (loader: SearchContainerLoader) output ->
-            let callback(d: BeatmapSearch) =
-                // todo: this is busted. need to use AsyncManyWorker
-                //if loader.Parent.IsSome then
-                    sync(
-                        fun () -> 
-                            for p in d.beatmaps do flowContainer.Add(BeatmapImportCard p)
+        fun (searchContainer: SearchContainer) callback ->
+            WebServices.download_json<BeatmapSearch>(s,
+                fun data ->
+                    match data with
+                    | Some d -> 
+                        sync(fun () ->
+                            for p in d.beatmaps do searchContainer.Items.Add(BeatmapImportCard p)
                             if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                                SearchContainerLoader(search filter (page + 1) flowContainer)
-                                |> flowContainer.Add
-                    )
-            downloadJson(s, callback)
+                                SearchContainerLoader(search filter (page + 1) searchContainer)
+                                |> searchContainer.Items.Add
+                        )
+                    | None -> ()
+            )

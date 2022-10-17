@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Themes.Noteskin
-open Prelude.Web
+open Prelude.Data
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
 open Interlude.Content
@@ -18,8 +18,7 @@ type NoteskinCard(data: RepoEntry) as this =
     let download() =
         let target = Path.Combine(getDataPath("Noteskins"), System.Guid.NewGuid().ToString() + ".isk")
         Notifications.add (Localisation.localiseWith [data.Name] "notification.download.noteskin", NotificationType.Task)
-        BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.Name)
-            ( BackgroundTask.Callback(fun b -> Noteskins.load()) (downloadFile(data.Download, target)) ) |> ignore
+        WebServices.download_file.Request((data.Download, target), fun success -> if success then sync(Noteskins.load))
         downloaded <- true
 
     let mutable preview = Sprite.Default
@@ -59,8 +58,3 @@ type NoteskinCard(data: RepoEntry) as this =
 module Noteskins =
 
     let source = "https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json"
-
-    let image_loader =
-        { new Async.Service<string, Bitmap>() with
-            member this.Handle(url) = downloadImage url
-        }

@@ -45,18 +45,18 @@ module Mounts =
         override this.Title = N"mount"
         override this.OnClose() =
             setting.Value <- Some { mount with ImportOnStartup = importOnStartup.Value }
-            if import then BackgroundTask.Create TaskFlags.NONE "Import from mounted source" (importMountedSource setting.Value.Value) |> ignore
+            if import then import_mounted_source.Request(setting.Value.Value, ignore)
 
     let handleStartupImports() =
         Logging.Debug("Checking for new songs in other games to import..")
         match options.OsuMount.Value with
-        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new osu! songs" (importMountedSource mount) |> ignore
+        | Some mount -> if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
         | None -> ()
         match options.StepmaniaMount.Value with
-        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new StepMania songs" (importMountedSource mount) |> ignore
+        | Some mount -> if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
         | None -> ()
         match options.EtternaMount.Value with
-        | Some mount -> if mount.ImportOnStartup then BackgroundTask.Create TaskFlags.NONE "Import new Etterna songs" (importMountedSource mount) |> ignore
+        | Some mount -> if mount.ImportOnStartup then import_mounted_source.Request(mount, ignore)
         | None -> ()
 
 type CreateMountDialog(mountType: Mounts.Game, setting: Setting<MountedChartSource option>) as this =

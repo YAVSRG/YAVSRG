@@ -9,10 +9,9 @@ open Prelude.Data.Charts.Sorting
 open Interlude.UI
 open Interlude.UI.Components
 
-type private SearchContainerLoader(t) as this =
+type private SearchContainerLoader(t: unit -> unit) =
     inherit StaticWidget(NodeType.None)
-    let t = t this
-    let mutable task = None
+    let mutable loading = false
     let timer = Animation.Counter(1000.0)
 
     let POP_AMOUNT = 10.0f
@@ -28,24 +27,26 @@ type private SearchContainerLoader(t) as this =
         Draw.rect (bar.Expand(0.0f, amt (value - Math.PI / 3.0))) (!*Palette.LIGHT)
         Draw.rect (bar.Translate(30.0f, 0.0f).Expand(0.0f, amt (value - Math.PI / 1.5))) (!*Palette.LIGHT)
 
-        if task.IsNone then task <- Some <| BackgroundTask.Create TaskFlags.HIDDEN "Search container loading" (t |> BackgroundTask.Callback(fun _ -> sync(fun () -> (this.Parent :?> FlowContainer.Base<Widget>).Remove this)))
+        if not loading then t(); loading <- true
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         timer.Update elapsedTime
 
-type private SearchContainer(populate, handleFilter, itemheight) as this =
+type private PopulateFunc = SearchContainer -> unit -> unit
+and private FilterFunc = SearchContainer -> Filter -> unit
+and private SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight) as this =
     inherit StaticContainer(NodeType.None)
 
     let flow = FlowContainer.Vertical<Widget>(itemheight, Spacing = 15.0f)
     let scroll = ScrollContainer.Flow(flow, Margin = Style.padding, Position = Position.TrimTop 70.0f)
-    let populate = populate flow
-    let handleFilter = handleFilter flow
 
     do
-        flow |* SearchContainerLoader populate
+        flow |* SearchContainerLoader (populate this)
         this
-        |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter f), Position = Position.SliceTop 60.0f ))
+        |+ (SearchBox(Setting.simple "", (fun (f: Filter) -> handleFilter this f), Position = Position.SliceTop 60.0f ))
         |* scroll
 
     new(populate, handleFilter) = SearchContainer(populate, handleFilter, 80.0f)
+
+    member this.Items = flow

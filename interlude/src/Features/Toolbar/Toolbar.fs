@@ -2,12 +2,12 @@
 
 open System
 open System.IO
-open SixLabors.ImageSharp
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Data
 open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
@@ -50,16 +50,12 @@ type Toolbar() =
                 ( fun () -> if shown() then Wiki.show() ),
                 Hotkey = "wiki",
                 HoverIcon = Icons.wiki2)
-            |+ IconButton(L"menu.tasks",
-                Icons.tasks, HEIGHT,
-                ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
-                Hotkey = "tasks")
             )
         |+ HotkeyAction("screenshot", fun () ->
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
             let path = Path.Combine(getDataPath "Screenshots", id)
-            use img = Render.screenshot()
-            img.SaveAsPng(path) // todo: this is a performance bottleneck
+            let img = Render.screenshot()
+            ImageServices.save_image.Request((img, path), img.Dispose)
             Notifications.notif("Screenshot saved: " + id, NotificationType.Info) )
         |+ HotkeyAction("reload_themes", fun () -> 
             first_init <- true

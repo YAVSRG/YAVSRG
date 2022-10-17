@@ -95,7 +95,6 @@
     <Compile Include="Features\MainMenu\MainMenu.fs" />
     <Compile Include="Features\Printerlude\Terminal.fs" />
     <Compile Include="Features\Printerlude\Printerlude.fs" />
-    <Compile Include="Features\Toolbar\TaskDisplay.fs" />
     <Compile Include="Features\Toolbar\Jukebox.fs" />
     <Compile Include="Features\Toolbar\Toolbar.fs" />
     <Compile Include="Startup.fs" />

@@ -6,7 +6,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
-open Prelude.Web
+open Prelude.Data
 open Interlude.UI
 open Interlude.Features.LevelSelect
 
@@ -41,16 +41,15 @@ type private SMImportCard(data: EOPackAttrs) as this =
     let download() =
         let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
         Notifications.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
-        BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
-            (BackgroundTask.Chain
-                [
-                    downloadFile(data.download, target)
-                    (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback( fun b -> 
-                            LevelSelect.refresh <- LevelSelect.refresh || b
-                            Notifications.add (Localisation.localiseWith [data.name] "notification.install.pack", NotificationType.Task)
-                            File.Delete target ))
-                ]) |> ignore
+        WebServices.download_file.Request((data.download, target),
+            fun completed ->
+                if completed then Library.Imports.auto_convert.Request(target,
+                    fun b ->
+                        LevelSelect.refresh <- LevelSelect.refresh || b
+                        Notifications.add (Localisation.localiseWith [data.name] "notification.install.pack", NotificationType.Task)
+                        File.Delete target
+                )
+            )
         downloaded <- true
     do
         this
