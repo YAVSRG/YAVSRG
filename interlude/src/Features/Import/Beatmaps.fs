@@ -47,7 +47,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             
     let mutable downloaded = false
     let download() =
-        let target = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".osz")
+        let target = Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
         Notifications.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
         WebServices.download_file.Request((sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target),
             fun completed ->

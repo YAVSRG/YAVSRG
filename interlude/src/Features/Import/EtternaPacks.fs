@@ -39,7 +39,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
         Directory.Exists path && not ( Seq.isEmpty (Directory.EnumerateDirectories path) )
 
     let download() =
-        let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
+        let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
         Notifications.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
         WebServices.download_file.Request((data.download, target),
             fun completed ->
