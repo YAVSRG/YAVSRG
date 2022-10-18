@@ -2,10 +2,8 @@
 
 open System
 open System.IO
-open System.ComponentModel
 open System.Net
 open System.Net.Http
-open System.Threading.Tasks
 open SixLabors.ImageSharp
 open Percyqaz.Common
 open Prelude.Common
@@ -18,7 +16,7 @@ module WebServices =
     let download_string = 
         { new Async.Service<string, string>() with
             override this.Handle(url: string) =
-                download_string_client.GetStringAsync url |> Async.AwaitTask
+                download_string_client.GetStringAsync(url) |> Async.AwaitTask
         }
         
     let private download_image_client = new HttpClient()
