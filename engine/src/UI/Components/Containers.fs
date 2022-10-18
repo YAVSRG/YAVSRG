@@ -373,9 +373,16 @@ type SwapContainer() as this =
         with get() = current
         and set(v) =
             current <- v
-            if not current.Initialised then current.Init this
-            else assert(current.Parent = this)
+            if this.Initialised then
+                if not current.Initialised then current.Init this
+                else assert(current.Parent = this)
             justSwapped <- true
+
+    override this.Init(parent) =
+        base.Init parent
+        if isNull (current :> obj) then 
+            Logging.Error("SwapContainer was not given child element before init")
+        else current.Init this
 
     override this.Draw() =
         current.Draw()
