@@ -57,4 +57,23 @@ type NoteskinCard(data: RepoEntry) as this =
         
 module Noteskins =
 
-    let source = "https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json"
+    let tab =
+        SearchContainer(
+            (fun searchContainer callback -> 
+                WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json",
+                    fun data ->
+                    match data with
+                    | Some (d: Themes.Noteskin.Repo) -> 
+                        sync( fun () -> 
+                            for ns in d.Noteskins do
+                                let nc = NoteskinCard ns
+                                ImageServices.get_cached_image.Request(ns.Preview, fun img -> sync(fun () -> nc.LoadPreview img))
+                                searchContainer.Items.Add nc
+                        )
+                    | None -> ()
+                    callback()
+                )
+            ),
+            (fun searchContainer filter -> searchContainer.Items.Filter <- NoteskinCard.Filter filter),
+            300.0f
+        )

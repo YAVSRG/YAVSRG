@@ -1,15 +1,12 @@
 ﻿namespace Interlude.Features.Import
 
-open System.IO
-open System.Net
-open System.Net.Security
+open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Data.Charts
 open Prelude.Data
+open Prelude.Data.Charts
 open Interlude.UI
-open Interlude.Options
-open Interlude.UI.Components
 open Interlude.Features.LevelSelect
 
 module FileDropHandling =
@@ -20,78 +17,72 @@ module FileDropHandling =
             Library.Imports.auto_convert.Request(path, fun b -> LevelSelect.refresh <- LevelSelect.refresh || b)
             true
 
+type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) =
+    inherit StaticContainer(NodeType.None)
+
+    override this.Init(parent) =
+        base.Init parent
+        this
+        |+ Frame(NodeType.None,
+            Border = fun () -> if container.Current = target then Color.White else Color.Transparent
+            ,
+            Fill = fun () -> if container.Current = target then Style.main 100 () else Style.dark 100 ())
+        |* Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f))
+
+type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Service<'Request, 'Result>) =
+    inherit StaticWidget(NodeType.None)
+
+    let fade = Animation.Fade 0.0f
+    let animation = Animation.Counter(250.0)
+
+    let animation_frames = 
+        [|
+            Percyqaz.Flux.Resources.Feather.cloud_snow
+            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+            Percyqaz.Flux.Resources.Feather.cloud_rain
+            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+        |]
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        if service.Status <> Async.ServiceStatus.Idle then
+            fade.Target <- 1.0f
+            animation.Update elapsedTime
+        else fade.Target <- 0.0f
+        fade.Update elapsedTime
+
+    override this.Draw() =
+        let icon = animation_frames.[animation.Loops % animation_frames.Length]
+        let iconColor =
+            match service.Status with
+            | Async.ServiceStatus.Busy -> Color.FromArgb(fade.Alpha, Color.Yellow)
+            | Async.ServiceStatus.Working -> Color.FromArgb(fade.Alpha, Color.Lime)
+            | _ -> Color.FromArgb(fade.Alpha, Color.Gray)
+        let textColor =
+            let x = 127 + fade.Alpha / 2
+            Color.FromArgb(x, x, x)
+        Text.drawFill(Style.baseFont, icon, this.Bounds.SliceLeft this.Bounds.Height, iconColor, Alignment.CENTER)
+        Text.drawFill(Style.baseFont, name, this.Bounds.TrimLeft this.Bounds.Height, textColor, Alignment.LEFT)
+
 type ImportScreen() as this =
     inherit Screen()
+
     do
-        (*
-            Online downloaders
-        *)
-
-        // EtternaOnline's certificate keeps expiring!! Rop get on it
-        // todo: set up automated test that pings eo for certificate expiry
-        ServicePointManager.ServerCertificateValidationCallback <-
-            RemoteCertificateValidationCallback(
-                fun _ cert _ sslPolicyErrors ->
-                    if sslPolicyErrors = SslPolicyErrors.None then true
-                    else cert.GetCertHashString().ToLower() = "e87a496fbc4b7914674f3bc3846368234e50fb74" )
-
-        let eoDownloads = 
-            SearchContainer(
-                (fun searchContainer callback -> 
-                    WebServices.download_json("https://api.etternaonline.com/v2/packs/",
-                        function
-                        | Some (d: {| data: ResizeArray<EOPack> |}) -> sync(fun () -> for p in d.data do searchContainer.Items.Add(SMImportCard p.attributes))
-                        | None -> ()
-                    )
-                ),
-                (fun searchContainer filter -> searchContainer.Items.Filter <- SMImportCard.Filter filter) )
-        let osuDownloads =
-            SearchContainer(
-                (Beatmap.search [] 0),
-                (fun searchContainer filter -> searchContainer.Items.Clear();  searchContainer.Items.Add(new SearchContainerLoader(Beatmap.search filter 0 searchContainer))) )
-        let noteskins = 
-            SearchContainer(
-                (fun searchContainer callback -> 
-                    WebServices.download_json(Noteskins.source, 
-                        function
-                        | Some (d: Themes.Noteskin.Repo) -> 
-                            sync( fun () -> 
-                                for ns in d.Noteskins do
-                                    let nc = NoteskinCard ns
-                                    ImageServices.get_cached_image.Request(ns.Preview, fun img -> sync(fun () -> nc.LoadPreview img))
-                                    searchContainer.Items.Add nc
-                            )
-                        | None -> ()
-                    )
-                ),
-                (fun searchContainer filter -> searchContainer.Items.Filter <- NoteskinCard.Filter filter),
-                300.0f)
-
+        let container = SwapContainer(Position = Position.TrimLeft(400.0f).Margin(200.0f, 20.0f), Current = Mounts.tab)
         let tabs = 
-            Tabs.Container(Position = { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 80.0f })
-                .WithTab("Etterna Packs", eoDownloads)
-                .WithTab("osu! Songs", osuDownloads)
-                .WithTab("Noteskins", noteskins)
+            FlowContainer.Vertical<Widget>(80.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
+            |+ TabButton(Icons.import_local, "Local imports", container, Mounts.tab)
+            |+ TabButton(Icons.import_etterna, "Etterna packs", container, EtternaPacks.tab)
+            |+ TabButton(Icons.import_osu, "osu!mania songs", container, Beatmaps.tab)
+            |+ TabButton(Icons.import_noteskin, "Noteskins", container, Noteskins.tab)
+            |+ ServiceStatus("Loading", WebServices.download_string)
+            |+ ServiceStatus("Downloading", WebServices.download_file)
+            |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
+            |+ ServiceStatus("Recaching", Library.recache_service)
 
         this
         |+ tabs
-        |+ Text("(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)",
-            Align = Alignment.CENTER,
-            Position = { Left = 0.0f %+ 600.0f; Top = 1.0f %- 90.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 30.0f })
-
-        (*
-            Offline importers from other games
-        *)
-
-        |+ MountControl(Mounts.Game.Osu, options.OsuMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
-        |+ MountControl(Mounts.Game.Stepmania, options.StepmaniaMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
-        |+ MountControl(Mounts.Game.Etterna, options.EtternaMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
-        |* Text("Import from game",
-            Align = Alignment.CENTER,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 150.0f, 250.0f, 50.0f))
+        |* container
 
     override this.OnEnter _ = ()
     override this.OnExit _ = ()

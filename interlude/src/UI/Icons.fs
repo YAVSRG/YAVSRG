@@ -36,6 +36,11 @@ module Icons =
     let wiki2 = Feather.book_open
     let tasks = Feather.sidebar
 
+    let import_local = Feather.link
+    let import_etterna = Feather.archive
+    let import_osu = Feather.download_cloud
+    let import_noteskin = Feather.image
+
     let system = Feather.airplay
     let themes = Feather.image
     let gameplay = Feather.sliders

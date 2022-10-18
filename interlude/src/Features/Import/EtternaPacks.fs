@@ -1,5 +1,7 @@
 ﻿namespace Interlude.Features.Import
 
+open System.Net
+open System.Net.Security
 open System.IO
 open Percyqaz.Json
 open Percyqaz.Flux.UI
@@ -41,6 +43,7 @@ type private SMImportCard(data: EOPackAttrs) as this =
     let download() =
         let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
         Notifications.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
+        // todo: visualise download progress
         WebServices.download_file.Request((data.download, target),
             fun completed ->
                 if completed then Library.Imports.auto_convert.Request(target,
@@ -85,3 +88,31 @@ type private SMImportCard(data: EOPackAttrs) as this =
                     | _ -> true
                 ) filter
             | _ -> true
+
+module EtternaPacks =
+
+    do
+        // EtternaOnline's certificate keeps expiring!! Rop get on it
+        // todo: set up automated test that pings eo for certificate expiry
+        ServicePointManager.ServerCertificateValidationCallback <-
+            RemoteCertificateValidationCallback(
+                fun _ cert _ sslPolicyErrors ->
+                    if sslPolicyErrors = SslPolicyErrors.None then true
+                    else cert.GetCertHashString().ToLower() = "e87a496fbc4b7914674f3bc3846368234e50fb74" )
+
+    let tab = 
+        StaticContainer(NodeType.None)
+        |+ SearchContainer(
+                (fun searchContainer callback -> 
+                    WebServices.download_json("https://api.etternaonline.com/v2/packs/",
+                        fun data ->
+                        match data with
+                        | Some (d: {| data: ResizeArray<EOPack> |}) -> sync(fun () -> for p in d.data do searchContainer.Items.Add(SMImportCard p.attributes))
+                        | None -> ()
+                        callback()
+                    )
+                ),
+                (fun searchContainer filter -> searchContainer.Items.Filter <- SMImportCard.Filter filter),
+                Position = Position.TrimBottom(60.0f)
+            )
+        |+ Text("(Interlude is not affiliated with Etterna, these downloads are provided through their API)", Position = Position.SliceBottom(60.0f))

@@ -84,7 +84,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             Position = { Left = Position.min; Top = 0.0f %+ 20.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 20.0f })
         |* Clickable((fun () -> if not downloaded then download()))
 
-module private Beatmap =
+module Beatmaps =
     
     let rec search (filter: Filter) (page: int) : PopulateFunc =
         let mutable s = "https://osusearch.com/api/search?modes=Mania&key="
@@ -109,13 +109,23 @@ module private Beatmap =
         fun (searchContainer: SearchContainer) callback ->
             WebServices.download_json<BeatmapSearch>(s,
                 fun data ->
-                    match data with
-                    | Some d -> 
-                        sync(fun () ->
-                            for p in d.beatmaps do searchContainer.Items.Add(BeatmapImportCard p)
-                            if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                                SearchContainerLoader(search filter (page + 1) searchContainer)
-                                |> searchContainer.Items.Add
-                        )
-                    | None -> ()
+                match data with
+                | Some d -> 
+                    sync(fun () ->
+                        for p in d.beatmaps do searchContainer.Items.Add(BeatmapImportCard p)
+                        if d.result_count < 0 || d.result_count > d.beatmaps.Count then
+                            SearchContainerLoader(search filter (page + 1) searchContainer)
+                            |> searchContainer.Items.Add
+                    )
+                | None -> ()
+                callback()
             )
+
+    let tab =
+        StaticContainer(NodeType.None)
+        |+ SearchContainer(
+                (search [] 0),
+                (fun searchContainer filter -> searchContainer.Items.Clear(); searchContainer.Items.Add(new SearchContainerLoader(search filter 0 searchContainer))),
+                Position = Position.TrimBottom(60.0f)
+            )
+        |+ Text("(Interlude is not affiliated with osu!, these downloads are provided through unofficial APIs)", Position = Position.SliceBottom(60.0f))

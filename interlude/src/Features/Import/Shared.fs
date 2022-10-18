@@ -4,12 +4,11 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
-open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
 open Interlude.UI.Components
 
-type private SearchContainerLoader(t: unit -> unit) =
+type SearchContainerLoader(taskWithCallback: (unit -> unit) -> unit) =
     inherit StaticWidget(NodeType.None)
     let mutable loading = false
     let timer = Animation.Counter(1000.0)
@@ -27,15 +26,15 @@ type private SearchContainerLoader(t: unit -> unit) =
         Draw.rect (bar.Expand(0.0f, amt (value - Math.PI / 3.0))) (!*Palette.LIGHT)
         Draw.rect (bar.Translate(30.0f, 0.0f).Expand(0.0f, amt (value - Math.PI / 1.5))) (!*Palette.LIGHT)
 
-        if not loading then t(); loading <- true
+        if not loading then taskWithCallback(fun () -> sync(fun () -> (this.Parent :?> FlowContainer.Vertical<Widget>).Remove this)); loading <- true
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         timer.Update elapsedTime
 
-type private PopulateFunc = SearchContainer -> unit -> unit
-and private FilterFunc = SearchContainer -> Filter -> unit
-and private SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight) as this =
+type PopulateFunc = SearchContainer -> (unit -> unit) -> unit
+and FilterFunc = SearchContainer -> Filter -> unit
+and SearchContainer(populate: PopulateFunc, handleFilter: FilterFunc, itemheight) as this =
     inherit StaticContainer(NodeType.None)
 
     let flow = FlowContainer.Vertical<Widget>(itemheight, Spacing = 15.0f)
