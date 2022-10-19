@@ -230,6 +230,7 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
     let mutable scroll_pos = Animation.Fade 0.0f // amount in pixels to move content UP inside container
     let mutable contentHeight = contentHeight
     let mutable refresh = false
+    let mutable scroll_to_child_next_frame = false
 
     static member Flow(child: FlowContainer.Vertical<'T>) =
         let sc = ScrollContainer(child, 0.0f)
@@ -245,7 +246,8 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
 
         let mutable scrollby = 0.0f
         if Mouse.hover this.Bounds then scrollby <- -Mouse.scroll() * SENSITIVITY
-        if this.Focused then
+        if this.Focused && scroll_to_child_next_frame then
+            scroll_to_child_next_frame <- false
             let selected_bounds = (Selection.get_focused_element().Value :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
             if selected_bounds.Bottom > this.Bounds.Bottom then
                 scrollby <- scrollby + selected_bounds.Bottom - this.Bounds.Bottom
@@ -260,7 +262,12 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
             else moved || scroll_pos.Moving
 
         if moved then child.Position <- Position.SliceTop(contentHeight).Translate(0.0f, -scroll_pos.Value).Margin(this.Margin)
-        child.Update(elapsedTime, moved)
+        if this.Focused then
+            let before = Selection.get_focused_element()
+            child.Update(elapsedTime, moved)
+            let after = Selection.get_focused_element()
+            if before <> after then scroll_to_child_next_frame <- true
+        else child.Update(elapsedTime, moved)
 
     override this.Draw() = 
         Stencil.create(false)
