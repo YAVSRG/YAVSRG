@@ -41,6 +41,9 @@ module Icons =
     let import_osu = Feather.download_cloud
     let import_noteskin = Feather.image
 
+    let open_in_browser = Feather.external_link
+    let download = Feather.download
+
     let system = Feather.airplay
     let themes = Feather.image
     let gameplay = Feather.sliders

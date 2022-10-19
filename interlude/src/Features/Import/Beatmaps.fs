@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.UI
 open Prelude.Common
@@ -85,6 +86,11 @@ type private BeatmapImportCard(data: BeatmapData) as this =
         |* Clickable((fun () -> if not downloaded then download()))
 
 module Beatmaps =
+
+    let download_json_switch = 
+        { new Async.SwitchService<string, BeatmapSearch option>()
+            with override this.Handle(url) = WebServices.download_json_async<BeatmapSearch>(url)
+        }
     
     let rec search (filter: Filter) (page: int) : PopulateFunc =
         let mutable s = "https://osusearch.com/api/search?modes=Mania&key="
@@ -107,7 +113,7 @@ module Beatmaps =
         s <- s + "&title=" + Uri.EscapeDataString title
         s <- s + "&offset=" + page.ToString()
         fun (searchContainer: SearchContainer) callback ->
-            WebServices.download_json<BeatmapSearch>(s,
+            download_json_switch.Request(s,
                 fun data ->
                 match data with
                 | Some d -> 
