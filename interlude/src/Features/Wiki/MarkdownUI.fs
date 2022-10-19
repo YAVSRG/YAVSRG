@@ -30,9 +30,7 @@ module LinkHandler =
                 handler.Action url
                 handled <- true
 
-        if not handled then
-            try Process.Start (ProcessStartInfo (url, UseShellExecute=true)) |> ignore
-            with err -> Logging.Debug ("Failed to open link: " + url, err)
+        if not handled then openUrl url
 
 module private Span =
 

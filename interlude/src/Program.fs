@@ -28,6 +28,10 @@ let main argv =
             Printerlude.init()
         )
         Window.onUnload.Add(Gameplay.save)
+        Window.onFileDrop.Add(fun path -> 
+            if not (Content.Noteskins.tryImport path [4; 7]) then 
+                if not (Import.FileDropHandling.tryImport path) then
+                    Logging.Warn("Unrecognised file dropped: " + path))
 
         Launch.entryPoint
             (

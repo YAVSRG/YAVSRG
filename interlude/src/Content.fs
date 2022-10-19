@@ -266,7 +266,9 @@ module Content =
                     load()
                     true
                 with err -> Logging.Error("Something went wrong when moving this skin!", err); true
-            | OsuSkinArchive -> Logging.Info("Can't directly import .osks yet, sorry :( You'll have to extract it first"); true
+            | OsuSkinArchive -> 
+                Logging.Info("Can't directly import .osks yet - Please extract it to a folder first")
+                true
             | Unknown -> false
 
     let init (themeId: string) (noteskinId: string) =

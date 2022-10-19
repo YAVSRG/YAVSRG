@@ -42,7 +42,6 @@ type private SMImportCard(data: EOPackAttrs) as this =
 
     let download() =
         let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
-        Notifications.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
         // todo: visualise download progress
         WebServices.download_file.Request((data.download, target),
             fun completed ->

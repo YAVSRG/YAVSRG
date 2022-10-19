@@ -7,6 +7,7 @@ open Prelude.Common
 open Prelude.Data
 open Prelude.Data.Charts
 open Interlude.UI
+open Interlude.Utils
 open Interlude.Features.LevelSelect
 
 module FileDropHandling =
@@ -14,7 +15,13 @@ module FileDropHandling =
         match Mounts.dropFunc with
         | Some f -> f path; true
         | None -> 
-            Library.Imports.auto_convert.Request(path, fun b -> LevelSelect.refresh <- LevelSelect.refresh || b)
+            Library.Imports.auto_convert.Request(path, 
+                fun success -> 
+                    if success then
+                        Notifications.add(L"notification.import.success", NotificationType.Task)
+                        LevelSelect.refresh <- true
+                    else Notifications.add(L"notification.import.failure", NotificationType.Warning)
+            )
             true
 
 type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) =

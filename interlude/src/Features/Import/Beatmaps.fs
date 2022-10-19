@@ -2,6 +2,7 @@
 
 open System
 open System.IO
+open System.Diagnostics
 open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.UI
@@ -9,7 +10,6 @@ open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
 open Prelude.Data
-open Interlude
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Features.LevelSelect
@@ -43,23 +43,31 @@ type BeatmapSearch =
         beatmaps: ResizeArray<BeatmapData>
     }
 
+type private Status =
+    | NotDownloaded
+    | Downloading
+    | Installed
+    | DownloadFailed
+
 type private BeatmapImportCard(data: BeatmapData) as this =
     inherit StaticContainer(NodeType.None)
             
-    let mutable downloaded = false
+    let mutable status = NotDownloaded
     let download() =
-        let target = Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
-        Notifications.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
-        WebServices.download_file.Request((sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target),
-            fun completed ->
-                if completed then Library.Imports.auto_convert.Request(target,
-                    fun b ->
-                        LevelSelect.refresh <- LevelSelect.refresh || b
-                        Notifications.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
-                        File.Delete target
+        if status = NotDownloaded || status = DownloadFailed then
+            let target = Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
+            WebServices.download_file.Request((sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target),
+                fun completed ->
+                    if completed then Library.Imports.auto_convert.Request(target,
+                        fun b ->
+                            LevelSelect.refresh <- LevelSelect.refresh || b
+                            Notifications.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
+                            File.Delete target
+                            status <- if b then Installed else DownloadFailed
+                    )
+                    else status <- DownloadFailed
                 )
-            )
-        downloaded <- true
+            status <- Downloading
 
     do
         let c =
@@ -82,8 +90,13 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 40.0f; Right = Position.max; Bottom = Position.max })
         |+ Text(sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs),
             Align = Alignment.RIGHT,
-            Position = { Left = Position.min; Top = 0.0f %+ 20.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 20.0f })
-        |* Clickable((fun () -> if not downloaded then download()))
+            Position = Position.TrimRight(160.0f).Margin(5.0f, 20.0f))
+        |+ Button(Icons.open_in_browser,
+            fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
+            ,
+            Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
+        |* Button(Icons.download, download,
+            Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
 
 module Beatmaps =
 

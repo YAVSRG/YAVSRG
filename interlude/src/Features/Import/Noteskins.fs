@@ -17,11 +17,16 @@ type NoteskinCard(data: RepoEntry) as this =
     let mutable downloaded = Noteskins.list() |> Array.map snd |> Array.contains data.Name
     let download() =
         let target = Path.Combine(getDataPath("Noteskins"), System.Guid.NewGuid().ToString() + ".isk")
-        Notifications.add (Localisation.localiseWith [data.Name] "notification.download.noteskin", NotificationType.Task)
-        WebServices.download_file.Request((data.Download, target), fun success -> if success then sync(Noteskins.load))
+        WebServices.download_file.Request((data.Download, target), 
+            fun success -> 
+                if success then 
+                    sync Noteskins.load
+                    Notifications.add (Localisation.localiseWith [data.Name] "notification.install.noteskin", NotificationType.Task)
+        )
         downloaded <- true
 
-    let mutable preview = Sprite.Default
+    let mutable preview : Sprite option = None
+    let imgFade = Animation.Fade 0.0f
     do
         this
         |+ Text(data.Name,
@@ -33,12 +38,20 @@ type NoteskinCard(data: RepoEntry) as this =
             Position = Position.Margin(5.0f, 0.0f).TrimTop(240.0f) )
         |* Clickable((fun () -> if not downloaded then download()))
 
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        imgFade.Update elapsedTime
+
     override this.Draw() =
         base.Draw()
-        Draw.sprite ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) Color.White preview
+        match preview with
+        | Some p -> 
+            Draw.sprite ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) (Color.FromArgb(imgFade.Alpha, Color.White)) p
+        | None -> ()
 
     member this.LoadPreview(img: Bitmap) =
-        preview <- Sprite.upload(img, 1, 1, true)
+        preview <- Some <| Sprite.upload(img, 1, 1, true)
+        imgFade.Target <- 1.0f
 
     member this.Name = data.Name
     member this.Downloaded = downloaded

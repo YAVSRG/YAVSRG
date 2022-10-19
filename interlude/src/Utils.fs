@@ -67,6 +67,10 @@ module Utils =
         |> Process.Start
         |> ignore
 
+    let openUrl (url: string) =
+        try Process.Start (ProcessStartInfo (url, UseShellExecute=true)) |> ignore
+        with err -> Logging.Debug ("Failed to open url in browser: " + url, err)
+
     module AutoUpdate =
         open System.IO.Compression
         open Percyqaz.Json

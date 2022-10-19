@@ -58,9 +58,7 @@ module Wiki =
                 ,
                 Position = Position.Column(0.0f, 200.0f))
             |+ IconButton(L"wiki.openinbrowser", Icons.open_in_browser, 50.0f,
-                fun () -> 
-                    try Process.Start (ProcessStartInfo ("https://github.com/YAVSRG/Interlude/wiki/" + page_url, UseShellExecute=true)) |> ignore
-                    with err -> Logging.Debug ("Failed to open wiki page in browser: " + page_url, err)
+                fun () -> openUrl("https://github.com/YAVSRG/Interlude/wiki/" + page_url)
                 ,
                 Position = Position.Column(200.0f, 300.0f))
 
