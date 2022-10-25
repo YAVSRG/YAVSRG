@@ -151,7 +151,7 @@ module Utils =
             let folderPath = Path.Combine(path, "update")
             File.Delete zipPath
             if Directory.Exists folderPath then Directory.Delete(folderPath, true)
-            WebServices.download_file.Request((download_url, zipPath),
+            WebServices.download_file.Request((download_url, zipPath, ignore),
                 fun success ->
                     if success then
                         ZipFile.ExtractToDirectory(zipPath, folderPath)

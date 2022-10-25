@@ -2,9 +2,9 @@
 
 open System
 open System.IO
-open System.Diagnostics
 open Percyqaz.Common
 open Percyqaz.Json
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
@@ -43,20 +43,15 @@ type BeatmapSearch =
         beatmaps: ResizeArray<BeatmapData>
     }
 
-type private Status =
-    | NotDownloaded
-    | Downloading
-    | Installed
-    | DownloadFailed
-
 type private BeatmapImportCard(data: BeatmapData) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit StaticContainer(NodeType.Button(fun () -> this.Download()))
             
     let mutable status = NotDownloaded
+    let mutable progress = 0.0f
     let download() =
         if status = NotDownloaded || status = DownloadFailed then
             let target = Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
-            WebServices.download_file.Request((sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target),
+            WebServices.download_file.Request((sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target, fun p -> progress <- p),
                 fun completed ->
                     if completed then Library.Imports.auto_convert.Request(target,
                         fun b ->
@@ -81,7 +76,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             | _ -> Color.Gray
 
         this
-        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(120, c)), Border = K (Color.FromArgb(200, c)))
+        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(120, c)), Border = fun () -> if this.Focused then Color.White else Color.FromArgb(200, c))
         |+ Text(data.artist + " - " + data.title,
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f })
@@ -97,6 +92,20 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
         |* Button(Icons.download, download,
             Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
+
+    override this.Draw() =
+        base.Draw()
+
+        match status with
+        | NotDownloaded -> ()
+        | Downloading -> Draw.rect(this.Bounds.SliceLeft(this.Bounds.Width * progress)) (Color.FromArgb(64, 255, 255, 255))
+        | Installed -> 
+            Draw.rect this.Bounds (Color.FromArgb(64, 255, 255, 255))
+            Text.drawFill(Style.baseFont, "Downloaded!", this.Bounds.SliceBottom(25.0f), Color.White, Alignment.CENTER)
+        | DownloadFailed ->
+            Text.drawFill(Style.baseFont, "Download failed!", this.Bounds.SliceBottom(25.0f), Color.FromArgb(255, 100, 100), Alignment.CENTER)
+
+    member private this.Download() = download()
 
 module Beatmaps =
 
@@ -141,10 +150,12 @@ module Beatmaps =
             )
 
     let tab =
-        StaticContainer(NodeType.None)
-        |+ SearchContainer(
+        let searchContainer =
+            SearchContainer(
                 (search [] 0),
                 (fun searchContainer filter -> searchContainer.Items.Clear(); searchContainer.Items.Add(new SearchContainerLoader(search filter 0 searchContainer))),
                 Position = Position.TrimBottom(60.0f)
             )
+        StaticContainer(NodeType.Switch(K searchContainer))
+        |+ searchContainer
         |+ Text("(Interlude is not affiliated with osu!, these downloads are provided through unofficial APIs)", Position = Position.SliceBottom(60.0f))

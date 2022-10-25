@@ -1,7 +1,6 @@
 ﻿namespace Interlude.Features.Import
 
 open System.IO
-open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
@@ -17,7 +16,7 @@ type NoteskinCard(data: RepoEntry) as this =
     let mutable downloaded = Noteskins.list() |> Array.map snd |> Array.contains data.Name
     let download() =
         let target = Path.Combine(getDataPath("Noteskins"), System.Guid.NewGuid().ToString() + ".isk")
-        WebServices.download_file.Request((data.Download, target), 
+        WebServices.download_file.Request((data.Download, target, ignore), 
             fun success -> 
                 if success then 
                     sync Noteskins.load

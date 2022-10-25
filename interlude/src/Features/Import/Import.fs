@@ -24,8 +24,12 @@ module FileDropHandling =
             )
             true
 
-type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) =
-    inherit StaticContainer(NodeType.None)
+type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
+    inherit StaticContainer(NodeType.Switch(fun _ -> this.Button))
+
+    let button = Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f))
+
+    member this.Button = button
 
     override this.Init(parent) =
         base.Init parent
@@ -33,8 +37,8 @@ type private TabButton(icon: string, name: string, container: SwapContainer, tar
         |+ Frame(NodeType.None,
             Border = fun () -> if container.Current = target then Color.White else Color.Transparent
             ,
-            Fill = fun () -> if container.Current = target then Style.main 100 () else Style.dark 100 ())
-        |* Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f))
+            Fill = fun () -> if this.Focused then Style.main 100 () else Style.dark 100 ())
+        |* button
 
 type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Service<'Request, 'Result>) =
     inherit StaticWidget(NodeType.None)
@@ -88,8 +92,11 @@ type ImportScreen() as this =
             |+ ServiceStatus("Recaching", Library.recache_service)
 
         this
-        |+ tabs
-        |* container
+        |* (
+            SwitchContainer.Row<Widget>()
+            |+ tabs
+            |+ container
+        )
 
     override this.OnEnter _ = ()
     override this.OnExit _ = ()

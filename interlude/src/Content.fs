@@ -251,7 +251,7 @@ module Content =
             Current.switch id
             Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
 
-        let tryImport (path: string) (keymodes: int list) : bool =
+        let rec tryImport (path: string) (keymodes: int list) : bool =
             match path with
             | OsuSkinFolder ->
                 let id = Guid.NewGuid().ToString()
@@ -266,9 +266,12 @@ module Content =
                     load()
                     true
                 with err -> Logging.Error("Something went wrong when moving this skin!", err); true
-            | OsuSkinArchive -> 
-                Logging.Info("Can't directly import .osks yet - Please extract it to a folder first")
-                true
+            | OsuSkinArchive ->
+                let dir = Path.ChangeExtension(path, null)
+                System.IO.Compression.ZipFile.ExtractToDirectory(path, dir)
+                let result = tryImport dir keymodes
+                Directory.Delete(dir, true)
+                result
             | Unknown -> false
 
     let init (themeId: string) (noteskinId: string) =
