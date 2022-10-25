@@ -93,6 +93,7 @@ module Selection =
         selected <- true
         focusTree <- tree
 
+
     let rec focus(item: ISelection) =
         match item.NodeType with
         | NodeType.None -> focus_tree []
