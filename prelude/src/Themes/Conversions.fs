@@ -3,6 +3,7 @@
 open System.IO
 open SixLabors.ImageSharp
 open SixLabors.ImageSharp.Processing
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.Themes
@@ -483,6 +484,7 @@ module OsuSkin =
                 Bitmap.load s
 
             // Copy all the textures and ensure they are square
+            // todo: for ln textures the image should stretch instead of being squared if h < w
             let square_images (name: string) (files: string list list) =
                 let animation_frames = List.map List.length files |> List.max
                 let colors = List.length files
@@ -505,13 +507,21 @@ module OsuSkin =
                         Mode = Loose
                     }
 
+            let mutable flipholdtail = false
+            let mutable useholdtail = true
             square_images "note" (textures |> Seq.map (fun x -> x.Note) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
             square_images "holdhead" (textures |> Seq.map (fun x -> x.Head) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
             square_images "holdbody" (textures |> Seq.map (fun x -> x.Body) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
-            square_images "holdtail" (textures |> Seq.map (fun x -> x.Tail) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
+            try
+                square_images "holdtail" (textures |> Seq.map (fun x -> x.Tail) |> Seq.map (fun x -> getTextureFilenames(x, source)) |> List.ofSeq)
+            with err ->
+                Logging.Debug("Error in holdtail textures - Using hold head textures for compatibility")
+                flipholdtail <- true
+                useholdtail <- false
 
             // Generate receptors
             let receptor_base = getTextureFilenames (textures.[0].Note, source) |> List.head |> loadbmp
+            // todo: square these images
             (grayscale 0.5f receptor_base).Save(Path.Combine(target, "receptor-0-0.png"))
             (grayscale 1.0f receptor_base).Save(Path.Combine(target, "receptor-1-0.png"))
             JSON.ToFile (Path.Combine(target, "receptor.json"), false)
@@ -542,8 +552,8 @@ module OsuSkin =
                     Author = ini.General.Author
                     Version = ini.General.Version
                     NoteColors = colorConfig
-                    FlipHoldTail = false
-                    UseHoldTailTexture = true
+                    FlipHoldTail = flipholdtail
+                    UseHoldTailTexture = useholdtail
                     HoldNoteTrim = 0.0f
                     PlayfieldColor = primaryKeymode.ColourΔ.[0]
                     ColumnWidth = 1080f / 512f * float32 primaryKeymode.ColumnWidth.[0]

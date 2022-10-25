@@ -4,6 +4,8 @@ open System
 open System.IO
 open System.Net
 open System.Net.Http
+open System.Threading.Tasks
+open System.ComponentModel
 open SixLabors.ImageSharp
 open Percyqaz.Common
 open Prelude.Common
@@ -31,15 +33,32 @@ module WebServices =
         }
 
     let download_file =
-        { new Async.Service<string * string, bool>() with
-            override this.Handle((url: string, target: string)) : Async<bool> =
+        { new Async.Service<string * string * (float32 -> unit), bool>() with
+            override this.Handle((url: string, target: string, progress: float32 -> unit)) : Async<bool> =
                 async {
-                    use w = new WebClient()
-                    w.Headers.Add("User-Agent", "Interlude")
-                    try
-                        do! w.DownloadFileTaskAsync(url, target) |> Async.AwaitTask
-                        return true
-                    with err -> 
+                    use client = new WebClient()
+                    client.Headers.Add("User-Agent", "Interlude")
+                    let tcs = new TaskCompletionSource<unit>(url)
+                    let completed =
+                        new AsyncCompletedEventHandler(fun cs ce ->
+                            if ce.UserState = (tcs :> obj) then
+                                if ce.Error <> null then tcs.TrySetException ce.Error |> ignore
+                                elif ce.Cancelled then tcs.TrySetCanceled() |> ignore
+                                else tcs.TrySetResult () |> ignore)
+                    let prog = new DownloadProgressChangedEventHandler(fun _ e -> progress(float32 e.ProgressPercentage / 100.0f))
+                    client.DownloadFileCompleted.AddHandler completed
+                    client.DownloadProgressChanged.AddHandler prog
+
+                    try 
+                        client.DownloadFileAsync(new Uri(url), target, tcs)
+                        do! tcs.Task |> Async.AwaitTask
+
+                        if isNull tcs.Task.Exception then return true
+                        else
+                            Logging.Error("Failed to download file from " + url, tcs.Task.Exception)
+                            return false
+
+                    with err ->
                         Logging.Error("Failed to download file from " + url, err)
                         return false
                 }
