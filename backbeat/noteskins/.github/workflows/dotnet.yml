@@ -13,7 +13,10 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Checkout Prelude
-      run: git clone --depth 1 https://github.com/YAVSRG/Prelude.git
+      run: |
+        cd ..
+        git clone --depth 1 https://github.com/YAVSRG/Prelude.git
+        cd Interlude.Noteskins
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
@@ -24,7 +27,9 @@ jobs:
       run: dotnet restore
       
     - name: Build & Run
-      run: dotnet run
+      run: |
+        cd Tools
+        dotnet run
 
     - name: Update repo
       run: git status --porcelain
