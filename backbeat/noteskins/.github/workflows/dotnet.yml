@@ -11,6 +11,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Checkout Prelude
+      run: git clone --depth 1 https://github.com/YAVSRG/Prelude.git
     
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
