@@ -9,7 +9,7 @@ open SixLabors.ImageSharp.Processing
 let check_noteskin_textures(ns: Noteskin) =
     for tex in Storage.noteskinTextures do
         match ns.GetTexture tex with
-        | Some (img, config) -> ()
+        | Some _ -> ()
         | None -> printfn "Missing texture: %s" tex
 
 let generate_preview(ns: Noteskin, target_file: string) =
@@ -117,9 +117,15 @@ let generate_preview(ns: Noteskin, target_file: string) =
 
     img.SaveAsPng target_file
 
-let root = "../../../../"
+let root = 
+    let dir = Path.GetFileName(Directory.GetCurrentDirectory())
+    match dir with
+    | "Tools" -> "../"
+    | _ -> "../../../../" // run from bin/net6.0 
 
 let skins = ResizeArray<Noteskin.RepoEntry>()
+
+Path.Combine(root, "Noteskins") |> Path.GetFullPath |> printfn "%s"
 
 for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) do
     let filename = Path.GetFileName noteskin_file
@@ -145,4 +151,5 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) d
 printfn "Generating index.json ..."
 let repo : Noteskin.Repo = { Noteskins = List.ofSeq skins }
 JSON.ToFile (Path.Combine(root, "index.json"), true) repo
-printfn "Generating index.md ..."
+
+//printfn "Generating index.html ..."
