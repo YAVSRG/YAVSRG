@@ -15,7 +15,7 @@ type NoteskinCard(data: RepoEntry) as this =
             
     let mutable downloaded = Noteskins.list() |> Array.map snd |> Array.contains data.Name
     let download() =
-        let target = Path.Combine(getDataPath("Noteskins"), System.Guid.NewGuid().ToString() + ".isk")
+        let target = Path.Combine(getDataPath "Noteskins", System.Guid.NewGuid().ToString() + ".isk")
         WebServices.download_file.Request((data.Download, target, ignore), 
             fun success -> 
                 if success then 

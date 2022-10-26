@@ -158,4 +158,4 @@ module Beatmaps =
             )
         StaticContainer(NodeType.Switch(K searchContainer))
         |+ searchContainer
-        |+ Text("(Interlude is not affiliated with osu!, these downloads are provided through unofficial APIs)", Position = Position.SliceBottom(60.0f))
+        |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom(60.0f))

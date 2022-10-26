@@ -78,19 +78,19 @@ type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Servi
 type ImportScreen() as this =
     inherit Screen()
 
-    do
-        let container = SwapContainer(Position = Position.TrimLeft(400.0f).Margin(200.0f, 20.0f), Current = Mounts.tab)
-        let tabs = 
-            FlowContainer.Vertical<Widget>(80.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
-            |+ TabButton(Icons.import_local, "Local imports", container, Mounts.tab)
-            |+ TabButton(Icons.import_etterna, "Etterna packs", container, EtternaPacks.tab)
-            |+ TabButton(Icons.import_osu, "osu!mania songs", container, Beatmaps.tab)
-            |+ TabButton(Icons.import_noteskin, "Noteskins", container, Noteskins.tab)
-            |+ ServiceStatus("Loading", WebServices.download_string)
-            |+ ServiceStatus("Downloading", WebServices.download_file)
-            |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
-            |+ ServiceStatus("Recaching", Library.recache_service)
+    let container = SwapContainer(Position = Position.TrimLeft(400.0f).Margin(200.0f, 20.0f), Current = Mounts.tab)
+    let tabs = 
+        FlowContainer.Vertical<Widget>(80.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
+        |+ TabButton(Icons.import_local, "Local imports", container, Mounts.tab)
+        |+ TabButton(Icons.import_etterna, "Etterna packs", container, EtternaPacks.tab)
+        |+ TabButton(Icons.import_osu, "osu!mania songs", container, Beatmaps.tab)
+        |+ TabButton(Icons.import_noteskin, "Noteskins", container, Noteskins.tab)
+        |+ ServiceStatus("Loading", WebServices.download_string)
+        |+ ServiceStatus("Downloading", WebServices.download_file)
+        |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
+        |+ ServiceStatus("Recaching", Library.recache_service)
 
+    do
         this
         |* (
             SwitchContainer.Row<Widget>()
@@ -98,5 +98,5 @@ type ImportScreen() as this =
             |+ container
         )
 
-    override this.OnEnter _ = ()
+    override this.OnEnter _ = tabs.Focus()
     override this.OnExit _ = ()

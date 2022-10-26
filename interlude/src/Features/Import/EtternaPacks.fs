@@ -137,4 +137,4 @@ module EtternaPacks =
             )
         StaticContainer(NodeType.Switch(K searchContainer))
         |+ searchContainer
-        |+ Text("(Interlude is not affiliated with Etterna, these downloads are provided through their API)", Position = Position.SliceBottom(60.0f))
+        |+ Text(L"imports.disclaimer.etterna", Position = Position.SliceBottom(60.0f))

@@ -7,6 +7,7 @@ open Prelude.Common
 open Prelude.Charts.Formats.Conversions
 open Prelude.Data.Charts.Library.Imports
 open Interlude.Options
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -65,9 +66,9 @@ module Mounts =
         let text = 
             Text(
                 match mountType with
-                | Game.Osu -> "Drag your osu! Songs folder onto this window."
-                | Game.Stepmania -> "Drag your Stepmania packs folder onto this window."
-                | Game.Etterna -> "Drag your Etterna packs folder onto this window."
+                | Game.Osu -> L"imports.mount.create.osu.hint"
+                | Game.Stepmania -> L"imports.mount.create.stepmania.hint"
+                | Game.Etterna -> L"imports.mount.create.etterna.hint"
                 | _ -> failwith "impossible"
                 ,
                 Align = Alignment.CENTER,
@@ -75,7 +76,7 @@ module Mounts =
 
         let button =
             Button(
-                "Try to auto detect it",
+                L"imports.mount.create.auto",
                 (fun () ->
                     match mountType with
                     | Game.Osu -> osuSongFolder
@@ -90,11 +91,11 @@ module Mounts =
                 fun path ->
                     match mountType, path with
                     | Game.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack ("osu!", path) |> Some
-                    | Game.Osu, _ -> Notifications.add ("Should be the osu! 'Songs' folder itself - This doesn't look like it.", NotificationType.Error)
+                    | Game.Osu, _ -> Notifications.add (L"imports.mount.create.osu.error", NotificationType.Error)
                     | Game.Stepmania, FolderOfPacks
                     | Game.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
-                    | Game.Stepmania, _
-                    | Game.Etterna, _ -> Notifications.add ("Should be a Stepmania 'Songs' folder/pack library - This doesn't look like one.", NotificationType.Error)
+                    | Game.Stepmania, _ -> Notifications.add (L"imports.mount.create.stepmania.error", NotificationType.Error)
+                    | Game.Etterna, _ -> Notifications.add (L"imports.mount.create.etterna.error", NotificationType.Error)
                     | _ -> failwith "impossible"
                     if setting.Value.IsSome then this.Close()
                 |> Some
@@ -118,63 +119,68 @@ module Mounts =
             text.Init this
             button.Init this
 
-    type Control(mountType: Game, setting: Setting<MountedChartSource option>) =
-        inherit StaticWidget(NodeType.None)
+    type Control(mountType: Game, setting: Setting<MountedChartSource option>) as this =
+        inherit Frame(NodeType.Switch(fun _ -> this.WhoShouldFocus))
 
         let createButton = 
-            Button(Icons.add,
+            Button(sprintf "%s %s" Icons.import_local (L"imports.mount.create"),
                 (fun () -> CreateDialog(mountType, setting).Show()),
-                Position = { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f })
-        let editButton = 
-            Button(Icons.edit,
+                Position = Position.SliceBottom(50.0f))
+        let editButtons =
+            SwitchContainer.Row<Button>()
+            |+ Button(sprintf "%s %s" Icons.edit (L"imports.mount.edit"),
                 (fun () -> Menu.ShowPage(EditorPage setting)),
-                Position = { Left = 1.0f %- 120.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 60.0f; Bottom = 1.0f %+ 0.0f })
-        let deleteButton = 
-            Button(Icons.delete,
+                Position = { Left = Position.min; Top = 1.0f %- 50.0f; Right = 0.5f %+ 0.0f; Bottom = Position.max })
+            |+ Button(sprintf "%s %s" Icons.delete (L"imports.mount.delete"),
                 (fun () -> setting.Value <- None),
-                Position = { Left = 1.0f %- 60.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
-        let text = 
-            Text(
+                Position = { Left = 0.5f %+ 0.0f; Top = 1.0f %- 50.0f; Right = Position.max; Bottom = Position.max })
+
+        override this.Init(parent: Widget) =
+            this
+            |+ Text(
                 match mountType with
                 | Game.Osu -> "osu!mania"
                 | Game.Stepmania -> "Stepmania"
                 | Game.Etterna -> "Etterna"
                 | _ -> failwith "impossible"
                 ,
-                Position = Position.TrimRight 120.0f
-            )
-
-        override this.Init(parent: Widget) =
+                Position = Position.SliceTop 80.0f,
+                Align = Alignment.CENTER)
+            |* Text(
+                fun () -> 
+                    match setting.Value with
+                    | Some s -> Localisation.localiseWith [if s.LastImported = System.DateTime.UnixEpoch then "--" else s.LastImported.ToString()] "imports.mount.lastimported"
+                    | None -> L"imports.mount.notlinked"
+                ,
+                Color = Style.text_subheading,
+                Position = Position.SliceTop(145.0f).TrimTop(85.0f),
+                Align = Alignment.CENTER)
             base.Init parent
             createButton.Init this
-            editButton.Init this
-            deleteButton.Init this
-            text.Init this
+            editButtons.Init this
+
+        member private this.WhoShouldFocus : Widget =
+            if setting.Value.IsSome then editButtons else createButton
 
         override this.Update(elapsedTime, moved) =
-            if setting.Value.IsSome then
-                editButton.Update(elapsedTime, moved)
-                deleteButton.Update(elapsedTime, moved)
-            else
-                createButton.Update(elapsedTime, moved)
-            text.Update(elapsedTime, moved)
+            base.Update(elapsedTime, moved)
+            this.WhoShouldFocus.Update(elapsedTime, moved)
 
         override this.Draw() =
-            if setting.Value.IsSome then
-                editButton.Draw()
-                deleteButton.Draw()
-            else
-                createButton.Draw()
-            text.Draw()
+            base.Draw()
+            this.WhoShouldFocus.Draw()
 
     let tab =
-        StaticContainer(NodeType.None)
+        SwitchContainer.Column<Widget>()
         |+ Control(Game.Osu, options.OsuMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
+            Position = Position.Row(100.0f, 200.0f) )
         |+ Control(Game.Stepmania, options.StepmaniaMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
+            Position = Position.Row(320.0f, 200.0f) )
         |+ Control(Game.Etterna, options.EtternaMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
-        |+ Text("Import from game",
+            Position = Position.Row(540.0f, 200.0f) )
+        |+ Text(L"imports.mount",
             Align = Alignment.CENTER,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 150.0f, 250.0f, 50.0f))
+            Position = Position.Row(0.0f, 80.0f) )
+        |+ Text(L"imports.drag_and_drop_hint",
+            Align = Alignment.CENTER,
+            Position = Position.Row(740.0f, 80.0f) )
