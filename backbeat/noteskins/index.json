@@ -1,5 +1,9 @@
 {
     "Noteskins": [{
+        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/Wafles4.isk", 
+        "Name": "Wafles4", 
+        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/Wafles4.png"
+    }, {
         "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/AkaiHaato.isk", 
         "Name": "Akai Haato", 
         "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/AkaiHaato.png"
@@ -11,9 +15,5 @@
         "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/PurpleRain.isk", 
         "Name": "Purple Rain v1", 
         "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/PurpleRain.png"
-    }, {
-        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/Wafles4.isk", 
-        "Name": "Wafles4", 
-        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/Wafles4.png"
     }]
 }
