@@ -11,6 +11,7 @@ open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
+open Interlude.Utils
 open Interlude.Features
 
 // todo: good lord this file should be split
@@ -159,11 +160,11 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f })
 
-        |+ Button("Graph settings", ignore,
-            Position = { Left = 1.0f %- 420.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 220.0f; Bottom = 1.0f %- 15.0f })
-        |* Button("Watch replay",
+        |+ Button(sprintf "%s %s" Icons.edit (L"score.graph.settings"), ignore,
+            Position = { Left = 1.0f %- 620.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 320.0f; Bottom = 1.0f %- 15.0f })
+        |* Button(sprintf "%s %s" Icons.preview (L"score.watch_replay"),
             (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)),
-            Position = { Left = 1.0f %- 220.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f })
+            Position = { Left = 1.0f %- 320.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f })
 
     override this.Draw() =
         let halfh = this.Bounds.CenterY
@@ -187,7 +188,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 if pb = PersonalBestType.None then
                     Text.drawFillB(Style.baseFont, existingPb, header.SliceBottom(35.0f), (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
                 else
-                    Text.drawFillB(Style.baseFont, Icons.sparkle + " New record! ", header.SliceBottom(35.0f), (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
+                    Text.drawFillB(Style.baseFont, sprintf "%s %s " Icons.sparkle (L"score.new_record"), header.SliceBottom(35.0f), (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
 
             infobar
                 bartop 
