@@ -4,20 +4,16 @@
 
 /publish
 /packages
-/src/bin
-/src/obj
-/Prelude/Prelude/bin
-/Prelude/Prelude/obj
+*/nupkg
+*/bin
+*/obj
 .ionide/symbolCache.db
 
 .vs
 .fake
 .ionide
 .editorconfig
+/nuget
+
 /src/Resources/FSharp.Formatting.Markdown.dll
 /src/Resources/FSharp.Formatting.Common.dll
-/tools/obj
-/tools/bin/Debug/netcoreapp3.1
-/tools/bin/Release/netcoreapp3.1
-/nuget
-/bin/Release

@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
+    <Compile Include="Features\Update.fs" />
     <Compile Include="Features\Releases.fs" />
     <Compile Include="Features\Assets.fs" />
     <None Include="Features\debug.bat">
@@ -24,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Percyqaz.Shell" Version="0.2.0" />
+    <PackageReference Include="Percyqaz.Shell" Version="0.3.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -32,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.5" />
+    <PackageReference Update="FSharp.Core" Version="6.0.6" />
   </ItemGroup>
 
 </Project>
