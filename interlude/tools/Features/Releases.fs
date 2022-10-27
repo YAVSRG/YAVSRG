@@ -2,6 +2,7 @@
 
 open Percyqaz.Shell
 open Interlude.Tools
+open Interlude.Tools.Utils
 
 module Releases =
 
@@ -9,7 +10,7 @@ module Releases =
     open System.Diagnostics
 
     let mutable current_version =
-        let file = Path.Combine(Utils.INTERLUDE, "Interlude.fsproj")
+        let file = Path.Combine(Utils.INTERLUDE_PATH, "Interlude.fsproj")
         let f = File.ReadAllText file
 
         let i = f.IndexOf "<AssemblyVersion>"
@@ -19,7 +20,7 @@ module Releases =
 
     let version (v: string) =
         printfn "Version: %s -> %s" current_version v
-        let file = Path.Combine(Utils.INTERLUDE, "Interlude.fsproj")
+        let file = Path.Combine(Utils.INTERLUDE_PATH, "Interlude.fsproj")
         let mutable f = File.ReadAllText file
 
         do
@@ -38,23 +39,19 @@ module Releases =
 
         current_version <- v
 
-    let build() =
-        Process.Start("Features/build.bat", current_version).WaitForExit()
-        printfn "DID YOU REMBER BASS.DLL?"
-        printfn "(todo: proper build system with the dlls)"
-        printfn "DID YOU REMBER BASS.DLL?"
-
-    let debug() =
-        Process.Start("Features/debug.bat").WaitForExit()
+    let build_win64() =
+        
+        Directory.SetCurrentDirectory(INTERLUDE_PATH)
+        exec "dotnet" "build --configuration Release /p:Platform=x64"
+        // copy lib
+        // zip it
+        // create release and upload assets
 
     let register(ctx: Context) : Context =
         ctx.WithCommand(
             "version",
             Command.create "Renames Interlude's version" ["new_version"] (Impl.Create (Types.str, version))
         ).WithCommand(
-            "release",
-            Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build)
-        ).WithCommand(
-            "debug",
-            Command.create "Build & debug Interlude" [] (Impl.Create debug)
+            "release_win64",
+            Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build_win64)
         )

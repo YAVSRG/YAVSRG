@@ -72,6 +72,6 @@ module Assets =
             "asset_script",
             Command.create "debug asset script" [] (Impl.Create user_script)
         ).WithCommand(
-            "bundle",
+            "bundle_assets",
             Command.create "Bundle all assets for build pipeline" [] (Impl.Create main)
         )

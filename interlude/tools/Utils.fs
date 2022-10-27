@@ -14,7 +14,7 @@ module Utils =
     let TOOLS_PATH = Path.Combine(YAVSRG_PATH, "Interlude", "tools")
     let ASSETS_PATH = Path.Combine(YAVSRG_PATH, "Interlude", "assets")
     let BUILD_RESOURCES_PATH = Path.Combine(YAVSRG_PATH, "Interlude", "src", "Resources")
-    let INTERLUDE = Path.Combine(YAVSRG_PATH, "Interlude", "src")
+    let INTERLUDE_PATH = Path.Combine(YAVSRG_PATH, "Interlude", "src")
 
     let exec (cmd: string) (args: string) =
         Process.Start(ProcessStartInfo(cmd, args)).WaitForExit()

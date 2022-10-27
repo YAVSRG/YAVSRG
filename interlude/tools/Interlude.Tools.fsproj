@@ -12,12 +12,9 @@
 
   <ItemGroup>
     <Compile Include="Utils.fs" />
-    <Compile Include="Features\Update.fs" />
+    <Compile Include="Features\Check.fs" />
     <Compile Include="Features\Releases.fs" />
     <Compile Include="Features\Assets.fs" />
-    <None Include="Features\debug.bat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Features\build.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

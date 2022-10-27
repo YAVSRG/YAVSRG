@@ -4,6 +4,7 @@ open Interlude.Tools.Features
 
 let ctx =
     Context.Empty
+    |> Check.register
     |> Assets.register
     |> Releases.register
 
