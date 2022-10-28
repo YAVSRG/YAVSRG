@@ -15,6 +15,3 @@
 .ionide
 .editorconfig
 /nuget
-
-/src/Resources/FSharp.Formatting.Markdown.dll
-/src/Resources/FSharp.Formatting.Common.dll
