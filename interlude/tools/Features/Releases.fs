@@ -48,10 +48,10 @@ module Releases =
     let build_win64() =
         
         Directory.SetCurrentDirectory(INTERLUDE_SOURCE_PATH)
-        exec "dotnet" "clean --configuration Release /p:Platform=x64"
-        exec "dotnet" "build --configuration Release /p:Platform=x64"
+        exec "dotnet" "clean --configuration Release -r win-x64"
+        exec "dotnet" "publish --configuration Release -r win-x64 -p:PublishSingleFile=True --self-contained false"
 
-        let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "x64", "Release", "netcoreapp3.1")
+        let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "netcoreapp3.1", "win-x64")
         let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", sprintf "Interlude.%s-win64" current_version)
         try Directory.Delete(clean_dir, true) with _ -> ()
         Directory.CreateDirectory(clean_dir) |> ignore
@@ -63,16 +63,12 @@ module Releases =
                 | ".dll"
                 | ".so"
                 | ".dylib"
-                | ".txt"
-                | ".exe" -> File.Copy(file, Path.Combine(target, Path.GetFileName file))
+                | ".txt" -> File.Copy(file, Path.Combine(target, Path.GetFileName file))
                 | _ -> ()
 
         File.Copy(Path.Combine(YAVSRG_PATH, "Percyqaz.Flux", "lib", "win-x64", "bass.dll"), Path.Combine(clean_dir, "bass.dll"))
-        File.Copy(Path.Combine(build_dir, "Interlude.deps.json"), Path.Combine(clean_dir, "Interlude.deps.json"))
-        File.Copy(Path.Combine(build_dir, "Interlude.runtimeconfig.json"), Path.Combine(clean_dir, "Interlude.runtimeconfig.json"))
-        copy build_dir clean_dir
+        File.Copy(Path.Combine(build_dir, "publish", "Interlude.exe"), Path.Combine(clean_dir, "Interlude.exe"))
         copy (Path.Combine(build_dir, "Locale")) (Path.Combine(clean_dir, "Locale"))
-        copy (Path.Combine(build_dir, "runtimes", "win-x64", "native")) (Path.Combine(clean_dir, "runtimes", "win-x64", "native"))
 
         printfn "Outputted to: %s" clean_dir
         ZipFile.CreateFromDirectory(clean_dir, clean_dir + ".zip")
