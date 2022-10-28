@@ -17,7 +17,14 @@ module Releases =
 
         f.Substring(i, j - i).Substring("<AssemblyVersion>".Length)
 
-    let version (v: string) =
+    let change_version (v: string) =
+
+        let changelog = Path.Combine(YAVSRG_PATH, "Interlude", "docs", "changelog.md")
+        let logtxt = File.ReadAllText(changelog)
+        let latest = logtxt.Split(current_version + "\r\n" + "====", 2)[0]
+        if latest.Trim() = "" then failwithf "No changelog for new version: %s! Create this first" v
+        File.WriteAllText(Path.Combine(YAVSRG_PATH, "Interlude", "docs", "changelog-latest.md"), latest)
+
         printfn "Version: %s -> %s" current_version v
         let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
         let mutable f = File.ReadAllText file
@@ -70,13 +77,11 @@ module Releases =
         printfn "Outputted to: %s" clean_dir
         ZipFile.CreateFromDirectory(clean_dir, clean_dir + ".zip")
         printfn "Zipped to: %s.zip" clean_dir
-        
-        // create release and upload assets
 
     let register(ctx: Context) : Context =
         ctx.WithCommand(
             "version",
-            Command.create "Renames Interlude's version" ["new_version"] (Impl.Create (Types.str, version))
+            Command.create "Renames Interlude's version" ["new_version"] (Impl.Create (Types.str, change_version))
         ).WithCommand(
             "release_win64",
             Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build_win64)

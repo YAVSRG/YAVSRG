@@ -15,9 +15,6 @@
     <Compile Include="Features\Check.fs" />
     <Compile Include="Features\Releases.fs" />
     <Compile Include="Features\Assets.fs" />
-    <None Include="Features\build.bat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <Compile Include="Program.fs" />
   </ItemGroup>
 
