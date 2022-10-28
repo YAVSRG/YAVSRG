@@ -52,7 +52,7 @@ module Releases =
         exec "dotnet" "build --configuration Release /p:Platform=x64"
 
         let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "x64", "Release", "netcoreapp3.1")
-        let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", current_version)
+        let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", sprintf "Interlude.%s-win64" current_version)
         try Directory.Delete(clean_dir, true) with _ -> ()
         Directory.CreateDirectory(clean_dir) |> ignore
 
@@ -81,7 +81,10 @@ module Releases =
     let register(ctx: Context) : Context =
         ctx.WithCommand(
             "version",
-            Command.create "Renames Interlude's version" ["new_version"] (Impl.Create (Types.str, change_version))
+            Command.create "Displays the current version of Interlude" [] (Impl.Create (fun () -> printfn "%s" current_version))
+        ).WithCommand(
+            "publish_version",
+            Command.create "Publishes a new version of Interlude" ["new_version"] (Impl.Create (Types.str, change_version))
         ).WithCommand(
             "release_win64",
             Command.create "Build an Interlude release and zip it for upload" [] (Impl.Create build_win64)
