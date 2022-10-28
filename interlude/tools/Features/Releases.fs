@@ -1,16 +1,15 @@
 ﻿namespace Interlude.Tools.Features
 
 open Percyqaz.Shell
-open Interlude.Tools
 open Interlude.Tools.Utils
 
 module Releases =
 
     open System.IO
-    open System.Diagnostics
+    open System.IO.Compression
 
     let mutable current_version =
-        let file = Path.Combine(Utils.INTERLUDE_PATH, "Interlude.fsproj")
+        let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
         let f = File.ReadAllText file
 
         let i = f.IndexOf "<AssemblyVersion>"
@@ -20,7 +19,7 @@ module Releases =
 
     let version (v: string) =
         printfn "Version: %s -> %s" current_version v
-        let file = Path.Combine(Utils.INTERLUDE_PATH, "Interlude.fsproj")
+        let file = Path.Combine(INTERLUDE_SOURCE_PATH, "Interlude.fsproj")
         let mutable f = File.ReadAllText file
 
         do
@@ -41,10 +40,37 @@ module Releases =
 
     let build_win64() =
         
-        Directory.SetCurrentDirectory(INTERLUDE_PATH)
+        Directory.SetCurrentDirectory(INTERLUDE_SOURCE_PATH)
+        exec "dotnet" "clean --configuration Release /p:Platform=x64"
         exec "dotnet" "build --configuration Release /p:Platform=x64"
-        // copy lib
-        // zip it
+
+        let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "x64", "Release", "netcoreapp3.1")
+        let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", current_version)
+        try Directory.Delete(clean_dir, true) with _ -> ()
+        Directory.CreateDirectory(clean_dir) |> ignore
+
+        let rec copy source target =
+            Directory.CreateDirectory target |> ignore
+            for file in Directory.GetFiles source do
+                match Path.GetExtension(file).ToLower() with
+                | ".dll"
+                | ".so"
+                | ".dylib"
+                | ".txt"
+                | ".exe" -> File.Copy(file, Path.Combine(target, Path.GetFileName file))
+                | _ -> ()
+
+        File.Copy(Path.Combine(YAVSRG_PATH, "Percyqaz.Flux", "lib", "win-x64", "bass.dll"), Path.Combine(clean_dir, "bass.dll"))
+        File.Copy(Path.Combine(build_dir, "Interlude.deps.json"), Path.Combine(clean_dir, "Interlude.deps.json"))
+        File.Copy(Path.Combine(build_dir, "Interlude.runtimeconfig.json"), Path.Combine(clean_dir, "Interlude.runtimeconfig.json"))
+        copy build_dir clean_dir
+        copy (Path.Combine(build_dir, "Locale")) (Path.Combine(clean_dir, "Locale"))
+        copy (Path.Combine(build_dir, "runtimes", "win-x64", "native")) (Path.Combine(clean_dir, "runtimes", "win-x64", "native"))
+
+        printfn "Outputted to: %s" clean_dir
+        ZipFile.CreateFromDirectory(clean_dir, clean_dir + ".zip")
+        printfn "Zipped to: %s.zip" clean_dir
+        
         // create release and upload assets
 
     let register(ctx: Context) : Context =

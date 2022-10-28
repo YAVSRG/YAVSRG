@@ -19,7 +19,7 @@ module Check =
     let check_locale(name: string) =
         let locale = 
             let mapping = new Dictionary<string, string>()
-            let path = Path.Combine (INTERLUDE_PATH, "Locale", name + ".txt")
+            let path = Path.Combine (INTERLUDE_SOURCE_PATH, "Locale", name + ".txt")
             let lines = File.ReadAllLines path
             Array.iter(
                 fun (l: string) ->
@@ -35,7 +35,7 @@ module Check =
                     for m in Regex(reg.Trim()).Matches(input) do
                         yield (m.Groups.[1].Value)
                 }
-            for file_contents in walk_fs_files INTERLUDE_PATH do
+            for file_contents in walk_fs_files INTERLUDE_SOURCE_PATH do
 
                 for m in matches """ L"([a-z\-_\.]*)" """ file_contents do
                     found.Add m

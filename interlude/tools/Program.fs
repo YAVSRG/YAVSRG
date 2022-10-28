@@ -10,12 +10,12 @@ let ctx =
 
 [<EntryPoint>]
 let main argv =
-    printfn "Path: %s" Utils.YAVSRG_PATH
     if argv.Length > 0 then
         match ctx.Interpret(String.concat " " argv) with
         | Ok _ -> ()
         | ParseFail err -> printfn "%A" err
         | RunFail err -> raise err
     else
+        printfn "== Interlude Tools CLI =="
         Shell.basic_repl ctx
     0
