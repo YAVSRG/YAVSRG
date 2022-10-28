@@ -11,7 +11,7 @@
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon></PackageIcon>
-    <Win32Resource>C:\Users\percy\Desktop\Source\YAVSRG\Interlude\src\Resources\icon.res</Win32Resource>
+    <Win32Resource>Resources\icon.res</Win32Resource>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
