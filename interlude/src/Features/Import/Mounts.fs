@@ -125,15 +125,15 @@ module Mounts =
         let createButton = 
             Button(sprintf "%s %s" Icons.import_local (L"imports.mount.create"),
                 (fun () -> CreateDialog(mountType, setting).Show()),
-                Position = Position.SliceBottom(50.0f))
+                Position = Position.SliceBottom(60.0f).Margin 5.0f)
         let editButtons =
-            SwitchContainer.Row<Button>()
+            SwitchContainer.Row<Button>(Position = Position.SliceBottom(60.0f).Margin 5.0f)
             |+ Button(sprintf "%s %s" Icons.edit (L"imports.mount.edit"),
                 (fun () -> Menu.ShowPage(EditorPage setting)),
-                Position = { Left = Position.min; Top = 1.0f %- 50.0f; Right = 0.5f %+ 0.0f; Bottom = Position.max })
+                Position = { Position.Default with Right = 0.5f %+ 0.0f })
             |+ Button(sprintf "%s %s" Icons.delete (L"imports.mount.delete"),
                 (fun () -> setting.Value <- None),
-                Position = { Left = 0.5f %+ 0.0f; Top = 1.0f %- 50.0f; Right = Position.max; Bottom = Position.max })
+                Position = { Position.Default with Left = 0.5f %+ 0.0f })
 
         override this.Init(parent: Widget) =
             this
