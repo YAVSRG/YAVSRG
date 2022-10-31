@@ -314,6 +314,7 @@ type Theme(storage) as this =
         }
 
     member this.GetGameplayConfig<'T> (name: string) = this.GetJsonOrDefault<'T> (true, "Interface", "Gameplay", name + ".json")
+    member this.SetGameplayConfig<'T> (name: string, value: 'T) = this.WriteJson<'T> (value, "Interface", "Gameplay", name + ".json")
         
     static member FromZipFile (file: string) = 
         let stream = File.OpenRead file
