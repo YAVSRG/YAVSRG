@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI.Menu
 
-open System
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -8,7 +7,6 @@ open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
 
 type Divider() =
     inherit StaticWidget(NodeType.None)
@@ -117,7 +115,7 @@ type PrettyButton(name, action) as this =
 
 type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
     inherit StaticWidget(NodeType.Switch(fun _ -> this._selector()))
-    
+
     let selector = PrettySetting(name, Selector<int>(Array.indexed cases, setting)).Pos(200.0f)
 
     member this._selector() = selector
@@ -181,3 +179,96 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
         for case in controls do
             for control in case do
                  control.Init this
+
+type ColorPicker(s: Setting<Color>, allowAlpha: bool) as this =
+    inherit StaticContainer(NodeType.Switch(fun _ -> this.HexEditor))
+
+    let (H, S, V) = s.Value.ToHsv()
+    let mutable H = H
+    let mutable S = S
+    let mutable V = V
+    let mutable A = if allowAlpha then float32 s.Value.A / 255.0f else 1.0f
+
+    let hex = 
+        Setting.simple (s.Value.ToHex())
+        |> Setting.trigger (fun color -> 
+            try 
+                s.Value <- Color.FromHex color
+                let (h, s, v) = s.Value.ToHsv()
+                H <- h
+                S <- s
+                V <- v
+            with _ -> ())
+
+    let hexEditor = 
+        { new TextEntry(hex, "none", Position = Position.TrimLeft(50.0f).SliceTop PRETTYHEIGHT) with
+            override this.OnDeselected() = 
+                base.OnDeselected()
+                hex.Value <- s.Value.ToHex()
+        }
+
+    let s = Setting.trigger (fun (c: Color) -> hex.Value <- c.ToHex()) s
+
+    do this.Add hexEditor
+
+    member private this.HexEditor = hexEditor
+
+    override this.Draw() =
+        base.Draw()
+
+        let preview = this.Bounds.SliceTop(PRETTYHEIGHT).SliceLeft(50.0f).Shrink(5.0f)
+
+        let saturation_value_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(200.0f).Shrink(5.0f)
+        let hue_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(230.0f).TrimLeft(200.0f).Shrink(5.0f)
+        let alpha_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(260.0f).TrimLeft(230.0f).Shrink(5.0f)
+
+        Draw.rect preview s.Value
+        Draw.quad 
+            (Quad.ofRect saturation_value_picker)
+            (struct (Color.White, Color.FromHsv(H, 1.0f, 1.0f), Color.Black, Color.Black))
+            Sprite.DefaultQuad
+        let x = saturation_value_picker.Left + S * saturation_value_picker.Width
+        let y = saturation_value_picker.Bottom - V * saturation_value_picker.Height
+        Draw.rect (Rect.Create (x - 2.5f, y - 2.5f, x + 2.5f, y + 2.5f)) Color.White
+
+        let h = hue_picker.Height / 6.0f
+        for i = 0 to 5 do
+            let a = Color.FromHsv(float32 i / 6.0f, 1.0f, 1.0f)
+            let b = Color.FromHsv((float32 i + 1.0f) / 6.0f, 1.0f, 1.0f)
+            Draw.quad 
+                (Quad.ofRect (Rect.Box(hue_picker.Left, hue_picker.Top + h * float32 i, hue_picker.Width, h)))
+                (struct (a, a, b, b))
+                Sprite.DefaultQuad
+        Draw.rect (Rect.Box (hue_picker.Left, hue_picker.Top + H * (hue_picker.Height - 5.0f), hue_picker.Width, 5.0f)) Color.White
+
+        if allowAlpha then
+            Draw.quad 
+                (Quad.ofRect alpha_picker)
+                (struct (Color.FromArgb(0, s.Value), Color.FromArgb(0, s.Value), s.Value, s.Value))
+                Sprite.DefaultQuad
+            Draw.rect (Rect.Box (alpha_picker.Left, alpha_picker.Top + A * (alpha_picker.Height - 5.0f), alpha_picker.Width, 5.0f)) Color.White
+
+    override this.Update(elapsedTime, moved) =
+
+        base.Update(elapsedTime, moved)
+        
+        let saturation_value_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(200.0f).Shrink(5.0f)
+        let hue_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(230.0f).TrimLeft(200.0f).Shrink(5.0f)
+        let alpha_picker = this.Bounds.TrimTop(PRETTYHEIGHT).SliceLeft(260.0f).TrimLeft(230.0f).Shrink(5.0f)
+
+        if Mouse.hover saturation_value_picker && Mouse.held Mouse.LEFT then
+            let x, y = Mouse.pos()
+            S <- (x - saturation_value_picker.Left) / saturation_value_picker.Width
+            V <- 1.0f - (y - saturation_value_picker.Top) / saturation_value_picker.Height
+            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+
+        elif Mouse.hover hue_picker && Mouse.held Mouse.LEFT then
+            let y = Mouse.y()
+            H <- (y - hue_picker.Top) / hue_picker.Height
+            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+
+        elif Mouse.hover alpha_picker && Mouse.held Mouse.LEFT then
+            let y = Mouse.y()
+            A <- (y - alpha_picker.Top) / alpha_picker.Height
+            s.Value <- Color.FromArgb(int (A * 255.0f), Color.FromHsv(H, S, V))
+        

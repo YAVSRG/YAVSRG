@@ -89,6 +89,7 @@ module Gameplay =
                 |+ PrettySetting("gameplay.screencover.hidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Pos(350.0f)
                 |+ PrettySetting("gameplay.screencover.sudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Pos(450.0f)
                 |+ PrettySetting("gameplay.screencover.fadelength", Slider(options.ScreenCover.FadeLength, 0.01f)).Pos(550.0f)
+                |+ PrettySetting("gameplay.screencover.color", ColorPicker(options.ScreenCover.Color, true)).Pos(650.0f, PRETTYWIDTH, PRETTYHEIGHT * 2.0f)
                 |+ preview
             )
         override this.Title = N"gameplay.screencover"

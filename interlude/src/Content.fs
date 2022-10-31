@@ -94,25 +94,30 @@ module Content =
 
                 let private cache = Dictionary<string, obj>()
 
-                let private add<'T>() =
+                let private load<'T>() =
                     let id = typeof<'T>.Name
                     cache.Remove(id) |> ignore
                     cache.Add(id, instance.GetGameplayConfig<'T> id)
 
                 let reload() =
-                    add<AccuracyMeter>()
-                    add<HitMeter>()
-                    add<LifeMeter>()
-                    add<Combo>()
-                    add<SkipButton>()
-                    add<ProgressMeter>()
-                    add<JudgementMeter>()
+                    load<AccuracyMeter>()
+                    load<HitMeter>()
+                    load<LifeMeter>()
+                    load<Combo>()
+                    load<SkipButton>()
+                    load<ProgressMeter>()
+                    load<JudgementMeter>()
             
                 let get<'T>() = 
                     let id = typeof<'T>.Name
                     if cache.ContainsKey id then
                         cache.[id] :?> 'T
                     else failwithf "config not loaded: %s" id
+
+                let set<'T>(value: 'T) =
+                    let id = typeof<'T>.Name
+                    cache.[id] <- value
+                    instance.SetGameplayConfig<'T>(id, value)
 
             let changeConfig(new_config: ThemeConfig) =
                 instance.Config <- new_config
