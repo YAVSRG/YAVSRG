@@ -82,6 +82,7 @@ type Slider<'T>(setting: Setting.Bounded<'T>, stepPercentage: float32) as this =
     member val Format = (fun x -> x.ToString()) with get, set
 
     static member Percent(setting, incr) = Slider<float>(setting, incr, Format = fun x -> sprintf "%.0f%%" (x * 100.0))
+    static member Percent(setting, incr) = Slider<float32>(setting, incr, Format = fun x -> sprintf "%.0f%%" (x * 100.0f))
 
     override this.OnSelected() = base.OnSelected(); color.Target <- 1.0f
     override this.OnDeselected() = base.OnDeselected(); color.Target <- 0.5f
