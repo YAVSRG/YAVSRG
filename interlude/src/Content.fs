@@ -106,7 +106,7 @@ module Content =
                     load<Combo>()
                     load<SkipButton>()
                     load<ProgressMeter>()
-                    load<JudgementMeter>()
+                    //load<JudgementMeter>()
             
                 let get<'T>() = 
                     let id = typeof<'T>.Name
