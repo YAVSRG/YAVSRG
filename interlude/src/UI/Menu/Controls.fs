@@ -22,7 +22,6 @@ type PrettySetting(name, widget: Widget) as this =
     inherit StaticContainer(NodeType.Switch (fun _ -> this.Child))
 
     let mutable widget = widget
-    let mutable _height = PRETTYHEIGHT
 
     member this.Child
         with get() = widget
@@ -35,7 +34,6 @@ type PrettySetting(name, widget: Widget) as this =
                 if old_widget.Focused then w.Focus()
     
     member this.Pos(y, width, height) =
-        _height <- height
         this.Position <- Position.Box(0.0f, 0.0f, 100.0f, y, width, height) 
         this
     
@@ -48,7 +46,7 @@ type PrettySetting(name, widget: Widget) as this =
             K (N name + ":"),
             Color = (fun () -> ((if this.Selected then Style.color(255, 1.0f, 0.2f) else Color.White), Color.Black)),
             Align = Alignment.LEFT,
-            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH, _height).Margin(Style.padding))
+            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT).Margin(Style.padding))
         |* TooltipRegion(T name)
         base.Init parent
         widget.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.padding)

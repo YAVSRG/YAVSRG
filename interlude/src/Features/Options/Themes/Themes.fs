@@ -2,67 +2,12 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
-open Percyqaz.Flux.Graphics
 open Prelude.Common
-open Prelude.Scoring
 open Prelude.Data.Themes
 open Interlude.Content
 open Interlude.Utils
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.Features
-open Interlude.Features.Play
-
-type NoteskinPreview(scale: float32) as this =
-    inherit StaticContainer(NodeType.None)
-
-    let fbo = FBO.create()
-
-    let createRenderer() =
-        match Gameplay.Chart.current with
-        | Some chart -> 
-            let nr = NoteRenderer(Metrics.createDummyMetric chart)
-            nr.Add(GameplayWidgets.ScreenCover())
-            if this.Initialised then nr.Init this
-            nr :> Widget
-        | None -> new Dummy()
-
-    let mutable renderer = createRenderer()
-
-
-    let w = Viewport.vwidth * scale
-    let h = Viewport.vheight * scale
-    let bounds_placeholder =
-        StaticContainer(NodeType.None,
-            Position = { Left = 1.0f %- (50.0f + w); Top = 0.5f %- (h * 0.5f); Right = 1.0f %- 50.0f; Bottom = 0.5f %+ (h * 0.5f) })
-
-    do
-        fbo.Unbind()
-
-        this
-        |* ( bounds_placeholder |+  Text("PREVIEW", Position = { Position.Default with Top = 1.0f %+ 0.0f; Bottom = 1.0f %+ 50.0f } ) )
-
-    member this.Refresh() =
-        Gameplay.Chart.recolor()
-        renderer <- createRenderer()
-
-    override this.Update(elapsedTime, moved) =
-        renderer.Update(elapsedTime, moved)
-        base.Update(elapsedTime, moved)
-
-    override this.Draw() =
-        fbo.Bind true
-        renderer.Draw()
-        fbo.Unbind()
-        Draw.sprite bounds_placeholder.Bounds Color.White fbo.sprite
-        base.Draw()
-
-    override this.Init(parent: Widget) =
-        base.Init parent
-        renderer.Init this
-
-    member this.Destroy() =
-        fbo.Dispose()
 
 type ThemesPage() as this =
     inherit Page()

@@ -50,6 +50,11 @@ module Icons =
     let binds = Feather.link
     let debug = Feather.terminal
 
+    let anchor = Feather.anchor
+    let move = Feather.move
+    let grow = Feather.maximize_2
+    let shrink = Feather.minimize_2
+
     let info = Feather.info
     let alert = Feather.alert_circle
     let system_notification = Feather.alert_octagon

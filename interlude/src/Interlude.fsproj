@@ -86,6 +86,7 @@
     <Compile Include="Features\Import\Noteskins.fs" />
     <Compile Include="Features\Import\Import.fs" />
     <Compile Include="Features\Options\System.fs" />
+    <Compile Include="Features\Options\Themes\Preview.fs" />
     <Compile Include="Features\Options\Themes\EditNoteskin.fs" />
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Themes\Themes.fs" />
