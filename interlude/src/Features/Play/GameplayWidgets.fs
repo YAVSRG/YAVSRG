@@ -97,7 +97,8 @@ module GameplayWidgets =
                     match hit.Judgement with
                     | None -> Color.FromArgb(Math.Clamp(127 - int (127.0f * (now - hit.Time) / conf.AnimationTime), 0, 127), Color.Silver)
                     | Some j -> Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - hit.Time) / conf.AnimationTime), 0, 255), helper.ScoringConfig.JudgementColor j)
-                Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
+                if conf.ShowNonJudgements || hit.Judgement.IsSome then
+                    Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
 
     // disabled for now
     type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =

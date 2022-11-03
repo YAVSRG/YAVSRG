@@ -21,7 +21,7 @@ module private Helpers =
         override this.Init(parent) =
             base.Init parent
             this
-            |+ Text(icon)
+            |+ Text(icon, Align = Alignment.LEFT)
             |* Clickable.Focus this
 
         override this.Update(elapsedTime, moved) =
@@ -44,12 +44,12 @@ module private Helpers =
             "themes.edittheme.gameplay.generic.enable",
             Selector<_>.FromBool(
                 Setting.make (fun v -> setting.Set { setting.Value with Enabled = v } ) (fun () -> setting.Value.Enabled)
-            ) ).Pos(200.0f)
+            ) ).Pos(100.0f)
         |+ PrettySetting(
             "themes.edittheme.gameplay.generic.float",
             Selector<_>.FromBool(
                 Setting.make (fun v -> setting.Set { setting.Value with Float = v } ) (fun () -> setting.Value.Float)
-            ) ).Pos(300.0f)
+            ) ).Pos(180.0f)
 
         |+ PrettySetting(
             "themes.edittheme.gameplay.generic.move",
@@ -74,7 +74,7 @@ module private Helpers =
                         Left = setting.Value.Left + 5.0f
                         Right = setting.Value.Right + 5.0f
                     } |> setting.Set
-            } ).Pos(380.0f)
+            } ).Pos(260.0f)
         
         |+ PrettySetting(
             "themes.edittheme.gameplay.generic.grow",
@@ -95,7 +95,7 @@ module private Helpers =
                     { setting.Value with 
                         Right = setting.Value.Right + 5.0f
                     } |> setting.Set
-            } ).Pos(460.0f)
+            } ).Pos(340.0f)
 
         |+ PrettySetting(
             "themes.edittheme.gameplay.generic.shrink",
@@ -116,12 +116,12 @@ module private Helpers =
                     { setting.Value with 
                         Left = setting.Value.Left + 5.0f
                     } |> setting.Set
-            } ).Pos(540.0f)
+            } ).Pos(420.0f)
         
         |+ PrettyButton(
             "themes.edittheme.gameplay.generic.reset",
             fun () -> setting.Value <- { default_pos with Enabled = setting.Value.Enabled }
-           ).Pos(620.0f)
+           ).Pos(500.0f)
 
 type EditAccuracyMeterPage() as this =
     inherit Page()
@@ -146,10 +146,10 @@ type EditAccuracyMeterPage() as this =
             positionEditor pos default_pos
             |+ PrettySetting(
                 "themes.edittheme.gameplay.accuracymeter.gradecolors",
-                Selector<_>.FromBool grade_colors ).Pos(720.0f)
+                Selector<_>.FromBool grade_colors ).Pos(600.0f)
             |+ PrettySetting(
                 "themes.edittheme.gameplay.accuracymeter.showname",
-                Selector<_>.FromBool show_name ).Pos(800.0f)
+                Selector<_>.FromBool show_name ).Pos(680.0f)
             |+ preview
         )
 
@@ -163,6 +163,62 @@ type EditAccuracyMeterPage() as this =
                 ShowName = show_name.Value
             }
 
+type EditHitMeterPage() as this =
+    inherit Page()
+
+    let data = Themes.Current.GameplayConfig.get<HitMeter>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = AccuracyMeter.Default.Position
+
+    let show_guide = Setting.simple data.ShowGuide
+    let show_non_judgements = Setting.simple data.ShowNonJudgements
+    let thickness = Setting.simple data.Thickness |> Setting.bound 5.0f 25.0f
+    let release_thickness = Setting.simple data.ReleasesExtraHeight |> Setting.bound 0.0f 20.0f
+    let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0f 2000.0f
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Draw.rect
+                    (Rect.Create(bounds.CenterX - thickness.Value / 2.0f, bounds.Top, bounds.CenterX + thickness.Value / 2.0f, bounds.Bottom))
+                    Color.White
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.hitmeter.showguide",
+                Selector<_>.FromBool show_guide ).Pos(600.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.hitmeter.shownonjudgements",
+                Selector<_>.FromBool show_non_judgements ).Pos(680.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.hitmeter.thickness",
+                Slider<float32>(thickness, 0.1f) ).Pos(760.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.hitmeter.releasesextraheight",
+                Slider<float32>(release_thickness, 0.1f) ).Pos(840.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.hitmeter.animationtime",
+                Slider<float32>(animation_time, 0.1f) ).Pos(900.0f)
+            |+ preview
+        )
+
+    override this.Title = N"themes.edittheme.gameplay.hitmeter"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        Themes.Current.GameplayConfig.set<HitMeter>
+            { data with
+                Position = pos.Value
+                ShowGuide = show_guide.Value
+                ShowNonJudgements = show_non_judgements.Value
+                Thickness = thickness.Value
+                ReleasesExtraHeight = release_thickness.Value
+                AnimationTime = animation_time.Value
+            }
+
 type EditGameplayConfigPage() as this =
     inherit Page()
 
@@ -170,7 +226,7 @@ type EditGameplayConfigPage() as this =
         this.Content(
             column()
             |+ PrettyButton("themes.edittheme.gameplay.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage).Pos(200.0f)
-            |+ PrettyButton("themes.edittheme.gameplay.hitmeter", ignore).Pos(280.0f)
+            |+ PrettyButton("themes.edittheme.gameplay.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage).Pos(280.0f)
             |+ PrettyButton("themes.edittheme.gameplay.lifemeter", ignore).Pos(360.0f)
             |+ PrettyButton("themes.edittheme.gameplay.combo", ignore).Pos(440.0f)
             |+ PrettyButton("themes.edittheme.gameplay.skipbutton", ignore).Pos(520.0f)
