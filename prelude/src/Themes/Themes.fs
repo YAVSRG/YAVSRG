@@ -130,7 +130,7 @@ module WidgetConfig =
         {
             Position: WidgetConfig
             Horizontal: bool
-            EndColor: Color
+            TipColor: Color
             FullColor: Color
             EmptyColor: Color
         }
@@ -150,7 +150,7 @@ module WidgetConfig =
                         BottomA = 1.0f
                     }
                 Horizontal = false
-                EndColor = Color.FromArgb(100, Color.Red)
+                TipColor = Color.FromArgb(100, Color.Red)
                 FullColor = Color.White
                 EmptyColor = Color.Red
             }
