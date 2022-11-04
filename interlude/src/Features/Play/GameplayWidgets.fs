@@ -186,8 +186,7 @@ module GameplayWidgets =
     type SkipButton(conf: WidgetConfig.SkipButton, helper) =
         inherit StaticWidget(NodeType.None)
 
-        // todo: localise
-        let text = sprintf "Press %O to skip" (!|"skip")
+        let text = Localisation.localiseWith [(!|"skip").ToString()] "play.skiphint"
         let mutable active = true
         
         let firstNote = offsetOf (Gameplay.Chart.colored().Notes.First.Value)

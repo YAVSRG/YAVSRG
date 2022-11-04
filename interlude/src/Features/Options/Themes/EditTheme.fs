@@ -317,6 +317,84 @@ type EditComboMeterPage() as this =
                 Growth = growth_amount.Value
             }
 
+type EditSkipButtonPage() as this =
+    inherit Page()
+
+    let data = Themes.Current.GameplayConfig.get<SkipButton>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = SkipButton.Default.Position
+
+    let preview_text = Localisation.localiseWith [(!|"skip").ToString()] "play.skiphint"
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.drawFillB(Style.baseFont, preview_text, bounds, Style.text(), Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ preview
+        )
+
+    override this.Title = N"themes.edittheme.gameplay.skipbutton"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        Themes.Current.GameplayConfig.set<SkipButton>
+            { data with Position = pos.Value }
+
+type EditProgressMeterPage() as this =
+    inherit Page()
+
+    let data = Themes.Current.GameplayConfig.get<ProgressMeter>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = ProgressMeter.Default.Position
+
+    let bar_color = Setting.simple data.BarColor
+    let glow_color = Setting.simple data.GlowColor
+    let bar_height = Setting.simple data.BarHeight |> Setting.bound 0.0f 100.0f
+    let glow_size = Setting.simple data.GlowSize |> Setting.bound 0.0f 20.0f
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                let bar = bounds.SliceTop(150.0f).SliceBottom(0.5f * bar_height.Value)
+                Draw.rect (bar.Expand glow_size.Value) (glow_color.Value)
+                Draw.rect bar bar_color.Value
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.progressmeter.barheight",
+                Slider(bar_height, 0.1f)).Pos(600.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.progressmeter.barcolor",
+                ColorPicker(bar_color, true) ).Pos(680.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.progressmeter.glowsize",
+                Slider(glow_size, 0.1f) ).Pos(800.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.progressmeter.glowcolor",
+                ColorPicker(glow_color, true) ).Pos(880.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ preview
+        )
+
+    override this.Title = N"themes.edittheme.gameplay.progressmeter"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        Themes.Current.GameplayConfig.set<ProgressMeter>
+            { data with
+                Position = pos.Value
+                BarHeight = bar_height.Value
+                BarColor = bar_color.Value
+                GlowSize = glow_size.Value
+                GlowColor = glow_color.Value
+            }
+
 type EditGameplayConfigPage() as this =
     inherit Page()
 
@@ -327,8 +405,8 @@ type EditGameplayConfigPage() as this =
             |+ PrettyButton("themes.edittheme.gameplay.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage).Pos(280.0f)
             |+ PrettyButton("themes.edittheme.gameplay.lifemeter", fun () -> Menu.ShowPage EditLifeMeterPage).Pos(360.0f)
             |+ PrettyButton("themes.edittheme.gameplay.combo", fun () -> Menu.ShowPage EditComboMeterPage).Pos(440.0f)
-            |+ PrettyButton("themes.edittheme.gameplay.skipbutton", ignore).Pos(520.0f)
-            |+ PrettyButton("themes.edittheme.gameplay.progressmeter", ignore).Pos(600.0f)
+            |+ PrettyButton("themes.edittheme.gameplay.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage).Pos(520.0f)
+            |+ PrettyButton("themes.edittheme.gameplay.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage).Pos(600.0f)
         )
 
     override this.Title = N"themes.edittheme.gameplay"
