@@ -1,8 +1,13 @@
-0.6.3.1
+0.6.4
 ====
 
-This release is a test of my automated publishing system :)
+New features around user settings!
 
-- Improved buttons on import screen mounts by moving them up slightly
-- You may also notice the release zip just has an exe, locale file and audio dll. That is new!
+- Under Themes > Edit Theme > Gameplay Config you can now edit the position and other settings about gameplay widgets
+  - Includes accuracy meter, combo meter, hit meter and more
+  - Includes tooltips explaining what things do
+- Added a color picker for screen covers, allowing you to change the color from ingame
+- Fixed several bugs with gameplay widgets that were discovered while putting these settings in
+
+You can now do more theme stuff in-game (and see its effects quicker) instead of making manual edits in your theme folder
 
