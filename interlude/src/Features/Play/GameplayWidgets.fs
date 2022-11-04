@@ -210,22 +210,26 @@ module GameplayWidgets =
         let slider = Animation.Fade(float32 helper.HP.State.Health)
 
         override this.Update(elapsedTime, moved) =
-            // todo: color nyi
             base.Update(elapsedTime, moved)
             slider.Target <- float32 helper.HP.State.Health
+            color.SetColor(Color.FromArgb(
+                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
+                ))
             color.Update elapsedTime
             slider.Update elapsedTime
 
         override this.Draw() =
             let w, h = this.Bounds.Width, this.Bounds.Height
             if conf.Horizontal then
-                let b = this.Bounds.SliceLeft(w * float32 helper.HP.State.Health)
-                Draw.rect b (color.GetColor 255)
-                Draw.rect (b.SliceRight h) conf.EndColor
+                let b = this.Bounds.SliceLeft(w * slider.Value)
+                Draw.rect b (color.GetColor())
+                Draw.rect (b.SliceRight h) conf.TipColor
             else
-                let b = this.Bounds.SliceBottom(h * float32 helper.HP.State.Health)
-                Draw.rect b (color.GetColor 255)
-                Draw.rect (b.SliceTop w) conf.EndColor
+                let b = this.Bounds.SliceBottom(h * slider.Value)
+                Draw.rect b (color.GetColor())
+                Draw.rect (b.SliceTop w) conf.TipColor
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)

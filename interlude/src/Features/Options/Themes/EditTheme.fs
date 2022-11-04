@@ -169,7 +169,7 @@ type EditHitMeterPage() as this =
     let data = Themes.Current.GameplayConfig.get<HitMeter>()
 
     let pos = Setting.simple data.Position
-    let default_pos = AccuracyMeter.Default.Position
+    let default_pos = HitMeter.Default.Position
 
     let show_guide = Setting.simple data.ShowGuide
     let show_non_judgements = Setting.simple data.ShowNonJudgements
@@ -202,7 +202,7 @@ type EditHitMeterPage() as this =
                 Slider<float32>(release_thickness, 0.1f) ).Pos(840.0f)
             |+ PrettySetting(
                 "themes.edittheme.gameplay.hitmeter.animationtime",
-                Slider<float32>(animation_time, 0.1f) ).Pos(900.0f)
+                Slider<float32>(animation_time, 0.1f) ).Pos(920.0f)
             |+ preview
         )
 
@@ -219,6 +219,60 @@ type EditHitMeterPage() as this =
                 AnimationTime = animation_time.Value
             }
 
+type EditLifeMeterPage() as this =
+    inherit Page()
+
+    let data = Themes.Current.GameplayConfig.get<LifeMeter>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = LifeMeter.Default.Position
+
+    let horizontal = Setting.simple data.Horizontal
+    let empty_color = Setting.simple data.EmptyColor
+    let full_color = Setting.simple data.FullColor
+    let tip_color = Setting.simple data.TipColor
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                if horizontal.Value then
+                    Draw.rect bounds (full_color.Value)
+                    Draw.rect (bounds.SliceRight bounds.Height) tip_color.Value
+                else
+                    Draw.rect bounds (full_color.Value)
+                    Draw.rect (bounds.SliceTop bounds.Width) tip_color.Value
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.lifemeter.horizontal",
+                Selector<_>.FromBool horizontal ).Pos(600.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.lifemeter.fullcolor",
+                ColorPicker(full_color, false) ).Pos(680.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.lifemeter.emptycolor",
+                ColorPicker(empty_color, false) ).Pos(800.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.lifemeter.tipcolor",
+                ColorPicker(tip_color, true) ).Pos(920.0f, PRETTYWIDTH, PRETTYHEIGHT * 1.5f)
+            |+ preview
+        )
+
+    override this.Title = N"themes.edittheme.gameplay.lifemeter"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        Themes.Current.GameplayConfig.set<LifeMeter>
+            { data with
+                Position = pos.Value
+                Horizontal = horizontal.Value
+                FullColor = full_color.Value
+                EmptyColor = empty_color.Value
+                TipColor = tip_color.Value
+            }
+
 type EditGameplayConfigPage() as this =
     inherit Page()
 
@@ -227,7 +281,7 @@ type EditGameplayConfigPage() as this =
             column()
             |+ PrettyButton("themes.edittheme.gameplay.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage).Pos(200.0f)
             |+ PrettyButton("themes.edittheme.gameplay.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage).Pos(280.0f)
-            |+ PrettyButton("themes.edittheme.gameplay.lifemeter", ignore).Pos(360.0f)
+            |+ PrettyButton("themes.edittheme.gameplay.lifemeter", fun () -> Menu.ShowPage EditLifeMeterPage).Pos(360.0f)
             |+ PrettyButton("themes.edittheme.gameplay.combo", ignore).Pos(440.0f)
             |+ PrettyButton("themes.edittheme.gameplay.skipbutton", ignore).Pos(520.0f)
             |+ PrettyButton("themes.edittheme.gameplay.progressmeter", ignore).Pos(600.0f)

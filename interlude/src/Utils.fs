@@ -214,7 +214,7 @@ module Utils =
 
         static member FromHex(s: string) : Color =
             if s.Length = 9 && s.[0] = '#' then
-                let alpha = Convert.ToByte(s.Substring(7))
+                let alpha = Convert.ToByte(s.Substring(7), 16)
                 Color.FromArgb(int alpha, Drawing.ColorTranslator.FromHtml(s.Substring(0, 7)))
             elif s.Length = 7 && s.[0] = '#' then Drawing.ColorTranslator.FromHtml(s)
             elif s.Length > 0 && s.[0] <> '#' then Drawing.ColorTranslator.FromHtml(s)
