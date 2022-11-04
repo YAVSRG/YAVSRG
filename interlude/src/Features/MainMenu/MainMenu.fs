@@ -72,7 +72,7 @@ type MainMenuScreen() as this =
         
     override this.OnEnter prev =
         if AutoUpdate.updateAvailable then Notifications.add (L"notification.update.available", NotificationType.System)
-        if prev = Screen.Type.SplashScreen && firstLaunch then QuickStartGuide.show_help()
+        if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()
         splashText <- newSplash()
         Logo.moveMenu()
         Background.dim 0.0f

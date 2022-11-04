@@ -1,12 +1,11 @@
 ﻿namespace Interlude.Features.Import
 
 open System.IO
-open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Themes.Noteskin
-open Prelude.Web
+open Prelude.Data
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
 open Interlude.Content
@@ -16,13 +15,17 @@ type NoteskinCard(data: RepoEntry) as this =
             
     let mutable downloaded = Noteskins.list() |> Array.map snd |> Array.contains data.Name
     let download() =
-        let target = Path.Combine(getDataPath("Noteskins"), System.Guid.NewGuid().ToString() + ".isk")
-        Notifications.add (Localisation.localiseWith [data.Name] "notification.download.noteskin", NotificationType.Task)
-        BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.Name)
-            ( BackgroundTask.Callback(fun b -> Noteskins.load()) (downloadFile(data.Download, target)) ) |> ignore
+        let target = Path.Combine(getDataPath "Noteskins", System.Guid.NewGuid().ToString() + ".isk")
+        WebServices.download_file.Request((data.Download, target, ignore), 
+            fun success -> 
+                if success then 
+                    sync Noteskins.load
+                    Notifications.add (Localisation.localiseWith [data.Name] "notification.install.noteskin", NotificationType.Task)
+        )
         downloaded <- true
 
-    let mutable preview = Sprite.Default
+    let mutable preview : Sprite option = None
+    let imgFade = Animation.Fade 0.0f
     do
         this
         |+ Text(data.Name,
@@ -34,12 +37,20 @@ type NoteskinCard(data: RepoEntry) as this =
             Position = Position.Margin(5.0f, 0.0f).TrimTop(240.0f) )
         |* Clickable((fun () -> if not downloaded then download()))
 
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        imgFade.Update elapsedTime
+
     override this.Draw() =
         base.Draw()
-        Draw.sprite ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) Color.White preview
+        match preview with
+        | Some p -> 
+            Draw.sprite ( Rect.Box(this.Bounds.Left, this.Bounds.Top, 320.0f, 240.0f) ) (Color.FromArgb(imgFade.Alpha, Color.White)) p
+        | None -> ()
 
     member this.LoadPreview(img: Bitmap) =
-        preview <- Sprite.upload(img, 1, 1, true)
+        preview <- Some <| Sprite.upload(img, 1, 1, true)
+        imgFade.Target <- 1.0f
 
     member this.Name = data.Name
     member this.Downloaded = downloaded
@@ -58,12 +69,23 @@ type NoteskinCard(data: RepoEntry) as this =
         
 module Noteskins =
 
-    let source = "https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json"
-
-    let image_loader =
-        { new Async.ManyWorker<(string * NoteskinCard), Bitmap>() with
-            member this.Handle( (url, _) ) =
-                 Async.RunSynchronously(downloadImage url)
-            member this.Callback((_, card), img) =
-                sync(fun () -> card.LoadPreview img)
-        }
+    let tab =
+        SearchContainer(
+            (fun searchContainer callback -> 
+                WebServices.download_json("https://raw.githubusercontent.com/YAVSRG/Interlude.Noteskins/main/index.json",
+                    fun data ->
+                    match data with
+                    | Some (d: Themes.Noteskin.Repo) -> 
+                        sync( fun () -> 
+                            for ns in d.Noteskins do
+                                let nc = NoteskinCard ns
+                                ImageServices.get_cached_image.Request(ns.Preview, fun img -> sync(fun () -> nc.LoadPreview img))
+                                searchContainer.Items.Add nc
+                        )
+                    | None -> ()
+                    callback()
+                )
+            ),
+            (fun searchContainer filter -> searchContainer.Items.Filter <- NoteskinCard.Filter filter),
+            300.0f
+        )

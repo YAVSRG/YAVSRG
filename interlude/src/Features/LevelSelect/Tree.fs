@@ -14,6 +14,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
+open Prelude.Data.Charts.Suggestions
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
@@ -143,7 +144,7 @@ module Tree =
 
         let updateCachedInfo() =
             localCacheFlag <- cacheFlag
-            if chartData.IsNone then chartData <- Scores.getScoreData cc.Hash
+            if chartData.IsNone then chartData <- Scores.getData cc.Hash
             match chartData with
             | Some d when d.Bests.ContainsKey rulesetId ->
                 pbData <- Some d.Bests.[rulesetId]
@@ -418,6 +419,10 @@ module Tree =
         if (!|"up").Tapped() && expandedGroup <> "" then
             scrollTo <- ScrollTo.Pack expandedGroup
             expandedGroup <- ""
+        elif (!|"random_chart").Tapped() then
+            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value filter rulesetId with
+            | Some c -> switchChart(c, LevelSelectContext.None, ""); refresh()
+            | None -> ()
         if right_click_scrolling then scrollPos.Target <- -(Mouse.y() - origin) / total_height * tree_height
 
         scrollPos.Target <- Math.Min (Math.Max (scrollPos.Target + Mouse.scroll() * 100.0f, total_height - tree_height - origin), 20.0f + origin)

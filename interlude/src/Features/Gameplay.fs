@@ -4,13 +4,13 @@ open System
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Prelude.Gameplay.Mods
 open Prelude.Scoring
 open Prelude.Gameplay.Difficulty
 open Prelude.Gameplay.NoteColors
 open Prelude.Data.Charts
-open Prelude.Data.Tables
+open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Scores
@@ -58,7 +58,7 @@ module Gameplay =
             cacheInfo <- Some cache
             current <- Some c
             context <- ctx
-            saveData <- Some (Scores.getOrCreateScoreData c)
+            saveData <- Some (Scores.getOrCreateData c)
             Background.load c.BackgroundPath
             if Song.change (c.AudioPath, saveData.Value.Offset - c.FirstNote, _rate.Value) then
                 Song.playFrom c.Header.PreviewTime
@@ -184,9 +184,10 @@ module Gameplay =
             &&
             match options.ScoreSaveCondition.Value with
             | ScoreSaving.Pacemaker ->
-                match options.Pacemaker.Value with
-                | Accuracy acc -> data.Scoring.Value >= acc
-                | Lamp l -> data.Lamp >= l
+                match options.Pacemakers.TryGetValue rulesetId with
+                | true, Accuracy acc -> data.Scoring.Value >= acc
+                | true, Lamp l -> data.Lamp >= l
+                | false, _ -> true
             | ScoreSaving.PersonalBest -> true // todo: nyi
             | ScoreSaving.Always
             | _ -> true

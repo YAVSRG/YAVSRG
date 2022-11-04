@@ -1,92 +1,102 @@
 ﻿namespace Interlude.Features.Import
 
-open System.IO
-open System.Net
-open System.Net.Security
+open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude.Common
+open Prelude.Data
 open Prelude.Data.Charts
-open Prelude.Web
 open Interlude.UI
-open Interlude.Options
-open Interlude.UI.Components
+open Interlude.Utils
 open Interlude.Features.LevelSelect
 
 module FileDropHandling =
     let tryImport(path: string) : bool =
         match Mounts.dropFunc with
         | Some f -> f path; true
-        | None ->
-            BackgroundTask.Create TaskFlags.NONE ("Import " + Path.GetFileName path)
-                (Library.Imports.autoConvert path |> BackgroundTask.Callback(fun b -> LevelSelect.refresh <- LevelSelect.refresh || b))
-            |> ignore
+        | None -> 
+            Library.Imports.auto_convert.Request(path, 
+                fun success -> 
+                    if success then
+                        Notifications.add(L"notification.import.success", NotificationType.Task)
+                        LevelSelect.refresh <- true
+                    else Notifications.add(L"notification.import.failure", NotificationType.Warning)
+            )
             true
+
+type private TabButton(icon: string, name: string, container: SwapContainer, target: Widget) as this =
+    inherit StaticContainer(NodeType.Switch(fun _ -> this.Button))
+
+    let button = Button(icon + " " + name, (fun () -> container.Current <- target), Position = Position.Margin(10.0f))
+
+    member this.Button = button
+
+    override this.Init(parent) =
+        base.Init parent
+        this
+        |+ Frame(NodeType.None,
+            Border = fun () -> if container.Current = target then Color.White else Color.Transparent
+            ,
+            Fill = fun () -> if this.Focused then Style.main 100 () else Style.dark 100 ())
+        |* button
+
+type private ServiceStatus<'Request, 'Result>(name: string, service: Async.Service<'Request, 'Result>) =
+    inherit StaticWidget(NodeType.None)
+
+    let fade = Animation.Fade 0.0f
+    let animation = Animation.Counter(250.0)
+
+    let animation_frames = 
+        [|
+            Percyqaz.Flux.Resources.Feather.cloud_snow
+            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+            Percyqaz.Flux.Resources.Feather.cloud_rain
+            Percyqaz.Flux.Resources.Feather.cloud_drizzle
+        |]
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        if service.Status <> Async.ServiceStatus.Idle then
+            fade.Target <- 1.0f
+            animation.Update elapsedTime
+        else fade.Target <- 0.0f
+        fade.Update elapsedTime
+
+    override this.Draw() =
+        let icon = animation_frames.[animation.Loops % animation_frames.Length]
+        let iconColor =
+            match service.Status with
+            | Async.ServiceStatus.Busy -> Color.FromArgb(fade.Alpha, Color.Yellow)
+            | Async.ServiceStatus.Working -> Color.FromArgb(fade.Alpha, Color.Lime)
+            | _ -> Color.FromArgb(fade.Alpha, Color.Gray)
+        let textColor =
+            let x = 127 + fade.Alpha / 2
+            Color.FromArgb(x, x, x)
+        Text.drawFill(Style.baseFont, icon, this.Bounds.SliceLeft this.Bounds.Height, iconColor, Alignment.CENTER)
+        Text.drawFill(Style.baseFont, name, this.Bounds.TrimLeft this.Bounds.Height, textColor, Alignment.LEFT)
 
 type ImportScreen() as this =
     inherit Screen()
+
+    let container = SwapContainer(Position = Position.TrimLeft(400.0f).Margin(200.0f, 20.0f), Current = Mounts.tab)
+    let tabs = 
+        FlowContainer.Vertical<Widget>(80.0f, Spacing = 20.0f, Position = Position.SliceLeft(400.0f).Margin(20.0f))
+        |+ TabButton(Icons.import_local, "Local imports", container, Mounts.tab)
+        |+ TabButton(Icons.import_etterna, "Etterna packs", container, EtternaPacks.tab)
+        |+ TabButton(Icons.import_osu, "osu!mania songs", container, Beatmaps.tab)
+        |+ TabButton(Icons.import_noteskin, "Noteskins", container, Noteskins.tab)
+        |+ ServiceStatus("Loading", WebServices.download_string)
+        |+ ServiceStatus("Downloading", WebServices.download_file)
+        |+ ServiceStatus("Importing", Library.Imports.convert_song_folder)
+        |+ ServiceStatus("Recaching", Library.recache_service)
+
     do
-        (*
-            Online downloaders
-        *)
-
-        // EtternaOnline's certificate keeps expiring!! Rop get on it
-        // todo: set up automated test that pings eo for certificate expiry
-        ServicePointManager.ServerCertificateValidationCallback <-
-            RemoteCertificateValidationCallback(
-                fun _ cert _ sslPolicyErrors ->
-                    if sslPolicyErrors = SslPolicyErrors.None then true
-                    else cert.GetCertHashString().ToLower() = "e87a496fbc4b7914674f3bc3846368234e50fb74" )
-
-        let eoDownloads = 
-            SearchContainer(
-                (fun flowContainer _ output -> downloadJson("https://api.etternaonline.com/v2/packs/", (fun (d: {| data: ResizeArray<EOPack> |}) -> sync(fun () -> for p in d.data do flowContainer.Add(new SMImportCard(p.attributes))) ))),
-                (fun flowContainer filter -> flowContainer.Filter <- SMImportCard.Filter filter) )
-        let osuDownloads =
-            SearchContainer(
-                (Beatmap.search [] 0),
-                (fun flowContainer filter -> flowContainer.Clear(); flowContainer.Add(new SearchContainerLoader(Beatmap.search filter 0 flowContainer))) )
-        let noteskins = 
-            SearchContainer(
-                (fun flowContainer _ output -> 
-                    downloadJson(Noteskins.source, 
-                        (fun (d: Prelude.Data.Themes.Noteskin.Repo) -> 
-                            sync( fun () -> 
-                                for ns in d.Noteskins do
-                                    let nc = NoteskinCard ns
-                                    Noteskins.image_loader.Request(ns.Preview, nc)
-                                    flowContainer.Add nc
-                            )
-                        )
-                    )
-                ),
-                (fun flowContainer filter -> flowContainer.Filter <- NoteskinCard.Filter filter),
-                300.0f)
-
-        let tabs = 
-            Tabs.Container(Position = { Left = 0.0f %+ 600.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 80.0f })
-                .WithTab("Etterna Packs", eoDownloads)
-                .WithTab("osu! Songs", osuDownloads)
-                .WithTab("Noteskins", noteskins)
-
         this
-        |+ tabs
-        |+ Text("(Interlude is not affiliated with osu! or Etterna, these downloads are provided through unofficial APIs)",
-            Align = Alignment.CENTER,
-            Position = { Left = 0.0f %+ 600.0f; Top = 1.0f %- 90.0f; Right = 1.0f %- 100.0f; Bottom = 1.0f %- 30.0f })
+        |* (
+            SwitchContainer.Row<Widget>()
+            |+ tabs
+            |+ container
+        )
 
-        (*
-            Offline importers from other games
-        *)
-
-        |+ MountControl(Mounts.Game.Osu, options.OsuMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 200.0f, 360.0f, 60.0f) )
-        |+ MountControl(Mounts.Game.Stepmania, options.StepmaniaMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 270.0f, 360.0f, 60.0f) )
-        |+ MountControl(Mounts.Game.Etterna, options.EtternaMount,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 340.0f, 360.0f, 60.0f) )
-        |* Text("Import from game",
-            Align = Alignment.CENTER,
-            Position = Position.Box(0.0f, 0.0f, 0.0f, 150.0f, 250.0f, 50.0f))
-
-    override this.OnEnter _ = ()
+    override this.OnEnter _ = tabs.Focus()
     override this.OnExit _ = ()

@@ -9,7 +9,7 @@ open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
@@ -125,7 +125,7 @@ module Scoreboard =
 
         let reload (container: FlowContainer.Vertical<ScoreCard>) =
             let worker =
-                { new Async.SingletonWorkerSeq<T, ScoreInfoProvider>() with
+                { new Async.SwitchServiceSeq<T, ScoreInfoProvider>() with
                     member this.Handle(req: T) =
                         match req.ChartSaveData with
                         | None -> Seq.empty

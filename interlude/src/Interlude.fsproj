@@ -5,13 +5,13 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RepositoryUrl>https://github.com/YAVSRG/Interlude</RepositoryUrl>
     <Version>$([System.DateTime]::Now.tostring("yyyyMMdd"))</Version>
-    <AssemblyVersion>0.6.1</AssemblyVersion>
-    <FileVersion>0.6.1</FileVersion>
+    <AssemblyVersion>0.6.4</AssemblyVersion>
+    <FileVersion>0.6.4</FileVersion>
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon></PackageIcon>
-    <Win32Resource>C:\Users\percy\Desktop\Source\YAVSRG\Interlude\src\Resources\icon.res</Win32Resource>
+    <Win32Resource>Resources\icon.res</Win32Resource>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
@@ -41,7 +41,6 @@
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
     <EmbeddedResource Include="Resources\defaultBar.isk" />
     <EmbeddedResource Include="Resources\defaultOrb.isk" />
-    <EmbeddedResource Include="Resources\QuickStart.md" />
     <EmbeddedResource Include="Resources\CrashSplashes.txt" />
     <EmbeddedResource Include="Resources\MenuSplashes.txt" />
     <EmbeddedResource Include="Resources\default.zip" />
@@ -63,7 +62,7 @@
     <Compile Include="UI\Screen\Transitions.fs" />
     <Compile Include="UI\Screen\Screen.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
-    <Compile Include="Features\Wiki\QuickStartGuide.fs" />
+    <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Gameplay.fs" />
     <Compile Include="Features\Score\Graph.fs" />
     <Compile Include="Features\Score\Score.fs" />
@@ -81,13 +80,16 @@
     <Compile Include="Features\LevelSelect\ChartInfo.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
     <Compile Include="Features\Import\Shared.fs" />
+    <Compile Include="Features\Import\Mounts.fs" />
     <Compile Include="Features\Import\EtternaPacks.fs" />
     <Compile Include="Features\Import\Beatmaps.fs" />
     <Compile Include="Features\Import\Noteskins.fs" />
-    <Compile Include="Features\Import\Mounts.fs" />
     <Compile Include="Features\Import\Import.fs" />
     <Compile Include="Features\Options\System.fs" />
-    <Compile Include="Features\Options\Themes.fs" />
+    <Compile Include="Features\Options\Themes\Preview.fs" />
+    <Compile Include="Features\Options\Themes\EditNoteskin.fs" />
+    <Compile Include="Features\Options\Themes\EditTheme.fs" />
+    <Compile Include="Features\Options\Themes\Themes.fs" />
     <Compile Include="Features\Options\Gameplay.fs" />
     <Compile Include="Features\Options\Keybinds.fs" />
     <Compile Include="Features\Options\Debug.fs" />
@@ -96,7 +98,6 @@
     <Compile Include="Features\MainMenu\MainMenu.fs" />
     <Compile Include="Features\Printerlude\Terminal.fs" />
     <Compile Include="Features\Printerlude\Printerlude.fs" />
-    <Compile Include="Features\Toolbar\TaskDisplay.fs" />
     <Compile Include="Features\Toolbar\Jukebox.fs" />
     <Compile Include="Features\Toolbar\Toolbar.fs" />
     <Compile Include="Startup.fs" />

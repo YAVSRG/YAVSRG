@@ -2,13 +2,14 @@
 
 open System
 open System.IO
+open Percyqaz.Common
 open Percyqaz.Json
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
-open Prelude.Web
-open Interlude
+open Prelude.Data
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Features.LevelSelect
@@ -43,23 +44,25 @@ type BeatmapSearch =
     }
 
 type private BeatmapImportCard(data: BeatmapData) as this =
-    inherit StaticContainer(NodeType.None)
+    inherit StaticContainer(NodeType.Button(fun () -> this.Download()))
             
-    let mutable downloaded = false
+    let mutable status = NotDownloaded
+    let mutable progress = 0.0f
     let download() =
-        let target = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".osz")
-        Notifications.add (Localisation.localiseWith [data.title] "notification.download.song", NotificationType.Task)
-        BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.title)
-            (BackgroundTask.Chain
-                [
-                    downloadFile(sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target)
-                    (Library.Imports.autoConvert target
-                    |> BackgroundTask.Callback( fun b -> 
-                        LevelSelect.refresh <- LevelSelect.refresh || b
-                        Notifications.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
-                        File.Delete target ))
-                ]) |> ignore
-        downloaded <- true
+        if status = NotDownloaded || status = DownloadFailed then
+            let target = Path.Combine(getDataPath "Downloads", Guid.NewGuid().ToString() + ".osz")
+            WebServices.download_file.Request((sprintf "http://beatconnect.io/b/%i/" data.beatmapset_id, target, fun p -> progress <- p),
+                fun completed ->
+                    if completed then Library.Imports.auto_convert.Request(target,
+                        fun b ->
+                            LevelSelect.refresh <- LevelSelect.refresh || b
+                            Notifications.add (Localisation.localiseWith [data.title] "notification.install.song", NotificationType.Task)
+                            File.Delete target
+                            status <- if b then Installed else DownloadFailed
+                    )
+                    else status <- DownloadFailed
+                )
+            status <- Downloading
 
     do
         let c =
@@ -73,7 +76,7 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             | _ -> Color.Gray
 
         this
-        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(120, c)), Border = K (Color.FromArgb(200, c)))
+        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(120, c)), Border = fun () -> if this.Focused then Color.White else Color.FromArgb(200, c))
         |+ Text(data.artist + " - " + data.title,
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f })
@@ -82,40 +85,77 @@ type private BeatmapImportCard(data: BeatmapData) as this =
             Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 40.0f; Right = Position.max; Bottom = Position.max })
         |+ Text(sprintf "%.2f*   %iBPM   %iK" data.difficulty data.bpm (int data.difficulty_cs),
             Align = Alignment.RIGHT,
-            Position = { Left = Position.min; Top = 0.0f %+ 20.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 20.0f })
-        |* Clickable((fun () -> if not downloaded then download()))
+            Position = Position.TrimRight(160.0f).Margin(5.0f, 20.0f))
+        |+ Button(Icons.open_in_browser,
+            fun () -> openUrl(sprintf "https://osu.ppy.sh/beatmapsets/%i" data.beatmapset_id)
+            ,
+            Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
+        |* Button(Icons.download, download,
+            Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
 
-module private Beatmap =
+    override this.Draw() =
+        base.Draw()
+
+        match status with
+        | NotDownloaded -> ()
+        | Downloading -> Draw.rect(this.Bounds.SliceLeft(this.Bounds.Width * progress)) (Color.FromArgb(64, 255, 255, 255))
+        | Installed -> 
+            Draw.rect this.Bounds (Color.FromArgb(64, 255, 255, 255))
+            Text.drawFill(Style.baseFont, "Downloaded!", this.Bounds.SliceBottom(25.0f), Color.White, Alignment.CENTER)
+        | DownloadFailed ->
+            Text.drawFill(Style.baseFont, "Download failed!", this.Bounds.SliceBottom(25.0f), Color.FromArgb(255, 100, 100), Alignment.CENTER)
+
+    member private this.Download() = download()
+
+module Beatmaps =
+
+    let download_json_switch = 
+        { new Async.SwitchService<string, BeatmapSearch option>()
+            with override this.Handle(url) = WebServices.download_json_async<BeatmapSearch>(url)
+        }
     
-    let rec search (filter: Filter) (page: int) : FlowContainer.Base<_> -> SearchContainerLoader -> StatusTask =
+    let rec search (filter: Filter) (page: int) : PopulateFunc =
         let mutable s = "https://osusearch.com/api/search?modes=Mania&key="
         let mutable invalid = false
         let mutable title = ""
         List.iter(
             function
             | Impossible -> invalid <- true
-            | String "-p" -> s <- s + "&premium_mappers=true"
+            | String "#p" -> s <- s + "&premium_mappers=true"
             | String s -> match title with "" -> title <- s | t -> title <- t + " " + s
-            | Criterion ("k", n)
-            | Criterion ("key", n)
-            | Criterion ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
-            | Criterion ("m", m)
-            | Criterion ("c", m)
-            | Criterion ("creator", m)
-            | Criterion ("mapper", m) -> s <- s + "&mapper=" + m
+            | Equals ("k", n)
+            | Equals ("key", n)
+            | Equals ("keys", n) -> match Int32.TryParse n with (true, i) -> s <- s + sprintf "&cs=(%i.0, %i.0)" i i | _ -> ()
+            | Equals ("m", m)
+            | Equals ("c", m)
+            | Equals ("creator", m)
+            | Equals ("mapper", m) -> s <- s + "&mapper=" + m
             | _ -> ()
         ) filter
         s <- s + "&title=" + Uri.EscapeDataString title
         s <- s + "&offset=" + page.ToString()
-        fun (flowContainer: FlowContainer.Base<Widget>) (loader: SearchContainerLoader) output ->
-            let callback(d: BeatmapSearch) =
-                // todo: this is busted. need to use AsyncManyWorker
-                //if loader.Parent.IsSome then
-                    sync(
-                        fun () -> 
-                            for p in d.beatmaps do flowContainer.Add(BeatmapImportCard p)
-                            if d.result_count < 0 || d.result_count > d.beatmaps.Count then
-                                SearchContainerLoader(search filter (page + 1) flowContainer)
-                                |> flowContainer.Add
+        fun (searchContainer: SearchContainer) callback ->
+            download_json_switch.Request(s,
+                fun data ->
+                match data with
+                | Some d -> 
+                    sync(fun () ->
+                        for p in d.beatmaps do searchContainer.Items.Add(BeatmapImportCard p)
+                        if d.result_count < 0 || d.result_count > d.beatmaps.Count then
+                            SearchContainerLoader(search filter (page + 1) searchContainer)
+                            |> searchContainer.Items.Add
                     )
-            downloadJson(s, callback)
+                | None -> ()
+                callback()
+            )
+
+    let tab =
+        let searchContainer =
+            SearchContainer(
+                (search [] 0),
+                (fun searchContainer filter -> searchContainer.Items.Clear(); searchContainer.Items.Add(new SearchContainerLoader(search filter 0 searchContainer))),
+                Position = Position.TrimBottom(60.0f)
+            )
+        StaticContainer(NodeType.Switch(K searchContainer))
+        |+ searchContainer
+        |+ Text(L"imports.disclaimer.osu", Position = Position.SliceBottom(60.0f))

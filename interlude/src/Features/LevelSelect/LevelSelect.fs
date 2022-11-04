@@ -123,6 +123,8 @@ type LevelSelectScreen() =
         base.Update(elapsedTime, moved)
         if LevelSelect.refresh then refresh(); LevelSelect.refresh <- false
 
+        Comments.update(elapsedTime, moved)
+
         if (!|"select").Tapped() then Tree.play()
 
         elif (!|"uprate_small").Tapped() then changeRate(0.01f)
@@ -140,7 +142,6 @@ type LevelSelectScreen() =
         elif (!|"end").Tapped() then Tree.endGroup()
         
         Tree.update(this.Bounds.Top + 170.0f, this.Bounds.Bottom, elapsedTime)
-        Comments.update(elapsedTime, moved)
 
     override this.Draw() =
 

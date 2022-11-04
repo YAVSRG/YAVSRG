@@ -1,12 +1,16 @@
 ﻿namespace Interlude.Features.Import
 
+open System.Net
+open System.Net.Security
 open System.IO
 open Percyqaz.Json
+open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Data.Charts.Sorting
-open Prelude.Web
+open Prelude.Data
+open Interlude.Utils
 open Interlude.UI
 open Interlude.Features.LevelSelect
 
@@ -28,30 +32,34 @@ type EOPack =
         attributes: EOPackAttrs
     }
 
-type private SMImportCard(data: EOPackAttrs) as this =
-    inherit Frame(NodeType.None,
-        Fill = (fun () -> Style.color(120, (if this.Downloaded then 0.7f else 0.5f), 0.0f)),
-        Border = (fun () -> Style.color(200, 0.7f, 0.2f))
+type private SMImportCard(id: int, data: EOPackAttrs) as this =
+    inherit Frame(NodeType.Button(fun () -> this.Download()),
+        Fill = (fun () -> Style.color(120, 0.5f, 0.0f)),
+        Border = (fun () -> if this.Focused then Color.White else Style.color(200, 0.7f, 0.2f))
     )
-
-    let mutable downloaded = 
+    
+    let mutable progress = 0.0f
+    let mutable status = 
         let path = Path.Combine(getDataPath "Songs", data.name)
-        Directory.Exists path && not ( Seq.isEmpty (Directory.EnumerateDirectories path) )
+        if Directory.Exists path && not ( Seq.isEmpty (Directory.EnumerateDirectories path) ) then
+            Installed else NotDownloaded
 
     let download() =
-        let target = Path.Combine(Path.GetTempPath(), System.Guid.NewGuid().ToString() + ".zip")
-        Notifications.add (Localisation.localiseWith [data.name] "notification.download.pack", NotificationType.Task)
-        BackgroundTask.Create TaskFlags.LONGRUNNING ("Installing " + data.name)
-            (BackgroundTask.Chain
-                [
-                    downloadFile(data.download, target)
-                    (Library.Imports.autoConvert target
-                        |> BackgroundTask.Callback( fun b -> 
+        if status = NotDownloaded || status = DownloadFailed then
+            let target = Path.Combine(getDataPath "Downloads", System.Guid.NewGuid().ToString() + ".zip")
+            WebServices.download_file.Request((data.download, target, fun p -> progress <- p),
+                fun completed ->
+                    if completed then Library.Imports.auto_convert.Request(target,
+                        fun b ->
                             LevelSelect.refresh <- LevelSelect.refresh || b
                             Notifications.add (Localisation.localiseWith [data.name] "notification.install.pack", NotificationType.Task)
-                            File.Delete target ))
-                ]) |> ignore
-        downloaded <- true
+                            File.Delete target
+                            status <- if b then Installed else DownloadFailed
+                    )
+                    else status <- DownloadFailed
+                )
+            status <- Downloading
+
     do
         this
         |+ Text(data.name,
@@ -60,20 +68,34 @@ type private SMImportCard(data: EOPackAttrs) as this =
         |+ Text(
             (sprintf "%.1fMB" (float data.size / 1000000.0)),
             Align = Alignment.RIGHT,
-            Position = { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 30.0f })
+            Position = { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 165.0f; Bottom = 1.0f %- 30.0f })
         |+ Text(
-            (fun () -> if downloaded then "Downloaded" else ""),
+            (fun () -> if status = Installed then "Downloaded!" elif status = DownloadFailed then "Download failed!" else ""),
             Align = Alignment.RIGHT,
-            Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 5.0f; Bottom = Position.max })
+            Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 165.0f; Bottom = Position.max })
         |+ Text(
             (sprintf "Average difficulty (MSD): %.2f" data.average),
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 5.0f; Top = 0.0f %+ 50.0f; Right = 1.0f %- 400.0f; Bottom = Position.max })
-        |* Clickable((fun () -> if not downloaded then download()))
+        |+ Button(Icons.open_in_browser,
+            fun () -> openUrl(sprintf "https://etternaonline.com/pack/%i" id)
+            ,
+            Position = Position.SliceRight(160.0f).TrimRight(80.0f).Margin(5.0f, 10.0f))
+        |* Button(Icons.download, download,
+            Position = Position.SliceRight(80.0f).Margin(5.0f, 10.0f))
 
-    member this.Downloaded = downloaded
+    override this.Draw() =
+        base.Draw()
+
+        match status with
+        | NotDownloaded -> ()
+        | Downloading -> Draw.rect(this.Bounds.SliceLeft(this.Bounds.Width * progress)) (Color.FromArgb(64, 255, 255, 255))
+        | Installed -> Draw.rect this.Bounds (Color.FromArgb(64, 255, 255, 255))
+        | DownloadFailed -> ()
 
     member this.Data = data
+
+    member private this.Download() = download()
 
     static member Filter(filter: Filter) =
         fun (c: Widget) ->
@@ -86,3 +108,33 @@ type private SMImportCard(data: EOPackAttrs) as this =
                     | _ -> true
                 ) filter
             | _ -> true
+
+module EtternaPacks =
+
+    do
+        // EtternaOnline's certificate keeps expiring!! Rop get on it
+        // todo: set up automated test that pings eo for certificate expiry
+        ServicePointManager.ServerCertificateValidationCallback <-
+            RemoteCertificateValidationCallback(
+                fun _ cert _ sslPolicyErrors ->
+                    if sslPolicyErrors = SslPolicyErrors.None then true
+                    else cert.GetCertHashString().ToLower() = "e87a496fbc4b7914674f3bc3846368234e50fb74" )
+
+    let tab = 
+        let searchContainer =
+            SearchContainer(
+                (fun searchContainer callback -> 
+                    WebServices.download_json("https://api.etternaonline.com/v2/packs/",
+                        fun data ->
+                        match data with
+                        | Some (d: {| data: ResizeArray<EOPack> |}) -> sync(fun () -> for p in d.data do searchContainer.Items.Add(SMImportCard (p.id, p.attributes)))
+                        | None -> ()
+                        callback()
+                    )
+                ),
+                (fun searchContainer filter -> searchContainer.Items.Filter <- SMImportCard.Filter filter),
+                Position = Position.TrimBottom(60.0f)
+            )
+        StaticContainer(NodeType.Switch(K searchContainer))
+        |+ searchContainer
+        |+ Text(L"imports.disclaimer.etterna", Position = Position.SliceBottom(60.0f))

@@ -2,12 +2,12 @@
 
 open System
 open System.IO
-open SixLabors.ImageSharp
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Data
 open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
@@ -34,7 +34,7 @@ type Toolbar() =
             Icons.back, HEIGHT,
             (fun () -> Screen.back Transitions.Flags.UnderLogo),
             Hotkey = "exit",
-            Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 200.0f, HEIGHT - 10.0f))
+            Position = Position.Box(0.0f, 1.0f, 0.0f, -HEIGHT, 160.0f, HEIGHT - 10.0f))
         |+ (
             FlowContainer.LeftToRight(200.0f, Navigation = false, Position = Position.SliceTop (HEIGHT - 10.0f))
             |+ IconButton(L"menu.options",
@@ -45,25 +45,23 @@ type Toolbar() =
                 Icons.import, HEIGHT,
                 ( fun () -> if shown() then Screen.change Screen.Type.Import Transitions.Flags.Default ),
                 Hotkey = "import")
-            |+ IconButton(L"menu.help",
+            |+ IconButton(L"menu.wiki",
                 Icons.wiki, HEIGHT,
-                ( fun () -> if shown() then QuickStartGuide.show_help() ),
-                Hotkey = "help",
+                ( fun () -> if shown() then Wiki.show() ),
+                Hotkey = "wiki",
                 HoverIcon = Icons.wiki2)
-            |+ IconButton(L"menu.tasks",
-                Icons.tasks, HEIGHT,
-                ( fun () -> if shown() then TaskDisplay.Dialog().Show() ),
-                Hotkey = "tasks")
             )
         |+ HotkeyAction("screenshot", fun () ->
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
             let path = Path.Combine(getDataPath "Screenshots", id)
-            use img = Render.screenshot()
-            img.SaveAsPng(path) // todo: this is a performance bottleneck
+            let img = Render.screenshot()
+            ImageServices.save_image.Request((img, path), img.Dispose)
             Notifications.notif("Screenshot saved: " + id, NotificationType.Info) )
         |+ HotkeyAction("reload_themes", fun () -> 
+            first_init <- true
             Noteskins.load()
             Themes.load()
+            first_init <- false
             Notifications.notif("Reloaded themes & noteskins", NotificationType.Info) )
         |* Jukebox(Position = Position.Margin(0.0f, HEIGHT))
 

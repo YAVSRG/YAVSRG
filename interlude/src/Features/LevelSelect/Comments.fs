@@ -40,6 +40,7 @@ module Comments =
     let update(elapsedTime, moved) =
         fade.Target <- if (!|"tooltip").Pressed() then 1.0f else 0.0f
         fade.Update elapsedTime
+        if textEntry.Selected && (!|"select").Tapped() then Selection.clear()
         editor.Update(elapsedTime, moved)
 
     let draw() = if textEntry.Selected then editor.Draw()

@@ -23,42 +23,48 @@ module Background =
 
     let load =
         let worker = 
-            { new Async.SingletonWorker<string, Bitmap option>() with
+            { new Async.SwitchService<string, Bitmap option>() with
                 member this.Handle(file: string) =
-                    match System.IO.Path.GetExtension(file).ToLower() with
-                    | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
-                        try Some (Image.Load file)
-                        with err -> Logging.Warn("Failed to load background image: " + file, err); None
-                    | ext -> None
-                member this.Callback(sprite: Bitmap option) =
-                    match sprite with
-                    | Some bmp ->
-                        let col =
-                            if Content.themeConfig().OverrideAccentColor then Content.themeConfig().DefaultAccentColor else
-                                let vibrance (c: Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
-                                seq {
-                                    let w = bmp.Width / 50
-                                    let h = bmp.Height / 50
-                                    for x = 0 to 49 do
-                                        for y = 0 to 49 do
-                                            yield Color.FromArgb(int bmp.[w * x, h * x].R, int bmp.[w * x, h * x].G, int bmp.[w * x, h * x].B) }
-                                |> Seq.maxBy vibrance
-                                |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
-                        sync(fun () ->
-                            let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
-                            bmp.Dispose()
-                            Content.accentColor <- col
-                            background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
-                        )
-                    | None ->
-                        sync(fun () ->
-                            background <- (Content.getTexture "background", Animation.Fade(0.0f, Target = 1.0f), true) :: background
-                            Content.accentColor <- Content.themeConfig().DefaultAccentColor
-                        )
+                    async {
+                        match System.IO.Path.GetExtension(file).ToLower() with
+                        | ".png" | ".bmp" | ".jpg" | ".jpeg" ->
+                            try
+                                let! img = Image.LoadAsync file |> Async.AwaitTask
+                                return Some img
+                            with err -> 
+                                Logging.Warn("Failed to load background image: " + file, err)
+                                return None
+                        | ext -> return None
+                    }
             }
         fun (path: string) ->
             List.iter (fun (_, fade: Animation.Fade, _) -> fade.Target <- 0.0f) background
-            worker.Request path
+            worker.Request(path,
+                function
+                | Some bmp ->
+                    let col =
+                        if Content.themeConfig().OverrideAccentColor then Content.themeConfig().DefaultAccentColor else
+                            let vibrance (c: Color) = Math.Abs(int c.R - int c.B) + Math.Abs(int c.B - int c.G) + Math.Abs(int c.G - int c.R)
+                            seq {
+                                let w = bmp.Width / 50
+                                let h = bmp.Height / 50
+                                for x = 0 to 49 do
+                                    for y = 0 to 49 do
+                                        yield Color.FromArgb(int bmp.[w * x, h * x].R, int bmp.[w * x, h * x].G, int bmp.[w * x, h * x].B) }
+                            |> Seq.maxBy vibrance
+                            |> fun c -> if vibrance c > 127 then Color.FromArgb(255, c) else Content.themeConfig().DefaultAccentColor
+                    sync(fun () ->
+                        let sprite = Sprite.upload(bmp, 1, 1, true) |> Sprite.cache "loaded background"
+                        bmp.Dispose()
+                        Content.accentColor <- col
+                        background <- (sprite, Animation.Fade(0.0f, Target = 1.0f), false) :: background
+                    )
+                | None ->
+                    sync(fun () ->
+                        background <- (Content.getTexture "background", Animation.Fade(0.0f, Target = 1.0f), true) :: background
+                        Content.accentColor <- Content.themeConfig().DefaultAccentColor
+                    )
+            )
 
     let update elapsedTime =
 

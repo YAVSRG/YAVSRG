@@ -5,7 +5,7 @@ module Icons =
     open Percyqaz.Flux.Resources
 
     let star = Feather.star
-    let back = Feather.arrow_left
+    let back = Feather.arrow_left_circle
     let bpm = Feather.music
     let time = Feather.clock
     let sparkle = Feather.award
@@ -36,11 +36,24 @@ module Icons =
     let wiki2 = Feather.book_open
     let tasks = Feather.sidebar
 
+    let import_local = Feather.link
+    let import_etterna = Feather.archive
+    let import_osu = Feather.download_cloud
+    let import_noteskin = Feather.image
+
+    let open_in_browser = Feather.external_link
+    let download = Feather.download
+
     let system = Feather.airplay
     let themes = Feather.image
     let gameplay = Feather.sliders
     let binds = Feather.link
     let debug = Feather.terminal
+
+    let anchor = Feather.anchor
+    let move = Feather.move
+    let grow = Feather.maximize_2
+    let shrink = Feather.minimize_2
 
     let info = Feather.info
     let alert = Feather.alert_circle

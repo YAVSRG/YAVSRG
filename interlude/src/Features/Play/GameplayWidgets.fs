@@ -6,7 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Grading
 open Prelude.Data.Themes
@@ -97,7 +97,8 @@ module GameplayWidgets =
                     match hit.Judgement with
                     | None -> Color.FromArgb(Math.Clamp(127 - int (127.0f * (now - hit.Time) / conf.AnimationTime), 0, 127), Color.Silver)
                     | Some j -> Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - hit.Time) / conf.AnimationTime), 0, 255), helper.ScoringConfig.JudgementColor j)
-                Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
+                if conf.ShowNonJudgements || hit.Judgement.IsSome then
+                    Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
 
     // disabled for now
     type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
@@ -185,8 +186,7 @@ module GameplayWidgets =
     type SkipButton(conf: WidgetConfig.SkipButton, helper) =
         inherit StaticWidget(NodeType.None)
 
-        // todo: localise
-        let text = sprintf "Press %O to skip" (!|"skip")
+        let text = Localisation.localiseWith [(!|"skip").ToString()] "play.skiphint"
         let mutable active = true
         
         let firstNote = offsetOf (Gameplay.Chart.colored().Notes.First.Value)
@@ -209,22 +209,26 @@ module GameplayWidgets =
         let slider = Animation.Fade(float32 helper.HP.State.Health)
 
         override this.Update(elapsedTime, moved) =
-            // todo: color nyi
             base.Update(elapsedTime, moved)
             slider.Target <- float32 helper.HP.State.Health
+            color.SetColor(Color.FromArgb(
+                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
+                ))
             color.Update elapsedTime
             slider.Update elapsedTime
 
         override this.Draw() =
             let w, h = this.Bounds.Width, this.Bounds.Height
             if conf.Horizontal then
-                let b = this.Bounds.SliceLeft(w * float32 helper.HP.State.Health)
-                Draw.rect b (color.GetColor 255)
-                Draw.rect (b.SliceRight h) conf.EndColor
+                let b = this.Bounds.SliceLeft(w * slider.Value)
+                Draw.rect b (color.GetColor())
+                Draw.rect (b.SliceRight h) conf.TipColor
             else
-                let b = this.Bounds.SliceBottom(h * float32 helper.HP.State.Health)
-                Draw.rect b (color.GetColor 255)
-                Draw.rect (b.SliceTop w) conf.EndColor
+                let b = this.Bounds.SliceBottom(h * slider.Value)
+                Draw.rect b (color.GetColor())
+                Draw.rect (b.SliceTop w) conf.TipColor
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)
@@ -234,7 +238,7 @@ module GameplayWidgets =
         inherit StaticWidget(NodeType.None)
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let sprite = Content.getTexture "receptorlighting"
-        let lightTime = Math.Min(0.99f, lightTime)
+        let lightTime = Math.Max(0.0f, Math.Min(0.99f, lightTime))
 
         do
             let hitpos = float32 options.HitPosition.Value
@@ -313,11 +317,13 @@ module GameplayWidgets =
                             if options.Upscroll.Value then Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Top, columnwidth, columnwidth)
                             else Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Bottom - columnwidth, columnwidth, columnwidth)
                         )
-                            .Expand((config.Scale - 1.0f) * columnwidth, (config.Scale - 1.0f) * columnwidth)
+                            .Expand((config.Scale - 1.0f) * columnwidth * 0.5f)
                             .Expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
                     | Hit e ->
-                        let color = match e.Judgement with Some j -> int j | None -> 0
+                        let color = 
+                            if config.Colors = ExplosionColors.Column then k
+                            else match e.Judgement with Some j -> int j | None -> 0
                         let frame = (helper.CurrentChartTime() - timers.[k]) / toTime config.AnimationFrameTime |> int
                         Draw.quad
                             (box |> Quad.ofRect |> NoteRenderer.noteRotation keys k)

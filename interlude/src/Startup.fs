@@ -17,7 +17,6 @@ module Startup =
         Screen.init [|LoadingScreen(); MainMenuScreen(); ImportScreen(); LevelSelectScreen()|]
         
         ScoreScreenHelpers.watchReplay <- fun (rate, data) -> Screen.changeNew (fun () -> ReplayScreen(ReplayMode.Replay (rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
-        TaskDisplay.init()
         Utils.AutoUpdate.checkForUpdates()
         Mounts.handleStartupImports()
         

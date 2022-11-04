@@ -94,25 +94,30 @@ module Content =
 
                 let private cache = Dictionary<string, obj>()
 
-                let private add<'T>() =
+                let private load<'T>() =
                     let id = typeof<'T>.Name
                     cache.Remove(id) |> ignore
                     cache.Add(id, instance.GetGameplayConfig<'T> id)
 
                 let reload() =
-                    add<AccuracyMeter>()
-                    add<HitMeter>()
-                    add<LifeMeter>()
-                    add<Combo>()
-                    add<SkipButton>()
-                    add<ProgressMeter>()
-                    add<JudgementMeter>()
+                    load<AccuracyMeter>()
+                    load<HitMeter>()
+                    load<LifeMeter>()
+                    load<Combo>()
+                    load<SkipButton>()
+                    load<ProgressMeter>()
+                    //load<JudgementMeter>()
             
                 let get<'T>() = 
                     let id = typeof<'T>.Name
                     if cache.ContainsKey id then
                         cache.[id] :?> 'T
                     else failwithf "config not loaded: %s" id
+
+                let set<'T>(value: 'T) =
+                    let id = typeof<'T>.Name
+                    cache.[id] <- value
+                    instance.SetGameplayConfig<'T>(id, value)
 
             let changeConfig(new_config: ThemeConfig) =
                 instance.Config <- new_config
@@ -251,7 +256,7 @@ module Content =
             Current.switch id
             Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
 
-        let tryImport (path: string) (keymodes: int list) : bool =
+        let rec tryImport (path: string) (keymodes: int list) : bool =
             match path with
             | OsuSkinFolder ->
                 let id = Guid.NewGuid().ToString()
@@ -266,7 +271,12 @@ module Content =
                     load()
                     true
                 with err -> Logging.Error("Something went wrong when moving this skin!", err); true
-            | OsuSkinArchive -> Logging.Info("Can't directly import .osks yet, sorry :( You'll have to extract it first"); true
+            | OsuSkinArchive ->
+                let dir = Path.ChangeExtension(path, null)
+                System.IO.Compression.ZipFile.ExtractToDirectory(path, dir)
+                let result = tryImport dir keymodes
+                Directory.Delete(dir, true)
+                result
             | Unknown -> false
 
     let init (themeId: string) (noteskinId: string) =
