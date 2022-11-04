@@ -273,6 +273,50 @@ type EditLifeMeterPage() as this =
                 TipColor = tip_color.Value
             }
 
+type EditComboMeterPage() as this =
+    inherit Page()
+
+    let data = Themes.Current.GameplayConfig.get<Combo>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = Combo.Default.Position
+
+    let lamp_colors = Setting.simple data.LampColors
+    let pop_amount = Setting.simple data.Pop |> Setting.bound 0.0f 20.0f
+    let growth_amount = Setting.simple data.Growth |> Setting.bound 0.0f 0.05f
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.drawFill(Style.baseFont, "727", bounds, Color.White, Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.combo.lampcolors",
+                Selector<_>.FromBool lamp_colors ).Pos(600.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.combo.pop",
+                Slider(pop_amount, 0.1f) ).Pos(680.0f)
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.combo.growth",
+                Slider(growth_amount, 0.2f) ).Pos(760.0f)
+            |+ preview
+        )
+
+    override this.Title = N"themes.edittheme.gameplay.combo"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        Themes.Current.GameplayConfig.set<Combo>
+            { data with
+                Position = pos.Value
+                LampColors = lamp_colors.Value
+                Pop = pop_amount.Value
+                Growth = growth_amount.Value
+            }
+
 type EditGameplayConfigPage() as this =
     inherit Page()
 
@@ -282,7 +326,7 @@ type EditGameplayConfigPage() as this =
             |+ PrettyButton("themes.edittheme.gameplay.accuracymeter", fun () -> Menu.ShowPage EditAccuracyMeterPage).Pos(200.0f)
             |+ PrettyButton("themes.edittheme.gameplay.hitmeter", fun () -> Menu.ShowPage EditHitMeterPage).Pos(280.0f)
             |+ PrettyButton("themes.edittheme.gameplay.lifemeter", fun () -> Menu.ShowPage EditLifeMeterPage).Pos(360.0f)
-            |+ PrettyButton("themes.edittheme.gameplay.combo", ignore).Pos(440.0f)
+            |+ PrettyButton("themes.edittheme.gameplay.combo", fun () -> Menu.ShowPage EditComboMeterPage).Pos(440.0f)
             |+ PrettyButton("themes.edittheme.gameplay.skipbutton", ignore).Pos(520.0f)
             |+ PrettyButton("themes.edittheme.gameplay.progressmeter", ignore).Pos(600.0f)
         )
