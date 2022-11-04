@@ -195,9 +195,9 @@ module Utils =
                 elif Cmax = R then
                     (((G - B) / d) %% 6.0f) / 6.0f
                 elif Cmax = G then
-                    (((B - R) / d) %% 6.0f) / 6.0f
+                    (((B - R) / d) + 2.0f) / 6.0f
                 else
-                    (((R - G) / d) %% 6.0f) / 6.0f
+                    (((R - G) / d) + 4.0f) / 6.0f
 
             let S =
                 if Cmax = 0.0f then 0.0f
