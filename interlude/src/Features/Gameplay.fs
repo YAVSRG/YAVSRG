@@ -22,6 +22,7 @@ open Interlude.Utils
 module Gameplay =
 
     let mutable autoplay = false
+    let mutable enablePacemaker = false
 
     let mutable ruleset : Ruleset = getCurrentRuleset()
     let mutable rulesetId = Ruleset.hash ruleset
@@ -178,19 +179,9 @@ module Gameplay =
             keycount = keys
         }
 
-    let setScore (data: ScoreInfoProvider) : BestFlags =
-        if
-            data.ModStatus < ModStatus.Unstored
-            &&
-            match options.ScoreSaveCondition.Value with
-            | ScoreSaving.Pacemaker ->
-                match options.Pacemakers.TryGetValue rulesetId with
-                | true, Accuracy acc -> data.Scoring.Value >= acc
-                | true, Lamp l -> data.Lamp >= l
-                | false, _ -> true
-            | ScoreSaving.PersonalBest -> true // todo: nyi
-            | ScoreSaving.Always
-            | _ -> true
+    let setScore (pacemakerMet: bool) (data: ScoreInfoProvider) : BestFlags =
+        if data.ModStatus < ModStatus.Unstored &&
+           (options.SaveScoreIfPaceNotMet.Value || pacemakerMet)
         then
             if data.ModStatus = ModStatus.Ranked then
                 // todo: score uploading goes here when online added

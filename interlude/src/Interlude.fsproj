@@ -70,6 +70,7 @@
     <Compile Include="Features\Play\NoteRenderer.fs" />
     <Compile Include="Features\Play\GameplayWidgets.fs" />
     <Compile Include="Features\Play\Play.fs" />
+    <Compile Include="Features\Play\Replay.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\Comments.fs" />

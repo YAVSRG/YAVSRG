@@ -116,8 +116,20 @@ module Tree =
         | Some data ->
             data.LastPlayed <- DateTime.Now
             Screen.changeNew
-                ( fun () -> if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T else PlayScreen() )
+                ( fun () -> 
+                    if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T
+                    else PlayScreen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
                 ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
+                Transitions.Flags.Default
+        | None -> Logging.Warn "There is no chart selected"
+
+    let challengeScore(rate, replay) =
+        match Chart.saveData with
+        | Some data ->
+            data.LastPlayed <- DateTime.Now
+            Screen.changeNew
+                ( fun () -> PlayScreen(PacemakerMode.Score (rate, replay)) )
+                ( Screen.Type.Play )
                 Transitions.Flags.Default
         | None -> Logging.Warn "There is no chart selected"
 

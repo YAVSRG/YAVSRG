@@ -395,6 +395,32 @@ type EditProgressMeterPage() as this =
                 GlowColor = glow_color.Value
             }
 
+type EditPacemakerPage() as this =
+    inherit Page()
+
+    let data = Themes.Current.GameplayConfig.get<Pacemaker>()
+
+    let pos = Setting.simple data.Position
+    let default_pos = Pacemaker.Default.Position
+
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Text.drawFillB(Style.baseFont, Icons.goal, bounds, Style.text(), Alignment.CENTER)
+        }
+
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ preview
+        )
+
+    override this.Title = N"themes.edittheme.gameplay.pacemaker"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        Themes.Current.GameplayConfig.set<Pacemaker>
+            { data with Position = pos.Value }
+
 type EditGameplayConfigPage() as this =
     inherit Page()
 
@@ -407,6 +433,7 @@ type EditGameplayConfigPage() as this =
             |+ PrettyButton("themes.edittheme.gameplay.combo", fun () -> Menu.ShowPage EditComboMeterPage).Pos(440.0f)
             |+ PrettyButton("themes.edittheme.gameplay.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage).Pos(520.0f)
             |+ PrettyButton("themes.edittheme.gameplay.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage).Pos(600.0f)
+            |+ PrettyButton("themes.edittheme.gameplay.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage).Pos(680.0f)
         )
 
     override this.Title = N"themes.edittheme.gameplay"

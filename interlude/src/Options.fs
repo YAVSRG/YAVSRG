@@ -28,12 +28,8 @@ module Options =
         | ``9K`` = 9
         | ``10K`` = 10
 
-    type ScoreSaving =
-        | Always = 0
-        | Pacemaker = 1
-        | PersonalBest = 2
-
     [<Json.AutoCodec>]
+    [<RequireQualifiedAccess>]
     type Pacemaker =
         | Accuracy of float
         | Lamp of int
@@ -94,9 +90,9 @@ module Options =
 
             Playstyles: Layout array
             Rulesets: Setting<CycleList<string>>
-            ScoreSaveCondition: Setting<ScoreSaving>
             FailCondition: Setting<FailType>
             Pacemakers: Dictionary<string, Pacemaker>
+            SaveScoreIfPaceNotMet: Setting<bool>
 
             OsuMount: Setting<MountedChartSource option>
             StepmaniaMount: Setting<MountedChartSource option>
@@ -157,9 +153,9 @@ module Options =
                         Content.Rulesets.switch (List.head l) false
                         l
                     )
-            ScoreSaveCondition = Setting.simple ScoreSaving.Always
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemakers = Dictionary<string, Pacemaker>()
+            SaveScoreIfPaceNotMet = Setting.simple true
 
             OsuMount = Setting.simple None
             StepmaniaMount = Setting.simple None

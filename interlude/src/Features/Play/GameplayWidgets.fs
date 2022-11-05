@@ -20,7 +20,14 @@ open Interlude.Features
     They can all be toggled/repositioned/configured using themes
 *)
 
-module GameplayWidgets = 
+module GameplayWidgets =
+
+    [<RequireQualifiedAccess>]
+    type PacemakerInfo =
+        | None
+        | Accuracy of float
+        | Replay of IScoreMetric
+        | Judgement of target: JudgementId * max_count: int
 
     type Helper = {
         ScoringConfig: Ruleset
@@ -28,6 +35,7 @@ module GameplayWidgets =
         HP: HealthBarMetric
         OnHit: IEvent<HitEvent<HitEventGuts>>
         CurrentChartTime: unit -> ChartTime
+        Pacemaker: PacemakerInfo
     }
     
     type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
@@ -100,40 +108,39 @@ module GameplayWidgets =
                 if conf.ShowNonJudgements || hit.Judgement.IsSome then
                     Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
 
-    // disabled for now
-    type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
-        inherit StaticWidget(NodeType.None)
-        let atime = conf.AnimationTime * 1.0f<ms>
-        let mutable tier = 0
-        let mutable late = 0
-        let mutable time = -Time.infinity
-        let texture = Content.getTexture "judgement"
+    //type JudgementMeter(conf: WidgetConfig.JudgementMeter, helper) =
+    //    inherit StaticWidget(NodeType.None)
+    //    let atime = conf.AnimationTime * 1.0f<ms>
+    //    let mutable tier = 0
+    //    let mutable late = 0
+    //    let mutable time = -Time.infinity
+    //    let texture = Content.getTexture "judgement"
 
-        do
-            helper.OnHit.Add
-                ( fun ev ->
-                    let (judge, delta) =
-                        match ev.Guts with
-                        | Hit e -> (e.Judgement, e.Delta)
-                        | Release e -> (e.Judgement, e.Delta)
-                    if
-                        judge.IsSome && true
-                        //match judge.Value with
-                        //| _JType.RIDICULOUS
-                        //| _JType.MARVELLOUS -> conf.ShowRDMA
-                        //| _ -> true
-                    then
-                        let j = int judge.Value in
-                        if j >= tier || ev.Time - atime > time then
-                            tier <- j
-                            time <- ev.Time
-                            late <- if delta > 0.0f<ms> then 1 else 0
-                )
+    //    do
+    //        helper.OnHit.Add
+    //            ( fun ev ->
+    //                let (judge, delta) =
+    //                    match ev.Guts with
+    //                    | Hit e -> (e.Judgement, e.Delta)
+    //                    | Release e -> (e.Judgement, e.Delta)
+    //                if
+    //                    judge.IsSome && true
+    //                    //match judge.Value with
+    //                    //| _JType.RIDICULOUS
+    //                    //| _JType.MARVELLOUS -> conf.ShowRDMA
+    //                    //| _ -> true
+    //                then
+    //                    let j = int judge.Value in
+    //                    if j >= tier || ev.Time - atime > time then
+    //                        tier <- j
+    //                        time <- ev.Time
+    //                        late <- if delta > 0.0f<ms> then 1 else 0
+    //            )
 
-        override this.Draw() =
-            if time > -Time.infinity then
-                let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
-                Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
+    //    override this.Draw() =
+    //        if time > -Time.infinity then
+    //            let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
+    //            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
 
     type ComboMeter(conf: WidgetConfig.Combo, helper) =
         inherit StaticWidget(NodeType.None)
@@ -229,6 +236,45 @@ module GameplayWidgets =
                 let b = this.Bounds.SliceBottom(h * slider.Value)
                 Draw.rect b (color.GetColor())
                 Draw.rect (b.SliceTop w) conf.TipColor
+
+    type Pacemaker(conf: WidgetConfig.Pacemaker, helper: Helper) =
+        inherit StaticWidget(NodeType.None)
+
+        let flag_position = Animation.Fade(0.5f)
+        let position_cooldown = Animation.Delay(3000.0)
+        let mutable ahead_by = 0.0
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+
+            match helper.Pacemaker with
+            | PacemakerInfo.None -> ()
+            | PacemakerInfo.Accuracy x ->
+                ahead_by <- helper.Scoring.State.PointsScored - helper.Scoring.State.MaxPointsScored * x
+                flag_position.Update elapsedTime
+                position_cooldown.Update elapsedTime
+            | PacemakerInfo.Replay score ->
+                score.Update(helper.CurrentChartTime())
+                ahead_by <- helper.Scoring.State.PointsScored - score.State.PointsScored
+                flag_position.Update elapsedTime
+                position_cooldown.Update elapsedTime
+            | PacemakerInfo.Judgement (_, _) -> () // todo: nyi
+
+            if position_cooldown.Complete then
+                if ahead_by >= 30.0 then flag_position.Target <- 1.0f
+                elif ahead_by >= 10.0 then flag_position.Target <- 0.75f
+                elif ahead_by >= 0.0 then flag_position.Target <- 0.5f
+                elif ahead_by >= -10.0 then flag_position.Target <- 0.25f
+                else flag_position.Target <- 0.0f
+                position_cooldown.Reset()
+
+        override this.Draw() =
+            match helper.Pacemaker with
+            | PacemakerInfo.None -> ()
+            | PacemakerInfo.Accuracy _
+            | PacemakerInfo.Replay _ ->
+                Text.drawFillB(Style.baseFont, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), Style.text(), 0.5f)
+            | PacemakerInfo.Judgement (_, _) -> () // todo: nyi
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)

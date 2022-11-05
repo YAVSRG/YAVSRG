@@ -17,16 +17,38 @@ open Interlude.Features
 open Interlude.Features.Play.GameplayWidgets
 open Interlude.Features.Score
 
-type PlayScreen() as this =
+[<RequireQualifiedAccess>]
+type PacemakerMode =
+    | None
+    | Score of rate: float32 * ReplayData
+    | Setting
+
+type PlayScreen(pacemakerMode: PacemakerMode) as this =
     inherit Screen()
     
     let chart = Gameplay.Chart.withMods.Value
     let firstNote = offsetOf chart.Notes.First.Value
 
     let liveplay = LiveReplayProvider firstNote
-    let scoringConfig = getCurrentRuleset()
+    let scoringConfig = Gameplay.ruleset
     let scoring = createScoreMetric scoringConfig chart.Keys liveplay chart.Notes Gameplay.rate.Value
     let onHit = new Event<HitEvent<HitEventGuts>>()
+
+    let pacemakerInfo =
+        match pacemakerMode with
+        | PacemakerMode.None -> PacemakerInfo.None
+        | PacemakerMode.Score (rate, replay) ->
+            let replayData = StoredReplayProvider(replay) :> IReplayProvider
+            let scoring = createScoreMetric scoringConfig chart.Keys replayData chart.Notes rate
+            PacemakerInfo.Replay scoring
+        | PacemakerMode.Setting ->
+            let setting = if options.Pacemakers.ContainsKey Gameplay.rulesetId then options.Pacemakers.[Gameplay.rulesetId] else Pacemaker.Default
+            match setting with
+            | Pacemaker.Accuracy acc -> PacemakerInfo.Accuracy acc
+            | Pacemaker.Lamp lamp ->
+                let l = Gameplay.ruleset.Grading.Lamps.[lamp]
+                PacemakerInfo.Judgement(l.Judgement, l.JudgementThreshold)
+
     let widgetHelper: Helper =
         {
             ScoringConfig = scoringConfig
@@ -34,6 +56,7 @@ type PlayScreen() as this =
             HP = scoring.HP
             OnHit = onHit.Publish
             CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
+            Pacemaker = pacemakerInfo
         }
     let binds = options.GameplayBinds.[chart.Keys - 3]
 
@@ -51,7 +74,7 @@ type PlayScreen() as this =
 
         noteRenderer.Add(LaneCover())
 
-        let inline f name (constructor: 'T -> Widget) = 
+        let inline add_widget (constructor: 'T -> Widget) = 
             let config: ^T = Content.getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
@@ -59,13 +82,13 @@ type PlayScreen() as this =
                 w.Position <- { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
                 if pos.Float then this.Add w else noteRenderer.Add w
 
-        f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper))
-        f "hitMeter" (fun c -> new HitMeter(c, widgetHelper))
-        f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper))
-        f "combo" (fun c -> new ComboMeter(c, widgetHelper))
-        //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper))
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper))
-        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper))
+        add_widget (fun c -> new AccuracyMeter(c, widgetHelper))
+        add_widget (fun c -> new HitMeter(c, widgetHelper))
+        add_widget (fun c -> new LifeMeter(c, widgetHelper))
+        add_widget (fun c -> new ComboMeter(c, widgetHelper))
+        add_widget (fun c -> new SkipButton(c, widgetHelper))
+        add_widget (fun c -> new ProgressMeter(c, widgetHelper))
+        add_widget (fun c -> new Pacemaker(c, widgetHelper))
 
         scoring.SetHitCallback onHit.Trigger
 
@@ -99,10 +122,10 @@ type PlayScreen() as this =
             Song.pause()
             inputKeyState <- 0us
             liveplay.Add(now, inputKeyState)
-            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> PlayScreen() :> Screen.T) Screen.Type.Play Transitions.Flags.Default)
+            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> PlayScreen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default)
 
         if (!|"retry").Pressed() then
-            Screen.changeNew (fun () -> PlayScreen() :> Screen.T) Screen.Type.Play Transitions.Flags.Default
+            Screen.changeNew (fun () -> PlayScreen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
         
         if scoring.Finished && not (liveplay :> IReplayProvider).Finished then
             liveplay.Finish()
@@ -116,94 +139,9 @@ type PlayScreen() as this =
                             ModChart = Gameplay.Chart.withMods.Value,
                             Difficulty = Gameplay.Chart.rating.Value
                         )
-                    (sd, Gameplay.setScore sd)
+                    // todo: replace true with flag if pacemaker met
+                    (sd, Gameplay.setScore true sd)
                     |> ScoreScreen
                 )
                 Screen.Type.Score
                 Transitions.Flags.Default
-
-// todo: move to own file and extract common function
-
-[<RequireQualifiedAccess>]
-type ReplayMode =
-    | Auto
-    | Replay of rate: float32 * ReplayData
-
-type ReplayScreen(mode: ReplayMode) as this =
-    inherit Screen()
-    
-    let chart = Gameplay.Chart.withMods.Value
-    let firstNote = offsetOf chart.Notes.First.Value
-
-    let keypressData, auto, rate =
-        match mode with
-        | ReplayMode.Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, Gameplay.rate.Value
-        | ReplayMode.Replay (rate, data) -> StoredReplayProvider(data) :> IReplayProvider, false, rate
-
-    let scoringConfig = getCurrentRuleset()
-    let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes rate
-    let onHit = new Event<HitEvent<HitEventGuts>>()
-    let widgetHelper: Helper =
-        {
-            ScoringConfig = scoringConfig
-            Scoring = scoring
-            HP = scoring.HP
-            OnHit = onHit.Publish
-            CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
-        }
-
-    do
-        let noteRenderer = NoteRenderer scoring
-        this.Add noteRenderer
-
-        if Content.noteskinConfig().EnableColumnLight then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
-
-        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
-
-        noteRenderer.Add(LaneCover())
-
-        let inline f name (constructor: 'T -> Widget) = 
-            let config: ^T = Content.getGameplayConfig<'T>()
-            let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
-            if pos.Enabled then
-                let w = constructor config
-                w.Position <- { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
-                if pos.Float then this.Add w else noteRenderer.Add w
-
-        if not auto then
-            f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper))
-            f "hitMeter" (fun c -> new HitMeter(c, widgetHelper))
-            f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper))
-        f "combo" (fun c -> new ComboMeter(c, widgetHelper))
-        f "skipButton" (fun c -> new SkipButton(c, widgetHelper))
-        f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper))
-
-        scoring.SetHitCallback onHit.Trigger
-
-    override this.OnEnter(prev) =
-        Background.dim (float32 options.BackgroundDim.Value)
-        Screen.Toolbar.hide()
-        Gameplay.rate.Value <- rate
-        Song.changeRate rate
-        Song.changeGlobalOffset (toTime options.AudioOffset.Value)
-        Song.onFinish <- SongFinishAction.Wait
-        Song.playLeadIn()
-        Input.finish_frame_events()
-
-    override this.OnExit next =
-        Background.dim 0.7f
-        Screen.Toolbar.show()
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        let now = Song.timeWithOffset()
-        let chartTime = now - firstNote
-
-        if not keypressData.Finished then scoring.Update chartTime
-
-        if (!|"options").Tapped() then
-            QuickOptions.show(scoring, ignore)
-        
-        if keypressData.Finished then Screen.back Transitions.Flags.Default

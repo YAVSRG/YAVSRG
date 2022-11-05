@@ -17,20 +17,20 @@ module Gameplay =
 
         let utype =
             match existing with
-            | Accuracy _ -> 0
-            | Lamp _ -> 1
+            | Pacemaker.Accuracy _ -> 0
+            | Pacemaker.Lamp _ -> 1
             |> Setting.simple
         let accuracy =
             match existing with
-            | Accuracy a -> a
-            | Lamp _ -> 0.95
+            | Pacemaker.Accuracy a -> a
+            | Pacemaker.Lamp _ -> 0.95
             |> Setting.simple
             |> Setting.bound 0.0 1.0
             |> Setting.round 3
         let lamp =
             match existing with
-            | Accuracy _ -> 0
-            | Lamp l -> l
+            | Pacemaker.Accuracy _ -> 0
+            | Pacemaker.Lamp l -> l
             |> Setting.simple
 
         do 
@@ -50,8 +50,8 @@ module Gameplay =
         override this.Title = N"gameplay.pacemaker"
         override this.OnClose() = 
             match utype.Value with
-            | 0 -> options.Pacemakers.[rulesetId] <- Accuracy accuracy.Value
-            | 1 -> options.Pacemakers.[rulesetId] <- Lamp lamp.Value
+            | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value
+            | 1 -> options.Pacemakers.[rulesetId] <- Pacemaker.Lamp lamp.Value
             | _ -> failwith "impossible"
 
     type RulesetsPage() as this =
