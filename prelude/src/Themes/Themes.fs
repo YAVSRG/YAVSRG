@@ -191,7 +191,7 @@ module WidgetConfig =
                 Position =
                     {
                         Enabled = true
-                        Float = true
+                        Float = false
                         Left = -200.0f
                         LeftA = 0.5f
                         Top = 20.0f
@@ -203,31 +203,31 @@ module WidgetConfig =
                     }
             }
 
-    [<Json.AutoCodec(false)>]
-    type JudgementMeter =
-        {
-            Position: WidgetConfig
-            AnimationTime: float32
-            ShowRDMA: bool
-        }
-        static member Default = 
-            {
-                Position = 
-                    {
-                        Enabled = true
-                        Float = false
-                        Left = -128.0f
-                        LeftA = 0.5f
-                        Top = 30.0f
-                        TopA = 0.5f
-                        Right = 128.0f
-                        RightA = 0.5f
-                        Bottom = 86.0f
-                        BottomA = 0.5f
-                    }
-                AnimationTime = 800.0f
-                ShowRDMA = true
-            }
+    //[<Json.AutoCodec(false)>]
+    //type JudgementMeter =
+    //    {
+    //        Position: WidgetConfig
+    //        AnimationTime: float32
+    //        ShowRDMA: bool
+    //    }
+    //    static member Default = 
+    //        {
+    //            Position = 
+    //                {
+    //                    Enabled = true
+    //                    Float = false
+    //                    Left = -128.0f
+    //                    LeftA = 0.5f
+    //                    Top = 30.0f
+    //                    TopA = 0.5f
+    //                    Right = 128.0f
+    //                    RightA = 0.5f
+    //                    Bottom = 86.0f
+    //                    BottomA = 0.5f
+    //                }
+    //            AnimationTime = 800.0f
+    //            ShowRDMA = true
+    //        }
 
     [<Json.AutoCodec(false)>]
     type ProgressMeter =
@@ -259,11 +259,30 @@ module WidgetConfig =
                 GlowColor = Color.FromArgb(100, 80, 190, 255)
             }
 
+    [<Json.AutoCodec(false)>]
+    type Pacemaker =
+        { Position: WidgetConfig }
+        static member Default =
+            {
+                Position =
+                    {
+                        Enabled = true
+                        Float = false
+                        Left = -300.0f
+                        LeftA = 0.5f
+                        Top = -10.0f
+                        TopA = 0.55f
+                        Right = 300.0f
+                        RightA = 0.5f
+                        Bottom = 50.0f
+                        BottomA = 0.55f
+                    }
+            }
+
     //song info
     //mod info
-    //current real time
+    //clock
     //judgement counts
-    //pacemaker
 
 type Theme(storage) as this =
     inherit Storage(storage)
