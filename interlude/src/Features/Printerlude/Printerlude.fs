@@ -83,8 +83,8 @@ module Printerlude =
                 let audioFile = Path.Combine(path, Path.GetFileName c.AudioPath)
                 let bgFile = Path.Combine(path, Path.GetFileName c.BackgroundPath)
                 try
-                    File.Copy (c.AudioPath, audioFile)
-                    File.Copy (c.BackgroundPath, bgFile)
+                    File.Copy (c.AudioPath, audioFile, true)
+                    File.Copy (c.BackgroundPath, bgFile, true)
                 with err -> printfn "%O" err
                 use fs = File.Create(Path.Combine(path, Path.ChangeExtension(exportName, ".osz")))
                 use archive = new ZipArchive(fs, ZipArchiveMode.Create, true)
@@ -92,13 +92,24 @@ module Printerlude =
                 archive.CreateEntryFromFile(audioFile, Path.GetFileName audioFile) |> ignore
                 archive.CreateEntryFromFile(bgFile, Path.GetFileName bgFile) |> ignore
                 Logging.Info "Exported."
+                try
+                    File.Delete(Path.Combine(path, Path.GetFileName c.AudioPath))
+                    File.Delete(Path.Combine(path, Path.GetFileName c.BackgroundPath))
+                    File.Delete beatmapFile
+                    Logging.Info "Cleaned up."
+                with err -> Logging.Error ("Error while cleaning up after export", err)
+        
+        let export_isk() =
+            Content.Noteskins.exportCurrent()
+            Utils.openDirectory(getDataPath "Exports")
         
         let register_commands (ctx: Context) = 
             ctx
                 .WithCommand("version", Command.create "Shows info about the current game version" [] (Impl.Create show_version))
                 .WithCommand("exit", Command.create "Exits the game" [] (Impl.Create (fun () -> UI.Screen.exit <- true)))
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
-                .WithCommand("export_osz", Command.create "Export current file as osz" [] (Impl.Create export_osz))
+                .WithCommand("export_osz", Command.create "Export current chart as osz" [] (Impl.Create export_osz))
+                .WithCommand("export_isk", Command.create "Export current noteskin as isk" [] (Impl.Create export_isk))
                 .WithCommand("fft", Command.create "Experimental" [] (Impl.Create fft))
 
     let private ms = new MemoryStream()

@@ -256,6 +256,18 @@ module Content =
             Current.switch id
             Current.changeConfig { Current.config with Name = Current.config.Name + " (Extracted)" }
 
+        let exportCurrent() =
+            match Current.instance.Source with
+            | Folder f ->
+                let name = Path.GetFileName f
+                let target = Path.Combine(getDataPath "Exports", name + ".isk")
+                Current.instance.CompressToZip target
+            | Zip (z, Some source) ->
+                let name = Path.GetFileName source
+                let target = Path.Combine(getDataPath "Exports", name)
+                File.Copy(source, target)
+            | Zip (z, None) -> failwith "Cannot export embedded skin"
+
         let rec tryImport (path: string) (keymodes: int list) : bool =
             match path with
             | OsuSkinFolder ->
