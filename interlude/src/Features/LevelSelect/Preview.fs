@@ -13,7 +13,7 @@ type Preview() =
         match Gameplay.Chart.current with
         | Some chart -> 
             NoteRenderer(Metrics.createDummyMetric chart)
-            |+ GameplayWidgets.ScreenCover()
+            |+ GameplayWidgets.LaneCover()
             :> Widget
         | None -> new Dummy()
 

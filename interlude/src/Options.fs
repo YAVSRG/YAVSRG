@@ -63,7 +63,7 @@ module Options =
         let add x xs = x :: xs
 
     [<Json.AutoCodec>]
-    type ScreenCoverOptions =
+    type LaneCoverOptions =
         {
             Enabled: Setting<bool>
             Sudden: Setting.Bounded<float>
@@ -87,7 +87,7 @@ module Options =
             Upscroll: Setting<bool>
             BackgroundDim: Setting.Bounded<float>
             PerspectiveTilt: Setting.Bounded<float>
-            ScreenCover: ScreenCoverOptions
+            LaneCover: LaneCoverOptions
             KeymodePreference: Setting<Keymode>
             UseKeymodePreference: Setting<bool>
             Noteskin: Setting<string>
@@ -128,7 +128,7 @@ module Options =
             Upscroll = Setting.simple false
             BackgroundDim = Setting.percent 0.5
             PerspectiveTilt = Setting.bounded 0.0 -1.0 1.0 |> Setting.round 2
-            ScreenCover = 
+            LaneCover = 
                 { 
                     Enabled = Setting.simple false
                     Sudden = Setting.percent 0.0

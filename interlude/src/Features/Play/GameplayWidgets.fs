@@ -332,34 +332,34 @@ module GameplayWidgets =
                     | _ -> ()
             Array.iteri f sliders
 
-    // Screencover is controlled by game settings, not theme or noteskin
+    // Lane cover is controlled by game settings, not theme or noteskin
 
-    type ScreenCover() =
+    type LaneCover() =
         inherit StaticWidget(NodeType.None)
 
         override this.Draw() =
             
-            if options.ScreenCover.Enabled.Value then
+            if options.LaneCover.Enabled.Value then
 
                 let bounds = this.Bounds.Expand(0.0f, 2.0f)
-                let fadeLength = float32 options.ScreenCover.FadeLength.Value
+                let fadeLength = float32 options.LaneCover.FadeLength.Value
                 let upper (amount: float32) =
-                    Draw.rect (bounds.SliceTop(amount - fadeLength)) options.ScreenCover.Color.Value
+                    Draw.rect (bounds.SliceTop(amount - fadeLength)) options.LaneCover.Color.Value
                     Draw.quad
                         (bounds.SliceTop(amount).SliceBottom(fadeLength) |> Quad.ofRect)
-                        struct (options.ScreenCover.Color.Value, options.ScreenCover.Color.Value, Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value))
+                        struct (options.LaneCover.Color.Value, options.LaneCover.Color.Value, Color.FromArgb(0, options.LaneCover.Color.Value), Color.FromArgb(0, options.LaneCover.Color.Value))
                         Sprite.DefaultQuad
                 let lower (amount: float32) =
-                    Draw.rect (bounds.SliceBottom(amount - fadeLength)) options.ScreenCover.Color.Value
+                    Draw.rect (bounds.SliceBottom(amount - fadeLength)) options.LaneCover.Color.Value
                     Draw.quad
                         (bounds.SliceBottom(amount).SliceTop(fadeLength) |> Quad.ofRect)
-                        struct (Color.FromArgb(0, options.ScreenCover.Color.Value), Color.FromArgb(0, options.ScreenCover.Color.Value), options.ScreenCover.Color.Value, options.ScreenCover.Color.Value)
+                        struct (Color.FromArgb(0, options.LaneCover.Color.Value), Color.FromArgb(0, options.LaneCover.Color.Value), options.LaneCover.Color.Value, options.LaneCover.Color.Value)
                         Sprite.DefaultQuad
 
                 let height = bounds.Height
 
-                let sudden = float32 options.ScreenCover.Sudden.Value * height
-                let hidden = float32 options.ScreenCover.Hidden.Value * height
+                let sudden = float32 options.LaneCover.Sudden.Value * height
+                let hidden = float32 options.LaneCover.Hidden.Value * height
 
                 if options.Upscroll.Value then upper hidden; lower sudden
                 else lower hidden; upper sudden

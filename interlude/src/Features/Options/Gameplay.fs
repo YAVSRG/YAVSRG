@@ -85,14 +85,14 @@ module Gameplay =
         do
             this.Content(
                 column()
-                |+ PrettySetting("gameplay.screencover.enabled", Selector<_>.FromBool options.ScreenCover.Enabled).Pos(200.0f)
-                |+ PrettySetting("gameplay.screencover.hidden", Slider<_>.Percent(options.ScreenCover.Hidden, 0.01f)).Pos(350.0f)
-                |+ PrettySetting("gameplay.screencover.sudden", Slider<_>.Percent(options.ScreenCover.Sudden, 0.01f)).Pos(450.0f)
-                |+ PrettySetting("gameplay.screencover.fadelength", Slider(options.ScreenCover.FadeLength, 0.01f)).Pos(550.0f)
-                |+ PrettySetting("gameplay.screencover.color", ColorPicker(options.ScreenCover.Color, true)).Pos(650.0f, PRETTYWIDTH, PRETTYHEIGHT * 2.0f)
+                |+ PrettySetting("gameplay.lanecover.enabled", Selector<_>.FromBool options.LaneCover.Enabled).Pos(200.0f)
+                |+ PrettySetting("gameplay.lanecover.hidden", Slider<_>.Percent(options.LaneCover.Hidden, 0.01f)).Pos(350.0f)
+                |+ PrettySetting("gameplay.lanecover.sudden", Slider<_>.Percent(options.LaneCover.Sudden, 0.01f)).Pos(450.0f)
+                |+ PrettySetting("gameplay.lanecover.fadelength", Slider(options.LaneCover.FadeLength, 0.01f)).Pos(550.0f)
+                |+ PrettySetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true)).Pos(650.0f, PRETTYWIDTH, PRETTYHEIGHT * 2.0f)
                 |+ preview
             )
-        override this.Title = N"gameplay.screencover"
+        override this.Title = N"gameplay.lanecover"
         override this.OnDestroy() = preview.Destroy()
         override this.OnClose() = ()
 
@@ -106,7 +106,7 @@ module Gameplay =
                 |+ PrettySetting("gameplay.hitposition", Slider(options.HitPosition, 0.005f)).Pos(280.0f)
                 |+ PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(360.0f)
                 |+ PrettySetting("gameplay.backgrounddim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
-                |+ PrettyButton("gameplay.screencover", fun() -> Menu.ShowPage ScreencoverPage).Pos(520.0f)
+                |+ PrettyButton("gameplay.lanecover", fun() -> Menu.ShowPage ScreencoverPage).Pos(520.0f)
                 |+ PrettyButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage).Pos(670.0f)
                 |+ PrettyButton("gameplay.rulesets", fun () -> Menu.ShowPage RulesetsPage).Pos(750.0f)
             )

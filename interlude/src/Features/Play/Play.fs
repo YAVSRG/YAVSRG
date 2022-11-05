@@ -49,7 +49,7 @@ type PlayScreen() as this =
         if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
             noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
 
-        noteRenderer.Add(ScreenCover())
+        noteRenderer.Add(LaneCover())
 
         let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Content.getGameplayConfig<'T>()
@@ -162,7 +162,7 @@ type ReplayScreen(mode: ReplayMode) as this =
         if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
             noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
 
-        noteRenderer.Add(ScreenCover())
+        noteRenderer.Add(LaneCover())
 
         let inline f name (constructor: 'T -> Widget) = 
             let config: ^T = Content.getGameplayConfig<'T>()
@@ -176,8 +176,7 @@ type ReplayScreen(mode: ReplayMode) as this =
             f "accuracyMeter" (fun c -> new AccuracyMeter(c, widgetHelper))
             f "hitMeter" (fun c -> new HitMeter(c, widgetHelper))
             f "lifeMeter" (fun c -> new LifeMeter(c, widgetHelper))
-            f "combo" (fun c -> new ComboMeter(c, widgetHelper))
-            //f "judgementMeter" (fun c -> new JudgementMeter(c, widgetHelper))
+        f "combo" (fun c -> new ComboMeter(c, widgetHelper))
         f "skipButton" (fun c -> new SkipButton(c, widgetHelper))
         f "progressMeter" (fun c -> new ProgressMeter(c, widgetHelper))
 
