@@ -12,8 +12,16 @@
         "Name": "Funkin'", 
         "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/Funkin.png"
     }, {
+        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/LokiBars.isk", 
+        "Name": "Koros Loki (Bars)", 
+        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/LokiBars.png"
+    }, {
         "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/PurpleRain.isk", 
         "Name": "Purple Rain v1", 
         "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/PurpleRain.png"
+    }, {
+        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/LokiArrows.isk", 
+        "Name": "Koros Loki (Arrows)", 
+        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/LokiArrows.png"
     }]
 }
