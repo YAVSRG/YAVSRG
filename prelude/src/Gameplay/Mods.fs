@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Filter
@@ -78,7 +79,13 @@ module Mods =
         let enumerate (mods: ModState) = Map.toSeq mods |> Seq.map fst |> Seq.sort
 
         let enumerateApplicable (chart: ModChart) (mods: ModState) =
-            enumerate mods |> Seq.choose (fun id -> if modList.[id].Check(mods.[id]) chart then Some (id, modList.[id], mods.[id]) else None)
+            seq {
+                for id in enumerate mods do
+                    if modList.ContainsKey id then
+                        if modList.[id].Check(mods.[id]) chart then 
+                            yield (id, modList.[id], mods.[id])
+                    else Logging.Error(sprintf "Unrecognised mod id: %s" id)
+            }
 
     let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ -> id); }
 
