@@ -39,13 +39,15 @@ module Gameplay =
                 |> Array.indexed
                 |> Array.map (fun (i, l) -> (i, l.Name))
             this.Content(
-                CaseSelector("gameplay.pacemaker.type", 
+                column()
+                |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.ScaveScoreIfUnderPace).Pos(200.0f)
+                |+ CaseSelector("gameplay.pacemaker.type", 
                     [|"ACCURACY"; "LAMP"|],
                     [|
-                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(300.0f) |]
-                        [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(300.0f) |]
-                    |], utype)
-                )
+                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(380.0f) |]
+                        [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(380.0f) |]
+                    |], utype).Pos(300.0f)
+                   )
 
         override this.Title = N"gameplay.pacemaker"
         override this.OnClose() = 

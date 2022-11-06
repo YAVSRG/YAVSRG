@@ -29,11 +29,10 @@ type ChartContextMenu(cc: CachedChart, context: LevelSelectContext) as this =
         this.Content(
             column()
             |+ PrettyButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDeleteChart(cc, true)), Icon = Icons.delete).Pos(200.0f)
-            // out until there is a nice way to display what collection is being added to/removed from
             //|+ (
             //    if CollectionManager.isInCurrentCollection(cc, context) then 
-            //         PrettyButton("chart.removefromcollection", ignore, Icon = Icons.remove_from_collection).Pos(280.0f)
-            //    else PrettyButton("chart.addtocollection", ignore, Icon = Icons.add_to_collection).Pos(280.0f)
+            //         PrettyButton("chart.removefrom*collection", ignore, Icon = Icons.remove_from_collection).Pos(280.0f)
+            //    else PrettyButton("chart.addto*collection", ignore, Icon = Icons.add_to_collection).Pos(280.0f)
             //   )
         )
     override this.Title = cc.Title

@@ -120,7 +120,9 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
 
     member this._selector() = selector
 
-     member private this.WhoIsFocused : int option =
+    member this.Pos(pos) = selector.Pos(pos) |> ignore; this
+
+    member private this.WhoIsFocused : int option =
         if selector.Focused then Some -1
         else Seq.tryFindIndex (fun (c: Widget) -> c.Focused) controls.[setting.Value]
 
@@ -169,7 +171,7 @@ type CaseSelector(name: string, cases: string array, controls: Widget array arra
                 control.Update(elapsedTime, false)
 
         if this.Focused then
-            if (!|"up").Tapped() then this.Previous()
+            if not selector.Focused && (!|"up").Tapped() then this.Previous()
             elif (!|"down").Tapped() then this.Next()
             elif (!|"select").Tapped() then this.SelectFocusedChild()
 

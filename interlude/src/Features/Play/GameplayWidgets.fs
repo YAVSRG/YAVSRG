@@ -258,7 +258,7 @@ module GameplayWidgets =
                 ahead_by <- helper.Scoring.State.PointsScored - score.State.PointsScored
                 flag_position.Update elapsedTime
                 position_cooldown.Update elapsedTime
-            | PacemakerInfo.Judgement (_, _) -> () // todo: nyi
+            | PacemakerInfo.Judgement (_, _) -> ()
 
             if position_cooldown.Complete then
                 if ahead_by >= 30.0 then flag_position.Target <- 1.0f
@@ -273,8 +273,17 @@ module GameplayWidgets =
             | PacemakerInfo.None -> ()
             | PacemakerInfo.Accuracy _
             | PacemakerInfo.Replay _ ->
-                Text.drawFillB(Style.baseFont, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), Style.text(), 0.5f)
-            | PacemakerInfo.Judgement (_, _) -> () // todo: nyi
+                Text.drawFillB(Style.baseFont, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), Style.text(), Alignment.CENTER)
+            | PacemakerInfo.Judgement (judgement, count) ->
+                let actual = 
+                    if judgement = -1 then helper.Scoring.State.ComboBreaks
+                    else helper.Scoring.State.Judgements.[judgement]
+                let hearts = 1 + count - actual
+                let display = 
+                    if hearts > 10 then sprintf "%s x%i" (String.replicate 10 Icons.heart) hearts
+                    elif hearts > 0 then (String.replicate hearts Icons.heart)
+                    else Icons.failure
+                Text.drawFillB(Style.baseFont, display, this.Bounds, Style.text(), Alignment.CENTER)
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)

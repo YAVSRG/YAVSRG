@@ -181,7 +181,7 @@ module Gameplay =
 
     let setScore (pacemakerMet: bool) (data: ScoreInfoProvider) : BestFlags =
         if data.ModStatus < ModStatus.Unstored &&
-           (options.SaveScoreIfPaceNotMet.Value || pacemakerMet)
+           (options.ScaveScoreIfUnderPace.Value || pacemakerMet)
         then
             if data.ModStatus = ModStatus.Ranked then
                 // todo: score uploading goes here when online added

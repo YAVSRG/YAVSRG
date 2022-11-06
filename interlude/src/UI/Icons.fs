@@ -4,11 +4,13 @@ module Icons =
     
     open Percyqaz.Flux.Resources
 
+    let heart = Feather.heart_on
     let star = Feather.star
     let back = Feather.arrow_left_circle
     let bpm = Feather.music
     let time = Feather.clock
     let sparkle = Feather.award
+    let failure = Feather.x
 
     let edit = Feather.edit_2
     let add = Feather.plus_circle

@@ -92,7 +92,7 @@ module Options =
             Rulesets: Setting<CycleList<string>>
             FailCondition: Setting<FailType>
             Pacemakers: Dictionary<string, Pacemaker>
-            SaveScoreIfPaceNotMet: Setting<bool>
+            ScaveScoreIfUnderPace: Setting<bool>
 
             OsuMount: Setting<MountedChartSource option>
             StepmaniaMount: Setting<MountedChartSource option>
@@ -155,7 +155,7 @@ module Options =
                     )
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemakers = Dictionary<string, Pacemaker>()
-            SaveScoreIfPaceNotMet = Setting.simple true
+            ScaveScoreIfUnderPace = Setting.simple true
 
             OsuMount = Setting.simple None
             StepmaniaMount = Setting.simple None
