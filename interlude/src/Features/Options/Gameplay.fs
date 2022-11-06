@@ -6,6 +6,7 @@ open Prelude.Scoring
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
+open Interlude.Utils
 
 module Gameplay = 
 
@@ -42,12 +43,13 @@ module Gameplay =
                 column()
                 |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.ScaveScoreIfUnderPace).Pos(200.0f)
                 |+ CaseSelector("gameplay.pacemaker.type", 
-                    [|"ACCURACY"; "LAMP"|],
+                    [|N"gameplay.pacemaker.accuracy"; N"gameplay.pacemaker.lamp"|],
                     [|
                         [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(380.0f) |]
                         [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(380.0f) |]
                     |], utype).Pos(300.0f)
-                   )
+                |+ Text(L"options.gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
+            )
 
         override this.Title = N"gameplay.pacemaker"
         override this.OnClose() = 

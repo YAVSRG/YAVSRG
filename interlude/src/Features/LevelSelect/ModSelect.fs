@@ -72,7 +72,7 @@ type private ModSelectPage() as this =
             |+ PrettySetting("gameplay.pacemaker.enable", Selector<_>.FromBool enable).Pos(200.0f)
             |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.ScaveScoreIfUnderPace).Pos(280.0f)
             |+ CaseSelector("gameplay.pacemaker.type", 
-                [|"ACCURACY"; "LAMP"|],
+                [|N"gameplay.pacemaker.accuracy"; N"gameplay.pacemaker.lamp"|],
                 [|
                     [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(460.0f) |]
                     [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(460.0f) |]

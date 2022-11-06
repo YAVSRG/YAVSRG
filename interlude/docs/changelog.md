@@ -3,7 +3,10 @@
 
 ## Stuff that's new
 
+- This changelog is automatically posted to Discord :)
 - Fixed some crash bugs
+- Renamed Screencover to Lane Cover (this is what it's more commonly known as)
+- Pacemaker stuff as explained below
 
 ### **Pacemaker features**
 

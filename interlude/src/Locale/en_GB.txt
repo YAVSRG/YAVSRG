@@ -109,6 +109,7 @@ options.gameplay.pacemaker.saveunderpace.tooltip=Uncheck this if you don't want 
 options.gameplay.pacemaker.tooltip=Edit pacemaker settings here (under construction).
 options.gameplay.pacemaker.type.name=Pacemaker Type
 options.gameplay.pacemaker.type.tooltip=
+options.gameplay.pacemaker.hint=The pacemaker can be turned on for your session via the Mods menu.
 options.gameplay.rulesets.name=Rulesets
 options.gameplay.rulesets.tooltip=Select which rulesets you want to use while playing.
 options.gameplay.scrollspeed.name=Scroll Speed
