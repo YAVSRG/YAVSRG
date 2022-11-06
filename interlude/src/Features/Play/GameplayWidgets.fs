@@ -14,6 +14,7 @@ open Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.Features
+open Interlude.Utils
 
 (*
     Handful of widgets that directly pertain to gameplay
@@ -54,7 +55,7 @@ module GameplayWidgets =
             this
             |* Text(
                 helper.Scoring.FormatAccuracy,
-                Color = (fun () -> color.GetColor(), Color.Transparent),
+                Color = (fun () -> color.Value, Color.Transparent),
                 Align = Alignment.CENTER,
                 Position = { Position.Default with Bottom = 0.7f %+ 0.0f })
             if conf.ShowName then
@@ -166,7 +167,7 @@ module GameplayWidgets =
         override this.Draw() =
             let combo = helper.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
-            Text.drawFill(Style.baseFont, combo.ToString(), this.Bounds.Expand amt, color.GetColor(), 0.5f)
+            Text.drawFill(Style.baseFont, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
     type ProgressMeter(conf: WidgetConfig.ProgressMeter, helper) =
         inherit StaticWidget(NodeType.None)
@@ -230,19 +231,41 @@ module GameplayWidgets =
             let w, h = this.Bounds.Width, this.Bounds.Height
             if conf.Horizontal then
                 let b = this.Bounds.SliceLeft(w * slider.Value)
-                Draw.rect b (color.GetColor())
+                Draw.rect b color.Value
                 Draw.rect (b.SliceRight h) conf.TipColor
             else
                 let b = this.Bounds.SliceBottom(h * slider.Value)
-                Draw.rect b (color.GetColor())
+                Draw.rect b color.Value
                 Draw.rect (b.SliceTop w) conf.TipColor
 
     type Pacemaker(conf: WidgetConfig.Pacemaker, helper: Helper) =
         inherit StaticWidget(NodeType.None)
 
+        let color = Animation.Color(Color.White)
         let flag_position = Animation.Fade(0.5f)
         let position_cooldown = Animation.Delay(3000.0)
         let mutable ahead_by = 0.0
+        let mutable hearts = -1
+
+        let update_flag_position() =
+            if ahead_by >= 10.0 then flag_position.Target <- 1.0f
+            elif ahead_by > -10.0 then 
+                flag_position.Target <- (ahead_by + 10.0) / 20.0 |> float32
+                if ahead_by > 0.0 then color.Target <- Color.FromHsv(140.0f/360.0f, ahead_by / 10.0 |> float32, 1.0f)
+                else color.Target <- Color.FromHsv(340.0f/360.0f, ahead_by / -10.0 |> float32, 1.0f)
+            else flag_position.Target <- 0.0f
+
+        do
+            match helper.Pacemaker with
+            | PacemakerInfo.None
+            | PacemakerInfo.Accuracy _
+            | PacemakerInfo.Replay _ -> ()
+            | PacemakerInfo.Judgement (judgement, _) -> 
+                if judgement = -1 then 
+                    Gameplay.ruleset.Judgements.[Gameplay.ruleset.Judgements.Length - 1].Color
+                else Gameplay.ruleset.Judgements.[judgement].Color
+                |> color.SetColor
+            
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
@@ -250,40 +273,44 @@ module GameplayWidgets =
             match helper.Pacemaker with
             | PacemakerInfo.None -> ()
             | PacemakerInfo.Accuracy x ->
-                ahead_by <- helper.Scoring.State.PointsScored - helper.Scoring.State.MaxPointsScored * x
+                if position_cooldown.Complete then
+                    ahead_by <- helper.Scoring.State.PointsScored - helper.Scoring.State.MaxPointsScored * x
+                    update_flag_position()
+                    position_cooldown.Reset()
+
                 flag_position.Update elapsedTime
                 position_cooldown.Update elapsedTime
             | PacemakerInfo.Replay score ->
-                score.Update(helper.CurrentChartTime())
-                ahead_by <- helper.Scoring.State.PointsScored - score.State.PointsScored
+                if position_cooldown.Complete then
+                    score.Update(helper.CurrentChartTime())
+                    ahead_by <- helper.Scoring.State.PointsScored - score.State.PointsScored
+                    update_flag_position()
+                    position_cooldown.Reset()
+
                 flag_position.Update elapsedTime
                 position_cooldown.Update elapsedTime
             | PacemakerInfo.Judgement (_, _) -> ()
 
-            if position_cooldown.Complete then
-                if ahead_by >= 30.0 then flag_position.Target <- 1.0f
-                elif ahead_by >= 10.0 then flag_position.Target <- 0.75f
-                elif ahead_by >= 0.0 then flag_position.Target <- 0.5f
-                elif ahead_by >= -10.0 then flag_position.Target <- 0.25f
-                else flag_position.Target <- 0.0f
-                position_cooldown.Reset()
+            color.Update elapsedTime
 
         override this.Draw() =
             match helper.Pacemaker with
             | PacemakerInfo.None -> ()
             | PacemakerInfo.Accuracy _
             | PacemakerInfo.Replay _ ->
-                Text.drawFillB(Style.baseFont, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), Style.text(), Alignment.CENTER)
+                Text.drawFillB(Style.baseFont, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), (color.Value, Color.Black), Alignment.CENTER)
             | PacemakerInfo.Judgement (judgement, count) ->
                 let actual = 
                     if judgement = -1 then helper.Scoring.State.ComboBreaks
                     else helper.Scoring.State.Judgements.[judgement]
-                let hearts = 1 + count - actual
+                let _hearts = 1 + count - actual
+                if _hearts < hearts then color.Value <- Color.White
+                hearts <- _hearts
                 let display = 
-                    if hearts > 10 then sprintf "%s x%i" (String.replicate 10 Icons.heart) hearts
+                    if hearts > 5 then sprintf "%s x%i" (String.replicate 5 Icons.heart) hearts
                     elif hearts > 0 then (String.replicate hearts Icons.heart)
                     else Icons.failure
-                Text.drawFillB(Style.baseFont, display, this.Bounds, Style.text(), Alignment.CENTER)
+                Text.drawFillB(Style.baseFont, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)

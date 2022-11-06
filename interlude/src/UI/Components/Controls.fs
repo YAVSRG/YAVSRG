@@ -9,6 +9,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
+open Interlude.Utils
 
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
     inherit StaticContainer(NodeType.Button onClick)
@@ -95,3 +96,19 @@ type SearchBox(s: Setting<string>, callback: unit -> unit) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if searchTimer.ElapsedMilliseconds > this.DebounceTime then searchTimer.Reset(); callback()
+
+type WIP() as this =
+    inherit StaticWidget(NodeType.None)
+
+    let text = L"misc.wip"
+
+    do
+        this.Position <- Position.SliceBottom(100.0f)
+
+    override this.Draw() =
+        Draw.rect this.Bounds (Color.FromArgb(127, Color.Yellow))
+        let w = this.Bounds.Width / 20.0f
+        for i = 0 to 19 do
+            Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Top, w, 10.0f)) (if i % 2 = 0 then Color.Yellow else Color.Black)
+            Draw.rect (Rect.Box (this.Bounds.Left + w * float32 i, this.Bounds.Bottom - 10.0f, w, 10.0f)) (if i % 2 = 1 then Color.Yellow else Color.Black)
+        Text.drawFillB(Style.baseFont, text, this.Bounds.Shrink(20.0f), Style.text(), Alignment.CENTER)

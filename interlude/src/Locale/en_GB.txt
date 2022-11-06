@@ -41,6 +41,7 @@ menu.wiki=Wiki
 misc.confirmdelete=Really delete '%0'?
 misc.edit=Editing '%0'
 misc.search=Press %0 to %1
+misc.wip=WORK IN PROGRESS: This feature or area is under construction!
 mod.auto.desc=Plays the chart for you.
 mod.auto.name=Auto
 mod.inverse.desc=Converts the chart to 'Inverse' mode, where notes are swapped with hold releases.

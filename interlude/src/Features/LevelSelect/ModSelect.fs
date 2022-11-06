@@ -80,13 +80,13 @@ type private ModSelectPage() as this =
 
         container.Position <- { Position.Default with Right = 0.5f %+ 0.0f }
         container
-            
 
     do
         this.Content(
             SwitchContainer.Row<Widget>()
             |+ pacemaker
             |+ mods
+            |+ WIP()
         )
 
     override this.Title = N"mods"
