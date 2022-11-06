@@ -127,7 +127,7 @@ let skins = ResizeArray<Noteskin.RepoEntry>()
 
 Path.Combine(root, "Noteskins") |> Path.GetFullPath |> printfn "%s"
 
-for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) do
+for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |> Seq.sort do
     let filename = Path.GetFileName noteskin_file
     printfn "Loading: %s" filename
     try
