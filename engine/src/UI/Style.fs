@@ -17,7 +17,7 @@ module Style =
     let text_subheading : unit -> Color * Color = K (Color.FromArgb(200, 230, 230, 230), Color.Black)
 
     let color (alpha, brightness, white) =
-        let accentColor = accentColor.GetColor()
+        let accentColor = accentColor.Value
         let r = float32 accentColor.R
         let g = float32 accentColor.G
         let b = float32 accentColor.B

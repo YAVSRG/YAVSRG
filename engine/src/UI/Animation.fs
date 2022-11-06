@@ -52,8 +52,21 @@ module Animation =
 
         member this.SetColor(color: Drawing.Color) =
             r.Target <- float32 color.R; g.Target <- float32 color.G; b.Target <- float32 color.B
-        member this.GetColor(alpha) = Color.FromArgb(alpha, int r.Value, int g.Value, int b.Value)   
-        member this.GetColor() = Color.FromArgb(255, int r.Value, int g.Value, int b.Value)    
+        member this.GetColor(alpha) = Color.FromArgb(alpha, int r.Value, int g.Value, int b.Value)
+
+        member this.Target
+            with get() = Color.FromArgb(int r.Target, int g.Target, int b.Target)
+            and set(color: Drawing.Color) = 
+                r.Target <- float32 color.R
+                g.Target <- float32 color.G
+                b.Target <- float32 color.B
+
+        member this.Value
+            with get() = Color.FromArgb(int r.Value, int g.Value, int b.Value)
+            and set(color: Drawing.Color) = 
+                r.Value <- float32 color.R
+                g.Value <- float32 color.G
+                b.Value <- float32 color.B
 
         override this.Update(t) =
             r.Update t; g.Update t; b.Update t
