@@ -1,6 +1,7 @@
 ﻿namespace Percyqaz.Flux.UI
 
 open System.Drawing
+open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -47,7 +48,10 @@ module Dialog =
 
     let show (d: Dialog) =
         match current with
-        | Some existing -> failwithf "Already showing %O. Nested dialogs not supported" existing
+        | Some existing ->
+            Logging.Warn(sprintf "Nested dialogs not supported, Already showing %O." existing)
+            d.Init display
+            d.Close()
         | None -> current <- Some d; d.Init display; fade.Target <- 1.0f
 
     let exists() = current.IsSome
