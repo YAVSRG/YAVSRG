@@ -58,6 +58,22 @@ type PlayScreen(pacemakerMode: PacemakerMode) as this =
             CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
             Pacemaker = pacemakerInfo
         }
+
+    let pacemakerMet() =
+        match widgetHelper.Pacemaker with
+        | PacemakerInfo.None -> true
+        | PacemakerInfo.Accuracy x -> widgetHelper.Scoring.Value >= x
+        | PacemakerInfo.Replay r -> r.Update Time.infinity; widgetHelper.Scoring.Value >= r.Value
+        | PacemakerInfo.Judgement (judgement, count) ->
+            let actual = 
+                if judgement = -1 then widgetHelper.Scoring.State.ComboBreaks
+                else
+                    let mutable c = widgetHelper.Scoring.State.Judgements.[judgement]
+                    for j = judgement + 1 to widgetHelper.Scoring.State.Judgements.Length - 1 do
+                        if widgetHelper.Scoring.State.Judgements.[j] > 0 then c <- 1000000
+                    c
+            actual <= count
+    
     let binds = options.GameplayBinds.[chart.Keys - 3]
 
     let mutable inputKeyState = 0us
@@ -139,8 +155,7 @@ type PlayScreen(pacemakerMode: PacemakerMode) as this =
                             ModChart = Gameplay.Chart.withMods.Value,
                             Difficulty = Gameplay.Chart.rating.Value
                         )
-                    // todo: replace true with flag if pacemaker met
-                    (sd, Gameplay.setScore true sd)
+                    (sd, Gameplay.setScore (pacemakerMet()) sd)
                     |> ScoreScreen
                 )
                 Screen.Type.Score
