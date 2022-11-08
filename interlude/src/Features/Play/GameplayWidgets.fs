@@ -302,7 +302,11 @@ module GameplayWidgets =
             | PacemakerInfo.Judgement (judgement, count) ->
                 let actual = 
                     if judgement = -1 then helper.Scoring.State.ComboBreaks
-                    else helper.Scoring.State.Judgements.[judgement]
+                    else
+                        let mutable c = helper.Scoring.State.Judgements.[judgement]
+                        for j = judgement + 1 to helper.Scoring.State.Judgements.Length - 1 do
+                            if helper.Scoring.State.Judgements.[j] > 0 then c <- 1000000
+                        c
                 let _hearts = 1 + count - actual
                 if _hearts < hearts then color.Value <- Color.White
                 hearts <- _hearts
