@@ -34,7 +34,7 @@ module Utils =
     /// L for localise -- Shorthand to get the localised text from a locale string id
     let L = Localisation.localise
 
-    let getInterludeLocation() = Assembly.GetExecutingAssembly().Location |> Path.GetDirectoryName
+    let getInterludeLocation() = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
 
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)
