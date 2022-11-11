@@ -27,39 +27,27 @@ module Collections =
     type Collection =
     | Collection of List<string> // duplicates not allowed
     | Playlist of List<string * PlaylistData> // order of list matters
-    | Goals of List<string * GoalData>
         member this.ToCollection() =
             match this with
             | Collection l -> Collection l
             | Playlist p -> 
-                Seq.map fst p
-                |> Seq.distinct |> List |> Collection
-            | Goals g -> 
-                Seq.map fst g
-                |> Seq.distinct |> List |> Collection
+                p
+                |> Seq.map fst
+                |> Seq.distinct
+                |> List
+                |> Collection
         member this.ToPlaylist(mods, rate) = 
             match this with
-            | Collection l -> 
-                Seq.map (fun i -> i, PlaylistData.Make mods rate) l
-                |> List |> Playlist
-            | Playlist p -> Playlist p
-            | Goals g -> 
-                Seq.map (fun (x, data: GoalData) -> x, PlaylistData.Make data.Mods.Value data.Rate.Value) g
-                |> List |> Playlist
-        member this.ToGoals(mods, rate) = 
-            match this with
             | Collection l ->
-                Seq.map (fun i -> i, GoalData.Make mods rate Goal.None) l
-                |> List |> Goals
-            | Playlist p ->
-                Seq.map (fun (x, data: PlaylistData) -> x, GoalData.Make data.Mods.Value data.Rate.Value Goal.None) p
-                |> List |> Goals
-            | Goals g -> Goals g
+                l
+                |> Seq.map (fun i -> i, PlaylistData.Make mods rate)
+                |> List
+                |> Playlist
+            | Playlist p -> Playlist p
         member this.IsEmpty() =
             match this with
             | Collection l -> l.Count = 0
             | Playlist p -> p.Count = 0
-            | Goals g -> g.Count = 0
         static member Blank = Collection (ResizeArray<_>())
 
     [<RequireQualifiedAccess>]
@@ -70,21 +58,18 @@ module Collections =
         | Table
         | Collection of index: int * id: string
         | Playlist of index: int * id: string * data: PlaylistData
-        | Goal of index: int * id: string * data: GoalData
         member this.InCollection =
             match this with
             | None
             | Table -> ""
             | Collection (_, id)
-            | Playlist (_, id, _)
-            | Goal (_, id, _) -> id
+            | Playlist (_, id, _) -> id
         member this.PositionInCollection =
             match this with
             | None
             | Table -> -1
             | Collection (i, _)
-            | Playlist (i, _, _)
-            | Goal (i, _, _) -> i
+            | Playlist (i, _, _) -> i
         override this.Equals(other: obj) =
             match other with
             | :? LevelSelectContext as other ->

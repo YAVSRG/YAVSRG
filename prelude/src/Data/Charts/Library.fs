@@ -158,14 +158,6 @@ module Library =
                         ) 
                         (Seq.indexed ps),
                     true
-                | Goals gs -> 
-                    Seq.choose
-                        ( fun (index, (i, data)) -> 
-                            lookup i
-                            |> Option.map (fun x -> x, LevelSelectContext.Goal (index, name, data))
-                        ) 
-                        (Seq.indexed gs),
-                    false
             charts
             |> Filter.applyf filter
             |> ResizeArray<CachedChart * LevelSelectContext>
