@@ -92,21 +92,16 @@ module Gameplay =
         let notifyChangeRate v =
             match Chart.context with
             | LevelSelectContext.Playlist (_, _, d) -> d.Rate.Value <- v
-            | LevelSelectContext.Goal (_, _, d) -> d.Rate.Value <- v
             | _ -> ()
     
         let notifyChangeMods mods =
             match Chart.context with
             | LevelSelectContext.Playlist (_, _, d) -> d.Mods.Value <- mods
-            | LevelSelectContext.Goal (_, _, d) -> d.Mods.Value <- mods
             | _ -> ()
     
-        let notifyChangeChart context (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
+        let notifyChangeChart (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
             match Chart.context with
             | LevelSelectContext.Playlist (_, _, d) -> 
-                rate.Value <- d.Rate.Value
-                mods.Value <- d.Mods.Value
-            | LevelSelectContext.Goal (_, _, d) ->
                 rate.Value <- d.Rate.Value
                 mods.Value <- d.Mods.Value
             | _ -> ()
@@ -138,22 +133,16 @@ module Gameplay =
                     if ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1 then 
                         ps.RemoveAll(fun (id, _) -> id = cc.FilePath) > 0
                     else false
-                | Goals gs ->
-                    if gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1 then 
-                        gs.RemoveAll(fun (id, _) -> id = cc.FilePath) > 0
-                    else false
             else
                 // Remove a chart from the selected collection, while looking at the collection in the UI
                 match selectedCollection with
                 | Collection ccs -> ccs.Remove cc.FilePath
                 | Playlist ps -> ps.RemoveAt ctx.PositionInCollection; true
-                | Goals gs -> gs.RemoveAt ctx.PositionInCollection; true
     
         let addChart (cc: CachedChart, rate, mods) =
             match selectedCollection with
             | Collection ccs -> if ccs.Contains cc.FilePath then false else ccs.Add cc.FilePath; true
             | Playlist ps -> ps.Add (cc.FilePath, PlaylistData.Make mods rate); true
-            | Goals gs -> gs.Add (cc.FilePath, GoalData.Make mods rate Goal.None); true
 
     let rate =
         Chart._rate
@@ -167,7 +156,7 @@ module Gameplay =
                 Collections.notifyChangeMods mods
                 Chart.update() )
 
-    do Chart.onChange.Add ( fun () -> Collections.notifyChangeChart Chart.context rate selectedMods)
+    do Chart.onChange.Add ( fun () -> Collections.notifyChangeChart rate selectedMods)
 
     let makeScore (replayData, keys) : Score =
         {
@@ -224,5 +213,5 @@ module Gameplay =
                     |> fun c -> c, Library.load(c).Value
             Chart.change(c, LevelSelectContext.None, ch)
         with err ->
-            Logging.Debug("Tried to auto select a chart but none exist", err)
+            Logging.Debug("No charts installed")
             Background.load ""

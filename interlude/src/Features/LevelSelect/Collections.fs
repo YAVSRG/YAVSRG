@@ -34,7 +34,6 @@ module CollectionManager =
         match Collections.selectedCollection with
         | Collection ccs -> ccs.Contains cc.FilePath
         | Playlist ps -> ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
-        | Goals gs -> gs.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
 
 type private EditCollectionPage(originalName) as this =
     inherit Page()
@@ -42,14 +41,14 @@ type private EditCollectionPage(originalName) as this =
     let data = (Collections.get originalName).Value
 
     let name = Setting.simple originalName |> Setting.alphaNum
-    let originalType = match data with Collection _ -> "Collection" | Playlist _ -> "Playlist" | Goals _ -> "Goals"
+    let originalType = match data with Collection _ -> "Collection" | Playlist _ -> "Playlist"
     let ctype = Setting.simple originalType
 
     do
         this.Content(
             column()
             |+ PrettySetting("collections.edit.collectionname", TextEntry(name, "none")).Pos(200.0f)
-            |+ PrettySetting("collections.edit.type", Selector([|"Collection", "Collection"; "Playlist", "Playlist"; "Goals", "Goals"|], ctype)).Pos(300.0f)
+            |+ PrettySetting("collections.edit.type", Selector([|"Collection", "Collection"; "Playlist", "Playlist";|], ctype)).Pos(300.0f)
         )
 
     override this.Title = originalType
@@ -68,7 +67,6 @@ type private EditCollectionPage(originalName) as this =
                 match ctype.Value with
                 | "Collection" -> data.ToCollection()
                 | "Playlist" -> data.ToPlaylist(selectedMods.Value, rate.Value)
-                | "Goals" -> data.ToGoals(selectedMods.Value, rate.Value)
                 | _ -> failwith "impossible"
             else data
         Collections.update (name.Value, data)

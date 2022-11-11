@@ -166,7 +166,6 @@ module Tree =
                     match Collections.selectedCollection with
                     | Collection ccs -> if ccs.Contains cc.FilePath then Icons.star + " " else ""
                     | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Icons.playlist + " " else ""
-                    | Goals gs -> if gs.Exists(fun (id, _) -> id = cc.FilePath) then Icons.goal + " " else ""
                 else ""
                 +
                 match chartData with
