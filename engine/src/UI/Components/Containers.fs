@@ -245,7 +245,11 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
         scroll_pos.Update elapsedTime
 
         let mutable scrollby = 0.0f
-        if Mouse.hover this.Bounds then scrollby <- -Mouse.scroll() * SENSITIVITY
+        if Mouse.hover this.Bounds then
+            if Mouse.held Mouse.RIGHT then
+                let target = (Mouse.y() - this.Bounds.Top) / this.Bounds.Height * contentHeight
+                scrollby <- target - scroll_pos.Target
+            else scrollby <- -Mouse.scroll() * SENSITIVITY
         if this.Focused && scroll_to_child_next_frame then
             scroll_to_child_next_frame <- false
             let selected_bounds = (Selection.get_focused_element().Value :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
