@@ -89,7 +89,7 @@ module Wiki =
                     AutoUpdate.applyUpdate(fun () -> Notifications.add (L"notification.update.installed", NotificationType.System))
                     Notifications.add (L"notification.update.installing", NotificationType.System)
                 ,
-                Position = Position.Column(500.0f, 300.0f))
+                Position = Position.Column(500.0f, 270.0f))
         
         member private this.UpdateContent() =
             let markdown = MarkdownUI.build (this.Bounds.Width - 500.0f) content

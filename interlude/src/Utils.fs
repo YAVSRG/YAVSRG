@@ -126,7 +126,7 @@ module Utils =
                 if s.Length > 3 then (int s.[0], int s.[1], int s.[2], int s.[3])
                 else (int s.[0], int s.[1], int s.[2], 0)
 
-            let current = "0.6.1"//smallVersion
+            let current = smallVersion
             let incoming = release.tag_name.Substring(1)
             latestVersionName <- incoming
 
