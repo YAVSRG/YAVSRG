@@ -1,12 +1,16 @@
-0.6.5.2
+0.6.6
 ====
 
-- Removed "Goals" collection type, this is in advance of a new goals system in the future :)
-  This will break your collections.json if you have a Goals collection (I'm certain nobody is)
+- Fixed yet another bug in the auto updater
+  It couldn't tell the difference between 0.6.5.1 and 0.6.5.2 so thought the game was up to date
+  So I created this feature release (albeit small) that you can update to
   
-  There are other collections changes coming up which may break collections
-  When the time comes, if anyone really does have collections they want to preserve give me a shout in the discord
+- Added a changelog button to the main menu
+  It reuses the ingame wiki feature to view the full Interlude changelog
+  It turns yellow when an update is available
   
-- You can now hold right-click to fast scroll on scrolling containers.
-  This is to help with navigating Imports > Etterna packs and Options > Keybinds > Hotkeys
+- Ingame wiki/changelog now has a button at the top to install updates
+  You can also still update via the debug menu
+  
+- Added a Discord button the main menu. It links to the discord :)
 
