@@ -31,7 +31,7 @@ module Gameplay =
     
         let mutable cacheInfo : CachedChart option = None
         let mutable current : Chart option = None
-        let mutable context : LevelSelectContext = LevelSelectContext.None
+        let mutable context : LibraryContext = LibraryContext.None
         let mutable withMods : ModChart option = None
         let mutable withColors : ColorizedChart option = None
     
@@ -91,17 +91,17 @@ module Gameplay =
     
         let notifyChangeRate v =
             match Chart.context with
-            | LevelSelectContext.Playlist (_, _, d) -> d.Rate.Value <- v
+            | LibraryContext.Playlist (_, _, d) -> d.Rate.Value <- v
             | _ -> ()
     
         let notifyChangeMods mods =
             match Chart.context with
-            | LevelSelectContext.Playlist (_, _, d) -> d.Mods.Value <- mods
+            | LibraryContext.Playlist (_, _, d) -> d.Mods.Value <- mods
             | _ -> ()
     
         let notifyChangeChart (rate: Setting.Bounded<float32>) (mods: Setting<ModState>) =
             match Chart.context with
-            | LevelSelectContext.Playlist (_, _, d) -> 
+            | LibraryContext.Playlist (_, _, d) -> 
                 rate.Value <- d.Rate.Value
                 mods.Value <- d.Mods.Value
             | _ -> ()
@@ -116,28 +116,30 @@ module Gameplay =
     
         let reorder (up: bool) : bool =
             match Chart.context with
-            | LevelSelectContext.Playlist (index, id, d) ->
+            | LibraryContext.Playlist (index, id, d) ->
                 match Collections.reorderPlaylist id index up with
                 | Some newIndex when newIndex <> index ->
-                    Chart.context <- LevelSelectContext.Playlist (newIndex, id, d)
+                    Chart.context <- LibraryContext.Playlist (newIndex, id, d)
                     true
                 | _ -> false
             | _ -> false
     
-        let removeChart (cc: CachedChart, ctx: LevelSelectContext) =
-            if ctx.InCollection <> selectedName then
-                // Remove a chart from the selected collection, you are not viewing it inside the collection
+        let removeChart (cc: CachedChart, ctx: LibraryContext) =
+            match ctx.CollectionSource with
+            | Some { Name = collection; Position = index } when collection = selectedName ->
+                // You are looking at the collection. Can remove at specific index
+                match selectedCollection with
+                | Collection ccs -> ccs.Remove cc.FilePath
+                | Playlist ps -> ps.RemoveAt index; true
+            | _ ->
+                // You are removing a chart that's in the collection but not looking at it
+                // For playlists, can remove the chart as long as it's clear which one needs removing
                 match selectedCollection with
                 | Collection ccs -> ccs.Remove cc.FilePath
                 | Playlist ps -> 
                     if ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1 then 
                         ps.RemoveAll(fun (id, _) -> id = cc.FilePath) > 0
                     else false
-            else
-                // Remove a chart from the selected collection, while looking at the collection in the UI
-                match selectedCollection with
-                | Collection ccs -> ccs.Remove cc.FilePath
-                | Playlist ps -> ps.RemoveAt ctx.PositionInCollection; true
     
         let addChart (cc: CachedChart, rate, mods) =
             match selectedCollection with
@@ -211,7 +213,7 @@ module Gameplay =
                     Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
                     |> fun d -> fst d.[(0, "All")].[0]
                     |> fun c -> c, Library.load(c).Value
-            Chart.change(c, LevelSelectContext.None, ch)
+            Chart.change(c, LibraryContext.None, ch)
         with err ->
             Logging.Debug("No charts installed")
             Background.load ""

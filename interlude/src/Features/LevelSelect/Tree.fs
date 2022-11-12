@@ -22,7 +22,7 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type ChartContextMenu(cc: CachedChart, context: LevelSelectContext) as this =
+type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
 
     do
@@ -51,7 +51,7 @@ type ChartContextMenu(cc: CachedChart, context: LevelSelectContext) as this =
 [<RequireQualifiedAccess>]
 type Navigation =
     | Nothing
-    | Backward of string * CachedChart * Collections.LevelSelectContext
+    | Backward of string * CachedChart * Collections.LibraryContext
     /// Forward false is consumed by the selected chart, and replaced with Forward true
     /// Forward true is consumed by any other chart, and switched to instantly
     /// Combined effect is navigating forward by one chart
@@ -143,7 +143,7 @@ module Tree =
             if bounds.Bottom > origin && top < originB then if_visible bounds
             top + bounds.Height + this.Spacing
 
-    type private ChartItem(groupName: string, cc: CachedChart, context: LevelSelectContext) =
+    type private ChartItem(groupName: string, cc: CachedChart, context: LibraryContext) =
         inherit TreeItem()
 
         let hover = Animation.Fade 0.0f
@@ -431,7 +431,7 @@ module Tree =
             expandedGroup <- ""
         elif (!|"random_chart").Tapped() then
             match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value filter rulesetId with
-            | Some c -> switchChart(c, LevelSelectContext.None, ""); refresh()
+            | Some c -> switchChart(c, LibraryContext.None, ""); refresh()
             | None -> ()
         if right_click_scrolling then scrollPos.Target <- -(Mouse.y() - origin) / total_height * tree_height
 

@@ -15,25 +15,18 @@ open Interlude.Options
 
 module CollectionManager =
 
-    let addChart(cc: CachedChart, context: LevelSelectContext) =
-        if Collections.selectedName <> context.InCollection then
-            let success = Collections.addChart(cc, rate.Value, selectedMods.Value)
-            if success then
-                if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
-                Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.added", NotificationType.Info)
+    let addChart(cc: CachedChart, context: LibraryContext) =
+        let success = Collections.addChart(cc, rate.Value, selectedMods.Value)
+        if success then
+            if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.added", NotificationType.Info)
 
-    let removeChart(cc: CachedChart, context: LevelSelectContext) =
+    let removeChart(cc: CachedChart, context: LibraryContext) =
         let success = Collections.removeChart(cc, context)
         if success then
             if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
             Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; Collections.selectedName] "collections.removed", NotificationType.Info)
-            if context = Chart.context then Chart.context <- LevelSelectContext.None
-
-    let isInCurrentCollection(cc: CachedChart, context: LevelSelectContext) =
-        context.InCollection = Collections.selectedName ||
-        match Collections.selectedCollection with
-        | Collection ccs -> ccs.Contains cc.FilePath
-        | Playlist ps -> ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1
+            if context = Chart.context then Chart.context <- LibraryContext.None
 
 type private EditCollectionPage(originalName) as this =
     inherit Page()
