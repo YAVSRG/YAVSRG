@@ -122,7 +122,8 @@ module Utils =
 
             let parseVer (s: string) =
                 let s = s.Split(".")
-                (int s.[0], int s.[1], int s.[2])
+                if s.Length > 3 then (int s.[0], int s.[1], int s.[2], int s.[3])
+                else (int s.[0], int s.[1], int s.[2], 0)
 
             let current = smallVersion
             let incoming = release.tag_name.Substring(1)
