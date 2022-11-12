@@ -10,6 +10,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 
@@ -68,7 +69,27 @@ type MainMenuScreen() as this =
         this
         |+ play
         |+ options
-        |* quit
+        |+ quit
+        |+ Text((fun () -> if AutoUpdate.updateDownloaded then L"menu.updatehint" else ""),
+            Color = Style.text_subheading,
+            Align = Alignment.RIGHT,
+            Position = Position.Box(1.0f, 1.0f, 490.0f, 40.0f).Translate(-500.0f, -95.0f))
+        |+ (
+            let b = StylishButton(
+                Wiki.show_changelog,
+                K (Icons.star + " " + L"menu.changelog"),
+                Style.main 100,
+                TiltRight = false,
+                Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-300.0f, -50.0f) )
+            let c = b.TextColor
+            b.TextColor <- fun () -> if AutoUpdate.updateAvailable then Color.Yellow, Color.Black else c()
+            b
+        )
+        |* StylishButton(
+            (fun () -> openUrl("https://discord.gg/tA22tWR")),
+            K (Icons.comment + " " + L"menu.discord"),
+            Style.dark 100,
+            Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f) )
         
     override this.OnEnter prev =
         if AutoUpdate.updateAvailable then Notifications.add (L"notification.update.available", NotificationType.System)

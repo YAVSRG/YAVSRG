@@ -15,11 +15,11 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
     inherit StaticContainer(NodeType.Button onClick)
     
     let color = Animation.Fade(0.0f)
-    let textColor = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER)
 
     member val Hotkey : Hotkey = "none" with get, set
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
+    member val TextColor = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER) with get, set
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
@@ -38,7 +38,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
                 <| Vector2(this.Bounds.Left - (if this.TiltLeft then h * 0.5f else 0.0f), this.Bounds.Bottom)
             ) (colorFunc () |> Quad.colorOf)
             Sprite.DefaultQuad
-        Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, textColor(), 0.5f)
+        Text.drawFillB(Style.baseFont, labelFunc(), this.Bounds, this.TextColor(), 0.5f)
         base.Draw()
 
     override this.Init(parent: Widget) =

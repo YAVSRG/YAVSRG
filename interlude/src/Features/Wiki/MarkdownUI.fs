@@ -1,7 +1,5 @@
 ﻿namespace Interlude.Features.Wiki
 
-open System.Diagnostics
-open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
@@ -72,7 +70,7 @@ module private Span =
             if settings.InlineCode then Some (Color.FromArgb(127, Color.Silver))
             else None
 
-        let mutable text = text
+        let mutable text = text.Replace("&gt;", ">").Replace("&lt;", "<")
         let mutable remainingText = ""
         let mutable width = (Text.measure(Style.baseFont, text)) * settings.Size
         let height = settings.Size / 0.6f

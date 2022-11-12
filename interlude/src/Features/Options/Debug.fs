@@ -28,7 +28,7 @@ module Debug =
                                 AutoUpdate.applyUpdate(fun () -> Notifications.add (L"notification.update.installed", NotificationType.System))
                         ),
                         L"notification.update.installing", NotificationType.System,
-                        Enabled = AutoUpdate.updateAvailable
+                        Enabled = (AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded)
                     ).Pos(300.0f)
                 |+ PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole).Pos(400.0f)
             )

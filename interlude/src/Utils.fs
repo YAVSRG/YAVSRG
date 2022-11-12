@@ -116,6 +116,7 @@ module Utils =
         let mutable latestVersionName = "<Unknown, server could not be reached>"
         let mutable latestRelease = None
         let mutable updateAvailable = false
+        let mutable updateDownloaded = false
 
         let private handleUpdate(release: GithubRelease) =
             latestRelease <- Some release
@@ -125,7 +126,7 @@ module Utils =
                 if s.Length > 3 then (int s.[0], int s.[1], int s.[2], int s.[3])
                 else (int s.[0], int s.[1], int s.[2], 0)
 
-            let current = smallVersion
+            let current = "0.6.1"//smallVersion
             let incoming = release.tag_name.Substring(1)
             latestVersionName <- incoming
 
@@ -145,6 +146,9 @@ module Utils =
 
         let applyUpdate(callback) =
             if not updateAvailable then failwith "No update available to install"
+            if updateDownloaded then () else
+
+            updateDownloaded <- true
 
             let download_url = latestRelease.Value.assets.Head.browser_download_url
             let path = getInterludeLocation()

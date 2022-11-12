@@ -11,37 +11,49 @@ open FSharp.Formatting.Markdown
 
 module Wiki =
 
+    type Page =
+        | Wiki of string
+        | Changelog
+
     let mutable private page_history = []
-    let mutable private page_url = ""
+    let mutable private current_page = Wiki ""
     let mutable private content : MarkdownDocument = new MarkdownDocument([], Map.empty)
     let mutable private page_changed : unit -> unit = ignore
 
     let private page_loader =
-        { new Async.Service<string, MarkdownDocument>() with
+        { new Async.Service<Page, MarkdownDocument>() with
             override this.Handle(req) =
                 async {
-                    let url = "https://raw.githubusercontent.com/wiki/YAVSRG/Interlude/" + req + ".md"
+                    let url = 
+                        match req with
+                        | Wiki p -> "https://raw.githubusercontent.com/wiki/YAVSRG/Interlude/" + p + ".md"
+                        | Changelog -> "https://raw.githubusercontent.com/YAVSRG/Interlude/main/docs/changelog.md"
                     let! page = WebServices.download_string.RequestAsync(url)
                     return Markdown.Parse page
                 }
         }
 
-    let load_page (page: string) =
-        page_history <- page :: page_history
-        page_url <- page
+    let load_wiki_page (page: string) =
+        page_history <- Wiki page :: page_history
+        current_page <- Wiki page
         let page = 
             if page.Contains('#') then
                 Heading.scrollTo <- page.Substring(page.LastIndexOf '#' + 1).Replace('-', ' ')
                 page.Substring(0, page.LastIndexOf '#')
             else page
-        page_loader.Request(page, fun md -> content <- md; sync(page_changed))
+        page_loader.Request(Wiki page, fun md -> content <- md; sync page_changed)
+
+    let load_changelog () =
+        page_history <- Changelog :: page_history
+        current_page <- Changelog
+        page_loader.Request(Changelog, fun md -> content <- md; sync page_changed)
 
     do
         LinkHandler.add { 
             Prefix = "https://github.com/YAVSRG/Interlude/wiki/"
-            Action = fun s -> s.Replace("https://github.com/YAVSRG/Interlude/wiki/", "") |> load_page
+            Action = fun s -> s.Replace("https://github.com/YAVSRG/Interlude/wiki/", "") |> load_wiki_page
         }
-        load_page "Home"
+        load_wiki_page "Home"
 
     type Browser() as this =
         inherit Dialog()
@@ -53,16 +65,31 @@ module Wiki =
             |+ IconButton(L"menu.back", Icons.back, 50.0f,
                 fun () ->
                     match page_history with
-                    | x :: y :: xs -> load_page y; page_history <- y :: xs
+                    | x :: y :: xs -> 
+                        match y with
+                        | Wiki p -> load_wiki_page p;
+                        | Changelog -> load_changelog ()
+                        page_history <- y :: xs
                     | _ -> this.Close()
                 ,
                 Position = Position.Column(0.0f, 200.0f))
             |+ IconButton(L"wiki.openinbrowser", Icons.open_in_browser, 50.0f,
-                fun () -> openUrl("https://github.com/YAVSRG/Interlude/wiki/" + page_url)
+                fun () -> 
+                    match current_page with
+                    | Wiki p -> openUrl("https://github.com/YAVSRG/Interlude/wiki/" + p)
+                    | Changelog -> openUrl("https://github.com/YAVSRG/Interlude/releases")
                 ,
                 Position = Position.Column(200.0f, 300.0f))
 
-        do Heading.scrollHandler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
+        do 
+            Heading.scrollHandler <- fun w -> flow.Scroll(w.Bounds.Top - flow.Bounds.Top)
+            if AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded then
+                buttons |* IconButton(L"wiki.downloadupdate", Icons.download, 50.0f,
+                fun () -> 
+                    AutoUpdate.applyUpdate(fun () -> Notifications.add (L"notification.update.installed", NotificationType.System))
+                    Notifications.add (L"notification.update.installing", NotificationType.System)
+                ,
+                Position = Position.Column(500.0f, 300.0f))
         
         member private this.UpdateContent() =
             let markdown = MarkdownUI.build (this.Bounds.Width - 500.0f) content
@@ -85,3 +112,8 @@ module Wiki =
         override this.Draw() = buttons.Draw(); flow.Draw()
 
     let show() = (Browser()).Show()
+
+    let show_changelog() = 
+        if current_page <> Changelog then
+            load_changelog()
+        (Browser()).Show()
