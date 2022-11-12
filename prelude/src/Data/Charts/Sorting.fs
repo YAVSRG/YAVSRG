@@ -79,7 +79,7 @@ module Sorting =
         let cmp2 = compareBy f
         fun a b -> match cmp a b with 0 -> cmp2 a b | x -> x
 
-    type SortMethod = Comparison<CachedChart * Collections.LevelSelectContext>
+    type SortMethod = Comparison<CachedChart * Collections.LibraryContext>
     let sortBy : IDictionary<string, SortMethod> = dict[
             "Physical", Comparison(compareBy (fun x -> x.Physical))
             "Technical", Comparison(compareBy (fun x -> x.Technical))
@@ -138,4 +138,4 @@ module Sorting =
 
         let apply (filter: Filter) (charts: CachedChart seq) = Seq.filter (_f filter) charts
 
-        let applyf (filter: Filter) (charts: (CachedChart * Collections.LevelSelectContext) seq) = Seq.filter (fun (c, _) -> _f filter c) charts
+        let applyf (filter: Filter) (charts: (CachedChart * Collections.LibraryContext) seq) = Seq.filter (fun (c, _) -> _f filter c) charts

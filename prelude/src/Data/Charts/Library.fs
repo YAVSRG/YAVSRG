@@ -123,15 +123,15 @@ module Library =
 
     // ---- Retrieving library for level select ----
 
-    type Group = ResizeArray<CachedChart * LevelSelectContext>
+    type Group = ResizeArray<CachedChart * LibraryContext>
     type LexSortedGroups = Dictionary<int * string, Group>
 
     let getGroups (ctx: GroupContext) (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
         for c in Filter.apply filter charts.Values do
             let s = grouping (c, ctx)
-            if groups.ContainsKey s |> not then groups.Add(s, new ResizeArray<CachedChart * LevelSelectContext>())
-            groups.[s].Add (c, LevelSelectContext.None)
+            if groups.ContainsKey s |> not then groups.Add(s, new ResizeArray<CachedChart * LibraryContext>())
+            groups.[s].Add (c, LibraryContext.None)
         for g in groups.Values do
             g.Sort sorting
         groups
@@ -146,7 +146,7 @@ module Library =
                     Seq.choose
                         ( fun (index, id) ->
                             lookup id
-                            |> Option.map (fun x -> x, LevelSelectContext.Collection (index, name))
+                            |> Option.map (fun x -> x, LibraryContext.Collection (index, name))
                         )
                         (Seq.indexed ids),
                     false
@@ -154,13 +154,13 @@ module Library =
                     Seq.choose
                         ( fun (index, (i, data)) -> 
                             lookup i
-                            |> Option.map (fun x -> x, LevelSelectContext.Playlist (index, name, data))
+                            |> Option.map (fun x -> x, LibraryContext.Playlist (index, name, data))
                         ) 
                         (Seq.indexed ps),
                     true
             charts
             |> Filter.applyf filter
-            |> ResizeArray<CachedChart * LevelSelectContext>
+            |> ResizeArray<CachedChart * LibraryContext>
             |> if orderMatters then id else fun x -> x.Sort sorting; x
             |> fun x -> if x.Count > 0 then groups.Add((0, name), x)
         groups
@@ -174,11 +174,11 @@ module Library =
                     Seq.choose
                         ( fun (c: TableChart) ->
                             lookupHash c.Hash
-                            |> Option.map (fun x -> x, LevelSelectContext.Table)
+                            |> Option.map (fun x -> x, LibraryContext.Table)
                         ) level.Charts
                 charts
                 |> Filter.applyf filter
-                |> ResizeArray<CachedChart * LevelSelectContext>
+                |> ResizeArray<CachedChart * LibraryContext>
                 |> fun x -> x.Sort sorting; x
                 |> fun x -> if x.Count > 0 then groups.Add((level_no, level.Name), x)
         | None -> ()

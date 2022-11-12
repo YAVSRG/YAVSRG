@@ -50,29 +50,25 @@ module Collections =
             | Playlist p -> p.Count = 0
         static member Blank = Collection (ResizeArray<_>())
 
+    type CollectionSource = { Name: string; Position: int }
+
     [<RequireQualifiedAccess>]
     [<CustomEquality>]
     [<NoComparison>]
-    type LevelSelectContext =
+    type LibraryContext =
         | None
         | Table
         | Collection of index: int * id: string
         | Playlist of index: int * id: string * data: PlaylistData
-        member this.InCollection =
+        member this.CollectionSource : CollectionSource option =
             match this with
             | None
-            | Table -> ""
-            | Collection (_, id)
-            | Playlist (_, id, _) -> id
-        member this.PositionInCollection =
-            match this with
-            | None
-            | Table -> -1
-            | Collection (i, _)
-            | Playlist (i, _, _) -> i
+            | Table -> Option.None
+            | Collection (i, id)
+            | Playlist (i, id, _) -> Some { Name = id; Position = i }
         override this.Equals(other: obj) =
             match other with
-            | :? LevelSelectContext as other ->
-                (this.InCollection = other.InCollection) && (this.PositionInCollection = other.PositionInCollection)
+            | :? LibraryContext as other ->
+                this.CollectionSource = other.CollectionSource
             | _ -> false
-        override this.GetHashCode() = (this.InCollection, this.PositionInCollection).GetHashCode()
+        override this.GetHashCode() = this.CollectionSource.GetHashCode()
