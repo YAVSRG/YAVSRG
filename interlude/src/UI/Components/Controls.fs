@@ -47,13 +47,12 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
         |* HotkeyAction(this.Hotkey, onClick)
         base.Init parent
 
-    static member FromEnum<'T when 'T: enum<int>>(label: string, setting: Setting<'T>, colorFunc) =
-        let names = Enum.GetNames(typeof<'T>)
-        let values = Enum.GetValues(typeof<'T>) :?> 'T array
-        let mutable i = array.IndexOf(values, setting.Value)
+    static member Selector<'T>(label: string, values: ('T * string) array, setting: Setting<'T>, colorFunc) =
+        let mutable current = array.IndexOf(values |> Array.map fst, setting.Value)
+        current <- max 0 current
         StylishButton(
-            (fun () -> i <- (i + 1) % values.Length; setting.Value <- values.[i]), 
-            (fun () -> sprintf "%s %s" label names.[i]),
+            (fun () -> current <- (current + 1) % values.Length; setting.Value <- fst values.[current]), 
+            (fun () -> sprintf "%s %s" label (snd values.[current])),
             colorFunc
         )
 

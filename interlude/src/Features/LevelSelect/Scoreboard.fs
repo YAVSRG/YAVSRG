@@ -44,16 +44,17 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
 
 module Scoreboard =
 
+    [<RequireQualifiedAccess>]
     type Sort =
     | Time = 0
     | Performance = 1
     | Accuracy = 2
-
+    
+    [<RequireQualifiedAccess>]
     type Filter =
     | None = 0
     | CurrentRate = 1
-    | CurrentPlaystyle = 2
-    | CurrentMods = 3
+    | CurrentMods = 2
 
     type ScoreCard(data: ScoreInfoProvider) as this =
         inherit StaticContainer(NodeType.None) // todo: make selectable with options for watching replay
@@ -187,7 +188,6 @@ type Scoreboard() as this =
     let filterer() : ScoreCard -> bool =
         match filter.Value with
         | Filter.CurrentRate -> (fun a -> a.Data.ScoreInfo.rate = rate.Value)
-        | Filter.CurrentPlaystyle -> (fun a -> a.Data.ScoreInfo.layout = options.Playstyles.[a.Data.ScoreInfo.keycount - 3])
         | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
         | _ -> K true
 
@@ -206,14 +206,24 @@ type Scoreboard() as this =
             TiltLeft = false)
             .Tooltip(L"levelselect.scoreboard.storage.tooltip")
             .WithPosition { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.33f %- 25.0f; Bottom = 0.0f %+ 50.0f }
-        |+ StylishButton.FromEnum(
+        |+ StylishButton.Selector(
             Icons.sort,
+            [|
+                Sort.Accuracy, L"levelselect.scoreboard.sort.accuracy"
+                Sort.Performance, L"levelselect.scoreboard.sort.performance"
+                Sort.Time, L"levelselect.scoreboard.sort.time"
+            |],
             sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
             Style.dark 100)
             .Tooltip(L"levelselect.scoreboard.sort.tooltip")
             .WithPosition { Left = 0.33f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.66f %- 25.0f; Bottom = 0.0f %+ 50.0f }
-        |+ StylishButton.FromEnum(
+        |+ StylishButton.Selector(
             Icons.filter,
+            [|
+                Filter.None, L"levelselect.scoreboard.filter.none"
+                Filter.CurrentRate, L"levelselect.scoreboard.filter.currentrate"
+                Filter.CurrentMods, L"levelselect.scoreboard.filter.currentmods"
+            |],
             filter |> Setting.trigger (fun _ -> this.Refresh()),
             Style.main 100,
             TiltRight = false)
