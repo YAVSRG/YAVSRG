@@ -135,83 +135,6 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
                 modstatus |> ValueSome
         modstatus.Value
 
-(*
-    !! Score buckets are likely getting binned in favour of tables, in the near future !!
-*)
-
-[<RequireQualifiedAccess>]
-[<Json.AutoCodec>]
-type ScoreFilter =
-    | Keymode of int
-    | Playstyle of Layout
-    | Grade of int
-    | Lamp of int
-    // pattern stuff
-    
-[<RequireQualifiedAccess>]
-[<Json.AutoCodec>]
-type ScoreSort =
-    | Physical
-    // pattern stuff
-    
-[<Json.AutoCodec>]
-type TopScore =
-    {
-        Hash: string
-        Timestamp: DateTime
-        Physical: float
-        // other stuff for sorting in future
-    }
-
-[<Json.AutoCodec>]
-type ScoreBucket =
-    {
-        Filters: ScoreFilter list
-        Sort: ScoreSort
-        Scores: ResizeArray<TopScore>
-        Size: int
-    }
-    static member Default =
-        {
-            Filters = [ScoreFilter.Keymode 4]
-            Sort = ScoreSort.Physical
-            Scores = ResizeArray()
-            Size = 50
-        }
-
-module Bucket =
-    
-    let add (score: ScoreInfoProvider) (bucket: ScoreBucket) =
-        if 
-            List.forall
-                (
-                    function
-                    | ScoreFilter.Keymode k -> score.ScoreInfo.keycount = k
-                    | ScoreFilter.Playstyle p -> score.ScoreInfo.layout = p
-                    | ScoreFilter.Grade g -> score.Grade >= g
-                    | ScoreFilter.Lamp l -> score.Lamp >= l
-                )
-                bucket.Filters
-        then
-            let sort =
-                match bucket.Sort with
-                | ScoreSort.Physical -> fun a b -> b.Physical.CompareTo a.Physical
-            let topScore =
-                {
-                    Hash = score.Chart |> Chart.hash
-                    Timestamp = score.ScoreInfo.time
-                    Physical = score.Physical
-                }
-            if
-                match bucket.Scores |> Seq.tryFind (fun x -> x.Hash = topScore.Hash) with
-                | Some existingScore when sort existingScore topScore <= 0 -> bucket.Scores.Remove existingScore // evaluates true
-                | Some existingScore -> false
-                | None -> true
-            then
-                bucket.Scores.Add topScore
-                bucket.Scores.Sort sort
-                if bucket.Scores.Count > bucket.Size then bucket.Scores.RemoveAt bucket.Size
-
 [<Json.AutoCodec>]
 type BestFlags =
     {
@@ -254,17 +177,15 @@ module Scores =
     type Data =
         {
             Entries: Dictionary<string, ChartSaveData>
-            Buckets: Dictionary<string, ScoreBucket>
         }
         static member Default =
             {
                 Entries = new Dictionary<string, ChartSaveData>()
-                Buckets = [("Best 4k", ScoreBucket.Default)] |> Map.ofList |> Dictionary<string, ScoreBucket>
             }
 
     let data: Data =
         loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) true
-        |> fun d -> Logging.Info (sprintf "Scores loaded, %i chart entries and %i buckets." d.Entries.Keys.Count d.Buckets.Keys.Count); d
+        |> fun d -> Logging.Info (sprintf "Scores loaded, with %i chart entries" d.Entries.Keys.Count); d
 
     let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "scores.json")) data
 
