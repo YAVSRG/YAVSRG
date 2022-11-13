@@ -30,7 +30,7 @@ type private ModCard(id) as this =
     member this.ModEnabled = if id = "auto" then autoplay else selectedMods.Value.ContainsKey id
     member this.ToggleMod() = if id = "auto" then autoplay <- not autoplay else Setting.app (ModState.cycleState id) selectedMods
 
-type private ModSelectPage() as this =
+type private ModSelectPage(onClose) as this =
     inherit Page()
 
     let mods =
@@ -95,9 +95,10 @@ type private ModSelectPage() as this =
         | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value
         | 1 -> options.Pacemakers.[rulesetId] <- Pacemaker.Lamp lamp.Value
         | _ -> failwith "impossible"
+        onClose()
     
-type ModSelect() =
-    inherit StylishButton((fun () -> Menu.ShowPage ModSelectPage), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")
+type ModSelect(onClose) =
+    inherit StylishButton((fun () -> Menu.ShowPage (ModSelectPage onClose)), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

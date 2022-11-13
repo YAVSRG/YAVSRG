@@ -70,7 +70,7 @@ type ChartInfo() as this =
             .Tooltip(L"levelselect.preview.tooltip")
             .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f }
 
-        |+ ModSelect()
+        |+ ModSelect(scores.Refresh)
             .Tooltip(L"levelselect.mods.tooltip")
             .WithPosition { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f }
         

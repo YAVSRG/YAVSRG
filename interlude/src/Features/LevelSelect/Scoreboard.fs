@@ -46,18 +46,18 @@ module Scoreboard =
 
     [<RequireQualifiedAccess>]
     type Sort =
-    | Time = 0
-    | Performance = 1
-    | Accuracy = 2
+        | Time = 0
+        | Performance = 1
+        | Accuracy = 2
     
     [<RequireQualifiedAccess>]
     type Filter =
-    | None = 0
-    | CurrentRate = 1
-    | CurrentMods = 2
+        | None = 0
+        | CurrentRate = 1
+        | CurrentMods = 2
 
     type ScoreCard(data: ScoreInfoProvider) as this =
-        inherit StaticContainer(NodeType.None) // todo: make selectable with options for watching replay
+        inherit StaticContainer(NodeType.None) // todo: make navigable using arrow keys
 
         let fade = Animation.Fade(0.0f, Target = 1.0f)
         let animation = Animation.seq [Animation.Delay 150; fade]
@@ -190,7 +190,6 @@ type Scoreboard() as this =
         | Filter.CurrentRate -> (fun a -> a.Data.ScoreInfo.rate = rate.Value)
         | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
         | _ -> K true
-
 
     let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.padding, Sort = sorter(), Filter = filterer())
     let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.padding, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
