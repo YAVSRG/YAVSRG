@@ -212,17 +212,17 @@ module Tree =
                     d.Grade
                     ruleset.GradeName
                     (fun _ -> let (_, _, c) = getPb d.Grade ruleset.GradeColor in c)
-                    425.0f
+                    415.0f
                 disp
                     d.Lamp
                     ruleset.LampName
                     ruleset.LampColor
-                    300.0f
+                    290.0f
                 disp
                     d.Clear
                     (fun x -> if x then "CLEAR" else "FAILED")
                     Themes.clearToColor
-                    175.0f
+                    165.0f
             | None -> ()
 
             // draw text
@@ -230,7 +230,7 @@ module Tree =
             Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Style.text())
             Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, Style.text_subheading())
             Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, Style.text_subheading())
-            Text.drawB(Style.baseFont, markers, 35.0f, right - 95.0f, top + 10.0f, Style.text())
+            Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Style.text(), Alignment.CENTER)
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
                 Draw.rect bounds (Style.color(Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
@@ -238,7 +238,7 @@ module Tree =
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
-        member private this.OnUpdate(bounds, elapsedTime, origin) =
+        member private this.OnUpdate(bounds, elapsedTime) =
 
             if localCacheFlag < cacheFlag then updateCachedInfo()
 
@@ -256,7 +256,7 @@ module Tree =
             if scrollTo = ScrollTo.Chart && groupName = selectedGroup && this.Selected then
                 scroll(-top + 500.0f)
                 scrollTo <- ScrollTo.Nothing
-            this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(b, elapsedTime, origin))
+            this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(b, elapsedTime))
 
     type private GroupItem(name: string, items: ChartItem list) =
         inherit TreeItem()
