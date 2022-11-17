@@ -163,9 +163,9 @@ module Tree =
             color <- colorFunc pbData
             markers <-
                 if options.ChartGroupMode.Value <> "Collections" then
-                    match Collections.selectedCollection with
-                    | Collection ccs -> if ccs.Contains cc.FilePath then Icons.star + " " else ""
-                    | Playlist ps -> if ps.Exists(fun (id, _) -> id = cc.FilePath) then Icons.playlist + " " else ""
+                    match Collections.current with
+                    | Collection c -> if c.Contains cc then c.Icon.Value + " " else ""
+                    | Playlist p -> if p.Contains cc then p.Icon.Value + " " else ""
                 else ""
                 +
                 match chartData with

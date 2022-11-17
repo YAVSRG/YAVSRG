@@ -167,7 +167,7 @@ module Options =
             ChartGroupReverse = Setting.simple false
             ScoreSortMode = Setting.simple 0
 
-            SelectedCollection = Setting.simple ""
+            SelectedCollection = Setting.simple (Localisation.localise "collections.favourites")
             SelectedTable = Setting.simple ""
 
             EnableConsole = Setting.simple false
@@ -184,7 +184,7 @@ module Options =
             |]
         }
 
-    let mutable internal config = Percyqaz.Flux.Windowing.Config.Default
+    let mutable internal config : Percyqaz.Flux.Windowing.Config = Unchecked.defaultof<_>
 
     do 
         // Register decoding rules for Percyqaz.Flux config
@@ -192,7 +192,7 @@ module Options =
             .WithAutoCodec<Percyqaz.Flux.Windowing.WindowResolution>()
             .WithAutoCodec<Percyqaz.Flux.Input.Bind>() |> ignore
 
-    let mutable options = GameOptions.Default
+    let mutable options : GameOptions = Unchecked.defaultof<_>
 
     module Hotkeys =
 

@@ -100,10 +100,9 @@ module Keybinds =
     type HotkeysPage() as this =
         inherit Page()
 
-        let container = FlowContainer.Vertical<PrettySetting>(PRETTYHEIGHT)
-        let scrollContainer = ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f))
-
         do
+            let container = FlowContainer.Vertical<PrettySetting>(PRETTYHEIGHT)
+            let scrollContainer = ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f))
             for hk in Hotkeys.hotkeys.Keys do
                 if hk <> "none" then
                     container.Add( PrettySetting("hotkeys." + hk.ToLower(), Keybinder hk) )

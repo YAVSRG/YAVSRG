@@ -80,14 +80,11 @@ module Gameplay =
         
         open Prelude.Data.Charts.Library
     
-        let mutable selectedName = Localisation.localise "collections.favourites"
-        let mutable selectedCollection = 
-            match Collections.get selectedName with
+        let mutable current =
+            let selection = options.SelectedCollection.Value
+            match collections.Get selection with
             | Some c -> c
-            | None ->
-                let n = Collection.Blank
-                Collections.create (selectedName, n) |> ignore
-                n
+            | None -> collections.CreateCollection(selection, Icons.heart).Value |> Collection
     
         let notifyChangeRate v =
             match Chart.context with
@@ -107,44 +104,11 @@ module Gameplay =
             | _ -> ()
     
         let select(name: string) =
-            match Collections.get name with
+            match collections.Get name with
             | Some c -> 
                 options.SelectedCollection.Set name
-                selectedName <- name
-                selectedCollection <- c
+                current <- c
             | None -> Logging.Error (sprintf "No such collection with name '%s'" name)
-    
-        let reorder (up: bool) : bool =
-            match Chart.context with
-            | LibraryContext.Playlist (index, id, d) ->
-                match Collections.reorderPlaylist id index up with
-                | Some newIndex when newIndex <> index ->
-                    Chart.context <- LibraryContext.Playlist (newIndex, id, d)
-                    true
-                | _ -> false
-            | _ -> false
-    
-        let removeChart (cc: CachedChart, ctx: LibraryContext) =
-            match ctx.CollectionSource with
-            | Some { Name = collection; Position = index } when collection = selectedName ->
-                // You are looking at the collection. Can remove at specific index
-                match selectedCollection with
-                | Collection ccs -> ccs.Remove cc.FilePath
-                | Playlist ps -> ps.RemoveAt index; true
-            | _ ->
-                // You are removing a chart that's in the collection but not looking at it
-                // For playlists, can remove the chart as long as it's clear which one needs removing
-                match selectedCollection with
-                | Collection ccs -> ccs.Remove cc.FilePath
-                | Playlist ps -> 
-                    if ps.FindAll(fun (id, _) -> id = cc.FilePath).Count = 1 then 
-                        ps.RemoveAll(fun (id, _) -> id = cc.FilePath) > 0
-                    else false
-    
-        let addChart (cc: CachedChart, rate, mods) =
-            match selectedCollection with
-            | Collection ccs -> if ccs.Contains cc.FilePath then false else ccs.Add cc.FilePath; true
-            | Playlist ps -> ps.Add (cc.FilePath, PlaylistData.Make mods rate); true
 
     let rate =
         Chart._rate

@@ -311,8 +311,8 @@ module GameplayWidgets =
                 if _hearts < hearts then color.Value <- Color.White
                 hearts <- _hearts
                 let display = 
-                    if hearts > 5 then sprintf "%s x%i" (String.replicate 5 Icons.heart) hearts
-                    elif hearts > 0 then (String.replicate hearts Icons.heart)
+                    if hearts > 5 then sprintf "%s x%i" (String.replicate 5 Icons.heart2) hearts
+                    elif hearts > 0 then (String.replicate hearts Icons.heart2)
                     else Icons.failure
                 Text.drawFillB(Style.baseFont, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 

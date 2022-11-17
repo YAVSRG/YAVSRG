@@ -66,11 +66,12 @@ type PrettyButton(name, action) as this =
     inherit StaticContainer(NodeType.Button (fun _ -> if this.Enabled then action()))
 
     member val Icon = "" with get, set
+    member val Text = N name with get, set
 
     override this.Init(parent: Widget) =
         this
         |+ Text(
-            K (if this.Icon <> "" then sprintf "%s %s  >" this.Icon (N name) else sprintf "%s  >" (N name)),
+            K (if this.Icon <> "" then sprintf "%s %s  >" this.Icon this.Text else sprintf "%s  >" this.Text),
             Color = ( 
                 fun () -> 
                     if this.Enabled then
