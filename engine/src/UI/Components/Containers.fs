@@ -37,7 +37,7 @@ module FlowContainer =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + children.Count - 1) % children.Count
-                while index <> i && not children.[index].Visible do
+                while index <> i && (not children.[index].Visible || not children.[index].Widget.Focusable) do
                     index <- (index + children.Count - 1) % children.Count
                 last_selected <- index
                 children.[index].Widget.Focus()
@@ -47,7 +47,7 @@ module FlowContainer =
             match this.WhoIsFocused with
             | Some i ->
                 let mutable index = (i + 1) % children.Count
-                while index <> i && not children.[index].Visible do
+                while index <> i && (not children.[index].Visible || not children.[index].Widget.Focusable) do
                     index <- (index + 1) % children.Count
                 last_selected <- index
                 children.[index].Widget.Focus()
