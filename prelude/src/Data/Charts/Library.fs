@@ -20,8 +20,8 @@ module Library =
 
     let charts : ConcurrentDictionary<string, CachedChart> = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) false
     let collections = 
-        let cs : Dictionary<string, Collection> = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "collections.json")) false
-        Logging.Info (sprintf "Loaded chart library of %i charts, %i collections" charts.Keys.Count cs.Keys.Count)
+        let cs : Collections = loadImportantJsonFile "Collections" (Path.Combine(getDataPath "Data", "collections.json")) false
+        Logging.Info (sprintf "Loaded chart library of %i charts, %i collections, %i playlists" charts.Count cs.Collections.Count cs.Playlists.Count)
         cs
 
     // ---- Basic data layer stuff ----
@@ -76,51 +76,6 @@ module Library =
     
     let deleteMany (cs: CachedChart seq) = Seq.iter delete cs
 
-    // ---- Collections stuff ----
-
-    module Collections =
-        
-        let getNewName () =
-            let mutable name = "New Collection"
-            let mutable n = 0
-            while collections.ContainsKey name do
-                n <- n + 1
-                name <- "New Collection " + n.ToString()
-            name
-
-        /// Returns false only in thread-unsafe case when two threads both make a new collection with same name
-        let create (name: string, data: Collection) : bool =
-            collections.TryAdd(name, data)
-
-        let rename (id: string, newId: string) : bool =
-            if collections.ContainsKey newId then false else
-                collections.Add (newId, collections.[id])
-                collections.Remove id
-
-        let exists (id: string) : bool = collections.ContainsKey id
-
-        let get (id: string) : Collection option = if collections.ContainsKey id then Some collections.[id] else None
-
-        let update (id: string, data: Collection) =
-            if collections.ContainsKey id then collections.[id] <- data else failwith "No such collection."
-
-        let delete (id: string) : bool = if collections.ContainsKey id then collections.Remove id else false
-
-        let enumerate () = collections.Keys :> string seq
-
-        /// Returns the new index if successful
-        let reorderPlaylist (id: string) (index: int) (up: bool) : int option =
-            if collections.ContainsKey id then
-                match collections.[id] with
-                | Playlist ps ->
-                    let newIndex = if up then max 0 (index - 1) else min (ps.Count - 1) (index + 1)
-                    let item = ps.[index]
-                    ps.RemoveAt index
-                    ps.Insert (newIndex, item)
-                    Some newIndex
-                | _ -> None
-            else None
-
     // ---- Retrieving library for level select ----
 
     type Group = ResizeArray<CachedChart * LibraryContext>
@@ -138,30 +93,37 @@ module Library =
 
     let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
-        for name in collections.Keys do
-            let c = collections.[name]
-            let charts, orderMatters = 
-                match c with
-                | Collection ids -> 
-                    Seq.choose
-                        ( fun (index, id) ->
-                            lookup id
-                            |> Option.map (fun x -> x, LibraryContext.Collection (index, name))
-                        )
-                        (Seq.indexed ids),
-                    false
-                | Playlist ps ->
-                    Seq.choose
-                        ( fun (index, (i, data)) -> 
-                            lookup i
-                            |> Option.map (fun x -> x, LibraryContext.Playlist (index, name, data))
-                        ) 
-                        (Seq.indexed ps),
-                    true
-            charts
+        for name in collections.Collections.Keys do
+            let collection = collections.Collections.[name]
+            collection.Charts
+            |> Seq.choose
+                ( fun entry ->
+                    match lookup entry.Path with
+                    | Some cc -> Some (cc, LibraryContext.Collection name)
+                    | None ->
+                    match lookupHash entry.Hash with
+                    | Some cc -> Some (cc, LibraryContext.Collection name)
+                    | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name); None
+                )
             |> Filter.applyf filter
             |> ResizeArray<CachedChart * LibraryContext>
-            |> if orderMatters then id else fun x -> x.Sort sorting; x
+            |> fun x -> x.Sort sorting; x
+            |> fun x -> if x.Count > 0 then groups.Add((0, name), x)
+        for name in collections.Playlists.Keys do
+            let playlist = collections.Playlists.[name]
+            playlist.Charts
+            |> Seq.indexed
+            |> Seq.choose
+                ( fun (i, (entry, info)) ->
+                    match lookup entry.Path with
+                    | Some cc -> Some (cc, LibraryContext.Playlist (i, name, info))
+                    | None ->
+                    match lookupHash entry.Hash with
+                    | Some cc -> Some (cc, LibraryContext.Playlist (i, name, info))
+                    | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for playlist %s" entry.Path entry.Hash name); None
+                )
+            |> Filter.applyf filter
+            |> ResizeArray<CachedChart * LibraryContext>
             |> fun x -> if x.Count > 0 then groups.Add((0, name), x)
         groups
 
@@ -170,13 +132,12 @@ module Library =
         match Table.current with
         | Some table ->
             for level_no, level in Seq.indexed table.Levels do
-                let charts =
-                    Seq.choose
-                        ( fun (c: TableChart) ->
-                            lookupHash c.Hash
-                            |> Option.map (fun x -> x, LibraryContext.Table)
-                        ) level.Charts
-                charts
+                level.Charts
+                |> Seq.choose
+                    ( fun (c: TableChart) ->
+                        lookupHash c.Hash
+                        |> Option.map (fun x -> x, LibraryContext.Table)
+                    )
                 |> Filter.applyf filter
                 |> ResizeArray<CachedChart * LibraryContext>
                 |> fun x -> x.Sort sorting; x

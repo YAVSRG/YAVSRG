@@ -4,8 +4,6 @@ open System
 open System.IO
 open SixLabors.ImageSharp
 open System.Drawing
-open System.Threading
-open System.Threading.Tasks
 open System.Collections.Generic
 open Percyqaz.Json
 open Percyqaz.Common
@@ -67,6 +65,10 @@ module Common =
         override this.Default (ctx: Json.Context) =
             fun () -> Collections.Concurrent.ConcurrentDictionary()
 
+    module Setting =
+        open Percyqaz.Common.Setting
+        let rate x = bounded x 0.5f 2.0f |> roundf 2
+
 (*
     Localisation
 *)
@@ -85,7 +87,7 @@ module Common =
                         mapping.Add (s.[0], s.[1].Replace("\\n","\n"))
                     ) lines
                 loadedPath <- Path.GetFullPath path
-            with err -> Logging.Error ("Failed to load localisation file: " + path, err)
+            with err -> Logging.Critical ("Failed to load localisation file: " + path, err)
 
         let localise str : string =
             if mapping.ContainsKey str then mapping.[str]
