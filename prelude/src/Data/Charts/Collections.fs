@@ -28,7 +28,7 @@ module Collections =
                 | _ -> -1
 
     [<Json.AutoCodec>]
-    type Collection =
+    type Folder =
         {
             Charts: ResizeArray<Entry>
             Icon: Setting<string>
@@ -113,26 +113,26 @@ module Collections =
             let entry = Entry.OfChart chart
             this.Charts |> Seq.tryFind (fun (e, _) -> e = entry) |> Option.isSome
 
-    type CollectionsU = Collection of Collection | Playlist of Playlist
+    type Collection = Folder of Folder | Playlist of Playlist
 
     [<Json.AutoCodec>]
     type Collections =
         {
-            Collections: Dictionary<string, Collection>
+            Folders: Dictionary<string, Folder>
             Playlists: Dictionary<string, Playlist>
         }
 
-        member this.List : (string * CollectionsU) seq =
+        member this.List : (string * Collection) seq =
             seq {
-                for c in this.Collections.Keys do
-                    yield (c, Collection this.Collections.[c])
+                for c in this.Folders.Keys do
+                    yield (c, Folder this.Folders.[c])
                 for p in this.Playlists.Keys do
                     yield (p, Playlist this.Playlists.[p])
             }
 
-        member this.Get(name: string) : CollectionsU option =
-            if this.Collections.ContainsKey name then
-                Some (Collection this.Collections.[name])
+        member this.Get(name: string) : Collection option =
+            if this.Folders.ContainsKey name then
+                Some (Folder this.Folders.[name])
             elif this.Playlists.ContainsKey name then
                 Some (Playlist this.Playlists.[name])
             else None
@@ -144,12 +144,12 @@ module Collections =
 
         member this.Exists(name) = this.Get(name).IsSome
 
-        member this.CreateCollection(name, icon) : Collection option =
+        member this.CreateFolder(name, icon) : Folder option =
             if this.Exists name then None
             else
-                let collection = Collection.Create icon
-                this.Collections.Add(name, collection)
-                Some collection
+                let folder = Folder.Create icon
+                this.Folders.Add(name, folder)
+                Some folder
 
         member this.CreatePlaylist(name, icon) : Playlist option =
             if this.Exists name then None
@@ -159,17 +159,17 @@ module Collections =
                 Some playlist
 
         member this.Delete(name) : bool =
-            if this.Collections.ContainsKey name then this.Collections.Remove name
+            if this.Folders.ContainsKey name then this.Folders.Remove name
             elif this.Playlists.ContainsKey name then this.Playlists.Remove name
             else false
 
         member this.RenameCollection(oldname, newname) : bool =
             if this.Exists newname then false
-            elif not (this.Collections.ContainsKey oldname) then false
+            elif not (this.Folders.ContainsKey oldname) then false
             else
-            let collection = this.Collections.[oldname]
-            this.Collections.Remove oldname |> ignore
-            this.Collections.Add(newname, collection)
+            let folder = this.Folders.[oldname]
+            this.Folders.Remove oldname |> ignore
+            this.Folders.Add(newname, folder)
             true
             
         member this.RenamePlaylist(oldname, newname) : bool =
@@ -189,13 +189,13 @@ module Collections =
     type LibraryContext =
         | None
         | Table
-        | Collection of id: string
+        | Folder of id: string
         | Playlist of index: int * id: string * data: PlaylistEntryInfo
         member this.CollectionSource : CollectionSource option =
             match this with
             | None
             | Table -> Option.None
-            | Collection id -> Some { Name = id; Position = 0 }
+            | Folder id -> Some { Name = id; Position = 0 }
             | Playlist (i, id, _) -> Some { Name = id; Position = i }
         override this.Equals(other: obj) =
             match other with

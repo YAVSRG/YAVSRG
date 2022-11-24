@@ -21,7 +21,7 @@ module Library =
     let charts : ConcurrentDictionary<string, CachedChart> = loadImportantJsonFile "Cache" (Path.Combine(getDataPath "Data", "cache.json")) false
     let collections = 
         let cs : Collections = loadImportantJsonFile "Collections" (Path.Combine(getDataPath "Data", "collections.json")) false
-        Logging.Info (sprintf "Loaded chart library of %i charts, %i collections, %i playlists" charts.Count cs.Collections.Count cs.Playlists.Count)
+        Logging.Info (sprintf "Loaded chart library of %i charts, %i folders, %i playlists" charts.Count cs.Folders.Count cs.Playlists.Count)
         cs
 
     // ---- Basic data layer stuff ----
@@ -94,16 +94,16 @@ module Library =
 
     let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
-        for name in collections.Collections.Keys do
-            let collection = collections.Collections.[name]
+        for name in collections.Folders.Keys do
+            let collection = collections.Folders.[name]
             collection.Charts
             |> Seq.choose
                 ( fun entry ->
                     match lookup entry.Path with
-                    | Some cc -> Some (cc, LibraryContext.Collection name)
+                    | Some cc -> Some (cc, LibraryContext.Folder name)
                     | None ->
                     match lookupHash entry.Hash with
-                    | Some cc -> Some (cc, LibraryContext.Collection name)
+                    | Some cc -> Some (cc, LibraryContext.Folder name)
                     | None -> Logging.Warn(sprintf "Could not find chart: %s [%s] for collection %s" entry.Path entry.Hash name); None
                 )
             |> Filter.applyf filter
