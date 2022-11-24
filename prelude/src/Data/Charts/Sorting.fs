@@ -69,9 +69,6 @@ module Sorting =
             "Artist", fun (c, _) -> 0, firstCharacter c.Artist
             "Creator", fun (c, _) -> 0, firstCharacter c.Creator
             "Keymode", fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
-            // todo: separate these out properly
-            "Collections", fun _ -> 0, "" // Placeholder for UI purposes, UI is hard coded to call collection grouping behaviour when this is chosen
-            "Table", fun _ -> 0, "" // Placeholder for UI purposes, UI is hard coded to call table grouping behaviour when this is chosen
         ]
 
     let private compareBy (f: CachedChart -> IComparable) = fun a b -> f(fst a).CompareTo <| f(fst b)

@@ -78,6 +78,7 @@ module Library =
 
     // ---- Retrieving library for level select ----
 
+    type [<RequireQualifiedAccess; Json.AutoCodec>] LibraryMode = All | Collections | Table
     type Group = ResizeArray<CachedChart * LibraryContext>
     type LexSortedGroups = Dictionary<int * string, Group>
 
