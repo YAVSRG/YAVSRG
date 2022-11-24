@@ -9,6 +9,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Input.Bind
 open Prelude.Common
 open Prelude.Gameplay.Layout
+open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Library.Imports
 open Interlude
 
@@ -101,6 +102,7 @@ module Options =
             ChartSortMode: Setting<string>
             ChartSortReverse: Setting<bool>
             ChartGroupMode: Setting<string>
+            LibraryMode: Setting<LibraryMode>
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
 
@@ -164,6 +166,7 @@ module Options =
             ChartSortMode = Setting.simple "Title"
             ChartSortReverse = Setting.simple false
             ChartGroupMode = Setting.simple "Pack"
+            LibraryMode = Setting.simple LibraryMode.All
             ChartGroupReverse = Setting.simple false
             ScoreSortMode = Setting.simple 0
 

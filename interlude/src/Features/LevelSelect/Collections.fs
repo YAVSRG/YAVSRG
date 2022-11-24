@@ -17,13 +17,13 @@ module CollectionManager =
 
     module Current =
 
-        let quick_add(cc: CachedChart, context: LibraryContext) =
+        let quick_add(cc: CachedChart, _: LibraryContext) =
             if 
                 match Collections.current with
                 | Collection c -> c.Add cc
                 | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
             then
-                if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
                 Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; options.SelectedCollection.Value] "collections.added", NotificationType.Info)
 
         let quick_remove(cc: CachedChart, context: LibraryContext) =
@@ -35,7 +35,7 @@ module CollectionManager =
                     | LibraryContext.Playlist (i, name, _) when name = options.SelectedCollection.Value -> p.RemoveAt i
                     | _ -> p.RemoveSingle cc
             then
-                if options.ChartGroupMode.Value = "Collections" then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
                 Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; options.SelectedCollection.Value] "collections.removed", NotificationType.Info)
                 if context = Chart.context then Chart.context <- LibraryContext.None
 

@@ -14,6 +14,7 @@ open Prelude.Data.Charts
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
+open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Suggestions
 open Interlude.UI
 open Interlude.UI.Menu
@@ -162,7 +163,7 @@ module Tree =
             | _ -> ()
             color <- colorFunc pbData
             markers <-
-                if options.ChartGroupMode.Value <> "Collections" then
+                if options.LibraryMode.Value <> LibraryMode.Collections then
                     match Collections.current with
                     | Collection c -> if c.Contains cc then c.Icon.Value + " " else ""
                     | Playlist p -> if p.Contains cc then p.Icon.Value + " " else ""
@@ -300,7 +301,7 @@ module Tree =
                         Localisation.localiseWith [groupName] "misc.confirmdelete",
                         NotificationType.Warning,
                         fun () ->
-                            items |> Seq.map (fun i -> i.Chart) |> Library.deleteMany
+                            items |> Seq.map (fun i -> i.Chart) |> deleteMany
                             LevelSelect.refresh <- true
                             Notifications.add (Localisation.localiseWith [groupName] "notification.deleted", NotificationType.Info)
                     )
@@ -329,10 +330,10 @@ module Tree =
         // fetch groups
         let library_groups =
             let ctx : GroupContext = { Rate = rate.Value; RulesetId = rulesetId; Ruleset = ruleset }
-            match options.ChartGroupMode.Value with
-            | "Collections" -> Library.getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
-            | "Table" -> Library.getTableGroups sortBy.[options.ChartSortMode.Value] filter
-            | grouping -> Library.getGroups ctx groupBy.[grouping] sortBy.[options.ChartSortMode.Value] filter
+            match options.LibraryMode.Value with
+            | LibraryMode.Collections -> getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
+            | LibraryMode.Table -> getTableGroups sortBy.[options.ChartSortMode.Value] filter
+            | LibraryMode.All -> getGroups ctx groupBy.[options.ChartGroupMode.Value] sortBy.[options.ChartSortMode.Value] filter
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()
