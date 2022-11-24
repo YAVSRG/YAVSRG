@@ -84,7 +84,7 @@ module Gameplay =
             let selection = options.SelectedCollection.Value
             match collections.Get selection with
             | Some c -> c
-            | None -> collections.CreateCollection(selection, Icons.heart).Value |> Collection
+            | None -> collections.CreateFolder(selection, Icons.heart).Value |> Folder
     
         let notifyChangeRate v =
             match Chart.context with

@@ -165,7 +165,7 @@ module Tree =
             markers <-
                 if options.LibraryMode.Value <> LibraryMode.Collections then
                     match Collections.current with
-                    | Collection c -> if c.Contains cc then c.Icon.Value + " " else ""
+                    | Folder c -> if c.Contains cc then c.Icon.Value + " " else ""
                     | Playlist p -> if p.Contains cc then p.Icon.Value + " " else ""
                 else ""
                 +

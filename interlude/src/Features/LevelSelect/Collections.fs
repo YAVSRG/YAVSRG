@@ -20,7 +20,7 @@ module CollectionManager =
         let quick_add(cc: CachedChart, _: LibraryContext) =
             if 
                 match Collections.current with
-                | Collection c -> c.Add cc
+                | Folder c -> c.Add cc
                 | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
             then
                 if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
@@ -29,7 +29,7 @@ module CollectionManager =
         let quick_remove(cc: CachedChart, context: LibraryContext) =
             if
                 match Collections.current with
-                | Collection c -> c.Remove cc
+                | Folder c -> c.Remove cc
                 | Playlist p ->
                     match context with
                     | LibraryContext.Playlist (i, name, _) when name = options.SelectedCollection.Value -> p.RemoveAt i
@@ -55,29 +55,33 @@ module CollectionManager =
             | _ -> false
         then LevelSelect.refresh <- true
 
-type private CreateCollectionPage() as this =
+type private CreateFolderPage() as this =
     inherit Page()
 
-    let new_name = Setting.simple "Collection" |> Setting.alphaNum
+    let new_name = Setting.simple "Folder" |> Setting.alphaNum
     let icon = Setting.simple Icons.heart
 
     do
         this.Content(
             column()
-            |+ PrettySetting("collections.edit.collection_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PrettySetting("collections.edit.folder_name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettySetting("collections.edit.icon",
-                Selector( [|
-                    Icons.heart, Icons.heart
-                    Icons.star, Icons.star
-                    Icons.folder, Icons.folder
-                    |],
+                Selector( CreateFolderPage.Icons,
                 icon)).Pos(300.0f)
             |+ PrettyButton("confirm.yes", 
-                (fun () -> if collections.CreateCollection(new_name.Value, icon.Value).IsSome then Menu.Back() )).Pos(400.0f)
+                (fun () -> if collections.CreateFolder(new_name.Value, icon.Value).IsSome then Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = N"collections.create_collection"
+    override this.Title = N"collections.create_folder"
     override this.OnClose() = ()
+
+    static member Icons = 
+        [|
+            Icons.heart, Icons.heart
+            Icons.star, Icons.star
+            Icons.bookmark, Icons.bookmark
+            Icons.folder, Icons.folder
+        |]
 
 type private CreatePlaylistPage() as this =
     inherit Page()
@@ -90,12 +94,7 @@ type private CreatePlaylistPage() as this =
             column()
             |+ PrettySetting("collections.edit.playlist_name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettySetting("collections.edit.icon",
-                Selector( [|
-                    Icons.star, Icons.star
-                    Icons.goal, Icons.goal
-                    Icons.play, Icons.play
-                    Icons.folder, Icons.folder
-                    |],
+                Selector( CreatePlaylistPage.Icons,
                 icon)).Pos(300.0f)
             |+ PrettyButton("confirm.yes", 
                 (fun () -> if collections.CreatePlaylist(new_name.Value, icon.Value).IsSome then Menu.Back() )).Pos(400.0f)
@@ -104,7 +103,15 @@ type private CreatePlaylistPage() as this =
     override this.Title = N"collections.create_playlist"
     override this.OnClose() = ()
 
-type private EditCollectionPage(name: string, collection: Collection) as this =
+    static member Icons =
+        [|
+            Icons.star, Icons.star
+            Icons.goal, Icons.goal
+            Icons.play, Icons.play
+            Icons.list, Icons.list
+        |]
+
+type private EditFolderPage(name: string, folder: Folder) as this =
     inherit Page()
 
     let new_name = Setting.simple name |> Setting.alphaNum
@@ -112,14 +119,10 @@ type private EditCollectionPage(name: string, collection: Collection) as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("collections.edit.collection_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PrettySetting("collections.edit.folder_name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettySetting("collections.edit.icon",
-                Selector( [|
-                    Icons.heart, Icons.heart
-                    Icons.star, Icons.star
-                    Icons.folder, Icons.folder
-                    |],
-                collection.Icon)).Pos(300.0f)
+                Selector( CreateFolderPage.Icons,
+                folder.Icon)).Pos(300.0f)
             |+ PrettyButton("collections.edit.delete", 
                 (fun () -> 
                     Menu.ShowPage (ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", fun () -> collections.Delete name |> ignore; Menu.Back() ))),
@@ -143,12 +146,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
             column()
             |+ PrettySetting("collections.edit.playlist_name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettySetting("collections.edit.icon",
-                Selector( [|
-                    Icons.star, Icons.star
-                    Icons.goal, Icons.goal
-                    Icons.play, Icons.play
-                    Icons.folder, Icons.folder
-                    |],
+                Selector( CreatePlaylistPage.Icons,
                 playlist.Icon)).Pos(300.0f)
             |+ PrettyButton("collections.edit.delete", 
                 (fun () -> 
@@ -169,14 +167,14 @@ type private CollectionsPage() as this =
     do
         let container =
             FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-            |+ PrettyButton("collections.create_collection", (fun () -> Menu.ShowPage CreateCollectionPage))
+            |+ PrettyButton("collections.create_folder", (fun () -> Menu.ShowPage CreateFolderPage))
             |+ PrettyButton("collections.create_playlist", (fun () -> Menu.ShowPage CreatePlaylistPage))
             |+ Dummy()
         for name, collection in collections.List do
             match collection with
-            | Collection c -> 
-                container.Add( PrettyButton("collections.collection",
-                    (fun () -> Menu.ShowPage(EditCollectionPage(name, c))),
+            | Folder c -> 
+                container.Add( PrettyButton("collections.folder",
+                    (fun () -> Menu.ShowPage(EditFolderPage(name, c))),
                     Icon = c.Icon.Value, Text = name) )
             | Playlist p ->
                 container.Add( PrettyButton("collections.playlist",
