@@ -439,7 +439,7 @@ type EditGameplayConfigPage() as this =
     override this.Title = N"themes.edittheme.gameplay"
     override this.OnClose() = ()
 
-type EditThemePage(refreshThemes) as this =
+type EditThemePage() as this =
     inherit Page()
 
     let data = Themes.Current.config
@@ -459,4 +459,3 @@ type EditThemePage(refreshThemes) as this =
             { data with
                 Name = name.Value
             }
-        refreshThemes()

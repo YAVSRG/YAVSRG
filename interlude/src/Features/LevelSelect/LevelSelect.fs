@@ -16,48 +16,6 @@ open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 
-type OrganiseCharts(options: string seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
-    inherit StaticContainer(NodeType.None)
-
-    override this.Init(parent: Widget) =
-        this 
-        |+ StylishButton(
-            ( fun () -> this.ToggleDropdown() ),
-            K (label + ":"),
-            ( fun () -> Style.color(100, 1.0f, 0.2f) ),
-            Hotkey = bind,
-            Position = Position.SliceLeft 120.0f)
-        |* StylishButton(
-            ( fun () -> reverse.Value <- not reverse.Value ),
-            ( fun () -> sprintf "%s %s" setting.Value (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
-            ( fun () -> Style.color(100, 0.5f, 0.0f) ),
-            // todo: hotkey for this
-            Position = Position.TrimLeft 145.0f )
-        base.Init parent
-
-    member this.ToggleDropdown() =
-        match this.Dropdown with
-        | Some d -> this.Dropdown <- None
-        | _ ->
-            let d = Dropdown.Selector options id (fun g -> setting.Set g) (fun () -> this.Dropdown <- None)
-            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
-            d.Init this
-            this.Dropdown <- Some d
-
-    member val Dropdown : Dropdown option = None with get, set
-
-    override this.Draw() =
-        base.Draw()
-        match this.Dropdown with
-        | Some d -> d.Draw()
-        | None -> ()
-
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        match this.Dropdown with
-        | Some d -> d.Update(elapsedTime, moved)
-        | None -> ()
-
 type LevelSelectScreen() =
     inherit Screen()
 
@@ -96,23 +54,7 @@ type LevelSelectScreen() =
             .Tooltip(L"levelselect.search.tooltip")
             .WithPosition { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f }
 
-        |+ CollectionManager()
-            .Tooltip(L"levelselect.collections.tooltip")
-            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f }
-
-        |+ OrganiseCharts(sortBy.Keys, "Sort",
-            options.ChartSortMode |> Setting.trigger (fun _ -> refresh()),
-            options.ChartSortReverse |> Setting.map not not |> Setting.trigger (fun _ -> refresh()),
-            "sort_mode")
-            .Tooltip(L"levelselect.sortby.tooltip")
-            .WithPosition { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f }
-
-        |+ OrganiseCharts(groupBy.Keys, "Group",
-            options.ChartGroupMode |> Setting.trigger (fun _ -> refresh()),
-            options.ChartGroupReverse |> Setting.trigger (fun _ -> refresh()),
-            "group_mode")
-            .Tooltip(L"levelselect.groupby.tooltip")
-            .WithPosition { Left = 0.8f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f }
+        |+ LibraryModeSettings()
 
         |* infoPanel
 

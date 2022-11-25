@@ -39,7 +39,7 @@ type NoteColorPicker(color: Setting<byte>) as this =
             elif (!|"left").Tapped() then bk()
             elif (!|"right").Tapped() then fd()
 
-type EditNoteskinPage(refreshNoteskins : unit -> unit) as this =
+type EditNoteskinPage() as this =
     inherit Page()
 
     let data = Noteskins.Current.config
@@ -100,4 +100,3 @@ type EditNoteskinPage(refreshNoteskins : unit -> unit) as this =
                 EnableColumnLight = enableColumnLight.Value
                 NoteColors = noteColors
             }
-        refreshNoteskins()

@@ -7,11 +7,13 @@ open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
+open Prelude.Data.Charts.Sorting
+open Interlude.Options
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
-open Interlude.Options
 
 module CollectionManager =
 
@@ -108,7 +110,7 @@ type private CreatePlaylistPage() as this =
             Icons.star, Icons.star
             Icons.goal, Icons.goal
             Icons.play, Icons.play
-            Icons.list, Icons.list
+            Icons.playlist, Icons.playlist
         |]
 
 type private EditFolderPage(name: string, folder: Folder) as this =
@@ -161,25 +163,30 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                 Logging.Debug (sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
             else Logging.Debug "Rename failed, maybe that name already exists?"
 
-type private CollectionsPage() as this =
+type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
     inherit Page()
 
-    do
-        let container =
-            FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
-            |+ PrettyButton("collections.create_folder", (fun () -> Menu.ShowPage CreateFolderPage))
-            |+ PrettyButton("collections.create_playlist", (fun () -> Menu.ShowPage CreatePlaylistPage))
-            |+ Dummy()
+    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let refresh() =
+        container.Clear()
+        container
+        |+ PrettyButton("collections.create_folder", (fun () -> Menu.ShowPage CreateFolderPage))
+        |+ PrettyButton("collections.create_playlist", (fun () -> Menu.ShowPage CreatePlaylistPage))
+        |* Dummy()
         for name, collection in collections.List do
             match collection with
-            | Folder c -> 
+            | Folder f -> 
                 container.Add( PrettyButton("collections.folder",
-                    (fun () -> Menu.ShowPage(EditFolderPage(name, c))),
-                    Icon = c.Icon.Value, Text = name) )
+                    (fun () -> Menu.ShowPage(EditFolderPage(name, f))),
+                    Icon = f.Icon.Value, Text = name) )
             | Playlist p ->
                 container.Add( PrettyButton("collections.playlist",
                     (fun () -> Menu.ShowPage(EditPlaylistPage(name, p))),
                     Icon = p.Icon.Value, Text = name) )
+        if container.Focused then container.Focus()
+
+    do
+        refresh()
 
         this.Content(
             SwitchContainer.Column<Widget>()
@@ -192,9 +199,123 @@ type private CollectionsPage() as this =
 
     override this.Title = N"collections"
     override this.OnClose() = ()
+    override this.OnReturnTo() = refresh()
+
+    static member Editor() = 
+        SelectCollectionPage(
+            fun (name, collection) ->
+                match collection with
+                | Folder f -> Menu.ShowPage(EditFolderPage(name, f))
+                | Playlist p -> Menu.ShowPage(EditPlaylistPage(name, p))
+        )
+
+type private ModeDropdown(options: string seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
+    inherit StaticContainer(NodeType.None)
+
+    override this.Init(parent: Widget) =
+        this 
+        |+ StylishButton(
+            ( fun () -> this.ToggleDropdown() ),
+            K (label + ":"),
+            Style.highlight 100,
+            Hotkey = bind,
+            Position = Position.SliceLeft 120.0f)
+        |* StylishButton(
+            ( fun () -> reverse.Value <- not reverse.Value ),
+            ( fun () -> sprintf "%s %s" setting.Value (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
+            Style.dark 100,
+            // todo: hotkey for direction reversal
+            Position = Position.TrimLeft 145.0f )
+        base.Init parent
+
+    member this.ToggleDropdown() =
+        match this.Dropdown with
+        | Some _ -> this.Dropdown <- None
+        | _ ->
+            let d = Dropdown.Selector options id (fun g -> setting.Set g) (fun () -> this.Dropdown <- None)
+            d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
+            d.Init this
+            this.Dropdown <- Some d
+
+    member val Dropdown : Dropdown option = None with get, set
+
+    override this.Draw() =
+        base.Draw()
+        match this.Dropdown with
+        | Some d -> d.Draw()
+        | None -> ()
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        match this.Dropdown with
+        | Some d -> d.Update(elapsedTime, moved)
+        | None -> ()
     
-type CollectionManager() =
-    inherit StylishButton ((fun () -> Menu.ShowPage CollectionsPage), K (sprintf "%s %s" Icons.collections (N"collections")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "collections")
+type LibraryModeSettings() =
+    inherit StaticContainer(NodeType.None)
+
+    let group_selector = 
+        ModeDropdown(
+            groupBy.Keys,
+            "Group",
+            options.ChartGroupMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            options.ChartGroupReverse |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            "group_mode"
+        ).Tooltip(L"levelselect.groupby.tooltip")
+
+    let manage_collections =
+        StylishButton(
+            (fun () -> Menu.ShowPage SelectCollectionPage.Editor),
+            K (sprintf "%s %s" Icons.collections (L"levelselect.collections.name")),
+            Style.main 100,
+            Hotkey = "group_mode"
+        ).Tooltip(L"levelselect.collections.tooltip")
+        
+    let manage_tables =
+        StylishButton(
+            ignore,
+            K (sprintf "%s %s" Icons.edit (L"levelselect.table.name")),
+            Style.main 100,
+            Hotkey = "group_mode"
+        ).Tooltip(L"levelselect.table.tooltip")
+
+    let swap = SwapContainer(Position = { Left = 0.8f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f })
+
+    let update_swap() =
+        swap.Current <-
+        match options.LibraryMode.Value with
+        | LibraryMode.All -> group_selector
+        | LibraryMode.Collections -> manage_collections
+        | LibraryMode.Table -> manage_tables
+
+    override this.Init(parent) =
+        this
+        |+ StylishButton.Selector(
+            sprintf "%s %s:" Icons.collections (L"levelselect.librarymode"),
+            [|
+                LibraryMode.All, L"levelselect.librarymode.all"
+                LibraryMode.Collections, L"levelselect.librarymode.collections"
+                LibraryMode.Table, L"levelselect.librarymode.table"
+            |],
+            options.LibraryMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true; update_swap()),
+            Style.dark 100,
+            Hotkey = "collections")
+            .Tooltip(L"levelselect.librarymode.tooltip")
+            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f }
+        
+        |+ ModeDropdown(sortBy.Keys, "Sort",
+            options.ChartSortMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            options.ChartSortReverse |> Setting.map not not |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            "sort_mode")
+            .Tooltip(L"levelselect.sortby.tooltip")
+            .WithPosition { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f }
+        
+        |* swap
+
+        update_swap()
+
+        base.Init(parent)
+        
     
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

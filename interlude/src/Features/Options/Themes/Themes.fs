@@ -15,14 +15,14 @@ type ThemesPage() as this =
     let preview = NoteskinPreview 0.5f
 
     let noteskins = PrettySetting("themes.noteskin", Dummy())
-    let refreshNoteskins() =
+    let themes = PrettySetting("themes.theme", Dummy())
+
+    let refresh() =
+
         options.Noteskin.Value <- Noteskins.Current.id
         noteskins.Child <- 
             Selector(Noteskins.list(), options.Noteskin |> Setting.trigger (fun id -> Noteskins.Current.switch id; preview.Refresh()))
-        preview.Refresh()
 
-    let themes = PrettySetting("themes.theme", Dummy())
-    let refreshThemes() =
         options.Theme.Value <- Themes.Current.id
         themes.Child <-
             Selector(Themes.list(), options.Theme |> Setting.trigger (fun id -> Themes.Current.switch id; preview.Refresh()))
@@ -32,10 +32,10 @@ type ThemesPage() as this =
         let ns = Noteskins.Current.instance
         match ns.Source with
         | Zip (_, Some file) ->
-            Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractzip", F Noteskins.extractCurrent refreshNoteskins) )
+            Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractzip", Noteskins.extractCurrent) )
         | Zip (_, None) ->
-            Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractdefault", F Noteskins.extractCurrent refreshNoteskins) )
-        | Folder _ -> Menu.ShowPage( EditNoteskinPage refreshNoteskins )
+            Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractdefault", Noteskins.extractCurrent) )
+        | Folder _ -> Menu.ShowPage EditNoteskinPage
 
     let tryEditTheme() =
         let theme = Themes.Current.instance
@@ -44,15 +44,14 @@ type ThemesPage() as this =
             Menu.ShowPage (
                 ConfirmPage(
                     Localisation.localiseWith [theme.Config.Name] "options.themes.confirmextractdefault",
-                    (fun () -> Themes.createNew(System.Guid.NewGuid().ToString()); refreshThemes())
+                    (fun () -> Themes.createNew(System.Guid.NewGuid().ToString()))
                 )
             )
-        | Folder _ -> Menu.ShowPage( EditThemePage refreshThemes )
+        | Folder _ -> Menu.ShowPage EditThemePage
         | Zip (_, Some file) -> failwith "impossible as user themes are always folders"
 
     do
-        refreshNoteskins()
-        refreshThemes()
+        refresh()
             
         this.Content(
             column()
@@ -70,4 +69,5 @@ type ThemesPage() as this =
 
     override this.OnClose() = ()
     override this.OnDestroy() = preview.Destroy()
+    override this.OnReturnTo() = refresh()
     override this.Title = N"themes"

@@ -19,6 +19,8 @@ type [<AbstractClass>] Page() as this =
     abstract member OnClose : unit -> unit
     abstract member OnDestroy : unit -> unit
     default this.OnDestroy() = ()
+    abstract member OnReturnTo : unit -> unit
+    default this.OnReturnTo() = ()
 
     member this.Content(w: Widget) =
         this.Add(w)
@@ -28,9 +30,10 @@ type [<AbstractClass>] Page() as this =
         if isCurrent && not content.Value.Focused then Menu.Back()
         base.Update(elapsedTime, moved)
 
-    member this.View() =
+    member this.View(returning: bool) =
         this.Position <- Position.Default
         Selection.clamp this
+        if returning then this.OnReturnTo()
         content.Value.Focus()
         isCurrent <- true
 
@@ -46,7 +49,7 @@ type [<AbstractClass>] Page() as this =
         if content.IsNone then failwithf "Call Content() to provide page content"
         this.MoveDown()
         base.Init parent
-        this.View()
+        this.View(false)
 
 and Menu(topLevel: Page) as this =
     inherit Dialog()
@@ -101,7 +104,7 @@ and Menu(topLevel: Page) as this =
         let page = stack.[n].Value
         page.OnClose()
         page.MoveDown()
-        if n > 0 then stack.[n - 1].Value.View()
+        if n > 0 then stack.[n - 1].Value.View(true)
 
     override this.Init(parent) =
         base.Init parent
