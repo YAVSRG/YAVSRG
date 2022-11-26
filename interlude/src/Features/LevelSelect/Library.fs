@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
@@ -17,29 +18,40 @@ open Interlude.Features.Gameplay
 
 module CollectionManager =
 
+    let add_to (name: string, collection: Collection, cc: CachedChart) =
+        if
+            match collection with
+            | Folder c -> c.Add cc
+            | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
+        then
+            if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.added", NotificationType.Info)
+            true
+        else false
+
+    let remove_from (name: string, collection: Collection, cc: CachedChart, context: LibraryContext) =
+        if
+            match collection with
+            | Folder c -> c.Remove cc
+            | Playlist p ->
+                match context with
+                | LibraryContext.Playlist (i, in_name, _) when name = in_name -> p.RemoveAt i
+                | _ -> p.RemoveSingle cc
+        then
+            if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.removed", NotificationType.Info)
+            if Some cc = Chart.cacheInfo then Chart.context <- LibraryContext.None
+            true
+        else false
+
     module Current =
 
-        let quick_add(cc: CachedChart, _: LibraryContext) =
-            if 
-                match Collections.current with
-                | Folder c -> c.Add cc
-                | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
-            then
-                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
-                Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; options.SelectedCollection.Value] "collections.added", NotificationType.Info)
+        let quick_add(cc: CachedChart) =
+            add_to (options.SelectedCollection.Value, Collections.current, cc)
 
         let quick_remove(cc: CachedChart, context: LibraryContext) =
-            if
-                match Collections.current with
-                | Folder c -> c.Remove cc
-                | Playlist p ->
-                    match context with
-                    | LibraryContext.Playlist (i, name, _) when name = options.SelectedCollection.Value -> p.RemoveAt i
-                    | _ -> p.RemoveSingle cc
-            then
-                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
-                Notifications.add (Localisation.localiseWith [Chart.cacheInfo.Value.Title; options.SelectedCollection.Value] "collections.removed", NotificationType.Info)
-                if context = Chart.context then Chart.context <- LibraryContext.None
+            remove_from(options.SelectedCollection.Value, Collections.current, cc, context)
+
 
     let reorder_up (context: LibraryContext) =
         if
@@ -163,6 +175,25 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                 Logging.Debug (sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
             else Logging.Debug "Rename failed, maybe that name already exists?"
 
+type private CollectionButton(icon, name, action) =
+    inherit StaticContainer(NodeType.Button (fun _ -> action()))
+    
+    override this.Init(parent: Widget) =
+        this
+        |+ Text(
+            K (sprintf "%s %s  >" icon name),
+            Color = ( 
+                fun () -> ( (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black )
+            ),
+            Align = Alignment.LEFT,
+            Position = Position.Margin(Style.padding))
+        |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
+        base.Init parent
+    
+    override this.Draw() =
+        if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+        base.Draw()
+
 type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
     inherit Page()
 
@@ -176,13 +207,17 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
         for name, collection in collections.List do
             match collection with
             | Folder f -> 
-                container.Add( PrettyButton("collections.folder",
-                    (fun () -> Menu.ShowPage(EditFolderPage(name, f))),
-                    Icon = f.Icon.Value, Text = name) )
+                container.Add( CollectionButton(
+                    f.Icon.Value,
+                    name,
+                    fun () -> on_select(name, collection) )
+                )
             | Playlist p ->
-                container.Add( PrettyButton("collections.playlist",
-                    (fun () -> Menu.ShowPage(EditPlaylistPage(name, p))),
-                    Icon = p.Icon.Value, Text = name) )
+                container.Add( CollectionButton(
+                    p.Icon.Value,
+                    name,
+                    fun () -> on_select(name, collection) )
+                )
         if container.Focused then container.Focus()
 
     do
@@ -322,7 +357,7 @@ type LibraryModeSettings() =
 
         if Chart.cacheInfo.IsSome then
 
-            if (!|"add_to_collection").Tapped() then CollectionManager.Current.quick_add(Chart.cacheInfo.Value, Chart.context)
-            elif (!|"remove_from_collection").Tapped() then CollectionManager.Current.quick_remove(Chart.cacheInfo.Value, Chart.context)
+            if (!|"add_to_collection").Tapped() then CollectionManager.Current.quick_add(Chart.cacheInfo.Value) |> ignore
+            elif (!|"remove_from_collection").Tapped() then CollectionManager.Current.quick_remove(Chart.cacheInfo.Value, Chart.context) |> ignore
             elif (!|"move_up_in_collection").Tapped() then CollectionManager.reorder_up(Chart.context)
             elif (!|"move_down_in_collection").Tapped() then CollectionManager.reorder_down(Chart.context)

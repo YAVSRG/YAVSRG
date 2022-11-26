@@ -27,15 +27,45 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
 
     do
-        this.Content(
-            column()
-            |+ PrettyButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDeleteChart(cc, true)), Icon = Icons.delete).Pos(200.0f)
-            //|+ (
-            //    if CollectionManager.isInCurrentCollection(cc, context) then 
-            //         PrettyButton("chart.removefrom*collection", ignore, Icon = Icons.remove_from_collection).Pos(280.0f)
-            //    else PrettyButton("chart.addto*collection", ignore, Icon = Icons.add_to_collection).Pos(280.0f)
-            //   )
-        )
+        let content = 
+            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
+            |+ PrettyButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDeleteChart(cc, true)), Icon = Icons.delete)
+
+            |+ PrettyButton(
+                "chart.add_to_collection.generic",
+                (fun () -> Menu.ShowPage (SelectCollectionPage(
+                    fun (name, collection) ->
+                        if CollectionManager.add_to(name, collection, cc) then Menu.Back()
+                    ))),
+                Icon = Icons.add_to_collection
+            )
+
+        match context with
+        | LibraryContext.None ->
+            content
+            |* PrettyButton(
+                "chart.add_to_collection.specific",
+                (fun () ->
+                    if CollectionManager.Current.quick_add(cc) then Menu.Back()
+                ),
+                Icon = Icons.add_to_collection,
+                Text = Localisation.localiseWith [options.SelectedCollection.Value] "options.chart.add_to_collection.specific.name"
+            )
+        | LibraryContext.Folder name
+        | LibraryContext.Playlist (_, name, _) ->
+            content
+            |* PrettyButton(
+                "chart.remove_from_collection",
+                (fun () -> 
+                    if CollectionManager.remove_from(name, collections.Get(name).Value, cc, context) then Menu.Back()
+                ),
+                Icon = Icons.remove_from_collection,
+                Text = Localisation.localiseWith [name] "options.chart.remove_from_collection.name"
+            )
+        | LibraryContext.Table -> () // todo: nyi
+
+        this.Content content
+
     override this.Title = cc.Title
     override this.OnClose() = ()
     
