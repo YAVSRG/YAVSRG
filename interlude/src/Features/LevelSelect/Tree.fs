@@ -204,7 +204,7 @@ module Tree =
                 | _ -> ""
 
         override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.4f, top, Viewport.vwidth, top + 90.0f)
-        override this.Selected = selectedChart = cc.FilePath && Chart.context = context
+        override this.Selected = selectedChart = cc.FilePath && (context = LibraryContext.None || Chart.context = context)
         override this.Spacing = 5.0f
         member this.Chart = cc
 
@@ -385,7 +385,7 @@ module Tree =
                         ( fun (cc, context) ->
                             match Chart.cacheInfo with
                             | None -> ()
-                            | Some c -> if c.FilePath = cc.FilePath && context = Chart.context then selectedChart <- c.FilePath; selectedGroup <- groupName
+                            | Some c -> if c.FilePath = cc.FilePath && (context = LibraryContext.None || context = Chart.context) then selectedChart <- c.FilePath; selectedGroup <- groupName
                             let i = ChartItem(groupName, cc, context)
                             lastItem <- Some i
                             i
@@ -401,26 +401,29 @@ module Tree =
     let previous() =
         match lastItem with
         | Some l ->
-            let mutable looping = true
+            let mutable searching = true
             let mutable last = l
             for g in groups do
                 for c in g.Items do
-                    if c.Selected && looping then last.Select(); looping <- false else last <- c
+                    if c.Selected && searching then last.Select(); searching <- false else last <- c
+            if searching then l.Select()
         | None -> ()
 
     let next() =
         match lastItem with
         | Some l ->
+            let mutable found = false
             let mutable goNext = l.Selected
             for g in groups do
                 for c in g.Items do
-                    if goNext then c.Select(); goNext <- false
+                    if goNext then c.Select(); goNext <- false; found <- true
                     elif c.Selected then goNext <- true
+            if not found then groups.First().Items.First().Select()
         | None -> ()
 
     let previousGroup() =
         match lastItem with
-        | Some l ->
+        | Some _ ->
             let mutable looping = true
             let mutable last = groups.Last()
             for g in groups do
@@ -429,7 +432,7 @@ module Tree =
     
     let nextGroup() =
         match lastItem with
-        | Some l ->
+        | Some _ ->
             let mutable goNext = groups.Last().Selected
             for g in groups do
                 if goNext then g.SelectFirst(); goNext <- false

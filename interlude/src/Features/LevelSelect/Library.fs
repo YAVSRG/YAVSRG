@@ -146,6 +146,7 @@ type private EditFolderPage(name: string, folder: Folder) as this =
     override this.OnClose() =
         if new_name.Value <> name then
             if collections.RenameCollection(name, new_name.Value) then
+                if options.SelectedCollection.Value = name then options.SelectedCollection.Set new_name.Value
                 Logging.Debug (sprintf "Renamed collection '%s' to '%s'" name new_name.Value)
             else Logging.Debug "Rename failed, maybe that name already exists?"
 
@@ -171,6 +172,7 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
     override this.OnClose() =
         if new_name.Value <> name then
             if collections.RenamePlaylist(name, new_name.Value) then
+                if options.SelectedCollection.Value = name then options.SelectedCollection.Set new_name.Value
                 Logging.Debug (sprintf "Renamed playlist '%s' to '%s'" name new_name.Value)
             else Logging.Debug "Rename failed, maybe that name already exists?"
 

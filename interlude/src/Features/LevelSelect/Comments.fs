@@ -3,8 +3,11 @@
 open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Graphics
+open Prelude.Common
 open Prelude.Data.Scores
 open Interlude.Features.Gameplay
+open Interlude.UI
 
 module Comments =
     
@@ -25,12 +28,12 @@ module Comments =
         }
 
     let editor =
-        StaticContainer(NodeType.None, Position = Position.SliceBottom(180.0f))
-        |+ (Frame(NodeType.None, Position = Position.Default.Margin(200.0f, 50.0f)) |+ textEntry)
+        StaticContainer(NodeType.None, Position = Position.SliceBottom(160.0f))
+        |+ (Frame(NodeType.None, Position = Position.Default.Margin(200.0f, 0.0f).TrimBottom(15.0f).TrimTop(60.0f)) |+ textEntry)
         |+ Text((fun () -> match Chart.current with Some c -> sprintf "Editing comment for %s" c.Header.Title | _ -> ""),
-            Color = Style.text_subheading,
+            Color = (fun () -> Style.highlightL 255 (), Color.Black),
             Align = Alignment.CENTER,
-            Position = Position.SliceTop 50.0f)
+            Position = Position.SliceTop 55.0f)
 
     let beginEdit() = editor.Select()
 
@@ -43,4 +46,7 @@ module Comments =
         if textEntry.Selected && (!|"select").Tapped() then Selection.clear()
         editor.Update(elapsedTime, moved)
 
-    let draw() = if textEntry.Selected then editor.Draw()
+    let draw() = 
+        if textEntry.Selected then
+            Draw.rect editor.Bounds (Color.FromArgb(160, 0, 0, 0))
+            editor.Draw()

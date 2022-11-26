@@ -57,12 +57,19 @@ module Scoreboard =
         | CurrentMods = 2
 
     type ScoreCard(data: ScoreInfoProvider) as this =
-        inherit StaticContainer(NodeType.None) // todo: make navigable using arrow keys
+        inherit Frame(NodeType.Button((fun () -> 
+            Screen.changeNew 
+                (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen)
+                Screen.Type.Score
+                Transitions.Flags.Default)))
 
         let fade = Animation.Fade(0.0f, Target = 1.0f)
         let animation = Animation.seq [Animation.Delay 150; fade]
 
         do
+            this.Fill <- fun () -> Style.color (int (150.0f * fade.Value), 0.5f, 0.2f)
+            this.Border <- fun () -> if this.Focused then Style.highlight fade.Alpha () else Style.highlightL (int (150.0f * fade.Value)) ()
+
             ignore data.Physical
             ignore data.Lamp
 
@@ -82,13 +89,13 @@ module Scoreboard =
                 ,
                 Color = text_subcolor,
                 Align = Alignment.LEFT,
-                Position = { Left = 0.0f %+ 5.0f; Top = 0.6f %+ 0.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %+ 0.0f })
+                Position = { Left = 0.0f %+ 5.0f; Top = 0.6f %- 5.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 2.0f })
 
             |+ Text(
                 K (formatTimeOffset(DateTime.Now - data.ScoreInfo.time)),
                 Color = text_subcolor,
                 Align = Alignment.RIGHT,
-                Position = { Left = 0.5f %+ 0.0f; Top = 0.6f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %+ 0.0f })
+                Position = { Left = 0.5f %+ 0.0f; Top = 0.6f %- 5.0f; Right = 1.0f %- 5.0f; Bottom = 1.0f %- 2.0f })
 
             |+ Text(
                 K data.Mods,
@@ -96,16 +103,9 @@ module Scoreboard =
                 Align = Alignment.RIGHT,
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f })
 
-            |* Clickable((fun () -> 
-                Screen.changeNew 
-                    (fun () -> new ScoreScreen(data, BestFlags.Default) :> Screen)
-                    Screen.Type.Score
-                    Transitions.Flags.Default),
+            |* Clickable(this.Select,
+                OnHover = (fun b -> if b then this.Focus()),
                 OnRightClick = fun () -> ScoreContextMenu data |> Menu.ShowPage)
-
-        override this.Draw() =
-            Draw.rect this.Bounds (Style.color (int (150.0f * fade.Value), 0.5f, 0.2f))
-            base.Draw()
 
         member this.Data = data
 
@@ -116,7 +116,7 @@ module Scoreboard =
 
     module Loader =
 
-        type private T =
+        type private Request =
             {
                 RulesetId: string
                 Ruleset: Ruleset
@@ -125,10 +125,10 @@ module Scoreboard =
                 mutable NewBests: Bests option
             }
 
-        let reload (container: FlowContainer.Vertical<ScoreCard>) =
+        let handle (container: FlowContainer.Vertical<ScoreCard>) =
             let worker =
-                { new Async.SwitchServiceSeq<T, ScoreInfoProvider>() with
-                    member this.Handle(req: T) =
+                { new Async.SwitchServiceSeq<Request, ScoreInfoProvider>() with
+                    member this.Handle(req: Request) =
                         match req.ChartSaveData with
                         | None -> Seq.empty
                         | Some d ->
@@ -145,7 +145,7 @@ module Scoreboard =
                     member this.Callback(score: ScoreInfoProvider) =
                         let sc = ScoreCard score
                         sync(fun () -> container.Add sc)
-                    member this.JobCompleted(req: T) =
+                    member this.JobCompleted(req: Request) =
                         match req.NewBests with
                         | None -> ()
                         | Some b ->
@@ -191,10 +191,10 @@ type Scoreboard() as this =
         | Filter.CurrentMods -> (fun a -> a.Data.ScoreInfo.selectedMods = selectedMods.Value)
         | _ -> K true
 
-    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.padding, Sort = sorter(), Filter = filterer())
+    let flowContainer =  FlowContainer.Vertical(75.0f, Spacing = Style.padding * 3.0f, Sort = sorter(), Filter = filterer())
     let scrollContainer = ScrollContainer.Flow(flowContainer, Margin = Style.padding, Position = Position.TrimTop(55.0f).TrimBottom(50.0f))
 
-    let loader = Loader.reload flowContainer
+    let load_scores_async = Loader.handle flowContainer
 
     do
         this
@@ -232,16 +232,16 @@ type Scoreboard() as this =
             .Tooltip(L"levelselect.scoreboard.filter.tooltip", "scoreboard_filter")
             .WithPosition { Left = 0.66f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f }
         |+ scrollContainer
+        |+ HotkeyAction("scoreboard", fun () -> if flowContainer.Focused then Selection.clear() else flowContainer.Focus())
         |* Text( (let noLocalScores = L"levelselect.scoreboard.empty" in (fun () -> if count = 0 then noLocalScores else "")),
             Align = Alignment.CENTER,
             Position = { Left = 0.0f %+ 50.0f; Top = 0.3f %+ 0.0f; Right = 1.0f %- 50.0f; Bottom = 0.5f %+ 0.0f })
-           
 
     member this.Refresh() =
         let h = match Chart.cacheInfo with Some c -> c.Hash | None -> ""
         if (match Chart.saveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
             chart <- h
-            loader() |> ignore
+            load_scores_async()
         elif scoring <> rulesetId then
             let s = getCurrentRuleset()
             flowContainer.Iter(fun score -> score.Data.Ruleset <- s)

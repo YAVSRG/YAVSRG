@@ -330,7 +330,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
 
-        if (!|"next").Tapped() then
+        if (!|"next").Tapped() || (!|"ruleset").Tapped() then
             Setting.app CycleList.forward options.Rulesets
             scoreData.Ruleset <- getCurrentRuleset()
             refresh()
