@@ -3,6 +3,7 @@
 open System.Net
 open System.Net.Security
 open System.IO
+open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
@@ -118,7 +119,11 @@ module EtternaPacks =
             RemoteCertificateValidationCallback(
                 fun _ cert _ sslPolicyErrors ->
                     if sslPolicyErrors = SslPolicyErrors.None then true
-                    else cert.GetCertHashString().ToLower() = "e87a496fbc4b7914674f3bc3846368234e50fb74" )
+                    else
+                        let cert_string = cert.GetCertHashString().ToLower()
+                        Logging.Debug(sprintf "Expired certificate: %s (expired on %s)" cert_string (cert.GetExpirationDateString()))
+                        cert_string = "5f9a90b88ae54db56d6fcff44ee5e0fb787801ad"
+            )
 
     let tab = 
         let searchContainer =
