@@ -2,6 +2,7 @@
 
 open System.Collections.Generic
 open OpenTK.Windowing.GraphicsLibraryFramework
+open Percyqaz.Common
 open Bind
 
 type Hotkey = string
@@ -20,7 +21,10 @@ module Hotkeys =
     let inline set (id: string) (value: Bind) = hotkeys.[id] <- value
 
     let reset (id: string) =
-        hotkeys.[id] <- defaults.[id]
+        if defaults.ContainsKey id then hotkeys.[id] <- defaults.[id]
+        else Logging.Warn(sprintf "Cannot reset hotkey '%s', no default exists" id)
+
+    let reset_all () = for id in defaults.Keys do reset id
 
     let init() =
         register "none" Dummy
