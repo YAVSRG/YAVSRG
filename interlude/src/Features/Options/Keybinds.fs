@@ -7,6 +7,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.Options
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -101,11 +102,22 @@ module Keybinds =
         inherit Page()
 
         do
-            let container = FlowContainer.Vertical<PrettySetting>(PRETTYHEIGHT)
+            let hotkeyEditor hk =
+                SwitchContainer.Row<Widget>()
+                |+ Keybinder(hk, Position = Position.TrimRight PRETTYHEIGHT)
+                |+ Button(Icons.reset, (fun () -> Hotkeys.reset hk), Position = Position.SliceRight PRETTYHEIGHT)
+
+            let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
             let scrollContainer = ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f))
+
+            container.Add(PrettyButton(
+                "keybinds.hotkeys.reset",
+                (fun () -> Menu.ShowPage (ConfirmPage (L"options.keybinds.hotkeys.reset.confirm", Hotkeys.reset_all))),
+                Icon = Icons.reset))
+
             for hk in Hotkeys.hotkeys.Keys do
                 if hk <> "none" then
-                    container.Add( PrettySetting("hotkeys." + hk.ToLower(), Keybinder hk) )
+                    container.Add( PrettySetting("hotkeys." + hk.ToLower(), hotkeyEditor hk) )
             this.Content scrollContainer
 
         override this.Title = N"keybinds.hotkeys"

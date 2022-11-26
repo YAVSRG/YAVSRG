@@ -22,6 +22,7 @@ module Icons =
     let delete = Feather.trash
     let selected = Feather.check_circle
     let unselected = Feather.circle
+    let reset = Feather.refresh_ccw
 
     let goal = Feather.flag
     let playlist = Feather.list

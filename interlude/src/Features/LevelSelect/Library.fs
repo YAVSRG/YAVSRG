@@ -52,7 +52,6 @@ module CollectionManager =
         let quick_remove(cc: CachedChart, context: LibraryContext) =
             remove_from(options.SelectedCollection.Value, Collections.current, cc, context)
 
-
     let reorder_up (context: LibraryContext) =
         if
             match context with
