@@ -156,7 +156,7 @@ module Render =
 
 module Draw =
 
-    let mutable lastTex = -1;
+    let mutable private lastTex = -1;
 
     let quad (struct (p1, p2, p3, p4): Quad) (struct (c1, c2, c3, c4): QuadColors) (struct (s, struct (u1, u2, u3, u4)): SpriteQuad) =
         if lastTex <> s.ID then

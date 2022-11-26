@@ -27,6 +27,9 @@ module FlowContainer =
         let mutable last_selected = 0
         let children = ResizeArray<FlowItem<'T>>()
 
+        override this.Focus() = if children.Count > 0 then base.Focus()
+        override this.Select() = if children.Count > 0 then base.Select()
+
         member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun c -> c.Widget.Focused) children
         member private this.WhoShouldFocus =
             if children.Count = 0 then failwithf "Tried to focus this %O with no children" this
@@ -298,6 +301,9 @@ module SwitchContainer =
 
         let children = ResizeArray<'T>()
         let mutable last_selected = 0
+        
+        override this.Focus() = if children.Count > 0 then base.Focus()
+        override this.Select() = if children.Count > 0 then base.Select()
 
         member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
         member private this.WhoShouldFocus =
