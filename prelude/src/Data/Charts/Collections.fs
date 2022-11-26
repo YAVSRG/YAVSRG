@@ -62,6 +62,7 @@ module Collections =
                 Mods = Setting.simple mods
                 Rate = Prelude.Common.Setting.rate rate
             }
+        static member Default = PlaylistEntryInfo.Create(1.0f, Map.empty)
 
     [<Json.AutoCodec>]
     type Playlist =
@@ -135,6 +136,11 @@ module Collections =
                 Some (Folder this.Folders.[name])
             elif this.Playlists.ContainsKey name then
                 Some (Playlist this.Playlists.[name])
+            else None
+            
+        member this.GetFolder(name: string) : Folder option =
+            if this.Folders.ContainsKey name then
+                Some this.Folders.[name]
             else None
 
         member this.GetPlaylist(name: string) : Playlist option =
