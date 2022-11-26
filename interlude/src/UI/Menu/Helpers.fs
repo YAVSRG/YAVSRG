@@ -36,19 +36,23 @@ module Helpers =
 type TooltipRegion(localisedText) =
     inherit StaticWidget(NodeType.None)
 
+    member val Hotkey = None with get, set
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
-            Notifications.tooltip ((!|"tooltip"), localisedText)
+            Notifications.tooltip ((!|"tooltip"), localisedText, this.Hotkey)
 
     override this.Draw() = ()
 
 type TooltipContainer(localisedText, child: Widget) =
     inherit StaticContainer(NodeType.Switch(fun _ -> child))
 
+    member val Hotkey = None with get, set
+
     override this.Init(parent: Widget) =
         this
-        |+ TooltipRegion(localisedText)
+        |+ TooltipRegion(localisedText, Hotkey = this.Hotkey)
         |* child
         base.Init parent
 
@@ -57,4 +61,5 @@ type TooltipContainer(localisedText, child: Widget) =
 [<AutoOpen>]
 module Tooltip =
     type Widget with
-        member this.Tooltip(localisedText) = TooltipContainer(localisedText, this)
+        //member this.Tooltip(localisedText) = TooltipContainer(localisedText, this)
+        member this.Tooltip(localisedText, hotkey) = TooltipContainer(localisedText, this, Hotkey = Some hotkey)

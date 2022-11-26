@@ -202,8 +202,9 @@ type Scoreboard() as this =
             this.Refresh,
             K <| Localisation.localise "levelselect.scoreboard.storage.local",
             Style.main 100,
+            Hotkey = "scoreboard_storage",
             TiltLeft = false)
-            .Tooltip(L"levelselect.scoreboard.storage.tooltip")
+            .Tooltip(L"levelselect.scoreboard.storage.tooltip", "scoreboard_storage")
             .WithPosition { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.33f %- 25.0f; Bottom = 0.0f %+ 50.0f }
         |+ StylishButton.Selector(
             Icons.sort,
@@ -213,8 +214,9 @@ type Scoreboard() as this =
                 Sort.Time, L"levelselect.scoreboard.sort.time"
             |],
             sort |> Setting.trigger (fun _ -> flowContainer.Sort <- sorter()),
-            Style.dark 100)
-            .Tooltip(L"levelselect.scoreboard.sort.tooltip")
+            Style.dark 100,
+            Hotkey = "scoreboard_sort")
+            .Tooltip(L"levelselect.scoreboard.sort.tooltip", "scoreboard_sort")
             .WithPosition { Left = 0.33f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 0.66f %- 25.0f; Bottom = 0.0f %+ 50.0f }
         |+ StylishButton.Selector(
             Icons.filter,
@@ -225,8 +227,9 @@ type Scoreboard() as this =
             |],
             filter |> Setting.trigger (fun _ -> this.Refresh()),
             Style.main 100,
+            Hotkey = "scoreboard_filter",
             TiltRight = false)
-            .Tooltip(L"levelselect.scoreboard.filter.tooltip")
+            .Tooltip(L"levelselect.scoreboard.filter.tooltip", "scoreboard_filter")
             .WithPosition { Left = 0.66f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 0.0f; Bottom = 0.0f %+ 50.0f }
         |+ scrollContainer
         |* Text( (let noLocalScores = L"levelselect.scoreboard.empty" in (fun () -> if count = 0 then noLocalScores else "")),

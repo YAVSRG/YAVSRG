@@ -67,19 +67,20 @@ type ChartInfo() as this =
             Style.main 100,
             Hotkey = "preview",
             TiltLeft = false)
-            .Tooltip(L"levelselect.preview.tooltip")
+            .Tooltip(L"levelselect.preview.tooltip", "preview")
             .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f }
 
         |+ ModSelect(scores.Refresh)
-            .Tooltip(L"levelselect.mods.tooltip")
+            .Tooltip(L"levelselect.mods.tooltip", "mods")
             .WithPosition { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f }
         
         |* StylishButton(
             (fun () -> Setting.app CycleList.forward options.Rulesets; LevelSelect.refresh <- true),
             (fun () -> ruleset.Name),
             Style.main 100,
+            Hotkey = "ruleset",
             TiltRight = false)
-            .Tooltip(L"levelselect.rulesets.tooltip")
+            .Tooltip(L"levelselect.rulesets.tooltip", "ruleset")
             .WithPosition { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f }
 
     member this.Refresh() =

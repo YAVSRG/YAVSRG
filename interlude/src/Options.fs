@@ -212,26 +212,22 @@ module Options =
             Hotkeys.register "next_group" (mk Keys.PageDown)
             Hotkeys.register "start" (mk Keys.Home)
             Hotkeys.register "end" (mk Keys.End)
-
-            Hotkeys.register "collections" (mk Keys.C)
-            Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
-            Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
-            Hotkeys.register "move_down_in_collection" (ctrl Keys.RightBracket)
-            Hotkeys.register "move_up_in_collection" (ctrl Keys.LeftBracket)
-            Hotkeys.register "sort_mode" (mk Keys.Comma)
-            Hotkeys.register "group_mode" (mk Keys.Period)
-            Hotkeys.register "comment" (shift Keys.Semicolon)
-
-            Hotkeys.register "mods" (mk Keys.M)
-            Hotkeys.register "random_chart" (mk Keys.F2)
-            Hotkeys.register "autoplay" (ctrl Keys.A)
-            Hotkeys.register "preview" (mk Keys.P)
-            Hotkeys.register "reload_themes" (Key (Keys.S, (true, true, true)))
-
+            
             Hotkeys.register "import" (ctrl Keys.I)
             Hotkeys.register "options" (ctrl Keys.O)
             Hotkeys.register "wiki" (ctrl Keys.H)
             Hotkeys.register "console" (mk Keys.GraveAccent)
+            
+            Hotkeys.register "library_mode" (mk Keys.D1)
+            Hotkeys.register "add_to_collection" (mk Keys.RightBracket)
+            Hotkeys.register "remove_from_collection" (mk Keys.LeftBracket)
+            Hotkeys.register "move_down_in_collection" (ctrl Keys.RightBracket)
+            Hotkeys.register "move_up_in_collection" (ctrl Keys.LeftBracket)
+            Hotkeys.register "sort_mode" (mk Keys.D2)
+            Hotkeys.register "reverse_sort_mode" (shift Keys.D2)
+            Hotkeys.register "group_mode" (mk Keys.D3)
+            Hotkeys.register "reverse_group_mode" (shift Keys.D3)
+            Hotkeys.register "comment" (mk Keys.F)
 
             Hotkeys.register "uprate" (mk Keys.Equal)
             Hotkeys.register "downrate" (mk Keys.Minus)
@@ -239,6 +235,21 @@ module Options =
             Hotkeys.register "downrate_half" (ctrl Keys.Minus)
             Hotkeys.register "uprate_small" (shift Keys.Equal)
             Hotkeys.register "downrate_small" (shift Keys.Minus)
+
+            Hotkeys.register "scoreboard_storage" (mk Keys.Q)
+            Hotkeys.register "scoreboard_sort" (mk Keys.W)
+            Hotkeys.register "scoreboard_filter" (mk Keys.E)
+
+            Hotkeys.register "scoreboard" (mk Keys.Z)
+            Hotkeys.register "table" (mk Keys.X)
+            Hotkeys.register "collections" (mk Keys.C)
+
+            Hotkeys.register "preview" (mk Keys.A)
+            Hotkeys.register "mods" (mk Keys.S)
+            Hotkeys.register "ruleset" (mk Keys.D)
+            Hotkeys.register "random_chart" (mk Keys.R)
+            Hotkeys.register "autoplay" (ctrl Keys.A)
+            Hotkeys.register "reload_themes" (Key (Keys.S, (true, true, true)))
 
             Hotkeys.register "skip" (mk Keys.Space)
             Hotkeys.register "retry" (ctrl Keys.R)

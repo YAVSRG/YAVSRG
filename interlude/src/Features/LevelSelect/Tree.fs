@@ -326,6 +326,7 @@ module Tree =
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
                 elif (!|"delete").Tapped() then
                     let groupName = sprintf "%s (%i charts)" name (items.Count())
+                    // todo: group context menu
                     Notifications.callback (
                         (!|"delete"),
                         Localisation.localiseWith [groupName] "misc.confirmdelete",
