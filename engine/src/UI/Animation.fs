@@ -24,13 +24,13 @@ module Animation =
 
         member this.Value 
             with get() = if time > 0.0 then value else target
-            and set(v) = value <- v; time <- 2000.0
+            and set(v) = value <- v; time <- 1500.0
 
         member this.Alpha = int(255.0f * value)
 
         member this.Target 
             with get() = target
-            and set(t) = target <- t; time <- 2000.0
+            and set(t) = target <- t; time <- 1500.0
 
         member this.Moving = time > 0.0
 

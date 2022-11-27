@@ -257,9 +257,9 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
             scroll_to_child_next_frame <- false
             let selected_bounds = (Selection.get_focused_element().Value :?> Widget).Bounds.Translate(0.0f, scroll_pos.Value - scroll_pos.Target)
             if selected_bounds.Bottom > this.Bounds.Bottom then
-                scrollby <- scrollby + selected_bounds.Bottom - this.Bounds.Bottom
+                scrollby <- scrollby + selected_bounds.Bottom - this.Bounds.Bottom + Style.padding
             elif this.Bounds.Top > selected_bounds.Top then
-                scrollby <- scrollby - this.Bounds.Top + selected_bounds.Top
+                scrollby <- scrollby - this.Bounds.Top + selected_bounds.Top - Style.padding
 
         let moved = 
             if scrollby <> 0.0f || refresh then
