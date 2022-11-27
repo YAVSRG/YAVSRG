@@ -74,7 +74,8 @@
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\Comments.fs" />
-    <Compile Include="Features\LevelSelect\Library.fs" />
+    <Compile Include="Features\LevelSelect\LibraryView.fs" />
+    <Compile Include="Features\LevelSelect\ContextMenus.fs" />
     <Compile Include="Features\LevelSelect\Tree.fs" />
     <Compile Include="Features\LevelSelect\ModSelect.fs" />
     <Compile Include="Features\LevelSelect\Scoreboard.fs" />

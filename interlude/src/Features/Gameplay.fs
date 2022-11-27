@@ -80,11 +80,23 @@ module Gameplay =
         
         open Prelude.Data.Charts.Library
     
-        let mutable current =
+        let mutable current = Unchecked.defaultof<_>
+
+        let select_something() =
             let selection = options.SelectedCollection.Value
             match collections.Get selection with
-            | Some c -> c
-            | None -> collections.CreateFolder(selection, Icons.heart).Value |> Folder
+            | Some c -> ()
+            | None -> 
+                match Seq.tryHead collections.List with
+                | Some (name, collection) ->
+                    options.SelectedCollection.Value <- name
+                    current <- collection
+                | None -> 
+                    let favourites = (Localisation.localise "collections.favourites")
+                    options.SelectedCollection.Value <- favourites
+                    current <- collections.CreateFolder(favourites, Icons.heart).Value |> Folder
+
+        do select_something()
     
         let notifyChangeRate v =
             match Chart.context with
@@ -170,12 +182,12 @@ module Gameplay =
                     | None ->
                         Logging.Error("Could not load chart file: " + cc.FilePath)
                         Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
-                        |> fun d -> fst d.[(0, "All")].[0]
+                        |> fun d -> fst d.[(0, "All")].Charts.[0]
                         |> fun c -> c, Library.load(c).Value
                 | None ->
                     Logging.Info("Could not find cached chart: " + options.CurrentChart.Value)
                     Library.getGroups Unchecked.defaultof<_> (K (0, "All")) (Comparison(fun _ _ -> 0)) []
-                    |> fun d -> fst d.[(0, "All")].[0]
+                    |> fun d -> fst d.[(0, "All")].Charts.[0]
                     |> fun c -> c, Library.load(c).Value
             Chart.change(c, LibraryContext.None, ch)
         with err ->

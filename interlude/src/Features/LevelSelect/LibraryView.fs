@@ -130,17 +130,34 @@ type private EditFolderPage(name: string, folder: Folder) as this =
     let new_name = Setting.simple name |> Setting.alphaNum
 
     do
-        this.Content(
+        let content = 
             column()
             |+ PrettySetting("collections.edit.folder_name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettySetting("collections.edit.icon",
                 Selector( CreateFolderPage.Icons,
-                folder.Icon)).Pos(300.0f)
+                folder.Icon)).Pos(280.0f)
             |+ PrettyButton("collections.edit.delete", 
-                (fun () -> 
-                    Menu.ShowPage (ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", fun () -> collections.Delete name |> ignore; Menu.Back() ))),
+                (fun () -> Menu.ShowPage (ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", fun () ->
+                    if collections.Delete name && options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
+                    Collections.select_something()
+                    Menu.Back() ))
+                ),
                 Icon = Icons.delete).Pos(400.0f)
-        )
+            |+ PrettyButton("collections.edit.select", 
+                (fun () -> Collections.select name; Menu.Back()) ).Pos(500.0f)
+
+            |+ if options.SelectedCollection.Value = name then
+                Text(L"collections.selected.this",
+                Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
+               else
+                Text(Localisation.localiseWith [options.SelectedCollection.Value] "collections.selected.other",
+                Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
+            |+ Text(Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint",
+                Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
+            |+ Text(Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint",
+                Position = Position.SliceBottom(120.0f).SliceTop(70.0f))
+
+        this.Content content
 
     override this.Title = name
     override this.OnClose() =
@@ -156,17 +173,34 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
     let new_name = Setting.simple name |> Setting.alphaNum
 
     do
-        this.Content(
+        let content =
             column()
             |+ PrettySetting("collections.edit.playlist_name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettySetting("collections.edit.icon",
                 Selector( CreatePlaylistPage.Icons,
-                playlist.Icon)).Pos(300.0f)
+                playlist.Icon)).Pos(280.0f)
             |+ PrettyButton("collections.edit.delete", 
-                (fun () -> 
-                    Menu.ShowPage (ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", fun () -> collections.Delete name |> ignore; Menu.Back() ))),
+                (fun () ->  Menu.ShowPage (ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", fun () -> 
+                    if collections.Delete name && options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
+                    Collections.select_something()
+                    Menu.Back() ))
+                ),
                 Icon = Icons.delete).Pos(400.0f)
-        )
+            |+ PrettyButton("collections.edit.select", 
+                (fun () -> Collections.select name; Menu.Back()) ).Pos(500.0f)
+            
+            |+ if options.SelectedCollection.Value = name then
+                Text(L"collections.selected.this",
+                Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
+               else
+                Text(Localisation.localiseWith [options.SelectedCollection.Value] "collections.selected.other",
+                Position = Position.SliceBottom(260.0f).SliceTop(70.0f))
+            |+ Text(Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint",
+                Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
+            |+ Text(Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint",
+                Position = Position.SliceBottom(120.0f).SliceTop(70.0f))
+
+        this.Content content
 
     override this.Title = name
     override this.OnClose() =
@@ -184,7 +218,10 @@ type private CollectionButton(icon, name, action) =
         |+ Text(
             K (sprintf "%s %s  >" icon name),
             Color = ( 
-                fun () -> ( (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black )
+                fun () -> ( 
+                    (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White),
+                    (if name = options.SelectedCollection.Value then Style.color(255, 0.5f, 0.0f) else Color.Black)
+                )
             ),
             Align = Alignment.LEFT,
             Position = Position.Margin(Style.padding))
@@ -224,14 +261,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
     do
         refresh()
 
-        this.Content(
-            SwitchContainer.Column<Widget>()
-            |+ ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f))
-            |+ Text(Localisation.localiseWith [(!|"add_to_collection").ToString()] "collections.addhint",
-                Position = Position.SliceBottom(190.0f).SliceTop(70.0f))
-            |+ Text(Localisation.localiseWith [(!|"remove_from_collection").ToString()] "collections.removehint",
-                Position = Position.SliceBottom(120.0f).SliceTop(70.0f))
-        )
+        this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
 
     override this.Title = N"collections"
     override this.OnClose() = ()
@@ -260,7 +290,6 @@ type private ModeDropdown(options: string seq, label: string, setting: Setting<s
             ( fun () -> reverse.Value <- not reverse.Value ),
             ( fun () -> sprintf "%s %s" setting.Value (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
             Style.dark 100,
-            // todo: hotkey for direction reversal
             Position = Position.TrimLeft 145.0f )
         base.Init parent
 

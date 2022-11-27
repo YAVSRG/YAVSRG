@@ -23,62 +23,6 @@ open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
 
-type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
-    inherit Page()
-
-    do
-        let content = 
-            FlowContainer.Vertical(PRETTYHEIGHT, Position = Position.Margin(100.0f, 200.0f))
-            |+ PrettyButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDeleteChart(cc, true)), Icon = Icons.delete)
-
-            |+ PrettyButton(
-                "chart.add_to_collection.generic",
-                (fun () -> Menu.ShowPage (SelectCollectionPage(
-                    fun (name, collection) ->
-                        if CollectionManager.add_to(name, collection, cc) then Menu.Back()
-                    ))),
-                Icon = Icons.add_to_collection
-            )
-
-        match context with
-        | LibraryContext.None ->
-            content
-            |* PrettyButton(
-                "chart.add_to_collection.specific",
-                (fun () ->
-                    if CollectionManager.Current.quick_add(cc) then Menu.Back()
-                ),
-                Icon = Icons.add_to_collection,
-                Text = Localisation.localiseWith [options.SelectedCollection.Value] "options.chart.add_to_collection.specific.name"
-            )
-        | LibraryContext.Folder name
-        | LibraryContext.Playlist (_, name, _) ->
-            content
-            |* PrettyButton(
-                "chart.remove_from_collection",
-                (fun () -> 
-                    if CollectionManager.remove_from(name, collections.Get(name).Value, cc, context) then Menu.Back()
-                ),
-                Icon = Icons.remove_from_collection,
-                Text = Localisation.localiseWith [name] "options.chart.remove_from_collection.name"
-            )
-        | LibraryContext.Table -> () // todo: nyi
-
-        this.Content content
-
-    override this.Title = cc.Title
-    override this.OnClose() = ()
-    
-    static member ConfirmDeleteChart(cc, is_submenu) =
-        let chartName = sprintf "%s [%s]" cc.Title cc.DiffName
-        ConfirmPage(
-            Localisation.localiseWith [chartName] "misc.confirmdelete",
-            fun () ->
-                Library.delete cc
-                LevelSelect.refresh <- true
-                if is_submenu then Menu.Back()
-            ) |> Menu.ShowPage
-
 [<RequireQualifiedAccess>]
 type Navigation =
     | Nothing
@@ -279,7 +223,7 @@ module Tree =
                     if this.Selected then play()
                     else this.Select()
                 elif Mouse.rightClick() then ChartContextMenu(cc, context) |> Menu.ShowPage
-                elif (!|"delete").Tapped() then ChartContextMenu.ConfirmDeleteChart(cc, false)
+                elif (!|"delete").Tapped() then ChartContextMenu.ConfirmDelete(cc, false)
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
 
@@ -289,7 +233,7 @@ module Tree =
                 scrollTo <- ScrollTo.Nothing
             this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(b, elapsedTime))
 
-    type private GroupItem(name: string, items: ChartItem list) =
+    type private GroupItem(name: string, items: ChartItem list, context: LibraryGroupContext) =
         inherit TreeItem()
 
         override this.Bounds(top) = Rect.Create(Viewport.vwidth * 0.5f, top, Viewport.vwidth - 15.0f, top + 65.0f)
@@ -324,18 +268,8 @@ module Tree =
             if Mouse.hover bounds then
                 if Mouse.leftClick() then
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
-                elif (!|"delete").Tapped() then
-                    let groupName = sprintf "%s (%i charts)" name (items.Count())
-                    // todo: group context menu
-                    Notifications.callback (
-                        (!|"delete"),
-                        Localisation.localiseWith [groupName] "misc.confirmdelete",
-                        NotificationType.Warning,
-                        fun () ->
-                            items |> Seq.map (fun i -> i.Chart) |> deleteMany
-                            LevelSelect.refresh <- true
-                            Notifications.add (Localisation.localiseWith [groupName] "notification.deleted", NotificationType.Info)
-                    )
+                elif Mouse.rightClick() then GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
+                elif (!|"delete").Tapped() then GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsedTime) =
             match scrollTo with
@@ -368,8 +302,8 @@ module Tree =
         // if exactly 1 result, switch to it
         if library_groups.Count = 1 then
             let g = library_groups.Keys.First()
-            if library_groups.[g].Count = 1 then
-                let cc, context = library_groups.[g].[0]
+            if library_groups.[g].Charts.Count = 1 then
+                let cc, context = library_groups.[g].Charts.[0]
                 if cc.FilePath <> selectedChart then
                     switchChart(cc, context, snd g)
         // build groups ui
@@ -380,7 +314,7 @@ module Tree =
             |> if options.ChartGroupReverse.Value then Seq.rev else id
             |> Seq.map
                 (fun (sortIndex, groupName) ->
-                    library_groups.[(sortIndex, groupName)]
+                    library_groups.[(sortIndex, groupName)].Charts
                     |> Seq.map
                         ( fun (cc, context) ->
                             match Chart.cacheInfo with
@@ -392,7 +326,8 @@ module Tree =
                         )
                     |> if options.ChartSortReverse.Value then Seq.rev else id
                     |> List.ofSeq
-                    |> fun l -> GroupItem(groupName, l))
+                    |> fun l -> GroupItem(groupName, l, library_groups.[(sortIndex, groupName)].Context)
+                )
             |> List.ofSeq
         cacheFlag <- 0
         expandedGroup <- selectedGroup

@@ -170,7 +170,7 @@ module Options =
             ChartGroupReverse = Setting.simple false
             ScoreSortMode = Setting.simple 0
 
-            SelectedCollection = Setting.simple (Localisation.localise "collections.favourites")
+            SelectedCollection = Setting.simple ""
             SelectedTable = Setting.simple ""
 
             EnableConsole = Setting.simple false
