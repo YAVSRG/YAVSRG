@@ -103,7 +103,6 @@ options.collections.edit.playlist_name.tooltip=Edit the name of your playlist he
 options.collections.edit.select.name=Select
 options.collections.edit.select.tooltip=Selects this collection as the 'active' collection.\nThis means the quick-add and quick-remove keys will act on this collection.
 options.collections.name=Collections
-options.collections.tooltip=Manage your collections here.
 options.confirm.no.name=Cancel
 options.confirm.no.tooltip=Cancels whatever you are doing and goes back.
 options.confirm.yes.name=Ok
