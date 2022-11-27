@@ -209,3 +209,11 @@ module Collections =
                 this.CollectionSource = other.CollectionSource
             | _ -> false
         override this.GetHashCode() = this.CollectionSource.GetHashCode()
+    
+    [<RequireQualifiedAccess>]
+    type LibraryGroupContext =
+        | None
+        | Table
+        | Folder of id: string
+        | Playlist of id: string
+    

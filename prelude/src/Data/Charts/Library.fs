@@ -79,21 +79,27 @@ module Library =
     // ---- Retrieving library for level select ----
 
     type [<RequireQualifiedAccess; Json.AutoCodec>] LibraryMode = All | Collections | Table
-    type Group = ResizeArray<CachedChart * LibraryContext>
+    type Group = { Charts: ResizeArray<CachedChart * LibraryContext>; Context: LibraryGroupContext }
     type LexSortedGroups = Dictionary<int * string, Group>
 
     let getGroups (ctx: GroupContext) (grouping: GroupMethod) (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+
         let groups = new Dictionary<int * string, Group>()
+
         for c in Filter.apply filter charts.Values do
             let s = grouping (c, ctx)
-            if groups.ContainsKey s |> not then groups.Add(s, new ResizeArray<CachedChart * LibraryContext>())
-            groups.[s].Add (c, LibraryContext.None)
+            if groups.ContainsKey s |> not then groups.Add(s, { Charts = ResizeArray<CachedChart * LibraryContext>(); Context = LibraryGroupContext.None })
+            groups.[s].Charts.Add (c, LibraryContext.None)
+
         for g in groups.Values do
-            g.Sort sorting
+            g.Charts.Sort sorting
+
         groups
 
     let getCollectionGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
+
         let groups = new Dictionary<int * string, Group>()
+
         for name in collections.Folders.Keys do
             let collection = collections.Folders.[name]
             collection.Charts
@@ -109,7 +115,8 @@ module Library =
             |> Filter.applyf filter
             |> ResizeArray<CachedChart * LibraryContext>
             |> fun x -> x.Sort sorting; x
-            |> fun x -> if x.Count > 0 then groups.Add((0, name), x)
+            |> fun x -> if x.Count > 0 then groups.Add((0, name), { Charts = x; Context = LibraryGroupContext.Folder name })
+
         for name in collections.Playlists.Keys do
             let playlist = collections.Playlists.[name]
             playlist.Charts
@@ -125,7 +132,8 @@ module Library =
                 )
             |> Filter.applyf filter
             |> ResizeArray<CachedChart * LibraryContext>
-            |> fun x -> if x.Count > 0 then groups.Add((0, name), x)
+            |> fun x -> if x.Count > 0 then groups.Add((0, name), { Charts = x; Context = LibraryGroupContext.Playlist name })
+
         groups
 
     let getTableGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
@@ -142,7 +150,7 @@ module Library =
                 |> Filter.applyf filter
                 |> ResizeArray<CachedChart * LibraryContext>
                 |> fun x -> x.Sort sorting; x
-                |> fun x -> if x.Count > 0 then groups.Add((level_no, level.Name), x)
+                |> fun x -> if x.Count > 0 then groups.Add((level_no, level.Name), { Charts = x; Context = LibraryGroupContext.Table })
         | None -> ()
         groups
 
