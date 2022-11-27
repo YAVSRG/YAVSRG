@@ -23,9 +23,7 @@ type private Notification =
         HotkeyHint: Hotkey option // hotkey displayed in tooltip (for tooltip purposes)
 
         Fade: Animation.Fade
-
         mutable Duration: float
-        Callback: unit -> unit
     }
 
 module Notifications =
@@ -45,10 +43,7 @@ module Notifications =
                 i.Duration <- i.Duration - elapsedTime
                 i.Fade.Update elapsedTime |> ignore
                 if i.Fade.Target <> 0.0f then
-                    if i.Duration <= 0.0 then
-                        i.Fade.Target <- 0.0f
-                        i.Callback()
-                    elif i.Bind.IsSome && not (i.Bind.Value.Pressed()) then
+                    if i.Duration <= 0.0 || (i.Bind.IsSome && not (i.Bind.Value.Pressed())) then
                         i.Fade.Target <- 0.0f
                 elif i.Fade.Value < 0.01f then sync (fun () -> items.Remove i |> ignore)
             if items.Count = 0 then
@@ -109,7 +104,6 @@ module Notifications =
                 HotkeyHint = hotkey
                 Duration = infinity
                 Fade = Animation.Fade(0.0f, Target = 1.0f)
-                Callback = ignore
                 Type = NotificationType.Info
             }
         sync (fun () -> items.Add t)
@@ -122,20 +116,6 @@ module Notifications =
                 HotkeyHint = None
                 Duration = 2000.0
                 Fade = Animation.Fade(0.0f, Target = 1.0f)
-                Callback = ignore
-                Type = t
-            }
-        sync (fun () -> items.Add t)
-
-    let callback (b: Bind, str: string, t: NotificationType, cb: unit -> unit) =
-        let t: Notification =
-            {
-                Bind = Some b
-                Message = str.Split "\n"
-                HotkeyHint = None
-                Duration = 2000.0
-                Fade = Animation.Fade(0.0f, Target = 1.0f)
-                Callback = cb
                 Type = t
             }
         sync (fun () -> items.Add t)

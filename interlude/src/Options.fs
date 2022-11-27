@@ -228,6 +228,7 @@ module Options =
             Hotkeys.register "group_mode" (mk Keys.D3)
             Hotkeys.register "reverse_group_mode" (shift Keys.D3)
             Hotkeys.register "comment" (mk Keys.F)
+            Hotkeys.register "context_menu" (mk Keys.Period)
 
             Hotkeys.register "uprate" (mk Keys.Equal)
             Hotkeys.register "downrate" (mk Keys.Minus)

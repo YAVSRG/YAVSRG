@@ -113,6 +113,7 @@ module Scoreboard =
             base.Update(elapsedTime, bounds)
             animation.Update elapsedTime
             if Mouse.hover this.Bounds && (!|"delete").Tapped() then ScoreContextMenu.ConfirmDeleteScore(data, false)
+            elif this.Focused && (!|"context_menu").Tapped() then ScoreContextMenu data |> Menu.ShowPage
 
     module Loader =
 

@@ -399,10 +399,15 @@ module Tree =
         if (!|"up").Tapped() && expandedGroup <> "" then
             scrollTo <- ScrollTo.Pack expandedGroup
             expandedGroup <- ""
+        if (!|"down").Tapped() && expandedGroup = "" && selectedGroup <> "" then
+            expandedGroup <- selectedGroup
+            scrollTo <- ScrollTo.Pack expandedGroup
         elif (!|"random_chart").Tapped() then
             match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value filter rulesetId with
             | Some c -> switchChart(c, LibraryContext.None, ""); refresh()
             | None -> ()
+        elif (!|"context_menu").Tapped() && Chart.cacheInfo.IsSome then
+            ChartContextMenu(Chart.cacheInfo.Value, Chart.context) |> Menu.ShowPage
         if right_click_scrolling then scrollPos.Target <- -(Mouse.y() - origin) / total_height * tree_height
 
         scrollPos.Target <- Math.Min (Math.Max (scrollPos.Target + Mouse.scroll() * 100.0f, total_height - tree_height - origin), 20.0f + origin)
