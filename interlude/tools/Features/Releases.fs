@@ -77,7 +77,7 @@ module Releases =
     let register(ctx: Context) : Context =
         ctx.WithCommand(
             "version",
-            Command.create "Displays the current version of Interlude" [] (Impl.Create (fun () -> printfn "%s" current_version))
+            Command.create "Displays the current version of Interlude" [] (Impl.Create ((fun () -> current_version), Types.str))
         ).WithCommand(
             "publish_version",
             Command.create "Publishes a new version of Interlude" ["new_version"] (Impl.Create (Types.str, change_version))
