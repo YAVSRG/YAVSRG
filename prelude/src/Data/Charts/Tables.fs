@@ -24,6 +24,9 @@ type Level =
 
     member this.Rename(name: string) = this.Name <- name
 
+    member this.Contains(chart: CachedChart) =
+        this.Charts |> Seq.forall (fun c -> c.Hash <> chart.Hash) |> not
+
 [<Json.AutoCodec>]
 type Table =
     {
@@ -47,31 +50,26 @@ type Table =
 
     // Charts
 
-    member this.AddChart(level: string, cid: string, chart: CachedChart) =
-        for l in this.Levels do
-            for c in l.Charts do
-                if c.Id = cid then failwith "A table entry with this id already exists"
-                elif c.Hash = chart.Hash then failwith "A table entry with this hash already exists"
+    member this.AddChart(level: string, cid: string, chart: CachedChart) : bool =
+        if
+            this.Levels
+            |> Seq.forall (fun l -> l.Charts |> Seq.forall (fun c -> c.Id <> cid && c.Hash <> chart.Hash))
+            |> not
+        then false else
 
         let l = this.Level level
         if l.Charts.TrueForAll (fun c -> c.Hash <> chart.Hash) then
             l.Charts.Add { Id = cid; Hash = chart.Hash }
-        else failwith "Chart already added to this level"
+            true
+        else false
         
-    member this.RemoveChart(cid: string) =
+    member this.RemoveChart(chart: CachedChart) : bool =
+        let mutable removed = false
         for l in this.Levels do
-            match Seq.tryFind (fun c -> c.Id = cid) l.Charts with
-            | Some c -> l.Charts.Remove c |> ignore
+            match Seq.tryFind (fun c -> c.Hash = chart.Hash) l.Charts with
+            | Some c -> removed <- l.Charts.Remove c
             | None -> ()
-
-    member this.MoveChart(cid: string, new_level: string) =
-        for l in this.Levels do
-            if l.Name <> new_level then
-                match Seq.tryFind (fun c -> c.Id = cid) l.Charts with
-                | Some c ->
-                    l.Charts.Remove c |> ignore
-                    (this.Level new_level).Charts.Add c
-                | None -> ()
+        removed
 
 module Table =
 
@@ -97,3 +95,9 @@ module Table =
         currentFile <- fileid + ".table"
         current <- Some { Name = name; RulesetId = Ruleset.hash ruleset; Levels = ResizeArray() }
         save()
+
+    let generate_cid(chart: CachedChart) =
+        let strip =
+            let regex = System.Text.RegularExpressions.Regex("[^\sa-zA-Z0-9_-]")
+            fun (s: string) -> regex.Replace(s.ToLowerInvariant(), "").Trim().Replace(" ", "-")
+        sprintf "%s/%s" (strip chart.Creator) (strip chart.Title)

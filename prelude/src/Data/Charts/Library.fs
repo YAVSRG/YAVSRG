@@ -150,7 +150,7 @@ module Library =
                 |> Filter.applyf filter
                 |> ResizeArray<CachedChart * LibraryContext>
                 |> fun x -> x.Sort sorting; x
-                |> fun x -> if x.Count > 0 then groups.Add((level_no, level.Name), { Charts = x; Context = LibraryGroupContext.Table })
+                |> fun x -> if x.Count > 0 then groups.Add((level_no, level.Name), { Charts = x; Context = LibraryGroupContext.Table level.Name })
         | None -> ()
         groups
 
