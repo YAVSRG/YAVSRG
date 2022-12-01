@@ -9,6 +9,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Sorting
+open Prelude.Data.Charts.Tables
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
@@ -23,6 +24,7 @@ module CollectionManager =
             match collection with
             | Folder c -> c.Add cc
             | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
+            | Level lvl -> Table.current.Value.AddChart(lvl.Name, Table.generate_cid cc, cc)
         then
             if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
             Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.added", NotificationType.Info)
@@ -37,6 +39,7 @@ module CollectionManager =
                 match context with
                 | LibraryContext.Playlist (i, in_name, _) when name = in_name -> p.RemoveAt i
                 | _ -> p.RemoveSingle cc
+            | Level _ -> Table.current.Value.RemoveChart cc
         then
             if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
             Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.removed", NotificationType.Info)
@@ -256,6 +259,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
                     name,
                     fun () -> on_select(name, collection) )
                 )
+            | Level _ -> failwith "impossible"
         if container.Focused then container.Focus()
 
     do
@@ -273,6 +277,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
                 match collection with
                 | Folder f -> Menu.ShowPage(EditFolderPage(name, f))
                 | Playlist p -> Menu.ShowPage(EditPlaylistPage(name, p))
+                | Level _ -> failwith "impossible"
         )
 
 type private ModeDropdown(options: string seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =

@@ -36,12 +36,12 @@ module Icons =
     let sort = Feather.chevrons_up
     let filter = Feather.filter
     let preview = Feather.eye
+    let table = Feather.sidebar
 
     let options = Feather.settings
     let import = Feather.download
     let wiki = Feather.book
     let wiki2 = Feather.book_open
-    let tasks = Feather.sidebar
 
     let import_local = Feather.link
     let import_etterna = Feather.archive

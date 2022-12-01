@@ -122,6 +122,14 @@ module Gameplay =
                 current <- c
             | None -> Logging.Error (sprintf "No such collection with name '%s'" name)
 
+    module Table =
+    
+        let select(id: string) =
+            try 
+                Table.load id
+                options.SelectedTable.Set id
+            with err -> Logging.Error (sprintf "Error loading table '%s'" id, err)
+
     let rate =
         Chart._rate
         |> Setting.trigger ( fun v ->
@@ -158,13 +166,6 @@ module Gameplay =
                 BestFlags.Default
         else BestFlags.Default
 
-    // todo: this is a temporary measure until the table module has a better interface
-    let selectTable(id: string) =
-        try 
-            Table.load id
-            options.SelectedTable.Set id
-        with err -> Logging.Error (sprintf "Error loading table '%s'" id, err)
-
     let save() =
         Table.save()
         Scores.save()
@@ -172,7 +173,7 @@ module Gameplay =
 
     let init() =
         match options.SelectedCollection.Value with "" -> () | v -> Collections.select v
-        match options.SelectedTable.Value with "" -> () | v -> selectTable v
+        match options.SelectedTable.Value with "" -> () | v -> Table.select v
         try
             let c, ch =
                 match Library.lookup options.CurrentChart.Value with

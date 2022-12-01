@@ -27,16 +27,16 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             )
 
         match context with
-        | LibraryContext.None ->
-            content
-            |* PrettyButton(
-                "chart.add_to_collection.specific",
-                (fun () ->
-                    if CollectionManager.Current.quick_add(cc) then Menu.Back()
-                ),
-                Icon = Icons.add_to_collection,
-                Text = Localisation.localiseWith [options.SelectedCollection.Value] "options.chart.add_to_collection.specific.name"
-            )
+        | LibraryContext.None -> ()
+            //content
+            //|* PrettyButton(
+            //    "chart.add_to_collection.specific",
+            //    (fun () ->
+            //        if CollectionManager.Current.quick_add(cc) then Menu.Back()
+            //    ),
+            //    Icon = Icons.add_to_collection,
+            //    Text = Localisation.localiseWith [options.SelectedCollection.Value] "options.chart.add_to_collection.specific.name"
+            //)
         | LibraryContext.Folder name
         | LibraryContext.Playlist (_, name, _) ->
             content
@@ -92,4 +92,4 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         | LibraryGroupContext.None -> GroupContextMenu(name, charts, context) |> Menu.ShowPage
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value) |> Menu.ShowPage
         | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value) |> Menu.ShowPage
-        | LibraryGroupContext.Table -> () // todo: nyi
+        | LibraryGroupContext.Table lvl -> () // todo: nyi

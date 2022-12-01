@@ -141,6 +141,7 @@ module Tree =
                     match Collections.current with
                     | Folder c -> if c.Contains cc then c.Icon.Value + " " else ""
                     | Playlist p -> if p.Contains cc then p.Icon.Value + " " else ""
+                    | Level lvl -> if lvl.Contains cc then Icons.table + " " else ""
                 else ""
                 +
                 match chartData with
