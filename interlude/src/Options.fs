@@ -107,10 +107,11 @@ module Options =
             ScoreSortMode: Setting<int>
 
             SelectedCollection: Setting<string>
-            SelectedTable: Setting<string>
+            SelectedTable: Setting<string option>
             GameplayBinds: (Bind array) array
 
             EnableConsole: Setting<bool>
+            EnableTableEdit: Setting<bool>
             Hotkeys: Dictionary<Hotkey, Bind>
         }
         static member Default = {
@@ -171,9 +172,10 @@ module Options =
             ScoreSortMode = Setting.simple 0
 
             SelectedCollection = Setting.simple ""
-            SelectedTable = Setting.simple ""
+            SelectedTable = Setting.simple None
 
             EnableConsole = Setting.simple false
+            EnableTableEdit = Setting.simple false
             Hotkeys = Dictionary<Hotkey, Bind>()
             GameplayBinds = [|
                 [|mk Keys.Left; mk Keys.Down; mk Keys.Right|]

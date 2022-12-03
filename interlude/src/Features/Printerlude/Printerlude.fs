@@ -17,6 +17,12 @@ module Printerlude =
         
         let register_commands (ctx: Context) =
             ctx
+                .WithCommand("enable_table_editing", Command.create "Enables editing of local tables" []
+                    ( Impl.Create (fun () -> Interlude.Options.options.EnableTableEdit.Value <- true) ))
+
+                .WithCommand("disable_table_editing", Command.create "Disables editing of local tables" []
+                    ( Impl.Create (fun () -> Interlude.Options.options.EnableTableEdit.Value <- false) ))
+
                 //.WithCommand("table_load", Command.create "Loads a table from file" ["filename"]
                 //    ( Impl.Create(Types.str, Gameplay.selectTable) ))
 

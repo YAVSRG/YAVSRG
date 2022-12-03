@@ -132,7 +132,7 @@ module Keybinds =
         do
             this.Content(
                 column()
-                |+ PrettySetting("generic.keymode", Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Pos(200.0f)
+                |+ PrettySetting("generic.keymode", Selector<_>.FromEnum(keycount |> Setting.trigger (ignore >> binds.OnKeymodeChanged))).Pos(200.0f)
                 |+ PrettySetting("keybinds.gameplay", binds).Pos(280.0f, Viewport.vwidth - 200.0f)
                 |+ PrettyButton("keybinds.hotkeys", (fun () -> Menu.ShowPage HotkeysPage)).Pos(400.0f)
             )

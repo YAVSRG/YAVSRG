@@ -24,7 +24,7 @@ module CollectionManager =
             match collection with
             | Folder c -> c.Add cc
             | Playlist p -> p.Add (cc, rate.Value, selectedMods.Value)
-            | Level lvl -> Table.current.Value.AddChart(lvl.Name, Table.generate_cid cc, cc)
+            | Level lvl -> Table.current().Value.AddChart(lvl.Name, Table.generate_cid cc, cc)
         then
             if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
             Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.added", NotificationType.Info)
@@ -39,7 +39,7 @@ module CollectionManager =
                 match context with
                 | LibraryContext.Playlist (i, in_name, _) when name = in_name -> p.RemoveAt i
                 | _ -> p.RemoveSingle cc
-            | Level _ -> Table.current.Value.RemoveChart cc
+            | Level _ -> Table.current().Value.RemoveChart cc
         then
             if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
             Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.removed", NotificationType.Info)
@@ -227,10 +227,50 @@ type private CollectionButton(icon, name, action) =
                 )
             ),
             Align = Alignment.LEFT,
-            Position = Position.Margin(Style.padding))
-        |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
+            Position = Position.Margin Style.padding)
+        |* Clickable.Focus this
         base.Init parent
     
+    override this.Draw() =
+        if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+        base.Draw()
+
+type private CreateTablePage() as this =
+    inherit Page()
+
+    let new_name = Setting.simple "Table" |> Setting.alphaNum
+    let keymode = Setting.simple (match Chart.cacheInfo with Some c -> enum c.Keys | None -> Keymode.``4K``)
+
+    do
+        this.Content(
+            column()
+            |+ PrettySetting("table.name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PrettySetting("generic.keymode", Selector<_>.FromEnum keymode).Pos(300.0f)
+            |+ PrettyButton("confirm.yes", 
+                (fun () -> if Table.create(new_name.Value, int keymode.Value, getCurrentRuleset()) then options.SelectedTable.Set (Some new_name.Value); Menu.Back() )).Pos(400.0f)
+        )
+
+    override this.Title = N"tables.create"
+    override this.OnClose() = ()
+
+type private TableButton(name, action) =
+    inherit StaticContainer(NodeType.Button (fun _ -> action()))
+            
+    override this.Init(parent: Widget) =
+        this
+        |+ Text(
+            K (sprintf "%s  >" name),
+            Color = ( 
+                fun () -> ( 
+                    (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White),
+                    (if Some name = options.SelectedTable.Value then Style.color(255, 0.5f, 0.0f) else Color.Black)
+                )
+            ),
+            Align = Alignment.LEFT,
+            Position = Position.Margin Style.padding)
+        |* Clickable.Focus this
+        base.Init parent
+            
     override this.Draw() =
         if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
         base.Draw()
@@ -279,6 +319,45 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
                 | Playlist p -> Menu.ShowPage(EditPlaylistPage(name, p))
                 | Level _ -> failwith "impossible"
         )
+
+type ManageTablesPage() as this =
+    inherit Page()
+
+    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let refresh() =
+        container.Clear()
+
+        container
+        |+ PrettyButton("tables.install", ignore, Icon = Icons.download)
+        |* Dummy()
+
+        for name in Table.list() do
+            container |* TableButton(name, fun () -> options.SelectedTable.Set (Some name); Table.load name)
+
+        if options.EnableTableEdit.Value then
+            
+            container
+            |+ Dummy()
+            |+ PrettyButton("tables.create", (fun () -> Menu.ShowPage CreateTablePage), Icon = Icons.add)
+            |* PrettyButton("tables.create_level", ignore, Icon = Icons.add_to_collection)
+
+            match Table.current() with
+            | Some t ->
+                container |* Dummy()
+                for level in t.Levels do
+                    container |* CollectionButton(Icons.folder, level.Name, ignore)
+            | None -> ()
+
+        if container.Focused then container.Focus()
+
+    do
+        refresh()
+
+        this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
+
+    override this.Title = N"table"
+    override this.OnClose() = ()
+    override this.OnReturnTo() = refresh()
 
 type private ModeDropdown(options: string seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
     inherit StaticContainer(NodeType.None)
@@ -343,7 +422,7 @@ type LibraryModeSettings() =
         
     let manage_tables =
         StylishButton(
-            ignore,
+            (fun () -> Menu.ShowPage ManageTablesPage),
             K (sprintf "%s %s" Icons.edit (L"levelselect.table.name")),
             Style.main 100,
             Hotkey = "group_mode"
@@ -398,7 +477,7 @@ type LibraryModeSettings() =
             elif (!|"move_down_in_collection").Tapped() then CollectionManager.reorder_down(Chart.context)
 
             elif (!|"collections").Tapped() then Menu.ShowPage SelectCollectionPage.Editor
-            elif (!|"table").Tapped() then ignore() // todo
+            elif (!|"table").Tapped() then Menu.ShowPage ManageTablesPage
             elif (!|"reverse_sort_mode").Tapped() then 
                 Setting.app not options.ChartSortReverse
                 LevelSelect.refresh <- true

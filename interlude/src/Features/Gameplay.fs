@@ -122,14 +122,6 @@ module Gameplay =
                 current <- c
             | None -> Logging.Error (sprintf "No such collection with name '%s'" name)
 
-    module Table =
-    
-        let select(id: string) =
-            try 
-                Table.load id
-                options.SelectedTable.Set id
-            with err -> Logging.Error (sprintf "Error loading table '%s'" id, err)
-
     let rate =
         Chart._rate
         |> Setting.trigger ( fun v ->
@@ -173,7 +165,6 @@ module Gameplay =
 
     let init() =
         match options.SelectedCollection.Value with "" -> () | v -> Collections.select v
-        match options.SelectedTable.Value with "" -> () | v -> Table.select v
         try
             let c, ch =
                 match Library.lookup options.CurrentChart.Value with
@@ -194,3 +185,4 @@ module Gameplay =
         with err ->
             Logging.Debug("No charts installed")
             Background.load ""
+        Table.init(options.SelectedTable.Value)
