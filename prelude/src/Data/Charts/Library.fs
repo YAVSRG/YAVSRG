@@ -138,7 +138,7 @@ module Library =
 
     let getTableGroups (sorting: SortMethod) (filter: Filter) : LexSortedGroups =
         let groups = new Dictionary<int * string, Group>()
-        match Table.current with
+        match Table.current() with
         | Some table ->
             for level_no, level in Seq.indexed table.Levels do
                 level.Charts

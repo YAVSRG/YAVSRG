@@ -185,7 +185,7 @@ module Scores =
 
     let data: Data =
         loadImportantJsonFile "Scores" (Path.Combine (getDataPath "Data", "scores.json")) true
-        |> fun d -> Logging.Info (sprintf "Scores loaded, with %i chart entries" d.Entries.Keys.Count); d
+        |> fun d -> Logging.Info (sprintf "Loaded scores for %i charts." d.Entries.Keys.Count); d
 
     let save() = saveImportantJsonFile (Path.Combine(getDataPath "Data", "scores.json")) data
 
