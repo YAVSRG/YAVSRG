@@ -61,6 +61,9 @@ type Table =
 
     // Charts
 
+    member this.Contains(cc: CachedChart) : bool =
+        this.Levels.Any(fun l -> l.Charts.Any(fun c -> c.Hash = cc.Hash))
+
     member this.AddChart(level: string, cid: string, chart: CachedChart) : bool =
         if
             this.Levels
