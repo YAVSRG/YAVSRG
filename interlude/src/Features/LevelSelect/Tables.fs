@@ -163,3 +163,30 @@ type ManageTablesPage() as this =
     override this.Title = N"table"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()
+
+type SelectTableLevelPage(action: Level -> unit) as this =
+    inherit Page()
+
+    let container = FlowContainer.Vertical<Widget>(PRETTYHEIGHT)
+    let refresh() =
+        container.Clear()
+        container
+        |* PrettyButton("tables.create_level", (fun () -> Menu.ShowPage CreateLevelPage), Icon = Icons.add_to_collection)
+
+        match Table.current() with
+        | Some t ->
+            container |* Dummy()
+            for level in t.Levels do
+                container |* LevelButton(level.Name, (fun () -> action level) )
+        | None -> ()
+
+        if container.Focused then container.Focus()
+
+    do
+        refresh()
+
+        this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
+
+    override this.Title = N"table"
+    override this.OnClose() = ()
+    override this.OnReturnTo() = refresh()

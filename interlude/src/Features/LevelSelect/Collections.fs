@@ -39,7 +39,7 @@ module CollectionManager =
                 | _ -> p.RemoveSingle cc
             | Level _ -> Table.current().Value.RemoveChart cc
         then
-            if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
+            if options.LibraryMode.Value <> LibraryMode.All then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
             Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.removed", NotificationType.Info)
             if Some cc = Chart.cacheInfo then Chart.context <- LibraryContext.None
             true

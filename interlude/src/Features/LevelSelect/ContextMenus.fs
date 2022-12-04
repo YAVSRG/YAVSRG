@@ -8,6 +8,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Options
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
@@ -18,7 +19,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
             |+ PrettyButton("chart.delete", (fun () -> ChartContextMenu.ConfirmDelete(cc, true)), Icon = Icons.delete)
 
             |+ PrettyButton(
-                "chart.add_to_collection.generic",
+                "chart.add_to_collection",
                 (fun () -> Menu.ShowPage (SelectCollectionPage(
                     fun (name, collection) ->
                         if CollectionManager.add_to(name, collection, cc) then Menu.Back()
@@ -28,7 +29,6 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
 
         match context with
         | LibraryContext.None -> ()
-            // todo: decide what to do about quick-add to selected collection via context menu
         | LibraryContext.Folder name
         | LibraryContext.Playlist (_, name, _) ->
             content
@@ -48,8 +48,22 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     if CollectionManager.remove_from(lvl, Level (Table.current().Value.TryLevel(lvl).Value), cc, context) then Menu.Back()
                 ),
                 Icon = Icons.remove_from_collection,
-                Text = Localisation.localiseWith [lvl] "options.chart.remove_from_collection.name"
+                Text = Localisation.localiseWith [options.Table.Value.Value] "options.chart.remove_from_collection.name"
             )
+
+        if options.EnableTableEdit.Value then
+            
+            match Table.current() with
+            | Some table -> 
+                if not (table.Contains(cc: CachedChart)) then
+                    content
+                    |* PrettyButton(
+                        "chart.add_to_table",
+                        (fun () -> SelectTableLevelPage(fun level -> if CollectionManager.add_to(level.Name, Level level, cc) then Menu.Back()) |> Menu.ShowPage),
+                        Icon = Icons.add_to_collection,
+                        Text = Localisation.localiseWith [table.Name] "options.chart.add_to_table.name"
+                    )
+            | None -> ()
 
         this.Content content
 
