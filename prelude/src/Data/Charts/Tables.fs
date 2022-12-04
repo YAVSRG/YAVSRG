@@ -39,9 +39,11 @@ type Table =
     // Levels
 
     member private this.Level(id: string) : Level = this.Levels.Find(fun l -> l.Name = id)
-    member private this.TryLevel(id: string) : Level option = Seq.tryFind (fun (l: Level) -> l.Name = id) this.Levels
+    member this.TryLevel(id: string) : Level option = Seq.tryFind (fun (l: Level) -> l.Name = id) this.Levels
 
     member this.AddLevel(id: string) : bool =
+        if id = "" then false else
+
         if Seq.forall (fun (l: Level) -> l.Name <> id) this.Levels |> not then false else
 
         let l = { Name = id; Charts = ResizeArray() }
@@ -52,6 +54,8 @@ type Table =
         this.Levels.Remove(this.Level id)
 
     member this.RenameLevel(old_name: string, new_name: string) =
+        if new_name = "" then false else
+
         if this.TryLevel(new_name).IsSome then false
         else this.Level(old_name).Name <- new_name; true
 
@@ -133,6 +137,8 @@ module Table =
         | None -> ()
 
     let create(name: string, keymode: int, ruleset: Ruleset) : bool =
+        if name = "" then false else
+
         save()
         let fileid = generate_table_name name + ".table"
         if table_pathf fileid |> File.Exists || loaded.Any(fun l -> l.Table.Name = name) then false else

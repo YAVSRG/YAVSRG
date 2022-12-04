@@ -151,14 +151,14 @@ module Collections =
         member this.Exists(name) = this.Get(name).IsSome
 
         member this.CreateFolder(name, icon) : Folder option =
-            if this.Exists name then None
+            if this.Exists name || name = ""  then None
             else
                 let folder = Folder.Create icon
                 this.Folders.Add(name, folder)
                 Some folder
 
         member this.CreatePlaylist(name, icon) : Playlist option =
-            if this.Exists name then None
+            if this.Exists name || name = "" then None
             else
                 let playlist = Playlist.Create icon
                 this.Playlists.Add(name, playlist)
@@ -170,7 +170,7 @@ module Collections =
             else false
 
         member this.RenameCollection(oldname, newname) : bool =
-            if this.Exists newname then false
+            if this.Exists newname || newname = "" then false
             elif not (this.Folders.ContainsKey oldname) then false
             else
             let folder = this.Folders.[oldname]
@@ -179,7 +179,7 @@ module Collections =
             true
             
         member this.RenamePlaylist(oldname, newname) : bool =
-            if this.Exists newname then false
+            if this.Exists newname || newname = "" then false
             elif not (this.Playlists.ContainsKey oldname) then false
             else
             let playlist = this.Playlists.[oldname]
@@ -194,13 +194,13 @@ module Collections =
     [<NoComparison>]
     type LibraryContext =
         | None
-        | Table
+        | Table of level: string
         | Folder of id: string
         | Playlist of index: int * id: string * data: PlaylistEntryInfo
         member this.CollectionSource : CollectionSource option =
             match this with
             | None
-            | Table -> Option.None
+            | Table _ -> Option.None
             | Folder id -> Some { Name = id; Position = 0 }
             | Playlist (i, id, _) -> Some { Name = id; Position = i }
         override this.Equals(other: obj) =

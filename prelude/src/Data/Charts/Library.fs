@@ -145,7 +145,7 @@ module Library =
                 |> Seq.choose
                     ( fun (c: TableChart) ->
                         lookupHash c.Hash
-                        |> Option.map (fun x -> x, LibraryContext.Table)
+                        |> Option.map (fun x -> x, LibraryContext.Table level.Name)
                     )
                 |> Filter.applyf filter
                 |> ResizeArray<CachedChart * LibraryContext>
