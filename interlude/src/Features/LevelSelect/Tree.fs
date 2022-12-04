@@ -139,9 +139,10 @@ module Tree =
             markers <-
                 if options.LibraryMode.Value <> LibraryMode.Collections then
                     match Collections.current with
-                    | Folder c -> if c.Contains cc then c.Icon.Value + " " else ""
-                    | Playlist p -> if p.Contains cc then p.Icon.Value + " " else ""
-                    | Level lvl -> if lvl.Contains cc then Icons.table + " " else ""
+                    | Some (Folder c) -> if c.Contains cc then c.Icon.Value + " " else ""
+                    | Some (Playlist p) -> if p.Contains cc then p.Icon.Value + " " else ""
+                    | Some (Level lvl) -> if context <> LibraryContext.Table lvl.Name && lvl.Contains cc then Icons.table + " " else ""
+                    | None -> ""
                 else ""
                 +
                 match chartData with

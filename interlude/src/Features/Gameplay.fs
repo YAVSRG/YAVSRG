@@ -80,23 +80,7 @@ module Gameplay =
         
         open Prelude.Data.Charts.Library
     
-        let mutable current = Unchecked.defaultof<_>
-
-        let select_something() =
-            let selection = options.SelectedCollection.Value
-            match collections.Get selection with
-            | Some c -> ()
-            | None -> 
-                match Seq.tryHead collections.List with
-                | Some (name, collection) ->
-                    options.SelectedCollection.Value <- name
-                    current <- collection
-                | None -> 
-                    let favourites = (Localisation.localise "collections.favourites")
-                    options.SelectedCollection.Value <- favourites
-                    current <- collections.CreateFolder(favourites, Icons.heart).Value |> Folder
-
-        do select_something()
+        let mutable current : Collection option = None
     
         let notifyChangeRate v =
             match Chart.context with
@@ -114,13 +98,27 @@ module Gameplay =
                 rate.Value <- d.Rate.Value
                 mods.Value <- d.Mods.Value
             | _ -> ()
+
+        let unselect() =
+            options.Collection.Set ActiveCollection.None
+            current <- None
     
         let select(name: string) =
             match collections.Get name with
             | Some c -> 
-                options.SelectedCollection.Set name
-                current <- c
+                options.Collection.Set (ActiveCollection.Collection name)
+                current <- Some c
             | None -> Logging.Error (sprintf "No such collection with name '%s'" name)
+
+        let select_level(name: string) =
+            match Table.current() with
+            | Some table ->
+                match table.TryLevel name with
+                | Some level -> 
+                    options.Collection.Set (ActiveCollection.Level name)
+                    current <- Some (Level level)
+                | None -> Logging.Error (sprintf "No such level with name '%s'" name)
+            | None -> Logging.Error (sprintf "No table selected, cannot select level '%s'" name)
 
     let rate =
         Chart._rate
@@ -164,7 +162,6 @@ module Gameplay =
         Library.save()
 
     let init() =
-        match options.SelectedCollection.Value with "" -> () | v -> Collections.select v
         try
             let c, ch =
                 match Library.lookup options.CurrentChart.Value with
@@ -185,4 +182,8 @@ module Gameplay =
         with err ->
             Logging.Debug("No charts installed")
             Background.load ""
-        Table.init(options.SelectedTable.Value)
+        Table.init(options.Table.Value)
+        match options.Collection.Value with
+        | ActiveCollection.Collection c -> Collections.select c
+        | ActiveCollection.Level l -> Collections.select_level l
+        | ActiveCollection.None -> ()

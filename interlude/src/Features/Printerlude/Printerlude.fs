@@ -23,28 +23,6 @@ module Printerlude =
                 .WithCommand("disable_table_editing", Command.create "Disables editing of local tables" []
                     ( Impl.Create (fun () -> Interlude.Options.options.EnableTableEdit.Value <- false) ))
 
-                //.WithCommand("table_load", Command.create "Loads a table from file" ["filename"]
-                //    ( Impl.Create(Types.str, Gameplay.selectTable) ))
-
-                //.WithCommand("table_save", Command.create "Creates a new table" []
-                //    ( Impl.Create Table.save ))
-
-                //.WithCommand("table_create", Command.create "Creates a new table" ["name"; "filename"]
-                //    ( Impl.Create(Types.str, Types.str, fun name filename -> Table.create(name, filename)) ))
-
-                //.WithCommand("table_create_level", Command.create "Creates a new level in the current table" ["level_name"]
-                //    ( Impl.Create(Types.str, fun levelid -> Table.current.Value.AddLevel levelid) ))
-
-                //.WithCommand("table_remove_level", Command.create "Deletes a level in the current table" ["level_name"]
-                //    ( Impl.Create(Types.str, fun levelid -> Table.current.Value.RemoveLevel levelid) ))
-                    
-                //.WithCommand("table_rename_level", Command.create "Renames a level in the current table" ["old_level_name"; "new_level_name"]
-                //    ( Impl.Create(Types.str, Types.str, fun oldname newname -> Table.current.Value.RenameLevel(oldname, newname)) ))
-
-                //.WithCommand("table_add_chart", Command.create "Adds the current chart to the current table" ["level_name"; "chart_id"]
-                //    ( Impl.Create(Types.str, Types.str, 
-                //        fun levelid chartid -> Table.current.Value.AddChart(levelid, chartid, Gameplay.Chart.cacheInfo.Value)) ))
-
     module private Themes =
 
         let register_commands (ctx: Context) =

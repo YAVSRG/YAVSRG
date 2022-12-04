@@ -19,6 +19,18 @@ module Options =
         User settings
     *)
 
+    [<Json.AutoCodec>]
+    [<RequireQualifiedAccess>]
+    type ActiveCollection =
+        | Collection of string
+        | Level of string
+        | None
+        override this.ToString() =
+            match this with
+            | Collection c -> c
+            | Level l -> l
+            | None -> "" // todo: localised placeholder for nothing
+
     type Keymode =
         | ``3K`` = 3
         | ``4K`` = 4
@@ -106,8 +118,8 @@ module Options =
             ChartGroupReverse: Setting<bool>
             ScoreSortMode: Setting<int>
 
-            SelectedCollection: Setting<string>
-            SelectedTable: Setting<string option>
+            Collection: Setting<ActiveCollection>
+            Table: Setting<string option>
             GameplayBinds: (Bind array) array
 
             EnableConsole: Setting<bool>
@@ -171,8 +183,8 @@ module Options =
             ChartGroupReverse = Setting.simple false
             ScoreSortMode = Setting.simple 0
 
-            SelectedCollection = Setting.simple ""
-            SelectedTable = Setting.simple None
+            Collection = Setting.simple ActiveCollection.None
+            Table = Setting.simple None
 
             EnableConsole = Setting.simple false
             EnableTableEdit = Setting.simple false

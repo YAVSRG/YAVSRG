@@ -3,11 +3,11 @@
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts
+open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Collections
 open Interlude.UI
 open Interlude.UI.Menu
-open Interlude.Options
 
 type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
     inherit Page()
@@ -28,15 +28,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
 
         match context with
         | LibraryContext.None -> ()
-            //content
-            //|* PrettyButton(
-            //    "chart.add_to_collection.specific",
-            //    (fun () ->
-            //        if CollectionManager.Current.quick_add(cc) then Menu.Back()
-            //    ),
-            //    Icon = Icons.add_to_collection,
-            //    Text = Localisation.localiseWith [options.SelectedCollection.Value] "options.chart.add_to_collection.specific.name"
-            //)
+            // todo: decide what to do about quick-add to selected collection via context menu
         | LibraryContext.Folder name
         | LibraryContext.Playlist (_, name, _) ->
             content
@@ -48,7 +40,16 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Icon = Icons.remove_from_collection,
                 Text = Localisation.localiseWith [name] "options.chart.remove_from_collection.name"
             )
-        | LibraryContext.Table -> () // todo: nyi
+        | LibraryContext.Table lvl ->
+            content
+            |* PrettyButton(
+                "chart.remove_from_collection",
+                (fun () -> 
+                    if CollectionManager.remove_from(lvl, Level (Table.current().Value.TryLevel(lvl).Value), cc, context) then Menu.Back()
+                ),
+                Icon = Icons.remove_from_collection,
+                Text = Localisation.localiseWith [lvl] "options.chart.remove_from_collection.name"
+            )
 
         this.Content content
 
@@ -92,4 +93,4 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
         | LibraryGroupContext.None -> GroupContextMenu(name, charts, context) |> Menu.ShowPage
         | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value) |> Menu.ShowPage
         | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value) |> Menu.ShowPage
-        | LibraryGroupContext.Table lvl -> () // todo: nyi
+        | LibraryGroupContext.Table lvl -> (EditLevelPage (Table.current().Value.TryLevel(lvl).Value)) |> Menu.ShowPage

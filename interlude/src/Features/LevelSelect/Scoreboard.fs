@@ -104,7 +104,6 @@ module Scoreboard =
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f })
 
             |* Clickable(this.Select,
-                OnHover = (fun b -> if b then this.Focus()),
                 OnRightClick = fun () -> ScoreContextMenu data |> Menu.ShowPage)
 
         member this.Data = data
