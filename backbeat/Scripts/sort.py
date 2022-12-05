@@ -7,7 +7,7 @@ f.close()
 
 def compare(left, right):
     print(left.strip(), "(<) vs (>)", right.strip())
-    return input("Choose the MORE DIFFICULT file: ") in "<,l"
+    return input("Choose the MORE DIFFICULT file: ") not in "<,l"
 
 def insert_sort(items, new_item):
     l = len(items)
@@ -31,7 +31,7 @@ while new_items:
     
 f = open("output.txt", "w+")
 for o in output:
-    f.write(o)
+    f.write(o.strip() + "\n")
 f.close()
 f = open("input.txt", "w+")
 f.write("")
