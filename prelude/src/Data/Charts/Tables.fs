@@ -122,7 +122,9 @@ module Table =
         | None -> Logging.Warn(sprintf "Table not found: '%s'" name)
 
     let init(selected: string option) =
-        for file in Directory.GetFiles(Path.Combine(getDataPath "Data", "Tables")) do
+        let table_path = Path.Combine(getDataPath "Data", "Tables")
+        Directory.CreateDirectory table_path |> ignore
+        for file in Directory.GetFiles table_path do
             if Path.GetExtension(file).ToLower() = ".table" then
                 match JSON.FromFile file with
                 | Ok t -> loaded.Add({ File = Path.GetFileName file; Table = t})
