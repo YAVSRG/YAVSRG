@@ -137,6 +137,7 @@ type ManageTablesPage() as this =
                 options.Table.Set (Some name)
                 Table.load name
                 match options.Collection.Value with ActiveCollection.Level _ -> Collections.unselect() | _ -> ()
+                if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
                 sync refresh)
 
         if options.EnableTableEdit.Value then
