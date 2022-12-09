@@ -1,49 +1,25 @@
-0.6.7
+0.6.8
 ====
 
-Collections and quality-of-life update
+## What's a table?
 
-## Collections
+A table = a ton of charts hand-sorted into levels/folders.  
+You work through each folder, setting a certain standard of score, and each folder is a good-sized step to slowly push your skills and improve.
 
-- Collections have been rewritten. As previously mentioned if anyone has collections they want to keep let me know in the discord.
-  
-- There are two kinds of collection: Folders and Playlists
-  Folders are groups of charts like osu! 'collections'
-  Playlists are ordered lists of charts including the gameplay modifiers and a specific rate for the chart
-  
-- Added library views: All, Collections and Table
-  These are what gets shown on level select.
-  
-  'Table' view is a placeholder for more fleshed out table features
-  'Collections' view lists all collections
-  'All' is just the normal list of every chart you have
+Interlude is getting tables because:
+- It gives the game the closest thing to "official" content - There will be clear goals to achieve rather than just picking stuff to play every session
+- It lets me collect some sweet sweet analytics data for difficulty calculation algorithms
+- It provides useful progression advice to players while the aforementioned difficulty calculation algorithms are made
 
-- You can quick-add and quick-remove charts from a 'selected' collection (more info is provided by the relevant menus)
-  This is a lot quicker and more convenient than going through the right-click menus.
+## Table stuff
 
-- Collections can be assigned various icons, and these are shown in level select. The display icons are a bit smaller and look better when you also have a comment on the chart.
+Following on from 0.6.7's collections update, the "Table" library mode and buttons now do more stuff
 
-## QOL
+- Clicking 'Manage Tables' displays a menu where you can select any installed tables if you have any (Check discord for initial release of a test table to try this out)
 
-- Hotkeys can now be individually reset in the keybinds menu
-- Hotkeys can now be reset all at once in the keybinds menu
-  **I would recommend doing this as some bindings have been changed and will not automatically change when you update**
+- Added some hidden stuff for creating and editing your own table. You can toggle it on via Printerlude if you're curious
 
-- Scoreboard looks a little different :)
-  Also you can now focus it by pressing Z (by default)
-  This lets you navigate it with the keyboard/press enter to view the screen for a score
-  
-- You can press . (by default) to open the context menu for charts (or for scores with the above scoreboard navigation feature)
-  Equivalent to right-clicking.
-
-- Added and updated a BUNCH of hotkeys around level select for ease of navigation with keyboard-only if that pleases you
-
-- The hotkey for many level select buttons are shown when displaying the tooltip info for that button. The key to show these is still ? (by default)
-
-- Fixed several bugs:
-  - Etterna pack downloads should be up again (caused by expired certificate)
-  - Scoreboard refreshes when selecting mods with "Current mods" filter active
-  - Some others
-  
-- Various locale consistency fixes
+- I'm in the process of setting up:
+	- Some nice tooling for contributing to tables and publishing changelogs when they get updated
+	- Some infrastructure for installing tables into your Interlude client from the 'Manage Tables' menu
 

@@ -9,6 +9,7 @@ open Prelude.Data.Charts.Tables
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 open Prelude.Data.Charts.Library
@@ -154,12 +155,14 @@ type ManageTablesPage() as this =
                     container |* LevelButton(level.Name, (fun () -> Menu.ShowPage (EditLevelPage level)) )
             | None -> ()
 
+
         if container.Focused then container.Focus()
 
     do
         refresh()
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
+        this |* WIP()
 
     override this.Title = N"table"
     override this.OnClose() = ()
