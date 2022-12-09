@@ -11,8 +11,8 @@ module Features =
 
     let fetch_table(file: string) =
         
-        let source = Path.Combine(INTERLUDE_TABLES_PATH, file)
-        let target = Path.Combine(TABLES_PATH, file)
+        let source = Path.Combine(INTERLUDE_TABLES_PATH, file + ".table")
+        let target = Path.Combine(TABLES_PATH, file + ".table")
 
         if File.GetLastWriteTime target > File.GetLastWriteTime source then
             printfn "Source is older than target. Is this what you want?"
@@ -23,8 +23,8 @@ module Features =
     
     let put_table(file: string) =
         
-        let target = Path.Combine(INTERLUDE_TABLES_PATH, file)
-        let source = Path.Combine(TABLES_PATH, file)
+        let target = Path.Combine(INTERLUDE_TABLES_PATH, file + ".table")
+        let source = Path.Combine(TABLES_PATH, file + ".table")
 
         if File.GetLastWriteTime target > File.GetLastWriteTime source then
             printfn "Source is older than target. Is this what you want?"
@@ -35,7 +35,7 @@ module Features =
 
     let flatten_table(file: string) =
         
-        let table : Table = Path.Combine(TABLES_PATH, file) |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
         let flat = Path.Combine(TABLES_PATH, Path.ChangeExtension(file, ".txt"))
 
         let lines = ResizeArray<string>()
@@ -49,7 +49,7 @@ module Features =
 
     let unflatten_table(file: string) =
         
-        let table : Table = Path.Combine(TABLES_PATH, file) |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
         let flat = Path.Combine(TABLES_PATH, Path.ChangeExtension(file, ".txt"))
         
         let lines = File.ReadAllLines flat
@@ -72,7 +72,7 @@ module Features =
                 levelCharts.Add chart
 
         printfn "overwriting table"
-        JSON.ToFile (Path.Combine(TABLES_PATH, file), true) newTable
+        JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true) newTable
 
     let register (ctx: Context) =
         ctx
