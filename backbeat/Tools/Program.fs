@@ -6,6 +6,7 @@ let ctx =
 
 [<EntryPoint>]
 let main argv =
+    Interlude.Charts.Utils.init()
     if argv.Length > 0 then
         match ctx.Interpret(String.concat " " argv) with
         | Ok _ -> ()

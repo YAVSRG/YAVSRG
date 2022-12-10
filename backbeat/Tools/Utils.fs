@@ -21,9 +21,9 @@ module Utils =
     [<Json.AutoCodec>]
     type Config = 
         {
-            InterludeTablesPath: string
+            InterludePath: string
         }
-        static member Default = { InterludeTablesPath = "" }
+        static member Default = { InterludePath = "C:/Interlude/dev" }
 
     let config : Config = 
         match JSON.FromFile SETTINGS_FILE with
@@ -31,9 +31,11 @@ module Utils =
         | Error e -> Logging.Error("Error loading settings (using default): ", e); Config.Default
 
     let TABLES_PATH = Path.Combine(REPO_PATH, "Tables")
-    let INTERLUDE_TABLES_PATH = config.InterludeTablesPath
+    let CHARTS_PATH = Path.Combine(REPO_PATH, "Charts")
+    let PACKS_PATH = Path.Combine(REPO_PATH, "Packs")
+    let INTERLUDE_TABLES_PATH = Path.Combine(config.InterludePath, "Data", "Tables")
 
-    do
+    let init() =
         JSON.ToFile (SETTINGS_FILE, true) config
         Directory.CreateDirectory TABLES_PATH |> ignore
     

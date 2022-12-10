@@ -3,3 +3,7 @@
 **/bin
 **/obj
 settings.json
+**/*.zip
+**/*.mp3
+**/*.png
+Charts
