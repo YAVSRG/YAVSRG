@@ -288,7 +288,7 @@ module Interlude =
                 ChartSource = Unknown
             }
 
-    type Chart(keys: int, header: ChartHeader, notes: TimeData<NoteRow>, bpms: TimeData<BPM>, sv: MultiTimeData<float32>, path: string) =
+    type Chart(keys: int, header: ChartHeader, notes: TimeData<NoteRow>, bpms: TimeData<BPM>, sv: MultiTimeData<float32>, loaded_from_path: string) =
 
         do if notes.Count = 0 then invalidArg (nameof notes) "A chart cannot have no notes"
 
@@ -297,10 +297,10 @@ module Interlude =
         member this.BPM: TimeData<BPM> = bpms
         member this.Header: ChartHeader = header
         member this.SV: MultiTimeData<float32> = sv
-        member this.FileIdentifier: string = path
+        member this.FileIdentifier: string = loaded_from_path
 
-        member this.BackgroundPath = match header.BackgroundFile with Relative s -> Path.Combine(Path.GetDirectoryName path, s) | Absolute s -> s
-        member this.AudioPath = match header.AudioFile with Relative s -> Path.Combine(Path.GetDirectoryName path, s) | Absolute s -> s
+        member this.BackgroundPath = match header.BackgroundFile with Relative s -> Path.Combine(Path.GetDirectoryName loaded_from_path, s) | Absolute s -> s
+        member this.AudioPath = match header.AudioFile with Relative s -> Path.Combine(Path.GetDirectoryName loaded_from_path, s) | Absolute s -> s
 
         member this.FirstNote = offsetOf this.Notes.First.Value
         member this.LastNote = offsetOf this.Notes.Last.Value
