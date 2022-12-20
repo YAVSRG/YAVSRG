@@ -41,7 +41,7 @@ module Assets =
         ZipFile.CreateFromDirectory(source, target_zip)
         
     let main() =
-        copy_rulesets()
+        //copy_rulesets()
         make_zip 
         <| Path.Combine(Utils.ASSETS_PATH, "default")
         <| Path.Combine(Utils.BUILD_RESOURCES_PATH, "default.zip")
