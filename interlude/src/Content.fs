@@ -138,7 +138,7 @@ module Content =
                     | None ->
                         match loaded.["*default"].GetTexture id with
                         | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
-                        | None -> failwith "default doesnt have this texture!!"
+                        | None -> failwithf "Failed to load texture %s from *default" id
 
                 GameplayConfig.reload()
                 Rulesets.load_from_theme(instance)
