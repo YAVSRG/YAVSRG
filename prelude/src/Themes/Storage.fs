@@ -21,7 +21,13 @@ type TextureConfig =
     { Columns: int; Rows: int; Mode: TextureFileMode }   
     static member Default = { Columns = 1; Rows = 1; Mode = Grid }
 
-type StorageType = Zip of ZipArchive * source: string option | Folder of string
+type StorageType = 
+    | Zip of ZipArchive * source: string option
+    | Folder of string
+    override this.ToString() =
+        match this with
+        | Zip (_, f) -> match f with Some f -> Path.GetFileName f | None -> "[Embedded Assets]"
+        | Folder f -> Path.GetFileName f + "/"
 
 type Storage(storage: StorageType) =
 
@@ -140,7 +146,7 @@ type Storage(storage: StorageType) =
                         function
                         | Ok v -> Some v
                         | Error err -> 
-                            Logging.Error (sprintf "Failed to load %s in user data" (String.concat "/" path), err)
+                            Logging.Error (sprintf "Failed to load %s in: %O" (String.concat "/" path) storage, err)
                             None
                 stream.Dispose()
                 result
@@ -162,7 +168,7 @@ type Storage(storage: StorageType) =
                         function
                         | Ok v -> v, false
                         | Error err -> 
-                            Logging.Error (sprintf "Error loading %s in user data (Will use default values)" (String.concat "/" path), err)
+                            Logging.Error (sprintf "Error loading %s in: %O (Will use default values)" (String.concat "/" path) storage, err)
                             JSON.Default<'T>(), true
                 stream.Dispose()
                 result

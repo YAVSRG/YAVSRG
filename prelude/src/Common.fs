@@ -130,8 +130,8 @@ module Common =
             | Error err ->
                 Logging.Critical (sprintf "Could not load %s! Maybe it is corrupt?" (Path.GetFileName path), err)
                 if prompt then
-                    Console.WriteLine "If you would like to launch anyway (WILL WIPE THIS DATA!!), press ENTER."
-                    Console.WriteLine "If you would like to try and fix the problem youself, CLOSE THIS WINDOW NOW."
+                    Logging.Critical "If you would like to launch anyway (WILL WIPE THIS DATA!!), press ENTER."
+                    Logging.Critical "If you would like to try and fix the problem youself, CLOSE THIS WINDOW NOW."
                     Console.ReadLine() |> ignore
                     Logging.Critical "User has chosen to launch game with default data."
                 JSON.Default<'T>()
