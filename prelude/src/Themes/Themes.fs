@@ -298,6 +298,12 @@ type Theme(storage) as this =
         and get () = config
         
     member this.GetTexture (name: string) : (Bitmap * TextureConfig) option =
+        let name = 
+            if 
+                (name = "logo" || name = "rain")
+                && (let dayOfYear = System.DateTime.Today.DayOfYear in dayOfYear < 5 || dayOfYear > 350)
+            then name + "-winterlude" else name
+
         match this.LoadTexture (name, "Textures") with
         | Ok res -> res
         | Error err -> Logging.Error(sprintf "Error loading theme texture '%s': %s" name err.Message); None
