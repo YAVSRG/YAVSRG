@@ -1,10 +1,9 @@
-0.6.8.1
+0.6.8.2
 ====
 
-### Winterlude 2022
+Small update
 
-Small update before I'm away for Christmas
-
-- Default bar and arrow noteskins now use DDR coloring, which they were always meant to have as the default
-- Brought back the Winterlude logo effect :)
+- Winterlude time is over
+- New feature: You can left-click and drag to scroll through level select
+- Improved old feature: You can right-click and drag to fast-scroll without opening the menu for a chart (before you had to right-click in the space to the left of the charts)
 
