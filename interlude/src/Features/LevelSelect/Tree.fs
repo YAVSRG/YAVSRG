@@ -55,7 +55,12 @@ module Tree =
     
     let private scrollPos = Animation.Fade 300.0f
     let private scroll(amount: float32) = scrollPos.Target <- scrollPos.Target + amount
-    let mutable private right_click_scrolling = false
+
+    let mutable private currently_drag_scrolling = false
+    let mutable private drag_scroll_distance = 0.0f
+    let mutable private drag_scroll_position = 0.0f
+    let DRAG_THRESHOLD = 40.0f
+    let DRAG_LEFTCLICK_SCALE = 1.75f
 
     /// Increment the flag to recalculate cached data on tree items
     /// Tree items use this number + their local copy of it to track if they have refreshed their data yet
@@ -117,6 +122,12 @@ module Tree =
             let bounds = this.Bounds (top + this.Spacing * 0.5f)
             if bounds.Bottom > origin && top < originB then if_visible bounds
             top + bounds.Height + this.Spacing
+
+        member this.LeftClick() =
+            Mouse.released Mouse.LEFT && drag_scroll_distance <= DRAG_THRESHOLD
+
+        member this.RightClick() =
+            Mouse.released Mouse.RIGHT && drag_scroll_distance <= DRAG_THRESHOLD
 
     type private ChartItem(groupName: string, cc: CachedChart, context: LibraryContext) =
         inherit TreeItem()
@@ -221,10 +232,10 @@ module Tree =
 
             if Mouse.hover bounds then
                 hover.Target <- 1.0f
-                if Mouse.leftClick() then
+                if this.LeftClick() then
                     if this.Selected then play()
                     else this.Select()
-                elif Mouse.rightClick() then ChartContextMenu(cc, context) |> Menu.ShowPage
+                elif this.RightClick() then ChartContextMenu(cc, context) |> Menu.ShowPage
                 elif (!|"delete").Tapped() then ChartContextMenu.ConfirmDelete(cc, false)
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
@@ -268,9 +279,9 @@ module Tree =
 
         member private this.OnUpdate(bounds, elapsedTime) =
             if Mouse.hover bounds then
-                if Mouse.leftClick() then
+                if this.LeftClick() then
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
-                elif Mouse.rightClick() then GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
+                elif this.RightClick() then GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
                 elif (!|"delete").Tapped() then GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsedTime) =
@@ -384,6 +395,24 @@ module Tree =
         for g in groups do
             if g.Selected then g.SelectLast()
 
+    let begin_dragScroll() =
+        currently_drag_scrolling <- true
+        drag_scroll_position <- Mouse.y()
+        drag_scroll_distance <- 0.0f
+
+    let finish_dragScroll() =
+        currently_drag_scrolling <- false
+
+    let dragScroll(origin, total_height, tree_height) =
+        let d = Mouse.y() - drag_scroll_position
+        drag_scroll_position <- Mouse.y()
+        drag_scroll_distance <- drag_scroll_distance + abs d
+        if Mouse.held Mouse.RIGHT then
+            if drag_scroll_distance > DRAG_THRESHOLD then scrollPos.Target <- -(Mouse.y() - origin) / total_height * tree_height
+        elif Mouse.held Mouse.LEFT then
+            if drag_scroll_distance > DRAG_THRESHOLD then scrollPos.Target <- scrollPos.Target + d * DRAG_LEFTCLICK_SCALE
+        else finish_dragScroll()
+
     let update(origin: float32, originB: float32, elapsedTime: float) =
         if LevelSelect.minorRefresh then LevelSelect.minorRefresh <- false; updateDisplay()
         scrollPos.Update(elapsedTime) |> ignore
@@ -394,10 +423,13 @@ module Tree =
                 scrollPos.Value
                 groups
 
+
         let total_height = originB - origin
         let tree_height = bottomEdge - scrollPos.Value
-        if Mouse.rightClick() then right_click_scrolling <- true
-        if not (Mouse.held Mouse.RIGHT) then right_click_scrolling <- false
+
+        if currently_drag_scrolling then dragScroll(origin, total_height, tree_height)
+        elif Mouse.leftClick() || Mouse.rightClick() then begin_dragScroll()
+
         if (!|"up").Tapped() && expandedGroup <> "" then
             scrollTo <- ScrollTo.Pack expandedGroup
             expandedGroup <- ""
@@ -410,7 +442,6 @@ module Tree =
             | None -> ()
         elif (!|"context_menu").Tapped() && Chart.cacheInfo.IsSome then
             ChartContextMenu(Chart.cacheInfo.Value, Chart.context) |> Menu.ShowPage
-        if right_click_scrolling then scrollPos.Target <- -(Mouse.y() - origin) / total_height * tree_height
 
         scrollPos.Target <- Math.Min (Math.Max (scrollPos.Target + Mouse.scroll() * 100.0f, total_height - tree_height - origin), 20.0f + origin)
 
