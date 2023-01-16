@@ -64,7 +64,14 @@ module Keybinds =
     type Keybinder(hotkey: Hotkey) as this =
         inherit StaticContainer(NodeType.Leaf)
 
-        let mutable blocked = true
+        let set = fun v -> Hotkeys.set hotkey v
+
+        let rec inputCallback(b) =
+            match b with
+            | Key (k, (ctrl, _, shift)) ->
+                set <| Key (k, (ctrl, false, shift))
+                this.Focus()
+            | _ -> Input.grabNextEvent inputCallback
 
         do
             this
@@ -74,29 +81,19 @@ module Keybinds =
                 Position = Position.TrimLeft 20.0f)
             |* Clickable((fun () -> if not this.Selected then this.Select()), 
                 OnHover = fun b -> if b then this.Focus())
-
-        let set = fun v -> Hotkeys.set hotkey v
     
         override this.Draw() =
             if this.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)
             elif this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
             base.Draw()
 
-        override this.OnSelected() = base.OnSelected(); blocked <- true
-    
-        override this.Update(elapsedTime, bounds) =
-            base.Update(elapsedTime, bounds)
-            if this.Selected && not blocked then
-                match Input.consumeAny InputEvType.Release with
-                | ValueNone -> ()
-                | ValueSome b ->
-                    match b with
-                    | Key (k, (ctrl, _, shift)) ->
-                        if k = Keys.Escape then set Bind.Dummy
-                        else set (Key (k, (ctrl, false, shift)))
-                        this.Focus()
-                    | _ -> ()
-            if this.Selected && blocked && not ((!|"select").Pressed()) then blocked <- false
+        override this.OnSelected() =
+            base.OnSelected()
+            Input.grabNextEvent inputCallback
+
+        override this.OnDeselected() =
+            base.OnDeselected()
+            Input.removeInputMethod()
 
     type HotkeysPage() as this =
         inherit Page()
