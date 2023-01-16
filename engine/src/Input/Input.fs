@@ -28,6 +28,14 @@ type Bind =
 
     static member DummyBind = Setting.simple Dummy
 
+    static member internal IsModifier (k: Keys) =
+           k = Keys.LeftShift
+        || k = Keys.RightShift 
+        || k = Keys.LeftControl 
+        || k = Keys.RightControl 
+        || k = Keys.LeftAlt 
+        || k = Keys.RightAlt
+
 module Bind =
 
     let inline mk k = Key (k, (false, false, false))
@@ -46,7 +54,7 @@ type InputEv = (struct (Bind * InputEvType * float32<ms>))
 [<RequireQualifiedAccess>]
 type InputMethod =
     | Text of setting: Setting<string> * callback: (unit -> unit)
-    | Bind of callback: (Bind -> unit) // todo: remove this. Can be replaced with other logic
+    | Bind of callback: (Bind -> unit)
     | None
 
 type internal FrameEvents =
@@ -267,8 +275,20 @@ module Input =
 
         | InputMethod.Bind callback ->
             match consumeAny InputEvType.Press with
-            | ValueSome x -> removeInputMethod(); callback x
-            | ValueNone -> ()
+            | ValueSome x ->
+                match x with
+                | Key (k, m) ->
+                    if Bind.IsModifier k then ()
+                    else removeInputMethod(); callback x
+                | _ -> removeInputMethod(); callback x
+            | ValueNone ->
+                match consumeAny InputEvType.Release with
+                | ValueSome x -> 
+                    match x with
+                    | Key (k, m) ->
+                        if Bind.IsModifier k then removeInputMethod(); callback x
+                    | _ -> ()
+                | ValueNone -> ()
 
         | InputMethod.None -> ()
 
