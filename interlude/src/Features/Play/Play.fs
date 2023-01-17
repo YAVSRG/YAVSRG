@@ -105,6 +105,7 @@ type PlayScreen(pacemakerMode: PacemakerMode) as this =
         add_widget (fun c -> new SkipButton(c, widgetHelper))
         add_widget (fun c -> new ProgressMeter(c, widgetHelper))
         add_widget (fun c -> new Pacemaker(c, widgetHelper))
+        add_widget (fun c -> new JudgementCounts(c, widgetHelper))
 
         scoring.SetHitCallback onHit.Trigger
 

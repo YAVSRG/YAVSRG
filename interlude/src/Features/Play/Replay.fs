@@ -68,6 +68,7 @@ type ReplayScreen(mode: ReplayMode) as this =
             add_widget (fun c -> new AccuracyMeter(c, widgetHelper))
             add_widget (fun c -> new HitMeter(c, widgetHelper))
             add_widget (fun c -> new LifeMeter(c, widgetHelper))
+            add_widget (fun c -> new JudgementCounts(c, widgetHelper))
         add_widget (fun c -> new ComboMeter(c, widgetHelper))
         add_widget (fun c -> new SkipButton(c, widgetHelper))
         add_widget (fun c -> new ProgressMeter(c, widgetHelper))

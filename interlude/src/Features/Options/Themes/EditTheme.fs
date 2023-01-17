@@ -420,6 +420,37 @@ type EditPacemakerPage() as this =
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<Pacemaker>
             { data with Position = pos.Value }
+            
+type EditJudgementCountsPage() as this =
+    inherit Page()
+            
+    let data = Themes.Current.GameplayConfig.get<JudgementCounts>()
+            
+    let pos = Setting.simple data.Position
+    let default_pos = JudgementCounts.Default.Position
+
+    let animation_time = Setting.simple data.AnimationTime |> Setting.bound 100.0 1000.0
+            
+    let preview = 
+        { new ConfigPreview(0.5f, pos) with
+            override this.DrawComponent(bounds) =
+                Draw.rect bounds (Color.FromArgb(127, 255, 255, 255))
+        }
+            
+    do
+        this.Content(
+            positionEditor pos default_pos
+            |+ PrettySetting(
+                "themes.edittheme.gameplay.judgementcounts.animationtime",
+                Slider<float>(animation_time, 0.1f) ).Pos(600.0f)
+            |+ preview
+        )
+            
+    override this.Title = N"themes.edittheme.gameplay.judgementcounts"
+    override this.OnDestroy() = preview.Destroy()
+    override this.OnClose() = 
+        Themes.Current.GameplayConfig.set<JudgementCounts>
+            { data with Position = pos.Value; AnimationTime = animation_time.Value }
 
 type EditGameplayConfigPage() as this =
     inherit Page()
@@ -434,6 +465,7 @@ type EditGameplayConfigPage() as this =
             |+ PrettyButton("themes.edittheme.gameplay.skipbutton", fun () -> Menu.ShowPage EditSkipButtonPage).Pos(520.0f)
             |+ PrettyButton("themes.edittheme.gameplay.progressmeter", fun () -> Menu.ShowPage EditProgressMeterPage).Pos(600.0f)
             |+ PrettyButton("themes.edittheme.gameplay.pacemaker", fun () -> Menu.ShowPage EditPacemakerPage).Pos(680.0f)
+            |+ PrettyButton("themes.edittheme.gameplay.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage).Pos(760.0f)
         )
 
     override this.Title = N"themes.edittheme.gameplay"

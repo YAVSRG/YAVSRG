@@ -107,6 +107,7 @@ module Content =
                     load<SkipButton>()
                     load<ProgressMeter>()
                     load<Pacemaker>()
+                    load<JudgementCounts>()
             
                 let get<'T>() = 
                     let id = typeof<'T>.Name

@@ -316,6 +316,36 @@ module GameplayWidgets =
                     else Icons.failure
                 Text.drawFillB(Style.baseFont, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
+    type JudgementCounts(conf: WidgetConfig.JudgementCounts, helper: Helper) =
+        inherit StaticWidget(NodeType.None)
+
+        let judgementAnimations = Array.init helper.ScoringConfig.Judgements.Length (fun _ -> Animation.Delay(conf.AnimationTime))
+
+        do
+            helper.OnHit.Add (
+                fun h -> 
+                    match h.Guts with 
+                    | Hit x -> if x.Judgement.IsSome then judgementAnimations[x.Judgement.Value].Reset()
+                    | Release x -> if x.Judgement.IsSome then judgementAnimations[x.Judgement.Value].Reset()
+                )
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            for j in judgementAnimations do
+                j.Update elapsedTime
+
+        override this.Draw() =
+            let h = this.Bounds.Height / float32 judgementAnimations.Length
+            let mutable r = this.Bounds.SliceTop(h).Shrink(5.0f)
+            for i = 0 to helper.ScoringConfig.Judgements.Length - 1 do
+                let j = helper.ScoringConfig.Judgements.[i]
+                Draw.rect (r.Expand(10.0f, 5.0f).SliceLeft(5.0f)) j.Color
+                if not judgementAnimations.[i].Complete && helper.Scoring.State.Judgements.[i] > 0 then
+                    Draw.rect (r.Expand 5.0f) (Color.FromArgb(127 - max 0 (int (127.0 * judgementAnimations.[i].Elapsed / conf.AnimationTime)), j.Color))
+                Text.drawFillB(Style.baseFont, j.Name, r, (Color.White, Color.Black), Alignment.LEFT)
+                Text.drawFillB(Style.baseFont, helper.Scoring.State.Judgements.[i].ToString(), r, (Color.White, Color.Black), Alignment.RIGHT)
+                r <- r.Translate(0.0f, h)
+
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)
     *)
