@@ -279,10 +279,33 @@ module WidgetConfig =
                     }
             }
 
+    [<Json.AutoCodec(false)>]
+    type JudgementCounts =
+        { 
+            Position: WidgetConfig
+            AnimationTime: float
+        }
+        static member Default =
+            {
+                Position =
+                    {
+                        Enabled = false
+                        Float = true
+                        Left = 20.0f
+                        LeftA = 0.0f
+                        Top = -320.0f
+                        TopA = 1.0f
+                        Right = 220.0f
+                        RightA = 0.0f
+                        Bottom = -20.0f
+                        BottomA = 1.0f
+                    }
+                AnimationTime = 200.0
+            }
+
     //song info
     //mod info
     //clock
-    //judgement counts
 
 type Theme(storage) as this =
     inherit Storage(storage)
