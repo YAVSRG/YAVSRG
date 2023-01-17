@@ -1,9 +1,10 @@
-0.6.8.2
+0.6.8.3
 ====
 
-Small update
+Back on a bit of a roll with these patch releases
 
-- Winterlude time is over
-- New feature: You can left-click and drag to scroll through level select
-- Improved old feature: You can right-click and drag to fast-scroll without opening the menu for a chart (before you had to right-click in the space to the left of the charts)
+- Bug fix: Previews would get out of sync when changing audio rate
+- But fix: You couldn't bind a hotkey to any of the navigation keys
+- New feature: Judgement counts display
+  This is turned off by default, go to Themes > Edit Theme > Gameplay config > Judgement counts > Enable to turn it on
 
