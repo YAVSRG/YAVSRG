@@ -116,8 +116,10 @@ module Render =
                 let r = Math.Max(1920.0f / width, 1000.0f / height);
                 (width * r, height * r)
             else (width, height)
-        vwidth <- float32 <| Math.Round(float width)
-        vheight <- float32 <| Math.Round(float height)
+        vwidth <- MathF.Round width
+        vheight <- MathF.Round height
+        //vwidth <- (width / height) * 1000.0f
+        //vheight <- 1000.0f
 
         Shader.setUniformMat4 ("uProjection", createProjection true) Shader.main
 
