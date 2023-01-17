@@ -73,7 +73,7 @@ type ConfigPreview(scale: float32, config: Setting<WidgetConfig>) =
             if config.Value.Float then this.PreviewBounds
             else
                 let cfg = Noteskins.Current.config
-                let width = cfg.ColumnWidth * NoteRenderer.pixel_scale_factor() * float32 (Gameplay.Chart.colored().Keys) * scale
+                let width = cfg.ColumnWidth * float32 (Gameplay.Chart.colored().Keys) * scale
                 let (screenAlign, columnAlign) = cfg.PlayfieldAlignment
 
                 Rect.Box(this.PreviewBounds.Left + this.PreviewBounds.Width * screenAlign, this.PreviewBounds.Top, width, this.PreviewBounds.Height)

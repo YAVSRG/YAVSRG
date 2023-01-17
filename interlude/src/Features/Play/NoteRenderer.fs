@@ -26,8 +26,6 @@ module NoteRenderer =
         let rotations = if Content.noteskinConfig().UseRotation then Content.noteskinConfig().Rotations.[keys - 3] else Array.zeroCreate keys
         fun k -> Quad.rotateDeg (rotations.[k])
 
-    let pixel_scale_factor() = 1.0f // todo: remove this disabled experimental feature
-
 type NoteRenderer(scoring: IScoreMetric) as this =
     inherit StaticContainer(NodeType.None)
 
@@ -35,7 +33,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     let chart = Gameplay.Chart.colored()
     let (keys, notes, bpm, sv) = (chart.Keys, chart.Notes, chart.BPM, chart.SV) // todo: at some point refactor this out
 
-    let column_width = Content.noteskinConfig().ColumnWidth * NoteRenderer.pixel_scale_factor()
+    let column_width = Content.noteskinConfig().ColumnWidth
 
     let columnPositions = Array.init keys (fun i -> float32 i * column_width)
     let noteHeight = column_width
@@ -83,7 +81,7 @@ type NoteRenderer(scoring: IScoreMetric) as this =
     override this.Draw() =
         let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = this.Bounds
         
-        let scale = float32 options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f</ms> * NoteRenderer.pixel_scale_factor()
+        let scale = float32 options.ScrollSpeed.Value / Gameplay.rate.Value * 1.0f</ms>
         let hitposition = float32 options.HitPosition.Value
 
         let playfieldHeight = bottom - top + holdnoteTrim
