@@ -29,7 +29,7 @@ type LoadingScreen() =
             animation.Add (Animation.Delay 1200.0)
             animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
         | _ ->
-            animation.Add (Animation.Action (fun () -> SoundEffect.play(Content.Sounds.getSound "hello")))
+            animation.Add (Animation.Action (fun () -> SoundEffect.play (Content.Sounds.getSound "hello") Options.options.AudioVolume.Value))
             animation.Add (Animation.Delay 1000.0)
             animation.Add (Animation.Action (fun () -> audio_fade.Target <- 1.0f))
             animation.Add (Animation.Delay 1200.0)
@@ -46,4 +46,4 @@ type LoadingScreen() =
         
     override this.Draw() =
         let (x, y) = this.Bounds.Center
-        Text.drawJust (Style.baseFont, (if closing then "Bye o/" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)
+        Text.drawJust (Style.baseFont, (if closing then "Thank you for playing" else "Loading :)"), 80.f, x, y - 500.0f, Color.White, 0.5f)
