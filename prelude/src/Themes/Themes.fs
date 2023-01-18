@@ -330,6 +330,9 @@ type Theme(storage) as this =
         match this.LoadTexture (name, "Textures") with
         | Ok res -> res
         | Error err -> Logging.Error(sprintf "Error loading theme texture '%s': %s" name err.Message); None
+
+    member this.GetSound (name: string) : Stream option =
+        this.TryReadFile("Sounds", name + ".wav")
             
     member this.GetRulesetTexture (name: string) : (Bitmap * TextureConfig) =
         match this.LoadTexture (name, "Rulesets") with
