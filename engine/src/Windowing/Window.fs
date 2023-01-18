@@ -15,6 +15,7 @@ open Percyqaz.Flux.Graphics
 module private WindowEvents =
 
     let onLoad = Event<unit>()
+    let afterInit = Event<unit>()
     let onUnload = Event<unit>()
     let onFileDrop = Event<string>()
     let onResize = Event<unit>()
@@ -22,6 +23,7 @@ module private WindowEvents =
 module Window =
     
     let onLoad = WindowEvents.onLoad.Publish
+    let afterInit = WindowEvents.afterInit.Publish
     let onUnload = WindowEvents.onUnload.Publish
     let onFileDrop = WindowEvents.onFileDrop.Publish
     let onResize = WindowEvents.onResize.Publish
@@ -33,7 +35,7 @@ module Window =
 type Window(config: Config, title: string, root: Root) as this =
     inherit NativeWindow(NativeWindowSettings(StartVisible = false, NumberOfSamples = 24))
 
-    let renderThread = RenderThread(this, config.AudioDevice.Value, root)
+    let renderThread = RenderThread(this, config.AudioDevice.Value, root, WindowEvents.afterInit.Trigger)
 
     do
         base.Title <- title

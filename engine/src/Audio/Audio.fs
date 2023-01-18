@@ -131,10 +131,12 @@ type SoundEffect =
         ID: int
         ChannelID: int
     }
-    static member FromStream(stream: IO.Stream) =
+    static member FromStream(source: string, stream: IO.Stream) =
         use ms = new IO.MemoryStream()
         stream.CopyTo ms
-        let id = Bass.SampleLoad(ms.ToArray(), 0L, 0, 1, BassFlags.SampleOverrideLongestPlaying ||| BassFlags.Prescan)
+        let data = ms.ToArray()
+        let id = Bass.SampleLoad(data, 0L, data.Length, 1, BassFlags.SampleOverrideLongestPlaying ||| BassFlags.Prescan)
+        if id = 0 then Logging.Error(sprintf "Couldn't load sound effect '%s'" source, Bass.LastError)
         let channel = Bass.SampleGetChannel(id)
         { ID = id; ChannelID = channel }
     member this.Free() = Bass.SampleFree this.ID |> bassError
@@ -203,7 +205,6 @@ module Devices =
 
     let init(device: int) =
         get()
-        for (i, name) in devices do
-            Bass.Init i |> bassError
+        for (i, name) in devices do Bass.Init i |> bassError
         change device
         Bass.GlobalStreamVolume <- 0

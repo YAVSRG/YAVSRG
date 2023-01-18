@@ -14,7 +14,7 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Percyqaz.Common
 
-type RenderThread(window: NativeWindow, audioDevice: int, root: Root) =
+type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit: unit -> unit) =
     
     let mutable resized = false
     let mutable fps_count = 0
@@ -75,3 +75,4 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root) =
         Render.init()
         Render.resize(window.ClientSize.X, window.ClientSize.Y)
         root.Init()
+        afterInit()
