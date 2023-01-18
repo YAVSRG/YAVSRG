@@ -22,7 +22,7 @@ let main argv =
         try Options.load()
         with err -> Logging.Critical("Fatal error loading game config", err); crashSplash(); Console.ReadLine() |> ignore
         
-        Window.onLoad.Add(fun () -> 
+        Window.afterInit.Add(fun () -> 
             Content.init Options.options.Theme.Value Options.options.Noteskin.Value
             Options.Hotkeys.init Options.options.Hotkeys
             Printerlude.init()

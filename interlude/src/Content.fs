@@ -154,10 +154,10 @@ module Content =
 
                 for id in Storage.themeSounds do
                     match instance.GetSound id with
-                    | Some stream -> SoundEffect.FromStream stream |> Sounds.add id
+                    | Some stream -> SoundEffect.FromStream (id, stream) |> Sounds.add id
                     | None -> 
                         match loaded.["*default"].GetSound id with
-                        | Some stream -> SoundEffect.FromStream stream |> Sounds.add id
+                        | Some stream -> SoundEffect.FromStream (id, stream) |> Sounds.add id
                         | None -> failwithf "Failed to load sound %s from *default" id
 
                 GameplayConfig.reload()
