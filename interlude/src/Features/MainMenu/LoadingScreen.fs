@@ -14,29 +14,35 @@ type LoadingScreen() =
     inherit Screen()
 
     let mutable closing = false
-    let fade = Animation.Fade 1.0f
+    let audio_fade = Animation.Fade 0.0f
     let animation = Animation.Sequence()
 
     override this.OnEnter (prev: Screen.Type) =
-        fade.Value <- 0.0f
         Logo.moveCentre()
         Screen.Toolbar.hide()
         match prev with
         | Screen.Type.MainMenu ->
             closing <- true
-            animation.Add (Animation.Delay 1500.0)
+            audio_fade.Snap()
+            animation.Add (Animation.Delay 1000.0)
+            animation.Add (Animation.Action (fun () -> audio_fade.Target <- 0.0f))
+            animation.Add (Animation.Delay 1200.0)
             animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
         | _ ->
-            animation.Add (Animation.Delay 1500.0)
+            animation.Add (Animation.Action (fun () -> SoundEffect.play(Content.Sounds.getSound "hello")))
+            animation.Add (Animation.Delay 1000.0)
+            animation.Add (Animation.Action (fun () -> audio_fade.Target <- 1.0f))
+            animation.Add (Animation.Delay 1200.0)
             animation.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
 
-    override this.OnExit _ = ()
+    override this.OnExit _ =
+        if not closing then Devices.changeVolume Options.options.AudioVolume.Value
 
     override this.Update (elapsedTime, bounds) =
         base.Update (elapsedTime, bounds)
-        fade.Update elapsedTime
+        audio_fade.Update elapsedTime
         animation.Update elapsedTime
-        Devices.changeVolume (Options.options.AudioVolume.Value * float (if closing then 1.0f - fade.Value else fade.Value))
+        Devices.changeVolume (Options.options.AudioVolume.Value * float audio_fade.Value)
         
     override this.Draw() =
         let (x, y) = this.Bounds.Center
