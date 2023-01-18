@@ -92,6 +92,7 @@ type MainMenuScreen() as this =
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f) )
         
     override this.OnEnter prev =
+        SoundEffect.play(Content.Sounds.getSound "hello")
         if AutoUpdate.updateAvailable then Notifications.add (L"notification.update.available", NotificationType.System)
         if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()
         splashText <- newSplash()

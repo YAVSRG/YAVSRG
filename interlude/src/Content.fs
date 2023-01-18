@@ -6,6 +6,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
+open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Scoring
 open Prelude.Data
@@ -26,7 +27,7 @@ module Content =
         
         let getTexture (id: string) =
             if cache.ContainsKey id then cache.[id]
-            else failwithf "should have already loaded %s" id
+            else failwithf "No such loaded sprite: %s" id
 
         let add (id: string) (s: Sprite) = 
             if cache.ContainsKey id then
@@ -35,8 +36,18 @@ module Content =
             cache.Add(id, s)
 
     module Sounds =
-        "not yet implemented"
-        |> ignore
+
+        let private cache = new Dictionary<string, SoundEffect>()
+        
+        let getSound (id: string) =
+            if cache.ContainsKey id then cache.[id]
+            else failwithf "No such loaded sound: %s" id
+
+        let add (id: string) (sound: SoundEffect) = 
+            if cache.ContainsKey id then
+                cache.[id].Free()
+                cache.Remove id |> ignore
+            cache.Add(id, sound)
 
     module Rulesets =
 
@@ -140,6 +151,14 @@ module Content =
                         match loaded.["*default"].GetTexture id with
                         | Some (img, config) -> Sprite.upload(img, config.Rows, config.Columns, false) |> Sprite.cache id |> Sprites.add id
                         | None -> failwithf "Failed to load texture %s from *default" id
+
+                for id in Storage.themeSounds do
+                    match instance.GetSound id with
+                    | Some stream -> SoundEffect.FromStream stream |> Sounds.add id
+                    | None -> 
+                        match loaded.["*default"].GetSound id with
+                        | Some stream -> SoundEffect.FromStream stream |> Sounds.add id
+                        | None -> failwithf "Failed to load sound %s from *default" id
 
                 GameplayConfig.reload()
                 Rulesets.load_from_theme(instance)

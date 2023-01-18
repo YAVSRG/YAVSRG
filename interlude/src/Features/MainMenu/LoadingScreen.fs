@@ -26,7 +26,7 @@ type LoadingScreen() =
             closing <- true
             animation.Add (Animation.Delay 1500.0)
             animation.Add (Animation.Action (fun () -> Screen.back Transitions.Flags.Default))
-        | _ -> 
+        | _ ->
             animation.Add (Animation.Delay 1500.0)
             animation.Add (Animation.Action (fun () -> Screen.change Screen.Type.MainMenu Transitions.Flags.UnderLogo))
 
