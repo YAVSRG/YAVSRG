@@ -9,6 +9,13 @@ open Interlude
 
 module Logo =
     
+    type private State =
+        | Centre
+        | Menu
+        | Hidden
+
+    let mutable private state = Centre
+
     type Display() =
         inherit DynamicContainer(NodeType.None)
 
@@ -76,16 +83,19 @@ module Logo =
                 Stencil.finish()
                 Draw.sprite this.Bounds Color.White (Content.getTexture "logo")
 
+        member this.Move (l, t, r, b) = this.Position <- { Left = 0.5f %+ l; Top = 0.5f %+ t; Right = 0.5f %+ r; Bottom = 0.5f %+ b }
+
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
+            if moved then
+                match state with
+                | Centre -> this.Move (-400.0f, -400.0f, 400.0f, 400.0f)
+                | Hidden -> this.Move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
+                | Menu -> this.Move (-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)
             counter.Update elapsedTime
 
     let display = Display(Position = { Left = 0.5f %- 300.0f; Top = 0.5f %+ 1000.0f; Right = 0.5f %+ 300.0f; Bottom = 0.5f %+ 1600.0f })
 
-    let private move (l, t, r, b) = display.Position <- { Left = 0.5f %+ l; Top = 0.5f %+ t; Right = 0.5f %+ r; Bottom = 0.5f %+ b }
-
-    let moveCentre () = move (-400.0f, -400.0f, 400.0f, 400.0f)
-
-    let moveOffscreen () = move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
-
-    let moveMenu () = move (-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)
+    let moveCentre () = state <- Centre; display.Move (-400.0f, -400.0f, 400.0f, 400.0f)
+    let moveOffscreen () = state <- Hidden; display.Move (-Viewport.vwidth * 0.5f - 600.0f, -300.0f, -Viewport.vwidth * 0.5f, 300.0f)
+    let moveMenu () = state <- Menu; display.Move (-Viewport.vwidth * 0.5f, -400.0f, 800.0f - Viewport.vwidth * 0.5f, 400.0f)

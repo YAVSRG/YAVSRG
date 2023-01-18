@@ -84,6 +84,45 @@ module Transitions =
         Stencil.draw()
         Background.draw (bounds, Style.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
         Stencil.finish()
+
+    let private stripes inbound amount bounds =
+        let s = 100.0f
+
+        let number_of_stripes = MathF.Ceiling((Viewport.vwidth + Viewport.vheight) / s) |> int
+
+        let stripe_size (stripe_no: int) =
+            let lo = float32 stripe_no / float32 number_of_stripes
+            let region = float32 (number_of_stripes - stripe_no) / float32 number_of_stripes
+            if inbound then
+                Math.Clamp((amount - lo) / region, 0.0f, 1.0f)
+            else 1.0f - Math.Clamp(((1.0f - amount) - lo) / region, 0.0f, 1.0f)
+        let stripe n =
+            let h = Viewport.vheight
+            let f = stripe_size n
+            let x = -h + float32 n * s
+
+            let v = new Vector2(h, -h) * f
+
+            if n % 2 = 0 then
+                Draw.quad(Quad.create 
+                    <| new Vector2(x, h) + v
+                    <| new Vector2(x + s, h) + v
+                    <| new Vector2(x + s, h)
+                    <| new Vector2(x, h))
+                    (Quad.colorOf Color.Transparent) Sprite.DefaultQuad
+            else 
+                Draw.quad(Quad.create 
+                    <| new Vector2(x + h, 0.0f)
+                    <| new Vector2(x + h + s, 0.0f)
+                    <| new Vector2(x + h + s, 0.0f) - v
+                    <| new Vector2(x + h, 0.0f) - v)
+                    (Quad.colorOf Color.Transparent) Sprite.DefaultQuad
+        Stencil.create false
+        for i = 0 to number_of_stripes - 1 do
+            stripe i
+        Stencil.draw()
+        Background.draw (bounds, Style.color (255.0f * amount |> int, 1.0f, 0.0f), 1.0f)
+        Stencil.finish()
     
     let private draw_internal flags inbound amount bounds =
         diamondWipe inbound amount bounds
