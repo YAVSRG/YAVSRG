@@ -29,7 +29,7 @@ type Song =
             let Frequency = d.Frequency
             //let ID = BassFx.TempoCreate(ID, BassFlags.FxFreeSource)
             { Path = file; ID = ID; Frequency = Frequency; Duration = float32 Duration * 1.0f<ms> }
-    member this.Dispose() = Bass.StreamFree this.ID |> bassError
+    member this.Free() = Bass.StreamFree this.ID |> bassError
 
 [<RequireQualifiedAccess>]
 type SongFinishAction =
@@ -104,7 +104,7 @@ module Song =
             if playing() then pause()
             timerStart <- -infinityf * 1.0f<ms>
             if nowplaying.ID <> 0 then
-                nowplaying.Dispose()
+                nowplaying.Free()
             channelPlaying <- false
             nowplaying <- Song.FromFile path
         changeLocalOffset offset
@@ -125,6 +125,25 @@ module Song =
             | SongFinishAction.Wait -> ()
             | SongFinishAction.Stop -> pause()
             | SongFinishAction.Callback f -> f()
+
+type SoundEffect =
+    {
+        ID: int
+        ChannelID: int
+    }
+    static member FromStream(stream: IO.Stream) =
+        use ms = new IO.MemoryStream()
+        stream.CopyTo ms
+        let id = Bass.SampleLoad(ms.ToArray(), 0L, 0, 1, BassFlags.SampleOverrideLongestPlaying ||| BassFlags.Prescan)
+        let channel = Bass.SampleGetChannel(id)
+        { ID = id; ChannelID = channel }
+    member this.Free() = Bass.SampleFree this.ID |> bassError
+
+module SoundEffect =
+
+    let play(fx: SoundEffect) =
+        Bass.ChannelSetDevice(fx.ChannelID, Bass.CurrentDevice) |> bassError
+        Bass.ChannelPlay(fx.ChannelID, true) |> bassError
 
 module Devices =
 
