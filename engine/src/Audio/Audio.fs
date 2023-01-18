@@ -143,8 +143,9 @@ type SoundEffect =
 
 module SoundEffect =
 
-    let play(fx: SoundEffect) =
+    let play (fx: SoundEffect) (volume: float) =
         Bass.ChannelSetDevice(fx.ChannelID, Bass.CurrentDevice) |> bassError
+        Bass.ChannelSetAttribute(fx.ChannelID, ChannelAttribute.Volume, volume * 3.0) |> bassError
         Bass.ChannelPlay(fx.ChannelID, true) |> bassError
 
 module Devices =
