@@ -11,6 +11,7 @@ open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features
 
@@ -160,16 +161,20 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f })
 
-        |+ Components.RulesetDropdown(
+        |+ StylishButton(
+            ignore,
+            sprintf "%s %s" Icons.edit (L"score.graph.settings") |> K,
+            Style.main 100,
+            Position = { Left = 0.55f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.7f %- 25.0f; Bottom = 1.0f %- 0.0f })
+        |+ StylishButton(
+            (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)),
+            sprintf "%s %s" Icons.preview (L"score.watch_replay") |> K,
+            Style.dark 100,
+            Position = { Left = 0.7f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.85f %- 25.0f; Bottom = 1.0f %- 0.0f })
+        |* RulesetDropdown(
             options.SelectedRuleset
             |> Setting.trigger (fun _ -> scoreData.Ruleset <- Rulesets.current; refresh()),
-            Position = { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
-
-        |+ Button(sprintf "%s %s" Icons.edit (L"score.graph.settings"), ignore,
-            Position = { Left = 1.0f %- 620.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 320.0f; Bottom = 1.0f %- 15.0f })
-        |* Button(sprintf "%s %s" Icons.preview (L"score.watch_replay"),
-            (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)),
-            Position = { Left = 1.0f %- 320.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 15.0f })
+            Position = { Left = 0.85f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
 
     override this.Draw() =
         let halfh = this.Bounds.CenterY

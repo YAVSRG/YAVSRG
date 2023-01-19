@@ -41,7 +41,7 @@ module Gameplay =
                 |> Array.map (fun (i, l) -> (i, l.Name))
             this.Content(
                 column()
-                |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.ScaveScoreIfUnderPace).Pos(200.0f)
+                |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace).Pos(200.0f)
                 |+ CaseSelector("gameplay.pacemaker.type", 
                     [|N"gameplay.pacemaker.accuracy"; N"gameplay.pacemaker.lamp"|],
                     [|
@@ -65,17 +65,16 @@ module Gameplay =
             this.Content(
                 column()
                 |+ PrettySetting("gameplay.rulesets",
-                        //Grid.create Rulesets.list (
-                        //    Grid.Config.Default
-                        //        .WithColumn(fun (_, rs: Prelude.Scoring.Ruleset) -> rs.Name)
-                        //        .WithSelection(
-                        //            (fun (id, _) -> CycleList.contains id options.Rulesets.Value),
-                        //            (fun ((id, rs), selected) ->
-                        //                if selected then Setting.app (CycleList.add id) options.Rulesets
-                        //                else Setting.app (CycleList.delete id) options.Rulesets
-                        //            ))
-                        //)
-                        Dummy()
+                        Grid.create Rulesets.list (
+                            Grid.Config.Default
+                                .WithColumn(fun (id: string, rs: Prelude.Scoring.Ruleset) -> if id.StartsWith '*' then sprintf "%s (default)" rs.Name else rs.Name)
+                                .WithSelection(
+                                    (fun (id, _) -> List.contains id options.FavouriteRulesets.Value),
+                                    (fun ((id, rs), selected) ->
+                                        if selected then Setting.app (fun l -> id :: l) options.FavouriteRulesets
+                                        else Setting.app (List.except [id]) options.FavouriteRulesets
+                                    ))
+                        )
                     ).Pos(200.0f, PRETTYWIDTH, 800.0f)
                 )
 

@@ -69,7 +69,7 @@ type private ModSelectPage(onClose) as this =
         let container = 
             column()
             |+ PrettySetting("gameplay.pacemaker.enable", Selector<_>.FromBool enable).Pos(200.0f)
-            |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.ScaveScoreIfUnderPace).Pos(280.0f)
+            |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace).Pos(280.0f)
             |+ CaseSelector("gameplay.pacemaker.type", 
                 [|N"gameplay.pacemaker.accuracy"; N"gameplay.pacemaker.lamp"|],
                 [|

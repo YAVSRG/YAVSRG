@@ -87,7 +87,7 @@ module Options =
             FavouriteRulesets: Setting<string list>
             FailCondition: Setting<FailType>
             Pacemakers: Dictionary<string, Pacemaker>
-            ScaveScoreIfUnderPace: Setting<bool>
+            SaveScoreIfUnderPace: Setting<bool>
 
             OsuMount: Setting<MountedChartSource option>
             StepmaniaMount: Setting<MountedChartSource option>
@@ -136,11 +136,14 @@ module Options =
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
             SelectedRuleset = 
                 Setting.simple Content.Rulesets.DEFAULT
-                |> Setting.trigger (fun t -> Content.Rulesets.switch t false)
+                |> Setting.trigger (fun t -> 
+                    if Content.first_init then Percyqaz.Flux.UI.Root.sync(fun () -> Content.Rulesets.switch t false)
+                    else Content.Rulesets.switch t false
+                )
             FavouriteRulesets = Setting.simple [Content.Rulesets.DEFAULT]
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemakers = Dictionary<string, Pacemaker>()
-            ScaveScoreIfUnderPace = Setting.simple true
+            SaveScoreIfUnderPace = Setting.simple true
 
             OsuMount = Setting.simple None
             StepmaniaMount = Setting.simple None
