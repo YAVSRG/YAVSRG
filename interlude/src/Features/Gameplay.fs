@@ -23,9 +23,6 @@ module Gameplay =
 
     let mutable autoplay = false
     let mutable enablePacemaker = false
-
-    let mutable ruleset : Ruleset = getCurrentRuleset()
-    let mutable rulesetId = Ruleset.hash ruleset
     
     module Chart =
     
@@ -150,7 +147,7 @@ module Gameplay =
         then
             if data.ModStatus = ModStatus.Ranked then
                 // todo: score uploading goes here when online added
-                Scores.saveScoreWithPbs Chart.saveData.Value rulesetId data
+                Scores.saveScoreWithPbs Chart.saveData.Value Content.Rulesets.current_hash data
             else
                 Scores.saveScore Chart.saveData.Value data
                 BestFlags.Default

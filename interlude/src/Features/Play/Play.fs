@@ -12,6 +12,7 @@ open Prelude.Data.Themes
 open Prelude.Data.Scores
 open Interlude
 open Interlude.Options
+open Interlude.Content
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Play.GameplayWidgets
@@ -30,7 +31,7 @@ type PlayScreen(pacemakerMode: PacemakerMode) as this =
     let firstNote = offsetOf chart.Notes.First.Value
 
     let liveplay = LiveReplayProvider firstNote
-    let scoringConfig = Gameplay.ruleset
+    let scoringConfig = Rulesets.current
     let scoring = createScoreMetric scoringConfig chart.Keys liveplay chart.Notes Gameplay.rate.Value
     let onHit = new Event<HitEvent<HitEventGuts>>()
 
@@ -42,11 +43,11 @@ type PlayScreen(pacemakerMode: PacemakerMode) as this =
             let scoring = createScoreMetric scoringConfig chart.Keys replayData chart.Notes rate
             PacemakerInfo.Replay scoring
         | PacemakerMode.Setting ->
-            let setting = if options.Pacemakers.ContainsKey Gameplay.rulesetId then options.Pacemakers.[Gameplay.rulesetId] else Pacemaker.Default
+            let setting = if options.Pacemakers.ContainsKey Rulesets.current_hash then options.Pacemakers.[Rulesets.current_hash] else Pacemaker.Default
             match setting with
             | Pacemaker.Accuracy acc -> PacemakerInfo.Accuracy acc
             | Pacemaker.Lamp lamp ->
-                let l = Gameplay.ruleset.Grading.Lamps.[lamp]
+                let l = Rulesets.current.Grading.Lamps.[lamp]
                 PacemakerInfo.Judgement(l.Judgement, l.JudgementThreshold)
 
     let widgetHelper: Helper =

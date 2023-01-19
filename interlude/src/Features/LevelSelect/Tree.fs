@@ -16,6 +16,7 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Suggestions
+open Interlude
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
@@ -143,8 +144,8 @@ module Tree =
             localCacheFlag <- cacheFlag
             if chartData.IsNone then chartData <- Scores.getData cc.Hash
             match chartData with
-            | Some d when d.Bests.ContainsKey rulesetId ->
-                pbData <- Some d.Bests.[rulesetId]
+            | Some d when d.Bests.ContainsKey Rulesets.current_hash ->
+                pbData <- Some d.Bests.[Rulesets.current_hash]
             | _ -> ()
             color <- colorFunc pbData
             markers <-
@@ -198,13 +199,13 @@ module Tree =
             | Some d ->
                 disp 
                     d.Grade
-                    ruleset.GradeName
-                    (fun _ -> let (_, _, c) = getPb d.Grade ruleset.GradeColor in c)
+                    Rulesets.current.GradeName
+                    (fun _ -> let (_, _, c) = getPb d.Grade Rulesets.current.GradeColor in c)
                     415.0f
                 disp
                     d.Lamp
-                    ruleset.LampName
-                    ruleset.LampColor
+                    Rulesets.current.LampName
+                    Rulesets.current.LampColor
                     290.0f
                 disp
                     d.Clear
@@ -307,7 +308,7 @@ module Tree =
     let refresh() =
         // fetch groups
         let library_groups =
-            let ctx : GroupContext = { Rate = rate.Value; RulesetId = rulesetId; Ruleset = ruleset }
+            let ctx : GroupContext = { Rate = rate.Value; RulesetId = Rulesets.current_hash; Ruleset = Rulesets.current }
             match options.LibraryMode.Value with
             | LibraryMode.Collections -> getCollectionGroups sortBy.[options.ChartSortMode.Value] filter
             | LibraryMode.Table -> getTableGroups sortBy.[options.ChartSortMode.Value] filter
@@ -437,7 +438,7 @@ module Tree =
             expandedGroup <- selectedGroup
             scrollTo <- ScrollTo.Pack expandedGroup
         elif (!|"random_chart").Tapped() then
-            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value filter rulesetId with
+            match Suggestion.get_suggestion Chart.current.Value Chart.cacheInfo.Value filter Rulesets.current_hash with
             | Some c -> switchChart(c, LibraryContext.None, ""); refresh()
             | None -> ()
         elif (!|"context_menu").Tapped() && Chart.cacheInfo.IsSome then

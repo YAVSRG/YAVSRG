@@ -52,25 +52,6 @@ module Options =
         | Instant = 0
         | EndOfSong = 1
 
-    type CycleList<'T> = 'T list
-    module CycleList =
-        let forward xs =
-            match xs with
-            | x :: xs -> xs @ [x]
-            | _ -> failwith "impossible"
-
-        let rec back xs =
-            match xs with
-            | [] -> failwith "impossible"
-            | x :: [] -> [x]
-            | x :: xs -> match back xs with (y :: ys) -> (y :: x :: ys) | _ -> failwith "impossible by case 2"
-
-        let contains x xs = xs |> List.exists (fun o -> o = x)
-
-        let delete x xs = xs |> List.filter (fun o -> o <> x)
-
-        let add x xs = x :: xs
-
     [<Json.AutoCodec>]
     type LaneCoverOptions =
         {
@@ -102,7 +83,8 @@ module Options =
             Noteskin: Setting<string>
 
             Playstyles: Layout array
-            Rulesets: Setting<CycleList<string>>
+            SelectedRuleset: Setting<string>
+            FavouriteRulesets: Setting<string list>
             FailCondition: Setting<FailType>
             Pacemakers: Dictionary<string, Pacemaker>
             ScaveScoreIfUnderPace: Setting<bool>
@@ -152,22 +134,10 @@ module Options =
             UseKeymodePreference = Setting.simple false
 
             Playstyles = [|Layout.OneHand; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread; Layout.LeftOne; Layout.Spread|]
-            Rulesets =
-                Setting.simple [Content.Rulesets.DEFAULT]
-                |> Setting.map
-                    id
-                    ( fun xs ->
-                        if Content.first_init then xs else
-                        let filtered = 
-                            List.filter 
-                                ( fun x -> 
-                                    if Content.Rulesets.exists x then true
-                                    else Logging.Debug(sprintf "Score system '%s' not found, deselecting" x); false
-                                ) xs
-                        let l = if filtered.IsEmpty then [Content.Rulesets.DEFAULT] else filtered
-                        Content.Rulesets.switch (List.head l) false
-                        l
-                    )
+            SelectedRuleset = 
+                Setting.simple Content.Rulesets.DEFAULT
+                |> Setting.trigger (fun t -> Content.Rulesets.switch t false)
+            FavouriteRulesets = Setting.simple [Content.Rulesets.DEFAULT]
             FailCondition = Setting.simple FailType.EndOfSong
             Pacemakers = Dictionary<string, Pacemaker>()
             ScaveScoreIfUnderPace = Setting.simple true
@@ -285,5 +255,3 @@ module Options =
             JSON.ToFile(configPath, true) config
             JSON.ToFile(Path.Combine(getDataPath "Data", "options.json"), true) options
         with err -> Logging.Critical("Failed to write options/config to file.", err)
-
-    let getCurrentRuleset() = Content.Rulesets.current

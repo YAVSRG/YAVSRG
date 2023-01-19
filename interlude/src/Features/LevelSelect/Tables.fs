@@ -8,6 +8,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Data.Charts.Tables
 open Interlude.Options
 open Interlude.Utils
+open Interlude.Content
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
@@ -26,7 +27,7 @@ type private CreateTablePage() as this =
             |+ PrettySetting("table.name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettySetting("generic.keymode", Selector<_>.FromEnum keymode).Pos(300.0f)
             |+ PrettyButton("confirm.yes", 
-                (fun () -> if Table.create(new_name.Value, int keymode.Value, getCurrentRuleset()) then options.Table.Set (Some new_name.Value); Menu.Back() )).Pos(400.0f)
+                (fun () -> if Table.create(new_name.Value, int keymode.Value, Rulesets.current) then options.Table.Set (Some new_name.Value); Menu.Back() )).Pos(400.0f)
         )
 
     override this.Title = N"tables.create"

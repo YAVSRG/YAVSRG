@@ -112,12 +112,12 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     let mutable lampAchieved = Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
     let mutable eventCounts = ScoreScreenHelpers.countEvents scoreData.Scoring.HitEvents
     let mutable existingBests = 
-        if Gameplay.Chart.saveData.Value.Bests.ContainsKey Gameplay.rulesetId then 
-            Some Gameplay.Chart.saveData.Value.Bests.[Gameplay.rulesetId]
+        if Gameplay.Chart.saveData.Value.Bests.ContainsKey Rulesets.current_hash then 
+            Some Gameplay.Chart.saveData.Value.Bests.[Rulesets.current_hash]
         else None
     let graph = new ScoreGraph(scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 1.0f %- 270.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 70.0f })
 
-    let originalRulesets = options.Rulesets.Value
+    let originalRuleset = options.SelectedRuleset.Value
 
     let refresh() =
         pbs <- BestFlags.Default
@@ -159,6 +159,11 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         |+ Text((fun () -> sprintf "Stdev: %.1fms" eventCounts.StandardDeviation),
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f })
+
+        |+ Components.RulesetDropdown(
+            options.SelectedRuleset
+            |> Setting.trigger (fun _ -> scoreData.Ruleset <- Rulesets.current; refresh()),
+            Position = { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
 
         |+ Button(sprintf "%s %s" Icons.edit (L"score.graph.settings"), ignore,
             Position = { Left = 1.0f %- 620.0f; Top = 1.0f %- 65.0f; Right = 1.0f %- 320.0f; Bottom = 1.0f %- 15.0f })
@@ -330,20 +335,11 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
 
-        if (!|"next").Tapped() || (!|"ruleset").Tapped() then
-            Setting.app CycleList.forward options.Rulesets
-            scoreData.Ruleset <- getCurrentRuleset()
-            refresh()
-        elif (!|"previous").Tapped() then
-            Setting.app CycleList.back options.Rulesets
-            scoreData.Ruleset <- getCurrentRuleset()
-            refresh()
-
     override this.OnEnter prev =
         Screen.Toolbar.hide()
 
     override this.OnExit next =
-        options.Rulesets.Value <- originalRulesets
-        scoreData.Ruleset <- getCurrentRuleset()
+        options.SelectedRuleset.Set originalRuleset
+        scoreData.Ruleset <- Rulesets.current
         graph.Dispose()
         Screen.Toolbar.show()

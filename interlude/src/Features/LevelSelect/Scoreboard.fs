@@ -3,13 +3,13 @@
 open System
 open Percyqaz.Common
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Scores
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Prelude.Charts.Formats.Interlude
+open Interlude
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Options
@@ -158,8 +158,8 @@ module Scoreboard =
             fun () ->
                 worker.Request
                     {
-                        RulesetId = rulesetId
-                        Ruleset = ruleset
+                        RulesetId = Content.Rulesets.current_hash
+                        Ruleset = Content.Rulesets.current
                         CurrentChart = Chart.current.Value
                         ChartSaveData = Chart.saveData
                         NewBests = None
@@ -242,8 +242,7 @@ type Scoreboard() as this =
         if (match Chart.saveData with None -> false | Some d -> let v = d.Scores.Count <> count in count <- d.Scores.Count; v) || h <> chart then
             chart <- h
             load_scores_async()
-        elif scoring <> rulesetId then
-            let s = getCurrentRuleset()
-            flowContainer.Iter(fun score -> score.Data.Ruleset <- s)
-            scoring <- rulesetId
+        elif scoring <> Content.Rulesets.current_hash then
+            flowContainer.Iter(fun score -> score.Data.Ruleset <- Content.Rulesets.current)
+            scoring <- Content.Rulesets.current_hash
         flowContainer.Filter <- filterer()

@@ -23,8 +23,6 @@ type LevelSelectScreen() =
     let infoPanel = ChartInfo(Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 175.0f; Right = 0.4f %- 10.0f; Bottom = 1.0f %+ 0.0f })
 
     let refresh() =
-        ruleset <- getCurrentRuleset()
-        rulesetId <- Ruleset.hash ruleset
         infoPanel.Refresh()
         Tree.refresh()
 

@@ -9,8 +9,8 @@ open Prelude.Charts.Formats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
 open Prelude.Data.Themes
-open Interlude
 open Interlude.Options
+open Interlude.Content
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Play.GameplayWidgets
@@ -31,7 +31,7 @@ type ReplayScreen(mode: ReplayMode) as this =
         | ReplayMode.Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, Gameplay.rate.Value
         | ReplayMode.Replay (rate, data) -> StoredReplayProvider(data) :> IReplayProvider, false, rate
 
-    let scoringConfig = Gameplay.ruleset
+    let scoringConfig = Rulesets.current
     let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes rate
     let onHit = new Event<HitEvent<HitEventGuts>>()
     let widgetHelper: Helper =
@@ -48,16 +48,16 @@ type ReplayScreen(mode: ReplayMode) as this =
         let noteRenderer = NoteRenderer scoring
         this.Add noteRenderer
 
-        if Content.noteskinConfig().EnableColumnLight then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
+        if noteskinConfig().EnableColumnLight then
+            noteRenderer.Add(new ColumnLighting(chart.Keys, noteskinConfig().ColumnLightTime, widgetHelper))
 
-        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
+        if noteskinConfig().Explosions.FadeTime >= 0.0f then
+            noteRenderer.Add(new Explosions(chart.Keys, noteskinConfig().Explosions, widgetHelper))
 
         noteRenderer.Add(LaneCover())
 
         let inline add_widget (constructor: 'T -> Widget) = 
-            let config: ^T = Content.getGameplayConfig<'T>()
+            let config: ^T = getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 let w = constructor config

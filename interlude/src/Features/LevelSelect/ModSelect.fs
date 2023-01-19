@@ -6,12 +6,12 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Gameplay.Mods
 open Prelude.Scoring
+open Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Utils
-open Interlude.Features
 open Interlude.Features.Gameplay
 
 type private ModCard(id) as this =
@@ -39,9 +39,8 @@ type private ModSelectPage(onClose) as this =
         for id in modList.Keys do container.Add(ModCard id)
         container
         
-    let rulesetId = Gameplay.rulesetId
     let enable = Setting.make (fun b -> enablePacemaker <- b) (fun () -> enablePacemaker)
-    let existing = if options.Pacemakers.ContainsKey rulesetId then options.Pacemakers.[Gameplay.rulesetId] else Pacemaker.Default
+    let existing = if options.Pacemakers.ContainsKey Content.Rulesets.current_hash then options.Pacemakers.[Content.Rulesets.current_hash] else Pacemaker.Default
 
     let utype =
         match existing with
@@ -63,7 +62,7 @@ type private ModSelectPage(onClose) as this =
 
     let pacemaker =
         let lamps = 
-            ruleset.Grading.Lamps
+            Content.Rulesets.current.Grading.Lamps
             |> Array.indexed
             |> Array.map (fun (i, l) -> (i, l.Name))
 
@@ -92,8 +91,8 @@ type private ModSelectPage(onClose) as this =
     override this.Title = N"mods"
     override this.OnClose() =
         match utype.Value with
-        | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value
-        | 1 -> options.Pacemakers.[rulesetId] <- Pacemaker.Lamp lamp.Value
+        | 0 -> options.Pacemakers.[Content.Rulesets.current_hash] <- Pacemaker.Accuracy accuracy.Value
+        | 1 -> options.Pacemakers.[Content.Rulesets.current_hash] <- Pacemaker.Lamp lamp.Value
         | _ -> failwith "impossible"
         onClose()
     

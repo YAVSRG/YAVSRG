@@ -6,6 +6,7 @@ open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
 
+// no longer used as it ended up being a UI antipattern
 module Grid =
     
     type IGrid =

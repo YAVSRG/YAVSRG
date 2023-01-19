@@ -57,6 +57,7 @@ module Content =
         let mutable private _theme : Theme = Unchecked.defaultof<_>
         let mutable private id = DEFAULT
         let mutable current = loaded.[DEFAULT]
+        let mutable current_hash = Ruleset.hash current
 
         let list() = 
             seq {
@@ -64,7 +65,7 @@ module Content =
                     yield (k, loaded.[k])
             }
 
-        let reload() =
+        let private reload() =
             let sourceTheme = if id.StartsWith('*') then defaultTheme else _theme
             for id in Storage.rulesetTextures do
                 let fileid = current.TextureNamePrefix + id 
@@ -74,9 +75,10 @@ module Content =
 
         let switch (new_id: string) (themeChanged: bool) =
             let new_id = if loaded.ContainsKey new_id then new_id else Logging.Warn("Ruleset '" + new_id + "' not found, switching to default"); DEFAULT
-            if Object.ReferenceEquals(_theme, null) |> not && (new_id <> id || themeChanged) then
+            if new_id <> id || themeChanged then
                 id <- new_id
                 current <- loaded.[id]
+                current_hash <- Ruleset.hash current
                 reload()
 
         let load_from_theme (theme: Theme) =

@@ -65,16 +65,17 @@ module Gameplay =
             this.Content(
                 column()
                 |+ PrettySetting("gameplay.rulesets",
-                        Grid.create Rulesets.list (
-                            Grid.Config.Default
-                                .WithColumn(fun (_, rs: Prelude.Scoring.Ruleset) -> rs.Name)
-                                .WithSelection(
-                                    (fun (id, _) -> CycleList.contains id options.Rulesets.Value),
-                                    (fun ((id, rs), selected) ->
-                                        if selected then Setting.app (CycleList.add id) options.Rulesets
-                                        else Setting.app (CycleList.delete id) options.Rulesets
-                                    ))
-                        )
+                        //Grid.create Rulesets.list (
+                        //    Grid.Config.Default
+                        //        .WithColumn(fun (_, rs: Prelude.Scoring.Ruleset) -> rs.Name)
+                        //        .WithSelection(
+                        //            (fun (id, _) -> CycleList.contains id options.Rulesets.Value),
+                        //            (fun ((id, rs), selected) ->
+                        //                if selected then Setting.app (CycleList.add id) options.Rulesets
+                        //                else Setting.app (CycleList.delete id) options.Rulesets
+                        //            ))
+                        //)
+                        Dummy()
                     ).Pos(200.0f, PRETTYWIDTH, 800.0f)
                 )
 

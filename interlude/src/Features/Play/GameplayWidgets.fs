@@ -13,6 +13,7 @@ open Prelude.Data.Themes
 open Interlude
 open Interlude.Options
 open Interlude.UI
+open Interlude.Content
 open Interlude.Features
 open Interlude.Utils
 
@@ -262,8 +263,8 @@ module GameplayWidgets =
             | PacemakerInfo.Replay _ -> ()
             | PacemakerInfo.Judgement (judgement, _) -> 
                 if judgement = -1 then 
-                    Gameplay.ruleset.Judgements.[Gameplay.ruleset.Judgements.Length - 1].Color
-                else Gameplay.ruleset.Judgements.[judgement].Color
+                    Rulesets.current.Judgements.[Rulesets.current.Judgements.Length - 1].Color
+                else Rulesets.current.Judgements.[judgement].Color
                 |> color.SetColor
             
 
@@ -353,7 +354,7 @@ module GameplayWidgets =
     type ColumnLighting(keys, lightTime, helper) as this =
         inherit StaticWidget(NodeType.None)
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
-        let sprite = Content.getTexture "receptorlighting"
+        let sprite = getTexture "receptorlighting"
         let lightTime = Math.Max(0.0f, Math.Min(0.99f, lightTime))
 
         do
