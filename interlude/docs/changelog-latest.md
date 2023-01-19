@@ -1,10 +1,16 @@
-0.6.8.3
+0.6.8.4
 ====
 
-Back on a bit of a roll with these patch releases
+Small update grindset
 
-- Bug fix: Previews would get out of sync when changing audio rate
-- But fix: You couldn't bind a hotkey to any of the navigation keys
-- New feature: Judgement counts display
-  This is turned off by default, go to Themes > Edit Theme > Gameplay config > Judgement counts > Enable to turn it on
+- New feature: Sound effects
+  More will come from this in the future but for now I've brought back a familiar sound when launching the game :)
+- "Bug fix: Favourite" rulesets as picked from the options screen now stay selected even when changing themes
+
+Other improvements to rulesets:
+- Ruleset switcher on level select now shows a selector instead of just cycling rulesets
+- Switcher now appears on score screen and is how you switch rulesets there too
+- In both cases the hotkey is D by default (you can no longer use arrow keys on the score screen)
+
+More improvements to the ruleset stuff coming soon I just wanted to put this out for the bug fix
 
