@@ -8,7 +8,7 @@ open Prelude.Data.Charts.Caching
 open Prelude.Gameplay.Mods
 open Prelude.Gameplay.Difficulty
 open Prelude.Charts.Formats.Interlude
-open Interlude
+open Interlude.Features
 open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
@@ -75,8 +75,8 @@ type ChartInfo() as this =
             .Tooltip(L"levelselect.mods.tooltip", "mods")
             .WithPosition { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f }
         
-        |* RulesetDropdown(options.SelectedRuleset |> Setting.trigger (fun _ -> LevelSelect.refresh <- true))
-            .Tooltip(L"levelselect.rulesets.tooltip", "ruleset")
+        |* Rulesets.QuickSwitcher(options.SelectedRuleset |> Setting.trigger (fun _ -> LevelSelect.refresh <- true))
+            .Tooltip(L"levelselect.rulesets.tooltip", "ruleset_switch")
             .WithPosition { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f }
 
     member this.Refresh() =

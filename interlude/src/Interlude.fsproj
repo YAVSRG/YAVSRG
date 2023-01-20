@@ -63,6 +63,7 @@
     <Compile Include="UI\Screen\Screen.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
+    <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Gameplay.fs" />
     <Compile Include="Features\Score\Graph.fs" />
     <Compile Include="Features\Score\Score.fs" />

@@ -2,7 +2,6 @@
 
 open Percyqaz.Common
 open Percyqaz.Flux.Graphics
-open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Scoring
@@ -171,7 +170,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             sprintf "%s %s" Icons.preview (L"score.watch_replay") |> K,
             Style.dark 100,
             Position = { Left = 0.7f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.85f %- 25.0f; Bottom = 1.0f %- 0.0f })
-        |* RulesetDropdown(
+        |* Rulesets.QuickSwitcher(
             options.SelectedRuleset
             |> Setting.trigger (fun _ -> scoreData.Ruleset <- Rulesets.current; refresh()),
             Position = { Left = 0.85f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })

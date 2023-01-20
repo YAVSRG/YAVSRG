@@ -7,6 +7,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
 open Interlude.Utils
+open Interlude.Features
 
 module Gameplay = 
 
@@ -58,29 +59,6 @@ module Gameplay =
             | 1 -> options.Pacemakers.[rulesetId] <- Pacemaker.Lamp lamp.Value
             | _ -> failwith "impossible"
 
-    type RulesetsPage() as this =
-        inherit Page()
-
-        do 
-            this.Content(
-                column()
-                |+ PrettySetting("gameplay.rulesets",
-                        Grid.create Rulesets.list (
-                            Grid.Config.Default
-                                .WithColumn(fun (id: string, rs: Prelude.Scoring.Ruleset) -> if id.StartsWith '*' then sprintf "%s (default)" rs.Name else rs.Name)
-                                .WithSelection(
-                                    (fun (id, _) -> List.contains id options.FavouriteRulesets.Value),
-                                    (fun ((id, rs), selected) ->
-                                        if selected then Setting.app (fun l -> id :: l) options.FavouriteRulesets
-                                        else Setting.app (List.except [id]) options.FavouriteRulesets
-                                    ))
-                        )
-                    ).Pos(200.0f, PRETTYWIDTH, 800.0f)
-                )
-
-        override this.Title = N"gameplay.rulesets"
-        override this.OnClose() = ()
-
     type ScreencoverPage() as this =
         inherit Page()
 
@@ -112,7 +90,7 @@ module Gameplay =
                 |+ PrettySetting("gameplay.backgrounddim", Slider<_>.Percent(options.BackgroundDim, 0.01f)).Pos(440.0f)
                 |+ PrettyButton("gameplay.lanecover", fun() -> Menu.ShowPage ScreencoverPage).Pos(520.0f)
                 |+ PrettyButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage).Pos(670.0f)
-                |+ PrettyButton("gameplay.rulesets", fun () -> Menu.ShowPage RulesetsPage).Pos(750.0f)
+                |+ PrettyButton("gameplay.rulesets", fun () -> Menu.ShowPage Rulesets.FavouritesPage).Pos(750.0f)
             )
         override this.Title = N"gameplay"
         override this.OnClose() = ()
