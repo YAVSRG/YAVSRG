@@ -124,11 +124,11 @@ module Tree =
             if bounds.Bottom > origin && top < originB then if_visible bounds
             top + bounds.Height + this.Spacing
 
-        member this.LeftClick() =
-            Mouse.released Mouse.LEFT && drag_scroll_distance <= DRAG_THRESHOLD
+        member this.LeftClick(origin) =
+            Mouse.released Mouse.LEFT && drag_scroll_distance <= DRAG_THRESHOLD && Mouse.y() > origin
 
-        member this.RightClick() =
-            Mouse.released Mouse.RIGHT && drag_scroll_distance <= DRAG_THRESHOLD
+        member this.RightClick(origin) =
+            Mouse.released Mouse.RIGHT && drag_scroll_distance <= DRAG_THRESHOLD && Mouse.y() > origin
 
     type private ChartItem(groupName: string, cc: CachedChart, context: LibraryContext) =
         inherit TreeItem()
@@ -227,16 +227,16 @@ module Tree =
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 
-        member private this.OnUpdate(bounds, elapsedTime) =
+        member private this.OnUpdate(origin, bounds, elapsedTime) =
 
             if localCacheFlag < cacheFlag then updateCachedInfo()
 
             if Mouse.hover bounds then
                 hover.Target <- 1.0f
-                if this.LeftClick() then
+                if this.LeftClick(origin) then
                     if this.Selected then play()
                     else this.Select()
-                elif this.RightClick() then ChartContextMenu(cc, context) |> Menu.ShowPage
+                elif this.RightClick(origin) then ChartContextMenu(cc, context) |> Menu.ShowPage
                 elif (!|"delete").Tapped() then ChartContextMenu.ConfirmDelete(cc, false)
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
@@ -245,7 +245,7 @@ module Tree =
             if scrollTo = ScrollTo.Chart && groupName = selectedGroup && this.Selected then
                 scroll(-top + 500.0f)
                 scrollTo <- ScrollTo.Nothing
-            this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(b, elapsedTime))
+            this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(origin, b, elapsedTime))
 
     type private GroupItem(name: string, items: ChartItem list, context: LibraryGroupContext) =
         inherit TreeItem()
@@ -278,11 +278,11 @@ module Tree =
                 b2
             else b
 
-        member private this.OnUpdate(bounds, elapsedTime) =
+        member private this.OnUpdate(origin, bounds, elapsedTime) =
             if Mouse.hover bounds then
-                if this.LeftClick() then
+                if this.LeftClick(origin) then
                     if this.Expanded then expandedGroup <- "" else (expandedGroup <- name; scrollTo <- ScrollTo.Pack name)
-                elif this.RightClick() then GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
+                elif this.RightClick(origin) then GroupContextMenu.Show(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), context)
                 elif (!|"delete").Tapped() then GroupContextMenu.ConfirmDelete(name, items |> Seq.map (fun (x: ChartItem) -> x.Chart), false)
 
         member this.Update(top, origin, originB, elapsedTime) =
@@ -293,7 +293,7 @@ module Tree =
                 else scroll(-top + origin + 400.0f)
                 scrollTo <- ScrollTo.Nothing
             | _ -> ()
-            let b = this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(b, elapsedTime))
+            let b = this.CheckBounds(top, origin, originB, fun b -> this.OnUpdate(origin, b, elapsedTime))
             if this.Expanded then
                 List.fold (fun t (i: ChartItem) -> i.Update(t, origin, originB, elapsedTime)) b items
             else b
@@ -424,12 +424,12 @@ module Tree =
                 scrollPos.Value
                 groups
 
-
         let total_height = originB - origin
         let tree_height = bottomEdge - scrollPos.Value
 
+        let my = Mouse.y()
         if currently_drag_scrolling then dragScroll(origin, total_height, tree_height)
-        elif Mouse.leftClick() || Mouse.rightClick() then begin_dragScroll()
+        elif my < originB && my > origin && (Mouse.leftClick() || Mouse.rightClick()) then begin_dragScroll()
 
         if (!|"up").Tapped() && expandedGroup <> "" then
             scrollTo <- ScrollTo.Pack expandedGroup
