@@ -19,7 +19,7 @@ open Interlude.Features.Gameplay
 type ChartInfo() as this =
     inherit StaticContainer(NodeType.None)
 
-    let scores = Scoreboard(Position = Position.TrimBottom 190.0f)
+    let scores = Scoreboard(Position = Position.TrimBottom 120.0f)
     let mutable length = ""
     let mutable bpm = ""
     let mutable notecounts = ""
@@ -29,28 +29,21 @@ type ChartInfo() as this =
         |+ scores
 
         |+ Text(
-            fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Physical) Icons.star
+            fun () -> sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
             ,
             Color = (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> physicalColor d.Physical),
             Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 240.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 170.0f })
-
-        |+ Text(
-            fun () -> sprintf "%.2f%s" (match Chart.rating with None -> 0.0 | Some d -> d.Technical) Icons.star
-            ,
-            Color = (fun () -> Color.White, match Chart.rating with None -> Color.Black | Some d -> technicalColor d.Technical),
-            Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 0.5f %+ 0.0f; Bottom = 1.0f %- 100.0f })
+            Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 0.33f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
         |+ Text(
             (fun () -> bpm),
-            Align = Alignment.RIGHT,
-            Position = { Left = 0.5f %+ 0.0f; Top = 1.0f %- 240.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 170.0f })
+            Align = Alignment.CENTER,
+            Position = { Left = 0.33f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 0.66f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
         |+ Text(
             (fun () -> length),
             Align = Alignment.RIGHT,
-            Position = { Left = 0.5f %+ 0.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f })
+            Position = { Left = 0.66f %+ 10.0f; Top = 1.0f %- 170.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 100.0f })
 
         |+ Text(
             (fun () -> notecounts),
