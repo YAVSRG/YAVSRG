@@ -1,16 +1,11 @@
-0.6.8.4
+0.6.8.5
 ====
 
-Small update grindset
+Bug fix update, Yippee!
 
-- New feature: Sound effects
-  More will come from this in the future but for now I've brought back a familiar sound when launching the game :)
-- "Bug fix: Favourite" rulesets as picked from the options screen now stay selected even when changing themes
-
-Other improvements to rulesets:
-- Ruleset switcher on level select now shows a selector instead of just cycling rulesets
-- Switcher now appears on score screen and is how you switch rulesets there too
-- In both cases the hotkey is D by default (you can no longer use arrow keys on the score screen)
-
-More improvements to the ruleset stuff coming soon I just wanted to put this out for the bug fix
+- Bug fix: A crash when you don't have any favourite rulesets
+- Bug fix: Ruleset picker (the big one, not the quick switcher) looks better and is less glitchy
+- Bug fix: Technical rating is shown and is confusing. It is no longer shown
+- Bug fix: Clicking on sorting/grouping buttons was treated as also clicking on the chart below the button
+- Minor feature: Press Shift+D to open the ruleset picker (the big one not the switcher) on level select and score screen
 
