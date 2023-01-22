@@ -1,63 +1,13 @@
 ﻿namespace Interlude.Features.OptionsMenu
 
-open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Scoring
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
-open Interlude.Utils
 open Interlude.Features
 
 module Gameplay = 
-
-    type PacemakerPage() as this =
-        inherit Page()
-
-        let rulesetId = Ruleset.hash Rulesets.current
-        let existing = if options.Pacemakers.ContainsKey rulesetId then options.Pacemakers.[rulesetId] else Pacemaker.Default
-
-        let utype =
-            match existing with
-            | Pacemaker.Accuracy _ -> 0
-            | Pacemaker.Lamp _ -> 1
-            |> Setting.simple
-        let accuracy =
-            match existing with
-            | Pacemaker.Accuracy a -> a
-            | Pacemaker.Lamp _ -> 0.95
-            |> Setting.simple
-            |> Setting.bound 0.0 1.0
-            |> Setting.round 3
-        let lamp =
-            match existing with
-            | Pacemaker.Accuracy _ -> 0
-            | Pacemaker.Lamp l -> l
-            |> Setting.simple
-
-        do 
-            let lamps = 
-                Rulesets.current.Grading.Lamps
-                |> Array.indexed
-                |> Array.map (fun (i, l) -> (i, l.Name))
-            this.Content(
-                column()
-                |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace).Pos(200.0f)
-                |+ CaseSelector("gameplay.pacemaker.type", 
-                    [|N"gameplay.pacemaker.accuracy"; N"gameplay.pacemaker.lamp"|],
-                    [|
-                        [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(380.0f) |]
-                        [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(380.0f) |]
-                    |], utype).Pos(300.0f)
-                |+ Text(L"options.gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
-            )
-
-        override this.Title = N"gameplay.pacemaker"
-        override this.OnClose() = 
-            match utype.Value with
-            | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value
-            | 1 -> options.Pacemakers.[rulesetId] <- Pacemaker.Lamp lamp.Value
-            | _ -> failwith "impossible"
 
     type ScreencoverPage() as this =
         inherit Page()

@@ -5,97 +5,57 @@ open Percyqaz.Common
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Gameplay.Mods
-open Prelude.Scoring
-open Interlude
-open Interlude.Options
+open Interlude.Features
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Utils
 open Interlude.Features.Gameplay
 
-type private ModCard(id) as this =
+type private ModCard(name: string, desc: string, enabled: Setting<bool>) as this =
     inherit Frame(
         NodeType.Button(fun () -> this.ToggleMod()),
-        Border = (fun () -> if this.ModEnabled then Color.White elif this.Focused then !*Palette.LIGHTER else Color.Transparent),
-        Fill = fun () -> if this.Focused then !*Palette.BASE else !*Palette.DARK
+        Border = (fun () -> if this.Focused then Color.White elif this.ModEnabled then Style.highlight 100 () else Color.Transparent),
+        Fill = fun () -> if this.ModEnabled then !*Palette.BASE else !*Palette.DARK
     )
 
     do
         this
-        |+ Text(ModState.getModName id, Position = Position.SliceTop(50.0f).TrimLeft(5.0f))
-        |+ Text(ModState.getModDesc id, Position = Position.TrimTop(50.0f).TrimLeft(5.0f))
+        |+ Text(name, Position = Position.SliceTop(50.0f).TrimLeft(5.0f))
+        |+ Text(desc, Position = Position.TrimTop(50.0f).TrimLeft(5.0f))
         |* Clickable.Focus this
 
-    member this.ModEnabled = if id = "auto" then autoplay else selectedMods.Value.ContainsKey id
-    member this.ToggleMod() = if id = "auto" then autoplay <- not autoplay else Setting.app (ModState.cycleState id) selectedMods
+    member this.ModEnabled = enabled.Value
+    member this.ToggleMod() = enabled.Set true
 
 type private ModSelectPage(onClose) as this =
     inherit Page()
 
-    let mods =
-        let container = FlowContainer.Vertical<ModCard>(80.0f, Spacing = 5.0f, Position = { Position.Default with Left = 0.5f %+ 0.0f }.Margin(150.0f, 200.0f))
-        container.Add(ModCard "auto")
-        for id in modList.Keys do container.Add(ModCard id)
-        container
-        
-    let enable = Setting.make (fun b -> enablePacemaker <- b) (fun () -> enablePacemaker)
-    let existing = if options.Pacemakers.ContainsKey Content.Rulesets.current_hash then options.Pacemakers.[Content.Rulesets.current_hash] else Pacemaker.Default
-
-    let utype =
-        match existing with
-        | Pacemaker.Accuracy _ -> 0
-        | Pacemaker.Lamp _ -> 1
-        |> Setting.simple
-    let accuracy =
-        match existing with
-        | Pacemaker.Accuracy a -> a
-        | Pacemaker.Lamp _ -> 0.95
-        |> Setting.simple
-        |> Setting.bound 0.0 1.0
-        |> Setting.round 3
-    let lamp =
-        match existing with
-        | Pacemaker.Accuracy _ -> 0
-        | Pacemaker.Lamp l -> l
-        |> Setting.simple
-
-    let pacemaker =
-        let lamps = 
-            Content.Rulesets.current.Grading.Lamps
-            |> Array.indexed
-            |> Array.map (fun (i, l) -> (i, l.Name))
-
-        let container = 
-            column()
-            |+ PrettySetting("gameplay.pacemaker.enable", Selector<_>.FromBool enable).Pos(200.0f)
-            |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace).Pos(280.0f)
-            |+ CaseSelector("gameplay.pacemaker.type", 
-                [|N"gameplay.pacemaker.accuracy"; N"gameplay.pacemaker.lamp"|],
-                [|
-                    [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(460.0f) |]
-                    [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(460.0f) |]
-                |], utype).Pos(380.0f)
-
-        container.Position <- { Position.Default with Right = 0.5f %+ 0.0f }
-        container
+    let mods = FlowContainer.Vertical<Widget>(PRETTYHEIGHT, Spacing = 15.0f, Position = { Position.Default with Right = 0.5f %+ 0.0f }.Margin(150.0f, 200.0f))
+    do 
+        mods
+        |* ModCard(ModState.getModName "auto", ModState.getModDesc "auto",
+            Setting.make (fun _ -> autoplay <- not autoplay) (fun _ -> autoplay))
+        for id in modList.Keys do
+            mods
+            |* ModCard(ModState.getModName id, ModState.getModDesc id,
+                Setting.make (fun _ -> Setting.app (ModState.cycleState id) selectedMods) (fun _ -> selectedMods.Value.ContainsKey id))
+        mods
+        |+ Dummy()
+        |+ ModCard("Pacemaker", "Enables pacemaker for your session.",
+            Setting.make (fun _ -> enablePacemaker <- not enablePacemaker) (fun _ -> enablePacemaker))
+        |* PrettyButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage)
 
     do
         this.Content(
             SwitchContainer.Row<Widget>()
-            |+ pacemaker
             |+ mods
-            |+ WIP()
         )
 
     override this.Title = N"mods"
     override this.OnClose() =
-        match utype.Value with
-        | 0 -> options.Pacemakers.[Content.Rulesets.current_hash] <- Pacemaker.Accuracy accuracy.Value
-        | 1 -> options.Pacemakers.[Content.Rulesets.current_hash] <- Pacemaker.Lamp lamp.Value
-        | _ -> failwith "impossible"
         onClose()
-    
+
 type ModSelect(onClose) =
     inherit StylishButton((fun () -> Menu.ShowPage (ModSelectPage onClose)), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")
 

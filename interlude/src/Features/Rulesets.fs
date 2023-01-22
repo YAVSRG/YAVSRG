@@ -5,6 +5,7 @@ open Prelude.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Interlude.Options
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
@@ -105,3 +106,51 @@ module Rulesets =
             match this.Dropdown with
             | Some d -> d.Update(elapsedTime, moved)
             | None -> ()
+
+type PacemakerPage() as this =
+    inherit Page()
+
+    let rulesetId = Rulesets.current_hash
+    let existing = if options.Pacemakers.ContainsKey rulesetId then options.Pacemakers.[rulesetId] else Pacemaker.Default
+
+    let utype =
+        match existing with
+        | Pacemaker.Accuracy _ -> 0
+        | Pacemaker.Lamp _ -> 1
+        |> Setting.simple
+    let accuracy =
+        match existing with
+        | Pacemaker.Accuracy a -> a
+        | Pacemaker.Lamp _ -> 0.95
+        |> Setting.simple
+        |> Setting.bound 0.0 1.0
+        |> Setting.round 3
+    let lamp =
+        match existing with
+        | Pacemaker.Accuracy _ -> 0
+        | Pacemaker.Lamp l -> l
+        |> Setting.simple
+
+    do 
+        let lamps = 
+            Rulesets.current.Grading.Lamps
+            |> Array.indexed
+            |> Array.map (fun (i, l) -> (i, l.Name))
+        this.Content(
+            column()
+            |+ PrettySetting("gameplay.pacemaker.saveunderpace", Selector<_>.FromBool options.SaveScoreIfUnderPace).Pos(200.0f)
+            |+ CaseSelector("gameplay.pacemaker.type", 
+                [|N"gameplay.pacemaker.accuracy"; N"gameplay.pacemaker.lamp"|],
+                [|
+                    [| PrettySetting("gameplay.pacemaker.accuracy", Slider<_>.Percent(accuracy, 0.01f)).Pos(380.0f) |]
+                    [| PrettySetting("gameplay.pacemaker.lamp", Selector(lamps, lamp)).Pos(380.0f) |]
+                |], utype).Pos(300.0f)
+            |+ Text(L"options.gameplay.pacemaker.hint", Align = Alignment.CENTER, Position = Position.SliceBottom(100.0f).TrimBottom(40.0f))
+        )
+
+    override this.Title = N"gameplay.pacemaker"
+    override this.OnClose() = 
+        match utype.Value with
+        | 0 -> options.Pacemakers.[rulesetId] <- Pacemaker.Accuracy accuracy.Value
+        | 1 -> options.Pacemakers.[rulesetId] <- Pacemaker.Lamp lamp.Value
+        | _ -> failwith "impossible"

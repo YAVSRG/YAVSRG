@@ -35,8 +35,8 @@ type private MenuButton(onClick, label: string, pos) as this =
         color.Update elapsedTime
 
     override this.Draw() =
-        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlightF 127 color.Value)) Sprite.DefaultQuad
-        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Style.main 80 ())) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlightF 140 color.Value)) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Style.main 120 ())) Sprite.DefaultQuad
         base.Draw()
 
     member this.Pop() =
