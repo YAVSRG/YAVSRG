@@ -16,6 +16,10 @@
     <Tailcalls>True</Tailcalls>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="Charts\Formats\Interlude.fs" />

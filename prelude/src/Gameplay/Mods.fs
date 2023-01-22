@@ -5,7 +5,7 @@ open System.Collections.Generic
 open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
-open Prelude.Charts.Tools.Filter
+open Prelude.Charts.Tools
 
 module Mods = 
     (*
@@ -92,7 +92,7 @@ module Mods =
     registerMod "mirror"
         { defaultMod with
             Status = ModStatus.Ranked
-            Apply = fun _ mc -> { mc with Notes = mirror -Time.infinity Time.infinity mc.Keys mc.Notes }
+            Apply = fun _ mc -> { mc with Notes = Filter.mirror -Time.infinity Time.infinity mc.Keys mc.Notes }
         }
 
     registerMod "nosv"
@@ -102,11 +102,11 @@ module Mods =
             Apply = fun _ mc -> { mc with SV = new MultiTimeData<float32>(mc.Keys) }
         }
 
-    //registerMod "inverse"
-    //    { defaultMod with
-    //        Status = ModStatus.Unranked
-    //        Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes }
-    //    }
+    registerMod "inverse"
+        { defaultMod with
+            Status = ModStatus.Unranked
+            Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes }
+        }
 
     //todo: no ln (removes all lns)
     //todo: randomiser with seed

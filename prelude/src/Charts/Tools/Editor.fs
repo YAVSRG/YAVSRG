@@ -63,7 +63,7 @@ module Inverse =
                 printfn "%s ~ " (NoteRow.prettyPrint d1)
                 a <- a.Tail
             elif t1 > t2 then
-                printfn "        ~ %s" (NoteRow.prettyPrint d2)
+                printfn "     ~ %s" (NoteRow.prettyPrint d2)
                 b <- b.Tail
             else
                 printfn "%s ~ %s" (NoteRow.prettyPrint d1) (NoteRow.prettyPrint d2)
@@ -72,112 +72,91 @@ module Inverse =
         for (_, d1) in a do
             printfn "%s ~ " (NoteRow.prettyPrint d1)
         for (_, d2) in b do
-            printfn "        ~ %s" (NoteRow.prettyPrint d2)
+            printfn "     ~ %s" (NoteRow.prettyPrint d2)
 
-    let apply keycount (bpms: TimeData<BPM>) (notes: TimeData<NoteRow>) : TimeData<NoteRow> =
-        let mutable holding = Bitmap.empty
-        let mutable last_yielded_holding = Bitmap.empty
-        let mutable memory : NoteRow = NoteRow.createEmpty keycount
-        let mutable memory_time : Time = -Time.infinity
-        let mutable spacing = 0.0f<ms>
-
+    let apply (keycount: int) (bpms: TimeData<BPM>) (notes: TimeData<NoteRow>) : TimeData<NoteRow> =
         let bpms = bpms.Data
         let mutable bpm_index = -1
+        let mutable spacing = 0.0f<ms>
+
+        let output = ResizeArray<TimeDataItem<NoteRow>>()
 
         let update_spacing now = 
-            if bpm_index + 1 < bpms.Count then
-                let (time, (meter, msPerBeat)) = bpms.[bpm_index + 1]
-                if time < now then
-                    spacing <- msPerBeat * 0.5f<beat>
-                    bpm_index <- bpm_index + 1
+            while bpm_index + 1 < bpms.Count && fst bpms.[bpm_index + 1] < now do
+                let msPerBeat = bpms.[bpm_index + 1] |> snd |> snd
+                spacing <- msPerBeat * 0.25f<beat>
+                bpm_index <- bpm_index + 1
 
-        seq {
-            
-            // set up first row
-            let (time, d) = notes.First.Value
-            memory_time <- time
+        let insert_release k time =
+
+            let mutable seek = output.Count - 1
+            let mutable (rt, row) = output.[seek]
+
+            let mutable place_tail = true
+
+            while seek > 0 && rt > time do
+                if row.[k] = NoteType.HOLDTAIL then 
+                    row.[k] <- NoteType.NOTHING
+                    place_tail <- false
+                elif row.[k] = NoteType.HOLDHEAD then
+                    row.[k] <- NoteType.NORMAL
+                    place_tail <- false
+                elif row.[k] = NoteType.NORMAL then
+                    place_tail <- false
+
+                seek <- seek - 1
+                let a, b = output.[seek]
+                rt <- a; row <- b
+
+            if place_tail then
+
+                if rt = time then row.[k] <- NoteType.HOLDTAIL
+                else // rt < time
+                    let r = NoteRow.createEmpty keycount
+                    r.[k] <- NoteType.HOLDTAIL
+                    output.Insert(seek + 1, (time, r))
+        
+        let mutable holding = Bitmap.empty
+
+        // place skeleton of heads and tails
+        for time, d in notes.Data do
+            update_spacing time
+
+            let new_row = NoteRow.createEmpty keycount
             for k, nt in Array.indexed d do
                 match nt with
                 | NoteType.HOLDHEAD ->
-                    memory.[k] <- NoteType.NORMAL
+                    new_row.[k] <- NoteType.NORMAL
+                    if Bitmap.hasBit k holding then insert_release k (time - spacing)
+                    holding <- Bitmap.unsetBit k holding
                 | NoteType.NORMAL ->
-                    memory.[k] <- NoteType.HOLDHEAD
+                    new_row.[k] <- NoteType.HOLDHEAD
+                    if Bitmap.hasBit k holding then insert_release k (time - spacing)
                     holding <- Bitmap.setBit k holding
                 | _ -> ()
-            
-            update_spacing time
+            output.Add (time, new_row)
 
-            // for all other rows
-            for (time, d) in Seq.skip 1 notes.Data do
+        // sever last row
+        let last_row = snd output.[output.Count - 1]
+        for k, nt in Array.indexed last_row do
+            match nt with
+            | NoteType.HOLDHEAD ->
+                last_row.[k] <- NoteType.NORMAL
+            | _ when Bitmap.hasBit k holding ->
+                last_row.[k] <- NoteType.HOLDTAIL
+            | _ -> ()
 
-                let currentRow = NoteRow.createEmpty keycount
-                NoteRow.setNoteData NoteType.HOLDBODY currentRow holding
-                let mutable check_for_releases = Bitmap.empty
-                
-                for k, nt in Array.indexed d do
-                    match nt with
-                    | NoteType.HOLDHEAD ->
-                        currentRow.[k] <- NoteType.NORMAL
-                        check_for_releases <- Bitmap.setBit k check_for_releases
-                        holding <- Bitmap.unsetBit k holding
-                    | NoteType.NORMAL ->
-                        currentRow.[k] <- NoteType.HOLDHEAD
-                        check_for_releases <- Bitmap.setBit k check_for_releases
-                        holding <- Bitmap.setBit k holding
-                    | _ -> ()
+        // final pass
+        let mutable holding = Bitmap.empty
+        for _, d in output do
+            for k, nt in Array.indexed d do
+                match nt with
+                | NoteType.HOLDHEAD ->
+                    holding <- Bitmap.setBit k holding
+                | NoteType.HOLDTAIL ->
+                    holding <- Bitmap.unsetBit k holding
+                | NoteType.NOTHING when Bitmap.hasBit k holding ->
+                    d.[k] <- NoteType.HOLDBODY
+                | _ -> ()
 
-                let time_since_last_row = time - memory_time
-
-                // RELEASES APPEAR IN LINE WITH PREVIOUS ROW
-                if Time.Abs(time_since_last_row - spacing) < 5.0f<ms> then
-                    for k in Bitmap.toSeq check_for_releases do
-                        match memory.[k] with
-                        | NoteType.HOLDHEAD -> memory.[k] <- NoteType.NORMAL
-                        | NoteType.HOLDBODY -> memory.[k] <- NoteType.HOLDTAIL
-                        | _ -> ()
-                    yield (memory_time, memory)
-                    //printfn "= %s" (NoteRow.prettyPrint memory)
-                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY memory ||| NoteRow.noteData NoteType.HOLDHEAD memory
-
-                // RELEASES APPEAR AFTER PREVIOUS ROW
-                elif time_since_last_row > spacing then
-                    yield (memory_time, memory)
-                    //printfn "+ %s" (NoteRow.prettyPrint memory)
-                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY memory ||| NoteRow.noteData NoteType.HOLDHEAD memory
-                    let releases_row = NoteRow.createEmpty keycount
-                    NoteRow.setNoteData NoteType.HOLDBODY releases_row last_yielded_holding
-                    NoteRow.setNoteData NoteType.HOLDTAIL releases_row (last_yielded_holding &&& check_for_releases)
-                    yield (time - spacing, releases_row)
-                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY releases_row
-                    //printfn "+ %s" (NoteRow.prettyPrint releases_row)
-
-                // RELEASES APPEAR BEFORE PREVIOUS ROW
-                else
-                    let releases_row = NoteRow.createEmpty keycount
-                    NoteRow.setNoteData NoteType.HOLDBODY releases_row last_yielded_holding
-                    for k in Bitmap.toSeq check_for_releases do
-                        if memory.[k] = NoteType.HOLDHEAD then memory.[k] <- NoteType.NORMAL
-                        if Bitmap.hasBit k last_yielded_holding then
-                            releases_row.[k] <- NoteType.HOLDTAIL
-                            memory.[k] <- NoteType.NOTHING
-                    yield (time - spacing, releases_row)
-                    //printfn "- %s %.2f" (NoteRow.prettyPrint releases_row) (time - spacing)
-                    yield (memory_time, memory)
-                    //printfn "- %s %.2f" (NoteRow.prettyPrint memory) memory_time
-                    last_yielded_holding <- NoteRow.noteData NoteType.HOLDBODY memory ||| NoteRow.noteData NoteType.HOLDHEAD memory
-                    
-                update_spacing time
-                memory_time <- time
-                memory <- currentRow
-
-            // cut off last row
-            for k, nt in Array.indexed memory do
-                if nt = NoteType.HOLDBODY then memory.[k] <- NoteType.HOLDTAIL
-                if nt = NoteType.HOLDHEAD then memory.[k] <- NoteType.NORMAL
-
-            yield (memory_time, memory)
-
-        }
-        |> Seq.filter (snd >> NoteRow.isEmpty >> not)
-        |> ResizeArray
-        |> TimeData
+        TimeData output
