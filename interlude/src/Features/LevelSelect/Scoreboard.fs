@@ -124,6 +124,7 @@ module Scoreboard =
                 ChartSaveData: ChartSaveData option
                 mutable NewBests: Bests option
             }
+            override this.ToString() = "<scoreboard calculation>"
 
         let handle (container: FlowContainer.Vertical<ScoreCard>) =
             let worker =
