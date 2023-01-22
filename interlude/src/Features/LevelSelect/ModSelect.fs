@@ -42,7 +42,7 @@ type private ModSelectPage(onClose) as this =
                 Setting.make (fun _ -> Setting.app (ModState.cycleState id) selectedMods) (fun _ -> selectedMods.Value.ContainsKey id))
         mods
         |+ Dummy()
-        |+ ModCard("Pacemaker", "Enables pacemaker for your session.",
+        |+ ModCard(L"options.gameplay.pacemaker.enable.name", L"options.gameplay.pacemaker.enable.tooltip",
             Setting.make (fun _ -> enablePacemaker <- not enablePacemaker) (fun _ -> enablePacemaker))
         |* PrettyButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage)
 
