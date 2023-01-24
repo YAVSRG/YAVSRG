@@ -7,6 +7,7 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Scoring
+open Prelude.Gameplay.NoteColors
 open Prelude.Data.Themes
 open Interlude
 open Interlude.Options
@@ -16,21 +17,16 @@ open Interlude.Features
 //  COLUMN INDEPENDENT SV
 //  FIX HOLD TAIL CLIPPING
 
-(*
-    Note rendering code. Designed so it could be repurposed as an editor but that may now never happen (editor will be another project)
-*)
-
 module NoteRenderer =
 
     let noteRotation keys =
         let rotations = if Content.noteskinConfig().UseRotation then Content.noteskinConfig().Rotations.[keys - 3] else Array.zeroCreate keys
         fun k -> Quad.rotateDeg (rotations.[k])
 
-type NoteRenderer(scoring: IScoreMetric) as this =
+type NoteRenderer(chart: ColorizedChart, scoring: IScoreMetric) as this =
     inherit StaticContainer(NodeType.None)
 
     //constants
-    let chart = Gameplay.Chart.colored()
     let (keys, notes, bpm, sv) = (chart.Keys, chart.Notes, chart.BPM, chart.SV) // todo: at some point refactor this out
 
     let column_width = Content.noteskinConfig().ColumnWidth
@@ -73,6 +69,8 @@ type NoteRenderer(scoring: IScoreMetric) as this =
                 Right = screenAlign %+ (width * (1.0f - columnAlign))
                 Bottom = Position.max
             }
+
+    new (scoring: IScoreMetric) = NoteRenderer(Gameplay.Chart.colored(), scoring)
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)

@@ -7,6 +7,7 @@ open Prelude.Common
 open Prelude.Scoring
 open Prelude.Scoring.Grading
 open Prelude.Data.Scores
+open Prelude.Gameplay.Mods
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -14,7 +15,7 @@ open Interlude.UI.Components
 open Interlude.Utils
 open Interlude.Features
 
-// todo: good lord this file should be split
+// todo: split this file
 
 type EventCounts =
     {
@@ -32,7 +33,7 @@ type EventCounts =
 
 module ScoreScreenHelpers =
 
-    let mutable watchReplay : float32 * ReplayData -> unit = ignore
+    let mutable watchReplay : ModChart * float32 * ReplayData -> unit = ignore
 
     let countEvents(events: HitEvent<HitEventGuts> seq) : EventCounts =
         let inc (x: int ref) = x.Value <- x.Value + 1
@@ -166,7 +167,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             Style.main 100,
             Position = { Left = 0.55f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.7f %- 25.0f; Bottom = 1.0f %- 0.0f })
         |+ StylishButton(
-            (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ScoreInfo.rate, scoreData.ReplayData)),
+            (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ModChart, scoreData.ScoreInfo.rate, scoreData.ReplayData)),
             sprintf "%s %s" Icons.preview (L"score.watch_replay") |> K,
             Style.dark 100,
             Position = { Left = 0.7f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.85f %- 25.0f; Bottom = 1.0f %- 0.0f })

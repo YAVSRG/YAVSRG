@@ -16,7 +16,7 @@ module Startup =
     let ui_entry_point() =
         Screen.init [|LoadingScreen(); MainMenuScreen(); ImportScreen(); LevelSelectScreen()|]
         
-        ScoreScreenHelpers.watchReplay <- fun (rate, data) -> Screen.changeNew (fun () -> ReplayScreen(ReplayMode.Replay (rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
+        ScoreScreenHelpers.watchReplay <- fun (modchart, rate, data) -> Screen.changeNew (fun () -> ReplayScreen(ReplayMode.Replay (modchart, rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
         Utils.AutoUpdate.checkForUpdates()
         Mounts.handleStartupImports()
         

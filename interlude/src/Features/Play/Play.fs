@@ -83,16 +83,16 @@ type PlayScreen(pacemakerMode: PacemakerMode) as this =
         let noteRenderer = NoteRenderer scoring
         this.Add noteRenderer
 
-        if Content.noteskinConfig().EnableColumnLight then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, Content.noteskinConfig().ColumnLightTime, widgetHelper))
+        if noteskinConfig().EnableColumnLight then
+            noteRenderer.Add(new ColumnLighting(chart.Keys, noteskinConfig().ColumnLightTime, widgetHelper))
 
-        if Content.noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, Content.noteskinConfig().Explosions, widgetHelper))
+        if noteskinConfig().Explosions.FadeTime >= 0.0f then
+            noteRenderer.Add(new Explosions(chart.Keys, noteskinConfig().Explosions, widgetHelper))
 
         noteRenderer.Add(LaneCover())
 
         let inline add_widget (constructor: 'T -> Widget) = 
-            let config: ^T = Content.getGameplayConfig<'T>()
+            let config: ^T = getGameplayConfig<'T>()
             let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
             if pos.Enabled then
                 let w = constructor config

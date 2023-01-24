@@ -53,8 +53,7 @@ type private ModSelectPage(onClose) as this =
         )
 
     override this.Title = N"mods"
-    override this.OnClose() =
-        onClose()
+    override this.OnClose() = onClose()
 
 type ModSelect(onClose) =
     inherit StylishButton((fun () -> Menu.ShowPage (ModSelectPage onClose)), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")

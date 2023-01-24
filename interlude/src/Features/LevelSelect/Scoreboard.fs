@@ -25,7 +25,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
         this.Content(
             column()
             |+ PrettyButton("score.delete", (fun () -> ScoreContextMenu.ConfirmDeleteScore(score, true)), Icon = Icons.delete).Pos(200.0f)
-            |+ PrettyButton("score.watchreplay", (fun () -> ScoreScreenHelpers.watchReplay(score.ScoreInfo.rate, score.ReplayData); Menu.Back()), Icon = Icons.preview).Pos(280.0f)
+            |+ PrettyButton("score.watchreplay", (fun () -> ScoreScreenHelpers.watchReplay(score.ModChart, score.ScoreInfo.rate, score.ReplayData); Menu.Back()), Icon = Icons.preview).Pos(280.0f)
             |+ PrettyButton("score.challenge", (fun () -> Tree.challengeScore(score.ScoreInfo.rate, score.ReplayData); Menu.Back()), Icon = Icons.goal).Pos(360.0f)
         )
     override this.Title = sprintf "%s | %s" (score.Scoring.FormatAccuracy()) (score.Lamp.ToString())

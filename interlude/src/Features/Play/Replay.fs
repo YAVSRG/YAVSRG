@@ -5,6 +5,7 @@ open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Gameplay.Mods
 open Prelude.Charts.Formats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
@@ -14,22 +15,31 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Play.GameplayWidgets
+open Prelude.Gameplay.NoteColors
 
 [<RequireQualifiedAccess>]
 type ReplayMode =
     | Auto
-    | Replay of rate: float32 * ReplayData
+    | Replay of chart: ModChart * rate: float32 * ReplayData
 
 type ReplayScreen(mode: ReplayMode) as this =
     inherit Screen()
     
-    let chart = Gameplay.Chart.withMods.Value
-    let firstNote = offsetOf chart.Notes.First.Value
-
-    let keypressData, auto, rate =
+    let keypressData, auto, rate, chart =
         match mode with
-        | ReplayMode.Auto -> StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider, true, Gameplay.rate.Value
-        | ReplayMode.Replay (rate, data) -> StoredReplayProvider(data) :> IReplayProvider, false, rate
+        | ReplayMode.Auto -> 
+            let chart = Gameplay.Chart.withMods.Value
+            StoredReplayProvider.AutoPlay (chart.Keys, chart.Notes) :> IReplayProvider,
+            true,
+            Gameplay.rate.Value,
+            chart
+        | ReplayMode.Replay (modchart, rate, data) -> 
+            StoredReplayProvider(data) :> IReplayProvider,
+            false,
+            rate,
+            modchart
+
+    let firstNote = offsetOf chart.Notes.First.Value
 
     let scoringConfig = Rulesets.current
     let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes rate
@@ -45,7 +55,7 @@ type ReplayScreen(mode: ReplayMode) as this =
         }
 
     do
-        let noteRenderer = NoteRenderer scoring
+        let noteRenderer = NoteRenderer(getColoredChart (noteskinConfig().NoteColors) chart, scoring)
         this.Add noteRenderer
 
         if noteskinConfig().EnableColumnLight then
