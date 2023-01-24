@@ -131,7 +131,7 @@ type ScoreInfoProvider(score: Score, chart: Chart, ruleset: Ruleset) =
     member this.ModStatus =
         modstatus <-
             ValueOption.defaultWith
-                (fun () -> score.selectedMods |> ModState.enumerate |> List.ofSeq |> List.map (fun s -> modList.[s].Status) |> fun l -> ModStatus.Ranked :: l |> List.max)
+                (fun () -> score.selectedMods |> ModState.enumerate |> Seq.map (fun (_, m, _) -> m.Status) |> List.ofSeq |> fun l -> ModStatus.Ranked :: l |> List.max)
                 modstatus |> ValueSome
         modstatus.Value
 

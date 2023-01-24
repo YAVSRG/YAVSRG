@@ -50,11 +50,11 @@ module Mods =
             States: int
             RandomSeed: bool
             Exclusions: string list
-            //Looks at a chart and returns true if applying the modifier will do anything, otherwise false
-            //Used to hide enabled mods that would have no effect e.g. a mod that removes hold notes on a chart with no hold notes
-            Check: int -> ModChart -> bool
-            //Applies the modifier to the content of the chart. This is where note data, timing data, sv data should be edited to create the desired effects
-            Apply: int -> ModChart -> ModChart
+            // Returns flag + resulting chart
+            // flag is true if the mod made meaningful changes to the chart
+            // The resulting chart can still be modified in ways that don't affect gameplay such as changing BPMs
+            Apply: int -> ModChart -> bool * ModChart
+            Priority: int
         }
     
     let modList = new Dictionary<string, Mod>()
@@ -76,36 +76,34 @@ module Mods =
                 let state = if modList.[id].RandomSeed then r.Next(modList.[id].States) else 0
                 List.fold (fun m i -> Map.remove i m) (Map.add id state mods) modList.[id].Exclusions
 
-        let enumerate (mods: ModState) = Map.toSeq mods |> Seq.map fst |> Seq.sort
+        let enumerate (mods: ModState) = 
+            mods
+            |> Map.toSeq
+            |> Seq.choose (fun (id, state) -> 
+                    if modList.ContainsKey id then Some (id, modList.[id], state)
+                    else Logging.Error(sprintf "Unrecognised mod id: %s" id); None
+                )
+            |> Seq.sortBy (fun (id, m, state) -> m.Priority)
 
-        let enumerateApplicable (chart: ModChart) (mods: ModState) =
-            seq {
-                for id in enumerate mods do
-                    if modList.ContainsKey id then
-                        if modList.[id].Check(mods.[id]) chart then 
-                            yield (id, modList.[id], mods.[id])
-                    else Logging.Error(sprintf "Unrecognised mod id: %s" id)
-            }
-
-    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Check = (fun _ _ -> true); Apply = (fun _ -> id); }
+    let defaultMod = { Status = ModStatus.Unstored; States = 1; Exclusions = []; RandomSeed = false; Apply = (fun _ mc -> false, mc); Priority = 0 }
 
     registerMod "mirror"
         { defaultMod with
             Status = ModStatus.Ranked
-            Apply = fun _ mc -> { mc with Notes = Filter.mirror -Time.infinity Time.infinity mc.Keys mc.Notes }
+            Apply = fun _ mc -> true, { mc with Notes = Filter.mirror -Time.infinity Time.infinity mc.Keys mc.Notes }
         }
 
     registerMod "nosv"
         { defaultMod with
             Status = ModStatus.Unranked
-            Check = fun _ mc -> not <| mc.SV.IsEmpty()
-            Apply = fun _ mc -> { mc with SV = new MultiTimeData<float32>(mc.Keys) }
+            Apply = fun _ mc -> if mc.SV.IsEmpty() then false, mc else true, { mc with SV = new MultiTimeData<float32>(mc.Keys) }
         }
 
     registerMod "inverse"
         { defaultMod with
             Status = ModStatus.Unranked
-            Apply = fun i mc -> { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes }
+            States = 1
+            Apply = fun s mc -> true, { mc with Notes = Inverse.apply mc.Keys mc.BPM mc.Notes (s > 0) }
         }
 
     //todo: no ln (removes all lns)
@@ -117,13 +115,15 @@ module Mods =
 
     let private applyMods (mods: ModState) (chart: Chart) : ModChart =
         let mutable modChart = ModChart.create chart
-        for (name, m, c) in mods |> ModState.enumerateApplicable modChart do
-            let mc = m.Apply c modChart
-            modChart <- { mc with ModsUsed = mc.ModsUsed @ [name] }
+
+        for id, m, state in ModState.enumerate mods do
+            let mod_was_applied, mc = m.Apply state modChart
+            modChart <- { mc with ModsUsed = if mod_was_applied then mc.ModsUsed @ [id] else mc.ModsUsed }
+
         modChart
 
     let getModChart (mods: ModState) (chart: Chart) : ModChart = applyMods mods chart
 
     let getModString(rate: float32, selectedMods: ModState, autoPlay: bool) = 
-        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (ModState.getModName) |> List.ofSeq))
+        String.Join(", ", sprintf "%.2fx" rate :: (selectedMods |> ModState.enumerate |> Seq.map (fun (id, _, _) -> id) |> Seq.map (ModState.getModName) |> List.ofSeq))
         + if autoPlay then ", " + ModState.getModName "auto" else ""
