@@ -72,6 +72,12 @@ module Check =
                 for m in Seq.append ["auto"] Prelude.Gameplay.Mods.modList.Keys do
                     found.Add (sprintf "mod.%s.name" m)
                     found.Add (sprintf "mod.%s.desc" m)
+
+                for m in Prelude.Data.Charts.Sorting.groupBy.Keys do
+                    found.Add (sprintf "levelselect.groupby.%s" m)
+
+                for m in Prelude.Data.Charts.Sorting.sortBy.Keys do
+                    found.Add (sprintf "levelselect.sortby.%s" m)
             found
 
         for m in referenced |> Seq.distinct |> Seq.sort do

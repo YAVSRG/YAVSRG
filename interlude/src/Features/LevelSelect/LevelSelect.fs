@@ -34,8 +34,8 @@ type LevelSelectScreen() =
     override this.Init(parent: Widget) =
         base.Init parent
 
-        Setting.app (fun s -> if sortBy.ContainsKey s then s else "Title") options.ChartSortMode
-        Setting.app (fun s -> if groupBy.ContainsKey s then s else "Pack") options.ChartGroupMode
+        Setting.app (fun s -> if sortBy.ContainsKey s then s else "title") options.ChartSortMode
+        Setting.app (fun s -> if groupBy.ContainsKey s then s else "pack") options.ChartGroupMode
 
         this
         |+ Text(

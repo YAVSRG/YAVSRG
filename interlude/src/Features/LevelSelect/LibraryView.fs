@@ -13,8 +13,10 @@ open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
 
-type private ModeDropdown(options: string seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
+type private ModeDropdown(options: (string * string) seq, label: string, setting: Setting<string>, reverse: Setting<bool>, bind: Hotkey) =
     inherit StaticContainer(NodeType.None)
+
+    let mutable displayValue = Seq.find (fun (id, _) -> id = setting.Value) options |> snd
 
     override this.Init(parent: Widget) =
         this 
@@ -26,7 +28,7 @@ type private ModeDropdown(options: string seq, label: string, setting: Setting<s
             Position = Position.SliceLeft 120.0f)
         |* StylishButton(
             ( fun () -> reverse.Value <- not reverse.Value ),
-            ( fun () -> sprintf "%s %s" setting.Value (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
+            ( fun () -> sprintf "%s %s" displayValue (if reverse.Value then Icons.order_descending else Icons.order_ascending) ),
             Style.dark 100,
             Position = Position.TrimLeft 145.0f )
         base.Init parent
@@ -35,7 +37,7 @@ type private ModeDropdown(options: string seq, label: string, setting: Setting<s
         match this.Dropdown with
         | Some _ -> this.Dropdown <- None
         | _ ->
-            let d = Dropdown.Selector options id (fun g -> setting.Set g) (fun () -> this.Dropdown <- None)
+            let d = Dropdown.Selector options snd (fun g -> displayValue <- snd g; setting.Set (fst g)) (fun () -> this.Dropdown <- None)
             d.Position <- Position.SliceTop(d.Height + 60.0f).TrimTop(60.0f).Margin(Style.padding, 0.0f)
             d.Init this
             this.Dropdown <- Some d
@@ -59,7 +61,8 @@ type LibraryModeSettings() =
 
     let group_selector = 
         ModeDropdown(
-            groupBy.Keys,
+            groupBy.Keys
+            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.groupby." + id))),
             "Group",
             options.ChartGroupMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             options.ChartGroupReverse |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
@@ -106,7 +109,10 @@ type LibraryModeSettings() =
             .Tooltip(L"levelselect.librarymode.tooltip", "library_mode")
             .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f }
         
-        |+ ModeDropdown(sortBy.Keys, "Sort",
+        |+ ModeDropdown(
+            sortBy.Keys
+            |> Seq.map (fun id -> (id, Localisation.localise (sprintf "levelselect.sortby." + id))),
+            "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             options.ChartSortReverse |> Setting.map not not |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             "sort_mode")
@@ -116,8 +122,7 @@ type LibraryModeSettings() =
         |* swap
 
         update_swap()
-
-        base.Init(parent)
+        base.Init parent
         
     
     override this.Update(elapsedTime, bounds) =
