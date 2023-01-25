@@ -60,15 +60,15 @@ module Sorting =
 
     type GroupMethod = CachedChart * GroupContext -> int * string
     let groupBy : IDictionary<string, GroupMethod> = dict[
-            "Level", fun (c, _) -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
-            "Pack", fun (c, _) -> 0, c.Pack
-            "Date Played", dateLastPlayed
-            "Grade", gradeAchieved
-            "Lamp", lampAchieved
-            "Title", fun (c, _) -> 0, firstCharacter c.Title
-            "Artist", fun (c, _) -> 0, firstCharacter c.Artist
-            "Creator", fun (c, _) -> 0, firstCharacter c.Creator
-            "Keymode", fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
+            "level", fun (c, _) -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
+            "pack", fun (c, _) -> 0, c.Pack
+            "date_played", dateLastPlayed
+            "grade", gradeAchieved
+            "lamp", lampAchieved
+            "title", fun (c, _) -> 0, firstCharacter c.Title
+            "artist", fun (c, _) -> 0, firstCharacter c.Artist
+            "creator", fun (c, _) -> 0, firstCharacter c.Creator
+            "keymode", fun (c, _) -> c.Keys, c.Keys.ToString() + "K"
         ]
 
     let private compareBy (f: CachedChart -> IComparable) = fun a b -> f(fst a).CompareTo <| f(fst b)
@@ -78,12 +78,11 @@ module Sorting =
 
     type SortMethod = Comparison<CachedChart * Collections.LibraryContext>
     let sortBy : IDictionary<string, SortMethod> = dict[
-            "Physical", Comparison(compareBy (fun x -> x.Physical))
-            "Technical", Comparison(compareBy (fun x -> x.Technical))
-            "BPM", Comparison(compareBy (fun x -> let (a, b) = x.BPM in (1f/a, 1f/b)) |> thenCompareBy (fun x -> x.Physical))
-            "Title", Comparison(compareBy (fun x -> x.Title) |> thenCompareBy (fun x -> x.Physical))
-            "Artist", Comparison(compareBy (fun x -> x.Artist) |> thenCompareBy (fun x -> x.Physical))
-            "Creator", Comparison(compareBy (fun x -> x.Creator) |> thenCompareBy (fun x -> x.Physical))
+            "difficulty", Comparison(compareBy (fun x -> x.Physical))
+            "bpm", Comparison(compareBy (fun x -> let (a, b) = x.BPM in (1f/a, 1f/b)) |> thenCompareBy (fun x -> x.Physical))
+            "title", Comparison(compareBy (fun x -> x.Title) |> thenCompareBy (fun x -> x.Physical))
+            "artist", Comparison(compareBy (fun x -> x.Artist) |> thenCompareBy (fun x -> x.Physical))
+            "creator", Comparison(compareBy (fun x -> x.Creator) |> thenCompareBy (fun x -> x.Physical))
         ]
 
     type FilterPart = 
