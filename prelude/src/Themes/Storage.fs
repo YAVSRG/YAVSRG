@@ -226,6 +226,7 @@ type Storage(storage: StorageType) =
         | Folder f -> failwith "Can only extract zip to folder"
         
     member this.CompressToZip target =
+        if File.Exists target then File.Delete target
         match storage with
         | Zip (z, _) -> failwith "nyi"
         | Folder f -> ZipFile.CreateFromDirectory(f, target)
