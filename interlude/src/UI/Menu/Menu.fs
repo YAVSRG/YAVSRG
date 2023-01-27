@@ -62,7 +62,7 @@ and Menu(topLevel: Page) as this =
     let mutable namestack = []
     let mutable name = ""
 
-    // todo: add a back button
+    let back_button = IconButton(L"menu.back", Icons.back, 60.0f, Menu.Back, Position = Position.Box(0.0f, 1.0f, 5.0f, -70.0f, 160.0f, 60.0f))
 
     static let mutable _instance = None
     do _instance <- Some this
@@ -108,9 +108,11 @@ and Menu(topLevel: Page) as this =
 
     override this.Init(parent) =
         base.Init parent
+        back_button.Init this
         this.ShowPage topLevel
 
     override this.Draw() =
+        back_button.Draw()
         let mutable i = 0
         while i < MAX_PAGE_DEPTH && stack.[i].IsSome do
             stack.[i].Value.Draw()
@@ -131,6 +133,8 @@ and Menu(topLevel: Page) as this =
                 stack.[i].Value.OnDestroy()
                 i <- i + 1
             this.Close()
+
+        back_button.Update(elapsedTime, moved)
 
     override this.Close() = base.Close(); Selection.unclamp(); _instance <- None
 
