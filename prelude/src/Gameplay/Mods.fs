@@ -96,7 +96,7 @@ module Mods =
     registerMod "nosv"
         { defaultMod with
             Status = ModStatus.Unranked
-            Apply = fun _ mc -> if mc.SV.IsEmpty() then false, mc else true, { mc with SV = new MultiTimeData<float32>(mc.Keys) }
+            Apply = fun _ mc -> let sv, changed = Filter.no_sv mc.Keys mc.SV in changed, { mc with SV = sv }
         }
 
     registerMod "inverse"

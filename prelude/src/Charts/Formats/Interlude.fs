@@ -240,7 +240,6 @@ module Interlude =
         member this.SetChannelData(k, (newData: List<TimeDataItem<'t>>)) = data.[k + 1].SetData(newData)
         member this.SetChannelData(k, (newData: TimeData<'t>)) = data.[k + 1].SetData(newData)
         member this.GetChannelData k = data.[k + 1]
-        member this.IsEmpty() = Array.fold (fun b (t: TimeData<'t>) -> b && t.Empty) true data
         member this.Clear() = Array.iter (fun (t: TimeData<'t>) -> t.Clear()) data
         member this.Clone() =
             let mt = MultiTimeData keys

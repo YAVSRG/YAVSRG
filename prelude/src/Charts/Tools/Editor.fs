@@ -50,6 +50,14 @@ module Filter =
     // todo: design a proper arrangement for filters on charts
     let mirror time1 time2 keys notes = applyMappingBetween (mirrorMapping keys) time1 time2 notes
 
+    let no_sv (keys: int) (sv: MultiTimeData<float32>) : MultiTimeData<float32> * bool =
+        let mutable has_sv = false
+        for i = 0 to keys do
+            for (_, v) in (sv.GetChannelData (i - 1)).Data do
+                if MathF.Round(v, 2) <> 1.0f then has_sv <- true
+        MultiTimeData keys, has_sv
+
+
 module Inverse =
 
     // debug tool
