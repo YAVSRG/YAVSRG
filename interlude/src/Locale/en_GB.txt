@@ -433,3 +433,5 @@ score.new_record=New record!
 score.watch_replay=Watch replay
 wiki.downloadupdate=Install update
 wiki.openinbrowser=Open in browser
+options.themes.editnoteskin.export.name=Export as .isk
+options.themes.editnoteskin.export.tooltip=Exports this noteskin as a .isk archive.\nUse this file to share a noteskin with someone.\nYou can import a .isk file by dragging it onto the game window.

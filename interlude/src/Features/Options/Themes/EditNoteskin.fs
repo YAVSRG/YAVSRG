@@ -89,6 +89,7 @@ type EditNoteskinPage() as this =
                         |> Setting.trigger (ignore >> refreshColors))
                 ).Pos(620.0f)
             |+ PrettySetting("themes.editnoteskin.notecolors", colors).Pos(700.0f, Viewport.vwidth - 200.0f, 120.0f)
+            |+ PrettyButton.Once("themes.editnoteskin.export", Noteskins.exportCurrent).Pos(850.0f)
         )
 
     override this.Title = data.Name

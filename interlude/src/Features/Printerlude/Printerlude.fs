@@ -83,17 +83,13 @@ module Printerlude =
                     Logging.Info "Cleaned up."
                 with err -> Logging.Error ("Error while cleaning up after export", err)
         
-        let export_isk() =
-            Content.Noteskins.exportCurrent()
-            Utils.openDirectory(getDataPath "Exports")
-        
         let register_commands (ctx: Context) = 
             ctx
                 .WithCommand("version", Command.create "Shows info about the current game version" [] (Impl.Create show_version))
                 .WithCommand("exit", Command.create "Exits the game" [] (Impl.Create (fun () -> UI.Screen.exit <- true)))
                 .WithCommand("clear", Command.create "Clears the terminal" [] (Impl.Create Terminal.Log.clear))
                 .WithCommand("export_osz", Command.create "Export current chart as osz" [] (Impl.Create export_osz))
-                .WithCommand("export_isk", Command.create "Export current noteskin as isk" [] (Impl.Create export_isk))
+                .WithCommand("export_isk", Command.create "Export current noteskin as isk" [] (Impl.Create Content.Noteskins.exportCurrent))
                 .WithCommand("fft", Command.create "Experimental" [] (Impl.Create fft))
 
     let private ms = new MemoryStream()
