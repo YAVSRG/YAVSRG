@@ -1,11 +1,13 @@
-0.6.8.5
+0.6.8.6
 ====
 
-Bug fix update, Yippee!
+Yet Another Quality Of Life Update
 
-- Bug fix: A crash when you don't have any favourite rulesets
-- Bug fix: Ruleset picker (the big one, not the quick switcher) looks better and is less glitchy
-- Bug fix: Technical rating is shown and is confusing. It is no longer shown
-- Bug fix: Clicking on sorting/grouping buttons was treated as also clicking on the chart below the button
-- Minor feature: Press Shift+D to open the ruleset picker (the big one not the switcher) on level select and score screen
+- New feature: Inverse mod (coming soon: customising of the gap size)
+- Bug fix: NoSV would always count as being applied on osu! converts (unranking your score)
+- New feature: There is a clickable back button on options menus (alternative to pressing escape)
+- New feature: You can export your noteskins as .isk files via the noteskins menu
+- Bug fix: Sort by Technical rating is gone
+- Improvement: The mod menu/pacemaker UI has been split
+  And so it shall stay for the time being, so I've removed the WIP markers
 
