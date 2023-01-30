@@ -1,9 +1,5 @@
 {
     "Noteskins": [{
-        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/Wafles4.isk", 
-        "Name": "Wafles4", 
-        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/Wafles4.png"
-    }, {
         "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/AkaiHaato.isk", 
         "Name": "Akai Haato", 
         "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/AkaiHaato.png"
@@ -11,6 +7,10 @@
         "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/Funkin.isk", 
         "Name": "Funkin'", 
         "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/Funkin.png"
+    }, {
+        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/LokiArrows.isk", 
+        "Name": "Koros Loki (Arrows)", 
+        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/LokiArrows.png"
     }, {
         "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/LokiBars.isk", 
         "Name": "Koros Loki (Bars)", 
@@ -20,8 +20,12 @@
         "Name": "Purple Rain v1", 
         "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/PurpleRain.png"
     }, {
-        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/LokiArrows.isk", 
-        "Name": "Koros Loki (Arrows)", 
-        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/LokiArrows.png"
+        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/Wafles4.isk", 
+        "Name": "Wafles4", 
+        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/Wafles4.png"
+    }, {
+        "Download": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Noteskins/WaggOrbs.isk", 
+        "Name": "Wagg 1080p", 
+        "Preview": "https://github.com/YAVSRG/Interlude.Noteskins/raw/main/Previews/WaggOrbs.png"
     }]
 }
