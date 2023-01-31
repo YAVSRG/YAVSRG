@@ -48,13 +48,16 @@ module Releases =
     let build_win64() =
         
         Directory.SetCurrentDirectory(INTERLUDE_SOURCE_PATH)
-        exec "dotnet" "clean --configuration Release -r win-x64"
-        exec "dotnet" "publish --configuration Release -r win-x64 -p:PublishSingleFile=True --self-contained false"
 
         let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net7.0", "win-x64")
         let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", sprintf "Interlude.%s-win64" current_version)
+
+        try Directory.Delete(build_dir, true) with _ -> ()
         try Directory.Delete(clean_dir, true) with _ -> ()
-        Directory.CreateDirectory(clean_dir) |> ignore
+
+        exec "dotnet" "publish --configuration Release -r win-x64 -p:PublishSingleFile=True --self-contained true"
+
+        Directory.CreateDirectory clean_dir |> ignore
 
         let rec copy source target =
             Directory.CreateDirectory target |> ignore
