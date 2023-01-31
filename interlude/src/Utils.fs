@@ -9,6 +9,8 @@ open Prelude.Common
 
 module Utils =
 
+    let getInterludeLocation() = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
+
     /// Numeric version e.g. "0.5.16"
     let smallVersion =
         let v = Assembly.GetExecutingAssembly().GetName()
@@ -17,7 +19,7 @@ module Utils =
     /// Full version string e.g. "Interlude 0.5.16 (20220722)"
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
-        let v2 = Assembly.GetExecutingAssembly().Location |> FileVersionInfo.GetVersionInfo
+        let v2 = Path.Combine(getInterludeLocation(), "Interlude.exe") |> FileVersionInfo.GetVersionInfo
         #if DEBUG
         sprintf "%s %s (%s Dev)" v.Name smallVersion v2.ProductVersion
         #else
@@ -34,7 +36,6 @@ module Utils =
     /// L for localise -- Shorthand to get the localised text from a locale string id
     let L = Localisation.localise
 
-    let getInterludeLocation() = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)
 
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)

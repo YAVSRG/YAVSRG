@@ -51,7 +51,7 @@ module Releases =
         exec "dotnet" "clean --configuration Release -r win-x64"
         exec "dotnet" "publish --configuration Release -r win-x64 -p:PublishSingleFile=True --self-contained false"
 
-        let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "netcoreapp3.1", "win-x64")
+        let build_dir = Path.Combine(INTERLUDE_SOURCE_PATH, "bin", "Release", "net7.0", "win-x64")
         let clean_dir = Path.Combine(YAVSRG_PATH, "Interlude", "releases", sprintf "Interlude.%s-win64" current_version)
         try Directory.Delete(clean_dir, true) with _ -> ()
         Directory.CreateDirectory(clean_dir) |> ignore
@@ -68,6 +68,7 @@ module Releases =
 
         File.Copy(Path.Combine(YAVSRG_PATH, "Percyqaz.Flux", "lib", "win-x64", "bass.dll"), Path.Combine(clean_dir, "bass.dll"))
         File.Copy(Path.Combine(build_dir, "publish", "Interlude.exe"), Path.Combine(clean_dir, "Interlude.exe"))
+        File.Copy(Path.Combine(build_dir, "publish", "glfw3.dll"), Path.Combine(clean_dir, "glfw3.dll"))
         copy (Path.Combine(build_dir, "Locale")) (Path.Combine(clean_dir, "Locale"))
 
         printfn "Outputted to: %s" clean_dir
