@@ -101,6 +101,7 @@
     <Compile Include="Features\Options\OptionsMenu.fs" />
     <Compile Include="Features\MainMenu\LoadingScreen.fs" />
     <Compile Include="Features\MainMenu\MainMenu.fs" />
+    <Compile Include="Features\Online\Online.fs" />
     <Compile Include="Features\Printerlude\Terminal.fs" />
     <Compile Include="Features\Printerlude\Printerlude.fs" />
     <Compile Include="Features\Toolbar\Jukebox.fs" />
@@ -114,7 +115,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Update="FSharp.Core" Version="6.0.5" />
+    <PackageReference Update="FSharp.Core" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -125,6 +126,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Interlude.Web\shared\Interlude.Web.Shared.fsproj" />
     <ProjectReference Include="..\..\Percyqaz.Flux\src\Percyqaz.Flux.fsproj" />
     <ProjectReference Include="..\..\Prelude\src\Prelude.fsproj" />
   </ItemGroup>
