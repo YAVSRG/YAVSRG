@@ -12,6 +12,8 @@ module Server =
             Address: string
             Port: int
             Handle_Packet: Guid * Upstream -> unit
+            Handle_Connect: Guid -> unit
+            Handle_Disconnect: Guid -> unit
         }
 
     type private Session(server: TcpServer, config: Config) =
@@ -21,9 +23,11 @@ module Server =
 
         override this.OnConnected() =
             Logging.Info(sprintf ">> %O" this.Id)
+            config.Handle_Connect this.Id
 
         override this.OnDisconnected() =
             Logging.Info(sprintf "<< %O" this.Id)
+            config.Handle_Disconnect this.Id
         
         override this.OnError(error: SocketError) =
             Logging.Error(sprintf "Socket error in session %O: %O" this.Id error)
@@ -47,7 +51,7 @@ module Server =
 
         override this.CreateSession() = new Session(this, config)
         override this.OnError(error: SocketError) =
-            printfn "Error in TCP server: %O" error
+            Logging.Error(sprintf "Error in TCP server: %O" error)
 
     let mutable private server = Unchecked.defaultof<Listener>
     
@@ -55,13 +59,17 @@ module Server =
         server <- new Listener(config)
 
     let start() = 
-        printfn "Starting server..."
-        if server.Start() then printfn "Started server."
+        Logging.Info "Starting server..."
+        if server.Start() then Logging.Info "Started server."
 
     let send(id: Guid, packet: Downstream) =
         let packet_with_header = Buffer.packet_bytes(packet.Write())
-        server.FindSession(id).Send packet_with_header
+        server.FindSession(id).Send packet_with_header |> ignore
+
+    let kick(id: Guid, reason: string) =
+        send(id, Downstream.DISCONNECT reason)
+        server.FindSession(id).Disconnect() |> ignore
 
     let stop() = 
-        printfn "Shutting down server..."
-        if server.Stop() then printfn "Server stopped."
+        Logging.Info "Stopping server..."
+        if server.Stop() then Logging.Info "Stopped server."

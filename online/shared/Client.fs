@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Web.Shared
 
-open System
 open System.Net.Sockets
 open NetCoreServer
 open Percyqaz.Common
@@ -32,7 +31,7 @@ module Client =
             try Buffer.handle(buffer, data, offset, size, Downstream.Read >> config.Handle_Packet)
             with err ->
                 Logging.Error(sprintf "Internal error processing socket data: %O" err)
-                this.SendPacket(Upstream.DISCONNECT)
+                this.SendPacket Upstream.DISCONNECT
                 this.Disconnect() |> ignore
 
         override this.OnError(error: SocketError) =
