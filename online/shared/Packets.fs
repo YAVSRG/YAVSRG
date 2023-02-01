@@ -42,8 +42,9 @@ module Packets =
     [<RequireQualifiedAccess>]
     type Downstream =
         | DISCONNECT of reason: string
-        | CHAT of sender: string * message: string
+        | HANDSHAKE_SUCCESS
         | LOGIN_SUCCESS of username: string
+        | CHAT of sender: string * message: string
 
         static member Read(kind: byte, data: byte array) : Downstream =
             use ms = new MemoryStream(data)
@@ -51,8 +52,9 @@ module Packets =
             let packet = 
                 match kind with
                 | 0x00uy -> DISCONNECT (br.ReadString())
-                | 0x01uy -> CHAT (br.ReadString(), br.ReadString())
+                | 0x01uy -> HANDSHAKE_SUCCESS
                 | 0x02uy -> LOGIN_SUCCESS (br.ReadString())
+                | 0x03uy -> CHAT (br.ReadString(), br.ReadString())
                 | _ -> failwithf "Unknown packet type: %i" kind
             if ms.Position <> ms.Length then failwithf "Expected end-of-packet but there are %i extra bytes" (ms.Length - ms.Position)
             packet
@@ -63,6 +65,7 @@ module Packets =
             let kind = 
                 match this with
                 | DISCONNECT reason -> bw.Write reason; 0x00uy
-                | CHAT (sender, msg) -> bw.Write sender; bw.Write msg; 0x01uy
+                | HANDSHAKE_SUCCESS -> 0x01uy
                 | LOGIN_SUCCESS name -> bw.Write name; 0x02uy
+                | CHAT (sender, msg) -> bw.Write sender; bw.Write msg; 0x03uy
             kind, ms.ToArray()

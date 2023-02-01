@@ -5,7 +5,6 @@ open Interlude.Web.Server
 
 let handle_packet(id: Guid, packet: Upstream) =
     async {
-        Logging.Debug(sprintf "%O >> %A" id packet)
         match packet with
 
         | Upstream.DISCONNECT -> Server.kick(id, "User disconnect")

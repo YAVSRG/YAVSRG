@@ -22,11 +22,9 @@ module Server =
         let buffer = ref Empty
 
         override this.OnConnected() =
-            Logging.Info(sprintf ">> %O" this.Id)
             config.Handle_Connect this.Id
 
         override this.OnDisconnected() =
-            Logging.Info(sprintf "<< %O" this.Id)
             config.Handle_Disconnect this.Id
         
         override this.OnError(error: SocketError) =

@@ -10,7 +10,6 @@ module Client =
         {
             Address: string
             Port: int
-            Username: string
             Handle_Packet: Downstream -> unit
         }
 
@@ -22,7 +21,6 @@ module Client =
         override this.OnConnected() =
             Logging.Info "Connected to server!"
             this.SendPacket(Upstream.VERSION PROTOCOL_VERSION)
-            this.SendPacket(Upstream.LOGIN config.Username)
 
         override this.OnDisconnected() =
             Logging.Info "Disconnected from server."

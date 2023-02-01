@@ -1,7 +1,7 @@
 ﻿namespace Interlude.Web.Server
 
 open System
-open System.Collections.Concurrent
+open System.Collections.Generic
 open Percyqaz.Common
 open Interlude.Web.Shared
 
@@ -20,8 +20,8 @@ module UserState =
         | Handshake of Guid
         | Login of Guid * string
 
-    let private user_states = ConcurrentDictionary<Guid, UserState>()
-    let private usernames = ConcurrentDictionary<string, Guid>()
+    let private user_states = Dictionary<Guid, UserState>()
+    let private usernames = Dictionary<string, Guid>()
 
     let valid_username (proposed: string) : bool =
         if (proposed.Length < 2 || proposed.Length > 20) then false else
@@ -31,34 +31,44 @@ module UserState =
         (Seq.forall (fun (c: char) -> Char.IsBetween(c, ' ', '~')) proposed)
 
     let private state_change = 
-        { new Async.Service<Action, bool>()
+        { new Async.Service<Action, unit>()
             with override this.Handle(req) = async {
                     match req with
-                    | Action.Connect id -> 
-                        return user_states.TryAdd(id, UserState.Nothing)
-                    | Action.Disconnect id -> 
-                        let ok, state = user_states.TryRemove(id)
-                        if ok then
-                            match state with
-                            | UserState.LoggedIn username ->
-                                assert((true, id) = usernames.TryRemove username)
+
+                    | Action.Connect id ->
+                        user_states.Add(id, UserState.Nothing)
+
+                    | Action.Disconnect id ->
+                        match user_states.[id] with
+                        | UserState.LoggedIn username ->
+                                assert(usernames.Remove username)
                                 Logging.Info(sprintf "<- %s" username)
-                            | _ -> ()
-                        return ok
+                        | _ -> ()
+                        assert(user_states.Remove id)
+
                     | Action.Handshake id ->
-                        return user_states.TryUpdate(id, UserState.Handshake, UserState.Nothing)
+                        match user_states.[id] with
+                        | UserState.Nothing -> 
+                            user_states.[id] <- UserState.Handshake
+                            Server.send(id, Downstream.HANDSHAKE_SUCCESS)
+                        | _ -> Server.kick(id, "Handshake sent twice")
+
                     | Action.Login (id, username) ->
-                        if valid_username username then
-                            if usernames.TryAdd(username, id) then
-                                Logging.Info(sprintf "-> %s" username)
+                        match user_states.[id] with
+                        | UserState.Handshake ->
+
+                            if valid_username username then
+                                if usernames.ContainsKey username then Server.kick(id, "Username is taken") else
+
+                                usernames.Add(username, id)
+                                user_states.[id] <- UserState.LoggedIn username
                                 Server.send(id, Downstream.LOGIN_SUCCESS username)
-                                return user_states.TryUpdate(id, UserState.LoggedIn username, UserState.Handshake)
-                            else
-                                Server.kick(id, "Username is taken")
-                                return false
-                        else
-                            Server.kick(id, "Invalid username")
-                            return false
+                                Logging.Info(sprintf "-> %s" username)
+                            else Server.kick(id, "Invalid username")
+
+                        | UserState.Nothing -> Server.kick(id, "Login sent before handshake")
+                        | _ -> Server.kick(id, "Login sent twice")
+
             }
         }
 
