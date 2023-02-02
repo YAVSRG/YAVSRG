@@ -23,12 +23,13 @@ module UserState =
     let private user_states = Dictionary<Guid, UserState>()
     let private usernames = Dictionary<string, Guid>()
 
+    let VALID_USERNAME_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!*_-+=~|'"
     let valid_username (proposed: string) : bool =
         if (proposed.Length < 2 || proposed.Length > 20) then false else
 
         if proposed.Trim().Length <> proposed.Length then false else
 
-        (Seq.forall (fun (c: char) -> Char.IsBetween(c, ' ', '~')) proposed)
+        (Seq.forall (fun (c: char) -> Seq.contains c VALID_USERNAME_CHARACTERS) proposed)
 
     let private state_change = 
         { new Async.Service<Action, unit>()
