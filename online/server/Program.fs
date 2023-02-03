@@ -29,7 +29,9 @@ let handle_packet(id: Guid, packet: Upstream) =
     } |> Async.Start
 
 let handle_connect(id: Guid) = UserState.connect id
-let handle_disconnect(id: Guid) = UserState.disconnect id
+let handle_disconnect(id: Guid) = 
+    UserState.disconnect id
+    Lobby.leave id
 
 Server.init { 
     Address = "0.0.0.0"; Port = 32767;

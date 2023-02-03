@@ -129,6 +129,7 @@ module Lobby =
                         lobby.Players.Add(player, LobbyPlayer.Create username)
 
                         Server.send(player, Downstream.YOU_JOINED_LOBBY players)
+                        // todo: send them all the ready statuses too
                         Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
 
                     | Action.Leave player ->
