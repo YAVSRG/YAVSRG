@@ -35,22 +35,22 @@ module Packets =
 
     type LobbyInfo =
         {
+            Id: Guid
             Name: string
             Players: byte
             CurrentlyPlaying: string option
-            Owner: string
         }
         member this.Write(bw: BinaryWriter) =
+            bw.Write (this.Id.ToByteArray())
             bw.Write this.Name
             bw.Write this.Players
             bw.Write (Option.defaultValue "" this.CurrentlyPlaying)
-            bw.Write this.Owner
         static member Read(br: BinaryReader) =
             {
+                Id = new Guid(br.ReadBytes 16)
                 Name = br.ReadString()
                 Players = br.ReadByte()
                 CurrentlyPlaying = br.ReadString() |> function "" -> None | s -> Some s
-                Owner = br.ReadString()
             }
 
     [<RequireQualifiedAccess>]
@@ -61,7 +61,7 @@ module Packets =
         | LOGIN of username: string
 
         | GET_LOBBIES
-        | JOIN_LOBBY of name: string
+        | JOIN_LOBBY of id: Guid
         | CREATE_LOBBY of name: string
 
         | INVITE_TO_LOBBY of username: string
@@ -91,7 +91,7 @@ module Packets =
                 | 0x02uy -> LOGIN (br.ReadString())
 
                 | 0x10uy -> GET_LOBBIES
-                | 0x11uy -> JOIN_LOBBY (br.ReadString())
+                | 0x11uy -> JOIN_LOBBY (new Guid(br.ReadBytes 16)) 
                 | 0x12uy -> CREATE_LOBBY (br.ReadString())
 
                 | 0x20uy -> INVITE_TO_LOBBY (br.ReadString())
@@ -125,7 +125,7 @@ module Packets =
                 | LOGIN name -> bw.Write name; 0x02uy
                 
                 | GET_LOBBIES -> 0x10uy
-                | JOIN_LOBBY name -> bw.Write name; 0x11uy
+                | JOIN_LOBBY id -> bw.Write (id.ToByteArray()); 0x11uy
                 | CREATE_LOBBY name -> bw.Write name; 0x11uy
                 
                 | INVITE_TO_LOBBY username -> bw.Write username; 0x20uy
@@ -153,13 +153,13 @@ module Packets =
         | LOGIN_SUCCESS of username: string
 
         | LOBBY_LIST of lobbies: LobbyInfo array
-        | YOU_JOINED_LOBBY of name: string
-        | INVITED_TO_LOBBY of name: string
+        | YOU_JOINED_LOBBY of players: string array
+        | INVITED_TO_LOBBY of by_who: string * id: Guid
 
         | YOU_LEFT_LOBBY
         | YOU_ARE_HOST
-        | SOMEONE_JOINED_LOBBY of username: string
-        | SOMEONE_LEFT_LOBBY of username: string
+        | PLAYER_JOINED_LOBBY of username: string
+        | PLAYER_LEFT_LOBBY of username: string
         | SELECT_CHART of LobbyChart
         | LOBBY_SETTINGS of LobbySettings
         | SYSTEM_MESSAGE of string
@@ -169,6 +169,7 @@ module Packets =
         | BEGIN_PLAYING
         | USER_IS_PLAYING of username: string
         | PLAY_DATA of username: string * data: byte array
+        | FINISH_PLAYING
 
         static member Read(kind: byte, data: byte array) : Downstream =
             use ms = new MemoryStream(data)
@@ -180,13 +181,13 @@ module Packets =
                 | 0x02uy -> LOGIN_SUCCESS (br.ReadString())
 
                 | 0x10uy -> LOBBY_LIST ( Array.init (br.ReadByte() |> int) (fun _ -> LobbyInfo.Read br) )
-                | 0x11uy -> YOU_JOINED_LOBBY (br.ReadString())
-                | 0x12uy -> INVITED_TO_LOBBY (br.ReadString())
+                | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString()) )
+                | 0x12uy -> INVITED_TO_LOBBY (br.ReadString(), new Guid(br.ReadBytes 16))
 
                 | 0x20uy -> YOU_LEFT_LOBBY
                 | 0x21uy -> YOU_ARE_HOST
-                | 0x22uy -> SOMEONE_JOINED_LOBBY (br.ReadString())
-                | 0x23uy -> SOMEONE_LEFT_LOBBY (br.ReadString())
+                | 0x22uy -> PLAYER_JOINED_LOBBY (br.ReadString())
+                | 0x23uy -> PLAYER_LEFT_LOBBY (br.ReadString())
                 | 0x24uy -> SELECT_CHART (LobbyChart.Read br)
                 | 0x25uy -> LOBBY_SETTINGS { Name = br.ReadString() }
                 | 0x26uy -> SYSTEM_MESSAGE (br.ReadString())
@@ -196,6 +197,7 @@ module Packets =
                 | 0x30uy -> BEGIN_PLAYING
                 | 0x31uy -> USER_IS_PLAYING (br.ReadString())
                 | 0x32uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
+                | 0x33uy -> FINISH_PLAYING
 
                 | _ -> failwithf "Unknown packet type: %i" kind
             if ms.Position <> ms.Length then failwithf "Expected end-of-packet but there are %i extra bytes" (ms.Length - ms.Position)
@@ -214,13 +216,16 @@ module Packets =
                     bw.Write (byte lobbies.Length)
                     for lobby in lobbies do lobby.Write bw
                     0x10uy
-                | YOU_JOINED_LOBBY name -> bw.Write name; 0x11uy
-                | INVITED_TO_LOBBY name -> bw.Write name; 0x12uy
+                | YOU_JOINED_LOBBY players -> 
+                    bw.Write (byte players.Length)
+                    for player in players do bw.Write player
+                    0x11uy
+                | INVITED_TO_LOBBY (by_who, id) -> bw.Write by_who; bw.Write (id.ToByteArray()); 0x12uy
 
                 | YOU_LEFT_LOBBY -> 0x20uy
                 | YOU_ARE_HOST -> 0x21uy
-                | SOMEONE_JOINED_LOBBY username -> bw.Write username; 0x22uy
-                | SOMEONE_LEFT_LOBBY username -> bw.Write username; 0x23uy
+                | PLAYER_JOINED_LOBBY username -> bw.Write username; 0x22uy
+                | PLAYER_LEFT_LOBBY username -> bw.Write username; 0x23uy
                 | SELECT_CHART chart -> chart.Write bw; 0x24uy
                 | LOBBY_SETTINGS settings -> bw.Write settings.Name; 0x25uy
                 | SYSTEM_MESSAGE message -> bw.Write message; 0x26uy
@@ -230,4 +235,5 @@ module Packets =
                 | BEGIN_PLAYING -> 0x30uy
                 | USER_IS_PLAYING username -> bw.Write username; 0x31uy
                 | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x32uy
+                | FINISH_PLAYING -> 0x33uy
             kind, ms.ToArray()
