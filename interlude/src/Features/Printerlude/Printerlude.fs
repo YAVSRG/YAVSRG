@@ -91,7 +91,7 @@ module Printerlude =
                 .WithCommand("export_osz", Command.create "Export current chart as osz" [] (Impl.Create export_osz))
                 .WithCommand("export_isk", Command.create "Export current noteskin as isk" [] (Impl.Create Content.Noteskins.exportCurrent))
                 .WithCommand("fft", Command.create "Experimental" [] (Impl.Create fft))
-                .WithCommand("login", Command.create "Experimental online features" [] (Impl.Create Multiplayer.connect))
+                .WithCommand("login", Command.create "Experimental online features" ["username"] (Impl.Create (Types.str, Multiplayer.connect)))
 
     let private ms = new MemoryStream()
     let private context_output = new StreamReader(ms)

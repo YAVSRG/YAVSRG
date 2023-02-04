@@ -7,6 +7,7 @@ open Interlude.Web.Shared
 module Multiplayer =
 
     let mutable username = ""
+    let mutable connected = false
 
     type LobbyPlayer =
         {
@@ -23,12 +24,18 @@ module Multiplayer =
 
     let mutable lobby : Lobby option = None
 
+    let handle_connect() = connected <- true
+    let handle_disconnect() = lobby <- None; connected <- false
+
     let handle_packet(packet: Downstream) =
+        printfn "%A" packet
         match packet with
         | Downstream.DISCONNECT reason -> Logging.Info(sprintf "Disconnected from server: %s" reason)
 
         | Downstream.HANDSHAKE_SUCCESS -> Client.send(Upstream.LOGIN username)
-        | Downstream.LOGIN_SUCCESS username -> Logging.Info(sprintf "Successfully logged in as %s" username)
+        | Downstream.LOGIN_SUCCESS username -> 
+            Logging.Info(sprintf "Successfully logged in as %s" username)
+            Client.send(Upstream.CREATE_LOBBY "Interlude's First Lobby")
 
         | Downstream.LOBBY_LIST lobbies -> () // nyi
         | Downstream.YOU_JOINED_LOBBY players ->
@@ -56,5 +63,12 @@ module Multiplayer =
 
     let connect(name) =
         username <- name
-        Client.init { Address = "127.0.0.1"; Port = 32767; Handle_Packet = handle_packet }
+        Client.init 
+            { 
+                Address = "127.0.0.1"
+                Port = 32767
+                Handle_Packet = handle_packet
+                Handle_Connect = handle_connect
+                Handle_Disconnect = handle_disconnect
+            }
         Client.connect()
