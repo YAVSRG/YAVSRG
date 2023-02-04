@@ -58,6 +58,8 @@ type NoteskinConfig =
         PlayfieldAlignment: float32 * float32
         /// Sets the width of columns, in pixels
         ColumnWidth: float32
+        /// Sets the spacing of columns, in pixels
+        ColumnSpacing: float32
         // todo: group every animation thing under an animations object
         /// ???
         ColumnLightTime: float32
@@ -89,6 +91,7 @@ type NoteskinConfig =
             PlayfieldAlignment = 0.5f, 0.5f
             DroppedHoldColor = Color.FromArgb(255, 150, 150, 150)
             ColumnWidth = 150.0f
+            ColumnSpacing = 0.0f
             ColumnLightTime = 0.4f
             EnableColumnLight = true
             AnimationFrameTime = 200.0
