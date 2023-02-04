@@ -1,13 +1,18 @@
-0.6.8.6
+0.6.9
 ====
 
-Yet Another Quality Of Life Update
+### Interlude now runs on .NET 7
 
-- New feature: Inverse mod (coming soon: customising of the gap size)
-- Bug fix: NoSV would always count as being applied on osu! converts (unranking your score)
-- New feature: There is a clickable back button on options menus (alternative to pressing escape)
-- New feature: You can export your noteskins as .isk files via the noteskins menu
-- Bug fix: Sort by Technical rating is gone
-- Improvement: The mod menu/pacemaker UI has been split
-  And so it shall stay for the time being, so I've removed the WIP markers
+.Net Core 3.1 is out of lifetime support and it was surprisingly easy to make the upgrade 
+
+This shouldn't mean anything for you, but if anything no longer works as it should please report the bug on discord
+
+Also, windows releases of the game are now an all-in-one that contains the .NET 7 runtime. 
+This makes the game and future updates about a 80mb download instead of 15mb, but bandwith/disk space is cheap and getting people to install a framework is not
+
+#### Other changes
+
+- The 'update available' message now reminds you that you can install it from ingame
+- New feature: Column spacing as a noteskin setting
+- Some hidden code for a secret feature I'm working on :)
 
