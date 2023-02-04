@@ -126,7 +126,7 @@ module Packets =
                 
                 | GET_LOBBIES -> 0x10uy
                 | JOIN_LOBBY id -> bw.Write (id.ToByteArray()); 0x11uy
-                | CREATE_LOBBY name -> bw.Write name; 0x11uy
+                | CREATE_LOBBY name -> bw.Write name; 0x12uy
                 
                 | INVITE_TO_LOBBY username -> bw.Write username; 0x20uy
                 | LEAVE_LOBBY -> 0x21uy

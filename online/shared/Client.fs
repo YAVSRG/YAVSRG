@@ -11,6 +11,8 @@ module Client =
             Address: string
             Port: int
             Handle_Packet: Downstream -> unit
+            Handle_Connect: unit -> unit
+            Handle_Disconnect: unit -> unit
         }
 
     type private Session(config: Config) =
