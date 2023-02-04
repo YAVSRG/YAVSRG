@@ -435,3 +435,7 @@ wiki.downloadupdate=Install update
 wiki.openinbrowser=Open in browser
 options.themes.editnoteskin.export.name=Export as .isk
 options.themes.editnoteskin.export.tooltip=Exports this noteskin as a .isk archive.\nUse this file to share a noteskin with someone.\nYou can import a .isk file by dragging it onto the game window.
+options.themes.editnoteskin.columnwidth.name=Column width
+options.themes.editnoteskin.columnwidth.tooltip=This is the width of columns, in pixels\nNeed to go even wider? You can manually edit noteskin.json to larger values.
+options.themes.editnoteskin.columnspacing.name=Column spacing
+options.themes.editnoteskin.columnspacing.tooltip=This is the visual spacing between columns, in pixels

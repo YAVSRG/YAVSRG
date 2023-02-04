@@ -351,11 +351,11 @@ module GameplayWidgets =
         These widgets are configured by noteskin, not theme (and do not have positioning info)
     *)
 
-    type ColumnLighting(keys, lightTime, helper) as this =
+    type ColumnLighting(keys, ns: NoteskinConfig, helper) as this =
         inherit StaticWidget(NodeType.None)
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let sprite = getTexture "receptorlighting"
-        let lightTime = Math.Max(0.0f, Math.Min(0.99f, lightTime))
+        let lightTime = Math.Max(0.0f, Math.Min(0.99f, ns.ColumnLightTime))
 
         do
             let hitpos = float32 options.HitPosition.Value
@@ -367,7 +367,6 @@ module GameplayWidgets =
             Array.iteri (fun k (s: Animation.Fade) -> if helper.Scoring.KeyState |> Bitmap.hasBit k then s.Value <- 1.0f) sliders
 
         override this.Draw() =
-            let columnwidth = this.Bounds.Width / (float32 keys)
             let threshold = 1.0f - lightTime
             let f k (s: Animation.Fade) =
                 if s.Value > threshold then
@@ -375,33 +374,34 @@ module GameplayWidgets =
                     let a = 255.0f * p |> int
                     Draw.sprite
                         (
+                            let x = ns.ColumnWidth * 0.5f + (ns.ColumnWidth + ns.ColumnSpacing) * float32 k
                             if options.Upscroll.Value then
-                                Sprite.alignedBoxX(this.Bounds.Left + columnwidth * (float32 k + 0.5f), this.Bounds.Top, 0.5f, 1.0f, columnwidth * p, -1.0f / p) sprite
-                            else Sprite.alignedBoxX(this.Bounds.Left + columnwidth * (float32 k + 0.5f), this.Bounds.Bottom, 0.5f, 1.0f, columnwidth * p, 1.0f / p) sprite
+                                Sprite.alignedBoxX(this.Bounds.Left + x, this.Bounds.Top, 0.5f, 1.0f, ns.ColumnWidth * p, -1.0f / p) sprite
+                            else Sprite.alignedBoxX(this.Bounds.Left + x, this.Bounds.Bottom, 0.5f, 1.0f, ns.ColumnWidth * p, 1.0f / p) sprite
                         )
                         (Color.FromArgb(a, Color.White))
                         sprite
             Array.iteri f sliders
 
-    type Explosions(keys, config: Prelude.Data.Themes.Explosions, helper) as this =
+    type Explosions(keys, ns: NoteskinConfig, helper) as this =
         inherit StaticWidget(NodeType.None)
 
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let timers = Array.zeroCreate keys
         let mem = Array.zeroCreate keys
         let holding = Array.create keys false
-        let explodeTime = Math.Min(0.99f, config.FadeTime)
-        let animation = Animation.Counter config.AnimationFrameTime
+        let explodeTime = Math.Min(0.99f, ns.Explosions.FadeTime)
+        let animation = Animation.Counter ns.Explosions.AnimationFrameTime
 
         let handleEvent (ev: HitEvent<HitEventGuts>) =
             match ev.Guts with
-            | Hit e when (config.ExplodeOnMiss || not e.Missed) ->
+            | Hit e when (ns.Explosions.ExplodeOnMiss || not e.Missed) ->
                 sliders.[ev.Column].Target <- 1.0f
                 sliders.[ev.Column].Value <- 1.0f
                 timers.[ev.Column] <- ev.Time
                 holding.[ev.Column] <- true
                 mem.[ev.Column] <- ev.Guts
-            | Hit e when (config.ExplodeOnMiss || not e.Missed) ->
+            | Hit e when (ns.Explosions.ExplodeOnMiss || not e.Missed) ->
                 sliders.[ev.Column].Value <- 1.0f
                 timers.[ev.Column] <- ev.Time
                 mem.[ev.Column] <- ev.Guts
@@ -422,7 +422,7 @@ module GameplayWidgets =
                     sliders.[k].Target <- 0.0f
 
         override this.Draw() =
-            let columnwidth = this.Bounds.Width / (float32 keys)
+            let columnwidth = ns.ColumnWidth
             let threshold = 1.0f - explodeTime
             let f k (s: Animation.Fade) =
                 if s.Value > threshold then
@@ -431,17 +431,17 @@ module GameplayWidgets =
                     
                     let box =
                         (
-                            if options.Upscroll.Value then Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Top, columnwidth, columnwidth)
-                            else Rect.Box(this.Bounds.Left + columnwidth * float32 k, this.Bounds.Bottom - columnwidth, columnwidth, columnwidth)
+                            if options.Upscroll.Value then Rect.Box(this.Bounds.Left + (columnwidth + ns.ColumnSpacing) * float32 k, this.Bounds.Top, columnwidth, columnwidth)
+                            else Rect.Box(this.Bounds.Left + (columnwidth + ns.ColumnSpacing) * float32 k, this.Bounds.Bottom - columnwidth, columnwidth, columnwidth)
                         )
-                            .Expand((config.Scale - 1.0f) * columnwidth * 0.5f)
-                            .Expand(config.ExpandAmount * (1.0f - p) * columnwidth, config.ExpandAmount * (1.0f - p) * columnwidth)
+                            .Expand((ns.Explosions.Scale - 1.0f) * columnwidth * 0.5f)
+                            .Expand(ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth, ns.Explosions.ExpandAmount * (1.0f - p) * columnwidth)
                     match mem.[k] with
                     | Hit e ->
                         let color = 
-                            if config.Colors = ExplosionColors.Column then k
+                            if ns.Explosions.Colors = ExplosionColors.Column then k
                             else match e.Judgement with Some j -> int j | None -> 0
-                        let frame = (helper.CurrentChartTime() - timers.[k]) / toTime config.AnimationFrameTime |> int
+                        let frame = (helper.CurrentChartTime() - timers.[k]) / toTime ns.Explosions.AnimationFrameTime |> int
                         Draw.quad
                             (box |> Quad.ofRect |> NoteRenderer.noteRotation keys k)
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))

@@ -30,8 +30,9 @@ type NoteRenderer(chart: ColorizedChart, scoring: IScoreMetric) as this =
     let (keys, notes, bpm, sv) = (chart.Keys, chart.Notes, chart.BPM, chart.SV) // todo: at some point refactor this out
 
     let column_width = Content.noteskinConfig().ColumnWidth
+    let column_spacing = Content.noteskinConfig().ColumnSpacing
 
-    let columnPositions = Array.init keys (fun i -> float32 i * column_width)
+    let columnPositions = Array.init keys (fun i -> float32 i * (column_width + column_spacing))
     let noteHeight = column_width
     let holdnoteTrim = column_width * Content.noteskinConfig().HoldNoteTrim
     let playfieldColor = Content.noteskinConfig().PlayfieldColor

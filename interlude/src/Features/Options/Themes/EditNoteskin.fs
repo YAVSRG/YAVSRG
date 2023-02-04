@@ -46,6 +46,8 @@ type EditNoteskinPage() as this =
         
     let name = Setting.simple data.Name
     let holdNoteTrim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
+    let columnWidth = Setting.bounded data.ColumnWidth 10.0f 200.0f |> Setting.roundf 0
+    let columnSpacing = Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
     let enableColumnLight = Setting.simple data.EnableColumnLight
     let keycount = Setting.simple options.KeymodePreference.Value
     let mutable noteColors = data.NoteColors
@@ -71,25 +73,27 @@ type EditNoteskinPage() as this =
             |+ PrettySetting("themes.editnoteskin.noteskinname", TextEntry(name, "none")).Pos(200.0f)
             |+ PrettySetting("themes.editnoteskin.holdnotetrim", Slider(holdNoteTrim, 0.05f)).Pos(280.0f)
             |+ PrettySetting("themes.editnoteskin.enablecolumnlight", Selector<_>.FromBool enableColumnLight).Pos(360.0f)
+            |+ PrettySetting("themes.editnoteskin.columnwidth", Slider(columnWidth, 0.05f)).Pos(440.0f)
+            |+ PrettySetting("themes.editnoteskin.columnspacing",Slider(columnSpacing, 0.05f)).Pos(520.0f)
             |+ PrettySetting("generic.keymode",
                     Selector<Keymode>.FromEnum(keycount |> Setting.trigger (ignore >> refreshColors))
-                ).Pos(460.0f)
+                ).Pos(580.0f)
             |+ PrettySetting("themes.editnoteskin.globalcolors",
                     Selector<_>.FromBool(
                         Setting.make
                             (fun v -> noteColors <- { noteColors with UseGlobalColors = v })
                             (fun () -> noteColors.UseGlobalColors)
                         |> Setting.trigger (ignore >> refreshColors))
-                ).Pos(540.0f)
+                ).Pos(660.0f)
             |+ PrettySetting("themes.editnoteskin.colorstyle",
                     Selector.FromEnum(
                         Setting.make
                             (fun v -> noteColors <- { noteColors with Style = v })
                             (fun () -> noteColors.Style)
                         |> Setting.trigger (ignore >> refreshColors))
-                ).Pos(620.0f)
-            |+ PrettySetting("themes.editnoteskin.notecolors", colors).Pos(700.0f, Viewport.vwidth - 200.0f, 120.0f)
-            |+ PrettyButton.Once("themes.editnoteskin.export", Noteskins.exportCurrent).Pos(850.0f)
+                ).Pos(720.0f)
+            |+ PrettySetting("themes.editnoteskin.notecolors", colors).Pos(760.0f, Viewport.vwidth - 200.0f, 120.0f)
+            |+ PrettyButton.Once("themes.editnoteskin.export", Noteskins.exportCurrent).Pos(900.0f)
         )
 
     override this.Title = data.Name
@@ -100,4 +104,6 @@ type EditNoteskinPage() as this =
                 HoldNoteTrim = holdNoteTrim.Value
                 EnableColumnLight = enableColumnLight.Value
                 NoteColors = noteColors
+                ColumnWidth = columnWidth.Value
+                ColumnSpacing = columnSpacing.Value
             }

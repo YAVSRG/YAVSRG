@@ -59,10 +59,10 @@ type ReplayScreen(mode: ReplayMode) as this =
         this.Add noteRenderer
 
         if noteskinConfig().EnableColumnLight then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, noteskinConfig().ColumnLightTime, widgetHelper))
+            noteRenderer.Add(new ColumnLighting(chart.Keys, noteskinConfig(), widgetHelper))
 
         if noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, noteskinConfig().Explosions, widgetHelper))
+            noteRenderer.Add(new Explosions(chart.Keys, noteskinConfig(), widgetHelper))
 
         noteRenderer.Add(LaneCover())
 
