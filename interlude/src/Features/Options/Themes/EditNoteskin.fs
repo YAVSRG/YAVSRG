@@ -46,7 +46,7 @@ type EditNoteskinPage() as this =
         
     let name = Setting.simple data.Name
     let holdNoteTrim = Setting.bounded data.HoldNoteTrim 0.0f 2.0f |> Setting.roundf 2
-    let columnWidth = Setting.bounded data.ColumnWidth 10.0f 200.0f |> Setting.roundf 0
+    let columnWidth = Setting.bounded data.ColumnWidth 10.0f 300.0f |> Setting.roundf 0
     let columnSpacing = Setting.bounded data.ColumnSpacing 0.0f 100.0f |> Setting.roundf 0
     let enableColumnLight = Setting.simple data.EnableColumnLight
     let keycount = Setting.simple options.KeymodePreference.Value
