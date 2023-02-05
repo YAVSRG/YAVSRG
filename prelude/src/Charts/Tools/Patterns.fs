@@ -111,6 +111,37 @@ module Analysis =
 
         } |> List.ofSeq
 
+    let density (samples: int) (chart: Chart) : int array * int array =
+        let mutable i = 0
+        let mutable notes = 0
+        let mutable rows = 0
+        let mutable last_sample = 0
+        let mutable last_sample_rows = 0
+        let start = chart.FirstNote
+        let length = chart.LastNote - start
+        let interval = length / float32 samples
+
+        let notecounts = Array.zeroCreate samples
+        let rowcounts = Array.zeroCreate samples
+
+        for t, row in chart.Notes.Data do
+            let mutable is_empty = true
+            for nt in row do
+                if nt = NoteType.NORMAL || nt = NoteType.HOLDHEAD then 
+                    is_empty <- false
+                    notes <- notes + 1
+            if not is_empty then rows <- rows + 1
+            while t - start >= interval * float32 (i + 1) do
+                notecounts.[i] <- notes - last_sample
+                rowcounts.[i] <- rows - last_sample_rows
+                last_sample <- notes
+                last_sample_rows <- rows
+                i <- i + 1
+        if i <> samples then 
+            notecounts.[samples - 1] <- notes - last_sample
+            rowcounts.[samples - 1] <- rows - last_sample_rows
+
+        notecounts, rowcounts
 
 type Pattern = RowInfo list -> bool
 
@@ -123,6 +154,22 @@ module Patterns =
             if pattern data then matches <- matches + 1
             data <- List.tail data
         matches
+
+    module Common =
+        
+        let STREAMS : Pattern = function { Jacks = 0 } :: _ -> true | _ -> false
+
+        let JACKS : Pattern = function { Jacks = x } :: _ when x > 0 -> true | _ -> false
+
+        let ALTERNATION : Pattern =
+            function 
+            |      { Jacks = 0; Direction = Direction.Right }
+                :: { Jacks = 0; Direction = Direction.Left }
+                :: _ -> true
+            |      { Jacks = 0; Direction = Direction.Left }
+                :: { Jacks = 0; Direction = Direction.Right }
+                :: _ -> true
+            | _ -> false
 
     module FourKey =
 
