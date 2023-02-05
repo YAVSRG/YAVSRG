@@ -56,7 +56,7 @@ type ChartInfo() as this =
             Position = { Left = 0.0f %+ 10.0f; Top = 1.0f %- 100.0f; Right = 1.0f %- 10.0f; Bottom = 1.0f %- 60.0f })
             
         |+ StylishButton(
-            (fun () -> Preview().Show()),
+            (fun () -> match Chart.current with Some c -> Preview(c).Show() | None -> ()),
             K (Icons.preview + " " + L"levelselect.preview"),
             Style.main 100,
             Hotkey = "preview",

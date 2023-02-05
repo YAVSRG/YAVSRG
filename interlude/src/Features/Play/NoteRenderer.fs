@@ -55,6 +55,11 @@ type NoteRenderer(chart: ColorizedChart, scoring: IScoreMetric) as this =
     let hold_colors = Array.create keys 0
     let hold_index = Array.create keys -1
 
+    let mutable time = -Time.infinity
+    let reset() =
+        note_seek <- 0
+        for k = 0 to keys do sv_seek.[k] <- 0
+
     let scrollDirectionPos bottom : Rect -> Rect =
         if options.Upscroll.Value then id 
         else fun (r: Rect) -> { Left = r.Left; Top = bottom - r.Bottom; Right = r.Right; Bottom = bottom - r.Top }
@@ -76,6 +81,9 @@ type NoteRenderer(chart: ColorizedChart, scoring: IScoreMetric) as this =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         animation.Update elapsedTime
+        let newtime = Song.time()
+        if newtime < time then reset()
+        time <- newtime
 
     override this.Draw() =
         let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = this.Bounds
