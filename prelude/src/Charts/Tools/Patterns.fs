@@ -7,6 +7,9 @@ open Prelude.Charts.Formats.Interlude
     This file is a WIP, will change significantly before it is used
 *)
 
+
+// Leaving this here as a reminder of the original idea but it would be foolish to build all of this in one
+
 type Primitives =
     | Stream of
         // if spacing of each note is equal back to back it's a stair e.g. 1234 or 1357, valued 1 - 10. note that 1 is only possible for an isolated note
@@ -39,123 +42,211 @@ type Primitives =
         length: int
     | Release
 
-type P1 =
-    {
-        Primitive: Primitives
-        BPM: int
-        Holding: int
-        Releasing: int
-        Timestamp: Time
-    }
-    
 [<RequireQualifiedAccess>]
-type RowTag =
-    | None = 0
-    | Stream = 1
-    | Jack = 2
-    | Chord = 3
-    | Chords = 4
-    | Only_Releases = 5
+type Direction =
+    | None
+    | Left
+    | Right
+    | Outwards
+    | Inwards
 
 type RowInfo =
     {
-        mutable Notes: NoteType array
-        mutable Tag: RowTag
-        // other vars go here
-        mutable Count: int
-        mutable MCount: int
-        mutable RCount: int
-        mutable JCount: int
-        mutable TCount: int
-        mutable TimeSince: Time
+        Notes: int
+        Jacks: int
+        Direction: Direction
+        Roll: bool
+        Time: Time
     }
-    static member Blank =
-        { 
-            Notes = Array.empty
-            Tag = RowTag.None
-            Count = 0
-            MCount = 0
-            RCount = 0
-            JCount = 0
-            TCount = 0
-            TimeSince = 0.0f<ms>
-        }
-
-type Buffer =
-    {
-        Size: int
-        Contents: RowInfo array
-        mutable Tail: int // Index of oldest item
-    }
-
-module Buffer =
-
-    let create (length: int) = { Size = length; Contents = Array.init length (fun i -> RowInfo.Blank); Tail = 0 }
-
-    let tail (buf: Buffer) = buf.Contents.[buf.Tail]
-
-    let push (nr: NoteRow) (buf: Buffer) : RowInfo =
-        let on = buf.Tail
-        let n = (buf.Tail + 1) % buf.Size
-        let head = buf.Contents.[buf.Tail]
-        head.Notes <- nr
-
-        head.Count <- 0
-        head.MCount <- 0
-        head.RCount <- 0
-        for nt in nr do
-            match nt with
-            | NoteType.NORMAL
-            | NoteType.HOLDHEAD -> head.Count <- head.Count + 1
-            | NoteType.HOLDBODY -> head.MCount <- head.MCount + 1
-            | NoteType.HOLDTAIL -> head.RCount <- head.RCount + 1
-            | NoteType.NOTHING
-            | _ -> ()
-        head.JCount <- 0
-        head.TCount <- 0
-        buf.Tail <- n
-        buf.Contents.[on]
 
 module Analysis =
 
-    let run (notes: TimeData<NoteRow>) (emit: P1 -> unit) =
+    let run (chart: Chart) : RowInfo list =
         
-        let emitter (inf: RowInfo) =
-            printfn "%s" (NoteRow.prettyPrint inf.Notes)
-            let e prim = 
-                emit { 
-                    Primitive = prim
-                    BPM = 15000.0f<ms/minute> / inf.TimeSince |> int
-                    Holding = inf.MCount
-                    Releasing = inf.RCount
-                    Timestamp = 0.0f<ms> //nyi
-                }
-            match inf.Tag with
-            | RowTag.Stream -> e (Stream 1) // stair length nyi
-            | RowTag.Chord -> e (Chord (inf.Count, 1)) // spacing nyi
-            | RowTag.Only_Releases -> e Release
-            | _ -> ()
+        let t, row = chart.Notes.First.Value
+        let mutable previous_row =
+            seq {0 .. chart.Keys - 1}
+            |> Seq.filter (fun x -> row.[x] = NoteType.NORMAL || row.[x] = NoteType.HOLDHEAD)
+            |> Array.ofSeq
+        let mutable previous_time = t
 
-        let buf = Buffer.create 10
+        seq {
+            for t, row in (chart.Notes.Data |> Seq.skip 1) do
+                
+                let current_row = 
+                    seq {0 .. chart.Keys - 1}
+                    |> Seq.filter (fun x -> row.[x] = NoteType.NORMAL || row.[x] = NoteType.HOLDHEAD)
+                    |> Array.ofSeq
 
-        let mutable lastTime = System.Single.MinValue * 1.0f<ms>
+                if current_row.Length > 0 then
+
+                    let pmin = Array.min previous_row
+                    let pmax = Array.max previous_row
+                    let cmin = Array.min current_row
+                    let cmax = Array.max current_row
+
+                    yield {
+                        Notes = current_row.Length
+                        Jacks = current_row.Length - (Array.except previous_row current_row).Length
+                        Direction =
+                            let lo = cmin - pmin
+                            let hi = cmax - pmax
+
+                            if lo > 0 then
+                                if hi > 0 then Direction.Right
+                                else Direction.Inwards
+                            elif lo < 0 then
+                                if hi < 0 then Direction.Left
+                                else Direction.Outwards
+                            else
+                                if hi < 0 then Direction.Inwards
+                                elif hi > 0 then Direction.Outwards
+                                else Direction.None
+                        Roll = pmin > cmax || pmax < cmin
+                        Time = t - previous_time
+                    }
+
+                    previous_row <- current_row
+                    previous_time <- t
+
+        } |> List.ofSeq
+
+
+type Pattern = RowInfo list -> bool
+
+module Patterns =
+
+    let matches (pattern: RowInfo list -> bool) (data: RowInfo list) : int =
+        let mutable data = data
+        let mutable matches = 0
+        while not data.IsEmpty do
+            if pattern data then matches <- matches + 1
+            data <- List.tail data
+        matches
+
+    module FourKey =
+
+        let HANDSTREAM : Pattern =
+            function
+            |      { Notes = 3; Jacks = 0 }
+                :: { Jacks = 0 }
+                :: _ -> true
+            | _ -> false
+
+        let JUMPSTREAM : Pattern =
+            function
+            |      { Notes = 2; Jacks = 0 }
+                :: { Jacks = 0 }
+                :: _ -> true
+            | _ -> false
+            
+        let DENSE_JUMPSTREAM : Pattern =
+            function
+            |      { Notes = 2; Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
+                :: { Notes = 2; Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
+                :: _ -> true
+            | _ -> false
+
+        let DOUBLE_JUMPSTREAM : Pattern =
+            function
+            |      { Notes = 1; Jacks = 0 }
+                :: { Notes = 2; Jacks = 0 }
+                :: { Notes = 2; Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
+                :: _ -> true
+            | _ -> false
+
+        let TRIPLE_JUMPSTREAM : Pattern =
+            function
+            |      { Notes = 1; Jacks = 0 }
+                :: { Notes = 2; Jacks = 0 }
+                :: { Notes = 2; Jacks = 0 }
+                :: { Notes = 2; Jacks = 0 }
+                :: { Notes = 1; Jacks = 0 }
+                :: _ -> true
+            | _ -> false
         
-        for (time, nr) in notes.Data do
+        let JUMPTRILL : Pattern =
+            function
+            |      { Notes = 2 }
+                :: { Notes = 2; Roll = true }
+                :: { Notes = 2; Roll = true }
+                :: _ -> true
+            | _ -> false
+
+        let SPLITTRILL : Pattern =
+            function
+            |      { Notes = 2 }
+                :: { Notes = 2; Jacks = 0; Roll = false }
+                :: { Notes = 2; Jacks = 0; Roll = false }
+                :: _ -> true
+            | _ -> false
+
+        let ROLL : Pattern =
+            function
+            |      { Notes = 1; Direction = Direction.Left }
+                :: { Notes = 1; Direction = Direction.Left }
+                :: { Notes = 1; Direction = Direction.Left }
+                :: _ -> true
+            |      { Notes = 1; Direction = Direction.Right }
+                :: { Notes = 1; Direction = Direction.Right }
+                :: { Notes = 1; Direction = Direction.Right }
+                :: _ -> true
+            | _ -> false
+
+        let QUAD : Pattern = function { Notes = 4 } :: _ -> true | _ -> false
+
+        let HAND_CHORDJACK : Pattern = function { Notes = 3 } :: { Notes = 3; Jacks = x } :: _ when x < 3 -> true | _ -> false
+        let HANDJACK : Pattern = function { Notes = 3 } :: { Notes = 3; Jacks = 3 } :: _ -> true | _ -> false
+
+    module SevenKey = 
+
+        let DOUBLE_STAIRS : Pattern =
+            function
+            |      { Notes = 2 }
+                :: { Notes = 2; Jacks = 0; Direction = Direction.Left; Roll = false }
+                :: _ -> true
+            |      { Notes = 2 }
+                :: { Notes = 2; Jacks = 0; Direction = Direction.Right; Roll = false }
+                :: _ -> true
+            | _ -> false
             
-            let newRow = Buffer.push nr buf
-            newRow.TimeSince <- time - lastTime
-            lastTime <- time
-            
-            match newRow.Count with
-            | 0 -> newRow.Tag <- RowTag.Only_Releases
-            | 1 -> newRow.Tag <- RowTag.Stream
-            | _ -> newRow.Tag <- RowTag.Chord
+        let DOUBLE_STREAMS : Pattern =
+            function
+            |      { Notes = 2 }
+                :: { Notes = 2; Jacks = 0; Roll = false }
+                :: _ -> true
+            | _ -> false
 
-            // jacks not yet
+        let CHORDSTREAM : Pattern =
+            function
+            |      { Notes = x }
+                :: { Notes = y; Jacks = 0 }
+                :: _ when x > 1 && y > 1 -> true
+            | _ -> false
 
-            let tail = Buffer.tail buf
-            emitter tail
-        ()
+        let STREAM : Pattern = function { Jacks = 0 } :: _ -> true | _ -> false
 
-    let test (chart: Chart) =
-        run chart.Notes (printfn "%A")
+    let analyse (chart: Chart) =
+        let data = Analysis.run chart
+        printfn "== %s ==" chart.Header.Title
+        if chart.Keys = 4 then
+            printfn "HANDSTREAM: %i" (matches FourKey.HANDSTREAM data)
+            printfn "JUMPSTREAM: %i" (matches FourKey.JUMPSTREAM data)
+            printfn "DENSE_JUMPSTREAM: %i" (matches FourKey.DENSE_JUMPSTREAM data)
+            printfn "DOUBLE_JUMPSTREAM: %i" (matches FourKey.DOUBLE_JUMPSTREAM data)
+            printfn "TRIPLE_JUMPSTREAM: %i" (matches FourKey.TRIPLE_JUMPSTREAM data)
+            printfn "JUMPTRILL: %i" (matches FourKey.JUMPTRILL data)
+            printfn "SPLITTRILL: %i" (matches FourKey.SPLITTRILL data)
+            printfn "ROLL: %i" (matches FourKey.ROLL data)
+            printfn "QUAD: %i" (matches FourKey.QUAD data)
+            printfn "HANDJACK: %i" (matches FourKey.HANDJACK data)
+            printfn "HAND_CHORDJACK: %i" (matches FourKey.HAND_CHORDJACK data)
+
+        if chart.Keys = 7 then
+            printfn "DOUBLE_STAIRS: %i" (matches SevenKey.DOUBLE_STAIRS data)
+            printfn "DOUBLE_STREAMS: %i" (matches SevenKey.DOUBLE_STREAMS data)
+            printfn "CHORDSTREAM: %i" (matches SevenKey.CHORDSTREAM data)
+            printfn "STREAM: %i" (matches SevenKey.STREAM data)
