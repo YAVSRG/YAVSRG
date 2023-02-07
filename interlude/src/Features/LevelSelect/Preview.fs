@@ -8,6 +8,7 @@ open Prelude.Common
 open Prelude.Scoring
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Patterns
+open Interlude.Features
 open Interlude.Features.Play
 
 type Preview(chart: Chart) =
@@ -16,11 +17,17 @@ type Preview(chart: Chart) =
     let density_graph_1, density_graph_2 = Analysis.density 100 chart
     let density_graph_1, density_graph_2 = Array.map float32 density_graph_1, Array.map float32 density_graph_2
     let max_note_density = Array.max density_graph_1
-    let patterns =
-        Patterns.analyse chart
-        |> Seq.groupBy fst
-        |> Array.ofSeq
-        |> Array.map (fun (pattern, data) -> (pattern, Seq.map snd data |> Array.ofSeq))
+    //let patterns =
+    //    Patterns.analyse chart
+    //    |> Seq.groupBy fst
+    //    |> Array.ofSeq
+    //    |> Array.map (fun (pattern, data) -> 
+    //            pattern, 
+    //            Seq.map snd data 
+    //            |> Seq.map (fun (t, bpm) -> (t, bpm * Gameplay.rate.Value))
+    //            |> Seq.filter (fun (t, bpm) -> bpm > 100.0f<beat/minute>)
+    //            |> Array.ofSeq
+    //        )
 
     let renderer =
         NoteRenderer(Metrics.createDummyMetric chart)
@@ -47,13 +54,15 @@ type Preview(chart: Chart) =
         let x = b.Width * percent
         Draw.rect (b.SliceBottom(5.0f).SliceLeft x) (Style.color(255, 1.0f, 0.0f))
 
-        let mutable y = 150.0f
-        for pattern, data in patterns do
-            for d in data do
-                let percent = (d - chart.FirstNote) / (chart.LastNote - chart.FirstNote)
-                Draw.rect (Rect.Box(b.Left + b.Width * percent, y, 20.0f, 30.0f)) (Color.FromArgb(100, Color.Blue))
-            Text.draw(Style.baseFont, pattern, 30.0f, b.Left, y, Color.White)
-            y <- y + 40.0f
+        //let mutable y = 150.0f
+        //for pattern, data in patterns do
+        //    for t, bpm in data do
+        //        let color, lo, hi = Patterns.display.[pattern]
+        //        let a = System.Math.Clamp((float32 bpm - float32 lo) / float32 (hi - lo), 0.0f, 1.0f)
+        //        let percent = (t - chart.FirstNote) / (chart.LastNote - chart.FirstNote)
+        //        Draw.rect (Rect.Box(b.Left + b.Width * percent, y, 20.0f, 30.0f * a)) (Color.FromArgb(int (80.0f * a), color))
+        //    Text.draw(Style.baseFont, pattern, 20.0f, b.Left, y, Color.White)
+        //    y <- y + 40.0f
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
