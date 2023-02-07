@@ -1,5 +1,6 @@
 ﻿namespace Prelude.Charts.Tools.Patterns
 
+open System.Collections.Generic
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 
@@ -57,6 +58,7 @@ type RowInfo =
         Direction: Direction
         Roll: bool
         Time: Time
+        BPM: int
     }
 
 module Analysis =
@@ -103,7 +105,8 @@ module Analysis =
                                 elif hi > 0 then Direction.Outwards
                                 else Direction.None
                         Roll = pmin > cmax || pmax < cmin
-                        Time = t - previous_time
+                        Time = t
+                        BPM = int (8.0f<beat> * (60000.0f<ms/minute> / (t - previous_time)))
                     }
 
                     previous_row <- current_row
@@ -147,19 +150,9 @@ type Pattern = RowInfo list -> bool
 
 module Patterns =
 
-    let matches (pattern: RowInfo list -> bool) (data: RowInfo list) : int =
-        let mutable data = data
-        let mutable matches = 0
-        while not data.IsEmpty do
-            if pattern data then matches <- matches + 1
-            data <- List.tail data
-        matches
-
     module Common =
         
         let STREAMS : Pattern = function { Jacks = 0 } :: _ -> true | _ -> false
-
-        let JACKS : Pattern = function { Jacks = x } :: _ when x > 0 -> true | _ -> false
 
         let ALTERNATION : Pattern =
             function 
@@ -169,6 +162,22 @@ module Patterns =
             |      { Jacks = 0; Direction = Direction.Left }
                 :: { Jacks = 0; Direction = Direction.Right }
                 :: _ -> true
+            | _ -> false
+
+        let JACKS : Pattern = function { Jacks = x } :: _ when x > 0 -> true | _ -> false
+
+        let CHORDJACKS : Pattern = 
+            function
+            |   { Notes = a }
+                :: { Notes = b; Jacks = j } 
+                :: _ when a > 1 && b > 1 && j >= 1 && (b < a || j < b) -> true
+            | _ -> false
+
+        let GLUTS : Pattern =
+            function
+            |   { Notes = a }
+                :: { Notes = b; Jacks = 1 } 
+                :: _ when a > 1 && b > 1 -> true
             | _ -> false
 
     module FourKey =
@@ -243,10 +252,19 @@ module Patterns =
                 :: _ -> true
             | _ -> false
 
-        let QUAD : Pattern = function { Notes = 4 } :: _ -> true | _ -> false
+        let JUMPJACKS : Pattern =
+            function
+            |      { Notes = 2 }
+                :: { Notes = 2; Jacks = 2 }
+                :: _ -> true
+            | _ -> false
 
-        let HAND_CHORDJACK : Pattern = function { Notes = 3 } :: { Notes = 3; Jacks = x } :: _ when x < 3 -> true | _ -> false
-        let HANDJACK : Pattern = function { Notes = 3 } :: { Notes = 3; Jacks = 3 } :: _ -> true | _ -> false
+        let JUMPGLUTS : Pattern =
+            function
+            |      { Notes = 2 }
+                :: { Notes = 2; Jacks = 1 }
+                :: _ -> true
+            | _ -> false
 
     module SevenKey = 
 
@@ -274,26 +292,67 @@ module Patterns =
                 :: _ when x > 1 && y > 1 -> true
             | _ -> false
 
-        let STREAM : Pattern = function { Jacks = 0 } :: _ -> true | _ -> false
+        let CHORD_ROLL : Pattern =
+            function
+            |      { Notes = x }
+                :: { Notes = y; Direction = Direction.Left; Roll = true }
+                :: { Notes = z; Direction = Direction.Left; Roll = true }
+                :: _ when x > 1 && y > 1 && z > 1 -> true
+            |      { Notes = x }
+                :: { Notes = y; Direction = Direction.Right; Roll = true }
+                :: { Notes = z; Direction = Direction.Right; Roll = true }
+                :: _ when x > 1 && y > 1 && z > 1 -> true
+            | _ -> false
+
+    let matches (patterns: IDictionary<string, Pattern>) (data: RowInfo list) : (string * Time) seq =
+        let mutable data = data
+        seq {
+            while not data.IsEmpty do
+                for pattern_name in patterns.Keys do
+                    if patterns.[pattern_name] data then yield (pattern_name, data.Head.Time)
+                data <- List.tail data
+        }
+
+    let analysis_4k = dict [
+            "Streams", Common.STREAMS
+            "Jumpstream", FourKey.JUMPSTREAM
+            "Dense Jumpstream", FourKey.DENSE_JUMPSTREAM
+            "Double Jumpstream", FourKey.DOUBLE_JUMPSTREAM
+            "Triple Jumpstream", FourKey.TRIPLE_JUMPSTREAM
+            "Jumptrill", FourKey.JUMPTRILL
+            "Split trill", FourKey.SPLITTRILL
+            "Roll", FourKey.ROLL
+            "Handstream", FourKey.HANDSTREAM
+            "Alternation", Common.ALTERNATION
+            "Jacks", Common.JACKS
+            "Jumpjacks", FourKey.JUMPJACKS
+            "Chordjacks", Common.CHORDJACKS
+            "Gluts", Common.GLUTS
+            "Jumpgluts", FourKey.JUMPGLUTS
+        ]
+
+    let analysis_generic = dict [
+            "Streams", Common.STREAMS
+            "Alternation", Common.ALTERNATION
+            "Jacks", Common.JACKS
+            "Chordjacks", Common.CHORDJACKS
+            "Gluts", Common.GLUTS
+        ]
+
+    let analysis_7k = dict [
+            "Streams", Common.STREAMS
+            "Chordstream", SevenKey.CHORDSTREAM
+            "Double streams", SevenKey.DOUBLE_STREAMS
+            "Double stairs", SevenKey.DOUBLE_STAIRS
+            "Chord rolls", SevenKey.CHORD_ROLL
+            "Alternation", Common.ALTERNATION
+            "Jacks", Common.JACKS
+            "Chordjacks", Common.CHORDJACKS
+            "Gluts", Common.GLUTS
+        ]
 
     let analyse (chart: Chart) =
         let data = Analysis.run chart
-        printfn "== %s ==" chart.Header.Title
-        if chart.Keys = 4 then
-            printfn "HANDSTREAM: %i" (matches FourKey.HANDSTREAM data)
-            printfn "JUMPSTREAM: %i" (matches FourKey.JUMPSTREAM data)
-            printfn "DENSE_JUMPSTREAM: %i" (matches FourKey.DENSE_JUMPSTREAM data)
-            printfn "DOUBLE_JUMPSTREAM: %i" (matches FourKey.DOUBLE_JUMPSTREAM data)
-            printfn "TRIPLE_JUMPSTREAM: %i" (matches FourKey.TRIPLE_JUMPSTREAM data)
-            printfn "JUMPTRILL: %i" (matches FourKey.JUMPTRILL data)
-            printfn "SPLITTRILL: %i" (matches FourKey.SPLITTRILL data)
-            printfn "ROLL: %i" (matches FourKey.ROLL data)
-            printfn "QUAD: %i" (matches FourKey.QUAD data)
-            printfn "HANDJACK: %i" (matches FourKey.HANDJACK data)
-            printfn "HAND_CHORDJACK: %i" (matches FourKey.HAND_CHORDJACK data)
-
-        if chart.Keys = 7 then
-            printfn "DOUBLE_STAIRS: %i" (matches SevenKey.DOUBLE_STAIRS data)
-            printfn "DOUBLE_STREAMS: %i" (matches SevenKey.DOUBLE_STREAMS data)
-            printfn "CHORDSTREAM: %i" (matches SevenKey.CHORDSTREAM data)
-            printfn "STREAM: %i" (matches SevenKey.STREAM data)
+        if chart.Keys = 4 then matches analysis_4k data
+        elif chart.Keys = 7 then matches analysis_7k data
+        else matches analysis_generic data

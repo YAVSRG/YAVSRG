@@ -59,7 +59,7 @@ module Sorting =
         | None -> -2, "No lamp achieved"
 
     type GroupMethod = CachedChart * GroupContext -> int * string
-    let groupBy : IDictionary<string, GroupMethod> = dict[
+    let groupBy : IDictionary<string, GroupMethod> = dict [
             "level", fun (c, _) -> let lvl = int (c.Physical * 5.0) in lvl, sprintf "Level %i" lvl
             "pack", fun (c, _) -> 0, c.Pack
             "date_played", dateLastPlayed
@@ -77,7 +77,7 @@ module Sorting =
         fun a b -> match cmp a b with 0 -> cmp2 a b | x -> x
 
     type SortMethod = Comparison<CachedChart * Collections.LibraryContext>
-    let sortBy : IDictionary<string, SortMethod> = dict[
+    let sortBy : IDictionary<string, SortMethod> = dict [
             "difficulty", Comparison(compareBy (fun x -> x.Physical))
             "bpm", Comparison(compareBy (fun x -> let (a, b) = x.BPM in (1f/a, 1f/b)) |> thenCompareBy (fun x -> x.Physical))
             "title", Comparison(compareBy (fun x -> x.Title) |> thenCompareBy (fun x -> x.Physical))
