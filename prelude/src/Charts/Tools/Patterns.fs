@@ -58,7 +58,7 @@ type RowInfo =
         Direction: Direction
         Roll: bool
         Time: Time
-        BPM: int
+        BPM: float32<beat/minute>
     }
 
 module Analysis =
@@ -106,7 +106,7 @@ module Analysis =
                                 else Direction.None
                         Roll = pmin > cmax || pmax < cmin
                         Time = t
-                        BPM = int (8.0f<beat> * (60000.0f<ms/minute> / (t - previous_time)))
+                        BPM = (0.25f<beat> * (60000.0f<ms/minute> / (t - previous_time)))
                     }
 
                     previous_row <- current_row
@@ -152,7 +152,14 @@ module Patterns =
 
     module Common =
         
-        let STREAMS : Pattern = function { Jacks = 0 } :: _ -> true | _ -> false
+        let STREAMS : Pattern = 
+            function
+            |      { Jacks = 0 }
+                :: { Jacks = 0 }
+                :: { Jacks = 0 }
+                :: { Jacks = 0 }
+                :: _ -> true
+            | _ -> false
 
         let ALTERNATION : Pattern =
             function 
@@ -227,6 +234,7 @@ module Patterns =
         let JUMPTRILL : Pattern =
             function
             |      { Notes = 2 }
+                :: { Notes = 2; Roll = true }
                 :: { Notes = 2; Roll = true }
                 :: { Notes = 2; Roll = true }
                 :: _ -> true
@@ -304,12 +312,12 @@ module Patterns =
                 :: _ when x > 1 && y > 1 && z > 1 -> true
             | _ -> false
 
-    let matches (patterns: IDictionary<string, Pattern>) (data: RowInfo list) : (string * Time) seq =
+    let matches (patterns: IDictionary<string, Pattern>) (data: RowInfo list) : (string * (Time * float32<beat/minute>)) seq =
         let mutable data = data
         seq {
             while not data.IsEmpty do
                 for pattern_name in patterns.Keys do
-                    if patterns.[pattern_name] data then yield (pattern_name, data.Head.Time)
+                    if patterns.[pattern_name] data then yield (pattern_name, (data.Head.Time, data.Head.BPM))
                 data <- List.tail data
         }
 
@@ -349,6 +357,28 @@ module Patterns =
             "Jacks", Common.JACKS
             "Chordjacks", Common.CHORDJACKS
             "Gluts", Common.GLUTS
+        ]
+
+    let display = dict [
+            "Streams", (Color.Green, 120, 400)
+            "Alternation", (Color.Cyan, 100, 300)
+            "Jumpstream", (Color.SkyBlue, 100, 350)
+            "Dense Jumpstream", (Color.DeepSkyBlue, 100, 350)
+            "Double Jumpstream", (Color.CadetBlue, 100, 300)
+            "Triple Jumpstream", (Color.Aqua, 100, 300)
+            "Handstream", (Color.Orange, 100, 300)
+            "Chordstream", (Color.Orange, 100, 250)
+            "Double streams", (Color.Yellow, 100, 250)
+            "Double stairs", (Color.OrangeRed, 100, 250)
+            "Chord rolls", (Color.Yellow, 100, 250)
+            "Split trill", (Color.Purple, 100, 400)
+            "Jumptrill", (Color.Blue, 100, 400)
+            "Roll", (Color.Lime, 100, 400)
+            "Jacks", (Color.PaleVioletRed, 100, 200)
+            "Jumpjacks", (Color.Lavender, 100, 200)
+            "Chordjacks", (Color.Red, 100, 200)
+            "Gluts", (Color.Crimson, 100, 200)
+            "Jumpgluts", (Color.Magenta, 100, 200)
         ]
 
     let analyse (chart: Chart) =
