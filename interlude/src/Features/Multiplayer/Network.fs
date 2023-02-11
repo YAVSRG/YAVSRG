@@ -1,10 +1,10 @@
-﻿namespace Interlude.Features
+﻿namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Common
 open System.Collections.Generic
 open Interlude.Web.Shared
 
-module Multiplayer =
+module Network =
 
     let mutable username = ""
     let mutable connected = false
@@ -23,6 +23,8 @@ module Multiplayer =
         }
 
     let mutable lobby : Lobby option = None
+
+    let mutable lobby_list : LobbyInfo array = [||]
 
     let handle_connect() = connected <- true
     let handle_disconnect() = lobby <- None; connected <- false
