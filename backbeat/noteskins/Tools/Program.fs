@@ -148,6 +148,20 @@ for noteskin_file in Directory.EnumerateFiles(Path.Combine(root, "Noteskins")) |
 
     printfn "==========================="
 
+let existing_skins = 
+    match JSON.FromFile(Path.Combine(root, "index.json")) with
+    | Ok (repo : Noteskin.Repo) -> repo.Noteskins |> Seq.map (fun ns -> ns.Name)
+    | Error e -> raise e
+
+let newly_added = ResizeArray ["✨ Newly added noteskins ✨"]
+for s in skins do
+    if not (Seq.contains s.Name existing_skins) then
+        newly_added.Add s.Name
+
+if newly_added.Count > 1 then
+    File.WriteAllText(Path.Combine(root, "new.txt"), String.concat "\n- " newly_added)
+else File.WriteAllText(Path.Combine(root, "new.txt"), "")
+
 printfn "Generating index.json ..."
 let repo : Noteskin.Repo = { Noteskins = List.ofSeq skins }
 JSON.ToFile (Path.Combine(root, "index.json"), true) repo
