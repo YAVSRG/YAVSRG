@@ -1,6 +1,8 @@
 ﻿namespace Interlude.Features.Multiplayer
 
 open Percyqaz.Common
+open Percyqaz.Flux.UI
+open Interlude.UI
 open System.Collections.Generic
 open Interlude.Web.Shared
 
@@ -22,6 +24,16 @@ module Network =
             mutable YouAreHost: bool
         }
 
+    module Events =
+        let receive_lobby_list_ev = new Event<unit>()
+        let receive_lobby_list = receive_lobby_list_ev.Publish
+
+        let join_lobby_ev = new Event<unit>()
+        let join_lobby = join_lobby_ev.Publish
+
+    let create_lobby name =
+        Client.send(Upstream.CREATE_LOBBY name)
+
     let mutable lobby : Lobby option = None
 
     let mutable lobby_list : LobbyInfo array = [||]
@@ -37,9 +49,9 @@ module Network =
         | Downstream.HANDSHAKE_SUCCESS -> Client.send(Upstream.LOGIN username)
         | Downstream.LOGIN_SUCCESS username -> 
             Logging.Info(sprintf "Successfully logged in as %s" username)
-            Client.send(Upstream.CREATE_LOBBY "Interlude's First Lobby")
+            sync(fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default)
 
-        | Downstream.LOBBY_LIST lobbies -> () // nyi
+        | Downstream.LOBBY_LIST lobbies -> lobby_list <- lobbies; sync Events.receive_lobby_list_ev.Trigger
         | Downstream.YOU_JOINED_LOBBY players ->
             lobby <- Some {
                     Settings = None
@@ -49,6 +61,7 @@ module Network =
                         d
                     YouAreHost = false
                 }
+            sync Events.join_lobby_ev.Trigger
         | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> () // nyi
         
         | Downstream.YOU_LEFT_LOBBY -> lobby <- None

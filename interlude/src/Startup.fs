@@ -8,13 +8,14 @@ open Interlude.Features.Import
 open Interlude.Features.Score
 open Interlude.Features.Play
 open Interlude.Features.LevelSelect
+open Interlude.Features.Multiplayer
 open Interlude.Features.Printerlude
 open Interlude.Features.Toolbar
 
 module Startup =
 
     let ui_entry_point() =
-        Screen.init [|LoadingScreen(); MainMenuScreen(); ImportScreen(); LevelSelectScreen()|]
+        Screen.init [|LoadingScreen(); MainMenuScreen(); ImportScreen(); LobbyScreen(); LevelSelectScreen()|]
         
         ScoreScreenHelpers.watchReplay <- fun (modchart, rate, data) -> Screen.changeNew (fun () -> ReplayScreen(ReplayMode.Replay (modchart, rate, data)) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
         Utils.AutoUpdate.checkForUpdates()

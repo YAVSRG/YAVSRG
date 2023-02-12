@@ -16,10 +16,11 @@ module Screen =
         | SplashScreen = 0
         | MainMenu = 1
         | Import = 2
-        | LevelSelect = 3
-        | Play = 4
-        | Replay = 5
-        | Score = 6
+        | Lobby = 3
+        | LevelSelect = 4
+        | Play = 5
+        | Replay = 6
+        | Score = 7
 
     [<AbstractClass>]
     type T() =
@@ -43,9 +44,10 @@ module Screen =
     let logo = Logo.display
     
     let mutable private current = Unchecked.defaultof<T>
-    let private screens : T array = Array.zeroCreate 4
+    let private screens : T array = Array.zeroCreate 5
     let init (_screens: T array) =
-        for i = 0 to 3 do screens.[i] <- _screens.[i]
+        assert(_screens.Length = 5)
+        for i = 0 to 4 do screens.[i] <- _screens.[i]
         current <- screens.[0]
     let mutable exit = false
     let mutable currentType = Type.SplashScreen
@@ -137,6 +139,7 @@ module Screen =
         | Type.MainMenu -> change Type.SplashScreen flags
         | Type.LevelSelect -> change Type.MainMenu flags
         | Type.Import
+        | Type.Lobby
         | Type.Play
         | Type.Replay
         | Type.Score -> change Type.LevelSelect flags
