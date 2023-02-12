@@ -2,6 +2,7 @@
 
 open System.IO
 open System.IO.Compression
+open System.Diagnostics
 open System.Linq
 open Percyqaz.Shell
 open Prelude.Common
@@ -11,6 +12,8 @@ open Prelude.Data.Charts.Library
 open Utils
 
 module Features =
+
+    // Editing/suggestion phase
 
     let fetch_table(file: string) =
         
@@ -38,10 +41,10 @@ module Features =
         File.Copy (source, target)
         printfn "Copied to %s" target
 
-    let flatten_table(file: string) =
+    let private flatten_table(file: string) =
         
         let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
-        let flat = Path.Combine(TABLES_PATH, Path.ChangeExtension(file, ".txt"))
+        let flat = Path.Combine(TABLES_PATH, file + ".txt")
 
         let lines = ResizeArray<string>()
 
@@ -53,10 +56,10 @@ module Features =
         File.WriteAllLines(flat, lines)
         printfn "Flattened %s.table -> %s.txt" file file
 
-    let unflatten_table(file: string) =
+    let private unflatten_table(file: string) =
         
         let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
-        let flat = Path.Combine(TABLES_PATH, Path.ChangeExtension(file, ".txt"))
+        let flat = Path.Combine(TABLES_PATH, file + ".txt")
         
         let lines = File.ReadAllLines flat
 
@@ -80,6 +83,75 @@ module Features =
         JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true) newTable
         printfn "Updated %s.table" file
 
+        File.Delete flat
+
+    let edit_table(table: string) =
+        let suggestions = table + ".suggestions"
+        flatten_table suggestions
+        printfn "Waiting for text editor to exit.."
+        Process.Start(ProcessStartInfo(Path.Combine(TABLES_PATH, suggestions + ".txt"), UseShellExecute = true)).WaitForExit()
+        printfn "Saving your changes :)"
+        unflatten_table suggestions
+
+    // Commit phase
+
+    type Action = 
+        | Removed
+        | Added
+        | MovedHere of string
+        | MovedAway of string
+
+    let commit_table(file: string) =
+        
+        let new_table : Table = Path.Combine(TABLES_PATH, file + ".suggestions.table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+
+        let diffs = ResizeArray<string * TableChart * Action>()
+        for new_level in new_table.Levels do
+            for chart in new_level.Charts do
+                if table.Contains chart.Hash then
+                    let level = table.LevelOf chart.Hash
+                    if level.Name <> new_level.Name then
+                        diffs.Add (level.Name, chart, MovedAway new_level.Name)
+                        diffs.Add (new_level.Name, chart, MovedHere level.Name)
+                else diffs.Add(new_level.Name, chart, Added)
+        
+        for level in table.Levels do
+            for chart in level.Charts do
+                if not (new_table.Contains chart.Hash) then
+                    diffs.Add(level.Name, chart, Removed)
+
+        if diffs.Count = 0 then printfn "No changes to commit." else
+
+        let diff_text = System.Text.StringBuilder()
+        let write_diff (s: string) = diff_text.AppendLine(s) |> ignore
+
+        sprintf "Changes to %s, %s:" new_table.Name (System.DateTime.Now.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
+
+        for level, changes in Seq.groupBy(fun (l, _, _) -> l) diffs do
+            sprintf "\n== %s ==" level |> write_diff
+            for (_, chart, action) in changes do
+                match action with
+                | Removed -> sprintf " - %s" chart.Id |> write_diff
+                | Added -> sprintf " + %s" chart.Id |> write_diff
+                | MovedAway target -> sprintf " ~ %s moved to %s" chart.Id target |> write_diff
+                | MovedHere from -> sprintf " * %s moved from %s" chart.Id from |> write_diff
+
+        let diff_text = diff_text.ToString()
+
+        printfn "%s" diff_text
+
+        printfn "Saving changelog."
+
+        File.WriteAllText(Path.Combine(TABLES_PATH, file + ".diff"), diff_text)
+        File.AppendAllText(Path.Combine(TABLES_PATH, file + ".changelog"), diff_text)
+
+        new_table |> JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true)
+
+        printfn "Commited updates to table."
+
+    // Publishing the table
+
     let export_table_sources(file: string) =
 
         Directory.SetCurrentDirectory config.InterludePath
@@ -101,12 +173,12 @@ module Features =
                     | None -> printfn "Error loading chart: %s" chart.Id
                 | None -> printfn "Chart missing from local library: %s" chart.Id
 
-        File.WriteAllLines(Path.Combine(TABLES_PATH, file + "-sources.txt"), sources)
-        printfn "Written to %s-sources.txt" file
+        File.WriteAllLines(Path.Combine(TABLES_PATH, file + ".sources.txt"), sources)
+        printfn "Written to %s.sources.txt" file
 
     open SixLabors.ImageSharp
 
-    let export_table_charts(file: string) =
+    let export_table_charts(file: string, skip: bool) =
 
         Directory.SetCurrentDirectory config.InterludePath
         
@@ -117,8 +189,11 @@ module Features =
                 | Some cc -> 
                     match load cc with
                     | Some c -> 
-                        printfn "%s" chart.Id
                         let path = Path.Combine(CHARTS_PATH, chart.Id.Replace("/", "_"))
+                        if skip && Directory.Exists path then
+                            printfn "Skipping %s" chart.Id
+                        else
+                        printfn "%s" chart.Id
                         Directory.Delete (path, true) |> ignore
                         Directory.CreateDirectory path |> ignore
                         let updated_chart = Chart(c.Keys, { c.Header with AudioFile = Relative "audio.mp3"; BackgroundFile = Relative "bg.png" }, c.Notes, c.BPM, c.SV, "")
@@ -131,16 +206,16 @@ module Features =
                     | None -> printfn "Error loading chart: %s" chart.Id
                 | None -> printfn "Chart missing from local library: %s" chart.Id
     
-    let export_crescent_packs() =
-    
-        Directory.SetCurrentDirectory config.InterludePath
-            
-        let crescent : Table = Path.Combine(TABLES_PATH, "crescent.table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+    let export_as_pack(file: string) =
 
-        use fs = File.Open(Path.Combine(PACKS_PATH, "crescent-draft001.zip"), FileMode.CreateNew)
+        export_table_charts (file, true)
+            
+        let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+
+        use fs = File.Open(Path.Combine(PACKS_PATH, file + ".zip"), FileMode.CreateNew)
         use zip = new ZipArchive(fs, ZipArchiveMode.Create)
 
-        for level in crescent.Levels do
+        for level in table.Levels do
             for chart in level.Charts do
                 let dirname = chart.Id.Replace("/", "_")
                 printfn "%s" dirname
@@ -152,17 +227,15 @@ module Features =
 
     let register (ctx: Context) =
         ctx
-            .WithCommand("fetch_table", 
-            Command.create "Copies local table to this repo" ["table"] <| Impl.Create(Types.str, fetch_table))
-            .WithCommand("put_table", 
+            .WithCommand("fetch", 
+            Command.create "Copies locally installed table to this repo" ["table"] <| Impl.Create(Types.str, fetch_table))
+            .WithCommand("put", 
             Command.create "Copies repo table to your local interlude" ["table"] <| Impl.Create(Types.str, put_table))
-            .WithCommand("flatten_table", 
-            Command.create "Flattens a table to a human-readable/editable file" ["table"] <| Impl.Create(Types.str, flatten_table))
-            .WithCommand("unflatten_table", 
-            Command.create "Unflattens a human-readable table to the Interlude format" ["table"] <| Impl.Create(Types.str, unflatten_table))
-            .WithCommand("export_table_sources", 
+            .WithCommand("edit", 
+            Command.create "Make edits to existing charts in a table" ["table"] <| Impl.Create(Types.str, edit_table))
+            .WithCommand("commit", 
+            Command.create "Commit suggestions to table and generate a changelog" ["table"] <| Impl.Create(Types.str, commit_table))
+            .WithCommand("sources", 
             Command.create "Export sources needed to have every chart for a table" ["table"] <| Impl.Create(Types.str, export_table_sources))
-            .WithCommand("export_table_charts", 
-            Command.create "Export charts for a table" ["table"] <| Impl.Create(Types.str, export_table_charts))
-            .WithCommand("export_crescent_packs", 
-            Command.create "Export Crescent as a .zip" [] <| Impl.Create(export_crescent_packs))
+            .WithCommand("publish", 
+            Command.create "Export Crescent as a .zip" ["table"] <| Impl.Create(Types.str, export_as_pack))
