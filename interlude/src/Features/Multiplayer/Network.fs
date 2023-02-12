@@ -31,8 +31,17 @@ module Network =
         let join_lobby_ev = new Event<unit>()
         let join_lobby = join_lobby_ev.Publish
 
+        let leave_lobby_ev = new Event<unit>()
+        let leave_lobby = leave_lobby_ev.Publish
+        
+        let lobby_settings_updated_ev = new Event<unit>()
+        let lobby_settings_updated = lobby_settings_updated_ev.Publish
+
     let create_lobby name =
         Client.send(Upstream.CREATE_LOBBY name)
+
+    let leave_lobby() =
+        Client.send(Upstream.LEAVE_LOBBY)
 
     let mutable lobby : Lobby option = None
 
@@ -64,12 +73,12 @@ module Network =
             sync Events.join_lobby_ev.Trigger
         | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> () // nyi
         
-        | Downstream.YOU_LEFT_LOBBY -> lobby <- None
+        | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
         | Downstream.YOU_ARE_HOST -> lobby.Value.YouAreHost <- true
         | Downstream.PLAYER_JOINED_LOBBY username -> lobby.Value.Players.Add(username, { IsReady = false; IsSpectating = false })
         | Downstream.PLAYER_LEFT_LOBBY username -> lobby.Value.Players.Remove(username) |> ignore
         | Downstream.SELECT_CHART _ -> () // nyi
-        | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s
+        | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
         | Downstream.SYSTEM_MESSAGE msg -> Logging.Info msg
         | Downstream.CHAT (sender, msg) -> Logging.Info(sprintf "<%s> %s" sender msg)
         | Downstream.READY_STATUS (username, ready) -> lobby.Value.Players.[username].IsReady <- ready
