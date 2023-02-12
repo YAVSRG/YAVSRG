@@ -46,7 +46,7 @@ module Lobby =
     [<RequireQualifiedAccess>]
     type Action =
         | List of player: PlayerId
-        | Create of player: PlayerId * string
+        | Create of player: PlayerId * name: string
         | Join of player: PlayerId * id: LobbyId
         | Leave of player: PlayerId
         | Invite of invitor: PlayerId * invitee: string
