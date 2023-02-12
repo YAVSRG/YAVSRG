@@ -91,7 +91,7 @@ module FlowContainer =
                 item_size <- value
                 refresh <- true
 
-        member val Navigation = true with get, set
+        member val AllowNavigation = true with get, set
                 
         member this.Clear() = children.Clear()
 
@@ -113,7 +113,7 @@ module FlowContainer =
                 if visible && (moved || c.VisibleBounds.Visible) then
                     c.Update(elapsedTime, moved)
 
-            if this.Navigation && this.Focused then this.Navigate()
+            if this.AllowNavigation && this.Focused then this.Navigate()
 
         abstract member FlowContent : ResizeArray<FlowItem<'T>> -> unit
         
