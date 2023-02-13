@@ -15,3 +15,28 @@ Changes to Crescent, 12/02/23:
 
 == E-21 ==
  * skwid/wave moved from E-20
+**Updates to Crescent table -- 13/02/23**
+
+__A-11__
+~ `blaziken/ice-cream-naritai` --> **A-13**
+
+__A-13__
+~ `blaziken/ice-cream-naritai` <-- **A-11**
+
+__E-25__
+~ `icyworld/anata-ga-mawaru` --> **E-22**
+
+__E-22__
+~ `icyworld/anata-ga-mawaru` <-- **E-25**
+~ `celebelian/3y3s` <-- **E-26**
+
+__E-26__
+~ `celebelian/3y3s` --> **E-22**
+
+__E-24__
+~ `zeta/cake-by-the-ocean` --> **E-23**
+~ `foxtail/the-title-track` <-- **E-23**
+
+__E-23__
+~ `zeta/cake-by-the-ocean` <-- **E-24**
+~ `foxtail/the-title-track` --> **E-24**
