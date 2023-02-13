@@ -62,6 +62,7 @@
     <Compile Include="UI\Screen\Background.fs" />
     <Compile Include="UI\Screen\Transitions.fs" />
     <Compile Include="UI\Screen\Screen.fs" />
+    <Compile Include="Features\Stats.fs" />
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Rulesets.fs" />

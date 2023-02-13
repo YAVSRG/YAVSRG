@@ -150,6 +150,9 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         |+ Text(scoreData.ScoreInfo.time.ToString(),
             Align = Alignment.RIGHT,
             Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f })
+        |+ Text((fun () -> "Current session: " + Stats.session_length()),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 180.0f })
 
         // graph & under graph
         |+ graph
