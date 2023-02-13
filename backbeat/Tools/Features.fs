@@ -121,21 +121,24 @@ module Features =
                 if not (new_table.Contains chart.Hash) then
                     diffs.Add(level.Name, chart, Removed)
 
-        if diffs.Count = 0 then printfn "No changes to commit." else
+        if diffs.Count = 0 then 
+            printfn "No changes to commit." 
+            File.WriteAllText(Path.Combine(TABLES_PATH, file + ".diff"), "")
+        else
 
         let diff_text = System.Text.StringBuilder()
         let write_diff (s: string) = diff_text.AppendLine(s) |> ignore
 
-        sprintf "Changes to %s, %s:" new_table.Name (System.DateTime.Now.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
+        sprintf "**Updates to %s table -- %s**" new_table.Name (System.DateTime.Now.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
 
         for level, changes in Seq.groupBy(fun (l, _, _) -> l) diffs do
-            sprintf "\n== %s ==" level |> write_diff
+            sprintf "\n__%s__" level |> write_diff
             for (_, chart, action) in changes do
                 match action with
-                | Removed -> sprintf " - %s" chart.Id |> write_diff
-                | Added -> sprintf " + %s" chart.Id |> write_diff
-                | MovedAway target -> sprintf " ~ %s moved to %s" chart.Id target |> write_diff
-                | MovedHere from -> sprintf " * %s moved from %s" chart.Id from |> write_diff
+                | Removed -> sprintf "- `%s`" chart.Id |> write_diff
+                | Added -> sprintf "+ `%s`" chart.Id |> write_diff
+                | MovedAway target -> sprintf "~ `%s` --> **%s**" chart.Id target |> write_diff
+                | MovedHere from -> sprintf "~ `%s` <-- **%s**" chart.Id from |> write_diff
 
         let diff_text = diff_text.ToString()
 
