@@ -90,6 +90,8 @@ module Features =
         flatten_table suggestions
         printfn "Waiting for text editor to exit.."
         Process.Start(ProcessStartInfo(Path.Combine(TABLES_PATH, suggestions + ".txt"), UseShellExecute = true)).WaitForExit()
+        printfn "Press ENTER to finish editing!"
+        System.Console.ReadLine() |> ignore
         printfn "Saving your changes :)"
         unflatten_table suggestions
 
