@@ -7,8 +7,17 @@
         }, {
             "Hash": "2E98F76D3A0E0CA4D30637FE55D53F283BDD73E926EB92DD174628A7AECBC142", 
             "Id": "pianoluigi/adamas"
+        }, {
+            "Hash": "A840B85AA0C229B62357348CFBEE9DD2CE83B93EEA02555B3281527429DDFB32", 
+            "Id": "hidden-is-fun/spy-and-spyce"
         }], 
         "Name": "R-00"
+    }, {
+        "Charts": [{
+            "Hash": "E77F185B9F0AA64F3758B1FC1D74856DA15705253E802F233A979E50B79427E9", 
+            "Id": "alsty/ninelie-remix"
+        }], 
+        "Name": "R-01"
     }, {
         "Charts": [{
             "Hash": "69F7445BD5537DE9DD512019F4A59D677D582B04A43170838D898B88A34C9C7F", 
@@ -20,13 +29,28 @@
         "Name": "R-04"
     }, {
         "Charts": [{
+            "Hash": "BBA9D467502C378BEBC794208804BCC3BCCEC87D3A979812A4E4D76F09B151EE", 
+            "Id": "civilization/m-a-missing-ascension"
+        }, {
+            "Hash": "75C4CF3FFA3E6CFF19F4A70A49799828679CA01688B6474F05F768F9294B1B77", 
+            "Id": "flexo123/plvck"
+        }, {
             "Hash": "041FDC9F0379AC2FD0373012AA837C2A425356289E6A696257DC36AAF69EBF26", 
             "Id": "arpia97/prism"
         }, {
             "Hash": "77A18B0FCD35B56F059102A597F92BC32C9E3E161DC442669362A7178513E184", 
             "Id": "ababab0306/cross-time"
+        }, {
+            "Hash": "FA232C08A8B285EEC953E491C442129339CCEDE5B3A90B3937602F407DD9B8C6", 
+            "Id": "riktoi/rhythm-of-love"
         }], 
         "Name": "R-05"
+    }, {
+        "Charts": [{
+            "Hash": "E2FFD03B9583D9BF45A0611437DCDE643203A17DCB99E9C6078F51FB1173AF42", 
+            "Id": "das-hikari/magical-musical-master"
+        }], 
+        "Name": "R-07"
     }, {
         "Charts": [{
             "Hash": "3485A35F1903C38F89E84169B38545762DCFFDB465764191DEE3A32BAF7EA2B3", 
@@ -37,8 +61,20 @@
         "Charts": [{
             "Hash": "63C546D5D2BE8181846EB0ED79D8DF11C3954C3A44E381D6AACFE2E977F6F815", 
             "Id": "percyqaz/rain"
+        }, {
+            "Hash": "A12684CD45E6A02CC4B0641790AD66F6B55E034E13DA3EA016AD4621B0970AF1", 
+            "Id": "muses/koufuku-na-wagamama"
         }], 
         "Name": "R-09"
+    }, {
+        "Charts": [{
+            "Hash": "6AEFD021059837E96B1702EE5ADE6D86005DBCA9E540E47AD711AE367052F491", 
+            "Id": "ziel/mirrorwall"
+        }, {
+            "Hash": "719C39343CCE68D47764FED8A2B9C35566371C4D640CDBA59B532465D0A5441F", 
+            "Id": "leo137/cinema"
+        }], 
+        "Name": "A-10"
     }, {
         "Charts": [{
             "Hash": "5ECD7A1B5D4E6057EBFCBB9118F16544F2720977AB51F4FE5877771705BFFE11", 
@@ -62,6 +98,9 @@
         "Name": "A-12"
     }, {
         "Charts": [{
+            "Hash": "8ABA25DF43676C63F4457DE02B10857F20BA9ACBFFE9F961175ACD2F1BA769DC", 
+            "Id": "hlimak/flowers"
+        }, {
             "Hash": "E44A79C145153C54A2C1FFF41FB97A2A61B0A4C68063DDD98105CDA93B592D9C", 
             "Id": "blaziken/ice-cream-naritai"
         }, {
@@ -71,15 +110,30 @@
         "Name": "A-13"
     }, {
         "Charts": [{
+            "Hash": "7B45CDAAAD502B2006A29A50FBF0A737243D3EAA619AEB0AD52629FF1053FE55", 
+            "Id": "lein/pleasure-island"
+        }, {
             "Hash": "F746FE10F6ED5C58F9F8070B06402CBE0870AE5F3F2FC93FA14F6EEEC796742F", 
             "Id": "tim/passionfruit"
         }, {
             "Hash": "9305FDB302936B8E1A2B9C3C82C66B56F5DA98DD42DD469BC75FF4E5814D397A", 
             "Id": "sheenoboo/cthugha"
+        }, {
+            "Hash": "BCD58B30544EF9F828B6A5CCE0B5E715BA88CD6C38D31375C475684944C8916C", 
+            "Id": "aeyeong/be-alright"
         }], 
         "Name": "A-14"
     }, {
         "Charts": [{
+            "Hash": "A5B2242240C7310C06AB78377D5CA0072FFAC954FC90B999184CDEA71154F716", 
+            "Id": "nikosek/cherry"
+        }, {
+            "Hash": "8944136F31AB5B2F696418D6C390AEA9B3EE53D65A716B4854ACA27EC15E6888", 
+            "Id": "wh1teh/harutoman-no-youkai-shoujo"
+        }, {
+            "Hash": "377BB639E6479A9A082FD748EDDCE3AD4AC5674ACC532E99696517864E9687AF", 
+            "Id": "aeyeoung/yes-ok"
+        }, {
             "Hash": "ADA3912E2990E97F7160D7AE7991BCC08DA106E48CEEB1D141FFF3AE10EE612B", 
             "Id": "piratom/boss-rush"
         }, {
@@ -92,26 +146,47 @@
         "Name": "A-15"
     }, {
         "Charts": [{
+            "Hash": "D36B91DD9D82BDCE56BF28090E38306ADBB8E9B8B5771BC856CCB891F4A9AB6A", 
+            "Id": "wafles/happiness"
+        }, {
+            "Hash": "7F023A4C4CF209F58602ABC4B098BDC5E6C8CE3C3D0BBE47BEFB14A7FBAE8E09", 
+            "Id": "felixspade/mate-um-bonito"
+        }, {
             "Hash": "CB3751A745CE62A3F637CF4E0306EBFD4E61239BC6AE1C3E59EFFD118B965E35", 
             "Id": "de-cade/dynamite"
+        }, {
+            "Hash": "5E55CF76882BF75A6A0BAECB10A9F828FF44E916CA16B23DCCE47343548EBA60", 
+            "Id": "nikosek/blight-my-name"
+        }, {
+            "Hash": "7F2A3B9750C79BDE6737DB003AE294E22A13731408B786A2259856FFE25D0E4F", 
+            "Id": "nikosek/shimmer"
         }], 
         "Name": "A-16"
+    }, {
+        "Charts": [{
+            "Hash": "B0BBB7E906DD211806D4B0BCB20DB3A77751564C86C451919D6ABEE028E382FF", 
+            "Id": "tim/drink-im-sippin-on"
+        }, {
+            "Hash": "4483462F18451F2139FB017B38E824F853D4FEB9AE7BE8192ADD27865630DBFE", 
+            "Id": "icyworld/everytime-i-hear-your-name"
+        }, {
+            "Hash": "0DD8E032B72B5E767333E70A68A4EDFAC26902ECF00E5D5676DF0C17A35FB51F", 
+            "Id": "xeostyle/lone-digger"
+        }, {
+            "Hash": "4A9C254BC82860AC9CC292618E1BE2F9F6AF85B08EAB6EBAE0D0554BCECAA2F8", 
+            "Id": "riktoi/flamingo-remix"
+        }], 
+        "Name": "A-17"
     }, {
         "Charts": [{
             "Hash": "A23E944DC94C7C914ACD0D183F3B3ED6DA985AFC74D282743D8472E6D62983E1", 
             "Id": "xeostyle/dancer-of-saramandora"
         }, {
-            "Hash": "B0BBB7E906DD211806D4B0BCB20DB3A77751564C86C451919D6ABEE028E382FF", 
-            "Id": "tim/drink-im-sippin-on"
-        }], 
-        "Name": "A-17"
-    }, {
-        "Charts": [{
+            "Hash": "23C85130AB538B6F560C68BF7413F2DF3F04FF6B2D3509D2B46EEA924389EE51", 
+            "Id": "arpia97/carry-me-away"
+        }, {
             "Hash": "76EE8AD4BFAB6EBC1916DEAC9D93ACB4E6B8F5F2CC1865EC8B38C20A407AB9A3", 
             "Id": "civilization/ametsuchi"
-        }, {
-            "Hash": "0DD8E032B72B5E767333E70A68A4EDFAC26902ECF00E5D5676DF0C17A35FB51F", 
-            "Id": "xeostyle/lone-digger"
         }, {
             "Hash": "35F85F742E7E8176A8A9765D5397D240F5E8F9D7279FD3B16D2196C5C9B2EB47", 
             "Id": "elekton/4172756869"
@@ -122,14 +197,11 @@
             "Hash": "9AC4965B6097F1C1AD5DA2FDB2F47A34AE35DEA3B80DC44E3CCF1DC988DAA2CA", 
             "Id": "wh1teh/to-the-limit"
         }, {
-            "Hash": "4483462F18451F2139FB017B38E824F853D4FEB9AE7BE8192ADD27865630DBFE", 
-            "Id": "icyworld/everytime-i-hear-your-name"
-        }, {
             "Hash": "7EF818EB2A1584C1D20F5F9315AB3F4F9F0FE2EE18A5A37D2E7676F1864111C3", 
             "Id": "leo137/reminiscing"
         }, {
-            "Hash": "16D9D5E9FB7D46D7AE37BCA108FCB297D27D5A07D8662D8ED91D1E14169208D8", 
-            "Id": "icyworld/send-my-love-to-mars"
+            "Hash": "4F48770986819CAFDA77D783F660D5F8AAC2D5FE0CD1CB1B6A6D37CB03FC2D65", 
+            "Id": "leo137/internet-bitch"
         }, {
             "Hash": "E92A27D38A5125F5F93F68710E918E089733AF50D1ED0BB27B5FA8F442275C61", 
             "Id": "tim/moonlight"
@@ -139,15 +211,21 @@
         }, {
             "Hash": "C9148C02E37EB7ACF0A8E6DC11D55D0AED31D8D47DA4F671948FCCCA64F54E91", 
             "Id": "lein/connxtion"
+        }, {
+            "Hash": "3F70906684A41FC77B1A2BC3F2B27EBC38760D8369800EACB6F47A7F597819E0", 
+            "Id": "autotelic/paiii-sensation"
+        }, {
+            "Hash": "3183020273B1D15910A73D474A54FF1DF3FFC74B9B4E4ABD7BEECD0B517A0F89", 
+            "Id": "ilikexd/ant-idm"
         }], 
         "Name": "A-19"
     }, {
         "Charts": [{
+            "Hash": "16D9D5E9FB7D46D7AE37BCA108FCB297D27D5A07D8662D8ED91D1E14169208D8", 
+            "Id": "icyworld/send-my-love-to-mars"
+        }, {
             "Hash": "14181D035DD34955CF51E8052084441643270C1CF382A3C88F1614C247F1DE31", 
             "Id": "xeostyle/uta"
-        }, {
-            "Hash": "4F48770986819CAFDA77D783F660D5F8AAC2D5FE0CD1CB1B6A6D37CB03FC2D65", 
-            "Id": "leo137/internet-bitch"
         }, {
             "Hash": "86A4247565633050993B69C3882795C05B3EF0395CC687186E298D403FAA082E", 
             "Id": "blaziken/senorita"
@@ -169,6 +247,9 @@
         }, {
             "Hash": "98539EC63F5D7DA18D489E9EE1D74C81EA3D6D89E0A73F7BD12EEB5411489E89", 
             "Id": "xeuphroda/crescent-moon"
+        }, {
+            "Hash": "BBBCCEDD274731C22A756BCC06FB776568B98B6BE77E4DC56642E5326ACB4AE7", 
+            "Id": "upan/rocket-beat"
         }], 
         "Name": "E-20"
     }, {
@@ -208,6 +289,9 @@
         }, {
             "Hash": "ACF635EE706B65B5CF456E5DD2DC3B6A085F0527241B2893B7EA2AAB6244C217", 
             "Id": "wh1teh/oracle"
+        }, {
+            "Hash": "1E51FF43B14182577B8A83130D8238F4457B8EBDE92866CE8FC78FA40A02C3FD", 
+            "Id": "tim/prom-night"
         }], 
         "Name": "E-21"
     }, {
@@ -316,6 +400,9 @@
         }, {
             "Hash": "7BDD7F0FDFE78F99E04932B5C059A08CCE513272514FEA361C186003DC533032", 
             "Id": "tim/archon"
+        }, {
+            "Hash": "204EFFC06F3C8271F2917A9E798B47210B6673A9B1C7883BFC250D42DFDE43D7", 
+            "Id": "juankristal/kamisama-nejimaki"
         }, {
             "Hash": "9612A1565A5028D16F21BC86E1CE31A725BBD832903F176163F559B574427741", 
             "Id": "blaziken/koisuru-uchu-sensou"
@@ -585,7 +672,7 @@
     }, {
         "Charts": [{
             "Hash": "ECA7A813FB8287210003E6AC328B8CF270E61D3BD13C9B8C529EC7AF4CEF560F", 
-            "Id": "lein-/beepbit-futures"
+            "Id": "lein/beepbit-futures"
         }, {
             "Hash": "9E353A96E4733325705281EEB4D2E65A1E71E19D77EAEB727BCFE0698C448099", 
             "Id": "spoon/yura-yura"
@@ -606,6 +693,144 @@
             "Id": "lovelyserenade/megalomania"
         }], 
         "Name": "X-38"
+    }, {
+        "Charts": [{
+            "Hash": "766AC5E5086B547E6B3137E79542F924A07A52DC089F5B66912D70F9A27A6512", 
+            "Id": "nixo/nijiiro-no-flugel"
+        }, {
+            "Hash": "4C588BE2098ADC4D29B7C3F960547FCAC4EC848952D0D675CC828631F949AAFB", 
+            "Id": "wh1teh/motteke-sailor-fuku"
+        }, {
+            "Hash": "7755BAC88BDDC5350B39C29EE07C5699F94830DA7FD025FCF007DC072C4F3D2A", 
+            "Id": "wiosna/abnormalize"
+        }, {
+            "Hash": "D76E63CBF9C2962FC748C9B198D0F69CD9AAB117F52290F446C5C0DE0695DB93", 
+            "Id": "wiosna/anguish"
+        }, {
+            "Hash": "A7F7988E0FF8100E006EA9091EFEB41B7025935125BE4D000D9A989AB4533484", 
+            "Id": "tim-evening/nightmare-of-hornets-squad"
+        }, {
+            "Hash": "72A9A0638DD6B590BD3BB2FBAADF1947EBBD525A68FE9279E29366D019347E3F", 
+            "Id": "yoshl/double-helix"
+        }, {
+            "Hash": "8A7577E148D382BA44BE9DA0208D9CE644E52C7F128D67566F12AEADD817377F", 
+            "Id": "skwid/harebare-fanfare"
+        }, {
+            "Hash": "FE97D862A476C666F2995778A6DEEDE820C14D3BBEE3B27F0BD45C5EEDF65946", 
+            "Id": "juankristal/move-that-body"
+        }, {
+            "Hash": "62A7B0CCC26560A3311A916C4A79846C2335C3156530031C05218E16E570AC4F", 
+            "Id": "myzterion/angels-salad"
+        }, {
+            "Hash": "B0C0457D1D6E80607E3E8E53F66B6C794B3AFED32CF21E2727B08D90DB8DA799", 
+            "Id": "sherie/sengoku-hop"
+        }, {
+            "Hash": "B65D186E0F3025EA4D069F1A7E5BA7E235015AA89256B45ABEC4D54262E747FD", 
+            "Id": "sherie/karma"
+        }, {
+            "Hash": "754F5B220A45764E0AD5E259DA78C64E8E7E4C4E95EEABBFE38993A24BB8AD72", 
+            "Id": "flexo123/popstars"
+        }, {
+            "Hash": "1C9F4E9733A7E357FF05FEE460E069BCE3F8C7C5813D7997C4818686799CBB8A", 
+            "Id": "ska/melissa"
+        }, {
+            "Hash": "D6677D7392AD7226A49AD8A276CBBAF957EC75771F48A938297C503331DFB496", 
+            "Id": "ska/last-surprise"
+        }, {
+            "Hash": "E052FE6C62067BE9638A457449D801F5672491E1A52C836F7C044C615743B08C", 
+            "Id": "ska/extra-exterminate"
+        }, {
+            "Hash": "4131B623AECC77C16AFDFA189EFFC352E33B002E2F177ACDFA2FEAA6A9C44565", 
+            "Id": "ska/crazy-for-you"
+        }, {
+            "Hash": "5843B4A9A27144D0AAB5F7C43ED77D89C111349EAA9A5E8B97515D940CEE1A2A", 
+            "Id": "felixspade/psychology"
+        }, {
+            "Hash": "B5D50D0EC33A938A8880CCEE5710C52A5EE57979D0BD7AEC9831F4401C45174F", 
+            "Id": "ska/blue-lagoon"
+        }, {
+            "Hash": "D96D37D50AFE21EBDFE4D08888869FCA91897E03E2C40CBFA19E3C917B82B91C", 
+            "Id": "sizuka/aishite"
+        }, {
+            "Hash": "4660EDDECE9CEAAB83628B15DC13CDD2820666CD7330C2B9A292FECDB9843606", 
+            "Id": "ska/babyhalo"
+        }, {
+            "Hash": "3F801C73CB662DDF60AEFC71EB13C1277107BFE4452B1E70E581A4BB144F8279", 
+            "Id": "ska/oddloop"
+        }, {
+            "Hash": "47ADB1266618FCAF036524FBE2292737D1FFF222510B9B1583D9AF6C49216F91", 
+            "Id": "cadmium/dj-mag-top-rankers-song"
+        }, {
+            "Hash": "10D673E62C59193774D4A965C797AA0AA876C09E2E4CB04E13E978B5AC282228", 
+            "Id": "ska/hampden-parks"
+        }, {
+            "Hash": "5903471AD667DC9F386420AC0F5A9987CC70BAB2D74917A59621E85D88FA9272", 
+            "Id": "ska/desert-theater"
+        }, {
+            "Hash": "4C15B656D928E05BECF2535370938D207B8ACFD6AD97E946A250EA19284CE4E7", 
+            "Id": "icyworld/aura"
+        }, {
+            "Hash": "CDAE74FFABDB400D2930ED003629E23A264A4191133EBA75980481C1A4321F48", 
+            "Id": "hylotl/21st-century"
+        }, {
+            "Hash": "F318A450CC18936452DCED1E94594A6CBF7F47E438F7D137E13FBCC055771847", 
+            "Id": "frolica/universe"
+        }, {
+            "Hash": "69FE8CA59E29E91A4FA05B75B406D878A58AC50EDC8E10B5718176FB172D84B1", 
+            "Id": "klaius/bassdrop-freaks"
+        }, {
+            "Hash": "3476FB7164737E359EBFFD1F90FAE2AF168AF99BBBD3D7944E1CBA0141059369", 
+            "Id": "klaius/kokonatsu-wa-yume-no-katachi"
+        }, {
+            "Hash": "C171950464570EE0600BB26BD125E6772384A83E3234B8241A493663CC494269", 
+            "Id": "klaius/speed-star-kanade"
+        }, {
+            "Hash": "3424BA4231A8347FABD7F4075B4BBD843DD34F313D6CEF0A13CD56A30AADB1CD", 
+            "Id": "xingren/ta-ti-tu-teatime"
+        }, {
+            "Hash": "0B47C0826B7F44D0DCA6C5FEBBFD112820819FCD826B2EEB4B612033EFBDD296", 
+            "Id": "snugglemagne/run-away-with-me"
+        }, {
+            "Hash": "6B3BFF9485C892E9AA3824CB9DB1C72AF43F117BEA6E8E65B5A8BF543BED5269", 
+            "Id": "xingren/video-game-lover-vs-hydraulic-press"
+        }, {
+            "Hash": "27FADF9C1A23E51C0A4DAD66B51678669A9CBB7C4D9F050400B0186622AF4404", 
+            "Id": "skwid/kaze-no-uta"
+        }, {
+            "Hash": "AD3D45458958B1561AF87495F112073426EF3F6544A0842ECCFDF751AEEA0F96", 
+            "Id": "skwid/lay-your-hands-on-me"
+        }, {
+            "Hash": "66770D195538F1089B57E617EF54B329B151A2DDF4201CF426D42A0260FF62E8", 
+            "Id": "skwid/bon-bon"
+        }, {
+            "Hash": "D18CFBC5F22944A7486700D13D17CA7369FBCD9D5E08BF981433F93017300040", 
+            "Id": "skwid/aozora-jumping-heart"
+        }, {
+            "Hash": "E1764244CDEFE860FCCE0CD63A1E9A7C334DF9EE231DAFCA79155FE0033743B0", 
+            "Id": "evening/uta"
+        }, {
+            "Hash": "66E9F8F0C81215884D2DD4F3CDEEBCDBF784D444F5DE7AF5815EEFA3408915BF", 
+            "Id": "evening/kyafa-2"
+        }, {
+            "Hash": "97249427C87913EE7AB9C3DDFCCE6A4C3A8EF9B43F1B16E69DD1BC55D21848C1", 
+            "Id": "evening/im-sorry-we-really-suck"
+        }, {
+            "Hash": "52E19866F4411D8B5918CD39A6A426C92CC8921EE04731F69C2D79087680C46C", 
+            "Id": "wiosna/kaisei-joshou-hallelujah"
+        }, {
+            "Hash": "62C3C7C17375D8C517AB8AA81AAFB4C766C3FD4AD1729836E4C66D96F41BE67E", 
+            "Id": "wh1teh/cannibal-coast"
+        }, {
+            "Hash": "756FDAB21E193228733E264BF91FAA40CE31D217DD52F8CA90C05F31B7AD9035", 
+            "Id": "ska/sugar-song-to-bitter-step"
+        }, {
+            "Hash": "75494C7392A3DB6FD631C5040010CE23178CC7C581E44582298998AF90656462", 
+            "Id": "leo137-celebelian/some"
+        }, {
+            "Hash": "E4A06A9314D6898142F83656BBB1D50768907939942FF6651DB0B032D7E1FB0E", 
+            "Id": "celebelian/the-magic-valleys-of-dark-wolf"
+        }], 
+        "Name": "XXX"
     }], 
     "Name": "Crescent", 
     "RulesetId": "SC(J4)BC581C"
