@@ -9,33 +9,33 @@ open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Data.Charts.Tables
 open Prelude.Data.Charts.Library
+open Prelude.Data.Charts.Collections
+open Prelude.Data.Charts.Caching
 open Utils
 
 module Features =
 
     // Editing/suggestion phase
 
-    let fetch_table(file: string) =
+    //let fetch_table(file: string) =
         
-        let source = Path.Combine(INTERLUDE_TABLES_PATH, file + ".table")
-        let target = Path.Combine(TABLES_PATH, file + ".table")
+    //    let source = Path.Combine(INTERLUDE_TABLES_PATH, file + ".table")
+    //    let target = Path.Combine(TABLES_PATH, file + ".table")
 
-        if File.GetLastWriteTime target > File.GetLastWriteTime source then
-            printfn "Source is older than target. Is this what you want?"
-        else
+    //    if File.GetLastWriteTime target > File.GetLastWriteTime source then
+    //        printfn "Source is older than target. Is this what you want?"
+    //    else
 
-        File.Delete target
-        File.Copy (source, target)
-        printfn "Copied from %s" source
+    //    File.Delete target
+    //    File.Copy (source, target)
+    //    printfn "Copied from %s" source
     
     let put_table(file: string) =
         
-        let target = Path.Combine(INTERLUDE_TABLES_PATH, file + ".table")
+        let target = Path.Combine(INTERLUDE_TABLES_PATH, file.Replace(".suggestions", "") + ".table")
         let source = Path.Combine(TABLES_PATH, file + ".table")
 
-        if File.GetLastWriteTime target > File.GetLastWriteTime source then
-            printfn "Source is older than target. Is this what you want?"
-        else
+        printfn "Overwriting Interlude local table with %s ..." file
 
         File.Delete target
         File.Copy (source, target)
@@ -94,6 +94,42 @@ module Features =
         System.Console.ReadLine() |> ignore
         printfn "Saving your changes :)"
         unflatten_table suggestions
+
+    let add_suggestions (file: string) (folder: string) =
+
+        let table : Table = Path.Combine(TABLES_PATH, file + ".suggestions.table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
+
+        table.AddLevel("XXX") |> ignore
+
+        let collections : Collections =
+            match JSON.FromFile INTERLUDE_COLLECTIONS_FILE with
+            | Result.Ok c -> c
+            | Error e -> raise e
+
+        match collections.GetFolder folder with
+        | None -> 
+            printfn "No such folder '%s' in your local Interlude" folder
+            printfn "Local folders: %s" (String.concat ", " collections.Folders.Keys)
+        | Some folder ->
+            for entry in folder.Charts |> List.ofSeq do
+                if table.Contains entry.Hash then printfn "Already in table: %s" entry.Path
+                else
+                    match Chart.fromFile entry.Path with
+                    | None -> printfn "Failed loading %s" entry.Path
+                    | Some chart -> 
+                        let cc = cacheChart chart
+                        let id = Table.generate_cid cc
+                        if table.AddChart("XXX", id, cc) then 
+                            printfn "+ %s" id
+                            folder.Remove cc |> ignore
+                        else printfn "Failed adding %s" id
+
+        table |> JSON.ToFile(Path.Combine(TABLES_PATH, file + ".suggestions.table"), true)
+        printfn "Saved table additions."
+        collections |> JSON.ToFile(INTERLUDE_COLLECTIONS_FILE, true)
+        printfn "Saved collections."
+
+        
 
     // Commit phase
 
@@ -232,10 +268,12 @@ module Features =
 
     let register (ctx: Context) =
         ctx
-            .WithCommand("fetch", 
-            Command.create "Copies locally installed table to this repo" ["table"] <| Impl.Create(Types.str, fetch_table))
+            //.WithCommand("fetch", 
+            //Command.create "Copies locally installed table to this repo" ["table"] <| Impl.Create(Types.str, fetch_table))
             .WithCommand("put", 
             Command.create "Copies repo table to your local interlude" ["table"] <| Impl.Create(Types.str, put_table))
+            .WithCommand("add_batch", 
+            Command.create "Add batch of table charts from a local collection" ["table"; "collection"] <| Impl.Create(Types.str, Types.str, add_suggestions))
             .WithCommand("edit", 
             Command.create "Make edits to existing charts in a table" ["table"] <| Impl.Create(Types.str, edit_table))
             .WithCommand("commit", 
