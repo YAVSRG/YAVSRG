@@ -1,0 +1,51 @@
+Interlude
+	Stats
+		Session timer
+		Total playtime & session time
+		Total notes hit
+		Table breakdown data
+		Pattern skill levels
+	Recommendations
+		Infinite mode
+		Pattern-based suggestions
+		Challenge rating
+	Tables
+		Ingame download & updater
+		Ingame suggestions system
+		Automated PB data collection
+		Automated pack releases
+	Wiki
+	Online
+		Accounts & login
+		Table score saving
+		Multiplayer lobbies
+			Teams
+			Spectating
+			Tournament support
+	Printerlude
+		Ingame terminal
+		Simple IPC
+		URL IPC
+		User scripts
+	Toolbar
+		Spotlight search
+		Jukebox controls
+	Imports
+		osu!mania support
+		Etterna support
+		Quaver support
+		Noteskins repo
+	Level Select
+		Sorting
+		Grouping
+		Table mode
+		Collections
+			Folders
+			Playlists
+	Themes
+		Script support
+		SFX
+	Goals
+		User-made
+		Daily
+		Recommendation-based
