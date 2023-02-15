@@ -73,6 +73,12 @@ module ``osu!`` =
         | HoldNote of Point * Time * Time * HitSound * HitAddition
         | Slider of Point * Time * int * (SliderShape * Point list) * float * HitSound * (HitSound list * (SampleSet * SampleSet) list * HitAddition) option
         | Spinner of Time * Time * HitSound * HitAddition
+        member this.Time =
+            match this with
+            | HitCircle (_, time, _, _) -> time
+            | HoldNote (_, time, _, _, _) -> time
+            | Slider (_, time, _, _, _, _, _) -> time
+            | Spinner (_, time, _, _) -> time
         override this.ToString() = 
             match this with
             | HitCircle ((x, y), offset, hs, addition) -> String.concat "," [x |> string; y |> string; offset |> string; "1"; hs |> int |> string; formatHitAddition addition]
@@ -605,7 +611,7 @@ module ``osu!`` =
                 Metadata = readMetadata metadata
                 Difficulty = readDifficulty difficulty
                 Events = events
-                Objects = hitobjects
+                Objects = List.sortBy (fun o -> o.Time) hitobjects
                 Timing = timingpoints
             }
 
