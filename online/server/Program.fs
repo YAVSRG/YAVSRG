@@ -34,12 +34,18 @@ let handle_disconnect(id: Guid) =
     UserState.disconnect id
     Lobby.leave id
 
+let PORT = 
+    try Environment.GetEnvironmentVariable("PORT") |> int
+    with err -> 32767
+
 Server.init { 
-    Address = "0.0.0.0"; Port = 32767;
+    Address = "0.0.0.0"; Port = PORT;
     Handle_Packet = handle_packet
     Handle_Connect = handle_connect
     Handle_Disconnect = handle_disconnect
 }
+
+Logging.Info(sprintf "Launching server on 0.0.0.0:%i ..." PORT)
 
 Server.start()
 
