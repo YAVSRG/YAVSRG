@@ -86,6 +86,7 @@ type ReplayScreen(mode: ReplayMode) as this =
         scoring.SetHitCallback onHit.Trigger
 
     override this.OnEnter(prev) =
+        Dialog.close()
         Background.dim (float32 options.BackgroundDim.Value)
         Screen.Toolbar.hide()
         Gameplay.rate.Value <- rate

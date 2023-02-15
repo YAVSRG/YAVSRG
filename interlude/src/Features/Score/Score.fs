@@ -42,12 +42,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         graph.Refresh()
 
     do
-        // banner text
         this
-
-        |+ Sidebar(stats, scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 190.0f; Right = 0.35f %- 0.0f; Bottom = 0.75f %- 0.0f})
-        |+ TopBanner(scoreData, Position = Position.SliceTop(195.0f))
-
         |+ InfoBar(
             (fun () -> scoreData.Ruleset.GradeColor (!grade).Grade),
             "Score",
@@ -102,9 +97,10 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
             ),
             Position = { Left = 0.35f %+ 0.0f; Top = (1.0f / 3.0f) %+ (190.0f / 3.0f); Right = 0.83f %- 0.0f; Bottom = 0.5f %+ 0.0f }
             )
-            
-        |+ Grade(grade, lamp, scoreData, Position = { Position.Default with Left = 0.66f %+ 0.0f })
 
+        |+ Sidebar(stats, scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 190.0f; Right = 0.35f %- 0.0f; Bottom = 0.75f %- 0.0f})
+        |+ TopBanner(scoreData, Position = Position.SliceTop(195.0f))
+        |+ Grade(grade, lamp, scoreData, Position = { Position.Default with Left = 0.66f %+ 0.0f })
         |* BottomBanner(stats, scoreData, graph, refresh, Position = { Position.Default with Top = 0.75f %- 5.0f })
 
     override this.Update(elapsedTime, bounds) =

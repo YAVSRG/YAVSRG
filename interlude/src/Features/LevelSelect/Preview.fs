@@ -67,7 +67,7 @@ type Preview(chart: Chart) =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         renderer.Update(elapsedTime, moved)
-        if Mouse.leftClick() then
+        if this.Bounds.Bottom - Mouse.y() < 200.0f && Mouse.leftClick() then
             let percent = Mouse.x() / Viewport.vwidth
             let newTime = chart.FirstNote + (chart.LastNote - chart.FirstNote) * percent
             Song.seek newTime
