@@ -56,4 +56,6 @@ module Dialog =
 
     let exists() = current.IsSome
 
+    let close() = match current with Some d -> d.Close() | None -> ()
+
 type Dialog with member this.Show() = Dialog.show this
