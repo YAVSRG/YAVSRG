@@ -5,7 +5,6 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Scoring
 open Prelude.Data.Scores
-open Interlude
 
 type ScoreGraph(data: ScoreInfoProvider) =
     inherit StaticWidget(NodeType.None)

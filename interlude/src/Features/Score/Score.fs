@@ -17,7 +17,7 @@ open Interlude.Features
 
 // todo: split this file
 
-type EventCounts =
+type ScoreScreenStats =
     {
         Notes: int * int
         Holds: int * int
@@ -30,12 +30,7 @@ type EventCounts =
 
         JudgementCount: int
     }
-
-module ScoreScreenHelpers =
-
-    let mutable watchReplay : ModChart * float32 * ReplayData -> unit = ignore
-
-    let countEvents(events: HitEvent<HitEventGuts> seq) : EventCounts =
+    static member Generate(events: HitEvent<HitEventGuts> seq) =
         let inc (x: int ref) = x.Value <- x.Value + 1
         let (++) (x: Time ref) (t: Time) = x.Value <- x.Value + t
 
@@ -104,29 +99,127 @@ module ScoreScreenHelpers =
             JudgementCount = judgementCount
         }
 
+module ScoreScreenHelpers =
+
+    let mutable watchReplay : ModChart * float32 * ReplayData -> unit = ignore
+
+type TopBanner(data: ScoreInfoProvider) as this =
+    inherit StaticContainer(NodeType.None)
+
+    do
+        this
+        |+ Text(data.Chart.Header.Artist + " - " + data.Chart.Header.Title,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f })
+        |+ Text(data.Chart.Header.DiffName,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 145.0f })
+        |+ Text(sprintf "From %s" data.Chart.Header.SourcePack,
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 180.0f })
+        |+ Text(data.ScoreInfo.time.ToString(),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f })
+        |* Text((fun () -> "Current session: " + Stats.session_length()),
+            Align = Alignment.RIGHT,
+            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 180.0f })
+
+    override this.Draw() =
+
+        Draw.rect (this.Bounds.TrimBottom 5.0f) (Style.color(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.SliceBottom 5.0f) (Color.FromArgb(127, Color.White))
+
+        base.Draw()
+
+type BottomBanner(stats: ScoreScreenStats ref, data: ScoreInfoProvider, graph: ScoreGraph, refresh: unit -> unit) as this =
+    inherit StaticContainer(NodeType.None)
+    
+    do
+        graph.Position <- { Left = 0.35f %+ 20.0f; Top = 0.0f %+ 20.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 70.0f }
+        this
+        |+ graph
+        |+ Text((fun () -> sprintf "Mean: %.1fms (%.1f - %.1fms)" (!stats).Mean (!stats).EarlyMean (!stats).LateMean),
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 20.0f; Top = 1.0f %- 55.0f; Right = 0.0f %+ 620.0f; Bottom = 1.0f %- 5.0f })
+        |+ Text((fun () -> sprintf "Stdev: %.1fms" (!stats).StandardDeviation),
+            Align = Alignment.LEFT,
+            Position = { Left = 0.0f %+ 620.0f; Top = 1.0f %- 55.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 5.0f })
+    
+        |+ StylishButton(
+            ignore,
+            sprintf "%s %s" Icons.edit (L"score.graph.settings") |> K,
+            Style.main 100,
+            Position = { Left = 0.55f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.7f %- 25.0f; Bottom = 1.0f %- 0.0f })
+        |+ StylishButton(
+            (fun () -> ScoreScreenHelpers.watchReplay (data.ModChart, data.ScoreInfo.rate, data.ReplayData)),
+            sprintf "%s %s" Icons.preview (L"score.watch_replay") |> K,
+            Style.dark 100,
+            Position = { Left = 0.7f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.85f %- 25.0f; Bottom = 1.0f %- 0.0f })
+        |* Rulesets.QuickSwitcher(
+            options.SelectedRuleset
+            |> Setting.trigger (fun _ -> data.Ruleset <- Rulesets.current; refresh()),
+            Position = { Left = 0.85f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
+
+    override this.Draw() =
+
+        Draw.rect (this.Bounds.TrimTop 5.0f) (Style.color(127, 0.5f, 0.0f))
+        Draw.rect (this.Bounds.SliceTop 5.0f) (Color.FromArgb(127, Color.White))
+
+        // graph background
+        Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White
+        Background.draw (graph.Bounds, Color.FromArgb(127, 127, 127), 3.0f)
+
+        base.Draw()
+
+type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
+    inherit StaticWidget(NodeType.None)
+
+    override this.Draw() =
+        Draw.rect (this.Bounds.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White))
+        Background.draw (this.Bounds, (Color.FromArgb(80, 80, 80)), 2.0f)
+
+        let title = this.Bounds.SliceTop(100.0f).Shrink(20.0f)
+        Draw.rect title (Color.FromArgb(127, Color.Black))
+        Text.drawFillB(Style.baseFont, sprintf "%iK Results  •  %s" data.Chart.Keys data.Ruleset.Name, title, (Color.White, Color.Black), 0.5f)
+        let mods = title.Translate(0.0f, 70.0f)
+        Draw.rect mods (Color.FromArgb(127, Color.Black))
+        Text.drawFillB(Style.baseFont, data.Mods, mods, (Color.White, Color.Black), 0.5f)
+
+        // accuracy info
+        let counters = Rect.Box(this.Bounds.Left, this.Bounds.Top + 150.0f, this.Bounds.Width, 320.0f)
+        Draw.rect counters (Color.FromArgb(127, Color.Black))
+
+        let judgeCounts = data.Scoring.State.Judgements
+        let judgements = data.Ruleset.Judgements |> Array.indexed
+        let h = (counters.Height - 20.0f) / float32 judgements.Length
+        let mutable y = counters.Top + 10.0f
+        for i, j in judgements do
+            let b = Rect.Create(counters.Left + 10.0f, y, counters.Right - 10.0f, y + h)
+            Draw.rect b (Color.FromArgb(40, j.Color))
+            Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 (!stats).JudgementCount))) (Color.FromArgb(127, j.Color))
+            Text.drawFill(Style.baseFont, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Color.White, 0.0f)
+            y <- y + h
+
+        // stats
+        let nhit, ntotal = (!stats).Notes
+        let hhit, htotal = (!stats).Holds
+        let rhit, rtotal = (!stats).Releases
+        let stats = sprintf "Notes: %i/%i  •  Holds: %i/%i  •  Releases: %i/%i  •  Combo: %ix" nhit ntotal hhit htotal rhit rtotal data.Scoring.State.BestCombo
+        Text.drawFillB(Style.baseFont, stats, this.Bounds.SliceBottom(80.0f).Shrink(5.0f, 5.0f), (Color.White, Color.Black), 0.5f)
+        
 
 type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     inherit Screen()
 
-    let mutable pbs = pbs
-    let mutable gradeAchieved = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
-    let mutable lampAchieved = Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
-    let mutable eventCounts = ScoreScreenHelpers.countEvents scoreData.Scoring.HitEvents
-    let mutable existingBests = 
+    let mutable personal_bests = pbs
+    let mutable grade = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+    let mutable lamp = Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
+    let stats = ref <| ScoreScreenStats.Generate scoreData.Scoring.HitEvents
+    let mutable previous_personal_bests = 
         if Gameplay.Chart.saveData.Value.Bests.ContainsKey Rulesets.current_hash then 
             Some Gameplay.Chart.saveData.Value.Bests.[Rulesets.current_hash]
         else None
-    let graph = new ScoreGraph(scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 1.0f %- 270.0f; Right = 1.0f %- 20.0f; Bottom = 1.0f %- 70.0f })
-
     let originalRuleset = options.SelectedRuleset.Value
-
-    let refresh() =
-        pbs <- BestFlags.Default
-        gradeAchieved <- Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
-        lampAchieved <- Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
-        eventCounts <- ScoreScreenHelpers.countEvents scoreData.Scoring.HitEvents
-        existingBests <- None
-        graph.Refresh()
 
     let getPb ({ Best = p1, r1; Fastest = p2, r2 }: PersonalBests<'T>) (textFunc: 'T -> string) =
         let rate = scoreData.ScoreInfo.rate
@@ -135,49 +228,23 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         elif rate <> r1 then sprintf "%s (%.2fx)" (textFunc p1) r1
         else textFunc p1
 
+    let graph = new ScoreGraph(scoreData)
+
+    let refresh() =
+        personal_bests <- BestFlags.Default
+        grade <- Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+        lamp <- Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
+        stats := ScoreScreenStats.Generate scoreData.Scoring.HitEvents
+        previous_personal_bests <- None
+        graph.Refresh()
+
     do
         // banner text
         this
-        |+ Text(scoreData.Chart.Header.Artist + " - " + scoreData.Chart.Header.Title,
-            Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 100.0f })
-        |+ Text(scoreData.Chart.Header.DiffName,
-            Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 145.0f })
-        |+ Text(sprintf "From %s" scoreData.Chart.Header.SourcePack,
-            Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 180.0f })
-        |+ Text(scoreData.ScoreInfo.time.ToString(),
-            Align = Alignment.RIGHT,
-            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 90.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 150.0f })
-        |+ Text((fun () -> "Current session: " + Stats.session_length()),
-            Align = Alignment.RIGHT,
-            Position = { Left = 0.0f %+ 0.0f; Top = 0.0f %+ 140.0f; Right = 1.0f %- 20.0f; Bottom = 0.0f %+ 180.0f })
 
-        // graph & under graph
-        |+ graph
-
-        |+ Text((fun () -> sprintf "Mean: %.1fms (%.1f - %.1fms)" eventCounts.Mean eventCounts.EarlyMean eventCounts.LateMean),
-            Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 20.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 620.0f; Bottom = 1.0f %- 15.0f })
-        |+ Text((fun () -> sprintf "Stdev: %.1fms" eventCounts.StandardDeviation),
-            Align = Alignment.LEFT,
-            Position = { Left = 0.0f %+ 620.0f; Top = 1.0f %- 65.0f; Right = 0.0f %+ 920.0f; Bottom = 1.0f %- 15.0f })
-
-        |+ StylishButton(
-            ignore,
-            sprintf "%s %s" Icons.edit (L"score.graph.settings") |> K,
-            Style.main 100,
-            Position = { Left = 0.55f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.7f %- 25.0f; Bottom = 1.0f %- 0.0f })
-        |+ StylishButton(
-            (fun () -> ScoreScreenHelpers.watchReplay (scoreData.ModChart, scoreData.ScoreInfo.rate, scoreData.ReplayData)),
-            sprintf "%s %s" Icons.preview (L"score.watch_replay") |> K,
-            Style.dark 100,
-            Position = { Left = 0.7f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.85f %- 25.0f; Bottom = 1.0f %- 0.0f })
-        |* Rulesets.QuickSwitcher(
-            options.SelectedRuleset
-            |> Setting.trigger (fun _ -> scoreData.Ruleset <- Rulesets.current; refresh()),
-            Position = { Left = 0.85f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
+        |+ Sidebar(stats, scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 190.0f; Right = 0.35f %- 0.0f; Bottom = 0.75f %- 0.0f})
+        |+ TopBanner(scoreData, Position = Position.SliceTop(195.0f))
+        |* BottomBanner(stats, scoreData, graph, refresh, Position = { Position.Default with Top = 0.75f %- 5.0f })
 
     override this.Draw() =
         let halfh = this.Bounds.CenterY
@@ -205,39 +272,39 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
             infobar
                 bartop 
-                (scoreData.Ruleset.GradeColor gradeAchieved.Grade)
+                (scoreData.Ruleset.GradeColor grade.Grade)
                 "Score"
                 (scoreData.Scoring.FormatAccuracy())
-                pbs.Accuracy
+                personal_bests.Accuracy
                 (
-                    match gradeAchieved.AccuracyNeeded with
+                    match grade.AccuracyNeeded with
                     | Some v -> 
-                        let nextgrade = scoreData.Ruleset.GradeName (gradeAchieved.Grade + 1)
+                        let nextgrade = scoreData.Ruleset.GradeName (grade.Grade + 1)
                         sprintf "+%.2f%% for %s grade" (v * 100.0 + 0.004) nextgrade
                     | None -> ""
                 )
                 (
-                    match existingBests with
+                    match previous_personal_bests with
                     | Some b -> getPb b.Accuracy (fun x -> sprintf "%.2f%%" (x * 100.0))
                     | None -> "--"
                 )
 
             infobar
                 (bartop + barh)
-                (scoreData.Ruleset.LampColor lampAchieved.Lamp)
+                (scoreData.Ruleset.LampColor lamp.Lamp)
                 "Lamp"
-                (scoreData.Ruleset.LampName lampAchieved.Lamp)
-                pbs.Lamp
+                (scoreData.Ruleset.LampName lamp.Lamp)
+                personal_bests.Lamp
                 (
-                    match lampAchieved.ImprovementNeeded with
+                    match lamp.ImprovementNeeded with
                     | Some i -> 
                         let judgement = if i.Judgement < 0 then "cbs" else scoreData.Ruleset.Judgements.[i.Judgement].Name
-                        let nextlamp = scoreData.Ruleset.LampName (lampAchieved.Lamp + 1)
+                        let nextlamp = scoreData.Ruleset.LampName (lamp.Lamp + 1)
                         sprintf "-%i %s for %s" i.LessNeeded judgement nextlamp
                     | None -> ""
                 )
                 (
-                    match existingBests with
+                    match previous_personal_bests with
                     | Some b -> getPb b.Lamp scoreData.Ruleset.LampName
                     | None -> "--"
                 )
@@ -247,53 +314,13 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                 (Themes.clearToColor (not scoreData.HP.Failed))
                 "HP"
                 (if scoreData.HP.Failed then "FAIL" else "CLEAR")
-                pbs.Clear
+                personal_bests.Clear
                 ""
                 (
-                    match existingBests with
+                    match previous_personal_bests with
                     | Some b -> getPb b.Clear (fun x -> if x then "CLEAR" else "FAIL")
                     | None -> "--"
                 )
-
-        // side panel
-        do
-            let panel = Rect.Create(this.Bounds.Left + 20.0f, this.Bounds.Top + 190.0f, this.Bounds.Left + 650.0f, this.Bounds.Bottom - 290.0f)
-            Draw.rect (panel.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White))
-            Background.draw (panel, (Color.FromArgb(80, 80, 80)), 2.0f)
-
-            let title = panel.SliceTop(100.0f).Shrink(20.0f)
-            Draw.rect title (Color.FromArgb(127, Color.Black))
-            Text.drawFillB(Style.baseFont, sprintf "%iK Results  •  %s" scoreData.Chart.Keys scoreData.Ruleset.Name, title, (Color.White, Color.Black), 0.5f)
-
-            // accuracy info
-            let counters = panel.TrimTop(70.0f).Shrink(20.0f).TrimBottom(120.0f)
-            Draw.rect counters (Color.FromArgb(127, Color.Black))
-
-            let judgeCounts = scoreData.Scoring.State.Judgements
-            let judgements = scoreData.Ruleset.Judgements |> Array.indexed
-            let h = (counters.Height - 20.0f) / float32 judgements.Length
-            let mutable y = counters.Top + 10.0f
-            for i, j in judgements do
-                let b = Rect.Create(counters.Left + 10.0f, y, counters.Right - 10.0f, y + h)
-                Draw.rect b (Color.FromArgb(40, j.Color))
-                Draw.rect (b.SliceLeft((counters.Width - 20.0f) * (float32 judgeCounts.[i] / float32 eventCounts.JudgementCount))) (Color.FromArgb(127, j.Color))
-                Text.drawFill(Style.baseFont, sprintf "%s: %i" j.Name judgeCounts.[i], b.Shrink(5.0f, 2.0f), Color.White, 0.0f)
-                y <- y + h
-
-            // stats
-            let nhit, ntotal = eventCounts.Notes
-            let hhit, htotal = eventCounts.Holds
-            let rhit, rtotal = eventCounts.Releases
-            let data = sprintf "Notes: %i/%i  •  Holds: %i/%i  •  Releases: %i/%i  •  Combo: %ix" nhit ntotal hhit htotal rhit rtotal scoreData.Scoring.State.BestCombo
-            Text.drawFillB(Style.baseFont, data, panel.SliceBottom(130.0f).TrimBottom(80.0f).Shrink(20.0f, 5.0f), (Color.White, Color.Black), 0.5f)
-            Text.drawFillB(Style.baseFont, scoreData.Mods, panel.SliceBottom(100.0f).Shrink(20.0f), (Color.White, Color.Black), 0.5f)
-
-        // top banner
-        Draw.rect (this.Bounds.SliceTop 190.0f) (Style.color(127, 0.5f, 0.0f))
-        Draw.rect (this.Bounds.SliceTop(195.0f).SliceBottom(5.0f)) (Color.FromArgb(127, Color.White))
-        // bottom banner
-        Draw.rect (this.Bounds.SliceBottom 290.0f) (Style.color(127, 0.5f, 0.0f))
-        Draw.rect (this.Bounds.SliceBottom(295.0f).SliceTop(5.0f)) (Color.FromArgb(127, Color.White))
 
         // right diamond
         do
@@ -307,7 +334,7 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                     (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding)
                     (this.Bounds.Right - size + padding + xadjust, halfh)
                 )
-                (Quad.colorOf (scoreData.Ruleset.GradeColor gradeAchieved.Grade))
+                (Quad.colorOf (scoreData.Ruleset.GradeColor grade.Grade))
                 Sprite.DefaultQuad
             Background.drawq ( 
                 ( Quad.createv
@@ -324,19 +351,15 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
                     (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding2)
                     (this.Bounds.Right - size + padding2 + xadjust, halfh)
                 )
-                (Quad.colorOf (Color.FromArgb(40, (scoreData.Ruleset.GradeColor gradeAchieved.Grade))))
+                (Quad.colorOf (Color.FromArgb(40, (scoreData.Ruleset.GradeColor grade.Grade))))
                 Sprite.DefaultQuad
 
         // grade stuff
         let gradeBounds = Rect.Box(this.Bounds.Right - halfh + xadjust - 270.0f, halfh - 305.0f, 540.0f, 540.0f)
-        Text.drawFill(Style.baseFont, scoreData.Ruleset.GradeName gradeAchieved.Grade, gradeBounds.Shrink 100.0f, scoreData.Ruleset.GradeColor gradeAchieved.Grade, 0.5f)
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-base")
-        if lampAchieved.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, lampAchieved.Lamp) <| getTexture "grade-lamp-overlay")
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, gradeAchieved.Grade) <| getTexture "grade-overlay")
-
-        // graph stuff
-        Draw.rect (graph.Bounds.Expand(5.0f, 5.0f)) Color.White
-        Background.draw (graph.Bounds, Color.FromArgb(127, 127, 127), 3.0f)
+        Text.drawFill(Style.baseFont, scoreData.Ruleset.GradeName grade.Grade, gradeBounds.Shrink 100.0f, scoreData.Ruleset.GradeColor grade.Grade, 0.5f)
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, grade.Grade) <| getTexture "grade-base")
+        if lamp.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, lamp.Lamp) <| getTexture "grade-lamp-overlay")
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, grade.Grade) <| getTexture "grade-overlay")
 
         base.Draw()
 
