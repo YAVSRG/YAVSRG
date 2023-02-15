@@ -178,7 +178,7 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
         Draw.rect (this.Bounds.Expand(5.0f, 0.0f)) (Color.FromArgb(127, Color.White))
         Background.draw (this.Bounds, (Color.FromArgb(80, 80, 80)), 2.0f)
 
-        let title = this.Bounds.SliceTop(100.0f).Shrink(20.0f)
+        let title = this.Bounds.SliceTop(100.0f).Shrink(5.0f, 20.0f)
         Draw.rect title (Color.FromArgb(127, Color.Black))
         Text.drawFillB(Style.baseFont, sprintf "%iK Results  •  %s" data.Chart.Keys data.Ruleset.Name, title, (Color.White, Color.Black), 0.5f)
         let mods = title.Translate(0.0f, 70.0f)
@@ -186,7 +186,7 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
         Text.drawFillB(Style.baseFont, data.Mods, mods, (Color.White, Color.Black), 0.5f)
 
         // accuracy info
-        let counters = Rect.Box(this.Bounds.Left, this.Bounds.Top + 150.0f, this.Bounds.Width, 320.0f)
+        let counters = Rect.Box(this.Bounds.Left + 5.0f, this.Bounds.Top + 160.0f, this.Bounds.Width - 10.0f, 310.0f)
         Draw.rect counters (Color.FromArgb(127, Color.Black))
 
         let judgeCounts = data.Scoring.State.Judgements
@@ -207,13 +207,74 @@ type Sidebar(stats: ScoreScreenStats ref, data: ScoreInfoProvider) =
         let stats = sprintf "Notes: %i/%i  •  Holds: %i/%i  •  Releases: %i/%i  •  Combo: %ix" nhit ntotal hhit htotal rhit rtotal data.Scoring.State.BestCombo
         Text.drawFillB(Style.baseFont, stats, this.Bounds.SliceBottom(80.0f).Shrink(5.0f, 5.0f), (Color.White, Color.Black), 0.5f)
         
+type Grade(grade: Grade.GradeResult ref, lamp: Lamp.LampResult ref, data: ScoreInfoProvider) =
+    inherit StaticWidget(NodeType.None)
+
+    override this.Draw() =
+        let x = this.Bounds.CenterX
+        let y = this.Bounds.CenterY - 35.0f
+        let size = (min this.Bounds.Height this.Bounds.Width) * 0.5f - 50.0f
+        let borderSize = size + 15.0f
+        Draw.quad
+            ( Quad.createv
+                (x, y - borderSize)
+                (x + borderSize, y)
+                (x, y + borderSize)
+                (x - borderSize, y)
+            )
+            (Quad.colorOf (data.Ruleset.GradeColor (!grade).Grade))
+            Sprite.DefaultQuad
+        Background.drawq ( 
+            ( Quad.createv
+                (x, y - size)
+                (x + size, y)
+                (x, y + size)
+                (x - size, y)
+            ), Color.FromArgb(60, 60, 60), 2.0f
+        )
+        Draw.quad
+            ( Quad.createv
+                (x, y - size)
+                (x + size, y)
+                (x, y + size)
+                (x - size, y)
+            )
+            (Quad.colorOf (Color.FromArgb(40, (data.Ruleset.GradeColor (!grade).Grade))))
+            Sprite.DefaultQuad
+
+        // grade stuff
+        let gradeBounds = Rect.Box(x - 270.0f, y - 270.0f, 540.0f, 540.0f)
+        Text.drawFill(Style.baseFont, data.Ruleset.GradeName (!grade).Grade, gradeBounds.Shrink 100.0f, data.Ruleset.GradeColor (!grade).Grade, 0.5f)
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, (!grade).Grade) <| getTexture "grade-base")
+        if (!lamp).Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, (!lamp).Lamp) <| getTexture "grade-lamp-overlay")
+        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, (!grade).Grade) <| getTexture "grade-overlay")
+        
+type InfoBar(color: unit -> System.Drawing.Color, label: string, text: unit -> string, pb: unit -> PersonalBestType, hint: unit -> string, existingPb: unit -> string) =
+    inherit StaticWidget(NodeType.None)
+
+    override this.Draw() =
+        let color = color()
+        let pb = pb()
+        let header = this.Bounds.SliceLeft 200.0f
+        let body = this.Bounds.TrimLeft 200.0f
+        Draw.rect this.Bounds (Color.FromArgb(80, color))
+        let header_card = header.SliceBottom (header.Height * 0.35f)
+        Draw.rect header_card (Color.FromArgb(80, color))
+        Draw.rect (body.SliceBottom 5.0f) (Color.FromArgb(80, color))
+        Text.drawFillB(Style.baseFont, label, header.TrimBottom (header.Height * 0.35f), (Color.White, Color.Black), 0.5f)
+        Text.drawFillB(Style.baseFont, text(), body.TrimLeft(10.0f).TrimBottom(header.Height * 0.3f), (color, Color.Black), 0.0f)
+        Text.drawFillB(Style.baseFont, hint(), body.TrimLeft(10.0f).SliceBottom(header.Height * 0.35f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
+        if pb = PersonalBestType.None then
+            Text.drawFillB(Style.baseFont, existingPb(), header_card, (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
+        else
+            Text.drawFillB(Style.baseFont, sprintf "%s %s " Icons.sparkle (L"score.new_record"), header_card, (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
 
 type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     inherit Screen()
 
     let mutable personal_bests = pbs
-    let mutable grade = Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
-    let mutable lamp = Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
+    let grade = ref <| Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+    let lamp = ref <| Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
     let stats = ref <| ScoreScreenStats.Generate scoreData.Scoring.HitEvents
     let mutable previous_personal_bests = 
         if Gameplay.Chart.saveData.Value.Bests.ContainsKey Rulesets.current_hash then 
@@ -232,8 +293,8 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
     let refresh() =
         personal_bests <- BestFlags.Default
-        grade <- Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
-        lamp <- Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
+        grade := Grade.calculateWithTarget scoreData.Ruleset.Grading.Grades scoreData.Scoring.State
+        lamp := Lamp.calculateWithTarget scoreData.Ruleset.Grading.Lamps scoreData.Scoring.State
         stats := ScoreScreenStats.Generate scoreData.Scoring.HitEvents
         previous_personal_bests <- None
         graph.Refresh()
@@ -244,124 +305,65 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
 
         |+ Sidebar(stats, scoreData, Position = { Left = 0.0f %+ 20.0f; Top = 0.0f %+ 190.0f; Right = 0.35f %- 0.0f; Bottom = 0.75f %- 0.0f})
         |+ TopBanner(scoreData, Position = Position.SliceTop(195.0f))
-        |* BottomBanner(stats, scoreData, graph, refresh, Position = { Position.Default with Top = 0.75f %- 5.0f })
 
-    override this.Draw() =
-        let halfh = this.Bounds.CenterY
-        let xadjust = 50.0f
-
-        // accuracy - lamp - clear bars
-        do
-            let barh = (halfh - 195.0f) / 3.0f
-            let bartop = this.Bounds.Top + 190.0f + 5.0f
-
-            let infobar t color label text pb hint existingPb = 
-                let box = Rect.Create(this.Bounds.Left + 650.0f, t, this.Bounds.Right - halfh, t + barh)
-                let header = box.SliceLeft 200.0f
-                let body = box.TrimLeft 200.0f
-                Draw.rect box (Color.FromArgb(80, color))
-                Draw.rect (header.SliceBottom 35.0f) (Color.FromArgb(80, color))
-                Draw.rect (body.SliceBottom 5.0f) (Color.FromArgb(80, color))
-                Text.drawFillB(Style.baseFont, label, header.TrimBottom 40.0f, (Color.White, Color.Black), 0.5f)
-                Text.drawFillB(Style.baseFont, text, body.TrimLeft(10.0f).TrimBottom(25.0f), (color, Color.Black), 0.0f)
-                Text.drawFillB(Style.baseFont, hint, body.TrimLeft(10.0f).SliceBottom(35.0f).TrimBottom(5.0f), (Color.White, Color.Black), 0.0f)
-                if pb = PersonalBestType.None then
-                    Text.drawFillB(Style.baseFont, existingPb, header.SliceBottom(35.0f), (Color.FromArgb(180, 180, 180, 180), Color.Black), 0.5f)
-                else
-                    Text.drawFillB(Style.baseFont, sprintf "%s %s " Icons.sparkle (L"score.new_record"), header.SliceBottom(35.0f), (themeConfig().PBColors.[int pb], Color.Black), 0.5f)
-
-            infobar
-                bartop 
-                (scoreData.Ruleset.GradeColor grade.Grade)
-                "Score"
-                (scoreData.Scoring.FormatAccuracy())
-                personal_bests.Accuracy
-                (
-                    match grade.AccuracyNeeded with
-                    | Some v -> 
-                        let nextgrade = scoreData.Ruleset.GradeName (grade.Grade + 1)
-                        sprintf "+%.2f%% for %s grade" (v * 100.0 + 0.004) nextgrade
-                    | None -> ""
-                )
-                (
-                    match previous_personal_bests with
-                    | Some b -> getPb b.Accuracy (fun x -> sprintf "%.2f%%" (x * 100.0))
-                    | None -> "--"
-                )
-
-            infobar
-                (bartop + barh)
-                (scoreData.Ruleset.LampColor lamp.Lamp)
-                "Lamp"
-                (scoreData.Ruleset.LampName lamp.Lamp)
-                personal_bests.Lamp
-                (
-                    match lamp.ImprovementNeeded with
-                    | Some i -> 
-                        let judgement = if i.Judgement < 0 then "cbs" else scoreData.Ruleset.Judgements.[i.Judgement].Name
-                        let nextlamp = scoreData.Ruleset.LampName (lamp.Lamp + 1)
-                        sprintf "-%i %s for %s" i.LessNeeded judgement nextlamp
-                    | None -> ""
-                )
-                (
-                    match previous_personal_bests with
-                    | Some b -> getPb b.Lamp scoreData.Ruleset.LampName
-                    | None -> "--"
-                )
-
-            infobar
-                (bartop + barh * 2.0f)
-                (Themes.clearToColor (not scoreData.HP.Failed))
-                "HP"
-                (if scoreData.HP.Failed then "FAIL" else "CLEAR")
-                personal_bests.Clear
-                ""
-                (
-                    match previous_personal_bests with
-                    | Some b -> getPb b.Clear (fun x -> if x then "CLEAR" else "FAIL")
-                    | None -> "--"
-                )
-
-        // right diamond
-        do
-            let padding = 110.0f
-            let padding2 = 125.0f
-            let size = this.Bounds.Height
-            Draw.quad
-                ( Quad.createv
-                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Top + padding)
-                    (this.Bounds.Right - padding + xadjust, halfh)
-                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding)
-                    (this.Bounds.Right - size + padding + xadjust, halfh)
-                )
-                (Quad.colorOf (scoreData.Ruleset.GradeColor grade.Grade))
-                Sprite.DefaultQuad
-            Background.drawq ( 
-                ( Quad.createv
-                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Top + padding2)
-                    (this.Bounds.Right - padding2 + xadjust, halfh)
-                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding2)
-                    (this.Bounds.Right - size + padding2 + xadjust, halfh)
-                ), Color.FromArgb(60, 60, 60), 2.0f
+        |+ InfoBar(
+            (fun () -> scoreData.Ruleset.GradeColor (!grade).Grade),
+            "Score",
+            (fun () -> scoreData.Scoring.FormatAccuracy()),
+            (fun () -> personal_bests.Accuracy),
+            (fun () ->
+                match (!grade).AccuracyNeeded with
+                | Some v -> 
+                    let nextgrade = scoreData.Ruleset.GradeName ((!grade).Grade + 1)
+                    sprintf "+%.2f%% for %s grade" (v * 100.0 + 0.004) nextgrade
+                | None -> ""
+            ),
+            (fun () ->
+                match previous_personal_bests with
+                | Some b -> getPb b.Accuracy (fun x -> sprintf "%.2f%%" (x * 100.0))
+                | None -> "--"
+            ),
+            Position = { Left = 0.35f %+ 0.0f; Top = 0.0f %+ 190.0f; Right = 0.83f %- 0.0f; Bottom = (0.5f / 3.0f) %+ (190.0f * (2.0f / 3.0f)) }
             )
-            Draw.quad
-                ( Quad.createv
-                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Top + padding2)
-                    (this.Bounds.Right - padding2 + xadjust, halfh)
-                    (this.Bounds.Right - halfh + xadjust, this.Bounds.Bottom - padding2)
-                    (this.Bounds.Right - size + padding2 + xadjust, halfh)
-                )
-                (Quad.colorOf (Color.FromArgb(40, (scoreData.Ruleset.GradeColor grade.Grade))))
-                Sprite.DefaultQuad
 
-        // grade stuff
-        let gradeBounds = Rect.Box(this.Bounds.Right - halfh + xadjust - 270.0f, halfh - 305.0f, 540.0f, 540.0f)
-        Text.drawFill(Style.baseFont, scoreData.Ruleset.GradeName grade.Grade, gradeBounds.Shrink 100.0f, scoreData.Ruleset.GradeColor grade.Grade, 0.5f)
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, grade.Grade) <| getTexture "grade-base")
-        if lamp.Lamp >= 0 then Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, lamp.Lamp) <| getTexture "grade-lamp-overlay")
-        Draw.quad (Quad.ofRect gradeBounds) (Quad.colorOf Color.White) (Sprite.gridUV (0, grade.Grade) <| getTexture "grade-overlay")
+        |+ InfoBar(
+            (fun () -> scoreData.Ruleset.LampColor (!lamp).Lamp),
+            "Lamp",
+            (fun () -> scoreData.Ruleset.LampName (!lamp).Lamp),
+            (fun () -> personal_bests.Lamp),
+            (fun () ->
+                match (!lamp).ImprovementNeeded with
+                | Some i -> 
+                    let judgement = if i.Judgement < 0 then "cbs" else scoreData.Ruleset.Judgements.[i.Judgement].Name
+                    let nextlamp = scoreData.Ruleset.LampName ((!lamp).Lamp + 1)
+                    sprintf "-%i %s for %s" i.LessNeeded judgement nextlamp
+                | None -> ""
+            ),
+            (fun () ->
+                match previous_personal_bests with
+                | Some b -> getPb b.Lamp scoreData.Ruleset.LampName
+                | None -> "--"
+            ),
+            Position = { Left = 0.35f %+ 0.0f; Top = (0.5f / 3.0f) %+ (190.0f * (2.0f / 3.0f)); Right = 0.83f %- 0.0f; Bottom = (1.0f / 3.0f) %+ (190.0f / 3.0f) }
+            )
+        
+        |+ InfoBar(
+            (fun () -> Themes.clearToColor (not scoreData.HP.Failed)),
+            "HP",
+            (fun () -> if scoreData.HP.Failed then "FAIL" else "CLEAR"),
+            (fun () -> personal_bests.Clear),
+            K "",
+            (fun () ->
+                match previous_personal_bests with
+                | Some b -> getPb b.Clear (fun x -> if x then "CLEAR" else "FAIL")
+                | None -> "--"
+            ),
+            Position = { Left = 0.35f %+ 0.0f; Top = (1.0f / 3.0f) %+ (190.0f / 3.0f); Right = 0.83f %- 0.0f; Bottom = 0.5f %+ 0.0f }
+            )
+            
+        |+ Grade(grade, lamp, scoreData, Position = { Position.Default with Left = 0.66f %+ 0.0f })
 
-        base.Draw()
+        |* BottomBanner(stats, scoreData, graph, refresh, Position = { Position.Default with Top = 0.75f %- 5.0f })
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
