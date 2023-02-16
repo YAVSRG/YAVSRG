@@ -6,10 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Version.txt" />
     <Compile Include="Users.fs" />
     <Compile Include="Lobbies.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="NetCoreServer" Version="7.0.0" />

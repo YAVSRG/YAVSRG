@@ -1,5 +1,6 @@
 ﻿open System
 open System.Threading
+open System.Reflection
 open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Server
@@ -39,9 +40,14 @@ let PORT =
     try Environment.GetEnvironmentVariable("PORT") |> int
     with err -> 32767
 
+let tagline = 
+    let stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Web.Server.Version.txt")
+    use tr = new IO.StreamReader(stream)
+    tr.ReadToEnd()
+
 try
 
-    Logging.Info(sprintf "Launching server on 0.0.0.0:%i ..." PORT)
+    Logging.Info(sprintf "Launching server [%s] on port %i ..." tagline PORT)
     Server.init { 
         Address = "0.0.0.0"; Port = PORT;
         Handle_Packet = handle_packet

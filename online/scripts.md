@@ -1,16 +1,18 @@
 # Build & Push
 
-### Build (from top level repo folder)
+For manual use, also see the github action which does the same
+
+Build (from top level repo folder)
 ```
 docker build -t interlude-web-server -f Interlude.Web/server/dockerfile .
 ```
 
-### gh actions uses doctl for this
+gh actions uses doctl for this
 ```
 docker login -u <TOKEN> -p <TOKEN> registry.digitalocean.com
 ```
 
-### Push
+Push
 ```
 docker tag interlude-web-server registry.digitalocean.com/yavsrg/interlude-web-server:latest
 docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
@@ -18,7 +20,9 @@ docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
 
 # Droplet setup
 
-### Docker setup
+Run on Ubuntu 22.10 x64
+
+### ./setup.sh
 ```
 sudo apt update
 
@@ -33,10 +37,15 @@ sudo apt install docker-ce
 sudo systemctl status docker
 ```
 
-### Run container
+### ./update.sh
 ```
 docker login -u <TOKEN> -p <TOKEN> registry.digitalocean.com
 docker pull registry.digitalocean.com/yavsrg/interlude-web-server
 docker rm server
 docker run -d -p 32767:32767 --restart unless-stopped --name server registry.digitalocean.com/yavsrg/interlude-web-server
+```
+
+### ./logs.sh
+```
+docker logs server
 ```
