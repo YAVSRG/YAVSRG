@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Multiplayer
 
+open System.Net
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Interlude.UI
@@ -89,7 +90,7 @@ module Network =
         username <- name
         Client.init 
             { 
-                Address = "127.0.0.1"
+                Address = IPAddress.Parse("144.126.234.130")
                 Port = 32767
                 Handle_Packet = handle_packet
                 Handle_Connect = handle_connect
