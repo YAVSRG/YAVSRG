@@ -1,4 +1,5 @@
 ﻿open System
+open System.Threading
 open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Server
@@ -38,17 +39,21 @@ let PORT =
     try Environment.GetEnvironmentVariable("PORT") |> int
     with err -> 32767
 
-Server.init { 
-    Address = "0.0.0.0"; Port = PORT;
-    Handle_Packet = handle_packet
-    Handle_Connect = handle_connect
-    Handle_Disconnect = handle_disconnect
-}
+try
 
-Logging.Info(sprintf "Launching server on 0.0.0.0:%i ..." PORT)
+    Logging.Info(sprintf "Launching server on 0.0.0.0:%i ..." PORT)
+    Server.init { 
+        Address = "0.0.0.0"; Port = PORT;
+        Handle_Packet = handle_packet
+        Handle_Connect = handle_connect
+        Handle_Disconnect = handle_disconnect
+    }
 
-Server.start()
+    Server.start()
 
-Console.ReadLine() |> ignore
+    Thread.Sleep Timeout.Infinite
 
-Server.stop()
+with err ->
+    Logging.Critical (err.ToString(), err)
+
+Logging.Wait()

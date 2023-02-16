@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Web.Shared
 
+open System.Net
 open System.Net.Sockets
 open NetCoreServer
 open Percyqaz.Common
@@ -8,7 +9,7 @@ module Client =
 
     type Config =
         {
-            Address: string
+            Address: IPAddress
             Port: int
             Handle_Packet: Downstream -> unit
             Handle_Connect: unit -> unit

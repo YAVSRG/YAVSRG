@@ -40,12 +40,13 @@ module UserState =
                         user_states.Add(id, UserState.Nothing)
 
                     | Action.Disconnect id ->
-                        match user_states.[id] with
-                        | UserState.LoggedIn username ->
-                                assert(usernames.Remove username)
-                                Logging.Info(sprintf "<- %s" username)
-                        | _ -> ()
-                        assert(user_states.Remove id)
+                        if user_states.ContainsKey id then
+                            match user_states.[id] with
+                            | UserState.LoggedIn username ->
+                                    assert(usernames.Remove username)
+                                    Logging.Info(sprintf "<- %s" username)
+                            | _ -> ()
+                            assert(user_states.Remove id)
 
                     | Action.Handshake id ->
                         match user_states.[id] with
