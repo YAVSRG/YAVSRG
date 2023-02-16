@@ -51,3 +51,5 @@ docker run -d -p 32767:32767 --restart unless-stopped --name server registry.dig
 ```
 docker logs server
 ```
+
+Still need a docker compose file and proper ssh stuff to secure it

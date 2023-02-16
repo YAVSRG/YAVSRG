@@ -1,1 +1,1 @@
-﻿the one where i test ssh stuff
+﻿celebrating the first simple ci/cd pipeline
