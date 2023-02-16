@@ -22,6 +22,8 @@ docker push registry.digitalocean.com/yavsrg/interlude-web-server:latest
 
 Run on Ubuntu 22.10 x64
 
+Got setup info from https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-22-04
+
 ### ./setup.sh
 ```
 sudo apt update
