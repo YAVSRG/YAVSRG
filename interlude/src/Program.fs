@@ -8,6 +8,7 @@ open Interlude
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Printerlude
+open Interlude.Features.Multiplayer
 
 [<EntryPoint>]
 let main argv =
@@ -41,6 +42,7 @@ let main argv =
             )
 
         Options.save()
+        Network.shutdown()
 
         m.ReleaseMutex()
     else

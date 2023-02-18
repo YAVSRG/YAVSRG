@@ -21,6 +21,7 @@ type Credentials =
     static member Location = Path.Combine(getDataPath "Data", "login.json") 
     static member Load() =
         if File.Exists Credentials.Location then
+            File.SetAttributes(Credentials.Location, FileAttributes.Normal)
             Credentials.Location
             |> JSON.FromFile
             |> function Ok res -> res | Error e -> Logging.Error("Error loading login credentials, you will need to log in again.", e); Credentials.Default
