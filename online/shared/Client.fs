@@ -32,7 +32,6 @@ module private Client =
             try Buffer.handle(buffer, data, offset, size, Downstream.Read >> config.Handle_Packet)
             with err ->
                 Logging.Error(sprintf "Internal error processing socket data: %O" err)
-                this.SendPacket Upstream.DISCONNECT
                 this.Disconnect() |> ignore
 
         override this.OnError(error: SocketError) =
@@ -55,6 +54,9 @@ type Client(address: IPAddress, port: int) as this =
 
     member this.Connect() =
         session.ConnectAsync() |> ignore
+
+    member this.Disconnect() =
+        session.Disconnect() |> ignore
 
     member this.Send(packet: Upstream) =
         let packet_with_header = Buffer.packet_bytes(packet.Write())

@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 0uy
+    let PROTOCOL_VERSION = 1uy
 
     type LobbyChart =
         {
@@ -55,10 +55,9 @@ module Packets =
 
     [<RequireQualifiedAccess>]
     type Upstream =
-        | DISCONNECT
-
         | VERSION of byte
         | LOGIN of username: string
+        | LOGOUT
 
         | GET_LOBBIES
         | JOIN_LOBBY of id: Guid
@@ -86,9 +85,9 @@ module Packets =
             use br = new BinaryReader(ms)
             let packet = 
                 match kind with
-                | 0x00uy -> DISCONNECT
-                | 0x01uy -> VERSION (br.ReadByte())
-                | 0x02uy -> LOGIN (br.ReadString())
+                | 0x00uy -> VERSION (br.ReadByte())
+                | 0x01uy -> LOGIN (br.ReadString())
+                | 0x02uy -> LOGOUT
 
                 | 0x10uy -> GET_LOBBIES
                 | 0x11uy -> JOIN_LOBBY (new Guid(br.ReadBytes 16)) 
@@ -120,9 +119,9 @@ module Packets =
             use bw = new BinaryWriter(ms)
             let kind = 
                 match this with
-                | DISCONNECT -> 0x00uy
-                | VERSION v -> bw.Write v; 0x01uy
-                | LOGIN name -> bw.Write name; 0x02uy
+                | VERSION v -> bw.Write v; 0x00uy
+                | LOGIN name -> bw.Write name; 0x01uy
+                | LOGOUT -> 0x02uy
                 
                 | GET_LOBBIES -> 0x10uy
                 | JOIN_LOBBY id -> bw.Write (id.ToByteArray()); 0x11uy

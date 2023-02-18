@@ -10,13 +10,13 @@ let handle_packet(id: Guid, packet: Upstream) =
         Logging.Debug (sprintf "%O >> %A" id packet)
         match packet with
 
-        | Upstream.DISCONNECT -> Server.kick(id, "User disconnect")
-
         | Upstream.VERSION v -> 
             if v = PROTOCOL_VERSION then UserState.handshake id
             else Server.kick(id, "Protocol version mismatch")
         | Upstream.LOGIN username ->
             UserState.login(id, username)
+        | Upstream.LOGOUT ->
+            UserState.logout(id)
 
         | Upstream.GET_LOBBIES -> Lobby.list id
         | Upstream.JOIN_LOBBY lid -> Lobby.join (id, lid)

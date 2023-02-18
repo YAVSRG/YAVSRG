@@ -19,6 +19,7 @@ module UserState =
         | Disconnect of Guid
         | Handshake of Guid
         | Login of Guid * string
+        | Logout of Guid
 
     let private user_states = Dictionary<Guid, UserState>()
     let private usernames = Dictionary<string, Guid>()
@@ -71,6 +72,13 @@ module UserState =
                         | UserState.Nothing -> Server.kick(id, "Login sent before handshake")
                         | _ -> Server.kick(id, "Login sent twice")
 
+                    | Action.Logout id ->
+                        match user_states.[id] with
+                        | UserState.LoggedIn username ->
+                            usernames.Remove username |> ignore
+                            user_states.[id] <- UserState.Handshake
+                            Logging.Info(sprintf "[<- %s" username)
+                        | _ -> Server.kick(id, "Not logged in")
             }
         }
 
@@ -85,6 +93,9 @@ module UserState =
 
     let login(id, username) =
         state_change.Request(Action.Login (id, username), ignore)
+
+    let logout(id) =
+        state_change.Request(Action.Logout (id), ignore)
 
     let private username_lookup =
         { new Async.Service<Guid, string option>()
