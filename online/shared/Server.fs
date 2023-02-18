@@ -62,12 +62,14 @@ module Server =
 
     let send(id: Guid, packet: Downstream) =
         let packet_with_header = Buffer.packet_bytes(packet.Write())
-        server.FindSession(id).Send packet_with_header |> ignore
+        let session = server.FindSession(id)
+        if not (isNull session) then session.Send packet_with_header |> ignore
 
     let kick(id: Guid, reason: string) =
         Logging.Info (sprintf "Kicking session %O: %s" id reason)
         send(id, Downstream.DISCONNECT reason)
-        server.FindSession(id).Disconnect() |> ignore
+        let session = server.FindSession(id)
+        if not (isNull session) then session.Disconnect() |> ignore
 
     let stop() = 
         Logging.Info "Stopping server..."

@@ -219,6 +219,6 @@ module Lobby =
 
     let list(player) = state_change.Request( Action.List player, ignore )
 
-    let user_disconnected(player) =
-        if in_lobby.ContainsKey(player) then state_change.Request( Action.Leave(player), ignore )
-
+    let user_disconnected(player, callback) =
+        if in_lobby.ContainsKey(player) then state_change.Request( Action.Leave(player), callback)
+        else callback()

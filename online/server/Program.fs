@@ -33,8 +33,7 @@ let handle_packet(id: Guid, packet: Upstream) =
 
 let handle_connect(id: Guid) = UserState.connect id
 let handle_disconnect(id: Guid) = 
-    Lobby.user_disconnected id
-    UserState.disconnect id
+    Lobby.user_disconnected (id, fun () -> UserState.disconnect id)
 
 let PORT = 
     try Environment.GetEnvironmentVariable("PORT") |> int
