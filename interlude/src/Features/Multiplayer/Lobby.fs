@@ -116,6 +116,7 @@ type LobbyScreen() =
     override this.OnEnter(_) =
         in_lobby <- Network.lobby.IsSome
         swap.Current <- if in_lobby then main :> Widget else list
+        if not in_lobby then Network.refresh_lobby_list()
     override this.OnExit(_) = ()
 
     override this.Init(parent) =
