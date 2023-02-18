@@ -18,7 +18,7 @@ type LoginPage() as this =
         Network.login(username.Value)
 
     let success(username) =
-        Credentials.username <- username
+        Network.credentials.Username <- username
         Menu.Back()
 
     let handler = Network.Events.successful_login.Subscribe(success)
@@ -70,7 +70,7 @@ type Status() =
         | Network.Connected -> [ 
                 Icons.login + " Log in", 
                 fun () -> 
-                    if Credentials.username <> "" then Network.login Credentials.username
+                    if Network.credentials.Username <> "" then Network.login Network.credentials.Username
                     else Menu.ShowPage LoginPage
             ]
         | Network.LoggedIn -> [

@@ -19,8 +19,6 @@ module Network =
 
     let mutable status = NotConnected
     let mutable username = ""
-    let mutable local = true
-    let online_ip = try Dns.GetHostAddresses("online.yavsrg.net").[0] with err -> Logging.Error("Failed to perform DNS lookup for online.yavsrg.net"); IPAddress.Parse("127.0.0.1")
 
     type LobbyPlayer =
         {
@@ -54,12 +52,16 @@ module Network =
     let mutable lobby : Lobby option = None
 
     let mutable lobby_list : LobbyInfo array = [||]
+
+    let lookup_ip(address) = 
+        try Dns.GetHostAddresses(address).[0]
+        with err -> Logging.Error("Failed to perform DNS lookup for " + address, err); IPAddress.Parse("127.0.0.1")
+
+    let credentials = Credentials.Load()
     
     let client =
-        let target = 
-            if local then IPAddress.Parse("127.0.0.1")
-            else Dns.GetHostAddresses("online.yavsrg.net").[0]
-        { new Client(target, 32767) with
+        let ip = lookup_ip(credentials.Host)
+        { new Client(ip, 32767) with
 
             override this.OnConnected() = status <- Connected
 
@@ -74,7 +76,7 @@ module Network =
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
                     Notifications.add(Localisation.localiseWith [reason] "notification.network.disconnected", NotificationType.Error)
 
-                | Downstream.HANDSHAKE_SUCCESS -> if Credentials.username <> "" then this.Send(Upstream.LOGIN Credentials.username)
+                | Downstream.HANDSHAKE_SUCCESS -> if credentials.Username <> "" then this.Send(Upstream.LOGIN credentials.Username)
                 | Downstream.LOGIN_SUCCESS name -> 
                     Logging.Info(sprintf "Logged in as %s" name)
                     sync(fun () -> Events.successful_login_ev.Trigger name)
@@ -111,8 +113,7 @@ module Network =
         if status <> NotConnected && status <> ConnectionFailed then () else
         status <- Connecting
 
-        if local then Logging.Info "Connecting to local instance of server ..."
-        else Logging.Info(sprintf "Connecting to online.yavsrg.net [%O] ..." online_ip)
+        Logging.Info(sprintf "Connecting to %s ..." credentials.Host)
         client.Connect()
 
     let login(name) =
@@ -137,3 +138,7 @@ module Network =
     
     let leave_lobby() =
         client.Send(Upstream.LEAVE_LOBBY)
+
+    let shutdown() =
+        if status <> NotConnected then client.Disconnect()
+        credentials.Save()
