@@ -8,13 +8,14 @@ open Interlude.UI.Components
 open Interlude.Web.Shared
 
 type LobbyInfoCard(info: LobbyInfo) =
-    inherit StaticContainer(NodeType.None)
+    inherit Frame(NodeType.None)
 
     override this.Init(parent) =
         this
-        |+ Text(info.Name, Position = Position.SliceTop 50.0f, Align = Alignment.LEFT)
-        |+ Text((match info.CurrentlyPlaying with None -> "--" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom 30.0f, Align = Alignment.LEFT)
-        |* Text(sprintf "%i players" info.Players, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(10.0f), Align = Alignment.RIGHT)
+        |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text((match info.CurrentlyPlaying with None -> "Idle" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(30.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Clickable(fun () -> Network.join_lobby info.Id)
+        |* Text(sprintf "%i players" info.Players, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
         base.Init parent
 
     member this.Name = info.Name
@@ -84,7 +85,7 @@ type PlayerList() =
     override this.Draw() =
         let user_bounds = this.Bounds.SliceTop(35.0f)
         Draw.rect user_bounds (Style.main 100 ())
-        Text.drawFillB(Style.baseFont, Network.username, user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
+        Text.drawFillB(Style.baseFont, Network.username.Value, user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
         Text.drawFillB(Style.baseFont, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
 
 type Lobby() =

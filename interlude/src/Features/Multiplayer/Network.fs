@@ -9,9 +9,16 @@ open Interlude.Web.Shared
 
 module Network =
 
-    let mutable username = ""
-    let mutable connected = false
-    let mutable local = false
+    type Status = 
+        | NotConnected
+        | Connecting
+        | ConnectionFailed
+        | Connected
+
+    let mutable status = NotConnected
+    let mutable requested_username = ""
+    let mutable username : string option = None
+    let mutable local = true
     let online_ip = try Dns.GetHostAddresses("online.yavsrg.net").[0] with err -> Logging.Error("Failed to perform DNS lookup for online.yavsrg.net"); IPAddress.Parse("127.0.0.1")
 
     type LobbyPlayer =
@@ -50,19 +57,21 @@ module Network =
             else Dns.GetHostAddresses("online.yavsrg.net").[0]
         { new Client(target, 32767) with
 
-            override this.OnConnected() = connected <- true 
+            override this.OnConnected() = status <- Connected
 
-            override this.OnDisconnected() = lobby <- None; connected <- false
+            override this.OnDisconnected() = 
+                lobby <- None
+                status <- if status = Connecting then ConnectionFailed else NotConnected
 
             override this.OnPacketReceived(packet: Downstream) =
                 printfn "%A" packet
                 match packet with
                 | Downstream.DISCONNECT reason -> Logging.Info(sprintf "Disconnected from server: %s" reason)
 
-                | Downstream.HANDSHAKE_SUCCESS -> this.Send(Upstream.LOGIN username)
-                | Downstream.LOGIN_SUCCESS username -> 
-                    Logging.Info(sprintf "Successfully logged in as %s" username)
-                    sync(fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default)
+                | Downstream.HANDSHAKE_SUCCESS -> this.Send(Upstream.LOGIN requested_username)
+                | Downstream.LOGIN_SUCCESS name -> 
+                    Logging.Info(sprintf "Logged in as %s" name)
+                    username <- Some name
 
                 | Downstream.LOBBY_LIST lobbies -> lobby_list <- lobbies; sync Events.receive_lobby_list_ev.Trigger
                 | Downstream.YOU_JOINED_LOBBY players ->
@@ -91,9 +100,10 @@ module Network =
         }
 
     let connect(name) =
-        if connected then () else 
+        if status <> NotConnected && status <> ConnectionFailed then () else
+        status <- Connecting
 
-        username <- name
+        requested_username <- name
         if local then Logging.Info "Connecting to local instance of server ..."
         else Logging.Info(sprintf "Connecting to online.yavsrg.net [%O] ..." online_ip)
         client.Connect()
@@ -103,6 +113,9 @@ module Network =
 
     let create_lobby name =
         client.Send(Upstream.CREATE_LOBBY name)
+
+    let join_lobby id =
+        client.Send(Upstream.JOIN_LOBBY id)
     
     let leave_lobby() =
         client.Send(Upstream.LEAVE_LOBBY)

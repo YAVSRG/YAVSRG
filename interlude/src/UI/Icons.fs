@@ -65,3 +65,8 @@ module Icons =
     let info = Feather.info
     let alert = Feather.alert_circle
     let system_notification = Feather.alert_octagon
+
+    let connected = Feather.globe
+    let connecting = Feather.globe
+    let connectionFailed = Feather.slash
+    let notConnected = Feather.user_x

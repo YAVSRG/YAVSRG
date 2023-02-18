@@ -12,6 +12,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.UI.Screen.Toolbar
+open Interlude.Features
 open Interlude.Features.Wiki
 open Interlude.Features.OptionsMenu
 open Interlude.Features.Printerlude
@@ -51,6 +52,7 @@ type Toolbar() =
                 Hotkey = "wiki",
                 HoverIcon = Icons.wiki2)
             )
+        |+ Multiplayer.Status(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
         |+ HotkeyAction("screenshot", fun () ->
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
             let path = Path.Combine(getDataPath "Screenshots", id)

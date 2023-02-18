@@ -8,7 +8,6 @@ open Prelude.Common
 open Interlude
 open Interlude.Utils
 open Interlude.UI
-open Interlude.UI.Components
         
 module Screen =
     
