@@ -14,10 +14,11 @@ module Network =
         | Connecting
         | ConnectionFailed
         | Connected
+        | LoggedIn
 
     let mutable status = NotConnected
     let mutable requested_username = ""
-    let mutable username : string option = None
+    let mutable username = ""
     let mutable local = true
     let online_ip = try Dns.GetHostAddresses("online.yavsrg.net").[0] with err -> Logging.Error("Failed to perform DNS lookup for online.yavsrg.net"); IPAddress.Parse("127.0.0.1")
 
@@ -68,10 +69,11 @@ module Network =
                 match packet with
                 | Downstream.DISCONNECT reason -> Logging.Info(sprintf "Disconnected from server: %s" reason)
 
-                | Downstream.HANDSHAKE_SUCCESS -> this.Send(Upstream.LOGIN requested_username)
+                | Downstream.HANDSHAKE_SUCCESS -> if requested_username <> "" then this.Send(Upstream.LOGIN requested_username)
                 | Downstream.LOGIN_SUCCESS name -> 
                     Logging.Info(sprintf "Logged in as %s" name)
-                    username <- Some name
+                    status <- LoggedIn
+                    username <- name
 
                 | Downstream.LOBBY_LIST lobbies -> lobby_list <- lobbies; sync Events.receive_lobby_list_ev.Trigger
                 | Downstream.YOU_JOINED_LOBBY players ->
@@ -99,14 +101,25 @@ module Network =
                 | _ -> () // nyi
         }
 
-    let connect(name) =
+    let connect() =
         if status <> NotConnected && status <> ConnectionFailed then () else
         status <- Connecting
 
-        requested_username <- name
         if local then Logging.Info "Connecting to local instance of server ..."
         else Logging.Info(sprintf "Connecting to online.yavsrg.net [%O] ..." online_ip)
         client.Connect()
+
+    let login(name) =
+        requested_username <- name
+        if status = Connected then client.Send(Upstream.LOGIN name)
+
+    let logout() = 
+        if status = LoggedIn then
+            client.Send(Upstream.LOGOUT)
+            status <- Connected
+
+    let disconnect() =
+        client.Disconnect()
 
     let refresh_lobby_list() =
         client.Send(Upstream.GET_LOBBIES)

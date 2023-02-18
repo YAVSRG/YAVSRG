@@ -85,7 +85,7 @@ type PlayerList() =
     override this.Draw() =
         let user_bounds = this.Bounds.SliceTop(35.0f)
         Draw.rect user_bounds (Style.main 100 ())
-        Text.drawFillB(Style.baseFont, Network.username.Value, user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
+        Text.drawFillB(Style.baseFont, Network.username, user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
         Text.drawFillB(Style.baseFont, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
 
 type Lobby() =
