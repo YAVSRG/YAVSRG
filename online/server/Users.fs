@@ -23,7 +23,7 @@ module UserState =
     let private user_states = Dictionary<Guid, UserState>()
     let private usernames = Dictionary<string, Guid>()
 
-    let VALID_USERNAME_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!*_-+=~|' "
+    let VALID_USERNAME_CHARACTERS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!*_-+=~|' "
     let valid_username (proposed: string) : bool =
         if (proposed.Length < 2 || proposed.Length > 20) then false else
 
@@ -43,10 +43,10 @@ module UserState =
                         if user_states.ContainsKey id then
                             match user_states.[id] with
                             | UserState.LoggedIn username ->
-                                    assert(usernames.Remove username)
-                                    Logging.Info(sprintf "<- %s" username)
+                                usernames.Remove username |> ignore
+                                Logging.Info(sprintf "[<- %s" username)
                             | _ -> ()
-                            assert(user_states.Remove id)
+                            user_states.Remove id |> ignore
 
                     | Action.Handshake id ->
                         match user_states.[id] with
@@ -65,7 +65,7 @@ module UserState =
                                 usernames.Add(username, id)
                                 user_states.[id] <- UserState.LoggedIn username
                                 Server.send(id, Downstream.LOGIN_SUCCESS username)
-                                Logging.Info(sprintf "-> %s" username)
+                                Logging.Info(sprintf "[-> %s" username)
                             else Server.kick(id, "Invalid username")
 
                         | UserState.Nothing -> Server.kick(id, "Login sent before handshake")

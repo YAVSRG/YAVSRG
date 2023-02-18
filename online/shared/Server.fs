@@ -65,6 +65,7 @@ module Server =
         server.FindSession(id).Send packet_with_header |> ignore
 
     let kick(id: Guid, reason: string) =
+        Logging.Info (sprintf "Kicking session %O: %s" id reason)
         send(id, Downstream.DISCONNECT reason)
         server.FindSession(id).Disconnect() |> ignore
 

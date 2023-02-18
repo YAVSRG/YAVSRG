@@ -41,8 +41,8 @@ sudo systemctl status docker
 
 ### ./update.sh
 ```
-docker login -u <TOKEN> -p <TOKEN> registry.digitalocean.com
 docker pull registry.digitalocean.com/yavsrg/interlude-web-server
+docker stop server
 docker rm server
 docker run -d -p 32767:32767 --restart unless-stopped --name server registry.digitalocean.com/yavsrg/interlude-web-server
 ```

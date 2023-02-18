@@ -7,7 +7,7 @@ open Interlude.Web.Server
 
 let handle_packet(id: Guid, packet: Upstream) =
     async {
-        printfn "%O >> %A" id packet
+        Logging.Debug (sprintf "%O >> %A" id packet)
         match packet with
 
         | Upstream.DISCONNECT -> Server.kick(id, "User disconnect")
@@ -33,8 +33,8 @@ let handle_packet(id: Guid, packet: Upstream) =
 
 let handle_connect(id: Guid) = UserState.connect id
 let handle_disconnect(id: Guid) = 
+    Lobby.user_disconnected id
     UserState.disconnect id
-    Lobby.leave id
 
 let PORT = 
     try Environment.GetEnvironmentVariable("PORT") |> int

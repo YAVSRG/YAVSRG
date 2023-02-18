@@ -5,7 +5,7 @@ open System.Net.Sockets
 open NetCoreServer
 open Percyqaz.Common
 
-module Client = 
+module private Client = 
 
     type Config =
         {
@@ -16,17 +16,17 @@ module Client =
             Handle_Disconnect: unit -> unit
         }
 
-    type private Session(config: Config) =
+    type Session(config: Config) =
         inherit TcpClient(config.Address, config.Port)
 
         let buffer = ref Empty
 
         override this.OnConnected() =
-            Logging.Info "Connected to server!"
+            config.Handle_Connect()
             this.SendPacket(Upstream.VERSION PROTOCOL_VERSION)
 
         override this.OnDisconnected() =
-            Logging.Info "Disconnected from server."
+            config.Handle_Disconnect()
 
         override this.OnReceived(data: byte array, offset: int64, size: int64) =
             try Buffer.handle(buffer, data, offset, size, Downstream.Read >> config.Handle_Packet)
@@ -42,14 +42,24 @@ module Client =
             let packet_with_header = Buffer.packet_bytes(packet.Write())
             this.SendAsync packet_with_header |> ignore
 
-    let mutable private session = Unchecked.defaultof<Session>
+[<AbstractClass>]
+type Client(address: IPAddress, port: int) as this =
 
-    let init(config: Config) =
-        session <- new Session(config)
+    let session = new Client.Session({ 
+            Address = address
+            Port = port
+            Handle_Connect = this.OnConnected
+            Handle_Disconnect = this.OnDisconnected
+            Handle_Packet = this.OnPacketReceived
+        })
 
-    let connect() =
+    member this.Connect() =
         session.ConnectAsync() |> ignore
 
-    let send(packet: Upstream) =
+    member this.Send(packet: Upstream) =
         let packet_with_header = Buffer.packet_bytes(packet.Write())
         session.SendAsync packet_with_header |> ignore
+
+    abstract member OnConnected : unit -> unit
+    abstract member OnDisconnected : unit -> unit
+    abstract member OnPacketReceived : Downstream -> unit

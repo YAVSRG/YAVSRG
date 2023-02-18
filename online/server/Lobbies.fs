@@ -143,15 +143,15 @@ module Lobby =
 
                         let lobby = lobbies.[lobby_id]
                         
-                        assert(lobby.Players.Remove player)
-                        assert(in_lobby.Remove player)
+                        lobby.Players.Remove player |> ignore
+                        in_lobby.Remove player |> ignore
 
                         for p in lobby.Players.Keys do
                             Server.send(p, Downstream.PLAYER_LEFT_LOBBY username)
                         Server.send(player, Downstream.YOU_LEFT_LOBBY)
 
                         if lobby.Players.Count = 0 then
-                            assert(lobbies.Remove lobby_id)
+                            lobbies.Remove lobby_id |> ignore
                             Logging.Info (sprintf "Closed lobby: %s (%O)" lobby.Settings.Name lobby_id)
                         else
                             if lobby.Host = player then 
@@ -213,5 +213,8 @@ module Lobby =
     let chat(player, message) = state_change.Request( Action.Chat(player, message) , ignore )
     let ready_up(player, ready) = state_change.Request( Action.ReadyUp(player, ready) , ignore )
 
-    let list(player) = state_change.Request( Action.List player , ignore )
+    let list(player) = state_change.Request( Action.List player, ignore )
+
+    let user_disconnected(player) =
+        if in_lobby.ContainsKey(player) then state_change.Request( Action.Leave(player), ignore )
 
