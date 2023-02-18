@@ -1,0 +1,2 @@
+cd tests
+dotnet run

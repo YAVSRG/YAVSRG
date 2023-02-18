@@ -121,14 +121,16 @@ module Lobby =
                         else
 
                         let lobby = lobbies.[lobby_id]
-                        let players = lobby.Players.Values |> Seq.map (fun p -> p.Username) |> Array.ofSeq
+                        let player_list = lobby.Players.Values |> Seq.map (fun p -> p.Username) |> Array.ofSeq
 
                         for p in lobby.Players.Keys do
                             Server.send(p, Downstream.PLAYER_JOINED_LOBBY username)
-
+                            
+                        in_lobby.Add(player, lobby_id)
                         lobby.Players.Add(player, LobbyPlayer.Create username)
+                        Logging.Info(sprintf "%s joined lobby %O, %i players now in lobby" username lobby_id lobby.Players.Count)
 
-                        Server.send(player, Downstream.YOU_JOINED_LOBBY players)
+                        Server.send(player, Downstream.YOU_JOINED_LOBBY player_list)
                         // todo: send them all the ready statuses too
                         Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
 
@@ -149,6 +151,8 @@ module Lobby =
                         for p in lobby.Players.Keys do
                             Server.send(p, Downstream.PLAYER_LEFT_LOBBY username)
                         Server.send(player, Downstream.YOU_LEFT_LOBBY)
+
+                        Logging.Info(sprintf "%s left lobby %O, %i players remain" username lobby_id lobby.Players.Count)
 
                         if lobby.Players.Count = 0 then
                             lobbies.Remove lobby_id |> ignore
