@@ -1,10 +1,11 @@
 ﻿namespace Interlude.Features.Multiplayer
 
 open System.Net
+open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.UI
+open Prelude.Common
 open Interlude.UI
-open System.Collections.Generic
 open Interlude.Web.Shared
 
 module Network =
@@ -17,7 +18,6 @@ module Network =
         | LoggedIn
 
     let mutable status = NotConnected
-    let mutable requested_username = ""
     let mutable username = ""
     let mutable local = true
     let online_ip = try Dns.GetHostAddresses("online.yavsrg.net").[0] with err -> Logging.Error("Failed to perform DNS lookup for online.yavsrg.net"); IPAddress.Parse("127.0.0.1")
@@ -36,6 +36,9 @@ module Network =
         }
 
     module Events =
+        let successful_login_ev = new Event<string>()
+        let successful_login = successful_login_ev.Publish
+
         let receive_lobby_list_ev = new Event<unit>()
         let receive_lobby_list = receive_lobby_list_ev.Publish
 
@@ -67,11 +70,14 @@ module Network =
             override this.OnPacketReceived(packet: Downstream) =
                 printfn "%A" packet
                 match packet with
-                | Downstream.DISCONNECT reason -> Logging.Info(sprintf "Disconnected from server: %s" reason)
+                | Downstream.DISCONNECT reason -> 
+                    Logging.Info(sprintf "Disconnected from server: %s" reason)
+                    Notifications.add(Localisation.localiseWith [reason] "notification.network.disconnected", NotificationType.Error)
 
-                | Downstream.HANDSHAKE_SUCCESS -> if requested_username <> "" then this.Send(Upstream.LOGIN requested_username)
+                | Downstream.HANDSHAKE_SUCCESS -> if Credentials.username <> "" then this.Send(Upstream.LOGIN Credentials.username)
                 | Downstream.LOGIN_SUCCESS name -> 
                     Logging.Info(sprintf "Logged in as %s" name)
+                    sync(fun () -> Events.successful_login_ev.Trigger name)
                     status <- LoggedIn
                     username <- name
 
@@ -110,7 +116,6 @@ module Network =
         client.Connect()
 
     let login(name) =
-        requested_username <- name
         if status = Connected then client.Send(Upstream.LOGIN name)
 
     let logout() = 

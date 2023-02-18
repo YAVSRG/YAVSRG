@@ -13,9 +13,9 @@ type LobbyInfoCard(info: LobbyInfo) =
     override this.Init(parent) =
         this
         |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Text((match info.CurrentlyPlaying with None -> "Idle" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(30.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text((match info.CurrentlyPlaying with None -> "No song selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
         |+ Clickable(fun () -> Network.join_lobby info.Id)
-        |* Text(sprintf "%i players" info.Players, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
+        |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
         base.Init parent
 
     member this.Name = info.Name
@@ -25,7 +25,7 @@ type LobbyList() =
 
     let searchtext = Setting.simple ""
 
-    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Position = Position.Margin (0.0f, 60.0f))
+    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 70.0f))
     let mutable no_lobbies = false
 
     let refresh() =

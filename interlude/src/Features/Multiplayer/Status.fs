@@ -1,11 +1,37 @@
 ﻿namespace Interlude.Features.Multiplayer
 
+open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.UI
 open Interlude.UI.Components
+open Interlude.UI.Menu
+
+type LoginPage() as this =
+    inherit Page()
+
+    let username = Setting.simple ""
+
+    let login() =
+        Network.login(username.Value)
+
+    let success(username) =
+        Credentials.username <- username
+        Menu.Back()
+
+    let handler = Network.Events.successful_login.Subscribe(success)
+
+    do
+        this.Content(
+            column()
+            |+ PrettySetting("login.username", TextEntry(username, "none")).Pos(200.0f)
+            |+ PrettyButton("confirm.yes", login).Pos(300.0f)
+        )
+
+    override this.Title = N"login"
+    override this.OnClose() = handler.Dispose()
 
 type Status() =
     inherit StaticWidget(NodeType.None)
@@ -17,7 +43,7 @@ type Status() =
             | Network.NotConnected -> Icons.notConnected + "  Offline", Color.FromArgb(200, 200, 200)
             | Network.Connecting -> Icons.connecting + "  Connecting..", Color.FromArgb(255, 255, 160)
             | Network.ConnectionFailed -> Icons.connectionFailed + "  Offline", Color.FromArgb(255, 160, 160)
-            | Network.Connected -> Icons.connected + "  Guest", Color.FromArgb(160, 255, 160)
+            | Network.Connected -> Icons.connected + "  Not logged in", Color.FromArgb(160, 255, 160)
             | Network.LoggedIn -> Icons.connected + "  " + Network.username, Color.FromArgb(160, 255, 160)
 
         Draw.rect area (Color.FromArgb(100, 0, 0, 0))
@@ -38,23 +64,24 @@ type Status() =
 
     member this.MenuItems : (string * (unit -> unit)) seq =
         match Network.status with
-        | Network.NotConnected -> [ "Connect", fun () -> Network.connect() ]
-        | Network.Connecting -> [ "Please wait..", ignore ]
-        | Network.ConnectionFailed -> [ "Reconnect", fun () -> Network.connect() ]
+        | Network.NotConnected -> [ Icons.connecting + " Connect", fun () -> Network.connect() ]
+        | Network.Connecting -> [ Icons.connectionFailed + " Cancel", ignore ]
+        | Network.ConnectionFailed -> [ Icons.connecting + " Reconnect", fun () -> Network.connect() ]
         | Network.Connected -> [ 
-                "Log in", fun () -> Network.login("Percyqaz")
-                "Disconnect", Network.disconnect
+                Icons.login + " Log in", 
+                fun () -> 
+                    if Credentials.username <> "" then Network.login Credentials.username
+                    else Menu.ShowPage LoginPage
             ]
         | Network.LoggedIn -> [
-                "Multiplayer", fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default
-                //"Log out", Network.disconnect
-                "Disconnect", Network.disconnect
+                Icons.multiplayer + " Multiplayer", fun () -> Screen.change Screen.Type.Lobby Transitions.Flags.Default
+                Icons.logout + " Log out", Network.logout
             ]
 
     member this.ToggleDropdown() =
         match this.Dropdown with
         | Some _ -> this.Dropdown <- None
-        | _ ->
+        | None ->
             let d = Dropdown(this.MenuItems, (fun () -> this.Dropdown <- None))
             d.Position <- Position.SliceTop(d.Height + Screen.Toolbar.HEIGHT).TrimTop(Screen.Toolbar.HEIGHT).Margin(Style.padding, 0.0f)
             d.Init this

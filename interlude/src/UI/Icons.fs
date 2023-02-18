@@ -70,3 +70,6 @@ module Icons =
     let connecting = Feather.globe
     let connectionFailed = Feather.slash
     let notConnected = Feather.user_x
+    let multiplayer = Feather.users
+    let login = Feather.log_in
+    let logout = Feather.log_out

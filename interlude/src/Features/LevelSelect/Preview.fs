@@ -8,7 +8,6 @@ open Prelude.Common
 open Prelude.Scoring
 open Prelude.Charts.Formats.Interlude
 open Prelude.Charts.Tools.Patterns
-open Interlude.Features
 open Interlude.Features.Play
 
 type Preview(chart: Chart) =
