@@ -104,6 +104,7 @@ module Render =
 
     let finish() =
         Batch.finish()
+        GL.Flush()
 
     let resize(width, height) =
         rwidth <- width
