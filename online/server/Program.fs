@@ -16,7 +16,7 @@ let handle_packet(id: Guid, packet: Upstream) =
         | Upstream.LOGIN username ->
             UserState.login(id, username)
         | Upstream.LOGOUT ->
-            UserState.logout(id)
+            Lobby.user_disconnected(id, fun () -> UserState.logout id)
 
         | Upstream.GET_LOBBIES -> Lobby.list id
         | Upstream.JOIN_LOBBY lid -> Lobby.join (id, lid)
