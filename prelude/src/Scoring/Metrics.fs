@@ -174,7 +174,7 @@ type IScoreMetric
 
     member this.IsHoldDropped (index: int) (k: int) =
         match internalHoldStates.[k] with
-        | Dropped, i | MissedHead, i when i + 1 >= index -> true
+        | Dropped, i | MissedHead, i when i >= index -> true
         | _ -> false
 
     member this.HitData = hitData
