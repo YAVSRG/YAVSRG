@@ -17,9 +17,23 @@ type Bind =
     override this.ToString() =
         match this with
         | Dummy -> "NONE"
-        | Key (k, m) -> Bind.ModifierString m + k.ToString()
+        | Key (k, m) -> Bind.ModifierString m + Bind.FormatKey k
         | Mouse b -> "M" + b.ToString()
         | Joystick _ -> "nyi"
+
+    static member private FormatKey (k: Keys) : string =
+        match k with
+        | Keys.D0 -> "0"
+        | Keys.D1 -> "1"
+        | Keys.D2 -> "2"
+        | Keys.D3 -> "3"
+        | Keys.D4 -> "4"
+        | Keys.D5 -> "5"
+        | Keys.D6 -> "6"
+        | Keys.D7 -> "7"
+        | Keys.D8 -> "8"
+        | Keys.D9 -> "9"
+        | _ -> k.ToString()
 
     static member private ModifierString (ctrl, alt, shift) =
         (if ctrl then "Ctrl + " else "")
