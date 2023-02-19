@@ -201,6 +201,7 @@ type NoteRenderer(chart: ColorizedChart, scoring: IScoreMetric) as this =
         for k in 0 .. (keys - 1) do
             if hold_presence.[k] then
                 let headpos = hold_pos.[k]
+                let tint = if hold_pos.[k] = hitposition && scoring.IsHoldDropped hold_index.[k] k then Content.noteskinConfig().DroppedHoldColor else Color.White
                 Draw.quad // body of ln, tail is offscreen
                     (
                         Quad.ofRect ( 
@@ -212,7 +213,7 @@ type NoteRenderer(chart: ColorizedChart, scoring: IScoreMetric) as this =
                             |> scrollDirectionPos bottom
                         )
                     )
-                    (Quad.colorOf Color.White)
+                    (Quad.colorOf tint)
                     (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdbody"))
                 Draw.quad // head of ln, tail is offscreen
                     (
@@ -222,7 +223,7 @@ type NoteRenderer(chart: ColorizedChart, scoring: IScoreMetric) as this =
                         )
                         |> NoteRenderer.noteRotation keys k
                     )
-                    (Quad.colorOf Color.White)
+                    (Quad.colorOf tint)
                     (Sprite.gridUV (animation.Loops, hold_colors.[k]) (Content.getTexture "holdhead"))
 
         base.Draw()
