@@ -92,7 +92,6 @@ module FBO =
                 fbo.Bind true
                 fbo
 
-
 module Render =
 
     /// Frames drawn * Ticks taken to draw them (10 million ticks = 1 second)
