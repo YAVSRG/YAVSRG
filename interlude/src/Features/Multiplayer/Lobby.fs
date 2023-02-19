@@ -137,6 +137,19 @@ type Chat() =
 
         Network.Events.chat_message.Add (chat_msg >> add_msg)
         Network.Events.system_message.Add (fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
+        Network.Events.lobby_event.Add (fun (kind, data) ->
+            let text, color =
+                match (kind, data) with
+                | LobbyEvent.Join, who -> sprintf "%s %s joined" Icons.login who, Color.Lime
+                | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.logout who, Color.PaleVioletRed
+                | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.star who, Color.Gold
+                | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.ready who, Color.PaleGreen
+                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.not_ready who, Color.Chartreuse
+                | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.invite who, Color.PaleTurquoise
+                | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.info msg, Color.WhiteSmoke
+                | _, msg -> msg, Color.White
+            add_msg (Text(text, Color = (fun () -> color, Color.Black), Align = Alignment.CENTER))
+            )
         Network.Events.join_lobby.Add (fun () -> messages.Clear())
 
         base.Init parent

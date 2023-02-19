@@ -44,9 +44,9 @@ type Status() =
         let area = this.Bounds.Shrink(30.0f, 0.0f).TrimBottom(15.0f)
         let text, color =
             match Network.status with
-            | Network.NotConnected -> Icons.notConnected + "  Offline", Color.FromArgb(200, 200, 200)
+            | Network.NotConnected -> Icons.not_connected + "  Offline", Color.FromArgb(200, 200, 200)
             | Network.Connecting -> Icons.connecting + "  Connecting..", Color.FromArgb(255, 255, 160)
-            | Network.ConnectionFailed -> Icons.connectionFailed + "  Offline", Color.FromArgb(255, 160, 160)
+            | Network.ConnectionFailed -> Icons.connection_failed + "  Offline", Color.FromArgb(255, 160, 160)
             | Network.Connected -> Icons.connected + "  Not logged in", Color.FromArgb(160, 255, 160)
             | Network.LoggedIn -> Icons.connected + "  " + Network.username, Color.FromArgb(160, 255, 160)
 
@@ -69,7 +69,7 @@ type Status() =
     member this.MenuItems : (string * (unit -> unit)) seq =
         match Network.status with
         | Network.NotConnected -> [ Icons.connecting + " Connect", fun () -> Network.connect() ]
-        | Network.Connecting -> [ Icons.connectionFailed + " Cancel", ignore ]
+        | Network.Connecting -> [ Icons.connection_failed + " Cancel", ignore ]
         | Network.ConnectionFailed -> [ Icons.connecting + " Reconnect", fun () -> Network.connect() ]
         | Network.Connected -> [ 
                 Icons.login + " Log in", 

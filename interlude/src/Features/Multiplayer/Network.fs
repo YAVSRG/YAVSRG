@@ -81,6 +81,9 @@ module Network =
         
         let lobby_settings_updated_ev = new Event<unit>()
         let lobby_settings_updated = lobby_settings_updated_ev.Publish
+        
+        let lobby_event_ev = new Event<LobbyEvent * string>()
+        let lobby_event = lobby_event_ev.Publish
 
         let lobby_players_updated_ev = new Event<unit>()
         let lobby_players_updated = lobby_players_updated_ev.Publish
@@ -130,6 +133,9 @@ module Network =
                         }
                     sync Events.join_lobby_ev.Trigger
                 | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> () // nyi
+                | Downstream.SYSTEM_MESSAGE msg -> 
+                    Logging.Info(sprintf "[NETWORK] %s" msg)
+                    sync(fun () -> Events.system_message_ev.Trigger msg)
                 
                 | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
                 | Downstream.YOU_ARE_HOST -> lobby.Value.YouAreHost <- true
@@ -141,9 +147,7 @@ module Network =
                     sync(Events.lobby_players_updated_ev.Trigger)
                 | Downstream.SELECT_CHART _ -> () // nyi
                 | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
-                | Downstream.SYSTEM_MESSAGE msg -> 
-                    Logging.Info(sprintf "[NETWORK] %s" msg)
-                    sync(fun () -> Events.system_message_ev.Trigger msg)
+                | Downstream.LOBBY_EVENT (kind, data) -> sync(fun () -> Events.lobby_event_ev.Trigger(kind, data))
                 | Downstream.CHAT (sender, msg) -> 
                     Logging.Info(sprintf "%s: %s" sender msg)
                     sync(fun () -> Events.chat_message_ev.Trigger(sender, msg))
