@@ -16,9 +16,15 @@ module WebServices =
         let w = new HttpClient()
         w.DefaultRequestHeaders.Add("User-Agent", "Interlude"); w
     let download_string = 
-        { new Async.Service<string, string>() with
-            override this.Handle(url: string) =
-                download_string_client.GetStringAsync(url) |> Async.AwaitTask
+        { new Async.Service<string, string option>() with
+            override this.Handle(url: string) = async {
+                try
+                    let! s = download_string_client.GetStringAsync(url) |> Async.AwaitTask
+                    return Some s
+                with err -> 
+                    Logging.Error(sprintf "Could not reach %s" url, err)
+                    return None
+            }
         }
         
     let private download_image_client = new HttpClient()
@@ -66,22 +72,26 @@ module WebServices =
 
     let download_json<'T> (url: string, callback: 'T option -> unit) =
         download_string.Request(url,
-            fun s ->
+            function 
+            | Some s ->
                 match JSON.FromString<'T> s with
                 | Ok s -> callback (Some s)
                 | Error err -> 
                     Logging.Error("Failed to parse json data from " + url, err)
                     callback None
+            | None -> callback None // appropriate error already logged by string service
         )
     
     let download_json_async<'T> (url: string) : Async<'T option> =
         async {
-            let! s = download_string.RequestAsync(url)
-            match JSON.FromString<'T> s with
-            | Ok s -> return (Some s)
-            | Error err ->
-                Logging.Error("Failed to parse json data from " + url, err)
-                return None
+            match!  download_string.RequestAsync(url) with
+            | Some s ->
+                match JSON.FromString<'T> s with
+                | Ok s -> return (Some s)
+                | Error err ->
+                    Logging.Error("Failed to parse json data from " + url, err)
+                    return None
+            | None -> return None // appropriate error already logged by string service
         }
 
 // todo: place in IO services file + have zip extractor/creator service
