@@ -29,7 +29,8 @@ module Wiki =
                         | Wiki p -> "https://raw.githubusercontent.com/wiki/YAVSRG/Interlude/" + p + ".md"
                         | Changelog -> "https://raw.githubusercontent.com/YAVSRG/Interlude/main/docs/changelog.md"
                     let! page = WebServices.download_string.RequestAsync(url)
-                    return Markdown.Parse page
+                    let text = Option.defaultValue "" page
+                    return Markdown.Parse text
                 }
         }
 

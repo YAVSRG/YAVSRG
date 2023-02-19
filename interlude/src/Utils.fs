@@ -139,7 +139,7 @@ module Utils =
             else Logging.Info "Game is up to date."
 
         let checkForUpdates() =
-            WebServices.download_json("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease option) -> handleUpdate d.Value)
+            WebServices.download_json("https://api.github.com/repos/YAVSRG/Interlude/releases/latest", fun (d: GithubRelease option) -> if d.IsSome then handleUpdate d.Value)
 
             let path = getInterludeLocation()
             let folderPath = Path.Combine(path, "update")
