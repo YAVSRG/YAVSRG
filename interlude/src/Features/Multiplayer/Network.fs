@@ -1,12 +1,39 @@
 ﻿namespace Interlude.Features.Multiplayer
 
 open System.Net
+open System.IO
 open System.Collections.Generic
 open Percyqaz.Common
+open Percyqaz.Json
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.UI
 open Interlude.Web.Shared
+
+[<Json.AutoCodec>]
+type Credentials =
+    {
+        DO_NOT_SHARE_THE_CONTENTS_OF_THIS_FILE_WITH_ANYONE_UNDER_ANY_CIRCUMSTANCES: string
+        mutable Username: string
+        mutable Host: string
+    }
+    static member Default =
+        {
+            DO_NOT_SHARE_THE_CONTENTS_OF_THIS_FILE_WITH_ANYONE_UNDER_ANY_CIRCUMSTANCES = "Doing so is equivalent to giving someone your account password"
+            Username = ""
+            Host = "online.yavsrg.net"
+        }
+    static member Location = Path.Combine(getDataPath "Data", "login.json") 
+    static member Load() =
+        if File.Exists Credentials.Location then
+            File.SetAttributes(Credentials.Location, FileAttributes.Normal)
+            Credentials.Location
+            |> JSON.FromFile
+            |> function Ok res -> res | Error e -> Logging.Error("Error loading login credentials, you will need to log in again.", e); Credentials.Default
+        else Credentials.Default
+    member this.Save() =
+        JSON.ToFile (Credentials.Location, true) this
+        File.SetAttributes(Credentials.Location, FileAttributes.Hidden)
 
 module Network =
 
@@ -49,19 +76,21 @@ module Network =
         let lobby_settings_updated_ev = new Event<unit>()
         let lobby_settings_updated = lobby_settings_updated_ev.Publish
 
+        let lobby_players_updated_ev = new Event<unit>()
+        let lobby_players_updated = lobby_players_updated_ev.Publish
+
     let mutable lobby : Lobby option = None
 
     let mutable lobby_list : LobbyInfo array = [||]
 
-    let lookup_ip(address) = 
-        try Dns.GetHostAddresses(address).[0]
-        with err -> Logging.Error("Failed to perform DNS lookup for " + address, err); IPAddress.Parse("127.0.0.1")
-
     let credentials = Credentials.Load()
+
+    let target_ip = 
+        try Dns.GetHostAddresses(credentials.Host).[0]
+        with err -> Logging.Error("Failed to perform DNS lookup for " + credentials.Host, err); IPAddress.Parse("0.0.0.0")
     
     let client =
-        let ip = lookup_ip(credentials.Host)
-        { new Client(ip, 32767) with
+        { new Client(target_ip, 32767) with
 
             override this.OnConnected() = status <- Connected
 
@@ -70,7 +99,7 @@ module Network =
                 status <- if status = Connecting then ConnectionFailed else NotConnected
 
             override this.OnPacketReceived(packet: Downstream) =
-                printfn "%A" packet
+                //printfn "%A" packet
                 match packet with
                 | Downstream.DISCONNECT reason -> 
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
@@ -98,13 +127,19 @@ module Network =
                 
                 | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
                 | Downstream.YOU_ARE_HOST -> lobby.Value.YouAreHost <- true
-                | Downstream.PLAYER_JOINED_LOBBY username -> lobby.Value.Players.Add(username, { IsReady = false; IsSpectating = false })
-                | Downstream.PLAYER_LEFT_LOBBY username -> lobby.Value.Players.Remove(username) |> ignore
+                | Downstream.PLAYER_JOINED_LOBBY username -> 
+                    lobby.Value.Players.Add(username, { IsReady = false; IsSpectating = false })
+                    sync(Events.lobby_players_updated_ev.Trigger)
+                | Downstream.PLAYER_LEFT_LOBBY username -> 
+                    lobby.Value.Players.Remove(username) |> ignore
+                    sync(Events.lobby_players_updated_ev.Trigger)
                 | Downstream.SELECT_CHART _ -> () // nyi
                 | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
                 | Downstream.SYSTEM_MESSAGE msg -> Logging.Info msg
                 | Downstream.CHAT (sender, msg) -> Logging.Info(sprintf "<%s> %s" sender msg)
-                | Downstream.READY_STATUS (username, ready) -> lobby.Value.Players.[username].IsReady <- ready
+                | Downstream.READY_STATUS (username, ready) -> 
+                    lobby.Value.Players.[username].IsReady <- ready
+                    sync(Events.lobby_players_updated_ev.Trigger)
 
                 | _ -> () // nyi
         }

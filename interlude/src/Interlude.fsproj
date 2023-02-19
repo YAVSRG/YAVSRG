@@ -105,7 +105,6 @@
     <Compile Include="Features\Options\OptionsMenu.fs" />
     <Compile Include="Features\MainMenu\LoadingScreen.fs" />
     <Compile Include="Features\MainMenu\MainMenu.fs" />
-    <Compile Include="Features\Multiplayer\Credentials.fs" />
     <Compile Include="Features\Multiplayer\Network.fs" />
     <Compile Include="Features\Multiplayer\Lobby.fs" />
     <Compile Include="Features\Multiplayer\Status.fs" />

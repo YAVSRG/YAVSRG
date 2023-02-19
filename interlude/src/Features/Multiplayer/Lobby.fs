@@ -25,7 +25,7 @@ type LobbyList() =
 
     let searchtext = Setting.simple ""
 
-    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 70.0f))
+    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 80.0f))
     let mutable no_lobbies = false
 
     let refresh() =
@@ -44,8 +44,9 @@ type LobbyList() =
     override this.Init(parent) =
         this
         |+ container
-        |+ Text((fun _ -> if no_lobbies then "No lobbies" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(100.0f))
-        |+ Button("Create a lobby", create_lobby, Position = Position.SliceBottom 60.0f)
+        |+ Text((fun _ -> if no_lobbies then "No lobbies" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Button(Icons.add + " Create lobby", create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(150.0f))
+        |+ Button(Icons.reset + " Refresh", Network.refresh_lobby_list, Position = Position.SliceBottom(60.0f).SliceRight(150.0f))
         |* SearchBox(searchtext, (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value), Position = Position.SliceTop 60.0f)
         
         base.Init parent
@@ -67,7 +68,8 @@ type Player(name: string, player: Network.LobbyPlayer) =
 type PlayerList() =
     inherit StaticContainer(NodeType.None)
 
-    let other_players = FlowContainer.Vertical<Player>(30.0f, Spacing = 5.0f, Position = Position.TrimTop 40.0f)
+    let other_players = FlowContainer.Vertical<Player>(40.0f, Spacing = 5.0f, Position = Position.TrimTop 50.0f)
+    let other_players_scroll = ScrollContainer.Flow(other_players, Position = Position.TrimTop 50.0f)
 
     let refresh() =
         other_players.Clear()
@@ -78,15 +80,21 @@ type PlayerList() =
                 other_players.Add(Player(username, l.Players.[username]))
 
     override this.Init(parent) =
-        this |* other_players
+        this |* other_players_scroll
+        refresh()
+        
+        Network.Events.join_lobby.Add refresh
+        Network.Events.lobby_players_updated.Add refresh
         
         base.Init parent
 
     override this.Draw() =
-        let user_bounds = this.Bounds.SliceTop(35.0f)
+        let user_bounds = this.Bounds.SliceTop(45.0f)
         Draw.rect user_bounds (Style.main 100 ())
         Text.drawFillB(Style.baseFont, Network.username, user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
         Text.drawFillB(Style.baseFont, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
+
+        base.Draw()
 
 type Lobby() =
     inherit StaticContainer(NodeType.None)
