@@ -296,6 +296,7 @@ type IScoreMetric
                     match internalHoldStates.[k] with
                     | Holding, i -> Dropped, i
                     | x -> x
+                match config.Accuracy.HoldNoteBehaviour with HoldNoteBehaviour.Osu _ -> this.State.BreakCombo(false) | _ -> ()
         | MissedHead, _
         | Nothing, _ -> ()
     

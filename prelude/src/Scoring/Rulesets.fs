@@ -139,10 +139,16 @@ type Ruleset =
         Grading: GradingConfig
     }
     member this.DefaultJudgement : JudgementId = this.Judgements.Length - 1
-    member this.GradeName i = if i < 0 then "F" else this.Grading.Grades.[i].Name
-    member this.GradeColor i = if i < 0 then Color.Gray else this.Grading.Grades.[i].Color
-    member this.LampName i = if i < 0 then "NONE" else  this.Grading.Lamps.[i].Name
-    member this.LampColor i = if i < 0 then Color.White else this.Grading.Lamps.[i].Color
+    member this.GradeName i = 
+        if i < 0 then "F"
+        else if i >= this.Grading.Grades.Length then "??"
+        else this.Grading.Grades.[i].Name
+    member this.GradeColor i = if i < 0 || i >= this.Grading.Grades.Length then Color.Gray else this.Grading.Grades.[i].Color
+    member this.LampName i = 
+        if i < 0 then "NONE"
+        else if i >= this.Grading.Lamps.Length then "??"
+        else this.Grading.Lamps.[i].Name
+    member this.LampColor i = if i < 0 || i >=this.Grading.Grades.Length then Color.White else this.Grading.Lamps.[i].Color
     member this.JudgementName i = this.Judgements.[i].Name
     member this.JudgementColor i = this.Judgements.[i].Color
 
@@ -333,24 +339,26 @@ module Rulesets =
             if
                 absolute < 16.5f<ms> * 1.2f &&
                 absolute + headDelta < 16.5f<ms> * 2.4f &&
-                (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+                headDelta < 151.5f<ms> - od * 3.0f<ms> &&
                 not dropped
             then 0 // 300g
             elif
                 absolute < (64.5f<ms> - od * 3.0f<ms>) * 1.1f &&
                 absolute + headDelta < (64.5f<ms> - od * 3.0f<ms>) * 2.2f &&
-                (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+                headDelta < 151.5f<ms> - od * 3.0f<ms> &&
                 not dropped
             then 1 // 300
             elif 
-                absolute < 97.5f<ms> - od * 3.0f<ms> &&
+                ((absolute < 97.5f<ms> - od * 3.0f<ms> &&
                 absolute + headDelta < (97.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-                (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
+                headDelta < 151.5f<ms> - od * 3.0f<ms>) || overhold) &&
+                not dropped
             then 2 // 200
             elif
                 absolute < 127.5f<ms> - od * 3.0f<ms> &&
                 absolute + headDelta < (127.5f<ms> - od * 3.0f<ms>) * 2.0f &&
-                (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>)
+                (overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>) &&
+                not dropped
             then 3 // 100
             elif
                 overhold || headDelta < 151.5f<ms> - od * 3.0f<ms>
@@ -410,8 +418,8 @@ module Rulesets =
                             |]
                         Lamps =
                             [|
-                                { Name = "SDCB"; Judgement = 5; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
-                                { Name = "FC"; Judgement = 5; JudgementThreshold = 0; Color = Color.FromArgb(0, 255, 160) }
+                                { Name = "SDCB"; Judgement = -1; JudgementThreshold = 9; Color = Color.FromArgb(255, 160, 160) }
+                                { Name = "FC"; Judgement = -1; JudgementThreshold = 0; Color = Color.FromArgb(0, 255, 160) }
                                 { Name = "PFC"; Judgement = 3; JudgementThreshold = 0; Color = Color.FromArgb(255, 255, 160) }
                                 { Name = "MFC"; Judgement = 1; JudgementThreshold = 0; Color = Color.FromArgb(160, 255, 255) }
                             |]
