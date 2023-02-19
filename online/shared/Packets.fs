@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 1uy
+    let PROTOCOL_VERSION = 2uy
 
     type LobbyChart =
         {
@@ -52,6 +52,15 @@ module Packets =
                 Players = br.ReadByte()
                 CurrentlyPlaying = br.ReadString() |> function "" -> None | s -> Some s
             }
+
+    type LobbyEvent =
+        | Join = 0uy
+        | Leave = 1uy
+        | Host = 2uy
+        | Ready = 3uy
+        | NotReady = 4uy
+        | Invite = 5uy
+        | Generic = 6uy
 
     [<RequireQualifiedAccess>]
     type Upstream =
@@ -161,6 +170,7 @@ module Packets =
         | PLAYER_LEFT_LOBBY of username: string
         | SELECT_CHART of LobbyChart
         | LOBBY_SETTINGS of LobbySettings
+        | LOBBY_EVENT of LobbyEvent * data: string
         | SYSTEM_MESSAGE of string
         | CHAT of sender: string * message: string
         | READY_STATUS of username: string * ready: bool
@@ -182,6 +192,7 @@ module Packets =
                 | 0x10uy -> LOBBY_LIST ( Array.init (br.ReadByte() |> int) (fun _ -> LobbyInfo.Read br) )
                 | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString()) )
                 | 0x12uy -> INVITED_TO_LOBBY (br.ReadString(), new Guid(br.ReadBytes 16))
+                | 0x13uy -> SYSTEM_MESSAGE (br.ReadString())
 
                 | 0x20uy -> YOU_LEFT_LOBBY
                 | 0x21uy -> YOU_ARE_HOST
@@ -189,7 +200,7 @@ module Packets =
                 | 0x23uy -> PLAYER_LEFT_LOBBY (br.ReadString())
                 | 0x24uy -> SELECT_CHART (LobbyChart.Read br)
                 | 0x25uy -> LOBBY_SETTINGS { Name = br.ReadString() }
-                | 0x26uy -> SYSTEM_MESSAGE (br.ReadString())
+                | 0x26uy -> LOBBY_EVENT (br.ReadByte() |> LanguagePrimitives.EnumOfValue, br.ReadString())
                 | 0x27uy -> CHAT (br.ReadString(), br.ReadString())
                 | 0x28uy -> READY_STATUS (br.ReadString(), br.ReadBoolean())
 
@@ -220,6 +231,7 @@ module Packets =
                     for player in players do bw.Write player
                     0x11uy
                 | INVITED_TO_LOBBY (by_who, id) -> bw.Write by_who; bw.Write (id.ToByteArray()); 0x12uy
+                | SYSTEM_MESSAGE message -> bw.Write message; 0x13uy
 
                 | YOU_LEFT_LOBBY -> 0x20uy
                 | YOU_ARE_HOST -> 0x21uy
@@ -227,7 +239,7 @@ module Packets =
                 | PLAYER_LEFT_LOBBY username -> bw.Write username; 0x23uy
                 | SELECT_CHART chart -> chart.Write bw; 0x24uy
                 | LOBBY_SETTINGS settings -> bw.Write settings.Name; 0x25uy
-                | SYSTEM_MESSAGE message -> bw.Write message; 0x26uy
+                | LOBBY_EVENT (kind, data) -> bw.Write (byte kind); bw.Write data; 0x26uy
                 | CHAT (sender, msg) -> bw.Write sender; bw.Write msg; 0x27uy
                 | READY_STATUS (username, ready) -> bw.Write username; bw.Write ready; 0x28uy
                 

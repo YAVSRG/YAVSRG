@@ -117,7 +117,7 @@ module Lobby =
                         | Some _ -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are already in a lobby")
                         | None ->
 
-                        if not (lobbies.ContainsKey lobby_id) then Server.send(player, Downstream.SYSTEM_MESSAGE "Lobby does not exist")
+                        if not (lobbies.ContainsKey lobby_id) then Server.send(player, Downstream.SYSTEM_MESSAGE "Lobby does not exist (or no longer exists)")
                         else
 
                         let lobby = lobbies.[lobby_id]
@@ -129,6 +129,9 @@ module Lobby =
                         in_lobby.Add(player, lobby_id)
                         lobby.Players.Add(player, LobbyPlayer.Create username)
                         Logging.Info(sprintf "%s joined lobby %O, %i players now in lobby" username lobby_id lobby.Players.Count)
+                        
+                        for p in lobby.Players.Keys do
+                            Server.send(p, Downstream.LOBBY_EVENT(LobbyEvent.Join, username))
 
                         Server.send(player, Downstream.YOU_JOINED_LOBBY player_list)
                         // todo: send them all the ready statuses too
@@ -150,6 +153,7 @@ module Lobby =
 
                         for p in lobby.Players.Keys do
                             Server.send(p, Downstream.PLAYER_LEFT_LOBBY username)
+                            Server.send(p, Downstream.LOBBY_EVENT(LobbyEvent.Leave, username))
                         Server.send(player, Downstream.YOU_LEFT_LOBBY)
 
                         Logging.Info(sprintf "%s left lobby %O, %i players remain" username lobby_id lobby.Players.Count)
@@ -161,6 +165,8 @@ module Lobby =
                             if lobby.Host = player then 
                                 lobby.Host <- Seq.head lobby.Players.Keys
                                 Server.send(lobby.Host, Downstream.YOU_ARE_HOST)
+                                for p in lobby.Players.Keys do
+                                    Server.send(p, Downstream.LOBBY_EVENT(LobbyEvent.Host, lobby.Players.[lobby.Host].Username))
 
                     | Action.Invite (sender, recipient) ->
                         match! UserState.find_username sender with
@@ -176,6 +182,9 @@ module Lobby =
                         | Some recipient_id ->
 
                         Server.send(recipient_id, Downstream.INVITED_TO_LOBBY (username, lobby_id))
+                        let lobby = lobbies.[lobby_id]
+                        for p in lobby.Players.Keys do
+                            Server.send(p, Downstream.LOBBY_EVENT(LobbyEvent.Invite, recipient))
                             
                     | Action.Chat (player, message) ->
                         match! UserState.find_username player with
@@ -203,10 +212,15 @@ module Lobby =
 
                         let lobby = lobbies.[lobby_id]
 
-                        lobby.Players.[player].Status <- if ready then Ready else NotReady
+                        let new_status = if ready then Ready else NotReady
 
-                        for p in lobby.Players.Keys do
-                            Server.send(p, Downstream.READY_STATUS(username, ready))
+                        if new_status <> lobby.Players.[player].Status then
+
+                            lobby.Players.[player].Status <- new_status
+
+                            for p in lobby.Players.Keys do
+                                Server.send(p, Downstream.READY_STATUS(username, ready))
+                                Server.send(p, Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
             }
         }
 

@@ -34,7 +34,11 @@ type TestClient(i: int) =
             Logging.Info(sprintf "%s logged in " username)
             status <- LoggedIn
             if i = 0 then
+                this.Send(Upstream.GET_LOBBIES)
+        | Downstream.LOBBY_LIST lobbies ->
+            if lobbies.Length = 0 then
                 this.Send(Upstream.CREATE_LOBBY "Test lobby")
+            else this.Send(Upstream.JOIN_LOBBY(lobbies.[0].Id))
         | Downstream.YOU_JOINED_LOBBY ps -> 
             if i = 0 then
                 for j = 1 to NUMBER_OF_CLIENTS - 1 do
