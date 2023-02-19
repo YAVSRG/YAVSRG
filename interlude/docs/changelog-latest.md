@@ -1,12 +1,13 @@
-0.6.9.1
+0.6.9.2
 ====
 
-A few goodies on the way
+Bug fix update for my beloved play testers
 
-- Improvement: Changed max column width to 300 in the ingame noteskin editor (you can set arbitrary numbers by editing the json file)
-- Improvement: Adjusted the design of the score screen a little bit
-- Improvement: Added some new menu splash messages
-- New feature: Seeking + density graph when previewing a chart
-- New feature: Session timer on the score screen
-- Bug fix: Issue when converting .osu files with notes in the wrong order
+- Bug fix: Releasing a long note on osu! ruleset will now correctly break your combo
+- Bug fix: Combo breaks other than from missing now correctly affect lamp on osu ruleset
+- Bug fix: Dropped hold notes no longer only grey out when the tail is visible on the screen
+- Some other adjustments to error logging and stuff
+
+I normally make a rule not to mention things that are work in progress in these changelogs
+So I'm not going to, but if you're in the discord you may know what is underway :)
 
