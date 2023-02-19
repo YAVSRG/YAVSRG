@@ -70,6 +70,12 @@ module Network =
         let join_lobby_ev = new Event<unit>()
         let join_lobby = join_lobby_ev.Publish
 
+        let chat_message_ev = new Event<string * string>()
+        let chat_message = chat_message_ev.Publish
+
+        let system_message_ev = new Event<string>()
+        let system_message = system_message_ev.Publish
+
         let leave_lobby_ev = new Event<unit>()
         let leave_lobby = leave_lobby_ev.Publish
         
@@ -135,8 +141,12 @@ module Network =
                     sync(Events.lobby_players_updated_ev.Trigger)
                 | Downstream.SELECT_CHART _ -> () // nyi
                 | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
-                | Downstream.SYSTEM_MESSAGE msg -> Logging.Info msg
-                | Downstream.CHAT (sender, msg) -> Logging.Info(sprintf "<%s> %s" sender msg)
+                | Downstream.SYSTEM_MESSAGE msg -> 
+                    Logging.Info(sprintf "[NETWORK] %s" msg)
+                    sync(fun () -> Events.system_message_ev.Trigger msg)
+                | Downstream.CHAT (sender, msg) -> 
+                    Logging.Info(sprintf "%s: %s" sender msg)
+                    sync(fun () -> Events.chat_message_ev.Trigger(sender, msg))
                 | Downstream.READY_STATUS (username, ready) -> 
                     lobby.Value.Players.[username].IsReady <- ready
                     sync(Events.lobby_players_updated_ev.Trigger)
@@ -161,6 +171,9 @@ module Network =
 
     let disconnect() =
         client.Disconnect()
+
+    let send_chat_message(msg) =
+        client.Send(Upstream.CHAT msg)
 
     let refresh_lobby_list() =
         client.Send(Upstream.GET_LOBBIES)

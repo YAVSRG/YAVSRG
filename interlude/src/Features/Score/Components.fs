@@ -183,8 +183,8 @@ type InfoBar(color: unit -> System.Drawing.Color, label: string, text: unit -> s
     override this.Draw() =
         let color = color()
         let pb = pb()
-        let header = this.Bounds.SliceLeft 200.0f
-        let body = this.Bounds.TrimLeft 200.0f
+        let header = this.Bounds.SliceLeft (this.Bounds.Width * 0.25f)
+        let body = this.Bounds.TrimLeft (this.Bounds.Width * 0.25f)
         Draw.rect this.Bounds (Color.FromArgb(80, color))
         let header_card = header.SliceBottom (header.Height * 0.35f)
         Draw.rect header_card (Color.FromArgb(80, color))

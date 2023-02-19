@@ -3,9 +3,13 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
+open Percyqaz.Flux.Input
+open Prelude.Common
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.Web.Shared
+
+// Lobby list mode
 
 type LobbyInfoCard(info: LobbyInfo) =
     inherit Frame(NodeType.None)
@@ -55,6 +59,8 @@ type LobbyList() =
         Network.Events.receive_lobby_list.Add refresh
         Network.Events.join_lobby.Add (fun () -> lobby_creating <- false)
 
+// Lobby gameplay mode
+
 type Player(name: string, player: Network.LobbyPlayer) =
     inherit StaticWidget(NodeType.None)
 
@@ -96,6 +102,59 @@ type PlayerList() =
 
         base.Draw()
 
+type Chat() =
+    inherit StaticContainer(NodeType.None)
+
+    let MESSAGE_HEIGHT = 40.0f
+    
+    let current_message = Setting.simple ""
+
+    let chat_msg(sender: string, message: string) =
+        let w = Text.measure(Style.baseFont, sender) * 0.6f * MESSAGE_HEIGHT
+        StaticContainer(NodeType.None)
+        |+ Text(sender, Color = Style.text_subheading, Position = Position.SliceLeft w, Align = Alignment.RIGHT)
+        |+ Text(": " + message, Position = Position.TrimLeft w, Align = Alignment.LEFT)
+
+    let messages = FlowContainer.Vertical<Widget>(MESSAGE_HEIGHT, Spacing = 2.0f)
+    let message_box = ScrollContainer.Flow(messages, Position = Position.TrimBottom(60.0f).Margin(5.0f))
+    let chatline = TextEntry(current_message, "none", Position = Position.SliceBottom(50.0f).Margin(5.0f))
+
+    let mutable last_msg : Widget option = None
+    let add_msg(w: Widget) =
+        messages.Add w
+        match last_msg with
+        | Some m ->
+            if m.VisibleBounds.Visible then
+                message_box.Scroll infinityf
+        | None -> ()
+        last_msg <- Some w
+
+    override this.Init(parent) =
+        this
+        |+ chatline
+        |+ Text((fun () -> if current_message.Value = "" then "Press ENTER to chat" else ""), Color = Style.text_subheading, Position = Position.SliceBottom(50.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |* message_box
+
+        Network.Events.chat_message.Add (chat_msg >> add_msg)
+        Network.Events.system_message.Add (fun msg -> add_msg (Text(msg, Align = Alignment.CENTER)))
+        Network.Events.join_lobby.Add (fun () -> messages.Clear())
+
+        base.Init parent
+
+    override this.Draw() =
+        Draw.rect(this.Bounds.TrimBottom 70.0f) (Color.FromArgb(100, 0, 0, 0))
+        Draw.rect(this.Bounds.SliceBottom 50.0f) (Color.FromArgb(100, 0, 0, 0))
+        base.Draw()
+
+    override this.Update(elapsedTime, moved) =
+        if (!|"select").Tapped() then
+            if chatline.Selected && current_message.Value <> "" then 
+                Network.send_chat_message current_message.Value
+                current_message.Set ""
+            else chatline.Select()
+
+        base.Update(elapsedTime, moved)
+
 type Lobby() =
     inherit StaticContainer(NodeType.None)
 
@@ -106,11 +165,14 @@ type Lobby() =
         |+ Text((fun () -> lobby_title), Align = Alignment.LEFT, Position = Position.SliceTop(80.0f).Margin(15.0f, 0.0f))
         |+ PlayerList(Position = Position.SliceLeft(600.0f).Margin(5.0f, 100.0f))
         |+ StylishButton(Network.leave_lobby, K "Leave lobby", Style.main 100, TiltLeft = false, Position = Position.Column(0.0f, 300.0f).SliceBottom(50.0f))
-        |* StylishButton(ignore, K "Invite player", Style.dark 100, Position = Position.Column(300.0f, 300.0f).SliceBottom(50.0f))
+        |+ StylishButton(ignore, K "Invite player", Style.dark 100, Position = Position.Column(300.0f, 300.0f).SliceBottom(50.0f))
+        |* Chat(Position = { Position.Margin(20.0f) with Left = 0.5f %+ 20.0f; Top = 0.5f %+ 10.0f } )
         
         base.Init parent
 
         Network.Events.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)
+
+// Screen
 
 type LobbyScreen() =
     inherit Screen()
