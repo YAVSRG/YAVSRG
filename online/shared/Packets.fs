@@ -159,9 +159,10 @@ module Packets =
         | DISCONNECT of reason: string
         | HANDSHAKE_SUCCESS
         | LOGIN_SUCCESS of username: string
+        // todo: login failure with reason
 
         | LOBBY_LIST of lobbies: LobbyInfo array
-        | YOU_JOINED_LOBBY of players: string array
+        | YOU_JOINED_LOBBY of players: string array // todo: send status along with username
         | INVITED_TO_LOBBY of by_who: string * id: Guid
 
         | YOU_LEFT_LOBBY
@@ -173,7 +174,7 @@ module Packets =
         | LOBBY_EVENT of LobbyEvent * data: string
         | SYSTEM_MESSAGE of string
         | CHAT of sender: string * message: string
-        | READY_STATUS of username: string * ready: bool
+        | READY_STATUS of username: string * ready: bool // todo: will just be status
 
         | BEGIN_PLAYING
         | USER_IS_PLAYING of username: string

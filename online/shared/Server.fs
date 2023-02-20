@@ -63,7 +63,9 @@ module Server =
     let send(id: Guid, packet: Downstream) =
         let packet_with_header = Buffer.packet_bytes(packet.Write())
         let session = server.FindSession(id)
-        if not (isNull session) then session.Send packet_with_header |> ignore
+        if not (isNull session) then
+            if session.IsDisposed || session.IsSocketDisposed then Logging.Debug(sprintf "Can't send packet to %O, already disconnected" id)
+            else session.Send packet_with_header |> ignore
 
     let kick(id: Guid, reason: string) =
         Logging.Info (sprintf "Kicking session %O: %s" id reason)

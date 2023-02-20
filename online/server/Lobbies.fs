@@ -69,6 +69,10 @@ module Lobby =
     let private multicast(lobby: Lobby, packet: Downstream) =
         for p in lobby.Players.Keys do
             Server.send(p, packet)
+    
+    let private multicast_except(id: PlayerId, lobby: Lobby, packet: Downstream) =
+        for p in lobby.Players.Keys do
+            if p <> id then Server.send(p, packet)
 
     let private state_change = 
         { new Async.Service<Action, unit>()
@@ -134,7 +138,8 @@ module Lobby =
                         lobby.Players.Add(player, LobbyPlayer.Create username)
 
                         Server.send(player, Downstream.YOU_JOINED_LOBBY player_list)
-                        // todo: send them all the ready statuses too
+                        for p in lobby.Players.Values do
+                            if p.Status = Ready then Server.send(player, Downstream.READY_STATUS(p.Username, true))
                         Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
 
                     | Action.Leave player ->
@@ -177,6 +182,10 @@ module Lobby =
                         | None -> Server.send(sender, Downstream.SYSTEM_MESSAGE "User not found")
                         | Some recipient_id ->
 
+                        if in_lobby.ContainsKey recipient_id && in_lobby.[recipient_id] = lobby_id then
+                            Server.send(sender, Downstream.SYSTEM_MESSAGE "User is already in this lobby")
+                        else
+
                         Server.send(recipient_id, Downstream.INVITED_TO_LOBBY (username, lobby_id))
                         multicast(lobbies.[lobby_id], Downstream.LOBBY_EVENT(LobbyEvent.Invite, recipient))
                             
@@ -209,7 +218,7 @@ module Lobby =
 
                             lobby.Players.[player].Status <- new_status
                             
-                            multicast(lobbies.[lobby_id], Downstream.READY_STATUS(username, ready))
+                            multicast_except(player, lobbies.[lobby_id], Downstream.READY_STATUS(username, ready))
                             multicast(lobbies.[lobby_id], Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
             }
         }
