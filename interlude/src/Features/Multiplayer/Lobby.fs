@@ -6,6 +6,7 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude.Common
 open Interlude.UI
+open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Web.Shared
 
@@ -24,6 +25,24 @@ type LobbyInfoCard(info: LobbyInfo) =
 
     member this.Name = info.Name
 
+type CreateLobbyPage() as this =
+    inherit Page()
+    
+
+    let value = Setting.simple ""
+    let submit() = Network.create_lobby value.Value
+    let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
+    
+    do
+        this.Content(
+            column()
+            |+ PrettySetting("create_lobby.name", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
+            |+ submit_button.Pos(300.0f)
+        )
+    
+    override this.Title = N"create_lobby"
+    override this.OnClose() = ()
+
 type LobbyList() =
     inherit StaticContainer(NodeType.None)
 
@@ -41,16 +60,15 @@ type LobbyList() =
     let mutable lobby_creating = false
     let create_lobby() =
         if lobby_creating then () else
-
         lobby_creating <- true
-        Network.create_lobby "My lobby"
+        Menu.ShowPage CreateLobbyPage
 
     override this.Init(parent) =
         this
         |+ container
         |+ Text((fun _ -> if no_lobbies then "No lobbies" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Button(Icons.add + " Create lobby", create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(150.0f))
-        |+ Button(Icons.reset + " Refresh", Network.refresh_lobby_list, Position = Position.SliceBottom(60.0f).SliceRight(150.0f))
+        |+ Button(Icons.add + " Create lobby", create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
+        |+ Button(Icons.reset + " Refresh", Network.refresh_lobby_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
         |* SearchBox(searchtext, (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value), Position = Position.SliceTop 60.0f)
         
         base.Init parent
@@ -67,15 +85,15 @@ type Player(name: string, player: Network.LobbyPlayer) =
     override this.Draw() =
         Draw.rect this.Bounds (Style.dark 100 ())
         Text.drawFillB(Style.baseFont, name, this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
-        Text.drawFillB(Style.baseFont, (if player.IsReady then "Ready" else ""), this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
+        Text.drawFillB(Style.baseFont, (if player.IsReady then Icons.ready else ""), this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
 
     member this.Name = name
 
 type PlayerList() =
     inherit StaticContainer(NodeType.None)
 
-    let other_players = FlowContainer.Vertical<Player>(40.0f, Spacing = 5.0f, Position = Position.TrimTop 50.0f)
-    let other_players_scroll = ScrollContainer.Flow(other_players, Position = Position.TrimTop 50.0f)
+    let other_players = FlowContainer.Vertical<Player>(50.0f, Spacing = 5.0f)
+    let other_players_scroll = ScrollContainer.Flow(other_players, Position = Position.TrimTop 60.0f)
 
     let refresh() =
         other_players.Clear()
@@ -95,7 +113,7 @@ type PlayerList() =
         base.Init parent
 
     override this.Draw() =
-        let user_bounds = this.Bounds.SliceTop(45.0f)
+        let user_bounds = this.Bounds.SliceTop(55.0f)
         Draw.rect user_bounds (Style.main 100 ())
         Text.drawFillB(Style.baseFont, Network.username, user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
         Text.drawFillB(Style.baseFont, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
@@ -155,7 +173,7 @@ type Chat() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect(this.Bounds.TrimBottom 70.0f) (Color.FromArgb(100, 0, 0, 0))
+        Draw.rect(this.Bounds.TrimBottom 60.0f) (Color.FromArgb(100, 0, 0, 0))
         Draw.rect(this.Bounds.SliceBottom 50.0f) (Color.FromArgb(100, 0, 0, 0))
         base.Draw()
 
@@ -168,6 +186,24 @@ type Chat() =
 
         base.Update(elapsedTime, moved)
 
+type InvitePlayerPage() as this =
+    inherit Page()
+    
+
+    let value = Setting.simple ""
+    let submit() = Network.invite_to_lobby value.Value
+    let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
+    
+    do
+        this.Content(
+            column()
+            |+ PrettySetting("invite_to_lobby.username", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
+            |+ submit_button.Pos(300.0f)
+        )
+    
+    override this.Title = N"invite_to_lobby"
+    override this.OnClose() = ()
+
 type Lobby() =
     inherit StaticContainer(NodeType.None)
 
@@ -175,10 +211,31 @@ type Lobby() =
 
     override this.Init(parent) =
         this
-        |+ Text((fun () -> lobby_title), Align = Alignment.LEFT, Position = Position.SliceTop(80.0f).Margin(15.0f, 0.0f))
-        |+ PlayerList(Position = Position.SliceLeft(600.0f).Margin(5.0f, 100.0f))
-        |+ StylishButton(Network.leave_lobby, K "Leave lobby", Style.main 100, TiltLeft = false, Position = Position.Column(0.0f, 300.0f).SliceBottom(50.0f))
-        |+ StylishButton(ignore, K "Invite player", Style.dark 100, Position = Position.Column(300.0f, 300.0f).SliceBottom(50.0f))
+        |+ Text(
+            (fun () -> lobby_title),
+            Align = Alignment.CENTER,
+            Position = { Position.Default with Bottom = 0.0f %+ 80.0f; Top = 0.0f %+ 10.0f; Right = 0.5f %- 0.0f })
+        |+ PlayerList(Position = { Left = 0.0f %+ 150.0f; Right = 0.5f %- 150.0f; Top = 0.0f %+ 100.0f; Bottom = 1.0f %- 100.0f })
+        |+ StylishButton(
+            Network.leave_lobby,
+            K (Icons.logout + " Leave lobby"),
+            Style.main 100,
+            TiltLeft = false,
+            Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = (0.5f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
+            )
+        |+ StylishButton(
+            (fun () -> Menu.ShowPage InvitePlayerPage),
+            K (Icons.invite + " Invite player"),
+            Style.dark 100,
+            Position = { Left = (0.5f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (1.0f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
+            )
+        |+ StylishButton(
+            ignore,
+            K (Icons.ready + " Ready"),
+            Style.main 100,
+            TiltRight = false,
+            Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }
+            )
         |* Chat(Position = { Position.Margin(20.0f) with Left = 0.5f %+ 20.0f; Top = 0.5f %+ 10.0f } )
         
         base.Init parent

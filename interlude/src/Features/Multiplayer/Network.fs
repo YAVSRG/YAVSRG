@@ -58,6 +58,7 @@ module Network =
             mutable Settings: LobbySettings option
             Players: Dictionary<string, LobbyPlayer>
             mutable YouAreHost: bool
+            mutable Ready: bool
         }
 
     module Events =
@@ -130,6 +131,7 @@ module Network =
                                 for p in players do d.Add(p, { IsReady = false; IsSpectating = false })
                                 d
                             YouAreHost = false
+                            Ready = false
                         }
                     sync Events.join_lobby_ev.Trigger
                 | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> () // nyi
@@ -144,7 +146,7 @@ module Network =
                     sync(Events.lobby_players_updated_ev.Trigger)
                 | Downstream.PLAYER_LEFT_LOBBY username -> 
                     lobby.Value.Players.Remove(username) |> ignore
-                    sync(Events.lobby_players_updated_ev.Trigger)
+                    sync Events.lobby_players_updated_ev.Trigger
                 | Downstream.SELECT_CHART _ -> () // nyi
                 | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
                 | Downstream.LOBBY_EVENT (kind, data) -> sync(fun () -> Events.lobby_event_ev.Trigger(kind, data))
@@ -153,7 +155,7 @@ module Network =
                     sync(fun () -> Events.chat_message_ev.Trigger(sender, msg))
                 | Downstream.READY_STATUS (username, ready) -> 
                     lobby.Value.Players.[username].IsReady <- ready
-                    sync(Events.lobby_players_updated_ev.Trigger)
+                    sync Events.lobby_players_updated_ev.Trigger
 
                 | _ -> () // nyi
         }
@@ -165,31 +167,26 @@ module Network =
         Logging.Info(sprintf "Connecting to %s ..." credentials.Host)
         client.Connect()
 
-    let login(name) =
-        if status = Connected then client.Send(Upstream.LOGIN name)
+    let login(name) = if status = Connected then client.Send(Upstream.LOGIN name)
 
     let logout() = 
         if status = LoggedIn then
             client.Send(Upstream.LOGOUT)
             status <- Connected
 
-    let disconnect() =
-        client.Disconnect()
+    let disconnect() = client.Disconnect()
 
-    let send_chat_message(msg) =
-        client.Send(Upstream.CHAT msg)
+    let send_chat_message(msg) = client.Send(Upstream.CHAT msg)
 
-    let refresh_lobby_list() =
-        client.Send(Upstream.GET_LOBBIES)
+    let refresh_lobby_list() = client.Send(Upstream.GET_LOBBIES)
 
-    let create_lobby name =
-        client.Send(Upstream.CREATE_LOBBY name)
+    let create_lobby name = client.Send(Upstream.CREATE_LOBBY name)
 
-    let join_lobby id =
-        client.Send(Upstream.JOIN_LOBBY id)
+    let invite_to_lobby username = client.Send(Upstream.INVITE_TO_LOBBY username)
+
+    let join_lobby id = client.Send(Upstream.JOIN_LOBBY id)
     
-    let leave_lobby() =
-        client.Send(Upstream.LEAVE_LOBBY)
+    let leave_lobby() = client.Send(Upstream.LEAVE_LOBBY)
 
     let shutdown() =
         if status <> NotConnected then client.Disconnect()
