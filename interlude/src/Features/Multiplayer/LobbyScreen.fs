@@ -5,79 +5,13 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude.Common
+open Prelude.Data.Charts
+open Interlude.Web.Shared
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
-open Interlude.Web.Shared
-
-// Lobby list mode
-
-type LobbyInfoCard(info: LobbyInfo) =
-    inherit Frame(NodeType.None)
-
-    override this.Init(parent) =
-        this
-        |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Text((match info.CurrentlyPlaying with None -> "No song selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Clickable(fun () -> Network.join_lobby info.Id)
-        |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
-        base.Init parent
-
-    member this.Name = info.Name
-
-type CreateLobbyPage() as this =
-    inherit Page()
-    
-
-    let value = Setting.simple ""
-    let submit() = Network.create_lobby value.Value
-    let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
-    
-    do
-        this.Content(
-            column()
-            |+ PrettySetting("create_lobby.name", TextEntry(value |> Setting.trigger (fun s -> submit_button.Enabled <- s.Length > 0), "none")).Pos(200.0f)
-            |+ submit_button.Pos(300.0f)
-        )
-    
-    override this.Title = N"create_lobby"
-    override this.OnClose() = ()
-
-type LobbyList() =
-    inherit StaticContainer(NodeType.None)
-
-    let searchtext = Setting.simple ""
-
-    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 80.0f))
-    let mutable no_lobbies = false
-
-    let refresh() =
-        container.Clear()
-        no_lobbies <- Network.lobby_list.Length = 0
-        for l in Network.lobby_list do
-            container.Add(LobbyInfoCard l)
-
-    let mutable lobby_creating = false
-    let create_lobby() =
-        if lobby_creating then () else
-        lobby_creating <- true
-        Menu.ShowPage CreateLobbyPage
-
-    override this.Init(parent) =
-        this
-        |+ container
-        |+ Text((fun _ -> if no_lobbies then "No lobbies" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Button(Icons.add + " Create lobby", create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
-        |+ Button(Icons.reset + " Refresh", Network.refresh_lobby_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
-        |* SearchBox(searchtext, (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value), Position = Position.SliceTop 60.0f)
-        
-        base.Init parent
-
-        refresh()
-        Network.Events.receive_lobby_list.Add refresh
-        Network.Events.join_lobby.Add (fun () -> lobby_creating <- false)
-
-// Lobby gameplay mode
+open Interlude.Features.Gameplay
+open Interlude.Features.LevelSelect
 
 type Player(name: string, player: Network.LobbyPlayer) =
     inherit StaticWidget(NodeType.None)
@@ -117,6 +51,65 @@ type PlayerList() =
         Draw.rect user_bounds (Style.main 100 ())
         Text.drawFillB(Style.baseFont, Network.username, user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
         Text.drawFillB(Style.baseFont, (if (match Network.lobby with Some l -> l.YouAreHost | None -> false) then Icons.star + " Host" else ""), user_bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
+
+        base.Draw()
+
+type ChartInfo() =
+    inherit StaticContainer(NodeType.None)
+
+    let mutable chart = None
+    let mutable found = false
+    let mutable difficulty = ""
+    let mutable length = ""
+    let mutable bpm = ""
+    let mutable notecounts = ""
+
+    let change_chart(c: LobbyChart option) =
+        
+        chart <- c
+        match c with
+        | None ->
+            found <- true
+            difficulty <- ""
+            length <- ""
+            bpm <- ""
+            notecounts <- ""
+        | Some chart ->
+            found <- 
+                match Library.lookupHash chart.Hash with
+                | Some cc -> 
+                    match Library.load cc with 
+                    | Some c -> Chart.change(cc, Collections.LibraryContext.None, c); rate.Set chart.Rate; true
+                    | None -> false
+                | None -> Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash); false
+            if found then
+                difficulty <- sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
+                length <- LevelSelect.format_chart_duration()
+                bpm <- LevelSelect.format_chart_bpm()
+                notecounts <- LevelSelect.format_chart_notecounts()
+            else
+                difficulty <- ""
+                length <- ""
+                bpm <- ""
+                notecounts <- ""
+
+    override this.Init(parent: Widget) =
+        this
+        |+ Text((fun () -> match chart with Some c -> c.Artist + " - " + c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(60.0f).Margin(20.0f, 5.0f))
+
+        |+ Text((fun () -> difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
+        |+ Text((fun () -> length), Align = Alignment.CENTER, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
+        |+ Text((fun () -> bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
+        |* Text((fun () -> if found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
+
+        change_chart(Network.lobby.Value.Chart)
+        Network.Events.change_chart.Add(fun () -> change_chart Network.lobby.Value.Chart)
+
+        base.Init parent
+
+    override this.Draw() =
+        Draw.rect (this.Bounds.SliceTop(120.0f)) (if found then Style.dark 100 () else Color.FromArgb(100, 100, 100, 100))
+        Draw.rect (this.Bounds.SliceTop(120.0f).SliceLeft(5.0f)) (if found then Style.main 255 () else Color.White)
 
         base.Draw()
 
@@ -236,6 +229,7 @@ type Lobby() =
             TiltRight = false,
             Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }
             )
+        |+ ChartInfo(Position = { Left = 0.5f %+ 20.0f; Top = 0.0f %+ 100.0f; Right = 1.0f %- 20.0f; Bottom = 0.5f %- 10.0f } )
         |* Chat(Position = { Position.Margin(20.0f) with Left = 0.5f %+ 20.0f; Top = 0.5f %+ 10.0f } )
         
         base.Init parent
