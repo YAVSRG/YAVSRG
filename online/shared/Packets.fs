@@ -160,6 +160,7 @@ module Packets =
         | HANDSHAKE_SUCCESS
         | LOGIN_SUCCESS of username: string
         // todo: login failure with reason
+        // todo: ping and idle timeout system after 2 mins
 
         | LOBBY_LIST of lobbies: LobbyInfo array
         | YOU_JOINED_LOBBY of players: string array // todo: send status along with username
