@@ -188,6 +188,8 @@ module Network =
     
     let leave_lobby() = client.Send(Upstream.LEAVE_LOBBY)
 
+    let ready_status flag = client.Send(Upstream.READY_STATUS flag)
+
     let shutdown() =
         if status <> NotConnected then client.Disconnect()
         credentials.Save()

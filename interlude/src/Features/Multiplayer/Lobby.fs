@@ -173,8 +173,8 @@ type Chat() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect(this.Bounds.TrimBottom 60.0f) (Color.FromArgb(100, 0, 0, 0))
-        Draw.rect(this.Bounds.SliceBottom 50.0f) (Color.FromArgb(100, 0, 0, 0))
+        Draw.rect(this.Bounds.TrimBottom 60.0f) (Color.FromArgb(180, 0, 0, 0))
+        Draw.rect(this.Bounds.SliceBottom 50.0f) (Color.FromArgb(180, 0, 0, 0))
         base.Draw()
 
     override this.Update(elapsedTime, moved) =
@@ -230,8 +230,8 @@ type Lobby() =
             Position = { Left = (0.5f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (1.0f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
             )
         |+ StylishButton(
-            ignore,
-            K (Icons.ready + " Ready"),
+            (fun () -> Network.lobby.Value.Ready <- not Network.lobby.Value.Ready; Network.ready_status Network.lobby.Value.Ready),
+            (fun () -> match Network.lobby with Some l -> (if l.Ready then (Icons.not_ready + " Not ready") else (Icons.ready + " Ready")) | None -> ""),
             Style.main 100,
             TiltRight = false,
             Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }
