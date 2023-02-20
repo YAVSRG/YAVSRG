@@ -26,6 +26,7 @@ let handle_packet(id: Guid, packet: Upstream) =
         | Upstream.LEAVE_LOBBY -> Lobby.leave id
         | Upstream.CHAT msg -> Lobby.chat (id, msg)
         | Upstream.READY_STATUS r -> Lobby.ready_up (id, r)
+        | Upstream.SELECT_CHART c -> Lobby.select_chart (id, c)
 
         | _ -> Server.kick(id, "Not yet implemented")
 

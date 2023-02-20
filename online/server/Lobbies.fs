@@ -52,6 +52,7 @@ module Lobby =
         | Invite of invitor: PlayerId * invitee: string
         | Chat of sender: PlayerId * msg: string
         | ReadyUp of player: PlayerId * isReady: bool
+        | SelectChart of player: PlayerId * chart: LobbyChart
 
     let private lobbies = Dictionary<LobbyId, Lobby>()
     let private in_lobby = Dictionary<PlayerId, LobbyId>()
@@ -219,7 +220,32 @@ module Lobby =
                             lobby.Players.[player].Status <- new_status
                             
                             multicast_except(player, lobbies.[lobby_id], Downstream.READY_STATUS(username, ready))
-                            multicast(lobbies.[lobby_id], Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
+                            multicast(lobby, Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
+
+                    | Action.SelectChart (player, chart) ->
+
+                        match! UserState.find_username player with
+                        | None -> Server.kick(player, "Must be logged in")
+                        | Some username ->
+                        
+                        match get_player_lobby_id player with
+                        | None -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are not in a lobby")
+                        | Some lobby_id ->
+
+                        let lobby = lobbies.[lobby_id]
+
+                        if lobby.Host <> player then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "You are not host")
+                        else
+
+                        // todo: only if no game in progress
+                        if lobby.Chart <> Some chart then
+
+                            lobby.Chart <- Some chart
+                            for p in lobby.Players.Values do
+                                p.Status <- NotReady
+
+                            multicast(lobby, Downstream.SELECT_CHART chart)
             }
         }
 
@@ -229,6 +255,7 @@ module Lobby =
     let invite(player, target) = state_change.Request( Action.Invite(player, target) , ignore )
     let chat(player, message) = state_change.Request( Action.Chat(player, message) , ignore )
     let ready_up(player, ready) = state_change.Request( Action.ReadyUp(player, ready) , ignore )
+    let select_chart(player, chart) = state_change.Request( Action.SelectChart(player, chart) , ignore )
 
     let list(player) = state_change.Request( Action.List player, ignore )
 
