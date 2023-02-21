@@ -54,8 +54,7 @@ type PlayerList() =
 
         base.Draw()
 
-type ChartInfo() =
-    inherit StaticContainer(NodeType.None)
+module SelectedChart =
 
     let mutable chart = None
     let mutable found = false
@@ -64,7 +63,7 @@ type ChartInfo() =
     let mutable bpm = ""
     let mutable notecounts = ""
 
-    let change_chart(c: LobbyChart option) =
+    let update(c: LobbyChart option) =
         
         chart <- c
         match c with
@@ -93,28 +92,33 @@ type ChartInfo() =
                 bpm <- ""
                 notecounts <- ""
 
+type SelectedChart() =
+    inherit StaticContainer(NodeType.None)
+
     override this.Init(parent: Widget) =
         this
-        |+ Text((fun () -> match chart with Some c -> c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.Artist + "  •  " + Chart.cacheInfo.Value.Creator else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.DiffName else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.Artist + "  •  " + Chart.cacheInfo.Value.Creator else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DiffName else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
-        |+ Text((fun () -> difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Text((fun () -> if found then getModString(rate.Value, selectedMods.Value, autoplay) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        |+ Text((fun () -> notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        |* Text((fun () -> if found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> SelectedChart.bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if SelectedChart.found then getModString(rate.Value, selectedMods.Value, autoplay) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |+ Text((fun () -> if SelectedChart.found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
-        change_chart Network.lobby.Value.Chart
-        Network.Events.change_chart.Add(fun () -> change_chart Network.lobby.Value.Chart)
+        |* IconButton("Change chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
+
+        SelectedChart.update Network.lobby.Value.Chart
+        Network.Events.change_chart.Add(fun () -> if Screen.currentType = Screen.Type.Lobby then SelectedChart.update Network.lobby.Value.Chart)
 
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.SliceTop(70.0f)) (if found then Style.dark 180 () else Color.FromArgb(180, 100, 100, 100))
-        Draw.rect (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f)) (if found then Style.darkD 180 () else Color.FromArgb(180, 50, 50, 50))
-        Draw.rect (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f)) (if found then Style.main 255 () else Color.White)
+        Draw.rect (this.Bounds.SliceTop(70.0f)) (if SelectedChart.found then Style.dark 180 () else Color.FromArgb(180, 100, 100, 100))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f)) (if SelectedChart.found then Style.darkD 180 () else Color.FromArgb(180, 50, 50, 50))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f)) (if SelectedChart.found then Style.main 255 () else Color.White)
 
         base.Draw()
 
@@ -234,7 +238,7 @@ type Lobby() =
             TiltRight = false,
             Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }
             )
-        |+ ChartInfo(Position = { Left = 0.5f %+ 20.0f; Top = 0.0f %+ 100.0f; Right = 1.0f %- 20.0f; Bottom = 0.5f %- 10.0f } )
+        |+ SelectedChart(Position = { Left = 0.5f %+ 20.0f; Top = 0.0f %+ 100.0f; Right = 1.0f %- 20.0f; Bottom = 0.5f %- 10.0f } )
         |* Chat(Position = { Position.Margin(20.0f) with Left = 0.5f %+ 20.0f; Top = 0.5f %+ 10.0f } )
         
         base.Init parent
@@ -257,7 +261,14 @@ type LobbyScreen() =
         in_lobby <- Network.lobby.IsSome
         swap.Current <- if in_lobby then main :> Widget else list
         if not in_lobby then Network.refresh_lobby_list()
+        if in_lobby then SelectedChart.update Network.lobby.Value.Chart
     override this.OnExit(_) = ()
+
+    override this.OnBack() = 
+        if in_lobby then
+            Menu.ShowPage <| ConfirmPage("Leave this lobby?", Network.leave_lobby)
+            None
+        else Some Screen.Type.LevelSelect
 
     override this.Init(parent) =
         this |* swap

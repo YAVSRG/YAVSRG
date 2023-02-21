@@ -107,6 +107,8 @@ type MainMenuScreen() as this =
         splashAnim.Target <- 0.0f
         Background.dim 0.7f
 
+    override this.OnBack() = Some Screen.Type.SplashScreen
+
     override this.Draw() =
         let c = this.Bounds.CenterX
         let (s, ss) = splashText

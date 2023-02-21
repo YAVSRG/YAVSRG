@@ -124,6 +124,8 @@ type PlayScreen(pacemakerMode: PacemakerMode) as this =
         Background.dim 0.7f
         if next <> Screen.Type.Score then Screen.Toolbar.show()
 
+    override this.OnBack() = Some Screen.Type.LevelSelect
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let now = Song.timeWithOffset()

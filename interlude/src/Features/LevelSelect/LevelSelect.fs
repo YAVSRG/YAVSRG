@@ -15,6 +15,7 @@ open Interlude.Features.Gameplay
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
+open Interlude.Features.Multiplayer
 
 type LevelSelectScreen() =
     inherit Screen()
@@ -107,3 +108,7 @@ type LevelSelectScreen() =
         refresh()
 
     override this.OnExit next = Input.removeInputMethod()
+
+    override this.OnBack() = 
+        if Network.lobby.IsSome then Some Screen.Type.Lobby
+        else Some Screen.Type.MainMenu

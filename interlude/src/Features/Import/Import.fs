@@ -100,3 +100,6 @@ type ImportScreen() as this =
 
     override this.OnEnter _ = tabs.Focus()
     override this.OnExit _ = ()
+    override this.OnBack() = 
+        if Interlude.Features.Multiplayer.Network.lobby.IsSome then Some Screen.Type.Lobby
+        else Some Screen.Type.LevelSelect

@@ -100,6 +100,8 @@ type ReplayScreen(mode: ReplayMode) as this =
         Background.dim 0.7f
         Screen.Toolbar.show()
 
+    override this.OnBack() = Some Screen.Type.LevelSelect
+
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         let now = Song.timeWithOffset()

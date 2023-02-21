@@ -114,3 +114,5 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         scoreData.Ruleset <- Rulesets.current
         graph.Dispose()
         Screen.Toolbar.show()
+
+    override this.OnBack() = Some Screen.Type.LevelSelect

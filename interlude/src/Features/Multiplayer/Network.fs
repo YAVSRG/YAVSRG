@@ -113,7 +113,6 @@ module Network =
                 status <- if status = Connecting then ConnectionFailed else NotConnected
 
             override this.OnPacketReceived(packet: Downstream) =
-                //printfn "%A" packet
                 match packet with
                 | Downstream.DISCONNECT reason -> 
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
@@ -147,9 +146,10 @@ module Network =
                 | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
                 | Downstream.YOU_ARE_HOST -> 
                     lobby.Value.YouAreHost <- true
-                    match Interlude.Features.Gameplay.Chart.cacheInfo with
-                    | Some cc -> this.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
-                    | None -> ()
+                    if lobby.Value.Chart.IsNone then
+                        match Interlude.Features.Gameplay.Chart.cacheInfo with
+                        | Some cc -> this.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
+                        | None -> ()
                 | Downstream.PLAYER_JOINED_LOBBY username -> 
                     lobby.Value.Players.Add(username, { IsReady = false; IsSpectating = false })
                     sync(Events.lobby_players_updated_ev.Trigger)
@@ -183,15 +183,15 @@ module Network =
     let login(name) = if status = Connected then client.Send(Upstream.LOGIN name)
 
     let logout() = 
+        if lobby.IsSome then sync Events.leave_lobby_ev.Trigger
         lobby <- None
-        sync Events.leave_lobby_ev.Trigger
         if status = LoggedIn then
             client.Send(Upstream.LOGOUT)
             status <- Connected
 
     let disconnect() =
+        if lobby.IsSome then sync Events.leave_lobby_ev.Trigger
         lobby <- None
-        sync Events.leave_lobby_ev.Trigger
         client.Disconnect()
 
     let send_chat_message(msg) = client.Send(Upstream.CHAT msg)
@@ -207,6 +207,11 @@ module Network =
     let leave_lobby() = client.Send(Upstream.LEAVE_LOBBY)
 
     let ready_status flag = client.Send(Upstream.READY_STATUS flag)
+
+    let change_to_selected_chart() =
+        if lobby.Value.YouAreHost then 
+            let cc = Interlude.Features.Gameplay.Chart.cacheInfo.Value
+            client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
 
     let shutdown() =
         if status <> NotConnected then client.Disconnect()

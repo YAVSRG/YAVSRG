@@ -26,6 +26,7 @@ module Screen =
         inherit StaticContainer(NodeType.None)
         abstract member OnEnter: Type -> unit
         abstract member OnExit: Type -> unit
+        abstract member OnBack: unit -> Type option
     
     module Toolbar =
         let HEIGHT = 70.0f
@@ -133,15 +134,8 @@ module Screen =
     let change (screenType: Type) (flags: Transitions.Flags) = changeNew (K screens.[int screenType]) screenType flags
     
     let back (flags: Transitions.Flags) =
-        match currentType with
-        | Type.SplashScreen -> exit <- true
-        | Type.MainMenu -> change Type.SplashScreen flags
-        | Type.LevelSelect -> change Type.MainMenu flags
-        | Type.Import
-        | Type.Lobby
-        | Type.Play
-        | Type.Replay
-        | Type.Score -> change Type.LevelSelect flags
-        | _ -> Logging.Critical (sprintf "No back-behaviour defined for %A" currentType)
+        match current.OnBack() with
+        | Some t -> change t flags
+        | None -> ()
 
 type Screen = Screen.T

@@ -16,13 +16,13 @@ open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Collections
 open Prelude.Data.Charts.Library
 open Prelude.Data.Charts.Suggestions
-open Interlude
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
+open Interlude.Features.Multiplayer
 
 [<RequireQualifiedAccess>]
 type Navigation =
@@ -92,16 +92,20 @@ module Tree =
         | None -> Logging.Error("Couldn't load cached file: " + cc.FilePath)
     
     let play() =
-        match Chart.saveData with
-        | Some data ->
-            data.LastPlayed <- DateTime.Now
-            Screen.changeNew
-                ( fun () -> 
-                    if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T
-                    else PlayScreen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
-                ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
-                Transitions.Flags.Default
-        | None -> Logging.Warn "There is no chart selected"
+        if Network.lobby.IsSome then
+            Network.change_to_selected_chart()
+            Screen.change Screen.Type.Lobby Transitions.Flags.Default
+        else
+            match Chart.saveData with
+            | Some data ->
+                data.LastPlayed <- DateTime.Now
+                Screen.changeNew
+                    ( fun () -> 
+                        if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T
+                        else PlayScreen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
+                    ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
+                    Transitions.Flags.Default
+            | None -> Logging.Warn "There is no chart selected"
 
     let challengeScore(rate, replay) =
         match Chart.saveData with
