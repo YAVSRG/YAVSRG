@@ -73,7 +73,7 @@ type ChartInfo() as this =
             .WithPosition { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f }
 
     member this.Refresh() =
-        length <- LevelSelect.format_chart_duration()
-        bpm <- LevelSelect.format_chart_bpm()
-        notecounts <- LevelSelect.format_chart_notecounts()
+        length <- Chart.format_duration()
+        bpm <- Chart.format_bpm()
+        notecounts <- Chart.format_notecounts()
         scores.Refresh()

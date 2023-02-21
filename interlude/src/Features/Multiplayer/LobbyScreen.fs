@@ -6,12 +6,12 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude.Common
 open Prelude.Data.Charts
+open Prelude.Gameplay.Mods
 open Interlude.Web.Shared
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Features.Gameplay
-open Interlude.Features.LevelSelect
 
 type Player(name: string, player: Network.LobbyPlayer) =
     inherit StaticWidget(NodeType.None)
@@ -84,9 +84,9 @@ type ChartInfo() =
                 | None -> Logging.Info(sprintf "Chart not found locally: %s [%s]" chart.Title chart.Hash); false
             if found then
                 difficulty <- sprintf "%s %.2f" Icons.star (match Chart.rating with None -> 0.0 | Some d -> d.Physical)
-                length <- LevelSelect.format_chart_duration()
-                bpm <- LevelSelect.format_chart_bpm()
-                notecounts <- LevelSelect.format_chart_notecounts()
+                length <- Chart.format_duration()
+                bpm <- Chart.format_bpm()
+                notecounts <- Chart.format_notecounts()
             else
                 difficulty <- ""
                 length <- ""
@@ -95,12 +95,16 @@ type ChartInfo() =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text((fun () -> match chart with Some c -> c.Artist + " - " + c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(60.0f).Margin(20.0f, 5.0f))
+        |+ Text((fun () -> match chart with Some c -> c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(20.0f, 0.0f))
+        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.Artist + "  •  " + Chart.cacheInfo.Value.Creator else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(20.0f, 0.0f))
+        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.DiffName else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(20.0f, 0.0f))
 
-        |+ Text((fun () -> difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
-        |+ Text((fun () -> length), Align = Alignment.CENTER, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
-        |+ Text((fun () -> bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
-        |* Text((fun () -> if found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(120.0f).SliceTop(60.0f))
+        |+ Text((fun () -> difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if found then getModString(rate.Value, selectedMods.Value, autoplay) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |+ Text((fun () -> notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
+        |* Text((fun () -> if found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
         change_chart(Network.lobby.Value.Chart)
         Network.Events.change_chart.Add(fun () -> change_chart Network.lobby.Value.Chart)
@@ -108,8 +112,9 @@ type ChartInfo() =
         base.Init parent
 
     override this.Draw() =
-        Draw.rect (this.Bounds.SliceTop(120.0f)) (if found then Style.dark 100 () else Color.FromArgb(100, 100, 100, 100))
-        Draw.rect (this.Bounds.SliceTop(120.0f).SliceLeft(5.0f)) (if found then Style.main 255 () else Color.White)
+        Draw.rect (this.Bounds.SliceTop(70.0f)) (if found then Style.dark 180 () else Color.FromArgb(180, 100, 100, 100))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceBottom(30.0f)) (if found then Style.darkD 180 () else Color.FromArgb(180, 50, 50, 50))
+        Draw.rect (this.Bounds.SliceTop(100.0f).SliceLeft(5.0f)) (if found then Style.main 255 () else Color.White)
 
         base.Draw()
 
