@@ -95,9 +95,9 @@ type ChartInfo() =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text((fun () -> match chart with Some c -> c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(20.0f, 0.0f))
-        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.Artist + "  •  " + Chart.cacheInfo.Value.Creator else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(20.0f, 0.0f))
-        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.DiffName else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(20.0f, 0.0f))
+        |+ Text((fun () -> match chart with Some c -> c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.Artist + "  •  " + Chart.cacheInfo.Value.Creator else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if chart.IsSome && found then Chart.cacheInfo.Value.DiffName else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
         |+ Text((fun () -> difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
@@ -106,7 +106,7 @@ type ChartInfo() =
         |+ Text((fun () -> notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |* Text((fun () -> if found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
-        change_chart(Network.lobby.Value.Chart)
+        change_chart Network.lobby.Value.Chart
         Network.Events.change_chart.Add(fun () -> change_chart Network.lobby.Value.Chart)
 
         base.Init parent
@@ -160,7 +160,7 @@ type Chat() =
                 | LobbyEvent.Leave, who -> sprintf "%s %s left" Icons.logout who, Color.PaleVioletRed
                 | LobbyEvent.Host, who -> sprintf "%s %s is now host" Icons.star who, Color.Gold
                 | LobbyEvent.Ready, who -> sprintf "%s %s is ready" Icons.ready who, Color.PaleGreen
-                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.not_ready who, Color.Chartreuse
+                | LobbyEvent.NotReady, who -> sprintf "%s %s is not ready" Icons.not_ready who, Color.DeepPink
                 | LobbyEvent.Invite, who -> sprintf "%s %s invited" Icons.invite who, Color.PaleTurquoise
                 | LobbyEvent.Generic, msg -> sprintf "%s %s" Icons.info msg, Color.WhiteSmoke
                 | _, msg -> msg, Color.White

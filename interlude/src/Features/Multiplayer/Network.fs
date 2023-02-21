@@ -183,11 +183,16 @@ module Network =
     let login(name) = if status = Connected then client.Send(Upstream.LOGIN name)
 
     let logout() = 
+        lobby <- None
+        sync Events.leave_lobby_ev.Trigger
         if status = LoggedIn then
             client.Send(Upstream.LOGOUT)
             status <- Connected
 
-    let disconnect() = client.Disconnect()
+    let disconnect() =
+        lobby <- None
+        sync Events.leave_lobby_ev.Trigger
+        client.Disconnect()
 
     let send_chat_message(msg) = client.Send(Upstream.CHAT msg)
 

@@ -25,9 +25,9 @@ type CreateLobbyPage() as this =
     inherit Page()
     
 
-    let value = Setting.simple ""
+    let value = Setting.simple (Network.username + "'s Lobby")
     let submit() = Network.create_lobby value.Value
-    let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
+    let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()))
     
     do
         this.Content(
