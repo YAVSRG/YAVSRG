@@ -142,6 +142,7 @@ module Lobby =
                         for p in lobby.Players.Values do
                             if p.Status = Ready then Server.send(player, Downstream.READY_STATUS(p.Username, true))
                         Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
+                        if lobby.Chart.IsSome then Server.send(player, Downstream.SELECT_CHART lobby.Chart.Value)
 
                     | Action.Leave player ->
                         match! UserState.find_username player with
