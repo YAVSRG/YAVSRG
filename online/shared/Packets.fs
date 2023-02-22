@@ -8,6 +8,17 @@ module Packets =
 
     let PROTOCOL_VERSION = 2uy
 
+    let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
+    let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
+
+    let PLAY_PACKET_THRESHOLD_PER_SECOND = 600
+    
+    type LobbyPlayerStatus =
+        | NotReady = 0uy
+        | Ready = 1uy
+        | Playing = 2uy
+        | Spectating = 3uy
+
     type LobbyChart =
         {
             Hash: string
@@ -77,15 +88,15 @@ module Packets =
         | CHAT of message: string
         | READY_STATUS of bool
 
-        | IS_PLAYING
-        | IS_SPECTATING
+        | START_PLAYING
         | PLAY_DATA of byte array
-        | FINISH_PLAY
+        | START_SPECTATING
+        | FINISH_PLAYING
 
         | TRANSFER_HOST of username: string
         | SELECT_CHART of LobbyChart
         | LOBBY_SETTINGS of LobbySettings
-        | BEGIN_PLAYING
+        | BEGIN_ROUND
 
         | KICK_PLAYER of username: string
 
@@ -107,15 +118,19 @@ module Packets =
                 | 0x22uy -> CHAT (br.ReadString())
                 | 0x23uy -> READY_STATUS (br.ReadBoolean())
 
-                | 0x30uy -> IS_PLAYING
-                | 0x31uy -> IS_SPECTATING
-                | 0x32uy -> PLAY_DATA (br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
-                | 0x33uy -> FINISH_PLAY
+                | 0x30uy -> START_PLAYING
+                | 0x31uy -> START_SPECTATING
+                | 0x32uy ->
+                    let length = int (br.BaseStream.Length - br.BaseStream.Position)
+                    if length > PLAY_PACKET_THRESHOLD_PER_SECOND * MULTIPLAYER_REPLAY_DELAY_SECONDS then
+                        failwithf "Excessive replay data being sent to server"
+                    PLAY_DATA (br.ReadBytes(length))
+                | 0x33uy -> FINISH_PLAYING
 
                 | 0x40uy -> TRANSFER_HOST (br.ReadString())
                 | 0x41uy -> SELECT_CHART (LobbyChart.Read br)
                 | 0x42uy -> LOBBY_SETTINGS { Name = br.ReadString() }
-                | 0x43uy -> BEGIN_PLAYING
+                | 0x43uy -> BEGIN_ROUND
 
                 | 0x50uy -> KICK_PLAYER (br.ReadString())
 
@@ -141,15 +156,15 @@ module Packets =
                 | CHAT msg -> bw.Write msg; 0x22uy
                 | READY_STATUS ready -> bw.Write ready; 0x23uy
 
-                | IS_PLAYING -> 0x30uy
-                | IS_SPECTATING -> 0x31uy
+                | START_PLAYING -> 0x30uy
+                | START_SPECTATING -> 0x31uy
                 | PLAY_DATA data -> bw.Write data; 0x32uy
-                | FINISH_PLAY -> 0x33uy
+                | FINISH_PLAYING -> 0x33uy
 
                 | TRANSFER_HOST username -> bw.Write username; 0x40uy
                 | SELECT_CHART chart -> chart.Write bw; 0x41uy
                 | LOBBY_SETTINGS settings -> bw.Write settings.Name; 0x42uy
-                | BEGIN_PLAYING -> 0x43uy
+                | BEGIN_ROUND -> 0x43uy
 
                 | KICK_PLAYER username -> bw.Write username; 0x50uy
             kind, ms.ToArray()
@@ -175,7 +190,7 @@ module Packets =
         | LOBBY_EVENT of LobbyEvent * data: string
         | SYSTEM_MESSAGE of string
         | CHAT of sender: string * message: string
-        | READY_STATUS of username: string * ready: bool // todo: will just be status
+        | PLAYER_STATUS of username: string * status: LobbyPlayerStatus
 
         | BEGIN_PLAYING
         | USER_IS_PLAYING of username: string
@@ -204,7 +219,7 @@ module Packets =
                 | 0x25uy -> LOBBY_SETTINGS { Name = br.ReadString() }
                 | 0x26uy -> LOBBY_EVENT (br.ReadByte() |> LanguagePrimitives.EnumOfValue, br.ReadString())
                 | 0x27uy -> CHAT (br.ReadString(), br.ReadString())
-                | 0x28uy -> READY_STATUS (br.ReadString(), br.ReadBoolean())
+                | 0x28uy -> PLAYER_STATUS (br.ReadString(), br.ReadByte() |> LanguagePrimitives.EnumOfValue)
 
                 | 0x30uy -> BEGIN_PLAYING
                 | 0x31uy -> USER_IS_PLAYING (br.ReadString())
@@ -243,7 +258,7 @@ module Packets =
                 | LOBBY_SETTINGS settings -> bw.Write settings.Name; 0x25uy
                 | LOBBY_EVENT (kind, data) -> bw.Write (byte kind); bw.Write data; 0x26uy
                 | CHAT (sender, msg) -> bw.Write sender; bw.Write msg; 0x27uy
-                | READY_STATUS (username, ready) -> bw.Write username; bw.Write ready; 0x28uy
+                | PLAYER_STATUS (username, status) -> bw.Write username; bw.Write (byte status); 0x28uy
                 
                 | BEGIN_PLAYING -> 0x30uy
                 | USER_IS_PLAYING username -> bw.Write username; 0x31uy

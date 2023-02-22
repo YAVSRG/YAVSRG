@@ -2,24 +2,38 @@
 
 open System
 open System.Collections.Generic
+open System.IO
 open Percyqaz.Common
 open Interlude.Web.Shared
 
 type LobbyId = Guid
 type PlayerId = Guid
 
-type LobbyPlayerStatus =
-    | NotReady
-    | Ready
-    | Spectating
-    | Playing
-
-type LobbyPlayer =
+type Player =
     {
         Username: string
         mutable Status: LobbyPlayerStatus
+        mutable CurrentPlayBuffer: MemoryStream
+        mutable PlayPacketsReceived: int
     }
-    static member Create name = { Username = name; Status = NotReady }
+    static member Create name =
+        { 
+            Username = name
+            Status = LobbyPlayerStatus.NotReady
+            CurrentPlayBuffer = new MemoryStream([||], false)
+            PlayPacketsReceived = 0
+        }
+    member this.ReceivePlayPacket(data: byte array) : Result<unit, string> =
+        if this.Status <> LobbyPlayerStatus.Playing then
+            Error "Sent play packet while not playing"
+        else
+            this.CurrentPlayBuffer.Write(data, 0, data.Length)
+            this.PlayPacketsReceived <- this.PlayPacketsReceived + 1
+            if int this.CurrentPlayBuffer.Length / (this.PlayPacketsReceived * MULTIPLAYER_REPLAY_DELAY_SECONDS) > PLAY_PACKET_THRESHOLD_PER_SECOND then
+                Error "Too much data sent too often"
+            else Ok()
+    member this.GetReplay() = this.CurrentPlayBuffer.ToArray()
+        
 
 type Lobby =
     {
@@ -27,7 +41,8 @@ type Lobby =
         mutable Settings: LobbySettings
         mutable Host: PlayerId
         mutable Chart: LobbyChart option
-        Players: Dictionary<PlayerId, LobbyPlayer>
+        mutable GameRunning: bool
+        Players: Dictionary<PlayerId, Player>
     }
     static member Create (playerId, username, name) =
         {
@@ -35,9 +50,10 @@ type Lobby =
             Settings = { Name = name }
             Host = playerId
             Chart = None
+            GameRunning = false
             Players = 
-                let d = Dictionary<PlayerId, LobbyPlayer>()
-                d.Add(playerId, LobbyPlayer.Create username)
+                let d = Dictionary<PlayerId, Player>()
+                d.Add(playerId, Player.Create username)
                 d
         }
 
@@ -136,11 +152,11 @@ module Lobby =
                         multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Join, username))
                             
                         in_lobby.Add(player, lobby_id)
-                        lobby.Players.Add(player, LobbyPlayer.Create username)
+                        lobby.Players.Add(player, Player.Create username)
 
                         Server.send(player, Downstream.YOU_JOINED_LOBBY player_list)
                         for p in lobby.Players.Values do
-                            if p.Status = Ready then Server.send(player, Downstream.READY_STATUS(p.Username, true))
+                            if p.Status <> LobbyPlayerStatus.NotReady then Server.send(player, Downstream.PLAYER_STATUS(p.Username, p.Status))
                         Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
                         if lobby.Chart.IsSome then Server.send(player, Downstream.SELECT_CHART lobby.Chart.Value)
 
@@ -166,7 +182,7 @@ module Lobby =
                             lobbies.Remove lobby_id |> ignore
                             Logging.Info (sprintf "Closed lobby: %s (%O)" lobby.Settings.Name lobby_id)
                         else
-                            if lobby.Host = player then 
+                            if lobby.Host = player then
                                 lobby.Host <- Seq.head lobby.Players.Keys
                                 Server.send(lobby.Host, Downstream.YOU_ARE_HOST)
                                 multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Host, lobby.Players.[lobby.Host].Username))
@@ -214,13 +230,17 @@ module Lobby =
 
                         let lobby = lobbies.[lobby_id]
 
-                        let new_status = if ready then Ready else NotReady
+                        let old_status = lobby.Players.[player].Status
+                        if old_status <> LobbyPlayerStatus.Ready && old_status <> LobbyPlayerStatus.NotReady then
+                            Server.kick(player, "Ready status changed while playing/spectating")
+                        else
 
-                        if new_status <> lobby.Players.[player].Status then
+                        let new_status = if ready then LobbyPlayerStatus.Ready else LobbyPlayerStatus.NotReady
+                        if new_status <> old_status then
 
                             lobby.Players.[player].Status <- new_status
                             
-                            multicast_except(player, lobbies.[lobby_id], Downstream.READY_STATUS(username, ready))
+                            multicast_except(player, lobbies.[lobby_id], Downstream.PLAYER_STATUS(username, new_status))
                             multicast(lobby, Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
 
                     | Action.SelectChart (player, chart) ->
@@ -239,12 +259,15 @@ module Lobby =
                             Server.send(player, Downstream.SYSTEM_MESSAGE "You are not host")
                         else
 
-                        // todo: only if no game in progress
+                        if lobby.GameRunning then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "Game is currently running")
+                        else
+
                         if lobby.Chart <> Some chart then
 
                             lobby.Chart <- Some chart
                             for p in lobby.Players.Values do
-                                p.Status <- NotReady
+                                p.Status <- LobbyPlayerStatus.NotReady
 
                             multicast(lobby, Downstream.SELECT_CHART chart)
             }
