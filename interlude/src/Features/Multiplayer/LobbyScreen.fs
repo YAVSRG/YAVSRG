@@ -19,7 +19,7 @@ type Player(name: string, player: Network.LobbyPlayer) =
     override this.Draw() =
         Draw.rect this.Bounds (Style.dark 100 ())
         Text.drawFillB(Style.baseFont, name, this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
-        Text.drawFillB(Style.baseFont, (if player.IsReady then Icons.ready else ""), this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
+        Text.drawFillB(Style.baseFont, (if player.Status = LobbyPlayerStatus.Ready then Icons.ready else ""), this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
 
     member this.Name = name
 

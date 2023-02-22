@@ -49,8 +49,7 @@ module Network =
 
     type LobbyPlayer =
         {
-            mutable IsReady: bool
-            mutable IsSpectating: bool
+            mutable Status: LobbyPlayerStatus
         }
 
     type Lobby =
@@ -131,7 +130,7 @@ module Network =
                             Settings = None
                             Players =
                                 let d = new Dictionary<string, LobbyPlayer>()
-                                for p in players do d.Add(p, { IsReady = false; IsSpectating = false })
+                                for p in players do d.Add(p, { Status = LobbyPlayerStatus.NotReady })
                                 d
                             YouAreHost = false
                             Ready = false
@@ -151,14 +150,15 @@ module Network =
                         | Some cc -> this.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
                         | None -> ()
                 | Downstream.PLAYER_JOINED_LOBBY username -> 
-                    lobby.Value.Players.Add(username, { IsReady = false; IsSpectating = false })
+                    lobby.Value.Players.Add(username, { Status = LobbyPlayerStatus.NotReady })
                     sync(Events.lobby_players_updated_ev.Trigger)
                 | Downstream.PLAYER_LEFT_LOBBY username -> 
                     lobby.Value.Players.Remove(username) |> ignore
                     sync Events.lobby_players_updated_ev.Trigger
                 | Downstream.SELECT_CHART c -> 
                     lobby.Value.Chart <- Some c
-                    for player in lobby.Value.Players.Values do player.IsReady <- false
+                    for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
+                    lobby.Value.Ready <- false
                     sync Events.change_chart_ev.Trigger
                     sync Events.lobby_players_updated_ev.Trigger
                 | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
@@ -166,8 +166,8 @@ module Network =
                 | Downstream.CHAT (sender, msg) -> 
                     Logging.Info(sprintf "%s: %s" sender msg)
                     sync(fun () -> Events.chat_message_ev.Trigger(sender, msg))
-                | Downstream.READY_STATUS (username, ready) -> 
-                    lobby.Value.Players.[username].IsReady <- ready
+                | Downstream.PLAYER_STATUS (username, status) -> 
+                    lobby.Value.Players.[username].Status <- status
                     sync Events.lobby_players_updated_ev.Trigger
 
                 | _ -> () // nyi
