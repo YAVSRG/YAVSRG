@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open System.Linq
 open System.IO
 open Percyqaz.Common
 open Interlude.Web.Shared
@@ -15,6 +16,7 @@ type Player =
         mutable Status: LobbyPlayerStatus
         mutable CurrentPlayBuffer: MemoryStream
         mutable PlayPacketsReceived: int
+        mutable PlayComplete: bool
     }
     static member Create name =
         { 
@@ -22,9 +24,17 @@ type Player =
             Status = LobbyPlayerStatus.NotReady
             CurrentPlayBuffer = new MemoryStream([||], false)
             PlayPacketsReceived = 0
+            PlayComplete = false
         }
+    member this.StartPlay() =
+        this.Status <- LobbyPlayerStatus.Playing
+        this.PlayComplete <- false
+        this.CurrentPlayBuffer <- new MemoryStream()
+        this.PlayPacketsReceived <- 0
+    member this.FinishPlay() =
+        this.PlayComplete <- true
     member this.ReceivePlayPacket(data: byte array) : Result<unit, string> =
-        if this.Status <> LobbyPlayerStatus.Playing then
+        if this.Status <> LobbyPlayerStatus.Playing || this.PlayComplete then
             Error "Sent play packet while not playing"
         else
             this.CurrentPlayBuffer.Write(data, 0, data.Length)
@@ -69,6 +79,12 @@ module Lobby =
         | Chat of sender: PlayerId * msg: string
         | ReadyUp of player: PlayerId * isReady: bool
         | SelectChart of player: PlayerId * chart: LobbyChart
+        | StartGame of player: PlayerId
+        | BeginPlaying of player: PlayerId
+        | FinishPlaying of player: PlayerId
+        | BeginSpectating of player: PlayerId
+        | PlayData of player: PlayerId * data: byte array
+        | GameplayTimeout of lobby: LobbyId
 
     let private lobbies = Dictionary<LobbyId, Lobby>()
     let private in_lobby = Dictionary<PlayerId, LobbyId>()
@@ -90,6 +106,13 @@ module Lobby =
     let private multicast_except(id: PlayerId, lobby: Lobby, packet: Downstream) =
         for p in lobby.Players.Keys do
             if p <> id then Server.send(p, packet)
+
+    let game_end(lobby: Lobby) =
+        lobby.GameRunning <- false
+        multicast(lobby, Downstream.GAME_END)
+        for p in lobby.Players.Values do
+            p.Status <- LobbyPlayerStatus.NotReady
+        // todo: if all players have PlayComplete true, the lobby went successfully and you can host rotate if the setting is on
 
     let private state_change = 
         { new Async.Service<Action, unit>()
@@ -155,10 +178,10 @@ module Lobby =
                         lobby.Players.Add(player, Player.Create username)
 
                         Server.send(player, Downstream.YOU_JOINED_LOBBY player_list)
-                        for p in lobby.Players.Values do
-                            if p.Status <> LobbyPlayerStatus.NotReady then Server.send(player, Downstream.PLAYER_STATUS(p.Username, p.Status))
                         Server.send(player, Downstream.LOBBY_SETTINGS lobby.Settings)
                         if lobby.Chart.IsSome then Server.send(player, Downstream.SELECT_CHART lobby.Chart.Value)
+                        for p in lobby.Players.Values do
+                            if p.Status <> LobbyPlayerStatus.NotReady then Server.send(player, Downstream.PLAYER_STATUS(p.Username, p.Status))
 
                     | Action.Leave player ->
                         match! UserState.find_username player with
@@ -182,6 +205,7 @@ module Lobby =
                             lobbies.Remove lobby_id |> ignore
                             Logging.Info (sprintf "Closed lobby: %s (%O)" lobby.Settings.Name lobby_id)
                         else
+                            if lobby.GameRunning && lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) |> not then game_end lobby
                             if lobby.Host = player then
                                 lobby.Host <- Seq.head lobby.Players.Keys
                                 Server.send(lobby.Host, Downstream.YOU_ARE_HOST)
@@ -244,7 +268,6 @@ module Lobby =
                             multicast(lobby, Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
 
                     | Action.SelectChart (player, chart) ->
-
                         match! UserState.find_username player with
                         | None -> Server.kick(player, "Must be logged in")
                         | Some username ->
@@ -270,6 +293,138 @@ module Lobby =
                                 p.Status <- LobbyPlayerStatus.NotReady
 
                             multicast(lobby, Downstream.SELECT_CHART chart)
+
+                    | Action.StartGame player ->
+                        match! UserState.find_username player with
+                        | None -> Server.kick(player, "Must be logged in")
+                        | Some username ->
+                    
+                        match get_player_lobby_id player with
+                        | None -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are not in a lobby")
+                        | Some lobby_id ->
+                        
+                        let lobby = lobbies.[lobby_id]
+                        
+                        if lobby.Host <> player then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "You are not host")
+                        else
+                        
+                        if lobby.GameRunning then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "Game is already running")
+                        else
+
+                        lobby.GameRunning <- true
+                        multicast(lobby, Downstream.GAME_START)
+
+                    | Action.BeginPlaying player ->
+                        match! UserState.find_username player with
+                        | None -> Server.kick(player, "Must be logged in")
+                        | Some username ->
+                    
+                        match get_player_lobby_id player with
+                        | None -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are not in a lobby")
+                        | Some lobby_id ->
+                        
+                        let lobby = lobbies.[lobby_id]
+                        
+                        if not lobby.GameRunning then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "Game is not running")
+                        else
+
+                        lobby.Players.[player].StartPlay()
+                        multicast(lobby, Downstream.PLAYER_IS_PLAYING username)
+
+                    | Action.FinishPlaying player ->
+                        match! UserState.find_username player with
+                        | None -> Server.kick(player, "Must be logged in")
+                        | Some username ->
+                    
+                        match get_player_lobby_id player with
+                        | None -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are not in a lobby")
+                        | Some lobby_id ->
+                        
+                        let lobby = lobbies.[lobby_id]
+                        
+                        if not lobby.GameRunning then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "Game is not running")
+                        else
+
+                        if lobby.Players.[player].PlayComplete then
+                            Server.kick(player, "Play finish packet already sent")
+                        else
+
+                        lobby.Players.[player].FinishPlay()
+
+                        if lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) |> not then
+                            // you are last player in the lobby to finish
+                            game_end lobby
+                        elif lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && p.PlayComplete) |> not then
+                            // you are first player in the lobby to finish
+                            Logging.Debug(sprintf "First player to finish is %s, starting timeout" username)
+                            async {
+                                let! _ = System.Threading.Tasks.Task.Delay(1000 * MULTIPLAYER_REPLAY_DELAY_SECONDS) |> Async.AwaitTask
+                                this.Request(Action.GameplayTimeout lobby_id, ignore)
+                            } |> Async.StartAsTask |> ignore
+
+                    | Action.BeginSpectating player ->
+                        match! UserState.find_username player with
+                        | None -> Server.kick(player, "Must be logged in")
+                        | Some username ->
+                    
+                        match get_player_lobby_id player with
+                        | None -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are not in a lobby")
+                        | Some lobby_id ->
+                        
+                        let lobby = lobbies.[lobby_id]
+                        
+                        if not lobby.GameRunning then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "Game is not running")
+                        else
+
+                        if lobby.Players.[player].Status <> LobbyPlayerStatus.NotReady && lobby.Players.[player].Status <> LobbyPlayerStatus.Ready then
+                            Server.kick(player, "Spectated while in an invalid state")
+                        else
+
+                        lobby.Players.[player].Status <- LobbyPlayerStatus.Spectating
+                        multicast(lobby, Downstream.PLAYER_IS_SPECTATING username)
+                        for p in lobby.Players.Values do
+                            if p.Status = LobbyPlayerStatus.Playing && p.PlayPacketsReceived > 0 then
+                                // todo: break play data that is too large into smaller packets
+                                Server.send(player, Downstream.PLAY_DATA(p.Username, p.GetReplay()))
+
+                    | Action.PlayData (player, data) ->
+                        match! UserState.find_username player with
+                        | None -> Server.kick(player, "Must be logged in")
+                        | Some username ->
+                    
+                        match get_player_lobby_id player with
+                        | None -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are not in a lobby")
+                        | Some lobby_id ->
+                        
+                        let lobby = lobbies.[lobby_id]
+                        
+                        if not lobby.GameRunning then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "Game is not running")
+                        else
+
+                        match lobby.Players.[player].ReceivePlayPacket(data) with
+                        | Ok() -> 
+                            for p in lobby.Players.Keys do
+                                if lobby.Players.[p].Status = LobbyPlayerStatus.Playing || lobby.Players.[p].Status = LobbyPlayerStatus.Spectating then
+                                    Server.send(p, Downstream.PLAY_DATA(username, data))
+                        | Error reason -> Server.kick(player, reason)
+
+                    | Action.GameplayTimeout lobby_id ->
+                        if not (lobbies.ContainsKey lobby_id) then
+                            Logging.Debug("Lobby closed before gameplay timeout")
+                        else
+                        
+                        Logging.Debug(sprintf "Timeout called on lobby with id %O" lobby_id)
+
+                        // todo: fix bug where if you start a new round before this timeout, it will end instantly
+
+                        if lobbies.[lobby_id].GameRunning then game_end lobbies.[lobby_id]
+                            
             }
         }
 

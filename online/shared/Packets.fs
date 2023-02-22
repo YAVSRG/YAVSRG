@@ -88,15 +88,15 @@ module Packets =
         | CHAT of message: string
         | READY_STATUS of bool
 
-        | START_PLAYING
+        | BEGIN_PLAYING
         | PLAY_DATA of byte array
-        | START_SPECTATING
+        | BEGIN_SPECTATING
         | FINISH_PLAYING
 
         | TRANSFER_HOST of username: string
         | SELECT_CHART of LobbyChart
         | LOBBY_SETTINGS of LobbySettings
-        | BEGIN_ROUND
+        | START_GAME
 
         | KICK_PLAYER of username: string
 
@@ -118,8 +118,8 @@ module Packets =
                 | 0x22uy -> CHAT (br.ReadString())
                 | 0x23uy -> READY_STATUS (br.ReadBoolean())
 
-                | 0x30uy -> START_PLAYING
-                | 0x31uy -> START_SPECTATING
+                | 0x30uy -> BEGIN_PLAYING
+                | 0x31uy -> BEGIN_SPECTATING
                 | 0x32uy ->
                     let length = int (br.BaseStream.Length - br.BaseStream.Position)
                     if length > PLAY_PACKET_THRESHOLD_PER_SECOND * MULTIPLAYER_REPLAY_DELAY_SECONDS then
@@ -130,7 +130,7 @@ module Packets =
                 | 0x40uy -> TRANSFER_HOST (br.ReadString())
                 | 0x41uy -> SELECT_CHART (LobbyChart.Read br)
                 | 0x42uy -> LOBBY_SETTINGS { Name = br.ReadString() }
-                | 0x43uy -> BEGIN_ROUND
+                | 0x43uy -> START_GAME
 
                 | 0x50uy -> KICK_PLAYER (br.ReadString())
 
@@ -156,15 +156,15 @@ module Packets =
                 | CHAT msg -> bw.Write msg; 0x22uy
                 | READY_STATUS ready -> bw.Write ready; 0x23uy
 
-                | START_PLAYING -> 0x30uy
-                | START_SPECTATING -> 0x31uy
+                | BEGIN_PLAYING -> 0x30uy
+                | BEGIN_SPECTATING -> 0x31uy
                 | PLAY_DATA data -> bw.Write data; 0x32uy
                 | FINISH_PLAYING -> 0x33uy
 
                 | TRANSFER_HOST username -> bw.Write username; 0x40uy
                 | SELECT_CHART chart -> chart.Write bw; 0x41uy
                 | LOBBY_SETTINGS settings -> bw.Write settings.Name; 0x42uy
-                | BEGIN_ROUND -> 0x43uy
+                | START_GAME -> 0x43uy
 
                 | KICK_PLAYER username -> bw.Write username; 0x50uy
             kind, ms.ToArray()
@@ -192,10 +192,11 @@ module Packets =
         | CHAT of sender: string * message: string
         | PLAYER_STATUS of username: string * status: LobbyPlayerStatus
 
-        | BEGIN_PLAYING
-        | USER_IS_PLAYING of username: string
+        | GAME_START
+        | PLAYER_IS_PLAYING of username: string
+        | PLAYER_IS_SPECTATING of username: string
         | PLAY_DATA of username: string * data: byte array
-        | FINISH_PLAYING
+        | GAME_END
 
         static member Read(kind: byte, data: byte array) : Downstream =
             use ms = new MemoryStream(data)
@@ -221,10 +222,11 @@ module Packets =
                 | 0x27uy -> CHAT (br.ReadString(), br.ReadString())
                 | 0x28uy -> PLAYER_STATUS (br.ReadString(), br.ReadByte() |> LanguagePrimitives.EnumOfValue)
 
-                | 0x30uy -> BEGIN_PLAYING
-                | 0x31uy -> USER_IS_PLAYING (br.ReadString())
-                | 0x32uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
-                | 0x33uy -> FINISH_PLAYING
+                | 0x30uy -> GAME_START
+                | 0x31uy -> PLAYER_IS_PLAYING (br.ReadString())
+                | 0x32uy -> PLAYER_IS_SPECTATING (br.ReadString())
+                | 0x33uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
+                | 0x34uy -> GAME_END
 
                 | _ -> failwithf "Unknown packet type: %i" kind
             if ms.Position <> ms.Length then failwithf "Expected end-of-packet but there are %i extra bytes" (ms.Length - ms.Position)
@@ -260,8 +262,9 @@ module Packets =
                 | CHAT (sender, msg) -> bw.Write sender; bw.Write msg; 0x27uy
                 | PLAYER_STATUS (username, status) -> bw.Write username; bw.Write (byte status); 0x28uy
                 
-                | BEGIN_PLAYING -> 0x30uy
-                | USER_IS_PLAYING username -> bw.Write username; 0x31uy
-                | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x32uy
-                | FINISH_PLAYING -> 0x33uy
+                | GAME_START -> 0x30uy
+                | PLAYER_IS_PLAYING username -> bw.Write username; 0x31uy
+                | PLAYER_IS_SPECTATING username -> bw.Write username; 0x32uy
+                | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x33uy
+                | GAME_END -> 0x34uy
             kind, ms.ToArray()
