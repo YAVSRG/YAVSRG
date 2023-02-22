@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.IO.Compression
+open Percyqaz.Common
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 
@@ -163,6 +164,7 @@ type StoredReplayProvider(data: ReplayData) =
 type LiveReplayProvider(firstNote: Time) =
     let mutable i = 0
     let mutable finished = false
+    let mutable export = 0
     let buffer = ResizeArray<ReplayRow>()
 
     interface IReplayProvider with
@@ -180,8 +182,46 @@ type LiveReplayProvider(firstNote: Time) =
 
     member this.Add (time, bitmap) =
         if not finished then buffer.Add(struct (time - firstNote, bitmap)) else invalidOp "Live play is declared as over; cannot append to replay"
+
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Live play is already declared as over; cannot do so again"
+
+    member this.ExportLiveBlock(until: Time, sw: StreamWriter) =
+        while export < buffer.Count && (let struct (time, _) = buffer.[export] in time <= until) do
+            let struct (time, bitmap) = buffer.[export]
+            sw.Write time
+            sw.Write bitmap
+            export <- export + 1
+
+type OnlineReplayProvider(firstNote: Time) =
+    let mutable i = 0
+    let mutable finished = false
+    let buffer = ResizeArray<ReplayRow>()
+
+    interface IReplayProvider with
+        member this.Finished = finished
+        member this.HasNext time =
+            if i >= buffer.Count then false
+            else 
+                let struct (t, _) = buffer.[i]
+                t <= time
+        member this.GetNext() =
+            i <- i + 1
+            buffer.[i - 1]
+        member this.GetFullReplay() =
+            if finished then buffer.ToArray() else invalidOp "Online play is not declared as over, we don't have the full replay yet!"
+
+    member this.ImportLiveBlock (br: BinaryReader) : bool =
+        if finished then invalidOp "Online play is declared as over; cannot append to replay" else
+
+        try
+            while not (br.BaseStream.Position = br.BaseStream.Length) do
+                buffer.Add(struct(br.ReadSingle() * 1.0f<ms>, br.ReadUInt16()))
+            true
+        with err -> Logging.Error("Error while parsing online replay data", err); false
+
+    member this.Finish() =
+        if not finished then finished <- true else invalidOp "Online play is already declared as over; cannot do so again"
 
 // provides an interface to read keypresses out of a replay easily
 [<AbstractClass>]
