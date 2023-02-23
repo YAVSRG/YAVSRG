@@ -31,8 +31,8 @@ module GameplayWidgets =
         | Replay of IScoreMetric
         | Judgement of target: JudgementId * max_count: int
 
-    type Helper = {
-        ScoringConfig: Ruleset
+    type PlayState = {
+        Ruleset: Ruleset
         Scoring: IScoreMetric
         HP: HealthBarMetric
         OnHit: IEvent<HitEvent<HitEventGuts>>
@@ -40,28 +40,28 @@ module GameplayWidgets =
         Pacemaker: PacemakerInfo
     }
     
-    type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, helper) as this =
+    type AccuracyMeter(conf: WidgetConfig.AccuracyMeter, state) as this =
         inherit StaticContainer(NodeType.None)
 
-        let grades = helper.ScoringConfig.Grading.Grades
+        let grades = state.Ruleset.Grading.Grades
         let color = Animation.Color (if conf.GradeColors then Array.last(grades).Color else Color.White)
 
         do
             if conf.GradeColors then
-                helper.OnHit.Add
+                state.OnHit.Add
                     ( fun _ ->
-                        Grade.calculate grades helper.Scoring.State |> helper.ScoringConfig.GradeColor |> color.SetColor
+                        Grade.calculate grades state.Scoring.State |> state.Ruleset.GradeColor |> color.SetColor
                     )
 
             this
             |* Text(
-                helper.Scoring.FormatAccuracy,
+                state.Scoring.FormatAccuracy,
                 Color = (fun () -> color.Value, Color.Transparent),
                 Align = Alignment.CENTER,
                 Position = { Position.Default with Bottom = 0.7f %+ 0.0f })
             if conf.ShowName then
                 this
-                |* Text(helper.Scoring.Name,
+                |* Text(state.Scoring.Name,
                     Color = Utils.K (Color.White, Color.Transparent),
                     Align = Alignment.CENTER,
                     Position = { Position.Default with Top = 0.6f %+ 0.0f })
@@ -73,24 +73,24 @@ module GameplayWidgets =
     [<Struct>]
     type private HitMeterHit = { Time: Time; Position: float32; IsRelease: bool; Judgement: JudgementId option }
 
-    type HitMeter(conf: WidgetConfig.HitMeter, helper) =
+    type HitMeter(conf: WidgetConfig.HitMeter, state) =
         inherit StaticWidget(NodeType.None)
         let hits = ResizeArray<HitMeterHit>()
         let mutable w = 0.0f
 
         do
-            helper.OnHit.Add(fun ev ->
+            state.OnHit.Add(fun ev ->
                 match ev.Guts with
                 | Hit e ->
-                    hits.Add { Time = ev.Time; Position = e.Delta / helper.Scoring.MissWindow * w * 0.5f; IsRelease = false; Judgement = e.Judgement }
+                    hits.Add { Time = ev.Time; Position = e.Delta / state.Scoring.MissWindow * w * 0.5f; IsRelease = false; Judgement = e.Judgement }
                 | Release e ->
-                    hits.Add { Time = ev.Time; Position = e.Delta / helper.Scoring.MissWindow * w * 0.5f; IsRelease = true; Judgement = e.Judgement }
+                    hits.Add { Time = ev.Time; Position = e.Delta / state.Scoring.MissWindow * w * 0.5f; IsRelease = true; Judgement = e.Judgement }
             )
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
             if w = 0.0f then w <- this.Bounds.Width
-            let now = helper.CurrentChartTime()
+            let now = state.CurrentChartTime()
             while hits.Count > 0 && hits.[0].Time + conf.AnimationTime * 1.0f<ms> < now do
                 hits.RemoveAt(0)
 
@@ -100,13 +100,13 @@ module GameplayWidgets =
                 Draw.rect
                     (Rect.Create(centre - conf.Thickness, this.Bounds.Top, centre + conf.Thickness, this.Bounds.Bottom))
                     Color.White
-            let now = helper.CurrentChartTime()
+            let now = state.CurrentChartTime()
             for hit in hits do
                 let r = Rect.Create(centre + hit.Position - conf.Thickness, this.Bounds.Top, centre + hit.Position + conf.Thickness, this.Bounds.Bottom)
                 let c = 
                     match hit.Judgement with
                     | None -> Color.FromArgb(Math.Clamp(127 - int (127.0f * (now - hit.Time) / conf.AnimationTime), 0, 127), Color.Silver)
-                    | Some j -> Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - hit.Time) / conf.AnimationTime), 0, 255), helper.ScoringConfig.JudgementColor j)
+                    | Some j -> Color.FromArgb(Math.Clamp(255 - int (255.0f * (now - hit.Time) / conf.AnimationTime), 0, 255), state.Ruleset.JudgementColor j)
                 if conf.ShowNonJudgements || hit.Judgement.IsSome then
                     Draw.rect (if hit.IsRelease then r.Expand(0.0f, conf.ReleasesExtraHeight) else r) c
 
@@ -144,19 +144,19 @@ module GameplayWidgets =
     //            let a = 255 - Math.Clamp(255.0f * (helper.CurrentChartTime() - time) / atime |> int, 0, 255)
     //            Draw.quad (Quad.ofRect this.Bounds) (Quad.colorOf (Color.FromArgb(a, Color.White))) (Sprite.gridUV (late, tier) texture)
 
-    type ComboMeter(conf: WidgetConfig.Combo, helper) =
+    type ComboMeter(conf: WidgetConfig.Combo, state) =
         inherit StaticWidget(NodeType.None)
         let popAnimation = Animation.Fade(0.0f)
         let color = Animation.Color(Color.White)
         let mutable hits = 0
 
         do
-            helper.OnHit.Add(
+            state.OnHit.Add(
                 fun _ ->
                     hits <- hits + 1
                     if (conf.LampColors && hits > 50) then
-                        Lamp.calculate helper.ScoringConfig.Grading.Lamps helper.Scoring.State
-                        |> helper.ScoringConfig.LampColor
+                        Lamp.calculate state.Ruleset.Grading.Lamps state.Scoring.State
+                        |> state.Ruleset.LampColor
                         |> color.SetColor
                     popAnimation.Value <- conf.Pop)
 
@@ -166,11 +166,11 @@ module GameplayWidgets =
             popAnimation.Update elapsedTime
 
         override this.Draw() =
-            let combo = helper.Scoring.State.CurrentCombo
+            let combo = state.Scoring.State.CurrentCombo
             let amt = popAnimation.Value + (((combo, 1000) |> Math.Min |> float32) * conf.Growth)
             Text.drawFill(Style.baseFont, combo.ToString(), this.Bounds.Expand amt, color.Value, 0.5f)
 
-    type ProgressMeter(conf: WidgetConfig.ProgressMeter, helper) =
+    type ProgressMeter(conf: WidgetConfig.ProgressMeter, state) =
         inherit StaticWidget(NodeType.None)
 
         let duration = 
@@ -185,14 +185,14 @@ module GameplayWidgets =
 
         override this.Draw() =
             let height = this.Bounds.Height - conf.BarHeight
-            let pc = helper.CurrentChartTime() / duration
+            let pc = state.CurrentChartTime() / duration
 
             let bar = Rect.Box(this.Bounds.Left, (this.Bounds.Top + height * pc), this.Bounds.Width, conf.BarHeight)
             let glowA = (float conf.GlowColor.A) * pulse.Time / 1000.0 |> int
             Draw.rect (bar.Expand(conf.GlowSize)) (Color.FromArgb(glowA, conf.GlowColor))
             Draw.rect bar conf.BarColor
 
-    type SkipButton(conf: WidgetConfig.SkipButton, helper) =
+    type SkipButton(conf: WidgetConfig.SkipButton, state) =
         inherit StaticWidget(NodeType.None)
 
         let text = Localisation.localiseWith [(!|"skip").ToString()] "play.skiphint"
@@ -202,7 +202,7 @@ module GameplayWidgets =
 
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
-            if active && helper.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
+            if active && state.CurrentChartTime() < -Song.LEADIN_TIME * 2.5f then
                 if (!|"skip").Tapped() then
                     Song.pause()
                     Song.playFrom(firstNote - Song.LEADIN_TIME)
@@ -211,19 +211,19 @@ module GameplayWidgets =
         override this.Draw() =
             if active then Text.drawFillB(Style.baseFont, text, this.Bounds, Style.text(), Alignment.CENTER)
 
-    type LifeMeter(conf: WidgetConfig.LifeMeter, helper: Helper) =
+    type LifeMeter(conf: WidgetConfig.LifeMeter, state: PlayState) =
         inherit StaticWidget(NodeType.None)
 
         let color = Animation.Color conf.FullColor
-        let slider = Animation.Fade(float32 helper.HP.State.Health)
+        let slider = Animation.Fade(float32 state.HP.State.Health)
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
-            slider.Target <- float32 helper.HP.State.Health
+            slider.Target <- float32 state.HP.State.Health
             color.SetColor(Color.FromArgb(
-                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
-                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
-                Percyqaz.Flux.Utils.lerp (float32 helper.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
+                Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.R) (float32 conf.FullColor.R) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.G) (float32 conf.FullColor.G) |> int,
+                Percyqaz.Flux.Utils.lerp (float32 state.HP.State.Health) (float32 conf.EmptyColor.B) (float32 conf.FullColor.B) |> int
                 ))
             color.Update elapsedTime
             slider.Update elapsedTime
@@ -239,7 +239,7 @@ module GameplayWidgets =
                 Draw.rect b color.Value
                 Draw.rect (b.SliceTop w) conf.TipColor
 
-    type Pacemaker(conf: WidgetConfig.Pacemaker, helper: Helper) =
+    type Pacemaker(conf: WidgetConfig.Pacemaker, state: PlayState) =
         inherit StaticWidget(NodeType.None)
 
         let color = Animation.Color(Color.White)
@@ -257,7 +257,7 @@ module GameplayWidgets =
             else flag_position.Target <- 0.0f
 
         do
-            match helper.Pacemaker with
+            match state.Pacemaker with
             | PacemakerInfo.None
             | PacemakerInfo.Accuracy _
             | PacemakerInfo.Replay _ -> ()
@@ -271,11 +271,11 @@ module GameplayWidgets =
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
 
-            match helper.Pacemaker with
+            match state.Pacemaker with
             | PacemakerInfo.None -> ()
             | PacemakerInfo.Accuracy x ->
                 if position_cooldown.Complete then
-                    ahead_by <- helper.Scoring.State.PointsScored - helper.Scoring.State.MaxPointsScored * x
+                    ahead_by <- state.Scoring.State.PointsScored - state.Scoring.State.MaxPointsScored * x
                     update_flag_position()
                     position_cooldown.Reset()
 
@@ -283,8 +283,8 @@ module GameplayWidgets =
                 position_cooldown.Update elapsedTime
             | PacemakerInfo.Replay score ->
                 if position_cooldown.Complete then
-                    score.Update(helper.CurrentChartTime())
-                    ahead_by <- helper.Scoring.State.PointsScored - score.State.PointsScored
+                    score.Update(state.CurrentChartTime())
+                    ahead_by <- state.Scoring.State.PointsScored - score.State.PointsScored
                     update_flag_position()
                     position_cooldown.Reset()
 
@@ -295,18 +295,18 @@ module GameplayWidgets =
             color.Update elapsedTime
 
         override this.Draw() =
-            match helper.Pacemaker with
+            match state.Pacemaker with
             | PacemakerInfo.None -> ()
             | PacemakerInfo.Accuracy _
             | PacemakerInfo.Replay _ ->
                 Text.drawFillB(Style.baseFont, Icons.goal, this.Bounds.SliceLeft(0.0f).Expand(this.Bounds.Height, 0.0f).Translate(this.Bounds.Width * flag_position.Value, 0.0f), (color.Value, Color.Black), Alignment.CENTER)
             | PacemakerInfo.Judgement (judgement, count) ->
                 let actual = 
-                    if judgement = -1 then helper.Scoring.State.ComboBreaks
+                    if judgement = -1 then state.Scoring.State.ComboBreaks
                     else
-                        let mutable c = helper.Scoring.State.Judgements.[judgement]
-                        for j = judgement + 1 to helper.Scoring.State.Judgements.Length - 1 do
-                            if helper.Scoring.State.Judgements.[j] > 0 then c <- 1000000
+                        let mutable c = state.Scoring.State.Judgements.[judgement]
+                        for j = judgement + 1 to state.Scoring.State.Judgements.Length - 1 do
+                            if state.Scoring.State.Judgements.[j] > 0 then c <- 1000000
                         c
                 let _hearts = 1 + count - actual
                 if _hearts < hearts then color.Value <- Color.White
@@ -317,13 +317,13 @@ module GameplayWidgets =
                     else Icons.failure
                 Text.drawFillB(Style.baseFont, display, this.Bounds, (color.Value, Color.Black), Alignment.CENTER)
 
-    type JudgementCounts(conf: WidgetConfig.JudgementCounts, helper: Helper) =
+    type JudgementCounts(conf: WidgetConfig.JudgementCounts, state: PlayState) =
         inherit StaticWidget(NodeType.None)
 
-        let judgementAnimations = Array.init helper.ScoringConfig.Judgements.Length (fun _ -> Animation.Delay(conf.AnimationTime))
+        let judgementAnimations = Array.init state.Ruleset.Judgements.Length (fun _ -> Animation.Delay(conf.AnimationTime))
 
         do
-            helper.OnHit.Add (
+            state.OnHit.Add (
                 fun h -> 
                     match h.Guts with 
                     | Hit x -> if x.Judgement.IsSome then judgementAnimations[x.Judgement.Value].Reset()
@@ -338,20 +338,20 @@ module GameplayWidgets =
         override this.Draw() =
             let h = this.Bounds.Height / float32 judgementAnimations.Length
             let mutable r = this.Bounds.SliceTop(h).Shrink(5.0f)
-            for i = 0 to helper.ScoringConfig.Judgements.Length - 1 do
-                let j = helper.ScoringConfig.Judgements.[i]
+            for i = 0 to state.Ruleset.Judgements.Length - 1 do
+                let j = state.Ruleset.Judgements.[i]
                 Draw.rect (r.Expand(10.0f, 5.0f).SliceLeft(5.0f)) j.Color
-                if not judgementAnimations.[i].Complete && helper.Scoring.State.Judgements.[i] > 0 then
+                if not judgementAnimations.[i].Complete && state.Scoring.State.Judgements.[i] > 0 then
                     Draw.rect (r.Expand 5.0f) (Color.FromArgb(127 - max 0 (int (127.0 * judgementAnimations.[i].Elapsed / conf.AnimationTime)), j.Color))
                 Text.drawFillB(Style.baseFont, j.Name, r, (Color.White, Color.Black), Alignment.LEFT)
-                Text.drawFillB(Style.baseFont, helper.Scoring.State.Judgements.[i].ToString(), r, (Color.White, Color.Black), Alignment.RIGHT)
+                Text.drawFillB(Style.baseFont, state.Scoring.State.Judgements.[i].ToString(), r, (Color.White, Color.Black), Alignment.RIGHT)
                 r <- r.Translate(0.0f, h)
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)
     *)
 
-    type ColumnLighting(keys, ns: NoteskinConfig, helper) as this =
+    type ColumnLighting(keys, ns: NoteskinConfig, state) as this =
         inherit StaticWidget(NodeType.None)
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
         let sprite = getTexture "receptorlighting"
@@ -364,7 +364,7 @@ module GameplayWidgets =
         override this.Update(elapsedTime, bounds) =
             base.Update(elapsedTime, bounds)
             sliders |> Array.iter (fun s -> s.Update elapsedTime)
-            Array.iteri (fun k (s: Animation.Fade) -> if helper.Scoring.KeyState |> Bitmap.hasBit k then s.Value <- 1.0f) sliders
+            Array.iteri (fun k (s: Animation.Fade) -> if state.Scoring.KeyState |> Bitmap.hasBit k then s.Value <- 1.0f) sliders
 
         override this.Draw() =
             let threshold = 1.0f - lightTime
@@ -383,7 +383,7 @@ module GameplayWidgets =
                         sprite
             Array.iteri f sliders
 
-    type Explosions(keys, ns: NoteskinConfig, helper) as this =
+    type Explosions(keys, ns: NoteskinConfig, state) as this =
         inherit StaticWidget(NodeType.None)
 
         let sliders = Array.init keys (fun _ -> Animation.Fade 0.0f)
@@ -410,14 +410,14 @@ module GameplayWidgets =
         do
             let hitpos = float32 options.HitPosition.Value
             this.Position <- { Position.Default with Top = 0.0f %+ hitpos; Bottom = 1.0f %- hitpos }
-            helper.OnHit.Add handleEvent
+            state.OnHit.Add handleEvent
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
             animation.Update elapsedTime
             sliders |> Array.iter (fun s -> s.Update elapsedTime)
             for k = 0 to (keys - 1) do
-                if holding.[k] && helper.Scoring.KeyState |> Bitmap.hasBit k |> not then
+                if holding.[k] && state.Scoring.KeyState |> Bitmap.hasBit k |> not then
                     holding.[k] <- false
                     sliders.[k].Target <- 0.0f
 
@@ -441,7 +441,7 @@ module GameplayWidgets =
                         let color = 
                             if ns.Explosions.Colors = ExplosionColors.Column then k
                             else match e.Judgement with Some j -> int j | None -> 0
-                        let frame = (helper.CurrentChartTime() - timers.[k]) / toTime ns.Explosions.AnimationFrameTime |> int
+                        let frame = (state.CurrentChartTime() - timers.[k]) / toTime ns.Explosions.AnimationFrameTime |> int
                         Draw.quad
                             (box |> Quad.ofRect |> NoteRenderer.noteRotation keys k)
                             (Quad.colorOf (Color.FromArgb(a, Color.White)))

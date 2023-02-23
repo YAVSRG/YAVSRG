@@ -44,9 +44,9 @@ type ReplayScreen(mode: ReplayMode) as this =
     let scoringConfig = Rulesets.current
     let scoring = createScoreMetric scoringConfig chart.Keys keypressData chart.Notes rate
     let onHit = new Event<HitEvent<HitEventGuts>>()
-    let widgetHelper: Helper =
+    let widgetHelper: PlayState =
         {
-            ScoringConfig = scoringConfig
+            Ruleset = scoringConfig
             Scoring = scoring
             HP = scoring.HP
             OnHit = onHit.Publish

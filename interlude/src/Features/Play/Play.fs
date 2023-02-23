@@ -10,7 +10,6 @@ open Prelude.Scoring
 open Prelude.Scoring.Metrics
 open Prelude.Data.Themes
 open Prelude.Data.Scores
-open Interlude
 open Interlude.Options
 open Interlude.Content
 open Interlude.UI
@@ -24,144 +23,98 @@ type PacemakerMode =
     | Score of rate: float32 * ReplayData
     | Setting
 
-type PlayScreen(pacemakerMode: PacemakerMode) as this =
-    inherit Screen()
+module PlayScreen =
     
-    let chart = Gameplay.Chart.withMods.Value
-    let firstNote = offsetOf chart.Notes.First.Value
-
-    let liveplay = LiveReplayProvider firstNote
-    let scoringConfig = Rulesets.current
-    let scoring = createScoreMetric scoringConfig chart.Keys liveplay chart.Notes Gameplay.rate.Value
-    let onHit = new Event<HitEvent<HitEventGuts>>()
-
-    let pacemakerInfo =
-        match pacemakerMode with
-        | PacemakerMode.None -> PacemakerInfo.None
-        | PacemakerMode.Score (rate, replay) ->
-            let replayData = StoredReplayProvider(replay) :> IReplayProvider
-            let scoring = createScoreMetric scoringConfig chart.Keys replayData chart.Notes rate
-            PacemakerInfo.Replay scoring
-        | PacemakerMode.Setting ->
-            let setting = if options.Pacemakers.ContainsKey Rulesets.current_hash then options.Pacemakers.[Rulesets.current_hash] else Pacemaker.Default
-            match setting with
-            | Pacemaker.Accuracy acc -> PacemakerInfo.Accuracy acc
-            | Pacemaker.Lamp lamp ->
-                let l = Rulesets.current.Grading.Lamps.[lamp]
-                PacemakerInfo.Judgement(l.Judgement, l.JudgementThreshold)
-
-    let widgetHelper: Helper =
-        {
-            ScoringConfig = scoringConfig
-            Scoring = scoring
-            HP = scoring.HP
-            OnHit = onHit.Publish
-            CurrentChartTime = fun () -> Song.timeWithOffset() - firstNote
-            Pacemaker = pacemakerInfo
-        }
-
-    let pacemakerMet() =
-        match widgetHelper.Pacemaker with
-        | PacemakerInfo.None -> true
-        | PacemakerInfo.Accuracy x -> widgetHelper.Scoring.Value >= x
-        | PacemakerInfo.Replay r -> r.Update Time.infinity; widgetHelper.Scoring.Value >= r.Value
-        | PacemakerInfo.Judgement (judgement, count) ->
-            let actual = 
-                if judgement = -1 then widgetHelper.Scoring.State.ComboBreaks
-                else
-                    let mutable c = widgetHelper.Scoring.State.Judgements.[judgement]
-                    for j = judgement + 1 to widgetHelper.Scoring.State.Judgements.Length - 1 do
-                        if widgetHelper.Scoring.State.Judgements.[j] > 0 then c <- 1000000
-                    c
-            actual <= count
-    
-    let binds = options.GameplayBinds.[chart.Keys - 3]
-
-    let mutable inputKeyState = 0us
-
-    do
-        let noteRenderer = NoteRenderer scoring
-        this.Add noteRenderer
-
-        if noteskinConfig().EnableColumnLight then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, noteskinConfig(), widgetHelper))
-
-        if noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, noteskinConfig(), widgetHelper))
-
-        noteRenderer.Add(LaneCover())
-
-        let inline add_widget (constructor: 'T -> Widget) = 
-            let config: ^T = getGameplayConfig<'T>()
-            let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
-            if pos.Enabled then
-                let w = constructor config
-                w.Position <- { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
-                if pos.Float then this.Add w else noteRenderer.Add w
-
-        add_widget (fun c -> new AccuracyMeter(c, widgetHelper))
-        add_widget (fun c -> new HitMeter(c, widgetHelper))
-        add_widget (fun c -> new LifeMeter(c, widgetHelper))
-        add_widget (fun c -> new ComboMeter(c, widgetHelper))
-        add_widget (fun c -> new SkipButton(c, widgetHelper))
-        add_widget (fun c -> new ProgressMeter(c, widgetHelper))
-        add_widget (fun c -> new Pacemaker(c, widgetHelper))
-        add_widget (fun c -> new JudgementCounts(c, widgetHelper))
-
-        scoring.SetHitCallback onHit.Trigger
-
-    override this.OnEnter(prev) =
-        Dialog.close()
-        Background.dim (float32 options.BackgroundDim.Value)
-        Screen.Toolbar.hide()
-        Song.changeRate Gameplay.rate.Value
-        Song.changeGlobalOffset (toTime options.AudioOffset.Value)
-        Song.onFinish <- SongFinishAction.Wait
-        Song.playLeadIn()
-        Input.finish_frame_events()
-
-    override this.OnExit next =
-        Background.dim 0.7f
-        if next <> Screen.Type.Score then Screen.Toolbar.show()
-
-    override this.OnBack() = Some Screen.Type.LevelSelect
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        let now = Song.timeWithOffset()
-        let chartTime = now - firstNote
-
-        if not (liveplay :> IReplayProvider).Finished then
-            // feed keyboard input into the replay provider
-            Input.consumeGameplay(binds, fun column time isRelease ->
-                if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
-                else inputKeyState <- Bitmap.setBit column inputKeyState
-                liveplay.Add(time, inputKeyState) )
-            scoring.Update chartTime
-
-        if (!|"options").Tapped() then
-            Song.pause()
-            inputKeyState <- 0us
-            liveplay.Add(now, inputKeyState)
-            QuickOptions.show(scoring, fun () -> Screen.changeNew (fun () -> PlayScreen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default)
-
-        if (!|"retry").Pressed() then
-            Screen.changeNew (fun () -> PlayScreen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
+    let rec play_screen (pacemakerMode: PacemakerMode) =
         
-        if scoring.Finished && not (liveplay :> IReplayProvider).Finished then
-            liveplay.Finish()
-            Screen.changeNew
-                ( fun () ->
-                    let sd =
-                        ScoreInfoProvider (
-                            Gameplay.makeScore((liveplay :> IReplayProvider).GetFullReplay(), chart.Keys),
-                            Gameplay.Chart.current.Value,
-                            scoringConfig,
-                            ModChart = Gameplay.Chart.withMods.Value,
-                            Difficulty = Gameplay.Chart.rating.Value
+        let chart = Gameplay.Chart.withMods.Value
+        let ruleset = Rulesets.current
+        let firstNote = offsetOf chart.Notes.First.Value
+        let liveplay = LiveReplayProvider firstNote
+        let pacemakerInfo =
+            match pacemakerMode with
+            | PacemakerMode.None -> PacemakerInfo.None
+            | PacemakerMode.Score (rate, replay) ->
+                let replayData = StoredReplayProvider(replay) :> IReplayProvider
+                let scoring = createScoreMetric ruleset chart.Keys replayData chart.Notes rate
+                PacemakerInfo.Replay scoring
+            | PacemakerMode.Setting ->
+                let setting = if options.Pacemakers.ContainsKey Rulesets.current_hash then options.Pacemakers.[Rulesets.current_hash] else Pacemaker.Default
+                match setting with
+                | Pacemaker.Accuracy acc -> PacemakerInfo.Accuracy acc
+                | Pacemaker.Lamp lamp ->
+                    let l = Rulesets.current.Grading.Lamps.[lamp]
+                    PacemakerInfo.Judgement(l.Judgement, l.JudgementThreshold)
+        let scoring = createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
+
+        let pacemakerMet(state: PlayState) =
+            match state.Pacemaker with
+            | PacemakerInfo.None -> true
+            | PacemakerInfo.Accuracy x -> scoring.Value >= x
+            | PacemakerInfo.Replay r -> r.Update Time.infinity; scoring.Value >= r.Value
+            | PacemakerInfo.Judgement (judgement, count) ->
+                let actual = 
+                    if judgement = -1 then scoring.State.ComboBreaks
+                    else
+                        let mutable c = scoring.State.Judgements.[judgement]
+                        for j = judgement + 1 to scoring.State.Judgements.Length - 1 do
+                            if scoring.State.Judgements.[j] > 0 then c <- 1000000
+                        c
+                actual <= count
+        
+        let binds = options.GameplayBinds.[chart.Keys - 3]
+        let mutable inputKeyState = 0us
+
+        { new IPlayScreen(chart, pacemakerInfo, ruleset, scoring) with
+            override this.AddWidgets() =
+                let inline add_widget x = add_widget (this, this.Playfield, this.State) x
+
+                add_widget AccuracyMeter
+                add_widget HitMeter
+                add_widget LifeMeter
+                add_widget ComboMeter
+                add_widget SkipButton
+                add_widget ProgressMeter
+                add_widget Pacemaker
+                add_widget JudgementCounts
+
+            override this.Update(elapsedTime, bounds) =
+                base.Update(elapsedTime, bounds)
+                let now = Song.timeWithOffset()
+                let chartTime = now - firstNote
+
+                if not (liveplay :> IReplayProvider).Finished then
+                    // feed keyboard input into the replay provider
+                    Input.consumeGameplay(binds, fun column time isRelease ->
+                        if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
+                        else inputKeyState <- Bitmap.setBit column inputKeyState
+                        liveplay.Add(time, inputKeyState) )
+                    this.State.Scoring.Update chartTime
+
+                if (!|"options").Tapped() then
+                    Song.pause()
+                    inputKeyState <- 0us
+                    liveplay.Add(now, inputKeyState)
+                    QuickOptions.show(this.State.Scoring, fun () -> Screen.changeNew (fun () -> play_screen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default)
+
+                if (!|"retry").Pressed() then
+                    Screen.changeNew (fun () -> play_screen(pacemakerMode) :> Screen.T) Screen.Type.Play Transitions.Flags.Default
+                
+                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
+                    liveplay.Finish()
+                    Screen.changeNew
+                        ( fun () ->
+                            let sd =
+                                ScoreInfoProvider (
+                                    Gameplay.makeScore((liveplay :> IReplayProvider).GetFullReplay(), this.Chart.Keys),
+                                    Gameplay.Chart.current.Value,
+                                    this.State.Ruleset,
+                                    ModChart = Gameplay.Chart.withMods.Value,
+                                    Difficulty = Gameplay.Chart.rating.Value
+                                )
+                            (sd, Gameplay.setScore (pacemakerMet this.State) sd)
+                            |> ScoreScreen
                         )
-                    (sd, Gameplay.setScore (pacemakerMet()) sd)
-                    |> ScoreScreen
-                )
-                Screen.Type.Score
-                Transitions.Flags.Default
+                        Screen.Type.Score
+                        Transitions.Flags.Default
+        }

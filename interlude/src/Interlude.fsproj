@@ -74,6 +74,7 @@
     <Compile Include="Features\Play\QuickOptions.fs" />
     <Compile Include="Features\Play\NoteRenderer.fs" />
     <Compile Include="Features\Play\GameplayWidgets.fs" />
+    <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\Replay.fs" />
     <Compile Include="Features\Multiplayer\Network.fs" />

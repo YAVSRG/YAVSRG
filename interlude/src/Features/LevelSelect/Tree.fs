@@ -102,7 +102,7 @@ module Tree =
                 Screen.changeNew
                     ( fun () -> 
                         if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T
-                        else PlayScreen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
+                        else PlayScreen.play_screen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
                     ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
                     Transitions.Flags.Default
             | None -> Logging.Warn "There is no chart selected"
@@ -112,7 +112,7 @@ module Tree =
         | Some data ->
             data.LastPlayed <- DateTime.Now
             Screen.changeNew
-                ( fun () -> PlayScreen(PacemakerMode.Score (rate, replay)) )
+                ( fun () -> PlayScreen.play_screen(PacemakerMode.Score (rate, replay)) )
                 ( Screen.Type.Play )
                 Transitions.Flags.Default
         | None -> Logging.Warn "There is no chart selected"
