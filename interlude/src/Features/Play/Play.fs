@@ -1,6 +1,5 @@
 ﻿namespace Interlude.Features.Play
 
-open OpenTK
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
 open Prelude.Common

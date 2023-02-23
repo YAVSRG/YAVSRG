@@ -101,7 +101,7 @@ module Tree =
                 data.LastPlayed <- DateTime.Now
                 Screen.changeNew
                     ( fun () -> 
-                        if autoplay then ReplayScreen(ReplayMode.Auto) :> Screen.T
+                        if autoplay then ReplayScreen.replay_screen(ReplayMode.Auto) :> Screen.T
                         else PlayScreen.play_screen(if enablePacemaker then PacemakerMode.Setting else PacemakerMode.None) )
                     ( if autoplay then Screen.Type.Replay else Screen.Type.Play )
                     Transitions.Flags.Default
