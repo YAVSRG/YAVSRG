@@ -12,6 +12,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Features.Gameplay
+open Interlude.Features.Play
 open Interlude.Features.Online
 
 type Player(name: string, player: Network.LobbyPlayer) =
@@ -109,7 +110,8 @@ type SelectedChart() =
         |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
-        |* IconButton("Change chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
+        |+ IconButton("Change chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
+        |* IconButton("Start game", Icons.play, 50.0f, (fun () -> Network.client.Send Upstream.START_GAME), Position = Position.TrimTop(200.0f).SliceTop(50.0f).TrimLeft(300.0f).SliceLeft(300.0f))
 
         SelectedChart.update Network.lobby.Value.Chart
         Network.Events.change_chart.Add(fun () -> if Screen.currentType = Screen.Type.Lobby then SelectedChart.update Network.lobby.Value.Chart)
@@ -244,6 +246,14 @@ type Lobby() =
         
         base.Init parent
 
+        Network.Events.game_start.Add(
+            fun () -> 
+                if Screen.currentType = Screen.Type.Lobby then 
+                    Screen.changeNew 
+                        (fun () -> PlayScreen.multiplayer_screen())
+                        Screen.Type.Play
+                        Transitions.Flags.Default
+            )
         Network.Events.lobby_settings_updated.Add(fun () -> lobby_title <- Network.lobby.Value.Settings.Value.Name)
 
 // Screen

@@ -93,6 +93,9 @@ module Network =
         let change_chart_ev = new Event<unit>()
         let change_chart = change_chart_ev.Publish
 
+        let game_start_ev = new Event<unit>()
+        let game_start = game_start_ev.Publish
+
     let mutable lobby : Lobby option = None
 
     let mutable lobby_list : LobbyInfo array = [||]
@@ -138,6 +141,7 @@ module Network =
                             Chart = None
                         }
                     sync Events.join_lobby_ev.Trigger
+
                 | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> () // nyi
                 | Downstream.SYSTEM_MESSAGE msg -> 
                     Logging.Info(sprintf "[NETWORK] %s" msg)
@@ -146,21 +150,11 @@ module Network =
                 | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
                 | Downstream.YOU_ARE_HOST -> 
                     lobby.Value.YouAreHost <- true
-                    //if lobby.Value.Chart.IsNone then
-                    //    match Interlude.Features.Gameplay.Chart.cacheInfo with
-                    //    | Some cc -> this.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
-                    //    | None -> ()
                 | Downstream.PLAYER_JOINED_LOBBY username -> 
                     lobby.Value.Players.Add(username, { Status = LobbyPlayerStatus.NotReady })
                     sync(Events.lobby_players_updated_ev.Trigger)
                 | Downstream.PLAYER_LEFT_LOBBY username -> 
                     lobby.Value.Players.Remove(username) |> ignore
-                    sync Events.lobby_players_updated_ev.Trigger
-                | Downstream.SELECT_CHART c -> 
-                    lobby.Value.Chart <- Some c
-                    for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
-                    lobby.Value.Ready <- false
-                    sync Events.change_chart_ev.Trigger
                     sync Events.lobby_players_updated_ev.Trigger
                 | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
                 | Downstream.LOBBY_EVENT (kind, data) -> sync(fun () -> Events.lobby_event_ev.Trigger(kind, data))
@@ -170,6 +164,14 @@ module Network =
                 | Downstream.PLAYER_STATUS (username, status) -> 
                     lobby.Value.Players.[username].Status <- status
                     sync Events.lobby_players_updated_ev.Trigger
+
+                | Downstream.SELECT_CHART c -> 
+                    lobby.Value.Chart <- Some c
+                    for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
+                    lobby.Value.Ready <- false
+                    sync Events.change_chart_ev.Trigger
+                    sync Events.lobby_players_updated_ev.Trigger
+                | Downstream.GAME_START -> sync Events.game_start_ev.Trigger
 
                 | _ -> () // nyi
         }
