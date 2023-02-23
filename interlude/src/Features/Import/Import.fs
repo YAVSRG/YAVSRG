@@ -9,6 +9,7 @@ open Prelude.Data.Charts
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Features.LevelSelect
+open Interlude.Features.Online
 
 module FileDropHandling =
     let tryImport(path: string) : bool =
@@ -101,5 +102,5 @@ type ImportScreen() as this =
     override this.OnEnter _ = tabs.Focus()
     override this.OnExit _ = ()
     override this.OnBack() = 
-        if Interlude.Features.Multiplayer.Network.lobby.IsSome then Some Screen.Type.Lobby
+        if Network.lobby.IsSome then Some Screen.Type.Lobby
         else Some Screen.Type.LevelSelect

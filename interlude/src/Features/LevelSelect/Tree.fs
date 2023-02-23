@@ -22,7 +22,7 @@ open Interlude.Content
 open Interlude.Options
 open Interlude.Features.Gameplay
 open Interlude.Features.Play
-open Interlude.Features.Multiplayer
+open Interlude.Features.Online
 
 [<RequireQualifiedAccess>]
 type Navigation =
@@ -93,7 +93,7 @@ module Tree =
     
     let play() =
         if Network.lobby.IsSome then
-            Network.change_to_selected_chart()
+            Network.select_chart(Chart.cacheInfo.Value, rate.Value)
             Screen.change Screen.Type.Lobby Transitions.Flags.Default
         else
             match Chart.saveData with

@@ -12,6 +12,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Features.Gameplay
+open Interlude.Features.Online
 
 type Player(name: string, player: Network.LobbyPlayer) =
     inherit StaticWidget(NodeType.None)

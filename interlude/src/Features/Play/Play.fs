@@ -116,3 +116,58 @@ module PlayScreen =
                         Screen.Type.Score
                         Transitions.Flags.Default
         }
+
+    let multiplayer_screen() =
+        
+        let chart = Gameplay.Chart.withMods.Value
+        let ruleset = Rulesets.current
+        let firstNote = offsetOf chart.Notes.First.Value
+        let liveplay = LiveReplayProvider firstNote
+        let scoring = createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
+        
+        let binds = options.GameplayBinds.[chart.Keys - 3]
+        let mutable inputKeyState = 0us
+
+        { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
+            override this.AddWidgets() =
+                let inline add_widget x = add_widget (this, this.Playfield, this.State) x
+
+                add_widget AccuracyMeter
+                add_widget HitMeter
+                add_widget LifeMeter
+                add_widget ComboMeter
+                add_widget SkipButton
+                add_widget ProgressMeter
+                add_widget Pacemaker
+                add_widget JudgementCounts
+
+            override this.Update(elapsedTime, bounds) =
+                base.Update(elapsedTime, bounds)
+                let now = Song.timeWithOffset()
+                let chartTime = now - firstNote
+
+                if not (liveplay :> IReplayProvider).Finished then
+                    Input.consumeGameplay(binds, fun column time isRelease ->
+                        if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
+                        else inputKeyState <- Bitmap.setBit column inputKeyState
+                        liveplay.Add(time, inputKeyState) )
+                    this.State.Scoring.Update chartTime
+                
+                if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
+                    liveplay.Finish()
+                    Screen.changeNew
+                        ( fun () ->
+                            let sd =
+                                ScoreInfoProvider (
+                                    Gameplay.makeScore((liveplay :> IReplayProvider).GetFullReplay(), this.Chart.Keys),
+                                    Gameplay.Chart.current.Value,
+                                    this.State.Ruleset,
+                                    ModChart = Gameplay.Chart.withMods.Value,
+                                    Difficulty = Gameplay.Chart.rating.Value
+                                )
+                            (sd, Gameplay.setScore true sd)
+                            |> ScoreScreen
+                        )
+                        Screen.Type.Score
+                        Transitions.Flags.Default
+        }

@@ -8,7 +8,7 @@ open Interlude
 open Interlude.UI
 open Interlude.Features
 open Interlude.Features.Printerlude
-open Interlude.Features.Multiplayer
+open Interlude.Features.Online
 
 [<EntryPoint>]
 let main argv =

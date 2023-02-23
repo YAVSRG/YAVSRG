@@ -7,6 +7,7 @@ open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
 open Interlude.Web.Shared
+open Interlude.Features.Online
 
 type LobbyInfoCard(info: LobbyInfo) =
     inherit Frame(NodeType.None)

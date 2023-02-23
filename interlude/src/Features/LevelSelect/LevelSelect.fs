@@ -6,7 +6,6 @@ open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.UI
-open Prelude.Scoring
 open Prelude.Data.Charts.Sorting
 open Prelude.Data.Charts.Caching
 open Interlude.Options
@@ -15,7 +14,7 @@ open Interlude.Features.Gameplay
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
-open Interlude.Features.Multiplayer
+open Interlude.Features.Online
 
 type LevelSelectScreen() =
     inherit Screen()

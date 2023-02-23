@@ -16,7 +16,7 @@ open Interlude.Options
 open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.Gameplay
-open Interlude.Features.Multiplayer
+open Interlude.Features.Online
 open Interlude.Features.Score
 
 type ScoreContextMenu(score: ScoreInfoProvider) as this =

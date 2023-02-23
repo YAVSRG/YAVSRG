@@ -29,7 +29,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Remove="Features\Online\**" />
     <EmbeddedResource Remove="Properties\**" />
   </ItemGroup>
 
@@ -66,6 +65,8 @@
     <Compile Include="Features\Wiki\MarkdownUI.fs" />
     <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Rulesets.fs" />
+    <Compile Include="Features\Online\Network.fs" />
+    <Compile Include="Features\Online\Status.fs" />
     <Compile Include="Features\Gameplay.fs" />
     <Compile Include="Features\Score\Util.fs" />
     <Compile Include="Features\Score\Graph.fs" />
@@ -77,10 +78,6 @@
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\Play.fs" />
     <Compile Include="Features\Play\Replay.fs" />
-    <Compile Include="Features\Multiplayer\Network.fs" />
-    <Compile Include="Features\Multiplayer\LobbySelect.fs" />
-    <Compile Include="Features\Multiplayer\LobbyScreen.fs" />
-    <Compile Include="Features\Multiplayer\Status.fs" />
     <Compile Include="Features\LevelSelect\Shared.fs" />
     <Compile Include="Features\LevelSelect\Preview.fs" />
     <Compile Include="Features\LevelSelect\Comments.fs" />
@@ -93,6 +90,8 @@
     <Compile Include="Features\LevelSelect\Scoreboard.fs" />
     <Compile Include="Features\LevelSelect\ChartInfo.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
+    <Compile Include="Features\Multiplayer\LobbySelect.fs" />
+    <Compile Include="Features\Multiplayer\LobbyScreen.fs" />
     <Compile Include="Features\Import\Shared.fs" />
     <Compile Include="Features\Import\Mounts.fs" />
     <Compile Include="Features\Import\EtternaPacks.fs" />

@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Multiplayer
+﻿namespace Interlude.Features.Online
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI

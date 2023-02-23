@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Multiplayer
+﻿namespace Interlude.Features.Online
 
 open System.Net
 open System.IO
@@ -7,6 +7,7 @@ open Percyqaz.Common
 open Percyqaz.Json
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Prelude.Data.Charts.Caching
 open Interlude.UI
 open Interlude.Web.Shared
 
@@ -145,10 +146,10 @@ module Network =
                 | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
                 | Downstream.YOU_ARE_HOST -> 
                     lobby.Value.YouAreHost <- true
-                    if lobby.Value.Chart.IsNone then
-                        match Interlude.Features.Gameplay.Chart.cacheInfo with
-                        | Some cc -> this.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
-                        | None -> ()
+                    //if lobby.Value.Chart.IsNone then
+                    //    match Interlude.Features.Gameplay.Chart.cacheInfo with
+                    //    | Some cc -> this.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
+                    //    | None -> ()
                 | Downstream.PLAYER_JOINED_LOBBY username -> 
                     lobby.Value.Players.Add(username, { Status = LobbyPlayerStatus.NotReady })
                     sync(Events.lobby_players_updated_ev.Trigger)
@@ -208,10 +209,9 @@ module Network =
 
     let ready_status flag = client.Send(Upstream.READY_STATUS flag)
 
-    let change_to_selected_chart() =
-        if lobby.Value.YouAreHost then 
-            let cc = Interlude.Features.Gameplay.Chart.cacheInfo.Value
-            client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = Interlude.Features.Gameplay.rate.Value })
+    let select_chart(cc: CachedChart, rate: float32) =
+        if lobby.Value.YouAreHost then
+            client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = rate })
 
     let shutdown() =
         if status <> NotConnected then client.Disconnect()
