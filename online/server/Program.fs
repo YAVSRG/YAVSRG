@@ -26,7 +26,14 @@ let handle_packet(id: Guid, packet: Upstream) =
         | Upstream.LEAVE_LOBBY -> Lobby.leave id
         | Upstream.CHAT msg -> Lobby.chat (id, msg)
         | Upstream.READY_STATUS r -> Lobby.ready_up (id, r)
+
+        | Upstream.BEGIN_PLAYING -> Lobby.begin_playing id
+        | Upstream.PLAY_DATA data -> Lobby.play_data (id, data)
+        | Upstream.BEGIN_SPECTATING -> Lobby.begin_spectating id
+        | Upstream.FINISH_PLAYING -> Lobby.finish_playing id
+
         | Upstream.SELECT_CHART c -> Lobby.select_chart (id, c)
+        | Upstream.START_GAME -> Lobby.start_game id
 
         | _ -> Server.kick(id, "Not yet implemented")
 

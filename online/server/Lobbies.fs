@@ -441,6 +441,11 @@ module Lobby =
     let chat(player, message) = state_change.Request( Action.Chat(player, message) , ignore )
     let ready_up(player, ready) = state_change.Request( Action.ReadyUp(player, ready) , ignore )
     let select_chart(player, chart) = state_change.Request( Action.SelectChart(player, chart) , ignore )
+    let start_game(player) = state_change.Request( Action.StartGame(player) , ignore )
+    let begin_playing(player) = state_change.Request( Action.BeginPlaying(player) , ignore )
+    let finish_playing(player) = state_change.Request( Action.FinishPlaying(player) , ignore )
+    let begin_spectating(player) = state_change.Request( Action.BeginSpectating(player) , ignore )
+    let play_data(player, data) = state_change.Request( Action.PlayData(player, data) , ignore )
 
     let list(player) = state_change.Request( Action.List player, ignore )
 
