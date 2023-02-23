@@ -186,12 +186,14 @@ type LiveReplayProvider(firstNote: Time) =
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Live play is already declared as over; cannot do so again"
 
-    member this.ExportLiveBlock(until: Time, sw: StreamWriter) =
-        while export < buffer.Count && (let struct (time, _) = buffer.[export] in time <= until) do
+    member this.ExportLiveBlock(sw: StreamWriter) =
+        while export < buffer.Count do
             let struct (time, bitmap) = buffer.[export]
-            sw.Write time
-            sw.Write bitmap
+            if time > -1000.0f<ms> then
+                sw.Write time
+                sw.Write bitmap
             export <- export + 1
+        sw.Flush()
 
 type OnlineReplayProvider(firstNote: Time) =
     let mutable i = 0
