@@ -3,12 +3,10 @@
 open OpenTK
 open Percyqaz.Flux.Audio
 open Percyqaz.Flux.Input
-open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Prelude.Scoring
 open Prelude.Scoring.Metrics
-open Prelude.Data.Themes
 open Prelude.Data.Scores
 open Interlude.Options
 open Interlude.Content
@@ -31,6 +29,8 @@ module PlayScreen =
         let ruleset = Rulesets.current
         let firstNote = offsetOf chart.Notes.First.Value
         let liveplay = LiveReplayProvider firstNote
+        let scoring = createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
+
         let pacemakerInfo =
             match pacemakerMode with
             | PacemakerMode.None -> PacemakerInfo.None
@@ -45,7 +45,6 @@ module PlayScreen =
                 | Pacemaker.Lamp lamp ->
                     let l = Rulesets.current.Grading.Lamps.[lamp]
                     PacemakerInfo.Judgement(l.Judgement, l.JudgementThreshold)
-        let scoring = createScoreMetric ruleset chart.Keys liveplay chart.Notes Gameplay.rate.Value
 
         let pacemakerMet(state: PlayState) =
             match state.Pacemaker with

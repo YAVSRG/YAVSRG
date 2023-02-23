@@ -55,16 +55,16 @@ type ReplayScreen(mode: ReplayMode) as this =
         }
 
     do
-        let noteRenderer = NoteRenderer(getColoredChart (noteskinConfig().NoteColors) chart, scoring)
-        this.Add noteRenderer
+        let playfield = Playfield(getColoredChart (noteskinConfig().NoteColors) chart, scoring)
+        this.Add playfield
 
         if noteskinConfig().EnableColumnLight then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, noteskinConfig(), widgetHelper))
+            playfield.Add(new ColumnLighting(chart.Keys, noteskinConfig(), widgetHelper))
 
         if noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, noteskinConfig(), widgetHelper))
+            playfield.Add(new Explosions(chart.Keys, noteskinConfig(), widgetHelper))
 
-        noteRenderer.Add(LaneCover())
+        playfield.Add(LaneCover())
 
         let inline add_widget (constructor: 'T -> Widget) = 
             let config: ^T = getGameplayConfig<'T>()
@@ -72,7 +72,7 @@ type ReplayScreen(mode: ReplayMode) as this =
             if pos.Enabled then
                 let w = constructor config
                 w.Position <- { Left = pos.LeftA %+ pos.Left; Top = pos.TopA %+ pos.Top; Right = pos.RightA %+ pos.Right; Bottom = pos.BottomA %+ pos.Bottom }
-                if pos.Float then this.Add w else noteRenderer.Add w
+                if pos.Float then this.Add w else playfield.Add w
 
         if not auto then
             add_widget (fun c -> new AccuracyMeter(c, widgetHelper))

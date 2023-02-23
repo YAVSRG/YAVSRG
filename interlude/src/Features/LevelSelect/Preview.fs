@@ -28,16 +28,16 @@ type Preview(chart: Chart) =
     //            |> Array.ofSeq
     //        )
 
-    let renderer =
-        NoteRenderer(Metrics.createDummyMetric chart)
+    let playfield =
+        Playfield(Metrics.createDummyMetric chart)
         |+ GameplayWidgets.LaneCover()
 
     override this.Init(parent: Widget) =
         base.Init parent
-        renderer.Init this
+        playfield.Init this
 
     override this.Draw() =
-        renderer.Draw()
+        playfield.Draw()
 
         let b = this.Bounds.Shrink(10.0f, 20.0f)
 
@@ -65,7 +65,7 @@ type Preview(chart: Chart) =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
-        renderer.Update(elapsedTime, moved)
+        playfield.Update(elapsedTime, moved)
         if this.Bounds.Bottom - Mouse.y() < 200.0f && Mouse.leftClick() then
             let percent = Mouse.x() / Viewport.vwidth
             let newTime = chart.FirstNote + (chart.LastNote - chart.FirstNote) * percent

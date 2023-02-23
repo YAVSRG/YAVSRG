@@ -18,7 +18,7 @@ open Interlude.Features.Play.GameplayWidgets
 [<AutoOpen>]
 module Utils =
 
-    let inline add_widget (screen: Screen, playfield: NoteRenderer, state: PlayState) (constructor: 'T * PlayState -> #Widget) = 
+    let inline add_widget (screen: Screen, playfield: Playfield, state: PlayState) (constructor: 'T * PlayState -> #Widget) = 
         let config: ^T = getGameplayConfig<'T>()
         let pos: WidgetConfig = (^T: (member Position: WidgetConfig) config)
         if pos.Enabled then
@@ -44,18 +44,18 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
             Pacemaker = pacemakerInfo
         }
 
-    let noteRenderer = NoteRenderer scoring
+    let playfield = Playfield scoring
 
     do
-        this.Add noteRenderer
+        this.Add playfield
 
         if noteskinConfig().EnableColumnLight then
-            noteRenderer.Add(new ColumnLighting(chart.Keys, noteskinConfig(), state))
+            playfield.Add(new ColumnLighting(chart.Keys, noteskinConfig(), state))
 
         if noteskinConfig().Explosions.FadeTime >= 0.0f then
-            noteRenderer.Add(new Explosions(chart.Keys, noteskinConfig(), state))
+            playfield.Add(new Explosions(chart.Keys, noteskinConfig(), state))
 
-        noteRenderer.Add(LaneCover())
+        playfield.Add(LaneCover())
 
         this.AddWidgets()
 
@@ -63,7 +63,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
 
     abstract member AddWidgets : unit -> unit
 
-    member this.Playfield = noteRenderer
+    member this.Playfield = playfield
     member this.State = state
     member this.Chart = chart
 

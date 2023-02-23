@@ -18,10 +18,10 @@ type NoteskinPreview(scale: float32) as this =
     let createRenderer() =
         match Gameplay.Chart.current with
         | Some chart -> 
-            let nr = NoteRenderer(Metrics.createDummyMetric chart)
-            nr.Add(GameplayWidgets.LaneCover())
-            if this.Initialised then nr.Init this
-            nr :> Widget
+            let playfield = Playfield(Metrics.createDummyMetric chart)
+            playfield.Add(GameplayWidgets.LaneCover())
+            if this.Initialised then playfield.Init this
+            playfield :> Widget
         | None -> new Dummy()
 
     let mutable renderer = createRenderer()

@@ -72,7 +72,7 @@
     <Compile Include="Features\Score\Components.fs" />
     <Compile Include="Features\Score\Score.fs" />
     <Compile Include="Features\Play\QuickOptions.fs" />
-    <Compile Include="Features\Play\NoteRenderer.fs" />
+    <Compile Include="Features\Play\Playfield.fs" />
     <Compile Include="Features\Play\GameplayWidgets.fs" />
     <Compile Include="Features\Play\Shared.fs" />
     <Compile Include="Features\Play\Play.fs" />
