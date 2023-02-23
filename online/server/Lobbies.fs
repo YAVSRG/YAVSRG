@@ -110,6 +110,9 @@ module Lobby =
     let game_end(lobby: Lobby) =
         lobby.GameRunning <- false
         multicast(lobby, Downstream.GAME_END)
+        Logging.Debug(sprintf "End of round in lobby %s" lobby.Settings.Name)
+        if lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) then
+            Logging.Debug(sprintf "%s round (%s) did not end cleanly" lobby.Settings.Name lobby.Chart.Value.Title)
         for p in lobby.Players.Values do
             p.Status <- LobbyPlayerStatus.NotReady
         // todo: if all players have PlayComplete true, the lobby went successfully and you can host rotate if the setting is on
@@ -308,6 +311,10 @@ module Lobby =
                         if lobby.Host <> player then
                             Server.send(player, Downstream.SYSTEM_MESSAGE "You are not host")
                         else
+                            
+                        if lobby.Chart.IsNone then
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "No chart selected")
+                        else
                         
                         if lobby.GameRunning then
                             Server.send(player, Downstream.SYSTEM_MESSAGE "Game is already running")
@@ -362,9 +369,9 @@ module Lobby =
                             // you are first player in the lobby to finish
                             Logging.Debug(sprintf "First player to finish is %s, starting timeout" username)
                             async {
-                                let! _ = System.Threading.Tasks.Task.Delay(1000 * MULTIPLAYER_REPLAY_DELAY_SECONDS) |> Async.AwaitTask
+                                do! Async.Sleep(1000 * MULTIPLAYER_REPLAY_DELAY_SECONDS)
                                 this.Request(Action.GameplayTimeout lobby_id, ignore)
-                            } |> Async.StartAsTask |> ignore
+                            } |> Async.Start
 
                     | Action.BeginSpectating player ->
                         match! UserState.find_username player with
@@ -424,7 +431,6 @@ module Lobby =
                         // todo: fix bug where if you start a new round before this timeout, it will end instantly
 
                         if lobbies.[lobby_id].GameRunning then game_end lobbies.[lobby_id]
-                            
             }
         }
 
