@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -10,12 +10,11 @@
     <Authors>Percyqaz</Authors>
     <RunPostBuildEvent>1</RunPostBuildEvent>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PackageIcon></PackageIcon>
-    <Win32Resource>Resources\icon.res</Win32Resource>
     <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
     <RunAnalyzersDuringLiveAnalysis>True</RunAnalyzersDuringLiveAnalysis>
     <RunAnalyzersDuringBuild>True</RunAnalyzersDuringBuild>
     <DebugType>embedded</DebugType>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -36,6 +35,7 @@
     <Content Include="Locale\en_GB.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\icon.ico" />
     <EmbeddedResource Include="Resources\shader.vert" />
     <EmbeddedResource Include="Resources\shader.frag" />
     <EmbeddedResource Include="Resources\defaultArrow.isk" />
