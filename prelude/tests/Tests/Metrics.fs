@@ -3,12 +3,13 @@
 open Percyqaz.Common
 open Prelude.Common
 open Prelude.Scoring
+open Prelude.Charts.Formats.Interlude
 
 module Metrics =
 
     let main() =
         
-        let chart = Imports.getRandomChart()
+        let chart : Chart = Imports.getRandomChart()
         let perfectPlayProvider = StoredReplayProvider.AutoPlay(chart.Keys, chart.Notes)
 
         Logging.Info "Replay round trip!"

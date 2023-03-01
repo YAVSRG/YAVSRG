@@ -1,6 +1,5 @@
 ﻿open System
 open Percyqaz.Common
-open Prelude.Common
 open Prelude.Test
 
 (*
@@ -25,7 +24,8 @@ let main argv =
     //Generic.main()
     //Imports.main()
     //Metrics.main()
-    Sail.main()
+    //Sail.main()
+    Caramell.main()
 
     Logging.Info "Test track complete, showing reports ..."
 

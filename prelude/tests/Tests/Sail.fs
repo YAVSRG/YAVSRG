@@ -1,7 +1,7 @@
 ﻿module Sail
 
 open Prelude.Common
-open Prelude.ChartFormats.``osu!``
+open Prelude.Charts.Formats.``osu!``
 
 let source = @"C:\Users\percy\AppData\Local\osu!\Songs\beatmap-637823398692216004-AWOLNATION - Sail (Official Music Video)\AWOLNATION - Sail (Percyqaz) [SAIL WITH ME INTO THE DARK].osu"
 let sail = loadBeatmapFile source
@@ -131,7 +131,7 @@ let lines =
         bass 104f
     ]
 
-let line (t: Time) = TimingPoint.BPM (t, 60000f<ms/minute> / bpm, 4<beat>, (SampleSet.Default, 0, 0), TimingEffect.OmitFirstBarline)
+let line (t: Time) = BPM (t, 60000f<ms/minute> / bpm, 4<beat>, (SampleSet.Default, 0, 0), TimingEffect.OmitFirstBarline)
 
 let renderedLines =
     lines

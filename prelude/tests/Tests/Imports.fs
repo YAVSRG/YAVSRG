@@ -1,8 +1,7 @@
 ﻿namespace Prelude.Test
 
 open Percyqaz.Common
-open Prelude.Common
-open Prelude.ChartFormats.Interlude
+open Prelude.Charts.Formats.Interlude
 open Prelude.Data.Charts
 
 module Imports =
@@ -15,8 +14,9 @@ module Imports =
 
         Reporter.func <- Reports.minor
         Logging.Info "Converting osu! songs ..."
-        let t = BackgroundTask.Create TaskFlags.NONE "Convert osu! songs" (Library.Imports.importMountedSource mount)
-        t.Wait()
+        // todo: update this system if I ever fix this test rig
+        //let t = BackgroundTask.Create TaskFlags.NONE "Convert osu! songs" (Library.Imports.importMountedSource mount)
+        //t.Wait()
         Library.save()
         Logging.Info "Conversion complete!"
         

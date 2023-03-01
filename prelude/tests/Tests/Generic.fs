@@ -1,9 +1,6 @@
 ﻿namespace Prelude.Test
 
-open System
-open Prelude.Common
-open Prelude.ChartFormats.Interlude
-open Prelude.Data.Charts
+open Prelude.Charts.Formats.Interlude
 
 module Generic =
     

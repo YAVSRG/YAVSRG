@@ -1,7 +1,7 @@
 ﻿module Trendy
 
 open Prelude.Common
-open Prelude.ChartFormats.``osu!``
+open Prelude.Charts.Formats.``osu!``
 
 let trendy = loadBeatmapFile @"C:\Users\percy\AppData\Local\osu!\Songs\1010949 greyl - Trendy\greyl - Trendy (Percyqaz) [Uncut Ver.].osu"
 
