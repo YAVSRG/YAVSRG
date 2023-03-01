@@ -27,7 +27,7 @@ module Dialog =
 
         override this.Draw() =
             if fade.Value > 0.0f then
-                Draw.rect this.Bounds (Color.FromArgb(int (200f * fade.Value), Color.Black))
+                Draw.rect this.Bounds (Color.FromArgb(int (225f * fade.Value), 35, 35, 35))
                 match current with
                 | Some d -> d.Draw()
                 | None -> ()
