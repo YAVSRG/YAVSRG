@@ -144,18 +144,19 @@ module ``osu!`` =
         | Trigger_Loop of Time * Time * TriggerType * StoryboardEvent list
         | Parameter of Time * Time * SpriteParameter
         member this.Format padding =
+            let strint : Time -> string = int >> string
             padding + (String.concat ","
                 (match this with
-                | Fade (time1, time2, easing, a, b) -> ["F"; easing |> int |> string; string time1; string time2; string a; string b]
-                | Move (time1, time2, easing, (x1,y1), (x2,y2)) -> ["M"; easing |> int |> string; string time1; string time2;
+                | Fade (time1, time2, easing, a, b) -> ["F"; easing |> int |> string; strint time1; strint time2; string a; string b]
+                | Move (time1, time2, easing, (x1,y1), (x2,y2)) -> ["M"; easing |> int |> string; strint time1; strint time2;
                     string x1; string y1; string x2; string y2]
-                | Move_X (time1, time2, easing, a, b) -> ["MX"; easing |> int |> string; string time1; string time2; string a; string b]
-                | Move_Y (time1, time2, easing, a, b) -> ["MY"; easing |> int |> string; string time1; string time2; string a; string b]
-                | Scale (time1, time2, easing, a, b) -> ["S"; easing |> int |> string; string time1; string time2; string a; string b]
-                | VectorScale (time1, time2, easing, (x1,y1), (x2,y2)) -> ["V"; easing |> int |> string; string time1; string time2;
+                | Move_X (time1, time2, easing, a, b) -> ["MX"; easing |> int |> string; strint time1; strint time2; string a; string b]
+                | Move_Y (time1, time2, easing, a, b) -> ["MY"; easing |> int |> string; strint time1; strint time2; string a; string b]
+                | Scale (time1, time2, easing, a, b) -> ["S"; easing |> int |> string; strint time1; strint time2; string a; string b]
+                | VectorScale (time1, time2, easing, (x1,y1), (x2,y2)) -> ["V"; easing |> int |> string; strint time1; strint time2;
                     string x1; string y1; string x2; string y2]
-                | Rotate (time1, time2, easing, a, b) -> ["R"; easing |> int |> string; string time1; string time2; string a; string b]
-                | Color (time1, time2, easing, (r1,g1,b1), (r2,g2,b2)) -> ["C"; easing |> int |> string; string time1; string time2;
+                | Rotate (time1, time2, easing, a, b) -> ["R"; easing |> int |> string; strint time1; strint time2; string a; string b]
+                | Color (time1, time2, easing, (r1,g1,b1), (r2,g2,b2)) -> ["C"; easing |> int |> string; strint time1; strint time2;
                         string r1; string g1; string b1; string r2; string g2; string b2]
                 | _ -> ["nyi"]
                 ))
@@ -581,7 +582,7 @@ module ``osu!`` =
             (clean beatmap.Metadata.Creator)
             (clean beatmap.Metadata.Version)
 
-    let eventsToString events = "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events)
+    let eventsToString (events: StoryboardObject list) = "[Events]\n" + String.concat "\n" (List.map (fun o -> o.ToString()) events)
 
     let beatmapToString beatmap = 
         String.concat "\n\n" [
