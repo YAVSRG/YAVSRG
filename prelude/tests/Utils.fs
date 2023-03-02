@@ -29,9 +29,9 @@ module Reports =
             match report.Severity with
             | Minor -> printfn "Warning> %s" report.Title; minorCount <- minorCount + 1
             | Major -> printfn "Error> %s" report.Title; majorCount <- majorCount + 1
-            printfn "%s" report.Content
+            Logging.Info report.Content
             if step then System.Console.ReadLine() |> ignore
-        printfn "%i Warnings, %i Errors." minorCount majorCount
+        Logging.Info (sprintf "%i Warnings, %i Errors." minorCount majorCount)
 
 module Reporter =
     

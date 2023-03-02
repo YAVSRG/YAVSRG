@@ -30,4 +30,6 @@ let main argv =
     Logging.Info "Test track complete, showing reports ..."
 
     Reports.display true
+
+    Logging.Wait()
     0
