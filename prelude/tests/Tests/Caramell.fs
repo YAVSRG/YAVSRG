@@ -77,6 +77,25 @@ let intro_scene() =
         ]
     Sprite(Layer.Foreground, SpriteOrigin.BottomCentre, "josh-5.png", (480, 500), josh) |> sb.Add
 
+let disco_ball() =
+    let events =
+        seq {
+            yield Rotate(0.0f<ms>, measure end_of_song, Easing.None, 0.0, Math.PI * 1.3 * float end_of_song)
+            let mutable last = 0.0f<ms>
+            let mutable last_was_kiai = false
+            for p in dansen.Timing do
+                match p with
+                | SV (t, _, _, effect) -> 
+                    if effect = TimingEffect.Kiai then 
+                        yield Fade(last, t, Easing.None, 0.0, 0.0)
+                    else yield Fade(last, t, Easing.None, 1.0, 1.0)
+                    last <- t
+                    last_was_kiai <- effect = TimingEffect.Kiai
+                | _ -> ()
+        } |> List.ofSeq
+    Sprite(Layer.Foreground, SpriteOrigin.Centre, "rays.png", (320, 80), events)
+    |> sb.Add
+
 let main_scene() =
     let bg =
         [
@@ -89,12 +108,28 @@ let main_scene() =
     let dance_floor =
         [
             Scale (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 0.8, 0.8)
-            Move_Y (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 700, 480)
+            Move_Y (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 520, 300)
             Fade (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 0.0, 1.0)
             Fade (measure end_of_song, measure (end_of_song + 1.0f<measure>), Easing.None, 1.0, 0.0)
         ]
-    Sprite(Layer.Foreground, SpriteOrigin.BottomCentre, "dance_floor.png", (320, 480), dance_floor)
+    let dance_floor_bounces =
+        seq {
+            let mutable t = hook1
+            while t < rest do
+                t <- t + 0.25f<measure>
+                yield VectorScale(measure t, measure (t + 0.125f<measure>), Easing.Decelerate, (0.8, 0.8), (0.8, 1.0))
+                yield VectorScale(measure (t + 0.125f<measure>), measure (t + 0.25f<measure>), Easing.Accelerate, (0.8, 1.0), (0.8, 0.8))
+            t <- oo_oo_oowah2
+            while t < end_of_song do
+                t <- t + 0.25f<measure>
+                yield VectorScale(measure t, measure (t + 0.125f<measure>), Easing.Decelerate, (0.8, 0.8), (0.8, 1.0))
+                yield VectorScale(measure (t + 0.125f<measure>), measure (t + 0.25f<measure>), Easing.Accelerate, (0.8, 1.0), (0.8, 0.8))
+        } |> List.ofSeq
+
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dance_floor.png", (320, 520), dance_floor @ dance_floor_bounces)
     |> sb.Add
+
+    disco_ball()
 
     let disco_ball =
         [
@@ -172,16 +207,16 @@ let main() =
     intro_scene()
     
     // hook
-    dance "blake" hook1 16 (0.5, 0.5) (0, 160)
-    dance "blake" hook1 16 (0.5, 0.5) (320, 480)
-    dance "josh" hook1 16 (0.8, 0.8) (160, 320)
-    dance "josh" hook1 16 (0.8, 0.8) (480, 640)
+    camera_1 hook1 "josh"
+    camera_1 (hook1 + 2.0f<measure>) "josh"
+    camera_1 (hook1 + 4.0f<measure>) "josh"
+    camera_1 (hook1 + 6.0f<measure>) "josh"
 
     // verse 1
-    camera_1 verse1_1 "josh"
+    camera_4 verse1_1 "josh"
     camera_3 (verse1_1 + 2.0f<measure>) "josh"
     camera_2 (verse1_1 + 4.0f<measure>) "josh"
-    camera_4 (verse1_1 + 6.0f<measure>) "josh"
+    camera_1 (verse1_1 + 6.0f<measure>) "josh"
 
     camera_3 verse1_2 "blake"
     camera_1 (verse1_2 + 2.0f<measure>) "blake"
@@ -202,20 +237,20 @@ let main() =
     
     // verse 2
     camera_1 verse2_1 "blake"
-    camera_1 (verse2_1 + 2.0f<measure>) "blake"
-    camera_1 (verse2_1 + 4.0f<measure>) "blake"
-    camera_1 (verse2_1 + 6.0f<measure>) "blake"
+    camera_3 (verse2_1 + 2.0f<measure>) "blake"
+    camera_4 (verse2_1 + 4.0f<measure>) "blake"
+    camera_2 (verse2_1 + 6.0f<measure>) "blake"
     
-    camera_1 verse2_2 "josh"
-    camera_1 (verse2_2 + 2.0f<measure>) "josh"
+    camera_3 verse2_2 "josh"
+    camera_2 (verse2_2 + 2.0f<measure>) "josh"
     camera_1 (verse2_2 + 4.0f<measure>) "josh"
-    camera_1 (verse2_2 + 6.0f<measure>) "josh"
+    camera_4 (verse2_2 + 6.0f<measure>) "josh"
     
     // chorus 2
-    camera_1 chorus2 "blake"
-    camera_1 (chorus2 + 2.0f<measure>) "blake"
+    camera_3 chorus2 "blake"
+    camera_4 (chorus2 + 2.0f<measure>) "blake"
     camera_1 (chorus2 + 4.0f<measure>) "blake"
-    camera_1 (chorus2 + 6.0f<measure>) "blake"
+    camera_2 (chorus2 + 6.0f<measure>) "blake"
     
     // hook 2
     camera_1 hook2 "blake"
@@ -241,7 +276,7 @@ let main() =
 
 (* todo list
 
-spinning rays during chorus
+bouncing stars
 disco ball animation
 dance floor animation
 stuff in break section
