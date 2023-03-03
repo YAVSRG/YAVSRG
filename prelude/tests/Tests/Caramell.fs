@@ -10,8 +10,7 @@ type measure
 
 let sprites = @"C:\Users\percy\Desktop\caramelldansen"
 let source = @"C:\Users\percy\AppData\Local\osu!\Songs\caramell"
-let osu_file = Path.Combine(source, "Caramell - Caramelldansen (Speedycake Remix) (Pope Gadget) [THE POPE GADGET VS. PERCYQAZ SHUFFLEGANZA].osu")
-let osb_file = Path.Combine(source, "Caramell - Caramelldansen (Speedycake Remix) (Pope Gadget).osb")
+let osu_file = Path.Combine(source, "Caramell - Caramelldansen (Speedycake Remix) (Pope Gadget) [THE POPE GADGET VS. PERCYQAZ SHUFFLEGANZA 1.05x].osu")
 let dansen = loadBeatmapFile osu_file
 
 let mutable _msPerBeat = Unchecked.defaultof<_>
@@ -48,7 +47,37 @@ let frame_times =
     |> List.map (fun t -> t / 340.0f<ms/beat> * _msPerBeat)
     |> List.scan (+) 0.0f<ms>
 
-let intro_scene() =
+let break_intro (time: float32<measure>) =
+    let measure1 (x: int) = measure (float32 x * 1.0f<measure> + time)
+    let blake = 
+        [
+            Fade (measure1 0, measure1 1, Easing.None, 0.0, 1.0)
+            Fade (measure1 1, measure1 2, Easing.None, 1.0, 0.0)
+            Move_X (measure1 0, measure1 2, Easing.None, 80, 480)
+            Rotate (measure1 0, measure1 2, Easing.None, Math.PI * -0.125, Math.PI * 0.125)
+
+            Fade (measure1 4, measure1 5, Easing.None, 0.0, 1.0)
+            Fade (measure1 5, measure1 6, Easing.None, 1.0, 0.0)
+            Move_X (measure1 4, measure1 6, Easing.None, 480, 80)
+            Rotate (measure1 4, measure1 6, Easing.None, Math.PI * 0.125, Math.PI * -0.125)
+        ]
+    Sprite(Layer.Foreground, SpriteOrigin.BottomCentre, "blake-1.png", (480, 500), blake) |> sb.Add
+
+    let josh = 
+        [
+            Fade (measure1 2, measure1 3, Easing.None, 0.0, 1.0)
+            Fade (measure1 3, measure1 4, Easing.None, 1.0, 0.0)
+            Move_X (measure1 2, measure1 4, Easing.None, 480, 80)
+            Rotate (measure1 2, measure1 4, Easing.None, Math.PI * 0.125, Math.PI * -0.125)
+
+            Fade (measure1 4, measure1 5, Easing.None, 0.0, 1.0)
+            Fade (measure1 5, measure1 6, Easing.None, 1.0, 0.0)
+            Move_X (measure1 4, measure1 6, Easing.None, 80, 480)
+            Rotate (measure1 4, measure1 6, Easing.None, Math.PI * -0.125, Math.PI * 0.125)
+        ]
+    Sprite(Layer.Foreground, SpriteOrigin.BottomCentre, "josh-5.png", (480, 500), josh) |> sb.Add
+
+let intro_scene () =
     let blake = 
         [
             Fade (measure 5.0f<measure>, measure 6.0f<measure>, Easing.None, 0.0, 1.0)
@@ -100,9 +129,17 @@ let main_scene() =
     let bg =
         [
             Fade (measure 0.0f<measure>, measure 1.0f<measure>, Easing.None, 0.0, 1.0)
+            Fade (measure 11.0f<measure>, measure (12.0f<measure>), Easing.None, 1.0, 0.0)
+        ]
+    Sprite(Layer.Foreground, SpriteOrigin.Centre, "background-dark.png", (320, 240), bg)
+    |> sb.Add
+
+    let bg2 =
+        [
+            Fade (measure 9.0f<measure>, measure 11.0f<measure>, Easing.None, 0.0, 1.0)
             Fade (measure end_of_song, measure (end_of_song + 1.0f<measure>), Easing.None, 1.0, 0.0)
         ]
-    Sprite(Layer.Foreground, SpriteOrigin.Centre, "background.png", (320, 240), bg)
+    Sprite(Layer.Foreground, SpriteOrigin.Centre, "background.png", (320, 240), bg2)
     |> sb.Add
 
     let dance_floor =
@@ -110,24 +147,43 @@ let main_scene() =
             Scale (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 0.8, 0.8)
             Move_Y (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 520, 300)
             Fade (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 0.0, 1.0)
-            Fade (measure end_of_song, measure (end_of_song + 1.0f<measure>), Easing.None, 1.0, 0.0)
+            Fade (measure 5.0f<measure>, measure 11.0f<measure>, Easing.None, 1.0, 1.0)
         ]
-    let dance_floor_bounces =
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-0.png", (320, 520), dance_floor)
+    |> sb.Add
+
+    let dance_floor2 =
+        [
+            Scale (measure 9.0f<measure>, measure 11.0f<measure>, Easing.None, 0.8, 0.8)
+            Fade (measure 9.0f<measure>, measure 11.0f<measure>, Easing.None, 0.0, 1.0)
+        ]
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-1.png", (320, 300), dance_floor2)
+    |> sb.Add
+
+    let dance_floor_bounces i =
         seq {
             let mutable t = hook1
             while t < rest do
-                t <- t + 0.25f<measure>
                 yield VectorScale(measure t, measure (t + 0.125f<measure>), Easing.Decelerate, (0.8, 0.8), (0.8, 1.0))
                 yield VectorScale(measure (t + 0.125f<measure>), measure (t + 0.25f<measure>), Easing.Accelerate, (0.8, 1.0), (0.8, 0.8))
+                
+                let f = if (MathF.Round(t % 1.0f<measure> / 0.25f<measure>) |> int) + 1 = i then 1.0 else 0.0
+                yield Fade(measure t, measure (t + 0.25f<measure>), Easing.None, f, f)
+                t <- t + 0.25f<measure>
             t <- oo_oo_oowah2
             while t < end_of_song do
-                t <- t + 0.25f<measure>
                 yield VectorScale(measure t, measure (t + 0.125f<measure>), Easing.Decelerate, (0.8, 0.8), (0.8, 1.0))
                 yield VectorScale(measure (t + 0.125f<measure>), measure (t + 0.25f<measure>), Easing.Accelerate, (0.8, 1.0), (0.8, 0.8))
+                
+                let f = if (MathF.Round(t % 1.0f<measure> / 0.25f<measure>) |> int) + 1 = i then 1.0 else 0.0
+                yield Fade(measure t, measure (t + 0.25f<measure>), Easing.None, f, f)
+                t <- t + 0.25f<measure>
         } |> List.ofSeq
 
-    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dance_floor.png", (320, 520), dance_floor @ dance_floor_bounces)
-    |> sb.Add
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-1.png", (320, 300), dance_floor_bounces 1) |> sb.Add
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-2.png", (320, 300), dance_floor_bounces 2) |> sb.Add
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-3.png", (320, 300), dance_floor_bounces 3) |> sb.Add
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-4.png", (320, 300), dance_floor_bounces 4) |> sb.Add
 
     disco_ball()
 
@@ -138,8 +194,26 @@ let main_scene() =
             Fade (measure 1.0f<measure>, measure 5.0f<measure>, Easing.None, 0.0, 1.0)
             Fade (measure end_of_song, measure (end_of_song + 1.0f<measure>), Easing.None, 1.0, 0.0)
         ]
-    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "disco_ball.png", (320, 0), disco_ball)
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "disco_ball-1.png", (320, 0), disco_ball)
     |> sb.Add
+
+    let db_frames i = 
+        seq {
+            yield Scale (measure (hook1 + float32 i * 0.1f<measure>), measure (hook1 + float32 i * 0.1f<measure>), Easing.None, 0.5, 0.5)
+            let mutable t = hook1
+            while t < rest do
+                let f = if (MathF.Round(t / 0.1f<measure>) |> int) % 4 + 1 = i then 1.0 else 0.0
+                yield Fade(measure t, measure (t + 0.1f<measure>), Easing.None, f, f)
+                t <- t + 0.1f<measure>
+            t <- oo_oo_oowah2
+            while t < end_of_song do
+                let f = if (MathF.Round(t / 0.1f<measure>) |> int) % 4 + 1 = i then 1.0 else 0.0
+                yield Fade(measure t, measure (t + 0.1f<measure>), Easing.None, f, f)
+                t <- t + 0.1f<measure>
+        } |> List.ofSeq
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "disco_ball-2.png", (320, 0), db_frames 2) |> sb.Add
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "disco_ball-3.png", (320, 0), db_frames 3) |> sb.Add
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "disco_ball-4.png", (320, 0), db_frames 4) |> sb.Add
 
 let dance_ext (who: string) (time: float32<measure>) (repeat: int) (scale1: float, scale2: float) (x_pos1: int, x_pos2: int) (y_pos: int) =
     for i = 1 to 8 do
@@ -195,6 +269,46 @@ let camera_3 (time: float32<measure>) (main: string) =
     
 let camera_4 (time: float32<measure>) (main: string) =
     dance_ext main time 4 (1.5, 1.7) (320, 320) 900
+
+let special_camera_1 (time: float32<measure>) (main: string) =
+
+    let support = if main = "josh" then "blake" else "josh"
+    
+    dance_ext main time 2 (1.0, 1.0) (100, 100) 600
+    dance_ext support time 2 (1.0, 1.0) (540, 540) 600
+
+let special_camera_2 (time: float32<measure>) (main: string) =
+    
+    let support = if main = "josh" then "blake" else "josh"
+    
+    let spacing = 320
+    let movement = 320
+    for i = -1 to (640 + movement) / spacing do
+        dance (if i % 2 = 0 then support else main) time 2 (0.8, 0.8) (-movement + i * spacing, i * spacing)
+
+let special_camera_3 (time: float32<measure>) (main: string) =
+    
+    let support = if main = "josh" then "blake" else "josh"
+
+    dance support time 1 (0.7, 0.7) (120, 120)
+    dance support time 1 (0.7, 0.7) (520, 520)
+    dance main time 1 (0.9, 0.9) (320, 320)
+    
+    dance main (time + 0.5f<measure>) 1 (0.5, 0.7) (320, 520)
+    dance support (time + 0.5f<measure>) 1 (0.7, 0.5) (120, 320)
+    dance main (time + 0.5f<measure>) 1 (0.9, 0.7) (320, 120)
+    dance support (time + 0.5f<measure>) 1 (0.7, 0.9) (520, 320)
+
+let face (who: string) (i: int) (fade: bool) (time: float32<measure>) (duration: float32<measure>) =
+    
+    let events = 
+        [
+            Fade(measure time, measure (time + duration), Easing.Accelerate, 1.0, if fade then 0.0 else 1.0)
+            Scale(measure time, measure (time + duration), Easing.None, 1.5, 1.5)
+        ]
+    Sprite(Layer.Foreground, SpriteOrigin.BottomCentre, who + "-" + i.ToString() + ".png", (320, 820), events)
+    |> sb.Add
+
 
 let main() =
     // copy files
@@ -258,9 +372,16 @@ let main() =
     camera_1 (hook2 + 4.0f<measure>) "blake"
     camera_1 (hook2 + 6.0f<measure>) "blake"
     
-    // rest TBC
+    // rest
+    break_intro rest
+
+    face "josh" 5 true (rest + 8.0f<measure>) 1.0f<measure>
+    face "blake" 1 true (rest + 9.0f<measure>) 0.25f<measure>
+    face "josh" 5 true (rest + 9.25f<measure>) 0.25f<measure>
+    for i = 1 to 8 do
+        face (if i % 2 = 0 then "josh" else "blake") i false (rest + 9.4375f<measure> + 0.0625f<measure> * float32 i) 0.0625f<measure>
     
-    /// alternate faces really fast
+    // alternate faces really fast
 
     // oo oo oowah 2
     camera_1 oo_oo_oowah2 "josh"
@@ -269,17 +390,33 @@ let main() =
     camera_1 (oo_oo_oowah2 + 6.0f<measure>) "josh"
 
     // final chorus
-    /// custom camera angles incorporating us both
+    special_camera_3 (chorus3_1 + 0.0f<measure>) "josh"
+    special_camera_3 (chorus3_1 + 1.0f<measure>) "blake"
+    special_camera_2 (chorus3_1 + 2.0f<measure>) "blake"
+    special_camera_2 (chorus3_1 + 3.0f<measure>) "josh"
+    special_camera_1 (chorus3_1 + 4.0f<measure>) "josh"
+    special_camera_1 (chorus3_1 + 5.0f<measure>) "josh"
+    special_camera_2 (chorus3_1 + 6.0f<measure>) "josh"
+    special_camera_2 (chorus3_1 + 7.0f<measure>) "blake"
+    
+    special_camera_3 (chorus3_2 + 0.0f<measure>) "josh"
+    special_camera_2 (chorus3_2 + 1.0f<measure>) "blake"
+    special_camera_1 (chorus3_2 + 2.0f<measure>) "blake"
+    special_camera_3 (chorus3_2 + 3.0f<measure>) "blake"
+    special_camera_2 (chorus3_2 + 4.0f<measure>) "josh"
+    special_camera_1 (chorus3_2 + 5.0f<measure>) "josh"
+    special_camera_2 (chorus3_2 + 6.0f<measure>) "blake"
+    special_camera_2 (chorus3_2 + 7.0f<measure>) "josh"
+
 
     // save
-    saveStoryboardFile osb_file (List.ofSeq sb)
+    let result = { dansen with Events = List.take 2 dansen.Events @ List.ofSeq sb }
+    saveBeatmapFile osu_file result
 
 (* todo list
 
 bouncing stars
 disco ball animation
-dance floor animation
-stuff in break section
-stuff in final chorus
+rate change
 
- *)
+*)
