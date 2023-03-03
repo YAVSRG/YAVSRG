@@ -157,17 +157,20 @@ let main_scene() =
             Scale (measure 9.0f<measure>, measure 11.0f<measure>, Easing.None, 0.8, 0.8)
             Fade (measure 9.0f<measure>, measure 11.0f<measure>, Easing.None, 0.0, 1.0)
         ]
-    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-1.png", (320, 300), dance_floor2)
+    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-1-1.png", (320, 300), dance_floor2)
     |> sb.Add
 
-    let dance_floor_bounces i =
+    let dance_floor_bounces i j =
         seq {
             let mutable t = hook1
             while t < rest do
                 yield VectorScale(measure t, measure (t + 0.125f<measure>), Easing.Decelerate, (0.8, 0.8), (0.8, 1.0))
                 yield VectorScale(measure (t + 0.125f<measure>), measure (t + 0.25f<measure>), Easing.Accelerate, (0.8, 1.0), (0.8, 0.8))
                 
-                let f = if (MathF.Round(t % 1.0f<measure> / 0.25f<measure>) |> int) + 1 = i then 1.0 else 0.0
+                let which_i = MathF.Floor((t - hook1) % 32.0f<measure> / 8.0f<measure>) |> int
+                let which_j = MathF.Floor((t - hook1) % 1.0f<measure> / 0.25f<measure>) |> int
+
+                let f = if i - 1 = which_i && j - 1 = which_j then 1.0 else 0.0
                 yield Fade(measure t, measure (t + 0.25f<measure>), Easing.None, f, f)
                 t <- t + 0.25f<measure>
             t <- oo_oo_oowah2
@@ -175,15 +178,17 @@ let main_scene() =
                 yield VectorScale(measure t, measure (t + 0.125f<measure>), Easing.Decelerate, (0.8, 0.8), (0.8, 1.0))
                 yield VectorScale(measure (t + 0.125f<measure>), measure (t + 0.25f<measure>), Easing.Accelerate, (0.8, 1.0), (0.8, 0.8))
                 
-                let f = if (MathF.Round(t % 1.0f<measure> / 0.25f<measure>) |> int) + 1 = i then 1.0 else 0.0
+                let which_i = MathF.Floor((t - oo_oo_oowah2) % 32.0f<measure> / 8.0f<measure>) |> int
+                let which_j = MathF.Floor((t - oo_oo_oowah2) % 1.0f<measure> / 0.25f<measure>) |> int
+
+                let f = if i - 1 = which_i && j - 1 = which_j then 1.0 else 0.0
                 yield Fade(measure t, measure (t + 0.25f<measure>), Easing.None, f, f)
                 t <- t + 0.25f<measure>
         } |> List.ofSeq
 
-    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-1.png", (320, 300), dance_floor_bounces 1) |> sb.Add
-    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-2.png", (320, 300), dance_floor_bounces 2) |> sb.Add
-    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-3.png", (320, 300), dance_floor_bounces 3) |> sb.Add
-    Sprite(Layer.Foreground, SpriteOrigin.TopCentre, "dancefloor-4.png", (320, 300), dance_floor_bounces 4) |> sb.Add
+    for i = 1 to 4 do
+        for j = 1 to 4 do
+            Sprite(Layer.Foreground, SpriteOrigin.TopCentre, sprintf "dancefloor-%i-%i.png" i j, (320, 300), dance_floor_bounces i j) |> sb.Add
 
     disco_ball()
 
@@ -237,6 +242,38 @@ let dance_ext (who: string) (time: float32<measure>) (repeat: int) (scale1: floa
 let dance (who: string) (time: float32<measure>) (repeat: int) (scale1: float, scale2: float) (x_pos1: int, x_pos2: int) =
     dance_ext who time repeat (scale1, scale2) (x_pos1, x_pos2) 480
 
+let star (x: int, y: int) (scale: float) (time: float32<measure>) (repeat: int) =
+    let events =
+        seq {
+            let start_time = measure time
+            let end_time = measure (time + 0.5f<measure> * float32 repeat)
+            yield Scale(start_time, end_time, Easing.None, scale, scale)
+            for x in 0 .. repeat - 1 do
+                let t1 = measure (time + 0.5f<measure> * float32 x)
+                let t2 = measure (time + + 0.125f<measure> + 0.5f<measure> * float32 x)
+                let t3 = measure (time + + 0.25f<measure> + 0.5f<measure> * float32 x)
+                let t4 = measure (time + + 0.375f<measure> + 0.5f<measure> * float32 x)
+                let t5 = measure (time + + 0.5f<measure> + 0.5f<measure> * float32 x)
+
+                yield Move_Y(t1, t2, Easing.Decelerate, float y + 50.0, float y)
+                yield Rotate(t1, t2, Easing.Decelerate, 0.3, 0.0)
+                yield Move_Y(t2, t3, Easing.Accelerate, float y, float y + 50.0)
+                yield Rotate(t2, t3, Easing.Accelerate, 0.0, -0.3)
+
+                yield Move_Y(t3, t4, Easing.Decelerate, float y + 50.0, float y)
+                yield Rotate(t3, t4, Easing.Decelerate, -0.3, 0.0)
+                yield Move_Y(t4, t5, Easing.Accelerate, float y, float y + 50.0)
+                yield Rotate(t4, t5, Easing.Accelerate, 0.0, 0.3)
+        } |> List.ofSeq
+    Sprite(Layer.Foreground, SpriteOrigin.Centre, "star.png", (x, y), events) |> sb.Add
+
+let stars (time: float32<measure>) =
+    star (320, 200) 0.7 time 16
+    star (145, 300) 0.75 time 16
+    star (495, 300) 0.75 time 16
+    star (-30, 240) 0.7 time 16
+    star (670, 240) 0.7 time 16
+
 let camera_1 (time: float32<measure>) (main: string) =
     
     let support = if main = "josh" then "blake" else "josh"
@@ -268,6 +305,7 @@ let camera_3 (time: float32<measure>) (main: string) =
     dance support time 4 (0.5, 0.6) (540, 340)
     
 let camera_4 (time: float32<measure>) (main: string) =
+
     dance_ext main time 4 (1.5, 1.7) (320, 320) 900
 
 let special_camera_1 (time: float32<measure>) (main: string) =
@@ -321,6 +359,7 @@ let main() =
     intro_scene()
     
     // hook
+    stars hook1
     camera_1 hook1 "josh"
     camera_1 (hook1 + 2.0f<measure>) "josh"
     camera_1 (hook1 + 4.0f<measure>) "josh"
@@ -338,12 +377,14 @@ let main() =
     camera_2 (verse1_2 + 6.0f<measure>) "blake"
 
     // chorus 1
+    stars chorus1
     camera_2 chorus1 "josh"
     camera_1 (chorus1 + 2.0f<measure>) "josh"
     camera_3 (chorus1 + 4.0f<measure>) "josh"
     camera_4 (chorus1 + 6.0f<measure>) "josh"
 
     // oo oo oowah
+    stars oo_oo_oowah1
     camera_3 oo_oo_oowah1 "blake"
     camera_1 (oo_oo_oowah1 + 2.0f<measure>) "blake"
     camera_4 (oo_oo_oowah1 + 4.0f<measure>) "blake"
@@ -361,12 +402,14 @@ let main() =
     camera_4 (verse2_2 + 6.0f<measure>) "josh"
     
     // chorus 2
+    stars chorus2
     camera_3 chorus2 "blake"
     camera_4 (chorus2 + 2.0f<measure>) "blake"
     camera_1 (chorus2 + 4.0f<measure>) "blake"
     camera_2 (chorus2 + 6.0f<measure>) "blake"
     
     // hook 2
+    stars hook2
     camera_1 hook2 "blake"
     camera_1 (hook2 + 2.0f<measure>) "blake"
     camera_1 (hook2 + 4.0f<measure>) "blake"
@@ -380,16 +423,16 @@ let main() =
     face "josh" 5 true (rest + 9.25f<measure>) 0.25f<measure>
     for i = 1 to 8 do
         face (if i % 2 = 0 then "josh" else "blake") i false (rest + 9.4375f<measure> + 0.0625f<measure> * float32 i) 0.0625f<measure>
-    
-    // alternate faces really fast
 
     // oo oo oowah 2
+    stars oo_oo_oowah2
     camera_1 oo_oo_oowah2 "josh"
     camera_1 (oo_oo_oowah2 + 2.0f<measure>) "josh"
     camera_1 (oo_oo_oowah2 + 4.0f<measure>) "josh"
     camera_1 (oo_oo_oowah2 + 6.0f<measure>) "josh"
 
     // final chorus
+    stars chorus3_1
     special_camera_3 (chorus3_1 + 0.0f<measure>) "josh"
     special_camera_3 (chorus3_1 + 1.0f<measure>) "blake"
     special_camera_2 (chorus3_1 + 2.0f<measure>) "blake"
@@ -399,6 +442,7 @@ let main() =
     special_camera_2 (chorus3_1 + 6.0f<measure>) "josh"
     special_camera_2 (chorus3_1 + 7.0f<measure>) "blake"
     
+    stars chorus3_2
     special_camera_3 (chorus3_2 + 0.0f<measure>) "josh"
     special_camera_2 (chorus3_2 + 1.0f<measure>) "blake"
     special_camera_1 (chorus3_2 + 2.0f<measure>) "blake"
@@ -416,7 +460,5 @@ let main() =
 (* todo list
 
 bouncing stars
-disco ball animation
-rate change
 
 *)
