@@ -248,10 +248,15 @@ module Options =
     let private configPath = Path.GetFullPath "config.json"
     let firstLaunch = not (File.Exists configPath)
 
-    let load() =
+    let load(instance: int) =
         config <- loadImportantJsonFile "Config" configPath true
         Localisation.loadFile config.Locale
         if config.WorkingDirectory <> "" then Directory.SetCurrentDirectory config.WorkingDirectory
+        if instance > 0 then
+            let newPath = (Directory.GetCurrentDirectory() + "-instance" + instance.ToString())
+            Directory.CreateDirectory newPath |> ignore
+            Directory.SetCurrentDirectory newPath
+            Logging.Info(sprintf "DEV MODE MULTIPLE INSTANCE: %s" (Directory.GetCurrentDirectory()))
         options <- loadImportantJsonFile "Options" (Path.Combine(getDataPath "Data", "options.json")) true
 
     let save() =

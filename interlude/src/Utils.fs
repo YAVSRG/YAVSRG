@@ -20,11 +20,10 @@ module Utils =
     let version =
         let v = Assembly.GetExecutingAssembly().GetName()
         let v2 = Path.Combine(getInterludeLocation(), "Interlude.exe") |> FileVersionInfo.GetVersionInfo
-        #if DEBUG
-        sprintf "%s %s (%s Dev)" v.Name smallVersion v2.ProductVersion
-        #else
-        sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
-        #endif
+        if DEV_MODE then
+            sprintf "%s %s (%s Dev)" v.Name smallVersion v2.ProductVersion
+        else
+            sprintf "%s %s (%s)" v.Name smallVersion v2.ProductVersion
 
     /// K for Konst/Kestrel -- K x is shorthand for a function that ignores its input and returns x
     /// Named after the FP combinator
@@ -35,7 +34,6 @@ module Utils =
 
     /// L for localise -- Shorthand to get the localised text from a locale string id
     let L = Localisation.localise
-
 
     let getResourceStream name =
         Assembly.GetExecutingAssembly().GetManifestResourceStream("Interlude.Resources." + name)

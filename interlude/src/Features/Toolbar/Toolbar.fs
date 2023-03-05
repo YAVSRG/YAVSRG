@@ -52,7 +52,7 @@ type Toolbar() =
                 Hotkey = "wiki",
                 HoverIcon = Icons.wiki2)
             )
-        |+ Online.Status(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f))
+        |+ if DEV_MODE then Online.Status(Position = Position.SliceTop(HEIGHT).SliceRight(300.0f)) :> Widget else Dummy()
         |+ HotkeyAction("screenshot", fun () ->
             let id =  DateTime.Now.ToString("yyyy'-'MM'-'dd'.'HH'_'mm'_'ss.fffffff") + ".png"
             let path = Path.Combine(getDataPath "Screenshots", id)

@@ -152,6 +152,10 @@ module PlayScreen =
                 add_widget Pacemaker
                 add_widget JudgementCounts
 
+            override this.OnExit(next) =
+                Network.client.Send Upstream.FINISH_PLAYING
+                base.OnExit(next)
+
             override this.Update(elapsedTime, bounds) =
                 base.Update(elapsedTime, bounds)
                 let now = Song.timeWithOffset()
@@ -170,7 +174,6 @@ module PlayScreen =
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()
                     send_replay_packet()
-                    Network.client.Send Upstream.FINISH_PLAYING
                     Screen.changeNew
                         ( fun () ->
                             let sd =

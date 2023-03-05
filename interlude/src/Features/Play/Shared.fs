@@ -13,6 +13,7 @@ open Interlude.Options
 open Interlude.Content
 open Interlude.UI
 open Interlude.Features
+open Interlude.Features.Online
 open Interlude.Features.Play.GameplayWidgets
 
 [<AutoOpen>]
@@ -81,4 +82,6 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
         Background.dim 0.7f
         if next <> Screen.Type.Score then Screen.Toolbar.show()
 
-    override this.OnBack() = Some Screen.Type.LevelSelect
+    override this.OnBack() =
+        if Network.lobby.IsSome then Some Screen.Type.Lobby
+        else Some Screen.Type.LevelSelect
