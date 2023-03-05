@@ -11,9 +11,9 @@ open Percyqaz.Common
 module Common =
 
     #if DEBUG
-    let DEBUG_MODE = true
+    let DEV_MODE = true
     #else
-    let DEBUG_MODE = false
+    let DEV_MODE = false
     #endif
 
     [<Measure>] type ms = Percyqaz.Common.ms
@@ -93,7 +93,7 @@ module Common =
             if mapping.ContainsKey str then mapping.[str]
             else
                 mapping.Add (str, str)
-                if DEBUG_MODE && loadedPath <> "" then File.AppendAllText (loadedPath, "\n"+str+"="+str)
+                if DEV_MODE && loadedPath <> "" then File.AppendAllText (loadedPath, "\n"+str+"="+str)
                 str
 
         let localiseWith xs str =
