@@ -195,7 +195,7 @@ type LiveReplayProvider(firstNote: Time) =
             export <- export + 1
         sw.Flush()
 
-type OnlineReplayProvider(firstNote: Time) =
+type OnlineReplayProvider() =
     let mutable i = 0
     let mutable finished = false
     let buffer = ResizeArray<ReplayRow>()
