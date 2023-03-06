@@ -8,6 +8,7 @@ open Percyqaz.Json
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Prelude.Data.Charts.Caching
+open Prelude.Scoring
 open Interlude.UI
 open Interlude.Web.Shared
 
@@ -51,7 +52,15 @@ module Network =
     type LobbyPlayer =
         {
             mutable Status: LobbyPlayerStatus
+            mutable Replay: OnlineReplayProvider
+            mutable Score: IScoreMetric
         }
+        static member Create = 
+            {
+                Status = LobbyPlayerStatus.NotReady
+                Replay = Unchecked.defaultof<_>
+                Score = Unchecked.defaultof<_>
+            }
 
     type Lobby =
         {
@@ -60,6 +69,7 @@ module Network =
             mutable YouAreHost: bool
             mutable Ready: bool
             mutable Chart: LobbyChart option
+            mutable Playing: bool
         }
 
     module Events =
@@ -134,11 +144,12 @@ module Network =
                             Settings = None
                             Players =
                                 let d = new Dictionary<string, LobbyPlayer>()
-                                for p in players do d.Add(p, { Status = LobbyPlayerStatus.NotReady })
+                                for p in players do d.Add(p, LobbyPlayer.Create)
                                 d
                             YouAreHost = false
                             Ready = false
                             Chart = None
+                            Playing = false
                         }
                     sync Events.join_lobby_ev.Trigger
 
@@ -148,10 +159,10 @@ module Network =
                     sync(fun () -> Events.system_message_ev.Trigger msg)
                 
                 | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
-                | Downstream.YOU_ARE_HOST -> 
-                    lobby.Value.YouAreHost <- true
+                | Downstream.YOU_ARE_HOST b -> 
+                    lobby.Value.YouAreHost <- b
                 | Downstream.PLAYER_JOINED_LOBBY username -> 
-                    lobby.Value.Players.Add(username, { Status = LobbyPlayerStatus.NotReady })
+                    lobby.Value.Players.Add(username, LobbyPlayer.Create)
                     sync(Events.lobby_players_updated_ev.Trigger)
                 | Downstream.PLAYER_LEFT_LOBBY username -> 
                     lobby.Value.Players.Remove(username) |> ignore
@@ -171,9 +182,21 @@ module Network =
                     lobby.Value.Ready <- false
                     sync Events.change_chart_ev.Trigger
                     sync Events.lobby_players_updated_ev.Trigger
-                | Downstream.GAME_START -> sync Events.game_start_ev.Trigger
-
-                | _ -> () // nyi
+                | Downstream.GAME_START -> lobby.Value.Playing <- true; sync Events.game_start_ev.Trigger
+                | Downstream.GAME_END -> 
+                    lobby.Value.Playing <- false
+                    for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
+                    lobby.Value.Ready <- false
+                | Downstream.PLAYER_IS_PLAYING username ->
+                    lobby.Value.Players.[username].Status <- LobbyPlayerStatus.Playing
+                    lobby.Value.Players.[username].Replay <- OnlineReplayProvider()
+                | Downstream.PLAYER_IS_SPECTATING username ->
+                    lobby.Value.Players.[username].Status <- LobbyPlayerStatus.Spectating
+                | Downstream.PLAY_DATA (username, data) ->
+                    use ms = new MemoryStream(data)
+                    use br = new BinaryReader(ms)
+                    if not (lobby.Value.Players.[username].Replay.ImportLiveBlock br) then
+                        Logging.Error(sprintf "Player %s is sending invalid replay data!" username)
         }
 
     let connect() =
@@ -197,24 +220,29 @@ module Network =
         lobby <- None
         client.Disconnect()
 
-    let send_chat_message(msg) = client.Send(Upstream.CHAT msg)
+    let shutdown() =
+        if status <> NotConnected then client.Disconnect()
+        credentials.Save()
 
-    let refresh_lobby_list() = client.Send(Upstream.GET_LOBBIES)
+module Lobby =
 
-    let create_lobby name = client.Send(Upstream.CREATE_LOBBY name)
+    open Network
 
-    let invite_to_lobby username = client.Send(Upstream.INVITE_TO_LOBBY username)
+    let chat msg = client.Send(Upstream.CHAT msg)
+    let refresh_list() = client.Send(Upstream.GET_LOBBIES)
+    let create name = client.Send(Upstream.CREATE_LOBBY name)
+    let invite username = client.Send(Upstream.INVITE_TO_LOBBY username)
+    let join id = client.Send(Upstream.JOIN_LOBBY id)
+    let leave() = client.Send(Upstream.LEAVE_LOBBY)
+    let set_ready flag = client.Send(Upstream.READY_STATUS flag)
+    let transfer_host username = client.Send(Upstream.TRANSFER_HOST username)
+    let settings (settings: LobbySettings) = client.Send(Upstream.LOBBY_SETTINGS settings)
 
-    let join_lobby id = client.Send(Upstream.JOIN_LOBBY id)
-    
-    let leave_lobby() = client.Send(Upstream.LEAVE_LOBBY)
-
-    let ready_status flag = client.Send(Upstream.READY_STATUS flag)
+    let start_playing() = client.Send Upstream.BEGIN_PLAYING
+    let play_data data = client.Send (Upstream.PLAY_DATA data)
+    let finish_playing() = client.Send (Upstream.FINISH_PLAYING false)
+    let abandon_play() = client.Send (Upstream.FINISH_PLAYING true)
 
     let select_chart(cc: CachedChart, rate: float32) =
         if lobby.Value.YouAreHost then
             client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = rate })
-
-    let shutdown() =
-        if status <> NotConnected then client.Disconnect()
-        credentials.Save()

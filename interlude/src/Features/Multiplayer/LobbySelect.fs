@@ -16,7 +16,7 @@ type LobbyInfoCard(info: LobbyInfo) =
         this
         |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
         |+ Text((match info.CurrentlyPlaying with None -> "No song selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Clickable(fun () -> Network.join_lobby info.Id)
+        |+ Clickable(fun () -> Lobby.join info.Id)
         |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
         base.Init parent
 
@@ -27,7 +27,7 @@ type CreateLobbyPage() as this =
     
 
     let value = Setting.simple (Network.username + "'s Lobby")
-    let submit() = Network.create_lobby value.Value
+    let submit() = Lobby.create value.Value
     let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()))
     
     do
@@ -65,7 +65,7 @@ type LobbyList() =
         |+ container
         |+ Text((fun _ -> if no_lobbies then "No lobbies" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Button(Icons.add + " Create lobby", create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
-        |+ Button(Icons.reset + " Refresh", Network.refresh_lobby_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
+        |+ Button(Icons.reset + " Refresh", Lobby.refresh_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
         |* SearchBox(searchtext, (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value), Position = Position.SliceTop 60.0f)
         
         base.Init parent

@@ -93,7 +93,7 @@ module Tree =
     
     let play() =
         if Network.lobby.IsSome then
-            Network.select_chart(Chart.cacheInfo.Value, rate.Value)
+            Lobby.select_chart(Chart.cacheInfo.Value, rate.Value)
             Screen.change Screen.Type.Lobby Transitions.Flags.Default
         else
             match Chart.saveData with

@@ -10,6 +10,7 @@ open Interlude.Content
 open Interlude.UI
 open Interlude.Utils
 open Interlude.Features
+open Interlude.Features.Online
 
 type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
     inherit Screen()
@@ -115,4 +116,6 @@ type ScoreScreen(scoreData: ScoreInfoProvider, pbs: BestFlags) as this =
         graph.Dispose()
         Screen.Toolbar.show()
 
-    override this.OnBack() = Some Screen.Type.LevelSelect
+    override this.OnBack() =
+        if Network.lobby.IsSome then Some Screen.Type.Lobby
+        else Some Screen.Type.LevelSelect

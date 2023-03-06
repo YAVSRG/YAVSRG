@@ -15,13 +15,41 @@ open Interlude.Features.Gameplay
 open Interlude.Features.Play
 open Interlude.Features.Online
 
+type LobbySettingsPage(settings: LobbySettings) as this =
+    inherit Page()
+
+    let name = Setting.simple settings.Name
+    
+    do
+        this.Content(
+            column()
+            |+ PrettySetting("lobby.name", TextEntry(name, "none")).Pos(200.0f)
+        )
+    
+    override this.Title = N"lobby"
+    override this.OnClose() = Lobby.settings { settings with Name = name.Value }
+
 type Player(name: string, player: Network.LobbyPlayer) =
     inherit StaticWidget(NodeType.None)
 
     override this.Draw() =
         Draw.rect this.Bounds (Style.dark 100 ())
+        let icon = 
+            match player.Status with
+            | LobbyPlayerStatus.Ready -> Icons.ready
+            | LobbyPlayerStatus.Playing -> Icons.play
+            | LobbyPlayerStatus.Spectating -> Icons.preview
+            | LobbyPlayerStatus.AbandonedPlay -> Icons.not_ready
+            | LobbyPlayerStatus.NotReady
+            | _ -> ""
         Text.drawFillB(Style.baseFont, name, this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
-        Text.drawFillB(Style.baseFont, (if player.Status = LobbyPlayerStatus.Ready then Icons.ready else ""), this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
+        Text.drawFillB(Style.baseFont, icon, this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.RIGHT)
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+
+        if Mouse.hover this.Bounds && Mouse.leftClick() then
+            ConfirmPage(sprintf "Transfer host to %s?" name, fun () -> Lobby.transfer_host name) |> Menu.ShowPage
 
     member this.Name = name
 
@@ -110,8 +138,14 @@ type SelectedChart() =
         |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> if SelectedChart.found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
-        |+ IconButton("Change chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
-        |* IconButton("Start game", Icons.play, 50.0f, (fun () -> Network.client.Send Upstream.START_GAME), Position = Position.TrimTop(200.0f).SliceTop(50.0f).TrimLeft(300.0f).SliceLeft(300.0f))
+        |+ Conditional(
+            (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost),
+            IconButton("Change chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
+        )
+        |* Conditional(
+            (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),
+            IconButton("Start game", Icons.play, 50.0f, (fun () -> Network.client.Send Upstream.START_GAME), Position = Position.TrimTop(200.0f).SliceTop(50.0f).TrimLeft(300.0f).SliceLeft(300.0f))
+        )
 
         SelectedChart.update Network.lobby.Value.Chart
         Network.Events.change_chart.Add(fun () -> if Screen.currentType = Screen.Type.Lobby then SelectedChart.update Network.lobby.Value.Chart)
@@ -185,7 +219,7 @@ type Chat() =
     override this.Update(elapsedTime, moved) =
         if (!|"select").Tapped() then
             if chatline.Selected && current_message.Value <> "" then 
-                Network.send_chat_message current_message.Value
+                Lobby.chat current_message.Value
                 current_message.Set ""
             else chatline.Select()
 
@@ -196,7 +230,7 @@ type InvitePlayerPage() as this =
     
 
     let value = Setting.simple ""
-    let submit() = Network.invite_to_lobby value.Value
+    let submit() = Lobby.invite value.Value
     let submit_button = PrettyButton("confirm.yes", (fun () -> submit(); Menu.Back()), Enabled = false)
     
     do
@@ -216,13 +250,18 @@ type Lobby() =
 
     override this.Init(parent) =
         this
+        |+ Conditional(
+            (fun () -> Network.lobby.IsSome && Network.lobby.Value.Settings.IsSome),
+            Button(Icons.options, fun () -> LobbySettingsPage(Network.lobby.Value.Settings.Value) |> Menu.ShowPage),
+            Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
+        )
         |+ Text(
             (fun () -> lobby_title),
             Align = Alignment.CENTER,
-            Position = { Position.Default with Bottom = 0.0f %+ 80.0f; Top = 0.0f %+ 10.0f; Right = 0.5f %- 0.0f })
+            Position = { Position.SliceTop(90.0f).Margin(10.0f) with Right = 0.5f %- 0.0f })
         |+ PlayerList(Position = { Left = 0.0f %+ 150.0f; Right = 0.5f %- 150.0f; Top = 0.0f %+ 100.0f; Bottom = 1.0f %- 100.0f })
         |+ StylishButton(
-            Network.leave_lobby,
+            Lobby.leave,
             K (Icons.logout + " Leave lobby"),
             Style.main 100,
             TiltLeft = false,
@@ -235,8 +274,8 @@ type Lobby() =
             Position = { Left = (0.5f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (1.0f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
             )
         |+ StylishButton(
-            (fun () -> Network.lobby.Value.Ready <- not Network.lobby.Value.Ready; Network.ready_status Network.lobby.Value.Ready),
-            (fun () -> match Network.lobby with Some l -> (if l.Ready then (Icons.not_ready + " Not ready") else (Icons.ready + " Ready")) | None -> ""),
+            (fun () -> Network.lobby.Value.Ready <- not Network.lobby.Value.Ready; Lobby.set_ready Network.lobby.Value.Ready),
+            (fun () -> match Network.lobby with Some l -> (if l.Ready then (Icons.not_ready + " Not ready") else (Icons.ready + " Ready")) | None -> "!"),
             Style.main 100,
             TiltRight = false,
             Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }
@@ -247,8 +286,9 @@ type Lobby() =
         base.Init parent
 
         Network.Events.game_start.Add(
-            fun () -> 
-                if Screen.currentType = Screen.Type.Lobby then 
+            fun () ->
+                // todo: if you are ready to spectate, spectate instead
+                if Screen.currentType = Screen.Type.Lobby && Network.lobby.Value.Ready then 
                     Screen.changeNew 
                         (fun () -> PlayScreen.multiplayer_screen())
                         Screen.Type.Play
@@ -271,13 +311,13 @@ type LobbyScreen() =
     override this.OnEnter(_) =
         in_lobby <- Network.lobby.IsSome
         swap.Current <- if in_lobby then main :> Widget else list
-        if not in_lobby then Network.refresh_lobby_list()
+        if not in_lobby then Lobby.refresh_list()
         if in_lobby then SelectedChart.update Network.lobby.Value.Chart
     override this.OnExit(_) = ()
 
     override this.OnBack() = 
         if in_lobby then
-            Menu.ShowPage <| ConfirmPage("Leave this lobby?", Network.leave_lobby)
+            Menu.ShowPage <| ConfirmPage("Leave this lobby?", Lobby.leave)
             None
         else Some Screen.Type.LevelSelect
 

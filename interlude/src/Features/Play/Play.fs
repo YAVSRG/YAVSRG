@@ -131,13 +131,13 @@ module PlayScreen =
         let mutable inputKeyState = 0us
         let mutable packet_count = 0
 
-        Network.client.Send Upstream.BEGIN_PLAYING
+        Lobby.start_playing()
 
         let send_replay_packet() =
             use ms = new System.IO.MemoryStream()
             use sw = new System.IO.StreamWriter(ms)
             liveplay.ExportLiveBlock sw
-            Network.client.Send(Upstream.PLAY_DATA (ms.ToArray()))
+            Lobby.play_data(ms.ToArray())
             packet_count <- packet_count + 1
 
         { new IPlayScreen(chart, PacemakerInfo.None, ruleset, scoring) with
@@ -153,7 +153,7 @@ module PlayScreen =
                 add_widget JudgementCounts
 
             override this.OnExit(next) =
-                Network.client.Send Upstream.FINISH_PLAYING
+                if next <> Screen.Type.Score then Lobby.abandon_play()
                 base.OnExit(next)
 
             override this.Update(elapsedTime, bounds) =
@@ -174,6 +174,7 @@ module PlayScreen =
                 if this.State.Scoring.Finished && not (liveplay :> IReplayProvider).Finished then
                     liveplay.Finish()
                     send_replay_packet()
+                    Lobby.finish_playing()
                     Screen.changeNew
                         ( fun () ->
                             let sd =
