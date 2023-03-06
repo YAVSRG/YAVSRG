@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 2uy
+    let PROTOCOL_VERSION = 3uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -17,7 +17,8 @@ module Packets =
         | NotReady = 0uy
         | Ready = 1uy
         | Playing = 2uy
-        | Spectating = 3uy
+        | AbandonedPlay = 3uy
+        | Spectating = 4uy
 
     type LobbyChart =
         {
@@ -91,14 +92,14 @@ module Packets =
         | BEGIN_PLAYING
         | PLAY_DATA of byte array
         | BEGIN_SPECTATING
-        | FINISH_PLAYING
+        | FINISH_PLAYING of abandoned: bool
 
         | TRANSFER_HOST of username: string
         | SELECT_CHART of LobbyChart
         | LOBBY_SETTINGS of LobbySettings
         | START_GAME
 
-        | KICK_PLAYER of username: string
+        | KICK_PLAYER of username: string // nyi
 
         static member Read(kind: byte, data: byte array) : Upstream =
             use ms = new MemoryStream(data)
@@ -125,7 +126,7 @@ module Packets =
                     if length > PLAY_PACKET_THRESHOLD_PER_SECOND * MULTIPLAYER_REPLAY_DELAY_SECONDS then
                         failwithf "Excessive replay data being sent to server"
                     PLAY_DATA (br.ReadBytes(length))
-                | 0x33uy -> FINISH_PLAYING
+                | 0x33uy -> FINISH_PLAYING (br.ReadBoolean())
 
                 | 0x40uy -> TRANSFER_HOST (br.ReadString())
                 | 0x41uy -> SELECT_CHART (LobbyChart.Read br)
@@ -159,7 +160,7 @@ module Packets =
                 | BEGIN_PLAYING -> 0x30uy
                 | BEGIN_SPECTATING -> 0x31uy
                 | PLAY_DATA data -> bw.Write data; 0x32uy
-                | FINISH_PLAYING -> 0x33uy
+                | FINISH_PLAYING abandon -> bw.Write abandon; 0x33uy
 
                 | TRANSFER_HOST username -> bw.Write username; 0x40uy
                 | SELECT_CHART chart -> chart.Write bw; 0x41uy
@@ -182,7 +183,7 @@ module Packets =
         | INVITED_TO_LOBBY of by_who: string * id: Guid
 
         | YOU_LEFT_LOBBY
-        | YOU_ARE_HOST
+        | YOU_ARE_HOST of bool
         | PLAYER_JOINED_LOBBY of username: string
         | PLAYER_LEFT_LOBBY of username: string
         | SELECT_CHART of LobbyChart
@@ -193,8 +194,8 @@ module Packets =
         | PLAYER_STATUS of username: string * status: LobbyPlayerStatus
 
         | GAME_START
-        | PLAYER_IS_PLAYING of username: string
-        | PLAYER_IS_SPECTATING of username: string
+        | PLAYER_IS_PLAYING of username: string // todo: replace with PLAYER_STATUS Playing
+        | PLAYER_IS_SPECTATING of username: string // todo: replace with PLAYER_STATUS Spectating
         | PLAY_DATA of username: string * data: byte array
         | GAME_END
 
@@ -213,7 +214,7 @@ module Packets =
                 | 0x13uy -> SYSTEM_MESSAGE (br.ReadString())
 
                 | 0x20uy -> YOU_LEFT_LOBBY
-                | 0x21uy -> YOU_ARE_HOST
+                | 0x21uy -> YOU_ARE_HOST (br.ReadBoolean())
                 | 0x22uy -> PLAYER_JOINED_LOBBY (br.ReadString())
                 | 0x23uy -> PLAYER_LEFT_LOBBY (br.ReadString())
                 | 0x24uy -> SELECT_CHART (LobbyChart.Read br)
@@ -253,7 +254,7 @@ module Packets =
                 | SYSTEM_MESSAGE message -> bw.Write message; 0x13uy
 
                 | YOU_LEFT_LOBBY -> 0x20uy
-                | YOU_ARE_HOST -> 0x21uy
+                | YOU_ARE_HOST you_are_host -> bw.Write you_are_host; 0x21uy
                 | PLAYER_JOINED_LOBBY username -> bw.Write username; 0x22uy
                 | PLAYER_LEFT_LOBBY username -> bw.Write username; 0x23uy
                 | SELECT_CHART chart -> chart.Write bw; 0x24uy

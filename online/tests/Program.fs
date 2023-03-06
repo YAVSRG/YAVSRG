@@ -56,7 +56,7 @@ type TestClient(i: int) =
                 status <- InLobby (n + 1)
                 if i = 0 && n + 1 = NUMBER_OF_CLIENTS then this.Send(Upstream.LEAVE_LOBBY)
             | _ -> ()
-        | Downstream.YOU_ARE_HOST ->
+        | Downstream.YOU_ARE_HOST true ->
             if i <> 0 && i <> NUMBER_OF_CLIENTS - 1 then
                 this.Send(Upstream.LEAVE_LOBBY)
         | Downstream.YOU_LEFT_LOBBY ->
