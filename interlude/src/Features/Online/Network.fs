@@ -53,13 +53,11 @@ module Network =
         {
             mutable Status: LobbyPlayerStatus
             mutable Replay: OnlineReplayProvider
-            mutable Score: IScoreMetric
         }
         static member Create = 
             {
                 Status = LobbyPlayerStatus.NotReady
                 Replay = Unchecked.defaultof<_>
-                Score = Unchecked.defaultof<_>
             }
 
     type Lobby =
@@ -99,12 +97,18 @@ module Network =
 
         let lobby_players_updated_ev = new Event<unit>()
         let lobby_players_updated = lobby_players_updated_ev.Publish
+
+        let player_status_ev = new Event<string * LobbyPlayerStatus>()
+        let player_status = player_status_ev.Publish
         
         let change_chart_ev = new Event<unit>()
         let change_chart = change_chart_ev.Publish
 
         let game_start_ev = new Event<unit>()
         let game_start = game_start_ev.Publish
+
+        let game_end_ev = new Event<unit>()
+        let game_end = game_end_ev.Publish
 
     let mutable lobby : Lobby option = None
 
@@ -121,8 +125,10 @@ module Network =
 
             override this.OnConnected() = status <- Connected
 
-            override this.OnDisconnected() = 
-                lobby <- None
+            override this.OnDisconnected() =
+                if lobby.IsSome then
+                    lobby <- None
+                    sync Events.leave_lobby_ev.Trigger
                 status <- if status = Connecting then ConnectionFailed else NotConnected
 
             override this.OnPacketReceived(packet: Downstream) =
@@ -174,7 +180,10 @@ module Network =
                     sync(fun () -> Events.chat_message_ev.Trigger(sender, msg))
                 | Downstream.PLAYER_STATUS (username, status) -> 
                     lobby.Value.Players.[username].Status <- status
+                    if status = LobbyPlayerStatus.Playing then
+                        lobby.Value.Players.[username].Replay <- OnlineReplayProvider()
                     sync Events.lobby_players_updated_ev.Trigger
+                    sync(fun () -> Events.player_status_ev.Trigger(username, status))
 
                 | Downstream.SELECT_CHART c -> 
                     lobby.Value.Chart <- Some c
@@ -182,21 +191,19 @@ module Network =
                     lobby.Value.Ready <- false
                     sync Events.change_chart_ev.Trigger
                     sync Events.lobby_players_updated_ev.Trigger
-                | Downstream.GAME_START -> lobby.Value.Playing <- true; sync Events.game_start_ev.Trigger
+                | Downstream.GAME_START -> 
+                    lobby.Value.Playing <- true
+                    sync Events.game_start_ev.Trigger
                 | Downstream.GAME_END -> 
                     lobby.Value.Playing <- false
                     for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
                     lobby.Value.Ready <- false
-                | Downstream.PLAYER_IS_PLAYING username ->
-                    lobby.Value.Players.[username].Status <- LobbyPlayerStatus.Playing
-                    lobby.Value.Players.[username].Replay <- OnlineReplayProvider()
-                | Downstream.PLAYER_IS_SPECTATING username ->
-                    lobby.Value.Players.[username].Status <- LobbyPlayerStatus.Spectating
+                    sync Events.game_end_ev.Trigger
                 | Downstream.PLAY_DATA (username, data) ->
                     use ms = new MemoryStream(data)
                     use br = new BinaryReader(ms)
-                    if not (lobby.Value.Players.[username].Replay.ImportLiveBlock br) then
-                        Logging.Error(sprintf "Player %s is sending invalid replay data!" username)
+                    lobby.Value.Players.[username].Replay.ImportLiveBlock br
+                    // todo: verify there are no race condition issues
         }
 
     let connect() =
@@ -239,7 +246,7 @@ module Lobby =
     let settings (settings: LobbySettings) = client.Send(Upstream.LOBBY_SETTINGS settings)
 
     let start_playing() = client.Send Upstream.BEGIN_PLAYING
-    let play_data data = client.Send (Upstream.PLAY_DATA data)
+    let play_data (data: byte array) = printfn "Sending %i bytes" data.Length; client.Send (Upstream.PLAY_DATA data)
     let finish_playing() = client.Send (Upstream.FINISH_PLAYING false)
     let abandon_play() = client.Send (Upstream.FINISH_PLAYING true)
 

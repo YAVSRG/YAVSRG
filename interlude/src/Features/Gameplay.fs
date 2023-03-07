@@ -1,6 +1,7 @@
 ﻿namespace Interlude.Features
 
 open System
+open System.Collections.Generic
 open Percyqaz.Common
 open Percyqaz.Flux.Audio
 open Prelude.Common
@@ -18,6 +19,7 @@ open Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.Utils
+open Interlude.Features.Online
 
 module Gameplay =
 
@@ -147,6 +149,36 @@ module Gameplay =
                 | None -> Logging.Error (sprintf "No such level with name '%s'" name)
             | None -> Logging.Error (sprintf "No table selected, cannot select level '%s'" name)
 
+    module Online =
+        
+        module Multiplayer =
+            
+            let replays = new Dictionary<string, IScoreMetric>()
+
+            let private on_game_start() =
+                replays.Clear()
+
+            let private player_status(username, status) =
+                if status = Web.Shared.Packets.LobbyPlayerStatus.Playing then
+                    let chart = Chart.withMods.Value
+                    replays.Add(username, 
+                        Metrics.createScoreMetric
+                            Content.Rulesets.current
+                            chart.Keys
+                            Network.lobby.Value.Players.[username].Replay
+                            chart.Notes
+                            Chart._rate.Value
+                    )
+
+            let add_own_replay(s: IScoreMetric) =
+                replays.Add(Network.username, s)
+
+            let init () =
+                Network.Events.game_start.Add on_game_start
+                Network.Events.player_status.Add player_status
+
+            
+
     let rate =
         Chart._rate
         |> Setting.trigger ( fun v ->
@@ -214,3 +246,4 @@ module Gameplay =
         | ActiveCollection.Collection c -> Collections.select c
         | ActiveCollection.Level l -> Collections.select_level l
         | ActiveCollection.None -> ()
+        Online.Multiplayer.init()

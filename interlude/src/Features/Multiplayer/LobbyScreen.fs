@@ -148,6 +148,7 @@ type SelectedChart() =
         )
 
         SelectedChart.update Network.lobby.Value.Chart
+        Network.Events.join_lobby.Add(fun () -> SelectedChart.update None)
         Network.Events.change_chart.Add(fun () -> if Screen.currentType = Screen.Type.Lobby then SelectedChart.update Network.lobby.Value.Chart)
 
         base.Init parent
@@ -186,6 +187,20 @@ type Chat() =
         | None -> ()
         last_msg <- Some w
 
+    let game_end_report() =
+        if Online.Multiplayer.replays.Keys.Count > 0 then
+            add_msg (Text(sprintf "== Results for %s ==" SelectedChart.chart.Value.Title, Color = Style.text, Align = Alignment.LEFT))
+            let scores = 
+                Online.Multiplayer.replays.Keys
+                |> Seq.map (fun username ->
+                    let s = Online.Multiplayer.replays.[username]
+                    s.Update(Time.infinity)
+                    username, s
+                )
+                |> Seq.sortByDescending(fun (_, s) -> s.Value)
+            for username, score in scores do
+                add_msg (Text(sprintf "%s - %s" username (score.FormatAccuracy()), Color = Style.text, Align = Alignment.LEFT))
+
     override this.Init(parent) =
         this
         |+ chatline
@@ -207,6 +222,7 @@ type Chat() =
                 | _, msg -> msg, Color.White
             add_msg (Text(text, Color = (fun () -> color, Color.Black), Align = Alignment.CENTER))
             )
+        Network.Events.game_end.Add game_end_report
         Network.Events.join_lobby.Add (fun () -> messages.Clear())
 
         base.Init parent

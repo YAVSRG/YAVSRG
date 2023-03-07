@@ -132,11 +132,12 @@ module PlayScreen =
         let mutable packet_count = 0
 
         Lobby.start_playing()
+        Gameplay.Online.Multiplayer.add_own_replay scoring
 
         let send_replay_packet() =
             use ms = new System.IO.MemoryStream()
-            use sw = new System.IO.StreamWriter(ms)
-            liveplay.ExportLiveBlock sw
+            use bw = new System.IO.BinaryWriter(ms)
+            liveplay.ExportLiveBlock bw
             Lobby.play_data(ms.ToArray())
             packet_count <- packet_count + 1
 
@@ -161,10 +162,12 @@ module PlayScreen =
                 let now = Song.timeWithOffset()
                 let chartTime = now - firstNote
 
-                if chartTime / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
-                    send_replay_packet()
 
                 if not (liveplay :> IReplayProvider).Finished then
+
+                    if chartTime / MULTIPLAYER_REPLAY_DELAY_MS / 1.0f<ms> |> floor |> int > packet_count then
+                        send_replay_packet()
+
                     Input.consumeGameplay(binds, fun column time isRelease ->
                         if isRelease then inputKeyState <- Bitmap.unsetBit column inputKeyState
                         else inputKeyState <- Bitmap.setBit column inputKeyState
