@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 3uy
+    let PROTOCOL_VERSION = 4uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -194,8 +194,6 @@ module Packets =
         | PLAYER_STATUS of username: string * status: LobbyPlayerStatus
 
         | GAME_START
-        | PLAYER_IS_PLAYING of username: string // todo: replace with PLAYER_STATUS Playing
-        | PLAYER_IS_SPECTATING of username: string // todo: replace with PLAYER_STATUS Spectating
         | PLAY_DATA of username: string * data: byte array
         | GAME_END
 
@@ -224,10 +222,8 @@ module Packets =
                 | 0x28uy -> PLAYER_STATUS (br.ReadString(), br.ReadByte() |> LanguagePrimitives.EnumOfValue)
 
                 | 0x30uy -> GAME_START
-                | 0x31uy -> PLAYER_IS_PLAYING (br.ReadString())
-                | 0x32uy -> PLAYER_IS_SPECTATING (br.ReadString())
-                | 0x33uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
-                | 0x34uy -> GAME_END
+                | 0x31uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
+                | 0x32uy -> GAME_END
 
                 | _ -> failwithf "Unknown packet type: %i" kind
             if ms.Position <> ms.Length then failwithf "Expected end-of-packet but there are %i extra bytes" (ms.Length - ms.Position)
@@ -264,8 +260,6 @@ module Packets =
                 | PLAYER_STATUS (username, status) -> bw.Write username; bw.Write (byte status); 0x28uy
                 
                 | GAME_START -> 0x30uy
-                | PLAYER_IS_PLAYING username -> bw.Write username; 0x31uy
-                | PLAYER_IS_SPECTATING username -> bw.Write username; 0x32uy
-                | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x33uy
-                | GAME_END -> 0x34uy
+                | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x31uy
+                | GAME_END -> 0x32uy
             kind, ms.ToArray()

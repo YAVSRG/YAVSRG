@@ -345,7 +345,7 @@ module Lobby =
                         else
 
                         lobby.Players.[player].StartPlay()
-                        multicast_except(player, lobby, Downstream.PLAYER_IS_PLAYING username)
+                        multicast_except(player, lobby, Downstream.PLAYER_STATUS (username, lobby.Players.[player].Status))
                         // todo? if anyone has sent play data you are probably starting too late and should be kicked
 
                     | Action.FinishPlaying (player, abandoned) ->
@@ -406,7 +406,7 @@ module Lobby =
                         | _ ->
 
                         lobby.Players.[player].Status <- LobbyPlayerStatus.Spectating
-                        multicast_except(player, lobby, Downstream.PLAYER_IS_SPECTATING username)
+                        multicast_except(player, lobby, Downstream.PLAYER_STATUS (username, LobbyPlayerStatus.Spectating))
                         for p in lobby.Players.Values do
                             if p.Status = LobbyPlayerStatus.Playing && p.PlayPacketsReceived > 0 then
                                 // todo: break play data that is too large into smaller packets, for when you start spectating late into a song
@@ -424,13 +424,13 @@ module Lobby =
                         let lobby = lobbies.[lobby_id]
                         
                         if not lobby.GameRunning then
-                            Server.send(player, Downstream.SYSTEM_MESSAGE "Game is not running")
+                            Server.send(player, Downstream.SYSTEM_MESSAGE "Replay sent while game is not running")
                         else
 
                         match lobby.Players.[player].ReceivePlayPacket(data) with
                         | Ok() -> 
                             for p in lobby.Players.Keys do
-                                if lobby.Players.[p].Status = LobbyPlayerStatus.Playing || lobby.Players.[p].Status = LobbyPlayerStatus.Spectating then
+                                if p <> player && (lobby.Players.[p].Status = LobbyPlayerStatus.Playing || lobby.Players.[p].Status = LobbyPlayerStatus.Spectating) then
                                     Server.send(p, Downstream.PLAY_DATA(username, data))
                         | Error reason -> Server.kick(player, reason)
 
@@ -489,6 +489,7 @@ module Lobby =
                             Server.send(player, Downstream.SYSTEM_MESSAGE "User is not in this lobby")
                         else
                         
+                        lobby.Host <- newhost_id
                         Server.send(player, Downstream.YOU_ARE_HOST false)
                         Server.send(newhost_id, Downstream.YOU_ARE_HOST true)
                         multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Host, newhost))
