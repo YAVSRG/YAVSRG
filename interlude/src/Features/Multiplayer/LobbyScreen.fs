@@ -291,7 +291,7 @@ type Lobby() =
             Position = { Left = (0.5f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (1.0f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
             )
         |+ StylishButton(
-            (fun () -> Network.lobby.Value.Ready <- not Network.lobby.Value.Ready; Lobby.set_ready Network.lobby.Value.Ready),
+            (fun () -> Network.lobby.Value.Ready <- SelectedChart.found && not Network.lobby.Value.Ready; Lobby.set_ready Network.lobby.Value.Ready),
             (fun () -> match Network.lobby with Some l -> (if l.Ready then (sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")) else (sprintf "%s %s" Icons.ready (L"lobby.ready"))) | None -> "!"),
             Style.main 100,
             TiltRight = false,
@@ -305,7 +305,7 @@ type Lobby() =
         Network.Events.game_start.Add(
             fun () ->
                 // todo: if you are ready to spectate, spectate instead
-                if Screen.currentType = Screen.Type.Lobby && Network.lobby.Value.Ready then 
+                if Screen.currentType = Screen.Type.Lobby && SelectedChart.found && Network.lobby.Value.Ready then 
                     Screen.changeNew 
                         (fun () -> PlayScreen.multiplayer_screen())
                         Screen.Type.Play
