@@ -186,14 +186,14 @@ type LiveReplayProvider(firstNote: Time) =
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Live play is already declared as over; cannot do so again"
 
-    member this.ExportLiveBlock(sw: StreamWriter) =
+    member this.ExportLiveBlock(bw: BinaryWriter) =
         while export < buffer.Count do
             let struct (time, bitmap) = buffer.[export]
             if time > -1000.0f<ms> then
-                sw.Write time
-                sw.Write bitmap
+                bw.Write (float32 time)
+                bw.Write bitmap
             export <- export + 1
-        sw.Flush()
+        bw.Flush()
 
 type OnlineReplayProvider() =
     let mutable i = 0
@@ -213,14 +213,13 @@ type OnlineReplayProvider() =
         member this.GetFullReplay() =
             if finished then buffer.ToArray() else invalidOp "Online play is not declared as over, we don't have the full replay yet!"
 
-    member this.ImportLiveBlock (br: BinaryReader) : bool =
+    member this.ImportLiveBlock (br: BinaryReader) =
         if finished then invalidOp "Online play is declared as over; cannot append to replay" else
 
         try
             while not (br.BaseStream.Position = br.BaseStream.Length) do
                 buffer.Add(struct(br.ReadSingle() * 1.0f<ms>, br.ReadUInt16()))
-            true
-        with err -> Logging.Error("Error while parsing online replay data", err); false
+        with err -> Logging.Error("Error while receiving online replay data", err)
 
     member this.Finish() =
         if not finished then finished <- true else invalidOp "Online play is already declared as over; cannot do so again"
