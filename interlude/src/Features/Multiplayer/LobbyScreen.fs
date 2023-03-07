@@ -8,6 +8,7 @@ open Prelude.Common
 open Prelude.Data.Charts
 open Prelude.Gameplay.Mods
 open Interlude.Web.Shared
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
@@ -49,7 +50,7 @@ type Player(name: string, player: Network.LobbyPlayer) =
         base.Update(elapsedTime, moved)
 
         if Mouse.hover this.Bounds && Mouse.leftClick() then
-            ConfirmPage(sprintf "Transfer host to %s?" name, fun () -> Lobby.transfer_host name) |> Menu.ShowPage
+            ConfirmPage(Localisation.localiseWith [name] "lobby.confirm_transfer_host", fun () -> Lobby.transfer_host name) |> Menu.ShowPage
 
     member this.Name = name
 
@@ -127,7 +128,7 @@ type SelectedChart() =
 
     override this.Init(parent: Widget) =
         this
-        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> "No chart selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
         |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.Artist + "  •  " + Chart.cacheInfo.Value.Creator else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
         |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DiffName else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
@@ -136,15 +137,15 @@ type SelectedChart() =
         |+ Text((fun () -> SelectedChart.bpm), Align = Alignment.RIGHT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> if SelectedChart.found then getModString(rate.Value, selectedMods.Value, autoplay) else ""), Align = Alignment.LEFT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
         |+ Text((fun () -> SelectedChart.notecounts), Align = Alignment.RIGHT, Position = Position.TrimTop(160.0f).SliceTop(40.0f))
-        |+ Text((fun () -> if SelectedChart.found then "" else "You don't have this chart!"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ Text((fun () -> if SelectedChart.found then "" else L"lobby.missing_chart"), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
 
         |+ Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost),
-            IconButton("Change chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
+            IconButton(L"lobby.change_chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
         )
         |* Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),
-            IconButton("Start game", Icons.play, 50.0f, (fun () -> Network.client.Send Upstream.START_GAME), Position = Position.TrimTop(200.0f).SliceTop(50.0f).TrimLeft(300.0f).SliceLeft(300.0f))
+            IconButton(L"lobby.start_game", Icons.play, 50.0f, (fun () -> Network.client.Send Upstream.START_GAME), Position = Position.TrimTop(200.0f).SliceTop(50.0f).TrimLeft(300.0f).SliceLeft(300.0f))
         )
 
         SelectedChart.update Network.lobby.Value.Chart
@@ -278,20 +279,20 @@ type Lobby() =
         |+ PlayerList(Position = { Left = 0.0f %+ 150.0f; Right = 0.5f %- 150.0f; Top = 0.0f %+ 100.0f; Bottom = 1.0f %- 100.0f })
         |+ StylishButton(
             Lobby.leave,
-            K (Icons.logout + " Leave lobby"),
+            K (sprintf "%s %s" Icons.logout (L"lobby.leave")),
             Style.main 100,
             TiltLeft = false,
             Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = (0.5f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
             )
         |+ StylishButton(
             (fun () -> Menu.ShowPage InvitePlayerPage),
-            K (Icons.invite + " Invite player"),
+            K (sprintf "%s %s" Icons.invite (L"lobby.send_invite")),
             Style.dark 100,
             Position = { Left = (0.5f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = (1.0f / 3f) %- 25.0f; Bottom = 1.0f %- 0.0f }
             )
         |+ StylishButton(
             (fun () -> Network.lobby.Value.Ready <- not Network.lobby.Value.Ready; Lobby.set_ready Network.lobby.Value.Ready),
-            (fun () -> match Network.lobby with Some l -> (if l.Ready then (Icons.not_ready + " Not ready") else (Icons.ready + " Ready")) | None -> "!"),
+            (fun () -> match Network.lobby with Some l -> (if l.Ready then (sprintf "%s %s" Icons.not_ready (L"lobby.not_ready")) else (sprintf "%s %s" Icons.ready (L"lobby.ready"))) | None -> "!"),
             Style.main 100,
             TiltRight = false,
             Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }

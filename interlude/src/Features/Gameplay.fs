@@ -177,8 +177,6 @@ module Gameplay =
                 Network.Events.game_start.Add on_game_start
                 Network.Events.player_status.Add player_status
 
-            
-
     let rate =
         Chart._rate
         |> Setting.trigger ( fun v ->

@@ -246,7 +246,7 @@ module Lobby =
     let settings (settings: LobbySettings) = client.Send(Upstream.LOBBY_SETTINGS settings)
 
     let start_playing() = client.Send Upstream.BEGIN_PLAYING
-    let play_data (data: byte array) = printfn "Sending %i bytes" data.Length; client.Send (Upstream.PLAY_DATA data)
+    let play_data data = client.Send (Upstream.PLAY_DATA data)
     let finish_playing() = client.Send (Upstream.FINISH_PLAYING false)
     let abandon_play() = client.Send (Upstream.FINISH_PLAYING true)
 

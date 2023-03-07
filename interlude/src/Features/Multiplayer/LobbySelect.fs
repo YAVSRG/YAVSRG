@@ -3,6 +3,7 @@
 open Percyqaz.Common
 open Percyqaz.Flux.UI
 open Prelude.Common
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.UI.Components
@@ -15,7 +16,7 @@ type LobbyInfoCard(info: LobbyInfo) =
     override this.Init(parent) =
         this
         |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Text((match info.CurrentlyPlaying with None -> "No song selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text((match info.CurrentlyPlaying with None -> L"lobby.no_song_selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
         |+ Clickable(fun () -> Lobby.join info.Id)
         |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
         base.Init parent
@@ -63,9 +64,9 @@ type LobbyList() =
     override this.Init(parent) =
         this
         |+ container
-        |+ Text((fun _ -> if no_lobbies then "No lobbies" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
-        |+ Button(Icons.add + " Create lobby", create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
-        |+ Button(Icons.reset + " Refresh", Lobby.refresh_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
+        |+ Text((fun _ -> if no_lobbies then L"lobby_list.none" else ""), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
+        |+ IconButton(L"lobby_list.create", Icons.add, 60.0f, create_lobby, Position = Position.SliceBottom(60.0f).TrimRight(250.0f))
+        |+ IconButton(L"lobby_list.refresh", Icons.reset, 60.0f, Lobby.refresh_list, Position = Position.SliceBottom(60.0f).SliceRight(250.0f))
         |* SearchBox(searchtext, (fun () -> container.Filter <- fun l -> l.Name.ToLower().Contains searchtext.Value), Position = Position.SliceTop 60.0f)
         
         base.Init parent
