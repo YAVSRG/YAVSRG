@@ -64,6 +64,7 @@ levelselect.table.tooltip=Work in progress.
 lobby.change_chart=Change chart
 lobby.confirm_transfer_host=Transfer host to %0?
 lobby.leave=Leave
+lobby.missing_chart=You don't have this chart!
 lobby.no_song_selected=No song selected
 lobby.not_ready=Not ready
 lobby.ready=Ready

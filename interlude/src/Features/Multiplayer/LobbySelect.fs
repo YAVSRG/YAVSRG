@@ -41,12 +41,41 @@ type CreateLobbyPage() as this =
     override this.Title = N"create_lobby"
     override this.OnClose() = ()
 
+type InviteCard(sender: string, lobby: System.Guid) =
+    inherit Frame(NodeType.None)
+
+    override this.Init(parent) =
+        this
+        |+ Text(Icons.invite + " " + sender, Position = Position.Margin(5.0f), Align = Alignment.LEFT)
+        |+ Button(
+            Icons.ready,
+            (fun () -> sync(fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this); Lobby.join lobby),
+            Position = Position.TrimRight(50.0f).SliceRight(50.0f)
+        )
+        |* Button(
+            Icons.not_ready,
+            (fun () -> sync(fun () -> (this.Parent :?> FlowContainer.Vertical<InviteCard>).Remove this)),
+            Position = Position.SliceRight(50.0f)
+        )
+        base.Init parent
+
+type InviteList() =
+    inherit StaticContainer(NodeType.None)
+
+    let container = FlowContainer.Vertical<InviteCard>(50.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 80.0f))
+    
+    do Network.Events.receive_invite.Add (fun (name, id) -> container.Add(InviteCard(name, id)))
+
+    override this.Init(parent) =
+        this |* container
+        base.Init parent
+
 type LobbyList() =
     inherit StaticContainer(NodeType.None)
 
     let searchtext = Setting.simple ""
 
-    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 80.0f))
+    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.SliceLeft(600.0f).Margin (0.0f, 80.0f))
     let mutable no_lobbies = false
 
     let refresh() =

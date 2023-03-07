@@ -1,5 +1,6 @@
 ﻿namespace Interlude.Features.Online
 
+open System
 open System.Net
 open System.IO
 open System.Collections.Generic
@@ -76,6 +77,9 @@ module Network =
 
         let receive_lobby_list_ev = new Event<unit>()
         let receive_lobby_list = receive_lobby_list_ev.Publish
+
+        let receive_invite_ev = new Event<string * Guid>()
+        let receive_invite = receive_invite_ev.Publish
 
         let join_lobby_ev = new Event<unit>()
         let join_lobby = join_lobby_ev.Publish
@@ -159,7 +163,7 @@ module Network =
                         }
                     sync Events.join_lobby_ev.Trigger
 
-                | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> () // nyi
+                | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> sync (fun () -> Events.receive_invite_ev.Trigger(by_user, lobby_id))
                 | Downstream.SYSTEM_MESSAGE msg -> 
                     Logging.Info(sprintf "[NETWORK] %s" msg)
                     sync(fun () -> Events.system_message_ev.Trigger msg)
