@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 4uy
+    let PROTOCOL_VERSION = 5uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -25,18 +25,21 @@ module Packets =
             Hash: string
             Artist: string
             Title: string
+            Creator: string
             Rate: float32
         }
         member this.Write(bw: BinaryWriter) =
             bw.Write this.Hash
             bw.Write this.Artist
             bw.Write this.Title
+            bw.Write this.Creator
             bw.Write this.Rate
         static member Read(br: BinaryReader) =
             {
                 Hash = br.ReadString()
                 Artist = br.ReadString()
                 Title = br.ReadString()
+                Creator = br.ReadString()
                 Rate = br.ReadSingle()
             }
 
