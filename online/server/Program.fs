@@ -30,6 +30,7 @@ let handle_packet(id: Guid, packet: Upstream) =
         | Upstream.LEAVE_LOBBY -> Lobby.leave id
         | Upstream.CHAT msg -> Lobby.chat (id, msg)
         | Upstream.READY_STATUS r -> Lobby.ready_up (id, r)
+        | Upstream.MISSING_CHART -> Lobby.missing_chart id
 
         | Upstream.BEGIN_PLAYING -> Lobby.begin_playing id
         | Upstream.PLAY_DATA data -> Lobby.play_data (id, data)

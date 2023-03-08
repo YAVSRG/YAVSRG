@@ -90,6 +90,7 @@ module Lobby =
         | GameplayTimeout of lobby: LobbyId
         | Settings of player: PlayerId * settings: LobbySettings
         | ChangeHost of player: PlayerId * newhost: string
+        | MissingChart of player: PlayerId
 
     let private lobbies = Dictionary<LobbyId, Lobby>()
     let private in_lobby = Dictionary<PlayerId, LobbyId>()
@@ -252,7 +253,6 @@ module Lobby =
                         multicast(lobbies.[lobby_id], Downstream.CHAT(username, message))
 
                     | Action.ReadyUp (player, ready) ->
-
                         match! UserState.find_username player with
                         | None -> Server.kick(player, "Must be logged in")
                         | Some username ->
@@ -264,9 +264,11 @@ module Lobby =
                         let lobby = lobbies.[lobby_id]
 
                         let old_status = lobby.Players.[player].Status
-                        if old_status <> LobbyPlayerStatus.Ready && old_status <> LobbyPlayerStatus.NotReady then
-                            Server.kick(player, "Ready status changed while playing/spectating")
-                        else
+                        match old_status with
+                        | LobbyPlayerStatus.Playing
+                        | LobbyPlayerStatus.AbandonedPlay
+                        | LobbyPlayerStatus.Spectating -> Server.kick(player, "Ready status changed while playing/spectating")
+                        | _ ->
 
                         let new_status = if ready then LobbyPlayerStatus.Ready else LobbyPlayerStatus.NotReady
                         if new_status <> old_status then
@@ -493,6 +495,25 @@ module Lobby =
                         Server.send(player, Downstream.YOU_ARE_HOST false)
                         Server.send(newhost_id, Downstream.YOU_ARE_HOST true)
                         multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Host, newhost))
+
+                    | Action.MissingChart (player) ->
+                        match! UserState.find_username player with
+                        | None -> Server.kick(player, "Must be logged in")
+                        | Some username ->
+                        
+                        match get_player_lobby_id player with
+                        | None -> Server.send(player, Downstream.SYSTEM_MESSAGE "You are not in a lobby")
+                        | Some lobby_id ->
+
+                        let lobby = lobbies.[lobby_id]
+
+                        if lobby.Players.[player].Status <> LobbyPlayerStatus.NotReady then
+                            Server.kick(player, "Declared missing a chart but status indicates otherwise")
+                        else
+
+                        lobby.Players.[player].Status <- LobbyPlayerStatus.MissingChart
+                            
+                        multicast_except(player, lobbies.[lobby_id], Downstream.PLAYER_STATUS(username, LobbyPlayerStatus.MissingChart))
             }
         }
 
@@ -510,6 +531,7 @@ module Lobby =
     let play_data(player, data) = state_change.Request( Action.PlayData(player, data) , ignore )
     let settings(player, settings) = state_change.Request( Action.Settings(player, settings) , ignore )
     let change_host(player, newhost) = state_change.Request( Action.ChangeHost(player, newhost) , ignore )
+    let missing_chart(player) = state_change.Request( Action.MissingChart(player), ignore )
 
     let list(player) = state_change.Request( Action.List player, ignore )
 

@@ -19,6 +19,7 @@ module Packets =
         | Playing = 2uy
         | AbandonedPlay = 3uy
         | Spectating = 4uy
+        | MissingChart = 5uy
 
     type LobbyChart =
         {
@@ -91,6 +92,7 @@ module Packets =
         | LEAVE_LOBBY
         | CHAT of message: string
         | READY_STATUS of bool
+        | MISSING_CHART
 
         | BEGIN_PLAYING
         | PLAY_DATA of byte array
@@ -121,6 +123,7 @@ module Packets =
                 | 0x21uy -> LEAVE_LOBBY
                 | 0x22uy -> CHAT (br.ReadString())
                 | 0x23uy -> READY_STATUS (br.ReadBoolean())
+                | 0x24uy -> MISSING_CHART
 
                 | 0x30uy -> BEGIN_PLAYING
                 | 0x31uy -> BEGIN_SPECTATING
@@ -159,6 +162,7 @@ module Packets =
                 | LEAVE_LOBBY -> 0x21uy
                 | CHAT msg -> bw.Write msg; 0x22uy
                 | READY_STATUS ready -> bw.Write ready; 0x23uy
+                | MISSING_CHART -> 0x24uy
 
                 | BEGIN_PLAYING -> 0x30uy
                 | BEGIN_SPECTATING -> 0x31uy
