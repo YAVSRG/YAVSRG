@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 5uy
+    let PROTOCOL_VERSION = 6uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -47,7 +47,19 @@ module Packets =
     type LobbySettings =
         {
             Name: string
+            HostRotation: bool
+            AutomaticRoundCountdown: bool 
         }
+        member this.Write(bw: BinaryWriter) =
+            bw.Write this.Name
+            bw.Write this.HostRotation
+            bw.Write this.AutomaticRoundCountdown
+        static member Read(br: BinaryReader) =
+            {
+                Name = br.ReadString()
+                HostRotation = br.ReadBoolean()
+                AutomaticRoundCountdown = br.ReadBoolean()
+            }
 
     type LobbyInfo =
         {
@@ -136,7 +148,7 @@ module Packets =
 
                 | 0x40uy -> TRANSFER_HOST (br.ReadString())
                 | 0x41uy -> SELECT_CHART (LobbyChart.Read br)
-                | 0x42uy -> LOBBY_SETTINGS { Name = br.ReadString() }
+                | 0x42uy -> LOBBY_SETTINGS (LobbySettings.Read br)
                 | 0x43uy -> START_GAME
 
                 | 0x50uy -> KICK_PLAYER (br.ReadString())
@@ -171,7 +183,7 @@ module Packets =
 
                 | TRANSFER_HOST username -> bw.Write username; 0x40uy
                 | SELECT_CHART chart -> chart.Write bw; 0x41uy
-                | LOBBY_SETTINGS settings -> bw.Write settings.Name; 0x42uy
+                | LOBBY_SETTINGS settings -> settings.Write bw; 0x42uy
                 | START_GAME -> 0x43uy
 
                 | KICK_PLAYER username -> bw.Write username; 0x50uy
@@ -199,6 +211,7 @@ module Packets =
         | SYSTEM_MESSAGE of string
         | CHAT of sender: string * message: string
         | PLAYER_STATUS of username: string * status: LobbyPlayerStatus
+        | COUNTDOWN of reason: string * seconds: int
 
         | GAME_START
         | PLAY_DATA of username: string * data: byte array
@@ -223,10 +236,11 @@ module Packets =
                 | 0x22uy -> PLAYER_JOINED_LOBBY (br.ReadString())
                 | 0x23uy -> PLAYER_LEFT_LOBBY (br.ReadString())
                 | 0x24uy -> SELECT_CHART (LobbyChart.Read br)
-                | 0x25uy -> LOBBY_SETTINGS { Name = br.ReadString() }
+                | 0x25uy -> LOBBY_SETTINGS (LobbySettings.Read br)
                 | 0x26uy -> LOBBY_EVENT (br.ReadByte() |> LanguagePrimitives.EnumOfValue, br.ReadString())
                 | 0x27uy -> CHAT (br.ReadString(), br.ReadString())
                 | 0x28uy -> PLAYER_STATUS (br.ReadString(), br.ReadByte() |> LanguagePrimitives.EnumOfValue)
+                | 0x29uy -> COUNTDOWN (br.ReadString(), br.ReadInt32())
 
                 | 0x30uy -> GAME_START
                 | 0x31uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
@@ -261,10 +275,11 @@ module Packets =
                 | PLAYER_JOINED_LOBBY username -> bw.Write username; 0x22uy
                 | PLAYER_LEFT_LOBBY username -> bw.Write username; 0x23uy
                 | SELECT_CHART chart -> chart.Write bw; 0x24uy
-                | LOBBY_SETTINGS settings -> bw.Write settings.Name; 0x25uy
+                | LOBBY_SETTINGS settings -> settings.Write bw; 0x25uy
                 | LOBBY_EVENT (kind, data) -> bw.Write (byte kind); bw.Write data; 0x26uy
                 | CHAT (sender, msg) -> bw.Write sender; bw.Write msg; 0x27uy
                 | PLAYER_STATUS (username, status) -> bw.Write username; bw.Write (byte status); 0x28uy
+                | COUNTDOWN (reason, seconds) -> bw.Write reason; bw.Write seconds; 0x29uy
                 
                 | GAME_START -> 0x30uy
                 | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x31uy

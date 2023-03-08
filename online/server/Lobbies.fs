@@ -60,7 +60,7 @@ type Lobby =
     static member Create (playerId, username, name) =
         {
             Owner = playerId
-            Settings = { Name = name }
+            Settings = { Name = name; AutomaticRoundCountdown = false; HostRotation = false }
             Host = playerId
             Chart = None
             GameRunning = false
@@ -113,15 +113,28 @@ module Lobby =
         for p in lobby.Players.Keys do
             if p <> id then Server.send(p, packet)
 
+    let private transfer_host(lobby: Lobby, new_host: PlayerId) =
+        Server.send(lobby.Host, Downstream.YOU_ARE_HOST false)
+        Server.send(new_host, Downstream.YOU_ARE_HOST true)
+        multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Host, lobby.Players.[new_host].Username))
+        lobby.Host <- new_host
+
     let private game_end(lobby: Lobby) =
         lobby.GameRunning <- false
         multicast(lobby, Downstream.GAME_END)
         Logging.Debug(sprintf "End of round in lobby %s" lobby.Settings.Name)
         if lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) then
+            // Somebody was a straggler
             Logging.Debug(sprintf "%s round (%s) did not end cleanly" lobby.Settings.Name lobby.Chart.Value.Title)
+            if lobby.Settings.HostRotation then
+                Server.send(lobby.Host, Downstream.SYSTEM_MESSAGE "Round didn't end properly so you are still host")
+        else if lobby.Settings.HostRotation && lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && p.PlayComplete) then
+            // Somebody played the song successfully and nobody was a straggler, hence the round went ok, time for host rotate
+            let user_ids = ResizeArray(lobby.Players.Keys)
+            let host_index = (user_ids.IndexOf(lobby.Host) + 1) % user_ids.Count
+            transfer_host(lobby, user_ids[host_index])
         for p in lobby.Players.Values do
             p.Status <- LobbyPlayerStatus.NotReady
-        // todo: if all Playing players have PlayComplete true (and one exists), the lobby went successfully and you can host rotate if the setting is on
 
     let private state_change = 
         { new Async.Service<Action, unit>()
@@ -491,10 +504,7 @@ module Lobby =
                             Server.send(player, Downstream.SYSTEM_MESSAGE "User is not in this lobby")
                         else
                         
-                        lobby.Host <- newhost_id
-                        Server.send(player, Downstream.YOU_ARE_HOST false)
-                        Server.send(newhost_id, Downstream.YOU_ARE_HOST true)
-                        multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Host, newhost))
+                        transfer_host(lobby, newhost_id)
 
                     | Action.MissingChart (player) ->
                         match! UserState.find_username player with
