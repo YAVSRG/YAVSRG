@@ -5,9 +5,13 @@ open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Server
 
+let log_packet(id: Guid, packet: Upstream) =
+    match packet with
+    | Upstream.PLAY_DATA _ -> ()
+    | _ -> Logging.Debug (sprintf "%O >> %A" id packet)
 let handle_packet(id: Guid, packet: Upstream) =
     async {
-        Logging.Debug (sprintf "%O >> %A" id packet)
+        log_packet (id, packet)
         match packet with
 
         | Upstream.VERSION v -> 

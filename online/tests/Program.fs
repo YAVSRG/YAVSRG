@@ -43,6 +43,7 @@ type TestClient(i: int) =
             if i = 0 then
                 for j = 1 to NUMBER_OF_CLIENTS - 1 do
                     this.Send(Upstream.INVITE_TO_LOBBY (sprintf "Test user %i" j))
+                this.Send(Upstream.INVITE_TO_LOBBY "Percyqaz")
             status <- InLobby 1
             this.Send(Upstream.READY_STATUS (i % 2 = 1))
         | Downstream.LOBBY_SETTINGS s ->
