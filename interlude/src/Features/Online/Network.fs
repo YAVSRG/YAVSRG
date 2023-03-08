@@ -245,9 +245,10 @@ module Lobby =
     let invite username = client.Send(Upstream.INVITE_TO_LOBBY username)
     let join id = client.Send(Upstream.JOIN_LOBBY id)
     let leave() = client.Send(Upstream.LEAVE_LOBBY)
-    let set_ready flag = client.Send(Upstream.READY_STATUS flag)
+    let set_ready flag = if not lobby.Value.Playing then client.Send(Upstream.READY_STATUS flag)
     let transfer_host username = client.Send(Upstream.TRANSFER_HOST username)
     let settings (settings: LobbySettings) = client.Send(Upstream.LOBBY_SETTINGS settings)
+    let missing_chart() = client.Send(Upstream.MISSING_CHART)
 
     let start_playing() = client.Send Upstream.BEGIN_PLAYING
     let play_data data = client.Send (Upstream.PLAY_DATA data)

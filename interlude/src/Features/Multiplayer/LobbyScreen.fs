@@ -41,6 +41,7 @@ type Player(name: string, player: Network.LobbyPlayer) =
             | LobbyPlayerStatus.Playing -> Icons.play
             | LobbyPlayerStatus.Spectating -> Icons.preview
             | LobbyPlayerStatus.AbandonedPlay -> Icons.not_ready
+            | LobbyPlayerStatus.MissingChart -> Icons.connection_failed
             | LobbyPlayerStatus.NotReady
             | _ -> ""
         Text.drawFillB(Style.baseFont, name, this.Bounds.Shrink(5.0f, 0.0f), Style.text(), Alignment.LEFT)
@@ -118,6 +119,7 @@ module SelectedChart =
                 bpm <- Chart.format_bpm()
                 notecounts <- Chart.format_notecounts()
             else
+                Lobby.missing_chart()
                 difficulty <- ""
                 length <- ""
                 bpm <- ""
@@ -145,18 +147,18 @@ type SelectedChart() =
             StylishButton(
                 (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default),
                 K (sprintf "%s %s" Icons.reset (L"lobby.change_chart")),
-                Style.main 100,
-                TiltLeft = false,
-                Position = Position.SliceBottom(50.0f).TrimRight(300.0f).SliceRight(300.0f))
+                Style.dark 100,
+                TiltRight = false,
+                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 25.0f }
+            )
         )
         |* Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),
             StylishButton(
                 (fun () -> Network.client.Send Upstream.START_GAME),
                 K (sprintf "%s %s" Icons.play (L"lobby.start_game")),
-                Style.dark 100,
-                TiltRight = false,
-                Position = Position.SliceBottom(50.0f).SliceRight(300.0f)
+                Style.main 100,
+                Position = { Position.SliceBottom(50.0f) with Left = 0.33f %+ 0.0f; Right = 0.66f %- 25.0f }
             )
         )
 
@@ -351,7 +353,7 @@ type LobbyScreen() =
         if in_lobby then
             Menu.ShowPage <| ConfirmPage("Leave this lobby?", Lobby.leave)
             None
-        else Some Screen.Type.LevelSelect
+        else Some Screen.Type.MainMenu
 
     override this.Init(parent) =
         this |* swap
