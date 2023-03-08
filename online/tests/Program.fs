@@ -15,16 +15,16 @@ let NUMBER_OF_CLIENTS = 100
 type TestClient(i: int) =
     inherit Client(System.Net.IPAddress.Parse("127.0.0.1"), 32767)
 
+    let mutable ready_to_play = false
+
     let mutable status = Disconnected
 
     member this.Status = status
 
     override this.OnConnected() = 
         status <- Connected
-        Logging.Info(sprintf "Client %i connected" i)
 
     override this.OnDisconnected() = 
-        Logging.Info(sprintf "Client %i disconnected" i)
         status <- Disconnected
 
     override this.OnPacketReceived(packet: Downstream) =
@@ -45,7 +45,11 @@ type TestClient(i: int) =
                     this.Send(Upstream.INVITE_TO_LOBBY (sprintf "Test user %i" j))
                 this.Send(Upstream.INVITE_TO_LOBBY "Percyqaz")
             status <- InLobby 1
+        | Downstream.SELECT_CHART _ ->
             this.Send(Upstream.READY_STATUS (i % 2 = 1))
+            ready_to_play <- i % 2 = 1
+        | Downstream.GAME_START ->
+            if ready_to_play then this.Send(Upstream.BEGIN_PLAYING) else this.Send(Upstream.BEGIN_SPECTATING)
         | Downstream.LOBBY_SETTINGS s ->
             Logging.Info(sprintf "%i now in lobby: %A" i s)
         | Downstream.INVITED_TO_LOBBY (inviter, id) ->
