@@ -155,6 +155,9 @@ module Gameplay =
             
             let replays = new Dictionary<string, IScoreMetric>()
 
+            let private on_leave_lobby() =
+                replays.Clear()
+
             let private on_game_start() =
                 replays.Clear()
 
@@ -175,6 +178,7 @@ module Gameplay =
 
             let init () =
                 Network.Events.game_start.Add on_game_start
+                Network.Events.leave_lobby.Add on_leave_lobby
                 Network.Events.player_status.Add player_status
 
     let rate =
