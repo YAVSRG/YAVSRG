@@ -379,7 +379,7 @@ module Lobby =
                         if lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) |> not then
                             // you are last player in the lobby to finish
                             game_end lobby
-                        elif not abandoned && lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && p.PlayComplete) |> not then
+                        elif not abandoned && lobby.Players.Values.Any(fun p -> p <> plr && p.Status = LobbyPlayerStatus.Playing && p.PlayComplete) |> not then
                             // you are first player in the lobby to finish
                             Logging.Debug(sprintf "First player to finish is %s, starting timeout" username)
                             async {
