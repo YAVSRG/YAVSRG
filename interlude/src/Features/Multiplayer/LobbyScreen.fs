@@ -149,7 +149,7 @@ type SelectedChart() =
                 K (sprintf "%s %s" Icons.reset (L"lobby.change_chart")),
                 Style.dark 100,
                 TiltRight = false,
-                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 25.0f }
+                Position = { Position.SliceBottom(50.0f) with Left = 0.66f %- 0.0f }
             )
         )
         |* Conditional(
@@ -204,7 +204,7 @@ type Chat() =
 
     let game_end_report() =
         if Online.Multiplayer.replays.Keys.Count > 0 then
-            add_msg (Text(sprintf "== Results for %s ==" SelectedChart.chart.Value.Title, Color = Style.text, Align = Alignment.LEFT))
+            add_msg (Text(sprintf "== Results for %s ==" SelectedChart.chart.Value.Title, Color = Style.text, Align = Alignment.CENTER))
             let scores = 
                 Online.Multiplayer.replays.Keys
                 |> Seq.map (fun username ->
@@ -213,8 +213,21 @@ type Chat() =
                     username, s
                 )
                 |> Seq.sortByDescending(fun (_, s) -> s.Value)
+            let mutable place = 0
             for username, score in scores do
-                add_msg (Text(sprintf "%s - %s" username (score.FormatAccuracy()), Color = Style.text, Align = Alignment.LEFT))
+                place <- place + 1
+                let color =
+                    match place with
+                    | 1 -> Color.Gold
+                    | 2 -> Color.Silver
+                    | 3 -> Color.DarkOrange
+                    | _ -> Color.White
+                let cmp =
+                    StaticContainer(NodeType.None)
+                    |+ Text(sprintf "%i. %s" place username, Color = K (color, Color.Black), Align = Alignment.LEFT)
+                    |+ Text(sprintf "%s" (score.FormatAccuracy()), Color = K (color, Color.Black), Align = Alignment.CENTER)
+                    |+ Text(sprintf "%ix" (score.State.BestCombo), Color = K (color, Color.Black), Align = Alignment.RIGHT)
+                add_msg cmp
 
     override this.Init(parent) =
         this

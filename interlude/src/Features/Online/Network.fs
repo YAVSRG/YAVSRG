@@ -127,29 +127,31 @@ module Network =
     let client =
         { new Client(target_ip, 32767) with
 
-            override this.OnConnected() = status <- Connected
+            override this.OnConnected() = sync <| fun () -> 
+                status <- Connected
 
-            override this.OnDisconnected() =
+            override this.OnDisconnected() = sync <| fun () -> 
                 if lobby.IsSome then
                     lobby <- None
-                    sync Events.leave_lobby_ev.Trigger
+                    Events.leave_lobby_ev.Trigger()
                 status <- if status = Connecting then ConnectionFailed else NotConnected
 
             override this.OnPacketReceived(packet: Downstream) =
                 match packet with
-                | Downstream.DISCONNECT reason -> 
+                | Downstream.DISCONNECT reason ->
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
                     Notifications.add(Localisation.localiseWith [reason] "notification.network.disconnected", NotificationType.Error)
-
                 | Downstream.HANDSHAKE_SUCCESS -> if credentials.Username <> "" then this.Send(Upstream.LOGIN credentials.Username)
-                | Downstream.LOGIN_SUCCESS name -> 
+                | Downstream.LOGIN_SUCCESS name -> sync <| fun () -> 
                     Logging.Info(sprintf "Logged in as %s" name)
-                    sync(fun () -> Events.successful_login_ev.Trigger name)
                     status <- LoggedIn
                     username <- name
+                    Events.successful_login_ev.Trigger name
 
-                | Downstream.LOBBY_LIST lobbies -> lobby_list <- lobbies; sync Events.receive_lobby_list_ev.Trigger
-                | Downstream.YOU_JOINED_LOBBY players ->
+                | Downstream.LOBBY_LIST lobbies -> sync <| fun () ->
+                    lobby_list <- lobbies
+                    Events.receive_lobby_list_ev.Trigger()
+                | Downstream.YOU_JOINED_LOBBY players -> sync <| fun () -> 
                     lobby <- Some {
                             Settings = None
                             Players =
@@ -161,53 +163,57 @@ module Network =
                             Chart = None
                             Playing = false
                         }
-                    sync Events.join_lobby_ev.Trigger
-
-                | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> sync (fun () -> Events.receive_invite_ev.Trigger(by_user, lobby_id))
+                    Events.join_lobby_ev.Trigger()
+                | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> sync <| fun () ->
+                    Events.receive_invite_ev.Trigger(by_user, lobby_id)
+                
+                | Downstream.YOU_LEFT_LOBBY -> sync <| fun () ->
+                    lobby <- None 
+                    Events.leave_lobby_ev.Trigger()
+                | Downstream.YOU_ARE_HOST b -> sync <| fun () ->
+                    lobby.Value.YouAreHost <- b
+                | Downstream.PLAYER_JOINED_LOBBY username -> sync <| fun () ->
+                    lobby.Value.Players.Add(username, LobbyPlayer.Create)
+                    Events.lobby_players_updated_ev.Trigger()
+                | Downstream.PLAYER_LEFT_LOBBY username -> sync <| fun () ->
+                    lobby.Value.Players.Remove(username) |> ignore
+                    Events.lobby_players_updated_ev.Trigger()
+                | Downstream.LOBBY_SETTINGS s -> sync <| fun () ->
+                    lobby.Value.Settings <- Some s
+                    Events.lobby_settings_updated_ev.Trigger()
+                | Downstream.LOBBY_EVENT (kind, data) -> sync <| fun () ->
+                    Events.lobby_event_ev.Trigger(kind, data)
                 | Downstream.SYSTEM_MESSAGE msg -> 
                     Logging.Info(sprintf "[NETWORK] %s" msg)
-                    sync(fun () -> Events.system_message_ev.Trigger msg)
-                
-                | Downstream.YOU_LEFT_LOBBY -> lobby <- None; sync Events.leave_lobby_ev.Trigger
-                | Downstream.YOU_ARE_HOST b -> 
-                    lobby.Value.YouAreHost <- b
-                | Downstream.PLAYER_JOINED_LOBBY username -> 
-                    lobby.Value.Players.Add(username, LobbyPlayer.Create)
-                    sync(Events.lobby_players_updated_ev.Trigger)
-                | Downstream.PLAYER_LEFT_LOBBY username -> 
-                    lobby.Value.Players.Remove(username) |> ignore
-                    sync Events.lobby_players_updated_ev.Trigger
-                | Downstream.LOBBY_SETTINGS s -> lobby.Value.Settings <- Some s; sync Events.lobby_settings_updated_ev.Trigger
-                | Downstream.LOBBY_EVENT (kind, data) -> sync(fun () -> Events.lobby_event_ev.Trigger(kind, data))
+                    sync <| fun () -> Events.system_message_ev.Trigger msg
                 | Downstream.CHAT (sender, msg) -> 
                     Logging.Info(sprintf "%s: %s" sender msg)
-                    sync(fun () -> Events.chat_message_ev.Trigger(sender, msg))
-                | Downstream.PLAYER_STATUS (username, status) -> 
+                    sync <| fun () -> Events.chat_message_ev.Trigger(sender, msg)
+                | Downstream.PLAYER_STATUS (username, status) -> sync <| fun () ->
                     lobby.Value.Players.[username].Status <- status
                     if status = LobbyPlayerStatus.Playing then
                         lobby.Value.Players.[username].Replay <- OnlineReplayProvider()
-                    sync Events.lobby_players_updated_ev.Trigger
-                    sync(fun () -> Events.player_status_ev.Trigger(username, status))
+                    Events.lobby_players_updated_ev.Trigger()
+                    Events.player_status_ev.Trigger(username, status)
 
-                | Downstream.SELECT_CHART c -> 
+                | Downstream.SELECT_CHART c -> sync <| fun () ->
                     lobby.Value.Chart <- Some c
                     for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
                     lobby.Value.Ready <- false
-                    sync Events.change_chart_ev.Trigger
-                    sync Events.lobby_players_updated_ev.Trigger
-                | Downstream.GAME_START -> 
+                    Events.change_chart_ev.Trigger()
+                    Events.lobby_players_updated_ev.Trigger()
+                | Downstream.GAME_START -> sync <| fun () ->
                     lobby.Value.Playing <- true
-                    sync Events.game_start_ev.Trigger
-                | Downstream.GAME_END -> 
+                    Events.game_start_ev.Trigger()
+                | Downstream.GAME_END -> sync <| fun () ->
                     lobby.Value.Playing <- false
                     for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
                     lobby.Value.Ready <- false
-                    sync Events.game_end_ev.Trigger
-                | Downstream.PLAY_DATA (username, data) ->
+                    Events.game_end_ev.Trigger()
+                | Downstream.PLAY_DATA (username, data) -> sync <| fun () ->
                     use ms = new MemoryStream(data)
                     use br = new BinaryReader(ms)
                     lobby.Value.Players.[username].Replay.ImportLiveBlock br
-                    // todo: verify there are no race condition issues
         }
 
     let connect() =

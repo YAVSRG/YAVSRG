@@ -66,7 +66,6 @@
     <Compile Include="Features\Wiki\Wiki.fs" />
     <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Online\Network.fs" />
-    <Compile Include="Features\Online\Status.fs" />
     <Compile Include="Features\Gameplay.fs" />
     <Compile Include="Features\Score\Util.fs" />
     <Compile Include="Features\Score\Graph.fs" />
@@ -112,6 +111,7 @@
     <Compile Include="Features\Printerlude\Terminal.fs" />
     <Compile Include="Features\Printerlude\Printerlude.fs" />
     <Compile Include="Features\Toolbar\Jukebox.fs" />
+    <Compile Include="Features\Toolbar\NetworkStatus.fs" />
     <Compile Include="Features\Toolbar\Toolbar.fs" />
     <Compile Include="Startup.fs" />
     <Compile Include="Program.fs" />

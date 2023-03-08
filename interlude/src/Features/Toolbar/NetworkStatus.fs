@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features.Online
+﻿namespace Interlude.Features.Toolbar
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -8,6 +8,7 @@ open Prelude.Common
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
+open Interlude.Features.Online
 
 type LoginPage() as this =
     inherit Page()
@@ -33,7 +34,7 @@ type LoginPage() as this =
     override this.Title = N"login"
     override this.OnClose() = handler.Dispose()
 
-type Status() =
+type NetworkStatus() =
     inherit StaticWidget(NodeType.None)
 
     override this.Init(parent: Widget) =
