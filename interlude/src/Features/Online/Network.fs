@@ -195,6 +195,7 @@ module Network =
                         lobby.Value.Players.[username].Replay <- OnlineReplayProvider()
                     Events.lobby_players_updated_ev.Trigger()
                     Events.player_status_ev.Trigger(username, status)
+                | Downstream.COUNTDOWN _ -> () // nyi
 
                 | Downstream.SELECT_CHART c -> sync <| fun () ->
                     lobby.Value.Chart <- Some c
@@ -207,9 +208,9 @@ module Network =
                     Events.game_start_ev.Trigger()
                 | Downstream.GAME_END -> sync <| fun () ->
                     lobby.Value.Playing <- false
+                    Events.game_end_ev.Trigger()
                     for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
                     lobby.Value.Ready <- false
-                    Events.game_end_ev.Trigger()
                 | Downstream.PLAY_DATA (username, data) -> sync <| fun () ->
                     use ms = new MemoryStream(data)
                     use br = new BinaryReader(ms)

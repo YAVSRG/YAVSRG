@@ -465,3 +465,5 @@ score.new_record=New record!
 score.watch_replay=Watch replay
 wiki.downloadupdate=Install update
 wiki.openinbrowser=Open in browser
+options.lobby.host_rotation.name=Host rotation
+options.lobby.host_rotation.tooltip=When enabled, host is automatically passed on to the next person in the lobby.\nThis gives everyone a turn to pick a song.
