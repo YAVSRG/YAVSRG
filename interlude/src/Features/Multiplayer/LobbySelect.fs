@@ -10,19 +10,6 @@ open Interlude.UI.Components
 open Interlude.Web.Shared
 open Interlude.Features.Online
 
-type LobbyInfoCard(info: LobbyInfo) =
-    inherit Frame(NodeType.None)
-
-    override this.Init(parent) =
-        this
-        |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Text((match info.CurrentlyPlaying with None -> L"lobby.no_song_selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
-        |+ Clickable(fun () -> Lobby.join info.Id)
-        |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
-        base.Init parent
-
-    member this.Name = info.Name
-
 type CreateLobbyPage() as this =
     inherit Page()
     
@@ -80,13 +67,26 @@ type InviteList() =
     override this.Init(parent) =
         this |* container
         base.Init parent
+        
+type LobbyInfoCard(info: LobbyInfo) =
+    inherit Frame(NodeType.None)
+        
+    override this.Init(parent) =
+        this
+        |+ Text(info.Name, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Text((match info.CurrentlyPlaying with None -> L"lobby.no_song_selected" | Some s -> s), Color = Style.text_subheading, Position = Position.SliceBottom(40.0f).Margin(5.0f), Align = Alignment.LEFT)
+        |+ Clickable(fun () -> Lobby.join info.Id)
+        |* Text(info.Players.ToString() + " " + Icons.multiplayer, Color = Style.text_subheading, Position = Position.SliceTop(50.0f).Margin(5.0f), Align = Alignment.RIGHT)
+        base.Init parent
+        
+    member this.Name = info.Name
 
 type LobbyList() =
     inherit StaticContainer(NodeType.None)
 
     let searchtext = Setting.simple ""
 
-    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.SliceLeft(600.0f).Margin (0.0f, 80.0f))
+    let container = FlowContainer.Vertical<LobbyInfoCard>(80.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 80.0f))
     let mutable no_lobbies = false
 
     let refresh() =

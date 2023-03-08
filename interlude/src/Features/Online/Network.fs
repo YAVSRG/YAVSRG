@@ -256,4 +256,4 @@ module Lobby =
 
     let select_chart(cc: CachedChart, rate: float32) =
         if lobby.Value.YouAreHost then
-            client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Rate = rate })
+            client.Send(Upstream.SELECT_CHART { Hash = cc.Hash; Artist = cc.Artist; Title = cc.Title; Creator = cc.Creator; Rate = rate })

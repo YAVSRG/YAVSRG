@@ -127,10 +127,11 @@ type SelectedChart() =
     inherit StaticContainer(NodeType.None)
 
     override this.Init(parent: Widget) =
+        
         this
         |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Title | None -> L"lobby.no_song_selected"), Align = Alignment.LEFT, Position = Position.SliceTop(40.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.Artist + "  •  " + Chart.cacheInfo.Value.Creator else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
-        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DiffName else ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> match SelectedChart.chart with Some c -> c.Artist + "  •  " + c.Creator | None -> ""), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(40.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
+        |+ Text((fun () -> if SelectedChart.chart.IsSome && SelectedChart.found then Chart.cacheInfo.Value.DiffName else "???"), Color = Style.text_subheading, Align = Alignment.LEFT, Position = Position.TrimTop(70.0f).SliceTop(30.0f).Margin(10.0f, 0.0f))
 
         |+ Text((fun () -> SelectedChart.difficulty), Align = Alignment.LEFT, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
         |+ Text((fun () -> SelectedChart.length), Align = Alignment.CENTER, Position = Position.TrimTop(100.0f).SliceTop(60.0f))
@@ -141,11 +142,22 @@ type SelectedChart() =
 
         |+ Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost),
-            IconButton(L"lobby.change_chart", Icons.reset, 50.0f, (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default), Position = Position.TrimTop(200.0f).SliceTop(50.0f).SliceLeft(300.0f))
+            StylishButton(
+                (fun () -> Screen.change Screen.Type.LevelSelect Transitions.Flags.Default),
+                K (sprintf "%s %s" Icons.reset (L"lobby.change_chart")),
+                Style.main 100,
+                TiltLeft = false,
+                Position = Position.SliceBottom(50.0f).TrimRight(300.0f).SliceRight(300.0f))
         )
         |* Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),
-            IconButton(L"lobby.start_game", Icons.play, 50.0f, (fun () -> Network.client.Send Upstream.START_GAME), Position = Position.TrimTop(200.0f).SliceTop(50.0f).TrimLeft(300.0f).SliceLeft(300.0f))
+            StylishButton(
+                (fun () -> Network.client.Send Upstream.START_GAME),
+                K (sprintf "%s %s" Icons.play (L"lobby.start_game")),
+                Style.dark 100,
+                TiltRight = false,
+                Position = Position.SliceBottom(50.0f).SliceRight(300.0f)
+            )
         )
 
         SelectedChart.update Network.lobby.Value.Chart
@@ -297,8 +309,8 @@ type Lobby() =
             TiltRight = false,
             Position = { Left = (1.0f / 3f) %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.5f %- 0.0f; Bottom = 1.0f %- 0.0f }
             )
-        |+ SelectedChart(Position = { Left = 0.5f %+ 20.0f; Top = 0.0f %+ 100.0f; Right = 1.0f %- 20.0f; Bottom = 0.5f %- 10.0f } )
-        |* Chat(Position = { Position.Margin(20.0f) with Left = 0.5f %+ 20.0f; Top = 0.5f %+ 10.0f } )
+        |+ SelectedChart(Position = { Left = 0.5f %+ 20.0f; Top = 0.0f %+ 100.0f; Right = 1.0f %- 20.0f; Bottom = 0.5f %- 0.0f } )
+        |* Chat(Position = { Position.Margin(20.0f) with Left = 0.5f %+ 20.0f; Top = 0.5f %+ 0.0f } )
         
         base.Init parent
 
