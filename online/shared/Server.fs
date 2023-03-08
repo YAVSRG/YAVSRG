@@ -22,7 +22,7 @@ module Server =
         let buffer = ref Empty
 
         override this.OnConnected() =
-            Logging.Debug(sprintf "%O :: %O" this.Id this.Socket.RemoteEndPoint)
+            Logging.Debug(sprintf "%O :: %O :: %O" DateTime.Now this.Id this.Socket.RemoteEndPoint)
             config.Handle_Connect this.Id
 
         override this.OnDisconnected() =
