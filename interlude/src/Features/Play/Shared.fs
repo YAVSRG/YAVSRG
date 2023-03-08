@@ -76,6 +76,7 @@ type IPlayScreen(chart: ModChart, pacemakerInfo: PacemakerInfo, ruleset: Ruleset
         Song.changeGlobalOffset (toTime options.AudioOffset.Value)
         Song.onFinish <- SongFinishAction.Wait
         Song.playLeadIn()
+        Input.removeInputMethod()
         Input.finish_frame_events()
 
     override this.OnExit next =
