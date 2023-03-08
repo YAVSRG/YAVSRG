@@ -152,6 +152,7 @@ module PlayScreen =
                 add_widget ProgressMeter
                 add_widget Pacemaker
                 add_widget JudgementCounts
+                add_widget MultiplayerScoreTracker
 
             override this.OnExit(next) =
                 if next <> Screen.Type.Score then Lobby.abandon_play()

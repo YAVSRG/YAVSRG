@@ -15,6 +15,8 @@ open Interlude.Options
 open Interlude.UI
 open Interlude.Content
 open Interlude.Features
+open Interlude.Features.Online
+open Interlude.Features.Gameplay.Online
 open Interlude.Utils
 
 (*
@@ -346,6 +348,27 @@ module GameplayWidgets =
                 Text.drawFillB(Style.baseFont, j.Name, r, (Color.White, Color.Black), Alignment.LEFT)
                 Text.drawFillB(Style.baseFont, state.Scoring.State.Judgements.[i].ToString(), r, (Color.White, Color.Black), Alignment.RIGHT)
                 r <- r.Translate(0.0f, h)
+
+    type MultiplayerScoreTracker(conf: WidgetConfig.Pacemaker, state: PlayState) =
+        inherit StaticWidget(NodeType.None)
+
+        override this.Draw() =
+            let x = this.Bounds.Right + 100.0f
+            let mutable y = this.Bounds.Top
+            Multiplayer.replays
+            |> Seq.map (|KeyValue|)
+            |> Seq.sortByDescending (fun (_, s) -> s.Value)
+            |> Seq.iter (fun (username, s) ->
+                let c = if username = Network.username then Color.SkyBlue else Color.White
+                Text.draw(Style.baseFont, username, 20.0f, x, y, c)
+                Text.drawJust(Style.baseFont, s.FormatAccuracy(), 20.0f, x - 10.0f, y, c, 1.0f)
+                y <- y + 25.0f
+            )
+
+        override this.Update(elapsedTime, moved) =
+            base.Update(elapsedTime, moved)
+            for s in Multiplayer.replays.Values do
+                s.Update(state.CurrentChartTime() - Web.Shared.Packets.MULTIPLAYER_REPLAY_DELAY_MS * 2.0f<ms>)
 
     (*
         These widgets are configured by noteskin, not theme (and do not have positioning info)
