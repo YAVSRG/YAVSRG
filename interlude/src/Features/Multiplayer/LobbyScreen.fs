@@ -268,7 +268,7 @@ type Lobby() =
     override this.Init(parent) =
         this
         |+ Conditional(
-            (fun () -> Network.lobby.IsSome && Network.lobby.Value.Settings.IsSome),
+            (fun () -> Network.lobby.IsSome && Network.lobby.Value.Settings.IsSome && Network.lobby.Value.YouAreHost),
             Button(Icons.options, fun () -> LobbySettingsPage(Network.lobby.Value.Settings.Value) |> Menu.ShowPage),
             Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
         )

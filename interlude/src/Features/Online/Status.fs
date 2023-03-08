@@ -52,6 +52,7 @@ type Status() =
 
         Draw.rect area (Color.FromArgb(100, 0, 0, 0))
         Text.drawFillB(Style.baseFont, text, area.Shrink(10.0f, 5.0f), (color, Color.Black), Alignment.CENTER)
+        if Network.credentials.Host = "localhost" then Text.drawFillB(Style.baseFont, "LOCALHOST", this.Bounds.SliceBottom(20.0f), (Color.White, Color.Black), Alignment.CENTER)
 
         if Screen.currentType <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)

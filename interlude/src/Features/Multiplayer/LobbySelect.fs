@@ -64,7 +64,18 @@ type InviteList() =
 
     let container = FlowContainer.Vertical<InviteCard>(50.0f, Spacing = 10.0f, Position = Position.Margin (0.0f, 80.0f))
     
-    do Network.Events.receive_invite.Add (fun (name, id) -> container.Add(InviteCard(name, id)))
+    do 
+        Network.Events.receive_invite.Add (fun (name, id) -> 
+            container.Add(InviteCard(name, id))
+            //if 
+            //    match Screen.currentType with
+            //    | Screen.Type.LevelSelect
+            //    | Screen.Type.Import
+            //    | Screen.Type.MainMenu -> true
+            //    | _ -> false
+            //then
+            //    Notifications.add(Localisation.localiseWith [name] "notification.invited_to_lobby", NotificationType.Info)
+        )
 
     override this.Init(parent) =
         this |* container

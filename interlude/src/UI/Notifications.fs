@@ -108,7 +108,7 @@ module Notifications =
             }
         sync (fun () -> items.Add t)
 
-    let notif (str: string, t: NotificationType) =
+    let add (str: string, t: NotificationType) =
         let t: Notification =
             {
                 Bind = None
@@ -119,6 +119,3 @@ module Notifications =
                 Type = t
             }
         sync (fun () -> items.Add t)
-
-    let add (str: string, t: NotificationType) =
-        notif (str, t)
