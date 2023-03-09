@@ -108,6 +108,9 @@ module Network =
         let change_chart_ev = new Event<unit>()
         let change_chart = change_chart_ev.Publish
 
+        let countdown_ev = new Event<string * int>()
+        let countdown = countdown_ev.Publish
+
         let game_start_ev = new Event<unit>()
         let game_start = game_start_ev.Publish
 
@@ -195,7 +198,8 @@ module Network =
                         lobby.Value.Players.[username].Replay <- OnlineReplayProvider()
                     Events.lobby_players_updated_ev.Trigger()
                     Events.player_status_ev.Trigger(username, status)
-                | Downstream.COUNTDOWN _ -> () // nyi
+                | Downstream.COUNTDOWN (reason, seconds) -> sync <| fun () ->
+                    Events.countdown_ev.Trigger(reason, seconds)
 
                 | Downstream.SELECT_CHART c -> sync <| fun () ->
                     lobby.Value.Chart <- Some c

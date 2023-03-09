@@ -90,6 +90,9 @@
     <Compile Include="Features\LevelSelect\ChartInfo.fs" />
     <Compile Include="Features\LevelSelect\LevelSelect.fs" />
     <Compile Include="Features\Multiplayer\LobbySelect.fs" />
+    <Compile Include="Features\Multiplayer\Chart.fs" />
+    <Compile Include="Features\Multiplayer\Players.fs" />
+    <Compile Include="Features\Multiplayer\Chat.fs" />
     <Compile Include="Features\Multiplayer\LobbyScreen.fs" />
     <Compile Include="Features\Import\Shared.fs" />
     <Compile Include="Features\Import\Mounts.fs" />
