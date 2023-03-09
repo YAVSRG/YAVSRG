@@ -129,7 +129,7 @@ type private HoldState =
 [<AbstractClass>]
 type IScoreMetric
     (
-        config: Ruleset,
+        ruleset: Ruleset,
         healthBar: HealthBarMetric,
         keys: int,
         replayProvider: IReplayProvider,
@@ -139,7 +139,7 @@ type IScoreMetric
     inherit ReplayConsumer(keys, replayProvider)
 
     let firstNote = offsetOf notes.First.Value
-    let missWindow = config.Accuracy.MissWindow * rate
+    let missWindow = ruleset.Accuracy.MissWindow * rate
 
     // having two seekers improves performance when feeding scores rather than playing live
     let mutable noteSeekPassive = 0
@@ -147,14 +147,14 @@ type IScoreMetric
 
     let internalHoldStates = Array.create keys (Nothing, -1)
 
-    let hitData = InternalScore.createDefault config.Accuracy.MissWindow keys notes
+    let hitData = InternalScore.createDefault ruleset.Accuracy.MissWindow keys notes
     let hitEvents = ResizeArray<HitEvent<HitEventGuts>>()
 
     let mutable hitCallback = fun ev -> ()
 
     member val State =
         {
-            Judgements = Array.zeroCreate config.Judgements.Length
+            Judgements = Array.zeroCreate ruleset.Judgements.Length
             PointsScored = 0.0
             MaxPointsScored = 0.0
             CurrentCombo = 0
@@ -163,14 +163,15 @@ type IScoreMetric
             MaxPossibleCombo = 0
         }
 
-    member this.Name = config.Name
+    member this.Name = ruleset.Name
     member this.Value =
         let v = this.State.PointsScored / this.State.MaxPointsScored
         if Double.IsNaN v then 1.0 else v
     member this.FormatAccuracy() = sprintf "%.2f%%" (this.Value * 100.0)
     member this.HP = healthBar
-    member this.MissWindow = config.Accuracy.MissWindow
+    member this.MissWindow = ruleset.Accuracy.MissWindow
     member this.ScaledMissWindow = missWindow
+    member this.Ruleset = ruleset
 
     member this.IsHoldDropped (index: int) (k: int) =
         match internalHoldStates.[k] with
@@ -241,7 +242,7 @@ type IScoreMetric
                     found <- i
                     delta <- d
             // Accept a hit that looks like it's intended for a previous badly hit note that was fumbled early (preventing column lock)
-            elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -config.Accuracy.CbrushWindow then
+            elif status.[k] = HitStatus.HIT_ACCEPTED && deltas.[k] < -ruleset.Accuracy.CbrushWindow then
                 if (Time.Abs delta > Time.Abs d) then
                     found <- i
                     delta <- d
@@ -296,7 +297,7 @@ type IScoreMetric
                     match internalHoldStates.[k] with
                     | Holding, i -> Dropped, i
                     | x -> x
-                match config.Accuracy.HoldNoteBehaviour with HoldNoteBehaviour.Osu _ -> this.State.BreakCombo(false) | _ -> ()
+                match ruleset.Accuracy.HoldNoteBehaviour with HoldNoteBehaviour.Osu _ -> this.State.BreakCombo(false) | _ -> ()
         | MissedHead, _
         | Nothing, _ -> ()
     
