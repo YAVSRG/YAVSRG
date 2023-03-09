@@ -9,6 +9,7 @@ let log_packet(id: Guid, packet: Upstream) =
     match packet with
     | Upstream.PLAY_DATA _ -> ()
     | _ -> Logging.Debug (sprintf "%O >> %A" id packet)
+
 let handle_packet(id: Guid, packet: Upstream) =
     async {
         log_packet (id, packet)
@@ -20,27 +21,27 @@ let handle_packet(id: Guid, packet: Upstream) =
         | Upstream.LOGIN username ->
             UserState.login(id, username)
         | Upstream.LOGOUT ->
-            Lobby.user_disconnected(id, fun () -> UserState.logout id)
+            Lobby.ensure_player_leaves_lobby(id, fun () -> UserState.logout id)
 
-        | Upstream.GET_LOBBIES -> Lobby.list id
-        | Upstream.JOIN_LOBBY lid -> Lobby.join (id, lid)
-        | Upstream.CREATE_LOBBY name -> Lobby.create (id, name)
+        | Upstream.GET_LOBBIES -> Lobby.List(id).Do
+        | Upstream.JOIN_LOBBY lid -> Lobby.Join(id, lid).Do
+        | Upstream.CREATE_LOBBY name -> Lobby.Create(id, name).Do
 
-        | Upstream.INVITE_TO_LOBBY username -> Lobby.invite (id, username)
-        | Upstream.LEAVE_LOBBY -> Lobby.leave id
-        | Upstream.CHAT msg -> Lobby.chat (id, msg)
-        | Upstream.READY_STATUS r -> Lobby.ready_up (id, r)
-        | Upstream.MISSING_CHART -> Lobby.missing_chart id
+        | Upstream.INVITE_TO_LOBBY username -> Lobby.Invite(id, username).Do
+        | Upstream.LEAVE_LOBBY -> Lobby.Leave(id).Do
+        | Upstream.CHAT msg -> Lobby.Chat(id, msg).Do
+        | Upstream.READY_STATUS r -> Lobby.ReadyUp(id, r).Do
+        | Upstream.MISSING_CHART -> Lobby.MissingChart(id).Do
 
-        | Upstream.BEGIN_PLAYING -> Lobby.begin_playing id
-        | Upstream.PLAY_DATA data -> Lobby.play_data (id, data)
-        | Upstream.BEGIN_SPECTATING -> Lobby.begin_spectating id
-        | Upstream.FINISH_PLAYING early_quit -> Lobby.finish_playing (id, early_quit)
+        | Upstream.BEGIN_PLAYING -> Lobby.BeginPlaying(id).Do
+        | Upstream.PLAY_DATA data -> Lobby.PlayData(id, data).Do
+        | Upstream.BEGIN_SPECTATING -> Lobby.BeginSpectating(id).Do
+        | Upstream.FINISH_PLAYING abandoned -> Lobby.FinishPlaying(id, abandoned).Do
         
-        | Upstream.TRANSFER_HOST who -> Lobby.change_host (id, who)
-        | Upstream.SELECT_CHART c -> Lobby.select_chart (id, c)
-        | Upstream.LOBBY_SETTINGS s -> Lobby.settings (id, s)
-        | Upstream.START_GAME -> Lobby.start_game id
+        | Upstream.TRANSFER_HOST who -> Lobby.ChangeHost(id, who).Do
+        | Upstream.SELECT_CHART c -> Lobby.SelectChart(id, c).Do
+        | Upstream.LOBBY_SETTINGS s -> Lobby.Settings(id, s).Do
+        | Upstream.START_GAME -> Lobby.StartGame(id).Do
 
         | _ -> Server.kick(id, "Not yet implemented")
 
@@ -48,7 +49,7 @@ let handle_packet(id: Guid, packet: Upstream) =
 
 let handle_connect(id: Guid) = UserState.connect id
 let handle_disconnect(id: Guid) = 
-    Lobby.user_disconnected (id, fun () -> UserState.disconnect id)
+    Lobby.ensure_player_leaves_lobby (id, fun () -> UserState.disconnect id)
 
 let PORT = 
     try Environment.GetEnvironmentVariable("PORT") |> int

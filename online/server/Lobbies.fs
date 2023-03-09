@@ -76,7 +76,6 @@ type Lobby =
 
 module Lobby = 
 
-    [<RequireQualifiedAccess>]
     type Action =
         | List of player: PlayerId
         | Create of player: PlayerId * name: string
@@ -163,7 +162,7 @@ module Lobby =
                     try
                         match req with
 
-                        | Action.List (player) ->
+                        | List (player) ->
                             let! _ = ensure_logged_in player
 
                             let lobbies = 
@@ -181,7 +180,7 @@ module Lobby =
 
                             Server.send(player, Downstream.LOBBY_LIST lobbies)
 
-                        | Action.Create (player, lobby_name) ->
+                        | Create (player, lobby_name) ->
                             let! username = ensure_logged_in player
                             ensure_not_in_lobby player
 
@@ -200,7 +199,7 @@ module Lobby =
 
 
 
-                        | Action.Join (player, lobby_id) ->
+                        | Join (player, lobby_id) ->
                             let! username = ensure_logged_in player
                             ensure_not_in_lobby player
 
@@ -225,7 +224,7 @@ module Lobby =
 
 
 
-                        | Action.Leave player ->
+                        | Leave player ->
                             let! username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
@@ -249,7 +248,7 @@ module Lobby =
 
 
 
-                        | Action.Invite (sender, recipient) ->
+                        | Invite (sender, recipient) ->
                             let! username = ensure_logged_in sender
                             let lobby_id, lobby = ensure_in_lobby sender
 
@@ -264,7 +263,7 @@ module Lobby =
                             Server.send(recipient_id, Downstream.INVITED_TO_LOBBY (username, lobby_id))
                             multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Invite, recipient))
                             
-                        | Action.Chat (player, message) ->
+                        | Chat (player, message) ->
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
@@ -272,7 +271,7 @@ module Lobby =
 
 
 
-                        | Action.ReadyUp (player, ready) ->
+                        | ReadyUp (player, ready) ->
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
@@ -294,7 +293,7 @@ module Lobby =
 
 
 
-                        | Action.SelectChart (player, chart) ->
+                        | SelectChart (player, chart) ->
                             let! _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
@@ -312,7 +311,7 @@ module Lobby =
 
 
 
-                        | Action.StartGame player ->
+                        | StartGame player ->
                             let! _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
                         
@@ -326,7 +325,7 @@ module Lobby =
 
 
 
-                        | Action.BeginPlaying player ->
+                        | BeginPlaying player ->
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
                         
@@ -340,7 +339,7 @@ module Lobby =
 
 
 
-                        | Action.FinishPlaying (player, abandoned) ->
+                        | FinishPlaying (player, abandoned) ->
                             let! username = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
@@ -364,12 +363,12 @@ module Lobby =
                                 Logging.Debug(sprintf "First player to finish is %s, starting timeout" username)
                                 async {
                                     do! Async.Sleep(1000 * MULTIPLAYER_REPLAY_DELAY_SECONDS)
-                                    this.Request(Action.GameplayTimeout lobby_id, ignore)
+                                    this.Request(GameplayTimeout lobby_id, ignore)
                                 } |> Async.Start
 
 
 
-                        | Action.BeginSpectating player ->
+                        | BeginSpectating player ->
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
@@ -389,7 +388,7 @@ module Lobby =
 
 
 
-                        | Action.PlayData (player, data) ->
+                        | PlayData (player, data) ->
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
                             if not lobby.GameRunning then user_error player "Replay data sent but game is not running"
@@ -402,7 +401,7 @@ module Lobby =
 
 
 
-                        | Action.Settings (player, settings) ->
+                        | Settings (player, settings) ->
                             let! _ = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
                         
@@ -414,7 +413,7 @@ module Lobby =
 
 
                     
-                        | Action.ChangeHost (player, newhost) ->
+                        | ChangeHost (player, newhost) ->
                             let! _ = ensure_logged_in player
                             let lobby_id, lobby = ensure_in_lobby player
 
@@ -433,7 +432,7 @@ module Lobby =
 
 
 
-                        | Action.MissingChart (player) ->
+                        | MissingChart (player) ->
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
@@ -446,7 +445,7 @@ module Lobby =
 
 
 
-                        | Action.GameplayTimeout lobby_id ->
+                        | GameplayTimeout lobby_id ->
                             if not (lobbies.ContainsKey lobby_id) then Logging.Debug("Lobby closed before gameplay timeout")
                             else
                         
@@ -464,24 +463,10 @@ module Lobby =
             }
         }
 
-    let create(player, name) = state_change.Request( Action.Create(player, name) , ignore )
-    let join(player, id) = state_change.Request( Action.Join(player, id) , ignore )
-    let leave(player) = state_change.Request( Action.Leave(player) , ignore )
-    let invite(player, target) = state_change.Request( Action.Invite(player, target) , ignore )
-    let chat(player, message) = state_change.Request( Action.Chat(player, message) , ignore )
-    let ready_up(player, ready) = state_change.Request( Action.ReadyUp(player, ready) , ignore )
-    let select_chart(player, chart) = state_change.Request( Action.SelectChart(player, chart) , ignore )
-    let start_game(player) = state_change.Request( Action.StartGame(player) , ignore )
-    let begin_playing(player) = state_change.Request( Action.BeginPlaying(player) , ignore )
-    let finish_playing(player) = state_change.Request( Action.FinishPlaying(player) , ignore )
-    let begin_spectating(player) = state_change.Request( Action.BeginSpectating(player) , ignore )
-    let play_data(player, data) = state_change.Request( Action.PlayData(player, data) , ignore )
-    let settings(player, settings) = state_change.Request( Action.Settings(player, settings) , ignore )
-    let change_host(player, newhost) = state_change.Request( Action.ChangeHost(player, newhost) , ignore )
-    let missing_chart(player) = state_change.Request( Action.MissingChart(player), ignore )
+    type Action with
+        member this.Do = state_change.Request (this, ignore)
 
-    let list(player) = state_change.Request( Action.List player, ignore )
 
-    let user_disconnected(player, callback) =
-        if in_lobby.ContainsKey(player) then state_change.Request( Action.Leave(player), callback)
+    let ensure_player_leaves_lobby(player, callback) =
+        if in_lobby.ContainsKey(player) then state_change.Request( Leave(player), callback)
         else callback()
