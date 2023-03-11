@@ -237,7 +237,7 @@ module Features =
                             printfn "Skipping %s" chart.Id
                         else
                         printfn "%s" chart.Id
-                        Directory.Delete (path, true) |> ignore
+                        if Directory.Exists path then Directory.Delete (path, true) |> ignore
                         Directory.CreateDirectory path |> ignore
                         let updated_chart = Chart(c.Keys, { c.Header with AudioFile = Relative "audio.mp3"; BackgroundFile = Relative "bg.png" }, c.Notes, c.BPM, c.SV, "")
                         try
@@ -252,6 +252,8 @@ module Features =
     let export_as_pack(file: string) =
 
         export_table_charts (file, true)
+
+        printfn "\n GOT ALL THE CHARTS WE NEED \n"
             
         let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
 
