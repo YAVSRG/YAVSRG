@@ -1,1 +1,1 @@
-﻿better logging and many bug fixes
+﻿reduced logging + new lobby settings
