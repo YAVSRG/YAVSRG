@@ -144,6 +144,8 @@ module Features =
         let new_table : Table = Path.Combine(TABLES_PATH, file + ".suggestions.table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
         let table : Table = Path.Combine(TABLES_PATH, file + ".table") |> JSON.FromFile |> function Result.Ok t -> t | Error e -> raise e
 
+        new_table.RemoveLevel("XXX") |> ignore
+
         let diffs = ResizeArray<string * TableChart * Action>()
         for new_level in new_table.Levels do
             for chart in new_level.Charts do
@@ -169,7 +171,7 @@ module Features =
 
         sprintf "**Updates to %s table -- %s**" new_table.Name (System.DateTime.Now.ToString("dd/MM/yy", System.Globalization.CultureInfo.InvariantCulture)) |> write_diff
 
-        for level, changes in Seq.groupBy(fun (l, _, _) -> l) diffs do
+        for level, changes in Seq.groupBy(fun (l, _, _) -> l) diffs |> Seq.sortBy(fun (l, _) -> int <| l.Substring(2)) do
             sprintf "\n__%s__" level |> write_diff
             for (_, chart, action) in changes do
                 match action with
@@ -185,7 +187,7 @@ module Features =
         printfn "Saving changelog."
 
         File.WriteAllText(Path.Combine(TABLES_PATH, file + ".diff"), diff_text)
-        File.AppendAllText(Path.Combine(TABLES_PATH, file + ".changelog"), diff_text)
+        File.AppendAllText(Path.Combine(TABLES_PATH, file + ".changelog"), "\n" + diff_text)
 
         new_table |> JSON.ToFile (Path.Combine(TABLES_PATH, file + ".table"), true)
 
