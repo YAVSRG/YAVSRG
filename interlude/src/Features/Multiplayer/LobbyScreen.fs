@@ -16,16 +16,24 @@ type LobbySettingsPage(settings: LobbySettings) as this =
 
     let name = Setting.simple settings.Name
     let host_rotation = Setting.simple settings.HostRotation
+    let auto_countdown = Setting.simple settings.AutomaticRoundCountdown
     
     do
         this.Content(
             column()
             |+ PrettySetting("lobby.name", TextEntry(name, "none")).Pos(200.0f)
             |+ PrettySetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation)).Pos(300.0f)
+            |+ PrettySetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown)).Pos(400.0f)
         )
     
     override this.Title = N"lobby"
-    override this.OnClose() = Lobby.settings { settings with Name = name.Value; HostRotation = host_rotation.Value }
+    override this.OnClose() = 
+        Lobby.settings 
+            { settings with 
+                Name = name.Value
+                HostRotation = host_rotation.Value
+                AutomaticRoundCountdown = auto_countdown.Value
+            }
 
 type InvitePlayerPage() as this =
     inherit Page()

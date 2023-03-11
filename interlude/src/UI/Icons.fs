@@ -76,3 +76,4 @@ module Icons =
     let ready = Feather.check
     let not_ready = Feather.x
     let invite = Feather.mail
+    let countdown = Feather.clock

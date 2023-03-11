@@ -82,8 +82,10 @@ type SelectedChart() =
         |* Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Network.lobby.Value.Ready),
             StylishButton(
-                (fun () -> Network.client.Send Upstream.START_GAME),
-                K (sprintf "%s %s" Icons.play (L"lobby.start_game")),
+                (fun () -> if Network.lobby.Value.Countdown then Lobby.cancel_round() else Lobby.start_round()),
+                (fun () -> 
+                    if Network.lobby.Value.Countdown then sprintf "%s %s" Icons.connection_failed (L"lobby.cancel_game")
+                    else sprintf "%s %s" Icons.play (L"lobby.start_game")),
                 Style.main 100,
                 Position = { Position.SliceBottom(50.0f) with Left = 0.33f %+ 0.0f; Right = 0.66f %- 25.0f }
             )

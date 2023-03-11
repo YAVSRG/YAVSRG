@@ -69,6 +69,18 @@ type Chat() =
                     |+ Text(sprintf "%ix" (score.State.BestCombo), Color = K (score.Ruleset.LampColor lamp, Color.Black), Align = Alignment.RIGHT)
                 add_msg cmp
 
+    let countdown(reason, seconds) =
+        let now = System.DateTime.Now
+        let seconds_left() =
+            let elapsed = (System.DateTime.Now - now).TotalSeconds |> System.Math.Floor |> int
+            max 0 (seconds - elapsed)
+        StaticContainer(NodeType.None)
+        |+ Text(
+            (fun () -> sprintf "%s %s: %i" Icons.countdown reason (seconds_left())),
+            Color = (fun () -> if seconds_left() > 0 then (Color.Lime, Color.Black) else (Color.Silver, Color.Black)),
+            Align = Alignment.CENTER)
+        |> add_msg
+
     override this.Init(parent) =
         this
         |+ chatline
@@ -92,6 +104,7 @@ type Chat() =
             )
         Network.Events.game_end.Add game_end_report
         Network.Events.join_lobby.Add (fun () -> messages.Clear())
+        Network.Events.countdown.Add countdown
 
         base.Init parent
 

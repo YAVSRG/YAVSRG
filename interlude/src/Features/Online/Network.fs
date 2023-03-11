@@ -69,6 +69,7 @@ module Network =
             mutable Ready: bool
             mutable Chart: LobbyChart option
             mutable Playing: bool
+            mutable Countdown: bool
         }
 
     module Events =
@@ -165,6 +166,7 @@ module Network =
                             Ready = false
                             Chart = None
                             Playing = false
+                            Countdown = false
                         }
                     Events.join_lobby_ev.Trigger()
                 | Downstream.INVITED_TO_LOBBY (by_user, lobby_id) -> sync <| fun () ->
@@ -180,6 +182,12 @@ module Network =
                     Events.lobby_players_updated_ev.Trigger()
                 | Downstream.PLAYER_LEFT_LOBBY username -> sync <| fun () ->
                     lobby.Value.Players.Remove(username) |> ignore
+                    Events.lobby_players_updated_ev.Trigger()
+                | Downstream.SELECT_CHART c -> sync <| fun () ->
+                    lobby.Value.Chart <- Some c
+                    for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
+                    lobby.Value.Ready <- false
+                    Events.change_chart_ev.Trigger()
                     Events.lobby_players_updated_ev.Trigger()
                 | Downstream.LOBBY_SETTINGS s -> sync <| fun () ->
                     lobby.Value.Settings <- Some s
@@ -201,13 +209,10 @@ module Network =
                 | Downstream.COUNTDOWN (reason, seconds) -> sync <| fun () ->
                     Events.countdown_ev.Trigger(reason, seconds)
 
-                | Downstream.SELECT_CHART c -> sync <| fun () ->
-                    lobby.Value.Chart <- Some c
-                    for player in lobby.Value.Players.Values do player.Status <- LobbyPlayerStatus.NotReady
-                    lobby.Value.Ready <- false
-                    Events.change_chart_ev.Trigger()
-                    Events.lobby_players_updated_ev.Trigger()
+                | Downstream.GAME_COUNTDOWN b -> sync <| fun () ->
+                    lobby.Value.Countdown <- b
                 | Downstream.GAME_START -> sync <| fun () ->
+                    lobby.Value.Countdown <- false
                     lobby.Value.Playing <- true
                     Events.game_start_ev.Trigger()
                 | Downstream.GAME_END -> sync <| fun () ->
@@ -231,7 +236,7 @@ module Network =
     let login(name) = if status = Connected then client.Send(Upstream.LOGIN name)
 
     let logout() = 
-        if lobby.IsSome then sync Events.leave_lobby_ev.Trigger
+        Events.leave_lobby_ev.Trigger()
         lobby <- None
         if status = LoggedIn then
             client.Send(Upstream.LOGOUT)
@@ -261,7 +266,10 @@ module Lobby =
     let settings (settings: LobbySettings) = client.Send(Upstream.LOBBY_SETTINGS settings)
     let missing_chart() = client.Send(Upstream.MISSING_CHART)
 
-    let start_playing() = client.Send Upstream.BEGIN_PLAYING
+    let start_round() = client.Send(Upstream.START_GAME)
+    let cancel_round() = client.Send(Upstream.CANCEL_GAME)
+
+    let start_playing() = client.Send(Upstream.BEGIN_PLAYING)
     let play_data data = client.Send (Upstream.PLAY_DATA data)
     let finish_playing() = client.Send (Upstream.FINISH_PLAYING false)
     let abandon_play() = client.Send (Upstream.FINISH_PLAYING true)
