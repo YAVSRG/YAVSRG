@@ -115,6 +115,7 @@ module Packets =
         | SELECT_CHART of LobbyChart
         | LOBBY_SETTINGS of LobbySettings
         | START_GAME
+        | CANCEL_GAME
 
         | KICK_PLAYER of username: string // nyi
 
@@ -150,6 +151,7 @@ module Packets =
                 | 0x41uy -> SELECT_CHART (LobbyChart.Read br)
                 | 0x42uy -> LOBBY_SETTINGS (LobbySettings.Read br)
                 | 0x43uy -> START_GAME
+                | 0x44uy -> CANCEL_GAME
 
                 | 0x50uy -> KICK_PLAYER (br.ReadString())
 
@@ -185,6 +187,7 @@ module Packets =
                 | SELECT_CHART chart -> chart.Write bw; 0x41uy
                 | LOBBY_SETTINGS settings -> settings.Write bw; 0x42uy
                 | START_GAME -> 0x43uy
+                | CANCEL_GAME -> 0x44uy
 
                 | KICK_PLAYER username -> bw.Write username; 0x50uy
             kind, ms.ToArray()
@@ -213,6 +216,7 @@ module Packets =
         | PLAYER_STATUS of username: string * status: LobbyPlayerStatus
         | COUNTDOWN of reason: string * seconds: int
 
+        | GAME_COUNTDOWN of bool
         | GAME_START
         | PLAY_DATA of username: string * data: byte array
         | GAME_END
@@ -241,10 +245,11 @@ module Packets =
                 | 0x27uy -> CHAT (br.ReadString(), br.ReadString())
                 | 0x28uy -> PLAYER_STATUS (br.ReadString(), br.ReadByte() |> LanguagePrimitives.EnumOfValue)
                 | 0x29uy -> COUNTDOWN (br.ReadString(), br.ReadInt32())
-
-                | 0x30uy -> GAME_START
-                | 0x31uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
-                | 0x32uy -> GAME_END
+                
+                | 0x30uy -> GAME_COUNTDOWN (br.ReadBoolean())
+                | 0x31uy -> GAME_START
+                | 0x32uy -> PLAY_DATA (br.ReadString(), br.ReadBytes(int (br.BaseStream.Length - br.BaseStream.Position)))
+                | 0x33uy -> GAME_END
 
                 | _ -> failwithf "Unknown packet type: %i" kind
             if ms.Position <> ms.Length then failwithf "Expected end-of-packet but there are %i extra bytes" (ms.Length - ms.Position)
@@ -281,7 +286,8 @@ module Packets =
                 | PLAYER_STATUS (username, status) -> bw.Write username; bw.Write (byte status); 0x28uy
                 | COUNTDOWN (reason, seconds) -> bw.Write reason; bw.Write seconds; 0x29uy
                 
-                | GAME_START -> 0x30uy
-                | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x31uy
-                | GAME_END -> 0x32uy
+                | GAME_COUNTDOWN b -> bw.Write b; 0x30uy
+                | GAME_START -> 0x31uy
+                | PLAY_DATA (username, data) -> bw.Write username; bw.Write data; 0x32uy
+                | GAME_END -> 0x33uy
             kind, ms.ToArray()

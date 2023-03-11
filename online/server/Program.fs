@@ -5,19 +5,13 @@ open Percyqaz.Common
 open Interlude.Web.Shared
 open Interlude.Web.Server
 
-let log_packet(id: Guid, packet: Upstream) =
-    match packet with
-    | Upstream.PLAY_DATA _ -> ()
-    | _ -> Logging.Debug (sprintf "%O >> %A" id packet)
-
 let handle_packet(id: Guid, packet: Upstream) =
     async {
-        log_packet (id, packet)
         match packet with
 
         | Upstream.VERSION v -> 
             if v = PROTOCOL_VERSION then UserState.handshake id
-            else Server.kick(id, "Protocol version mismatch")
+            else Server.kick(id, "Your client is out of date")
         | Upstream.LOGIN username ->
             UserState.login(id, username)
         | Upstream.LOGOUT ->
@@ -42,8 +36,9 @@ let handle_packet(id: Guid, packet: Upstream) =
         | Upstream.SELECT_CHART c -> Lobby.SelectChart(id, c).Do
         | Upstream.LOBBY_SETTINGS s -> Lobby.Settings(id, s).Do
         | Upstream.START_GAME -> Lobby.StartGame(id).Do
+        | Upstream.CANCEL_GAME -> Lobby.CancelStartGame(id).Do
 
-        | _ -> Server.kick(id, "Not yet implemented")
+        | Upstream.KICK_PLAYER _ -> Server.kick(id, "not yet implemented")
 
     } |> Async.Start
 
@@ -52,7 +47,7 @@ let handle_disconnect(id: Guid) =
     Lobby.ensure_player_leaves_lobby (id, fun () -> UserState.disconnect id)
 
 let PORT = 
-    try Environment.GetEnvironmentVariable("PORT") |> int
+    try Environment.GetEnvironmentVariable "PORT" |> int
     with err -> 32767
 
 let tagline = 
@@ -64,7 +59,8 @@ try
 
     Logging.Info(sprintf "Launching server [%s] on port %i ..." tagline PORT)
     Server.init { 
-        Address = "0.0.0.0"; Port = PORT;
+        Address = "0.0.0.0"
+        Port = PORT
         Handle_Packet = handle_packet
         Handle_Connect = handle_connect
         Handle_Disconnect = handle_disconnect

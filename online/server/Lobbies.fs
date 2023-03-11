@@ -58,15 +58,20 @@ type Lobby =
         mutable Settings: LobbySettings
         mutable Host: PlayerId
         mutable Chart: LobbyChart option
+        mutable CountdownId: int
+        mutable CountingDown: bool
         mutable GameRunning: bool
         Players: Dictionary<PlayerId, Player>
     }
+    static member CountdownDurationSeconds = 5
     static member Create (playerId, username, name) =
         {
             Owner = playerId
             Settings = { Name = name; AutomaticRoundCountdown = false; HostRotation = false }
             Host = playerId
             Chart = None
+            CountdownId = 0
+            CountingDown = false
             GameRunning = false
             Players = 
                 let d = Dictionary<PlayerId, Player>()
@@ -86,6 +91,7 @@ module Lobby =
         | ReadyUp of player: PlayerId * isReady: bool
         | SelectChart of player: PlayerId * chart: LobbyChart
         | StartGame of player: PlayerId
+        | CancelStartGame of player: PlayerId
         | BeginPlaying of player: PlayerId
         | FinishPlaying of player: PlayerId * abandoned: bool
         | BeginSpectating of player: PlayerId
@@ -93,7 +99,8 @@ module Lobby =
         | Settings of player: PlayerId * settings: LobbySettings
         | ChangeHost of player: PlayerId * newhost: string
         | MissingChart of player: PlayerId
-        | GameplayTimeout of lobby: LobbyId
+        | GameplayTimeout of lobby: LobbyId * countdownId: int
+        | CountdownTimeout of lobby: LobbyId * countdownId: int * automatic: bool
 
     let private lobbies = Dictionary<LobbyId, Lobby>()
     let private in_lobby = Dictionary<PlayerId, LobbyId>()
@@ -125,7 +132,7 @@ module Lobby =
     let private game_end(lobby: Lobby) =
         lobby.GameRunning <- false
         multicast(lobby, Downstream.GAME_END)
-        Logging.Debug(sprintf "End of round in lobby %s" lobby.Settings.Name)
+        Logging.Debug(sprintf "End of song (%s) in lobby %s" lobby.Chart.Value.Title lobby.Settings.Name)
 
         if lobby.Players.Values.Any(fun p -> p.Status = LobbyPlayerStatus.Playing && not p.PlayComplete) then
             // Somebody was a straggler
@@ -263,17 +270,20 @@ module Lobby =
                             Server.send(recipient_id, Downstream.INVITED_TO_LOBBY (username, lobby_id))
                             multicast(lobby, Downstream.LOBBY_EVENT(LobbyEvent.Invite, recipient))
                             
+
+
                         | Chat (player, message) ->
                             let! username = ensure_logged_in player
                             let _, lobby = ensure_in_lobby player
 
+                            Logging.Info(sprintf "%s: %s" username message)
                             multicast(lobby, Downstream.CHAT(username, message))
 
 
 
                         | ReadyUp (player, ready) ->
                             let! username = ensure_logged_in player
-                            let _, lobby = ensure_in_lobby player
+                            let lobby_id, lobby = ensure_in_lobby player
 
                             let old_status = lobby.Players.[player].Status
                             match old_status with
@@ -290,6 +300,22 @@ module Lobby =
                             
                                 multicast_except(player, lobby, Downstream.PLAYER_STATUS(username, new_status))
                                 multicast(lobby, Downstream.LOBBY_EVENT((if ready then LobbyEvent.Ready else LobbyEvent.NotReady), username))
+
+                                if 
+                                    not lobby.CountingDown 
+                                    && lobby.Settings.AutomaticRoundCountdown 
+                                    && lobby.Players.Values.All(fun p -> p.Status = LobbyPlayerStatus.Ready)
+                                then
+                                    
+                                    lobby.CountdownId <- lobby.CountdownId + 1
+                                    let cid = lobby.CountdownId
+                                    lobby.CountingDown <- true
+                                    multicast(lobby, Downstream.GAME_COUNTDOWN true)
+                                    multicast(lobby, Downstream.COUNTDOWN ("Round starting", Lobby.CountdownDurationSeconds))
+                                    async {
+                                        do! Async.Sleep(1000 * Lobby.CountdownDurationSeconds)
+                                        this.Request(CountdownTimeout(lobby_id, cid, true), ignore)
+                                    } |> Async.Start
 
 
 
@@ -313,15 +339,38 @@ module Lobby =
 
                         | StartGame player ->
                             let! _ = ensure_logged_in player
-                            let _, lobby = ensure_in_lobby player
+                            let lobby_id, lobby = ensure_in_lobby player
                         
                             if lobby.Host <> player then user_error player "You are not host"
                             if lobby.Chart.IsNone then user_error player "No chart selected"
-                            if lobby.GameRunning then user_error player "Game is currently running"
+                            if lobby.GameRunning then user_error player "Game is already running"
+                            if lobby.CountingDown then user_error player "Game countdown already started"
 
 
-                            lobby.GameRunning <- true
-                            multicast(lobby, Downstream.GAME_START)
+                            lobby.CountdownId <- lobby.CountdownId + 1
+                            let cid = lobby.CountdownId
+                            lobby.CountingDown <- true
+                            multicast(lobby, Downstream.GAME_COUNTDOWN true)
+                            multicast(lobby, Downstream.COUNTDOWN ("Round starting", Lobby.CountdownDurationSeconds))
+                            async {
+                                do! Async.Sleep(1000 * Lobby.CountdownDurationSeconds)
+                                this.Request(CountdownTimeout(lobby_id, cid, false), ignore)
+                            } |> Async.Start
+
+
+
+                        | CancelStartGame player ->
+                            let! _ = ensure_logged_in player
+                            let _, lobby = ensure_in_lobby player
+                        
+                            if lobby.Host <> player then user_error player "You are not host"
+                            if lobby.GameRunning then user_error player "Game is already running"
+                            if not lobby.CountingDown then user_error player "No countdown to cancel"
+
+
+                            lobby.CountingDown <- false
+                            multicast(lobby, Downstream.GAME_COUNTDOWN false)
+                            multicast(lobby, Downstream.SYSTEM_MESSAGE "Countdown cancelled")
 
 
 
@@ -361,9 +410,11 @@ module Lobby =
                             elif not abandoned && lobby.Players.Values.Any(fun p -> p <> plr && p.Status = LobbyPlayerStatus.Playing && p.PlayComplete) |> not then
                                 // you are first player in the lobby to finish
                                 Logging.Debug(sprintf "First player to finish is %s, starting timeout" username)
+                                lobby.CountdownId <- lobby.CountdownId + 1
+                                let cid = lobby.CountdownId
                                 async {
                                     do! Async.Sleep(1000 * MULTIPLAYER_REPLAY_DELAY_SECONDS)
-                                    this.Request(GameplayTimeout lobby_id, ignore)
+                                    this.Request(GameplayTimeout(lobby_id, cid), ignore)
                                 } |> Async.Start
 
 
@@ -445,15 +496,40 @@ module Lobby =
 
 
 
-                        | GameplayTimeout lobby_id ->
+                        | GameplayTimeout(lobby_id, countdown_ref) ->
                             if not (lobbies.ContainsKey lobby_id) then Logging.Debug("Lobby closed before gameplay timeout")
                             else
                         
-                            Logging.Debug(sprintf "Timeout called on lobby with id %O" lobby_id)
+                            let lobby = lobbies.[lobby_id]
+                            if countdown_ref = lobby.CountdownId && lobby.GameRunning then
+                                Logging.Debug(sprintf "Round timed out on lobby with id %O" lobby_id)
+                                game_end lobbies.[lobby_id]
+                                
+                                
+                                
+                        | CountdownTimeout(lobby_id, countdown_ref, automatic) ->
+                            if not (lobbies.ContainsKey lobby_id) then Logging.Debug("Lobby closed before countdown timeout")
+                            else
+                                                        
+                            let lobby = lobbies.[lobby_id]
+                            if countdown_ref = lobby.CountdownId && lobby.CountingDown then
 
-                            // todo: fix bug where if you start a new round before this timeout, it will end instantly
+                                if automatic && not <| lobby.Players.Values.All(fun p -> p.Status = LobbyPlayerStatus.Ready) then
+                                    Logging.Debug("Cancelling auto lobby start because someone is no longer ready")
+                                    lobby.CountingDown <- false
+                                    multicast(lobby, Downstream.GAME_COUNTDOWN false)
+                                    multicast(lobby, Downstream.SYSTEM_MESSAGE "Automatic countdown cancelled")
 
-                            if lobbies.[lobby_id].GameRunning then game_end lobbies.[lobby_id]
+                                elif not automatic && lobby.Players.Values.All(fun p -> p.Status <> LobbyPlayerStatus.Ready) then
+                                    Logging.Debug("Cancelling manual lobby start because nobody is ready")
+                                    lobby.CountingDown <- false
+                                    multicast(lobby, Downstream.GAME_COUNTDOWN false)
+                                    multicast(lobby, Downstream.SYSTEM_MESSAGE "Countdown cancelled")
+                                
+                                else
+                                    lobby.CountingDown <- false
+                                    lobby.GameRunning <- true
+                                    multicast(lobby, Downstream.GAME_START)
 
 
 
