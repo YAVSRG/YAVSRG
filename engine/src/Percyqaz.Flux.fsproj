@@ -19,6 +19,7 @@
     <Compile Include="Graphics\Render.fs" />
     <Compile Include="Graphics\Text.fs" />
     <Compile Include="Audio\Audio.fs" />
+    <Compile Include="Audio\Waveform.fs" />
     <Compile Include="Input\Input.fs" />
     <Compile Include="Input\Hotkeys.fs" />
     <Compile Include="UI\Animation.fs" />
