@@ -34,7 +34,7 @@ module Waveform =
     let private high_min = 2000f
     let private high_max = 12000f
 
-    let pt l r = { Left = l; Right = r; Low = 0.0f; Mid = 0.0f; High = 0.0f }
+    let pt l r = { Left = l * l; Right = r * r; Low = 0.0f; Mid = 0.0f; High = 0.0f }
 
     let intensity(info: ChannelInfo, bins: float32 array, startFrequency : float32, endFrequency: float32) =
         let startBin = int <| float32 fft_bins * 2f * startFrequency / float32 info.Frequency

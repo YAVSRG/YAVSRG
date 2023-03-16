@@ -232,7 +232,7 @@ module Input =
         let rec f evs =
             match evs with
             | [] -> []
-            | struct (b, T, time) :: xs when T = t -> out <- ValueSome b; xs
+            | struct (b, T, time) :: xs when T = t -> out <- ValueSome (b, time); xs
             | x :: xs -> x :: (f xs)
         events_this_frame <- f events_this_frame
         out
@@ -289,7 +289,7 @@ module Input =
 
         | InputMethod.Bind callback ->
             match consumeAny InputEvType.Press with
-            | ValueSome x ->
+            | ValueSome (x, _) ->
                 match x with
                 | Key (k, m) ->
                     if Bind.IsModifier k then ()
@@ -297,7 +297,7 @@ module Input =
                 | _ -> removeInputMethod(); callback x
             | ValueNone ->
                 match consumeAny InputEvType.Release with
-                | ValueSome x -> 
+                | ValueSome (x, _) -> 
                     match x with
                     | Key (k, m) ->
                         if Bind.IsModifier k then removeInputMethod(); callback x

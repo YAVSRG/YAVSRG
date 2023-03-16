@@ -47,11 +47,11 @@ module Song =
     let mutable private timerStart = 0.0f<ms>
     let mutable private channelPlaying = false
     let mutable private rate = 1.0f
-    let mutable private localOffset = 0.0f<ms>
+    let mutable localOffset = 0.0f<ms>
     let mutable private globalOffset = 0.0f<ms>
     let mutable onFinish = SongFinishAction.Wait
 
-    let audioDuration() = nowplaying.Duration
+    let duration() = nowplaying.Duration
 
     let time() = rate * (float32 timer.Elapsed.TotalMilliseconds * 1.0f<ms>) + timerStart
 
@@ -61,7 +61,7 @@ module Song =
 
     let playFrom(time) =
         timerStart <- time
-        if (time >= 0.0f<ms> && time < audioDuration()) then
+        if (time >= 0.0f<ms> && time < duration()) then
             channelPlaying <- true
             Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
             Bass.ChannelPlay nowplaying.ID |> bassError
@@ -71,7 +71,7 @@ module Song =
         timer.Restart()
 
     let seek(time) =
-        if (time >= 0.0f<ms> && time < audioDuration()) then
+        if (time >= 0.0f<ms> && time < duration()) then
             if playing() then playFrom time
             else
                 Bass.ChannelSetPosition(nowplaying.ID, Bass.ChannelSeconds2Bytes(nowplaying.ID, float <| time / 1000.0f<ms>)) |> bassError
@@ -206,6 +206,11 @@ module Devices =
 
     let init(device: int) =
         get()
-        for (i, name) in devices do Bass.Init i |> bassError
+        for (i, name) in devices do
+            // https://github.com/ppy/osu/issues/3800
+            Bass.Configure(Configuration.DevNonStop, true) |> bassError
+            Bass.Configure(Configuration.DevicePeriod, 2) |> bassError
+            Bass.Configure(Configuration.DeviceBufferLength, 4) |> bassError
+            Bass.Init i |> bassError
         change device
         Bass.GlobalStreamVolume <- 0
