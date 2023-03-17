@@ -9,14 +9,22 @@ open Percyqaz.Flux.Audio
 open Interlude.Options
 open Interlude.UI.Menu
 
+module private LoadWaveform =
+    
+    let loader =
+        { new Async.SwitchService<string, Waveform.Waveform>()
+            with override this.Handle(path) = async { return Waveform.generate path }
+        }
+
 type WaveformRender(fade: Animation.Fade) =
     inherit StaticContainer(NodeType.None)
     
-    let waveform = 
-        try
-            let audioPath = Interlude.Features.Gameplay.Chart.current.Value.AudioPath
-            Waveform.generate audioPath
-        with err -> Logging.Error("Waveform error", err); { MsPerPoint = 1.0f<ms>; Points = Array.zeroCreate 0 }
+    let mutable waveform : Waveform.Waveform = { MsPerPoint = 1.0f<ms>; Points = Array.zeroCreate 0 }
+
+    do
+        match Gameplay.Chart.current with
+        | Some c -> LoadWaveform.loader.Request(c.AudioPath, fun wf -> sync(fun () -> waveform <- wf))
+        | None -> ()
 
     member val PointOfReference = 1.0f<ms> with get, set
     member val MsPerBeat = 1.0f<ms> with get, set
@@ -40,7 +48,7 @@ type WaveformRender(fade: Animation.Fade) =
             x <- x + waveform.MsPerPoint * scale
         Draw.rect (this.Bounds.TrimRight(this.Bounds.Width * 0.25f).SliceRight(5.0f)) (Color.FromArgb(fade.Alpha, Color.White))
         let rel = this.Bounds.Width * 0.75f
-        let mutable por = (this.PointOfReference + 1.0f<ms> * float32 options.AudioOffset.Value * Gameplay.rate.Value) % this.MsPerBeat
+        let mutable por = (this.PointOfReference + 1.0f<ms> * float32 options.AudioOffset.Value * Gameplay.rate.Value)
         let left = time - rel / scale
         let right = time + (rel / 3.0f) / scale
         por <- por + this.MsPerBeat * ceil ((left - por) / this.MsPerBeat)
@@ -60,7 +68,7 @@ type OffsetPage() as this =
 
     let chart_mspb, chart_por =
         match Gameplay.Chart.current with
-        | Some c -> let (por, (_, mspb)) = c.BPM.First.Value in (mspb * 1.0f<beat>, por)
+        | Some c -> let (por, (_, mspb)) = c.BPM.First.Value in (mspb * 1.0f<beat>, por %% (mspb * 1.0f<beat>))
         | None -> 500.0f<ms>, 0.0f<ms>
 
     let mutable deviation = 60.0f<ms>
@@ -77,7 +85,7 @@ type OffsetPage() as this =
     do 
         this.Content(
             column()
-            |+ PrettySetting("system.audiooffset", Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>)), 0.005f)).Pos(800.0f)
+            |+ PrettySetting("system.audiooffset", Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>)), 0.001f)).Pos(800.0f)
             |+ Text("Tap to the beat ...", Align = Alignment.CENTER, Position = Position.Row(200.0f, 80.0f))
             |+ Text((fun () -> if state = Progress.Keep_Going then "Keep going ..." elif try_again then "A bit more ..." else  ""), Align = Alignment.CENTER, Position = Position.Row(300.0f, 80.0f))
             |+ waveform
@@ -86,8 +94,10 @@ type OffsetPage() as this =
     override this.Draw() =
         base.Draw()
 
-        let w = deviation / threshold * 25.0f
-        Draw.rect (Rect.Create(this.Bounds.CenterX - w, this.Bounds.Top + 400.0f, this.Bounds.CenterX + w, this.Bounds.Top + 480.0f)) (Color.FromArgb(tap_fade.Alpha, Color.White))
+        let w, color = 
+            if taps.Count <= 12 then float32 (13 - taps.Count) / 13.0f * 125.0f, Color.White
+            else deviation / threshold * 25.0f, Color.FromArgb(200, 200, 255)
+        Draw.rect (Rect.Create(this.Bounds.CenterX - w, this.Bounds.Top + 400.0f, this.Bounds.CenterX + w, this.Bounds.Top + 480.0f)) (Color.FromArgb(tap_fade.Alpha, color))
     
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
