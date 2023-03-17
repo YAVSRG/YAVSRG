@@ -106,8 +106,8 @@ module Waveform =
 
         Bass.StreamFree(decode_stream) |> ignore
 
-        let points_per_second = (info.Frequency * info.Channels / samples_per_point)
-        let ms_per_point = 1000.0f<ms> / float32 points_per_second
+        let points_per_second = (float32 info.Frequency * float32 info.Channels / float32 samples_per_point)
+        let ms_per_point = 1000.0f<ms> / points_per_second
 
         { Points = points; MsPerPoint = ms_per_point }
             
