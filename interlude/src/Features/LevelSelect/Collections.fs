@@ -148,11 +148,14 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                 Selector( CreateFolderPage.Icons,
                 folder.Icon)).Pos(280.0f)
             |+ PrettyButton("collections.edit.delete", 
-                (fun () -> Menu.ShowPage (ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", fun () ->
-                    if collections.Delete name then 
-                        if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
-                        if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
-                        Menu.Back() ))
+                (fun () -> 
+                    ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", 
+                        fun () ->
+                            if collections.Delete name then 
+                                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
+                                if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
+                                Menu.Back()
+                    ).Show()
                 ),
                 Icon = Icons.delete).Pos(400.0f)
             |+ PrettyButton("collections.edit.select", 
@@ -192,11 +195,14 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                 Selector( CreatePlaylistPage.Icons,
                 playlist.Icon)).Pos(280.0f)
             |+ PrettyButton("collections.edit.delete", 
-                (fun () ->  Menu.ShowPage (ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", fun () -> 
-                    if collections.Delete name then 
-                        if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
-                        if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
-                        Menu.Back() ))
+                (fun () -> 
+                    ConfirmPage(Localisation.localiseWith [name] "misc.confirmdelete", 
+                        fun () -> 
+                            if collections.Delete name then 
+                                if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true
+                                if ActiveCollection.Collection name = options.Collection.Value then Collections.unselect()
+                                Menu.Back()
+                    ).Show()
                 ),
                 Icon = Icons.delete).Pos(400.0f)
             |+ PrettyButton("collections.edit.select", 
@@ -285,7 +291,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
         SelectCollectionPage(
             fun (name, collection) ->
                 match collection with
-                | Folder f -> Menu.ShowPage(EditFolderPage(name, f))
-                | Playlist p -> Menu.ShowPage(EditPlaylistPage(name, p))
+                | Folder f -> EditFolderPage(name, f).Show()
+                | Playlist p -> EditPlaylistPage(name, p).Show()
                 | Level _ -> failwith "impossible"
         )

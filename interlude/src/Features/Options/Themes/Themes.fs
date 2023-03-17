@@ -32,22 +32,20 @@ type ThemesPage() as this =
         let ns = Noteskins.Current.instance
         match ns.Source with
         | Zip (_, Some file) ->
-            Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractzip", Noteskins.extractCurrent) )
+            ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractzip", Noteskins.extractCurrent).Show()
         | Zip (_, None) ->
-            Menu.ShowPage ( ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractdefault", Noteskins.extractCurrent) )
+            ConfirmPage(Localisation.localiseWith [ns.Config.Name] "options.themes.confirmextractdefault", Noteskins.extractCurrent).Show()
         | Folder _ -> Menu.ShowPage EditNoteskinPage
 
     let tryEditTheme() =
         let theme = Themes.Current.instance
         match theme.Source with
         | Zip (_, None) ->
-            Menu.ShowPage (
-                ConfirmPage(
-                    Localisation.localiseWith [theme.Config.Name] "options.themes.confirmextractdefault",
-                    (fun () -> Themes.createNew(System.Guid.NewGuid().ToString()))
-                )
-            )
-        | Folder _ -> Menu.ShowPage EditThemePage
+            ConfirmPage(
+                Localisation.localiseWith [theme.Config.Name] "options.themes.confirmextractdefault",
+                (fun () -> Themes.createNew(System.Guid.NewGuid().ToString()))
+            ).Show()
+        | Folder _ -> EditThemePage().Show()
         | Zip (_, Some file) -> failwith "impossible as user themes are always folders"
 
     do

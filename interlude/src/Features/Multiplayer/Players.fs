@@ -31,7 +31,7 @@ type Player(name: string, player: Network.LobbyPlayer) =
         base.Update(elapsedTime, moved)
 
         if Mouse.hover this.Bounds && Mouse.leftClick() then
-            ConfirmPage(Localisation.localiseWith [name] "lobby.confirm_transfer_host", fun () -> Lobby.transfer_host name) |> Menu.ShowPage
+            ConfirmPage(Localisation.localiseWith [name] "lobby.confirm_transfer_host", fun () -> Lobby.transfer_host name).Show()
 
     member this.Name = name
 

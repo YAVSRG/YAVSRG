@@ -59,11 +59,14 @@ type private EditLevelPage(level: Level) as this =
             column()
             |+ PrettySetting("table.level_name", TextEntry(new_name, "none")).Pos(200.0f)
             |+ PrettyButton("collections.edit.delete", 
-                (fun () ->  Menu.ShowPage (ConfirmPage(Localisation.localiseWith [level.Name] "misc.confirmdelete", fun () -> 
-                    if Table.current().Value.RemoveLevel level.Name then 
-                        if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh <- true
-                        if ActiveCollection.Level level.Name = options.Collection.Value then Collections.unselect()
-                        Menu.Back() ))
+                (fun () -> 
+                    ConfirmPage(Localisation.localiseWith [level.Name] "misc.confirmdelete", 
+                        fun () -> 
+                            if Table.current().Value.RemoveLevel level.Name then 
+                                if options.LibraryMode.Value = LibraryMode.Table then LevelSelect.refresh <- true
+                                if ActiveCollection.Level level.Name = options.Collection.Value then Collections.unselect()
+                                Menu.Back()
+                    ).Show()
                 ),
                 Icon = Icons.delete).Pos(400.0f)
             |+ PrettyButton("collections.edit.select", 
@@ -153,7 +156,7 @@ type ManageTablesPage() as this =
             | Some t ->
                 container |* Dummy()
                 for level in t.Levels do
-                    container |* LevelButton(level.Name, (fun () -> Menu.ShowPage (EditLevelPage level)) )
+                    container |* LevelButton(level.Name, (fun () -> EditLevelPage(level).Show()) )
             | None -> ()
 
 

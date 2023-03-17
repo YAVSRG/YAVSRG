@@ -240,7 +240,7 @@ module Tree =
                 if this.LeftClick(origin) then
                     if this.Selected then play()
                     else this.Select()
-                elif this.RightClick(origin) then ChartContextMenu(cc, context) |> Menu.ShowPage
+                elif this.RightClick(origin) then ChartContextMenu(cc, context).Show()
                 elif (!|"delete").Tapped() then ChartContextMenu.ConfirmDelete(cc, false)
             else hover.Target <- 0.0f
             hover.Update(elapsedTime) |> ignore
@@ -446,7 +446,7 @@ module Tree =
             | Some c -> switchChart(c, LibraryContext.None, ""); refresh()
             | None -> ()
         elif (!|"context_menu").Tapped() && Chart.cacheInfo.IsSome then
-            ChartContextMenu(Chart.cacheInfo.Value, Chart.context) |> Menu.ShowPage
+            ChartContextMenu(Chart.cacheInfo.Value, Chart.context).Show()
 
         scrollPos.Target <- Math.Min (Math.Max (scrollPos.Target + Mouse.scroll() * 100.0f, total_height - tree_height - origin), 20.0f + origin)
 

@@ -52,4 +52,4 @@ module QuickOptions =
         override this.Title = N"quick"
         override this.OnClose() = callback()
 
-    let show(scoring, callback) = Menu.ShowPage(QuickOptionsPage(scoring, callback))
+    let show(scoring, callback) = QuickOptionsPage(scoring, callback).Show()

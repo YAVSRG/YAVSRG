@@ -109,7 +109,7 @@ module Keybinds =
 
             container.Add(PrettyButton(
                 "keybinds.hotkeys.reset",
-                (fun () -> Menu.ShowPage (ConfirmPage (L"options.keybinds.hotkeys.reset.confirm", Hotkeys.reset_all))),
+                (fun () -> ConfirmPage(L"options.keybinds.hotkeys.reset.confirm", Hotkeys.reset_all).Show()),
                 Icon = Icons.reset))
 
             for hk in Hotkeys.hotkeys.Keys do

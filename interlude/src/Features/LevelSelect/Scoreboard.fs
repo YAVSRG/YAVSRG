@@ -41,7 +41,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
                 LevelSelect.refresh <- true
                 Notifications.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
                 if is_submenu then Menu.Back()
-        ) |> Menu.ShowPage
+        ).Show()
 
 module Scoreboard =
 
@@ -105,7 +105,7 @@ module Scoreboard =
                 Position = { Left = 0.5f %+ 0.0f; Top = 0.0f %+ 0.0f; Right = 1.0f %- 5.0f; Bottom = 0.6f %+ 0.0f })
 
             |* Clickable(this.Select,
-                OnRightClick = fun () -> ScoreContextMenu data |> Menu.ShowPage)
+                OnRightClick = fun () -> ScoreContextMenu(data).Show())
 
         member this.Data = data
 
@@ -113,7 +113,7 @@ module Scoreboard =
             base.Update(elapsedTime, bounds)
             animation.Update elapsedTime
             if Mouse.hover this.Bounds && (!|"delete").Tapped() then ScoreContextMenu.ConfirmDeleteScore(data, false)
-            elif this.Focused && (!|"context_menu").Tapped() then ScoreContextMenu data |> Menu.ShowPage
+            elif this.Focused && (!|"context_menu").Tapped() then ScoreContextMenu(data).Show()
 
     module Loader =
 

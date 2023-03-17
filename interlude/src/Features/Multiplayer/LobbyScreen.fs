@@ -61,7 +61,7 @@ type Lobby() =
         this
         |+ Conditional(
             (fun () -> Network.lobby.IsSome && Network.lobby.Value.Settings.IsSome && Network.lobby.Value.YouAreHost),
-            Button(Icons.options, fun () -> LobbySettingsPage(Network.lobby.Value.Settings.Value) |> Menu.ShowPage),
+            Button(Icons.options, fun () -> LobbySettingsPage(Network.lobby.Value.Settings.Value).Show()),
             Position = Position.SliceTop(90.0f).Margin(10.0f).SliceRight(70.0f)
         )
         |+ Text(
@@ -129,7 +129,7 @@ type LobbyScreen() =
 
     override this.OnBack() = 
         if in_lobby then
-            Menu.ShowPage <| ConfirmPage("Leave this lobby?", Lobby.leave)
+            ConfirmPage("Leave this lobby?", Lobby.leave).Show()
             None
         else Some Screen.Type.MainMenu
 

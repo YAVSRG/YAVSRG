@@ -44,7 +44,7 @@ type private ModSelectPage(onClose) as this =
         |+ Dummy()
         |+ ModCard(L"options.gameplay.pacemaker.enable.name", L"options.gameplay.pacemaker.enable.tooltip",
             Setting.make (fun _ -> enablePacemaker <- not enablePacemaker) (fun _ -> enablePacemaker))
-        |* PrettyButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage)
+        |* PrettyButton("gameplay.pacemaker", fun () -> PacemakerPage().Show())
 
     do
         this.Content(
@@ -56,7 +56,7 @@ type private ModSelectPage(onClose) as this =
     override this.OnClose() = onClose()
 
 type ModSelect(onClose) =
-    inherit StylishButton((fun () -> Menu.ShowPage (ModSelectPage onClose)), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")
+    inherit StylishButton((fun () -> ModSelectPage(onClose).Show()), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

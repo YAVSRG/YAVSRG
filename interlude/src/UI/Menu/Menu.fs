@@ -150,3 +150,6 @@ type ConfirmPage(prompt: string, yes: unit -> unit) as this =
         )
     override this.Title = L"options.confirm"
     override this.OnClose() = ()
+
+type Page with
+    member this.Show() = Menu.ShowPage this

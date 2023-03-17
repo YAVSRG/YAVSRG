@@ -20,10 +20,12 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
 
             |+ PrettyButton(
                 "chart.add_to_collection",
-                (fun () -> Menu.ShowPage (SelectCollectionPage(
-                    fun (name, collection) ->
-                        if CollectionManager.add_to(name, collection, cc) then Menu.Back()
-                    ))),
+                (fun () -> 
+                    SelectCollectionPage(
+                        fun (name, collection) ->
+                            if CollectionManager.add_to(name, collection, cc) then Menu.Back()
+                    ).Show()
+                ),
                 Icon = Icons.add_to_collection
             )
 
@@ -59,7 +61,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                     content
                     |* PrettyButton(
                         "chart.add_to_table",
-                        (fun () -> SelectTableLevelPage(fun level -> if CollectionManager.add_to(level.Name, Level level, cc) then Menu.Back()) |> Menu.ShowPage),
+                        (fun () -> SelectTableLevelPage(fun level -> if CollectionManager.add_to(level.Name, Level level, cc) then Menu.Back()).Show()),
                         Icon = Icons.add_to_collection,
                         Text = Localisation.localiseWith [table.Name] "options.chart.add_to_table.name"
                     )
@@ -78,7 +80,7 @@ type ChartContextMenu(cc: CachedChart, context: LibraryContext) as this =
                 Library.delete cc
                 LevelSelect.refresh <- true
                 if is_submenu then Menu.Back()
-            ) |> Menu.ShowPage
+        ).Show()
 
 type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGroupContext) as this =
     inherit Page()
@@ -100,11 +102,11 @@ type GroupContextMenu(name: string, charts: CachedChart seq, context: LibraryGro
                 Library.deleteMany charts
                 LevelSelect.refresh <- true
                 if is_submenu then Menu.Back()
-            ) |> Menu.ShowPage
+        ).Show()
 
     static member Show(name, charts, context) =
         match context with
-        | LibraryGroupContext.None -> GroupContextMenu(name, charts, context) |> Menu.ShowPage
-        | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value) |> Menu.ShowPage
-        | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value) |> Menu.ShowPage
-        | LibraryGroupContext.Table lvl -> (EditLevelPage (Table.current().Value.TryLevel(lvl).Value)) |> Menu.ShowPage
+        | LibraryGroupContext.None -> GroupContextMenu(name, charts, context).Show()
+        | LibraryGroupContext.Folder id -> EditFolderPage(id, Library.collections.GetFolder(id).Value).Show()
+        | LibraryGroupContext.Playlist id -> EditPlaylistPage(id, Library.collections.GetPlaylist(id).Value).Show()
+        | LibraryGroupContext.Table lvl -> (EditLevelPage (Table.current().Value.TryLevel(lvl).Value)).Show()

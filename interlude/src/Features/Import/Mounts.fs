@@ -129,7 +129,7 @@ module Mounts =
         let editButtons =
             SwitchContainer.Row<Button>(Position = Position.SliceBottom(60.0f).Margin 5.0f)
             |+ Button(sprintf "%s %s" Icons.edit (L"imports.mount.edit"),
-                (fun () -> Menu.ShowPage(EditorPage setting)),
+                (fun () -> EditorPage(setting).Show()),
                 Position = { Position.Default with Right = 0.5f %+ 0.0f })
             |+ Button(sprintf "%s %s" Icons.delete (L"imports.mount.delete"),
                 (fun () -> setting.Value <- None),
