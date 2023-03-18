@@ -245,6 +245,7 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
+        scroll_pos.Target <- Math.Max(0.0f, Math.Min(scroll_pos.Target, contentHeight - this.Bounds.Height))
         scroll_pos.Update elapsedTime
 
         let mutable scrollby = 0.0f
@@ -288,8 +289,9 @@ type ScrollContainer(child: Widget, contentHeight: float32) =
         child.Init this
         child.Position <- Position.SliceTop(contentHeight).Translate(0.0f, -scroll_pos.Value).Margin(this.Margin)
 
+    member this.RemainingScrollAnimation = scroll_pos.Target - scroll_pos.Value
     member this.Scroll(amount: float32) =
-        scroll_pos.Target <- Math.Max(0.0f, Math.Min(scroll_pos.Target + amount, contentHeight - this.Bounds.Height))
+        scroll_pos.Target <- scroll_pos.Target + amount
 
 /// Container that provides navigation and selection using arrow keys + enter
 /// Content is assumed to be positioned in a layout that fits the navigation
