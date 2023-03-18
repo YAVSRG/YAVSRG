@@ -38,11 +38,12 @@ module Callout =
 
     let measure (c: Callout) : float32 =
         let spacing = spacing c.IsSmall
-        let mutable result = -spacing
+        let mutable result = 0.0f
         for b in c.Contents do
             match b with
             | Header _ -> result <- result + header_size c.IsSmall
-            | Body xs -> result <- result + float32 xs.Length * text_size c.IsSmall + float32 (xs.Length - 1) * text_spacing c.IsSmall 
+            | Body xs -> 
+                result <- result + (float32 xs.Length * text_size c.IsSmall) + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
             | Hotkey _ -> result <- result + text_size c.IsSmall
             result <- result + spacing
         result
@@ -53,7 +54,7 @@ module Callout =
             match c._Icon with
             | Some i ->
                 let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
-                Text.drawB(Style.baseFont, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.5f, col)
+                Text.drawB(Style.baseFont, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
                 x + icon_size + 60.0f
             | None -> x
         let spacing = spacing c.IsSmall
@@ -75,7 +76,11 @@ module Callout =
             | Hotkey hk ->
                 let size = text_size c.IsSmall
                 // todo: color
-                Text.drawB(Style.baseFont, Localisation.localiseWith [(!|hk).ToString()] "misc.hotkeyhint", size, x, y, col)
+                Text.drawB(
+                    Style.baseFont,
+                    Localisation.localiseWith [(!|hk).ToString()] "misc.hotkeyhint",
+                    size, x, y,
+                    (Color.FromArgb(0, 120, 190), snd col))
                 y <- y + size
             y <- y + spacing
 

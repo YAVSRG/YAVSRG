@@ -59,7 +59,7 @@ type WaveformRender(fade: Animation.Fade) =
             Draw.rect (Rect.Create (x, this.Bounds.Top, x + 2.0f, this.Bounds.Bottom)) (Color.FromArgb(fade.Alpha, Color.Red))
             por <- por + this.MsPerBeat
 
-type GlobalSync(chart: Chart) =
+type GlobalSync(chart: Chart, when_done: Time -> unit) =
     inherit StaticContainer(NodeType.Leaf)
 
     let chart_mspb, chart_por =
@@ -92,7 +92,7 @@ type GlobalSync(chart: Chart) =
                 "Done",
                 Interlude.UI.Icons.ready,
                 80.0f,
-                Menu.Back,
+                when_done(waveform.PointOfReference),
                 Position = Position.Row(700.0f, 80.0f).TrimRight(200.0f).SliceRight(250.0f))
         )
 
@@ -213,15 +213,14 @@ type GlobalSync(chart: Chart) =
             if taps.Count > 13 then taps.RemoveAt(0)
         | _ -> ()
 
-type TileButton(body: Callout, onclick: unit -> unit) =
+type TileButton(body: Callout, onclick: unit -> unit, is_selected: unit -> bool) =
     inherit StaticContainer(NodeType.Button (onclick))
 
     let body_height = Callout.measure body
 
-    member this.Height = body_height + this.Margin * 2.0f
-    member val Active = false with get, set
     member val Disabled = false with get, set
-    member val Margin = 20.0f with get, set
+    member val Margin = (0.0f, 20.0f) with get, set
+    member this.Height = body_height + snd this.Margin * 2.0f
 
     override this.Init(parent) =
         this |* Clickable.Focus(this)
@@ -230,38 +229,51 @@ type TileButton(body: Callout, onclick: unit -> unit) =
     override this.Draw() =
         let color, dark = 
             if this.Disabled then Colors.grey1, false
-            elif this.Active then Colors.yellow, true
+            elif is_selected() then Colors.yellow, true
             elif this.Focused then Colors.pink, false
             else Colors.grey1, false
         Draw.rect this.Bounds (Color.FromArgb(180, color))
         Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
-        Callout.draw (this.Bounds.Left + this.Margin, this.Bounds.Top + this.Margin, body_height, dark, body)
+        Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_height, dark, body)
 
 type OffsetPage(chart: Chart) as this =
     inherit Page()
 
+    let mutable tab = 0
+
     do 
-        let goffset_tile = 
+        let global_offset_tile = 
             TileButton(
-                Callout.Small.Body("Compensate for hardware delay\nUse this if all songs are offsync").Title("Global offset").Icon(Icons.connected),
-                ignore
+                Callout.Small.Body("Compensate for hardware delay\nUse this if all songs are offsync").Title("Hardware sync").Icon(Icons.connected),
+                (fun () -> tab <- 1),
+                fun () -> tab = 1
+            )
+            
+        let local_offset_tile = 
+            TileButton(
+                Callout.Small.Body("Synchronise this chart\nUse this if the chart's timing is off").Title("Chart sync").Icon(Icons.reset),
+                (fun () -> tab <- 2),
+                fun () -> tab = 2
+            )
+        
+        let visual_offset_tile = 
+            TileButton(
+                Callout.Small.Body("Adjust your scroll speed or hitposition\nUse this if your timing is off").Title("Visual sync").Icon(Icons.preview),
+                (fun () -> tab <- 3),
+                fun () -> tab = 3
             )
 
-        goffset_tile.Position <- Position.Box(0.33f, 0.1f, 600.0f, goffset_tile.Height)
+        let height = max (max global_offset_tile.Height local_offset_tile.Height) visual_offset_tile.Height
 
         this.Content(
-            column()
-            |+ PrettyButton("offset.globaloffset", 
-                fun () -> 
-                    goffset_tile.Active <- true
-                    { new Page() with
-                        override this.Init(parent) =
-                            this.Content(GlobalSync chart)
-                            base.Init parent
-                        override this.OnClose() = ()
-                        override this.Title = N"offset.globaloffset"
-                    }.Show()).Pos(200.0f)
-            |+ goffset_tile
+            StaticContainer(NodeType.Leaf)
+            |+ (
+                GridContainer(1, 3, Spacing = (100.0f, 0.0f), Position = Position.Row(60.0f, height).Margin(150.0f, 0.0f))
+                |+ global_offset_tile
+                |+ local_offset_tile
+                |+ visual_offset_tile
+            )
+            |+ Conditional((fun () -> tab = 1), GlobalSync(chart, fun s -> tab <- 0), Position = Position.TrimTop(100.0f + height))
         )
 
     override this.Title = N"offset"

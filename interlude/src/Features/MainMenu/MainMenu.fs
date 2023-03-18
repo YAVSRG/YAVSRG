@@ -2,7 +2,7 @@
 
 open System
 open Prelude.Common
-open Interlude
+open Interlude.Features
 open Interlude.Options
 open Interlude.Utils
 open Percyqaz.Flux.Input
@@ -93,7 +93,7 @@ type MainMenuScreen() as this =
         
     override this.OnEnter prev =
 
-        //Features.OffsetPage(Features.Gameplay.Chart.current.Value).Show()
+        OffsetPage(Gameplay.Chart.current.Value).Show()
 
         if AutoUpdate.updateAvailable then Notifications.add (L"notification.update.available", NotificationType.System)
         if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()
