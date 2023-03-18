@@ -1,11 +1,12 @@
 ﻿namespace Interlude.Features
 
 open Percyqaz.Common
-open Prelude.Common
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
+open Prelude.Common
+open Prelude.Charts.Formats.Interlude
 open Interlude.Options
 open Interlude.UI.Menu
 
@@ -57,52 +58,128 @@ type WaveformRender(fade: Animation.Fade) =
             Draw.rect (Rect.Create (x, this.Bounds.Top, x + 2.0f, this.Bounds.Bottom)) (Color.FromArgb(fade.Alpha, Color.Red))
             por <- por + this.MsPerBeat
 
-type Progress =
-    | Waiting_For_Taps = 0uy
-    | Keep_Going = 1uy
-    | Show_Waveform = 2uy
-    | Confirm_Global_Sync = 3uy
-
-type OffsetPage() as this =
-    inherit Page()
+type GlobalSync(chart: Chart) =
+    inherit StaticContainer(NodeType.Leaf)
 
     let chart_mspb, chart_por =
-        match Gameplay.Chart.current with
-        | Some c -> let (por, (_, mspb)) = c.BPM.First.Value in (mspb * 1.0f<beat>, por %% (mspb * 1.0f<beat>))
-        | None -> 500.0f<ms>, 0.0f<ms>
+        let (por, (_, mspb)) = chart.BPM.First.Value in (mspb * 1.0f<beat>, por %% (mspb * 1.0f<beat>))
 
+    let mutable step2_completion = 0
     let mutable deviation = 60.0f<ms>
-    let threshold = 12.0f<ms>
+    let step1_threshold = 12.0f<ms>
+    let step2_threshold = 5.0f<ms>
 
-    let mutable state = Progress.Waiting_For_Taps
-    let mutable try_again = false
+    let mutable step = 0
 
     let taps = ResizeArray<Time>()
     let tap_fade = Animation.Fade 0.0f
+    let step1_fade = Animation.Fade 0.0f
+    let step2_fade = Animation.Fade 0.0f
     let waveform_fade = Animation.Fade 0.0f
-    let waveform = WaveformRender(waveform_fade, Position = Position.SliceBottom(500.0f).TrimBottom(300.0f))
-
-    do 
-        this.Content(
-            column()
-            |+ PrettySetting("system.audiooffset", Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>)), 0.001f)).Pos(800.0f)
-            |+ Text("Tap to the beat ...", Align = Alignment.CENTER, Position = Position.Row(200.0f, 80.0f))
-            |+ Text((fun () -> if state = Progress.Keep_Going then "Keep going ..." elif try_again then "A bit more ..." else  ""), Align = Alignment.CENTER, Position = Position.Row(300.0f, 80.0f))
-            |+ waveform
+    let step3_fade = Animation.Fade 0.0f
+    let waveform = WaveformRender(waveform_fade, Position = { Position.Default with Top = 0.5f %- 100.0f; Bottom = 0.5f %+ 100.0f })
+    let offset_changer =
+        Conditional((fun () -> step = 3),
+            PrettySetting(
+                "system.audiooffset",
+                Slider(options.AudioOffset |> Setting.trigger (fun v -> Song.changeGlobalOffset (float32 options.AudioOffset.Value * 1.0f<ms>)), 0.001f)
+            ).Pos(700.0f)
         )
+    let done_button =
+        Conditional((fun () -> step = 3),
+            IconButton(
+                "Done",
+                Interlude.UI.Icons.ready,
+                80.0f,
+                Menu.Back,
+                Position = Position.Row(700.0f, 80.0f).TrimRight(200.0f).SliceRight(250.0f))
+        )
+
+    let step_1() =
+        step <- 1
+        taps.Clear()
+        step1_fade.Target <- 1.0f
+        step2_fade.Target <- 0.0f
+        step3_fade.Target <- 0.0f
+        waveform_fade.Target <- 0.0f
+
+    let step_2(por, mspb) =
+        step <- 2
+        waveform.PointOfReference <- por
+        waveform.MsPerBeat <- mspb
+        step1_fade.Target <- 0.0f
+        step2_fade.Target <- 1.0f
+        waveform_fade.Target <- 1.0f
+
+    let step_3() =
+        step <- 3
+        step2_fade.Target <- 0.0f
+        step3_fade.Target <- 1.0f
+        offset_changer.Update(0.0, true)
+
+    override this.Init(parent) =
+        this
+        |+ offset_changer
+        |+ done_button
+        |* waveform
+
+        base.Init(parent)
+
+        step_1()
 
     override this.Draw() =
         base.Draw()
 
+        // step 1
+        Text.drawFillB(
+            Style.baseFont,
+            "Tap to the beat ...",
+            this.Bounds.SliceTop(280.0f).SliceBottom(80.0f),
+            (Color.FromArgb(step1_fade.Alpha, Color.White), Color.FromArgb(step1_fade.Alpha, Color.Black)),
+            Alignment.CENTER)
+        Text.drawFillB(
+            Style.baseFont,
+            "You can use any key",
+            this.Bounds.SliceTop(330.0f).SliceBottom(50.0f),
+            (Color.FromArgb(step1_fade.Alpha, Color.Silver), Color.FromArgb(step1_fade.Alpha, Color.Black)),
+            Alignment.CENTER)
+
         let w, color = 
-            if taps.Count <= 12 then float32 (13 - taps.Count) / 13.0f * 125.0f, Color.White
-            else deviation / threshold * 25.0f, Color.FromArgb(200, 200, 255)
-        Draw.rect (Rect.Create(this.Bounds.CenterX - w, this.Bounds.Top + 400.0f, this.Bounds.CenterX + w, this.Bounds.Top + 480.0f)) (Color.FromArgb(tap_fade.Alpha, color))
+            if taps.Count <= 12 then float32 (14 - taps.Count) / 12.0f * 100.0f, Color.White
+            else deviation / step1_threshold * 25.0f, Color.FromArgb(200, 200, 255)
+        Draw.rect (Rect.Create(this.Bounds.CenterX - w, this.Bounds.Top + 350.0f, this.Bounds.CenterX + w, this.Bounds.CenterY - 120.0f)) (Color.FromArgb(tap_fade.Alpha, color))
+
+        // step 2
+        Text.drawFillB(
+            Style.baseFont,
+            "Keep tapping to the beat until the lines stop moving",
+            this.Bounds.SliceTop(280.0f).SliceBottom(80.0f),
+            (Color.FromArgb(step2_fade.Alpha, Color.White), Color.FromArgb(step2_fade.Alpha, Color.Black)),
+            Alignment.CENTER)
+        Text.drawFillB(
+            Style.baseFont,
+            "If the red lines keep jumping around, try another song",
+            this.Bounds.SliceTop(330.0f).SliceBottom(50.0f),
+            (Color.FromArgb(step2_fade.Alpha, Color.Silver), Color.FromArgb(step2_fade.Alpha, Color.Black)),
+            Alignment.CENTER)
+
+        // step 3
+        Text.drawFillB(
+            Style.baseFont,
+            "Adjust your offset to align with the peaks",
+            this.Bounds.SliceTop(280.0f).SliceBottom(80.0f),
+            (Color.FromArgb(step3_fade.Alpha, Color.White), Color.FromArgb(step3_fade.Alpha, Color.Black)),
+            Alignment.CENTER)
     
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
         tap_fade.Update elapsedTime
+        step1_fade.Update elapsedTime
+        step2_fade.Update elapsedTime
+        step3_fade.Update elapsedTime
     
+        if step = 3 then ()
+        else
         match Input.consumeAny InputEvType.Press with
         | ValueSome (Key _, t) ->
             let raw_song_time = (t - 1.0f<ms> * float32 options.AudioOffset.Value * Gameplay.rate.Value - Song.localOffset)
@@ -110,16 +187,12 @@ type OffsetPage() as this =
             tap_fade.Value <- 1.0f
 
             if taps.Count > 12 then
-                if state < Progress.Show_Waveform then
+                if step = 1 then
                     let deltas = taps |> Seq.pairwise |> Seq.map (fun (a, b) -> b - a)
                     let average_deviation = (deltas |> Seq.sumBy(fun x -> abs (x - chart_mspb))) / float32 taps.Count
                     deviation <- average_deviation
-                    let acceptable = average_deviation < threshold
-                    if not acceptable then try_again <- true; state <- Progress.Waiting_For_Taps
-                    else 
-                        state <- Progress.Show_Waveform
-                        try_again <- false
-                        waveform_fade.Target <- 1.0f
+                    let acceptable = average_deviation < step1_threshold
+                    if acceptable then 
                         let mutable w = 0.0f
                         let mutable t = 0.0f<ms>
                         for i = 1 to taps.Count - 1 do
@@ -127,18 +200,34 @@ type OffsetPage() as this =
                             t <- t + (taps[i - 1] % chart_mspb) * 0.5f
                             w <- w + 1.0f
                         let por = t / w
-                        printfn "Your POR: %f" (por % chart_mspb)
-                        printfn "Chart POR: %f" (chart_por % chart_mspb)
-                        waveform.PointOfReference <- por
-                        waveform.MsPerBeat <- chart_mspb
-                else
+                        step_2(por, chart_mspb)
+                elif step = 2 then
                     let t = taps.[taps.Count - 1]
                     let diff = (t % chart_mspb) - waveform.PointOfReference
-                    if Time.Abs diff > 2.0f<ms> then waveform.PointOfReference <- waveform.PointOfReference + diff * 0.3f
+                    waveform.PointOfReference <- waveform.PointOfReference + diff * 0.3f
+                    step2_completion <- step2_completion + 1
+                    if Time.Abs diff * 0.3f > step2_threshold then step2_completion <- 0
+                    if step2_completion = 5 then step_3()
 
             if taps.Count > 13 then taps.RemoveAt(0)
-            elif taps.Count > 3 && state < Progress.Keep_Going then state <- Progress.Keep_Going
         | _ -> ()
+
+type OffsetPage(chart: Chart) as this =
+    inherit Page()
+
+    do 
+        this.Content(
+            column()
+            |+ PrettyButton("offset.globaloffset", 
+                fun () -> 
+                    { new Page() with
+                        override this.Init(parent) =
+                            this.Content(GlobalSync chart)
+                            base.Init parent
+                        override this.OnClose() = ()
+                        override this.Title = N"offset.globaloffset"
+                    }.Show()).Pos(200.0f)
+        )
 
     override this.Title = N"offset"
     override this.OnClose() = ()

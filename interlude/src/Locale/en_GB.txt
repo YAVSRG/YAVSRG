@@ -470,3 +470,6 @@ options.lobby.host_rotation.name=Host rotation
 options.lobby.host_rotation.tooltip=When enabled, host is automatically passed on to the next person in the lobby.\nThis gives everyone a turn to pick a song.
 options.lobby.auto_countdown.name=Automatic countdown
 options.lobby.auto_countdown.tooltip=When enabled, the round will automatically start when everyone is ready.
+options.offset.name=Offset Wizard
+options.offset.globaloffset.name=Global Offset
+options.offset.globaloffset.tooltip=

@@ -7,6 +7,15 @@ open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.UI
 
+//type CalloutBody =
+//    | Header of string
+//    | Body of string
+//    | Hotkey of Hotkey
+
+//type CalloutLifespan =
+//    | Notification
+//    | KeyHeld of Bind
+
 [<RequireQualifiedAccess>]
 type NotificationType =
     | Info

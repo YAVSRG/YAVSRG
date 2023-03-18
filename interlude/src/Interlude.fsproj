@@ -49,7 +49,7 @@
     <Compile Include="Options.fs" />
     <Compile Include="UI\Icons.fs" />
     <Compile Include="UI\Style.fs" />
-    <Compile Include="UI\Notifications.fs" />
+    <Compile Include="UI\Callouts.fs" />
     <Compile Include="UI\Components\Controls.fs" />
     <Compile Include="UI\Components\Tabs.fs" />
     <Compile Include="UI\Components\Dropdown.fs" />
