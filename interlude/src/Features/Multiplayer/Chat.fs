@@ -34,7 +34,7 @@ type Chat() =
         messages.Add w
         match last_msg with
         | Some m ->
-            if m.VisibleBounds.Visible then
+            if m.Bounds.Top - message_box.RemainingScrollAnimation - message_box.Bounds.Bottom < 200.0f then
                 message_box.Scroll infinityf
         | None -> ()
         last_msg <- Some w
