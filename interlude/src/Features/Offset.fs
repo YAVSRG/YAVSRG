@@ -212,6 +212,18 @@ type GlobalSync(chart: Chart) =
             if taps.Count > 13 then taps.RemoveAt(0)
         | _ -> ()
 
+type TileButton(onclick, isSelected, isDisabled) =
+    inherit StaticContainer(NodeType.Button (onclick))
+
+    member val Header = "" with get, set
+    member val Body = "" with get, set
+    member val Icon = "" with get, set
+    member val Margin = Style.padding with get, set
+
+    override this.Init(parent) =
+        
+        base.Init(parent)
+
 type OffsetPage(chart: Chart) as this =
     inherit Page()
 

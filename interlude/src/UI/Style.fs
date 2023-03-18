@@ -4,6 +4,13 @@ open System.Drawing
 open Percyqaz.Flux.UI
 open Interlude.Utils
 
+module Colors =
+    
+    let green = Color.FromHex("#5CFF85")
+    let yellow = Color.FromHex("#FFD166")
+    let pink = Color.FromHex("##FF85C0")
+    let green3 = Color.FromHex("#33FF66")
+
 // todo: merge into Percyqaz.Flux
 module Style =
 
