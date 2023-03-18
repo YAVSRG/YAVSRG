@@ -125,8 +125,7 @@ module Network =
     let credentials = Credentials.Load()
 
     let target_ip = 
-        try IPAddress.Parse(credentials.Host)
-            //Dns.GetHostAddresses(credentials.Host).[0]
+        try Dns.GetHostAddresses(credentials.Host).[0]
         with err -> Logging.Error("Failed to perform DNS lookup for " + credentials.Host, err); IPAddress.Parse("0.0.0.0")
     
     let client =
