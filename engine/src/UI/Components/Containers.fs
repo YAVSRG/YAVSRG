@@ -410,3 +410,75 @@ type SwapContainer() as this =
         base.Update(elapsedTime, moved)
         let moved = if justSwapped then justSwapped <- false; true else moved
         current.Update(elapsedTime, moved)
+
+
+/// WIP
+type GridContainer<'T when 'T :> Widget>(rows, columns) as this =
+    inherit StaticWidget(NodeType.Switch (fun _ -> this.WhoShouldFocus))
+    
+    let children = ResizeArray<'T>()
+    let mutable last_selected = 0
+    let mutable refresh = false
+
+    let i_to_xy i = (i % columns, i / columns)
+    let xy_to_i (x, y) = x + y * columns
+            
+    override this.Focus() = if children.Count > 0 then base.Focus()
+    override this.Select() = if children.Count > 0 then base.Select()
+
+    member val Spacing = (0.0f, 0.0f) with get, set
+    
+    member private this.WhoIsFocused : int option = Seq.tryFindIndex (fun (c: 'T) -> c.Focused) children
+    member private this.WhoShouldFocus =
+        if children.Count = 0 then failwithf "Tried to focus this %O with no children" this
+        if last_selected >= children.Count then last_selected <- 0
+        children.[last_selected]
+
+    member this.PackContent() =
+        let spacing_x, spacing_y = this.Spacing
+        let height = (this.Bounds.Height - (float32 rows - 1.0f) * spacing_y) / float32 rows
+        let width = (this.Bounds.Width - (float32 columns - 1.0f) * spacing_x) / float32 columns
+        let mutable x = 0
+        let mutable y = 0
+        for w in children do
+            w.Position <- Position.Box(0.0f, 0.0f, float32 x * (width + spacing_x), float32 y * (height + spacing_y), width, height)
+            x <- x + 1
+            if x = columns then x <- 0; y <- y + 1
+
+    member this.Add(child: 'T) =
+        children.Add child
+        if this.Initialised then 
+            child.Init this
+            refresh <- true
+    
+    override this.Init(parent: Widget) =
+        base.Init parent
+        this.PackContent()
+        for c in children do
+            c.Init this
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved || refresh)
+
+        let moved = 
+            if refresh then
+                refresh <- false
+                this.PackContent()
+                true
+            else moved
+
+        for c in children do
+            c.Update(elapsedTime, moved)
+
+        if (!|"up").Tapped() then ()
+        if (!|"select").Tapped() then
+            match this.WhoIsFocused with
+            | Some i -> last_selected <- i; children.[i].Select()
+            | None -> ()
+
+    override this.Draw() =
+        for c in children do
+            c.Draw()
+
+    static member (|+) (parent: #GridContainer<'T>, child: 'T) = parent.Add child; parent
+    static member (|*) (parent: #GridContainer<'T>, child: 'T) = parent.Add child
