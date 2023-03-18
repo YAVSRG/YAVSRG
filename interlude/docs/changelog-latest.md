@@ -1,8 +1,6 @@
-0.6.10.3
+0.6.10.4
 ====
 
-Minor bug fixes
-- When login fails, the server doesn't just kick you with a message any more
-- Idle connections time out after 2 minutes, fixing "Username is already taken" bug
-
+Fixed not being able to connect to the online server
+I commented something out and forgot to put it back
 
