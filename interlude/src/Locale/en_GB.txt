@@ -103,6 +103,7 @@ notification.install.noteskin=Installed noteskin: %0!
 notification.install.pack=Installed pack: %0!
 notification.install.song=Installed song: %0!
 notification.network.disconnected=Disconnected from network\nReason: %0
+notification.network.loginfailed=Login failed: %0
 notification.invited_to_lobby=%0 invited you to a lobby!\nGo to the multiplayer lobby screen to join.
 notification.taskstarted=Task started: %0\n.
 notification.update.available=Update available!\nClick on 'What's New' to see and install it.

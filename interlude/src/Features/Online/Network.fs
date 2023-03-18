@@ -125,7 +125,8 @@ module Network =
     let credentials = Credentials.Load()
 
     let target_ip = 
-        try Dns.GetHostAddresses(credentials.Host).[0]
+        try IPAddress.Parse(credentials.Host)
+            //Dns.GetHostAddresses(credentials.Host).[0]
         with err -> Logging.Error("Failed to perform DNS lookup for " + credentials.Host, err); IPAddress.Parse("0.0.0.0")
     
     let client =
@@ -151,6 +152,9 @@ module Network =
                     status <- LoggedIn
                     username <- name
                     Events.successful_login_ev.Trigger name
+                | Downstream.LOGIN_FAILED reason -> 
+                    Logging.Info(sprintf "Login failed: %s" reason)
+                    Notifications.add(Localisation.localiseWith [reason] "notification.network.loginfailed", NotificationType.Error)
 
                 | Downstream.LOBBY_LIST lobbies -> sync <| fun () ->
                     lobby_list <- lobbies
