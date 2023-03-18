@@ -76,6 +76,7 @@ type [<Sealed>] Conditional(condition: unit -> bool, child: Widget) =
         child.Init this
     override this.Draw() = if condition() then child.Draw()
     override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
         if moved || condition() then child.Update(elapsedTime, moved)
 
 type Frame(nodeType) =
