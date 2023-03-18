@@ -6,7 +6,7 @@ open System.IO
 [<AutoOpen>]
 module Packets =
 
-    let PROTOCOL_VERSION = 6uy
+    let PROTOCOL_VERSION = 7uy
 
     let MULTIPLAYER_REPLAY_DELAY_SECONDS = 3
     let MULTIPLAYER_REPLAY_DELAY_MS = float32 MULTIPLAYER_REPLAY_DELAY_SECONDS * 1000.0f
@@ -197,7 +197,7 @@ module Packets =
         | DISCONNECT of reason: string
         | HANDSHAKE_SUCCESS
         | LOGIN_SUCCESS of username: string
-        // todo: login failure with reason
+        | LOGIN_FAILED of reason: string
         // todo: ping and idle timeout system after 2 mins
 
         | LOBBY_LIST of lobbies: LobbyInfo array
@@ -229,6 +229,7 @@ module Packets =
                 | 0x00uy -> DISCONNECT (br.ReadString())
                 | 0x01uy -> HANDSHAKE_SUCCESS
                 | 0x02uy -> LOGIN_SUCCESS (br.ReadString())
+                | 0x03uy -> LOGIN_FAILED (br.ReadString())
 
                 | 0x10uy -> LOBBY_LIST ( Array.init (br.ReadByte() |> int) (fun _ -> LobbyInfo.Read br) )
                 | 0x11uy -> YOU_JOINED_LOBBY ( Array.init (br.ReadByte() |> int) (fun _ -> br.ReadString()) )
@@ -263,6 +264,7 @@ module Packets =
                 | DISCONNECT reason -> bw.Write reason; 0x00uy
                 | HANDSHAKE_SUCCESS -> 0x01uy
                 | LOGIN_SUCCESS name -> bw.Write name; 0x02uy
+                | LOGIN_FAILED reason -> bw.Write reason; 0x03uy
 
                 | LOBBY_LIST lobbies -> 
                     bw.Write (byte lobbies.Length)

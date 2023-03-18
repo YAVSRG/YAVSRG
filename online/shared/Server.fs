@@ -46,7 +46,12 @@ module Server =
             this.Disconnect() |> ignore
 
     type private Listener(config: Config) =
-        inherit TcpServer(config.Address, config.Port)
+        inherit TcpServer(
+            config.Address,
+            config.Port,
+            OptionKeepAlive = true,
+            OptionTcpKeepAliveTime = 120,
+            OptionTcpKeepAliveRetryCount = 1)
 
         override this.CreateSession() = new Session(this, config)
         override this.OnError(error: SocketError) =

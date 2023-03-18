@@ -61,13 +61,13 @@ module UserState =
                         | UserState.Handshake ->
 
                             if valid_username username then
-                                if usernames.ContainsKey username then Server.kick(id, "Username is taken") else
+                                if usernames.ContainsKey username then Server.send(id, Downstream.LOGIN_FAILED "Username is taken") else
 
                                 usernames.Add(username, id)
                                 user_states.[id] <- UserState.LoggedIn username
                                 Server.send(id, Downstream.LOGIN_SUCCESS username)
                                 Logging.Info(sprintf "[-> %s" username)
-                            else Server.kick(id, "Invalid username")
+                            else Server.send(id, Downstream.LOGIN_FAILED "Invalid username")
 
                         | UserState.Nothing -> Server.kick(id, "Login sent before handshake")
                         | _ -> Server.kick(id, "Login sent twice")
