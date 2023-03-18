@@ -6,10 +6,15 @@ open Interlude.Utils
 
 module Colors =
     
-    let green = Color.FromHex("#5CFF85")
-    let yellow = Color.FromHex("#FFD166")
-    let pink = Color.FromHex("##FF85C0")
-    let green3 = Color.FromHex("#33FF66")
+    let green2 = Color.FromArgb 0xFF33FF66
+    let green3 = Color.FromArgb 0xFF5CFF85
+    let green4 = Color.FromArgb 0xFF89FFA6
+    let yellow = Color.FromArgb 0xFFFFD166
+    let pink = Color.FromArgb 0xFFFF85C0
+
+    let black = Color.Black
+    let white = Color.White
+    let grey1 = Color.FromArgb 0xFF0C1821
 
 // todo: merge into Percyqaz.Flux
 module Style =

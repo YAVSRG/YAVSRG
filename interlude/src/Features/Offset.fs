@@ -8,6 +8,7 @@ open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Interlude.Options
+open Interlude.UI
 open Interlude.UI.Menu
 
 module private LoadWaveform =
@@ -212,26 +213,47 @@ type GlobalSync(chart: Chart) =
             if taps.Count > 13 then taps.RemoveAt(0)
         | _ -> ()
 
-type TileButton(onclick, isSelected, isDisabled) =
+type TileButton(body: Callout, onclick: unit -> unit) =
     inherit StaticContainer(NodeType.Button (onclick))
 
-    member val Header = "" with get, set
-    member val Body = "" with get, set
-    member val Icon = "" with get, set
-    member val Margin = Style.padding with get, set
+    let body_height = Callout.measure body
+
+    member this.Height = body_height + this.Margin * 2.0f
+    member val Active = false with get, set
+    member val Disabled = false with get, set
+    member val Margin = 20.0f with get, set
 
     override this.Init(parent) =
-        
+        this |* Clickable.Focus(this)
         base.Init(parent)
+
+    override this.Draw() =
+        let color, dark = 
+            if this.Disabled then Colors.grey1, false
+            elif this.Active then Colors.yellow, true
+            elif this.Focused then Colors.pink, false
+            else Colors.grey1, false
+        Draw.rect this.Bounds (Color.FromArgb(180, color))
+        Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
+        Callout.draw (this.Bounds.Left + this.Margin, this.Bounds.Top + this.Margin, body_height, dark, body)
 
 type OffsetPage(chart: Chart) as this =
     inherit Page()
 
     do 
+        let goffset_tile = 
+            TileButton(
+                Callout.Small.Body("Compensate for hardware delay\nUse this if all songs are offsync").Title("Global offset").Icon(Icons.connected),
+                ignore
+            )
+
+        goffset_tile.Position <- Position.Box(0.33f, 0.1f, 600.0f, goffset_tile.Height)
+
         this.Content(
             column()
             |+ PrettyButton("offset.globaloffset", 
                 fun () -> 
+                    goffset_tile.Active <- true
                     { new Page() with
                         override this.Init(parent) =
                             this.Content(GlobalSync chart)
@@ -239,6 +261,7 @@ type OffsetPage(chart: Chart) as this =
                         override this.OnClose() = ()
                         override this.Title = N"offset.globaloffset"
                     }.Show()).Pos(200.0f)
+            |+ goffset_tile
         )
 
     override this.Title = N"offset"
