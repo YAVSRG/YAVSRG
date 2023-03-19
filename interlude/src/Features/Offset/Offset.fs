@@ -217,7 +217,7 @@ type GlobalSync(chart: Chart, when_done: Time -> unit) =
 type TileButton(body: Callout, onclick: unit -> unit, is_selected: unit -> bool) =
     inherit StaticContainer(NodeType.Button (onclick))
 
-    let body_height = Callout.measure body
+    let body_height = snd <| Callout.measure body
 
     member val Disabled = false with get, set
     member val Margin = (0.0f, 20.0f) with get, set
@@ -235,7 +235,7 @@ type TileButton(body: Callout, onclick: unit -> unit, is_selected: unit -> bool)
             else Colors.shadow_1, false
         Draw.rect this.Bounds (Color.FromArgb(180, color))
         Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
-        Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_height, dark, body)
+        Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_height, Colors.text, body)
 
 type OffsetPage(chart: Chart) as this =
     inherit Page()

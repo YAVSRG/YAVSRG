@@ -32,20 +32,30 @@ module Callout =
     let text_size isSmall = if isSmall then 18.0f else 25.0f
     let text_spacing isSmall = if isSmall then 8.0f else 10.0f
 
-    let measure (c: Callout) : float32 =
+    let measure (c: Callout) : float32 * float32 =
         let spacing = spacing c.IsSmall
-        let mutable result = 0.0f
+        let mutable width = 0.0f
+        let mutable height = 0.0f
         for b in c.Contents do
             match b with
-            | Header _ -> result <- result + header_size c.IsSmall
-            | Body xs -> 
-                result <- result + (float32 xs.Length * text_size c.IsSmall) + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
-            | Hotkey _ -> result <- result + text_size c.IsSmall
-            result <- result + spacing
-        result
+            | Header text -> 
+                let size = header_size c.IsSmall
+                height <- height + size
+                width <- max width (Text.measure (Style.baseFont, text) * size)
+            | Body xs ->
+                let size = text_size c.IsSmall
+                height <- height + (float32 xs.Length * size) + (float32 (xs.Length - 1) * text_spacing c.IsSmall)
+                for x in xs do width <- max width (Text.measure (Style.baseFont, x) * size)
+            | Hotkey _ -> height <- height + text_size c.IsSmall
+            height <- height + spacing
+        let icon_size =
+            if c._Icon.IsSome then
+                min (if c.IsSmall then 30.0f else 50.0f) height + 60.0f
+            else 0.0f
+                
+        width + icon_size + 30.0f, height
 
-    let draw (x, y, height, dark, c: Callout) =
-        let col = if dark then (Colors.shadow_1, Colors.white) else (Colors.white, Colors.black)
+    let draw (x, y, height, col, c: Callout) =
         let x =
             match c._Icon with
             | Some i ->
@@ -76,16 +86,17 @@ module Callout =
                     Style.baseFont,
                     Localisation.localiseWith [(!|hk).ToString()] "misc.hotkeyhint",
                     size, x, y,
-                    (Color.FromArgb(0, 120, 190), snd col))
+                    (Colors.cyan_accent, Colors.shadow_2))
                 y <- y + size
             y <- y + spacing
 
 type private Notification =
     {
         Data: Callout
-        Height: float32
+        Size: float32 * float32
         Fade: Animation.Fade
-        Color: Color
+        FillColor: Color * Color
+        ContentColor: Color * Color
         mutable Duration: float
     }
 
@@ -106,40 +117,42 @@ module Notifications =
                 elif i.Fade.Value < 0.01f then sync(fun () -> items.Remove i |> ignore)
 
         override this.Draw() =
-            let width = this.Bounds.Width / 3.0f // for now
             let padding = 20.0f
             let mutable y = this.Bounds.Top + 70.0f
             for i in items do
-                let bounds = Rect.Box(this.Bounds.Right - width * i.Fade.Value, y, width, i.Height + padding * 2.0f)
-                Draw.rect (bounds.Expand(5.0f, 0.0f).SliceLeft(5.0f)) (Color.FromArgb(i.Fade.Alpha, i.Color))
-                Draw.rect bounds (Color.FromArgb(i.Fade.Alpha * 2 / 3, i.Color))
-                Callout.draw (bounds.Left, bounds.Top + padding, i.Height, false, i.Data)
-                y <- y + (i.Height + padding * 2.0f) * i.Fade.Value
+                let width, height = i.Size
+                let accent, body = i.FillColor
+                let bounds = Rect.Box(this.Bounds.Right - width * i.Fade.Value, y, width, height + padding * 2.0f)
+                Draw.rect (bounds.Expand(5.0f, 0.0f).SliceLeft(5.0f)) (accent.O4a i.Fade.Alpha)
+                Draw.rect bounds (body.O3a i.Fade.Alpha)
+                Callout.draw (bounds.Left, bounds.Top + padding, height, i.ContentColor, i.Data)
+                y <- y + (height + padding * 2.0f) * i.Fade.Value
 
     let display = Display()
 
     let tooltip (b: Bind, str: string, hotkey: Hotkey option) = ()
 
-    let private add (body: Callout, color: Color) =
+    let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) =
         let n: Notification =
             {
                 Data = body
-                Height = Callout.measure body
-                Color = color
+                Size = Callout.measure body
+                FillColor = colors
+                ContentColor = content_colors
                 Fade = Animation.Fade(0.0f, Target = 1.0f)
                 Duration = 2000.0
             }
         if Percyqaz.Flux.Utils.isUiThread() then items.Add n else sync(fun () -> items.Add n)
 
     let task_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.pink)
+        add (Callout.Small.Icon(icon).Body(description).Title(title), (Colors.pink_accent, Colors.pink), Colors.text)
 
     let action_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.cyan)
+        add (Callout.Small.Icon(icon).Body(description).Title(title), (Colors.cyan_accent, Colors.cyan), Colors.text)
 
     let system_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.green)
+        add (Callout.Small.Icon(icon).Body(description).Title(title), (Colors.green_accent, Colors.green), Colors.text)
 
     let error(title, description) =
-        add (Callout.Small.Icon(Icons.alert).Body(description).Title(title), Colors.red)
+        add (Callout.Small.Icon(Icons.alert).Body(description).Title(title), (Colors.red_accent, Colors.red), Colors.text)
         

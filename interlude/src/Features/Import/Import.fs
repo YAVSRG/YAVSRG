@@ -21,7 +21,7 @@ module FileDropHandling =
                     if success then
                         Notifications.action_feedback(Icons.check, L"notification.import_success", "")
                         LevelSelect.refresh <- true // todo: this should just be an event that level select listens to
-                    else Notifications.action_feedback(Icons.x, L"notification.import_failure", "")
+                    else Notifications.error(L"notification.import_failure", "")
             )
             true
 
