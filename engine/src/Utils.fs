@@ -3,6 +3,7 @@
 open System
 open System.IO
 open System.Reflection
+open System.Threading
 open SixLabors.ImageSharp
 
 module Utils =
@@ -21,3 +22,7 @@ module Utils =
     type Color = Drawing.Color
 
     let lerp x a b : float32 = (b - a) * x + a
+
+    let mutable internal UITHREAD = 0
+
+    let isUiThread() = Thread.CurrentThread.ManagedThreadId = UITHREAD

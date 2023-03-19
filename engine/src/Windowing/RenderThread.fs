@@ -37,7 +37,9 @@ type RenderThread(window: NativeWindow, audioDevice: int, root: Root, afterInit:
         with fatal_err -> Logging.Critical("Fatal crash in UI thread", fatal_err); window.Close()
 
     member this.Start() =
-        Thread(this.Loop).Start()
+        let thread = Thread(this.Loop)
+        Percyqaz.Flux.Utils.UITHREAD <- thread.ManagedThreadId
+        thread.Start()
         
     member this.DispatchFrame() =
 
