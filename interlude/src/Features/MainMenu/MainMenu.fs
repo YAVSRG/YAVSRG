@@ -92,10 +92,7 @@ type MainMenuScreen() as this =
             Position = Position.Box(1.0f, 1.0f, 300.0f, 50.0f).Translate(-625.0f, -50.0f) )
         
     override this.OnEnter prev =
-
-        Offset.OffsetPage(Gameplay.Chart.current.Value).Show()
-
-        if AutoUpdate.updateAvailable then Notifications.add (L"notification.update.available", NotificationType.System)
+        if AutoUpdate.updateAvailable then Notifications.system_feedback (Icons.system_notification, L"notification.update_available.title", L"notification.update_available.body")
         if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()
         splashText <- newSplash()
         Logo.moveMenu()

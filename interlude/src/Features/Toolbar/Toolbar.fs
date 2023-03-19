@@ -58,13 +58,13 @@ type Toolbar() =
             let path = Path.Combine(getDataPath "Screenshots", id)
             let img = Render.screenshot()
             ImageServices.save_image.Request((img, path), img.Dispose)
-            Notifications.add("Screenshot saved: " + id, NotificationType.Info) )
+            Notifications.action_feedback(Icons.screenshot, L"notification.screenshot", id) )
         |+ HotkeyAction("reload_themes", fun () -> 
             first_init <- true
             Noteskins.load()
             Themes.load()
             first_init <- false
-            Notifications.add("Reloaded themes & noteskins", NotificationType.Info) )
+            Notifications.action_feedback(Icons.system_notification, L"notification.reload_themes", "") )
         |* Jukebox(Position = Position.Margin(0.0f, HEIGHT))
 
     override this.Draw() = 

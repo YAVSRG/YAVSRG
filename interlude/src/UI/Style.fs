@@ -11,6 +11,7 @@ module Colors =
     let green4 = Color.FromArgb 0xFF89FFA6
     let yellow = Color.FromArgb 0xFFFFD166
     let pink = Color.FromArgb 0xFFFF85C0
+    let blue = Color.FromArgb 0xFF0078BE
 
     let black = Color.Black
     let white = Color.White

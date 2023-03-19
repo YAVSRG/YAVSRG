@@ -53,7 +53,7 @@ type private SMImportCard(id: int, data: EOPackAttrs) as this =
                     if completed then Library.Imports.auto_convert.Request(target,
                         fun b ->
                             LevelSelect.refresh <- LevelSelect.refresh || b
-                            Notifications.add (Localisation.localiseWith [data.name] "notification.install.pack", NotificationType.Task)
+                            Notifications.task_feedback (Icons.download, L"notification.install_pack", data.name)
                             File.Delete target
                             status <- if b then Installed else DownloadFailed
                     )

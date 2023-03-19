@@ -8,6 +8,7 @@ open Prelude.Data.Themes.Noteskin
 open Prelude.Data
 open Prelude.Data.Charts.Sorting
 open Interlude.UI
+open Interlude.Utils
 open Interlude.Content
 
 type NoteskinCard(data: RepoEntry) as this =
@@ -20,7 +21,7 @@ type NoteskinCard(data: RepoEntry) as this =
             fun success -> 
                 if success then 
                     sync Noteskins.load
-                    Notifications.add (Localisation.localiseWith [data.Name] "notification.install.noteskin", NotificationType.Task)
+                    Notifications.task_feedback (Icons.download, L"notification.install_noteskin", data.Name)
         )
         downloaded <- true
 

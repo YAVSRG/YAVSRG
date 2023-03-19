@@ -87,8 +87,8 @@ module Wiki =
             if AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded then
                 buttons |* IconButton(L"wiki.downloadupdate", Icons.download, 50.0f,
                 fun () -> 
-                    AutoUpdate.applyUpdate(fun () -> Notifications.add (L"notification.update.installed", NotificationType.System))
-                    Notifications.add (L"notification.update.installing", NotificationType.System)
+                    AutoUpdate.applyUpdate(fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.update_installed.title", L"notification.update_installed.body"))
+                    Notifications.system_feedback(Icons.system_notification, L"notification.update_installing.title", L"notification.update_installing.body")
                 ,
                 Position = Position.Column(500.0f, 270.0f))
         

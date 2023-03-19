@@ -11,6 +11,7 @@ open Prelude.Common
 open Prelude.Data.Charts.Caching
 open Prelude.Scoring
 open Interlude.UI
+open Interlude.Utils
 open Interlude.Web.Shared
 
 [<Json.AutoCodec>]
@@ -144,7 +145,7 @@ module Network =
                 match packet with
                 | Downstream.DISCONNECT reason ->
                     Logging.Info(sprintf "Disconnected from server: %s" reason)
-                    Notifications.add(Localisation.localiseWith [reason] "notification.network.disconnected", NotificationType.Error)
+                    Notifications.error(L"notification.network.disconnected", reason)
                 | Downstream.HANDSHAKE_SUCCESS -> if credentials.Username <> "" then this.Send(Upstream.LOGIN credentials.Username)
                 | Downstream.LOGIN_SUCCESS name -> sync <| fun () -> 
                     Logging.Info(sprintf "Logged in as %s" name)
@@ -153,7 +154,7 @@ module Network =
                     Events.successful_login_ev.Trigger name
                 | Downstream.LOGIN_FAILED reason -> 
                     Logging.Info(sprintf "Login failed: %s" reason)
-                    Notifications.add(Localisation.localiseWith [reason] "notification.network.loginfailed", NotificationType.Error)
+                    Notifications.error(L"notification.network.loginfailed", reason)
 
                 | Downstream.LOBBY_LIST lobbies -> sync <| fun () ->
                     lobby_list <- lobbies

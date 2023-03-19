@@ -33,13 +33,16 @@ module Mounts =
                 |+ PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup).Pos(200.0f)
                 |+ PrettyButton.Once(
                         "mount.import",
-                        (fun () -> import <- true),
-                        Localisation.localiseWith ["Import new songs"] "notification.taskstarted", NotificationType.Task
+                        fun () -> 
+                            import <- true
+                            Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "")
                     ).Pos(400.0f)
                 |+ PrettyButton.Once(
                         "mount.importall",
-                        (fun () -> import <- true; mount.LastImported <- System.DateTime.UnixEpoch),
-                        Localisation.localiseWith ["Import all songs"] "notification.taskstarted", NotificationType.Task
+                        fun () -> 
+                            import <- true
+                            mount.LastImported <- System.DateTime.UnixEpoch
+                            Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "")
                     ).Pos(500.0f)
             )
 
@@ -91,11 +94,11 @@ module Mounts =
                 fun path ->
                     match mountType, path with
                     | Game.Osu, PackFolder -> setting.Value <- MountedChartSource.Pack ("osu!", path) |> Some
-                    | Game.Osu, _ -> Notifications.add (L"imports.mount.create.osu.error", NotificationType.Error)
+                    | Game.Osu, _ -> Notifications.error (L"imports.mount.create.osu.error", "")
                     | Game.Stepmania, FolderOfPacks
                     | Game.Etterna, FolderOfPacks -> setting.Value <- MountedChartSource.Library path |> Some
-                    | Game.Stepmania, _ -> Notifications.add (L"imports.mount.create.stepmania.error", NotificationType.Error)
-                    | Game.Etterna, _ -> Notifications.add (L"imports.mount.create.etterna.error", NotificationType.Error)
+                    | Game.Stepmania, _ -> Notifications.error (L"imports.mount.create.stepmania.error", "")
+                    | Game.Etterna, _ -> Notifications.error (L"imports.mount.create.etterna.error", "")
                     | _ -> failwith "impossible"
                     if setting.Value.IsSome then this.Close()
                 |> Some

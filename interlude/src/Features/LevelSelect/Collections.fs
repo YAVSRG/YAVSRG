@@ -25,7 +25,7 @@ module CollectionManager =
             | Level lvl -> Table.current().Value.AddChart(lvl.Name, Table.generate_cid cc, cc)
         then
             if options.LibraryMode.Value = LibraryMode.Collections then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
-            Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.added", NotificationType.Info)
+            Notifications.action_feedback (Icons.add_to_collection, Localisation.localiseWith [cc.Title; name] "collections.added", "")
             true
         else false
 
@@ -40,7 +40,7 @@ module CollectionManager =
             | Level _ -> Table.current().Value.RemoveChart cc
         then
             if options.LibraryMode.Value <> LibraryMode.All then LevelSelect.refresh <- true else LevelSelect.minorRefresh <- true
-            Notifications.add (Localisation.localiseWith [cc.Title; name] "collections.removed", NotificationType.Info)
+            Notifications.action_feedback (Icons.remove_from_collection, Localisation.localiseWith [cc.Title; name] "collections.removed", "")
             if Some cc = Chart.cacheInfo then Chart.context <- LibraryContext.None
             true
         else false

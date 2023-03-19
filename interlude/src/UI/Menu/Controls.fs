@@ -105,15 +105,6 @@ type PrettyButton(name, action) as this =
         ref <- button
         button
 
-    static member Once(name, action, notifText, notifType) =
-        let mutable ref = Unchecked.defaultof<PrettyButton>
-        let button = PrettyButton(name, fun () ->
-                if ref.Enabled then action(); Notifications.add (notifText, notifType)
-                ref.Enabled <- false
-            )
-        ref <- button
-        button
-
 type CaseSelector(name: string, cases: string array, controls: Widget array array, setting: Setting<int>) as this =
     inherit StaticWidget(NodeType.Switch(fun _ -> this._selector()))
 

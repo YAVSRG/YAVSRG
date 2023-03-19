@@ -61,7 +61,7 @@ type InviteList() =
             //    | Screen.Type.MainMenu -> true
             //    | _ -> false
             //then
-            //    Notifications.add(Localisation.localiseWith [name] "notification.invited_to_lobby", NotificationType.Info)
+            //    Notifications.add(Localisation.localiseWith [name] "notification.invited_to_lobby.title", NotificationType.Info)
         )
 
     override this.Init(parent) =

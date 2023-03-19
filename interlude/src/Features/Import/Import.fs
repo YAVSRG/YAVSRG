@@ -19,9 +19,9 @@ module FileDropHandling =
             Library.Imports.auto_convert.Request(path, 
                 fun success -> 
                     if success then
-                        Notifications.add(L"notification.import.success", NotificationType.Task)
-                        LevelSelect.refresh <- true
-                    else Notifications.add(L"notification.import.failure", NotificationType.Warning)
+                        Notifications.action_feedback(Icons.check, L"notification.import_success", "")
+                        LevelSelect.refresh <- true // todo: this should just be an event that level select listens to
+                    else Notifications.action_feedback(Icons.x, L"notification.import_failure", "")
             )
             true
 

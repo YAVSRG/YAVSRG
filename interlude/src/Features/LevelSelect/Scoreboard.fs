@@ -39,7 +39,7 @@ type ScoreContextMenu(score: ScoreInfoProvider) as this =
             fun () ->
                 Chart.saveData.Value.Scores.Remove score.ScoreInfo |> ignore
                 LevelSelect.refresh <- true
-                Notifications.add (Localisation.localiseWith [scoreName] "notification.deleted", NotificationType.Info)
+                Notifications.action_feedback (Icons.delete, Localisation.localiseWith [scoreName] "notification.deleted", "")
                 if is_submenu then Menu.Back()
         ).Show()
 
