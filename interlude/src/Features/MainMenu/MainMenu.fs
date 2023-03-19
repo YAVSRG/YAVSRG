@@ -93,7 +93,7 @@ type MainMenuScreen() as this =
         
     override this.OnEnter prev =
 
-        OffsetPage(Gameplay.Chart.current.Value).Show()
+        Offset.OffsetPage(Gameplay.Chart.current.Value).Show()
 
         if AutoUpdate.updateAvailable then Notifications.add (L"notification.update.available", NotificationType.System)
         if prev = Screen.Type.SplashScreen && firstLaunch then Wiki.show()

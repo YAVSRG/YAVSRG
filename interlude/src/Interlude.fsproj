@@ -67,7 +67,8 @@
     <Compile Include="Features\Rulesets.fs" />
     <Compile Include="Features\Online\Network.fs" />
     <Compile Include="Features\Gameplay.fs" />
-    <Compile Include="Features\Offset.fs" />
+    <Compile Include="Features\Offset\AudioSync.fs" />
+    <Compile Include="Features\Offset\Offset.fs" />
     <Compile Include="Features\Score\Util.fs" />
     <Compile Include="Features\Score\Graph.fs" />
     <Compile Include="Features\Score\Components.fs" />

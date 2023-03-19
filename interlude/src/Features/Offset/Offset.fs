@@ -1,4 +1,4 @@
-﻿namespace Interlude.Features
+﻿namespace Interlude.Features.Offset
 
 open Percyqaz.Common
 open Percyqaz.Flux.UI
@@ -10,6 +10,7 @@ open Prelude.Charts.Formats.Interlude
 open Interlude.Options
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.Features
 
 module private LoadWaveform =
     
@@ -50,7 +51,7 @@ type WaveformRender(fade: Animation.Fade) =
             x <- x + waveform.MsPerPoint * scale
         Draw.rect (this.Bounds.TrimRight(this.Bounds.Width * 0.25f).SliceRight(5.0f)) (Color.FromArgb(fade.Alpha, Color.White))
         let rel = this.Bounds.Width * 0.75f
-        let mutable por = (this.PointOfReference + 1.0f<ms> * float32 options.AudioOffset.Value * Gameplay.rate.Value)
+        let mutable por = (this.PointOfReference + 1.0f<ms> * float32 options.AudioOffset.Value / Gameplay.rate.Value)
         let left = time - rel / scale
         let right = time + (rel / 3.0f) / scale
         por <- por + this.MsPerBeat * ceil ((left - por) / this.MsPerBeat)
@@ -90,9 +91,9 @@ type GlobalSync(chart: Chart, when_done: Time -> unit) =
         Conditional((fun () -> step = 3),
             IconButton(
                 "Done",
-                Interlude.UI.Icons.ready,
+                Icons.ready,
                 80.0f,
-                when_done(waveform.PointOfReference),
+                ignore,
                 Position = Position.Row(700.0f, 80.0f).TrimRight(200.0f).SliceRight(250.0f))
         )
 
@@ -183,7 +184,7 @@ type GlobalSync(chart: Chart, when_done: Time -> unit) =
         else
         match Input.consumeAny InputEvType.Press with
         | ValueSome (Key _, t) ->
-            let raw_song_time = (t - 1.0f<ms> * float32 options.AudioOffset.Value * Gameplay.rate.Value - Song.localOffset)
+            let raw_song_time = (t - 1.0f<ms> * float32 options.AudioOffset.Value / Gameplay.rate.Value - Song.localOffset)
             taps.Add raw_song_time
             tap_fade.Value <- 1.0f
 
@@ -273,7 +274,8 @@ type OffsetPage(chart: Chart) as this =
                 |+ local_offset_tile
                 |+ visual_offset_tile
             )
-            |+ Conditional((fun () -> tab = 1), GlobalSync(chart, fun s -> tab <- 0), Position = Position.TrimTop(100.0f + height))
+            |+ Conditional((fun () -> tab = 1), GlobalSync(chart, fun s -> tab <- 0), Position = Position.TrimTop(60.0f + height))
+            |+ Conditional((fun () -> tab = 2), AudioSync(chart, fun () -> tab <- 0), Position = Position.TrimTop(60.0f + height))
         )
 
     override this.Title = N"offset"
