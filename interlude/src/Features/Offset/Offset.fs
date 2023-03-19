@@ -229,10 +229,10 @@ type TileButton(body: Callout, onclick: unit -> unit, is_selected: unit -> bool)
 
     override this.Draw() =
         let color, dark = 
-            if this.Disabled then Colors.grey1, false
-            elif is_selected() then Colors.yellow, true
-            elif this.Focused then Colors.pink, false
-            else Colors.grey1, false
+            if this.Disabled then Colors.shadow_1, false
+            elif is_selected() then Colors.yellow_accent, true
+            elif this.Focused then Colors.pink_accent, false
+            else Colors.shadow_1, false
         Draw.rect this.Bounds (Color.FromArgb(180, color))
         Draw.rect (this.Bounds.Expand(0.0f, 5.0f).SliceBottom(5.0f)) color
         Callout.draw (this.Bounds.Left + fst this.Margin, this.Bounds.Top + snd this.Margin, body_height, dark, body)

@@ -114,7 +114,7 @@ module Utils =
 
         let mutable latestVersionName = "<Unknown, server could not be reached>"
         let mutable latestRelease = None
-        let mutable updateAvailable = true
+        let mutable updateAvailable = false
         let mutable updateDownloaded = false
 
         let private handleUpdate(release: GithubRelease) =

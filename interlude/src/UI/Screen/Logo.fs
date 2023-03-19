@@ -1,6 +1,5 @@
 ﻿namespace Interlude.UI
 
-open System.Drawing
 open OpenTK.Mathematics
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Audio
@@ -30,41 +29,41 @@ module Logo =
 
                 Draw.quad
                     (Quad.create(new Vector2(l + 0.08f * w, t + 0.09f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(r - 0.08f * w, t + 0.09f * w)))
-                    (Quad.colorOf(Color.DarkBlue))
+                    (Quad.colorOf(Colors.blue))
                     Sprite.DefaultQuad
                 Draw.quad
                     (Quad.create(new Vector2(l + 0.08f * w, t + 0.29f * w)) (new Vector2(l + 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
-                    (Quad.colorOf(Color.DarkBlue))
+                    (Quad.colorOf(Colors.blue))
                     Sprite.DefaultQuad
                 Draw.quad
                     (Quad.create(new Vector2(r - 0.08f * w, t + 0.29f * w)) (new Vector2(r - 0.22f * w, t + 0.29f * w)) (new Vector2(l + 0.5f * w, t + 0.76875f * w)) (new Vector2(l + 0.5f * w, t + 0.96875f * w)))
-                    (Quad.colorOf(Color.DarkBlue))
+                    (Quad.colorOf(Colors.blue))
                     Sprite.DefaultQuad
 
                 Stencil.create(true)
                 Draw.quad
                     (Quad.create(new Vector2(l + 0.1f * w, t + 0.1f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(l + 0.5f * w, t + 0.75f * w)) (new Vector2(r - 0.1f * w, t + 0.1f * w)))
-                    (Quad.colorOf(Color.Aqua))
+                    (Quad.colorOf(Colors.cyan_accent))
                     Sprite.DefaultQuad
                 Draw.quad
                     (Quad.create(new Vector2(l + 0.1f * w, t + 0.3f * w)) (new Vector2(l + 0.2075f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.77f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
-                    (Quad.colorOf(Color.Aqua))
+                    (Quad.colorOf(Colors.cyan_accent))
                     Sprite.DefaultQuad
                 Draw.quad
                     (Quad.create(new Vector2(r - 0.1f * w, t + 0.3f * w)) (new Vector2(r - 0.2075f * w, t + 0.3f * w)) (new Vector2(l + 0.5f * w, t + 0.77f * w)) (new Vector2(l + 0.5f * w, t + 0.95f * w)))
-                    (Quad.colorOf(Color.Aqua))
+                    (Quad.colorOf(Colors.cyan_accent))
                     Sprite.DefaultQuad
-                Draw.sprite this.Bounds Color.White (Content.getTexture "logo")
+                Draw.sprite this.Bounds Colors.white (Content.getTexture "logo")
 
                 Stencil.draw()
                 //chart background
-                Draw.rect this.Bounds Color.Aqua
+                Draw.rect this.Bounds Colors.cyan_accent
                 let rain = Content.getTexture "rain"
                 let v = float32 counter.Time
                 let q = Quad.ofRect this.Bounds
-                Draw.quad <| q <| Quad.colorOf (Color.FromArgb(80, 0, 0, 255))  <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f) rain q)
-                Draw.quad <| q <| Quad.colorOf (Color.FromArgb(150, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f) rain q)
-                Draw.quad <| q <| Quad.colorOf (Color.FromArgb(220, 0, 0, 255)) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f) rain q)
+                Draw.quad <| q <| Quad.colorOf (Colors.blue.O2)  <| rain.WithUV(Sprite.tilingUV(0.625f, v * 0.06f, v * 0.07f) rain q)
+                Draw.quad <| q <| Quad.colorOf (Colors.blue.O3) <| rain.WithUV(Sprite.tilingUV(1.0f, v * 0.1f, v * 0.11f) rain q)
+                Draw.quad <| q <| Quad.colorOf (Colors.blue) <| rain.WithUV(Sprite.tilingUV(1.5625f, v * 0.15f, v * 0.16f) rain q)
 
                 let mutable prev = 0.0f
                 let m = b - w * 0.5f
@@ -76,12 +75,12 @@ module Logo =
                     let i = float32 i
                     Draw.quad
                         (Quad.create(new Vector2(l + i * w / 32.0f, m - prev)) (new Vector2(l + (i + 1.0f) * w / 32.0f, m - level)) (new Vector2(l + (i + 1.0f) * w / 32.0f, b)) (new Vector2(l + i * w / 32.0f, b)))
-                        (Quad.colorOf(Color.FromArgb(127, 0, 0, 255)))
+                        (Quad.colorOf(Colors.blue_accent.O3))
                         Sprite.DefaultQuad
                     prev <- level
 
                 Stencil.finish()
-                Draw.sprite this.Bounds Color.White (Content.getTexture "logo")
+                Draw.sprite this.Bounds Colors.white (Content.getTexture "logo")
 
         member this.Move (l, t, r, b) = this.Position <- { Left = 0.5f %+ l; Top = 0.5f %+ t; Right = 0.5f %+ r; Bottom = 0.5f %+ b }
 

@@ -45,7 +45,7 @@ module Callout =
         result
 
     let draw (x, y, height, dark, c: Callout) =
-        let col = if dark then (Colors.grey1, Colors.white) else (Colors.white, Colors.black)
+        let col = if dark then (Colors.shadow_1, Colors.white) else (Colors.white, Colors.black)
         let x =
             match c._Icon with
             | Some i ->
@@ -135,11 +135,11 @@ module Notifications =
         add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.pink)
 
     let action_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.blue)
+        add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.cyan)
 
     let system_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.green2)
+        add (Callout.Small.Icon(icon).Body(description).Title(title), Colors.green)
 
     let error(title, description) =
-        add (Callout.Small.Icon(Icons.alert).Body(description).Title(title), Colors.pink)
+        add (Callout.Small.Icon(Icons.alert).Body(description).Title(title), Colors.red)
         
