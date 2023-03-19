@@ -168,10 +168,10 @@ module Interlude =
                 if low = 0 then (-1, false) else
                     if (offsetOf data.[low - 1] = time) then (low - 1, true) else (low - 1, false)
 
-        member this.GetPointAt time: TimeDataItem<'t> =
+        member this.GetPointAt time : TimeDataItem<'t> =
             let (index, _) = this.IndexAt time in data.[index]
 
-        member this.GetNextPointAt time: TimeDataItem<'t> =
+        member this.GetNextPointAt time : TimeDataItem<'t> =
                 let (index, _) = this.IndexAt time
                 if (index + 1 < this.Count) then data.[index + 1] else data.[index]
 
