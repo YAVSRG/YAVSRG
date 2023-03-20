@@ -45,20 +45,20 @@ type NetworkStatus() =
         let area = this.Bounds.Shrink(30.0f, 0.0f).TrimBottom(15.0f)
         let text, color =
             match Network.status with
-            | Network.NotConnected -> Icons.not_connected + "  Offline", Color.FromArgb(200, 200, 200)
-            | Network.Connecting -> Icons.connecting + "  Connecting..", Color.FromArgb(255, 255, 160)
-            | Network.ConnectionFailed -> Icons.connection_failed + "  Offline", Color.FromArgb(255, 160, 160)
-            | Network.Connected -> Icons.connected + "  Not logged in", Color.FromArgb(160, 255, 160)
-            | Network.LoggedIn -> Icons.connected + "  " + Network.username, Color.FromArgb(160, 255, 160)
+            | Network.NotConnected -> Icons.not_connected + "  Offline", Colors.grey_2
+            | Network.Connecting -> Icons.connecting + "  Connecting..", Colors.grey_1
+            | Network.ConnectionFailed -> Icons.connection_failed + "  Offline", Colors.red_accent
+            | Network.Connected -> Icons.connected + "  Not logged in", Colors.green_accent
+            | Network.LoggedIn -> Icons.connected + "  " + Network.username, Colors.green_accent
 
-        Draw.rect area (Color.FromArgb(100, 0, 0, 0))
-        Text.drawFillB(Style.baseFont, text, area.Shrink(10.0f, 5.0f), (color, Color.Black), Alignment.CENTER)
-        if Network.credentials.Host = "localhost" then Text.drawFillB(Style.baseFont, "LOCALHOST", this.Bounds.SliceBottom(20.0f), (Color.White, Color.Black), Alignment.CENTER)
+        Draw.rect area (Colors.shadow_1.O2)
+        Text.drawFillB(Style.baseFont, text, area.Shrink(10.0f, 5.0f), (color, Colors.shadow_1), Alignment.CENTER)
+        if Network.credentials.Host = "localhost" then Text.drawFillB(Style.baseFont, "LOCALHOST", this.Bounds.SliceBottom(20.0f), Colors.text, Alignment.CENTER)
 
         if Screen.currentType <> Screen.Type.Lobby && Network.lobby.IsSome then
             let area = area.Translate(-300.0f, 0.0f)
-            Draw.rect area (Color.FromArgb(100, 0, 0, 0))
-            Text.drawFillB(Style.baseFont, Icons.multiplayer + "  In a lobby", area.Shrink(10.0f, 5.0f), (Color.White, Color.Black), Alignment.CENTER)
+            Draw.rect area (Colors.shadow_1.O2)
+            Text.drawFillB(Style.baseFont, Icons.multiplayer + "  In a lobby", area.Shrink(10.0f, 5.0f), Colors.text, Alignment.CENTER)
 
         match this.Dropdown with
         | Some d -> d.Draw()

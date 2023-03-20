@@ -114,15 +114,15 @@ module Terminal =
 
         let bounds = Viewport.bounds.Shrink(100.0f)
 
-        Draw.rect (bounds.Expand 5.0f) (Color.FromArgb(127, 255, 255, 255))
-        Draw.rect (bounds.TrimBottom 70.0f) (Color.FromArgb(200, 0, 0, 0))
-        Draw.rect (bounds.SliceBottom 65.0f) (Color.FromArgb(255, 0, 0, 0))
-        Text.drawB(font.Value, ">  " + currentLine.Value, 30.0f, bounds.Left + 20.0f, bounds.Bottom - 50.0f, (Color.White, Color.Black))
+        Draw.rect (bounds.Expand 5.0f) (Colors.white.O2)
+        Draw.rect (bounds.TrimBottom 70.0f) (Colors.shadow_1.O3)
+        Draw.rect (bounds.SliceBottom 65.0f) (Colors.shadow_2.O3)
+        Text.drawB(font.Value, ">  " + currentLine.Value, 30.0f, bounds.Left + 20.0f, bounds.Bottom - 50.0f, Colors.text)
         
         lock lockObj (fun () -> 
             for i, line in Seq.indexed Log.visible do
                 if i < 19 then
-                    Text.drawB(font.Value, line, 20.0f, bounds.Left + 20.0f, bounds.Bottom - 60.0f - 60.0f - 40f * float32 i, (Color.White, Color.Black))
+                    Text.drawB(font.Value, line, 20.0f, bounds.Left + 20.0f, bounds.Bottom - 60.0f - 60.0f - 40f * float32 i, Colors.text)
         )
 
     let update() =
