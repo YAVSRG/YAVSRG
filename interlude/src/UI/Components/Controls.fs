@@ -19,7 +19,7 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
     member val Hotkey : Hotkey = "none" with get, set
     member val TiltLeft = true with get, set
     member val TiltRight = true with get, set
-    member val TextColor = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER) with get, set
+    member val TextColor = Palette.text (Palette.transition color Palette.LIGHTER Palette.WHITE) (!%Palette.DARKER) with get, set
 
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)

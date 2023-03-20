@@ -70,8 +70,8 @@ module Tree =
     // future todo: different color settings?
     let private colorFunc : Bests option -> Color = 
         function
-        | None -> Color.FromArgb(80, 150, 150, 150)
-        | Some b -> Color.FromArgb(100, Color.White)
+        | None -> Colors.grey_2.O2
+        | Some b -> Colors.white.O2
     
     /// Set these globals to have them "consumed" in the next frame by a level select item with sufficient knowledge to do so
     let mutable private scrollTo = ScrollTo.Nothing
@@ -176,8 +176,8 @@ module Tree =
             let { Rect.Left = left; Top = top; Right = right; Bottom = bottom } = bounds
 
             // draw base
-            let accent = Style.color(80 + int (hover.Value * 40.0f), 1.0f, 0.5f)
-            Draw.rect bounds (if this.Selected then Style.main 80 () else Style.black 120 ())
+            let accent = Style.color(80 + int (hover.Value * 40.0f), 1.0f, 0.4f)
+            Draw.rect bounds (if this.Selected then Style.main 80 () else Colors.shadow_1.O2)
             let stripeLength = (right - left) * (0.4f + 0.6f * hover.Value)
             Draw.quad
                 (Quad.create <| new Vector2(left, top) <| new Vector2(left + stripeLength, top) <| new Vector2(left + stripeLength * 0.9f, bottom - 25.0f) <| new Vector2(left, bottom - 25.0f))
@@ -219,15 +219,15 @@ module Tree =
             | None -> ()
 
             // draw text
-            Draw.rect (bounds.SliceBottom 25.0f) (Color.FromArgb(60, 0, 0, 0))
-            Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Style.text())
-            Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, Style.text_subheading())
-            Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, Style.text_subheading())
-            Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Style.text(), Alignment.CENTER)
+            Draw.rect (bounds.SliceBottom 25.0f) Colors.shadow_1.O1
+            Text.drawB(Style.baseFont, cc.Title, 23.0f, left + 5f, top, Colors.text)
+            Text.drawB(Style.baseFont, cc.Artist + "  •  " + cc.Creator, 18.0f, left + 5f, top + 34.0f, Colors.text_subheading)
+            Text.drawB(Style.baseFont, cc.DiffName, 15.0f, left + 5f, top + 65.0f, Colors.text_subheading)
+            Text.drawJustB(Style.baseFont, markers, 25.0f, right - 65.0f, top + 15.0f, Colors.text, Alignment.CENTER)
 
             if Comments.fade.Value > 0.01f && chartData.IsSome && chartData.Value.Comment <> "" then
                 Draw.rect bounds (Style.color(Comments.fade.Alpha * 2 / 3, 1.0f, 0.0f))
-                Text.drawFillB(Style.baseFont, chartData.Value.Comment, bounds.Shrink(30.0f, 15.0f), (Color.FromArgb(Comments.fade.Alpha, Color.White), Color.FromArgb(Comments.fade.Alpha, Color.Black)), Alignment.CENTER)
+                Text.drawFillB(Style.baseFont, chartData.Value.Comment, bounds.Shrink(30.0f, 15.0f), (Colors.white.O4a Comments.fade.Alpha, Colors.shadow_1.O4a Comments.fade.Alpha), Alignment.CENTER)
 
         member this.Draw(top, origin, originB) = this.CheckBounds(top, origin, originB, this.OnDraw)
 

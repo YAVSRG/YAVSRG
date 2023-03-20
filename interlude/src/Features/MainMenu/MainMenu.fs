@@ -17,25 +17,17 @@ open Interlude.Features.OptionsMenu
 type private MenuButton(onClick, label: string, pos) as this =
     inherit DynamicContainer(NodeType.Button(onClick))
 
-    let color = Animation.Fade 0.3f
-
     do
         this
         |+ Clickable.Focus this
         |* Text(label,
             Align = Alignment.CENTER,
+            Color = K Colors.text,
             Position = { Left = 0.7f %+ 0.0f; Top = 0.0f %+ 10.0f; Right = 1.0f %+ 0.0f; Bottom = 1.0f %- 20.0f })
         this.Position <- pos
-        
-    override this.OnFocus() = base.OnFocus(); color.Target <- 0.7f
-    override this.OnUnfocus() = base.OnUnfocus(); color.Target <- 0.3f
-
-    override this.Update(elapsedTime, moved) =
-        base.Update(elapsedTime, moved)
-        color.Update elapsedTime
 
     override this.Draw() =
-        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlightF 140 color.Value)) Sprite.DefaultQuad
+        Draw.quad (Quad.parallelogram 0.5f (this.Bounds.Expand 5.0f)) (Quad.colorOf (Style.highlight 100 ())) Sprite.DefaultQuad
         Draw.quad (Quad.parallelogram 0.5f this.Bounds) (Quad.colorOf (Style.main 120 ())) Sprite.DefaultQuad
         base.Draw()
 

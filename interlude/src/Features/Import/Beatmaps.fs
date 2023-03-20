@@ -67,16 +67,16 @@ type private BeatmapImportCard(data: BeatmapData) as this =
     do
         let c =
             match data.beatmap_status with
-            | BeatmapStatus.RANKED -> Color.Aqua
-            | BeatmapStatus.QUALIFIED -> Color.Lime
-            | BeatmapStatus.LOVED -> Color.HotPink
-            | BeatmapStatus.PENDING -> Color.LightGoldenrodYellow
-            | BeatmapStatus.WORK_IN_PROGRESS -> Color.White
+            | BeatmapStatus.RANKED -> Colors.cyan_accent
+            | BeatmapStatus.QUALIFIED -> Colors.green_accent
+            | BeatmapStatus.LOVED -> Colors.pink_accent
+            | BeatmapStatus.PENDING -> Colors.yellow_accent
+            | BeatmapStatus.WORK_IN_PROGRESS -> Colors.white
             | BeatmapStatus.GRAVEYARD
-            | _ -> Color.Gray
+            | _ -> Colors.grey_2
 
         this
-        |+ Frame(NodeType.None, Fill = K (Color.FromArgb(120, c)), Border = fun () -> if this.Focused then Color.White else Color.FromArgb(200, c))
+        |+ Frame(NodeType.None, Fill = K c.O2, Border = fun () -> if this.Focused then Colors.white else c.O3)
         |+ Text(data.artist + " - " + data.title,
             Align = Alignment.LEFT,
             Position = { Left = 0.0f %+ 5.0f; Top = Position.min; Right = 1.0f %- 400.0f; Bottom = 1.0f %- 30.0f })
@@ -98,12 +98,12 @@ type private BeatmapImportCard(data: BeatmapData) as this =
 
         match status with
         | NotDownloaded -> ()
-        | Downloading -> Draw.rect(this.Bounds.SliceLeft(this.Bounds.Width * progress)) (Color.FromArgb(64, 255, 255, 255))
+        | Downloading -> Draw.rect (this.Bounds.SliceLeft(this.Bounds.Width * progress)) Colors.white.O1
         | Installed -> 
             Draw.rect this.Bounds (Color.FromArgb(64, 255, 255, 255))
-            Text.drawFill(Style.baseFont, "Downloaded!", this.Bounds.SliceBottom(25.0f), Color.White, Alignment.CENTER)
+            Text.drawFill(Style.baseFont, "Downloaded!", this.Bounds.SliceBottom(25.0f), Colors.white, Alignment.CENTER)
         | DownloadFailed ->
-            Text.drawFill(Style.baseFont, "Download failed!", this.Bounds.SliceBottom(25.0f), Color.FromArgb(255, 100, 100), Alignment.CENTER)
+            Text.drawFill(Style.baseFont, "Download failed!", this.Bounds.SliceBottom(25.0f), Colors.red_accent, Alignment.CENTER)
 
     member private this.Download() = download()
 

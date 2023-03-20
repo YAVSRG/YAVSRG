@@ -7,12 +7,12 @@ open Interlude.Utils
 module Colors =
 
     let black = Color.Black
-    let shadow_1 = Color.FromArgb 0xFF_0c1821
-    let shadow_2 = Color.FromArgb 0xFF_122e39
+    let shadow_1 = Color.FromArgb 0xFF_050308
+    let shadow_2 = Color.FromArgb 0xFF_0a0911
 
     let white = Color.White
-    let grey_1 = Color.FromArgb 0xFF_d9e2e7
-    let grey_2 = Color.FromArgb 0xFF_b4c5cc
+    let grey_1 = Color.FromArgb 0xFF_cecfd9
+    let grey_2 = Color.FromArgb 0xFF_b4b3bc
     let text = white, shadow_1
     let text_subheading = grey_1, shadow_2
     let text_greyout = grey_2, shadow_2
@@ -37,12 +37,12 @@ module Colors =
     let pink_shadow = Color.FromArgb 0xFF_6c2d4d
     let text_pink = pink_accent, pink_shadow
     
-    let blue_accent = Color.FromArgb 0xFF_1a53ff
+    let blue_accent = Color.FromArgb 0xFF_0032ff
     let blue = Color.FromArgb 0xFF_001696
     let blue_shadow = Color.FromArgb 0xFF_000450
     let text_blue = blue_accent, blue_shadow
 
-    let yellow_accent = Color.FromArgb 0xFF_ffd166
+    let yellow_accent = Color.FromArgb 0xFF_ffde40
     let text_yellow_2 = yellow_accent, shadow_1
 
 [<AutoOpen>]
