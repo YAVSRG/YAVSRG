@@ -6,7 +6,7 @@ type Button(text: string, onClick: unit -> unit) =
     inherit StaticContainer(NodeType.Button onClick)
     
     let color = Animation.Fade(0.0f)
-    let colorFunc = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER)
+    let colorFunc = Palette.text (Palette.transition color Palette.LIGHTER Palette.WHITE) (!%Palette.DARKER)
 
     member val Hotkey : Hotkey = "none" with get, set
 
@@ -36,7 +36,7 @@ type IconButton(text: string, icon: string, iconSize: float32, onClick: unit -> 
     inherit StaticContainer(NodeType.Button onClick)
 
     let color = Animation.Fade(0.0f)
-    let colorFunc = Palette.text (Palette.transition color Palette.LIGHT Palette.WHITE) (!%Palette.DARKER)
+    let colorFunc = Palette.text (Palette.transition color Palette.LIGHTER Palette.WHITE) (!%Palette.DARKER)
 
     member val Hotkey : Hotkey = "none" with get, set
 
