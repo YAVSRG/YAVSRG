@@ -51,12 +51,12 @@ module ColorExtensions =
     type Color with
         member this.O1a a = Color.FromArgb(a / 4, this)
         member this.O2a a = Color.FromArgb(a / 2, this)
-        member this.O3a a = Color.FromArgb(a * 3 / 4, this)
+        member this.O3a a = Color.FromArgb(a * 7 / 8, this)
         member this.O4a a = Color.FromArgb(a, this)
 
         member this.O1 = Color.FromArgb(63, this)
         member this.O2 = Color.FromArgb(127, this)
-        member this.O3 = Color.FromArgb(191, this)
+        member this.O3 = Color.FromArgb(223, this)
 
 // todo: merge into Percyqaz.Flux
 module Style =

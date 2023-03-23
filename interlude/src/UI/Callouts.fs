@@ -27,6 +27,7 @@ type Callout =
 
 module Callout =
 
+    let x_padding = 30.0f
     let spacing isSmall = if isSmall then 10.0f else 15.0f
     let header_size isSmall = if isSmall then 25.0f else 35.0f
     let text_size isSmall = if isSmall then 18.0f else 25.0f
@@ -50,10 +51,10 @@ module Callout =
             height <- height + spacing
         let icon_size =
             if c._Icon.IsSome then
-                min (if c.IsSmall then 30.0f else 50.0f) height + 60.0f
-            else 0.0f
+                min (if c.IsSmall then 30.0f else 50.0f) height + x_padding * 2.0f
+            else x_padding
                 
-        width + icon_size + 30.0f, height
+        width + icon_size + x_padding, height
 
     let draw (x, y, height, col, c: Callout) =
         let x =
@@ -61,8 +62,8 @@ module Callout =
             | Some i ->
                 let icon_size = min (if c.IsSmall then 30.0f else 50.0f) height
                 Text.drawB(Style.baseFont, i, icon_size, x + 30.0f, y + height * 0.5f - icon_size * 0.7f, col)
-                x + icon_size + 60.0f
-            | None -> x
+                x + icon_size + x_padding * 2.0f
+            | None -> x + x_padding
         let spacing = spacing c.IsSmall
         let mutable y = y
         for b in c.Contents do
@@ -100,8 +101,18 @@ type private Notification =
         mutable Duration: float
     }
 
+type private Tooltip =
+    {
+        Data: Callout
+        Size: float32 * float32
+        Fade: Animation.Fade
+        Target: Widget
+        Bind: Bind
+    }
+
 module Notifications =
 
+    let mutable private current_tooltip : Tooltip option = None
     let private items = ResizeArray<Notification>()
 
     type Display() =
@@ -109,6 +120,14 @@ module Notifications =
 
         override this.Update(elapsedTime, moved) =
             base.Update(elapsedTime, moved)
+            match current_tooltip with
+            | None -> ()
+            | Some t ->
+                t.Fade.Update elapsedTime
+                if t.Fade.Target <> 0.0f then
+                    if t.Bind.Released() then t.Fade.Target <- 0.0f
+                elif t.Fade.Value < 0.01f then current_tooltip <- None
+
             for i in items do
                 i.Duration <- i.Duration - elapsedTime
                 i.Fade.Update elapsedTime
@@ -117,6 +136,39 @@ module Notifications =
                 elif i.Fade.Value < 0.01f then sync(fun () -> items.Remove i |> ignore)
 
         override this.Draw() =
+            match current_tooltip with
+            | None -> ()
+            | Some t ->
+                let outline = t.Target.Bounds.Expand(20.0f).Intersect(Viewport.bounds)
+                let c l = Math.Clamp((t.Fade.Value - l) / 0.25f, 0.0f, 1.0f)
+                // border around thing
+                Draw.rect (outline.SliceLeft(Style.padding).SliceBottom(outline.Height * c 0.0f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                Draw.rect (outline.SliceTop(Style.padding).SliceLeft(outline.Width * c 0.25f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                Draw.rect (outline.SliceRight(Style.padding).SliceTop(outline.Height * c 0.5f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                Draw.rect (outline.SliceBottom(Style.padding).SliceRight(outline.Width * c 0.75f)) (Colors.yellow_accent.O3a t.Fade.Alpha)
+                // blackout effect
+                Draw.rect (Viewport.bounds.SliceLeft outline.Left) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.TrimLeft outline.Right) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.TrimLeft(outline.Left).SliceLeft(outline.Width).SliceTop(outline.Top)) (Colors.shadow_2.O3a t.Fade.Alpha)
+                Draw.rect (Viewport.bounds.TrimLeft(outline.Left).SliceLeft(outline.Width).TrimTop(outline.Bottom)) (Colors.shadow_2.O3a t.Fade.Alpha)
+                let width, height = t.Size
+                let x = 
+                    outline.CenterX - width * 0.5f
+                    |> min (Viewport.bounds.Width - width - 50.0f)
+                    |> max 50.0f
+                let y =
+                    if outline.Top > Viewport.bounds.CenterY then
+                        outline.Top - 50.0f - height - 60.0f
+                    else outline.Bottom + 50.0f
+                let calloutBounds = Rect.Box(x, y, width, height + 60.0f)
+                Draw.rect calloutBounds (Colors.cyan.O3a t.Fade.Alpha)
+                let frameBounds = calloutBounds.Expand(5.0f)
+                Draw.rect (frameBounds.SliceTop 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frameBounds.SliceBottom 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frameBounds.SliceLeft 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Draw.rect (frameBounds.SliceRight 5.0f) (Colors.cyan_accent.O4a t.Fade.Alpha)
+                Callout.draw (calloutBounds.Left, calloutBounds.Top + 30.0f, height, (Colors.white.O4a t.Fade.Alpha, Colors.shadow_1.O4a t.Fade.Alpha), t.Data)
+
             let padding = 20.0f
             let mutable y = this.Bounds.Top + 70.0f
             for i in items do
@@ -130,7 +182,16 @@ module Notifications =
 
     let display = Display()
 
-    let tooltip (b: Bind, str: string, hotkey: Hotkey option) = ()
+    let tooltip (b: Bind, w: Widget, body: Callout) =
+        let t: Tooltip =
+            {
+                Data = body
+                Size = Callout.measure body
+                Fade = Animation.Fade(0.0f, Target = 1.0f)
+                Target = w
+                Bind = b
+            }
+        current_tooltip <- Some t
 
     let private add (body: Callout, colors: Color * Color, content_colors: Color * Color) =
         let n: Notification =

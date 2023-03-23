@@ -41,7 +41,11 @@ type TooltipRegion(localisedText) =
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
         if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
-            Notifications.tooltip ((!|"tooltip"), localisedText, this.Hotkey)
+            let c = 
+                (if this.Hotkey.IsSome then Callout.Normal.Hotkey(this.Hotkey.Value) else Callout.Normal)
+                    .Body(localisedText)
+                    .Icon(Icons.info)
+            Notifications.tooltip ((!|"tooltip"), this, c)
 
     override this.Draw() = ()
 

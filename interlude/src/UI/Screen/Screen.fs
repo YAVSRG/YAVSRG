@@ -105,9 +105,9 @@ module Screen =
                 if (Transitions.flags &&& Transitions.Flags.UnderLogo = Transitions.Flags.UnderLogo) then logo.Draw()
             Dialog.display.Draw()
             if currentType <> Type.Play || Dialog.exists() then 
+                Notifications.display.Draw()
                 let x, y = Mouse.pos()
                 Draw.sprite (Rect.Box(x, y, Content.themeConfig().CursorSize, Content.themeConfig().CursorSize)) (Style.color(255, 1.0f, 0.5f)) (Content.getTexture "cursor")
-                Notifications.display.Draw()
 
         override this.Init() =
             base.Init()
