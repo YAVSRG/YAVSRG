@@ -2,6 +2,7 @@
 
 open Percyqaz.Flux.UI
 open Percyqaz.Flux.Input
+open Percyqaz.Flux.Graphics
 open Prelude.Common
 open Interlude.Utils
 open Interlude.UI
@@ -36,16 +37,21 @@ module Helpers =
 type TooltipRegion(localisedText) =
     inherit StaticWidget(NodeType.None)
 
+    let mutable hover = false
+
     member val Hotkey = None with get, set
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)
-        if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
-            let c = 
-                (if this.Hotkey.IsSome then Callout.Normal.Hotkey(this.Hotkey.Value) else Callout.Normal)
-                    .Body(localisedText)
-                    .Icon(Icons.info)
-            Notifications.tooltip ((!|"tooltip"), this, c)
+        if Mouse.hover this.Bounds then
+            hover <- true
+            if (!|"tooltip").Tapped() then
+                let c = 
+                    (if this.Hotkey.IsSome then Callout.Normal.Hotkey(this.Hotkey.Value) else Callout.Normal)
+                        .Body(localisedText)
+                        .Icon(Icons.info)
+                Notifications.tooltip ((!|"tooltip"), this, c)
+        else hover <- false
 
     override this.Draw() = ()
 
@@ -62,8 +68,33 @@ type TooltipContainer(localisedText, child: Widget) =
 
     member this.WithPosition(pos) = this.Position <- pos; this
 
+type Tooltip(content: Callout) =
+    inherit StaticWidget(NodeType.None)
+
+    let content = content.Icon(Icons.info)
+    
+    override this.Update(elapsedTime, bounds) =
+        base.Update(elapsedTime, bounds)
+        if Mouse.hover this.Bounds && (!|"tooltip").Tapped() then
+            Notifications.tooltip ((!|"tooltip"), this, content)
+
+    override this.Draw() = ()
+
+    static member Info(feature: string) =
+        Callout.Normal
+            .Title(L (sprintf "%s.name" feature))
+            .Body(L (sprintf "%s.tooltip" feature))
+
+    static member Info(feature: string, hotkey: Hotkey) =
+        Callout.Normal
+            .Title(L (sprintf "%s.name" feature))
+            .Body(L (sprintf "%s.tooltip" feature))
+            .Hotkey(hotkey)
+
 [<AutoOpen>]
 module Tooltip =
     type Widget with
-        //member this.Tooltip(localisedText) = TooltipContainer(localisedText, this)
         member this.Tooltip(localisedText, hotkey) = TooltipContainer(localisedText, this, Hotkey = Some hotkey)
+
+    type StaticContainer with
+        member this.Tooltip(content: Callout) = this |+ Tooltip(content)

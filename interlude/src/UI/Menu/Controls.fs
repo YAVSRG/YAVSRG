@@ -47,7 +47,7 @@ type PrettySetting(name, widget: Widget) as this =
             Color = (fun () -> ((if this.Selected then Style.color(255, 1.0f, 0.2f) else Color.White), Color.Black)),
             Align = Alignment.LEFT,
             Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT).Margin(Style.padding))
-        |* TooltipRegion(T name)
+        |* Tooltip(Tooltip.Info(sprintf "options.%s" name))
         base.Init parent
         widget.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.padding)
         widget.Init this
@@ -81,7 +81,7 @@ type PrettyButton(name, action) as this =
             Align = Alignment.LEFT,
             Position = Position.Margin(Style.padding))
         |+ Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
-        |* TooltipRegion(T name)
+        |* Tooltip(Tooltip.Info(sprintf "options.%s" name))
         base.Init parent
 
     override this.Draw() =

@@ -56,7 +56,7 @@ type private ModSelectPage(onClose) as this =
     override this.OnClose() = onClose()
 
 type ModSelect(onClose) =
-    inherit StylishButton((fun () -> ModSelectPage(onClose).Show()), K (sprintf "%s %s" Icons.mods (N"mods")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")
+    inherit StylishButton((fun () -> ModSelectPage(onClose).Show()), K (sprintf "%s %s" Icons.mods (L"levelselect.mods.name")), (fun () -> Style.color(100, 0.5f, 0.0f)), Hotkey = "mods")
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

@@ -6,11 +6,12 @@ open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.UI
+open Interlude.Utils
 
 type CalloutContent =
     | Header of string
     | Body of string[]
-    | Hotkey of Hotkey
+    | Hotkey of string option * Hotkey
 
 type Callout =
     {
@@ -20,9 +21,10 @@ type Callout =
     }
     static member Small = { IsSmall = true; Contents = []; _Icon = None }
     static member Normal = { IsSmall = false; Contents = []; _Icon = None }
-    member this.Title(s: string) = if s <> "" then { this with Contents = Header s :: this.Contents } else this
-    member this.Body(s: string) = if s <> "" then { this with Contents = Body (s.Split "\n") :: this.Contents } else this
-    member this.Hotkey(h: Hotkey) = { this with Contents = Hotkey h :: this.Contents }
+    member this.Title(s: string) = if s <> "" then { this with Contents = this.Contents @ [Header s] } else this
+    member this.Body(s: string) = if s <> "" then { this with Contents = this.Contents @ [Body (s.Split "\n")] } else this
+    member this.Hotkey(h: Hotkey) = { this with Contents = this.Contents @ [Hotkey (None, h)] }
+    member this.Hotkey(desc: string, h: Hotkey) = { this with Contents = this.Contents @ [Hotkey (Some desc, h)] }
     member this.Icon(icon: string) = if icon <> "" then { this with _Icon = Some icon } else { this with _Icon = None }
 
 module Callout =
@@ -32,6 +34,8 @@ module Callout =
     let header_size isSmall = if isSmall then 25.0f else 35.0f
     let text_size isSmall = if isSmall then 18.0f else 25.0f
     let text_spacing isSmall = if isSmall then 8.0f else 10.0f
+
+    let default_hotkey_text = L"misc.hotkeyhint"
 
     let measure (c: Callout) : float32 * float32 =
         let spacing = spacing c.IsSmall
@@ -80,14 +84,15 @@ module Callout =
                     y <- y + size
                     y <- y + tspacing
                 y <- y - tspacing
-            | Hotkey hk ->
+            | Hotkey (desc, hk) ->
                 let size = text_size c.IsSmall
-                // todo: color
+                let text = sprintf "%s: %O" (Option.defaultValue default_hotkey_text desc) (!|hk)
+                let a = int (fst col).A
                 Text.drawB(
                     Style.baseFont,
-                    Localisation.localiseWith [(!|hk).ToString()] "misc.hotkeyhint",
+                    text,
                     size, x, y,
-                    (Colors.cyan_accent, Colors.shadow_2))
+                    (Colors.cyan_accent.O4a a, Colors.shadow_2.O4a a))
                 y <- y + size
             y <- y + spacing
 
@@ -206,14 +211,14 @@ module Notifications =
         if Percyqaz.Flux.Utils.isUiThread() then items.Add n else sync(fun () -> items.Add n)
 
     let task_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), (Colors.pink_accent, Colors.pink), Colors.text)
+        add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.pink_accent, Colors.pink), Colors.text)
 
     let action_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), (Colors.cyan_accent, Colors.cyan), Colors.text)
+        add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.cyan_accent, Colors.cyan), Colors.text)
 
     let system_feedback(icon: string, title: string, description: string) =
-        add (Callout.Small.Icon(icon).Body(description).Title(title), (Colors.green_accent, Colors.green), Colors.text)
+        add (Callout.Small.Icon(icon).Title(title).Body(description), (Colors.green_accent, Colors.green), Colors.text)
 
     let error(title, description) =
-        add (Callout.Small.Icon(Icons.alert).Body(description).Title(title), (Colors.red_accent, Colors.red), Colors.text)
+        add (Callout.Small.Icon(Icons.alert).Title(title).Body(description), (Colors.red_accent, Colors.red), Colors.text)
         

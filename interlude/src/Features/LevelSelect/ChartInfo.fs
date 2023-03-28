@@ -57,20 +57,21 @@ type ChartInfo() as this =
             
         |+ StylishButton(
             (fun () -> match Chart.current with Some c -> Preview(c).Show() | None -> ()),
-            K (Icons.preview + " " + L"levelselect.preview"),
+            K (Icons.preview + " " + L"levelselect.preview.name"),
             Style.main 100,
             Hotkey = "preview",
-            TiltLeft = false)
-            .Tooltip(L"levelselect.preview.tooltip", "preview")
-            .WithPosition { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f }
+            TiltLeft = false,
+            Position = { Left = 0.0f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.33f %- 25.0f; Bottom = 1.0f %- 0.0f })
+            .Tooltip(Tooltip.Info("levelselect.preview", "preview"))
 
-        |+ ModSelect(scores.Refresh)
-            .Tooltip(L"levelselect.mods.tooltip", "mods")
-            .WithPosition { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f }
+        |+ ModSelect(scores.Refresh,
+             Position = { Left = 0.33f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 0.66f %- 25.0f; Bottom = 1.0f %- 0.0f })
+            .Tooltip(Tooltip.Info("levelselect.mods", "mods"))
         
-        |* Rulesets.QuickSwitcher(options.SelectedRuleset |> Setting.trigger (fun _ -> LevelSelect.refresh <- true))
-            .Tooltip(L"levelselect.rulesets.tooltip", "ruleset_switch")
-            .WithPosition { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f }
+        |* Rulesets.QuickSwitcher(
+            options.SelectedRuleset |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
+            Position = { Left = 0.66f %+ 0.0f; Top = 1.0f %- 50.0f; Right = 1.0f %- 0.0f; Bottom = 1.0f %- 0.0f })
+            .Tooltip(Tooltip.Info("levelselect.rulesets", "ruleset_switch").Hotkey(L"levelselect.rulesets.picker_hint", "ruleset_picker"))
 
     member this.Refresh() =
         length <- Chart.format_duration()
