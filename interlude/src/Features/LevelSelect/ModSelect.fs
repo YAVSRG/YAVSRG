@@ -52,7 +52,7 @@ type private ModSelectPage(onClose) as this =
             |+ mods
         )
 
-    override this.Title = N"mods"
+    override this.Title = L"options.mods.name"
     override this.OnClose() = onClose()
 
 type ModSelect(onClose) =

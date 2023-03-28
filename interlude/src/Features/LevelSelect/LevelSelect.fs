@@ -48,9 +48,9 @@ type LevelSelectScreen() =
             Align = Alignment.CENTER,
             Position = { Left = 0.0f %+ 30.0f; Top = 0.0f %+ 90.0f; Right = 0.4f %- 30.0f; Bottom = 0.0f %+ 140.0f })
 
-        |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()))
-            .Tooltip(L"levelselect.search.tooltip", "search")
-            .WithPosition { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f }
+        |+ SearchBox(searchText, (fun f -> Tree.filter <- f; refresh()),
+            Position = { Left = 1.0f %- 600.0f; Top = 0.0f %+ 30.0f; Right = 1.0f %- 50.0f; Bottom = 0.0f %+ 90.0f })
+            .Tooltip(Tooltip.Info("levelselect.search", "search"))
 
         |+ LibraryModeSettings()
 

@@ -25,7 +25,7 @@ type CreateLobbyPage() as this =
             |+ submit_button.Pos(300.0f)
         )
     
-    override this.Title = N"create_lobby"
+    override this.Title = L"options.create_lobby.name"
     override this.OnClose() = ()
 
 type InviteCard(sender: string, lobby: System.Guid) =

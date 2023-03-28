@@ -23,50 +23,12 @@ module Helpers =
         refresh()
         r, refresh
 
-    /// N for Name -- Shorthand for getting localised name of a setting `s`
-    let N (s: string) = L ("options." + s + ".name")
-    /// T for Tooltip -- Shorthand for getting localised tooltip of a setting `s`
-    let T (s: string) = L ("options." + s + ".tooltip")
     /// E for Editing -- Shorthand for getting localised title of page when editing object named `name`
     let E (name: string) = Localisation.localiseWith [name] "misc.edit"
 
     let PRETTYTEXTWIDTH = 500.0f
     let PRETTYHEIGHT = 80.0f
     let PRETTYWIDTH = 1200.0f
-
-type TooltipRegion(localisedText) =
-    inherit StaticWidget(NodeType.None)
-
-    let mutable hover = false
-
-    member val Hotkey = None with get, set
-
-    override this.Update(elapsedTime, bounds) =
-        base.Update(elapsedTime, bounds)
-        if Mouse.hover this.Bounds then
-            hover <- true
-            if (!|"tooltip").Tapped() then
-                let c = 
-                    (if this.Hotkey.IsSome then Callout.Normal.Hotkey(this.Hotkey.Value) else Callout.Normal)
-                        .Body(localisedText)
-                        .Icon(Icons.info)
-                Notifications.tooltip ((!|"tooltip"), this, c)
-        else hover <- false
-
-    override this.Draw() = ()
-
-type TooltipContainer(localisedText, child: Widget) =
-    inherit StaticContainer(NodeType.Switch(fun _ -> child))
-
-    member val Hotkey = None with get, set
-
-    override this.Init(parent: Widget) =
-        this
-        |+ TooltipRegion(localisedText, Hotkey = this.Hotkey)
-        |* child
-        base.Init parent
-
-    member this.WithPosition(pos) = this.Position <- pos; this
 
 type Tooltip(content: Callout) =
     inherit StaticWidget(NodeType.None)
@@ -93,8 +55,5 @@ type Tooltip(content: Callout) =
 
 [<AutoOpen>]
 module Tooltip =
-    type Widget with
-        member this.Tooltip(localisedText, hotkey) = TooltipContainer(localisedText, this, Hotkey = Some hotkey)
-
     type StaticContainer with
         member this.Tooltip(content: Callout) = this |+ Tooltip(content)

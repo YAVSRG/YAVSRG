@@ -8,6 +8,7 @@ open Prelude.Common
 open Prelude.Data.Themes
 open Prelude.Data.Themes.WidgetConfig
 open Interlude.Content
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 
@@ -153,7 +154,7 @@ type EditAccuracyMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = N"themes.edittheme.gameplay.accuracymeter"
+    override this.Title = L"options.themes.edittheme.gameplay.accuracymeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<AccuracyMeter>
@@ -206,7 +207,7 @@ type EditHitMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = N"themes.edittheme.gameplay.hitmeter"
+    override this.Title = L"options.themes.edittheme.gameplay.hitmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<HitMeter>
@@ -261,7 +262,7 @@ type EditLifeMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = N"themes.edittheme.gameplay.lifemeter"
+    override this.Title = L"options.themes.edittheme.gameplay.lifemeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<LifeMeter>
@@ -306,7 +307,7 @@ type EditComboMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = N"themes.edittheme.gameplay.combo"
+    override this.Title = L"options.themes.edittheme.gameplay.combo.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<Combo>
@@ -338,7 +339,7 @@ type EditSkipButtonPage() as this =
             |+ preview
         )
 
-    override this.Title = N"themes.edittheme.gameplay.skipbutton"
+    override this.Title = L"options.themes.edittheme.gameplay.skipbutton.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<SkipButton>
@@ -383,7 +384,7 @@ type EditProgressMeterPage() as this =
             |+ preview
         )
 
-    override this.Title = N"themes.edittheme.gameplay.progressmeter"
+    override this.Title = L"options.themes.edittheme.gameplay.progressmeter.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<ProgressMeter>
@@ -415,7 +416,7 @@ type EditPacemakerPage() as this =
             |+ preview
         )
 
-    override this.Title = N"themes.edittheme.gameplay.pacemaker"
+    override this.Title = L"options.themes.edittheme.gameplay.pacemaker.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<Pacemaker>
@@ -446,7 +447,7 @@ type EditJudgementCountsPage() as this =
             |+ preview
         )
             
-    override this.Title = N"themes.edittheme.gameplay.judgementcounts"
+    override this.Title = L"options.themes.edittheme.gameplay.judgementcounts.name"
     override this.OnDestroy() = preview.Destroy()
     override this.OnClose() = 
         Themes.Current.GameplayConfig.set<JudgementCounts>
@@ -468,7 +469,7 @@ type EditGameplayConfigPage() as this =
             |+ PrettyButton("themes.edittheme.gameplay.judgementcounts", fun () -> Menu.ShowPage EditJudgementCountsPage).Pos(760.0f)
         )
 
-    override this.Title = N"themes.edittheme.gameplay"
+    override this.Title = L"options.themes.edittheme.gameplay.name"
     override this.OnClose() = ()
 
 type EditThemePage() as this =

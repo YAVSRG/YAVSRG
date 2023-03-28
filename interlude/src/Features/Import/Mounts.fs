@@ -46,7 +46,7 @@ module Mounts =
                     ).Pos(500.0f)
             )
 
-        override this.Title = N"mount"
+        override this.Title = L"options.mount.name"
         override this.OnClose() =
             setting.Value <- Some { mount with ImportOnStartup = importOnStartup.Value }
             if import then import_mounted_source.Request(setting.Value.Value, ignore)

@@ -6,6 +6,7 @@ open Percyqaz.Flux.Windowing
 open Percyqaz.Flux.UI
 open Prelude.Common
 open Interlude.Options
+open Interlude.Utils
 open Interlude.UI.Menu
 
 module System =
@@ -34,4 +35,4 @@ module System =
             )
 
         override this.OnClose() = Window.apply_config <- Some config
-        override this.Title = N"system"
+        override this.Title = L"options.system.name"

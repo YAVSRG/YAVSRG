@@ -67,7 +67,7 @@ type LibraryModeSettings() =
             options.ChartGroupMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             options.ChartGroupReverse |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             "group_mode"
-        ).Tooltip(L"levelselect.groupby.tooltip", "group_mode")
+        ).Tooltip(Tooltip.Info("levelselect.groupby", "group_mode"))
 
     let manage_collections =
         StylishButton(
@@ -75,7 +75,7 @@ type LibraryModeSettings() =
             K (sprintf "%s %s" Icons.collections (L"levelselect.collections.name")),
             Style.main 100,
             Hotkey = "group_mode"
-        ).Tooltip(L"levelselect.collections.tooltip", "group_mode")
+        ).Tooltip(Tooltip.Info("levelselect.collections", "group_mode"))
         
     let manage_tables =
         StylishButton(
@@ -83,7 +83,7 @@ type LibraryModeSettings() =
             K (sprintf "%s %s" Icons.edit (L"levelselect.table.name")),
             Style.main 100,
             Hotkey = "group_mode"
-        ).Tooltip(L"levelselect.table.tooltip", "group_mode")
+        ).Tooltip(Tooltip.Info("levelselect.table", "group_mode"))
 
     let swap = SwapContainer(Position = { Left = 0.8f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 1.0f %+ 0.0f; Bottom = 0.0f %+ 170.0f })
 
@@ -105,9 +105,9 @@ type LibraryModeSettings() =
             |],
             options.LibraryMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true; update_swap()),
             Style.dark 100,
-            Hotkey = "library_mode")
-            .Tooltip(L"levelselect.librarymode.tooltip", "library_mode")
-            .WithPosition { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f }
+            Hotkey = "library_mode",
+            Position = { Left = 0.4f %+ 25.0f; Top = 0.0f %+ 120.0f; Right = 0.6f %- 25.0f; Bottom = 0.0f %+ 170.0f })
+            .Tooltip(Tooltip.Info("levelselect.librarymode", "library_mode"))
         
         |+ ModeDropdown(
             sortBy.Keys
@@ -115,9 +115,9 @@ type LibraryModeSettings() =
             "Sort",
             options.ChartSortMode |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
             options.ChartSortReverse |> Setting.map not not |> Setting.trigger (fun _ -> LevelSelect.refresh <- true),
-            "sort_mode")
-            .Tooltip(L"levelselect.sortby.tooltip", "sort_mode")
-            .WithPosition { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f }
+            "sort_mode",
+            Position = { Left = 0.6f %+ 0.0f; Top = 0.0f %+ 120.0f; Right = 0.8f %- 25.0f; Bottom = 0.0f %+ 170.0f })
+            .Tooltip(Tooltip.Info("levelselect.sortby", "sort_mode"))
         
         |* swap
 

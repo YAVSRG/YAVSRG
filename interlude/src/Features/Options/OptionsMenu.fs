@@ -26,15 +26,15 @@ module OptionsMenuRoot =
         do
             this.Content(
                 row()
-                |+ BigButton( N"system", Icons.system, (fun () -> Menu.ShowPage System.SystemPage),
+                |+ BigButton( L"options.system.name", Icons.system, (fun () -> Menu.ShowPage System.SystemPage),
                     Position = Position.Box(0.5f, 0.5f, -790.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"themes", Icons.themes, (fun () -> Menu.ShowPage Themes.ThemesPage),
+                |+ BigButton( L"options.themes.name", Icons.themes, (fun () -> Menu.ShowPage Themes.ThemesPage),
                     Position = Position.Box(0.5f, 0.5f, -470.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"gameplay", Icons.gameplay, (fun () -> Menu.ShowPage Gameplay.GameplayPage),
+                |+ BigButton( L"options.gameplay.name", Icons.gameplay, (fun () -> Menu.ShowPage Gameplay.GameplayPage),
                     Position = Position.Box(0.5f, 0.5f, -150.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"keybinds", Icons.binds, (fun () -> Menu.ShowPage Keybinds.KeybindsPage),
+                |+ BigButton( L"options.keybinds.name", Icons.binds, (fun () -> Menu.ShowPage Keybinds.KeybindsPage),
                     Position = Position.Box(0.5f, 0.5f, 170.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( N"debug", Icons.debug, (fun () -> Menu.ShowPage Debug.DebugPage),
+                |+ BigButton( L"options.debug.name", Icons.debug, (fun () -> Menu.ShowPage Debug.DebugPage),
                     Position = Position.Box(0.5f, 0.5f, 490.0f, -150.0f, 300.0f, 300.0f) )
             )
         override this.Title = L"options.name"

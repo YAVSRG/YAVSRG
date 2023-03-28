@@ -8,6 +8,7 @@ open Percyqaz.Flux.Audio
 open Prelude.Common
 open Prelude.Charts.Formats.Interlude
 open Interlude.Options
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
 open Interlude.Features
@@ -278,5 +279,5 @@ type OffsetPage(chart: Chart) as this =
             |+ Conditional((fun () -> tab = 2), AudioSync(chart, fun () -> tab <- 0), Position = Position.TrimTop(60.0f + height))
         )
 
-    override this.Title = N"offset"
+    override this.Title = L"options.offset.name"
     override this.OnClose() = ()

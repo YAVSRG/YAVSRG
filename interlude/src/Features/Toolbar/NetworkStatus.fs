@@ -5,6 +5,7 @@ open Percyqaz.Flux.UI
 open Percyqaz.Flux.Graphics
 open Percyqaz.Flux.Input
 open Prelude.Common
+open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Components
 open Interlude.UI.Menu
@@ -31,7 +32,7 @@ type LoginPage() as this =
             |+ PrettyButton("confirm.yes", login).Pos(300.0f)
         )
 
-    override this.Title = N"login"
+    override this.Title = L"options.login.name"
     override this.OnClose() = handler.Dispose()
 
 type NetworkStatus() =

@@ -96,7 +96,7 @@ type private CreateFolderPage() as this =
                 (fun () -> if collections.CreateFolder(new_name.Value, icon.Value).IsSome then Collections.select new_name.Value; Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = N"collections.create_folder"
+    override this.Title = L"options.collections.create_folder.name"
     override this.OnClose() = ()
 
     static member Icons = 
@@ -124,7 +124,7 @@ type private CreatePlaylistPage() as this =
                 (fun () -> if collections.CreatePlaylist(new_name.Value, icon.Value).IsSome then Collections.select new_name.Value; Menu.Back() )).Pos(400.0f)
         )
 
-    override this.Title = N"collections.create_playlist"
+    override this.Title = L"options.collections.create_playlist.name"
     override this.OnClose() = ()
 
     static member Icons =
@@ -283,7 +283,7 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
 
         this.Content( ScrollContainer.Flow(container, Position = Position.Margin(100.0f, 200.0f)) )
 
-    override this.Title = N"collections"
+    override this.Title = L"options.collections.name"
     override this.OnClose() = ()
     override this.OnReturnTo() = refresh()
 

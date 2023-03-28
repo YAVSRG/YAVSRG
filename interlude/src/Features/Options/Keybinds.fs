@@ -117,7 +117,7 @@ module Keybinds =
                     container.Add( PrettySetting("hotkeys." + hk.ToLower(), hotkeyEditor hk) )
             this.Content scrollContainer
 
-        override this.Title = N"keybinds.hotkeys"
+        override this.Title = L"options.keybinds.hotkeys.name"
         override this.OnClose() = ()
 
     type KeybindsPage() as this =
@@ -133,5 +133,5 @@ module Keybinds =
                 |+ PrettySetting("keybinds.gameplay", binds).Pos(280.0f, Viewport.vwidth - 200.0f)
                 |+ PrettyButton("keybinds.hotkeys", (fun () -> Menu.ShowPage HotkeysPage)).Pos(400.0f)
             )
-        override this.Title = N"keybinds"
+        override this.Title = L"options.keybinds.name"
         override this.OnClose() = ()

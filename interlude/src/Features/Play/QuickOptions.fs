@@ -7,6 +7,7 @@ open Prelude.Common
 open Prelude.Scoring
 open Interlude.Features
 open Interlude.Options
+open Interlude.Utils
 open Interlude.UI.Menu
 
 module QuickOptions =
@@ -49,7 +50,7 @@ module QuickOptions =
                 |+ PrettySetting("gameplay.upscroll", Selector<_>.FromBool options.Upscroll).Pos(540.0f)
             )
 
-        override this.Title = N"quick"
+        override this.Title = L"options.quick.name"
         override this.OnClose() = callback()
 
     let show(scoring, callback) = QuickOptionsPage(scoring, callback).Show()

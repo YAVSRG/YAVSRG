@@ -56,8 +56,9 @@ module Check =
                     found.Add (sprintf "options.%s.name" m)
                     found.Add (sprintf "options.%s.tooltip" m)
 
-                for m in matches """ N\s*"([a-z\-_\.]*)" """ file_contents do
-                    found.Add (sprintf "options.%s.name" m)
+                for m in matches """ Tooltip.Info\("([a-z\-_\.]*)" """ file_contents do
+                    found.Add (sprintf "%s.name" m)
+                    found.Add (sprintf "%s.tooltip" m)
 
                 for m in matches """ localise\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add m

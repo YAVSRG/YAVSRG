@@ -68,4 +68,4 @@ type ThemesPage() as this =
     override this.OnClose() = ()
     override this.OnDestroy() = preview.Destroy()
     override this.OnReturnTo() = refresh()
-    override this.Title = N"themes"
+    override this.Title = L"options.themes.name"

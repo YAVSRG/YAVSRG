@@ -33,5 +33,5 @@ module Debug =
                     ).Pos(300.0f)
                 |+ PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole).Pos(400.0f)
             )
-        override this.Title = N"debug"
+        override this.Title = L"options.debug.name"
         override this.OnClose() = ()

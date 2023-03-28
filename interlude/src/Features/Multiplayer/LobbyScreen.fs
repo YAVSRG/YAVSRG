@@ -26,7 +26,7 @@ type LobbySettingsPage(settings: LobbySettings) as this =
             |+ PrettySetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown)).Pos(400.0f)
         )
     
-    override this.Title = N"lobby"
+    override this.Title = L"options.lobby.name"
     override this.OnClose() = 
         Lobby.settings 
             { settings with 
@@ -49,7 +49,7 @@ type InvitePlayerPage() as this =
             |+ submit_button.Pos(300.0f)
         )
     
-    override this.Title = N"invite_to_lobby"
+    override this.Title = L"options.invite_to_lobby.name"
     override this.OnClose() = ()
 
 type Lobby() =

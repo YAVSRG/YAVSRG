@@ -5,6 +5,7 @@ open Prelude.Scoring
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
+open Interlude.Utils
 open Interlude.Features
 
 module Gameplay = 
@@ -24,7 +25,7 @@ module Gameplay =
                 |+ PrettySetting("gameplay.lanecover.color", ColorPicker(options.LaneCover.Color, true)).Pos(650.0f, PRETTYWIDTH, PRETTYHEIGHT * 2.0f)
                 |+ preview
             )
-        override this.Title = N"gameplay.lanecover"
+        override this.Title = L"options.gameplay.lanecover.name"
         override this.OnDestroy() = preview.Destroy()
         override this.OnClose() = ()
 
@@ -42,5 +43,5 @@ module Gameplay =
                 |+ PrettyButton("gameplay.pacemaker", fun () ->  Menu.ShowPage PacemakerPage).Pos(670.0f)
                 |+ PrettyButton("gameplay.rulesets", fun () -> Menu.ShowPage Rulesets.FavouritesPage).Pos(750.0f)
             )
-        override this.Title = N"gameplay"
+        override this.Title = L"options.gameplay.name"
         override this.OnClose() = ()
