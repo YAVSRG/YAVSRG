@@ -53,15 +53,25 @@ type ThemesPage() as this =
             
         this.Content(
             column()
-            |+ themes.Pos(200.0f)
-            |+ PrettyButton("themes.edittheme", tryEditTheme).Pos(300.0f)
-            |+ PrettyButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes")).Pos(400.0f)
+            |+ themes
+                .Pos(200.0f)
+                .Tooltip(Tooltip.Info("options.themes.theme"))
+            |+ PrettyButton("themes.edittheme", tryEditTheme)
+                .Pos(270.0f)
+                .Tooltip(Tooltip.Info("options.themes.edittheme"))
+            |+ PrettyButton("themes.showthemesfolder", fun () -> openDirectory (getDataPath "Themes"))
+                .Pos(340.0f)
+                .Tooltip(Tooltip.Info("options.themes.showthemesfolder"))
 
-            |+ Divider().Pos(550.0f)
-
-            |+ noteskins.Pos(600.0f)
-            |+ PrettyButton("themes.editnoteskin", tryEditNoteskin).Pos(700.0f)
-            |+ PrettyButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins")).Pos(800.0f)
+            |+ noteskins
+                .Pos(500.0f)
+                .Tooltip(Tooltip.Info("options.themes.noteskin"))
+            |+ PrettyButton("themes.editnoteskin", tryEditNoteskin)
+                .Pos(570.0f)
+                .Tooltip(Tooltip.Info("options.themes.editnoteskin"))
+            |+ PrettyButton("themes.shownoteskinsfolder", fun () -> openDirectory (getDataPath "Noteskins"))
+                .Pos(640.0f)
+                .Tooltip(Tooltip.Info("options.themes.shownoteskinsfolder"))
             |+ preview
         )
 

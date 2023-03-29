@@ -42,19 +42,18 @@ type PrettySetting(name, widget: Widget) as this =
 
     override this.Init(parent) =
         this
-        |+ Text(
+        |* Text(
             K (L (sprintf "options.%s.name" name) + ":"),
-            Color = (fun () -> ((if this.Selected then Style.color(255, 1.0f, 0.2f) else Color.White), Color.Black)),
+            Color = (fun () -> (if this.Focused then Colors.text_yellow_2 else Colors.text)),
             Align = Alignment.LEFT,
-            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH, PRETTYHEIGHT).Margin(Style.padding))
-        |* Tooltip(Tooltip.Info(sprintf "options.%s" name))
+            Position = Position.Box(0.0f, 0.0f, PRETTYTEXTWIDTH - 10.0f, PRETTYHEIGHT).Margin(Style.padding))
         base.Init parent
         widget.Position <- Position.TrimLeft(PRETTYTEXTWIDTH).Margin(Style.padding)
         widget.Init this
 
     override this.Draw() =
-        if widget.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)
-        elif widget.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+        if widget.Selected then Draw.rect this.Bounds Colors.cyan.O2
+        elif widget.Focused then Draw.rect this.Bounds Colors.cyan_accent.O2
         base.Draw()
         widget.Draw()
     
@@ -74,9 +73,8 @@ type PrettyButton(name, action) as this =
             K (if this.Icon <> "" then sprintf "%s %s  >" this.Icon this.Text else sprintf "%s  >" this.Text),
             Color = ( 
                 fun () -> 
-                    if this.Enabled then
-                        ( (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White), Color.Black )
-                    else (Color.Gray, Color.Black)
+                    if this.Enabled then (if this.Focused then Colors.text_yellow_2 else Colors.text)
+                    else Colors.text_greyout
             ),
             Align = Alignment.LEFT,
             Position = Position.Margin(Style.padding))
@@ -85,7 +83,7 @@ type PrettyButton(name, action) as this =
         base.Init parent
 
     override this.Draw() =
-        if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+        if this.Focused then Draw.rect this.Bounds Colors.cyan_accent.O2
         base.Draw()
 
     member this.Pos(y, height) = 

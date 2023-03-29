@@ -26,8 +26,8 @@ module Helpers =
     /// E for Editing -- Shorthand for getting localised title of page when editing object named `name`
     let E (name: string) = Localisation.localiseWith [name] "misc.edit"
 
-    let PRETTYTEXTWIDTH = 500.0f
-    let PRETTYHEIGHT = 80.0f
+    let PRETTYTEXTWIDTH = 425.0f
+    let PRETTYHEIGHT = 70.0f
     let PRETTYWIDTH = 1200.0f
 
 type Tooltip(content: Callout) =

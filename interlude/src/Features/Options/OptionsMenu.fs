@@ -32,8 +32,6 @@ module OptionsMenuRoot =
                     Position = Position.Box(0.5f, 0.5f, -470.0f, -150.0f, 300.0f, 300.0f) )
                 |+ BigButton( L"options.gameplay.name", Icons.gameplay, (fun () -> Menu.ShowPage Gameplay.GameplayPage),
                     Position = Position.Box(0.5f, 0.5f, -150.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( L"options.keybinds.name", Icons.binds, (fun () -> Menu.ShowPage Keybinds.KeybindsPage),
-                    Position = Position.Box(0.5f, 0.5f, 170.0f, -150.0f, 300.0f, 300.0f) )
                 |+ BigButton( L"options.debug.name", Icons.debug, (fun () -> Menu.ShowPage Debug.DebugPage),
                     Position = Position.Box(0.5f, 0.5f, 490.0f, -150.0f, 300.0f, 300.0f) )
             )

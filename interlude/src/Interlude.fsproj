@@ -108,7 +108,6 @@
     <Compile Include="Features\Options\Themes\EditTheme.fs" />
     <Compile Include="Features\Options\Themes\Themes.fs" />
     <Compile Include="Features\Options\Gameplay.fs" />
-    <Compile Include="Features\Options\Keybinds.fs" />
     <Compile Include="Features\Options\Debug.fs" />
     <Compile Include="Features\Options\OptionsMenu.fs" />
     <Compile Include="Features\MainMenu\LoadingScreen.fs" />
