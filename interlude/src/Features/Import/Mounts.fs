@@ -30,20 +30,24 @@ module Mounts =
         do
             this.Content(
                 column()
-                |+ PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup).Pos(200.0f)
+                |+ PrettySetting("mount.importatstartup", Selector<_>.FromBool importOnStartup)
+                    .Pos(200.0f)
+                    .Tooltip(Tooltip.Info("options.mount.importatstartup"))
                 |+ PrettyButton.Once(
                         "mount.import",
                         fun () -> 
                             import <- true
-                            Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "")
-                    ).Pos(400.0f)
+                            Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "") )
+                    .Pos(300.0f)
+                    .Tooltip(Tooltip.Info("options.mount.import"))
                 |+ PrettyButton.Once(
                         "mount.importall",
                         fun () -> 
                             import <- true
                             mount.LastImported <- System.DateTime.UnixEpoch
-                            Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "")
-                    ).Pos(500.0f)
+                            Notifications.action_feedback(Icons.add_to_collection, L"notification.import_queued", "") )
+                    .Pos(400.0f)
+                    .Tooltip(Tooltip.Info("options.mount.importall"))
             )
 
         override this.Title = L"options.mount.name"

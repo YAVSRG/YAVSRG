@@ -75,7 +75,7 @@ type EditNoteskinPage() as this =
                 .Tooltip(Tooltip.Info("options.themes.editnoteskin.noteskinname"))
             |+ PrettySetting("themes.editnoteskin.holdnotetrim", Slider(holdNoteTrim, 0.05f))
                 .Pos(170.0f)
-                .Tooltip(Tooltip.Info("options.themes.editnoteskin.holenotetrim"))
+                .Tooltip(Tooltip.Info("options.themes.editnoteskin.holdnotetrim"))
             |+ PrettySetting("themes.editnoteskin.enablecolumnlight", Selector<_>.FromBool enableColumnLight)
                 .Pos(240.0f)
                 .Tooltip(Tooltip.Info("options.themes.editnoteskin.enablecolumnlight"))

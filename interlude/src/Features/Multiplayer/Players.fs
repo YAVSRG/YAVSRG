@@ -30,7 +30,7 @@ type Player(name: string, player: Network.LobbyPlayer) =
     override this.Update(elapsedTime, moved) =
         base.Update(elapsedTime, moved)
 
-        if Mouse.hover this.Bounds && Mouse.leftClick() then
+        if Network.lobby.IsSome && Network.lobby.Value.YouAreHost && Mouse.hover this.Bounds && Mouse.leftClick() then
             ConfirmPage(Localisation.localiseWith [name] "lobby.confirm_transfer_host", fun () -> Lobby.transfer_host name).Show()
 
     member this.Name = name

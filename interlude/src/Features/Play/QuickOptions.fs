@@ -10,6 +10,8 @@ open Interlude.Options
 open Interlude.Utils
 open Interlude.UI.Menu
 
+// todo: replace with offset wizard
+
 module QuickOptions =
 
     type QuickOptionsPage(scoring: IScoreMetric, callback) as this =

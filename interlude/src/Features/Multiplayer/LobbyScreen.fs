@@ -21,9 +21,14 @@ type LobbySettingsPage(settings: LobbySettings) as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("lobby.name", TextEntry(name, "none")).Pos(200.0f)
-            |+ PrettySetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation)).Pos(300.0f)
-            |+ PrettySetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown)).Pos(400.0f)
+            |+ PrettySetting("lobby.name", TextEntry(name, "none"))
+                .Pos(200.0f)
+            |+ PrettySetting("lobby.host_rotation", Selector<_>.FromBool(host_rotation))
+                .Pos(300.0f)
+                .Tooltip(Tooltip.Info("options.lobby.host_rotation"))
+            |+ PrettySetting("lobby.auto_countdown", Selector<_>.FromBool(auto_countdown))
+                .Pos(370.0f)
+                .Tooltip(Tooltip.Info("options.lobby.auto_countdown"))
         )
     
     override this.Title = L"options.lobby.name"

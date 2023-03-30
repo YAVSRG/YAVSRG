@@ -41,9 +41,11 @@ type private CreateLevelPage() as this =
     do
         this.Content(
             column()
-            |+ PrettySetting("table.level_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PrettySetting("table.level_name", TextEntry(new_name, "none"))
+                .Pos(200.0f)
             |+ PrettyButton("confirm.yes", 
-                (fun () -> if Table.current().Value.AddLevel new_name.Value then Menu.Back() )).Pos(300.0f)
+                (fun () -> if Table.current().Value.AddLevel new_name.Value then Menu.Back() ))
+                .Pos(300.0f)
         )
     
     override this.Title = L"options.tables.create.name"
@@ -57,7 +59,8 @@ type private EditLevelPage(level: Level) as this =
     do
         let content =
             column()
-            |+ PrettySetting("table.level_name", TextEntry(new_name, "none")).Pos(200.0f)
+            |+ PrettySetting("table.level_name", TextEntry(new_name, "none"))
+                .Pos(200.0f)
             |+ PrettyButton("collections.edit.delete", 
                 (fun () -> 
                     ConfirmPage(Localisation.localiseWith [level.Name] "misc.confirmdelete", 
@@ -68,9 +71,12 @@ type private EditLevelPage(level: Level) as this =
                                 Menu.Back()
                     ).Show()
                 ),
-                Icon = Icons.delete).Pos(400.0f)
+                Icon = Icons.delete)
+                .Pos(400.0f)
             |+ PrettyButton("collections.edit.select", 
-                (fun () -> Collections.select_level level.Name; Menu.Back()) ).Pos(500.0f)
+                (fun () -> Collections.select_level level.Name; Menu.Back()) )
+                .Pos(500.0f)
+                .Tooltip(Tooltip.Info("options.collections.edit.select"))
 
         this.Content content
 

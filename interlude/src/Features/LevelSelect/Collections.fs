@@ -159,7 +159,9 @@ type private EditFolderPage(name: string, folder: Folder) as this =
                 ),
                 Icon = Icons.delete).Pos(400.0f)
             |+ PrettyButton("collections.edit.select", 
-                (fun () -> Collections.select name; Menu.Back()) ).Pos(500.0f)
+                (fun () -> Collections.select name; Menu.Back()) )
+                .Pos(500.0f)
+                .Tooltip(Tooltip.Info("options.collections.edit.select"))
 
             |+ if options.Collection.Value = ActiveCollection.Collection name then
                 Text(L"collections.selected.this",
@@ -204,9 +206,12 @@ type private EditPlaylistPage(name: string, playlist: Playlist) as this =
                                 Menu.Back()
                     ).Show()
                 ),
-                Icon = Icons.delete).Pos(400.0f)
+                Icon = Icons.delete)
+                .Pos(400.0f)
             |+ PrettyButton("collections.edit.select", 
-                (fun () -> Collections.select name; Menu.Back()) ).Pos(500.0f)
+                (fun () -> Collections.select name; Menu.Back()) )
+                .Pos(500.0f)
+                .Tooltip(Tooltip.Info("options.collections.edit.select"))
             
             |+ if options.Collection.Value = ActiveCollection.Collection name then
                 Text(L"collections.selected.this",
@@ -259,7 +264,9 @@ type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =
         container.Clear()
         container
         |+ PrettyButton("collections.create_folder", (fun () -> Menu.ShowPage CreateFolderPage))
+            .Tooltip(Tooltip.Info("options.collections.create_folder"))
         |+ PrettyButton("collections.create_playlist", (fun () -> Menu.ShowPage CreatePlaylistPage))
+            .Tooltip(Tooltip.Info("options.collections.create_playlist"))
         |* Dummy()
         for name, collection in collections.List do
             match collection with

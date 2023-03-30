@@ -9,6 +9,9 @@ open Prelude.Data.Scores
 open Interlude.Features.Gameplay
 open Interlude.UI
 
+// todo: better hotkey to display comments
+// todo: better way to find out you can add comments
+
 module Comments =
     
     let fade = Animation.Fade(0.0f)
