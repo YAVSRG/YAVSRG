@@ -29,7 +29,6 @@
     <Compile Include="UI\Style.fs" />
     <Compile Include="UI\Components\Primitives.fs" />
     <Compile Include="UI\Components\Containers.fs" />
-    <Compile Include="UI\Components\Controls.fs" />
     <Compile Include="UI\Components\Buttons.fs" />
     <Compile Include="UI\Components\Dialogs.fs" />
     <Compile Include="UI\Root.fs" />
