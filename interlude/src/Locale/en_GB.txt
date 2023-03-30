@@ -195,7 +195,7 @@ options.gameplay.pacemaker.tooltip=The pacemaker is an optional tool to help you
 options.gameplay.rulesets.name=Rulesets
 options.gameplay.rulesets.tooltip=Rulesets control how accuracy, scoring and HP mechanics work when you play.\nThemes can provide new rulesets, and you can select which ones to use here.
 options.gameplay.scrollspeed.name=Scroll speed
-options.gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nThis is measured in 'pixels scrolled per millisecond'.
+options.gameplay.scrollspeed.tooltip=Controls the scroll speed of notes.\nIt's a linear scale, 100% = 1 pixel scrolled per millisecond.
 options.gameplay.upscroll.name=Upscroll
 options.gameplay.upscroll.tooltip=Set this to true if you want notes to scroll upwards instead of downwards.
 options.generic.keymode.name=Keymode
@@ -488,3 +488,6 @@ options.lobby.auto_countdown.tooltip=When enabled, the round will automatically 
 options.offset.name=Offset Wizard
 options.offset.globaloffset.name=Global Offset
 options.offset.globaloffset.tooltip=
+options.gameplay.tooltip=Gameplay settings here!
+options.system.tooltip=Window, audio and input settings
+options.themes.tooltip=Visual customisation here!

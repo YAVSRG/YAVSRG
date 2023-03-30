@@ -20,8 +20,9 @@ module Debug =
                         "debug.rebuildcache",
                         fun () -> 
                             Library.recache_service.Request((), fun () -> Notifications.task_feedback(Icons.folder, L"notification.recache_complete", ""))
-                            Notifications.action_feedback(Icons.folder, L"notification.recache", "")
-                    ).Pos(200.0f)
+                            Notifications.action_feedback(Icons.folder, L"notification.recache", "") )
+                    .Pos(200.0f)
+                    .Tooltip(Tooltip.Info("options.debug.rebuildcache"))
                 |+ PrettyButton.Once(
                         "debug.downloadupdate",
                         ( fun () ->
@@ -29,9 +30,11 @@ module Debug =
                                 AutoUpdate.applyUpdate(fun () -> Notifications.system_feedback(Icons.system_notification, L"notification.update_installed.title", L"notification.update_installed.body"))
                                 Notifications.system_feedback(Icons.system_notification, L"notification.update_installing.title", L"notification.update_installing.body")
                         ),
-                        Enabled = (AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded)
-                    ).Pos(300.0f)
-                |+ PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole).Pos(400.0f)
+                        Enabled = (AutoUpdate.updateAvailable && not AutoUpdate.updateDownloaded) )
+                    .Pos(300.0f)
+                |+ PrettySetting("debug.enableconsole", Selector<_>.FromBool options.EnableConsole)
+                    .Pos(400.0f)
+                    .Tooltip(Tooltip.Info("options.debug.enableconsole"))
             )
         override this.Title = L"options.debug.name"
         override this.OnClose() = ()

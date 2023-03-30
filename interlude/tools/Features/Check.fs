@@ -42,19 +42,15 @@ module Check =
 
                 for m in matches """ PrettySetting\(\s*"([a-z\-_\.]*[^\.])" """ file_contents do
                     found.Add (sprintf "options.%s.name" m)
-                    found.Add (sprintf "options.%s.tooltip" m)
 
                 for m in matches """ PrettyButton\(\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "options.%s.name" m)
-                    found.Add (sprintf "options.%s.tooltip" m)
 
                 for m in matches """ CaseSelector\(\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "options.%s.name" m)
-                    found.Add (sprintf "options.%s.tooltip" m)
                     
                 for m in matches """ PrettyButton.Once\(\s*"([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "options.%s.name" m)
-                    found.Add (sprintf "options.%s.tooltip" m)
 
                 for m in matches """ Tooltip.Info\("([a-z\-_\.]*)" """ file_contents do
                     found.Add (sprintf "%s.name" m)

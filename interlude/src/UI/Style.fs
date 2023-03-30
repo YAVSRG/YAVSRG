@@ -42,7 +42,7 @@ module Colors =
     let blue_shadow = Color.FromArgb 0xFF_000450
     let text_blue = blue_accent, blue_shadow
 
-    let yellow_accent = Color.FromArgb 0xFF_ffde40
+    let yellow_accent = Color.FromArgb 0xFF_ffe670
     let text_yellow_2 = yellow_accent, shadow_1
 
 [<AutoOpen>]

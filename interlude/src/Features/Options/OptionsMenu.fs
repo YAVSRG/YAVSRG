@@ -4,6 +4,7 @@ open System.Drawing
 open Percyqaz.Flux.UI
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.UI.Menu
 open Interlude.Features.LevelSelect
 
@@ -23,17 +24,35 @@ module OptionsMenuRoot =
     type OptionsPage() as this =
         inherit Page()
 
+        let system =
+            GoodButton(
+                Callout.Normal
+                    .Icon(Icons.system)
+                    .Title(L"options.system.name"),
+                fun () -> Menu.ShowPage System.SystemPage)
+
+        let gameplay =
+            GoodButton(
+                Callout.Normal
+                    .Icon(Icons.gameplay)
+                    .Title(L"options.gameplay.name"),
+                fun () -> Menu.ShowPage Gameplay.GameplayPage)
+                
+        let themes =
+            GoodButton(
+                Callout.Normal
+                    .Icon(Icons.themes)
+                    .Title(L"options.themes.name"),
+                fun () -> Menu.ShowPage Themes.ThemesPage)
+
         do
             this.Content(
-                row()
-                |+ BigButton( L"options.system.name", Icons.system, (fun () -> Menu.ShowPage System.SystemPage),
-                    Position = Position.Box(0.5f, 0.5f, -790.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( L"options.themes.name", Icons.themes, (fun () -> Menu.ShowPage Themes.ThemesPage),
-                    Position = Position.Box(0.5f, 0.5f, -470.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( L"options.gameplay.name", Icons.gameplay, (fun () -> Menu.ShowPage Gameplay.GameplayPage),
-                    Position = Position.Box(0.5f, 0.5f, -150.0f, -150.0f, 300.0f, 300.0f) )
-                |+ BigButton( L"options.debug.name", Icons.debug, (fun () -> Menu.ShowPage Debug.DebugPage),
-                    Position = Position.Box(0.5f, 0.5f, 490.0f, -150.0f, 300.0f, 300.0f) )
+                GridContainer(1, 3,
+                    Spacing = (50.0f, 0.0f),
+                    Position = Position.SliceTop(300.0f).SliceBottom(system.Height).Margin(100.0f, 0.0f))
+                |+ system
+                |+ gameplay
+                |+ themes
             )
         override this.Title = L"options.name"
         override this.OnClose() = LevelSelect.refresh <- true

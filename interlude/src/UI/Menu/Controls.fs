@@ -52,8 +52,8 @@ type PrettySetting(name, widget: Widget) as this =
         widget.Init this
 
     override this.Draw() =
-        if widget.Selected then Draw.rect this.Bounds Colors.cyan.O2
-        elif widget.Focused then Draw.rect this.Bounds Colors.cyan_accent.O2
+        if widget.Selected then Draw.rect this.Bounds Colors.pink_accent.O2
+        elif widget.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1
         base.Draw()
         widget.Draw()
     
@@ -78,12 +78,11 @@ type PrettyButton(name, action) as this =
             ),
             Align = Alignment.LEFT,
             Position = Position.Margin(Style.padding))
-        |+ Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
-        |* Tooltip(Tooltip.Info(sprintf "options.%s" name))
+        |* Clickable(this.Select, OnHover = fun b -> if b then this.Focus())
         base.Init parent
 
     override this.Draw() =
-        if this.Focused then Draw.rect this.Bounds Colors.cyan_accent.O2
+        if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O2
         base.Draw()
 
     member this.Pos(y, height) = 
