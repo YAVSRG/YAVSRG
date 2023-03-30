@@ -29,16 +29,11 @@ module System =
         do
             this
             |+ Text((fun () -> (!|hotkey).ToString()),
-                Color = (fun () -> (if this.Selected then Style.color(255, 1.0f, 0.0f) else Color.White), Color.Black),
+                Color = (fun () -> (if this.Selected then Colors.pink_accent elif this.Focused then Colors.yellow_accent else Colors.white), Colors.shadow_1),
                 Align = Alignment.LEFT,
                 Position = Position.TrimLeft 20.0f)
             |* Clickable((fun () -> if not this.Selected then this.Select()), 
                 OnHover = fun b -> if b then this.Focus())
-    
-        override this.Draw() =
-            if this.Selected then Draw.rect this.Bounds (!*Palette.SELECTED)
-            elif this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
-            base.Draw()
 
         override this.OnSelected() =
             base.OnSelected()

@@ -11,6 +11,7 @@ open Interlude.Content
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.UI.Components
 
 [<AutoOpen>]
 module private Helpers =

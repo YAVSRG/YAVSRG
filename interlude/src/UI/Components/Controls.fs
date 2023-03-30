@@ -11,6 +11,38 @@ open Prelude.Data.Charts.Sorting
 open Interlude.UI
 open Interlude.Utils
 
+type TextEntry(setting: Setting<string>, hotkey: Hotkey) as this =
+    inherit StaticContainer(NodeType.Leaf)
+
+    let ticker = Animation.Counter(600.0)
+
+    let toggle() = if this.Selected then this.Focus() else this.Select()
+
+    member val Clickable = true with get, set
+    member val ColorFunc = fun () -> Colors.white, (if this.Selected then Colors.pink_accent elif this.Focused then Colors.yellow_accent else Colors.shadow_1) with get, set
+
+    override this.Init(parent) =
+        base.Init parent
+        this
+        |+ Text(
+            (fun () -> setting.Get() + if this.Selected && ticker.Loops % 2 = 0 then "_" else ""),
+            Align = Alignment.LEFT, 
+            Color = this.ColorFunc)
+        |* HotkeyAction(hotkey, toggle)
+        if this.Clickable then this.Add (Clickable.Focus this)
+
+    override this.OnSelected() =
+        base.OnSelected()
+        Input.setTextInput(setting, fun () -> if this.Selected then this.Focus())
+
+    override this.OnDeselected() =
+        base.OnDeselected()
+        Input.removeInputMethod()
+
+    override this.Update(elapsedTime, moved) =
+        base.Update(elapsedTime, moved)
+        ticker.Update(elapsedTime)
+
 type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
     inherit StaticContainer(NodeType.Button onClick)
     
@@ -59,7 +91,11 @@ type StylishButton(onClick, labelFunc: unit -> string, colorFunc) =
 type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as this =
     inherit Frame(NodeType.Switch(fun _ -> this.TextEntry))
 
-    let textEntry = TextEntry(setting, bind, Position = Position.Margin(10.0f, 0.0f))
+    let textEntry = 
+        TextEntry(setting, bind, 
+            Position = Position.Margin(10.0f, 0.0f),
+            ColorFunc = fun () -> (if this.TextEntry.Selected then !*Palette.WHITE else !*Palette.LIGHT), !*Palette.DARKER
+        )
 
     do
         this
@@ -73,11 +109,11 @@ type TextEntryBox(setting: Setting<string>, bind: Hotkey, prompt: string) as thi
                         | "" -> Localisation.localiseWith [(!|b).ToString(); prompt] "misc.search"
                         | _ -> ""
                 ,
-                Color = textEntry.TextColor,
+                Color = textEntry.ColorFunc,
                 Align = Alignment.LEFT,
                 Position = Position.Margin(10.0f, 0.0f))
 
-    member private this.TextEntry = textEntry
+    member private this.TextEntry : TextEntry = textEntry
 
     override this.Update(elapsedTime, bounds) =
         base.Update(elapsedTime, bounds)

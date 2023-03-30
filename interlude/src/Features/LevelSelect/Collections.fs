@@ -13,6 +13,7 @@ open Interlude.Options
 open Interlude.Utils
 open Interlude.UI
 open Interlude.UI.Menu
+open Interlude.UI.Components
 open Interlude.Features.Gameplay
 
 module CollectionManager =
@@ -243,8 +244,8 @@ type private CollectionButton(icon, name, action) =
             K (sprintf "%s %s  >" icon name),
             Color = ( 
                 fun () -> ( 
-                    (if this.Focused then Style.color(255, 1.0f, 0.5f) else Color.White),
-                    (if options.Collection.Value = ActiveCollection.Collection name then Style.color(255, 0.5f, 0.0f) else Color.Black)
+                    (if this.Focused then Colors.yellow_accent else Colors.white),
+                    (if options.Collection.Value = ActiveCollection.Collection name then Colors.blue_shadow else Colors.shadow_2)
                 )
             ),
             Align = Alignment.LEFT,
@@ -253,7 +254,7 @@ type private CollectionButton(icon, name, action) =
         base.Init parent
     
     override this.Draw() =
-        if this.Focused then Draw.rect this.Bounds (!*Palette.HOVER)
+        if this.Focused then Draw.rect this.Bounds Colors.yellow_accent.O1
         base.Draw()
 
 type SelectCollectionPage(on_select: (string * Collection) -> unit) as this =

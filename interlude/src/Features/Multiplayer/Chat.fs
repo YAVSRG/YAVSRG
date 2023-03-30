@@ -9,6 +9,7 @@ open Prelude.Scoring.Grading
 open Interlude.Web.Shared
 open Interlude.Utils
 open Interlude.UI
+open Interlude.UI.Components
 open Interlude.Features.Gameplay
 open Interlude.Features.Online
 

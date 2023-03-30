@@ -10,6 +10,7 @@ open Prelude.Data.Themes
 open Interlude.Content
 open Interlude.Options
 open Interlude.UI.Menu
+open Interlude.UI.Components
 
 type NoteColorPicker(color: Setting<byte>) as this =
     inherit StaticContainer(NodeType.Leaf)

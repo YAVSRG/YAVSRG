@@ -8,6 +8,7 @@ open Prelude.Common
 open Prelude.Data.Scores
 open Interlude.Features.Gameplay
 open Interlude.UI
+open Interlude.UI.Components
 
 // todo: better hotkey to display comments
 // todo: better way to find out you can add comments
