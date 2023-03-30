@@ -450,6 +450,58 @@ type GridContainer<'T when 'T :> Widget>(rows, columns) as this =
         if this.Initialised then 
             child.Init this
             refresh <- true
+
+    member private this.Up() =
+        match this.WhoIsFocused with
+        | Some i ->
+            let x, y = i_to_xy i
+            let mutable index = (y - 1) %% rows
+            let mutable i = xy_to_i (x, index) 
+            while index <> y && (children.Count <= i || not children.[i].Focusable) do
+                index <- (index - 1) %% rows
+                i <- xy_to_i (x, index) 
+            last_selected <- i
+            children.[i].Focus()
+        | None -> ()
+        
+    member private this.Down() =
+        match this.WhoIsFocused with
+        | Some i ->
+            let x, y = i_to_xy i
+            let mutable index = (y + 1) %% rows
+            let mutable i = xy_to_i (x, index) 
+            while index <> y && (children.Count <= i || not children.[i].Focusable) do
+                index <- (index + 1) %% rows
+                i <- xy_to_i (x, index) 
+            last_selected <- i
+            children.[i].Focus()
+        | None -> ()
+
+    member private this.Left() =
+        match this.WhoIsFocused with
+        | Some i ->
+            let x, y = i_to_xy i
+            let mutable index = (x - 1) %% columns
+            let mutable i = xy_to_i (index, y) 
+            while index <> x && (children.Count <= i || not children.[i].Focusable) do
+                index <- (index - 1) %% columns
+                i <- xy_to_i (index, y) 
+            last_selected <- i
+            children.[i].Focus()
+        | None -> ()
+            
+    member private this.Right() =
+        match this.WhoIsFocused with
+        | Some i ->
+            let x, y = i_to_xy i
+            let mutable index = (x + 1) %% columns
+            let mutable i = xy_to_i (index, y) 
+            while index <> x && (children.Count <= i || not children.[i].Focusable) do
+                index <- (index + 1) %% columns
+                i <- xy_to_i (index, y) 
+            last_selected <- i
+            children.[i].Focus()
+        | None -> ()
     
     override this.Init(parent: Widget) =
         base.Init parent
@@ -470,11 +522,16 @@ type GridContainer<'T when 'T :> Widget>(rows, columns) as this =
         for c in children do
             c.Update(elapsedTime, moved)
 
-        if (!|"up").Tapped() then ()
-        if (!|"select").Tapped() then
-            match this.WhoIsFocused with
-            | Some i -> last_selected <- i; children.[i].Select()
-            | None -> ()
+        if this.Focused then
+
+            if (!|"up").Tapped() then this.Up()
+            elif (!|"down").Tapped() then this.Down()
+            elif (!|"left").Tapped() then this.Left()
+            elif (!|"right").Tapped() then this.Right()
+            elif (!|"select").Tapped() then
+                match this.WhoIsFocused with
+                | Some i -> last_selected <- i; children.[i].Select()
+                | None -> ()
 
     override this.Draw() =
         for c in children do
